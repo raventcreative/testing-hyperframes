@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg: #08090c;
+        --charcoal: #111317;
+        --panel: #16181c;
+        --line: #24272d;
+        --orange: #d9673a;
+        --orange-hi: #ec8455;
+        --orange-lo: #b9512a;
+        --white: #f5f3ef;
+        --dim: #6e737c;
+        --fk-blue: #2f7bff;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        background: var(--bg);
+        font-family: Inter, sans-serif;
+      }
+      .layer {
+        position: absolute;
+        inset: 0;
+      }
+
+      /* ---------- Background: Claude Code interface ---------- */
+      #bg-wrap {
+        clip-path: inset(0 0 100% 0);
+      }
+      #bg-ui {
+        position: absolute;
+        inset: -40px;
+        background: var(--bg);
+      }
+      .editor {
+        position: absolute;
+        left: 40px;
+        top: 40px;
+        width: 975px;
+        height: 1080px;
+        background: #0c0d10;
+        border-right: 1px solid var(--line);
+      }
+      .explorer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 330px;
+        height: 100%;
+        border-right: 1px solid var(--line);
+        padding: 28px 0 0 18px;
+        font-family: "JetBrains Mono", monospace;
+        color: #8d929b;
+      }
+      .explorer .hdr {
+        font-family: Inter, sans-serif;
+        font-size: 18px;
+        letter-spacing: 0.04em;
+        color: #6f747c;
+        margin-bottom: 52px;
+      }
+      .explorer .dir {
+        font-size: 21px;
+        color: #9aa0a8;
+        margin-bottom: 16px;
+      }
+      .explorer .file {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-family: Inter, sans-serif;
+        font-size: 25px;
+        color: #a6abb3;
+        height: 61px;
+        padding-left: 6px;
+      }
+      .explorer .file.active {
+        background: #1a1c21;
+        color: #d8dbe0;
+      }
+      .file-ico {
+        width: 20px;
+        height: 25px;
+        border: 2px solid #8c9199;
+        border-radius: 3px;
+        position: relative;
+      }
+      .file-ico::after {
+        content: "";
+        position: absolute;
+        left: 3px;
+        right: 3px;
+        top: 7px;
+        height: 2px;
+        background: #8c9199;
+        box-shadow: 0 5px 0 #8c9199, 0 10px 0 #8c9199;
+      }
+      .term {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 660px;
+        border-top: 1px solid var(--line);
+        padding: 36px 26px;
+        font-size: 19px;
+        letter-spacing: 0.06em;
+        color: #6f747c;
+      }
+      .term .prompt {
+        margin-top: 36px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 24px;
+        color: #565b62;
+      }
+      .tabbar {
+        position: absolute;
+        left: 330px;
+        right: 0;
+        top: 0;
+        height: 50px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding-left: 18px;
+        gap: 12px;
+        font-family: Inter, sans-serif;
+        font-size: 22px;
+        color: #c9ccd2;
+      }
+      .tab-ico {
+        width: 18px;
+        height: 18px;
+        border-radius: 3px;
+        background: #4c6ef5;
+      }
+      .tab-x {
+        margin-left: 70px;
+        color: #8a8f97;
+      }
+      .code {
+        position: absolute;
+        left: 330px;
+        right: 0;
+        top: 64px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 25px;
+        line-height: 37px;
+        white-space: pre;
+      }
+      .code .ln {
+        display: inline-block;
+        width: 52px;
+        text-align: right;
+        margin-right: 26px;
+        color: #4a4e55;
+      }
+      .k {
+        color: #c8a86a;
+      }
+      .v {
+        color: #b9bec6;
+      }
+      .c {
+        color: #8b9099;
+      }
+      .side {
+        position: absolute;
+        left: 1015px;
+        top: 70px;
+        width: 960px;
+        height: 1100px;
+        background: #121418;
+        border: 1px solid #23262c;
+        border-radius: 14px;
+      }
+      .side-nav {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 290px;
+        height: 100%;
+        border-right: 1px solid #23262c;
+        padding: 26px 22px;
+        font-size: 21px;
+        color: #a2a7af;
+      }
+      .side-nav .title {
+        font-size: 24px;
+        color: #c6c9cf;
+        margin-bottom: 34px;
+      }
+      .side-nav .item {
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+      }
+      .side-nav .item.on {
+        background: #1d2025;
+        color: #e1e3e7;
+      }
+      .side-nav .blurb {
+        margin-top: 60px;
+        font-size: 15px;
+        line-height: 22px;
+        color: #7d828a;
+        text-align: center;
+      }
+      .side-nav .btn {
+        margin: 22px auto 0;
+        width: 140px;
+        padding: 9px 0;
+        text-align: center;
+        font-size: 15px;
+        border: 1px solid #33373e;
+        border-radius: 8px;
+        color: #a2a7af;
+      }
+      .side-list {
+        position: absolute;
+        left: 290px;
+        top: 0;
+        width: 380px;
+        height: 100%;
+        padding: 26px 22px;
+        font-size: 19px;
+        color: #8e939b;
+        border-right: 1px solid #23262c;
+      }
+      .side-list .title {
+        font-size: 24px;
+        color: #c6c9cf;
+        margin-bottom: 34px;
+      }
+      .side-list .row {
+        height: 46px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .side-list .row.on {
+        background: #1d2025;
+        color: #dfe2e6;
+        border-radius: 8px;
+        padding-left: 10px;
+      }
+      .side-list .sub {
+        padding-left: 42px;
+      }
+      .side-detail {
+        position: absolute;
+        left: 670px;
+        top: 0;
+        right: 0;
+        height: 100%;
+        padding: 26px 22px;
+        color: #9ea3ab;
+        font-size: 19px;
+        line-height: 27px;
+      }
+      .side-detail .card {
+        margin-top: 50px;
+        background: #f2efe9;
+        color: #2a2b2e;
+        border-radius: 14px;
+        padding: 30px 24px;
+        height: 600px;
+        font-family: "EB Garamond", serif;
+        font-size: 22px;
+        line-height: 32px;
+      }
+      .side-detail .card h4 {
+        font-size: 34px;
+        font-weight: 400;
+        margin-bottom: 22px;
+      }
+      #ui-shade {
+        background: radial-gradient(60% 45% at 28% 42%, rgba(8, 9, 12, 0.45), rgba(8, 9, 12, 0) 100%),
+          linear-gradient(180deg, rgba(8, 9, 12, 0.15) 0%, rgba(8, 9, 12, 0) 30%, rgba(8, 9, 12, 0.92) 92%),
+          rgba(8, 9, 12, 0.5);
+      }
+
+      /* code rain + particles */
+      #rain {
+        font-family: "JetBrains Mono", monospace;
+        color: var(--orange);
+        opacity: 0;
+      }
+      #rain span {
+        position: absolute;
+        font-size: 22px;
+      }
+      #particles i {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--orange-hi);
+        box-shadow: 0 0 10px 2px rgba(217, 103, 58, 0.6);
+      }
+
+      /* scan beam */
+      #scan {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 2px;
+        background: var(--orange-hi);
+        box-shadow: 0 0 18px 4px rgba(217, 103, 58, 0.75), 0 0 80px 18px rgba(217, 103, 58, 0.25);
+        opacity: 0;
+      }
+      #scanlines {
+        background: repeating-linear-gradient(
+          180deg,
+          rgba(217, 103, 58, 0.09) 0px,
+          rgba(217, 103, 58, 0.09) 2px,
+          transparent 2px,
+          transparent 6px
+        );
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+
+      /* orange floor glow */
+      #glow {
+        background: radial-gradient(62% 58% at 33% 100%, rgba(217, 103, 58, 0.85), rgba(185, 81, 42, 0.38) 45%, rgba(8, 9, 12, 0) 78%);
+        opacity: 0;
+      }
+
+      /* presenter */
+      #presenter-wrap {
+        position: absolute;
+        left: 1140px;
+        top: 120px;
+        width: 780px;
+        height: 960px;
+        clip-path: inset(0 0 0 100%);
+      }
+      #presenter {
+        width: 780px;
+        height: 960px;
+        display: block;
+      }
+      #presenter-rim {
+        position: absolute;
+        left: 1080px;
+        top: 160px;
+        width: 900px;
+        height: 920px;
+        background: radial-gradient(45% 50% at 55% 45%, rgba(217, 103, 58, 0.18), rgba(8, 9, 12, 0) 70%);
+        opacity: 0;
+      }
+
+      /* logos */
+      #logo-aip {
+        position: absolute;
+        left: 72px;
+        top: 92px;
+        height: 40px;
+        width: 330px;
+        font-family: Montserrat, sans-serif;
+        font-weight: 700;
+        font-size: 31px;
+        letter-spacing: 0.06em;
+        color: var(--white);
+        white-space: nowrap;
+      }
+      #logo-aip .ch {
+        display: inline-block;
+      }
+      #logo-aip .ghost {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+      }
+      #logo-aip .ghost.o {
+        color: var(--orange);
+      }
+      #logo-aip .ghost.b {
+        color: var(--fk-blue);
+      }
+      #logo-fk {
+        position: absolute;
+        left: 1640px;
+        top: 80px;
+        width: 220px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      #logo-fk svg {
+        width: 52px;
+        height: 44px;
+        flex: none;
+      }
+      #logo-fk .name {
+        font-family: Montserrat, sans-serif;
+        font-weight: 700;
+        font-size: 19px;
+        line-height: 21px;
+        letter-spacing: 0.05em;
+        color: var(--white);
+      }
+
+      /* title */
+      #title {
+        position: absolute;
+        left: 108px;
+        top: 282px;
+        width: 1220px;
+        height: 230px;
+      }
+      #claude-mask {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 700px;
+        height: 230px;
+        overflow: hidden;
+      }
+      .claude-word {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 700px;
+        height: 230px;
+        font-family: "Playfair Display", serif;
+        font-weight: 400;
+        font-size: 192px;
+        line-height: 230px;
+        letter-spacing: -0.01em;
+        color: var(--white);
+      }
+      #claude-glitch span {
+        position: absolute;
+        inset: 0;
+      }
+      #claude-glitch span:first-child {
+        color: var(--orange);
+        transform: translateX(var(--g-o, 0px));
+        opacity: 0.85;
+      }
+      #claude-glitch span:nth-child(2) {
+        color: var(--fk-blue);
+        transform: translateX(var(--g-b, 0px));
+        opacity: 0.85;
+      }
+      #claude-glitch strong {
+        position: absolute;
+        inset: 0;
+        font-weight: 400;
+        color: var(--white);
+      }
+      #fb {
+        position: absolute;
+        left: 616px;
+        top: 112px;
+        width: 560px;
+        height: 100px;
+        overflow: hidden;
+        font-family: Poppins, sans-serif;
+        font-weight: 400;
+        font-size: 74px;
+        line-height: 100px;
+        color: var(--white);
+        white-space: nowrap;
+      }
+      #fb .w {
+        display: inline-block;
+      }
+
+      /* icons */
+      #icons {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        perspective: 1400px;
+      }
+      .tile {
+        position: absolute;
+        border-radius: 22%;
+        background: linear-gradient(160deg, #ee8a5c 0%, #dc6a3c 45%, #c4562b 100%);
+        box-shadow: inset 0 3px 0 rgba(255, 220, 200, 0.35), inset 0 -6px 14px rgba(120, 40, 10, 0.35),
+          0 26px 40px rgba(0, 0, 0, 0.55), 0 0 0 rgba(217, 103, 58, 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+      }
+      .tile svg {
+        width: 64%;
+        height: 64%;
+      }
+      #t1 {
+        left: 148px;
+        top: 590px;
+        width: 210px;
+        height: 210px;
+        z-index: 1;
+      }
+      #t2 {
+        left: 328px;
+        top: 552px;
+        width: 210px;
+        height: 210px;
+        z-index: 2;
+      }
+      #t3 {
+        left: 530px;
+        top: 520px;
+        width: 248px;
+        height: 248px;
+        z-index: 5;
+      }
+      #t4 {
+        left: 762px;
+        top: 572px;
+        width: 210px;
+        height: 210px;
+        z-index: 3;
+      }
+      #t5 {
+        left: 950px;
+        top: 612px;
+        width: 196px;
+        height: 196px;
+        z-index: 2;
+      }
+      #trails {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        z-index: 6;
+        opacity: 0;
+      }
+
+      /* shimmer sweep (adapted from registry shimmer-sweep) */
+      .shimmer-band {
+        position: absolute;
+        pointer-events: none;
+        background: linear-gradient(
+          112deg,
+          transparent 0%,
+          transparent calc(var(--shimmer-pos, -20%) - 9%),
+          rgba(255, 196, 160, 0.55) var(--shimmer-pos, -20%),
+          transparent calc(var(--shimmer-pos, -20%) + 9%),
+          transparent 100%
+        );
+        mix-blend-mode: overlay;
+      }
+      #shimmer-title {
+        left: 100px;
+        top: 280px;
+        width: 1240px;
+        height: 240px;
+      }
+      #shimmer-icons {
+        left: 130px;
+        top: 500px;
+        width: 1040px;
+        height: 330px;
+        z-index: 7;
+      }
+
+      #vignette {
+        background: radial-gradient(120% 100% at 50% 50%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%);
+        pointer-events: none;
+      }
+      #black {
+        background: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="20"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="camera" class="layer">
+        <!-- BACKGROUND (deepest parallax) -->
+        <div id="bg-wrap" class="layer">
+          <div id="bg-ui">
+            <div class="editor">
+              <div class="explorer">
+                <div class="hdr">EXPLORER</div>
+                <div class="dir">⌄ .claude/skills/</div>
+                <div class="file active"><i class="file-ico"></i>hot-tip.md</div>
+                <div class="file"><i class="file-ico"></i>motion-system.md</div>
+                <div class="file"><i class="file-ico"></i>agent-browser.md</div>
+                <div class="file"><i class="file-ico"></i>html.md</div>
+                <div class="file"><i class="file-ico"></i>extract-logos.md</div>
+                <div class="file"><i class="file-ico"></i>design-tasks.md</div>
+                <div class="file"><i class="file-ico"></i>remotion.md</div>
+                <div class="file"><i class="file-ico"></i>copywriting.md</div>
+              </div>
+              <div class="term">
+                TERMINAL
+                <div class="prompt">› Claude</div>
+              </div>
+              <div class="tabbar"><i class="tab-ico"></i>hot-tip.md<span class="tab-x">✕</span></div>
+              <div class="code">
+<span class="ln">1</span><span class="c">---</span>
+<span class="ln">2</span><span class="k">name:</span> <span class="v">hot--tip</span>
+<span class="ln">3</span><span class="k">description:</span> <span class="v">Capture a quick, actionable tip</span>
+<span class="ln">4</span><span class="v">deliver value fast.</span>
+<span class="ln">5</span><span class="k">metadata:</span>
+<span class="ln">6</span>  <span class="k">category:</span> <span class="v">communication</span>
+<span class="ln">7</span>  <span class="k">tags:</span> <span class="v">[tips, clarity, quick-win]</span>
+<span class="ln">8</span>  <span class="k">version:</span> <span class="v">1.0.0</span>
+<span class="ln">9</span>  <span class="k">created:</span> <span class="v">2025-05-24</span>
+<span class="ln">10</span><span class="c">---</span>
+<span class="ln">11</span>
+<span class="ln">12</span><span class="c"># Rules</span>
+<span class="ln">13</span><span class="v">1. Lead with the tip. Be precise.</span>
+<span class="ln">14</span><span class="v">2. Keep it short. One idea per tip.</span>
+<span class="ln">15</span><span class="v">3. Give a clear example or next step.</span>
+<span class="ln">16</span><span class="v">4. Avoid generic advice.</span>
+<span class="ln">17</span><span class="v">5. Make it something a reader can use now.</span>
+              </div>
+            </div>
+            <div class="side">
+              <div class="side-nav">
+                <div class="title">←&nbsp;&nbsp;Customize</div>
+                <div class="item on">▢&nbsp;&nbsp;Skills</div>
+                <div class="item">⊞&nbsp;&nbsp;Connectors</div>
+                <div class="blurb">Give Claude role-level<br />expertise with Plugins</div>
+                <div class="btn">Browse plugins</div>
+              </div>
+              <div class="side-list">
+                <div class="title">Skills</div>
+                <div class="row">›&nbsp;&nbsp;My skills</div>
+                <div class="row">⌄&nbsp;&nbsp;Examples</div>
+                <div class="row on">▤&nbsp;&nbsp;skill-creator</div>
+                <div class="row sub">SKILL.md</div>
+                <div class="row sub">▭ agents</div>
+                <div class="row sub">▭ assets</div>
+                <div class="row sub">▭ eval-viewer</div>
+                <div class="row sub">▭ references</div>
+                <div class="row sub">▭ scripts</div>
+                <div class="row sub">LICENSE.txt</div>
+                <div class="row">▤&nbsp;&nbsp;algorithmic-art</div>
+                <div class="row">▤&nbsp;&nbsp;brand-guidelines</div>
+                <div class="row">▤&nbsp;&nbsp;canvas-design</div>
+              </div>
+              <div class="side-detail">
+                <div style="font-size: 24px; color: #c6c9cf">skill-creator</div>
+                <div style="margin-top: 14px; color: #7d828a">Added by</div>
+                <div>Anthropic</div>
+                <div style="margin-top: 14px; color: #7d828a">Description ⓘ</div>
+                <div>Create new skills, modify and improve existing skills, and measure skill performance.</div>
+                <div class="card">
+                  <h4>Skill Creator</h4>
+                  A skill for creating new skills and iteratively improving them. At a high level, the process of
+                  creating a skill goes like this: Decide what you want the skill to do.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="rain" class="layer"></div>
+          <div id="ui-shade" class="layer"></div>
+        </div>
+
+        <div id="particles" class="layer"></div>
+        <div id="glow" class="layer"></div>
+
+        <!-- PRESENTER (foreground parallax) -->
+        <div id="presenter-layer" class="layer">
+          <div id="presenter-rim"></div>
+          <div id="presenter-wrap"><img id="presenter" src="assets/presenter.png" alt="Freddie Kashawan" /></div>
+        </div>
+
+        <!-- TYPOGRAPHY + ICONS (mid parallax) -->
+        <div id="mid-layer" class="layer">
+          <div id="title">
+            <div id="claude-mask">
+              <div id="claude-glitch" class="claude-word"><span>Claude</span><span>Claude</span><strong>Claude</strong></div>
+            </div>
+            <div id="fb"><span class="w">For</span> <span class="w">Beginner</span></div>
+          </div>
+          <div id="shimmer-title" class="shimmer-band"></div>
+
+          <div id="icons">
+            <!-- 1. palette -->
+            <div class="tile" id="t1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" />
+                <circle cx="13.5" cy="6.5" r="1.1" fill="#fff" />
+                <circle cx="17.5" cy="10.5" r="1.1" fill="#fff" />
+                <circle cx="6.5" cy="12.5" r="1.1" fill="#fff" />
+                <circle cx="8.5" cy="7.5" r="1.1" fill="#fff" />
+              </svg>
+            </div>
+            <!-- 2. pixel creature -->
+            <div class="tile" id="t2">
+              <svg viewBox="0 0 7 7" shape-rendering="crispEdges" fill="#fff">
+                <rect x="1" y="0.5" width="5" height="1" />
+                <rect x="0" y="1.5" width="7" height="1" />
+                <rect x="0" y="2.5" width="1" height="1" /><rect x="2" y="2.5" width="3" height="1" /><rect x="6" y="2.5" width="1" height="1" />
+                <rect x="0" y="3.5" width="7" height="1" />
+                <rect x="1" y="4.5" width="1" height="1" /><rect x="3" y="4.5" width="1" height="1" /><rect x="5" y="4.5" width="1" height="1" />
+                <rect x="1" y="5.5" width="1" height="1" /><rect x="5" y="5.5" width="1" height="1" />
+              </svg>
+            </div>
+            <!-- 3. Claude starburst -->
+            <div class="tile" id="t3">
+              <svg viewBox="-50 -50 100 100" id="burst" stroke="#fff" stroke-linecap="round" stroke-width="7"></svg>
+            </div>
+            <!-- 4. lightning with nodes -->
+            <div class="tile" id="t4">
+              <svg viewBox="0 0 100 100">
+                <path d="M62 4 L22 58 L46 58 L36 96 L80 38 L55 38 Z" fill="#fff" />
+                <polyline points="38,30 58,52 44,74" fill="none" stroke="#1c1d20" stroke-width="3.5" stroke-linejoin="round" />
+                <circle cx="38" cy="30" r="4.5" fill="#1c1d20" />
+                <circle cx="58" cy="52" r="4.5" fill="#1c1d20" />
+                <circle cx="44" cy="74" r="4.5" fill="#1c1d20" />
+              </svg>
+            </div>
+            <!-- 5. braces + bubble -->
+            <div class="tile" id="t5">
+              <svg viewBox="0 0 100 100" fill="none">
+                <path d="M24 14 C12 14 16 34 14 44 C13 49 8 50 6 50 C8 50 13 51 14 56 C16 66 12 86 24 86" stroke="#151618" stroke-width="5" stroke-linecap="round" />
+                <path d="M76 14 C88 14 84 34 86 44 C87 49 92 50 94 50 C92 50 87 51 86 56 C84 66 88 86 76 86" stroke="#151618" stroke-width="5" stroke-linecap="round" />
+                <path d="M50 24 C64 24 74 33 74 46 C74 59 64 67 50 67 C46 67 43 66 40 65 L29 72 L32 61 C28 57 26 52 26 46 C26 33 36 24 50 24 Z" fill="#fff" />
+                <path d="M40 40 C41 46 41 52 46 52 C50 52 52 47 53 41 C53 47 54 52 58 52 C60 52 61 50 62 48" stroke="#151618" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <svg id="trails" viewBox="0 0 1920 1080" fill="none">
+              <defs>
+                <linearGradient id="trailGrad" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stop-color="#d9673a" stop-opacity="0" />
+                  <stop offset="0.5" stop-color="#ffb08a" stop-opacity="1" />
+                  <stop offset="1" stop-color="#d9673a" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path id="trail-a" d="M253 840 C 330 880, 400 860, 433 800 S 560 840, 654 812 S 790 860, 867 822 S 1000 860, 1048 846" stroke="url(#trailGrad)" stroke-width="3" />
+              <path id="trail-b" d="M253 548 C 330 500, 400 520, 433 512 S 560 470, 654 480 S 790 520, 867 532 S 1000 560, 1048 576" stroke="url(#trailGrad)" stroke-width="2" />
+            </svg>
+          </div>
+          <div id="shimmer-icons" class="shimmer-band"></div>
+        </div>
+
+        <div id="scanlines" class="layer"></div>
+      </div>
+
+      <!-- BRANDING (fixed to frame, not camera) -->
+      <div id="logo-aip">
+        <span class="ghost o">AI PRENEUR</span><span class="ghost b">AI PRENEUR</span><span class="real"></span>
+      </div>
+      <div id="logo-fk">
+        <svg viewBox="0 0 52 44">
+          <path d="M8 4 H30 L28 11 H15 L13.5 18 H25 L23.3 25 H12 L8.2 40 H0.5 Z" fill="#2f7bff" />
+          <path d="M33 4 H40.5 L36.6 19 L49 4 H58 L43 21 L52 40 H43.6 L36.8 25 L33 40 H25.5 Z" fill="#2f7bff" transform="translate(-5 0)" />
+        </svg>
+        <div class="name">FREDDIE<br />KASHAWAN</div>
+      </div>
+
+      <div id="scan"></div>
+      <div id="vignette" class="layer"></div>
+      <div id="black" class="layer"></div>
+
+      <audio id="vo-academy" class="clip" src="assets/audio/vo-1-aipreneur-academy.wav" data-start="3.7" data-duration="1.86" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo-claude" class="clip" src="assets/audio/vo-2-claude-for-beginner.wav" data-start="7.55" data-duration="1.45" data-track-index="11" data-volume="1"></audio>
+    </div>
+
+    <script>
+      (function () {
+        // ---------- deterministic build helpers ----------
+        let seed = 20261016;
+        function rnd() {
+          seed = (seed * 1664525 + 1013904223) % 4294967296;
+          return seed / 4294967296;
+        }
+
+        // Claude starburst rays
+        const burst = document.getElementById("burst");
+        const rays = [40, 34, 42, 30, 38, 33, 41, 29, 36, 40, 31, 37];
+        rays.forEach(function (len, i) {
+          const a = (i / rays.length) * Math.PI * 2 + 0.12;
+          const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          l.setAttribute("x1", (Math.cos(a) * 7).toFixed(2));
+          l.setAttribute("y1", (Math.sin(a) * 7).toFixed(2));
+          l.setAttribute("x2", (Math.cos(a) * len).toFixed(2));
+          l.setAttribute("y2", (Math.sin(a) * len).toFixed(2));
+          burst.appendChild(l);
+        });
+
+        // AI PRENEUR letters
+        const real = document.querySelector("#logo-aip .real");
+        "AI PRENEUR".split("").forEach(function (c) {
+          const s = document.createElement("span");
+          s.className = "ch";
+          s.textContent = c === " " ? " " : c;
+          real.appendChild(s);
+        });
+
+        // code rain characters
+        const rain = document.getElementById("rain");
+        const glyphs = "{}[]<>/=;:01#$*+-_λ";
+        for (let i = 0; i < 70; i++) {
+          const s = document.createElement("span");
+          s.textContent = glyphs[Math.floor(rnd() * glyphs.length)];
+          s.style.left = Math.floor(rnd() * 1880) + "px";
+          s.style.top = Math.floor(rnd() * 1040) + "px";
+          s.style.opacity = (0.25 + rnd() * 0.6).toFixed(2);
+          rain.appendChild(s);
+        }
+
+        // particles
+        const pWrap = document.getElementById("particles");
+        const parts = [];
+        for (let i = 0; i < 26; i++) {
+          const p = document.createElement("i");
+          p.style.left = Math.floor(rnd() * 1900) + "px";
+          p.style.top = Math.floor(300 + rnd() * 780) + "px";
+          pWrap.appendChild(p);
+          parts.push({ el: p, dx: (rnd() - 0.5) * 120, dy: -60 - rnd() * 160, o: 0.25 + rnd() * 0.55, d: rnd() * 3 });
+        }
+
+        // ---------- timeline ----------
+        const tl = gsap.timeline({ paused: true });
+        const E = "power3.out";
+
+        // initial states (immediate, outside the paused timeline)
+        gsap.set("#camera", { scale: 1.14, x: -60, y: -20, transformOrigin: "50% 50%" });
+        gsap.set("#bg-ui", { scale: 1.06, transformOrigin: "40% 40%" });
+        gsap.set("#logo-aip .ch", { yPercent: 110, opacity: 0 });
+        gsap.set("#logo-fk", { opacity: 0, x: 30 });
+        gsap.set("#presenter-wrap", { x: 90 });
+        gsap.set("#claude-glitch", { xPercent: -104 });
+        gsap.set("#fb .w", { yPercent: 105, opacity: 0 });
+        gsap.set(".tile", { y: 260, rotationX: 55, opacity: 0, transformPerspective: 1000 });
+        gsap.set("#t1", { rotation: -9 });
+        gsap.set("#t2", { rotation: -5 });
+        gsap.set("#t3", { rotation: 0 });
+        gsap.set("#t4", { rotation: 7 });
+        gsap.set("#t5", { rotation: 9 });
+        gsap.set(["#trail-a", "#trail-b"], { strokeDasharray: 1100, strokeDashoffset: 1100 });
+        gsap.set(["#shimmer-title", "#shimmer-icons"], { "--shimmer-pos": "-20%" });
+
+        // 00:00–00:03  CINEMATIC OPENING — from black, orange scan reveals the UI
+        tl.to("#black", { opacity: 0, duration: 0.6, ease: "sine.inOut" }, 0.2);
+        tl.fromTo("#scan", { y: 0, opacity: 0 }, { opacity: 1, duration: 0.15 }, 0.35);
+        tl.to("#scan", { y: 1078, duration: 2.1, ease: "power2.inOut" }, 0.4);
+        tl.to("#bg-wrap", { clipPath: "inset(0 0 0% 0)", duration: 2.1, ease: "power2.inOut" }, 0.4);
+        tl.to("#scan", { opacity: 0, duration: 0.3 }, 2.45);
+        tl.to("#rain", { opacity: 0.22, duration: 1.0, ease: "sine.out" }, 0.9);
+        tl.to("#rain span", { y: 26, duration: 3.2, ease: "none", stagger: { each: 0.01 } }, 0.9);
+        tl.to("#rain", { opacity: 0.06, duration: 1.4, ease: "sine.inOut" }, 3.0);
+        parts.forEach(function (p) {
+          tl.fromTo(p.el, { opacity: 0, x: 0, y: 0 }, { opacity: p.o, x: p.dx * 0.4, y: p.dy * 0.4, duration: 2.4, ease: "sine.out" }, 0.8 + p.d * 0.4);
+          tl.to(p.el, { x: p.dx, y: p.dy, opacity: p.o * 0.4, duration: 14, ease: "none" }, 3.4 + p.d * 0.3);
+        });
+        // slow push-in
+        tl.to("#camera", { scale: 1.08, x: -30, y: -10, duration: 3.6, ease: "sine.inOut" }, 0);
+        tl.to("#bg-ui", { scale: 1.0, duration: 17, ease: "sine.out" }, 0);
+
+        // 00:03–00:07  BRAND INTRO
+        tl.to("#scanlines", { opacity: 1, duration: 0.25 }, 3.0);
+        tl.to("#scanlines", { opacity: 0.25, duration: 0.8 }, 3.4);
+        tl.to("#scanlines", { opacity: 0, duration: 0.6 }, 4.4);
+        tl.to("#logo-aip .ch", { yPercent: 0, opacity: 1, duration: 0.7, ease: E, stagger: 0.045 }, 3.15);
+        tl.to("#logo-aip .ghost", { opacity: 0.8, duration: 0.01 }, 3.55);
+        tl.fromTo("#logo-aip .ghost.o", { x: 0 }, { x: -7, duration: 0.05, repeat: 5, yoyo: true, ease: "steps(1)" }, 3.56);
+        tl.fromTo("#logo-aip .ghost.b", { x: 0 }, { x: 7, duration: 0.05, repeat: 5, yoyo: true, ease: "steps(1)" }, 3.56);
+        tl.to("#logo-aip .ghost", { opacity: 0, duration: 0.01 }, 3.9);
+        // presenter masked reveal from right
+        tl.to("#presenter-wrap", { clipPath: "inset(0 0 0 0%)", duration: 1.6, ease: "power3.inOut" }, 4.0);
+        tl.to("#presenter-wrap", { x: 0, duration: 2.2, ease: "power3.out" }, 4.0);
+        tl.to("#presenter-rim", { opacity: 1, duration: 1.6, ease: "sine.out" }, 4.6);
+        tl.to("#logo-fk", { opacity: 1, x: 0, duration: 0.9, ease: E }, 5.6);
+        tl.to("#glow", { opacity: 0.35, duration: 2.5, ease: "sine.inOut" }, 4.5);
+
+        // 00:07–00:11  MAIN TITLE REVEAL — camera eases toward the title
+        tl.to("#camera", { scale: 1.1, x: 120, y: 60, duration: 3.6, ease: "power2.inOut" }, 6.6);
+        tl.to("#claude-glitch", { xPercent: 0, duration: 1.1, ease: "expo.out" }, 7.25);
+        tl.to("#claude-glitch", { "--g-o": "-10px", "--g-b": "10px", duration: 0.05, repeat: 7, yoyo: true, ease: "steps(1)" }, 7.3);
+        tl.set("#claude-glitch", { "--g-o": "0px", "--g-b": "0px" }, 7.72);
+        tl.to("#claude-glitch span", { opacity: 0, duration: 0.2 }, 7.75);
+        tl.to("#fb .w", { yPercent: 0, opacity: 1, duration: 0.8, ease: E, stagger: 0.16 }, 8.15);
+
+        // 00:11–00:15  ICON ANIMATION — camera drops to the icon row
+        tl.to("#camera", { scale: 1.07, x: 110, y: -50, duration: 3.4, ease: "power2.inOut" }, 10.4);
+        ["#t1", "#t2", "#t4", "#t5", "#t3"].forEach(function (id, i) {
+          const t = 11.1 + i * 0.28;
+          tl.to(id, { y: 0, rotationX: 0, opacity: 1, duration: 1.15, ease: "back.out(1.4)" }, t);
+          tl.to(id, { boxShadow: "inset 0 3px 0 rgba(255,220,200,0.35), inset 0 -6px 14px rgba(120,40,10,0.35), 0 26px 40px rgba(0,0,0,0.55), 0 0 60px rgba(217,103,58,0.65)", duration: 0.5, ease: "sine.out" }, t + 0.5);
+          tl.to(id, { boxShadow: "inset 0 3px 0 rgba(255,220,200,0.35), inset 0 -6px 14px rgba(120,40,10,0.35), 0 26px 40px rgba(0,0,0,0.55), 0 0 26px rgba(217,103,58,0.3)", duration: 1.0, ease: "sine.inOut" }, t + 1.0);
+        });
+        tl.to("#glow", { opacity: 0.85, duration: 2.0, ease: "sine.inOut" }, 11.0);
+        tl.to("#trails", { opacity: 1, duration: 0.2 }, 12.7);
+        tl.to("#trail-a", { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }, 12.7);
+        tl.to("#trail-b", { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }, 12.85);
+        tl.to("#trails", { opacity: 0, duration: 0.7, ease: "sine.in" }, 14.0);
+
+        // 00:15–00:18  HERO COMPOSITION — camera settles into the exact thumbnail framing
+        tl.to("#camera", { scale: 1.0, x: 0, y: 0, duration: 1.8, ease: "power3.inOut" }, 14.6);
+        // parallax: presenter / mid layers drift against bg
+        tl.fromTo("#presenter-layer", { x: 22 }, { x: -8, duration: 5.4, ease: "sine.inOut" }, 14.6);
+        tl.fromTo("#mid-layer", { x: -14 }, { x: 4, duration: 5.4, ease: "sine.inOut" }, 14.6);
+        // breathing glow
+        tl.to("#glow", { opacity: 0.68, duration: 1.3, ease: "sine.inOut", repeat: 3, yoyo: true }, 15.0);
+
+        // 00:18–00:20  FINAL HOLD — light sweep, fade to black
+        tl.to("#shimmer-title", { "--shimmer-pos": "120%", duration: 1.2, ease: "power2.inOut" }, 18.0);
+        tl.to("#shimmer-icons", { "--shimmer-pos": "120%", duration: 1.2, ease: "power2.inOut" }, 18.2);
+        tl.to("#black", { opacity: 1, duration: 0.65, ease: "sine.in" }, 19.35);
+
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

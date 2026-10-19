@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — Dots vs Muse vs Grok Bot</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --ink: #101b3d;
+        --blue: #294772;
+        --ice: #dce8fa;
+        --paper: #fafbff;
+        --line: #cbd8ee;
+        --acc: #3e6fc9;
+        --navy2: #18295a;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--paper); }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        font-family: "Poppins", sans-serif; color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+      }
+      .clip { position: absolute; inset: 0; }
+      .abs { position: absolute; }
+      .cx { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
+      .m { overflow: hidden; padding: 0.04em 0.06em 0.1em; }
+      .mi { display: block; }
+      .ov { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .dr { stroke-dasharray: 1; stroke-dashoffset: 0; }
+      svg.ic { display: block; fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+
+      /* ---------- background layers ---------- */
+      #bg {
+        background:
+          radial-gradient(900px 820px at -8% -6%, #c6d8f4 0%, rgba(198, 216, 244, 0) 62%),
+          radial-gradient(820px 760px at 108% 104%, #d9e5f8 0%, rgba(217, 229, 248, 0) 62%),
+          var(--paper);
+      }
+      #bgDots {
+        background-image: radial-gradient(circle, rgba(16, 27, 61, 0.07) 1.6px, transparent 1.8px);
+        background-size: 46px 46px; background-position: 17px 21px;
+      }
+      #museWash {
+        background:
+          radial-gradient(900px 700px at 50% 18%, #eef4fe 0%, rgba(238, 244, 254, 0) 70%),
+          linear-gradient(180deg, #e3edfc 0%, #d2e1f8 100%);
+      }
+      #navyBg {
+        background:
+          radial-gradient(900px 760px at 50% 34%, #213773 0%, rgba(33, 55, 115, 0) 70%),
+          linear-gradient(180deg, #13204a 0%, #0d1735 100%);
+      }
+
+      /* ---------- header + nav ---------- */
+      #hdrWrap { top: 192px; bottom: auto; }
+      #hdr {
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px 40px; border-radius: 999px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 10px 30px rgba(16, 27, 61, 0.08), 0 0 0 1.5px rgba(16, 27, 61, 0.06);
+      }
+      .logoFrame { position: relative; width: 357px; height: 32px; overflow: hidden; }
+      .logoFrame img { position: absolute; left: -49px; top: -21.7px; width: 460.35px; height: auto; }
+
+      #navWrap { top: 298px; bottom: auto; }
+      #nav { display: flex; gap: 14px; }
+      .pill {
+        font-size: 27px; font-weight: 700; line-height: 1; letter-spacing: 0.01em;
+        padding: 13px 26px; border-radius: 999px;
+        border: 2px solid var(--line); color: rgba(16, 27, 61, 0.55); background: rgba(255, 255, 255, 0.6);
+      }
+
+      /* ---------- shared type ---------- */
+      .ttl { top: 384px; }
+      .ttl .mi { font-size: 128px; font-weight: 700; line-height: 1.08; letter-spacing: -0.025em; }
+      .sub { top: 538px; }
+      .sub .mi { font-size: 42px; font-weight: 400; color: var(--blue); letter-spacing: 0.01em; }
+      .panel {
+        left: 110px; top: 642px; width: 860px; height: 700px; border-radius: 46px;
+        background: #ffffff; border: 2px solid #d5e0f2;
+        box-shadow: 0 30px 70px rgba(16, 27, 61, 0.09);
+      }
+      .capWrap { top: 1396px; }
+      .cap {
+        font-size: 36px; font-weight: 700; letter-spacing: 0.02em; line-height: 1;
+        padding: 22px 34px; border-radius: 999px; background: #ffffff; color: var(--ink);
+        border: 2px solid #d5e0f2; box-shadow: 0 10px 26px rgba(16, 27, 61, 0.07);
+      }
+      .cap.dark { background: var(--ice); border-color: transparent; }
+      .lbl { font-size: 44px; font-weight: 700; line-height: 1.15; letter-spacing: 0.005em; }
+      .muted { color: var(--blue); }
+      .iconDot {
+        width: 92px; height: 92px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        background: var(--ice); color: var(--ink);
+      }
+
+      /* ---------- B01 hook ---------- */
+      #h1a { top: 560px; }
+      #h1a .mi { font-size: 104px; font-weight: 400; letter-spacing: -0.01em; line-height: 1.05; }
+      #h1b { top: 670px; }
+      #h1b .mi { font-size: 210px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+      #h1c { top: 930px; }
+      #h1c .mi { font-size: 44px; font-weight: 700; color: var(--blue); letter-spacing: 0.04em; }
+      #jd { left: 230px; top: 1050px; width: 620px; height: 330px; }
+      #jdCard {
+        width: 100%; height: 100%; border-radius: 40px; background: #fff; border: 2px solid #d5e0f2;
+        box-shadow: 0 26px 60px rgba(16, 27, 61, 0.1);
+      }
+      .tag {
+        font-size: 24px; font-weight: 700; letter-spacing: 0.14em; padding: 10px 20px; border-radius: 999px;
+        background: var(--ink); color: #fff; display: inline-block; line-height: 1;
+      }
+
+      /* ---------- B02 lineup ---------- */
+      #l1 { top: 452px; }
+      #l1 .mi { font-size: 108px; font-weight: 400; letter-spacing: -0.015em; line-height: 1.05; }
+      #l1 b { font-weight: 700; }
+      #l2 { top: 586px; }
+      #l2 .mi { font-size: 42px; font-weight: 700; color: var(--blue); letter-spacing: 0.04em; }
+      .tool {
+        width: 380px; height: 220px; border-radius: 40px; background: #fff; border: 2px solid #d5e0f2;
+        box-shadow: 0 22px 54px rgba(16, 27, 61, 0.1);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      }
+      .tool .nm { font-size: 56px; font-weight: 700; letter-spacing: -0.015em; line-height: 1; }
+      .tool .no { position: absolute; left: 26px; top: 22px; font-size: 22px; font-weight: 700; letter-spacing: 0.12em; color: var(--blue); }
+      .slot { width: 380px; height: 220px; border-radius: 40px; border: 3px dashed #b9cbe9; }
+
+      /* ---------- recap / steps / example / cta ---------- */
+      .row {
+        left: 120px; width: 840px; height: 160px; border-radius: 36px; background: #fff; border: 2px solid #d5e0f2;
+        box-shadow: 0 16px 40px rgba(16, 27, 61, 0.07);
+      }
+      .rname { font-size: 50px; font-weight: 700; line-height: 1.05; letter-spacing: -0.01em; }
+      .rdesc { font-size: 34px; font-weight: 400; color: var(--blue); line-height: 1.2; margin-top: 4px; }
+      .num {
+        width: 92px; height: 92px; border-radius: 50%; border: 3px solid var(--line); background: #fff;
+        display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 700; color: var(--blue);
+      }
+      .bubble {
+        border-radius: 42px; background: #fff; border: 2px solid #d5e0f2; box-shadow: 0 22px 56px rgba(16, 27, 61, 0.09);
+      }
+      .word { display: inline-block; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="72" data-width="1080" data-height="1920">
+      <!-- ================= AUDIO (original narration, untouched) ================= -->
+      <audio id="vo" src="assets/voiceover_original.mp3" data-start="0" data-duration="71.758" data-track-index="20" data-volume="1"></audio>
+
+      <!-- ================= BACKGROUND ================= -->
+      <div id="bg" class="clip" data-start="0" data-duration="72" data-track-index="0"></div>
+      <div id="bgDots" class="clip" data-start="0" data-duration="72" data-track-index="1"></div>
+      <div id="museWash" class="clip" data-start="21" data-duration="15.3" data-track-index="2" style="opacity: 0"></div>
+      <div id="navyBg" class="clip" data-start="35.4" data-duration="14.1" data-track-index="3" style="opacity: 0"></div>
+
+      <!-- ================= B01 HOOK ================= -->
+      <section id="sHook" class="clip" data-start="0" data-duration="3.45" data-track-index="4">
+        <div id="h1a" class="cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion>MAU REKRUT</span></div></div>
+        <div id="h1b" class="cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion>AI?</span></div></div>
+        <div id="h1c" class="cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion>SIAPIN JOB DESC-NYA DULU</span></div></div>
+        <div id="jd" class="abs">
+          <div id="jdCard"></div>
+          <div class="abs" style="left: 44px; top: 40px"><span class="tag">JOB DESC</span></div>
+          <svg class="ov" style="left: -230px; top: -1050px" viewBox="0 0 1080 1920">
+            <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <rect id="jdB1" x="274" y="1176" width="40" height="40" rx="10" stroke="#294772" stroke-width="4" />
+              <rect id="jdB2" x="274" y="1240" width="40" height="40" rx="10" stroke="#294772" stroke-width="4" />
+              <rect id="jdB3" x="274" y="1304" width="40" height="40" rx="10" stroke="#294772" stroke-width="4" />
+              <path id="jdL1" class="dr" pathLength="1" d="M344 1196 H 760" stroke="#dce8fa" stroke-width="18" />
+              <path id="jdL2" class="dr" pathLength="1" d="M344 1260 H 690" stroke="#dce8fa" stroke-width="18" />
+              <path id="jdL3" class="dr" pathLength="1" d="M344 1324 H 730" stroke="#dce8fa" stroke-width="18" />
+              <path id="jdC1" class="dr" pathLength="1" d="M283 1197 l8 8 l15 -16" stroke="#101b3d" stroke-width="5" />
+              <path id="jdC2" class="dr" pathLength="1" d="M283 1261 l8 8 l15 -16" stroke="#101b3d" stroke-width="5" />
+              <path id="jdC3" class="dr" pathLength="1" d="M283 1325 l8 8 l15 -16" stroke="#101b3d" stroke-width="5" />
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- ================= B02 LINEUP ================= -->
+      <section id="sLine" class="clip" data-start="2.95" data-duration="5.65" data-track-index="5">
+        <div id="l1" class="cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion>INI <b>3 TOOLS</b></span></div></div>
+        <div id="l2" class="cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion>YANG BISA LO KASIH TUGAS</span></div></div>
+        <div id="slot1" class="slot abs" style="left: 350px; top: 790px"></div>
+        <div id="slot2" class="slot abs" style="left: 110px; top: 1090px"></div>
+        <div id="slot3" class="slot abs" style="left: 590px; top: 1090px"></div>
+        <svg class="ov" viewBox="0 0 1080 1920">
+          <g fill="none" stroke="#294772" stroke-width="4" stroke-linecap="round">
+            <path id="lnA" class="dr" pathLength="1" d="M440 1012 L 330 1088" />
+            <path id="lnB" class="dr" pathLength="1" d="M640 1012 L 750 1088" />
+            <path id="lnC" class="dr" pathLength="1" d="M492 1200 L 588 1200" />
+          </g>
+        </svg>
+        <div id="tDots" class="tool abs" style="left: 350px; top: 790px">
+          <span class="no">01</span>
+          <svg class="ic" width="78" height="78" viewBox="0 0 48 48" style="stroke-width: 0">
+            <g fill="#101b3d">
+              <circle cx="24" cy="6" r="3.6" /><circle cx="36.7" cy="11.3" r="3" /><circle cx="42" cy="24" r="3" />
+              <circle cx="36.7" cy="36.7" r="3" /><circle cx="24" cy="42" r="3" /><circle cx="11.3" cy="36.7" r="3" />
+              <circle cx="6" cy="24" r="3" /><circle cx="11.3" cy="11.3" r="3" /><circle cx="24" cy="24" r="6" fill="#3e6fc9" />
+            </g>
+          </svg>
+          <span class="nm">dots</span>
+        </div>
+        <div id="tMuse" class="tool abs" style="left: 110px; top: 1090px">
+          <span class="no">02</span>
+          <svg class="ic" width="78" height="78" viewBox="0 0 48 48"><rect x="7" y="10" width="34" height="31" rx="5" /><path d="M7 19h34M16 6v8M32 6v8M17 30l5 5 9-9" /></svg>
+          <span class="nm">Muse</span>
+        </div>
+        <div id="tGrok" class="tool abs" style="left: 590px; top: 1090px">
+          <span class="no">03</span>
+          <svg class="ic" width="78" height="78" viewBox="0 0 48 48"><rect x="9" y="16" width="30" height="23" rx="7" /><path d="M24 16v-6M18 33h12" /><circle cx="24" cy="8" r="2.4" /><circle cx="18.5" cy="26" r="2.4" fill="currentColor" /><circle cx="29.5" cy="26" r="2.4" fill="currentColor" /></svg>
+          <span class="nm">Grok Bot</span>
+        </div>
+      </section>
+
+      <!-- ================= NAV (sections) ================= -->
+      <div id="navWrap" class="cx clip" data-start="7.9" data-duration="40" data-track-index="6">
+        <div id="nav">
+          <span id="pDots" class="pill">dots</span>
+          <span id="pMuse" class="pill">Muse</span>
+          <span id="pGrok" class="pill">Grok Bot</span>
+        </div>
+      </div>
+
+      <!-- ================= B03 + B04 DOTS ================= -->
+      <section id="sDots" class="clip" data-start="7.7" data-duration="14.05" data-track-index="7">
+        <div id="dPanel" class="panel abs"></div>
+        <div id="dTtl" class="ttl cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion>dots</span></div></div>
+        <div id="dSub" class="sub cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion>dari OpenAI</span></div></div>
+
+        <!-- loop (docks to badge in the example state) -->
+        <div id="dLoop" class="abs" style="left: 410px; top: 742px; width: 260px; height: 260px">
+          <svg viewBox="0 0 260 260" width="260" height="260" style="overflow: visible">
+            <circle cx="130" cy="130" r="112" fill="none" stroke="#dce8fa" stroke-width="16" />
+            <g id="dRing"></g>
+            <circle id="dCore" cx="130" cy="130" r="50" fill="#101b3d" />
+            <path id="dCoreIc" d="M147 122a20 20 0 1 0 2 14 M151 108v14h-14" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+            <g id="dArm"><circle cx="130" cy="18" r="17" fill="#3e6fc9" stroke="#fff" stroke-width="5" /></g>
+          </svg>
+        </div>
+
+        <svg class="ov" viewBox="0 0 1080 1920">
+          <g fill="none" stroke="#294772" stroke-width="4" stroke-linecap="round">
+            <path id="dcA" class="dr" pathLength="1" d="M520 1004 C 500 1060, 330 1050, 330 1104" />
+            <path id="dcB" class="dr" pathLength="1" d="M540 1006 L 540 1104" />
+            <path id="dcC" class="dr" pathLength="1" d="M560 1004 C 580 1060, 750 1050, 750 1104" />
+          </g>
+        </svg>
+        <div id="dApps">
+          <div class="abs app" id="dApp1" style="left: 282px; top: 1110px"><div class="iconDot" style="width: 96px; height: 96px; border-radius: 28px; background: #fff; border: 3px solid #101b3d"><svg class="ic" width="50" height="50" viewBox="0 0 48 48"><path d="M13 6h15l8 8v28H13z M28 6v8h8 M18 24h13 M18 31h13 M18 38h8" /></svg></div></div>
+          <div class="abs app" id="dApp2" style="left: 492px; top: 1110px"><div class="iconDot" style="width: 96px; height: 96px; border-radius: 28px; background: #fff; border: 3px solid #101b3d"><svg class="ic" width="50" height="50" viewBox="0 0 48 48"><rect x="7" y="12" width="34" height="25" rx="4" /><path d="M7 15l17 12 17-12" /></svg></div></div>
+          <div class="abs app" id="dApp3" style="left: 702px; top: 1110px"><div class="iconDot" style="width: 96px; height: 96px; border-radius: 28px; background: #fff; border: 3px solid #101b3d"><svg class="ic" width="50" height="50" viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="4" /><path d="M8 19h32M8 29h32M19 8v32" /></svg></div></div>
+          <svg class="ov" viewBox="0 0 1080 1920">
+            <g id="dOk1"><circle cx="372" cy="1112" r="19" fill="#3e6fc9" /><path d="M363 1112l6 6 11-12" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" /></g>
+            <g id="dOk2"><circle cx="582" cy="1112" r="19" fill="#3e6fc9" /><path d="M573 1112l6 6 11-12" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" /></g>
+            <g id="dOk3"><circle cx="792" cy="1112" r="19" fill="#3e6fc9" /><path d="M783 1112l6 6 11-12" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" /></g>
+          </svg>
+        </div>
+
+        <!-- example pipeline -->
+        <svg class="ov" viewBox="0 0 1080 1920">
+          <g fill="none" stroke="#294772" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+            <path id="dAr1" class="dr" pathLength="1" d="M262 922 L 262 986" />
+            <path id="dAr2" class="dr" pathLength="1" d="M262 1092 L 262 1156" />
+            <path id="dArc" class="dr" pathLength="1" d="M216 1212 A 86 86 0 0 1 216 1040" stroke="#3e6fc9" stroke-dasharray="1" />
+          </g>
+          <g id="dArcDot"><circle cx="216" cy="1212" r="11" fill="#3e6fc9" stroke="#fff" stroke-width="4" /></g>
+        </svg>
+        <div id="dR1" class="abs" style="left: 216px; top: 830px; display: flex; align-items: center; gap: 22px">
+          <div class="iconDot"><svg class="ic" width="50" height="50" viewBox="0 0 48 48"><rect x="18" y="5" width="12" height="23" rx="6" /><path d="M11 23a13 13 0 0 0 26 0M24 36v6M17 42h14" /></svg></div>
+          <div class="lbl" style="max-width: 620px; font-size: 40px">TRANSCRIPT PODCAST</div>
+        </div>
+        <div id="dR2" class="abs" style="left: 216px; top: 1000px; display: flex; align-items: center; gap: 22px">
+          <div class="iconDot"><svg class="ic" width="50" height="50" viewBox="0 0 48 48"><path d="M13 6h15l8 8v28H13z M28 6v8h8 M18 22h13 M18 29h13 M18 36h8" /></svg></div>
+          <div class="lbl" style="max-width: 620px; font-size: 40px">DRAFT KONTEN</div>
+        </div>
+        <div id="dR3" class="abs" style="left: 216px; top: 1170px; display: flex; align-items: center; gap: 22px">
+          <div class="iconDot" style="background: #101b3d; color: #fff"><svg class="ic" width="50" height="50" viewBox="0 0 48 48"><path d="M31 8l9 9-21 21H10v-9z M27 12l9 9" /></svg></div>
+          <div class="lbl" style="max-width: 620px; font-size: 40px">REVISI SESUAI ARAHAN LO</div>
+        </div>
+
+        <div class="capWrap cx" id="dCap1w"><div class="cap" id="dCap1">KERJA DI BELAKANG LAYAR</div></div>
+        <div class="capWrap cx" id="dCap2w" data-layout-allow-overlap><div class="cap" id="dCap2">LEWAT APLIKASI YANG LO IZINKAN</div></div>
+        <div class="capWrap cx" id="dCap3w"><div class="cap dark" id="dCap3">CONTOHNYA</div></div>
+      </section>
+
+      <!-- ================= B05 + B06 MUSE ================= -->
+      <section id="sMuse" class="clip" data-start="21.2" data-duration="14.75" data-track-index="8">
+        <div id="mPanel" class="panel abs" style="background: rgba(255, 255, 255, 0.86); border-color: #c9dbf6"></div>
+        <div id="mTtl" class="ttl cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion>Muse</span></div></div>
+        <div id="mSub" class="sub cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion>dari Meta</span></div></div>
+
+        <div id="mHead" class="abs" style="left: 184px; top: 712px; display: flex; align-items: center; gap: 24px">
+          <div class="iconDot" style="background: #101b3d; color: #fff"><svg class="ic" width="50" height="50" viewBox="0 0 48 48"><rect x="7" y="10" width="34" height="31" rx="5" /><path d="M7 19h34M16 6v8M32 6v8M17 30l5 5 9-9" /></svg></div>
+          <div class="lbl" style="font-size: 54px">URUSAN HARIAN</div>
+        </div>
+        <svg class="ov" viewBox="0 0 1080 1920"><path id="mDiv" class="dr" pathLength="1" d="M184 840 H 896" stroke="#c9dbf6" stroke-width="3" fill="none" stroke-linecap="round" /></svg>
+        <div id="mRow1" class="abs row" style="left: 170px; width: 740px; height: 116px; top: 878px"></div>
+        <div id="mRow2" class="abs row" style="left: 170px; width: 740px; height: 116px; top: 1018px"></div>
+        <div id="mRow3" class="abs row" style="left: 170px; width: 740px; height: 116px; top: 1158px"></div>
+        <div id="mR1" class="abs" style="left: 196px; top: 890px; display: flex; align-items: center; gap: 24px">
+          <div class="iconDot"><svg class="ic" width="48" height="48" viewBox="0 0 48 48"><path d="M5 25l37-16-11 31-7-12z M24 28L42 9" /></svg></div>
+          <div class="lbl">PERJALANAN</div>
+        </div>
+        <div id="mR2" class="abs" style="left: 196px; top: 1030px; display: flex; align-items: center; gap: 24px">
+          <div class="iconDot"><svg class="ic" width="48" height="48" viewBox="0 0 48 48"><rect x="11" y="6" width="26" height="36" rx="4" /><path d="M17 16h14M17 24h14M17 32h8" /></svg></div>
+          <div class="lbl">FORMULIR</div>
+        </div>
+        <div id="mR3" class="abs" style="left: 196px; top: 1170px; display: flex; align-items: center; gap: 24px">
+          <div class="iconDot"><svg class="ic" width="48" height="48" viewBox="0 0 48 48"><path d="M7 18h34l-4 21H11z M16 18l6-10M32 18l-6-10M20 26v6M28 26v6" /></svg></div>
+          <div class="lbl">BELANJA</div>
+        </div>
+
+        <!-- example: hotel + approval -->
+        <div id="mHotel" class="abs" style="left: 170px; top: 708px; display: flex; align-items: center; gap: 26px">
+          <div class="iconDot" style="width: 112px; height: 112px; border-radius: 32px; background: #101b3d; color: #fff"><svg class="ic" width="60" height="60" viewBox="0 0 48 48"><path d="M5 37V11M5 29h38v8M43 29v-6a6 6 0 0 0-6-6H21v12" /><circle cx="13" cy="22" r="3.5" /></svg></div>
+          <div>
+            <div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi lbl" style="font-size: 58px">CARI HOTEL</span></div>
+            <div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion id="mBudgetTxt" style="font-size: 38px; font-weight: 400; color: #294772">sesuai budget</span></div>
+          </div>
+        </div>
+        <div id="mBar" class="abs" style="left: 170px; top: 880px; width: 740px; height: 20px; border-radius: 10px; background: #dce8fa; overflow: hidden">
+          <div id="mBarFill" style="width: 100%; height: 100%; border-radius: 10px; background: #294772; transform-origin: 0 50%"></div>
+        </div>
+        <svg class="ov" viewBox="0 0 1080 1920"><path id="mDiv2" class="dr" pathLength="1" d="M170 968 H 910" stroke="#c9dbf6" stroke-width="3" fill="none" stroke-linecap="round" /></svg>
+        <div id="mBuy" class="abs" style="left: 170px; top: 1012px; display: flex; align-items: center; gap: 26px">
+          <div id="mBuyBtn" style="position: relative; width: 230px; height: 92px; border-radius: 999px; border: 3px solid #101b3d; display: flex; align-items: center; justify-content: center; gap: 12px; background: #fff">
+            <svg class="ic" width="40" height="40" viewBox="0 0 48 48"><path d="M7 18h34l-4 21H11z M16 18l6-10M32 18l-6-10" /></svg>
+            <span class="lbl" style="font-size: 40px">BELI</span>
+          </div>
+          <div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="font-size: 34px; color: #294772">kalau sampai membeli…</span></div>
+        </div>
+        <div id="mLock" class="abs" style="left: 352px; top: 990px; width: 56px; height: 56px; border-radius: 50%; background: #101b3d; display: flex; align-items: center; justify-content: center; color: #fff">
+          <svg class="ic" width="30" height="30" viewBox="0 0 48 48" style="stroke-width: 5"><rect x="11" y="22" width="26" height="19" rx="4" /><path d="M16 22v-6a8 8 0 0 1 16 0v6" /></svg>
+        </div>
+        <svg class="ov" viewBox="0 0 1080 1920"><path id="mArr" class="dr" pathLength="1" d="M285 1108 L 285 1160" stroke="#294772" stroke-width="4" fill="none" stroke-linecap="round" /></svg>
+        <div id="mOk" class="abs" style="left: 170px; top: 1170px; width: 740px; height: 124px; border-radius: 36px; background: #101b3d; display: flex; align-items: center; gap: 22px; padding-left: 40px">
+          <svg class="ic" width="62" height="62" viewBox="0 0 48 48" style="color: #fff"><path d="M24 5l15 6v11c0 9.5-6.5 16.5-15 20C15.5 38.5 9 31.5 9 22V11z" /><path id="mOkChk" class="dr" pathLength="1" d="M17 23l5 5 9-10" /></svg>
+          <span class="lbl" style="color: #fff">PERLU PERSETUJUAN LO</span>
+        </div>
+        <div class="capWrap cx"><div class="cap dark" id="mCap">MISALNYA</div></div>
+      </section>
+
+      <!-- ================= B07–B09 GROK BOT ================= -->
+      <section id="sGrok" class="clip" data-start="35.5" data-duration="13.8" data-track-index="9">
+        <div id="gPanel" class="panel abs" style="background: #18295a; border-color: #2d4580; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3)"></div>
+        <div id="gTtl" class="ttl cx"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="color: #fff">Grok Bot</span></div></div>
+        <div id="gSub" class="sub cx" style="gap: 16px">
+          <div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="color: #a9c1ec">beberapa bot</span></div>
+          <div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="color: #a9c1ec">·</span></div>
+          <div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="color: #a9c1ec">tugas berbeda</span></div>
+        </div>
+        <svg class="ov" viewBox="0 0 1080 1920">
+          <g fill="none" stroke-linecap="round">
+            <path id="gc1" class="dr" pathLength="1" d="M476 768 H 300 Q 262 768 262 806 V 902" stroke="#3b5694" stroke-width="4" />
+            <path id="gc2" class="dr" pathLength="1" d="M476 768 H 300 Q 262 768 262 806 V 1062" stroke="#3b5694" stroke-width="4" />
+            <path id="gc3" class="dr" pathLength="1" d="M476 768 H 300 Q 262 768 262 806 V 1222" stroke="#3b5694" stroke-width="4" />
+            <path id="gh1" class="dr" pathLength="1" d="M476 768 H 300 Q 262 768 262 806 V 902" stroke="#dce8fa" stroke-width="5" />
+            <path id="gh2" class="dr" pathLength="1" d="M476 768 H 300 Q 262 768 262 806 V 1062" stroke="#dce8fa" stroke-width="5" />
+            <path id="gh3" class="dr" pathLength="1" d="M476 768 H 300 Q 262 768 262 806 V 1222" stroke="#dce8fa" stroke-width="5" />
+            <path id="gBus" class="dr" pathLength="1" d="M262 994 L 262 1062 M262 1154 L 262 1222" style="display:none" stroke="#dce8fa" stroke-width="5" />
+          </g>
+          <circle id="gPulse" cx="262" cy="806" r="12" fill="#dce8fa" />
+        </svg>
+        <div id="gHub" class="abs" style="left: 476px; top: 704px; width: 128px; height: 128px; border-radius: 50%; background: #dce8fa; color: #101b3d; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 10px rgba(220, 232, 250, 0.12)">
+          <svg class="ic" width="70" height="70" viewBox="0 0 48 48"><rect x="9" y="16" width="30" height="23" rx="7" /><path d="M24 16v-6M18 33h12" /><circle cx="24" cy="8" r="2.4" /><circle cx="18.5" cy="26" r="2.4" fill="currentColor" /><circle cx="29.5" cy="26" r="2.4" fill="currentColor" /></svg>
+        </div>
+        <!-- worker rows -->
+        <div id="gN1" class="abs gnode" style="left: 216px; top: 902px"></div>
+        <div id="gN2" class="abs gnode" style="left: 216px; top: 1062px"></div>
+        <div id="gN3" class="abs gnode" style="left: 216px; top: 1222px"></div>
+        <div id="gSk1" class="abs" style="left: 336px; top: 937px; width: 400px; height: 22px; border-radius: 11px; background: rgba(255, 255, 255, 0.16)"></div>
+        <div id="gSk2" class="abs" style="left: 336px; top: 1097px; width: 300px; height: 22px; border-radius: 11px; background: rgba(255, 255, 255, 0.16)"></div>
+        <div id="gSk3" class="abs" style="left: 336px; top: 1257px; width: 360px; height: 22px; border-radius: 11px; background: rgba(255, 255, 255, 0.16)"></div>
+        <div id="gL1" class="abs m" data-layout-allow-overflow data-layout-allow-occlusion style="left: 330px; top: 918px"><span class="mi lbl" data-layout-allow-occlusion style="color: #fff; font-size: 42px">RISET CALON PELANGGAN</span></div>
+        <div id="gL2" class="abs m" data-layout-allow-overflow data-layout-allow-occlusion style="left: 330px; top: 1078px"><span class="mi lbl" data-layout-allow-occlusion style="color: #fff; font-size: 42px">DRAF PENAWARAN</span></div>
+        <div id="gL3" class="abs m" data-layout-allow-overflow data-layout-allow-occlusion style="left: 330px; top: 1238px"><span class="mi lbl" data-layout-allow-occlusion style="color: #fff; font-size: 42px">KONTEN MARKETING</span></div>
+        <div class="capWrap cx"><div class="cap dark" id="gCap1">KERJA BARENGAN</div></div>
+        <div class="capWrap cx"><div class="cap dark" id="gCap2">KEMAMPUANNYA ADA YANG MIRIP</div></div>
+      </section>
+
+      <!-- ================= B09/B10 MIRIP → PILIH ================= -->
+      <section id="sChoose" class="clip" data-start="47.3" data-duration="5.4" data-track-index="10">
+        <div id="cT1" class="cx" style="top: 418px"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="font-size: 84px; font-weight: 400; letter-spacing: -0.01em">PILIH SESUAI</span></div></div>
+        <div id="cT2" class="cx" style="top: 518px"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="font-size: 100px; font-weight: 700; letter-spacing: -0.02em">KEBUTUHAN LO</span></div></div>
+        <div id="cRow1" class="abs row" style="top: 690px"></div>
+        <div id="cRow2" class="abs row" style="top: 878px"></div>
+        <div id="cRow3" class="abs row" style="top: 1066px"></div>
+        <div id="cTx1" class="abs" style="left: 300px; top: 718px"><div class="rname">dots</div><div class="rdesc">kerja di belakang layar</div></div>
+        <div id="cTx2" class="abs" style="left: 300px; top: 906px"><div class="rname">Muse</div><div class="rdesc">urusan harian</div></div>
+        <div id="cTx3" class="abs" style="left: 300px; top: 1094px"><div class="rname">Grok Bot</div><div class="rdesc">tim bot, tugas berbeda</div></div>
+        <!-- overlap circles: glide into the row icons -->
+        <div id="cC1" class="abs" style="left: 270px; top: 760px; width: 330px; height: 330px; border-radius: 50%; background: rgba(220, 232, 250, 0.78); border: 4px solid #3e6fc9"></div>
+        <div id="cC2" class="abs" style="left: 480px; top: 760px; width: 330px; height: 330px; border-radius: 50%; background: rgba(220, 232, 250, 0.78); border: 4px solid #3e6fc9"></div>
+        <div id="cC3" class="abs" style="left: 375px; top: 940px; width: 330px; height: 330px; border-radius: 50%; background: rgba(220, 232, 250, 0.78); border: 4px solid #3e6fc9"></div>
+        <div id="cV1" class="abs lbl" style="left: 316px; top: 870px; width: 170px; text-align: center; font-size: 40px">dots</div>
+        <div id="cV2" class="abs lbl" style="left: 596px; top: 870px; width: 170px; text-align: center; font-size: 40px">Muse</div>
+        <div id="cV3" class="abs lbl" style="left: 430px; top: 1130px; width: 220px; text-align: center; font-size: 40px">Grok Bot</div>
+        <div id="cI1" class="abs iconDot" style="left: 164px; top: 724px; background: #101b3d; color: #fff"><svg class="ic" width="48" height="48" viewBox="0 0 48 48"><path d="M38 24a14 14 0 1 1-4.1-9.9 M38 9v6h-6" /></svg></div>
+        <div id="cI2" class="abs iconDot" style="left: 164px; top: 912px; background: #101b3d; color: #fff"><svg class="ic" width="48" height="48" viewBox="0 0 48 48"><rect x="7" y="10" width="34" height="31" rx="5" /><path d="M7 19h34M16 6v8M32 6v8M17 30l5 5 9-9" /></svg></div>
+        <div id="cI3" class="abs iconDot" style="left: 164px; top: 1100px; background: #101b3d; color: #fff"><svg class="ic" width="48" height="48" viewBox="0 0 48 48"><rect x="9" y="16" width="30" height="23" rx="7" /><path d="M24 16v-6M18 33h12" /><circle cx="18.5" cy="26" r="2.4" fill="currentColor" /><circle cx="29.5" cy="26" r="2.4" fill="currentColor" /></svg></div>
+      </section>
+
+      <!-- ================= B11 MULAI ================= -->
+      <section id="sSteps" class="clip" data-start="52.25" data-duration="8.75" data-track-index="11">
+        <div id="sT1" class="cx" style="top: 400px"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="font-size: 132px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.05">MULAI</span></div></div>
+        <div id="sT2" class="cx" style="top: 554px"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="font-size: 42px; font-weight: 400; color: #294772">dari sini</span></div></div>
+        <svg class="ov" viewBox="0 0 1080 1920">
+          <g fill="none" stroke="#294772" stroke-width="4" stroke-linecap="round">
+            <path id="sRl1" class="dr" pathLength="1" d="M206 798 L 206 868" />
+            <path id="sRl2" class="dr" pathLength="1" d="M206 968 L 206 1038" />
+            <path id="sRl3" class="dr" pathLength="1" d="M206 1138 L 206 1208" />
+          </g>
+        </svg>
+        <div id="sS1" class="abs" style="left: 160px; top: 706px; display: flex; align-items: center; gap: 30px">
+          <div class="num" id="sN1">1</div><div class="lbl" style="font-size: 42px; max-width: 640px">SATU TUGAS BERULANG</div>
+        </div>
+        <div id="sS2" class="abs" style="left: 160px; top: 876px; display: flex; align-items: center; gap: 30px">
+          <div class="num" id="sN2">2</div><div class="lbl" style="font-size: 42px; max-width: 640px">KASIH BAHANNYA</div>
+        </div>
+        <div id="sS3" class="abs" style="left: 160px; top: 1046px; display: flex; align-items: center; gap: 30px">
+          <div class="num" id="sN3">3</div><div class="lbl" style="font-size: 42px; max-width: 640px">CONTOH HASIL YANG LO MAU</div>
+        </div>
+        <div id="sS4" class="abs" style="left: 160px; top: 1216px; display: flex; align-items: center; gap: 30px">
+          <div class="num" id="sN4">4</div><div class="lbl" style="font-size: 42px; max-width: 600px">KAPAN AI PERLU PERSETUJUAN</div>
+        </div>
+      </section>
+
+      <!-- ================= B12 CONTOH PROMPT ================= -->
+      <section id="sEx" class="clip" data-start="60.6" data-duration="6.65" data-track-index="12">
+        <div id="eTag" class="cx" style="top: 448px"><div class="cap dark" style="font-size: 40px">MISALNYA</div></div>
+        <div id="eB1" class="abs bubble" style="left: 130px; top: 560px; width: 820px; height: 360px; padding: 46px 52px">
+          <div style="font-size: 24px; font-weight: 700; letter-spacing: 0.16em; color: #294772; margin-bottom: 14px">PROMPT</div>
+          <div id="ePrompt" style="font-size: 58px; font-weight: 700; line-height: 1.22; letter-spacing: -0.01em">
+            <span class="word">Bikin</span> <span class="word">3</span> <span class="word">draft</span> <span class="word">penawaran</span> <span class="word">dari</span> <span class="word">catatan</span> <span class="word">ini.</span>
+          </div>
+        </div>
+        <div id="eDoc1" class="abs bubble" style="left: 312px; top: 975px; width: 150px; height: 190px; border-radius: 22px; padding: 26px 22px"><div style="font-size: 19px; font-weight: 700; color: #294772; letter-spacing: 0.04em; white-space: nowrap">DRAFT 1</div><div style="margin-top: 18px; height: 12px; border-radius: 6px; background: #dce8fa"></div><div style="margin-top: 14px; height: 12px; width: 70%; border-radius: 6px; background: #dce8fa"></div><div style="margin-top: 14px; height: 12px; width: 85%; border-radius: 6px; background: #dce8fa"></div></div>
+        <div id="eDoc2" class="abs bubble" style="left: 465px; top: 963px; width: 150px; height: 190px; border-radius: 22px; padding: 26px 22px"><div style="font-size: 19px; font-weight: 700; color: #294772; letter-spacing: 0.04em; white-space: nowrap">DRAFT 2</div><div style="margin-top: 18px; height: 12px; border-radius: 6px; background: #dce8fa"></div><div style="margin-top: 14px; height: 12px; width: 80%; border-radius: 6px; background: #dce8fa"></div><div style="margin-top: 14px; height: 12px; width: 60%; border-radius: 6px; background: #dce8fa"></div></div>
+        <div id="eDoc3" class="abs bubble" style="left: 618px; top: 975px; width: 150px; height: 190px; border-radius: 22px; padding: 26px 22px"><div style="font-size: 19px; font-weight: 700; color: #294772; letter-spacing: 0.04em; white-space: nowrap">DRAFT 3</div><div style="margin-top: 18px; height: 12px; border-radius: 6px; background: #dce8fa"></div><div style="margin-top: 14px; height: 12px; width: 75%; border-radius: 6px; background: #dce8fa"></div><div style="margin-top: 14px; height: 12px; width: 90%; border-radius: 6px; background: #dce8fa"></div></div>
+        <div id="eEye1" class="abs" style="left: 420px; top: 952px"><div class="iconDot" style="width: 52px; height: 52px; background: #101b3d; color: #fff"><svg class="ic" width="32" height="32" viewBox="0 0 48 48" style="stroke-width: 4.5"><path d="M4 24s7-13 20-13 20 13 20 13-7 13-20 13S4 24 4 24z" /><circle cx="24" cy="24" r="5" /></svg></div></div>
+        <div id="eEye2" class="abs" style="left: 573px; top: 940px"><div class="iconDot" style="width: 52px; height: 52px; background: #101b3d; color: #fff"><svg class="ic" width="32" height="32" viewBox="0 0 48 48" style="stroke-width: 4.5"><path d="M4 24s7-13 20-13 20 13 20 13-7 13-20 13S4 24 4 24z" /><circle cx="24" cy="24" r="5" /></svg></div></div>
+        <div id="eEye3" class="abs" style="left: 726px; top: 952px"><div class="iconDot" style="width: 52px; height: 52px; background: #101b3d; color: #fff"><svg class="ic" width="32" height="32" viewBox="0 0 48 48" style="stroke-width: 4.5"><path d="M4 24s7-13 20-13 20 13 20 13-7 13-20 13S4 24 4 24z" /><circle cx="24" cy="24" r="5" /></svg></div></div>
+        <div id="eB2" class="abs bubble" style="left: 180px; top: 1210px; width: 770px; height: 150px; background: #101b3d; border-color: #101b3d; display: flex; align-items: center; gap: 24px; padding-left: 40px">
+          <svg class="ic" width="58" height="58" viewBox="0 0 48 48" style="color: #fff"><path d="M4 24s7-13 20-13 20 13 20 13-7 13-20 13S4 24 4 24z" /><circle cx="24" cy="24" r="5" /></svg>
+          <span style="font-size: 42px; font-weight: 700; color: #fff; line-height: 1.15">Tunjukin dulu sebelum dikirim.</span>
+        </div>
+      </section>
+
+      <!-- ================= B13 CTA ================= -->
+      <section id="sCta" class="clip" data-start="66.9" data-duration="5.1" data-track-index="13">
+        <div id="kSave" class="abs" style="left: 0; right: 0; top: 600px; display: flex; flex-direction: column; align-items: center">
+          <svg class="ic" width="120" height="120" viewBox="0 0 48 48" style="stroke-width: 3.4"><path id="kBm" class="dr" pathLength="1" d="M13 5h22v38l-11-9-11 9z" /></svg>
+          <div class="m" data-layout-allow-overflow data-layout-allow-occlusion style="margin-top: 10px"><span class="mi" data-layout-allow-occlusion style="font-size: 150px; font-weight: 700; letter-spacing: -0.03em; line-height: 1">SAVE</span></div>
+        </div>
+        <div id="kSub" class="cx" style="top: 940px"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="font-size: 42px; font-weight: 700; color: #294772; letter-spacing: 0.03em">BUAT NENTUIN TUGAS PERTAMA LO</span></div></div>
+        <div id="kF1" class="cx" style="top: 980px"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="font-size: 74px; font-weight: 400; letter-spacing: 0.02em; line-height: 1.05">FOLLOW</span></div></div>
+        <div id="kF2" class="cx" style="top: 1066px"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="font-size: 134px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05">AIPRENEUR</span></div></div>
+        <div class="cx" style="top: 1232px"><div id="kUl" style="width: 520px; height: 10px; border-radius: 5px; background: #3e6fc9; transform-origin: 50% 50%"></div></div>
+        <div id="kSub2" class="cx" style="top: 1270px"><div class="m" data-layout-allow-overflow data-layout-allow-occlusion><span class="mi" data-layout-allow-occlusion style="font-size: 42px; font-weight: 700; color: #294772; letter-spacing: 0.03em">BUAT CARA PAKAI AI DI BISNIS</span></div></div>
+      </section>
+
+      <!-- ================= HEADER (persistent brand anchor, on top) ================= -->
+      <div id="hdrWrap" class="cx clip" data-start="0" data-duration="72" data-track-index="30">
+        <div id="hdr"><div class="logoFrame" id="logoFrame"><img src="assets/aipreneur_logo_original.png" alt="AI PRENEUR" data-layout-allow-overflow /></div></div>
+      </div>
+    </div>
+
+    <script>
+      // ---------- build-time DOM (deterministic) ----------
+      (function buildRing() {
+        const g = document.getElementById("dRing");
+        const NS = "http://www.w3.org/2000/svg";
+        for (let i = 0; i < 12; i++) {
+          const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+          const c = document.createElementNS(NS, "circle");
+          c.setAttribute("cx", (130 + 112 * Math.cos(a)).toFixed(2));
+          c.setAttribute("cy", (130 + 112 * Math.sin(a)).toFixed(2));
+          c.setAttribute("r", i === 0 ? 0 : 8);
+          c.setAttribute("fill", "#101b3d");
+          c.setAttribute("class", "rdot");
+          g.appendChild(c);
+        }
+      })();
+      document.querySelectorAll(".gnode").forEach((n, i) => {
+        n.style.cssText += ";width:92px;height:92px;border-radius:50%;background:#dce8fa;color:#101b3d;display:flex;align-items:center;justify-content:center";
+        n.innerHTML =
+          '<svg class="ic" width="50" height="50" viewBox="0 0 48 48" style="position:absolute"><g class="gBot"><rect x="9" y="16" width="30" height="23" rx="7"/><path d="M24 16v-6M18 33h12"/><circle cx="18.5" cy="26" r="2.4" fill="currentColor"/><circle cx="29.5" cy="26" r="2.4" fill="currentColor"/></g></svg>' +
+          '<svg class="ic gRole" width="50" height="50" viewBox="0 0 48 48" style="position:absolute">' +
+          [
+            '<circle cx="21" cy="21" r="12"/><path d="M30 30l11 11"/>',
+            '<path d="M12 6h16l8 8v11M12 6v36h12M28 6v8h8M17 18h12M17 25h8"/><path d="M34 29l6 6-9 9h-6v-6z"/>',
+            '<path d="M8 20v8h6l16 9V11L14 20z"/><path d="M14 28l3 10h5l-2-9M36 18a8 8 0 0 1 0 12"/>',
+          ][i] +
+          "</svg>";
+      });
+
+      // ---------- timeline ----------
+      const tl = gsap.timeline({ paused: true });
+      const OUT = "power3.out", IO = "power2.inOut", IN = "power2.in";
+      const q = (s) => s;
+      function inUp(sel, t, o = {}) {
+        tl.fromTo(sel, { opacity: 0, y: o.y ?? 28, scale: o.s ?? 0.985 }, { opacity: 1, y: 0, scale: 1, duration: o.d ?? 0.5, ease: o.e ?? OUT, stagger: o.st ?? 0 }, t);
+      }
+      function pop(sel, t, o = {}) {
+        tl.fromTo(sel, { opacity: 0, scale: o.s ?? 0.9, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: o.d ?? 0.42, ease: o.e ?? "back.out(1.3)", stagger: o.st ?? 0 }, t);
+      }
+      function mask(sel, t, o = {}) {
+        tl.fromTo(sel, { yPercent: 112, opacity: 0 }, { yPercent: 0, opacity: 1, duration: o.d ?? 0.46, ease: o.e ?? OUT, stagger: o.st ?? 0 }, t);
+      }
+      function draw(sel, t, o = {}) {
+        tl.fromTo(sel, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: o.d ?? 0.5, ease: o.e ?? IO, stagger: o.st ?? 0 }, t);
+      }
+      function hide(sel, t, o = {}) {
+        tl.to(sel, { opacity: 0, y: o.y ?? -16, duration: o.d ?? 0.32, ease: o.e ?? IN, stagger: o.st ?? 0 }, t);
+      }
+      function fadeIn(sel, t, d = 0.4) { tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: d, ease: "power1.inOut" }, t); }
+      function fadeOut(sel, t, d = 0.4) { tl.to(sel, { opacity: 0, duration: d, ease: "power1.inOut" }, t); }
+
+      // ===== B01 HOOK (VO 0.16 "Mau rekrut AI?" · 1.43 "Siapin job desc-nya dulu") =====
+      mask("#h1a .mi", 0.1);
+      mask("#h1b .mi", 0.42, { d: 0.5 });
+      mask("#h1c .mi", 1.36);
+      inUp("#jd", 1.42, { y: 40, s: 0.96, d: 0.55 });
+      draw("#jdL1,#jdL2,#jdL3", 1.7, { d: 0.45, st: 0.18 });
+      draw("#jdC1,#jdC2,#jdC3", 2.0, { d: 0.25, st: 0.2, e: OUT });
+      hide("#h1a,#h1b,#h1c", 2.86, { st: 0.04 });
+      tl.to("#jd", { opacity: 0, scale: 0.94, y: -30, duration: 0.36, ease: IN }, 2.96);
+
+      // ===== B02 LINEUP (3.05 "Ini 3 tools…" · 5.32 dots · 6.09 Muse · 6.85 Grok Bot) =====
+      mask("#l1 .mi", 3.05, { d: 0.5 });
+      mask("#l2 .mi", 3.5);
+      inUp("#slot1,#slot2,#slot3", 3.55, { y: 18, d: 0.45, st: 0.12 });
+      inUp("#tDots", 5.22, { y: 30, s: 0.94, d: 0.5 });
+      inUp("#tMuse", 5.98, { y: 30, s: 0.94, d: 0.5 });
+      inUp("#tGrok", 6.74, { y: 30, s: 0.94, d: 0.5 });
+      fadeOut("#slot1", 5.4, 0.3); fadeOut("#slot2", 6.16, 0.3); fadeOut("#slot3", 6.92, 0.3);
+      draw("#lnA", 6.2, { d: 0.4 });
+      draw("#lnB", 6.95, { d: 0.4 });
+      draw("#lnC", 7.25, { d: 0.35 });
+      // handoff → Dots (7.95 "Dots dari OpenAI")
+      hide("#l1,#l2", 7.5, { st: 0.05 });
+      fadeOut("#lnA,#lnB,#lnC", 7.5, 0.25);
+      tl.to("#tMuse", { x: 203, y: -874, scale: 0.3, duration: 0.55, ease: IO }, 7.55);
+      tl.to("#tGrok", { x: -121, y: -874, scale: 0.3, duration: 0.55, ease: IO }, 7.58);
+      tl.to("#tMuse,#tGrok", { opacity: 0, duration: 0.3, ease: "power1.in" }, 7.62);
+      tl.to("#tDots", { y: 120, scale: 1.3, opacity: 0, duration: 0.42, ease: IO }, 7.7);
+
+      // ===== NAV =====
+      inUp("#nav .pill", 8.12, { y: 12, d: 0.4, st: 0.06 });
+      const ACT = { backgroundColor: "#101b3d", color: "#ffffff", borderColor: "#101b3d" };
+      const IDLE = { backgroundColor: "rgba(255,255,255,0.6)", color: "rgba(16,27,61,0.55)", borderColor: "#cbd8ee" };
+      const IDLE_D = { backgroundColor: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.62)", borderColor: "rgba(255,255,255,0.22)" };
+      const ACT_D = { backgroundColor: "#dce8fa", color: "#101b3d", borderColor: "#dce8fa" };
+      tl.to("#pDots", { ...ACT, duration: 0.3 }, 8.1);
+      tl.to("#pDots", { ...IDLE, duration: 0.3 }, 21.45);
+      tl.to("#pMuse", { ...ACT, duration: 0.3 }, 21.5);
+      tl.to("#nav", { opacity: 0, duration: 0.2, ease: "power1.in" }, 35.4);
+      tl.set("#pDots,#pMuse", IDLE_D, 35.62);
+      tl.set("#pGrok", ACT_D, 35.62);
+      tl.to("#nav", { opacity: 1, duration: 0.3, ease: "power1.out" }, 35.95);
+      hide("#nav .pill", 47.3, { y: -10, st: 0.05 });
+
+      // ===== B03 DOTS (7.95 dots · 8.6 OpenAI · 9.49 kerja di belakang layar · 11.50 lewat aplikasi · izinkan ~12.8) =====
+      tl.fromTo("#dPanel", { opacity: 0, scale: 0.46, y: -40 }, { opacity: 1, scale: 1, y: 0, duration: 0.62, ease: IO }, 7.7);
+      mask("#dTtl .mi", 8.12, { d: 0.5 });
+      mask("#dSub .mi", 8.55);
+      pop("#dLoop", 8.2, { s: 0.7, d: 0.55, e: OUT });
+      tl.fromTo("#dRing .rdot", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.3, ease: "back.out(2)", stagger: 0.035 }, 8.35);
+      tl.fromTo("#dArm", { rotation: 0, svgOrigin: "130 130" }, { rotation: 360, svgOrigin: "130 130", duration: 1.75, ease: "power1.inOut" }, 9.5);
+      inUp("#dCap1", 9.46, { y: 18, d: 0.4 });
+      hide("#dCap1", 11.3, { y: -10, d: 0.25 });
+      inUp("#dCap2", 11.48, { y: 18, d: 0.4 });
+      draw("#dcA,#dcB,#dcC", 11.55, { d: 0.5, st: 0.12 });
+      pop("#dApp1,#dApp2,#dApp3", 11.75, { s: 0.8, st: 0.15 });
+      pop("#dOk1,#dOk2,#dOk3", 12.35, { s: 0.4, st: 0.2, e: "back.out(2.2)" });
+      // second orbit lap while apps run (finite)
+      tl.to("#dArm", { rotation: 720, svgOrigin: "130 130", duration: 1.6, ease: "power1.inOut" }, 12.0);
+
+      // ===== B04 DOTS CONTOH (14.03 contohnya · 15.1 transcript podcast · 16.33 draft content · 18.67 revisi…) =====
+      hide("#dCap2", 13.85, { y: -10, d: 0.25 });
+      inUp("#dCap3", 14.0, { y: 18, d: 0.4 });
+      fadeOut("#dApps", 14.0, 0.3);
+      fadeOut("#dcA,#dcB,#dcC", 14.0, 0.3);
+      tl.to("#dLoop", { x: 310, y: -137, scale: 0.4, duration: 0.7, ease: IO }, 14.05);
+      inUp("#dR1", 15.0, { y: 24 });
+      draw("#dAr1", 16.05, { d: 0.35 });
+      inUp("#dR2", 16.3, { y: 24 });
+      draw("#dAr2", 18.35, { d: 0.35 });
+      inUp("#dR3", 18.62, { y: 24 });
+      draw("#dArc", 19.6, { d: 0.6 });
+      fadeIn("#dArcDot", 19.95, 0.15);
+      tl.fromTo("#dArcDot", { rotation: 0, svgOrigin: "216 1126" }, { rotation: 180, svgOrigin: "216 1126", duration: 0.9, ease: IO }, 20.0);
+      fadeOut("#dArcDot", 20.85, 0.2);
+      // exit → Muse
+      hide("#dTtl,#dSub", 21.22, { st: 0.04 });
+      fadeOut("#dLoop", 21.0, 0.28);
+      hide("#dR1,#dR2,#dR3,#dCap3", 21.0, { y: -12, st: 0.03, d: 0.26 });
+      fadeOut("#dAr1,#dAr2,#dArc", 21.0, 0.25);
+      fadeOut("#dPanel", 21.35, 0.3);
+
+      // ===== B05 MUSE (21.56 Muse dari Meta · 22.6 urusan harian · 24.24 perjalanan · 26.11 formulir · 27.15 belanja) =====
+      fadeIn("#museWash", 21.05, 0.6);
+      fadeIn("#mPanel", 21.3, 0.35);
+      mask("#mTtl .mi", 21.52, { d: 0.5 });
+      mask("#mSub .mi", 22.15);
+      inUp("#mHead", 22.55, { y: 20 });
+      draw("#mDiv", 22.9, { d: 0.5 });
+      inUp("#mRow1,#mR1", 24.12, { y: 22, d: 0.45 });
+      inUp("#mRow2,#mR2", 25.98, { y: 22, d: 0.45 });
+      inUp("#mRow3,#mR3", 27.02, { y: 22, d: 0.45 });
+      const HL = { backgroundColor: "#dce8fa", borderColor: "#101b3d", duration: 0.3 };
+      const UN = { backgroundColor: "#ffffff", borderColor: "#d5e0f2", duration: 0.3 };
+      tl.to("#mRow1", HL, 24.3); tl.to("#mRow1", UN, 26.1);
+      tl.to("#mRow2", HL, 26.15); tl.to("#mRow2", UN, 27.15);
+      tl.to("#mRow3", HL, 27.2);
+
+      // ===== B06 MUSE CONTOH (28.46 misalnya · 29.53 cari hotel · 30.99 budget · 32.52 membeli · 33.78 tetap · 34.24 persetujuan) =====
+      hide("#mHead,#mR1,#mR2,#mR3,#mRow1,#mRow2,#mRow3", 28.3, { y: -14, st: 0.03 });
+      fadeOut("#mDiv", 28.3, 0.25);
+      inUp("#mCap", 28.42, { y: 18, d: 0.4 });
+      inUp("#mHotel", 29.45, { y: 24 });
+      mask("#mHotel .mi", 29.5, { st: 1.4 });
+      fadeIn("#mBar", 30.9, 0.3);
+      tl.fromTo("#mBarFill", { scaleX: 0 }, { scaleX: 0.62, duration: 0.8, ease: OUT }, 31.0);
+      draw("#mDiv2", 31.6, { d: 0.5 });
+      inUp("#mBuy", 32.45, { y: 22 });
+      mask("#mBuy .mi", 32.6);
+      pop("#mLock", 33.72, { s: 0.3, e: "back.out(2.2)" });
+      tl.to("#mBuyBtn", { opacity: 0.45, duration: 0.3 }, 33.75);
+      draw("#mArr", 33.95, { d: 0.3 });
+      inUp("#mOk", 34.18, { y: 22, d: 0.45 });
+      draw("#mOkChk", 34.6, { d: 0.4, e: OUT });
+      // exit → Grok (35.81)
+      hide("#mTtl,#mSub", 35.42, { st: 0.04 });
+      hide("#mHotel,#mBar,#mBuy,#mLock,#mOk,#mCap", 35.45, { y: -12, st: 0.025 });
+      fadeOut("#mDiv2,#mArr", 35.45, 0.25);
+      fadeOut("#mPanel", 35.55, 0.3);
+      fadeOut("#museWash", 35.6, 0.5);
+
+      // ===== B07 GROK (35.81 Grok Bot · 36.86 beberapa bot · 38.31 tugas berbeda) =====
+      fadeIn("#navyBg", 35.45, 0.55);
+      fadeIn("#gPanel", 35.6, 0.4);
+      mask("#gTtl .mi", 35.78, { d: 0.5 });
+      pop("#gHub", 36.1, { s: 0.6, e: OUT, d: 0.5 });
+      mask("#gSub .m:nth-child(1) .mi", 36.82);
+      mask("#gSub .m:nth-child(2) .mi, #gSub .m:nth-child(3) .mi", 38.25, { st: 0.12 });
+      draw("#gc1,#gc2,#gc3", 36.95, { d: 0.45, st: 0.18 });
+      pop("#gN1,#gN2,#gN3", 37.15, { s: 0.6, st: 0.18 });
+      tl.set(".gRole", { opacity: 0 }, 0);
+      tl.fromTo("#gSk1,#gSk2,#gSk3", { opacity: 0, scaleX: 0, transformOrigin: "0 50%" }, { opacity: 1, scaleX: 1, duration: 0.45, ease: OUT, stagger: 0.18 }, 37.4);
+      // "tugas berbeda": each task line changes length once
+      tl.to("#gSk1", { scaleX: 0.7, duration: 0.4, ease: IO }, 38.35);
+      tl.to("#gSk2", { scaleX: 1.3, duration: 0.4, ease: IO }, 38.47);
+      tl.to("#gSk3", { scaleX: 0.85, duration: 0.4, ease: IO }, 38.59);
+
+      // ===== B08 ROLES (39.98 riset · 41.73 draf penawaran · 43.65 konten marketing) =====
+      [["1", 39.9], ["2", 41.65], ["3", 43.57]].forEach(([i, t]) => {
+        fadeOut("#gSk" + i, t, 0.2);
+        tl.fromTo("#gL" + i + " .mi", { yPercent: 112, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.45, ease: OUT }, t + 0.08);
+        draw("#gh" + i, t, { d: 0.45 });
+        tl.to("#gN" + i + " .gBot", { opacity: 0, duration: 0.2 }, t + 0.05);
+        tl.to("#gN" + i + " .gRole", { opacity: 1, duration: 0.25 }, t + 0.15);
+        tl.fromTo("#gN" + i, { scale: 1 }, { scale: 1.12, duration: 0.18, ease: "power2.out", immediateRender: false }, t + 0.05);
+        tl.to("#gN" + i, { scale: 1, duration: 0.3, ease: "power2.out" }, t + 0.23);
+      });
+
+      // ===== B09 BARENG (45.75 kerja barengan · 47.54 kemampuannya ada yang mirip) =====
+      inUp("#gCap1", 45.7, { y: 18, d: 0.4 });
+            fadeIn("#gPulse", 45.9, 0.15);
+      tl.fromTo("#gPulse", { attr: { cy: 806 } }, { attr: { cy: 1268 }, duration: 1.0, ease: IO }, 46.0);
+      fadeOut("#gPulse", 46.85, 0.2);
+      tl.to("#gHub", { boxShadow: "0 0 0 22px rgba(220,232,250,0.22)", duration: 0.35, ease: OUT }, 46.0);
+      tl.to("#gHub", { boxShadow: "0 0 0 10px rgba(220,232,250,0.12)", duration: 0.45, ease: IO }, 46.4);
+      hide("#gCap1", 47.32, { y: -10, d: 0.22 });
+      inUp("#gCap2", 47.48, { y: 18, d: 0.4 });
+      hide("#gTtl,#gSub", 47.2, { st: 0.04 });
+      hide("#gHub,#gN1,#gN2,#gN3,#gL1,#gL2,#gL3", 47.2, { y: -10, st: 0.02 });
+      fadeOut("#gc1,#gc2,#gc3,#gh1,#gh2,#gh3", 47.2, 0.3);
+      fadeOut("#gPanel", 47.3, 0.35);
+      hide("#gCap2", 48.95, { y: -10, d: 0.25 });
+      fadeOut("#navyBg", 48.8, 0.5);
+
+      // ===== B09→B10 overlap circles → PILIH SESUAI (49.17 jadi · 49.99 pilih sesuai…) =====
+      tl.fromTo("#cC1,#cC2,#cC3", { opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.5, ease: OUT, stagger: 0.12 }, 47.5);
+      inUp("#cV1,#cV2,#cV3", 47.65, { y: 10, d: 0.35, st: 0.12 });
+      fadeOut("#cV1,#cV2,#cV3", 49.15, 0.2);
+      // circle centres → row icon centres (210, 770/958/1146) ; r 165 → 46
+      const S = 92 / 330;
+      tl.to("#cC1", { x: 210 - 435, y: 770 - 925, scale: S, duration: 0.65, ease: IO }, 49.2);
+      tl.to("#cC2", { x: 210 - 645, y: 958 - 925, scale: S, duration: 0.65, ease: IO }, 49.25);
+      tl.to("#cC3", { x: 210 - 540, y: 1146 - 1105, scale: S, duration: 0.65, ease: IO }, 49.3);
+      fadeIn("#cI1,#cI2,#cI3", 49.75, 0.25);
+      fadeOut("#cC1,#cC2,#cC3", 49.85, 0.2);
+      inUp("#cRow1,#cRow2,#cRow3", 49.55, { y: 20, d: 0.45, st: 0.1 });
+      inUp("#cTx1,#cTx2,#cTx3", 49.8, { y: 16, d: 0.45, st: 0.14 });
+      mask("#cT1 .mi", 49.95);
+      mask("#cT2 .mi", 50.12, { d: 0.5 });
+      // exit
+      hide("#cT1,#cT2", 52.12, { st: 0.04 });
+      hide("#cRow1,#cTx1,#cI1,#cRow2,#cTx2,#cI2,#cRow3,#cTx3,#cI3", 52.15, { y: -14, st: 0.015 });
+
+      // ===== B11 MULAI (52.46 · 54.55 · 55.95 · 57.73/58.64) =====
+      mask("#sT1 .mi", 52.4, { d: 0.5 });
+      mask("#sT2 .mi", 52.75);
+      const NA = { backgroundColor: "#101b3d", borderColor: "#101b3d", color: "#ffffff", duration: 0.3 };
+      inUp("#sS1", 52.6, { y: 22 }); tl.to("#sN1", NA, 52.9);
+      draw("#sRl1", 54.2, { d: 0.35 });
+      inUp("#sS2", 54.45, { y: 22 }); tl.to("#sN2", NA, 54.6);
+      draw("#sRl2", 55.6, { d: 0.35 });
+      inUp("#sS3", 55.85, { y: 22 }); tl.to("#sN3", NA, 56.0);
+      draw("#sRl3", 57.35, { d: 0.35 });
+      inUp("#sS4", 57.65, { y: 22 }); tl.to("#sN4", NA, 58.7);
+      hide("#sT1,#sT2", 60.45, { st: 0.04 });
+      hide("#sS1,#sS2,#sS3,#sS4", 60.48, { y: -14, st: 0.04 });
+      fadeOut("#sRl1,#sRl2,#sRl3", 60.48, 0.25);
+
+      // ===== B12 CONTOH PROMPT (60.88 misalnya · 62.10–64.38 prompt · 65.10 tunjukin dulu) =====
+      inUp("#eTag", 60.82, { y: 16, d: 0.4 });
+      inUp("#eB1", 61.35, { y: 30, s: 0.97 });
+      tl.fromTo("#ePrompt .word", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, ease: OUT, stagger: 0.31 }, 62.05);
+      tl.fromTo("#eDoc1", { opacity: 0, y: 30, rotation: 0 }, { opacity: 1, y: 0, rotation: -8, duration: 0.5, ease: OUT }, 62.75);
+      tl.fromTo("#eDoc2", { opacity: 0, y: 30, rotation: 0 }, { opacity: 1, y: 0, rotation: 0, duration: 0.5, ease: OUT }, 62.85);
+      tl.fromTo("#eDoc3", { opacity: 0, y: 30, rotation: 0 }, { opacity: 1, y: 0, rotation: 8, duration: 0.5, ease: OUT }, 62.95);
+      inUp("#eB2", 65.0, { y: 26, s: 0.97 });
+      pop("#eEye1,#eEye2,#eEye3", 65.55, { s: 0.4, st: 0.12, e: "back.out(2)" });
+      hide("#eTag,#eB1", 66.68, { st: 0.04 });
+      hide("#eDoc1,#eDoc2,#eDoc3,#eEye1,#eEye2,#eEye3,#eB2", 66.72, { y: -14, st: 0.015 });
+
+      // ===== B13 CTA (67.12 save · 69.22 follow · 70.02 buat cara pakai AI di bisnis) =====
+      draw("#kBm", 67.05, { d: 0.5 });
+      mask("#kSave .mi", 67.12, { d: 0.5 });
+      mask("#kSub .mi", 67.6);
+      hide("#kSub", 68.85, { y: -10, d: 0.25 });
+      tl.to("#kSave", { y: 24, scale: 0.6, duration: 0.6, ease: IO }, 68.9);
+      mask("#kF1 .mi", 69.18, { d: 0.42 });
+      mask("#kF2 .mi", 69.3, { d: 0.5 });
+      tl.fromTo("#kUl", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: OUT }, 69.85);
+      mask("#kSub2 .mi", 70.0);
+      // brand signature: header logo glides down & grows (357 → 571 px visible)
+      tl.to("#hdr", { y: 300, scale: 1.6, duration: 0.8, ease: IO }, 68.95);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

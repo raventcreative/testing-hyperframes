@@ -86,17 +86,29 @@ cap_html = "\n".join(
     for c in caps)
 
 # ---- helpers ---------------------------------------------------------------------------------
-def pwin(sid, imgs, left=90, top=1290, w=250, h=280, dark=False):
-    """Portrait window: crop from 2.png / 1.png sits on the window's bottom edge."""
-    def layer(j, n):
-        vis = 1 if j == 0 else 0
-        if n == "yapping":
-            return f'<div id="{sid}-px-{n}" class="xl" style="opacity:{vis}"><img class="px" src="assets/expr/{n}.png" alt=""></div>'
-        mouths = "".join(f'<img class="px m{k}" src="assets/lips/{n}-{k}.png" alt="">' for k in range(3))
-        return f'<div id="{sid}-px-{n}" class="xl" style="opacity:{vis}">{mouths}</div>'
-    layers = "".join(layer(j, n) for j, n in enumerate(imgs))
-    return (f'<div id="{sid}-pw" class="pwin{" dark" if dark else ""}" data-m="0" style="left:{left}px;top:{top}px;width:{w}px;height:{h}px">'
-            f'<div id="{sid}-pwi" class="pwin-in">{layers}</div></div>')
+CHAR_SUBS = []  # (sid, frame-css) -> one sub-composition per scene, written below
+SRC_W, SRC_H = 720, 1280
+
+def char_host(sid, w, h, vid_w, vid_left, vid_top):
+    CHAR_SUBS.append((sid, w, h, vid_w, vid_left, vid_top))
+    return (f'<div id="{sid}-ch" class="charhost" data-composition-id="char-{sid}" '
+            f'data-composition-src="compositions/char-{sid}.html" data-width="{w}" data-height="{h}" '
+            f'data-start="%%START_{sid}%%" data-duration="%%DUR_{sid}%%" data-track-index="5"></div>')
+
+def pwin(sid, imgs=None, left=90, top=1290, w=250, h=280, dark=False):
+    """Portrait window: the HeyGen talking character, head-and-shoulders framed."""
+    cw, cx0, cy0 = 616.0, 72.0, 70.0           # crop window in source pixels (head + collar)
+    sc = w / cw
+    host = char_host(sid, w, h, SRC_W * sc, -cx0 * sc, -cy0 * sc)
+    return (f'<div id="{sid}-pw" class="pwin{" dark" if dark else ""}" style="left:{left}px;top:{top}px;width:{w}px;height:{h}px">'
+            f'<div id="{sid}-pwi" class="pwin-in">{host}</div></div>')
+
+def seat(sid, left, top, sc):
+    """Full seated character (replaces 1.png) from the HeyGen video."""
+    vw = SRC_W * sc; vh = SRC_H * sc
+    host = char_host(sid, round(vw), round(vh), vw, 0, 0)
+    return (f'<div id="{sid}-char" class="seat" data-layout-allow-overflow style="left:{left:.0f}px;top:{top:.0f}px;width:{vw:.0f}px;height:{vh:.0f}px">'
+            f'<div id="{sid}-char-img" class="seat-in" style="width:100%;height:100%">{host}</div></div>')
 
 def words_spans(sid, text, hl):
     out = []
@@ -118,7 +130,6 @@ ICON_UP = '<svg viewBox="0 0 200 200"><path d="M36 120 V160 H164 V120" fill="non
 ICON_SET = '<svg viewBox="0 0 200 200"><line x1="34" y1="56" x2="166" y2="56" stroke="#D9D6CF" stroke-width="10" stroke-linecap="round"/><line x1="34" y1="100" x2="166" y2="100" stroke="#D9D6CF" stroke-width="10" stroke-linecap="round"/><line x1="34" y1="144" x2="166" y2="144" stroke="#D9D6CF" stroke-width="10" stroke-linecap="round"/><circle cx="120" cy="56" r="16" fill="#18213A"/><circle cx="70" cy="100" r="16" fill="#7B1834"/><circle cx="140" cy="144" r="16" fill="#18213A"/></svg>'
 CHECK = '<svg viewBox="0 0 40 40"><path d="M10 21 L17 28 L30 13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
-SEAT = "".join(f'<img class="m{k}" src="assets/lips/seated-{k}.png" alt="">' for k in range(3))
 
 # ---- scenes ----------------------------------------------------------------------------------
 S = {}
@@ -130,7 +141,7 @@ S["s01"] = f'''
   <div id="s01-l2" class="sans" style="font-size:122px;line-height:.95;margin-top:14px;letter-spacing:-.02em">1 TIM <span class="burg">MARKETING?</span></div>
   <div id="s01-rule" class="rule" style="width:420px;margin-top:26px"></div>
 </div>
-<div id="s01-char" class="seat" data-m="0" data-layout-allow-overflow style="left:-170px;top:880px;width:820px"><div id="s01-char-img" class="seat-in">{SEAT}</div></div>
+{seat("s01", -113, 878, 0.98)}
 '''
 S["s02"] = f'''
 <div class="ground paper"></div>
@@ -300,7 +311,7 @@ S["s11"] = f'''
 </div>
 <div id="s11-cards">{"".join(f'<div id="s11-m{i}" class="task" style="left:{x}px;top:{y}px"><span style="width:64%"></span><span style="width:44%"></span></div>' for i,(x,y,r) in enumerate(scat))}</div>
 <div id="s11-sys" class="syscard" style="top:580px"><div class="syscheck">{CHECK}</div><div class="sysl"><span style="width:78%"></span><span style="width:56%"></span><span style="width:66%"></span></div></div>
-<div id="s11-char" class="seat" data-m="0" data-layout-allow-overflow style="left:-170px;top:970px;width:760px"><div id="s11-char-img" class="seat-in">{SEAT}</div></div>
+{seat("s11", -117, 968, 0.905)}
 '''
 S["s12"] = f'''
 <div class="ground paper"></div>
@@ -316,8 +327,30 @@ S["s12"] = f'''
 scene_html = ""
 for k, (sid, st, kind, tr) in enumerate(SC):
     s, d = win(k)
+    body = S[sid].replace(f"%%START_{sid}%%", str(s)).replace(f"%%DUR_{sid}%%", str(d))
     scene_html += (f'<section id="{sid}" class="clip scene" data-start="{s}" data-duration="{d}" data-track-index="{1 + k % 2}" style="z-index:{10 + k}">'
-                   f'<div id="{sid}-stage" class="stage">{S[sid]}</div></section>\n')
+                   f'<div id="{sid}-stage" class="stage">{body}</div></section>\n')
+
+import os
+os.makedirs("compositions", exist_ok=True)
+SCENE_START = {sid: win(k) for k, (sid, *_r) in enumerate(SC)}
+for sid, w, h, vw, vl, vt in CHAR_SUBS:
+    st, du = SCENE_START[sid]
+    open(f"compositions/char-{sid}.html", "w").write(f'''<!doctype html>
+<html><head><meta charset="UTF-8" /></head><body><template>
+<style>
+  #root {{ position:absolute; inset:0; overflow:hidden; }}
+  #char-{sid}-v {{ position:absolute; left:{vl:.2f}px; top:{vt:.2f}px; width:{vw:.2f}px; height:auto; display:block; }}
+</style>
+<div id="root" data-composition-id="char-{sid}" data-width="{w}" data-height="{h}">
+  <video id="char-{sid}-v" class="clip" src="assets/heygen/char-alpha.webm" muted playsinline
+         data-start="0" data-duration="{du}" data-media-start="{st}" data-track-index="0"></video>
+</div>
+<script>
+  window.__timelines["char-{sid}"] = gsap.timeline({{ paused: true }});
+</script>
+</template></body></html>
+''')
 
 # ---- timeline script -------------------------------------------------------------------------
 JS = []
@@ -376,7 +409,6 @@ ent("#s03-ah", "{opacity:0,x:-10}", "{opacity:1,x:0,duration:.2}", t(32) + 0.6)
 for i in range(3):
     ent(f"#s03-ok{i}", "{scale:0}", "{scale:1,duration:.3,ease:'back.out(2)'}", t(40) + i * 0.14)
 ent("#s03-pw", "{x:-60,opacity:0}", "{x:0,opacity:1,duration:.35,ease:'power2.out'}", b + 0.3)
-a(f'tl.set("#s03-px-quiet",{{opacity:0}},{t(40):.3f}); tl.set("#s03-px-smile",{{opacity:1}},{t(40):.3f});')
 
 # S04 seven agents
 b = SC[3][1]
@@ -393,7 +425,6 @@ ent("#s04-tag", "{clipPath:'inset(0% 100% 0% 0%)'}", "{clipPath:'inset(0% 0% 0% 
 ent("#s04-ch1", "{y:30,opacity:0}", "{y:0,opacity:1,duration:.3,ease:'power2.out'}", t(51) - 0.05)
 ent("#s04-ch2", "{x:60,opacity:0}", "{x:0,opacity:1,duration:.3,ease:'power2.out'}", t(53) - 0.05)
 ent("#s04-pw", "{scale:.8,opacity:0}", "{scale:1,opacity:1,duration:.35,ease:'back.out(1.6)'}", b + 0.35)
-a(f'tl.set("#s04-px-smile2",{{opacity:0}},{t(53):.3f}); tl.set("#s04-px-confident",{{opacity:1}},{t(53):.3f});')
 
 # S05 install
 b = SC[4][1]
@@ -451,8 +482,6 @@ ent("#s08-c2", "{x:80,opacity:0}", "{x:0,opacity:1,duration:.35,ease:'power3.out
 ent("#s08-c2t", "{opacity:0,y:20}", "{opacity:1,y:0,duration:.25,ease:'power2.out'}", t(116) - 0.05)
 a(f'tl.to("#s08-c2",{{scale:1.06,duration:.15,yoyo:true,repeat:1}},{t(116)+0.2:.3f});')
 ent("#s08-pw", "{y:60,opacity:0}", "{y:0,opacity:1,duration:.35,ease:'power2.out'}", b + 0.4)
-a(f'tl.set("#s08-px-confident",{{opacity:0}},{t(105):.3f}); tl.set("#s08-px-yapping",{{opacity:1}},{t(105):.3f});')
-a(f'tl.set("#s08-px-yapping",{{opacity:0}},{t(106)-0.05:.3f}); tl.set("#s08-px-confident",{{opacity:1}},{t(106)-0.05:.3f});')
 
 # S09 second command
 b = SC[8][1]
@@ -482,7 +511,6 @@ a(f'tl.to("#s10-fill",{{scaleX:1,duration:1.4,ease:"power1.inOut"}},{t(151):.3f}
 ent("#s10-ck2", "{scale:0}", "{scale:1,duration:.3,ease:'back.out(2)'}", t(151) + 1.4)
 ent("#s10-jm", "{scale:1.3,opacity:0}", "{scale:1,opacity:1,duration:.32,ease:'power4.out'}", t(156) - 0.08)
 ent("#s10-pw", "{y:50,opacity:0}", "{y:0,opacity:1,duration:.35,ease:'power2.out'}", b + 0.4)
-a(f'tl.set("#s10-px-smile",{{opacity:0}},{t(156):.3f}); tl.set("#s10-px-confident",{{opacity:1}},{t(156):.3f});')
 
 # S11 payoff
 b = SC[10][1]
@@ -504,7 +532,6 @@ a(f'tl.to("#s12-pill",{{scale:1.06,duration:.16,yoyo:true,repeat:1,ease:"power2.
 ent("#s12-ul", "{scaleX:0,transformOrigin:'50% 50%'}", "{scaleX:1,duration:.4,ease:'power2.out'}", t(174))
 ent("#s12-sub", "{y:30,opacity:0}", "{y:0,opacity:1,duration:.4,ease:'power3.out'}", t(175) - 0.05)
 ent("#s12-pw", "{x:-80,opacity:0}", "{x:0,opacity:1,duration:.4,ease:'power3.out'}", b + 0.3)
-a(f'tl.set("#s12-px-yapping",{{opacity:0}},{t(175)-0.05:.3f}); tl.set("#s12-px-quiet",{{opacity:1}},{t(175)-0.05:.3f});')
 ent("#s12-fade", "{opacity:0}", "{opacity:1,duration:.45,ease:'power1.in'}", DUR - 0.45)
 
 
@@ -524,37 +551,7 @@ for i in range(3):
     a(f'tl.to("#s03-k{i}",{{y:-18,duration:.3,yoyo:true,repeat:1,ease:"power2.out"}},{t(35)+i*0.12:.3f});')
 
 
-# ---- lip-sync: mouth state per frame from the real VO envelope -------------------------------
-import subprocess, numpy as np
-_raw = subprocess.run(["ffmpeg","-v","error","-i","assets/vo.mp3","-ac","1","-ar","16000","-af","highpass=f=150,lowpass=f=4000","-f","f32le","-"],capture_output=True,check=True).stdout
-_x = np.frombuffer(_raw, dtype=np.float32); FPS = 30; hop = 16000 // FPS
-_n = len(_x) // hop
-_db = np.array([20*np.log10(np.sqrt(np.mean(_x[i*hop:(i+1)*hop]**2))+1e-9) for i in range(_n)])
-_pk = np.percentile(_db, 97)
-_st = np.where(_db > _pk - 11, 2, np.where(_db > _pk - 24, 1, 0))
-# syllable articulation: drop one step at local envelope dips so long vowels still read as motion
-for i in range(1, _n - 1):
-    if _st[i] > 0 and _db[i] < _db[i-1] - 2.5 and _db[i] < _db[i+1] - 2.5: _st[i] -= 1
-# 2-frame minimum hold to avoid flicker
-for i in range(1, _n - 1):
-    if _st[i] != _st[i-1] and _st[i] != _st[i+1]: _st[i] = _st[i-1]
-LEAD = 1.0 / FPS  # mouth shape leads the sound by one frame
-MOUTH_TARGET = {"s01": "#s01-char", "s11": "#s11-char"}
-prev = None; lips = 0
-for i in range(_n):
-    tt = round(i / FPS - LEAD, 3)
-    if tt < 0 or tt >= DUR: continue
-    v = int(_st[i])
-    if v == prev: continue
-    sid = scene_at(tt)
-    sel = MOUTH_TARGET.get(sid, f"#{sid}-pw")
-    a(f'tl.set("{sel}",{{attr:{{"data-m":"{v}"}}}},{tt});')
-    # keep the outgoing scene's mouth closed once its scene ends
-    prev = v; lips += 1
-for k, (sid, st0, kind, tr) in enumerate(SC):
-    sel = MOUTH_TARGET.get(sid, f"#{sid}-pw")
-    if k + 1 < len(SC): a(f'tl.set("{sel}",{{attr:{{"data-m":"0"}}}},{SC[k+1][1]:.3f});')
-print("lip-sync state changes", lips)
+
 
 # captions: in = opacity + 12px x-shift; out = the clip window (hard kill)
 for c in caps:

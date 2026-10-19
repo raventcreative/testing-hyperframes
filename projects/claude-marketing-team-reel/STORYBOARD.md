@@ -48,3 +48,12 @@ S09 prompt type-on (49.00–54.90), S12 CTA (66.90–end). Highlighted: 16, 7, C
 - `pembuat` in "AI pembuat visual" (txt said `membuat`) chosen from context; not shown as hero copy.
 - No logos, dashboards, URLs, sales numbers or ROAS shown. Tiles, charts and cards are abstract placeholders.
 - SFX omitted (no verified licensed local source). No BGM.
+
+## Character (v3)
+
+The character is now the HeyGen talking video supplied by the user (`assets/source/Testing_Karakter_1.mp4`,
+720x1280, 25 fps, 70.0s, rendered by HeyGen from 1.png + the same VO; audio cross-correlation with the VO:
+0.968, offset 0.02s). Its pure-black background is keyed locally (`tools/key_black.py`, border-connected
+flood-fill on r+g+b <= 6 with a 2px soft edge) into `assets/heygen/char-alpha.webm` (VP9 + alpha).
+Each scene mounts it as a sub-composition (`compositions/char-sXX.html`, muted, `data-media-start` = scene
+start) so mouth/head motion stays in sync with the master VO. The VO stays the only audio source.

@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Poppins";
+        src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Poppins";
+        src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2");
+        font-weight: 700;
+        font-style: normal;
+        font-display: block;
+      }
+      :root {
+        --navy: #0a0d2c;
+        --steel: #294b77;
+        --grad: linear-gradient(120deg, #0a0d2c 15%, #294b77 100%);
+        --rule: rgba(41, 75, 119, 0.26);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #eef3fb;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        font-synthesis: none;
+        color: var(--navy);
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      #bg {
+        position: absolute;
+        inset: 0;
+        width: 1080px;
+        height: 1920px;
+        object-fit: cover;
+        z-index: 0;
+      }
+      #guides {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+      #guides .gv {
+        position: absolute;
+        top: 0;
+        width: 1px;
+        height: 1920px;
+        background: rgba(41, 75, 119, 0.14);
+      }
+      .scene {
+        z-index: 5;
+        overflow: hidden;
+      }
+      #thread {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1000px;
+        height: 3px;
+        background: var(--steel);
+        transform-origin: 0 50%;
+        z-index: 50;
+        border-radius: 2px;
+      }
+
+      /* ---------- type system ---------- */
+      .blk {
+        position: absolute;
+        left: 100px;
+        width: 820px;
+      }
+      .m {
+        display: block;
+        overflow: hidden;
+        padding: 0.06em 0 0.16em;
+        margin: -0.06em 0 -0.16em;
+      }
+      .ln {
+        display: block;
+        width: fit-content;
+        white-space: nowrap;
+      }
+      .reg {
+        font-weight: 400;
+        color: var(--navy);
+        letter-spacing: 0.01em;
+        line-height: 1.2;
+      }
+      .bold {
+        font-weight: 700;
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+      .g,
+      .gw {
+        background-image: var(--grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+      }
+      .gl {
+        display: block;
+        width: fit-content;
+        white-space: nowrap;
+      }
+      .w {
+        display: inline-block;
+        overflow: hidden;
+        vertical-align: top;
+        padding: 0.06em 0 0.16em;
+        margin: -0.06em 0 -0.16em;
+      }
+      .gw {
+        display: inline-block;
+      }
+      .solid {
+        color: var(--navy);
+      }
+      .center {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* ---------- shared graphics ---------- */
+      .panel {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.62);
+        border: 2px solid rgba(41, 75, 119, 0.24);
+        border-radius: 22px;
+        box-shadow: 0 30px 70px rgba(10, 13, 44, 0.08);
+      }
+      .bar {
+        position: absolute;
+        border-radius: 8px;
+        background: var(--navy);
+      }
+      .crop {
+        position: absolute;
+        width: 44px;
+        height: 44px;
+        border-color: var(--steel);
+        border-style: solid;
+        border-width: 0;
+      }
+      .crop.tl {
+        border-top-width: 3px;
+        border-left-width: 3px;
+      }
+      .crop.tr {
+        border-top-width: 3px;
+        border-right-width: 3px;
+      }
+      .crop.bl {
+        border-bottom-width: 3px;
+        border-left-width: 3px;
+      }
+      .crop.br {
+        border-bottom-width: 3px;
+        border-right-width: 3px;
+      }
+      .node {
+        position: absolute;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 3px solid var(--steel);
+      }
+      .dot {
+        position: absolute;
+        border-radius: 50%;
+        background: var(--steel);
+      }
+      .rule {
+        position: absolute;
+        height: 2px;
+        background: var(--rule);
+      }
+      .logo {
+        position: absolute;
+        display: block;
+        height: auto;
+      }
+
+      /* ---------- S02 ---------- */
+      #s2-L,
+      #s2-R {
+        top: 740px;
+        width: 370px;
+        height: 660px;
+        overflow: hidden;
+      }
+      #s2-L {
+        left: 100px;
+      }
+      #s2-R {
+        left: 530px;
+      }
+      .wf {
+        position: absolute;
+        border: 2px dashed rgba(41, 75, 119, 0.55);
+        border-radius: 8px;
+        background-color: rgba(41, 75, 119, 0);
+      }
+
+      /* ---------- S04 ---------- */
+      .mod {
+        left: 190px;
+        width: 710px;
+        height: 190px;
+      }
+      #s4-focus {
+        position: absolute;
+        left: 178px;
+        width: 734px;
+        height: 214px;
+        border: 3px solid var(--steel);
+        border-radius: 28px;
+      }
+
+      /* ---------- S05 ---------- */
+      #s5-panel {
+        left: 100px;
+        top: 560px;
+        width: 800px;
+        height: 870px;
+      }
+      .ph {
+        position: absolute;
+        border: 2px dashed rgba(41, 75, 119, 0.42);
+        border-radius: 8px;
+      }
+      #s5-cur {
+        position: absolute;
+        width: 6px;
+        height: 92px;
+        background: var(--steel);
+      }
+
+      /* ---------- S06 ---------- */
+      .lab {
+        position: absolute;
+        left: 175px;
+        height: 98px;
+        width: 380px;
+      }
+      .lab .m {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      .lab .lr,
+      .lab .lb {
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 64px;
+        white-space: nowrap;
+      }
+      .lab .lr {
+        font-weight: 400;
+        color: rgba(10, 13, 44, 0.5);
+      }
+      .lab .lb {
+        font-weight: 700;
+      }
+      .lab .inner {
+        position: relative;
+        display: block;
+        height: 98px;
+        width: 380px;
+      }
+      .mini {
+        position: absolute;
+        left: 580px;
+        width: 320px;
+        height: 110px;
+      }
+
+      /* ---------- S07 ---------- */
+      #s7-stage {
+        left: 100px;
+        top: 730px;
+        width: 800px;
+        height: 740px;
+        overflow: hidden;
+      }
+      .el {
+        position: absolute;
+        transform-origin: 0 0;
+      }
+      .flat {
+        position: absolute;
+        inset: 0;
+        background: #9aa3b5;
+        border-radius: inherit;
+      }
+
+      /* ---------- S08 ---------- */
+      #s8-frame {
+        left: 70px;
+        top: 380px;
+        width: 940px;
+        height: 1120px;
+        background: rgba(255, 255, 255, 0.32);
+        border-color: rgba(41, 75, 119, 0.3);
+      }
+      .seg {
+        position: absolute;
+        background: var(--steel);
+        border-radius: 2px;
+      }
+      .micro {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.78);
+        border: 2px solid rgba(41, 75, 119, 0.24);
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(10, 13, 44, 0.07);
+      }
+      .blkq {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: var(--steel);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="48" data-width="1080" data-height="1920">
+      <img id="bg" src="assets/background/background_portrait_1080x1920.png" alt="" />
+      <div id="guides">
+        <div class="gv" style="left: 100px"></div>
+        <div class="gv" style="left: 900px"></div>
+      </div>
+
+      <!-- ================= S01 HOOK ================= -->
+      <section id="s1" class="clip scene" data-start="0" data-duration="4.133333" data-track-index="1">
+        <img id="s1-logo" class="logo" src="assets/logo/ai_preneur_wordmark_trimmed.png" alt="AI PRENEUR" style="left: 86px; top: 236px; width: 360px" />
+        <div class="crop tl" id="s1-c1" style="left: 72px; top: 650px"></div>
+        <div class="crop tr" id="s1-c2" style="left: 884px; top: 650px"></div>
+        <div class="crop bl" id="s1-c3" style="left: 72px; top: 1196px"></div>
+        <div class="crop br" id="s1-c4" style="left: 884px; top: 1196px"></div>
+        <div class="rule" id="s1-rule" style="left: 100px; top: 1206px; width: 800px"></div>
+        <div class="bar" id="s1-trav" style="left: 0; top: 1205px; width: 150px; height: 4px; background: var(--steel)"></div>
+        <div id="s1-block" class="blk" style="top: 716px">
+          <div class="m"><div id="s1-l1" class="ln reg" style="font-size: 54px">BANYAK ORANG BILANG</div></div>
+          <div style="height: 14px"></div>
+          <div class="m"><div id="s1-a" class="ln bold g" style="font-size: 112px">AI HASILNYA</div></div>
+          <div class="m"><div id="s1-b1" class="ln bold g" style="font-size: 112px">MASIH BIASA</div></div>
+          <div class="m"><div id="s1-b2" class="ln bold g" style="font-size: 112px">AJA.</div></div>
+        </div>
+      </section>
+
+      <!-- ================= S02 REFRAME ================= -->
+      <section id="s2" class="clip scene" data-start="4.133333" data-duration="3.4" data-track-index="1">
+        <div class="blk" style="top: 250px">
+          <div class="m"><div id="s2-l1" class="ln reg" style="font-size: 54px">PADAHAL MASALAHNYA</div></div>
+          <div style="height: 10px"></div>
+          <div class="m"><div id="s2-b1" class="ln bold g" style="font-size: 96px">SERING BUKAN</div></div>
+          <div class="m"><div id="s2-b2" class="ln bold g" style="font-size: 96px">DI AI-NYA.</div></div>
+        </div>
+        <div id="s2-L" class="panel">
+          <div id="s2-Lin" style="position: absolute; inset: 0">
+            <div class="bar" style="left: 34px; top: 58px; width: 250px; height: 30px; background: #a3abbb"></div>
+            <div class="bar" style="left: 52px; top: 96px; width: 180px; height: 30px; background: #a3abbb"></div>
+            <div class="bar" style="left: 28px; top: 170px; width: 300px; height: 12px; background: #b8bfcc"></div>
+            <div class="bar" style="left: 46px; top: 188px; width: 210px; height: 12px; background: #b8bfcc"></div>
+            <div class="bar" style="left: 22px; top: 206px; width: 280px; height: 12px; background: #b8bfcc"></div>
+            <div class="bar" style="left: 60px; top: 224px; width: 150px; height: 12px; background: #b8bfcc"></div>
+            <div style="position: absolute; left: 30px; top: 280px; width: 170px; height: 150px; background: #c3c9d4; border-radius: 4px"></div>
+            <div style="position: absolute; left: 150px; top: 320px; width: 190px; height: 140px; background: #b0b8c6; border-radius: 4px"></div>
+            <div class="bar" style="left: 40px; top: 498px; width: 290px; height: 12px; background: #b8bfcc"></div>
+            <div class="bar" style="left: 26px; top: 516px; width: 230px; height: 12px; background: #b8bfcc"></div>
+            <div class="bar" style="left: 70px; top: 534px; width: 260px; height: 12px; background: #b8bfcc"></div>
+            <div class="bar" style="left: 34px; top: 590px; width: 120px; height: 26px; background: #a3abbb"></div>
+          </div>
+        </div>
+        <div id="s2-R" class="panel">
+          <div id="s2-Rin" style="position: absolute; inset: 0">
+            <div class="wf s2-wf" id="s2-w1" style="left: 40px; top: 50px; width: 290px; height: 86px"></div>
+            <div class="wf s2-wf" id="s2-w2" style="left: 40px; top: 170px; width: 290px; height: 12px"></div>
+            <div class="wf s2-wf" id="s2-w3" style="left: 40px; top: 200px; width: 230px; height: 12px"></div>
+            <div class="wf s2-wf" id="s2-w4" style="left: 40px; top: 230px; width: 170px; height: 12px"></div>
+            <div class="wf s2-wf" id="s2-w5" style="left: 40px; top: 290px; width: 135px; height: 135px"></div>
+            <div class="wf s2-wf" id="s2-w6" style="left: 195px; top: 290px; width: 135px; height: 135px"></div>
+            <div class="wf s2-wf" id="s2-w7" style="left: 40px; top: 445px; width: 135px; height: 135px"></div>
+            <div class="wf s2-wf" id="s2-w8" style="left: 195px; top: 445px; width: 135px; height: 135px"></div>
+            <div class="rule" id="s2-rr" style="left: 40px; top: 612px; width: 290px; background: var(--steel)"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= S03 THESIS ================= -->
+      <section id="s3" class="clip scene" data-start="7.533333" data-duration="3.066667" data-track-index="1">
+        <div class="panel" id="s3-gh1" style="left: 76px; top: 600px; width: 870px; height: 560px; background: rgba(255, 255, 255, 0.22); box-shadow: none"></div>
+        <div class="panel" id="s3-gh2" style="left: 104px; top: 628px; width: 870px; height: 560px; background: transparent; box-shadow: none; border-color: rgba(41, 75, 119, 0.16)"></div>
+        <div class="blk" style="top: 660px; left: 120px">
+          <div class="m"><div id="s3-l1" class="ln reg" style="font-size: 56px">MASALAHNYA ADA DI</div></div>
+          <div style="height: 14px"></div>
+          <div class="gl s3-gl" style="font-size: 104px; font-weight: 700; line-height: 1.08"><span class="w"><span class="gw s3-w">ARAHAN</span></span> <span class="w"><span class="gw s3-w">YANG</span></span></div>
+          <div class="gl s3-gl" style="font-size: 104px; font-weight: 700; line-height: 1.08"><span class="w"><span class="gw s3-w">DIBERIKAN.</span></span></div>
+        </div>
+        <div class="bar s3-tick" style="left: 259px; top: 1290px; width: 3px; height: 22px; background: var(--steel)"></div>
+        <div class="bar s3-tick" style="left: 499px; top: 1290px; width: 3px; height: 22px; background: var(--steel)"></div>
+        <div class="bar s3-tick" style="left: 739px; top: 1290px; width: 3px; height: 22px; background: var(--steel)"></div>
+        <div class="node s3-n" id="s3-n1" style="left: 247px; top: 1248px; width: 28px; height: 28px"></div>
+        <div class="node s3-n" id="s3-n2" style="left: 487px; top: 1248px; width: 28px; height: 28px"></div>
+        <div class="node s3-n" id="s3-n3" style="left: 727px; top: 1248px; width: 28px; height: 28px"></div>
+      </section>
+
+      <!-- ================= S04 REASON ================= -->
+      <section id="s4" class="clip scene" data-start="10.6" data-duration="4.333333" data-track-index="1">
+        <div class="blk" style="top: 236px">
+          <div class="m"><div id="s4-t1" class="ln bold g" style="font-size: 100px">AI ITU CEPAT.</div></div>
+          <div style="height: 22px"></div>
+          <div class="m"><div id="s4-t2" class="ln reg" style="font-size: 46px">TAPI HASILNYA MENGIKUTI</div></div>
+          <div style="height: 6px"></div>
+          <div class="m"><div id="s4-t3a" class="ln bold g" style="font-size: 78px">SEBERAPA JELAS</div></div>
+          <div class="m"><div id="s4-t3b" class="ln bold g" style="font-size: 78px">BRIEF-NYA.</div></div>
+        </div>
+        <div class="panel mod" id="s4-m1" style="top: 790px">
+          <div class="bar" style="left: 50px; top: 78px; width: 520px; height: 34px; background: rgba(10, 13, 44, 0.24); filter: blur(7px)"></div>
+        </div>
+        <div class="panel mod" id="s4-m2" style="top: 1015px">
+          <div class="dot" style="left: 50px; top: 44px; width: 12px; height: 12px"></div>
+          <div class="bar s4-row" style="left: 80px; top: 44px; width: 470px; height: 12px"></div>
+          <div class="dot" style="left: 50px; top: 78px; width: 12px; height: 12px"></div>
+          <div class="bar s4-row" style="left: 80px; top: 78px; width: 380px; height: 12px"></div>
+          <div class="dot" style="left: 50px; top: 112px; width: 12px; height: 12px"></div>
+          <div class="bar s4-row" style="left: 80px; top: 112px; width: 520px; height: 12px"></div>
+          <div class="dot" style="left: 50px; top: 146px; width: 12px; height: 12px"></div>
+          <div class="bar s4-row" style="left: 80px; top: 146px; width: 300px; height: 12px"></div>
+        </div>
+        <div class="panel mod" id="s4-m3" style="top: 1240px">
+          <div id="s4-m3in" style="position: absolute; inset: 0">
+            <div class="s4-r" style="position: absolute; left: 40px; top: 36px; width: 250px; height: 118px; border-radius: 12px; background-image: var(--grad)"></div>
+            <div class="bar s4-r" style="left: 320px; top: 44px; width: 340px; height: 16px"></div>
+            <div class="bar s4-r" style="left: 320px; top: 74px; width: 280px; height: 10px; background: var(--steel)"></div>
+            <div class="bar s4-r" style="left: 320px; top: 96px; width: 220px; height: 10px; background: var(--steel)"></div>
+            <div class="s4-r" style="position: absolute; left: 320px; top: 124px; width: 100px; height: 30px; border-radius: 6px; border: 2px solid var(--steel)"></div>
+            <div class="s4-r" style="position: absolute; left: 436px; top: 124px; width: 100px; height: 30px; border-radius: 6px; background: rgba(41, 75, 119, 0.2)"></div>
+          </div>
+        </div>
+        <div class="node s4-k" style="left: 130px; top: 874px; width: 22px; height: 22px"></div>
+        <div class="node s4-k" style="left: 130px; top: 1099px; width: 22px; height: 22px"></div>
+        <div class="node s4-k" style="left: 130px; top: 1324px; width: 22px; height: 22px"></div>
+        <div id="s4-focus" style="top: 778px"></div>
+      </section>
+
+      <!-- ================= S05 WEAK PROMPT ================= -->
+      <section id="s5" class="clip scene" data-start="14.933333" data-duration="3.4" data-track-index="1">
+        <div class="blk" style="top: 300px">
+          <div class="m"><div id="s5-l1" class="ln reg" style="font-size: 60px">BUKAN CUMA SURUH</div></div>
+        </div>
+        <div id="s5-panel" class="panel">
+          <div id="s5-pin" style="position: absolute; inset: 0">
+            <div class="ph s5-cb" style="left: 60px; top: 470px; width: 30px; height: 30px"></div>
+            <div class="ph s5-ph" style="left: 112px; top: 474px; width: 520px; height: 22px"></div>
+            <div class="ph s5-cb" style="left: 60px; top: 545px; width: 30px; height: 30px"></div>
+            <div class="ph s5-ph" style="left: 112px; top: 549px; width: 430px; height: 22px"></div>
+            <div class="ph s5-cb" style="left: 60px; top: 620px; width: 30px; height: 30px"></div>
+            <div class="ph s5-ph" style="left: 112px; top: 624px; width: 580px; height: 22px"></div>
+            <div class="ph s5-cb" style="left: 60px; top: 695px; width: 30px; height: 30px"></div>
+            <div class="ph s5-ph" style="left: 112px; top: 699px; width: 360px; height: 22px"></div>
+            <div class="ph s5-cb" style="left: 60px; top: 770px; width: 30px; height: 30px"></div>
+            <div class="ph s5-ph" style="left: 112px; top: 774px; width: 480px; height: 22px"></div>
+          </div>
+        </div>
+        <div id="s5-cur" style="left: 160px; top: 646px"></div>
+        <div id="s5-q" style="position: absolute; left: 160px; top: 640px; transform-origin: 0 0">
+          <div class="gl s5-gl" style="font-size: 96px; font-weight: 700; line-height: 1.08"><span class="gw s5-c">‘</span><span class="gw s5-c">B</span><span class="gw s5-c">I</span><span class="gw s5-c">K</span><span class="gw s5-c">I</span><span class="gw s5-c">N</span><span class="gw s5-c">&nbsp;</span><span class="gw s5-c">Y</span><span class="gw s5-c">A</span><span class="gw s5-c">N</span><span class="gw s5-c">G</span></div>
+          <div class="gl s5-gl" style="font-size: 96px; font-weight: 700; line-height: 1.08"><span class="gw s5-c">K</span><span class="gw s5-c">E</span><span class="gw s5-c">R</span><span class="gw s5-c">E</span><span class="gw s5-c">N</span><span class="gw s5-c">’</span></div>
+        </div>
+      </section>
+
+      <!-- ================= S06 FIVE PARAMETERS ================= -->
+      <section id="s6" class="clip scene" data-start="18.333333" data-duration="6.066667" data-track-index="1">
+        <div id="s6-chip" style="position: absolute; left: 100px; top: 232px; transform-origin: 0 0">
+          <div class="gl" style="font-size: 96px; font-weight: 700; line-height: 1.08"><span class="gw s6-c">‘BIKIN YANG</span></div>
+          <div class="gl" style="font-size: 96px; font-weight: 700; line-height: 1.08"><span class="gw s6-c">KEREN’</span></div>
+        </div>
+        <div id="s6-all" style="position: absolute; inset: 0; transform-origin: 160px 668px">
+          <div class="blk" style="top: 352px">
+            <div class="m"><div id="s6-l1" class="ln reg" style="font-size: 58px">TAPI MENJELASKAN</div></div>
+          </div>
+          <div class="panel" id="s6-frame" style="left: 92px; top: 530px; width: 840px; height: 880px; background: rgba(255, 255, 255, 0.3); box-shadow: none; border-color: rgba(41, 75, 119, 0.45)"></div>
+
+          <div class="node s6-n" style="left: 120px; top: 589px; width: 22px; height: 22px"></div>
+          <div class="node s6-n" style="left: 120px; top: 769px; width: 22px; height: 22px"></div>
+          <div class="node s6-n" style="left: 120px; top: 949px; width: 22px; height: 22px"></div>
+          <div class="node s6-n" style="left: 120px; top: 1129px; width: 22px; height: 22px"></div>
+          <div class="node s6-n" style="left: 120px; top: 1309px; width: 22px; height: 22px"></div>
+          <div class="dot" id="s6-head" style="left: 123px; top: 592px; width: 16px; height: 16px; background: var(--navy)"></div>
+
+          <div class="lab" style="top: 557px"><div class="m"><span class="inner s6-lab"><span class="lr">STYLE</span><span class="lb g">STYLE</span></span></div></div>
+          <div class="lab" style="top: 737px"><div class="m"><span class="inner s6-lab"><span class="lr">RITME</span><span class="lb g">RITME</span></span></div></div>
+          <div class="lab" style="top: 917px"><div class="m"><span class="inner s6-lab"><span class="lr">KOMPOSISI</span><span class="lb g">KOMPOSISI</span></span></div></div>
+          <div class="lab" style="top: 1097px"><div class="m"><span class="inner s6-lab"><span class="lr">TRANSISI</span><span class="lb g">TRANSISI</span></span></div></div>
+          <div class="lab" style="top: 1277px"><div class="m"><span class="inner s6-lab"><span class="lr">HIERARKI</span><span class="lb g">HIERARKI</span></span></div></div>
+
+          <!-- STYLE: weight + palette swatches -->
+          <div class="mini s6-mini" id="s6-g1" style="top: 545px">
+            <div class="bar" id="s6-g1-thick" style="left: 0; top: 18px; width: 300px; height: 30px; background-image: var(--grad); transform-origin: 0 50%"></div>
+            <div class="bar" style="left: 0; top: 64px; width: 220px; height: 6px; background: var(--navy)"></div>
+            <div class="s6-sw" style="position: absolute; left: 0; top: 84px; width: 26px; height: 26px; border-radius: 6px; background: var(--navy)"></div>
+            <div class="s6-sw" style="position: absolute; left: 38px; top: 84px; width: 26px; height: 26px; border-radius: 6px; background: var(--steel)"></div>
+            <div class="s6-sw" style="position: absolute; left: 76px; top: 84px; width: 26px; height: 26px; border-radius: 6px; background: #fff; border: 2px solid var(--steel)"></div>
+          </div>
+          <!-- RITME: rhythm bars -->
+          <div class="mini s6-mini" id="s6-g2" style="top: 725px">
+            <div class="bar s6-rb" style="left: 0; top: 10px; width: 16px; height: 90px; transform-origin: 50% 100%"></div>
+            <div class="bar s6-rb" style="left: 36px; top: 10px; width: 16px; height: 90px; transform-origin: 50% 100%"></div>
+            <div class="bar s6-rb" style="left: 72px; top: 10px; width: 16px; height: 90px; transform-origin: 50% 100%"></div>
+            <div class="bar s6-rb" style="left: 108px; top: 10px; width: 16px; height: 90px; transform-origin: 50% 100%"></div>
+            <div class="bar s6-rb" style="left: 144px; top: 10px; width: 16px; height: 90px; transform-origin: 50% 100%"></div>
+            <div class="bar s6-rb" style="left: 180px; top: 10px; width: 16px; height: 90px; transform-origin: 50% 100%"></div>
+            <div class="bar s6-rb" style="left: 216px; top: 10px; width: 16px; height: 90px; transform-origin: 50% 100%"></div>
+            <div class="bar s6-rb" style="left: 252px; top: 10px; width: 16px; height: 90px; transform-origin: 50% 100%"></div>
+            <div class="bar s6-rb" style="left: 288px; top: 10px; width: 16px; height: 90px; transform-origin: 50% 100%"></div>
+          </div>
+          <!-- KOMPOSISI: responsive grid -->
+          <div class="mini s6-mini" id="s6-g3" style="top: 905px">
+            <div class="s6-t" id="s6-t1" style="position: absolute; left: 0; top: 0; width: 180px; height: 110px; border-radius: 10px; background-image: var(--grad); transform-origin: 0 0"></div>
+            <div class="s6-t" id="s6-t2" style="position: absolute; left: 196px; top: 0; width: 120px; height: 47px; border-radius: 8px; background: var(--steel); transform-origin: 0 0"></div>
+            <div class="s6-t" id="s6-t3" style="position: absolute; left: 196px; top: 63px; width: 120px; height: 47px; border-radius: 8px; border: 2px solid var(--steel); transform-origin: 0 0"></div>
+          </div>
+          <!-- TRANSISI: travelling morph -->
+          <div class="mini s6-mini" id="s6-g4" style="top: 1085px">
+            <div class="rule" style="left: 20px; top: 54px; width: 280px; background: rgba(41, 75, 119, 0.4)"></div>
+            <div class="node" style="left: 6px; top: 41px; width: 28px; height: 28px"></div>
+            <div class="node" style="left: 286px; top: 41px; width: 28px; height: 28px"></div>
+            <div id="s6-morph" style="position: absolute; left: 0; top: 25px; width: 60px; height: 60px; border-radius: 8px; background-image: var(--grad)"></div>
+          </div>
+          <!-- HIERARKI: reading order -->
+          <div class="mini s6-mini" id="s6-g5" style="top: 1265px">
+            <div class="bar s6-h" style="left: 0; top: 8px; width: 310px; height: 30px; background-image: var(--grad)"></div>
+            <div class="bar s6-h" style="left: 0; top: 56px; width: 220px; height: 16px; background: var(--steel)"></div>
+            <div class="bar s6-h" style="left: 0; top: 88px; width: 150px; height: 10px; background: var(--steel)"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= S07 CAUSE / EFFECT ================= -->
+      <section id="s7" class="clip scene" data-start="24.4" data-duration="5.133333" data-track-index="1">
+        <div class="blk" style="top: 236px">
+          <div class="m"><div id="s7-l1" class="ln reg" style="font-size: 56px">PROMPT YANG TEPAT</div></div>
+          <div style="height: 8px"></div>
+          <div class="m"><div id="s7-b1" class="ln bold g" style="font-size: 108px">MENGUBAH</div></div>
+          <div class="m"><div id="s7-b2" class="ln bold g" style="font-size: 108px">OUTPUT</div></div>
+        </div>
+        <div id="s7-token" style="position: absolute; left: 100px; top: 640px; width: 120px; height: 56px; border-radius: 28px; background: var(--navy)">
+          <div class="dot" style="left: 22px; top: 23px; width: 10px; height: 10px; background: #fff"></div>
+          <div class="dot" style="left: 39px; top: 23px; width: 10px; height: 10px; background: #fff"></div>
+          <div class="dot" style="left: 56px; top: 23px; width: 10px; height: 10px; background: #fff"></div>
+          <div class="dot" style="left: 73px; top: 23px; width: 10px; height: 10px; background: #fff"></div>
+          <div class="dot" style="left: 90px; top: 23px; width: 10px; height: 10px; background: #fff"></div>
+        </div>
+        <div id="s7-cam" style="position: absolute; inset: 0; transform-origin: 700px 1100px">
+          <div id="s7-stage" class="panel">
+            <div class="el s7-e" id="s7-e1" style="left: 60px; top: 64px; width: 520px; height: 120px; border-radius: 12px; background-image: var(--grad)"><div class="flat"></div></div>
+            <div class="el s7-e" id="s7-e8" style="left: 60px; top: 210px; width: 680px; height: 3px; background: var(--steel)"><div class="flat"></div></div>
+            <div class="el s7-e" id="s7-e2" style="left: 60px; top: 246px; width: 600px; height: 16px; border-radius: 8px; background: var(--navy)"><div class="flat"></div></div>
+            <div class="el s7-e" id="s7-e3" style="left: 60px; top: 282px; width: 520px; height: 12px; border-radius: 6px; background: var(--steel)"><div class="flat"></div></div>
+            <div class="el s7-e" id="s7-e4" style="left: 60px; top: 312px; width: 420px; height: 12px; border-radius: 6px; background: var(--steel)"><div class="flat"></div></div>
+            <div class="el s7-e" id="s7-e5" style="left: 60px; top: 370px; width: 330px; height: 300px; border-radius: 14px; background: rgba(41, 75, 119, 0.14); overflow: hidden">
+              <div id="s7-piv" style="position: absolute; left: 0; top: 0; width: 330px; height: 300px">
+                <div style="position: absolute; left: 60px; top: 50px; width: 150px; height: 150px; border-radius: 50%; background-image: var(--grad)"></div>
+                <div style="position: absolute; left: 150px; top: 150px; width: 130px; height: 100px; border-radius: 10px; border: 3px solid var(--steel)"></div>
+              </div>
+              <div class="flat"></div>
+            </div>
+            <div class="el s7-e" id="s7-e6" style="left: 420px; top: 370px; width: 320px; height: 140px; border-radius: 14px; background: #fff; border: 2px solid rgba(41, 75, 119, 0.3)">
+              <div class="flat"></div>
+            </div>
+            <div class="el s7-e" id="s7-e7" style="left: 420px; top: 530px; width: 320px; height: 140px; border-radius: 14px; background: #fff; border: 2px solid rgba(41, 75, 119, 0.3)">
+              <div class="flat"></div>
+            </div>
+            <div class="blkq s7-q" style="left: 450px; top: 420px"></div>
+            <div class="blkq s7-q" style="left: 510px; top: 420px; background: var(--navy)"></div>
+            <div class="blkq s7-q" style="left: 570px; top: 420px; background: rgba(41, 75, 119, 0.35)"></div>
+            <div class="bar s7-q" style="left: 450px; top: 582px; width: 250px; height: 14px"></div>
+            <div class="bar s7-q" style="left: 450px; top: 610px; width: 180px; height: 10px; background: var(--steel)"></div>
+            <div id="s7-sweep" style="position: absolute; left: 0; top: 0; width: 4px; height: 740px; background: var(--steel); box-shadow: 0 0 0 6px rgba(41, 75, 119, 0.1)"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= S08 HERO ================= -->
+      <section id="s8" class="clip scene" data-start="29.533333" data-duration="4.566667" data-track-index="1">
+        <div id="s8-world" style="position: absolute; inset: 0; transform-origin: 540px 940px">
+          <div id="s8-frame" class="panel"></div>
+          <div class="seg" id="s8-sg1" style="left: 70px; top: 379px; width: 180px; height: 4px"></div>
+          <div class="seg" id="s8-sg2" style="left: 1007px; top: 380px; width: 4px; height: 180px"></div>
+          <div class="seg" id="s8-sg3" style="left: 830px; top: 1497px; width: 180px; height: 4px"></div>
+          <div class="seg" id="s8-sg4" style="left: 69px; top: 1320px; width: 4px; height: 180px"></div>
+          <div class="crop tl s8-ic" style="left: 120px; top: 460px"></div>
+          <div class="crop tr s8-ic" style="left: 916px; top: 460px"></div>
+          <div class="crop bl s8-ic" style="left: 120px; top: 1376px"></div>
+          <div class="crop br s8-ic" style="left: 916px; top: 1376px"></div>
+          <div class="micro s8-mp" id="s8-mp1" style="left: 770px; top: 420px; width: 210px; height: 92px">
+            <div class="bar" style="left: 24px; top: 26px; width: 120px; height: 12px"></div>
+            <div class="bar" style="left: 24px; top: 50px; width: 80px; height: 10px; background: var(--steel)"></div>
+          </div>
+          <div class="micro s8-mp" id="s8-mp2" style="left: 800px; top: 1060px; width: 180px; height: 130px">
+            <div style="position: absolute; left: 22px; top: 22px; width: 58px; height: 58px; border-radius: 50%; background-image: var(--grad)"></div>
+            <div class="bar" style="left: 22px; top: 96px; width: 120px; height: 10px; background: var(--steel)"></div>
+          </div>
+          <div class="micro s8-mp" id="s8-mp3" style="left: 100px; top: 1290px; width: 250px; height: 120px">
+            <div class="bar" style="left: 24px; top: 28px; width: 190px; height: 16px; background-image: var(--grad)"></div>
+            <div class="bar" style="left: 24px; top: 60px; width: 150px; height: 10px; background: var(--steel)"></div>
+            <div class="bar" style="left: 24px; top: 82px; width: 110px; height: 10px; background: var(--steel)"></div>
+          </div>
+          <svg id="s8-svg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position: absolute; left: 0; top: 0; overflow: visible">
+            <path id="s8-path" d="M150 1040 L520 1040 L520 1210 L760 1210 L760 1330 L900 1330" fill="none" stroke="#294b77" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div class="blkq s8-bq" style="left: 400px; top: 1390px"></div>
+          <div class="blkq s8-bq" style="left: 456px; top: 1390px; background: var(--navy)"></div>
+          <div class="blkq s8-bq" style="left: 512px; top: 1390px; background: rgba(41, 75, 119, 0.4)"></div>
+          <div class="blkq s8-bq" style="left: 568px; top: 1390px"></div>
+          <div class="blkq s8-bq" style="left: 624px; top: 1390px; background: #fff; border: 2px solid var(--steel)"></div>
+          <div class="blk" style="top: 560px; left: 150px; width: 780px">
+            <div class="m"><div id="s8-l1" class="ln reg" style="font-size: 56px">DARI TEKS BIASA</div></div>
+            <div style="height: 14px"></div>
+            <div class="m"><div class="ln bold g s8-b" style="font-size: 100px">JADI MOTION</div></div>
+            <div class="m"><div class="ln bold g s8-b" style="font-size: 100px">YANG TERLIHAT</div></div>
+            <div class="m"><div class="ln bold g s8-b" style="font-size: 100px">MAHAL.</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= S09 BRAND ================= -->
+      <section id="s9" class="clip scene" data-start="34.1" data-duration="3.866667" data-track-index="1">
+        <img id="s9-logo" class="logo" src="assets/logo/ai_preneur_wordmark_trimmed.png" alt="AI PRENEUR" style="left: 73px; top: 552px; width: 820px" />
+        <div class="node s9-p" style="left: 549px; top: 690px; width: 24px; height: 24px"></div>
+        <div class="node s9-p" style="left: 689px; top: 690px; width: 24px; height: 24px"></div>
+        <div class="node s9-p" style="left: 829px; top: 690px; width: 24px; height: 24px"></div>
+        <div class="blk" style="top: 790px">
+          <div class="m"><div id="s9-l1" class="ln reg" style="font-size: 58px">INILAH CARA</div></div>
+          <div style="height: 12px"></div>
+          <div class="m"><div class="ln bold g s9-b" style="font-size: 80px">AI PRENEUR</div></div>
+          <div class="m"><div class="ln bold g s9-b" style="font-size: 80px">MENGARAHKAN AI.</div></div>
+        </div>
+      </section>
+
+      <!-- ================= S10 VALUE ================= -->
+      <section id="s10" class="clip scene" data-start="37.966667" data-duration="5.3" data-track-index="1">
+        <div class="node s10-n" style="left: 98px; top: 478px; width: 24px; height: 24px"></div>
+        <div class="node s10-n" style="left: 98px; top: 768px; width: 24px; height: 24px"></div>
+        <div class="node s10-n" style="left: 98px; top: 1058px; width: 24px; height: 24px"></div>
+        <div class="blk" style="top: 432px; left: 150px; width: 760px">
+          <div class="m"><div id="s10-r1" class="ln reg" style="font-size: 80px">LEBIH CEPAT.</div></div>
+        </div>
+        <div class="blk" style="top: 722px; left: 150px; width: 760px">
+          <div class="m"><div id="s10-r2" class="ln reg" style="font-size: 80px">LEBIH TERARAH.</div></div>
+        </div>
+        <div class="blk" style="top: 1012px; left: 150px; width: 760px">
+          <div class="m"><div id="s10-r3" class="ln bold g" style="font-size: 80px">LEBIH PREMIUM.</div></div>
+        </div>
+        <svg id="s10-svg" width="1080" height="1920" viewBox="0 0 1080 1920" style="position: absolute; left: 0; top: 0; overflow: visible">
+          <path id="s10-p1" d="M152 620 C 300 620, 380 566, 520 586 S 760 600, 900 588" fill="none" stroke="#294b77" stroke-width="4" stroke-linecap="round" />
+        </svg>
+        <div class="dot" id="s10-p1head" style="left: 891px; top: 579px; width: 18px; height: 18px; background: var(--navy)"></div>
+        <div id="s10-g1" style="position: absolute; left: 0; top: 0"></div>
+        <div class="rule" style="left: 152px; top: 899px; width: 748px; background: rgba(41, 75, 119, 0.3)"></div>
+        <div class="node s10-sn" style="left: 141px; top: 889px; width: 22px; height: 22px"></div>
+        <div class="node s10-sn" style="left: 264px; top: 889px; width: 22px; height: 22px"></div>
+        <div class="node s10-sn" style="left: 387px; top: 889px; width: 22px; height: 22px"></div>
+        <div class="node s10-sn" style="left: 510px; top: 889px; width: 22px; height: 22px"></div>
+        <div class="node s10-sn" style="left: 633px; top: 889px; width: 22px; height: 22px"></div>
+        <div class="node s10-sn" style="left: 756px; top: 889px; width: 22px; height: 22px"></div>
+        <div class="node s10-sn" style="left: 879px; top: 889px; width: 22px; height: 22px"></div>
+        <div id="s10-box" style="position: absolute; left: 150px; top: 1140px; width: 750px; height: 120px; border: 2px solid rgba(41, 75, 119, 0.3); border-radius: 14px; background: rgba(255, 255, 255, 0.5)">
+          <div class="bar s10-bb" style="left: 32px; top: 34px; width: 380px; height: 18px; background-image: var(--grad)"></div>
+          <div class="bar s10-bb" style="left: 32px; top: 70px; width: 260px; height: 10px; background: var(--steel)"></div>
+          <div class="s10-bb" style="position: absolute; left: 600px; top: 26px; width: 110px; height: 66px; border-radius: 10px; border: 2px solid var(--steel)"></div>
+        </div>
+        <div class="crop tl s10-c" style="left: 136px; top: 1126px"></div>
+        <div class="crop tr s10-c" style="left: 870px; top: 1126px"></div>
+        <div class="crop bl s10-c" style="left: 136px; top: 1230px"></div>
+        <div class="crop br s10-c" style="left: 870px; top: 1230px"></div>
+        <div class="seg" id="s10-hl" style="left: 150px; top: 1139px; width: 160px; height: 4px"></div>
+        <img id="s10-logo" class="logo" src="assets/logo/ai_preneur_wordmark_trimmed.png" alt="AI PRENEUR" style="left: 86px; top: 236px; width: 340px; transform-origin: 0 0" />
+      </section>
+
+      <!-- ================= S11 ENDCARD ================= -->
+      <section id="s11" class="clip scene" data-start="43.266667" data-duration="4.733333" data-track-index="1">
+        <img id="s11-logo" class="logo" src="assets/logo/ai_preneur_wordmark_trimmed.png" alt="AI PRENEUR" style="left: 225px; top: 360px; width: 630px" />
+        <div class="blk" style="top: 640px; left: 90px; width: 900px; text-align: center">
+          <div class="m"><div id="s11-l1" class="ln reg center" style="font-size: 58px">AI BISA MEMBUAT</div></div>
+          <div style="height: 14px"></div>
+          <div class="m"><div class="ln bold g center s11-b" style="font-size: 110px">MOTION</div></div>
+          <div class="m"><div class="ln bold g center s11-b" style="font-size: 110px">SELEVEL INI.</div></div>
+          <div style="height: 28px"></div>
+          <div class="gl center" style="font-size: 62px; font-weight: 700; line-height: 1.1"><span class="w"><span class="s11-g" style="display: inline-block; color: #0a0d2c">ASAL</span></span> <span class="w"><span class="s11-g" style="display: inline-block; color: #0a0d2c">PROMPT-NYA</span></span> <span class="w"><span class="s11-g" style="display: inline-block; color: #0a0d2c">TEPAT.</span></span></div>
+        </div>
+      </section>
+
+      <div id="thread"></div>
+
+      <audio id="vo" src="assets/voice/voice_master_48s.m4a" data-start="0" data-duration="48" data-track-index="10" data-volume="1"></audio>
+    </div>
+
+    <script>
+      (function () {
+        const ST = [0, 4.133333, 7.533333, 10.6, 14.933333, 18.333333, 24.4, 29.533333, 34.1, 37.966667, 43.266667];
+        const A = (i, t) => ST[i] + t;
+
+        // Continuous gradient across per-word / per-char spans: each span shares
+        // one gradient box the size of its whole line (measured on a canvas).
+        function bindLineGradients() {
+          const cv = document.createElement("canvas");
+          const ctx = cv.getContext("2d");
+          document.querySelectorAll(".gl").forEach((line) => {
+            const cs = getComputedStyle(line);
+            ctx.font = `${cs.fontWeight} ${cs.fontSize} Poppins`;
+            const spans = [...line.querySelectorAll(".gw")];
+            if (!spans.length) return;
+            const text = line.textContent.replace(/ /g, " ");
+            const total = ctx.measureText(text).width;
+            const h = parseFloat(cs.fontSize) * 1.3;
+            let prefix = "";
+            const full = text;
+            let cursor = 0;
+            spans.forEach((sp) => {
+              const t = sp.textContent.replace(/ /g, " ");
+              const idx = full.indexOf(t, cursor);
+              prefix = full.slice(0, idx);
+              cursor = idx + t.length;
+              const off = ctx.measureText(prefix).width;
+              sp.style.backgroundSize = `${total}px ${h}px`;
+              sp.style.backgroundPosition = `${-off}px 0`;
+              sp.dataset.off = off;
+              sp.dataset.w = ctx.measureText(t).width;
+            });
+          });
+        }
+
+        function build() {
+          bindLineGradients();
+          const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+          const TH = "#thread";
+          // Thread changes orientation by retracting, re-anchoring, then growing,
+          // so it never sweeps diagonally across copy.
+          function fold(x, y, r, s, d, t) {
+            const a = d * 0.45;
+            tl.to(TH, { scaleX: 0, duration: a, ease: "power2.in" }, t);
+            tl.set(TH, { x: x, y: y, rotation: r }, t + a);
+            if (s > 0) tl.to(TH, { scaleX: s, duration: d - a, ease: "power3.out" }, t + a);
+          }
+
+          // ---------- global thread: initial ----------
+          tl.fromTo(TH, { x: 100, y: 690, rotation: 0, scaleX: 0 }, { scaleX: 0.8, duration: 0.42, ease: "power2.out" }, 0.02);
+
+          /* ===================== S01 ===================== */
+          tl.fromTo("#s1-logo", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.6, ease: "power2.inOut" }, 0.08);
+          tl.fromTo("#s1-c1", { x: -26, y: -26, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.55 }, 0.05);
+          tl.fromTo("#s1-c2", { x: 26, y: -26, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.55 }, 0.08);
+          tl.fromTo("#s1-c3", { x: -26, y: 26, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.55 }, 0.11);
+          tl.fromTo("#s1-c4", { x: 26, y: 26, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.55 }, 0.14);
+          // diagonal shallow clip for line 1
+          tl.fromTo("#s1-l1", { clipPath: "polygon(0% 0%, 0% 0%, -12% 100%, -12% 100%)" }, { clipPath: "polygon(0% 0%, 112% 0%, 100% 100%, -12% 100%)", duration: 0.45, ease: "power3.out" }, 0.2);
+          // two offset word groups: A from the left, B from the right
+          tl.fromTo("#s1-a", { xPercent: -104 }, { xPercent: 0, duration: 0.62, ease: "expo.out" }, 0.62);
+          tl.fromTo(["#s1-b1", "#s1-b2"], { x: 880 }, { x: 0, duration: 0.62, ease: "expo.out", stagger: 0.08 }, 0.86);
+          // depth shift + travelling hairline
+          tl.fromTo("#s1-rule", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.6, ease: "power2.out" }, 1.2);
+          tl.fromTo("#s1-trav", { x: 100, opacity: 0 }, { x: 750, opacity: 1, duration: 2.1, ease: "sine.inOut" }, 1.45);
+          tl.to("#s1-trav", { opacity: 0, duration: 0.2 }, 3.56);
+          tl.fromTo("#s1-l1", { x: 0 }, { x: -14, duration: 2.25, ease: "sine.inOut", immediateRender: false }, 1.4);
+          tl.to(["#s1-a", "#s1-b1", "#s1-b2"], { x: 10, duration: 2.0, ease: "sine.inOut" }, 1.62);
+          tl.fromTo("#s1-block", { scale: 1, transformOrigin: "0% 50%" }, { scale: 1.022, duration: 2.25, ease: "sine.inOut" }, 1.4);
+          tl.to("#s1-c1", { x: 10, y: 8, duration: 2.25, ease: "sine.inOut" }, 1.4);
+          tl.to("#s1-c2", { x: -10, y: 8, duration: 2.25, ease: "sine.inOut" }, 1.4);
+          tl.to("#s1-c3", { x: 10, y: -8, duration: 2.25, ease: "sine.inOut" }, 1.4);
+          tl.to("#s1-c4", { x: -10, y: -8, duration: 2.25, ease: "sine.inOut" }, 1.4);
+          // exit: masks lift, rails form
+          tl.to(["#s1-l1", "#s1-a", "#s1-b1", "#s1-b2"], { yPercent: -112, duration: 0.3, ease: "power3.in", stagger: 0.03 }, 3.66);
+          tl.to("#s1-logo", { clipPath: "inset(0% 0% 0% 100%)", duration: 0.3, ease: "power2.in" }, 3.7);
+          tl.to(["#s1-c1", "#s1-c2", "#s1-c3", "#s1-c4", "#s1-rule"], { opacity: 0, duration: 0.25 }, 3.8);
+          fold(500, 740, 90, 0.66, 0.42, 3.71);
+
+          /* ===================== S02 ===================== */
+          const s2 = (t) => A(1, t);
+          tl.fromTo("#s2-L", { rotationY: -88, transformPerspective: 1400, transformOrigin: "100% 50%" }, { rotationY: 0, duration: 0.48, ease: "power3.out" }, s2(0));
+          tl.fromTo("#s2-R", { rotationY: 88, transformPerspective: 1400, transformOrigin: "0% 50%" }, { rotationY: 0, duration: 0.48, ease: "power3.out" }, s2(0.04));
+          tl.fromTo("#s2-Lin", { clipPath: "inset(0% 0% 100% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.45, ease: "power2.inOut" }, s2(0.45));
+          tl.fromTo("#s2-Rin", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.45, ease: "power2.inOut" }, s2(0.5));
+          tl.fromTo("#s2-l1", { clipPath: "inset(0% 100% 0% 0%)", x: -24 }, { clipPath: "inset(0% 0% 0% 0%)", x: 0, duration: 0.5, ease: "power3.out" }, s2(0.2));
+          tl.fromTo("#s2-b1", { clipPath: "inset(0% 100% 0% 0%)", x: -30 }, { clipPath: "inset(0% 0% 0% 0%)", x: 0, duration: 0.55, ease: "power3.out" }, s2(0.62));
+          tl.fromTo("#s2-b2", { clipPath: "inset(0% 100% 0% 0%)", x: -30 }, { clipPath: "inset(0% 0% 0% 0%)", x: 0, duration: 0.55, ease: "power3.out" }, s2(0.78));
+          // right: wireframe -> composed grid (left holds flat)
+          const wfFrom = [
+            { x: 26, y: 18, rotation: -3 },
+            { x: -18, y: 30, rotation: 2 },
+            { x: 34, y: 12, rotation: -2 },
+            { x: -10, y: 42, rotation: 3 },
+            { x: 22, y: -20, rotation: 4 },
+            { x: -26, y: 16, rotation: -4 },
+            { x: 14, y: 30, rotation: 3 },
+            { x: -20, y: -14, rotation: -3 },
+          ];
+          const wfFill = ["#294b77", "#0a0d2c", "#294b77", "#294b77", "rgba(41,75,119,0.85)", "rgba(10,13,44,0.9)", "rgba(41,75,119,0.3)", "rgba(41,75,119,0.55)"];
+          document.querySelectorAll(".s2-wf").forEach((el, i) => {
+            tl.fromTo(el, { ...wfFrom[i] }, { x: 0, y: 0, rotation: 0, duration: 0.62, ease: "power3.inOut" }, s2(0.95 + i * 0.1));
+            tl.fromTo(el, { borderColor: "rgba(41,75,119,0.55)", backgroundColor: "rgba(41,75,119,0)" }, { borderColor: "rgba(41,75,119,0)", backgroundColor: wfFill[i], duration: 0.4, ease: "power2.out" }, s2(1.3 + i * 0.1));
+          });
+          tl.fromTo("#s2-rr", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, s2(2.1));
+          tl.to("#s2-R", { borderColor: "rgba(41,75,119,0.6)", duration: 0.2, ease: "power2.out" }, s2(2.35));
+          // exit
+          tl.to(["#s2-l1", "#s2-b1", "#s2-b2"], { yPercent: -112, duration: 0.3, ease: "power3.in", stagger: 0.03 }, s2(3.0));
+          tl.to("#s2-L", { x: -60, opacity: 0, duration: 0.3, ease: "power3.in" }, s2(3.02));
+          tl.to("#s2-R", { y: 60, opacity: 0, duration: 0.3, ease: "power3.in" }, s2(3.02));
+          fold(120, 1261, 0, 0.38, 0.36, s2(3.04));
+
+          /* ===================== S03 ===================== */
+          const s3 = (t) => A(2, t);
+          tl.to(TH, { scaleX: 0.78, duration: 0.35, ease: "power2.out" }, s3(0));
+          tl.fromTo("#s3-gh1", { x: 34, y: 30, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.9, ease: "power2.out" }, s3(0.25));
+          tl.fromTo("#s3-gh2", { x: 60, y: 54, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 1.0, ease: "power2.out" }, s3(0.32));
+          tl.to("#s3-gh1", { x: -8, y: -4, duration: 1.6, ease: "sine.inOut" }, s3(1.15));
+          tl.to("#s3-gh2", { x: -14, y: -8, duration: 1.6, ease: "sine.inOut" }, s3(1.3));
+          tl.fromTo("#s3-l1", { clipPath: "inset(100% 0% 0% 0%)", y: 18 }, { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.45, ease: "power3.out" }, s3(0.25));
+          tl.fromTo(".s3-w", { yPercent: 108 }, { yPercent: 0, duration: 0.6, ease: "expo.out", stagger: 0.07 }, s3(0.7));
+          // control nodes slide to fixed anchors, then stop
+          tl.fromTo("#s3-n1", { x: -110, scale: 0 }, { scale: 1, duration: 0.3, ease: "power2.out" }, s3(0.35));
+          tl.fromTo("#s3-n2", { x: -190, scale: 0 }, { scale: 1, duration: 0.3, ease: "power2.out" }, s3(0.42));
+          tl.fromTo("#s3-n3", { x: 140, scale: 0 }, { scale: 1, duration: 0.3, ease: "power2.out" }, s3(0.49));
+          tl.to(".s3-n", { x: 0, duration: 0.8, ease: "power4.out", stagger: 0.06 }, s3(1.0));
+          tl.fromTo(".s3-tick", { scaleY: 0, transformOrigin: "50% 0%" }, { scaleY: 1, duration: 0.3, ease: "power2.out", stagger: 0.06 }, s3(1.55));
+          tl.to(".s3-n", { backgroundColor: "#294b77", duration: 0.18, stagger: 0.06 }, s3(1.75));
+          // exit: guide folds into S04 spine
+          tl.to(".s3-w", { yPercent: -108, duration: 0.3, ease: "power3.in", stagger: 0.03 }, s3(2.68));
+          tl.to("#s3-l1", { clipPath: "inset(0% 0% 100% 0%)", duration: 0.28, ease: "power3.in" }, s3(2.66));
+          tl.to([".s3-n", ".s3-tick"], { opacity: 0, scale: 0.4, duration: 0.25, ease: "power2.in" }, s3(2.74));
+          tl.to(["#s3-gh1", "#s3-gh2"], { opacity: 0, duration: 0.25 }, s3(2.74));
+          fold(141, 790, 90, 0.64, 0.36, s3(2.71));
+
+          /* ===================== S04 ===================== */
+          const s4 = (t) => A(3, t);
+          tl.fromTo("#s4-t1", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power3.inOut" }, s4(0.2));
+          tl.fromTo("#s4-t2", { yPercent: 110 }, { yPercent: 0, duration: 0.55, ease: "expo.out" }, s4(1.45));
+          tl.fromTo(["#s4-t3a", "#s4-t3b"], { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "expo.out", stagger: 0.1 }, s4(2.5));
+          // unfold three modules from one shared centre pivot (module 2)
+          tl.fromTo("#s4-m1", { y: 225, scale: 0.4, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.75, ease: "power3.out" }, s4(0.3));
+          tl.fromTo("#s4-m2", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.75, ease: "power3.out" }, s4(0.4));
+          tl.fromTo("#s4-m3", { y: -225, scale: 0.4, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.75, ease: "power3.out" }, s4(0.5));
+          tl.fromTo(".s4-k", { scale: 0 }, { scale: 1, duration: 0.3, ease: "power2.out", stagger: 0.1 }, s4(0.75));
+          tl.fromTo(".s4-row", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.45, ease: "power3.out", stagger: 0.06 }, s4(1.85));
+          // focus indicator sweeps 1 -> 2 -> 3
+          tl.fromTo("#s4-focus", { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.3 }, s4(1.3));
+          tl.to("#s4-focus", { y: 225, duration: 0.42, ease: "power3.inOut" }, s4(1.82));
+          tl.to("#s4-focus", { y: 450, duration: 0.42, ease: "power3.inOut" }, s4(2.45));
+          tl.to(".s4-k", { backgroundColor: "#294b77", duration: 0.15, stagger: 0.6 }, s4(1.45));
+          // module 3 assembles via a constrained rectangle morph
+          const m3From = [
+            { x: 180, y: 10, scale: 0.6, rotation: 6 },
+            { x: -150, y: 40, rotation: -4 },
+            { x: -60, y: 50, rotation: 3 },
+            { x: 80, y: -30, rotation: -5 },
+            { x: -200, y: -40, rotation: 8 },
+            { x: 100, y: -60, rotation: -7 },
+          ];
+          document.querySelectorAll(".s4-r").forEach((el, i) => {
+            tl.fromTo(el, { ...m3From[i], opacity: 0.35 }, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, duration: 0.55, ease: "power3.inOut" }, s4(2.55 + i * 0.02));
+          });
+          // exit: everything but module 3 frame clears
+          tl.to(["#s4-t1", "#s4-t2", "#s4-t3a", "#s4-t3b"], { yPercent: -112, duration: 0.3, ease: "power3.in", stagger: 0.03 }, s4(3.94));
+          tl.to(["#s4-m1", "#s4-m2", ".s4-k", "#s4-focus"], { opacity: 0, x: -30, duration: 0.3, ease: "power2.in" }, s4(4.0));
+          tl.to("#s4-m3in", { opacity: 0, duration: 0.25 }, s4(4.05));
+
+          /* ===================== S05 ===================== */
+          const s5 = (t) => A(4, t);
+          tl.fromTo("#s5-panel", { clipPath: "inset(680px 0px 0px 90px round 22px)" }, { clipPath: "inset(0px 0px 0px 0px round 22px)", duration: 0.5, ease: "power3.inOut" }, s5(0));
+          fold(160, 900, 0, 0.68, 0.5, s5(0));
+          tl.fromTo("#s5-l1", { clipPath: "inset(0% 50% 0% 50%)", scale: 0.96, transformOrigin: "50% 50%" }, { clipPath: "inset(0% 0% 0% 0%)", scale: 1, duration: 0.6, ease: "power3.out" }, s5(0.28));
+          tl.fromTo(".s5-ph", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.45, ease: "power2.out", stagger: 0.07 }, s5(0.55));
+          tl.fromTo(".s5-cb", { scale: 0 }, { scale: 1, duration: 0.3, ease: "power2.out", stagger: 0.07 }, s5(0.55));
+          // typing: one char per step, cursor rides the measured edge
+          const chars = [...document.querySelectorAll(".s5-c")];
+          tl.set(chars, { opacity: 0 }, 0);
+          tl.fromTo("#s5-cur", { opacity: 0 }, { opacity: 1, duration: 0.01 }, s5(0.9));
+          const typeStart = s5(1.55);
+          const step = 0.65 / chars.length;
+          chars.forEach((c, i) => {
+            const t = typeStart + i * step;
+            tl.set(c, { opacity: 1 }, t);
+            const lineIdx = i < 11 ? 0 : 1;
+            const right = parseFloat(c.dataset.off) + parseFloat(c.dataset.w);
+            tl.set("#s5-cur", { x: right + 6, y: lineIdx * 104 }, t);
+          });
+          // blink (square wave) while waiting, before and after typing
+          [0.95, 1.25, 2.3, 2.6].forEach((t) => {
+            tl.set("#s5-cur", { opacity: 0 }, s5(t + 0.15));
+            tl.set("#s5-cur", { opacity: 1 }, s5(t + 0.3));
+          });
+          tl.set("#s5-cur", { x: 0, y: 0 }, s5(0.9));
+          // dock the raw prompt top-left; detail rows stay empty
+          tl.to("#s5-cur", { opacity: 0, duration: 0.1 }, s5(2.98));
+          tl.to("#s5-q", { x: -60, y: -408, scale: 0.38, duration: 0.42, ease: "power3.inOut" }, s5(2.98));
+          tl.to("#s5-panel", { clipPath: "inset(0px 0px 870px 0px round 22px)", duration: 0.4, ease: "power3.inOut" }, s5(2.98));
+          tl.to("#s5-l1", { yPercent: -112, duration: 0.3, ease: "power3.in" }, s5(2.82));
+          fold(131, 560, 90, 0.86, 0.42, s5(2.98));
+
+          /* ===================== S06 ===================== */
+          const s6 = (t) => A(5, t);
+          tl.set("#s6-chip", { scale: 0.38 }, 0);
+          tl.to("#s6-chip", { opacity: 0.5, duration: 0.4 }, s6(0.3));
+          tl.fromTo("#s6-l1", { yPercent: 110 }, { yPercent: 0, duration: 0.55, ease: "expo.out" }, s6(0.3));
+          tl.fromTo(".s6-n", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, stagger: 0.05 }, s6(0.25));
+          tl.fromTo("#s6-head", { opacity: 0, y: 0 }, { opacity: 1, duration: 0.2 }, s6(0.7));
+          const labs = [...document.querySelectorAll(".s6-lab")];
+          const minis = [...document.querySelectorAll(".s6-mini")];
+          const nodes = [...document.querySelectorAll(".s6-n")];
+          const cues = [1.18, 1.74, 2.54, 3.44, 4.22];
+          labs.forEach((lab, i) => {
+            const lr = lab.querySelector(".lr");
+            const lb = lab.querySelector(".lb");
+            tl.set(lr, { clipPath: "inset(0% 100% 0% 0%)" }, 0);
+            tl.set(lb, { clipPath: "inset(0% 0% 0% 0%)" }, 0);
+            tl.fromTo(lab, { yPercent: 105 }, { yPercent: 0, duration: 0.5, ease: "expo.out" }, s6(cues[i]));
+            tl.fromTo(minis[i], { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, s6(cues[i] + 0.02));
+            tl.to(nodes[i], { backgroundColor: "#294b77", duration: 0.15 }, s6(cues[i]));
+            tl.to("#s6-head", { y: i * 180, duration: 0.34, ease: "power3.inOut" }, s6(cues[i] - 0.3));
+            if (i > 0) {
+              const pl = labs[i - 1];
+              tl.fromTo(pl.querySelector(".lb"), { clipPath: "inset(0% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 100%)", duration: 0.28, ease: "power2.inOut", immediateRender: false }, s6(cues[i]));
+              tl.fromTo(pl.querySelector(".lr"), { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.28, ease: "power2.inOut", immediateRender: false }, s6(cues[i]));
+            }
+          });
+          // mini graphics: each acts once on its cue
+          tl.fromTo("#s6-g1-thick", { scaleY: 0.2 }, { scaleY: 1, duration: 0.45, ease: "power3.out" }, s6(cues[0] + 0.15));
+          tl.fromTo(".s6-sw", { scale: 0 }, { scale: 1, duration: 0.3, ease: "power2.out", stagger: 0.06 }, s6(cues[0] + 0.25));
+          const rb = [...document.querySelectorAll(".s6-rb")];
+          rb.forEach((b, i) => {
+            tl.fromTo(b, { scaleY: 0.15 }, { scaleY: 0.35 + 0.65 * Math.abs(Math.sin(i * 0.9 + 0.6)), duration: 0.3, ease: "power2.out" }, s6(cues[1] + 0.05 + i * 0.03));
+            tl.to(b, { scaleY: 0.3 + 0.7 * Math.abs(Math.sin(i * 0.9 + 2.0)), duration: 0.32, ease: "sine.inOut", yoyo: true, repeat: 5 }, s6(cues[1] + 0.4 + i * 0.03));
+          });
+          tl.fromTo("#s6-t1", { x: 0, scaleX: 0.55 }, { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, s6(cues[2] + 0.12));
+          tl.fromTo("#s6-t2", { x: -96, y: 31 }, { x: 0, y: 0, duration: 0.5, ease: "power3.inOut" }, s6(cues[2] + 0.12));
+          tl.fromTo("#s6-t3", { x: 0, y: -31 }, { x: 0, y: 0, duration: 0.5, ease: "power3.inOut" }, s6(cues[2] + 0.18));
+          tl.fromTo("#s6-morph", { x: 0, rotation: 0, borderRadius: "8px" }, { x: 260, rotation: 90, borderRadius: "30px", duration: 0.7, ease: "power3.inOut" }, s6(cues[3] + 0.12));
+          const hb = [...document.querySelectorAll(".s6-h")];
+          hb.forEach((b, i) => {
+            tl.fromTo(b, { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.4, ease: "power3.out" }, s6(cues[4] + 0.08 + i * 0.12));
+          });
+          // 5.2–5.8: everything aligns into one schematic, all parameters bold
+          tl.fromTo("#s6-frame", { clipPath: "inset(50% 50% 50% 50% round 22px)", opacity: 0 }, { clipPath: "inset(0% 0% 0% 0% round 22px)", opacity: 1, duration: 0.55, ease: "power3.inOut" }, s6(5.2));
+          tl.to("#s6-head", { opacity: 0, duration: 0.2 }, s6(5.2));
+          labs.slice(0, 4).forEach((lab) => {
+            tl.set(lab.querySelector(".lb"), { clipPath: "inset(0% 100% 0% 0%)" }, s6(5.25));
+            tl.to(lab.querySelector(".lb"), { clipPath: "inset(0% 0% 0% 0%)", duration: 0.3, ease: "power2.inOut" }, s6(5.25));
+            tl.to(lab.querySelector(".lr"), { clipPath: "inset(0% 0% 0% 100%)", duration: 0.3, ease: "power2.inOut" }, s6(5.25));
+          });
+          tl.to(minis, { x: -12, duration: 0.5, ease: "power3.inOut" }, s6(5.25));
+          // last 0.3s: compress into the S07 prompt token
+          tl.to("#s6-all", { scale: 0.08, opacity: 0, duration: 0.3, ease: "power3.in" }, s6(5.77));
+          tl.to("#s6-chip", { opacity: 0, duration: 0.2 }, s6(5.8));
+          fold(232, 667, 0, 0, 0.3, s6(5.77));
+
+          /* ===================== S07 ===================== */
+          const s7 = (t) => A(6, t);
+          tl.fromTo("#s7-token", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: "power3.out" }, s7(0));
+          tl.fromTo("#s7-l1", { yPercent: 110 }, { yPercent: 0, duration: 0.55, ease: "expo.out" }, s7(0.35));
+          tl.fromTo("#s7-stage", { clipPath: "inset(0% 0% 100% 0% round 22px)" }, { clipPath: "inset(0% 0% 0% 0% round 22px)", duration: 0.5, ease: "power3.inOut" }, s7(0.1));
+          // cramped state -> polished state, triggered as the sweep passes each element
+          const cramp = {
+            "s7-e1": { x: -36, y: -46, scaleX: 0.62, scaleY: 0.46 },
+            "s7-e8": { x: -40, y: -150, scaleX: 0.72, scaleY: 1 },
+            "s7-e2": { x: -40, y: -168, scaleX: 0.7, scaleY: 0.7 },
+            "s7-e3": { x: -40, y: -190, scaleX: 0.75, scaleY: 0.7 },
+            "s7-e4": { x: -40, y: -208, scaleX: 0.8, scaleY: 0.7 },
+            "s7-e5": { x: -40, y: -230, scaleX: 0.55, scaleY: 0.45 },
+            "s7-e6": { x: -230, y: -238, scaleX: 0.5, scaleY: 0.6 },
+            "s7-e7": { x: -230, y: -320, scaleX: 0.5, scaleY: 0.6 },
+          };
+          const sweepStart = s7(0.6),
+            sweepDur = 1.8;
+          tl.fromTo("#s7-sweep", { x: 0, opacity: 0 }, { x: 796, opacity: 1, duration: sweepDur, ease: "power1.inOut" }, sweepStart);
+          tl.to("#s7-sweep", { opacity: 0, duration: 0.25 }, sweepStart + sweepDur);
+          tl.to(TH, { scaleX: 0.668, duration: sweepDur, ease: "power1.inOut" }, sweepStart);
+          Object.entries(cramp).forEach(([id, from]) => {
+            const el = document.getElementById(id);
+            const leftPx = parseFloat(el.style.left) + parseFloat(el.style.width) * 0.5;
+            const t = sweepStart + sweepDur * Math.min(1, leftPx / 800) - 0.1;
+            tl.fromTo(el, { ...from }, { x: 0, y: 0, scaleX: 1, scaleY: 1, duration: 0.55, ease: "power3.inOut" }, t);
+            tl.fromTo(el.querySelector(".flat"), { opacity: 1 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, t + 0.1);
+          });
+          // premium side: staggered reveal + masked object pivot
+          tl.fromTo(".s7-q", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "power3.out", stagger: 0.08 }, s7(2.45));
+          tl.fromTo("#s7-piv", { xPercent: -100, rotation: -14, transformOrigin: "0% 100%" }, { xPercent: 0, rotation: 0, duration: 0.85, ease: "power3.inOut" }, s7(2.6));
+          tl.fromTo("#s7-b1", { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, s7(2.9));
+          tl.fromTo("#s7-b2", { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, s7(3.02));
+          // camera eases into the dominant premium side
+          tl.fromTo("#s7-cam", { scale: 1, x: 0 }, { scale: 1.04, x: -10, duration: 0.4, ease: "power2.inOut" }, s7(4.25));
+          // exit: AFTER side expands to the full S08 frame
+          tl.to(["#s7-l1", "#s7-b1", "#s7-b2"], { yPercent: -112, duration: 0.3, ease: "power3.in", stagger: 0.03 }, s7(4.7));
+          tl.to("#s7-token", { scale: 0.4, opacity: 0, duration: 0.3, ease: "power3.in" }, s7(4.72));
+          tl.to("#s7-stage", { opacity: 0, duration: 0.18 }, s7(4.95));
+          tl.to(TH, { opacity: 0, duration: 0.2 }, s7(4.75));
+
+          /* ===================== S08 ===================== */
+          const s8 = (t) => A(7, t);
+          tl.set(TH, { x: 70, y: 1499, rotation: 0, scaleX: 0.94 }, s8(0));
+          tl.to(TH, { opacity: 1, duration: 0.3 }, s8(0.15));
+          tl.fromTo("#s8-frame", { x: -40, y: 150, scaleX: 0.851, scaleY: 0.661, opacity: 0.6 }, { x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1, duration: 0.42, ease: "power3.out" }, s8(0));
+          tl.fromTo("#s8-l1", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.42, ease: "power3.inOut" }, s8(0.3));
+          tl.fromTo(".s8-b", { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "expo.out", stagger: 0.13 }, s8(0.75));
+          // border segments orbit the frame (one full lap, finite)
+          tl.fromTo("#s8-sg1", { x: 0 }, { x: 760, duration: 3.2, ease: "power1.inOut" }, s8(0.4));
+          tl.fromTo("#s8-sg2", { y: 0 }, { y: 940, duration: 3.2, ease: "power1.inOut" }, s8(0.4));
+          tl.fromTo("#s8-sg3", { x: 0 }, { x: -760, duration: 3.2, ease: "power1.inOut" }, s8(0.4));
+          tl.fromTo("#s8-sg4", { y: 0 }, { y: -940, duration: 3.2, ease: "power1.inOut" }, s8(0.4));
+          tl.fromTo("#s8 .seg", { opacity: 0 }, { opacity: 1, duration: 0.3 }, s8(0.4));
+          // nested frame resolves
+          const icFrom = [
+            { x: -50, y: -80 },
+            { x: 94, y: -80 },
+            { x: -50, y: 124 },
+            { x: 94, y: 124 },
+          ];
+          document.querySelectorAll(".s8-ic").forEach((el, i) => {
+            tl.fromTo(el, { ...icFrom[i], opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.8, ease: "power3.inOut" }, s8(1.4));
+          });
+          // rectilinear hairline path
+          const p8 = document.getElementById("s8-path");
+          const L8 = p8.getTotalLength();
+          tl.fromTo(p8, { attr: { "stroke-dasharray": L8, "stroke-dashoffset": L8 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.2, ease: "power2.inOut" }, s8(1.2));
+          // edge micro-panels + travelling blocks
+          tl.fromTo("#s8-mp1", { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, s8(1.0));
+          tl.fromTo("#s8-mp2", { x: 90, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, s8(1.2));
+          tl.fromTo("#s8-mp3", { x: -90, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, s8(1.4));
+          tl.fromTo(".s8-bq", { x: -260, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.09 }, s8(1.8));
+          // camera drift < 3%
+          tl.fromTo("#s8-world", { scale: 1 }, { scale: 1.024, duration: 2.4, ease: "sine.inOut" }, s8(1.2));
+          // exit: components move outward, centre clears for the logo
+          tl.to(["#s8-l1", ".s8-b"], { yPercent: -112, duration: 0.32, ease: "power3.in", stagger: 0.03 }, s8(4.1));
+          tl.to("#s8-mp1", { x: 220, opacity: 0, duration: 0.35, ease: "power3.in" }, s8(4.12));
+          tl.to("#s8-mp2", { x: 240, opacity: 0, duration: 0.35, ease: "power3.in" }, s8(4.12));
+          tl.to("#s8-mp3", { x: -280, opacity: 0, duration: 0.35, ease: "power3.in" }, s8(4.12));
+          tl.to(".s8-bq", { y: 260, opacity: 0, duration: 0.35, ease: "power3.in", stagger: 0.02 }, s8(4.12));
+          tl.to(["#s8-frame", ".s8-ic", "#s8 .seg"], { scale: 1.08, opacity: 0, duration: 0.38, ease: "power2.in" }, s8(4.14));
+          tl.to(p8, { opacity: 0, duration: 0.3 }, s8(4.12));
+          tl.to(TH, { x: 100, y: 702, scaleX: 0, duration: 0.42, ease: "power3.inOut" }, s8(4.12));
+
+          /* ===================== S09 ===================== */
+          const s9 = (t) => A(8, t);
+          tl.fromTo("#s9-logo", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: "power3.inOut" }, s9(0.35));
+          tl.to(TH, { scaleX: 0.42, duration: 0.5, ease: "power3.inOut" }, s9(0.35));
+          tl.fromTo("#s9-l1", { clipPath: "inset(100% 0% 0% 0%)", y: 16 }, { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.45, ease: "power3.out" }, s9(0.85));
+          tl.fromTo(".s9-b", { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "expo.out", stagger: 0.14 }, s9(1.12));
+          // last 1.0s: line draws right and plants three nodes
+          tl.to(TH, { scaleX: 0.8, duration: 0.8, ease: "power2.inOut" }, s9(2.85));
+          tl.fromTo(".s9-p", { scale: 0 }, { scale: 1, duration: 0.25, ease: "power2.out", stagger: 0.17 }, s9(3.12));
+
+          /* ===================== S10 ===================== */
+          const s10 = (t) => A(9, t);
+          // nodes travel from the S09 plant points onto the spine
+          const s9pts = [
+            [549, 690],
+            [689, 690],
+            [829, 690],
+          ];
+          const s10pts = [
+            [98, 478],
+            [98, 768],
+            [98, 1058],
+          ];
+          document.querySelectorAll(".s10-n").forEach((el, i) => {
+            tl.fromTo(el, { x: s9pts[i][0] - s10pts[i][0], y: s9pts[i][1] - s10pts[i][1] }, { x: 0, y: 0, duration: 0.55, ease: "power3.inOut" }, s10(0));
+          });
+          fold(111, 490, 90, 0.58, 0.55, s10(0));
+          tl.fromTo("#s10-logo", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: "power2.inOut" }, s10(0.15));
+          // CEPAT
+          tl.fromTo("#s10-r1", { xPercent: -102 }, { xPercent: 0, duration: 0.55, ease: "expo.out" }, s10(0.22));
+          const p1 = document.getElementById("s10-p1");
+          const L1 = p1.getTotalLength();
+          tl.fromTo(p1, { attr: { "stroke-dasharray": L1, "stroke-dashoffset": L1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.5, ease: "expo.out" }, s10(0.4));
+          tl.fromTo("#s10-p1head", { scale: 0 }, { scale: 1, duration: 0.2, ease: "power2.out" }, s10(0.7));
+          tl.to(".s10-n", { backgroundColor: "#294b77", duration: 0.15, stagger: { each: 0.8, from: "start" } }, s10(0.22));
+          // TERARAH
+          tl.fromTo("#s10-r2", { xPercent: -102 }, { xPercent: 0, duration: 0.55, ease: "expo.out" }, s10(1.02));
+          const snFrom = [
+            [0, -40],
+            [-30, 30],
+            [40, -20],
+            [-20, 46],
+            [30, -36],
+            [-36, 20],
+            [20, 38],
+          ];
+          document.querySelectorAll(".s10-sn").forEach((el, i) => {
+            tl.fromTo(el, { x: snFrom[i][0], y: snFrom[i][1], opacity: 0 }, { opacity: 1, duration: 0.2 }, s10(1.1 + i * 0.03));
+            tl.to(el, { x: 0, y: 0, duration: 0.5, ease: "power4.out" }, s10(1.4 + i * 0.05));
+          });
+          tl.to([".s10-sn"], { backgroundColor: "#294b77", duration: 0.15, stagger: 0.04 }, s10(1.95));
+          tl.to("#s10-r1", { opacity: 0.55, duration: 0.35 }, s10(1.05));
+          tl.to(["#s10-svg", "#s10-p1head"], { opacity: 0.4, duration: 0.35 }, s10(1.05));
+          // PREMIUM
+          tl.fromTo("#s10-r3", { xPercent: -102 }, { xPercent: 0, duration: 0.6, ease: "expo.out" }, s10(2.3));
+          tl.to("#s10-r2", { opacity: 0.55, duration: 0.35 }, s10(2.35));
+          tl.to(".s10-sn", { opacity: 0.4, duration: 0.35 }, s10(2.35));
+          tl.fromTo("#s10-box", { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, s10(2.45));
+          tl.fromTo(".s10-bb", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out", stagger: 0.08 }, s10(2.7));
+          const cFrom = [
+            [-30, -30],
+            [30, -30],
+            [-30, 30],
+            [30, 30],
+          ];
+          document.querySelectorAll(".s10-c").forEach((el, i) => {
+            tl.fromTo(el, { x: cFrom[i][0], y: cFrom[i][1], opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.7, ease: "power3.inOut" }, s10(2.6));
+          });
+          tl.fromTo("#s10-hl", { x: 0, opacity: 0 }, { x: 590, opacity: 1, duration: 1.1, ease: "power2.inOut" }, s10(3.15));
+          tl.to("#s10-hl", { opacity: 0, duration: 0.25 }, s10(4.2));
+          // last 0.4s: motifs contract to one brand baseline; logo carries into the endcard lockup
+          tl.to(["#s10-r1", "#s10-r2", "#s10-r3"], { yPercent: -112, duration: 0.32, ease: "power3.in", stagger: 0.03 }, s10(4.88));
+          tl.to(["#s10-svg", "#s10-p1head", ".s10-sn", ".s10-n", "#s10-box", ".s10-c", "#s10 .rule"], { y: 30, scaleY: 0.2, opacity: 0, duration: 0.36, ease: "power3.in" }, s10(4.9));
+          tl.to("#s10-logo", { x: 139, y: 124, scale: 630 / 340, duration: 0.42, ease: "power3.inOut" }, s10(4.88));
+          fold(290, 1110, 0, 0.5, 0.42, s10(4.88));
+
+          /* ===================== S11 ===================== */
+          const s11 = (t) => A(10, t);
+          tl.fromTo("#s11-l1", { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, s11(0.4));
+          tl.fromTo(".s11-b", { yPercent: 110 }, { yPercent: 0, duration: 0.65, ease: "expo.out", stagger: 0.16 }, s11(0.62));
+          tl.fromTo(".s11-g", { yPercent: 108 }, { yPercent: 0, duration: 0.5, ease: "expo.out", stagger: 0.2 }, s11(2.45));
+
+          window.__timelines["main"] = tl;
+          if (window.__hfForceTimelineRebind) window.__hfForceTimelineRebind();
+        }
+
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(build);
+        } else {
+          build();
+        }
+      })();
+    </script>
+  </body>
+</html>

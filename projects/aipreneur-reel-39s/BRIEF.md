@@ -28,3 +28,10 @@ Look: "ice-ivory dimensional editorial" — airy pastel, porcelain/ivory stage, 
 - All on-screen copy must be contiguous words from production/transcript_review.md.
 - No invented CTA, numbers, platforms, URLs, testimonials. No BGM (none supplied). No TTS.
 - Final render only after user approves the assembled preview. Local render only (no cloud).
+
+## Customizations
+
+- v2 (user feedback "visual masih kurang"): navy brand stage band, key-light rays + glass motes/bokeh,
+  camera punch-ins on apex words, whip-pan blur cuts (19.89s, 27.9s), masked editorial word reveals,
+  navy marker on key words (AI-nya, arahan, brief-nya, prompt, prompt-nya), S3 camera tracks the
+  selected folder, dial light burst, logo sheen. No SFX (bundled library has no stated licence).

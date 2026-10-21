@@ -39,6 +39,12 @@
 
       /* ---------- 3D STAGE ---------- */
       #stage { perspective: 1700px; perspective-origin: 540px 560px; }
+      #kick { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
+      .ray { position: absolute; left: -700px; width: 2600px; height: 230px; transform-origin: 50% 50%;
+        background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.55) 45%, rgba(255,255,255,0) 100%); filter: blur(26px); }
+      .mote { position: absolute; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffffff, rgba(203,219,244,0.75) 60%, rgba(172,198,231,0.2)); box-shadow: 0 0 10px rgba(255,255,255,0.8); }
+      .bokeh { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.75), rgba(203,219,244,0.25) 60%, rgba(203,219,244,0) 72%); filter: blur(6px); }
+      .burst { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(95,134,189,0.0) 30%, rgba(95,134,189,0.55) 52%, rgba(255,255,255,0.0) 70%); }
       #world { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
       .g3 { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
       .f { position: absolute; backface-visibility: hidden; }
@@ -52,15 +58,15 @@
         mask-image: linear-gradient(180deg, transparent 0%, #000 34%, #000 100%);
       }
       .lip {
-        position: absolute; left: -1300px; top: 0; width: 2600px; height: 54px;
-        background: linear-gradient(180deg, #ffffff 0 3px, #eef3fa 3px, #d6e1f0 100%);
+        position: absolute; left: -1300px; top: 0; width: 2600px; height: 760px;
+        background: linear-gradient(180deg, #ffffff 0 4px, #8fb0dd 4px, #3a6299 22px, #294b77 120px, #1c3354 100%);
       }
-      .lipshade { position: absolute; left: -1300px; top: 54px; width: 2600px; height: 120px; background: linear-gradient(180deg, rgba(41,75,119,0.16), rgba(41,75,119,0)); }
+      .lipshade { position: absolute; left: -1300px; top: 4px; width: 2600px; height: 260px; background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0)); }
       .pool { position: absolute; width: 900px; height: 900px; left: -450px; top: -450px; border-radius: 50%;
         background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,255,255,0.45) 38%, rgba(255,255,255,0) 68%); }
       .shadow { position: absolute; border-radius: 50%; }
       .shadow::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
-        background: radial-gradient(ellipse, rgba(32,43,59,0.42), rgba(32,43,59,0.16) 42%, rgba(32,43,59,0) 70%); }
+        background: radial-gradient(ellipse, rgba(28,51,84,0.62), rgba(28,51,84,0.22) 40%, rgba(28,51,84,0) 70%); }
 
       /* materials */
       .glass {
@@ -167,6 +173,10 @@
       .bi { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
       .ln { display: block; white-space: nowrap; }
       .w { display: inline-block; }
+      .mask { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.02em 0.05em 0.16em; margin: -0.02em -0.05em -0.16em; }
+      .ln.mkr { display: inline-block; position: relative; color: #fbfcfe; padding: 0.06em 0.22em 0.1em; margin-left: -0.08em; }
+      .ln.mkr .mkbg { position: absolute; inset: 0; border-radius: 0.16em; background: linear-gradient(135deg, #3a6299, #294b77 55%, #1f3a5f); box-shadow: 0 18px 40px rgba(28,51,84,0.28); }
+      .ln.mkr .mask { position: relative; }
       .k { font: 700 48px/1.12 Montserrat, sans-serif; color: var(--acc); letter-spacing: -0.01em; }
       .k2 { font: 700 50px/1.12 Montserrat, sans-serif; color: var(--ink); }
       .h { font: 900 92px/1.0 Montserrat, sans-serif; color: var(--ink); letter-spacing: -0.035em; }
@@ -187,12 +197,14 @@
         <div id="haze-a" class="haze"></div>
         <div id="haze-b" class="haze"></div>
         <div id="haze-c" class="haze"></div>
+        <div id="rays"><div class="ray" id="ray1"></div><div class="ray" id="ray2"></div><div class="ray" id="ray3"></div></div>
+        <div id="motes"></div>
         <div id="grain"></div>
       </div>
 
       <!-- 3D stage (MG + hero objects) -->
       <div id="stage" class="clip layer" data-start="0" data-duration="39.4" data-track-index="1">
-        <div id="world">
+        <div id="kick"><div id="world">
           <div class="g3" id="floorg"><div class="f floor" id="floor" data-layout-allow-overflow></div></div>
           <div class="g3" id="lipg"><div class="f lip" data-layout-allow-overflow></div><div class="f lipshade" data-layout-allow-overflow></div></div>
           <div class="g3" id="poolg"><div class="f pool" id="pool"></div></div>
@@ -208,11 +220,12 @@
           <div id="s-box" class="clip g3" data-start="27.6" data-duration="8.4" data-track-index="2"></div>
           <div id="s-slabs" class="clip g3" data-start="30.9" data-duration="4.9" data-track-index="3"></div>
           <div id="s-logo" class="clip g3" data-start="28.5" data-duration="10.9" data-track-index="4"></div>
-        </div>
+        </div></div>
       </div>
 
       <!-- FG occluder: paper sheet sweeps past the lens (S1 -> S2) -->
       <div id="wipel" class="clip layer" data-start="5.3" data-duration="0.9" data-track-index="6"><div id="wipe"><div class="wedge"></div><div class="lines" style="padding:150px 160px"><i class="t"></i><i class="m"></i><i class="s"></i><i class="m"></i><i class="d"></i></div></div></div>
+      <div id="fgl" class="clip layer" data-start="0" data-duration="39.4" data-track-index="6"><div id="bokeh"></div></div>
       <div id="flashl" class="clip layer" data-start="22.9" data-duration="1.2" data-track-index="6"><div id="flash"></div></div>
 
       <!-- Camera-facing text plane: word-synced copy, built from the verified transcript -->
@@ -717,8 +730,9 @@
         // ================= camera (world) =================
         const CAM = (v, at, dur, ease) => tl.to("#world", Object.assign({ duration: dur, ease: ease || "power2.inOut" }, v), at);
         // per-scene crane (y) + dolly (z): frames each beat, BG never moves
-        S("#world", { x: 560, y: -335, z: 510, rotationY: -3, rotationX: 0 });
-        CAM({ x: 540, z: 580, rotationY: 2 }, 0, 5.4, "sine.inOut");
+        S("#world", { x: 600, y: -300, z: 230, rotationY: -9, rotationX: 0 });
+        CAM({ x: 548, y: -335, z: 545, rotationY: -1 }, 0, 1.1, "power3.out");
+        CAM({ x: 540, z: 590, rotationY: 2.5 }, 1.1, 4.3, "sine.inOut");
         S("#world", { x: 540, y: -200, z: 320, rotationY: 3 }, 5.78);
         CAM({ z: 370, rotationY: -2.5 }, 5.8, 5.7, "sine.inOut");
         S("#world", { x: 540, y: -60, z: 150, rotationY: 5, rotationX: -3 }, 11.94);
@@ -743,41 +757,140 @@
         tl.to(["#haze-a", "#haze-b", "#haze-c"], { opacity: 0.55, duration: 1.0 }, 35.7);
         tl.to("#floor", { opacity: 0.6, duration: 1.0 }, 35.7);
 
+
+        // ================= ATMOSPHERE: key-light rays + glass motes (seeded, seekable) =================
+        [["#ray1", 300, -28, 0.55], ["#ray2", 520, -31, 0.38], ["#ray3", 760, -26, 0.28]].forEach(([id, top, rot, op], i) => {
+          const r = $(id); r.style.top = top + "px";
+          S(r, { rotation: rot, opacity: op, x: -60 });
+          tl.to(r, { x: 80, duration: 19.7, ease: "sine.inOut", repeat: 1, yoyo: true }, 0);
+          tl.to(r, { opacity: op * 0.45, duration: 4.925, ease: "sine.inOut", repeat: 7, yoyo: true }, i * 1.3);
+        });
+        let seed = 20261021;
+        const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+        for (let i = 0; i < 26; i++) {
+          const m = mk("div", "mote", $("#motes"));
+          const sz = 5 + rnd() * 11;
+          m.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080}px;top:${200 + rnd() * 1500}px;`;
+          S(m, { opacity: 0.35 + rnd() * 0.5, x: 0, y: 0 });
+          tl.to(m, { y: -(120 + rnd() * 260), duration: 39.4, ease: "none" }, 0);
+          const sway = 3.5 + rnd() * 3;
+          tl.to(m, { x: 18 + rnd() * 30, duration: sway, ease: "sine.inOut", repeat: Math.max(0, Math.floor(39.4 / sway) - 1), yoyo: true }, 0);
+        }
+        for (let i = 0; i < 5; i++) {
+          const b = mk("div", "bokeh", $("#bokeh"));
+          const sz = 60 + rnd() * 90;
+          b.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080 - 40}px;top:${1350 + rnd() * 420}px;`;
+          S(b, { opacity: 0.25 + rnd() * 0.3 });
+          tl.to(b, { y: -(160 + rnd() * 200), x: -40 + rnd() * 80, duration: 39.4, ease: "none" }, 0);
+        }
+
+        // ================= EDITING: camera punch-ins on the spoken apex words (#kick layer) =================
+        const KICK = (t, dz, hold, back) => {
+          tl.fromTo("#kick", { z: 0 }, { z: dz, duration: hold || 0.18, ease: "power3.out", immediateRender: false }, t - 0.06);
+          tl.fromTo("#kick", { z: dz }, { z: 0, duration: back || 0.75, ease: "power2.inOut", immediateRender: false }, t - 0.06 + (hold || 0.18));
+        };
+        S("#kick", { z: 0, rotationY: 0, transformOrigin: "540px 1000px -150px" });
+        KICK(T(7), -45, 0.3, 0.9);       // "biasa aja"  -> deflating pull-back
+        KICK(T(14), 60);                 // "AI-nya."
+        KICK(T(18), 70);                 // "arahan"
+        KICK(T(28), 55, 0.18, 0.6);      // "jelas"
+        KICK(T(37), 45, 0.16, 0.6);      // "tapi" (strike)
+        [39, 40, 41, 42].forEach((wi, k) => KICK(T(wi), 26, 0.12, Math.min(0.22, T([40, 41, 42, 44][k]) - T(wi) - 0.2)));
+        KICK(T(44), 30, 0.14, 0.3);      // "hierarki."
+        KICK(T(48), 40, 0.16, 0.6);      // "tepat"
+        KICK(T(53), 95, 0.16, 0.7);      // "drastis."
+        KICK(T(61), 55, 0.18, 0.12);     // "mahal."
+        KICK(T(65), 55, 0.2, 0.7);       // "AI PRENEUR"
+        KICK(T(76), 65, 0.18, 0.12);     // "premium."
+        KICK(T(85), 45, 0.2, 0.32);      // "tepat."
+
+        // ================= EDITING: whip-pan cuts (rotation + shutter blur on the stage) =================
+        const WHIP = (cut, dir) => {
+          tl.fromTo("#kick", { rotationY: 0 }, { rotationY: -26 * dir, duration: 0.17, ease: "power2.in", immediateRender: false }, cut - 0.17);
+          tl.fromTo("#kick", { rotationY: 26 * dir }, { rotationY: 0, duration: 0.3, ease: "power3.out", immediateRender: false }, cut);
+          tl.fromTo("#stage", { filter: "blur(0px)" }, { filter: "blur(18px)", duration: 0.17, ease: "power2.in", immediateRender: false }, cut - 0.17);
+          tl.fromTo("#stage", { filter: "blur(18px)" }, { filter: "blur(0px)", duration: 0.3, ease: "power3.out", immediateRender: false }, cut);
+          tl.set("#stage", { filter: "none" }, cut + 0.31);
+        };
+        WHIP(19.89, 1);
+        WHIP(27.9, -1);
+        tl.fromTo("#stage", { filter: "blur(0px)" }, { filter: "blur(10px)", duration: 0.2, ease: "power2.in", immediateRender: false }, 11.76);
+        tl.fromTo("#stage", { filter: "blur(10px)" }, { filter: "blur(0px)", duration: 0.28, ease: "power3.out", immediateRender: false }, 11.96);
+        tl.set("#stage", { filter: "none" }, 12.25);
+
+        // ================= S3: camera tracks the selected folder (REF-A selection follow) =================
+        [39, 40, 41, 42, 44].forEach((wi, i) => {
+          const tabX = CX + (-290 + 118 + i * 86);
+          tl.to("#world", { x: 540 - tabX * 0.45, y: -60 + i * 26, duration: 0.42, ease: "power3.inOut" }, T(wi) - 0.12);
+        });
+        tl.to("#world", { x: 540, y: -60, duration: 0.4, ease: "power2.inOut" }, 19.3);
+
+        // ================= S4: light burst when the dial clicks on "tepat" =================
+        const burst = mk("div", "burst", dial.face);
+        burst.style.cssText += "width:380px;height:380px;left:0;top:0;";
+        S(burst, { scale: 0.5, opacity: 0 });
+        tl.fromTo(burst, { scale: 0.5, opacity: 1 }, { scale: 1.6, opacity: 0, duration: 0.6, ease: "power2.out", immediateRender: false }, T(48) - 0.02);
+
+        // ================= logo sheen (reveal + final lockup) =================
+        const lsheen = mk("div", "sheen", logo.f.front);
+        logo.f.front.style.overflow = "hidden";
+        S(lsheen, { xPercent: 0 });
+        tl.fromTo(lsheen, { xPercent: 0 }, { xPercent: 480, duration: 0.9, ease: "power2.inOut", immediateRender: false }, T(65) + 0.35);
+        tl.fromTo(lsheen, { xPercent: 0 }, { xPercent: 480, duration: 1.1, ease: "power2.inOut", immediateRender: false }, 37.2);
+
         // ================= TEXT PLANE (word-synced copy) =================
         const textRoot = $("#text");
         const BLOCKS = [
           { s: 0.0, e: 3.42, lines: [["k", [0, 1, 2]], ["h", [3, 4, 5]], ["h m", [6, 7, 8]]] },
-          { s: 3.42, e: 6.02, lines: [["k", [9, 10, 11]], ["h", [12, 13]], ["h a xl", [14]]] },
-          { s: 6.02, e: 8.42, lines: [["k", [15, 16, 17]], ["h a xl", [18]], ["k2", [19, 20]]] },
-          { s: 8.42, e: 12.12, lines: [["h", [21, 22, 23]], ["k", [24, 25, 26]], ["h", [27, 28]], ["h a", [29]]] },
+          { s: 3.42, e: 6.02, lines: [["k", [9, 10, 11]], ["h", [12, 13]], ["h xl mkr", [14]]] },
+          { s: 6.02, e: 8.42, lines: [["k", [15, 16, 17]], ["h xl mkr", [18]], ["k2", [19, 20]]] },
+          { s: 8.42, e: 12.12, lines: [["h", [21, 22, 23]], ["k", [24, 25, 26]], ["h", [27, 28]], ["h mkr", [29]]] },
           { s: 11.94, e: 14.72, lines: [["k", [30, 31, 32, 33]]] },
           { s: 14.72, e: 19.75, lines: [["k", [37, 38]]], terms: true },
-          { s: 19.89, e: 21.3, lines: [["k", [45]], ["h a xl", [46]], ["h", [47, 48]]] },
+          { s: 19.89, e: 21.3, lines: [["k", [45]], ["h xl mkr", [46]], ["h", [47, 48]]] },
           { s: 21.3, e: 24.05, lines: [["k", [49, 50, 51]], ["h", [52, 53]]] },
           { s: 24.2, e: 25.78, lines: [["k", [54]]], top: 640 },
           { s: 25.78, e: 27.75, lines: [["k", [57]]], top: 640 },
           { s: 28.1, e: 30.95, lines: [["k", [62, 63, 64]], ["sp", 326], ["h", [66, 67]]] },
-          { s: 35.7, e: 39.4, lines: [["k", [77, 78, 79, 80]], ["k", [81, 82]], ["k2", [83]], ["h a xl", [84]], ["h xl", [85]]] },
+          { s: 35.7, e: 39.4, lines: [["k", [77, 78, 79, 80]], ["k", [81, 82]], ["k2", [83]], ["h xl mkr", [84]], ["h xl", [85]]] },
         ];
+        let prevExit = -9;
         BLOCKS.forEach((b, bi) => {
+          // a block never rolls in until the previous block has rolled out
+          const RA = (wi) => Math.max(W[wi][1] - 0.09, prevExit - 0.06);
           const blk = mk("div", "blk clip", textRoot);
           blk.id = "blk" + bi;
           blk.setAttribute("data-start", b.s);
-          blk.setAttribute("data-duration", (b.e - b.s).toFixed(3));
+          // exit waits for the last word's reveal to finish (no clipped tails)
+          let lastEnd = 0;
+          b.lines.forEach(([cls, ids]) => { if (cls !== "sp") ids.forEach((wi) => { const hero = /xl/.test(cls) || wi === 8 || wi === 53; lastEnd = Math.max(lastEnd, RA(wi) + (hero ? 0.6 : 0.44)); }); });
+          const exitAt = Math.max(b.e - 0.3, lastEnd + 0.04);
+          const nW = b.lines.reduce((n, [c, ids]) => n + (c === "sp" ? 0 : ids.length), 0);
+          const wordsGone = exitAt + 0.26 + 0.012 * nW;       // last word fully out
+          const endAt = b.e < 39.3 ? Math.max(b.e, wordsGone + 0.26) : b.e;
+          blk.setAttribute("data-duration", (endAt - b.s).toFixed(3));
           blk.setAttribute("data-track-index", 8);
           if (b.top) blk.style.top = b.top + "px";
           const inner = mk("div", "bi", blk);
           b.lines.forEach(([cls, ids]) => {
             if (cls === "sp") { const sp = mk("div", "", inner); sp.style.height = ids + "px"; return; }
             const ln = mk("div", "ln " + cls, inner);
+            if (/mkr/.test(cls)) {
+              const bg = mk("div", "mkbg", ln);
+              S(bg, { scaleX: 0, transformOrigin: "0% 50%" });
+              tl.to(bg, { scaleX: 1, duration: 0.38, ease: "power3.inOut" }, RA(ids[0]) - 0.13);
+              if (b.e < 39.3) tl.to(bg, { scaleX: 0, transformOrigin: "100% 50%", duration: 0.24, ease: "power3.in" }, wordsGone - 0.06);
+            }
             if (b.wrap && cls === "k") { ln.style.whiteSpace = "normal"; ln.style.maxWidth = "810px"; }
             ids.forEach((wi, j) => {
               if (j > 0) mk("span", "sp", ln);
-              const w = mk("span", "w", ln, W[wi][0]);
+              const mask = mk("span", "mask", ln);
+              const w = mk("span", "w", mask, W[wi][0]);
               w.dataset.t = W[wi][1];
               const hero = /xl/.test(cls) || wi === 8 || wi === 53;
-              S(w, { opacity: 0, y: hero ? 46 : 26, rotationX: hero ? -70 : -40, scale: hero ? 1.14 : 1, transformPerspective: 700, transformOrigin: "50% 100%" });
-              tl.to(w, { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: hero ? 0.5 : 0.36, ease: "power3.out" }, W[wi][1] - 0.07);
+              S(w, { yPercent: 112, rotation: hero ? 5 : 3, opacity: 0, transformOrigin: "0% 100%" });
+              tl.set(w, { opacity: 1 }, RA(wi));
+              tl.to(w, { yPercent: 0, rotation: 0, duration: hero ? 0.6 : 0.44, ease: "power4.out" }, RA(wi));
             });
           });
           if (b.terms) {
@@ -795,9 +908,11 @@
                 tl.to(hs, { opacity: 1, duration: 0.25 }, T(ids[1]) - 0.06);
               }
               if (t1 !== null) tl.to(t, { opacity: 0, y: -50, duration: 0.18, ease: "power2.in" }, t1 - 0.12);
+              else tl.to(t, { opacity: 0, y: -50, duration: 0.22, ease: "power2.in" }, b.e - 0.3);
             });
           }
-          if (b.e < 39.3) tl.to(inner, { opacity: 0, y: -26, duration: 0.22, ease: "power2.in" }, b.e - 0.24);
+          if (b.e < 39.3) tl.to(inner.querySelectorAll(".ln:not(.terms) .w"), { yPercent: -115, duration: 0.26, ease: "power3.in", stagger: 0.012 }, exitAt);
+          prevExit = b.e < 39.3 ? wordsGone : -9;
         });
 
         window.__timelines["main"] = tl;

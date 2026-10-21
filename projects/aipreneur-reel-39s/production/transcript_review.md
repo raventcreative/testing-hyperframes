@@ -2,7 +2,12 @@
 
 **Status:** machine transcript, reviewed by agent. Text is high-confidence (master WAV slice and untouched original part give identical text for all 11 segments). **Awaiting user confirmation of 3 flagged spellings below.**
 
-Engine: Whisper **large-v3** multilingual, `language=id`, local CPU (sherpa-onnx int8). `hyperframes transcribe` (whisper.cpp) built OK but could not download `ggml-large-v3.bin` because `huggingface.co` is blocked by this session's network policy; the same Whisper large-v3 weights came from the official k2-fsa/sherpa-onnx GitHub release. No paid ASR, no HeyGen.
+Engine: Whisper **large-v3** multilingual, `language=id`, local CPU (sherpa-onnx int8; same weights from the official k2-fsa/sherpa-onnx GitHub release). No paid ASR, no HeyGen.
+
+## Cross-check with official `npx hyperframes transcribe` (whisper.cpp, ggml-large-v3, `--language id`)
+Run after Hugging Face access was enabled (model fetched with curl into `~/.cache/hyperframes/whisper/models/` because the CLI's Node downloader does not use the HTTPS proxy; sha256 64d182b4…d1e2). Output: `production/transcript_cli_whispercpp_large-v3.json`.
+- **Text: 86/86 words identical** to the reviewed transcript. Brand heard as “AI-preneur” (confirms AI PRENEUR), “se-level” = “selevel”.
+- **Timing: NOT adopted.** whisper.cpp word starts run a median 0.32 s early; 10 words start before their own clip even begins (inside silence), and 11 of 13 ASR-verified pause anchors are contradicted. The pause-anchored timing in `transcript_machine.json` stays the timing of record.
 
 ## Verbatim (reviewed display spelling)
 

@@ -5,16 +5,226 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; overflow: hidden; }
-        .s01-ph { position: absolute; left: 440px; top: 840px; width: 200px; height: 200px; border-radius: 50%; background: #294b77; }
+        .s01-stage { position: absolute; inset: 0; }
+        .s01-layer { position: absolute; inset: 0; }
+        .s01-far { filter: blur(2.4px); opacity: 0.82; }
+        .s01-near { filter: blur(0.7px); }
+        .s01-pos { position: absolute; transform-origin: 0 0; }
+        .s01-pop { position: relative; }
+        .s01-b { position: relative; border-radius: 30px; padding: 20px 22px; font-size: 0;
+          background: linear-gradient(162deg, #ffffff 0%, #f6f9fd 55%, #e9eff8 100%);
+          border: 1.5px solid rgba(41,75,119,0.08);
+          box-shadow: inset 0 2px 0 #ffffff, inset 0 -3px 6px rgba(172,198,231,0.25), 0 26px 40px -18px rgba(28,51,84,0.42), 0 6px 14px rgba(28,51,84,0.10); }
+        .s01-b::after { content: ""; position: absolute; bottom: -11px; width: 28px; height: 28px; border-radius: 5px; transform: rotate(45deg); z-index: -1;
+          background: #edf2f9; box-shadow: 8px 8px 16px -6px rgba(28,51,84,0.28); }
+        .s01-tl .s01-b::after { left: 36px; }
+        .s01-tr .s01-b::after { right: 36px; }
+        .s01-ice { background: linear-gradient(162deg, #f1f6fd 0%, #d9e6f7 60%, #c7d9f1 100%); border-color: rgba(255,255,255,0.9); }
+        .s01-ice::after { background: #c9dbf2; }
+        .s01-navy { background: linear-gradient(150deg, #4670a8 0%, #2f5689 45%, #213f69 100%); border-color: rgba(28,51,84,0.4);
+          box-shadow: inset 0 2px 0 rgba(255,255,255,0.35), inset 0 -4px 10px rgba(16,30,52,0.35), 0 28px 44px -18px rgba(28,51,84,0.55), 0 6px 14px rgba(28,51,84,0.18); }
+        .s01-navy::after { background: #23426d; }
+        .s01-glass { background: linear-gradient(140deg, rgba(255,255,255,0.95), rgba(222,233,248,0.88)); border: 2px solid #ffffff; }
+        .s01-glass::after { background: #e1eaf6; }
+        .s01-row { display: flex; align-items: center; gap: 16px; }
+        .s01-col { display: flex; flex-direction: column; gap: 10px; }
+        .s01-av { display: block; flex: none; width: 58px; height: 58px; border-radius: 50%;
+          box-shadow: inset 0 2px 2px rgba(255,255,255,0.7), inset 0 -4px 8px rgba(16,30,52,0.25), 0 4px 8px rgba(28,51,84,0.2); }
+        .s01-av.s01-sm { width: 40px; height: 40px; }
+        .s01-ln { display: block; height: 12px; border-radius: 6px; background: #ccd7e6; }
+        .s01-ln.s01-dk { background: #43597a; height: 13px; }
+        .s01-navy .s01-ln { background: rgba(232,240,251,0.55); }
+        .s01-navy .s01-ln.s01-dk { background: #f3f7fd; }
+        .s01-meta { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1.5px solid rgba(41,75,119,0.08); color: #3a6299; }
+        .s01-meta svg { width: 22px; height: 22px; }
+        .s01-meta .s01-ln { width: 60px; height: 9px; margin-left: auto; }
+        .s01-dots { display: flex; gap: 14px; padding: 24px 28px; }
+        .s01-dots i { display: block; width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #5d86bd, #294b77 70%); box-shadow: 0 3px 5px rgba(28,51,84,0.3); }
+        .s01-ico { flex: none; width: 46px; height: 46px; }
+        .s01-face { flex: none; width: 66px; height: 66px; filter: drop-shadow(0 4px 6px rgba(28,51,84,0.22)); }
+        .s01-pill { display: flex; align-items: center; gap: 14px; padding: 16px 22px; color: #294b77; }
+        .s01-pill svg { width: 30px; height: 30px; }
+        .s01-pill .s01-ln { width: 70px; }
+
+        /* phone */
+        .s01-phonewrap { position: absolute; left: 308px; top: 500px; width: 464px; height: 900px; }
+        .s01-contact { position: absolute; left: 300px; top: 1350px; width: 520px; height: 110px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(28,51,84,0.42), rgba(28,51,84,0.13) 46%, rgba(28,51,84,0) 72%); }
+        .s01-phone { position: absolute; inset: 0; border-radius: 62px; padding: 16px;
+          background: linear-gradient(150deg, #ffffff 0%, #eef3fa 35%, #cfdcee 100%);
+          box-shadow: inset 0 3px 0 #ffffff, inset 3px 0 0 rgba(255,255,255,0.9), inset -4px -6px 12px rgba(41,75,119,0.22), 0 60px 90px -30px rgba(28,51,84,0.5), 0 16px 30px rgba(28,51,84,0.16); }
+        .s01-btn { position: absolute; width: 6px; border-radius: 3px; background: linear-gradient(90deg, #b5c6dc, #e8eef7); }
+        .s01-screen { position: absolute; inset: 16px; border-radius: 48px; overflow: hidden; background: #fbfcfe;
+          box-shadow: inset 0 0 0 3px #2e3a4c, inset 0 0 0 5px rgba(46,58,76,0.15); }
+        .s01-island { position: absolute; left: 50%; top: 20px; width: 112px; height: 32px; margin-left: -56px; border-radius: 16px; background: #222c3a; z-index: 3; }
+        .s01-status { position: absolute; left: 34px; right: 34px; top: 28px; height: 14px; z-index: 3; }
+        .s01-status i { position: absolute; top: 0; height: 12px; border-radius: 6px; background: #3b4b62; }
+        .s01-feed { position: absolute; left: 0; right: 0; top: 70px; }
+        .s01-post { padding: 0 20px 18px; }
+        .s01-ph { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+        .s01-ph .s01-av { width: 44px; height: 44px; }
+        .s01-kebab { margin-left: auto; display: flex; gap: 4px; }
+        .s01-kebab i { width: 6px; height: 6px; border-radius: 50%; background: #8193ab; }
+        .s01-media { position: relative; height: 330px; border-radius: 22px; overflow: hidden;
+          background: linear-gradient(180deg, #e8f0fb 0%, #cbdbf4 55%, #acc6e7 100%); box-shadow: inset 0 0 0 1.5px rgba(41,75,119,0.08); }
+        .s01-media svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .s01-acts { display: flex; align-items: center; gap: 16px; padding: 14px 4px 10px; color: #294b77; }
+        .s01-acts svg { width: 30px; height: 30px; }
+        .s01-acts .s01-bm { margin-left: auto; }
+        .s01-cmt { display: flex; align-items: center; gap: 10px; padding: 6px 4px; }
+        .s01-cmt .s01-av { width: 26px; height: 26px; }
+        .s01-cmt .s01-ln { height: 9px; }
+        .s01-nav { position: absolute; left: 0; right: 0; bottom: 0; height: 88px; display: flex; justify-content: space-around; align-items: center; padding-bottom: 14px;
+          background: linear-gradient(180deg, rgba(251,252,254,0.6), #fbfcfe 40%); border-top: 1.5px solid rgba(41,75,119,0.07); z-index: 3; }
+        .s01-nav i { width: 30px; height: 30px; border-radius: 9px; border: 3px solid #4b6283; }
+        .s01-nav i:nth-child(3) { border-radius: 50%; background: #294b77; border-color: #294b77; }
+        .s01-glare { position: absolute; inset: 0; border-radius: 48px; z-index: 4;
+          background: linear-gradient(118deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 70%, rgba(255,255,255,0.18) 100%); }
+        .s01-ring { position: absolute; left: 540px; top: 950px; width: 600px; height: 600px; margin: -300px 0 0 -300px; border-radius: 50%;
+          border: 4px solid rgba(58,98,153,0.5); background: radial-gradient(circle, rgba(203,219,244,0) 55%, rgba(203,219,244,0.45) 70%, rgba(255,255,255,0) 71%); box-shadow: 0 0 40px rgba(172,198,231,0.8), inset 0 0 40px rgba(255,255,255,0.7); }
+        .s01-spot { position: absolute; left: 90px; top: 420px; width: 900px; height: 1100px; border-radius: 50%;
+          background: radial-gradient(ellipse at 45% 42%, rgba(255,255,255,0.85), rgba(255,255,255,0) 62%); }
+        .s01-fx { position: absolute; width: 34px; height: 34px; color: #3a6299; }
+        .s01-fx svg { width: 100%; height: 100%; display: block; }
       </style>
       <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
-        <div class="s01-ph"></div>
+        <div class="s01-spot" id="s01-spot"></div>
+        <div class="s01-stage" id="s01-stage">
+          <div class="s01-layer s01-far" id="s01-far"></div>
+          <div class="s01-ring" id="s01-ring0"></div>
+          <div class="s01-ring" id="s01-ring1"></div>
+          <div class="s01-ring" id="s01-ring2"></div>
+          <div class="s01-contact" id="s01-contact"></div>
+          <div class="s01-phonewrap" id="s01-phone">
+            <div class="s01-phone">
+              <i class="s01-btn" style="left:-4px;top:170px;height:60px"></i>
+              <i class="s01-btn" style="left:-4px;top:250px;height:90px"></i>
+              <i class="s01-btn" style="right:-4px;top:220px;height:120px"></i>
+              <div class="s01-screen">
+                <div class="s01-island"></div>
+                <div class="s01-status"><i style="left:0;width:46px"></i><i style="right:0;width:24px"></i><i style="right:32px;width:18px;height:10px;top:1px"></i></div>
+                <div class="s01-feed" id="s01-feed"></div>
+                <div class="s01-nav"><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="s01-glare"></div>
+              </div>
+            </div>
+          </div>
+          <div class="s01-layer" id="s01-fxl"></div>
+          <div class="s01-layer" id="s01-mid"></div>
+          <div class="s01-layer s01-near" id="s01-near"></div>
+        </div>
       </div>
       <script>
         (function () {
-          const R = document.querySelector('[data-composition-id="s01"] .s01-ph');
+          const R = document.querySelector('[data-composition-id="s01"]');
+          const q = (s) => R.querySelector(s), qa = (s) => R.querySelectorAll(s);
           const tl = gsap.timeline({ paused: true });
-          tl.fromTo(R, { scale: 0.5 }, { scale: 1, duration: 0.5 }, 0);
+          const D = 1.05;
+
+          const HEART = '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.6-9.2C1 8 3 4.6 6.6 4.6c2.2 0 3.6 1.3 4.4 2.6.8-1.3 2.2-2.6 4.4-2.6 3.6 0 5.6 3.4 4.2 6.7-2.1 4.6-9.6 9.2-9.6 9.2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
+          const HEARTF = '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.6-9.2C1 8 3 4.6 6.6 4.6c2.2 0 3.6 1.3 4.4 2.6.8-1.3 2.2-2.6 4.4-2.6 3.6 0 5.6 3.4 4.2 6.7-2.1 4.6-9.6 9.2-9.6 9.2z" fill="currentColor"/></svg>';
+          const CHAT = '<svg viewBox="0 0 24 24"><path d="M4.5 4.5h15a1.5 1.5 0 0 1 1.5 1.5v9.5a1.5 1.5 0 0 1-1.5 1.5H11l-4.8 3.6V17H4.5A1.5 1.5 0 0 1 3 15.5V6a1.5 1.5 0 0 1 1.5-1.5z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="8" cy="10.8" r="1.2" fill="currentColor"/><circle cx="12" cy="10.8" r="1.2" fill="currentColor"/><circle cx="16" cy="10.8" r="1.2" fill="currentColor"/></svg>';
+          const SEND = '<svg viewBox="0 0 24 24"><path d="M21 3.5 3 10.8l7 2.6 2.6 7L21 3.5zM10 13.4l4.6-4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+          const BOOK = '<svg viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4.2-6 4.2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
+          const MEH = (id) => '<svg class="s01-face" viewBox="0 0 64 64"><defs><radialGradient id="' + id + '" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#e3ecf8"/><stop offset="1" stop-color="#acc6e7"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#' + id + ')" stroke="#294b77" stroke-opacity="0.18" stroke-width="2"/><circle cx="23" cy="27" r="4" fill="#294b77"/><circle cx="41" cy="27" r="4" fill="#294b77"/><path d="M21 42.5h22" stroke="#294b77" stroke-width="4.2" stroke-linecap="round"/></svg>';
+          const AVG = [
+            "radial-gradient(circle at 32% 28%, #ffffff 0%, #acc6e7 30%, #294b77 100%)",
+            "radial-gradient(circle at 32% 28%, #ffffff 0%, #c4ece0 30%, #5c9f93 100%)",
+            "radial-gradient(circle at 32% 28%, #ffffff 0%, #cbdbf4 30%, #3a6299 100%)",
+            "radial-gradient(circle at 32% 28%, #fff6e0 0%, #f2c46d 34%, #b98c3a 100%)",
+            "radial-gradient(circle at 32% 28%, #e8f0fb 0%, #5d7fae 34%, #1c3354 100%)",
+          ];
+          const av = (i, cls) => '<i class="s01-av' + (cls ? " " + cls : "") + '" style="background:' + AVG[i % AVG.length] + '"></i>';
+          const ln = (w, dk) => '<b class="s01-ln' + (dk ? " s01-dk" : "") + '" style="width:' + w + 'px"></b>';
+
+          const TYPES = {
+            A: (i) => ({ w: 300, html: '<div class="s01-b"><div class="s01-row">' + av(i) + '<div class="s01-col">' + ln(110 + (i % 3) * 20, 1) + ln(170) + ln(96 + (i % 2) * 30) + '</div></div><div class="s01-meta">' + HEART + CHAT + ln(60) + '</div></div>' }),
+            B: (i) => ({ w: 150, html: '<div class="s01-b s01-ice s01-dots"><i></i><i></i><i></i></div>' }),
+            C: (i) => ({ w: 280, html: '<div class="s01-b s01-navy"><div class="s01-row"><span class="s01-ico" style="color:#cbdbf4">' + HEARTF + '</span><div class="s01-col">' + ln(150, 1) + ln(120) + '</div></div></div>' }),
+            D: (i) => ({ w: 290, html: '<div class="s01-b"><div class="s01-row">' + MEH("s01-mg" + i) + '<div class="s01-col">' + ln(130, 1) + ln(150) + ln(80) + '</div></div></div>' }),
+            E: (i) => ({ w: 270, html: '<div class="s01-b s01-glass s01-pill">' + av(i, "s01-sm") + HEART + CHAT + ln(70) + '</div>' }),
+          };
+          // [layer, type, x, y, k, wave, tail(l/r), rot]
+          const B = [
+            ["far", "B", 140, 680, 0.8, -1, "r", -3], ["far", "A", 60, 455, 0.62, -1, "r", 3], ["far", "E", 825, 610, 0.62, 0, "l", 4],
+            ["far", "D", 800, 1360, 0.62, 1, "l", -3], ["far", "C", 330, 405, 0.6, 1, "r", 2], ["far", "A", 70, 1460, 0.58, 2, "r", -4],
+            ["far", "B", 700, 420, 0.7, 2, "l", 3],
+            ["mid", "A", 600, 440, 1.0, -1, "l", 3], ["mid", "C", 40, 560, 1.0, -1, "r", -4], ["mid", "A", 735, 870, 0.95, 0, "l", 3],
+            ["mid", "B", 175, 975, 1.0, 0, "r", -5], ["mid", "D", 765, 690, 0.9, 1, "l", -2], ["near", "E", 330, 1420, 1.18, 1, "r", 2], ["far", "C", 905, 840, 0.6, 0, "l", 4], ["far", "D", 560, 1490, 0.6, 2, "l", -3], ["mid", "B", 640, 1440, 0.85, 0, "l", 4],
+            ["mid", "A", 60, 1080, 0.95, 2, "r", -3], ["mid", "C", 715, 1150, 0.88, 2, "l", 4],
+            ["near", "D", -70, 1235, 1.32, -1, "r", -4], ["near", "A", 745, 1300, 1.3, 0, "l", 4], ["near", "C", -120, 765, 1.25, 1, "r", 5],
+            ["near", "B", 840, 1015, 1.4, 2, "l", -4],
+          ];
+          const WAVE = [0.08, 0.41, 0.73];
+          const counts = [0, 0, 0];
+          B.forEach((b, i) => {
+            const [layer, type, x, y, k, wave, tail, rot] = b;
+            const T = TYPES[type](i);
+            const pos = document.createElement("div");
+            pos.className = "s01-pos s01-t" + tail;
+            pos.style.cssText = "left:" + x + "px;top:" + y + "px;transform:scale(" + k + ");";
+            const pop = document.createElement("div");
+            pop.className = "s01-pop";
+            pop.style.width = T.w + "px";
+            pop.style.transformOrigin = tail === "l" ? "15% 110%" : "85% 110%";
+            pop.innerHTML = T.html;
+            pos.appendChild(pop);
+            q("#s01-" + layer).appendChild(pos);
+            if (wave < 0) {
+              tl.fromTo(pop, { scale: 0.7, opacity: 1, y: 20, rotation: rot - 8 }, { scale: 1, opacity: 1, y: 0, rotation: rot, duration: 0.26, ease: "back.out(1.8)" }, 0);
+            } else {
+              const t = WAVE[wave] + counts[wave]++ * 0.04;
+              tl.fromTo(pop, { scale: 0.2, opacity: 0, y: 46, rotation: rot - 10 * (tail === "l" ? -1 : 1) }, { scale: 1, opacity: 1, y: 0, rotation: rot, duration: 0.36, ease: "back.out(1.7)" }, t);
+            }
+            // typing dots bounce
+            pop.querySelectorAll(".s01-dots i").forEach((d, j) => {
+              tl.fromTo(d, { y: 0 }, { y: -8, duration: 0.14, ease: "sine.inOut", yoyo: true, repeat: 5 }, 0.02 + j * 0.07);
+            });
+          });
+
+          // phone feed content
+          const feed = q("#s01-feed");
+          const media = (n) => '<div class="s01-media"><svg viewBox="0 0 330 300" preserveAspectRatio="none"><defs><linearGradient id="s01-hill' + n + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d86bd"/><stop offset="1" stop-color="#294b77"/></linearGradient><radialGradient id="s01-sun' + n + '" cx="40%" cy="35%" r="60%"><stop offset="0" stop-color="#fff8e6"/><stop offset="1" stop-color="#f2c46d"/></radialGradient></defs><circle cx="236" cy="96" r="40" fill="url(#s01-sun' + n + ')" opacity="0.9"/><path d="M0 210 Q70 140 140 190 T330 170 V300 H0z" fill="#acc6e7" opacity="0.9"/><path d="M0 250 Q90 180 190 236 T330 222 V300 H0z" fill="url(#s01-hill' + n + ')"/><path d="M30 60h70M30 76h44" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.7"/></svg></div>';
+          const post = (n) => '<div class="s01-post"><div class="s01-ph">' + av(n + 2) + '<div class="s01-col" style="gap:8px">' + ln(120, 1) + ln(80) + '</div><div class="s01-kebab"><i></i><i></i><i></i></div></div>' + media(n) +
+            '<div class="s01-acts"><span class="s01-hrt">' + HEART + '</span>' + CHAT + SEND + '<span class="s01-bm">' + BOOK + '</span></div>' + '<div class="s01-col" style="gap:9px;padding:0 4px 8px">' + ln(210, 1) + ln(260) + '</div>' +
+            [0, 1, 2].map((c) => '<div class="s01-cmt">' + av(c + n, "") + ln(70, 1) + ln(110 + c * 22) + '</div>').join("") + '</div>';
+          feed.innerHTML = post(0) + post(1);
+
+          // floating reaction particles from the phone
+          const fxl = q("#s01-fxl");
+          const FX = [[430, 1060, HEARTF, 0.12], [610, 1010, CHAT, 0.18], [500, 900, HEART, 0.45], [690, 1140, HEARTF, 0.5], [380, 1200, CHAT, 0.55], [560, 1180, HEARTF, 0.78], [470, 980, HEART, 0.84], [650, 880, CHAT, 0.9]];
+          FX.forEach(([x, y, svg, t], i) => {
+            const e = document.createElement("div");
+            e.className = "s01-fx";
+            e.style.left = x + "px"; e.style.top = y + "px";
+            e.style.color = i % 3 === 0 ? "#3a6299" : i % 3 === 1 ? "#5d86bd" : "#294b77";
+            e.innerHTML = svg;
+            fxl.appendChild(e);
+            tl.fromTo(e, { opacity: 0, scale: 0.3, y: 0, x: 0 }, { opacity: 1, scale: 1, y: -70, x: (i % 2 ? 26 : -26), duration: 0.24, ease: "power3.out" }, t);
+            tl.to(e, { opacity: 0, y: -170, duration: 0.4, ease: "power1.in" }, t + 0.24);
+          });
+
+          // phone: already on screen at frame 0, settling + rising
+          tl.fromTo(q("#s01-phone"), { y: 40, scale: 0.94, rotation: -4 }, { y: 0, scale: 1, rotation: -1.5, duration: 0.55, ease: "power3.out" }, 0);
+          tl.to(q("#s01-phone"), { y: -16, rotation: -0.5, duration: 0.5, ease: "sine.inOut" }, 0.55);
+          tl.fromTo(q("#s01-contact"), { scaleX: 1.08, opacity: 0.85 }, { scaleX: 0.96, opacity: 1, duration: D, ease: "sine.inOut" }, 0);
+          tl.fromTo(q("#s01-feed"), { y: 0 }, { y: -170, duration: D, ease: "power1.inOut" }, 0);
+          // like tap on each word
+          [0.11, 0.44, 0.76].forEach((t, i) => {
+            tl.fromTo(q("#s01-ring" + i), { scale: 0.45, opacity: 0.9 }, { scale: 1.45, opacity: 0, duration: 0.55, ease: "power2.out" }, t);
+            tl.fromTo(q(".s01-phone"), { scale: 1 }, { scale: 1.018, duration: 0.08, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, t + 0.02);
+          });
+          qa(".s01-hrt").forEach((h, i) => {
+            tl.fromTo(h, { color: "#294b77", scale: 1 }, { color: "#3a6299", scale: 1.25, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 0.11 + i * 0.33);
+          });
+
+          // camera push-in + parallax
+          tl.fromTo(q("#s01-stage"), { scale: 1, transformOrigin: "50% 50%" }, { scale: 1.08, duration: D, ease: "none" }, 0);
+          tl.fromTo(q("#s01-far"), { x: 0, y: 0 }, { x: -12, y: 10, duration: D, ease: "none" }, 0);
+          tl.fromTo(q("#s01-mid"), { x: 0, y: 0 }, { x: 10, y: -16, duration: D, ease: "none" }, 0);
+          tl.fromTo(q("#s01-near"), { x: 0, y: 0, scale: 1, transformOrigin: "50% 50%" }, { x: 22, y: -30, scale: 1.05, duration: D, ease: "none" }, 0);
+          tl.fromTo(q("#s01-spot"), { opacity: 0.7, x: -20 }, { opacity: 1, x: 20, duration: D, ease: "sine.inOut" }, 0);
+
           window.__timelines["s01"] = tl;
         })();
       </script>

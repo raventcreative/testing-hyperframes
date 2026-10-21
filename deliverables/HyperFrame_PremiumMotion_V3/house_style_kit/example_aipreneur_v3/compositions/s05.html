@@ -1,0 +1,265 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; overflow: hidden; }
+        .s05-cam { position: absolute; inset: 0;
+          -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 360px, #000 460px, #000 1530px, transparent 1650px);
+          mask-image: linear-gradient(180deg, transparent 0, transparent 360px, #000 460px, #000 1530px, transparent 1650px); }
+        .s05-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+        .s05-lane { position: absolute; left: -360px; top: 0; width: 1800px; height: 0; }
+        .s05-farcard { position: absolute; width: 120px; height: 90px; border-radius: 14px; background: linear-gradient(170deg, #ffffff, #e8f0fb); border: 2px solid rgba(41,75,119,0.12); filter: blur(5px); opacity: 0.75; }
+        .s05-speed { position: absolute; height: 5px; border-radius: 3px; background: linear-gradient(90deg, rgba(41,75,119,0), rgba(41,75,119,0.55) 75%, rgba(232,240,251,1)); }
+        .s05-speed.s05-w { background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.95)); height: 6px; }
+        .s05-beltshadow { position: absolute; left: -360px; top: 980px; width: 1800px; height: 150px; border-radius: 75px; background: rgba(28,51,84,0.22); filter: blur(26px); }
+        .s05-belt { position: absolute; left: -360px; top: 690px; width: 1800px; height: 240px; }
+        .s05-rail { position: absolute; left: 0; width: 1800px; height: 38px; border-radius: 19px;
+          background: linear-gradient(180deg, #ffffff 0%, #e8f0fb 35%, #acc6e7 70%, #8fa9cc 100%); box-shadow: 0 2px 0 rgba(255,255,255,0.9) inset, 0 8px 14px rgba(28,51,84,0.25); }
+        .s05-railtop { top: 0; }
+        .s05-railbot { top: 202px; }
+        .s05-bolt { position: absolute; top: 12px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff, #8fa9cc); box-shadow: 0 1px 2px rgba(28,51,84,0.4); }
+        .s05-bed { position: absolute; left: 0; top: 30px; width: 1800px; height: 180px; overflow: hidden; background: linear-gradient(180deg, #1c3354, #294b77 40%, #24446f 60%, #1c3354); }
+        .s05-ribs { position: absolute; left: -2200px; top: 0; width: 4200px; height: 180px;
+          background: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 22px, rgba(172,198,231,0.28) 22px 26px, rgba(0,0,0,0.18) 26px 30px, rgba(255,255,255,0) 30px 44px); }
+        .s05-bedshine { position: absolute; left: 0; top: 30px; width: 1800px; height: 50px; background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0)); }
+        .s05-roller { position: absolute; top: 216px; width: 48px; height: 48px; margin-left: -24px; border-radius: 50%;
+          background: radial-gradient(circle at 38% 34%, #ffffff, #cbdbf4 45%, #7f9cc4); box-shadow: 0 6px 10px rgba(28,51,84,0.3); }
+        .s05-roller i { position: absolute; left: 22px; top: 4px; width: 4px; height: 40px; border-radius: 2px; background: #3a6299; }
+        .s05-roller b { position: absolute; left: 4px; top: 22px; width: 40px; height: 4px; border-radius: 2px; background: #3a6299; }
+        .s05-roller u { position: absolute; left: 16px; top: 16px; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff, #8fa9cc); }
+        .s05-card { position: absolute; top: 50px; width: 190px; height: 140px; margin-left: -95px; }
+        .s05-trail { position: absolute; right: 150px; top: 18px; width: 420px; height: 104px; border-radius: 52px;
+          background: linear-gradient(90deg, rgba(232,240,251,0), rgba(232,240,251,0.55) 70%, rgba(255,255,255,0.85)); filter: blur(6px); }
+        .s05-ghost { opacity: 0.32; filter: blur(5px) !important; }
+        .s05-ghost2 { opacity: 0.14; filter: blur(9px) !important; }
+        .s05-cardface { position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(170deg, #ffffff, #eef3fa); border: 2px solid rgba(255,255,255,0.95);
+          box-shadow: 0 2px 0 #fff inset, 10px 16px 18px rgba(10,20,40,0.35); overflow: hidden; filter: blur(1.2px); }
+        .s05-cardface .s05-hd { position: absolute; left: 14px; top: 13px; width: 64px; height: 10px; border-radius: 5px; background: #294b77; }
+        .s05-cardface .s05-dt { position: absolute; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: #acc6e7; }
+        .s05-cardface .s05-th { position: absolute; left: 14px; top: 34px; width: 162px; height: 62px; border-radius: 10px; background: radial-gradient(circle at 70% 40%, #e8f0fb, #acc6e7 40%, #3a6299 100%); }
+        .s05-cardface .s05-th::after { content: ""; position: absolute; left: 18px; top: 14px; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.85); }
+        .s05-cardface .s05-l1 { position: absolute; left: 14px; top: 106px; width: 120px; height: 8px; border-radius: 4px; background: #acc6e7; }
+        .s05-cardface .s05-l2 { position: absolute; left: 14px; top: 120px; width: 84px; height: 8px; border-radius: 4px; background: #cbdbf4; }
+        .s05-cardface .s05-ok { position: absolute; right: 14px; top: 104px; width: 26px; height: 26px; border-radius: 50%; background: #9fd8c4; }
+        .s05-box .s05-cardface { background: linear-gradient(160deg, #fffefb, #eadfc8); }
+        .s05-box .s05-tape { position: absolute; left: 80px; top: 0; width: 30px; height: 140px; background: linear-gradient(90deg, #3a6299, #294b77); opacity: 0.9; }
+        .s05-box .s05-tape2 { position: absolute; left: 0; top: 56px; width: 190px; height: 26px; background: linear-gradient(180deg, #3a6299, #294b77); opacity: 0.9; }
+        .s05-box .s05-lbl { position: absolute; left: 124px; top: 14px; width: 50px; height: 34px; border-radius: 6px; background: #fbfcfe; }
+        .s05-watchwrap { position: absolute; left: 220px; top: 790px; width: 640px; height: 746px; }
+        .s05-watchshadow { position: absolute; left: 290px; top: 1430px; width: 640px; height: 120px; }
+        .s05-watch { position: absolute; left: 0; top: 0; width: 640px; height: 746px; overflow: visible; filter: drop-shadow(18px 30px 30px rgba(28,51,84,0.35)); }
+        .s05-fx { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+        .s05-mote { position: absolute; border-radius: 50%; background: radial-gradient(circle, #ffffff, rgba(203,219,244,0.5) 60%, rgba(203,219,244,0)); filter: blur(4px); }
+      </style>
+      <div id="root" data-composition-id="s05" data-width="1080" data-height="1920">
+        <div class="s05-cam">
+          <div class="s05-stage" id="s05-stage">
+            <!-- far lane: blurred cards (parallax) -->
+            <div class="s05-lane" id="s05-farlane"></div>
+            <!-- speed lines behind -->
+            <div class="s05-lane" id="s05-speedback"></div>
+            <!-- conveyor -->
+            <div class="s05-beltshadow" id="s05-beltshadow"></div>
+            <div class="s05-belt" id="s05-belt">
+              <div class="s05-bed"><div class="s05-ribs" id="s05-ribs"></div></div>
+              <div class="s05-bedshine"></div>
+              <div id="s05-rollers"></div>
+              <div class="s05-rail s05-railtop" id="s05-railtop"></div>
+              <div id="s05-cards"></div>
+              <div class="s05-rail s05-railbot" id="s05-railbot"></div>
+            </div>
+            <!-- stopwatch (foreground hero) -->
+            <div class="s05-watchshadow kit-contact"></div>
+            <div class="s05-watchwrap" id="s05-watchwrap">
+              <svg class="s05-watch" viewBox="0 0 600 700">
+                <defs>
+                  <linearGradient id="s05-case" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" /><stop offset="0.35" stop-color="#E8F0FB" /><stop offset="0.6" stop-color="#ACC6E7" /><stop offset="0.8" stop-color="#F4F8FD" /><stop offset="1" stop-color="#7F9CC4" /></linearGradient>
+                  <linearGradient id="s05-case2" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFFFFF" /><stop offset="0.5" stop-color="#CBDBF4" /><stop offset="1" stop-color="#8FA9CC" /></linearGradient>
+                  <radialGradient id="s05-face" cx="0.42" cy="0.38" r="0.7"><stop offset="0" stop-color="#FFFFFF" /><stop offset="0.75" stop-color="#F4F7FB" /><stop offset="1" stop-color="#DCE6F4" /></radialGradient>
+                  <linearGradient id="s05-metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8FA9CC" /><stop offset="0.35" stop-color="#FFFFFF" /><stop offset="0.7" stop-color="#CBDBF4" /><stop offset="1" stop-color="#7F9CC4" /></linearGradient>
+                  <linearGradient id="s05-sweep" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3A6299" stop-opacity="0" /><stop offset="1" stop-color="#3A6299" stop-opacity="0.38" /></linearGradient>
+                  <linearGradient id="s05-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.85" /><stop offset="1" stop-color="#FFFFFF" stop-opacity="0" /></linearGradient>
+                </defs>
+                <!-- crown + loop + pushers -->
+                <circle cx="300" cy="34" r="28" fill="none" stroke="url(#s05-metal)" stroke-width="12" />
+                <rect x="278" y="84" width="44" height="58" rx="8" fill="url(#s05-metal)" />
+                <g id="s05-crown"><rect x="246" y="52" width="108" height="44" rx="14" fill="url(#s05-metal)" stroke="#8FA9CC" stroke-width="2" />
+                  <g stroke="#8FA9CC" stroke-width="3"><path d="M262 58 V90 M276 58 V90 M290 58 V90 M304 58 V90 M318 58 V90 M332 58 V90" /></g>
+                  <rect x="250" y="55" width="100" height="8" rx="4" fill="#FFFFFF" opacity="0.8" /></g>
+                <g transform="rotate(42 300 400)"><rect x="282" y="104" width="36" height="40" rx="8" fill="url(#s05-metal)" /><rect x="272" y="88" width="56" height="26" rx="9" fill="url(#s05-metal)" stroke="#8FA9CC" stroke-width="2" /></g>
+                <g transform="rotate(-42 300 400)"><rect x="282" y="104" width="36" height="40" rx="8" fill="url(#s05-metal)" /><rect x="272" y="88" width="56" height="26" rx="9" fill="url(#s05-metal)" stroke="#8FA9CC" stroke-width="2" /></g>
+                <!-- case -->
+                <circle cx="300" cy="400" r="272" fill="url(#s05-case)" />
+                <circle cx="300" cy="400" r="256" fill="url(#s05-case2)" />
+                <circle cx="300" cy="400" r="244" fill="#294B77" />
+                <circle cx="300" cy="400" r="236" fill="url(#s05-face)" />
+                <circle cx="300" cy="400" r="236" fill="none" stroke="#FFFFFF" stroke-width="3" opacity="0.8" />
+                <g id="s05-ticks"></g>
+                <circle cx="300" cy="400" r="150" fill="none" stroke="#CBDBF4" stroke-width="2" />
+                <circle cx="300" cy="400" r="128" fill="none" stroke="#E8F0FB" stroke-width="16" opacity="0.7" />
+                <!-- sub-dials -->
+                <circle cx="300" cy="510" r="50" fill="#EEF3FA" stroke="#ACC6E7" stroke-width="3" />
+                <g id="s05-subticks"></g>
+                <g id="s05-subhand"><path d="M300 512 L300 470" stroke="#3A6299" stroke-width="5" stroke-linecap="round" /></g>
+                <circle cx="300" cy="510" r="6" fill="#294B77" />
+                <circle cx="210" cy="400" r="34" fill="#EEF3FA" stroke="#ACC6E7" stroke-width="3" /><g id="s05-sub2"><path d="M210 400 L210 374" stroke="#3A6299" stroke-width="4" stroke-linecap="round" /></g><circle cx="210" cy="400" r="5" fill="#294B77" />
+                <circle cx="390" cy="400" r="34" fill="#EEF3FA" stroke="#ACC6E7" stroke-width="3" /><rect x="372" y="394" width="36" height="12" rx="6" fill="#9FD8C4" opacity="0.85" />
+                <rect x="262" y="270" width="76" height="12" rx="6" fill="#294B77" opacity="0.8" />
+                <rect x="276" y="290" width="48" height="8" rx="4" fill="#ACC6E7" />
+                <!-- hand + sweep trail -->
+                <g id="s05-hand">
+                  <path id="s05-sweepwedge" d="M300 400 L300 172 A228 228 0 0 0 108 277 Z" fill="url(#s05-sweep)" />
+                  <path d="M294 452 L297 186 L300 160 L303 186 L306 452 Z" fill="#1C3354" />
+                  <circle cx="300" cy="458" r="17" fill="#294B77" /><circle cx="300" cy="458" r="7" fill="#ACC6E7" />
+                  <path d="M298.5 190 L300 166" stroke="#ACC6E7" stroke-width="2" />
+                </g>
+                <circle cx="300" cy="400" r="20" fill="#1C3354" /><circle cx="300" cy="400" r="12" fill="url(#s05-metal)" /><circle cx="296" cy="396" r="4" fill="#FFFFFF" />
+                <!-- glass reflections -->
+                <path d="M110 330 A200 200 0 0 1 300 170 L300 196 A176 176 0 0 0 136 330 Z" fill="url(#s05-glass)" opacity="0.8" />
+                <path d="M430 560 A190 190 0 0 1 380 600" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.7" />
+                <circle cx="300" cy="400" r="272" fill="none" stroke="#FFFFFF" stroke-width="3" opacity="0.9" />
+              </svg>
+            </div>
+            <!-- FX: shockwave, bolts, speed lines front -->
+            <div class="s05-lane" id="s05-speedfront"></div>
+            <svg class="s05-fx" viewBox="0 0 1080 1920" id="s05-fx">
+              <defs><filter id="s05-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" /></filter></defs>
+              <circle id="s05-shock" cx="540" cy="1217" r="290" fill="none" stroke="#ACC6E7" stroke-width="10" />
+              <g id="s05-bolts"></g>
+            </svg>
+            <div class="s05-mote" style="left:90px;top:1300px;width:70px;height:70px;"></div>
+            <div class="s05-mote" style="left:940px;top:1080px;width:54px;height:54px;"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const R = document.querySelector('[data-composition-id="s05"]');
+          const q = (s) => R.querySelector(s), qa = (s) => R.querySelectorAll(s);
+          const NS = "http://www.w3.org/2000/svg";
+          const tl = gsap.timeline({ paused: true });
+          let seed = 505;
+          const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+          const mk = (tag, cls, parent) => { const e = document.createElement(tag); if (cls) e.className = cls; parent.appendChild(e); return e; };
+          const sv = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+          const DUR = 0.86, ANG = -24, SPEED = 2500;
+
+          // camera: slight push + rotation settle, shake on "cepat"
+          const stage = q("#s05-stage");
+          tl.set(stage, { transformOrigin: "540px 1100px" }, 0);
+          tl.fromTo(stage, { scale: 1.08, rotation: -1.5 }, { scale: 1.0, rotation: 0, duration: DUR, ease: "power2.out" }, 0);
+
+          // diagonal lanes (all share the conveyor angle)
+          ["#s05-belt", "#s05-beltshadow", "#s05-farlane", "#s05-speedback", "#s05-speedfront"].forEach((s) => tl.set(q(s), { rotation: ANG, transformOrigin: "900px 50%" }, 0));
+          tl.set("#s05-farlane", { y: 520, rotation: ANG, transformOrigin: "900px 50%" }, 0);
+          tl.set("#s05-speedback", { y: 810 }, 0);
+          tl.set("#s05-speedfront", { y: 810 }, 0);
+
+          // belt ribs + rollers + rail bolts
+          tl.fromTo("#s05-ribs", { x: 0 }, { x: SPEED * DUR, duration: DUR, ease: "none" }, 0);
+          const rollers = q("#s05-rollers");
+          for (let i = 0; i < 16; i++) {
+            const r = mk("div", "s05-roller", rollers); r.style.left = 60 + i * 112 + "px";
+            mk("i", "", r); mk("b", "", r); mk("u", "", r);
+            tl.fromTo(r, { rotation: i * 23 }, { rotation: i * 23 + (SPEED * DUR / (Math.PI * 48)) * 360, duration: DUR, ease: "none" }, 0);
+          }
+          ["#s05-railtop", "#s05-railbot"].forEach((s) => { for (let i = 0; i < 20; i++) { const b = mk("div", "s05-bolt", q(s)); b.style.left = 40 + i * 90 + "px"; } });
+
+          // output cards zooming along the belt
+          const cards = q("#s05-cards");
+          for (let i = 0; i < 7; i++) {
+            const box = i === 2 || i === 5;
+            const c = mk("div", "s05-card" + (box ? " s05-box" : ""), cards);
+            mk("div", "s05-trail", c);
+            const g2 = mk("div", "s05-cardface s05-ghost2", c); g2.style.left = "-150px"; g2.style.right = "150px";
+            const g1 = mk("div", "s05-cardface s05-ghost", c); g1.style.left = "-70px"; g1.style.right = "70px";
+            const f = mk("div", "s05-cardface", c);
+            if (box) { mk("div", "s05-tape", f); mk("div", "s05-tape2", f); mk("div", "s05-lbl", f); }
+            else { mk("div", "s05-hd", f); const d1 = mk("div", "s05-dt", f); d1.style.right = "14px"; const d2 = mk("div", "s05-dt", f); d2.style.right = "32px"; mk("div", "s05-th", f); mk("div", "s05-l1", f); mk("div", "s05-l2", f); if (i % 3 === 0) mk("div", "s05-ok", f); }
+            const x0 = 520 - i * 330;
+            tl.fromTo(c, { x: x0, rotation: (rnd() - 0.5) * 6 }, { x: x0 + SPEED * DUR, rotation: (rnd() - 0.5) * 4, duration: DUR, ease: "none" }, 0);
+          }
+          // far blurred cards (slower = parallax)
+          const farlane = q("#s05-farlane");
+          for (let i = 0; i < 6; i++) {
+            const c = mk("div", "s05-farcard", farlane); c.style.top = (i % 2 ? 60 : -40) + "px";
+            const x0 = 1500 - i * 300;
+            tl.fromTo(c, { x: x0 - 300 }, { x: x0 - 300 + 900, duration: DUR, ease: "none" }, 0);
+          }
+          // speed lines (back + front)
+          const mkLines = (lane, n, spread, len) => {
+            for (let i = 0; i < n; i++) {
+              const s = mk("div", "s05-speed" + (i % 3 === 0 ? " s05-w" : ""), q(lane));
+              const w = len * (0.5 + rnd());
+              s.style.width = w + "px"; s.style.top = (rnd() - 0.5) * spread + "px";
+              const x0 = -900 + rnd() * 2400;
+              tl.fromTo(s, { x: x0, opacity: 0.25 + rnd() * 0.6 }, { x: x0 + 3800 * DUR, duration: DUR, ease: "none" }, 0);
+            }
+          };
+          mkLines("#s05-speedback", 26, 1300, 420);
+          mkLines("#s05-speedfront", 9, 1500, 560);
+
+          // stopwatch ticks
+          const ticks = q("#s05-ticks");
+          for (let i = 0; i < 60; i++) {
+            const a = (i * 6 * Math.PI) / 180, major = i % 5 === 0;
+            const r1 = 226, r2 = major ? 196 : 212;
+            sv("line", { x1: 300 + r1 * Math.sin(a), y1: 400 - r1 * Math.cos(a), x2: 300 + r2 * Math.sin(a), y2: 400 - r2 * Math.cos(a), stroke: major ? "#294B77" : "#8FA9CC", "stroke-width": major ? 7 : 3, "stroke-linecap": "round" }, ticks);
+          }
+          const sub = q("#s05-subticks");
+          for (let i = 0; i < 12; i++) { const a = (i * 30 * Math.PI) / 180; sv("line", { x1: 300 + 44 * Math.sin(a), y1: 510 - 44 * Math.cos(a), x2: 300 + 36 * Math.sin(a), y2: 510 - 36 * Math.cos(a), stroke: "#8FA9CC", "stroke-width": 3 }, sub); }
+
+          // hand whips a full revolution, lands on "cepat" 0.59 with overshoot
+          const hand = q("#s05-hand");
+          tl.fromTo(hand, { rotation: 20, svgOrigin: "300 400" }, { rotation: 360, svgOrigin: "300 400", duration: 0.59, ease: "power1.in" }, 0);
+          tl.to(hand, { keyframes: [{ rotation: 368, duration: 0.05, ease: "power2.out" }, { rotation: 357, duration: 0.07, ease: "power2.inOut" }, { rotation: 360, duration: 0.08, ease: "power2.out" }], svgOrigin: "300 400" }, 0.59);
+          tl.fromTo("#s05-sweepwedge", { opacity: 0.55 }, { opacity: 1, duration: 0.5, ease: "power1.in" }, 0);
+          tl.to("#s05-sweepwedge", { opacity: 0, duration: 0.14, ease: "power2.out" }, 0.59);
+          tl.fromTo("#s05-subhand", { rotation: 0, svgOrigin: "300 510" }, { rotation: 1440, svgOrigin: "300 510", duration: DUR, ease: "power1.inOut" }, 0);
+          tl.fromTo("#s05-sub2", { rotation: 40, svgOrigin: "210 400" }, { rotation: 400, svgOrigin: "210 400", duration: DUR, ease: "none" }, 0);
+
+          // click: crown press + watch punch + shockwave
+          tl.fromTo("#s05-crown", { y: 0 }, { y: 12, duration: 0.06, ease: "power2.in" }, 0.53);
+          tl.to("#s05-crown", { y: 0, duration: 0.14, ease: "back.out(3)" }, 0.6);
+          const ww = q("#s05-watchwrap");
+          tl.set(ww, { transformOrigin: "50% 60%" }, 0);
+          tl.fromTo(ww, { scale: 0.94, rotation: -4, y: 30 }, { scale: 1, rotation: 0, y: 0, duration: 0.45, ease: "power3.out" }, 0);
+          tl.to(ww, { keyframes: [{ scale: 1.05, rotation: 1.5, duration: 0.05, ease: "power2.out" }, { scale: 0.99, rotation: -1, duration: 0.08 }, { scale: 1.0, rotation: 0, duration: 0.12, ease: "power2.out" }] }, 0.59);
+          tl.set("#s05-shock", { opacity: 0 }, 0);
+          tl.fromTo("#s05-shock", { attr: { r: 298 }, opacity: 0.95 }, { attr: { r: 400 }, opacity: 0, duration: 0.26, ease: "power2.out", immediateRender: false }, 0.59);
+          tl.to(stage, { keyframes: [{ x: 7, y: -4, duration: 0.03 }, { x: -6, y: 3, duration: 0.03 }, { x: 3, y: -1, duration: 0.03 }, { x: 0, y: 0, duration: 0.05 }] }, 0.59);
+
+          // lightning / spark accents
+          const bolts = q("#s05-bolts");
+          const BOLT = "M0 -26 L10 -4 L-2 -2 L8 26 L-12 -2 L0 -4 Z";
+          const mkBolt = (x, y, s, rot, t, col) => {
+            const g = sv("g", { transform: `translate(${x} ${y}) rotate(${rot})` }, bolts);
+            const glow = sv("path", { d: BOLT, fill: col, filter: "url(#s05-gl)", opacity: 0.9 }, g);
+            const p = sv("path", { d: BOLT, fill: col, stroke: "#FFFFFF", "stroke-width": 2.5, "stroke-linejoin": "round" }, g);
+            [glow, p].forEach((e) => {
+              tl.fromTo(e, { scale: 0, opacity: 0, transformOrigin: "50% 50%" }, { scale: s, opacity: 1, duration: 0.12, ease: "back.out(3)" }, t);
+              tl.to(e, { scale: s * 0.6, opacity: 0, duration: 0.16, ease: "power2.in" }, t + 0.2);
+            });
+          };
+          mkBolt(250, 560, 1.4, -14, 0.09, "#F2C46D");
+          mkBolt(860, 640, 1.1, 18, 0.12, "#ACC6E7");
+          mkBolt(800, 1180, 1.0, 22, 0.34, "#F2C46D");
+          [[170, 930, -30], [910, 930, 30], [130, 1260, -70], [960, 1280, 70], [230, 1520, -120], [860, 1530, 120]].forEach(([x, y, r], i) =>
+            mkBolt(x, y, 1.3 + (i % 2) * 0.3, r, 0.59 + i * 0.012, i % 2 ? "#F2C46D" : "#3A6299"));
+          // short spark dashes radiating from the watch on the click
+          for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 + 0.2;
+            const g = sv("g", { transform: `translate(${540 + Math.cos(a) * 335} ${1217 + Math.sin(a) * 335}) rotate(${(a * 180) / Math.PI})` }, bolts);
+            const l = sv("path", { d: "M0 0 H40", stroke: i % 3 ? "#ACC6E7" : "#F2C46D", "stroke-width": 7, "stroke-linecap": "round" }, g);
+            tl.fromTo(l, { x: -10, scaleX: 0.2, opacity: 0 }, { x: 30, scaleX: 1, opacity: 1, duration: 0.1, ease: "power3.out" }, 0.59);
+            tl.to(l, { x: 70, opacity: 0, duration: 0.16, ease: "power1.in" }, 0.7);
+          }
+
+          window.__timelines["s05"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

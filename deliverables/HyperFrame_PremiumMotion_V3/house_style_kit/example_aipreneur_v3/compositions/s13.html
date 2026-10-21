@@ -1,0 +1,364 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; overflow: hidden; }
+        /* ---------- far plane ---------- */
+        .s13-far { position: absolute; inset: 0; }
+        .s13-cone { position: absolute; top: -160px; width: 620px; height: 1800px; transform-origin: 50% 0%;
+          background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.8) 28%, rgba(232,240,251,0.35) 70%, rgba(255,255,255,0));
+          clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%); filter: blur(26px); }
+        .s13-reel { position: absolute; filter: blur(6px); }
+        .s13-halo { position: absolute; left: 40px; top: 400px; width: 1000px; height: 1000px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(232,240,251,0.5) 42%, rgba(232,240,251,0) 70%); }
+        .s13-bk { position: absolute; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(203,219,244,0.75) 45%, rgba(172,198,231,0.2) 75%, rgba(172,198,231,0)); }
+        /* ---------- camera ---------- */
+        .s13-cam { position: absolute; inset: 0; }
+        /* ---------- clapperboard ---------- */
+        .s13-board { position: absolute; left: 100px; top: 620px; width: 880px; height: 716px; }
+        .s13-rays { position: absolute; left: -360px; top: -330px; width: 1600px; height: 1600px; border-radius: 50%;
+          background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.95) 0deg 5deg, rgba(203,219,244,0.0) 5deg 15deg);
+          -webkit-mask-image: radial-gradient(circle, #000 12%, rgba(0,0,0,0.6) 30%, transparent 62%); mask-image: radial-gradient(circle, #000 12%, rgba(0,0,0,0.6) 30%, transparent 62%); }
+        .s13-raysb { position: absolute; left: -160px; top: -130px; width: 1200px; height: 1200px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,1), rgba(232,240,251,0.8) 25%, rgba(242,196,109,0.16) 45%, rgba(255,255,255,0) 66%); }
+        .s13-contact { position: absolute; left: 40px; top: 690px; width: 800px; height: 80px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(28,51,84,0.42), rgba(28,51,84,0.13) 45%, rgba(28,51,84,0) 72%); }
+        .s13-stick { position: absolute; left: 0; width: 880px; height: 96px; border-radius: 14px; overflow: hidden;
+          box-shadow: inset 0 3px 0 rgba(255,255,255,0.55), inset 0 -4px 0 rgba(0,0,0,0.18), 0 16px 26px -12px rgba(28,51,84,0.5), 0 4px 8px rgba(28,51,84,0.18); }
+        .s13-stick.s13-top { top: 0; background: repeating-linear-gradient(62deg, #fbfcfe 0 52px, #26364d 52px 104px); }
+        .s13-stick.s13-bot { top: 104px; background: repeating-linear-gradient(118deg, #fbfcfe 0 52px, #26364d 52px 104px); }
+        .s13-stick-gloss { position: absolute; left: 0; right: 0; top: 0; height: 44%; background: linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0)); }
+        .s13-stick-edge { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; background: linear-gradient(180deg, rgba(28,51,84,0), rgba(28,51,84,0.25)); }
+        .s13-hinge { position: absolute; left: -6px; top: 58px; width: 92px; height: 96px; border-radius: 18px;
+          background: linear-gradient(160deg, #f4f7fb, #cbd6e6 60%, #9fb2cc); box-shadow: inset 0 2px 0 #fff, 0 10px 18px -6px rgba(28,51,84,0.5); }
+        .s13-screw { position: absolute; width: 26px; height: 26px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #ffffff, #d5deea 50%, #8396b1); box-shadow: 0 2px 3px rgba(28,51,84,0.4), inset 0 -2px 3px rgba(28,51,84,0.3); }
+        .s13-screw::after { content: ""; position: absolute; left: 5px; top: 11.5px; width: 16px; height: 3px; border-radius: 2px; background: rgba(28,51,84,0.55); transform: rotate(-35deg); }
+        .s13-body { position: absolute; left: 0; top: 196px; width: 880px; height: 520px; border-radius: 30px;
+          background: linear-gradient(170deg, #ffffff, #f3f6fb 55%, #e4ebf5);
+          border: 2px solid rgba(41,75,119,0.10);
+          box-shadow: inset 0 3px 0 #ffffff, inset 0 -6px 14px rgba(41,75,119,0.12), 0 50px 80px -30px rgba(28,51,84,0.5), 0 14px 26px rgba(28,51,84,0.14); }
+        .s13-face { position: absolute; left: 30px; top: 26px; right: 30px; bottom: 30px; border-radius: 18px;
+          background: linear-gradient(175deg, #fbfcfe, #f1f5fb); box-shadow: inset 0 2px 6px rgba(28,51,84,0.12), inset 0 -2px 0 #ffffff; overflow: hidden; }
+        .s13-facehl { position: absolute; left: -140px; top: -200px; width: 640px; height: 420px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,1), rgba(255,255,255,0) 70%); }
+        .s13-logo { position: absolute; left: 44px; top: 40px; width: 720px; }
+        .s13-titleph { position: absolute; left: 44px; top: 58px; width: 720px; height: 70px; border-radius: 12px;
+          background: repeating-linear-gradient(90deg, rgba(41,75,119,0.08) 0 22px, transparent 22px 34px); }
+        .s13-rule { position: absolute; left: 0; right: 0; height: 3px; background: #294b77; opacity: 0.85; }
+        .s13-vrule { position: absolute; width: 3px; background: #294b77; opacity: 0.85; }
+        .s13-lab { position: absolute; height: 9px; border-radius: 5px; background: #acc6e7; }
+        .s13-chalk { position: absolute; height: 16px; border-radius: 8px; background: #3a6299; opacity: 0.8; }
+        .s13-chalk.s13-lt { background: #cbdbf4; opacity: 1; }
+        .s13-sweep { position: absolute; left: 0; top: -150px; width: 200px; height: 900px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.75) 50%, rgba(255,255,255,0)); }
+        .s13-lip { position: absolute; left: 60px; right: 60px; bottom: -14px; height: 22px; border-radius: 0 0 14px 14px;
+          background: linear-gradient(180deg, #dfe7f2, #b9c8dd); box-shadow: 0 8px 14px -6px rgba(28,51,84,0.4); }
+        /* fx */
+        .s13-shock { position: absolute; left: 290px; top: 828px; width: 500px; height: 500px; border-radius: 50%;
+          border: 8px solid rgba(255,255,255,0.95); box-shadow: 0 0 30px rgba(172,198,231,0.9), inset 0 0 30px rgba(172,198,231,0.7); }
+        .s13-shock2 { border-width: 3px; border-color: rgba(58,98,153,0.55); }
+        .s13-dust { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle, #ffffff, rgba(203,219,244,0.9) 60%, rgba(203,219,244,0)); }
+        /* ---------- director console ---------- */
+        .s13-console { position: absolute; left: 90px; top: 1020px; width: 900px; height: 470px; border-radius: 34px;
+          background: linear-gradient(170deg, rgba(255,255,255,0.97), rgba(232,240,251,0.94) 60%, rgba(214,228,247,0.92));
+          border: 2px solid rgba(255,255,255,0.98);
+          box-shadow: inset 0 0 40px rgba(255,255,255,0.85), inset 0 -8px 20px rgba(172,198,231,0.4), 0 44px 80px -30px rgba(28,51,84,0.45), 0 10px 22px rgba(28,51,84,0.12); }
+        .s13-cgrid { position: absolute; left: 30px; right: 30px; top: 62px; bottom: 18px; border-radius: 20px;
+          background: repeating-linear-gradient(90deg, rgba(41,75,119,0.06) 0 1px, transparent 1px 28px), repeating-linear-gradient(0deg, rgba(41,75,119,0.06) 0 1px, transparent 1px 28px);
+          border: 1.5px dashed rgba(41,75,119,0.18); }
+        .s13-cdot { position: absolute; top: 24px; width: 14px; height: 14px; border-radius: 50%; }
+        .s13-cbar { position: absolute; top: 28px; height: 6px; border-radius: 3px; background: rgba(41,75,119,0.16); }
+        .s13-knob { position: absolute; top: 18px; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #cbdbf4 60%, #8eabd4); box-shadow: 0 3px 6px rgba(28,51,84,0.35); }
+        .s13-slot { position: absolute; width: 262px; height: 178px; border-radius: 18px; border: 2px dashed rgba(41,75,119,0.16); }
+        .s13-card { position: absolute; width: 262px; height: 178px; border-radius: 18px;
+          background: linear-gradient(175deg, #ffffff, #f2f6fb); border: 2px solid rgba(41,75,119,0.10);
+          box-shadow: inset 0 2px 0 #fff, 0 22px 34px -16px rgba(28,51,84,0.42), 0 5px 12px rgba(28,51,84,0.10); overflow: hidden; }
+        .s13-chd { position: absolute; left: 14px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: #acc6e7; box-shadow: 12px 0 0 #cbdbf4, 24px 0 0 #e8f0fb; }
+        .s13-cln { position: absolute; height: 8px; border-radius: 4px; background: #d5deea; }
+        .s13-cmint { position: absolute; inset: 0; border-radius: 16px; border: 3px solid #9fd8c4; box-shadow: inset 0 0 22px rgba(159,216,196,0.55); }
+        .s13-lockglow { position: absolute; left: 80px; top: 1010px; width: 920px; height: 490px; border-radius: 40px;
+          border: 4px solid rgba(159,216,196,0.95); box-shadow: 0 0 40px rgba(159,216,196,0.8), inset 0 0 40px rgba(159,216,196,0.45); }
+        .s13-check { position: absolute; left: 912px; top: 984px; width: 92px; height: 92px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #d9f3ea, #9fd8c4 60%, #6fbfa5); border: 4px solid #ffffff;
+          box-shadow: 0 14px 26px -8px rgba(28,51,84,0.45), 0 0 30px rgba(159,216,196,0.9); }
+        .s13-check svg { position: absolute; left: 18px; top: 20px; width: 48px; height: 44px; overflow: visible; }
+        .s13-cursor { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+        .s13-cursor svg { position: absolute; left: -6px; top: -4px; width: 64px; height: 78px; overflow: visible; filter: drop-shadow(0 8px 10px rgba(28,51,84,0.35)); }
+        .s13-tap { position: absolute; left: -30px; top: -30px; width: 60px; height: 60px; border-radius: 50%; border: 3px solid rgba(41,75,119,0.6); }
+      </style>
+      <div id="root" data-composition-id="s13" data-width="1080" data-height="1920">
+        <div class="s13-far">
+          <div class="s13-cone" id="s13-coneL" style="left:-250px"></div>
+          <div class="s13-cone" id="s13-coneR" style="left:700px"></div>
+          <div class="s13-halo" id="s13-halo"></div>
+          <svg class="s13-reel" id="s13-reel1" style="left:-70px;top:440px;width:260px;height:260px;opacity:0.5" viewBox="-50 -50 100 100">
+            <circle r="48" fill="#cbdbf4" stroke="#acc6e7" stroke-width="3" />
+            <circle r="9" fill="#fbfcfe" /><circle cx="0" cy="-26" r="11" fill="#fbfcfe" /><circle cx="24.7" cy="-8" r="11" fill="#fbfcfe" /><circle cx="15.3" cy="21" r="11" fill="#fbfcfe" /><circle cx="-15.3" cy="21" r="11" fill="#fbfcfe" /><circle cx="-24.7" cy="-8" r="11" fill="#fbfcfe" />
+          </svg>
+          <svg class="s13-reel" id="s13-reel2" style="left:870px;top:1300px;width:200px;height:200px;opacity:0.45" viewBox="-50 -50 100 100">
+            <circle r="48" fill="#cbdbf4" stroke="#acc6e7" stroke-width="3" />
+            <circle r="9" fill="#fbfcfe" /><circle cx="0" cy="-26" r="11" fill="#fbfcfe" /><circle cx="24.7" cy="-8" r="11" fill="#fbfcfe" /><circle cx="15.3" cy="21" r="11" fill="#fbfcfe" /><circle cx="-15.3" cy="21" r="11" fill="#fbfcfe" /><circle cx="-24.7" cy="-8" r="11" fill="#fbfcfe" />
+          </svg>
+          <div class="s13-bk" id="s13-bk1" style="left:880px;top:450px;width:90px;height:90px;filter:blur(6px);opacity:0.7"></div>
+          <div class="s13-bk" id="s13-bk2" style="left:60px;top:1340px;width:110px;height:110px;filter:blur(8px);opacity:0.6"></div>
+        </div>
+
+        <div class="s13-cam" id="s13-cam">
+          <!-- director console (appears on "mengarahkan") -->
+          <div class="s13-lockglow" id="s13-lockglow"></div>
+          <div class="s13-console" id="s13-console">
+            <div class="s13-cdot" style="left:30px;background:#acc6e7"></div>
+            <div class="s13-cdot" style="left:52px;background:#cbdbf4"></div>
+            <div class="s13-cdot" style="left:74px;background:#9fd8c4"></div>
+            <div class="s13-cbar" style="left:110px;width:140px"></div>
+            <div class="s13-cbar" style="left:262px;width:70px"></div>
+            <div class="s13-cbar" style="left:560px;width:150px;background:rgba(41,75,119,0.1)"></div>
+            <div class="s13-knob" id="s13-knob" style="left:600px"></div>
+            <div class="s13-knob" style="left:760px"></div>
+            <div class="s13-knob" style="left:800px"></div>
+            <div class="s13-knob" style="left:840px"></div>
+            <div class="s13-cgrid"></div>
+            <div id="s13-slots"></div>
+          </div>
+          <div id="s13-cards"></div>
+          <div class="s13-check" id="s13-check">
+            <svg viewBox="0 0 48 44"><path id="s13-checkp" d="M4 24 L18 38 L44 6" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </div>
+
+          <div class="s13-shock" id="s13-shock"></div>
+          <div class="s13-shock s13-shock2" id="s13-shock2"></div>
+          <!-- clapperboard -->
+          <div class="s13-board" id="s13-board">
+            <div class="s13-raysb" id="s13-raysb"></div>
+            <div class="s13-rays" id="s13-rays"></div>
+            <div class="s13-contact" id="s13-contact"></div>
+            <div class="s13-body">
+              <div class="s13-face">
+                <div class="s13-facehl"></div>
+                <div class="s13-titleph" id="s13-titleph"></div>
+                <img class="s13-logo" id="s13-logo" src="assets/brand/ai_preneur_logo_trimmed.png" alt="" />
+                <div class="s13-rule" style="top:168px"></div>
+                <div class="s13-rule" style="top:268px"></div>
+                <div class="s13-rule" style="top:362px"></div>
+                <div class="s13-vrule" style="left:270px;top:168px;height:100px"></div>
+                <div class="s13-vrule" style="left:540px;top:168px;height:100px"></div>
+                <div class="s13-vrule" style="left:410px;top:268px;height:94px"></div>
+                <div class="s13-vrule" style="left:205px;top:362px;height:120px"></div>
+                <div class="s13-vrule" style="left:410px;top:362px;height:120px"></div>
+                <div class="s13-vrule" style="left:615px;top:362px;height:120px"></div>
+                <div class="s13-lab" style="left:22px;top:186px;width:70px"></div>
+                <div class="s13-chalk" style="left:22px;top:222px;width:180px"></div>
+                <div class="s13-lab" style="left:292px;top:186px;width:56px"></div>
+                <div class="s13-chalk" style="left:292px;top:222px;width:120px"></div>
+                <div class="s13-chalk s13-lt" style="left:426px;top:222px;width:60px"></div>
+                <div class="s13-lab" style="left:562px;top:186px;width:84px"></div>
+                <div class="s13-chalk" style="left:562px;top:222px;width:150px"></div>
+                <div class="s13-lab" style="left:22px;top:284px;width:60px"></div>
+                <div class="s13-chalk" style="left:22px;top:318px;width:300px"></div>
+                <div class="s13-lab" style="left:432px;top:284px;width:60px"></div>
+                <div class="s13-chalk s13-lt" style="left:432px;top:318px;width:250px"></div>
+                <div class="s13-lab" style="left:22px;top:380px;width:50px"></div>
+                <div class="s13-chalk" style="left:22px;top:414px;width:140px"></div>
+                <div class="s13-lab" style="left:227px;top:380px;width:50px"></div>
+                <div class="s13-chalk s13-lt" style="left:227px;top:414px;width:120px"></div>
+                <div class="s13-lab" style="left:432px;top:380px;width:50px"></div>
+                <div class="s13-chalk" style="left:432px;top:414px;width:100px"></div>
+                <div class="s13-lab" style="left:637px;top:380px;width:50px"></div>
+                <div class="s13-chalk s13-lt" style="left:637px;top:414px;width:130px"></div>
+                <div class="s13-sweep" id="s13-sweep"></div>
+              </div>
+              <div class="s13-screw" style="left:10px;top:10px"></div>
+              <div class="s13-screw" style="right:10px;top:10px"></div>
+              <div class="s13-screw" style="left:10px;bottom:10px"></div>
+              <div class="s13-screw" style="right:10px;bottom:10px"></div>
+              <div class="s13-lip"></div>
+            </div>
+            <div class="s13-stick s13-bot"><div class="s13-stick-gloss"></div><div class="s13-stick-edge"></div></div>
+            <div class="s13-stick s13-top" id="s13-stickT"><div class="s13-stick-gloss"></div><div class="s13-stick-edge"></div></div>
+            <div class="s13-hinge"><div class="s13-screw" style="left:33px;top:14px"></div><div class="s13-screw" style="left:33px;top:56px"></div></div>
+          </div>
+
+          <div id="s13-dusts"></div>
+          <div class="s13-cursor" id="s13-cursor">
+            <div class="s13-tap" id="s13-tap"></div>
+            <svg viewBox="0 0 64 78"><path d="M6 4 L6 62 L20 49 L30 72 L41 67 L31 45 L50 45 Z" fill="#294b77" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" /></svg>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const R = document.querySelector('[data-composition-id="s13"]');
+          const q = (s) => R.querySelector(s), qa = (s) => R.querySelectorAll(s);
+          const tl = gsap.timeline({ paused: true });
+          const mk = (tag, cls, parent, css) => { const e = document.createElement(tag); if (cls) e.className = cls; if (css) e.style.cssText = css; parent.appendChild(e); return e; };
+          let seed = 1313;
+          const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+          const DUR = 3.05;
+          const T = { dan: 0.18, inilah: 0.38, cara: 0.86, brand: 1.21, arah: 1.89, ai: 2.53 };
+
+          // ---------- clapperboard entrance ----------
+          const board = q("#s13-board"), stick = q("#s13-stickT"), cam = q("#s13-cam");
+          tl.set(board, { y: 80, scale: 0.95, transformOrigin: "440px 0px" }, 0);
+          tl.to(board, { y: 0, scale: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.set(stick, { rotation: 0, transformOrigin: "40px 90px" }, 0);
+          // inilah: stick lifts open
+          tl.to(stick, { rotation: -12, duration: 0.3, ease: "power3.out" }, T.inilah);
+          // cara: pull back further (anticipation)
+          tl.to(stick, { rotation: -16, duration: 0.27, ease: "sine.out" }, T.cara);
+          // AI PRENEUR: snap shut + small bounce
+          tl.to(stick, { rotation: 0, duration: 0.08, ease: "power4.in" }, T.brand - 0.08);
+          tl.to(stick, { rotation: -3, duration: 0.05, ease: "power2.out" }, T.brand);
+          tl.to(stick, { rotation: 0, duration: 0.14, ease: "power2.in" }, T.brand + 0.05);
+          tl.to(board, { y: 10, duration: 0.04, ease: "power2.out" }, T.brand);
+          tl.to(board, { y: 0, duration: 0.28, ease: "back.out(3)" }, T.brand + 0.04);
+
+          // title: placeholder → genuine logo stamps in on the snap
+          const logo = q("#s13-logo"), ph = q("#s13-titleph");
+          tl.set(logo, { opacity: 0, scale: 1.12, transformOrigin: "50% 50%" }, 0);
+          tl.to(logo, { opacity: 1, scale: 1, duration: 0.16, ease: "power3.out" }, T.brand - 0.02);
+          tl.to(ph, { opacity: 0, duration: 0.08, ease: "none" }, T.brand - 0.02);
+          tl.fromTo(q("#s13-sweep"), { x: -260, rotation: 16 }, { x: 900, rotation: 16, duration: 0.6, ease: "power2.inOut" }, T.brand + 0.08);
+
+          // spotlight beams flare from behind
+          const rays = q("#s13-rays"), raysb = q("#s13-raysb");
+          tl.set(rays, { opacity: 0, scale: 0.6, rotation: 0 }, 0);
+          tl.set(raysb, { opacity: 0.25, scale: 0.7 }, 0);
+          tl.to(raysb, { opacity: 0.45, scale: 0.8, duration: 0.35, ease: "sine.out" }, T.cara);
+          tl.to(rays, { opacity: 0.18, scale: 0.75, duration: 0.35, ease: "sine.out" }, T.cara);
+          tl.to(rays, { opacity: 1, scale: 1.08, duration: 0.18, ease: "power3.out" }, T.brand);
+          tl.to(raysb, { opacity: 1, scale: 1.05, duration: 0.18, ease: "power3.out" }, T.brand);
+          tl.to(rays, { opacity: 0.55, scale: 1, duration: 0.6, ease: "power2.out" }, T.brand + 0.2);
+          tl.to(raysb, { opacity: 0.75, duration: 0.6, ease: "power2.out" }, T.brand + 0.2);
+          tl.to(rays, { rotation: 14, duration: DUR, ease: "none" }, 0);
+
+          // shockwave rings + chalk dust
+          [["#s13-shock", 0, 2.5], ["#s13-shock2", 0.06, 2.1]].forEach(([s, d, sc]) => {
+            const e = q(s);
+            tl.set(e, { scale: 0.3, opacity: 0 }, 0);
+            tl.to(e, { opacity: 1, duration: 0.03, ease: "none" }, T.brand + d);
+            tl.to(e, { scale: sc, duration: 0.5, ease: "power3.out" }, T.brand + d);
+            tl.to(e, { opacity: 0, duration: 0.35, ease: "power2.in" }, T.brand + d + 0.15);
+          });
+          const dusts = q("#s13-dusts");
+          for (let i = 0; i < 18; i++) {
+            const x0 = 160 + rnd() * 820, y0 = 720;
+            const d = mk("div", "s13-dust", dusts, "left:" + x0 + "px;top:" + y0 + "px");
+            const sz = 0.6 + rnd() * 1.4;
+            tl.set(d, { opacity: 0, scale: sz }, 0);
+            tl.to(d, { opacity: 1, duration: 0.03, ease: "none" }, T.brand);
+            tl.to(d, { x: (rnd() - 0.5) * 220, y: -40 - rnd() * 160, duration: 0.6, ease: "power3.out" }, T.brand);
+            tl.to(d, { opacity: 0, duration: 0.3, ease: "power1.in" }, T.brand + 0.3 + rnd() * 0.2);
+          }
+
+          // camera: drift + micro push on the snap, release for the console
+          tl.set(cam, { scale: 1, y: 0, transformOrigin: "540px 960px" }, 0);
+          tl.to(cam, { scale: 1.015, duration: T.brand, ease: "sine.inOut" }, 0);
+          tl.to(cam, { scale: 1.05, duration: 0.22, ease: "power3.out" }, T.brand);
+          tl.to(cam, { scale: 1.03, duration: 0.45, ease: "sine.inOut" }, T.brand + 0.22);
+          tl.to(cam, { scale: 1, duration: 0.4, ease: "power3.inOut" }, T.arah);
+          tl.to(cam, { scale: 1.02, duration: DUR - T.arah - 0.4, ease: "sine.inOut" }, T.arah + 0.4);
+
+          // mengarahkan: board rises & scales to make room for the director console
+          tl.to(board, { y: -210, scale: 0.82, duration: 0.42, ease: "power3.inOut" }, T.arah - 0.04);
+          tl.to(board, { y: -218, duration: DUR - T.arah - 0.38, ease: "sine.inOut" }, T.arah + 0.38);
+          tl.to(q("#s13-contact"), { opacity: 0.4, duration: 0.4, ease: "power2.out" }, T.arah);
+
+          // ---------- director console ----------
+          const con = q("#s13-console");
+          tl.set(con, { y: 140, opacity: 0, scale: 0.94, transformOrigin: "50% 0%" }, 0);
+          tl.to(con, { y: 0, opacity: 1, scale: 1, duration: 0.36, ease: "power3.out" }, T.arah);
+          tl.fromTo(q("#s13-knob"), { x: 0 }, { x: 110, duration: 0.6, ease: "power2.inOut" }, T.arah + 0.2);
+          const CX = 90, CY = 1020, OX = 37, OY = 72, CW = 262, CH = 178, G = 20;
+          const slots = q("#s13-slots"), cards = q("#s13-cards");
+          const order = [0, 1, 2, 5, 4, 3]; // snake path for the cursor
+          const content = [
+            // 1 frame / image
+            '<div class="s13-chd"></div><svg style="position:absolute;left:14px;top:32px" width="234" height="132" viewBox="0 0 234 132"><defs><linearGradient id="s13-g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f0fb"/><stop offset="1" stop-color="#cbdbf4"/></linearGradient></defs><rect width="234" height="132" rx="10" fill="url(#s13-g1)"/><circle cx="178" cy="36" r="16" fill="#f2c46d" opacity="0.8"/><path d="M0 132 L70 56 L120 104 L156 74 L234 132 Z" fill="#3a6299"/><path d="M60 132 L120 84 L180 132 Z" fill="#294b77"/></svg>',
+            // 2 waveform
+            '<div class="s13-chd"></div><svg style="position:absolute;left:18px;top:44px" width="226" height="110" viewBox="0 0 226 110">' + Array.from({ length: 28 }, (_, i) => { const h = 14 + Math.abs(Math.sin(i * 0.9) * 70) + (i % 3) * 6; return '<rect x="' + (i * 8) + '" y="' + (55 - h / 2) + '" width="5" height="' + h + '" rx="2.5" fill="' + (i < 15 ? '#294b77' : '#acc6e7') + '"/>'; }).join("") + '</svg>',
+            // 3 swatches
+            '<div class="s13-chd"></div><div style="position:absolute;left:16px;top:48px;display:flex;gap:10px"><i style="width:48px;height:48px;border-radius:50%;background:#294b77;box-shadow:0 4px 8px rgba(28,51,84,.3)"></i><i style="width:48px;height:48px;border-radius:50%;background:#acc6e7"></i><i style="width:48px;height:48px;border-radius:50%;background:#9fd8c4"></i><i style="width:48px;height:48px;border-radius:50%;background:#f2c46d"></i></div><div class="s13-cln" style="left:16px;top:120px;width:200px"></div><div class="s13-cln" style="left:16px;top:140px;width:130px"></div>',
+            // 4 mini timeline
+            '<div class="s13-chd"></div><div class="s13-cln" style="left:16px;top:52px;width:228px;background:#3a6299;height:12px;border-radius:6px"></div><div class="s13-cln" style="left:60px;top:80px;width:150px;background:#acc6e7;height:12px;border-radius:6px"></div><div class="s13-cln" style="left:30px;top:108px;width:110px;background:#cbdbf4;height:12px;border-radius:6px"></div><i style="position:absolute;left:150px;top:44px;width:3px;height:110px;background:#294b77;border-radius:2px"></i><i style="position:absolute;left:94px;top:136px;width:14px;height:14px;background:#294b77;transform:rotate(45deg);border-radius:3px"></i><i style="position:absolute;left:190px;top:136px;width:14px;height:14px;background:#fbfcfe;border:2.5px solid #294b77;transform:rotate(45deg);border-radius:3px"></i>',
+            // 5 play / progress
+            '<div class="s13-chd"></div><div style="position:absolute;left:96px;top:40px;width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#3a6299,#1f3a5f);box-shadow:0 8px 14px -4px rgba(28,51,84,.5)"><i style="position:absolute;left:27px;top:20px;width:0;height:0;border-left:24px solid #fbfcfe;border-top:15px solid transparent;border-bottom:15px solid transparent"></i></div><div class="s13-cln" style="left:16px;top:134px;width:228px"></div><div class="s13-cln" style="left:16px;top:134px;width:140px;background:#294b77"></div><i style="position:absolute;left:150px;top:128px;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #294b77"></i>',
+            // 6 layout grid
+            '<div class="s13-chd"></div><div style="position:absolute;left:16px;top:36px;width:230px;height:126px;display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr;gap:8px"><i style="grid-row:span 2;border-radius:10px;background:linear-gradient(160deg,#cbdbf4,#acc6e7)"></i><i style="border-radius:10px;background:#e8f0fb;border:2px solid #cbdbf4"></i><i style="border-radius:10px;background:#294b77;opacity:.85"></i></div>',
+          ];
+          const LAND0 = 2.12, STEP = 0.07;
+          const cursor = q("#s13-cursor"), tap = q("#s13-tap");
+          tl.set(cursor, { x: 1000, y: 1560, opacity: 0, scale: 1 }, 0);
+          tl.set(tap, { scale: 0.3, opacity: 0 }, 0);
+          tl.to(cursor, { opacity: 1, duration: 0.12, ease: "none" }, T.arah + 0.08);
+          const cardEls = [];
+          order.forEach((slotIdx, k) => {
+            const col = slotIdx % 3, row = Math.floor(slotIdx / 3);
+            const lx = OX + col * (CW + G), ly = OY + row * (CH + G);
+            mk("div", "s13-slot", slots, "left:" + lx + "px;top:" + ly + "px");
+            const c = mk("div", "s13-card", cards, "left:" + (CX + lx) + "px;top:" + (CY + ly) + "px");
+            c.innerHTML = content[slotIdx] + '<div class="s13-cmint"></div>';
+            cardEls.push(c);
+            const land = LAND0 + k * STEP;
+            const ang = -2.4 + k * 0.95;
+            const fx = Math.cos(ang) * 520 + (rnd() - 0.5) * 80, fy = -120 + Math.sin(ang) * 260 + (rnd() - 0.5) * 60;
+            tl.set(c, { x: fx, y: fy, rotation: (rnd() - 0.5) * 50, scale: 0.72, opacity: 0 }, 0);
+            tl.to(c, { opacity: 1, duration: 0.08, ease: "none" }, land - 0.3);
+            tl.to(c, { x: 0, y: 0, rotation: 0, scale: 1.05, duration: 0.28, ease: "power3.out" }, land - 0.3);
+            tl.to(c, { scale: 1, duration: 0.16, ease: "back.out(3)" }, land - 0.02);
+            tl.set(c.querySelector(".s13-cmint"), { opacity: 0 }, 0);
+            // the cursor directs each card into its slot
+            const px = CX + lx + CW * 0.62, py = CY + ly + CH * 0.58;
+            tl.to(cursor, { x: px, y: py, duration: k === 0 ? 0.2 : STEP, ease: k === 0 ? "power3.out" : "power1.inOut" }, land - (k === 0 ? 0.2 : STEP));
+            tl.to(cursor, { scale: 0.86, duration: 0.03, ease: "none" }, land - 0.01);
+            tl.to(cursor, { scale: 1, duration: 0.05, ease: "power2.out" }, land + 0.02);
+          });
+          // tap ripples
+          cardEls.forEach((c, k) => {
+            const t = LAND0 + k * STEP;
+            const tp = k === 0 ? tap : mk("div", "s13-tap", cursor);
+            tl.set(tp, { scale: 0.3, opacity: 0 }, 0);
+            tl.to(tp, { opacity: 1, duration: 0.02, ease: "none" }, t);
+            tl.to(tp, { scale: 1.6, duration: 0.25, ease: "power2.out" }, t);
+            tl.to(tp, { opacity: 0, duration: 0.18, ease: "power1.in" }, t + 0.08);
+          });
+          // cursor glides away after the grid locks
+          tl.to(cursor, { x: 960, y: 1440, duration: 0.35, ease: "power2.inOut" }, T.ai + 0.05);
+          tl.to(cursor, { opacity: 0, duration: 0.2, ease: "none" }, T.ai + 0.3);
+
+          // AI.: grid locks with mint check glow
+          const lg = q("#s13-lockglow"), chk = q("#s13-check"), chp = q("#s13-checkp");
+          tl.set(lg, { opacity: 0, scale: 1.03 }, 0);
+          tl.to(lg, { opacity: 1, scale: 1, duration: 0.18, ease: "power3.out" }, T.ai);
+          tl.to(lg, { opacity: 0.55, duration: 0.3, ease: "sine.inOut" }, T.ai + 0.25);
+          tl.set(chk, { scale: 0, rotation: -40, opacity: 0 }, 0);
+          tl.to(chk, { scale: 1, rotation: 0, opacity: 1, duration: 0.3, ease: "back.out(2.2)" }, T.ai);
+          tl.set(chp, { strokeDasharray: 70, strokeDashoffset: 70 }, 0);
+          tl.to(chp, { strokeDashoffset: 0, duration: 0.22, ease: "power2.out" }, T.ai + 0.08);
+          cardEls.forEach((c, k) => {
+            const m = c.querySelector(".s13-cmint");
+            tl.to(m, { opacity: 1, duration: 0.1, ease: "none" }, T.ai + k * 0.025);
+            tl.to(m, { opacity: 0.35, duration: 0.3, ease: "sine.inOut" }, T.ai + 0.15 + k * 0.025);
+          });
+          tl.to(con, { scale: 1.012, duration: 0.1, ease: "power2.out" }, T.ai);
+          tl.to(con, { scale: 1, duration: 0.25, ease: "back.out(2)" }, T.ai + 0.1);
+
+          // ---------- far plane ambience ----------
+          tl.set(q("#s13-coneL"), { rotation: -26, opacity: 0.6 }, 0);
+          tl.set(q("#s13-coneR"), { rotation: 26, opacity: 0.45 }, 0);
+          tl.to(q("#s13-coneL"), { rotation: -20, opacity: 0.85, duration: DUR, ease: "sine.inOut" }, 0);
+          tl.to(q("#s13-coneR"), { rotation: 21, opacity: 0.7, duration: DUR, ease: "sine.inOut" }, 0);
+          tl.fromTo(q("#s13-reel1"), { rotation: 0, x: 0 }, { rotation: 70, x: 30, duration: DUR, ease: "none" }, 0);
+          tl.fromTo(q("#s13-reel2"), { rotation: 0, y: 0 }, { rotation: -60, y: -40, duration: DUR, ease: "none" }, 0);
+          tl.fromTo(q("#s13-bk1"), { x: 0, y: 0 }, { x: -40, y: 30, duration: DUR, ease: "none" }, 0);
+          tl.fromTo(q("#s13-bk2"), { x: 0, y: 0 }, { x: 50, y: -40, duration: DUR, ease: "none" }, 0);
+          tl.set(q("#s13-halo"), { opacity: 0.7, scale: 0.92 }, 0);
+          tl.to(q("#s13-halo"), { opacity: 1, scale: 1.04, duration: 0.3, ease: "power2.out" }, T.brand);
+
+          window.__timelines["s13"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

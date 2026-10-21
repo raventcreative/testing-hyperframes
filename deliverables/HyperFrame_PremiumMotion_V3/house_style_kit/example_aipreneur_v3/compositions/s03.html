@@ -1,0 +1,333 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; overflow: hidden; }
+        .s03-far { position: absolute; inset: 0; filter: blur(4px); }
+        .s03-fchip { position: absolute; border-radius: 16px; background: linear-gradient(150deg, #ffffff, #cbdbf4); box-shadow: 0 20px 30px -12px rgba(28,51,84,0.35); }
+        .s03-fchip::before { content: ""; position: absolute; inset: 22%; border-radius: 8px; background: linear-gradient(150deg, #e8f0fb, #acc6e7); }
+        .s03-spot { position: absolute; left: 40px; top: 420px; width: 1000px; height: 1100px; border-radius: 50%;
+          background: radial-gradient(ellipse at 50% 46%, rgba(255,255,255,0.9), rgba(232,240,251,0.5) 38%, rgba(232,240,251,0) 66%); }
+        .s03-floor { position: absolute; left: 60px; top: 1360px; width: 960px; height: 200px; border-radius: 50%; background: radial-gradient(ellipse, rgba(28,51,84,0.34), rgba(28,51,84,0.10) 50%, rgba(28,51,84,0) 72%); }
+        .s03-stage { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% 32%; }
+        .s03-cam { position: absolute; inset: 0; transform-style: preserve-3d; }
+        .s03-board { position: absolute; left: 130px; top: 560px; width: 820px; height: 820px; transform-style: preserve-3d; }
+        .s03-bshadow { position: absolute; inset: 20px; border-radius: 60px; background: rgba(28,51,84,0.42); filter: blur(34px); transform: translate3d(34px, 46px, -60px); }
+        .s03-slab { position: absolute; inset: 0; border-radius: 34px;
+          background: radial-gradient(ellipse at 28% 18%, #ffffff 0%, rgba(255,255,255,0) 55%), linear-gradient(150deg, #fbfcfe 0%, #e8f0fb 55%, #d5e2f4 100%);
+          box-shadow: inset 0 0 0 2px rgba(255,255,255,0.95), inset 0 0 0 14px rgba(203,219,244,0.35), inset 0 0 0 16px rgba(41,75,119,0.08); }
+        .s03-gridp { position: absolute; inset: 30px; border-radius: 20px; opacity: 0.6;
+          background: radial-gradient(circle, rgba(41,75,119,0.18) 1.6px, rgba(0,0,0,0) 2.2px) 0 0 / 28px 28px; }
+        .s03-wall { position: absolute; background: linear-gradient(180deg, #c3d3e8, #93aacb); }
+        .s03-wall-s { left: 28px; top: 820px; width: 764px; height: 30px; transform-origin: 50% 0; transform: rotateX(-90deg); }
+        .s03-wall-e { left: 820px; top: 28px; width: 30px; height: 764px; transform-origin: 0 50%; transform: rotateY(90deg); background: linear-gradient(90deg, #aebfd6, #8399ba); }
+        .s03-wall-w { left: -30px; top: 28px; width: 30px; height: 764px; transform-origin: 100% 50%; transform: rotateY(-90deg); background: linear-gradient(90deg, #e3ebf6, #c8d6ea); }
+        .s03-svg { position: absolute; left: 0; top: 0; width: 820px; height: 820px; overflow: visible; transform: translateZ(1px); }
+        .s03-glowsvg { filter: blur(7px); }
+        .s03-comp { position: absolute; transform: translateZ(3px); }
+        .s03-smd { position: absolute; width: 34px; height: 16px; border-radius: 3px; background: linear-gradient(90deg, #c9d3df 0 18%, #2e3a4c 18% 82%, #c9d3df 82%); box-shadow: 3px 4px 4px rgba(28,51,84,0.25); }
+        .s03-cap { position: absolute; width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffffff, #cbdbf4 40%, #6f88aa 100%); box-shadow: 5px 7px 8px rgba(28,51,84,0.3), inset 0 0 0 3px rgba(255,255,255,0.6); }
+        .s03-cap::after { content: ""; position: absolute; left: 12px; right: 12px; top: 20px; height: 4px; border-radius: 2px; background: rgba(41,75,119,0.35); }
+        .s03-hole { position: absolute; width: 46px; height: 46px; border-radius: 50%; background: radial-gradient(circle, #8fa5c2 0 30%, #f6f9fd 34% 58%, #b9c9de 62% 70%, rgba(0,0,0,0) 72%); }
+        .s03-hdr { position: absolute; width: 150px; height: 40px; border-radius: 8px; background: linear-gradient(180deg, #33415a, #1f2a3b); box-shadow: 5px 8px 10px rgba(28,51,84,0.35);
+          display: flex; align-items: center; justify-content: space-around; padding: 0 8px; }
+        .s03-hdr i { width: 12px; height: 12px; border-radius: 2px; background: linear-gradient(135deg, #f7e2b0, #c69a47); }
+        .s03-pins { position: absolute; left: 0; top: 0; width: 820px; height: 820px; transform: translateZ(2px); }
+        .s03-pin { position: absolute; border-radius: 3px; background: linear-gradient(135deg, #ffffff, #b6c6da 50%, #8399ba); box-shadow: 2px 3px 3px rgba(28,51,84,0.25); }
+        .s03-chip { position: absolute; left: 245px; top: 245px; width: 330px; height: 330px; transform-style: preserve-3d; }
+        .s03-cshadow { position: absolute; inset: 0; border-radius: 26px; background: rgba(28,51,84,0.5); filter: blur(16px); transform: translate3d(18px, 26px, 1px); }
+        .s03-cw { position: absolute; }
+        .s03-cw-s { left: 0; top: 330px; width: 330px; height: 36px; transform-origin: 50% 0; transform: rotateX(90deg); background: linear-gradient(180deg, #8ea3bf, #c3d1e4); }
+        .s03-cw-e { left: 330px; top: 0; width: 36px; height: 330px; transform-origin: 0 50%; transform: rotateY(-90deg); background: linear-gradient(90deg, #7f95b4, #b5c5da); }
+        .s03-cw-w { left: -36px; top: 0; width: 36px; height: 330px; transform-origin: 100% 50%; transform: rotateY(90deg); background: linear-gradient(90deg, #dfe8f4, #c3d1e4); }
+        .s03-cw-n { left: 0; top: -36px; width: 330px; height: 36px; transform-origin: 50% 100%; transform: rotateX(-90deg); background: #d5e0ee; }
+        .s03-top { position: absolute; left: 0; top: 0; width: 330px; height: 330px; border-radius: 14px; overflow: hidden; transform: translateZ(36px);
+          background: radial-gradient(ellipse at 22% 14%, #ffffff 0%, rgba(255,255,255,0) 50%), linear-gradient(145deg, #fbfcfe 0%, #e3ebf6 60%, #c9d8ec 100%);
+          box-shadow: inset 0 0 0 2px rgba(255,255,255,0.95), inset 0 0 0 4px rgba(41,75,119,0.10); }
+        .s03-bevel { position: absolute; inset: 22px; border-radius: 12px; background: linear-gradient(145deg, #dbe6f4, #f7faff);
+          box-shadow: inset 3px 3px 6px rgba(28,51,84,0.18), inset -3px -3px 4px rgba(255,255,255,0.95); }
+        .s03-core { position: absolute; inset: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+          background: radial-gradient(ellipse at 30% 25%, #ffffff, #e8f0fb 50%, #cbdbf4 100%);
+          box-shadow: 0 2px 0 rgba(255,255,255,0.9) inset, 0 -3px 6px rgba(41,75,119,0.15) inset, 4px 6px 10px rgba(28,51,84,0.18); }
+        .s03-ai { font: 900 128px/1 Montserrat, sans-serif; letter-spacing: -0.02em; color: #294b77;
+          text-shadow: -2px -2px 0 rgba(255,255,255,0.95), 2px 3px 0 #1c3354, 5px 8px 10px rgba(28,51,84,0.3); }
+        .s03-coreglow { position: absolute; inset: 0; border-radius: 10px; background: radial-gradient(circle, rgba(172,198,231,0.95), rgba(172,198,231,0) 70%); }
+        .s03-mark { position: absolute; left: 34px; top: 34px; width: 12px; height: 12px; border-radius: 50%; background: #294b77; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.5); }
+        .s03-etch { position: absolute; left: 60px; bottom: 30px; display: flex; gap: 6px; }
+        .s03-etch i { display: block; height: 5px; border-radius: 3px; background: rgba(41,75,119,0.3); }
+        .s03-scan { position: absolute; left: -20px; right: -20px; top: 0; height: 46px;
+          background: linear-gradient(180deg, rgba(172,198,231,0) 0%, rgba(58,98,153,0.35) 48%, rgba(255,255,255,0.95) 52%, rgba(172,198,231,0) 100%); }
+        .s03-sring { position: absolute; left: 410px; top: 410px; width: 640px; height: 640px; margin: -320px 0 0 -320px; border-radius: 50%;
+          border: 10px solid rgba(58,98,153,0.55); box-shadow: 0 0 30px rgba(172,198,231,0.9), inset 0 0 30px rgba(172,198,231,0.8); }
+        .s03-sringw { position: absolute; left: 0; top: 0; width: 820px; height: 820px; transform: translateZ(4px); }
+        /* magnifier */
+        .s03-lens { position: absolute; left: 280px; top: 720px; width: 520px; height: 520px; }
+        .s03-lens svg { width: 100%; height: 100%; display: block; overflow: visible; }
+        /* status card */
+        .s03-card { position: absolute; left: 650px; top: 418px; width: 370px; padding: 22px 24px 18px; border-radius: 28px;
+          background: linear-gradient(165deg, #ffffff, #f2f6fb); border: 2px solid rgba(41,75,119,0.08);
+          box-shadow: inset 0 2px 0 #fff, 0 34px 54px -22px rgba(28,51,84,0.45), 0 8px 18px rgba(28,51,84,0.10); }
+        .s03-chd { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; margin-bottom: 8px; border-bottom: 1.5px solid rgba(41,75,119,0.08); }
+        .s03-chd svg { width: 34px; height: 34px; }
+        .s03-chd b { display: block; height: 11px; width: 130px; border-radius: 6px; background: #43597a; }
+        .s03-chd i { margin-left: auto; width: 12px; height: 12px; border-radius: 50%; background: #9fd8c4; box-shadow: 0 0 0 5px rgba(159,216,196,0.3); }
+        .s03-row { display: flex; align-items: center; gap: 14px; padding: 11px 0; }
+        .s03-ric { flex: none; width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(145deg, #eef3fa, #d7e3f3); display: flex; align-items: center; justify-content: center; color: #294b77;
+          box-shadow: inset 0 2px 0 #fff, 0 3px 6px rgba(28,51,84,0.12); }
+        .s03-ric svg { width: 26px; height: 26px; }
+        .s03-rbar { flex: 1; height: 12px; border-radius: 6px; background: #e3eaf4; overflow: hidden; position: relative; }
+        .s03-rfill { position: absolute; inset: 0; border-radius: 6px; background: linear-gradient(90deg, #acc6e7, #3a6299); transform-origin: 0 50%; }
+        .s03-chk { flex: none; width: 44px; height: 44px; }
+        .s03-chk svg { width: 100%; height: 100%; display: block; overflow: visible; }
+        .s03-link { position: absolute; left: 600px; top: 700px; width: 120px; height: 2px; }
+        /* badge */
+        .s03-badgewrap { position: absolute; left: 688px; top: 812px; width: 0; height: 0; }
+        .s03-badge { position: absolute; left: -100px; top: -100px; width: 200px; height: 200px; }
+        .s03-badge svg { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(10px 22px 18px rgba(28,51,84,0.4)); }
+        .s03-wave { position: absolute; left: -150px; top: -150px; width: 300px; height: 300px; border-radius: 50%; opacity: 0; border: 6px solid rgba(58,98,153,0.6); box-shadow: 0 0 24px rgba(172,198,231,0.9); }
+        .s03-fg { position: absolute; inset: 0; filter: blur(5px); }
+        .s03-fgo { position: absolute; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffffff, rgba(203,219,244,0.8) 55%, rgba(172,198,231,0) 72%); }
+      </style>
+      <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+        <div class="s03-spot" id="s03-spot"></div>
+        <div class="s03-far" id="s03-far">
+          <div class="s03-fchip" style="left:40px;top:470px;width:110px;height:110px"></div>
+          <div class="s03-fchip" style="left:930px;top:1180px;width:90px;height:90px"></div>
+          <div class="s03-fchip" style="left:70px;top:1420px;width:70px;height:70px"></div>
+        </div>
+        <div class="s03-floor" id="s03-floor"></div>
+        <div class="s03-stage">
+          <div class="s03-cam" id="s03-cam">
+            <div class="s03-board" id="s03-board">
+              <div class="s03-bshadow"></div>
+              <div class="s03-wall s03-wall-s"></div>
+              <div class="s03-wall s03-wall-e"></div>
+              <div class="s03-wall s03-wall-w"></div>
+              <div class="s03-slab"><div class="s03-gridp"></div></div>
+              <svg class="s03-svg s03-glowsvg" id="s03-glow" viewBox="0 0 820 820"></svg>
+              <svg class="s03-svg" id="s03-traces" viewBox="0 0 820 820"></svg>
+              <div class="s03-comp" id="s03-comps" style="left:0;top:0;width:820px;height:820px"></div>
+              <div class="s03-pins" id="s03-pins"></div>
+              <div class="s03-sringw"><div class="s03-sring" id="s03-sring"></div></div>
+              <div class="s03-chip" id="s03-chip">
+                <div class="s03-cshadow"></div>
+                <div class="s03-cw s03-cw-n"></div>
+                <div class="s03-cw s03-cw-w"></div>
+                <div class="s03-cw s03-cw-s"></div>
+                <div class="s03-cw s03-cw-e"></div>
+                <div class="s03-top" id="s03-top">
+                  <div class="s03-bevel"></div>
+                  <i class="s03-mark"></i>
+                  <div class="s03-core"><div class="s03-coreglow" id="s03-coreglow"></div><span class="s03-ai" style="position:relative">AI</span></div>
+                  <div class="s03-etch"><i style="width:40px"></i><i style="width:18px"></i><i style="width:60px"></i><i style="width:24px"></i></div>
+                  <div class="s03-scan" id="s03-scan"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="s03-card" id="s03-card">
+          <div class="s03-chd"><svg viewBox="0 0 34 34"><rect x="8" y="8" width="18" height="18" rx="4" fill="#294b77"/><rect x="12.5" y="12.5" width="9" height="9" rx="2" fill="#cbdbf4"/><path d="M12 3v5M17 3v5M22 3v5M12 26v5M17 26v5M22 26v5M3 12h5M3 17h5M3 22h5M26 12h5M26 17h5M26 22h5" stroke="#3a6299" stroke-width="2.2" stroke-linecap="round"/></svg><b></b><i></i></div>
+          <div class="s03-row"><span class="s03-ric"><svg viewBox="0 0 26 26"><path d="M14.5 2 5 15h7l-1.5 9L20 11h-7z" fill="currentColor"/></svg></span><span class="s03-rbar"><i class="s03-rfill" id="s03-rf0"></i></span><span class="s03-chk" id="s03-ck0"></span></div>
+          <div class="s03-row"><span class="s03-ric"><svg viewBox="0 0 26 26"><path d="M2 14h4l3-8 4 15 4-11 2 4h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="s03-rbar"><i class="s03-rfill" id="s03-rf1"></i></span><span class="s03-chk" id="s03-ck1"></span></div>
+          <div class="s03-row"><span class="s03-ric"><svg viewBox="0 0 26 26"><path d="M13 2.5 22.5 8v10L13 23.5 3.5 18V8z M3.5 8 13 13.5 22.5 8 M13 13.5v10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span><span class="s03-rbar"><i class="s03-rfill" id="s03-rf2"></i></span><span class="s03-chk" id="s03-ck2"></span></div>
+        </div>
+        <div class="s03-lens" id="s03-lens">
+          <svg viewBox="0 0 520 520">
+            <defs>
+              <radialGradient id="s03-glass" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/><stop offset="0.7" stop-color="#e8f0fb" stop-opacity="0.18"/><stop offset="1" stop-color="#acc6e7" stop-opacity="0.45"/></radialGradient>
+              <linearGradient id="s03-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.4" stop-color="#cbdbf4"/><stop offset="1" stop-color="#3a6299"/></linearGradient>
+              <linearGradient id="s03-rim2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a6299"/><stop offset="1" stop-color="#1c3354"/></linearGradient>
+              <linearGradient id="s03-hdl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4a74ad"/><stop offset="0.45" stop-color="#294b77"/><stop offset="1" stop-color="#1c3354"/></linearGradient>
+            </defs>
+            <g transform="translate(14 22)" opacity="0.22"><circle cx="200" cy="200" r="150" fill="none" stroke="#1c3354" stroke-width="30"/><rect x="300" y="285" width="60" height="200" rx="28" transform="rotate(-45 330 385)" fill="#1c3354"/></g>
+            <g transform="rotate(-45 330 385)">
+              <rect x="306" y="300" width="48" height="40" rx="8" fill="#c3d1e4"/>
+              <rect x="300" y="330" width="60" height="190" rx="28" fill="url(#s03-hdl)"/>
+              <rect x="309" y="345" width="10" height="160" rx="5" fill="#ffffff" opacity="0.3"/>
+              <path d="M300 380h60M300 400h60M300 420h60M300 440h60" stroke="#1c3354" stroke-width="3" opacity="0.5"/>
+            </g>
+            <circle cx="200" cy="200" r="136" fill="url(#s03-glass)"/>
+            <g id="s03-ret" opacity="0.7"><circle cx="200" cy="200" r="58" fill="none" stroke="#3a6299" stroke-width="3" stroke-dasharray="10 8"/><path d="M200 120v30M200 250v30M120 200h30M250 200h30" stroke="#294b77" stroke-width="4" stroke-linecap="round"/></g>
+            <circle cx="200" cy="200" r="150" fill="none" stroke="url(#s03-rim2)" stroke-width="30"/>
+            <circle cx="200" cy="200" r="150" fill="none" stroke="url(#s03-rim)" stroke-width="16"/>
+            <circle cx="200" cy="200" r="135" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.8"/>
+            <path d="M110 140 A110 110 0 0 1 190 92" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" opacity="0.85"/>
+            <path d="M104 175 A110 110 0 0 1 108 160" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="s03-badgewrap" id="s03-bw">
+          <div class="s03-wave" id="s03-wave0"></div>
+          <div class="s03-wave" id="s03-wave1"></div>
+          <div class="s03-badge" id="s03-badge">
+            <svg viewBox="0 0 236 236">
+              <defs>
+                <radialGradient id="s03-bg" cx="36%" cy="30%" r="75%"><stop offset="0" stop-color="#5d86bd"/><stop offset="0.5" stop-color="#294b77"/><stop offset="1" stop-color="#1c3354"/></radialGradient>
+                <linearGradient id="s03-brim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#acc6e7"/></linearGradient>
+              </defs>
+              <circle cx="118" cy="118" r="112" fill="url(#s03-brim)"/>
+              <circle cx="118" cy="118" r="100" fill="url(#s03-bg)"/>
+              <circle cx="118" cy="118" r="86" fill="none" stroke="#acc6e7" stroke-opacity="0.55" stroke-width="2.5" stroke-dasharray="4 7"/>
+              <path d="M58 70 A72 72 0 0 1 120 42" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="9" stroke-linecap="round"/>
+              <path id="s03-bchk" d="M76 120 L106 148 L162 90" fill="none" stroke="#fbfcfe" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
+            </svg>
+          </div>
+        </div>
+        <div class="s03-fg" id="s03-fg">
+          <i class="s03-fgo" style="left:-40px;top:1300px;width:150px;height:150px"></i>
+          <i class="s03-fgo" style="left:950px;top:760px;width:120px;height:120px"></i>
+          <i class="s03-fgo" style="left:830px;top:1430px;width:80px;height:80px"></i>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const R = document.querySelector('[data-composition-id="s03"]');
+          const q = (s) => R.querySelector(s), qa = (s) => R.querySelectorAll(s);
+          const tl = gsap.timeline({ paused: true });
+          const D = 2.6;
+          const NS = "http://www.w3.org/2000/svg";
+          const sv = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+
+          // ---- circuit traces (built in the "top side" frame, rotated for 4 sides) ----
+          const TR = q("#s03-traces"), GL = q("#s03-glow");
+          const defs = sv("defs", {}, TR);
+          const base = [], pulses = [], glows = [];
+          const PIN = (i) => 245 + 19 + i * 22.4;   // 14 pins per side
+          const pick = [0, 2, 4, 6, 7, 9, 11, 13];
+          for (let side = 0; side < 4; side++) {
+            const g = sv("g", { transform: "rotate(" + side * 90 + " 410 410)" }, TR);
+            const gg = sv("g", { transform: "rotate(" + side * 90 + " 410 410)" }, GL);
+            pick.forEach((pi, k) => {
+              const x = PIN(pi), y0 = 211;
+              const a = 22 + ((k + side) % 3) * 16;
+              const dx = (x - 410) * 0.62;
+              const y1 = y0 - a, y2 = y1 - Math.abs(dx);
+              const yEnd = Math.max(52, Math.min(y2 - 22, 56 + ((k * 7 + side * 3) % 4) * 28));
+              const d = "M" + x + " " + y0 + " V" + y1 + " L" + (x + dx) + " " + y2 + " V" + yEnd;
+              sv("path", { d, fill: "none", stroke: "#ffffff", "stroke-width": 9, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: 0.9, transform: "translate(-1.5 -1.5)" }, g);
+              const p = sv("path", { d, fill: "none", stroke: "#a9c0de", "stroke-width": 6, "stroke-linecap": "round", "stroke-linejoin": "round", pathLength: 1, "stroke-dasharray": "1 1" }, g);
+              const v = sv("circle", { cx: x + dx, cy: yEnd, r: 9, fill: "#ffffff", stroke: "#8ea7c8", "stroke-width": 3.5 }, g);
+              const pu = sv("path", { d, fill: "none", stroke: "#294b77", "stroke-width": 6.5, "stroke-linecap": "round", "stroke-linejoin": "round", pathLength: 100, "stroke-dasharray": "9 120", "stroke-dashoffset": 9, opacity: 0 }, g);
+              const gl = sv("path", { d, fill: "none", stroke: "#6f93c3", "stroke-width": 16, "stroke-linecap": "round", "stroke-linejoin": "round" }, gg);
+              base.push([p, v]); pulses.push(pu); glows.push(gl);
+            });
+          }
+          // the cable leaving the board (s04 follows it)
+          const cableD = "M575 470 H640 Q700 470 720 520 L760 610 Q790 680 860 700 L1180 790";
+          sv("path", { d: cableD, fill: "none", stroke: "rgba(28,51,84,0.25)", "stroke-width": 22, "stroke-linecap": "round", transform: "translate(8 12)" }, TR);
+          const cable = sv("path", { d: cableD, fill: "none", stroke: "#294b77", "stroke-width": 18, "stroke-linecap": "round", pathLength: 1, "stroke-dasharray": "1 1" }, TR);
+          const cableHi = sv("path", { d: cableD, fill: "none", stroke: "#7fa0cd", "stroke-width": 5, "stroke-linecap": "round", transform: "translate(-3 -4)", pathLength: 1, "stroke-dasharray": "1 1" }, TR);
+          const cablePulse = sv("path", { d: cableD, fill: "none", stroke: "#e8f0fb", "stroke-width": 8, "stroke-linecap": "round", pathLength: 100, "stroke-dasharray": "6 120", "stroke-dashoffset": 6, opacity: 0 }, TR);
+          sv("path", { d: cableD, fill: "none", stroke: "#acc6e7", "stroke-width": 30, "stroke-linecap": "round" }, GL);
+          void defs;
+
+          // pins on all four sides
+          const pins = q("#s03-pins");
+          for (let s = 0; s < 4; s++) for (let i = 0; i < 14; i++) {
+            const e = document.createElement("i"); e.className = "s03-pin";
+            const c = PIN(i) - 5;
+            if (s === 0) e.style.cssText = "left:" + c + "px;top:209px;width:10px;height:44px";
+            if (s === 1) e.style.cssText = "left:567px;top:" + c + "px;width:44px;height:10px";
+            if (s === 2) e.style.cssText = "left:" + c + "px;top:567px;width:10px;height:44px";
+            if (s === 3) e.style.cssText = "left:209px;top:" + c + "px;width:44px;height:10px";
+            pins.appendChild(e);
+          }
+          // small board components
+          const comps = q("#s03-comps");
+          const add = (cls, css) => { const e = document.createElement("i"); e.className = cls; e.style.cssText = css; comps.appendChild(e); return e; };
+          [[40, 40], [734, 40], [40, 734], [734, 734]].forEach(([x, y]) => add("s03-hole", "left:" + x + "px;top:" + y + "px"));
+          [[120, 640], [160, 680], [120, 700], [650, 120], [690, 160], [600, 690], [640, 720], [150, 150], [110, 190], [700, 610]].forEach(([x, y], i) => add("s03-smd", "left:" + x + "px;top:" + y + "px;transform:rotate(" + (i % 2 ? 90 : 0) + "deg)"));
+          [[690, 250], [94, 300], [270, 700], [520, 96]].forEach(([x, y]) => add("s03-cap", "left:" + x + "px;top:" + y + "px"));
+          const hdr = add("s03-hdr", "left:620px;top:770px"); hdr.innerHTML = "<i></i><i></i><i></i><i></i><i></i><i></i>";
+
+          // status checks
+          [0, 1, 2].forEach((i) => {
+            q("#s03-ck" + i).innerHTML = '<svg viewBox="0 0 44 44"><circle id="s03-ckc' + i + '" cx="22" cy="22" r="19" fill="#eef2f7" stroke="#cdd8e6" stroke-width="3"/><path id="s03-ckp' + i + '" d="M13 22.5l6 6 12-13" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/></svg>';
+          });
+
+          // ---------------- timeline ----------------
+          const B = q("#s03-board"), CAM = q("#s03-cam");
+          tl.fromTo(CAM, { y: 60, scale: 0.9, transformOrigin: "50% 52%" }, { y: 0, scale: 1, duration: 0.8, ease: "power3.out" }, 0);
+          tl.to(CAM, { scale: 1.05, y: -10, duration: D - 0.8, ease: "sine.inOut" }, 0.8);
+          tl.fromTo(B, { rotationX: 58, rotationZ: -20 }, { rotationX: 42, rotationZ: -8, duration: 0.9, ease: "power3.out" }, 0);
+          tl.to(B, { rotationX: 38, rotationZ: 5, duration: D - 0.9, ease: "sine.inOut" }, 0.9);
+          tl.fromTo(q("#s03-far"), { x: 30, y: 20 }, { x: -30, y: -10, duration: D, ease: "none" }, 0);
+          tl.fromTo(q("#s03-fg"), { x: -20, y: 30 }, { x: 40, y: -40, duration: D, ease: "none" }, 0);
+          tl.fromTo(q("#s03-floor"), { scaleX: 0.8, y: 40, opacity: 0.6 }, { scaleX: 1, y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 0);
+          tl.fromTo(q("#s03-spot"), { opacity: 0.6 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0);
+
+          // traces draw in (already ~35% drawn on frame 0), finish by Padahal
+          base.forEach(([p, v], i) => {
+            const t = (i % 8) * 0.012 + Math.floor(i / 8) * 0.02;
+            tl.fromTo(p, { strokeDashoffset: 0.65 }, { strokeDashoffset: 0, duration: 0.42, ease: "power2.out" }, t);
+            tl.fromTo(v, { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.2, ease: "back.out(2.5)" }, t + 0.32);
+          });
+          tl.fromTo(cable, { strokeDashoffset: 0.7 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }, 0);
+          tl.fromTo(cableHi, { strokeDashoffset: 0.7 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }, 0);
+          glows.forEach((g) => tl.set(g, { opacity: 0 }, 0));
+          tl.set(GL, { opacity: 0 }, 0);
+
+          // Padahal (0.15): chip core lights up
+          tl.fromTo(q("#s03-coreglow"), { opacity: 0 }, { opacity: 0.9, duration: 0.2, ease: "power2.out" }, 0.15);
+          tl.to(q("#s03-coreglow"), { opacity: 0.35, duration: 0.4, ease: "power2.inOut" }, 0.4);
+
+          // light pulses travelling outward along the traces (finite repeats)
+          pulses.forEach((pu, i) => {
+            const st = 0.2 + ((i * 37) % 23) * 0.025;
+            const cyc = 0.55 + (i % 5) * 0.06;
+            const reps = Math.max(0, Math.floor((D - st) / cyc) - 1);
+            tl.set(pu, { opacity: 1 }, st);
+            tl.fromTo(pu, { strokeDashoffset: 9 }, { strokeDashoffset: -100, duration: cyc, ease: "none", repeat: reps }, st);
+          });
+          tl.set(cablePulse, { opacity: 1 }, 0.3);
+          tl.fromTo(cablePulse, { strokeDashoffset: 6 }, { strokeDashoffset: -100, duration: 0.5, ease: "none", repeat: Math.floor((D - 0.3) / 0.5) - 1 }, 0.3);
+
+          // magnifier sweep 0.55–1.6 (masalahnya 0.62 → sering 1.23)
+          const L = q("#s03-lens");
+          tl.fromTo(L, { x: -720, y: 160, rotation: -14, scale: 0.92 }, { x: -230, y: 40, rotation: -6, scale: 1, duration: 0.3, ease: "power3.out" }, 0.55);
+          tl.to(L, { x: -40, y: -60, rotation: 0, duration: 0.38, ease: "sine.inOut" }, 0.85);
+          tl.to(L, { scale: 1.07, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 1.21);
+          tl.to(L, { x: 170, y: -90, rotation: 6, duration: 0.25, ease: "sine.inOut" }, 1.23);
+          tl.to(L, { x: 820, y: -40, rotation: 16, duration: 0.3, ease: "power3.in" }, 1.48);
+          tl.fromTo(q("#s03-ret"), { rotation: 0, svgOrigin: "200 200" }, { rotation: 180, duration: 1.2, ease: "none" }, 0.55);
+          tl.fromTo(q("#s03-scan"), { y: -60, opacity: 0 }, { y: 360, opacity: 1, duration: 0.6, ease: "sine.inOut" }, 0.82);
+          tl.to(q("#s03-scan"), { opacity: 0, duration: 0.1 }, 1.42);
+
+          // status card + checks on "bukan" (1.56)
+          const C = q("#s03-card");
+          tl.fromTo(C, { x: 140, y: -20, scale: 0.85, rotation: 6, opacity: 0, transformOrigin: "0% 100%" }, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, duration: 0.32, ease: "back.out(1.5)" }, 1.26);
+          tl.to(C, { y: -12, duration: D - 1.58, ease: "sine.inOut" }, 1.58);
+          [0, 1, 2].forEach((i) => {
+            const t = 1.56 + i * 0.07;
+            tl.fromTo(q("#s03-rf" + i), { scaleX: 0.15 }, { scaleX: 1, duration: 0.22, ease: "power3.out" }, t - 0.12);
+            tl.to(q("#s03-ckc" + i), { attr: { fill: "#9fd8c4", stroke: "#7cc4ab" }, duration: 0.08 }, t);
+            tl.fromTo(q("#s03-ckc" + i), { scale: 0.6, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.25, ease: "back.out(3)" }, t);
+            tl.to(q("#s03-ckp" + i), { strokeDashoffset: 0, duration: 0.14, ease: "power2.out" }, t + 0.03);
+          });
+
+          // AI-nya (2.08): navy check badge stamps on the chip
+          const BW = q("#s03-badge");
+          tl.fromTo(BW, { scale: 2.6, opacity: 0, rotation: -26, y: -60 }, { scale: 1, opacity: 1, rotation: -6, y: 0, duration: 0.16, ease: "power4.in" }, 1.94);
+          tl.to(BW, { scaleX: 1.08, scaleY: 0.92, duration: 0.05, ease: "power2.out", yoyo: true, repeat: 1 }, 2.1);
+          tl.set(q("#s03-bchk"), { strokeDasharray: "1 1", strokeDashoffset: 1 }, 0);
+          tl.to(q("#s03-bchk"), { strokeDashoffset: 0, duration: 0.18, ease: "power3.out" }, 2.1);
+          tl.to(BW, { y: -10, rotation: -4, duration: 0.4, ease: "sine.inOut" }, 2.2);
+          tl.fromTo(q("#s03-wave0"), { scale: 0.6, opacity: 1 }, { scale: 2.4, opacity: 0, duration: 0.5, ease: "power2.out", immediateRender: false }, 2.08);
+          tl.fromTo(q("#s03-wave1"), { scale: 0.6, opacity: 0.8 }, { scale: 3.2, opacity: 0, duration: 0.6, ease: "power2.out", immediateRender: false }, 2.14);
+          tl.fromTo(q("#s03-sring"), { scale: 0.45, opacity: 0 }, { scale: 1.25, opacity: 1, duration: 0.2, ease: "power2.out" }, 2.08);
+          tl.to(q("#s03-sring"), { scale: 1.6, opacity: 0, duration: 0.3, ease: "power1.in" }, 2.28);
+          tl.fromTo(CAM, { y: -10 }, { y: 2, duration: 0.05, yoyo: true, repeat: 3, ease: "sine.inOut", immediateRender: false }, 2.08);
+          tl.to(GL, { opacity: 0.85, duration: 0.15, ease: "power2.out" }, 2.08);
+          glows.forEach((g) => tl.to(g, { opacity: 1, duration: 0.15 }, 2.08));
+          tl.to(q("#s03-coreglow"), { opacity: 1, duration: 0.15, ease: "power2.out" }, 2.08);
+          base.forEach(([p]) => tl.to(p, { attr: { stroke: "#7fa0cd" }, duration: 0.15 }, 2.08));
+          tl.fromTo(q("#s03-spot"), { scale: 1 }, { scale: 1.12, duration: 0.3, ease: "power2.out", immediateRender: false }, 2.08);
+
+          window.__timelines["s03"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

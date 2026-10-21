@@ -1,0 +1,397 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; overflow: hidden; }
+        /* ---------- far plane ---------- */
+        .s12-far { position: absolute; inset: 0; }
+        .s12-beam { position: absolute; left: -260px; top: -200px; width: 760px; height: 1900px; transform-origin: 50% 0%;
+          background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,255,255,0.75) 30%, rgba(232,240,251,0.35) 70%, rgba(255,255,255,0));
+          clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); filter: blur(28px); }
+        .s12-glow { position: absolute; left: 90px; top: 430px; width: 900px; height: 900px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(232,240,251,0.55) 40%, rgba(232,240,251,0) 70%); }
+        .s12-bokeh { position: absolute; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(203,219,244,0.75) 45%, rgba(172,198,231,0.25) 75%, rgba(172,198,231,0));
+          box-shadow: inset 0 0 18px rgba(255,255,255,0.9); }
+        .s12-floor { position: absolute; left: 140px; top: 1430px; width: 800px; height: 90px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(28,51,84,0.30), rgba(28,51,84,0.10) 45%, rgba(28,51,84,0) 72%); }
+        /* ---------- camera / world ---------- */
+        .s12-cam { position: absolute; inset: 0; perspective: 1700px; perspective-origin: 50% 46%; }
+        .s12-world { position: absolute; inset: 0; transform-style: preserve-3d; }
+        /* paper shards */
+        .s12-shard { position: absolute; left: 240px; top: 580px; width: 600px; height: 760px; }
+        .s12-paper { position: absolute; inset: 0; background: linear-gradient(178deg, #fffefb, #f4f2ec); }
+        .s12-pline { position: absolute; height: 13px; border-radius: 7px; background: #c4c7cc; }
+        .s12-pfold { position: absolute; right: 0; top: 0; width: 70px; height: 70px;
+          background: linear-gradient(225deg, #eef3fa 50%, #e2e0d8 50%, #f7f5ef); }
+        .s12-shglass { position: absolute; inset: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.97), rgba(203,219,244,0.92) 50%, rgba(142,171,212,0.82)); opacity: 0; }
+        /* glass panel */
+        .s12-panel { position: absolute; left: 80px; top: 560px; width: 920px; height: 640px; border-radius: 44px; overflow: hidden;
+          background: linear-gradient(140deg, rgba(255,255,255,0.96), rgba(232,240,251,0.9) 45%, rgba(203,219,244,0.86));
+          border: 3px solid rgba(255,255,255,0.98);
+          box-shadow: inset 0 0 60px rgba(255,255,255,0.85), inset 0 -10px 30px rgba(172,198,231,0.45), 0 50px 90px -30px rgba(28,51,84,0.45), 0 14px 30px rgba(28,51,84,0.14); }
+        .s12-pgrid { position: absolute; inset: 0;
+          background: repeating-linear-gradient(90deg, rgba(41,75,119,0.06) 0 1px, transparent 1px 46px), repeating-linear-gradient(0deg, rgba(41,75,119,0.06) 0 1px, transparent 1px 46px); }
+        .s12-prim { position: absolute; left: 22px; top: 22px; right: 22px; bottom: 22px; border-radius: 28px; border: 1.5px solid rgba(41,75,119,0.12);
+          box-shadow: inset 0 2px 0 rgba(255,255,255,0.9); }
+        .s12-phl { position: absolute; left: -120px; top: -260px; width: 700px; height: 520px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(255,255,255,0.95), rgba(255,255,255,0) 70%); }
+        .s12-pin { position: absolute; width: 18px; height: 18px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #ffffff, #cbdbf4 55%, #6f90c0); box-shadow: 0 2px 4px rgba(28,51,84,0.35), inset 0 -1px 2px rgba(28,51,84,0.3); }
+        .s12-pin::after { content: ""; position: absolute; left: 4px; top: 8px; width: 10px; height: 2px; background: rgba(28,51,84,0.45); border-radius: 1px; }
+        .s12-dot { position: absolute; top: 44px; width: 14px; height: 14px; border-radius: 50%; }
+        .s12-tbar { position: absolute; top: 49px; height: 5px; border-radius: 3px; background: rgba(41,75,119,0.16); }
+        .s12-corner { position: absolute; width: 34px; height: 34px; border: 3px solid #294b77; opacity: 0.55; }
+        .s12-sweep { position: absolute; left: 0; top: -200px; width: 220px; height: 1100px;
+          background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.95) 50%, rgba(255,255,255,0)); }
+        .s12-edge { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 44px;
+          background: linear-gradient(120deg, rgba(255,255,255,0.0) 30%, rgba(255,255,255,0.0) 70%); }
+        /* 3D type */
+        .s12-line { position: absolute; left: 0; width: 1080px; display: flex; justify-content: center; align-items: center; gap: 30px; transform-style: preserve-3d; }
+        .s12-word { position: relative; transform-style: preserve-3d; font-family: Montserrat, sans-serif; font-weight: 900; letter-spacing: -0.035em; line-height: 1; white-space: nowrap; }
+        .s12-face { position: relative; display: block; color: transparent; -webkit-background-clip: text; background-clip: text;
+          background-image: linear-gradient(105deg, rgba(255,255,255,0) 44%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0) 56%), linear-gradient(180deg, #3a6299 0%, #294b77 46%, #1c3354 100%);
+          background-size: 300% 100%, 100% 100%; background-repeat: no-repeat; background-position: 160% 0%, 0% 0%; padding: 0 0.04em 0.08em; }
+        .s12-face.s12-ink { background-image: linear-gradient(105deg, rgba(255,255,255,0) 44%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0) 56%), linear-gradient(180deg, #34445c 0%, #202b3b 60%, #151d29 100%); }
+        .s12-dep { position: absolute; left: 0; top: 0; padding: 0 0.04em 0.08em; }
+        .s12-rim { position: absolute; left: 0; top: 0; padding: 0 0.04em 0.08em; color: #ffffff; }
+        /* orbiters */
+        .s12-orbit { position: absolute; left: 540px; width: 0; height: 0; transform-style: preserve-3d; }
+        .s12-sph { position: absolute; border-radius: 50%;
+          background: radial-gradient(circle at 32% 28%, #ffffff 0%, #ffffff 10%, rgba(232,240,251,0.95) 30%, rgba(172,198,231,0.9) 70%, #8eabd4 100%);
+          box-shadow: inset -8px -10px 18px rgba(41,75,119,0.28), inset 6px 6px 12px rgba(255,255,255,0.9), 0 18px 30px -10px rgba(28,51,84,0.4); }
+        .s12-ring { position: absolute; border-radius: 50%; border: 10px solid rgba(203,219,244,0.95);
+          box-shadow: inset 0 0 0 2px rgba(255,255,255,0.95), 0 0 0 2px rgba(255,255,255,0.8), 0 14px 26px -10px rgba(28,51,84,0.35), inset 0 6px 10px rgba(41,75,119,0.25); }
+        .s12-pill { position: absolute; border-radius: 30px;
+          background: linear-gradient(180deg, #ffffff, #cbdbf4 60%, #acc6e7); box-shadow: inset 0 2px 0 #fff, 0 14px 24px -10px rgba(28,51,84,0.4); }
+        /* timeline strip */
+        .s12-strip { position: absolute; left: 110px; top: 1252px; width: 860px; height: 178px; border-radius: 26px;
+          background: linear-gradient(175deg, rgba(255,255,255,0.97), rgba(232,240,251,0.94));
+          border: 2px solid rgba(255,255,255,0.98); box-shadow: inset 0 0 26px rgba(255,255,255,0.9), 0 30px 50px -22px rgba(28,51,84,0.42), 0 6px 14px rgba(28,51,84,0.1); overflow: hidden; }
+        .s12-ruler { position: absolute; left: 70px; right: 30px; top: 12px; height: 18px;
+          background: repeating-linear-gradient(90deg, rgba(41,75,119,0.45) 0 2px, transparent 2px 74px), repeating-linear-gradient(90deg, rgba(41,75,119,0.22) 0 1px, transparent 1px 14.8px);
+          -webkit-mask-image: linear-gradient(180deg, #000 0 100%); }
+        .s12-ruler2 { position: absolute; left: 70px; right: 30px; top: 22px; height: 8px; background: repeating-linear-gradient(90deg, transparent 0 7px, rgba(41,75,119,0.0) 7px 14.8px); }
+        .s12-track { position: absolute; left: 70px; right: 30px; height: 28px; border-radius: 8px; background: rgba(41,75,119,0.05); }
+        .s12-thead { position: absolute; left: 22px; width: 34px; height: 20px; border-radius: 6px; background: rgba(41,75,119,0.1); }
+        .s12-thead i { position: absolute; left: 6px; top: 6px; width: 8px; height: 8px; border-radius: 50%; }
+        .s12-clip { position: absolute; top: 4px; height: 20px; border-radius: 6px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 4px rgba(28,51,84,0.18); }
+        .s12-clip.s12-c1 { background: linear-gradient(180deg, #3a6299, #294b77); }
+        .s12-clip.s12-c2 { background: linear-gradient(180deg, #cbdbf4, #acc6e7); }
+        .s12-clip.s12-c3 { background: linear-gradient(180deg, #e8f0fb, #cbdbf4); border: 1px solid rgba(41,75,119,0.2); }
+        .s12-wave { position: absolute; left: 8px; right: 8px; top: 5px; height: 10px;
+          background: repeating-linear-gradient(90deg, rgba(255,255,255,0.75) 0 2px, transparent 2px 6px); -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 30%, #000 70%, transparent 100%); }
+        .s12-kf { position: absolute; width: 0; height: 0; }
+        .s12-kfi { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 3px; transform: rotate(45deg);
+          background: #fbfcfe; border: 2.5px solid #294b77; box-shadow: 0 2px 4px rgba(28,51,84,0.3); }
+        .s12-kfon { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 3px; transform: rotate(45deg);
+          background: #294b77; border: 2.5px solid #294b77; box-shadow: 0 0 10px rgba(58,98,153,0.7); }
+        .s12-curve { position: absolute; left: 70px; top: 0; width: 760px; height: 178px; }
+        .s12-ph { position: absolute; left: 70px; top: 6px; width: 0; height: 166px; }
+        .s12-phline { position: absolute; left: -1.5px; top: 14px; width: 3px; height: 150px; background: #294b77; border-radius: 2px; box-shadow: 0 0 8px rgba(41,75,119,0.4); }
+        .s12-phhead { position: absolute; left: -11px; top: 0; width: 22px; height: 18px; background: #294b77; border-radius: 5px 5px 50% 50%; box-shadow: 0 2px 5px rgba(28,51,84,0.4); }
+        /* fx */
+        .s12-fx { position: absolute; inset: 0; pointer-events: none; }
+        .s12-flash { position: absolute; left: 190px; top: 840px; width: 700px; height: 380px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(255,255,255,1), rgba(232,240,251,0.7) 35%, rgba(242,196,109,0.12) 60%, rgba(255,255,255,0) 72%); }
+        .s12-spk { position: absolute; width: 0; height: 0; }
+        .s12-spk svg { position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; overflow: visible; }
+        .s12-fg { position: absolute; border-radius: 50%; filter: blur(10px);
+          background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(203,219,244,0.7) 50%, rgba(172,198,231,0)); }
+      </style>
+      <div id="root" data-composition-id="s12" data-width="1080" data-height="1920">
+        <div class="s12-far">
+          <div class="s12-beam" id="s12-beam"></div>
+          <div class="s12-glow" id="s12-glow"></div>
+          <div class="s12-bokeh" id="s12-bk1" style="left:70px;top:470px;width:120px;height:120px;filter:blur(8px);opacity:0.7"></div>
+          <div class="s12-bokeh" id="s12-bk2" style="left:900px;top:1180px;width:90px;height:90px;filter:blur(7px);opacity:0.65"></div>
+          <div class="s12-bokeh" id="s12-bk3" style="left:880px;top:430px;width:60px;height:60px;filter:blur(5px);opacity:0.6"></div>
+          <div class="s12-bokeh" id="s12-bk4" style="left:120px;top:1300px;width:70px;height:70px;filter:blur(6px);opacity:0.55"></div>
+          <div class="s12-floor" id="s12-floor"></div>
+        </div>
+
+        <div class="s12-cam" id="s12-cam">
+          <div class="s12-world" id="s12-world">
+            <div id="s12-shards"></div>
+
+            <div class="s12-panel" id="s12-panel">
+              <div class="s12-pgrid"></div>
+              <div class="s12-phl"></div>
+              <div class="s12-prim"></div>
+              <div class="s12-dot" style="left:48px;background:#acc6e7"></div>
+              <div class="s12-dot" style="left:70px;background:#cbdbf4"></div>
+              <div class="s12-dot" style="left:92px;background:#9fd8c4"></div>
+              <div class="s12-tbar" style="left:130px;width:120px"></div>
+              <div class="s12-tbar" style="left:262px;width:60px"></div>
+              <div class="s12-tbar" style="left:740px;width:40px"></div>
+              <div class="s12-tbar" style="left:790px;width:80px"></div>
+              <div class="s12-corner" style="left:50px;top:96px;border-right:0;border-bottom:0;border-radius:10px 0 0 0"></div>
+              <div class="s12-corner" style="right:50px;top:96px;border-left:0;border-bottom:0;border-radius:0 10px 0 0"></div>
+              <div class="s12-corner" style="left:50px;bottom:50px;border-right:0;border-top:0;border-radius:0 0 0 10px"></div>
+              <div class="s12-corner" style="right:50px;bottom:50px;border-left:0;border-top:0;border-radius:0 0 10px 0"></div>
+              <div class="s12-pin" style="left:30px;top:30px"></div>
+              <div class="s12-pin" style="right:30px;top:30px"></div>
+              <div class="s12-pin" style="left:30px;bottom:30px"></div>
+              <div class="s12-pin" style="right:30px;bottom:30px"></div>
+              <div class="s12-sweep" id="s12-sweep"></div>
+            </div>
+
+            <div class="s12-line" id="s12-l1" style="top:618px"><div class="s12-word" id="s12-w1" data-layout-allow-overlap data-size="176" data-tone="navy">motion</div></div>
+            <div class="s12-line" id="s12-l2" style="top:820px"><div class="s12-word" id="s12-w2" data-layout-allow-overlap data-size="86" data-tone="ink">yang</div><div class="s12-word" id="s12-w3" data-layout-allow-overlap data-size="86" data-tone="ink">terlihat</div></div>
+            <div class="s12-line" id="s12-l3" style="top:936px"><div class="s12-word" id="s12-w4" data-layout-allow-overlap data-size="176" data-tone="navy">mahal.</div></div>
+
+            <div class="s12-orbit" id="s12-o1" style="top:640px"><div class="s12-sph" id="s12-o1c" style="left:-38px;top:-38px;width:76px;height:76px"></div></div>
+            <div class="s12-orbit" id="s12-o2" style="top:1478px"><div class="s12-sph" id="s12-o2c" style="left:-28px;top:-28px;width:56px;height:56px"></div></div>
+            <div class="s12-orbit" id="s12-o3" style="top:500px"><div class="s12-ring" id="s12-o3c" style="left:-50px;top:-50px;width:100px;height:100px"></div></div>
+            <div class="s12-orbit" id="s12-o4" style="top:560px"><div class="s12-ring" id="s12-o4c" style="left:-32px;top:-32px;width:64px;height:64px;border-width:7px"></div></div>
+            <div class="s12-orbit" id="s12-o5" style="top:1090px"><div class="s12-pill" id="s12-o5c" style="left:-40px;top:-14px;width:80px;height:28px"></div></div>
+            <div class="s12-orbit" id="s12-o6" style="top:760px"><div class="s12-sph" id="s12-o6c" style="left:-18px;top:-18px;width:36px;height:36px"></div></div>
+
+            <div class="s12-strip" id="s12-strip">
+              <div class="s12-ruler"></div>
+              <div id="s12-tracks"></div>
+              <svg class="s12-curve" viewBox="0 0 760 178">
+                <path id="s12-cpath" d="M0 166 C 120 166, 160 150, 220 140 S 360 120, 420 132 S 560 150, 760 116" fill="none" stroke="rgba(58,98,153,0.0)" stroke-width="2" />
+              </svg>
+              <div class="s12-ph" id="s12-ph"><div class="s12-phline"></div><div class="s12-phhead"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="s12-fx">
+          <div class="s12-flash" id="s12-flash"></div>
+          <div id="s12-spks"></div>
+          <div class="s12-fg" id="s12-fg1" style="left:-40px;top:1360px;width:180px;height:180px"></div>
+          <div class="s12-fg" id="s12-fg2" style="left:960px;top:600px;width:140px;height:140px"></div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const R = document.querySelector('[data-composition-id="s12"]');
+          const q = (s) => R.querySelector(s), qa = (s) => R.querySelectorAll(s);
+          const tl = gsap.timeline({ paused: true });
+          const mk = (tag, cls, parent, css) => { const e = document.createElement(tag); if (cls) e.className = cls; if (css) e.style.cssText = css; parent.appendChild(e); return e; };
+          let seed = 1212;
+          const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+          const DUR = 2.3;
+
+          // ---------- paper (from s11) built as shards ----------
+          const PW = 600, PH = 760, PX = 240, PY = 580;
+          const paperHTML = (() => {
+            let h = '<div class="s12-paper">';
+            const rows = [[70, 300], [118, 430], [150, 380], [182, 455], [214, 330], [262, 440], [294, 400], [326, 460], [358, 250], [406, 430], [438, 390], [470, 450], [502, 300], [550, 420], [582, 360], [614, 200]];
+            rows.forEach(([y, w]) => { h += '<div class="s12-pline" style="left:70px;top:' + y + 'px;width:' + w + 'px"></div>'; });
+            h += '<div class="s12-pfold"></div></div>';
+            return h;
+          })();
+          const COLS = 4, ROWS = 5;
+          const pts = [];
+          for (let r = 0; r <= ROWS; r++) {
+            pts[r] = [];
+            for (let c = 0; c <= COLS; c++) {
+              let x = (c / COLS) * PW, y = (r / ROWS) * PH;
+              if (c > 0 && c < COLS) x += (rnd() - 0.5) * 70;
+              if (r > 0 && r < ROWS) y += (rnd() - 0.5) * 70;
+              pts[r][c] = [x, y];
+            }
+          }
+          const tris = [];
+          for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+            const a = pts[r][c], b = pts[r][c + 1], d = pts[r + 1][c], e = pts[r + 1][c + 1];
+            if ((r + c) % 2) { tris.push([a, b, e]); tris.push([a, e, d]); } else { tris.push([a, b, d]); tris.push([b, e, d]); }
+          }
+          const shardRoot = q("#s12-shards");
+          // panel rect the shards rebuild into
+          const QX = 80, QY = 560, QW = 920, QH = 640, SX = QW / PW, SY = QH / PH;
+          tris.forEach((tri, i) => {
+            const s = mk("div", "s12-shard", shardRoot);
+            const poly = tri.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+            s.innerHTML = paperHTML + '<div class="s12-shglass"><svg width="600" height="760" style="position:absolute;left:0;top:0;overflow:visible"><polygon points="' + poly + '" fill="none" stroke="rgba(255,255,255,1)" stroke-width="7"/><polygon points="' + poly + '" fill="none" stroke="rgba(41,75,119,0.45)" stroke-width="2.5"/></svg></div>';
+            s.style.clipPath = "polygon(" + tri.map((p) => p[0].toFixed(1) + "px " + p[1].toFixed(1) + "px").join(",") + ")";
+            const cx = (tri[0][0] + tri[1][0] + tri[2][0]) / 3, cy = (tri[0][1] + tri[1][1] + tri[2][1]) / 3;
+            const g = s.querySelector(".s12-shglass"), p = s.querySelector(".s12-paper");
+            const dx = cx - PW / 2, dy = cy - PH / 2, len = Math.hypot(dx, dy) || 1;
+            const push = 110 + rnd() * 190;
+            tl.set(s, { transformOrigin: cx + "px " + cy + "px", x: 0, y: 0, z: 0, rotation: 0, rotationX: 0, rotationY: 0, scaleX: 1, scaleY: 1 }, 0);
+            // tiny lift / tension before break
+            tl.to(s, { z: 18 + rnd() * 10, rotationX: -4, duration: 0.07, ease: "power1.in" }, 0);
+            const t0 = 0.07 + (len / 480) * 0.06;
+            // burst
+            tl.to(s, { x: (dx / len) * push + (rnd() - 0.5) * 60, y: (dy / len) * push * 0.8 - 40 + (rnd() - 0.5) * 60, z: 60 + rnd() * 260,
+              rotation: (rnd() - 0.5) * 70, rotationX: (rnd() - 0.5) * 120, rotationY: (rnd() - 0.5) * 120, scaleX: 0.9, scaleY: 0.9,
+              duration: 0.26, ease: "power3.out" }, t0);
+            tl.to(g, { opacity: 0.92, duration: 0.22, ease: "power1.out" }, t0 + 0.02);
+            tl.to(p, { opacity: 0.15, duration: 0.22, ease: "power1.out" }, t0 + 0.02);
+            // rebuild into the glass stage
+            const tx = QX + cx * SX, ty = QY + cy * SY;
+            tl.to(s, { x: tx - (PX + cx), y: ty - (PY + cy), z: 0, rotation: 0, rotationX: 0, rotationY: 0, scaleX: SX, scaleY: SY,
+              duration: 0.26, ease: "power3.inOut" }, 0.31 + rnd() * 0.04);
+            tl.to(s, { opacity: 0, duration: 0.1, ease: "none" }, 0.6);
+          });
+          // panel materializes as the shards lock in
+          const panel = q("#s12-panel");
+          tl.set(panel, { opacity: 0, z: 0 }, 0);
+          tl.to(panel, { opacity: 1, duration: 0.1, ease: "none" }, 0.53);
+          tl.fromTo(q("#s12-sweep"), { x: -320, rotation: 18 }, { x: 1100, rotation: 18, duration: 0.55, ease: "power2.inOut" }, 0.56);
+          tl.to(q("#s12-sweep"), { x: -320, duration: 0.01 }, 1.4);
+          tl.to(q("#s12-sweep"), { x: 1100, duration: 0.5, ease: "power2.inOut" }, 1.72);
+
+          // ---------- 3D extruded words ----------
+          const DEP = ["#3a6299", "#4f74a8", "#6687ba", "#7e9dca", "#97b3da", "#b2c9e8"];
+          const words = [];
+          qa(".s12-word").forEach((w) => {
+            const txt = w.textContent, size = +w.dataset.size, ink = w.dataset.tone === "ink";
+            w.textContent = "";
+            w.style.fontSize = size + "px";
+            const st = size / 176;
+            const layers = [];
+            for (let i = DEP.length; i >= 1; i--) {
+              const d = mk("span", "s12-dep", w, "color:" + DEP[i - 1] + ";" + (i === DEP.length ? "text-shadow:0 " + (22 * st).toFixed(1) + "px " + (26 * st).toFixed(1) + "px rgba(28,51,84,0.28);" : ""));
+              d.textContent = txt;
+              tl.set(d, { x: i * 1.6 * st, y: i * 2.1 * st, z: -i * 6 * st }, 0);
+              layers.push(d);
+            }
+            const rim = mk("span", "s12-rim", w); rim.textContent = txt;
+            tl.set(rim, { x: -1.6 * st, y: -1.8 * st, z: -1 }, 0);
+            layers.push(rim);
+            const f = mk("span", "s12-face" + (ink ? " s12-ink" : ""), w); f.textContent = txt;
+            tl.set(f, { z: 0.5 }, 0);
+            layers.push(f);
+            words.push({ w, layers, face: f });
+          });
+          const land = (k, t, from, dur, ease) => {
+            const { w, layers } = words[k];
+            tl.set(w, Object.assign({ z: 60 }, from), 0);
+            tl.set(layers, { opacity: 0 }, 0);
+            tl.to(layers, { opacity: 1, duration: 0.08, ease: "none" }, t - 0.09);
+            tl.to(w, { x: 0, y: 0, z: 60, rotationX: 0, rotationY: 0, rotation: 0, scale: 1, duration: dur, ease }, t - 0.09);
+          };
+          land(0, 0.61, { y: -60, z: 520, rotationX: -55, scale: 1 }, 0.42, "power4.out");
+          land(1, 0.99, { y: 70, rotationX: 85, scale: 0.9 }, 0.34, "back.out(1.5)");
+          land(2, 1.21, { y: 70, rotationX: 85, scale: 0.9 }, 0.34, "back.out(1.5)");
+          land(3, 1.75, { y: 20, z: 700, rotationX: -20, scale: 1.25 }, 0.34, "power4.out");
+          // tiny settle wobble on each landing (depth breathing)
+          [0, 1, 2].forEach((k) => tl.to(words[k].w, { z: 70, duration: 0.5, ease: "sine.inOut" }, [0.61, 0.99, 1.21][k] + 0.3));
+          // sheen across the type at "mahal."
+          words.forEach((o, k) => tl.fromTo(o.face, { backgroundPosition: "160% 0%, 0% 0%" }, { backgroundPosition: "-60% 0%, 0% 0%", duration: 0.38, ease: "power2.inOut" }, 1.76 + k * 0.03));
+          tl.fromTo(words[0].face, { backgroundPosition: "160% 0%, 0% 0%" }, { backgroundPosition: "-60% 0%, 0% 0%", duration: 0.45, ease: "power2.inOut", immediateRender: false }, 0.66);
+
+          // ---------- orbiters ----------
+          const orb = [
+            ["#s12-o1", "#s12-o1c", 470, -40, 80, 0.48],
+            ["#s12-o2", "#s12-o2c", 400, 150, 250, 0.52],
+            ["#s12-o3", "#s12-o3c", 430, 220, 330, 0.56],
+            ["#s12-o4", "#s12-o4c", 380, 110, 200, 0.5],
+            ["#s12-o5", "#s12-o5c", 460, 30, -30, 0.6],
+            ["#s12-o6", "#s12-o6c", 500, 20, 120, 0.46],
+          ];
+          orb.forEach(([o, c, rad, a0, a1, tin], i) => {
+            const oe = q(o), ce = q(c);
+            const ring = ce.classList.contains("s12-ring"), pill = ce.classList.contains("s12-pill");
+            tl.set(oe, { rotationY: a0 }, 0);
+            tl.set(ce, { x: rad, rotationY: -a0, rotationX: ring ? 62 : 0, rotation: pill ? -30 : 0, scale: 0, opacity: 0 }, 0);
+            tl.to(oe, { rotationY: a1, duration: DUR, ease: "none" }, 0);
+            tl.to(ce, { rotationY: ring ? -a1 + 160 : -a1, rotation: pill ? 30 : 0, duration: DUR, ease: "none" }, 0);
+            tl.to(ce, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(1.6)" }, tin + i * 0.03);
+          });
+
+          // ---------- timeline strip ----------
+          const strip = q("#s12-strip"), tracks = q("#s12-tracks");
+          tl.set(strip, { y: 90, opacity: 0, rotationX: -40, transformOrigin: "50% 100%" }, 0);
+          tl.to(strip, { y: 0, opacity: 1, rotationX: 0, duration: 0.42, ease: "power3.out" }, 0.42);
+          const TW = 760, TX = 70;
+          const tX = (t) => (t / DUR) * TW;
+          const TR = [
+            { y: 42, head: "#294b77", clips: [[0.05, 0.9, "s12-c1", 1], [1.0, 2.25, "s12-c1", 1]], kf: [0.61, 1.75] },
+            { y: 76, head: "#acc6e7", clips: [[0.3, 1.5, "s12-c2", 0], [1.6, 2.2, "s12-c3", 0]], kf: [0.99, 1.21, 2.0] },
+            { y: 110, head: "#9fd8c4", clips: [[0.0, 0.55, "s12-c3", 0], [0.6, 2.28, "s12-c2", 1]], kf: [0.07, 0.4, 1.4] },
+            { y: 144, head: "#cbdbf4", clips: [[0.5, 1.2, "s12-c3", 0], [1.3, 1.9, "s12-c2", 0]], kf: [0.85, 1.55, 2.15] },
+          ];
+          TR.forEach((tr) => {
+            const row = mk("div", "s12-track", tracks, "top:" + tr.y + "px");
+            const h = mk("div", "s12-thead", tracks, "top:" + (tr.y + 4) + "px");
+            mk("i", "", h, "background:" + tr.head);
+            tr.clips.forEach(([a, b, cls, wave]) => {
+              const c = mk("div", "s12-clip " + cls, row, "left:" + tX(a).toFixed(1) + "px;width:" + (tX(b) - tX(a)).toFixed(1) + "px");
+              if (wave) mk("div", "s12-wave", c);
+            });
+            tr.kf.forEach((t) => {
+              const k = mk("div", "s12-kf", tracks, "left:" + (TX + tX(t)).toFixed(1) + "px;top:" + (tr.y + 14) + "px");
+              mk("div", "s12-kfi", k);
+              const on = mk("div", "s12-kfon", k);
+              tl.set(on, { opacity: 0 }, 0);
+              tl.set(k, { scale: 1 }, 0);
+              tl.to(on, { opacity: 1, duration: 0.06, ease: "none" }, t);
+              tl.to(k, { scale: 1.6, duration: 0.08, ease: "power2.out" }, t);
+              tl.to(k, { scale: 1, duration: 0.22, ease: "back.out(2)" }, t + 0.08);
+            });
+          });
+          const ph = q("#s12-ph");
+          tl.set(ph, { x: 0 }, 0);
+          tl.to(ph, { x: TW, duration: DUR, ease: "none" }, 0);
+          const cpath = q("#s12-cpath");
+          const cl = 900;
+          tl.set(cpath, { strokeDasharray: cl, strokeDashoffset: cl, stroke: "rgba(58,98,153,0.35)" }, 0);
+          tl.to(cpath, { strokeDashoffset: 0, duration: DUR - 0.4, ease: "none" }, 0.4);
+
+          // ---------- sparkle burst at "mahal." ----------
+          const spks = q("#s12-spks");
+          const SPK = '<svg viewBox="-24 -24 48 48"><path d="M0 -24 C 3 -6, 6 -3, 24 0 C 6 3, 3 6, 0 24 C -3 6, -6 3, -24 0 C -6 -3, -3 -6, 0 -24 Z" fill="#ffffff" stroke="rgba(41,75,119,0.35)" stroke-width="1.2"/><circle r="5" fill="#f2c46d" opacity="0.55"/></svg>';
+          const C0 = { x: 540, y: 1030 };
+          for (let i = 0; i < 14; i++) {
+            const s = mk("div", "s12-spk", spks);
+            s.innerHTML = SPK;
+            const ang = (i / 14) * Math.PI * 2 + rnd() * 0.3;
+            const r0 = 120 + rnd() * 60, r1 = 300 + rnd() * 160;
+            const sx = C0.x + Math.cos(ang) * r0, sy = C0.y + Math.sin(ang) * r0 * 0.55;
+            s.style.left = sx + "px"; s.style.top = sy + "px";
+            const sc = 0.5 + rnd() * 0.9;
+            tl.set(s, { scale: 0, opacity: 0, rotation: 0 }, 0);
+            const t = 1.76 + rnd() * 0.08;
+            tl.to(s, { opacity: 1, scale: sc, duration: 0.12, ease: "back.out(2.5)" }, t);
+            tl.to(s, { x: Math.cos(ang) * (r1 - r0), y: Math.sin(ang) * (r1 - r0) * 0.55, rotation: 90, duration: 0.5, ease: "power3.out" }, t);
+            tl.to(s, { scale: 0, opacity: 0, duration: 0.2, ease: "power2.in" }, t + 0.3 + rnd() * 0.1);
+          }
+          // small sparkles on each earlier word landing
+          [[0.61, 820, 640], [1.21, 820, 830], [0.99, 250, 830]].forEach(([t, x, y], j) => {
+            for (let i = 0; i < 3; i++) {
+              const s = mk("div", "s12-spk", spks, "left:" + (x + i * 46 - 30) + "px;top:" + (y + (i % 2) * 40) + "px");
+              s.innerHTML = SPK;
+              tl.set(s, { scale: 0, opacity: 0 }, 0);
+              tl.to(s, { scale: 0.45 + i * 0.1, opacity: 1, rotation: 45, duration: 0.14, ease: "back.out(2)" }, t + i * 0.04);
+              tl.to(s, { scale: 0, opacity: 0, rotation: 90, duration: 0.2, ease: "power2.in" }, t + 0.24 + i * 0.04);
+            }
+          });
+          const flash = q("#s12-flash");
+          tl.set(flash, { opacity: 0, scale: 0.6 }, 0);
+          tl.to(flash, { opacity: 0.95, scale: 1.05, duration: 0.12, ease: "power2.out" }, 1.75);
+          tl.to(flash, { opacity: 0, scale: 1.2, duration: 0.4, ease: "power2.out" }, 1.87);
+
+          // ---------- camera + world orbit ----------
+          const cam = q("#s12-cam"), world = q("#s12-world");
+          tl.set(cam, { scale: 1, transformOrigin: "50% 48%" }, 0);
+          tl.to(cam, { scale: 1.025, duration: 1.75, ease: "sine.inOut" }, 0);
+          tl.to(cam, { scale: 1.07, duration: 0.3, ease: "power3.out" }, 1.75);
+          tl.to(cam, { scale: 1.08, duration: 0.25, ease: "none" }, 2.05);
+          tl.set(world, { rotationY: -6, rotationX: 4, transformOrigin: "540px 920px" }, 0);
+          tl.to(world, { rotationY: 6, rotationX: 2, duration: DUR, ease: "sine.inOut" }, 0);
+
+          // ---------- far / fore planes ----------
+          tl.set(q("#s12-beam"), { rotation: -24, opacity: 0.55 }, 0);
+          tl.to(q("#s12-beam"), { rotation: -20, opacity: 0.8, duration: DUR, ease: "sine.inOut" }, 0);
+          tl.set(q("#s12-glow"), { opacity: 0.6, scale: 0.9 }, 0);
+          tl.to(q("#s12-glow"), { opacity: 1, scale: 1.05, duration: 0.6, ease: "power2.out" }, 0.4);
+          [["#s12-bk1", 30, -40], ["#s12-bk2", -40, -30], ["#s12-bk3", -25, 30], ["#s12-bk4", 35, -25], ["#s12-fg1", 60, -50], ["#s12-fg2", -70, 40]].forEach(([s, x, y]) => {
+            tl.fromTo(q(s), { x: 0, y: 0 }, { x, y, duration: DUR, ease: "none" }, 0);
+          });
+          tl.fromTo(q("#s12-floor"), { scaleX: 0.7, opacity: 0.4 }, { scaleX: 1, opacity: 1, duration: 0.6, ease: "power2.out" }, 0.3);
+
+          window.__timelines["s12"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

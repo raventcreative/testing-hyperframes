@@ -3,246 +3,91 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>AI PRENEUR — Arahan yang Tepat</title>
+    <title>AI PRENEUR — Arahan yang Tepat (v3)</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <style>
+      /* ===== shared design kit (available to every scene sub-composition) ===== */
       :root {
-        --ink: #202b3b;
-        --acc: #294b77;
-        --ice1: #acc6e7;
-        --ice2: #cbdbf4;
-        --ice3: #e8f0fb;
-        --ice4: #fbfcfe;
-        --graphite: #2e2e2e;
-        --muted: #5b6676;
+        --ink: #202b3b; --navy: #294b77; --navy-2: #3a6299; --navy-deep: #1c3354;
+        --ice1: #acc6e7; --ice2: #cbdbf4; --ice3: #e8f0fb; --ice4: #fbfcfe;
+        --graphite: #2e2e2e; --muted: #5b6676; --paper: #fffefb;
+        --shadow-lg: 0 2px 0 rgba(255,255,255,0.9) inset, 0 40px 70px -24px rgba(28,51,84,0.38), 0 10px 22px rgba(28,51,84,0.12);
+        --shadow-md: 0 2px 0 rgba(255,255,255,0.9) inset, 0 22px 40px -16px rgba(28,51,84,0.32), 0 6px 14px rgba(28,51,84,0.10);
+        --shadow-sm: 0 10px 20px -8px rgba(28,51,84,0.30), 0 2px 6px rgba(28,51,84,0.10);
       }
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #e8f0fb; }
-      #root {
-        position: relative; width: 100%; height: 100%; overflow: hidden;
-        font-family: Montserrat, sans-serif; color: var(--ink);
-      }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #eef3fa; }
+      #main-root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: Montserrat, sans-serif; color: var(--ink); }
       .layer { position: absolute; inset: 0; }
+      .kit-card { background: linear-gradient(175deg, #ffffff, #f4f7fb); border: 2px solid rgba(41,75,119,0.10); border-radius: 26px; box-shadow: var(--shadow-lg); }
+      .kit-paper { background: linear-gradient(178deg, #fffefb, #f6f4ee); border: 1px solid rgba(46,46,46,0.08); box-shadow: var(--shadow-md); }
+      .kit-glass { background: linear-gradient(140deg, rgba(255,255,255,0.92), rgba(214,228,247,0.78)); border: 2px solid rgba(255,255,255,0.95);
+        box-shadow: inset 0 0 40px rgba(255,255,255,0.8), 0 30px 60px -20px rgba(28,51,84,0.35); }
+      .kit-navy { background: linear-gradient(135deg, #3a6299, #294b77 55%, #1f3a5f); color: #fbfcfe; box-shadow: var(--shadow-md); }
+      .kit-contact { position: absolute; border-radius: 50%; background: radial-gradient(ellipse, rgba(28,51,84,0.45), rgba(28,51,84,0.14) 45%, rgba(28,51,84,0) 72%); }
+      .kit-mono { font-family: "IBM Plex Mono", monospace; letter-spacing: 0.06em; }
+      .kit-line { display: block; height: 12px; border-radius: 6px; background: #c9d4e3; }
 
-      /* ---------- BG ---------- */
+      /* ===== BG ===== */
       #bg .plate { position: absolute; inset: 0; background: url(assets/brand/pastel_background_1080x1920.png) center / cover no-repeat; }
+      #bg .grid { position: absolute; inset: -60px;
+        background: repeating-linear-gradient(90deg, rgba(41,75,119,0.055) 0 1px, transparent 1px 54px), repeating-linear-gradient(0deg, rgba(41,75,119,0.055) 0 1px, transparent 1px 54px);
+        -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 52%, #000 30%, transparent 85%); mask-image: radial-gradient(ellipse 75% 60% at 50% 52%, #000 30%, transparent 85%); }
       .haze { position: absolute; border-radius: 50%; }
-      #haze-a { left: -260px; top: -120px; width: 900px; height: 900px; background: radial-gradient(circle, rgba(172,198,231,0.55), rgba(172,198,231,0) 68%); }
-      #haze-b { left: 420px; top: 1240px; width: 1000px; height: 1000px; background: radial-gradient(circle, rgba(203,219,244,0.6), rgba(203,219,244,0) 68%); }
-      #haze-c { left: 180px; top: 520px; width: 760px; height: 760px; background: radial-gradient(circle, rgba(255,255,255,0.75), rgba(255,255,255,0) 66%); }
-      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/brand/grain_256.png); opacity: 0.55; }
-      #wipe { position: absolute; left: 0; top: -200px; width: 1500px; height: 2320px;
-        background: linear-gradient(100deg, #ffffff, #f4f7fb 70%, #e9eff8); box-shadow: 40px 0 80px rgba(41,75,119,0.28), -30px 0 60px rgba(41,75,119,0.18); }
-      #wipe .wedge { position: absolute; right: -22px; top: 0; width: 22px; height: 100%; background: linear-gradient(90deg, #d3deee, #b9cbe4); }
-      #wipe .lines i { height: 34px; border-radius: 17px; margin-bottom: 48px; opacity: 0.35; }
-      #flash { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 45% at 50% 58%, rgba(255,255,255,0.95), rgba(255,255,255,0) 70%); opacity: 0; }
-
-      /* ---------- 3D STAGE ---------- */
-      #stage { perspective: 1700px; perspective-origin: 540px 560px; }
-      #kick { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
-      .ray { position: absolute; left: -700px; width: 2600px; height: 230px; transform-origin: 50% 50%;
-        background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.55) 45%, rgba(255,255,255,0) 100%); filter: blur(26px); }
+      #haze-a { left: -260px; top: -120px; width: 900px; height: 900px; background: radial-gradient(circle, rgba(172,198,231,0.5), rgba(172,198,231,0) 68%); }
+      #haze-b { left: 420px; top: 1240px; width: 1000px; height: 1000px; background: radial-gradient(circle, rgba(203,219,244,0.55), rgba(203,219,244,0) 68%); }
+      #haze-c { left: 140px; top: 560px; width: 800px; height: 800px; background: radial-gradient(circle, rgba(255,255,255,0.8), rgba(255,255,255,0) 66%); }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/brand/grain_256.png); opacity: 0.5; }
       .mote { position: absolute; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffffff, rgba(203,219,244,0.75) 60%, rgba(172,198,231,0.2)); box-shadow: 0 0 10px rgba(255,255,255,0.8); }
-      .bokeh { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.75), rgba(203,219,244,0.25) 60%, rgba(203,219,244,0) 72%); filter: blur(6px); }
-      .burst { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(95,134,189,0.0) 30%, rgba(95,134,189,0.55) 52%, rgba(255,255,255,0.0) 70%); }
-      #world { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
-      .g3 { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
-      .f { position: absolute; backface-visibility: hidden; }
-      .floor {
-        position: absolute; left: -1300px; top: -1275px; width: 2600px; height: 2550px;
-        background:
-          repeating-linear-gradient(90deg, rgba(41,75,119,0.07) 0 2px, transparent 2px 130px),
-          repeating-linear-gradient(0deg, rgba(41,75,119,0.07) 0 2px, transparent 2px 130px),
-          linear-gradient(180deg, rgba(232,240,251,0) 0%, rgba(240,245,252,0.55) 38%, rgba(250,251,254,0.96) 78%, #fbfcfe 100%);
-        -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 34%, #000 100%);
-        mask-image: linear-gradient(180deg, transparent 0%, #000 34%, #000 100%);
-      }
-      .lip {
-        position: absolute; left: -1300px; top: 0; width: 2600px; height: 760px;
-        background: linear-gradient(180deg, #ffffff 0 4px, #8fb0dd 4px, #3a6299 22px, #294b77 120px, #1c3354 100%);
-      }
-      .lipshade { position: absolute; left: -1300px; top: 4px; width: 2600px; height: 260px; background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0)); }
-      .pool { position: absolute; width: 900px; height: 900px; left: -450px; top: -450px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,255,255,0.45) 38%, rgba(255,255,255,0) 68%); }
-      .shadow { position: absolute; border-radius: 50%; }
-      .shadow::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
-        background: radial-gradient(ellipse, rgba(28,51,84,0.62), rgba(28,51,84,0.22) 40%, rgba(28,51,84,0) 70%); }
 
-      /* materials */
-      .glass {
-        background: linear-gradient(150deg, rgba(255,255,255,0.97), rgba(226,236,250,0.95) 52%, rgba(196,214,240,0.96));
-        border: 2px solid rgba(255,255,255,0.95);
-        box-shadow: inset 0 0 38px rgba(255,255,255,0.75), inset -10px -14px 30px rgba(41,75,119,0.10);
-      }
-      .glass-side { background: linear-gradient(165deg, #c4d6ef, #9fb9de); border: 2px solid rgba(255,255,255,0.55); }
-      .glass-top { background: linear-gradient(180deg, #fdfeff, #dde8f7); border: 2px solid rgba(255,255,255,0.9); }
-      .porc { background: linear-gradient(172deg, #ffffff, #f0f4fa); border: 2px solid rgba(41,75,119,0.10); }
-      .porc-side { background: linear-gradient(180deg, #dfe7f3, #c9d6ea); }
-      .porc-top { background: linear-gradient(180deg, #fbfcfe, #edf2f9); }
-      .inner { background: linear-gradient(180deg, #bccde5, #d7e2f1); }
-
-      .cube-ai { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
-        font: 900 118px/1 Montserrat, sans-serif; color: var(--acc); letter-spacing: -0.02em; }
-      .ring { position: absolute; width: 420px; height: 420px; left: -210px; top: -210px; border-radius: 50%;
-        border: 5px solid rgba(41,75,119,0.75); box-shadow: 0 0 30px rgba(41,75,119,0.25), inset 0 0 26px rgba(41,75,119,0.18); }
-
-      /* output slab faces */
-      .dull { width: 100%; height: 100%; background: linear-gradient(180deg, #dadde2, #c9cdd3); padding: 34px 30px; }
-      .bars i { display: block; height: 18px; border-radius: 9px; background: #aeb4bd; margin-bottom: 18px; }
-      .bars i:nth-child(1) { width: 70%; height: 30px; }
-      .bars i:nth-child(2) { width: 92%; }
-      .bars i:nth-child(3) { width: 80%; }
-      .bars i:nth-child(4) { width: 56%; }
-      .sharp { position: absolute; inset: 0; padding: 34px 30px;
-        background: linear-gradient(140deg, #ffffff 0%, #e3edfb 45%, #b9cfee 100%);
-        border: 2px solid #ffffff; box-shadow: inset 0 0 30px rgba(255,255,255,0.8); }
-      .sharp .bars i { background: var(--acc); }
-      .sharp .bars i:nth-child(2) { background: #5f86bd; }
-      .sharp .bars i:nth-child(3) { background: #8fb0dd; }
-      .sharp .bars i:nth-child(4) { background: var(--graphite); }
-      .sheen { position: absolute; top: -10%; bottom: -10%; width: 34%; left: -40%;
-        background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,0.85), rgba(255,255,255,0)); }
-
-      /* paper sheet */
-      .paper { background: linear-gradient(176deg, #ffffff, #f6f8fb); border: 2px solid rgba(41,75,119,0.12); padding: 40px 34px; overflow: hidden; }
-      .lines i { display: block; height: 14px; border-radius: 7px; background: #5c6b80; margin-bottom: 20px; opacity: 0.85; }
-      .lines i.t { height: 26px; width: 62%; background: var(--acc); margin-bottom: 30px; }
-      .lines i.s { width: 74%; }
-      .lines i.m { width: 88%; }
-      .lines i.d { width: 46%; background: #8fb0dd; }
-      .beam { position: absolute; height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgba(41,75,119,0.0), #5f86bd 18%, #294b77 60%, #acc6e7); box-shadow: 0 0 22px rgba(95,134,189,0.7); }
-      .beamdot { position: absolute; width: 26px; height: 26px; left: -13px; top: -13px; border-radius: 50%; background: #fff; box-shadow: 0 0 24px 8px rgba(95,134,189,0.85); }
-      .streak { position: absolute; height: 6px; border-radius: 3px; background: linear-gradient(90deg, rgba(41,75,119,0), rgba(41,75,119,0.55)); }
-
-      /* folders */
-      .card-body { width: 100%; height: 100%; position: relative; }
-      .tab { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative;
-        font: 800 32px/1 Montserrat, sans-serif; color: var(--ink); letter-spacing: -0.01em; }
-      .tab .lbl { display: block; }
-      .tab .hl { position: absolute; inset: 0; background: var(--acc); }
-      .tab .lbl2 { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fbfcfe; }
-      .brk { position: absolute; inset: -16px; }
-      .brk i { position: absolute; width: 26px; height: 26px; border: 0 solid var(--acc); }
-      .brk i:nth-child(1) { left: 0; top: 0; border-left-width: 5px; border-top-width: 5px; }
-      .brk i:nth-child(2) { right: 0; top: 0; border-right-width: 5px; border-top-width: 5px; }
-      .brk i:nth-child(3) { left: 0; bottom: 0; border-left-width: 5px; border-bottom-width: 5px; }
-      .brk i:nth-child(4) { right: 0; bottom: 0; border-right-width: 5px; border-bottom-width: 5px; }
-      .glyph { position: absolute; right: 34px; top: 26px; width: 240px; height: 130px; }
-
-      /* chip */
-      .chip { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; gap: 18px;
-        font: 700 60px/1 Montserrat, sans-serif; color: var(--muted); letter-spacing: -0.02em; position: relative; }
-      .chip .q { color: #9aa6b6; font-weight: 900; }
-      .strike { position: absolute; left: 36px; right: 36px; top: 50%; height: 8px; margin-top: -4px; border-radius: 4px; background: var(--acc); }
-
-      /* dial */
-      .disc { position: absolute; border-radius: 50%; backface-visibility: hidden; }
-      .dialface { background: radial-gradient(circle at 36% 30%, #ffffff, #eef3fa 55%, #d6e1f0); border: 2px solid rgba(255,255,255,0.95); }
-      .knobface { background: radial-gradient(circle at 38% 30%, #ffffff, #e6edf7 60%, #c9d6ea); border: 2px solid #fff; }
-      .dlabel { position: absolute; left: 0; right: 0; bottom: 58px; text-align: center; font: 700 26px/1 "IBM Plex Mono", monospace; letter-spacing: 0.22em; color: var(--acc); }
-      .led { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #c9d4e3; box-shadow: inset 0 2px 3px rgba(32,43,59,0.25); }
-      .led.on { background: #5f86bd; box-shadow: 0 0 18px 6px rgba(95,134,189,0.85), inset 0 0 4px #fff; }
-
-      /* text plate */
-      .plain { position: absolute; inset: 0; background: #ffffff; display: flex; align-items: center; justify-content: center;
-        font: 400 78px/1 Inter, sans-serif; color: #8a94a3; }
-      .glassface { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(214,228,247,0.94) 45%, rgba(178,203,236,0.95));
-        border: 3px solid #ffffff; box-shadow: inset 0 0 44px rgba(255,255,255,0.85), inset 0 -18px 40px rgba(41,75,119,0.12); overflow: hidden; }
-      .xt { position: absolute; left: -380px; top: -150px; width: 760px; height: 300px; display: flex; flex-direction: column;
-        align-items: center; justify-content: center; font: 900 80px/1.02 Montserrat, sans-serif; letter-spacing: -0.03em; text-align: center; backface-visibility: hidden; }
-      .xt.shadowcopy { color: rgba(32,43,59,0.22); filter: blur(7px); }
-      .xt span { display: inline-block; }
-      .uline { position: absolute; left: 0; top: 0; overflow: visible; }
-
-      /* box + slabs */
-      .slabtxt { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center;
-        font: 900 64px/1.04 Montserrat, sans-serif; letter-spacing: -0.03em; color: var(--ink); }
-      .slabtxt span { display: inline-block; white-space: pre; }
-      .navy { background: linear-gradient(135deg, #3c659d, #294b77 55%, #213e64); border: 2px solid rgba(255,255,255,0.55); box-shadow: inset 0 0 36px rgba(255,255,255,0.18); }
-      .navy-side { background: linear-gradient(180deg, #23426b, #1a3150); }
-      .navy .slabtxt { color: #fbfcfe; font-size: 54px; flex-direction: column; }
-      .lightbeam { position: absolute; width: 760px; height: 900px; left: -380px; top: -900px;
-        background: linear-gradient(0deg, rgba(255,255,255,0.75), rgba(255,255,255,0) 92%);
-        -webkit-mask-image: radial-gradient(ellipse 50% 100% at 50% 100%, #000 40%, transparent 100%);
-        mask-image: radial-gradient(ellipse 50% 100% at 50% 100%, #000 40%, transparent 100%); }
-      .logoface { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-      .logoface img { width: 650px; height: auto; display: block; }
-
-      /* ---------- TEXT PLANE ---------- */
-      .blk { position: absolute; left: 90px; top: 250px; width: 810px; }
-      .bi { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-      .ln { display: block; white-space: nowrap; }
-      .w { display: inline-block; }
-      .mask { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.02em 0.05em 0.16em; margin: -0.02em -0.05em -0.16em; }
-      .ln.mkr { display: inline-block; position: relative; color: #fbfcfe; padding: 0.06em 0.22em 0.1em; margin-left: -0.08em; }
-      .ln.mkr .mkbg { position: absolute; inset: 0; border-radius: 0.16em; background: linear-gradient(135deg, #3a6299, #294b77 55%, #1f3a5f); box-shadow: 0 18px 40px rgba(28,51,84,0.28); }
-      .ln.mkr .mask { position: relative; }
-      .k { font: 700 48px/1.12 Montserrat, sans-serif; color: var(--acc); letter-spacing: -0.01em; }
-      .k2 { font: 700 50px/1.12 Montserrat, sans-serif; color: var(--ink); }
-      .h { font: 900 92px/1.0 Montserrat, sans-serif; color: var(--ink); letter-spacing: -0.035em; }
-      .a { color: var(--acc); }
-      .m { color: var(--muted); }
-      .xl { font-size: 132px; }
-      .sp { display: inline-block; width: 0.26em; }
-      .terms { position: relative; height: 140px; width: 810px; }
-      .term { position: absolute; left: 0; top: 0; white-space: nowrap; font: 900 124px/1.05 Montserrat, sans-serif; color: var(--acc); letter-spacing: -0.04em; }
-      .term .dan { font-size: 64px; color: var(--ink); letter-spacing: -0.01em; }
+      /* ===== caption (small, word-synced; visuals carry the story) ===== */
+      .cap { position: absolute; left: 70px; right: 70px; top: 232px; text-align: center; font: 700 46px/1.22 Montserrat, sans-serif; color: var(--ink); letter-spacing: -0.01em; }
+      .cap .m { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.04em 0.06em 0.14em; margin: -0.04em -0.06em -0.14em; }
+      .cap .w { display: inline-block; }
+      .cap .key { color: var(--navy); background: linear-gradient(transparent 62%, rgba(172,198,231,0.75) 62%, rgba(172,198,231,0.75) 92%, transparent 92%); }
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="39.4" data-width="1080" data-height="1920">
-      <!-- BG plane -->
+    <div id="main-root" data-composition-id="main" data-start="0" data-duration="39.4" data-width="1080" data-height="1920">
       <div id="bg" class="clip layer" data-start="0" data-duration="39.4" data-track-index="0">
         <div class="plate"></div>
+        <div class="grid" id="bggrid"></div>
         <div id="haze-a" class="haze"></div>
         <div id="haze-b" class="haze"></div>
         <div id="haze-c" class="haze"></div>
-        <div id="rays"><div class="ray" id="ray1"></div><div class="ray" id="ray2"></div><div class="ray" id="ray3"></div></div>
         <div id="motes"></div>
         <div id="grain"></div>
       </div>
 
-      <!-- 3D stage (MG + hero objects) -->
-      <div id="stage" class="clip layer" data-start="0" data-duration="39.4" data-track-index="1">
-        <div id="kick"><div id="world">
-          <div class="g3" id="floorg"><div class="f floor" id="floor" data-layout-allow-overflow></div></div>
-          <div class="g3" id="lipg"><div class="f lip" data-layout-allow-overflow></div><div class="f lipshade" data-layout-allow-overflow></div></div>
-          <div class="g3" id="poolg"><div class="f pool" id="pool"></div></div>
+      <!-- 15 visual scenes (sub-compositions), cut on the spoken phrases -->
+      <div id="s01" data-composition-id="s01" data-composition-src="compositions/s01.html" data-start="0" data-duration="1.05" data-track-index="2" data-width="1080" data-height="1920"></div>
+      <div id="s02" data-composition-id="s02" data-composition-src="compositions/s02.html" data-start="1.05" data-duration="2.37" data-track-index="3" data-width="1080" data-height="1920"></div>
+      <div id="s03" data-composition-id="s03" data-composition-src="compositions/s03.html" data-start="3.42" data-duration="2.6" data-track-index="4" data-width="1080" data-height="1920"></div>
+      <div id="s04" data-composition-id="s04" data-composition-src="compositions/s04.html" data-start="6.02" data-duration="2.4" data-track-index="2" data-width="1080" data-height="1920"></div>
+      <div id="s05" data-composition-id="s05" data-composition-src="compositions/s05.html" data-start="8.42" data-duration="0.86" data-track-index="3" data-width="1080" data-height="1920"></div>
+      <div id="s06" data-composition-id="s06" data-composition-src="compositions/s06.html" data-start="9.28" data-duration="2.66" data-track-index="4" data-width="1080" data-height="1920"></div>
+      <div id="s07" data-composition-id="s07" data-composition-src="compositions/s07.html" data-start="11.94" data-duration="2.74" data-track-index="2" data-width="1080" data-height="1920"></div>
+      <div id="s08" data-composition-id="s08" data-composition-src="compositions/s08.html" data-start="14.68" data-duration="5.21" data-track-index="3" data-width="1080" data-height="1920"></div>
+      <div id="s09" data-composition-id="s09" data-composition-src="compositions/s09.html" data-start="19.89" data-duration="1.41" data-track-index="4" data-width="1080" data-height="1920"></div>
+      <div id="s10" data-composition-id="s10" data-composition-src="compositions/s10.html" data-start="21.3" data-duration="2.95" data-track-index="2" data-width="1080" data-height="1920"></div>
+      <div id="s11" data-composition-id="s11" data-composition-src="compositions/s11.html" data-start="24.25" data-duration="1.5" data-track-index="3" data-width="1080" data-height="1920"></div>
+      <div id="s12" data-composition-id="s12" data-composition-src="compositions/s12.html" data-start="25.75" data-duration="2.3" data-track-index="4" data-width="1080" data-height="1920"></div>
+      <div id="s13" data-composition-id="s13" data-composition-src="compositions/s13.html" data-start="28.05" data-duration="3.05" data-track-index="2" data-width="1080" data-height="1920"></div>
+      <div id="s14" data-composition-id="s14" data-composition-src="compositions/s14.html" data-start="31.1" data-duration="4.55" data-track-index="3" data-width="1080" data-height="1920"></div>
+      <div id="s15" data-composition-id="s15" data-composition-src="compositions/s15.html" data-start="35.65" data-duration="3.75" data-track-index="4" data-width="1080" data-height="1920"></div>
 
-          <div id="s-cube" class="clip g3" data-start="0" data-duration="11.94" data-track-index="2"></div>
-          <div id="s-slabA" class="clip g3" data-start="0.9" data-duration="11.04" data-track-index="3"></div>
-          <div id="s-sheets" class="clip g3" data-start="5.76" data-duration="6.24" data-track-index="5"></div>
-          <div id="s-chip" class="clip g3" data-start="11.94" data-duration="3.6" data-track-index="2"></div>
-          <div id="s-folders" class="clip g3" data-start="11.94" data-duration="8.0" data-track-index="3"></div>
-          <div id="s-dial" class="clip g3" data-start="19.85" data-duration="4.6" data-track-index="2"></div>
-          <div id="s-slabB" class="clip g3" data-start="20.9" data-duration="3.55" data-track-index="4"></div>
-          <div id="s-plate" class="clip g3" data-start="23.95" data-duration="4.3" data-track-index="5"></div>
-          <div id="s-box" class="clip g3" data-start="27.6" data-duration="8.4" data-track-index="2"></div>
-          <div id="s-slabs" class="clip g3" data-start="30.9" data-duration="4.9" data-track-index="3"></div>
-          <div id="s-logo" class="clip g3" data-start="28.5" data-duration="10.9" data-track-index="4"></div>
-        </div></div>
-      </div>
+      <div id="caps" class="clip layer" data-start="0" data-duration="39.4" data-track-index="7"></div>
 
-      <!-- FG occluder: paper sheet sweeps past the lens (S1 -> S2) -->
-      <div id="wipel" class="clip layer" data-start="5.3" data-duration="0.9" data-track-index="6"><div id="wipe"><div class="wedge"></div><div class="lines" style="padding:150px 160px"><i class="t"></i><i class="m"></i><i class="s"></i><i class="m"></i><i class="d"></i></div></div></div>
-      <div id="fgl" class="clip layer" data-start="0" data-duration="39.4" data-track-index="6"><div id="bokeh"></div></div>
-      <div id="flashl" class="clip layer" data-start="22.9" data-duration="1.2" data-track-index="6"><div id="flash"></div></div>
-
-      <!-- Camera-facing text plane: word-synced copy, built from the verified transcript -->
-      <div id="text" class="clip layer" data-start="0" data-duration="39.4" data-track-index="7"></div>
-
-      <!-- Single authoritative VO track (placed once) -->
       <audio id="vo" src="assets/audio/vo_master_39s.wav" data-start="0" data-duration="39.381361" data-track-index="9" data-volume="1"></audio>
     </div>
 
     <script>
       (function () {
-        const FY = 1250; // floor height in world space
         const tl = gsap.timeline({ paused: true });
-        const $ = (s) => document.querySelector(s);
         const S = (t, v, at) => tl.set(t, v, at || 0);
+        const mk = (tag, cls, parent, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; };
 
-        // ---------- verified transcript words (production/transcript_review.md) ----------
+        // verified transcript (production/transcript_review.md) — word, start (s)
         const W = [
           ["Banyak",0.11],["orang",0.44],["bilang",0.76],["hasil",1.09],["AI",1.41],["itu",1.74],["masih",2.06],["biasa",2.39],["aja.",2.85],
           ["Padahal",3.57],["masalahnya",4.04],["sering",4.65],["bukan",4.98],["di",5.31],["AI-nya.",5.5],
@@ -256,664 +101,44 @@
           ["Lebih",31.24],["cepat,",31.54],["lebih",32.05],["terarah,",32.36],["dan",33.0],["hasilnya",33.27],["jauh",33.95],["lebih",34.22],["premium.",34.86],
           ["AI",35.82],["bisa",36.12],["membuat",36.42],["motion",36.85],["selevel",37.15],["ini,",37.58],["asal",38.05],["prompt-nya",38.45],["tepat.",38.85]
         ];
-        const T = (i) => W[i][1];
-
-        // ---------- helpers ----------
-        function mk(tag, cls, parent, html) {
-          const e = document.createElement(tag);
-          if (cls) e.className = cls;
-          if (html != null) e.innerHTML = html;
-          if (parent) parent.appendChild(e);
-          return e;
-        }
-        // box with real faces; mat values are class names; null = no face
-        function box(parent, w, h, d, mat) {
-          const g = mk("div", "g3", parent);
-          const spec = {
-            front: [w, h, `translateZ(${d / 2}px)`],
-            back: [w, h, `rotateY(180deg) translateZ(${d / 2}px)`],
-            right: [d, h, `rotateY(90deg) translateZ(${w / 2}px)`],
-            left: [d, h, `rotateY(-90deg) translateZ(${w / 2}px)`],
-            top: [w, d, `rotateX(90deg) translateZ(${h / 2}px)`],
-            bottom: [w, d, `rotateX(-90deg) translateZ(${h / 2}px)`],
-          };
-          g.f = {};
-          for (const k in spec) {
-            const m = k in mat ? mat[k] : mat.side;
-            if (m === null) continue;
-            const [fw, fh, tr] = spec[k];
-            const f = mk("div", "f " + (m || ""), g);
-            f.style.cssText = `width:${fw}px;height:${fh}px;left:${-fw / 2}px;top:${-fh / 2}px;transform:${tr};`;
-            g.f[k] = f;
-          }
-          return g;
-        }
-        const faces = (g) => g.querySelectorAll(".f, .disc, .xt");
-        function shadowEl(parent, w, d) {
-          const s = mk("div", "f shadow", parent);
-          s.style.cssText = `width:${w}px;height:${d}px;left:${-w / 2}px;top:${-d / 2}px;`;
-          return s;
-        }
-        // shadow lying on the floor at (x,z); key light upper-left -> offset +x/+z
-        const SH = (s, x, z, at, extra) => S(s, Object.assign({ x: x + 26, y: FY - 1, z: z + 30, rotationX: 90, scale: 1, opacity: 1 }, extra || {}), at);
-
-        // ---------- static stage ----------
-        S("#world", { x: 540, y: 0, z: 0, rotationX: 0, rotationY: 0, transformOrigin: "0px 1060px -200px" });
-        S("#floorg", { x: 0, y: FY, z: -1025, rotationX: 90 });
-        S("#lipg", { x: 0, y: FY, z: 250 });
-        S("#poolg", { x: 0, y: FY - 2, z: 0, rotationX: 90 });
-        S("#pool", { x: 120, y: 0, scale: 0.9, opacity: 0.9 });
-
-        // ================= S1/S2: AI cube =================
-        const cubeHost = $("#s-cube");
-        const cubeSh = shadowEl(cubeHost, 360, 300);
-        const cubeRing = mk("div", "f ring", cubeHost);
-        const cube = box(cubeHost, 230, 230, 230, { front: "glass", right: "glass-side", left: "glass", top: "glass-top", back: "glass-side", bottom: "glass-side" });
-        cube.f.front.innerHTML = '<div class="cube-ai">AI</div>';
-        S(cube, { x: 150, y: FY - 115, z: -150, rotationY: -30, rotationX: 0 });
-        SH(cubeSh, 150, -150, 0);
-        S(cubeRing, { x: 150, y: FY - 2, z: -150, rotationX: 90, scale: 0.55, opacity: 0 });
-        // ambient float (inner hover is the whole cube; tiny, deterministic)
-        tl.to(cube, { y: FY - 123, duration: 1.4, ease: "sine.inOut", repeat: 1, yoyo: true }, 0.2);
-        // 4.98 "bukan di AI-nya" -> clean ring: the AI is not the problem
-        tl.to(cubeRing, { scale: 1, opacity: 1, duration: 0.55, ease: "power3.out" }, T(12) - 0.05);
-        tl.to(cube.f.front, { borderColor: "#294b77", duration: 0.3 }, T(12));
-        // 5.75 behind the wipe: cube moves to the back-right of the S2 layout
-        S(cube, { x: 250, y: FY - 115, z: -420, rotationY: -24 }, 5.78);
-        SH(cubeSh, 250, -420, 5.78);
-        S(cubeRing, { opacity: 0 }, 5.78);
-        S(cube.f.front, { borderColor: "rgba(255,255,255,0.95)" }, 5.78);
-        // 8.51 "AI itu cepat," -> fast spin + speed streaks
-        const streaks = [0, 1, 2].map((i) => {
-          const s = mk("div", "f streak", cubeHost);
-          s.style.cssText += `width:${360 - i * 70}px;left:0;top:0;`;
-          S(s, { x: 20 - i * 30, y: FY - 170 + i * 52, z: -400, scaleX: 0, transformOrigin: "100% 50%", opacity: 0 });
-          return s;
-        });
-        tl.to(cube, { rotationY: 336, duration: 0.62, ease: "power4.inOut" }, T(21) - 0.05);
-        streaks.forEach((s, i) => {
-          tl.to(s, { scaleX: 1, opacity: 1, duration: 0.22, ease: "power2.out" }, T(21) + 0.08 + i * 0.04);
-          tl.to(s, { opacity: 0, x: "+=120", duration: 0.35, ease: "power2.in" }, T(22) + 0.05 + i * 0.04);
-        });
-
-        // ================= S1/S2: output slab A (dull -> crisp) =================
-        const slabHost = $("#s-slabA");
-        const slabSh = shadowEl(slabHost, 420, 160);
-        const slabA = box(slabHost, 340, 230, 16, { front: null, side: "porc-side", top: "porc-top" });
-        const slabFront = mk("div", "f", slabA);
-        slabFront.style.cssText = "width:340px;height:230px;left:-170px;top:-115px;transform:translateZ(8px);overflow:hidden;";
-        slabFront.innerHTML = '<div class="dull"><div class="bars"><i></i><i></i><i></i><i></i></div></div><div class="sharp"><div class="bars"><i></i><i></i><i></i><i></i></div><div class="sheen"></div></div>';
-        const dullBars = slabFront.querySelector(".dull .bars");
-        const sharp = slabFront.querySelector(".sharp");
-        S(dullBars, { filter: "blur(2px)" });
-        S(sharp, { opacity: 0 });
-        // 1.09 "hasil" -> the result slides out of the cube
-        S(slabA, { x: 150, y: FY - 125, z: -160, rotationY: -10, rotationX: 0, scale: 0.4 });
-        SH(slabSh, 150, -160, 0, { scale: 0.3, opacity: 0 });
-        tl.to(slabA, { x: -150, z: -90, scale: 1, rotationY: 16, duration: 0.75, ease: "power3.out" }, T(3) - 0.1);
-        tl.to(slabSh, { x: -124, z: -60, scale: 1, opacity: 1, duration: 0.75, ease: "power3.out" }, T(3) - 0.1);
-        // 2.39 "biasa aja" -> it sags, greys out
-        tl.to(slabA, { rotationX: -16, y: FY - 116, duration: 0.6, ease: "power2.inOut" }, T(7));
-        tl.to(dullBars, { filter: "blur(5px)", opacity: 0.6, duration: 0.6 }, T(7));
-        // 5.78 behind wipe -> front-right of S2 layout, still dull
-        S(slabA, { x: 205, y: FY - 140, z: 40, rotationX: 0, rotationY: -18 }, 5.78);
-        SH(slabSh, 205, 40, 5.78, { scale: 1.05, opacity: 0.8 });
-        // 11.15 "jelas" -> crisp
-        tl.to(dullBars, { filter: "blur(0px)", duration: 0.25 }, T(28) - 0.2);
-        tl.to(sharp, { opacity: 1, duration: 0.35, ease: "power2.out" }, T(28) - 0.05);
-        tl.to(slabA, { y: FY - 160, rotationY: -10, duration: 0.5, ease: "power3.out" }, T(28) - 0.05);
-        tl.to(slabSh, { scale: 1.25, opacity: 0.55, duration: 0.5 }, T(28) - 0.05);
-        tl.fromTo(slabFront.querySelector(".sheen"), { xPercent: 0 }, { xPercent: 480, duration: 0.7, ease: "power2.inOut" }, T(29));
-
-        // ================= S1 -> S2 FG occlusion wipe (2D layer above the stage) =================
-        S("#wipe", { x: -1700, rotation: -5, transformOrigin: "50% 50%" });
-        tl.to("#wipe", { x: 1300, duration: 0.82, ease: "power2.inOut" }, 5.36);
-
-        // ================= S2: brief sheets (REF-B paper elevation) =================
-        const shHost = $("#s-sheets");
-        const sheets = [], sheetSh = [];
-        const SHEET_POSE = [
-          { x: -175, y: FY - 250, z: 60, rotationX: 10, rotationY: 18, rotationZ: -3 },
-          { x: -140, y: FY - 266, z: -40, rotationX: 9, rotationY: 13, rotationZ: 2 },
-          { x: -105, y: FY - 282, z: -140, rotationX: 8, rotationY: 8, rotationZ: 5 },
+        // caption per scene: [start, end, firstWord, lastWord, keyWords]
+        const CAPS = [
+          [0, 1.05, 0, 2, []], [1.05, 3.42, 3, 8, [7, 8]], [3.42, 6.02, 9, 14, [14]], [6.02, 8.42, 15, 20, [18]],
+          [8.42, 9.28, 21, 23, [23]], [9.28, 11.94, 24, 29, [27, 28, 29]], [11.94, 14.68, 30, 36, [34, 35, 36]],
+          [14.68, 19.89, 37, 44, [39, 40, 41, 42, 44]], [19.89, 21.3, 45, 48, [46, 48]], [21.3, 24.25, 49, 53, [53]],
+          [24.25, 25.75, 54, 56, [55, 56]], [25.75, 28.05, 57, 61, [61]], [28.05, 31.1, 62, 67, [65]],
+          [31.1, 35.65, 68, 76, [69, 71, 76]], [35.65, 39.4, 77, 85, [84, 85]],
         ];
-        for (let i = 2; i >= 0; i--) {
-          sheetSh[i] = shadowEl(shHost, 360, 220);
-          const sh = box(shHost, 290, 380, 6, { front: "paper", side: "porc-side", top: "porc-top" });
-          sh.f.front.innerHTML = '<div class="lines"><i class="t"></i><i class="m"></i><i class="s"></i><i class="m"></i><i class="s"></i><i class="d"></i><i class="m"></i></div>';
-          sheets[i] = sh;
-        }
-        const sheetLines = sheets.map((s) => s.f.front.querySelector(".lines"));
-        sheets.forEach((s, i) => {
-          S(s, { x: -230 + i * 12, y: FY - 4 - i * 7, z: 40 - i * 8, rotationX: 90, rotationY: 0, rotationZ: -4 + i * 5 });
-          SH(sheetSh[i], -230 + i * 12, 40 - i * 8, 0, { scale: 0.85, opacity: 0.55 });
-          S(sheetLines[i], { filter: "blur(6px)" });
-          const at = 6.55 + (2 - i) * 0.0 + i * 0.12;
-          tl.to(s, Object.assign({ duration: 0.85, ease: "power3.out" }, SHEET_POSE[i]), at);
-          tl.to(sheetSh[i], { x: SHEET_POSE[i].x + 60, z: SHEET_POSE[i].z + 70, scale: 1.3, opacity: 0.4, duration: 0.85, ease: "power3.out" }, at);
-        });
-        // 7.13 "arahan" -> front sheet takes focus (blue rim)
-        tl.to(sheets[0].f.front, { borderColor: "#294b77", borderWidth: 4, duration: 0.3 }, T(18) - 0.05);
-        // 10.6-11.15 "seberapa jelas" -> lines resolve from blur to crisp
-        sheetLines.forEach((l, i) => tl.to(l, { filter: "blur(0px)", duration: 0.7, ease: "power2.out" }, T(27) + i * 0.08));
-        // beam: brief -> output (9.63 "hasilnya mengikuti")
-        const beam = mk("div", "f beam", shHost);
-        beam.style.cssText += "width:330px;left:0;top:-4px;";
-        S(beam, { x: -100, y: FY - 236, z: 40, rotationY: -3, scaleX: 0, transformOrigin: "0% 50%", opacity: 1 });
-        tl.to(beam, { scaleX: 1, duration: 0.55, ease: "power3.inOut" }, T(25) - 0.05);
-        const bdot = mk("div", "f beamdot", shHost);
-        S(bdot, { x: -100, y: FY - 236, z: 42, opacity: 0 });
-        tl.to(bdot, { opacity: 1, duration: 0.15 }, T(26));
-        tl.to(bdot, { x: 215, z: 46, duration: 1.0, ease: "power2.inOut" }, T(26));
-        tl.to(bdot, { opacity: 0, scale: 2.2, duration: 0.3 }, T(28) - 0.05);
-        tl.to(beam, { opacity: 0, duration: 0.25 }, 11.45);
-        // 11.50 push-through: front sheet flies into camera (hand-off to S3)
-        tl.to(sheets[0], { x: 0, y: 807, z: 1150, rotationX: 0, rotationY: 0, rotationZ: 0, duration: 0.36, ease: "power3.in" }, 11.6);
-        tl.to(sheetSh[0], { opacity: 0, duration: 0.2 }, 11.6);
-
-        // ================= S3: quote chip "bikin yang keren," =================
-        const chipHost = $("#s-chip");
-        const chipSh = shadowEl(chipHost, 720, 200);
-        const chip = box(chipHost, 680, 150, 20, { front: "porc", side: "porc-side", top: "porc-top" });
-        chip.f.front.innerHTML = '<div class="chip" data-layout-allow-occlusion><span class="q">“</span><span class="cw">bikin</span><span class="cw">yang</span><span class="cw">keren,</span><span class="q">”</span><div class="strike"></div></div>';
-        const chipW = chip.f.front.querySelectorAll(".cw"), chipQ = chip.f.front.querySelectorAll(".q");
-        const strike = chip.f.front.querySelector(".strike");
-        S(chip, { x: 0, y: FY - 75, z: 20, rotationX: 90, transformOrigin: "0px 75px 0px" });
-        SH(chipSh, 0, 20, 0, { scale: 0.6, opacity: 0 });
-        S([...chipW, ...chipQ], { opacity: 0, y: 20 });
-        S(strike, { scaleX: 0, transformOrigin: "0% 50%" });
-        tl.to(chip, { rotationX: 0, duration: 0.6, ease: "power3.out" }, 12.25);
-        tl.to(chipSh, { scale: 1, opacity: 0.8, duration: 0.6 }, 12.25);
-        tl.to(chipQ, { opacity: 1, y: 0, duration: 0.3 }, T(34) - 0.12);
-        chipW.forEach((w, i) => tl.to(w, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, T(34 + i) - 0.06));
-        // 14.75 "tapi" -> struck through, tips back
-        tl.to(strike, { scaleX: 1, duration: 0.28, ease: "power2.out" }, T(37) - 0.05);
-        tl.to(chip, { rotationX: 88, duration: 0.5, ease: "power3.in" }, T(37) + 0.28);
-        tl.to(faces(chip), { opacity: 0, duration: 0.25 }, T(37) + 0.62);
-        tl.to(chipSh, { opacity: 0, duration: 0.3 }, T(37) + 0.5);
-
-        // ================= S3: five brief folders on a tiered rack =================
-        const fHost = $("#s-folders");
-        const TERMS = ["style", "ritme", "komposisi", "transisi", "hierarki"];
-        const TERM_W = [39, 40, 41, 42, 44]; // word indexes in W
-        const GLYPH = [
-          '<svg viewBox="0 0 240 130" class="glyph"><circle cx="70" cy="65" r="46" fill="#294b77"/><circle cx="125" cy="65" r="46" fill="#acc6e7" opacity="0.95"/><circle cx="180" cy="65" r="46" fill="#2e2e2e" opacity="0.92"/></svg>',
-          '<svg viewBox="0 0 240 130" class="glyph"><g fill="#294b77">' + [40, 90, 60, 120, 50, 100, 70, 110, 45].map((h, i) => `<rect x="${12 + i * 25}" y="${125 - h}" width="14" height="${h}" rx="7"/>`).join("") + "</g></svg>",
-          '<svg viewBox="0 0 240 130" class="glyph"><rect x="20" y="6" width="200" height="118" rx="8" fill="none" stroke="#294b77" stroke-width="6"/><path d="M87 6V124M153 6V124M20 45H220M20 85H220" stroke="#acc6e7" stroke-width="4"/><circle cx="153" cy="45" r="14" fill="#294b77"/></svg>',
-          '<svg viewBox="0 0 240 130" class="glyph"><rect x="14" y="30" width="70" height="70" rx="8" fill="#acc6e7"/><path d="M98 65H150M136 48L154 65L136 82" fill="none" stroke="#294b77" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="196" cy="65" r="36" fill="#294b77"/></svg>',
-          '<svg viewBox="0 0 240 130" class="glyph"><rect x="14" y="10" width="212" height="34" rx="10" fill="#294b77"/><rect x="14" y="56" width="150" height="26" rx="9" fill="#5f86bd"/><rect x="14" y="94" width="96" height="18" rx="8" fill="#acc6e7"/></svg>',
-        ];
-        const cards = [], cardSh = [], tabs = [], risers = [];
-        const CX = -70;
-        for (let i = 4; i >= 0; i--) {
-          const z = 70 - i * 115, rise = i * 58;
-          if (i > 0) {
-            const r = box(fHost, 660, rise, 110, { front: "porc", side: "porc-side", top: "porc-top", back: null, bottom: null });
-            risers[i] = r;
+        const capRoot = document.getElementById("caps");
+        CAPS.forEach(([s, e, a, b, keys], ci) => {
+          const c = mk("div", "cap clip", capRoot);
+          c.id = "cap" + ci;
+          c.setAttribute("data-start", s); c.setAttribute("data-duration", (e - s).toFixed(3)); c.setAttribute("data-track-index", 8);
+          for (let i = a; i <= b; i++) {
+            const m = mk("span", "m", c);
+            const w = mk("span", "w" + (keys.includes(i) ? " key" : ""), m, W[i][0]);
+            if (i < b) c.appendChild(document.createTextNode(" "));
+            const t = Math.max(s + 0.02, W[i][1] - 0.08);
+            S(w, { yPercent: 110, opacity: 0 });
+            tl.set(w, { opacity: 1 }, t);
+            tl.to(w, { yPercent: 0, duration: 0.34, ease: "power4.out" }, t);
           }
-          cardSh[i] = shadowEl(fHost, 680, 150);
-          const c = box(fHost, 580, 360, 12, { front: "porc", side: "porc-side", top: "porc-top" });
-          c.f.front.innerHTML = '<div class="card-body">' + GLYPH[i] + "</div>";
-          const tb = box(c, 236, 68, 12, { front: "porc", side: "porc-side", top: "porc-top", bottom: null });
-          tb.f.front.innerHTML = `<div class="tab" data-layout-allow-overlap data-layout-allow-occlusion><span class="lbl">${TERMS[i]}</span><div class="hl"></div><span class="lbl2">${TERMS[i]}</span><div class="brk"><i></i><i></i><i></i><i></i></div></div>`;
-          S(tb, { x: -290 + 118 + i * 86, y: -180 - 34, z: 0 });
-          cards[i] = c; tabs[i] = tb;
-          c.home = { x: CX, y: FY - rise - 180, z };
-          c.rise = rise;
-        }
-        for (let i = 0; i < 5; i++) {
-          const c = cards[i], tb = tabs[i];
-          const q = (s) => tb.f.front.querySelector(s);
-          S([q(".lbl"), q(".hl"), q(".lbl2"), q(".brk")], { opacity: 0 });
-          S(q(".brk"), { scale: 1.25 });
-          S(c.f.front.querySelector(".glyph"), { opacity: 0.0, y: 12 });
-          // stand up from lying flat (back to front), 15.05-15.75
-          S(c, Object.assign({ rotationX: 88, transformOrigin: "0px 180px 0px" }, c.home));
-          if (risers[i]) { S(risers[i], { x: CX, y: FY - c.rise / 2 + c.rise, z: c.home.z - 30 }); S(faces(risers[i]), { opacity: 0 }); }
-          S(faces(c), { opacity: 0 });
-          SH(cardSh[i], CX, c.home.z, 0, { scale: 0.9, opacity: 0, y: FY - c.rise - 1 });
-          const up = 15.02 + (4 - i) * 0.09;
-          if (risers[i]) { tl.to(risers[i], { y: FY - c.rise / 2, duration: 0.5, ease: "power3.out" }, up - 0.1); tl.to(faces(risers[i]), { opacity: 1, duration: 0.2 }, up - 0.1); }
-          tl.to(faces(c), { opacity: 1, duration: 0.18 }, up);
-          tl.to(c, { rotationX: -4, duration: 0.6, ease: "power3.out" }, up);
-          tl.to(cardSh[i], { opacity: 0.75, duration: 0.6 }, up);
-          // selection on its spoken word
-          const t0 = T(TERM_W[i]);
-          const t1 = i < 4 ? T(TERM_W[i + 1]) : 19.3;
-          tl.to(q(".lbl"), { opacity: 1, duration: 0.2 }, t0 - 0.08);
-          tl.to([q(".hl"), q(".lbl2")], { opacity: 1, duration: 0.18 }, t0 - 0.06);
-          tl.to(q(".brk"), { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" }, t0 - 0.06);
-          tl.to(c, { y: c.home.y - 120, z: c.home.z + 26, duration: 0.42, ease: "power3.out" }, t0 - 0.08);
-          tl.to(cardSh[i], { scale: 1.25, opacity: 0.45, duration: 0.42 }, t0 - 0.08);
-          tl.to(c.f.front.querySelector(".glyph"), { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, t0 + 0.02);
-          if (i < 4) {
-            tl.to(c, { y: c.home.y, z: c.home.z, duration: 0.32, ease: "power2.inOut" }, t1 - 0.1);
-            tl.to(cardSh[i], { scale: 1, opacity: 0.75, duration: 0.32 }, t1 - 0.1);
-            tl.to([q(".hl"), q(".lbl2"), q(".brk")], { opacity: 0, duration: 0.2 }, t1 - 0.1);
-          }
-        }
-        // 19.30 domino exit: cards fall back flat, back-to-front
-        for (let i = 0; i < 5; i++) {
-          const at = 19.28 + (4 - i) * 0.07;
-          tl.to(cards[i], { y: cards[i].home.y, rotationX: 88, duration: 0.42, ease: "power3.in" }, at);
-          tl.to(tabs[i].f.front.querySelectorAll(".hl, .lbl2, .brk, .lbl"), { opacity: 0, duration: 0.15 }, at + 0.1);
-          tl.to(faces(cards[i]), { opacity: 0, duration: 0.15 }, at + 0.36);
-          tl.to(cardSh[i], { opacity: 0, duration: 0.3 }, at + 0.1);
-          if (risers[i]) tl.to(risers[i], { y: FY + cards[i].rise, duration: 0.4, ease: "power2.in" }, at + 0.05);
-        }
-
-        // ================= S4: dial (REF-B UI -> physical control) =================
-        const dHost = $("#s-dial");
-        const dialSh = shadowEl(dHost, 470, 200);
-        const dial = mk("div", "g3", dHost);
-        const DD = 380;
-        for (let i = 13; i >= 0; i--) {
-          const d = mk("div", "disc " + (i === 0 ? "dialface" : ""), dial);
-          const c = i === 0 ? "" : `background:${i < 3 ? "#e7eef8" : i < 9 ? "#c9d7ea" : "#adc1df"};`;
-          d.style.cssText = `width:${DD}px;height:${DD}px;left:${-DD / 2}px;top:${-DD / 2}px;transform:translateZ(${-i * 2.4}px);${c}`;
-          if (i === 0) {
-            let ticks = "";
-            for (let k = 0; k < 25; k++) {
-              const a = (-120 + k * 10) * Math.PI / 180, r1 = 168, r2 = k % 4 === 0 ? 146 : 156;
-              ticks += `<line x1="${190 + Math.sin(a) * r1}" y1="${190 - Math.cos(a) * r1}" x2="${190 + Math.sin(a) * r2}" y2="${190 - Math.cos(a) * r2}" stroke="#294b77" stroke-opacity="${k % 4 === 0 ? 0.9 : 0.45}" stroke-width="${k % 4 === 0 ? 5 : 3}" stroke-linecap="round"/>`;
-            }
-            d.innerHTML = `<svg width="380" height="380" style="position:absolute;left:0;top:0">${ticks}</svg><div class="dlabel" data-layout-allow-occlusion>PROMPT</div>`;
-            d.leds = [];
-            [-120, -80, -40, 0, 40, 80, 120].forEach((deg) => {
-              const a = deg * Math.PI / 180;
-              const l = mk("div", "led", d);
-              l.style.left = 190 + Math.sin(a) * 124 + "px";
-              l.style.top = 190 - Math.cos(a) * 124 + "px";
-              d.leds.push(l);
-            });
-            dial.face = d;
-          }
-        }
-        const knob = mk("div", "g3", dial);
-        const KD = 150;
-        for (let i = 9; i >= 0; i--) {
-          const d = mk("div", "disc " + (i === 0 ? "knobface" : ""), knob);
-          d.style.cssText = `width:${KD}px;height:${KD}px;left:${-KD / 2}px;top:${-KD / 2}px;transform:translateZ(${4 + (9 - i) * 2.6}px);` + (i === 0 ? "" : `background:${i < 4 ? "#d8e2f0" : "#b4c6e0"};`);
-          if (i === 0) d.innerHTML = '<div style="position:absolute;left:69px;top:10px;width:12px;height:46px;border-radius:6px;background:#294b77"></div>';
-        }
-        S(knob, { rotationZ: -118 });
-        const ledOn = dial.face.leds[4];
-        S(dial, { x: -170, y: FY - 255, z: -40, rotationX: -18, rotationY: 16, scale: 0.6 });
-        SH(dialSh, -170, -40, 0, { scale: 0.5, opacity: 0 });
-        S(faces(dial), { opacity: 0 });
-        tl.to(faces(dial), { opacity: 1, duration: 0.25 }, 19.9);
-        tl.to(dial, { scale: 1, y: FY - 235, duration: 0.55, ease: "power3.out" }, 19.9);
-        tl.to(dialSh, { scale: 1, opacity: 0.8, duration: 0.55 }, 19.9);
-        // 20.62-21.02 "prompt yang tepat" -> knob turns and clicks into the lit state
-        tl.to(knob, { rotationZ: 46, duration: 0.42, ease: "power3.out" }, T(46) - 0.04);
-        tl.to(knob, { rotationZ: 40, duration: 0.16, ease: "power2.out" }, T(48) - 0.02);
-        const ledGlow = mk("div", "led on", dial.face);
-        ledGlow.style.left = ledOn.style.left; ledGlow.style.top = ledOn.style.top;
-        S(ledGlow, { opacity: 0 });
-        tl.to(ledGlow, { opacity: 1, duration: 0.12 }, T(48) - 0.02);
-        // beam dial -> output (21.72 "mengubah")
-        const beam2 = mk("div", "f beam", dHost);
-        beam2.style.cssText += "width:300px;left:0;top:-4px;";
-        S(beam2, { x: -20, y: FY - 240, z: -10, scaleX: 0, transformOrigin: "0% 50%" });
-        tl.to(beam2, { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, T(50) - 0.05);
-        tl.to(beam2, { opacity: 0, duration: 0.3 }, 23.6);
-        // exit
-        tl.to(dial, { x: -760, rotationY: 40, duration: 0.42, ease: "power2.in" }, 24.0);
-        tl.to(dialSh, { x: -734, opacity: 0, duration: 0.42, ease: "power2.in" }, 24.0);
-
-        // ================= S4: output slab B (flip = drastic change) =================
-        const sbHost = $("#s-slabB");
-        const slabBSh = shadowEl(sbHost, 440, 220);
-        const slabB = box(sbHost, 330, 430, 18, { front: null, back: null, side: "porc-side", top: "porc-top" });
-        const sbF = mk("div", "f", slabB);
-        sbF.style.cssText = "width:330px;height:430px;left:-165px;top:-215px;transform:translateZ(9px);overflow:hidden;";
-        sbF.innerHTML = '<div class="dull" style="padding:44px 34px"><div class="bars"><i></i><i></i><i></i><i></i><i></i></div></div>';
-        const sbB = mk("div", "f", slabB);
-        sbB.style.cssText = "width:330px;height:430px;left:-165px;top:-215px;transform:rotateY(180deg) translateZ(9px);overflow:hidden;";
-        sbB.innerHTML = '<div class="sharp" style="padding:44px 34px"><div class="bars"><i></i><i></i><i></i><i></i><i></i></div><div class="sheen"></div></div>';
-        S(slabB, { x: 640, y: FY - 225, z: -20, rotationY: -16 });
-        SH(slabBSh, 640, -20, 0, { opacity: 0.8 });
-        tl.to(slabB, { x: 215, duration: 0.6, ease: "power3.out" }, 21.05);
-        tl.to(slabBSh, { x: 241, duration: 0.6, ease: "power3.out" }, 21.05);
-        // flip with apex on 23.13 "drastis"
-        tl.to(slabB, { rotationY: 164, y: FY - 250, duration: 0.5, ease: "power3.inOut" }, T(53) - 0.36);
-        tl.to(slabB, { y: FY - 225, duration: 0.3, ease: "power2.out" }, T(53) + 0.14);
-        tl.fromTo(sbB.querySelector(".sheen"), { xPercent: 0 }, { xPercent: 480, duration: 0.7, ease: "power2.inOut" }, T(53) + 0.1);
-        tl.fromTo("#flash", { opacity: 0 }, { opacity: 0.85, duration: 0.12, ease: "power2.out" }, T(53) - 0.04);
-        tl.to("#flash", { opacity: 0, duration: 0.6, ease: "power2.out" }, T(53) + 0.1);
-        tl.to(slabB, { x: 760, rotationY: 130, duration: 0.42, ease: "power2.in" }, 24.0);
-        tl.to(slabBSh, { x: 786, opacity: 0, duration: 0.42, ease: "power2.in" }, 24.0);
-
-        // ================= S4: text plate — "teks biasa" -> motion yang terlihat mahal =================
-        const pHost = $("#s-plate");
-        const plateSh = shadowEl(pHost, 900, 220);
-        const plate = box(pHost, 780, 330, 24, { front: null, side: "porc-side", top: "porc-top" });
-        const pf = mk("div", "f", plate);
-        pf.style.cssText = "width:780px;height:330px;left:-390px;top:-165px;transform:translateZ(12px);overflow:hidden;";
-        pf.innerHTML = '<div class="plain"><span class="pw">teks</span>&nbsp;<span class="pw">biasa,</span></div><div class="glassface"><div class="xt shadowcopy" data-layout-allow-overlap style="left:24px;top:30px;"></div><div class="sheen"></div></div>';
-        const plainWords = pf.querySelectorAll(".pw");
-        const gface = pf.querySelector(".glassface");
-        const shadowCopy = pf.querySelector(".shadowcopy");
-        const XT_LINES = [[58, 59], [60, 61]];
-        const xtHTML = XT_LINES.map((ln) => "<div>" + ln.map((i) => `<span data-w="${i}">${W[i][0]}</span>`).join(" ") + "</div>").join("");
-        shadowCopy.innerHTML = xtHTML;
-        const LAYERS = 6, xlayers = [];
-        for (let i = LAYERS - 1; i >= 0; i--) {
-          const L = mk("div", "xt", plate);
-          L.setAttribute("data-layout-allow-overlap", "");
-          L.innerHTML = xtHTML;
-          const col = i === 0 ? "#202b3b" : ["#294b77", "#3b5f91", "#5f86bd", "#86a7d6", "#acc6e7"][i - 1];
-          L.style.color = col;
-          L.style.transform = `translateZ(${14 + (LAYERS - 1 - i) * 3.2}px)`;
-          xlayers.push(L);
-        }
-        const uline = mk("div", "f", plate);
-        uline.style.cssText = "width:400px;height:30px;left:-10px;top:96px;transform:translateZ(31px);";
-        uline.innerHTML = '<svg width="400" height="30" class="uline"><path d="M8 18 C 120 6, 260 26, 392 12" fill="none" stroke="#294b77" stroke-width="9" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>';
-        const upath = uline.querySelector("path");
-        S(upath, { opacity: 0 });
-        tl.set(upath, { opacity: 1 }, T(61) + 0.12);
-        S(plate, { x: 0, y: FY - 185, z: -40, rotationX: 90, rotationY: 0, transformOrigin: "0px 165px 0px" });
-        SH(plateSh, 0, -40, 0, { opacity: 0, scale: 0.8 });
-        S(plainWords, { opacity: 0, y: 16 });
-        S(gface, { opacity: 0 });
-        const plateWords = Array.from(document.querySelectorAll("#s-plate [data-w]"));
-        S(plateWords, { opacity: 0, y: 26 });
-        tl.to(plate, { rotationX: 0, duration: 0.6, ease: "power3.out" }, 24.08);
-        tl.to(plateSh, { opacity: 0.8, scale: 1, duration: 0.6 }, 24.08);
-        plainWords.forEach((w, i) => tl.to(w, { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" }, T(55 + i) - 0.06));
-        // 25.82 "menjadi" -> material change: flat card becomes lit glass, plain words drop away
-        tl.to(plainWords, { opacity: 0, y: 30, duration: 0.25, ease: "power2.in" }, T(57) - 0.1);
-        tl.to(gface, { opacity: 1, duration: 0.45, ease: "power2.out" }, T(57) - 0.05);
-        tl.to(plate, { y: FY - 200, duration: 0.6, ease: "power3.out" }, T(57) - 0.05);
-        tl.to(plateSh, { scale: 1.12, opacity: 0.6, duration: 0.6 }, T(57) - 0.05);
-        [58, 59, 60, 61].forEach((wi) => {
-          tl.to(plateWords.filter((e) => e.dataset.w == wi), { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, T(wi) - 0.07);
         });
-        tl.to(upath, { strokeDashoffset: 0, duration: 0.45, ease: "power2.inOut" }, T(61) + 0.12);
-        tl.fromTo(gface.querySelector(".sheen"), { xPercent: 0 }, { xPercent: 480, duration: 0.9, ease: "power2.inOut" }, T(61) - 0.1);
-        // exit (spatial pan) 27.72
-        tl.to(plate, { x: -980, z: -260, rotationY: 24, duration: 0.42, ease: "power2.in" }, 27.72);
-        tl.to(plateSh, { x: -954, opacity: 0, duration: 0.42, ease: "power2.in" }, 27.72);
 
-        // ================= S5: porcelain box with hinged lid (REF-B open-box reveal) =================
-        const bHost = $("#s-box");
-        const boxSh = shadowEl(bHost, 980, 420);
-        const BW = 780, BH = 230, BD = 300;
-        const bx = box(bHost, BW, BH, BD, { front: "porc", left: "porc", right: "porc-side", back: null, top: null, bottom: null });
-        const inner = (tr, w, h) => { const f = mk("div", "f inner", bx); f.style.cssText = `width:${w}px;height:${h}px;left:${-w / 2}px;top:${-h / 2}px;transform:${tr};`; return f; };
-        inner(`translateZ(${-BD / 2 + 1}px)`, BW, BH);
-        inner(`rotateY(90deg) translateZ(${-BW / 2 + 1}px)`, BD, BH);
-        inner(`rotateY(-90deg) translateZ(${-BW / 2 + 1}px)`, BD, BH);
-        inner(`rotateX(90deg) translateZ(${-BH / 2 + 2}px)`, BW, BD);
-        const glowIn = mk("div", "f", bx);
-        glowIn.style.cssText = `width:${BW}px;height:${BD}px;left:${-BW / 2}px;top:${-BD / 2}px;transform:rotateX(90deg) translateZ(${-BH / 2 + 3}px);background:radial-gradient(ellipse, rgba(255,255,255,0.95), rgba(255,255,255,0) 70%);`;
-        const lid = box(bHost, BW + 12, 26, BD + 12, { front: "porc", side: "porc-side", top: "porc-top", bottom: "inner" });
-        const lbeam = mk("div", "f lightbeam", bHost);
-        S(bx, { x: 900, y: FY - BH / 2, z: -90, rotationY: -12 });
-        S(lid, { x: 900, y: FY - BH - 13, z: -90, rotationY: -12, rotationX: 0, transformOrigin: `0px 13px ${-(BD + 12) / 2}px` });
-        SH(boxSh, 900, -90, 0, { opacity: 0.85 });
-        S(glowIn, { opacity: 0 });
-        S(lbeam, { x: 0, y: FY - BH, z: -110, opacity: 0, scaleY: 0.4, transformOrigin: "50% 100%" });
-        tl.to([bx, lid], { x: 0, rotationY: 0, duration: 0.62, ease: "power3.out" }, 27.78);
-        tl.to(boxSh, { x: 26, duration: 0.62, ease: "power3.out" }, 27.78);
-        // 28.43 "inilah" -> lid opens under a spotlight
-        tl.to(lid, { rotationX: 108, duration: 1.0, ease: "power3.inOut" }, T(63) + 0.1);
-        tl.to(glowIn, { opacity: 1, duration: 0.8 }, T(63) + 0.4);
-        tl.to(lbeam, { opacity: 0.9, scaleY: 1, duration: 0.9, ease: "power2.out" }, T(63) + 0.45);
-        tl.to("#pool", { x: 0, scale: 1.25, opacity: 1, duration: 0.9 }, T(63) + 0.3);
-        // 34.95 simplify: lid closes, box sinks away
-        tl.to(lbeam, { opacity: 0, duration: 0.4 }, 35.0);
-        tl.to(glowIn, { opacity: 0, duration: 0.3 }, 35.3);
-        tl.to(lid, { rotationX: 0, duration: 0.45, ease: "power2.inOut" }, 35.2);
-        tl.to([bx, lid], { x: -40, z: -500, duration: 0.5, ease: "power2.in" }, 35.5);
-        tl.to(faces(bHost), { opacity: 0, duration: 0.3 }, 35.68);
-        tl.to(boxSh, { opacity: 0, duration: 0.35 }, 35.6);
-
-        // ================= S5: three statement slabs rise out of the box =================
-        const slHost = $("#s-slabs");
-        const SL = [
-          { words: [[68, 69]], h: 120, cls: "porc", side: "porc-side", t: T(68) },
-          { words: [[70, 71]], h: 120, cls: "porc", side: "porc-side", t: T(70) },
-          { words: [[72, 73], [74, 75, 76]], h: 190, cls: "navy", side: "navy-side", t: T(72) },
-        ];
-        const slabs = SL.map((d) => {
-          const s = box(slHost, 720, d.h, 26, { front: d.cls, side: d.side, top: d.side });
-          s.f.front.innerHTML = '<div class="slabtxt" data-layout-allow-overlap data-layout-allow-occlusion style="flex-direction:column">' + d.words.map((ln) => "<div>" + ln.map((i) => `<span data-w="${i}">${W[i][0]}</span>`).join(" ") + "</div>").join("") + "</div>";
-          return s;
-        });
-        const STACK = [[896], [880, 742], [895, 728, 596]]; // centre Y per slab after each arrival
-        slabs.forEach((s) => S(s, { x: 0, y: FY - 110, z: -90, opacity: 1 }));
-        const slabWords = Array.from(slHost.querySelectorAll("[data-w]"));
-        S(slabWords, { opacity: 0, y: 18 });
-        slabs.forEach((s, i) => {
-          const at = SL[i].t - 0.22;
-          // arriving slab rises from inside the box; earlier slabs step up
-          for (let j = 0; j <= i; j++) {
-            const order = i - j; // newest is lowest
-            const yTarget = STACK[i][order];
-            tl.to(slabs[j], { y: yTarget, duration: j === i ? 0.55 : 0.45, ease: "power3.out" }, at);
-          }
-          SL[i].words.flat().forEach((wi) => tl.to(slabWords.filter((e) => e.dataset.w == wi), { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, T(wi) - 0.06));
-        });
-        // 34.86 "premium." apex: navy slab tilts toward the key light
-        tl.to(slabs[2], { rotationX: -8, duration: 0.3, ease: "power2.out" }, T(76) - 0.04);
-        tl.to(slabs[2], { rotationX: 0, duration: 0.4, ease: "power2.inOut" }, T(76) + 0.3);
-        slabs.forEach((s, i) => tl.to(s, { y: FY - 110, duration: 0.42, ease: "power2.in" }, 35.0 + (2 - i) * 0.06));
-
-        // ================= S5/S6: genuine logo plate =================
-        const lHost = $("#s-logo");
-        const logoSh = shadowEl(lHost, 820, 220);
-        const logo = box(lHost, 720, 132, 22, { front: "porc", side: "porc-side", top: "porc-top" });
-        logo.f.front.innerHTML = '<div class="logoface"><img src="assets/brand/ai_preneur_logo_trimmed.png" alt="AI PRENEUR"></div>';
-        S(logo, { x: 0, y: FY - 120, z: -100, scale: 1 });
-        SH(logoSh, 0, -100, 0, { opacity: 0, scale: 0.7 });
-        // 29.26 "AI PRENEUR" -> rises out of the open box, camera-facing
-        tl.to(logo, { y: 640, z: -60, duration: 1.0, ease: "power3.out" }, T(65) - 0.35);
-        tl.to(logo, { y: 424, duration: 0.5, ease: "power3.inOut" }, 30.85);
-        tl.to(logoSh, { opacity: 0.35, scale: 1.2, duration: 1.0 }, T(65) - 0.35);
-        // 35.45 descend to the closing lockup position
-        tl.to(logo, { y: 1080, z: 40, scale: 0.95, duration: 0.95, ease: "power3.inOut" }, 35.45);
-        tl.to(logoSh, { x: 26, z: 70, opacity: 0.6, scale: 1.25, duration: 0.95, ease: "power3.inOut" }, 35.45);
-        tl.to(logo, { y: 1072, duration: 1.6, ease: "sine.inOut", repeat: 1, yoyo: true }, 36.45);
-
-        // ================= spotlight pool (follows the focus) =================
-        tl.to("#pool", { x: -230, scale: 1.1, duration: 0.7, ease: "power2.inOut" }, 5.25);
-        tl.to("#pool", { x: -60, scale: 1.3, duration: 0.8, ease: "power2.inOut" }, 9.4);
-        tl.set("#pool", { x: 0, scale: 1.2 }, 11.94);
-        tl.to("#pool", { x: -120, scale: 1.25, duration: 0.6 }, 15.0);
-        tl.set("#pool", { x: -150, scale: 1.0 }, 19.89);
-        tl.to("#pool", { x: 120, scale: 1.4, duration: 0.6 }, T(53) - 0.2);
-        tl.set("#pool", { x: 0, scale: 1.2 }, 24.1);
-        tl.to("#pool", { scale: 1.05, opacity: 0.85, duration: 0.8 }, 35.6);
-
-        // ================= camera (world) =================
-        const CAM = (v, at, dur, ease) => tl.to("#world", Object.assign({ duration: dur, ease: ease || "power2.inOut" }, v), at);
-        // per-scene crane (y) + dolly (z): frames each beat, BG never moves
-        S("#world", { x: 600, y: -300, z: 230, rotationY: -9, rotationX: 0 });
-        CAM({ x: 548, y: -335, z: 545, rotationY: -1 }, 0, 1.1, "power3.out");
-        CAM({ x: 540, z: 590, rotationY: 2.5 }, 1.1, 4.3, "sine.inOut");
-        S("#world", { x: 540, y: -200, z: 320, rotationY: 3 }, 5.78);
-        CAM({ z: 370, rotationY: -2.5 }, 5.8, 5.7, "sine.inOut");
-        S("#world", { x: 540, y: -60, z: 150, rotationY: 5, rotationX: -3 }, 11.94);
-        CAM({ rotationY: 3, z: 170 }, 11.95, 3.0, "sine.inOut");
-        CAM({ rotationY: -4, z: 220 }, 15.0, 4.3, "sine.inOut");
-        S("#world", { x: 540, y: -150, z: 220, rotationY: 0, rotationX: 0 }, 19.89);
-        CAM({ z: 250 }, 19.9, 3.0, "sine.inOut");
-        CAM({ z: 290, rotationY: 2.5 }, T(53) - 0.1, 0.25, "power3.out");
-        CAM({ rotationY: 0, z: 280 }, 24.0, 0.6);
-        CAM({ rotationY: 5 }, 25.7, 0.5);
-        CAM({ rotationY: -4, z: 310 }, 26.2, 1.6, "sine.inOut");
-        CAM({ rotationY: 0, z: 150, y: -100 }, 27.72, 0.5);
-        CAM({ z: 190 }, 31.0, 3.9, "sine.inOut");
-        CAM({ z: 150 }, 35.2, 0.9);
-
-        // ================= BG ambience (seekable) =================
-        tl.to("#haze-a", { x: 70, y: 60, duration: 19.7, ease: "sine.inOut", repeat: 1, yoyo: true }, 0);
-        tl.to("#haze-b", { x: -90, y: -50, duration: 19.7, ease: "sine.inOut", repeat: 1, yoyo: true }, 0);
-        tl.to("#haze-c", { scale: 1.12, duration: 9.85, ease: "sine.inOut", repeat: 3, yoyo: true }, 0);
-        tl.to("#grain", { x: 64, y: 40, duration: 39.4, ease: "steps(394)" }, 0);
-        // closing: calm back to the original plate
-        tl.to(["#haze-a", "#haze-b", "#haze-c"], { opacity: 0.55, duration: 1.0 }, 35.7);
-        tl.to("#floor", { opacity: 0.6, duration: 1.0 }, 35.7);
-
-
-        // ================= ATMOSPHERE: key-light rays + glass motes (seeded, seekable) =================
-        [["#ray1", 300, -28, 0.55], ["#ray2", 520, -31, 0.38], ["#ray3", 760, -26, 0.28]].forEach(([id, top, rot, op], i) => {
-          const r = $(id); r.style.top = top + "px";
-          S(r, { rotation: rot, opacity: op, x: -60 });
-          tl.to(r, { x: 80, duration: 19.7, ease: "sine.inOut", repeat: 1, yoyo: true }, 0);
-          tl.to(r, { opacity: op * 0.45, duration: 4.925, ease: "sine.inOut", repeat: 7, yoyo: true }, i * 1.3);
-        });
+        // ambient BG (seeded, seekable)
         let seed = 20261021;
         const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-        for (let i = 0; i < 26; i++) {
-          const m = mk("div", "mote", $("#motes"));
-          const sz = 5 + rnd() * 11;
-          m.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080}px;top:${200 + rnd() * 1500}px;`;
-          S(m, { opacity: 0.35 + rnd() * 0.5, x: 0, y: 0 });
-          tl.to(m, { y: -(120 + rnd() * 260), duration: 39.4, ease: "none" }, 0);
-          const sway = 3.5 + rnd() * 3;
-          tl.to(m, { x: 18 + rnd() * 30, duration: sway, ease: "sine.inOut", repeat: Math.max(0, Math.floor(39.4 / sway) - 1), yoyo: true }, 0);
+        for (let i = 0; i < 22; i++) {
+          const m = mk("div", "mote", document.getElementById("motes"));
+          const sz = 4 + rnd() * 9;
+          m.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080}px;top:${300 + rnd() * 1500}px;`;
+          S(m, { opacity: 0.3 + rnd() * 0.45 });
+          tl.to(m, { y: -(120 + rnd() * 240), duration: 39.4, ease: "none" }, 0);
         }
-        for (let i = 0; i < 5; i++) {
-          const b = mk("div", "bokeh", $("#bokeh"));
-          const sz = 60 + rnd() * 90;
-          b.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080 - 40}px;top:${1350 + rnd() * 420}px;`;
-          S(b, { opacity: 0.25 + rnd() * 0.3 });
-          tl.to(b, { y: -(160 + rnd() * 200), x: -40 + rnd() * 80, duration: 39.4, ease: "none" }, 0);
-        }
-
-        // ================= EDITING: camera punch-ins on the spoken apex words (#kick layer) =================
-        const KICK = (t, dz, hold, back) => {
-          tl.fromTo("#kick", { z: 0 }, { z: dz, duration: hold || 0.18, ease: "power3.out", immediateRender: false }, t - 0.06);
-          tl.fromTo("#kick", { z: dz }, { z: 0, duration: back || 0.75, ease: "power2.inOut", immediateRender: false }, t - 0.06 + (hold || 0.18));
-        };
-        S("#kick", { z: 0, rotationY: 0, transformOrigin: "540px 1000px -150px" });
-        KICK(T(7), -45, 0.3, 0.9);       // "biasa aja"  -> deflating pull-back
-        KICK(T(14), 60);                 // "AI-nya."
-        KICK(T(18), 70);                 // "arahan"
-        KICK(T(28), 55, 0.18, 0.6);      // "jelas"
-        KICK(T(37), 45, 0.16, 0.6);      // "tapi" (strike)
-        [39, 40, 41, 42].forEach((wi, k) => KICK(T(wi), 26, 0.12, Math.min(0.22, T([40, 41, 42, 44][k]) - T(wi) - 0.2)));
-        KICK(T(44), 30, 0.14, 0.3);      // "hierarki."
-        KICK(T(48), 40, 0.16, 0.6);      // "tepat"
-        KICK(T(53), 95, 0.16, 0.7);      // "drastis."
-        KICK(T(61), 55, 0.18, 0.12);     // "mahal."
-        KICK(T(65), 55, 0.2, 0.7);       // "AI PRENEUR"
-        KICK(T(76), 65, 0.18, 0.12);     // "premium."
-        KICK(T(85), 45, 0.2, 0.32);      // "tepat."
-
-        // ================= EDITING: whip-pan cuts (rotation + shutter blur on the stage) =================
-        const WHIP = (cut, dir) => {
-          tl.fromTo("#kick", { rotationY: 0 }, { rotationY: -26 * dir, duration: 0.17, ease: "power2.in", immediateRender: false }, cut - 0.17);
-          tl.fromTo("#kick", { rotationY: 26 * dir }, { rotationY: 0, duration: 0.3, ease: "power3.out", immediateRender: false }, cut);
-          tl.fromTo("#stage", { filter: "blur(0px)" }, { filter: "blur(18px)", duration: 0.17, ease: "power2.in", immediateRender: false }, cut - 0.17);
-          tl.fromTo("#stage", { filter: "blur(18px)" }, { filter: "blur(0px)", duration: 0.3, ease: "power3.out", immediateRender: false }, cut);
-          tl.set("#stage", { filter: "none" }, cut + 0.31);
-        };
-        WHIP(19.89, 1);
-        WHIP(27.9, -1);
-        tl.fromTo("#stage", { filter: "blur(0px)" }, { filter: "blur(10px)", duration: 0.2, ease: "power2.in", immediateRender: false }, 11.76);
-        tl.fromTo("#stage", { filter: "blur(10px)" }, { filter: "blur(0px)", duration: 0.28, ease: "power3.out", immediateRender: false }, 11.96);
-        tl.set("#stage", { filter: "none" }, 12.25);
-
-        // ================= S3: camera tracks the selected folder (REF-A selection follow) =================
-        [39, 40, 41, 42, 44].forEach((wi, i) => {
-          const tabX = CX + (-290 + 118 + i * 86);
-          tl.to("#world", { x: 540 - tabX * 0.45, y: -60 + i * 26, duration: 0.42, ease: "power3.inOut" }, T(wi) - 0.12);
-        });
-        tl.to("#world", { x: 540, y: -60, duration: 0.4, ease: "power2.inOut" }, 19.3);
-
-        // ================= S4: light burst when the dial clicks on "tepat" =================
-        const burst = mk("div", "burst", dial.face);
-        burst.style.cssText += "width:380px;height:380px;left:0;top:0;";
-        S(burst, { scale: 0.5, opacity: 0 });
-        tl.fromTo(burst, { scale: 0.5, opacity: 1 }, { scale: 1.6, opacity: 0, duration: 0.6, ease: "power2.out", immediateRender: false }, T(48) - 0.02);
-
-        // ================= logo sheen (reveal + final lockup) =================
-        const lsheen = mk("div", "sheen", logo.f.front);
-        logo.f.front.style.overflow = "hidden";
-        S(lsheen, { xPercent: 0 });
-        tl.fromTo(lsheen, { xPercent: 0 }, { xPercent: 480, duration: 0.9, ease: "power2.inOut", immediateRender: false }, T(65) + 0.35);
-        tl.fromTo(lsheen, { xPercent: 0 }, { xPercent: 480, duration: 1.1, ease: "power2.inOut", immediateRender: false }, 37.2);
-
-        // ================= TEXT PLANE (word-synced copy) =================
-        const textRoot = $("#text");
-        const BLOCKS = [
-          { s: 0.0, e: 3.42, lines: [["k", [0, 1, 2]], ["h", [3, 4, 5]], ["h m", [6, 7, 8]]] },
-          { s: 3.42, e: 6.02, lines: [["k", [9, 10, 11]], ["h", [12, 13]], ["h xl mkr", [14]]] },
-          { s: 6.02, e: 8.42, lines: [["k", [15, 16, 17]], ["h xl mkr", [18]], ["k2", [19, 20]]] },
-          { s: 8.42, e: 12.12, lines: [["h", [21, 22, 23]], ["k", [24, 25, 26]], ["h", [27, 28]], ["h mkr", [29]]] },
-          { s: 11.94, e: 14.72, lines: [["k", [30, 31, 32, 33]]] },
-          { s: 14.72, e: 19.75, lines: [["k", [37, 38]]], terms: true },
-          { s: 19.89, e: 21.3, lines: [["k", [45]], ["h xl mkr", [46]], ["h", [47, 48]]] },
-          { s: 21.3, e: 24.05, lines: [["k", [49, 50, 51]], ["h", [52, 53]]] },
-          { s: 24.2, e: 25.78, lines: [["k", [54]]], top: 640 },
-          { s: 25.78, e: 27.75, lines: [["k", [57]]], top: 640 },
-          { s: 28.1, e: 30.95, lines: [["k", [62, 63, 64]], ["sp", 326], ["h", [66, 67]]] },
-          { s: 35.7, e: 39.4, lines: [["k", [77, 78, 79, 80]], ["k", [81, 82]], ["k2", [83]], ["h xl mkr", [84]], ["h xl", [85]]] },
-        ];
-        let prevExit = -9;
-        BLOCKS.forEach((b, bi) => {
-          // a block never rolls in until the previous block has rolled out
-          const RA = (wi) => Math.max(W[wi][1] - 0.09, prevExit - 0.06);
-          const blk = mk("div", "blk clip", textRoot);
-          blk.id = "blk" + bi;
-          blk.setAttribute("data-start", b.s);
-          // exit waits for the last word's reveal to finish (no clipped tails)
-          let lastEnd = 0;
-          b.lines.forEach(([cls, ids]) => { if (cls !== "sp") ids.forEach((wi) => { const hero = /xl/.test(cls) || wi === 8 || wi === 53; lastEnd = Math.max(lastEnd, RA(wi) + (hero ? 0.6 : 0.44)); }); });
-          const exitAt = Math.max(b.e - 0.3, lastEnd + 0.04);
-          const nW = b.lines.reduce((n, [c, ids]) => n + (c === "sp" ? 0 : ids.length), 0);
-          const wordsGone = exitAt + 0.26 + 0.012 * nW;       // last word fully out
-          const endAt = b.e < 39.3 ? Math.max(b.e, wordsGone + 0.26) : b.e;
-          blk.setAttribute("data-duration", (endAt - b.s).toFixed(3));
-          blk.setAttribute("data-track-index", 8);
-          if (b.top) blk.style.top = b.top + "px";
-          const inner = mk("div", "bi", blk);
-          b.lines.forEach(([cls, ids]) => {
-            if (cls === "sp") { const sp = mk("div", "", inner); sp.style.height = ids + "px"; return; }
-            const ln = mk("div", "ln " + cls, inner);
-            if (/mkr/.test(cls)) {
-              const bg = mk("div", "mkbg", ln);
-              S(bg, { scaleX: 0, transformOrigin: "0% 50%" });
-              tl.to(bg, { scaleX: 1, duration: 0.38, ease: "power3.inOut" }, RA(ids[0]) - 0.13);
-              if (b.e < 39.3) tl.to(bg, { scaleX: 0, transformOrigin: "100% 50%", duration: 0.24, ease: "power3.in" }, wordsGone - 0.06);
-            }
-            if (b.wrap && cls === "k") { ln.style.whiteSpace = "normal"; ln.style.maxWidth = "810px"; }
-            ids.forEach((wi, j) => {
-              if (j > 0) mk("span", "sp", ln);
-              const mask = mk("span", "mask", ln);
-              const w = mk("span", "w", mask, W[wi][0]);
-              w.dataset.t = W[wi][1];
-              const hero = /xl/.test(cls) || wi === 8 || wi === 53;
-              S(w, { yPercent: 112, rotation: hero ? 5 : 3, opacity: 0, transformOrigin: "0% 100%" });
-              tl.set(w, { opacity: 1 }, RA(wi));
-              tl.to(w, { yPercent: 0, rotation: 0, duration: hero ? 0.6 : 0.44, ease: "power4.out" }, RA(wi));
-            });
-          });
-          if (b.terms) {
-            const tw = mk("div", "terms", inner);
-            const TL = [[39], [40], [41], [42], [43, 44]];
-            TL.forEach((ids, k) => {
-              const t = mk("div", "term", tw);
-              t.innerHTML = ids.map((wi) => `<span class="${wi === 43 ? "dan" : ""}">${W[wi][0]}</span>`).join(ids.length > 1 ? " " : "");
-              const t0 = T(ids[0]), t1 = k < 4 ? T(TL[k + 1][0]) : null;
-              S(t, { opacity: 0, y: 60 });
-              tl.to(t, { opacity: 1, y: 0, duration: 0.34, ease: "power3.out" }, t0 - 0.07);
-              if (ids.length > 1) {
-                const hs = t.querySelectorAll("span")[1];
-                S(hs, { opacity: 0 });
-                tl.to(hs, { opacity: 1, duration: 0.25 }, T(ids[1]) - 0.06);
-              }
-              if (t1 !== null) tl.to(t, { opacity: 0, y: -50, duration: 0.18, ease: "power2.in" }, t1 - 0.12);
-              else tl.to(t, { opacity: 0, y: -50, duration: 0.22, ease: "power2.in" }, b.e - 0.3);
-            });
-          }
-          if (b.e < 39.3) tl.to(inner.querySelectorAll(".ln:not(.terms) .w"), { yPercent: -115, duration: 0.26, ease: "power3.in", stagger: 0.012 }, exitAt);
-          prevExit = b.e < 39.3 ? wordsGone : -9;
-        });
+        tl.to("#haze-a", { x: 70, y: 60, duration: 19.7, ease: "sine.inOut", repeat: 1, yoyo: true }, 0);
+        tl.to("#haze-b", { x: -90, y: -50, duration: 19.7, ease: "sine.inOut", repeat: 1, yoyo: true }, 0);
+        tl.to("#bggrid", { x: 27, y: 27, duration: 39.4, ease: "none" }, 0);
+        tl.to("#grain", { x: 64, y: 40, duration: 39.4, ease: "steps(394)" }, 0);
 
         window.__timelines["main"] = tl;
       })();

@@ -5,16 +5,317 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; overflow: hidden; }
-        .s06-ph { position: absolute; left: 440px; top: 840px; width: 200px; height: 200px; border-radius: 50%; background: #294b77; }
+        .s06-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+        .s06-abs { position: absolute; }
+        .s06-bokeh { position: absolute; border-radius: 50%; background: radial-gradient(circle at 40% 38%, rgba(255,255,255,0.95), rgba(203,219,244,0.55) 55%, rgba(203,219,244,0) 72%); filter: blur(4px); }
+        .s06-floor { position: absolute; left: 40px; top: 1010px; width: 1000px; height: 140px; border-radius: 50%; background: radial-gradient(ellipse, rgba(28,51,84,0.2), rgba(28,51,84,0) 70%); filter: blur(10px); }
+        /* brief clipboard */
+        .s06-brief { position: absolute; left: 86px; top: 470px; width: 404px; height: 566px; }
+        .s06-board { position: absolute; inset: 0; border-radius: 30px; background: linear-gradient(155deg, #4a74ad, #294b77 55%, #1c3354);
+          box-shadow: 0 2px 0 rgba(255,255,255,0.35) inset, 0 -3px 0 rgba(0,0,0,0.2) inset, 22px 34px 44px -14px rgba(28,51,84,0.45), 0 8px 16px rgba(28,51,84,0.18); }
+        .s06-board::after { content: ""; position: absolute; left: 10px; top: 10px; right: 10px; bottom: 10px; border-radius: 22px; border: 2px solid rgba(255,255,255,0.12); }
+        .s06-paper { position: absolute; left: 30px; top: 74px; width: 344px; height: 462px; border-radius: 8px; background: linear-gradient(178deg, #fffefb, #f4f2ec);
+          box-shadow: 0 10px 18px rgba(10,20,40,0.28), 0 1px 0 #fff inset; overflow: hidden; }
+        .s06-paper i { position: absolute; display: block; border-radius: 5px; }
+        .s06-clip { position: absolute; left: 112px; top: -26px; width: 180px; height: 112px; }
+        .s06-tab { position: absolute; left: 366px; top: 140px; width: 112px; height: 126px; }
+        /* output poster */
+        .s06-poster { position: absolute; left: 588px; top: 452px; width: 410px; height: 600px; }
+        .s06-glow { position: absolute; left: -110px; top: -110px; width: 630px; height: 760px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,1), rgba(172,198,231,0.85) 38%, rgba(159,216,196,0.3) 55%, rgba(172,198,231,0) 70%); }
+        .s06-bezel { position: absolute; left: 0; top: 0; width: 410px; height: 540px; border-radius: 30px; background: linear-gradient(160deg, #ffffff, #e8f0fb 60%, #cbdbf4);
+          box-shadow: 0 2px 0 #fff inset, 22px 34px 44px -14px rgba(28,51,84,0.42), 0 8px 16px rgba(28,51,84,0.16); }
+        .s06-screen { position: absolute; left: 18px; top: 18px; width: 374px; height: 504px; border-radius: 16px; overflow: hidden; background: linear-gradient(170deg, #fbfcfe, #e8f0fb); box-shadow: inset 0 0 0 2px rgba(41,75,119,0.12); }
+        .s06-screen i { position: absolute; display: block; }
+        .s06-neck { position: absolute; left: 175px; top: 536px; width: 60px; height: 40px; background: linear-gradient(90deg, #acc6e7, #fbfcfe 40%, #8fa9cc); }
+        .s06-foot { position: absolute; left: 110px; top: 570px; width: 190px; height: 26px; border-radius: 13px; background: linear-gradient(180deg, #ffffff, #acc6e7); box-shadow: 10px 14px 18px rgba(28,51,84,0.3); }
+        .s06-bracket { position: absolute; width: 40px; height: 40px; border-color: #294b77; border-style: solid; border-width: 0; }
+        /* lens */
+        .s06-lens { position: absolute; left: 255px; top: 930px; width: 570px; height: 570px; }
+        .s06-lens svg { position: absolute; left: 0; top: 0; width: 570px; height: 570px; overflow: visible; }
+        .s06-lensshadow { position: absolute; left: 300px; top: 1400px; width: 560px; height: 120px; }
+        .s06-fx { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
       </style>
       <div id="root" data-composition-id="s06" data-width="1080" data-height="1920">
-        <div class="s06-ph"></div>
+        <div class="s06-stage" id="s06-stage">
+          <!-- far plane -->
+          <div id="s06-far" class="s06-abs" style="left:0;top:0;width:1080px;height:1920px;">
+            <div class="s06-bokeh" style="left:470px;top:520px;width:120px;height:120px;filter:blur(14px);"></div>
+            <div class="s06-bokeh" style="left:60px;top:1150px;width:90px;height:90px;filter:blur(10px);"></div>
+            <div class="s06-bokeh" style="left:930px;top:1180px;width:70px;height:70px;filter:blur(9px);"></div>
+            <div class="s06-bokeh" style="left:520px;top:440px;width:40px;height:40px;filter:blur(6px);"></div>
+          </div>
+          <div class="s06-floor"></div>
+
+          <!-- BRIEF (left) -->
+          <div class="s06-brief" id="s06-brief">
+            <div class="s06-board"></div>
+            <div class="s06-paper">
+              <i style="left:26px;top:30px;width:190px;height:24px;background:#294b77;border-radius:7px;"></i>
+              <i style="left:228px;top:32px;width:58px;height:20px;background:#acc6e7;border-radius:10px;"></i>
+              <i style="left:26px;top:68px;width:292px;height:3px;background:#cbdbf4;"></i>
+              <i style="left:26px;top:88px;width:250px;height:11px;background:#8fa9cc;"></i>
+              <i style="left:26px;top:110px;width:280px;height:11px;background:#cbdbf4;"></i>
+              <i style="left:26px;top:132px;width:220px;height:11px;background:#cbdbf4;"></i>
+              <i style="left:26px;top:164px;width:136px;height:112px;background:#eef3fa;border:2px dashed #8fa9cc;border-radius:10px;"></i>
+              <i style="left:44px;top:182px;width:46px;height:46px;border:4px solid #3a6299;border-radius:50%;"></i>
+              <i style="left:100px;top:186px;width:44px;height:10px;background:#3a6299;"></i>
+              <i style="left:100px;top:204px;width:34px;height:8px;background:#acc6e7;"></i>
+              <i style="left:44px;top:240px;width:100px;height:22px;background:#acc6e7;border-radius:6px;"></i>
+              <i style="left:180px;top:168px;width:16px;height:16px;border:3px solid #294b77;border-radius:4px;"></i>
+              <i style="left:206px;top:171px;width:104px;height:10px;background:#8fa9cc;"></i>
+              <i style="left:180px;top:200px;width:16px;height:16px;border:3px solid #294b77;border-radius:4px;"></i>
+              <i style="left:206px;top:203px;width:88px;height:10px;background:#cbdbf4;"></i>
+              <i style="left:180px;top:232px;width:16px;height:16px;border:3px solid #294b77;border-radius:4px;"></i>
+              <i style="left:206px;top:235px;width:96px;height:10px;background:#cbdbf4;"></i>
+              <i style="left:26px;top:298px;width:292px;height:3px;background:#cbdbf4;"></i>
+              <i style="left:26px;top:318px;width:60px;height:60px;background:linear-gradient(135deg,#acc6e7,#294b77);border-radius:10px;"></i>
+              <i style="left:96px;top:318px;width:60px;height:60px;background:linear-gradient(135deg,#e8f0fb,#acc6e7);border-radius:10px;"></i>
+              <i style="left:166px;top:318px;width:60px;height:60px;background:#fbfcfe;border:3px solid #acc6e7;border-radius:10px;"></i>
+              <i style="left:236px;top:318px;width:60px;height:60px;background:#294b77;border-radius:30px;"></i>
+              <i style="left:26px;top:398px;width:230px;height:10px;background:#cbdbf4;"></i>
+              <i style="left:26px;top:418px;width:170px;height:10px;background:#cbdbf4;"></i>
+              <svg style="position:absolute;left:226px;top:396px;width:100px;height:50px;" viewBox="0 0 100 50"><path d="M6 34 C18 6, 26 44, 40 24 S 62 8, 70 30 S 88 30, 96 18" fill="none" stroke="#294b77" stroke-width="3.5" stroke-linecap="round" /></svg>
+            </div>
+            <svg class="s06-clip" viewBox="0 0 180 112">
+              <defs>
+                <linearGradient id="s06-steel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8FA9CC" /><stop offset="0.3" stop-color="#FFFFFF" /><stop offset="0.65" stop-color="#CBDBF4" /><stop offset="1" stop-color="#7F9CC4" /></linearGradient>
+                <linearGradient id="s06-steelv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" /><stop offset="1" stop-color="#8FA9CC" /></linearGradient>
+              </defs>
+              <path d="M58 30 Q58 6 90 6 Q122 6 122 30" fill="none" stroke="url(#s06-steel)" stroke-width="10" stroke-linecap="round" />
+              <rect x="8" y="40" width="164" height="62" rx="16" fill="url(#s06-steelv)" stroke="#8FA9CC" stroke-width="2" />
+              <rect x="30" y="26" width="120" height="30" rx="12" fill="url(#s06-steel)" stroke="#8FA9CC" stroke-width="2" />
+              <rect x="14" y="44" width="152" height="6" rx="3" fill="#FFFFFF" opacity="0.9" />
+              <circle cx="34" cy="76" r="8" fill="url(#s06-steel)" stroke="#7F9CC4" stroke-width="2" /><circle cx="146" cy="76" r="8" fill="url(#s06-steel)" stroke="#7F9CC4" stroke-width="2" />
+              <path d="M60 86 H120" stroke="#7F9CC4" stroke-width="3" stroke-linecap="round" />
+            </svg>
+            <div class="s06-tab" id="s06-tab">
+              <svg viewBox="0 0 92 104" width="112" height="126" style="overflow:visible;filter:drop-shadow(8px 12px 10px rgba(28,51,84,0.35));">
+                <defs><linearGradient id="s06-navy" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4A74AD" /><stop offset="1" stop-color="#1C3354" /></linearGradient></defs>
+                <rect x="0" y="0" width="92" height="104" rx="18" fill="url(#s06-navy)" />
+                <rect x="4" y="4" width="84" height="8" rx="4" fill="#FFFFFF" opacity="0.25" />
+                <rect x="-10" y="38" width="30" height="28" rx="6" fill="url(#s06-steel)" stroke="#7F9CC4" stroke-width="2" />
+                <circle cx="54" cy="52" r="26" fill="#9FD8C4" opacity="0.25" />
+                <path id="s06-check" d="M38 54 L50 66 L72 38" fill="none" stroke="#FBFCFE" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- OUTPUT poster (right) -->
+          <div class="s06-poster" id="s06-poster">
+            <div class="s06-glow" id="s06-glow"></div>
+            <div class="s06-neck"></div>
+            <div class="s06-foot"></div>
+            <div class="s06-bezel"></div>
+            <div class="s06-screen" id="s06-screen">
+              <i style="left:150px;top:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle at 40% 60%, #e8f0fb, #acc6e7 35%, #3a6299 75%, #1c3354);"></i>
+              <i style="left:96px;top:60px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #ffffff, #cbdbf4 60%, #acc6e7);box-shadow:12px 18px 24px rgba(28,51,84,0.25);"></i>
+              <i style="left:24px;top:24px;width:56px;height:56px;border-radius:50%;border:8px solid #294b77;"></i>
+              <i style="left:40px;top:150px;width:0;height:0;border-left:34px solid transparent;border-right:34px solid transparent;border-bottom:58px solid #9fd8c4;opacity:0.85;"></i>
+              <i style="left:24px;top:240px;width:220px;height:30px;border-radius:8px;background:#294b77;"></i>
+              <i style="left:24px;top:282px;width:160px;height:30px;border-radius:8px;background:#3a6299;"></i>
+              <i style="left:24px;top:328px;width:300px;height:8px;border-radius:4px;background:#acc6e7;"></i>
+              <i style="left:24px;top:346px;width:250px;height:8px;border-radius:4px;background:#cbdbf4;"></i>
+              <i style="left:24px;top:376px;width:100px;height:72px;border-radius:12px;background:linear-gradient(135deg,#ffffff,#cbdbf4);box-shadow:0 6px 12px rgba(28,51,84,0.15);"></i>
+              <i style="left:136px;top:376px;width:100px;height:72px;border-radius:12px;background:linear-gradient(135deg,#acc6e7,#3a6299);box-shadow:0 6px 12px rgba(28,51,84,0.15);"></i>
+              <i style="left:248px;top:376px;width:100px;height:72px;border-radius:12px;background:linear-gradient(135deg,#ffffff,#e8f0fb);box-shadow:0 6px 12px rgba(28,51,84,0.15);"></i>
+              <i style="left:272px;top:396px;width:32px;height:32px;border-radius:50%;background:#9fd8c4;"></i>
+              <i style="left:0;top:466px;width:374px;height:38px;background:#1c3354;"></i>
+              <i style="left:24px;top:480px;width:90px;height:10px;border-radius:5px;background:#acc6e7;"></i>
+              <i style="left:300px;top:476px;width:50px;height:18px;border-radius:9px;background:#f2c46d;"></i>
+              <i style="left:260px;top:250px;width:90px;height:56px;border-radius:10px;border:3px solid #acc6e7;"></i>
+              <i style="left:0;top:0;width:374px;height:200px;background:linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0));"></i>
+            </div>
+          </div>
+
+          <!-- AF brackets (snap on focus) -->
+          <div id="s06-br" class="s06-abs" style="left:0;top:0;width:1080px;height:1920px;"></div>
+
+          <!-- beams linking brief -> lens -> output -->
+          <svg class="s06-fx" viewBox="0 0 1080 1920" id="s06-beams">
+            <defs>
+              <filter id="s06-bglow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6" /></filter>
+              <linearGradient id="s06-beamL" gradientUnits="userSpaceOnUse" x1="288" y1="760" x2="540" y2="1210"><stop offset="0" stop-color="#FFFFFF" /><stop offset="1" stop-color="#ACC6E7" /></linearGradient>
+              <linearGradient id="s06-beamR" gradientUnits="userSpaceOnUse" x1="540" y1="1210" x2="792" y2="742"><stop offset="0" stop-color="#ACC6E7" /><stop offset="1" stop-color="#FFFFFF" /></linearGradient>
+            </defs>
+            <g id="s06-beamg">
+              <path id="s06-bl-glow" d="M288 760 Q 360 1060 540 1210" fill="none" stroke="#CBDBF4" stroke-width="16" stroke-linecap="round" filter="url(#s06-bglow)" />
+              <path id="s06-bl" d="M288 760 Q 360 1060 540 1210" fill="none" stroke="url(#s06-beamL)" stroke-width="4" stroke-linecap="round" />
+              <path id="s06-br-glow" d="M540 1210 Q 720 1060 792 742" fill="none" stroke="#CBDBF4" stroke-width="16" stroke-linecap="round" filter="url(#s06-bglow)" />
+              <path id="s06-brm" d="M540 1210 Q 720 1060 792 742" fill="none" stroke="url(#s06-beamR)" stroke-width="4" stroke-linecap="round" />
+              <circle id="s06-n1" cx="288" cy="760" r="10" fill="#FFFFFF" stroke="#3A6299" stroke-width="4" />
+              <circle id="s06-n2" cx="792" cy="742" r="10" fill="#FFFFFF" stroke="#3A6299" stroke-width="4" />
+              <path id="s06-pl" d="M288 760 Q 360 1060 540 1210" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" />
+              <path id="s06-pr" d="M540 1210 Q 720 1060 792 742" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" />
+            </g>
+          </svg>
+
+          <!-- FOCUS RING (foreground hero) -->
+          <div class="s06-lensshadow kit-contact"></div>
+          <div class="s06-lens" id="s06-lens">
+            <svg viewBox="0 0 570 570">
+              <defs>
+                <radialGradient id="s06-barrel" cx="0.38" cy="0.32" r="0.75"><stop offset="0" stop-color="#FFFFFF" /><stop offset="0.6" stop-color="#E8F0FB" /><stop offset="1" stop-color="#8FA9CC" /></radialGradient>
+                <linearGradient id="s06-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" /><stop offset="0.45" stop-color="#CBDBF4" /><stop offset="0.7" stop-color="#F4F8FD" /><stop offset="1" stop-color="#7F9CC4" /></linearGradient>
+                <radialGradient id="s06-glass" cx="0.45" cy="0.42" r="0.62"><stop offset="0" stop-color="#5A86C0" /><stop offset="0.45" stop-color="#294B77" /><stop offset="0.85" stop-color="#16294A" /><stop offset="1" stop-color="#0F1E33" /></radialGradient>
+                <radialGradient id="s06-coat" cx="0.6" cy="0.68" r="0.5"><stop offset="0" stop-color="#9FD8C4" stop-opacity="0.55" /><stop offset="1" stop-color="#9FD8C4" stop-opacity="0" /></radialGradient>
+                <radialGradient id="s06-coat2" cx="0.32" cy="0.3" r="0.45"><stop offset="0" stop-color="#ACC6E7" stop-opacity="0.7" /><stop offset="1" stop-color="#ACC6E7" stop-opacity="0" /></radialGradient>
+                <linearGradient id="s06-glintg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0" /><stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.85" /><stop offset="1" stop-color="#FFFFFF" stop-opacity="0" /></linearGradient>
+                <clipPath id="s06-glassclip"><circle cx="285" cy="285" r="150" /></clipPath>
+                <filter id="s06-ls" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="16" dy="26" stdDeviation="20" flood-color="#1C3354" flood-opacity="0.35" /></filter>
+              </defs>
+              <g filter="url(#s06-ls)"><circle cx="285" cy="285" r="282" fill="url(#s06-barrel)" /></g>
+              <circle cx="285" cy="285" r="280" fill="none" stroke="#FFFFFF" stroke-width="3" />
+              <!-- rotating grip + distance scale -->
+              <g id="s06-grip">
+                <circle cx="285" cy="285" r="262" fill="#1C3354" />
+                <g id="s06-knurl"></g>
+                <circle cx="285" cy="285" r="234" fill="url(#s06-metal)" />
+                <circle cx="285" cy="285" r="234" fill="none" stroke="#FFFFFF" stroke-width="2" />
+                <g id="s06-scale"></g>
+                <path id="s06-arc" d="" fill="none" stroke="#3A6299" stroke-width="6" stroke-linecap="round" />
+              </g>
+              <circle cx="285" cy="285" r="200" fill="#294B77" />
+              <circle cx="285" cy="285" r="194" fill="url(#s06-metal)" />
+              <circle cx="285" cy="285" r="180" fill="none" stroke="#8FA9CC" stroke-width="1.5" />
+              <circle cx="285" cy="285" r="172" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.8" />
+              <circle cx="285" cy="285" r="164" fill="#1C3354" />
+              <g id="s06-glassg">
+                <circle cx="285" cy="285" r="152" fill="url(#s06-glass)" />
+                <circle cx="285" cy="285" r="152" fill="url(#s06-coat)" />
+                <circle cx="285" cy="285" r="152" fill="url(#s06-coat2)" />
+                <path d="M285 205 L354 245 L354 325 L285 365 L216 325 L216 245 Z" fill="none" stroke="#ACC6E7" stroke-width="2" opacity="0.35" id="s06-hex" />
+                <circle cx="285" cy="285" r="58" fill="#0F1E33" opacity="0.55" />
+                <circle cx="285" cy="285" r="110" fill="none" stroke="#ACC6E7" stroke-width="2" opacity="0.3" />
+                <path d="M170 238 A124 124 0 0 1 262 162" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" fill="none" opacity="0.75" />
+                <path d="M184 270 A104 104 0 0 1 196 236" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.6" />
+                <circle cx="352" cy="352" r="12" fill="#FFFFFF" opacity="0.55" />
+                <circle cx="372" cy="330" r="5" fill="#FFFFFF" opacity="0.6" />
+                <ellipse cx="300" cy="300" rx="22" ry="12" fill="#9FD8C4" opacity="0.4" transform="rotate(-35 300 300)" />
+                <g clip-path="url(#s06-glassclip)"><rect id="s06-glint" x="140" y="80" width="90" height="420" fill="url(#s06-glintg)" transform="rotate(25 285 285)" /></g>
+              </g>
+              <!-- fixed index marker -->
+              <path d="M285 6 L273 -14 L297 -14 Z" fill="#294B77" />
+              <circle id="s06-ok" cx="285" cy="-30" r="9" fill="#9FD8C4" stroke="#FBFCFE" stroke-width="3" />
+            </svg>
+          </div>
+
+          <!-- FG particles -->
+          <div id="s06-fg" class="s06-abs" style="left:0;top:0;width:1080px;height:1920px;">
+            <div class="s06-bokeh" style="left:40px;top:1440px;width:110px;height:110px;filter:blur(12px);"></div>
+            <div class="s06-bokeh" style="left:950px;top:1380px;width:80px;height:80px;filter:blur(10px);"></div>
+            <div class="s06-bokeh" style="left:960px;top:420px;width:50px;height:50px;filter:blur(7px);"></div>
+          </div>
+        </div>
       </div>
       <script>
         (function () {
-          const R = document.querySelector('[data-composition-id="s06"] .s06-ph');
+          const R = document.querySelector('[data-composition-id="s06"]');
+          const q = (s) => R.querySelector(s), qa = (s) => R.querySelectorAll(s);
+          const NS = "http://www.w3.org/2000/svg";
           const tl = gsap.timeline({ paused: true });
-          tl.fromTo(R, { scale: 0.5 }, { scale: 1, duration: 0.5 }, 0);
+          const sv = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+          const DUR = 2.66;
+
+          // ---- build lens details ----
+          const kn = q("#s06-knurl");
+          for (let i = 0; i < 120; i++) {
+            const a = (i * 3 * Math.PI) / 180;
+            sv("line", { x1: 285 + 238 * Math.sin(a), y1: 285 - 238 * Math.cos(a), x2: 285 + 260 * Math.sin(a), y2: 285 - 260 * Math.cos(a), stroke: i % 2 ? "#3A6299" : "#6F93C4", "stroke-width": 5, "stroke-linecap": "round" }, kn);
+          }
+          const sc = q("#s06-scale");
+          for (let i = 0; i < 72; i++) {
+            const a = (i * 5 * Math.PI) / 180, major = i % 6 === 0;
+            const r1 = 230, r2 = major ? 212 : 220;
+            sv("line", { x1: 285 + r1 * Math.sin(a), y1: 285 - r1 * Math.cos(a), x2: 285 + r2 * Math.sin(a), y2: 285 - r2 * Math.cos(a), stroke: major ? "#294B77" : "#8FA9CC", "stroke-width": major ? 4 : 2, "stroke-linecap": "round" }, sc);
+            if (major) sv("circle", { cx: 285 + 206 * Math.sin(a + 0.04), cy: 285 - 206 * Math.cos(a + 0.04), r: 3, fill: "#3A6299" }, sc);
+          }
+          { // depth-of-field arc on the scale ring (ends up under the index after the turn)
+            const a0 = (-90 - 26) * Math.PI / 180, a1 = (-90 + 26) * Math.PI / 180, r = 214;
+            q("#s06-arc").setAttribute("d", `M${285 + r * Math.sin(a0)} ${285 - r * Math.cos(a0)} A${r} ${r} 0 0 1 ${285 + r * Math.sin(a1)} ${285 - r * Math.cos(a1)}`);
+          }
+
+          // ---- AF brackets around brief + poster ----
+          const brRoot = q("#s06-br");
+          const mkBrackets = (x, y, w, h) => {
+            const set = [];
+            [[0, 0, "top", "left"], [1, 0, "top", "right"], [0, 1, "bottom", "left"], [1, 1, "bottom", "right"]].forEach(([fx, fy, v, hz]) => {
+              const b = document.createElement("div"); b.className = "s06-bracket";
+              b.style.left = x + fx * (w - 40) + "px"; b.style.top = y + fy * (h - 40) + "px";
+              b.style["border" + v[0].toUpperCase() + v.slice(1) + "Width"] = "7px";
+              b.style["border" + hz[0].toUpperCase() + hz.slice(1) + "Width"] = "7px";
+              b.style["border" + v[0].toUpperCase() + v.slice(1) + hz[0].toUpperCase() + hz.slice(1) + "Radius"] = "10px";
+              brRoot.appendChild(b); set.push([b, fx ? 1 : -1, fy ? 1 : -1]);
+            });
+            return set;
+          };
+          const brA = mkBrackets(64, 446, 448, 616), brB = mkBrackets(566, 430, 454, 590);
+
+          // ---- camera: slow push-in + parallax ----
+          const stage = q("#s06-stage");
+          tl.set(stage, { transformOrigin: "540px 980px" }, 0);
+          tl.fromTo(stage, { scale: 1.0 }, { scale: 1.035, duration: DUR, ease: "sine.inOut" }, 0);
+          tl.fromTo("#s06-far", { y: 0, x: 0 }, { y: -30, x: 12, duration: DUR, ease: "none" }, 0);
+          tl.fromTo("#s06-fg", { y: 60 }, { y: -90, duration: DUR, ease: "none" }, 0);
+
+          // ---- objects in (frame 0 already populated), heavily defocused ----
+          const brief = q("#s06-brief"), poster = q("#s06-poster"), lens = q("#s06-lens");
+          const BLUR = "blur(15px) contrast(0.62) saturate(0.55) brightness(1.08)";
+          const SHARP = "blur(0px) contrast(1) saturate(1) brightness(1)";
+          tl.fromTo(brief, { x: -40, y: 20, rotation: -7, filter: BLUR }, { x: 0, y: 0, rotation: -4, duration: 0.6, ease: "power3.out" }, 0);
+          tl.fromTo(poster, { x: 40, y: 20, rotation: 6, filter: BLUR }, { x: 0, y: 0, rotation: 3, duration: 0.6, ease: "power3.out" }, 0);
+          tl.set(lens, { transformOrigin: "50% 50%" }, 0);
+          tl.fromTo(lens, { scale: 0.9, y: 50 }, { scale: 1, y: 0, duration: 0.55, ease: "power3.out" }, 0);
+          tl.fromTo("#s06-grip", { rotation: -35, svgOrigin: "285 285" }, { rotation: 0, svgOrigin: "285 285", duration: 0.7, ease: "power3.out" }, 0);
+          // idle sway of objects
+          tl.to(brief, { y: -8, duration: 1.2, ease: "sine.inOut" }, 0.6);
+          tl.to(poster, { y: -10, duration: 1.2, ease: "sine.inOut" }, 0.6);
+
+          // "hasilnya" 0.35: output nudges forward
+          tl.to(poster, { scale: 1.035, duration: 0.18, ease: "power2.out" }, 0.35);
+          tl.to(poster, { scale: 1, duration: 0.3, ease: "power2.inOut" }, 0.53);
+
+          // "mengikuti" 0.77: beams draw brief -> lens -> output
+          const beams = [["#s06-bl", 0.77], ["#s06-bl-glow", 0.77], ["#s06-brm", 0.95], ["#s06-br-glow", 0.95]];
+          beams.forEach(([s, t]) => {
+            const p = q(s), L = p.getTotalLength();
+            p.setAttribute("stroke-dasharray", L + " " + L);
+            tl.fromTo(p, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.3, ease: "power2.inOut" }, t);
+          });
+          tl.fromTo("#s06-n1", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.25, ease: "back.out(2.5)" }, 0.74);
+          tl.fromTo("#s06-n2", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.25, ease: "back.out(2.5)" }, 1.2);
+          // pulses travelling along the beams
+          [["#s06-pl", [0.85, 1.9]], ["#s06-pr", [1.05, 2.1]]].forEach(([s, ts]) => {
+            const p = q(s), L = p.getTotalLength(), seg = 40;
+            p.setAttribute("stroke-dasharray", seg + " " + (L + seg));
+            tl.set(p, { strokeDashoffset: seg }, 0);
+            ts.forEach((t) => tl.fromTo(p, { strokeDashoffset: seg }, { strokeDashoffset: -L, duration: 0.42, ease: "power1.inOut", immediateRender: false }, t));
+          });
+
+          // "seberapa" 1.32 -> "jelas" 1.87: focus ring turns ~90°, both sharpen together
+          tl.to("#s06-grip", { rotation: 90, svgOrigin: "285 285", duration: 0.55, ease: "power2.inOut" }, 1.32);
+          tl.to(brief, { filter: SHARP, duration: 0.55, ease: "power2.inOut" }, 1.32);
+          tl.to(poster, { filter: SHARP, duration: 0.55, ease: "power2.inOut" }, 1.32);
+          tl.fromTo("#s06-hex", { rotation: 0, svgOrigin: "285 285" }, { rotation: 30, svgOrigin: "285 285", duration: 0.55, ease: "power2.inOut" }, 1.32);
+          tl.to(lens, { scale: 1.02, duration: 0.2, ease: "power2.out" }, 1.87);
+          tl.to(lens, { scale: 1, duration: 0.3, ease: "power2.inOut" }, 2.07);
+          // glint sweeps across the glass exactly on "jelas"
+          tl.fromTo("#s06-glint", { x: -260 }, { x: 330, duration: 0.42, ease: "power2.inOut" }, 1.8);
+          tl.fromTo("#s06-ok", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.25, ease: "back.out(3)" }, 1.87);
+          // AF brackets snap onto both
+          [...brA, ...brB].forEach(([b, sx, sy], i) => {
+            tl.fromTo(b, { x: sx * 26, y: sy * 26, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.22, ease: "back.out(2)" }, 1.84 + (i % 4) * 0.02);
+          });
+
+          // "brief-nya." 2.16: check tab clips on, output brightens with glow
+          tl.fromTo("#s06-tab", { x: 70, opacity: 0, rotation: 12, transformOrigin: "0% 50%" }, { x: 0, opacity: 1, rotation: 0, duration: 0.3, ease: "back.out(1.8)" }, 2.16);
+          const ck = q("#s06-check"), CL = ck.getTotalLength();
+          ck.setAttribute("stroke-dasharray", CL + " " + CL);
+          tl.fromTo(ck, { strokeDashoffset: CL }, { strokeDashoffset: 0, duration: 0.22, ease: "power2.out" }, 2.24);
+          tl.fromTo("#s06-glow", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }, 2.16);
+          tl.to(poster, { filter: "blur(0px) contrast(1.04) saturate(1.1) brightness(1.06)", duration: 0.3, ease: "power2.out" }, 2.16);
+          tl.to(brief, { y: -18, duration: 0.3, ease: "power2.out" }, 2.16);
+          tl.to(poster, { y: -22, duration: 0.3, ease: "power2.out" }, 2.16);
+
           window.__timelines["s06"] = tl;
         })();
       </script>

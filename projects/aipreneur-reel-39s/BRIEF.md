@@ -35,3 +35,7 @@ Look: "ice-ivory dimensional editorial" — airy pastel, porcelain/ivory stage, 
   camera punch-ins on apex words, whip-pan blur cuts (19.89s, 27.9s), masked editorial word reveals,
   navy marker on key words (AI-nya, arahan, brief-nya, prompt, prompt-nya), S3 camera tracks the
   selected folder, dial light burst, logo sheen. No SFX (bundled library has no stated licence).
+- v3 (user: "visual masih kalah jauh vs REF-A/B/C, kurangi teks, perbanyak visual"; chose full light pastel,
+  no mascot): rebuilt visual-first — small word-synced caption only, 15 sub-composition scenes
+  (compositions/s01–s15.html) cut on the spoken phrases, each a detailed lit illustrated metaphor at REF-B density.
+  Scene contract: production/SCENE_CONTRACT.md. Previous build kept at versions/index_v2.html.

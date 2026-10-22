@@ -1,0 +1,229 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s5-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1500px; perspective-origin: 540px 960px; }
+    #s5-world { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 540px 960px; }
+    .s5-obj { position: absolute; transform-style: preserve-3d; }
+    /* ---------- S04 handoff card (identical final state: 620x420, centre 540,960) ---------- */
+    #s5-card-sh { left: 232px; top: 776px; width: 686px; height: 465px; }
+    #s5-card { left: 230px; top: 750px; width: 620px; height: 420px; }
+    #s5-cbase { position: absolute; left: 0; top: 0; width: 620px; height: 210px; border-radius: 18px 18px 0 0; transform: translateZ(1px);
+      background: linear-gradient(170deg, #f7f9fc 0%, #eaf0f6 100%); box-shadow: inset 0 1px 0 #ffffff; }
+    #s5-flapF { position: absolute; left: 0; top: 210px; width: 620px; height: 210px; border-radius: 0 0 18px 18px; overflow: hidden;
+      background: linear-gradient(170deg, #eef3f8 0%, #e4ebf3 100%); box-shadow: inset 0 1px 0 #ffffff, 0 1px 0 #d3dde8, 0 3px 0 #c3d0de, 0 5px 0 #b7c6d6; }
+    #s5-flapShade { position: absolute; inset: 0; opacity: 0.22; background: linear-gradient(180deg, rgba(30, 55, 95, 0.38) 0%, rgba(30, 55, 95, 0) 46%); }
+    #s5-crease { position: absolute; left: 6px; top: 207px; width: 608px; height: 5px; transform: translateZ(2px);
+      background: linear-gradient(180deg, rgba(120, 145, 180, 0) 0%, rgba(90, 118, 158, 0.55) 45%, rgba(255, 255, 255, 0.9) 75%, rgba(255, 255, 255, 0) 100%); }
+    .s5-row { position: absolute; left: 36px; height: 12px; }
+    .s5-row .d { position: absolute; left: 0; top: 0; width: 12px; height: 12px; border-radius: 50%; background: #3d679e; }
+    .s5-row .l { position: absolute; left: 26px; top: 2px; height: 9px; border-radius: 5px; background: #b9c8d8; }
+    #s5-hd { position: absolute; left: 34px; top: 92px; width: 270px; height: 14px; border-radius: 7px; background: #294b77; opacity: 0.82; }
+    #s5-tag { position: absolute; left: 30px; top: 24px; width: 172px; height: 48px; border-radius: 10px; background: linear-gradient(170deg, #1a3463, #12284f);
+      box-shadow: inset 0 1px 0 rgba(190, 225, 255, 0.35), 0 3px 0 #07122b, 0px 6px 10px rgba(2, 8, 26, 0.35); transform: rotate(-3deg);
+      font: 700 24px/48px "Poppins", sans-serif; letter-spacing: 0.22em; color: #eaf4ff; padding-left: 50px; }
+    #s5-tag::before { content: ""; position: absolute; left: 18px; top: 17px; width: 14px; height: 14px; border-radius: 50%; background: #0a1630; box-shadow: inset 0 0 0 3px #8fb0d6; }
+    /* ---------- dim main screen → final dark panel (440x280 at centre 540,1000) ---------- */
+    #s5-scr-sh { left: 186px; top: 816px; width: 780px; height: 484px; }
+    #s5-scr { left: 150px; top: 768px; width: 780px; height: 484px; }
+    #s5-scr-in { position: absolute; left: 16px; top: 16px; right: 16px; bottom: 16px; overflow: hidden; border-radius: 16px; }
+    #s5-scr-in svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #s5-scr-dim { position: absolute; inset: 0; background: rgba(4, 10, 28, 0.55); }
+    #s5-pool { left: 330px; top: 860px; width: 330px; height: 230px; opacity: 0; }
+    /* ---------- glass layer: plain 2D perspective, never inside preserve-3d ---------- */
+    #s5-gl { position: absolute; inset: 0; perspective: 1200px; perspective-origin: 850px 750px; }
+    #s5-stack, #s5-stp { position: absolute; inset: 0; }
+    #s5-stp { perspective: 1200px; perspective-origin: 850px 750px; }
+    .s5-win { position: absolute; }
+    .s5-win::before { content: ""; position: absolute; inset: 0; transform: translate(5px, 7px); border-radius: 22px; background: linear-gradient(160deg, rgba(120, 165, 225, 0.16), rgba(40, 70, 130, 0.30)); box-shadow: inset 0 -1px 0 rgba(200, 235, 255, 0.30), inset -1px 0 0 rgba(0, 201, 255, 0.22); }
+    .s5-win .k-glass { position: absolute; inset: 0; overflow: hidden; }
+    #s5-wA { left: 450px; top: 480px; width: 400px; height: 270px; }
+    #s5-wB { left: 398px; top: 662px; width: 380px; height: 250px; }
+    .s5-bar { position: absolute; left: 0; right: 0; top: 0; height: 36px; border-bottom: 1px solid rgba(220, 240, 255, 0.22); background: rgba(220, 238, 255, 0.07); }
+    .s5-bar i { position: absolute; top: 13px; width: 10px; height: 10px; border-radius: 50%; background: rgba(214, 232, 252, 0.55); }
+    .s5-bar b { position: absolute; left: 72px; top: 11px; width: 190px; height: 14px; border-radius: 7px; background: rgba(214, 232, 252, 0.16); }
+    .s5-vid { position: absolute; left: 16px; top: 52px; width: 168px; height: 124px; border-radius: 12px; background: linear-gradient(180deg, rgba(40, 74, 128, 0.75), rgba(12, 28, 66, 0.8)); overflow: hidden; }
+    .s5-ln { position: absolute; height: 9px; border-radius: 5px; background: rgba(226, 239, 255, 0.72); }
+    .s5-ln.m { background: rgba(200, 222, 248, 0.42); }
+    #s5-cy { position: absolute; left: 200px; top: 55px; width: 12px; height: 12px; }
+    #s5-sweepW { position: absolute; left: -60px; top: -40px; width: 140px; height: 360px; transform: skewX(-18deg); }
+    #s5-sweep { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(235, 248, 255, 0.34) 50%, rgba(255, 255, 255, 0) 100%); opacity: 0; }
+    .s5-key { position: absolute; inset: 0; background: radial-gradient(90% 80% at 12% 0%, rgba(235, 246, 255, 0.20), rgba(235, 246, 255, 0) 70%); opacity: 0; }
+    .s5-rol { position: absolute; top: -19px; width: 16px; height: 16px; border-radius: 50%; opacity: 0; }
+    .s5-rol::after { content: ""; position: absolute; left: 7px; top: 2px; width: 2px; height: 12px; background: #1b3766; }
+    .s5-trkW { position: absolute; height: 6px; }
+    .s5-trk { position: absolute; inset: 0; border-radius: 3px; transform-origin: 50% 50%; }
+    #s5-shA { left: 450px; top: 505px; width: 430px; height: 290px; }
+    #s5-shB { left: 560px; top: 690px; width: 400px; height: 260px; opacity: 0; }
+    /* ---------- light split + question arc ---------- */
+    #s5-shade { position: absolute; inset: 0; opacity: 0; pointer-events: none;
+      background: linear-gradient(90deg, rgba(3, 8, 24, 0.72) 0%, rgba(3, 8, 24, 0.6) 24%, rgba(3, 8, 24, 0) 40%, rgba(3, 8, 24, 0) 62%, rgba(3, 8, 24, 0.6) 78%, rgba(3, 8, 24, 0.72) 100%); }
+    #s5-cone { position: absolute; left: 330px; top: 300px; width: 420px; height: 760px; opacity: 0; pointer-events: none; clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+      background: linear-gradient(180deg, rgba(190, 220, 255, 0) 0%, rgba(190, 220, 255, 0.09) 60%, rgba(190, 220, 255, 0.0) 100%); }
+    #s5-arc { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    #s5-dot { position: absolute; left: 611px; top: 924px; width: 18px; height: 18px; opacity: 0; }
+    /* ---------- text plane ---------- */
+    #s5-text { position: absolute; left: 90px; top: 214px; width: 900px; height: 340px; }
+    .s5-hl { position: absolute; left: 0; top: 0; width: 900px; }
+    .s5-line { display: block; overflow: hidden; padding: 0 6px 6px 0; }
+    .s5-line .k-hl { font-size: 96px; }
+    #s5-h3 .s5-line .k-hl { font-size: 104px; }
+    #s5-count { position: absolute; left: 90px; top: 186px; font: 400 22px/1 "Poppins", sans-serif; letter-spacing: 0.2em; color: #8fb0d6; }
+  </style>
+  <div data-hf-id="hf-58hn" id="root" data-composition-id="s05" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-057f" id="s5-cam">
+      <div data-hf-id="hf-u4pe" id="s5-world">
+        <div data-hf-id="hf-78nq" id="s5-scr-sh" class="k-cast s5-obj"></div>
+        <div data-hf-id="hf-nbmk" id="s5-card-sh" class="k-cast s5-obj"></div>
+        <div data-hf-id="hf-z29v" id="s5-scr" class="k-panel s5-obj">
+          <div data-hf-id="hf-1yvb" id="s5-scr-in" class="k-screen">
+            <svg data-hf-id="hf-07b9" viewBox="0 0 636 356" preserveAspectRatio="xMidYMid slice"><defs data-hf-id="hf-mh0t"><linearGradient data-hf-id="hf-fvks" id="s5-room" x1="0" y1="0" x2="0" y2="1"><stop data-hf-id="hf-57ej" offset="0" stop-color="#284a80"/><stop data-hf-id="hf-p5mb" offset="1" stop-color="#0f2048"/></linearGradient><linearGradient data-hf-id="hf-27pr" id="s5-fig" x1="0" y1="0" x2="0" y2="1"><stop data-hf-id="hf-k3eq" offset="0" stop-color="#a9c4e6"/><stop data-hf-id="hf-fid9" offset="1" stop-color="#6f8fbb"/></linearGradient></defs><g data-hf-id="hf-8isc" id="s5-sil"><rect data-hf-id="hf-fg8n" width="636" height="356" fill="url(#s5-room)"/><rect data-hf-id="hf-nv2l" x="430" y="40" width="150" height="190" rx="10" fill="#3d64a0" opacity=".45"/><path data-hf-id="hf-mbtj" d="M230 356 L230 168 Q230 118 280 118 L356 118 Q406 118 406 168 L406 356 Z" fill="#0b1838"/><circle data-hf-id="hf-eo48" cx="318" cy="150" r="46" fill="url(#s5-fig)"/><path data-hf-id="hf-1ixc" d="M196 356 Q204 238 318 226 Q432 238 440 356 Z" fill="url(#s5-fig)"/></g></svg>
+            <div data-hf-id="hf-zatz" id="s5-scr-dim"></div>
+          </div>
+        </div>
+        <div data-hf-id="hf-mi0j" id="s5-pool" class="k-pool s5-obj"></div>
+        <div data-hf-id="hf-5wv9" id="s5-card" class="s5-obj">
+          <div data-hf-id="hf-e08n" id="s5-flapF">
+            <div data-hf-id="hf-mmul" class="s5-row" style="top:30px"><span data-hf-id="hf-5jqr" class="d"></span><span data-hf-id="hf-cg0o" class="l" style="width:470px"></span></div><div data-hf-id="hf-tj5d" class="s5-row" style="top:70px"><span data-hf-id="hf-fjwz" class="d"></span><span data-hf-id="hf-grtu" class="l" style="width:380px"></span></div><div data-hf-id="hf-ubui" class="s5-row" style="top:110px"><span data-hf-id="hf-f5ly" class="d"></span><span data-hf-id="hf-dald" class="l" style="width:440px"></span></div><div data-hf-id="hf-wnxq" class="s5-row" style="top:150px"><span data-hf-id="hf-erax" class="d"></span><span data-hf-id="hf-bjq2" class="l" style="width:300px"></span></div>
+            <div data-hf-id="hf-asa2" id="s5-flapShade"></div>
+          </div>
+          <div data-hf-id="hf-y3my" id="s5-cbase">
+            <div data-hf-id="hf-goeq" id="s5-hd"></div>
+            <div data-hf-id="hf-97j3" class="s5-row" style="top:128px"><span data-hf-id="hf-eczw" class="d"></span><span data-hf-id="hf-6c8k" class="l" style="width:430px"></span></div><div data-hf-id="hf-hd4t" class="s5-row" style="top:166px"><span data-hf-id="hf-dyov" class="d"></span><span data-hf-id="hf-4zi9" class="l" style="width:350px"></span></div>
+            <div data-hf-id="hf-8we5" id="s5-tag">DRAFT</div>
+          </div>
+          <div data-hf-id="hf-mxp7" id="s5-crease"></div>
+        </div>
+      </div>
+    </div>
+    <div data-hf-id="hf-k5kj" id="s5-gl">
+      <div data-hf-id="hf-22sd" id="s5-shB" class="k-cast"></div>
+      <div data-hf-id="hf-88i6" id="s5-shA" class="k-cast"></div>
+      <div data-hf-id="hf-w5ou" id="s5-stack">
+        <div data-hf-id="hf-szdp" id="s5-stp">
+          <div data-hf-id="hf-ti2s" class="s5-trkW" style="left:380px;top:646px;width:580px;transform:translateZ(30px)"><div data-hf-id="hf-hws7" class="s5-trk k-metal" id="s5-trkB"></div></div>
+          <div data-hf-id="hf-69zf" id="s5-wB" class="s5-win">
+            <div data-hf-id="hf-ekbs" class="k-glass">
+              <div data-hf-id="hf-w0dw" class="s5-bar"><i data-hf-id="hf-3fdb" style="left:14px"></i><i data-hf-id="hf-fgn5" style="left:30px"></i><i data-hf-id="hf-zzju" style="left:46px"></i><b data-hf-id="hf-n62c" style="width:150px"></b></div>
+              <div data-hf-id="hf-xf0b" class="s5-ln" style="left:22px;top:58px;width:180px"></div><div data-hf-id="hf-g2u5" class="s5-ln m" style="left:22px;top:84px;width:300px"></div>
+              <div data-hf-id="hf-b44t" class="s5-ln m" style="left:22px;top:108px;width:260px"></div><div data-hf-id="hf-vjdj" class="s5-ln m" style="left:22px;top:132px;width:290px"></div>
+              <div data-hf-id="hf-zkty" class="s5-ln m" style="left:22px;top:156px;width:200px"></div><div data-hf-id="hf-8nev" class="s5-ln m" style="left:22px;top:180px;width:240px"></div>
+            </div>
+            <div data-hf-id="hf-y71x" class="s5-rol k-metal" style="left:54px"></div><div data-hf-id="hf-wxzu" class="s5-rol k-metal" style="left:310px"></div>
+          </div>
+          <div data-hf-id="hf-dmbm" class="s5-trkW" style="left:320px;top:734px;width:620px;transform:translateZ(60px)"><div data-hf-id="hf-71ak" class="s5-trk k-metal" id="s5-trkA"></div></div>
+          <div data-hf-id="hf-xm3k" id="s5-wA" class="s5-win">
+            <div data-hf-id="hf-cajk" class="k-glass">
+              <div data-hf-id="hf-3570" class="s5-bar"><i data-hf-id="hf-irov" style="left:14px"></i><i data-hf-id="hf-xhjp" style="left:30px"></i><i data-hf-id="hf-mcm6" style="left:46px"></i><b data-hf-id="hf-xujp"></b></div>
+              <div data-hf-id="hf-0tda" class="s5-vid"><svg data-hf-id="hf-hgua" width="168" height="124" viewBox="0 0 168 124"><circle data-hf-id="hf-anls" cx="84" cy="52" r="20" fill="rgba(180,205,238,0.85)"/><path data-hf-id="hf-l3wj" d="M40 124 Q44 80 84 76 Q124 80 128 124 Z" fill="rgba(160,190,230,0.8)"/></svg></div>
+              <div data-hf-id="hf-bfpv" id="s5-cy" class="k-signal"></div>
+              <div data-hf-id="hf-bpm5" class="s5-ln" style="left:222px;top:57px;width:150px"></div><div data-hf-id="hf-a837" class="s5-ln m" style="left:222px;top:83px;width:132px"></div>
+              <div data-hf-id="hf-d0r2" class="s5-ln m" style="left:222px;top:107px;width:156px"></div><div data-hf-id="hf-gg1b" class="s5-ln m" style="left:222px;top:131px;width:110px"></div>
+              <div data-hf-id="hf-xqgn" class="s5-ln m" style="left:16px;top:196px;width:330px"></div><div data-hf-id="hf-z6qs" class="s5-ln m" style="left:16px;top:220px;width:250px"></div>
+              <div data-hf-id="hf-otmx" id="s5-sweepW"><div data-hf-id="hf-1hne" id="s5-sweep"></div></div>
+              <div data-hf-id="hf-h3dr" class="s5-key" id="s5-keyA"></div>
+            </div>
+            <div data-hf-id="hf-oknd" class="s5-rol k-metal" style="left:58px"></div><div data-hf-id="hf-79w1" class="s5-rol k-metal" style="left:326px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div data-hf-id="hf-2xdd" id="s5-shade"></div>
+    <div data-hf-id="hf-woxf" id="s5-cone"></div>
+    <svg data-hf-id="hf-r6f5" id="s5-arc" width="1080" height="1920" viewBox="0 0 1080 1920">
+      <path data-hf-id="hf-m55y" id="s5-q" d="M170 990 C330 985 540 900 540 760 C540 705 575 680 620 680 C668 680 702 708 702 748 C702 790 660 800 638 818 C624 830 620 845 620 880" fill="none" stroke="#00c9ff" stroke-width="5" stroke-linecap="round" opacity="0"/>
+      <path data-hf-id="hf-kz4b" id="s5-qh" d="M540 760 C540 705 575 680 620 680 C668 680 702 708 702 748 C702 790 660 800 638 818 C624 830 620 845 620 880" fill="none" stroke="none"/>
+    </svg>
+    <div data-hf-id="hf-uxvk" id="s5-dot" class="k-signal"></div>
+    <div data-hf-id="hf-qm8z" id="s5-count">05 / 08</div>
+    <div data-hf-id="hf-tnma" id="s5-text" class="k-field">
+      <div data-hf-id="hf-idvt" id="s5-h1" class="s5-hl">
+        <span data-hf-id="hf-rs7s" class="s5-line"><span data-hf-id="hf-5v5b" class="k-hl">SATU JENDELA</span></span>
+        <span data-hf-id="hf-r0mo" class="s5-line"><span data-hf-id="hf-5ywr" class="k-hl k-white">KECIL.</span></span>
+      </div>
+      <div data-hf-id="hf-mbzu" id="s5-h2" class="s5-hl">
+        <span data-hf-id="hf-ptpl" class="s5-line"><span data-hf-id="hf-b8g5" class="k-hl">PRAKTIS</span></span>
+        <span data-hf-id="hf-q80m" class="s5-line"><span data-hf-id="hf-j8rw" class="k-hl k-white">BANGET.</span></span>
+      </div>
+      <div data-hf-id="hf-qa3v" id="s5-h3" class="s5-hl">
+        <span data-hf-id="hf-p13j" class="s5-line"><span data-hf-id="hf-sm25" class="k-hl k-white">TAPI…</span></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      if (window.__kitAlign) window.__kitAlign(document.getElementById("s5-text"));
+      const q = document.getElementById("s5-q"), L = q.getTotalLength(), Lq = document.getElementById("s5-qh").getTotalLength();
+      q.setAttribute("stroke-dasharray", Lq.toFixed(1) + " " + (L + Lq + 10).toFixed(1));
+      const tl = gsap.timeline({ paused: true });
+
+      // ---------- B13 44.83–48.95 (local 0–4.12) SATU JENDELA KECIL. ----------
+      tl.fromTo("#s5-card-sh", { z: -160, opacity: 0.85 }, { z: -160, opacity: 0.85, duration: 0.01 }, 0);
+      // the window grows out of the card's top-right corner (850,750): z 0→80, rotateY −8°→0°
+      tl.fromTo("#s5-wA", { transformOrigin: "100% 100%", scale: 0.06, z: 0, opacity: 0 }, { scale: 1, z: 80, opacity: 1, duration: 0.95, ease: "expo.out" }, 0.27);
+      tl.fromTo("#s5-wA", { rotationY: -8 }, { rotationY: 0, duration: 1.3, ease: "power2.out" }, 0.27);
+      tl.fromTo("#s5-shA", { transformOrigin: "100% 100%", scale: 0.08, x: -30, y: -40, opacity: 0.2 }, { scale: 1, x: 0, y: 0, opacity: 0.6, duration: 1.0, ease: "expo.out" }, 0.3);
+      tl.fromTo("#s5-sweep", { x: -40, opacity: 0 }, { x: 520, opacity: 1, duration: 0.65, ease: "power2.inOut", keyframes: { opacity: [0, 1, 1, 0] } }, 0.95);
+      // the card hands over and drops back out of the shot
+      tl.to("#s5-card", { y: 140, z: -260, opacity: 0, duration: 0.45, ease: "power3.in" }, 1.25);
+      tl.to("#s5-card-sh", { opacity: 0, duration: 0.4, ease: "power2.in" }, 1.25);
+      // headline: masked rise on "satu jendela" 46.75 (1.92) and "kecil" 47.60 (2.77)
+      tl.fromTo("#s5-h1 .s5-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.65, ease: "expo.out" }, 1.87);
+      tl.fromTo("#s5-h1 .s5-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 2.72);
+      // dim main screen rises from depth; the window glides and docks above it ("di atas layar lain" 47.95 = 3.12)
+      tl.fromTo("#s5-scr", { z: -320, y: 70, opacity: 0 }, { z: 0, y: 0, opacity: 1, duration: 0.75, ease: "expo.out" }, 2.8);
+      tl.fromTo("#s5-scr-sh", { z: -320, y: 70, opacity: 0 }, { z: -20, y: 0, opacity: 0.7, duration: 0.75, ease: "expo.out" }, 2.85);
+      tl.to("#s5-wA", { x: 60, y: 270, duration: 0.8, ease: "power2.inOut" }, 3.12);
+      tl.to("#s5-wA", { z: 60, duration: 0.3, ease: "expo.out" }, 3.92);
+      tl.to("#s5-shA", { x: 62, y: 262, opacity: 0.7, duration: 0.8, ease: "power2.inOut" }, 3.12);
+      tl.to("#s5-h1", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 4.47);
+
+      // ---------- B14 48.95–51.05 (local 4.12–6.22) PRAKTIS BANGET. ----------
+      tl.fromTo(".s5-trk", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "expo.out", stagger: 0.06 }, 4.22);
+      tl.fromTo(".s5-rol", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 4.4);
+      // the second window was hiding behind the docked one: it rises out from behind it onto its own track (no in-place fade)
+      tl.fromTo("#s5-wB", { z: 30, opacity: 0 }, { z: 30, opacity: 1, duration: 0.12, ease: "none" }, 4.36);
+      tl.fromTo("#s5-wB", { y: 88 }, { y: 0, duration: 0.6, ease: "power3.out" }, 4.44);
+      tl.fromTo("#s5-shB", { opacity: 0, y: 88 }, { opacity: 0.45, y: 0, duration: 0.6, ease: "power3.out" }, 4.44);
+      // opposite slides on the tracks; long-tail settle, no bounce
+      tl.to("#s5-wA", { x: -110, duration: 0.95, ease: "expo.out" }, 4.8);
+      tl.to("#s5-shA", { x: -116, duration: 0.95, ease: "expo.out" }, 4.8);
+      tl.fromTo("#s5-wB", { x: 112 }, { x: 150, duration: 0.95, ease: "expo.out" }, 4.8);
+      tl.fromTo("#s5-shB", { x: 112 }, { x: 154, duration: 0.95, ease: "expo.out" }, 4.8);
+      tl.fromTo("#s5-wA .s5-rol", { rotation: 0 }, { rotation: -170 / (Math.PI * 16) * 360, duration: 0.95, ease: "expo.out" }, 4.8);
+      tl.fromTo("#s5-wB .s5-rol", { rotation: 0 }, { rotation: 150 / (Math.PI * 16) * 360, duration: 0.95, ease: "expo.out" }, 4.8);
+      tl.fromTo("#s5-keyA", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.inOut" }, 4.9);
+      // headline: per-word blur, apex "praktis" 49.97 (5.14)
+      tl.fromTo("#s5-h2 .s5-line:nth-child(1) .k-hl", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out" }, 5.1);
+      tl.fromTo("#s5-h2 .s5-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out" }, 5.19);
+      // cyan lighting recedes
+      tl.fromTo("#s5-cy", { opacity: 1 }, { opacity: 0, duration: 0.4, ease: "power2.inOut" }, 5.95);
+      tl.to("#s5-h2", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 6.18);
+
+      // ---------- B15 51.05–53.13 (local 6.22–8.30) TAPI… ----------
+      // near-still 6.22–6.67; only the headline changes
+      tl.fromTo("#s5-h3 .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, 6.43);
+      // spotlight divides the stage into light and shadow
+      tl.fromTo("#s5-shade", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.inOut" }, 6.67);
+      tl.fromTo("#s5-cone", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.inOut" }, 6.67);
+      // one thin cyan arc travels over the stack and bends into a question form
+      tl.fromTo(q, { opacity: 0 }, { opacity: 1, duration: 0.06, ease: "none" }, 6.67);
+      tl.fromTo(q, { attr: { "stroke-dashoffset": Lq } }, { attr: { "stroke-dashoffset": -(L - Lq) }, duration: 0.8, ease: "power2.inOut" }, 6.67);
+      tl.fromTo("#s5-dot", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "expo.out" }, 7.42);
+      tl.to(["#s5-q", "#s5-dot"], { opacity: 0, duration: 0.3, ease: "power2.in" }, 7.78);
+      // camera starts a 6° orbit; the windows recede and the frame simplifies
+      tl.fromTo("#s5-stack", { transformOrigin: "640px 860px", rotationY: 0, z: 0 }, { rotationY: -6, duration: 1.45, ease: "power2.inOut" }, 6.67);
+      tl.to("#s5-stack", { z: -320, opacity: 0, duration: 0.65, ease: "power3.in" }, 7.45);
+      tl.to(["#s5-shA", "#s5-shB"], { opacity: 0, duration: 0.45, ease: "power2.in" }, 7.45);
+      tl.to("#s5-sil", { opacity: 0, duration: 0.45, ease: "power2.inOut" }, 7.3);
+      tl.to("#s5-scr-dim", { backgroundColor: "rgba(4,10,28,0.7)", duration: 0.5, ease: "power2.inOut" }, 7.3);
+      tl.to("#s5-scr", { x: 170, y: 92, width: 440, height: 280, duration: 0.85, ease: "power2.inOut" }, 7.3);
+      tl.to("#s5-scr-sh", { x: 156, y: 76, width: 470, height: 300, opacity: 0.6, duration: 0.85, ease: "power2.inOut" }, 7.3);
+      tl.fromTo("#s5-pool", { opacity: 0, z: 2 }, { opacity: 0.9, z: 2, duration: 0.6, ease: "power2.out" }, 7.6);
+      tl.to(["#s5-shade", "#s5-cone"], { opacity: 0, duration: 0.4, ease: "power2.inOut" }, 7.85);
+      tl.to("#s5-h3", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 8.02);
+
+      window.__timelines["s05"] = tl;
+    })();
+  </script>
+</template>

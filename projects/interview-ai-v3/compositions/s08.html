@@ -308,17 +308,17 @@
       }
       function render3D(g) {
         if (!renderer) return;
-        const dialOn = g >= 79.55 && g < 85.9, qOn = g >= 90.3;
+        const dialOn = g >= 79.55 && g < 85.25, qOn = g >= 90.3;
         dialG.visible = dialOn; qG.visible = qOn;
         let op = 0;
-        if (dialOn) op = clamp((g - 79.6) / 0.45, 0, 1) * (1 - io(seg(g, 85.0, 85.75)));
+        if (dialOn) op = clamp((g - 79.6) / 0.45, 0, 1) * (1 - io(seg(g, 85.04, 85.2)));
         if (qOn) op = 1;
         canvas.style.opacity = String(op);
         if (!dialOn && !qOn) return;
         if (dialOn) {
           // dial rises from the decision node, camera orbits 6°, sinks away into the split line at 85.0
           const rise = eo(seg(g, 79.6, 80.5));
-          dialG.position.set(0, lerp(-1.2, 0, rise) - 1.6 * io(seg(g, 85.0, 85.75)), 0);
+          dialG.position.set(0, lerp(-1.2, 0, rise), 0);
           dialG.scale.setScalar(lerp(0.55, 1, rise));
           dialG.rotation.y = THREE.MathUtils.degToRad(lerp(-10, 0, io(seg(g, 79.6, 81.6))));
           hand.rotation.y = -THREE.MathUtils.degToRad(handAngle(g));
@@ -326,8 +326,12 @@
           rimRing.material.emissiveIntensity = 0.9 * hit;
           const orb = THREE.MathUtils.degToRad(lerp(-6, 0, io(seg(g, 79.7, 82.2))));
           const dist = lerp(11.2, 10.4, io(seg(g, 79.7, 84.9)));
-          cam.position.set(Math.sin(orb) * dist * 0.62, dist * 0.78, Math.cos(orb) * dist * 0.62);
-          cam.lookAt(0, 0.35, 0.15);
+          // zoom INTO the dial centre (accelerating), the next scene opens out of the AI ring — circle to circle
+          const zk = Math.pow(seg(g, 84.62, 85.15), 3);
+          const px = Math.sin(orb) * dist * 0.62, py = dist * 0.78, pz = Math.cos(orb) * dist * 0.62;
+          cam.position.set(lerp(px, 0, zk), lerp(py, 1.25, zk), lerp(pz, 0.12, zk));
+          cam.lookAt(0, lerp(0.35, 0.74, zk), lerp(0.15, 0, zk));
+          canvas.style.filter = zk > 0.05 ? "blur(" + (8 * zk).toFixed(2) + "px)" : "none";
           floor.material.opacity = 0.45;
         }
         if (qOn) {
@@ -404,7 +408,9 @@
       // ===== B24 84.95–90.45 =====
       tl.fromTo("#s8-line", { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.6, ease: "expo.out" }, L(85.15));
       tl.fromTo("#s8-pL", { x: -240, rotationY: 38, opacity: 0 }, { x: 0, rotationY: 14, opacity: 1, duration: 0.8, ease: "expo.out" }, L(85.2));
-      tl.fromTo("#s8-pR", { x: 240, rotationY: -38, opacity: 0 }, { x: 0, rotationY: -14, opacity: 1, duration: 0.8, ease: "expo.out" }, L(85.35));
+      tl.fromTo("#s8-pwR", { opacity: 0 }, { opacity: 1, duration: 0.06, ease: "none" }, L(85.06));
+      tl.fromTo("#s8-pwR", { x: -306, y: 28, scale: 7.5, transformOrigin: "200px 178px" }, { x: 0, y: 0, scale: 1, duration: 0.95, ease: "expo.out" }, L(85.08));
+      tl.fromTo("#s8-pR", { rotationY: 0, opacity: 1 }, { rotationY: -14, duration: 0.9, ease: "power2.out" }, L(85.2));
       tl.fromTo(["#s8-pLsh", "#s8-pRsh"], { opacity: 0 }, { opacity: 0.65, duration: 0.6, ease: "power2.out" }, L(85.4));
       // push/pull: the focused panel comes forward, the other recedes
       tl.to("#s8-pL", { z: 60, rotationY: 8, duration: 0.7, ease: "power2.inOut" }, L(85.6));

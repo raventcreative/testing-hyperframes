@@ -55,3 +55,8 @@ Motion feel between sampled frames, ease quality, overall pacing. Sound is measu
 - B11 semantic tiles and B14 window stack read a little small on a phone.
 - B05/B06 strips + assistant ring could carry more material detail.
 - S06 → S07 passes through a ~0.3 s near-empty dark frame (intentional dip, but could carry the light pool more strongly).
+
+## v2 draft render (out/interview-ai-v2_DRAFT_review.mp4, --quality draft, local)
+ffprobe: 1080×1920, H.264, 30/1, 2850 frames, 95.000 s; AAC 48 kHz stereo. blackdetect: 0. `hyperframes audio`: -14.8 LUFS,
+true peak -1.0 dBTP, no clipping, speech ends 92.97 s. 14 frames extracted from the MP4 (incl. box drop, click, laptop reveal,
+prompt click, 3D scale/dial, decision cursor, final logo) match the snapshots. `check` passed; seek test 0 px diff.

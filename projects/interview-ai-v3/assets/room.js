@@ -49,13 +49,13 @@
       <path d="M74 300 L52 170" stroke="url(#${P}-lm)" stroke-width="13" stroke-linecap="round"/>
       <path d="M52 170 L172 74" stroke="url(#${P}-lm)" stroke-width="12" stroke-linecap="round"/>
       <circle cx="52" cy="170" r="11" fill="#2c4673"/><circle cx="74" cy="300" r="10" fill="#2c4673"/><circle cx="172" cy="74" r="10" fill="#2c4673"/>
-      <g transform="rotate(32 172 74)"><path d="M150 64 L208 64 L236 128 L122 128 Z" fill="url(#${P}-lm)"/><path d="M150 64 L208 64" stroke="#6f93c4" stroke-width="3"/>
+      <g transform="rotate(-20 172 74)"><path d="M150 64 L208 64 L236 128 L122 128 Z" fill="url(#${P}-lm)"/><path d="M150 64 L208 64" stroke="#6f93c4" stroke-width="3"/>
         <ellipse id="${P}-bulbG" cx="179" cy="130" rx="52" ry="14" fill="url(#${P}-bulb)" opacity="0"/></g>
     </svg>`;
   }
   function svgPlant(P) {
     return `<svg id="${P}-plant" viewBox="0 0 160 260" style="position:absolute;left:868px;top:850px;width:150px;height:244px;overflow:visible">
-      <g fill="#4f8a4a"><path d="M80 170 C40 140 20 90 34 40 C60 80 76 120 80 170 Z"/><path d="M82 170 C110 120 140 100 152 60 C150 110 120 150 82 170 Z" fill="#6aa65a"/>
+      <g id="${P}-leaves" fill="#4f8a4a"><path d="M80 170 C40 140 20 90 34 40 C60 80 76 120 80 170 Z"/><path d="M82 170 C110 120 140 100 152 60 C150 110 120 150 82 170 Z" fill="#6aa65a"/>
         <path d="M78 170 C70 110 80 60 100 20 C108 70 96 120 78 170 Z" fill="#5c9a50"/><path d="M80 168 C50 160 18 150 4 122 C40 124 62 140 80 168 Z" fill="#3f7640"/></g>
       <path d="M44 166 L116 166 L106 246 Q80 254 54 246 Z" fill="#e8eef6"/><path d="M44 166 L116 166 L114 180 L46 180 Z" fill="#c9d6e6"/>
       <path d="M106 166 L116 166 L106 246 L96 246 Z" fill="#9fb3cc" opacity="0.6"/>
@@ -83,10 +83,11 @@
       <div style="position:absolute;left:90px;top:1500px;width:960px;height:90px;border-radius:50%;background:radial-gradient(closest-side,rgba(2,8,26,0.75),rgba(2,8,26,0))"></div>
       <div id="${P}-shaft" style="position:absolute;left:0;top:0;width:1080px;height:1920px;mix-blend-mode:screen;opacity:0.9;
         background:linear-gradient(115deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 0%);"></div>
+      <svg id="${P}-dust" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible;pointer-events:none;mix-blend-mode:screen;filter:blur(0.8px)">${Array.from({length:14},(_,i)=>`<circle id="${P}-d${i}" r="${(1.6+(i*7%5)*0.5).toFixed(1)}" fill="#e6f4ff" opacity="0"/>`).join("")}</svg>
       <img id="${P}-desk" src="assets/icons/desk.png" alt="" style="position:absolute;left:80px;top:1000px;width:920px;height:541px"/>
       <div style="position:absolute;left:80px;top:1097px;width:920px;height:40px;background:linear-gradient(180deg,rgba(2,8,26,0.35),rgba(2,8,26,0));pointer-events:none"></div>
       <div id="${P}-deskTone" style="position:absolute;left:80px;top:1000px;width:920px;height:541px;background:linear-gradient(90deg,rgba(10,22,52,0.15),rgba(10,22,52,0.45));-webkit-mask:url(assets/icons/desk.png) center/100% 100% no-repeat;mask:url(assets/icons/desk.png) center/100% 100% no-repeat"></div>
-      <div id="${P}-lampPool" style="position:absolute;left:150px;top:1010px;width:520px;height:110px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,206,140,0.55),rgba(255,190,120,0.18) 60%,rgba(255,190,120,0));mix-blend-mode:screen;opacity:0"></div>
+      <div id="${P}-lampPool" style="position:absolute;left:200px;top:1028px;width:450px;height:92px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,150,0.75),rgba(255,196,124,0.26) 58%,rgba(255,190,120,0));mix-blend-mode:screen;opacity:0"></div>
       <div style="position:absolute;left:470px;top:1062px;width:470px;height:44px;border-radius:50%;background:radial-gradient(closest-side,rgba(2,8,26,0.6),rgba(2,8,26,0))"></div>
       <div style="position:absolute;left:440px;top:1072px;width:420px;height:22px;border-radius:50%;background:radial-gradient(closest-side,rgba(2,8,26,0.85),rgba(2,8,26,0))"></div>
       <svg style="position:absolute;left:0;top:0;width:1080px;height:1920px" viewBox="0 0 1080 1920">
@@ -100,9 +101,16 @@
       <div id="${P}-scr" style="position:absolute;left:${SCR.x}px;top:${SCR.y}px;width:${SCR.w}px;height:${SCR.h}px;border-radius:4px;overflow:hidden"></div>
       <div id="${P}-scrGlow" style="position:absolute;left:400px;top:690px;width:500px;height:330px;border-radius:50%;background:radial-gradient(closest-side,rgba(110,190,255,0.22),rgba(110,190,255,0));mix-blend-mode:screen"></div>
       ${svgLamp(P)}
-      <div id="${P}-lampCone" style="position:absolute;left:0;top:0;width:1080px;height:1920px;mix-blend-mode:screen;opacity:0;
-        background:radial-gradient(60% 40% at 34% 56%,rgba(255,208,140,0.30),rgba(255,190,120,0) 70%);
-        clip-path:polygon(338px 826px, 372px 816px, 700px 1080px, 170px 1090px)"></div>
+      <svg id="${P}-lampCone" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0;width:1080px;height:1920px;mix-blend-mode:screen;opacity:0;overflow:visible">
+        <defs><linearGradient id="${P}-beam" gradientUnits="userSpaceOnUse" x1="348" y1="866" x2="420" y2="1075"><stop offset="0" stop-color="#ffe2b0" stop-opacity="0.55"/><stop offset="0.55" stop-color="#ffcf96" stop-opacity="0.22"/><stop offset="1" stop-color="#ffc488" stop-opacity="0.05"/></linearGradient>
+          <filter id="${P}-beamBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="9"/></filter></defs>
+        <polygon points="298,880 398,848 610,1080 236,1094" fill="url(#${P}-beam)" filter="url(#${P}-beamBlur)"/>
+      </svg>
+      <div id="${P}-bulbHalo" style="position:absolute;left:278px;top:796px;width:140px;height:140px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,236,196,0.55),rgba(255,210,150,0.16) 55%,rgba(255,200,140,0));mix-blend-mode:screen;opacity:0"></div>
+      <svg id="${P}-steam" viewBox="0 0 1080 1920" style="position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible;pointer-events:none">
+        <path id="${P}-st1" d="M396 1024 C384 1004 410 990 398 968 C388 950 408 936 400 918" fill="none" stroke="#dfeaf8" stroke-width="4" stroke-linecap="round" stroke-dasharray="40 200" opacity="0"/>
+        <path id="${P}-st2" d="M408 1024 C420 1004 396 988 410 966 C422 946 402 932 412 912" fill="none" stroke="#dfeaf8" stroke-width="3" stroke-linecap="round" stroke-dasharray="34 200" opacity="0"/>
+      </svg>
     </div>
     <div id="${P}-L2" class="hfr-L" style="position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:${O.x}px ${O.y}px">${svgPerson(P)}</div>`;
     host.insertAdjacentHTML("afterbegin", html);
@@ -112,7 +120,7 @@
       "linear-gradient(118deg, rgba(0,0,0,0) 34%, rgba(200,236,255,0.10) 40%, rgba(200,236,255,0.0) 47%, rgba(200,236,255,0.08) 52%, rgba(0,0,0,0) 60%)";
     $("shaft").style.clipPath = "polygon(110px 560px, 540px 560px, 1080px 1500px, 380px 1500px)";
     return { L0: $("L0"), L1: $("L1"), L2: $("L2"), scr: $("scr"), lapImg: $("lapImg"), head: $("head"), body: $("body"),
-      lampPool: $("lampPool"), lampCone: $("lampCone"), bulb: $("bulbG"), shaft: $("shaft"), winGlow: $("winGlow"), scrGlow: $("scrGlow") };
+      lampPool: $("lampPool"), lampCone: $("lampCone"), bulb: $("bulbG"), halo: $("bulbHalo"), leaves: $("leaves"), st: [$("st1"), $("st2")], dust: Array.from({length:14},(_, i) => $("d" + i)), lampK: 0, shaftK: 1, shaft: $("shaft"), winGlow: $("winGlow"), scrGlow: $("scrGlow") };
   }
   // camera: scale s about the screen centre + vertical tilt y + lateral x, applied with differential parallax
   function cam(R, s, x, y, extraFrontY) {
@@ -122,13 +130,35 @@
   // lamp: 0 = off, 1 = on (bulb, cone, desk pool)
   function light(R, lamp, shaft) {
     R.lampPool.style.opacity = String(lamp); R.lampCone.style.opacity = String(lamp); R.bulb.setAttribute("opacity", String(lamp));
-    if (shaft !== undefined) { R.shaft.style.opacity = String(0.9 * shaft); R.winGlow.style.opacity = String(shaft); }
+    R.halo.style.opacity = String(lamp); R.lampK = lamp;
+    if (shaft !== undefined) { R.shaft.style.opacity = String(0.9 * shaft); R.winGlow.style.opacity = String(shaft); R.shaftK = shaft; }
   }
   // applicant acting: breathing only (closed form of global time g) + a small shoulder settle `k` (0..1)
   function act(R, g, k) {
     const br = Math.sin((g / 3.6) * Math.PI * 2);
     R.body.setAttribute("transform", "translate(0," + (br * 1.2).toFixed(2) + ")");
     R.head.setAttribute("transform", "translate(0," + (br * 1.0 + (k || 0) * 5).toFixed(2) + ")");
+    ambient(R, g);
+  }
+  // ambient life, pure function of global time g: plant sway, mug steam, dust drifting in the window light, warm lamp breathing
+  function ambient(R, g) {
+    const TAU = Math.PI * 2;
+    R.leaves.setAttribute("transform", "rotate(" + (Math.sin(g / 4.2 * TAU) * 1.6 + Math.sin(g / 1.9 * TAU) * 0.4).toFixed(2) + " 80 170)");
+    R.st.forEach((el, i) => {
+      const per = 2.6 + i * 0.5, u = ((g + i * 1.3) / per) % 1;
+      el.setAttribute("stroke-dashoffset", (40 - u * 150).toFixed(1));
+      el.setAttribute("opacity", (0.38 * Math.sin(u * Math.PI)).toFixed(3));
+      el.setAttribute("transform", "translate(" + (Math.sin(g * 0.9 + i) * 3).toFixed(1) + ",0)");
+    });
+    R.dust.forEach((el, i) => {
+      const per = 9 + (i % 5) * 1.7, u = ((g / per) + i * 0.137) % 1;
+      // drift down the window shaft (from the window towards the desk), slight sideways wobble
+      const x0 = 180 + ((i * 97) % 360), x = x0 + u * 230 + Math.sin(g * 0.7 + i) * 10, y = 600 + u * 520 + Math.cos(g * 0.5 + i * 2) * 8;
+      el.setAttribute("cx", x.toFixed(1)); el.setAttribute("cy", y.toFixed(1));
+      el.setAttribute("opacity", (0.45 * R.shaftK * Math.sin(u * Math.PI) * (0.5 + 0.5 * Math.sin(g * 1.3 + i * 1.7))).toFixed(3));
+    });
+    const warm = 0.96 + 0.04 * Math.sin(g / 3.1 * TAU);
+    R.lampPool.style.opacity = String((R.lampK * warm).toFixed(3));
   }
   window.HFRoom = { build, cam, light, act, LAP, SCR, O };
 })();

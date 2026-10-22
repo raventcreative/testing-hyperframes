@@ -15,3 +15,10 @@ Project: `projects/interview-ai-v3/` (v1, v2 frozen — never edit them).
   S06→S07 zoom THROUGH the window. Use motion blur on fast moves, anticipation and settle.
 - Glow must be elegant: small, soft, never thick neon halos. Subtitles are handled by the root (do not touch).
 - Light and shadow are part of the design: lamp warm pool, window shafts, contact + cast shadows on every object.
+
+## v3c (client: logo top-left with slow motion, lamp light aligned, more life)
+- Brand mark: user's white AI PRENEUR wordmark (`assets/branding/logo_aipreneur_white_user_crop.png`, cropped to alpha bbox) at left 64 / top 104, 320 px wide, outside `#gcam` so it never zooms.
+  Motion (pure function of root time): 0.9 s soft entrance, float ±4 px (6.4 s), drift ±2 px (9.7 s), breathing scale ±1.2 % (5.3 s), tilt ±0.5° (8.1 s), cyan sheen sweep every 7 s. Fades out 91.9–92.4 before the end logo plate (no double logo).
+- Lamp fix: head was rotated +32° (shade pointed left, off the desk) while cone/pool were drawn to the right. Head now −20° → bulb ≈ (348,866), axis hits desk ≈ (420,1068).
+  Cone redrawn as a blurred SVG beam from the shade mouth to the pool; pool re-centred under the axis; warm halo at the bulb; slow ±4 % warmth breathing (no flicker).
+- Ambient (room.js `ambient()`, called from `act()`): plant sway, two mug steam wisps, 14 dust motes drifting down the window shaft (behind the desk/laptop).

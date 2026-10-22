@@ -17,6 +17,13 @@
       #gcam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; z-index: 2; transform-origin: 540px 900px; }
       .scene-host { z-index: 2; }
       #captions { z-index: 6; }
+      /* brand mark, top-left, outside the camera so it never zooms; slow in-place life driven by the root clock */
+      #brand { position: absolute; left: 64px; top: 104px; width: 320px; height: 31px; z-index: 7; pointer-events: none; opacity: 0; }
+      #brand-img { position: absolute; left: 0; top: 0; width: 320px; height: 31px; display: block;
+        filter: drop-shadow(0 3px 10px rgba(2, 8, 26, 0.55)); }
+      #brand-sheen { position: absolute; left: 0; top: 0; width: 320px; height: 31px;
+        -webkit-mask: url(assets/branding/logo_aipreneur_white_user_crop.png) center/100% 100% no-repeat;
+        mask: url(assets/branding/logo_aipreneur_white_user_crop.png) center/100% 100% no-repeat; }
       #orbs { position: absolute; inset: 0; z-index: 4; pointer-events: none; mix-blend-mode: screen; }
       .orb { position: absolute; left: 0; top: 0; opacity: 0; }
     </style>
@@ -53,6 +60,10 @@
         <div id="orb2" class="orb" style="width:761px;height:761px;margin:-120px 0 0 -120px;background:url(assets/icons/orb_blur.png) center/100% 100% no-repeat"></div>
         <div id="orb3" class="orb" style="width:819px;height:819px;margin:-130px 0 0 -130px;background:url(assets/icons/orb_blur.png) center/100% 100% no-repeat"></div>
         <div id="orb4" class="orb" style="width:878px;height:878px;margin:-139px 0 0 -139px;background:url(assets/icons/orb_blur.png) center/100% 100% no-repeat"></div>
+      </div>
+      <div id="brand" data-layout-ignore>
+        <img id="brand-img" src="assets/branding/logo_aipreneur_white_user_crop.png" alt="AI PRENEUR" />
+        <div id="brand-sheen"></div>
       </div>
       <div data-hf-id="hf-kc1a" id="captions" data-composition-id="captions" data-composition-src="compositions/captions.html" data-track-kind="captions"
         data-start="0" data-duration="95" data-track-index="5" data-width="1080" data-height="1920"></div>
@@ -127,7 +138,19 @@
           orbEls[i].style.opacity = (0.24 + 0.22 * k).toFixed(3);
         });
       }
+      // brand: soft entrance, slow float + breathing, a gentle cyan sheen sweeping every 7 s; hands over to the end logo plate at 92.25
+      const brandEl = document.getElementById("brand"), sheenEl = document.getElementById("brand-sheen");
+      function applyBrand(t) {
+        const TAU = Math.PI * 2, inK = ioE(Math.min(1, Math.max(0, (t - 0.25) / 0.9))), outK = 1 - ioE(Math.min(1, Math.max(0, (t - 91.9) / 0.5)));
+        const fy = Math.sin(t / 6.4 * TAU) * 4 + (1 - inK) * -14, fx = Math.sin(t / 9.7 * TAU) * 2;
+        const sc = 1 + Math.sin(t / 5.3 * TAU) * 0.012, rot = Math.sin(t / 8.1 * TAU) * 0.5;
+        brandEl.style.transform = "translate(" + fx.toFixed(2) + "px," + fy.toFixed(2) + "px) rotate(" + rot.toFixed(3) + "deg) scale(" + sc.toFixed(4) + ")";
+        brandEl.style.opacity = (0.96 * inK * outK).toFixed(3);
+        const u = ((t + 4.5) % 7) / 1.6, p = Math.min(1.25, u) * 160 - 40; // sweep for 1.6 s then rest
+        sheenEl.style.background = "linear-gradient(105deg, rgba(0,201,255,0) " + (p - 22).toFixed(1) + "%, rgba(120,225,255,0.95) " + p.toFixed(1) + "%, rgba(0,201,255,0) " + (p + 22).toFixed(1) + "%)";
+      }
       function applyCam() {
+        applyBrand(camState.t);
         applyOrbs(camState.t);
         const [sc, rot] = camAt(camState.t);
         gcamEl.style.transform = "scale(" + sc.toFixed(4) + ") rotate(" + rot.toFixed(3) + "deg)";

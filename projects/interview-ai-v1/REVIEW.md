@@ -22,6 +22,11 @@ S04 starts 32.90 (VO4 "Cara kerjanya…" begins 33.15, not 34.93). Internal beat
 - Seams: 5-frame strips around every cut checked; handoff objects match on both sides.
 - Phone sheet (360 px): headlines and subtitles legible.
 
+## Draft render (out/interview-ai-v1_DRAFT_review.mp4, --quality draft, local)
+ffprobe: 1080×1920, H.264, 30/1, 2850 frames, 95.000 s; AAC 48 kHz stereo. blackdetect: 0 black segments.
+`hyperframes audio`: -14.8 LUFS integrated, true peak -1.0 dBTP, no clipping, speech ends 92.97 s. Frames extracted from the MP4
+at 12 instants incl. 3D mid-action (68.4, 71.9, 83.4, 94.95) match the snapshots; last frame = logo lockup.
+
 ## Looked at only
 Motion feel between sampled frames, ease quality, overall pacing. Sound is measured, not heard.
 

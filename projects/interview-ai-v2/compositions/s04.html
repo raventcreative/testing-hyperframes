@@ -1,0 +1,366 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    /* ---------- camera + world (CSS 3D); world == screen coords when the camera is at rest ---------- */
+    #s4-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1500px; perspective-origin: 540px 960px; }
+    #s4-world { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 540px 960px; }
+    .s4-obj { position: absolute; transform-style: preserve-3d; }
+    #s4-pool { left: 120px; top: 620px; width: 860px; height: 640px; }
+    /* ---------- B10 interview monitor (screen box x 90–390, y 860–1060) ---------- */
+    #s4-mon { left: 72px; top: 842px; width: 336px; height: 280px; }
+    #s4-mon-sh { left: 34px; top: 46px; width: 330px; height: 236px; transform: translateZ(-30px); }
+    #s4-mon-ct { left: 96px; top: 252px; width: 190px; height: 26px; }
+    #s4-mon-body { position: absolute; left: 0; top: 0; width: 336px; height: 236px; border-radius: 20px; }
+    #s4-mon-side { position: absolute; left: 326px; top: 8px; width: 16px; height: 220px; transform-origin: 0 0; transform: rotateY(90deg);
+      background: linear-gradient(180deg, #0f1c3c, #07102a); border-radius: 0 8px 8px 0; }
+    #s4-screen { position: absolute; left: 18px; top: 18px; width: 300px; height: 200px; overflow: hidden; border-radius: 12px; }
+    #s4-neck { position: absolute; left: 148px; top: 236px; width: 40px; height: 22px; background: linear-gradient(90deg, #233f6e, #3b5f96 45%, #1b3460); }
+    #s4-foot { position: absolute; left: 103px; top: 254px; width: 130px; height: 10px; border-radius: 5px;
+      background: linear-gradient(180deg, #4c71a8, #1d3561); box-shadow: 0 3px 0 #0b1735; }
+    /* ---------- waveform tube + track ---------- */
+    #s4-wave { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; transform: translateZ(1px); }
+    /* ---------- intake aperture: back (walls + tunnel) / wave / front (face ring + iris) ---------- */
+    #s4-apB, #s4-apF { left: 730px; top: 790px; width: 220px; height: 220px; }
+    .s4-apP { position: absolute; inset: 0; perspective: 700px; perspective-origin: 110px 110px; }
+    .s4-ap3 { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateY(26deg); transform-origin: 110px 110px; }
+    .s4-wall { position: absolute; left: 10px; top: 10px; width: 200px; height: 200px; border-radius: 50%; border: 42px solid #1c3664; }
+    .s4-tun { position: absolute; border-radius: 50%; border: 2px solid rgba(120, 170, 230, 0.28); }
+    #s4-apBack { position: absolute; left: 52px; top: 52px; width: 116px; height: 116px; border-radius: 50%; transform: translateZ(-34px);
+      background: radial-gradient(circle at 50% 50%, #02060f 0%, #061230 70%, #0b1b40 100%); }
+    #s4-ap-sh { left: 772px; top: 846px; width: 230px; height: 200px; }
+    #s4-led { position: absolute; left: 104px; top: 22px; width: 11px; height: 11px; opacity: 0; }
+    /* ---------- B11 rails, ribbons, tiles, focus tracker ---------- */
+    #s4-rails { left: 0; top: 0; width: 1080px; height: 1920px; }
+    .s4-rail { position: absolute; left: 160px; width: 600px; height: 6px; border-radius: 3px; transform-origin: 100% 50%; }
+    .s4-anc { position: absolute; left: 146px; width: 18px; height: 32px; border-radius: 5px; }
+    .s4-rib { position: absolute; left: 176px; width: 590px; height: 12px; border-radius: 6px; transform-origin: 100% 50%;
+      background: linear-gradient(180deg, #00c9ff 0%, #9cecff 50%, #00c9ff 100%); box-shadow: 0 0 10px rgba(0, 201, 255, 0.45); }
+    .s4-tile { position: absolute; width: 112px; height: 58px; border-radius: 10px;
+      background: linear-gradient(170deg, #f4f7fb 0%, #dfe7f0 100%); box-shadow: inset 0 1px 0 #ffffff, 0 2px 0 #c3d0de, 0 4px 0 #a9bacd, 6px 10px 14px rgba(2, 8, 26, 0.35); }
+    .s4-tile i { position: absolute; left: 14px; height: 7px; border-radius: 4px; }
+    .s4-tile i.a { top: 17px; width: 62px; background: #8fa6c2; }
+    .s4-tile i.b { top: 33px; width: 40px; background: #c0cddc; }
+    .s4-tile b { position: absolute; right: 12px; top: 14px; width: 9px; height: 9px; border-radius: 50%; background: #00c9ff;
+      box-shadow: 0 0 8px rgba(0, 201, 255, 0.6); opacity: 0; }
+    #s4-trk { position: absolute; left: 170px; top: 760px; width: 132px; height: 266px; opacity: 0; }
+    #s4-trk i { position: absolute; width: 22px; height: 22px; border-color: #00c9ff; border-style: solid; border-width: 0; }
+    #s4-trk i:nth-child(1) { left: 0; top: 0; border-left-width: 3px; border-top-width: 3px; border-top-left-radius: 8px; }
+    #s4-trk i:nth-child(2) { right: 0; top: 0; border-right-width: 3px; border-top-width: 3px; border-top-right-radius: 8px; }
+    #s4-trk i:nth-child(3) { left: 0; bottom: 0; border-left-width: 3px; border-bottom-width: 3px; border-bottom-left-radius: 8px; }
+    #s4-trk i:nth-child(4) { right: 0; bottom: 0; border-right-width: 3px; border-bottom-width: 3px; border-bottom-right-radius: 8px; }
+    /* ---------- B12 outline card (final: 620x420, centre 540,960, top-right corner 850,750) ---------- */
+    #s4-card-sh { left: 232px; top: 776px; width: 686px; height: 232px; } /* at z -160: projects to x 262, y 794, 620 wide */
+    #s4-card { left: 230px; top: 750px; width: 620px; height: 420px; }
+    #s4-cbase { position: absolute; left: 0; top: 0; width: 620px; height: 210px; border-radius: 18px 18px 0 0; transform: translateZ(1px);
+      background: linear-gradient(170deg, #f7f9fc 0%, #eaf0f6 100%); box-shadow: inset 0 1px 0 #ffffff; }
+    #s4-cfold { position: absolute; left: 0; top: 202px; width: 620px; height: 9px; border-radius: 0 0 9px 9px; transform: translateZ(1px);
+      background: linear-gradient(180deg, #dfe7f0 0%, #b7c6d6 100%); }
+    #s4-flap { position: absolute; left: 0; top: 210px; width: 620px; height: 210px; transform-style: preserve-3d; transform-origin: 50% 0; }
+    .s4-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    #s4-flapF { border-radius: 0 0 18px 18px; background: linear-gradient(170deg, #eef3f8 0%, #e4ebf3 100%);
+      box-shadow: inset 0 1px 0 #ffffff, 0 1px 0 #d3dde8, 0 3px 0 #c3d0de, 0 5px 0 #b7c6d6; overflow: hidden; }
+    #s4-flapB { transform: rotateX(180deg); border-radius: 0 0 18px 18px; background: linear-gradient(170deg, #dbe4ee, #c9d6e4); }
+    #s4-flapShade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(30, 55, 95, 0.38) 0%, rgba(30, 55, 95, 0) 46%); }
+    #s4-crease { position: absolute; left: 6px; top: 207px; width: 608px; height: 5px; transform: translateZ(2px); opacity: 0;
+      background: linear-gradient(180deg, rgba(120, 145, 180, 0) 0%, rgba(90, 118, 158, 0.55) 45%, rgba(255, 255, 255, 0.9) 75%, rgba(255, 255, 255, 0) 100%); }
+    .s4-row { position: absolute; left: 36px; height: 12px; }
+    .s4-row .d { position: absolute; left: 0; top: 0; width: 12px; height: 12px; border-radius: 50%; background: #3d679e; }
+    .s4-row .l { position: absolute; left: 26px; top: 2px; height: 9px; border-radius: 5px; background: #b9c8d8; transform-origin: 0 50%; }
+    #s4-hd { position: absolute; left: 34px; top: 92px; width: 270px; height: 14px; border-radius: 7px; background: #294b77; opacity: 0.82; transform-origin: 0 50%; }
+    #s4-earW { position: absolute; left: 550px; top: 0; width: 70px; height: 70px; filter: drop-shadow(-3px 5px 4px rgba(20, 40, 80, 0.35)); }
+    #s4-ear { position: absolute; inset: 0; background: linear-gradient(45deg, #c7d4e2 0%, #e6edf5 100%); }
+    #s4-tag { position: absolute; left: 30px; top: 24px; width: 172px; height: 48px; border-radius: 10px; background: linear-gradient(170deg, #1a3463, #12284f);
+      box-shadow: inset 0 1px 0 rgba(190, 225, 255, 0.35), 0 3px 0 #07122b, 0 6px 10px rgba(2, 8, 26, 0.35);
+      font: 700 24px/48px "Poppins", sans-serif; letter-spacing: 0.22em; color: #eaf4ff; padding-left: 50px; }
+    #s4-tag::before { content: ""; position: absolute; left: 18px; top: 17px; width: 14px; height: 14px; border-radius: 50%;
+      background: #0a1630; box-shadow: inset 0 0 0 3px #8fb0d6; }
+    #s4-bead { position: absolute; left: 33px; top: 124px; width: 18px; height: 18px; opacity: 0; }
+    /* ---------- text plane ---------- */
+    #s4-text { position: absolute; left: 90px; top: 214px; width: 900px; height: 340px; }
+    .s4-hl { position: absolute; left: 0; top: 0; width: 900px; }
+    .s4-line { display: block; overflow: hidden; padding: 0 6px 6px 0; }
+    .s4-line .k-hl { font-size: 104px; }
+    #s4-h3 .s4-line .k-hl { font-size: 90px; }
+    #s4-count { position: absolute; left: 90px; top: 186px; font: 400 22px/1 "Poppins", sans-serif; letter-spacing: 0.2em; color: #8fb0d6; }
+  </style>
+  <div data-hf-id="hf-8xwg" id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-y75u" id="s4-cam">
+      <div data-hf-id="hf-ah4v" id="s4-world">
+        <div data-hf-id="hf-2mf3" id="s4-pool" class="k-pool s4-obj"></div>
+        <div data-hf-id="hf-zgnz" id="s4-ap-sh" class="k-cast s4-obj"></div>
+        <div data-hf-id="hf-ibdc" id="s4-card-sh" class="k-cast s4-obj"></div>
+        <!-- monitor -->
+        <div data-hf-id="hf-6nin" id="s4-mon" class="s4-obj">
+          <div data-hf-id="hf-bxq9" id="s4-mon-sh" class="k-cast"></div>
+          <div data-hf-id="hf-kzq6" id="s4-mon-ct" class="k-contact"></div>
+          <div data-hf-id="hf-bkqo" id="s4-neck"></div>
+          <div data-hf-id="hf-1gs5" id="s4-foot"></div>
+          <div data-hf-id="hf-hdz1" id="s4-mon-body" class="k-panel">
+            <div data-hf-id="hf-pvng" id="s4-screen" class="k-screen">
+              <svg data-hf-id="hf-luyv" width="300" height="200" viewBox="0 0 636 356" preserveAspectRatio="xMidYMid slice"><defs data-hf-id="hf-mh0t"><linearGradient data-hf-id="hf-j567" id="s4-room" x1="0" y1="0" x2="0" y2="1"><stop data-hf-id="hf-57ej" offset="0" stop-color="#284a80"/><stop data-hf-id="hf-p5mb" offset="1" stop-color="#0f2048"/></linearGradient><linearGradient data-hf-id="hf-o9i2" id="s4-fig" x1="0" y1="0" x2="0" y2="1"><stop data-hf-id="hf-k3eq" offset="0" stop-color="#a9c4e6"/><stop data-hf-id="hf-fid9" offset="1" stop-color="#6f8fbb"/></linearGradient></defs><rect data-hf-id="hf-s1vc" width="636" height="356" fill="url(#s4-room)"/><rect data-hf-id="hf-nv2l" x="430" y="40" width="150" height="190" rx="10" fill="#3d64a0" opacity=".45"/><rect data-hf-id="hf-vb0i" x="440" y="50" width="62" height="170" rx="6" fill="#6f95cf" opacity=".35"/><path data-hf-id="hf-mbtj" d="M230 356 L230 168 Q230 118 280 118 L356 118 Q406 118 406 168 L406 356 Z" fill="#0b1838"/><circle data-hf-id="hf-pb1t" cx="318" cy="150" r="46" fill="url(#s4-fig)"/><path data-hf-id="hf-f45r" d="M196 356 Q204 238 318 226 Q432 238 440 356 Z" fill="url(#s4-fig)"/><rect data-hf-id="hf-k08j" x="0" y="300" width="636" height="56" fill="#08132e" opacity=".35"/></svg>
+            </div>
+            <div data-hf-id="hf-cjlr" id="s4-mon-side"></div>
+          </div>
+        </div>
+        <!-- aperture back: housing wall + tunnel -->
+        <div data-hf-id="hf-7psi" id="s4-apB" class="s4-obj">
+          <div data-hf-id="hf-ax53" class="s4-apP"><div data-hf-id="hf-cknq" class="s4-ap3" id="s4-apB3">
+            <div data-hf-id="hf-uncn" id="s4-apBack"></div>
+          </div></div>
+        </div>
+        <!-- B11 rails (behind tiles) -->
+        <div data-hf-id="hf-32ou" id="s4-rails" class="s4-obj">
+          <div data-hf-id="hf-173b" class="s4-anc k-metal" style="top:784px"></div><div data-hf-id="hf-eke7" class="s4-anc k-metal" style="top:876px"></div><div data-hf-id="hf-7kor" class="s4-anc k-metal" style="top:968px"></div>
+          <div data-hf-id="hf-eekr" class="s4-rail k-metal" style="top:797px"></div><div data-hf-id="hf-mwnl" class="s4-rail k-metal" style="top:889px"></div><div data-hf-id="hf-f0u8" class="s4-rail k-metal" style="top:981px"></div>
+          <div data-hf-id="hf-r9ni" class="s4-rib" style="top:794px"></div><div data-hf-id="hf-pjf0" class="s4-rib" style="top:886px"></div><div data-hf-id="hf-zlw2" class="s4-rib" style="top:978px"></div>
+        </div>
+        <!-- waveform tube on its track -->
+        <svg data-hf-id="hf-c0ej" id="s4-wave" class="s4-obj" width="1080" height="1920" viewBox="0 0 1080 1920">
+          <defs data-hf-id="hf-vl9d"><filter data-hf-id="hf-lv4p" id="s4-blur" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur data-hf-id="hf-5pp5" stdDeviation="7"/></filter></defs>
+          <path data-hf-id="hf-3c0r" id="s4-lane" d="" fill="none" stroke="rgba(4,10,30,0.42)" stroke-width="104" stroke-linecap="butt" pathLength="1" stroke-dasharray="1 2" stroke-dashoffset="1"/>
+          <path data-hf-id="hf-w63n" id="s4-laneA" d="" fill="none" stroke="rgba(150,200,255,0.30)" stroke-width="2" pathLength="1" stroke-dasharray="1 2" stroke-dashoffset="1"/>
+          <path data-hf-id="hf-t6st" id="s4-laneB" d="" fill="none" stroke="rgba(150,200,255,0.22)" stroke-width="2" pathLength="1" stroke-dasharray="1 2" stroke-dashoffset="1"/>
+          <path data-hf-id="hf-a7f4" id="s4-wsh" d="" fill="none" stroke="rgba(2,8,26,0.55)" stroke-width="14" stroke-linecap="round" filter="url(#s4-blur)" transform="translate(10 14)" opacity="0"/>
+          <path data-hf-id="hf-vk32" id="s4-wv" d="" fill="none" stroke="#00c9ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path data-hf-id="hf-lwmi" id="s4-wc" d="" fill="none" stroke="#d2f6ff" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+        </svg>
+        <!-- aperture front: face ring + iris blades -->
+        <div data-hf-id="hf-v3sm" id="s4-apF" class="s4-obj">
+          <div data-hf-id="hf-i89z" class="s4-apP"><div data-hf-id="hf-9o1o" class="s4-ap3">
+            <svg data-hf-id="hf-9m35" width="220" height="220" viewBox="0 0 220 220" style="position:absolute;left:0;top:0;overflow:visible"><defs data-hf-id="hf-ws6g"><radialGradient data-hf-id="hf-5bql" id="s4-vig" cx="110" cy="110" r="58" gradientUnits="userSpaceOnUse"><stop data-hf-id="hf-1qew" offset="0" stop-color="#030814" stop-opacity="0.96"/><stop data-hf-id="hf-80wi" offset="0.55" stop-color="#05102a" stop-opacity="0.55"/><stop data-hf-id="hf-vft3" offset="1" stop-color="#05102a" stop-opacity="0"/></radialGradient><linearGradient data-hf-id="hf-ql69" id="s4-ring" x1="0" y1="0" x2="1" y2="1"><stop data-hf-id="hf-iujb" offset="0" stop-color="#8fb0dc"/><stop data-hf-id="hf-zswt" offset="0.38" stop-color="#4a72aa"/><stop data-hf-id="hf-tx9o" offset="1" stop-color="#1b3766"/></linearGradient><linearGradient data-hf-id="hf-2vnj" id="s4-blade" x1="0" y1="0" x2="1" y2="1"><stop data-hf-id="hf-j375" offset="0" stop-color="#4f78b0"/><stop data-hf-id="hf-1in1" offset="1" stop-color="#22426f"/></linearGradient><clipPath data-hf-id="hf-5zwf" id="s4-hole"><circle data-hf-id="hf-9x0i" cx="110" cy="110" r="59"/></clipPath></defs><circle data-hf-id="hf-bkl2" cx="110" cy="110" r="58" fill="url(#s4-vig)"/><g data-hf-id="hf-5frq" clip-path="url(#s4-hole)" id="s4-blades"></g><path data-hf-id="hf-u246" d="M110 10 A100 100 0 1 1 109.9 10 Z M110 52 A58 58 0 1 0 110.1 52 Z" fill="url(#s4-ring)" fill-rule="evenodd"/><circle data-hf-id="hf-xbh4" cx="110" cy="110" r="99" fill="none" stroke="rgba(220,238,255,0.45)" stroke-width="1.5"/><circle data-hf-id="hf-9cth" cx="110" cy="110" r="59" fill="none" stroke="#0b1838" stroke-width="3"/><circle data-hf-id="hf-349t" cx="110" cy="110" r="63" fill="none" stroke="rgba(200,230,255,0.35)" stroke-width="1"/><g data-hf-id="hf-9avk" fill="#1a3462" stroke="rgba(210,235,255,0.5)" stroke-width="1"><circle data-hf-id="hf-9544" cx="110" cy="31" r="4"/><circle data-hf-id="hf-cejj" cx="178" cy="70" r="4"/><circle data-hf-id="hf-u5eu" cx="178" cy="150" r="4"/><circle data-hf-id="hf-th6q" cx="110" cy="189" r="4"/><circle data-hf-id="hf-981g" cx="42" cy="150" r="4"/><circle data-hf-id="hf-hfr9" cx="42" cy="70" r="4"/></g></svg>
+            <div data-hf-id="hf-z313" id="s4-led" class="k-signal"></div>
+          </div></div>
+        </div>
+        <!-- B11 semantic tiles + focus tracker -->
+        <div data-hf-id="hf-vo8l" id="s4-tiles" class="s4-obj" style="left:0;top:0;width:1080px;height:1920px">
+          <div data-hf-id="hf-fugi" id="s4-trk"><i data-hf-id="hf-wt6k"></i><i data-hf-id="hf-zeb8"></i><i data-hf-id="hf-y7e5"></i><i data-hf-id="hf-ylp6"></i></div>
+        </div>
+        <!-- B12 outline card -->
+        <div data-hf-id="hf-9ght" id="s4-card" class="s4-obj">
+          <div data-hf-id="hf-h7uk" id="s4-flap">
+            <div data-hf-id="hf-xgm8" id="s4-flapF" class="s4-face">
+              <div data-hf-id="hf-f8rq" class="s4-row" style="top:30px"><span data-hf-id="hf-5jqr" class="d"></span><span data-hf-id="hf-cg0o" class="l" style="width:470px"></span></div><div data-hf-id="hf-djoy" class="s4-row" style="top:70px"><span data-hf-id="hf-fjwz" class="d"></span><span data-hf-id="hf-grtu" class="l" style="width:380px"></span></div><div data-hf-id="hf-hqff" class="s4-row" style="top:110px"><span data-hf-id="hf-f5ly" class="d"></span><span data-hf-id="hf-dald" class="l" style="width:440px"></span></div><div data-hf-id="hf-6xnr" class="s4-row" style="top:150px"><span data-hf-id="hf-erax" class="d"></span><span data-hf-id="hf-bjq2" class="l" style="width:300px"></span></div>
+              <div data-hf-id="hf-nxhz" id="s4-flapShade"></div>
+            </div>
+            <div data-hf-id="hf-kumc" id="s4-flapB" class="s4-face"></div>
+          </div>
+          <div data-hf-id="hf-2gt5" id="s4-cfold"></div>
+          <div data-hf-id="hf-vyuj" id="s4-cbase">
+            <div data-hf-id="hf-1ixl" id="s4-hd"></div>
+            <div data-hf-id="hf-b7ie" class="s4-row" style="top:128px"><span data-hf-id="hf-eczw" class="d"></span><span data-hf-id="hf-au2o" class="l s4-bl" style="width:430px"></span></div>
+            <div data-hf-id="hf-27mc" class="s4-row" style="top:166px"><span data-hf-id="hf-dyov" class="d"></span><span data-hf-id="hf-n7z1" class="l s4-bl" style="width:350px"></span></div>
+            <div data-hf-id="hf-cu5m" id="s4-earW"><div data-hf-id="hf-xkqf" id="s4-ear"></div></div>
+            <div data-hf-id="hf-omj6" id="s4-tag">DRAFT</div>
+          </div>
+          <div data-hf-id="hf-59yo" id="s4-crease"></div>
+          <div data-hf-id="hf-flpw" id="s4-bead" class="k-signal"></div>
+        </div>
+      </div>
+    </div>
+    <div data-hf-id="hf-dlwt" id="s4-count">04 / 08</div>
+    <div data-hf-id="hf-da3h" id="s4-text" class="k-field">
+      <div data-hf-id="hf-giwv" id="s4-h1" class="s4-hl">
+        <span data-hf-id="hf-19nb" class="s4-line"><span data-hf-id="hf-q1p5" class="k-hl">SUARA</span></span>
+        <span data-hf-id="hf-goif" class="s4-line"><span data-hf-id="hf-y1fw" class="k-hl k-white">DITANGKAP.</span></span>
+      </div>
+      <div data-hf-id="hf-7v10" id="s4-h2" class="s4-hl">
+        <span data-hf-id="hf-ga7e" class="s4-line"><span data-hf-id="hf-i7sy" class="k-hl">PERTANYAAN</span></span>
+        <span data-hf-id="hf-fvwd" class="s4-line"><span data-hf-id="hf-7y8y" class="k-hl k-white">DIPAHAMI.</span></span>
+      </div>
+      <div data-hf-id="hf-8mot" id="s4-h3" class="s4-hl">
+        <span data-hf-id="hf-io1k" class="s4-line"><span data-hf-id="hf-j0qi" class="k-hl k-white">SARAN,</span></span>
+        <span data-hf-id="hf-i9qj" class="s4-line"><span data-hf-id="hf-wfkg" class="k-hl">BUKAN JAWABAN</span></span>
+        <span data-hf-id="hf-hvfi" class="s4-line"><span data-hf-id="hf-8vv7" class="k-hl">FINAL.</span></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => Array.from(document.querySelectorAll(s));
+      const NS = "http://www.w3.org/2000/svg";
+      const D = 11.93;
+
+      // ---------- static build ----------
+      // aperture walls (stacked annuli = cylinder depth) and tunnel rings
+      const apB3 = $("#s4-apB3");
+      for (let i = 10; i >= 1; i--) {
+        const w = document.createElement("div"); w.className = "s4-wall";
+        const k = i / 10;
+        w.style.borderColor = "rgb(" + Math.round(16 + 26 * (1 - k)) + "," + Math.round(32 + 46 * (1 - k)) + "," + Math.round(66 + 70 * (1 - k)) + ")";
+        w.style.transform = "translateZ(" + (-i * 3.2) + "px)";
+        apB3.appendChild(w);
+      }
+      [[56, -8], [50, -16], [43, -25]].forEach(([r, z]) => {
+        const t = document.createElement("div"); t.className = "s4-tun";
+        t.style.left = (110 - r) + "px"; t.style.top = (110 - r) + "px"; t.style.width = 2 * r + "px"; t.style.height = 2 * r + "px";
+        t.style.transform = "translateZ(" + z + "px)"; apB3.appendChild(t);
+      });
+      // iris blades: 6 wedges that tile the hole
+      const bl = $("#s4-blades");
+      for (let i = 0; i < 6; i++) {
+        const a = (i * 60 - 90) * Math.PI / 180, h = 34 * Math.PI / 180, R = 70;
+        const g = document.createElementNS(NS, "g"); g.setAttribute("class", "s4-bld");
+        const p = document.createElementNS(NS, "path");
+        p.setAttribute("d", "M110 110 L" + (110 + R * Math.cos(a - h)).toFixed(1) + " " + (110 + R * Math.sin(a - h)).toFixed(1) +
+          " L" + (110 + R * Math.cos(a + h)).toFixed(1) + " " + (110 + R * Math.sin(a + h)).toFixed(1) + " Z");
+        p.setAttribute("fill", "url(#s4-blade)"); p.setAttribute("stroke", "#0c1d42"); p.setAttribute("stroke-width", "1.6");
+        g.appendChild(p); g.dataset.a = a; bl.appendChild(g);
+      }
+      // tiles: 3 rows x 4 columns riding the rails
+      const COLS = [180, 312, 444, 576], ROWS = [771, 863, 955];
+      const tiles = [];
+      const tw = $("#s4-tiles");
+      ROWS.forEach((top, r) => COLS.forEach((left, c) => {
+        const t = document.createElement("div"); t.className = "s4-tile";
+        t.style.left = left + "px"; t.style.top = top + "px";
+        t.innerHTML = '<i class="a" style="width:' + [62, 48, 70, 54][(r + c) % 4] + 'px"></i><i class="b" style="width:' + [40, 58, 34, 46][(r * 3 + c) % 4] + 'px"></i><b></b>';
+        t.dataset.r = r; t.dataset.c = c; tw.insertBefore(t, $("#s4-trk")); tiles.push(t);
+      }));
+      if (window.__kitAlign) window.__kitAlign(document.getElementById("s4-text"));
+
+      // ---------- waveform tube: a pure function of scene time ----------
+      const wv = $("#s4-wv"), wc = $("#s4-wc"), wsh = $("#s4-wsh"), lane = $("#s4-lane"), laneA = $("#s4-laneA"), laneB = $("#s4-laneB");
+      const ss = (a, b, x) => { x = Math.min(1, Math.max(0, (x - a) / (b - a))); return x * x * (3 - 2 * x); };
+      const cy = (x, k) => 1010 - k * 110 * ss(420, 780, x);
+      const LAM = 150;
+      let laneK = -1;
+      function draw(t) {
+        const k = ss(0.15, 1.05, t);
+        const amp = 26 - 14 * ss(0.1, 1.2, t) + 30 * ss(2.0, 2.36, t) * (1 - ss(2.75, 3.3, t));
+        const p = Math.min(1, Math.max(0, (t - 2.45) / 0.85));
+        const tx = 160 + 680 * p * p;
+        const hx = 920 - 80 * k;
+        const ph = 2 * Math.PI * (130 * t) / LAM;
+        if (hx - tx < 6) { wv.setAttribute("d", ""); wc.setAttribute("d", ""); wsh.setAttribute("d", ""); }
+        else {
+          let d = "";
+          for (let x = tx; x <= hx + 0.01; x += 5) {
+            const xx = Math.min(x, hx);
+            const hd = 1 - ss(hx - 70, hx, xx), env = (ss(tx, tx + 40, xx) * 0.85 + 0.15) * hd;
+            const y = cy(xx, k) + amp * env * Math.sin(2 * Math.PI * (xx - 160) / LAM - ph);
+            d += (d ? " L" : "M") + xx.toFixed(1) + " " + y.toFixed(1);
+          }
+          wv.setAttribute("d", d); wc.setAttribute("d", d); wsh.setAttribute("d", d);
+        }
+        wv.setAttribute("stroke-width", (5 + 8 * ss(0.1, 0.7, t)).toFixed(2));
+        wc.setAttribute("stroke-width", (3.5 * ss(0.2, 0.7, t)).toFixed(2));
+        wc.setAttribute("opacity", ss(0.15, 0.6, t).toFixed(3));
+        wsh.setAttribute("opacity", (0.8 * ss(0.1, 0.6, t)).toFixed(3));
+        const kk = Math.round(k * 200) / 200;
+        if (kk !== laneK) {
+          laneK = kk;
+          let c = "", a = "", b = "";
+          for (let x = 404; x <= 842; x += 6) {
+            const y = cy(x, kk);
+            c += (c ? " L" : "M") + x + " " + y.toFixed(1);
+            a += (a ? " L" : "M") + x + " " + (y - 52).toFixed(1);
+            b += (b ? " L" : "M") + x + " " + (y + 52).toFixed(1);
+          }
+          lane.setAttribute("d", c); laneA.setAttribute("d", a); laneB.setAttribute("d", b);
+        }
+      }
+      const P = { t: 0 };
+      draw(0);
+
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(P, { t: 0 }, { t: D, duration: D, ease: "none", onUpdate: () => draw(P.t) }, 0);
+
+      // ---------- B10 32.90–36.30 (local 0–3.40) SUARA DITANGKAP. ----------
+      tl.fromTo("#s4-pool", { opacity: 0 }, { opacity: 1, duration: 0.9, ease: "power2.out" }, 0.1);
+      // camera dolly toward the intake, looking right
+      tl.fromTo("#s4-world", { z: 0, x: 0, rotationY: 0 }, { z: 50, x: -16, rotationY: -4, duration: 3.0, ease: "power2.inOut" }, 0.3);
+      // intake aperture emerges from depth; its track draws along the defined path
+      tl.fromTo("#s4-apB", { z: -380, opacity: 0 }, { z: -3, opacity: 1, duration: 0.9, ease: "expo.out" }, 0.15);
+      tl.fromTo("#s4-apF", { z: -374, opacity: 0 }, { z: 3, opacity: 1, duration: 0.9, ease: "expo.out" }, 0.15);
+      tl.fromTo("#s4-ap-sh", { opacity: 0, z: -20 }, { opacity: 0.8, z: -20, duration: 0.9, ease: "power2.out" }, 0.35);
+      tl.fromTo(["#s4-lane", "#s4-laneA", "#s4-laneB"], { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.75, ease: "power2.out" }, 0.4);
+      // iris: unlock twitch, then blades retract mechanically on "suara" 35.16 (2.26)
+      $$(".s4-bld").forEach((g) => {
+        const a = +g.dataset.a;
+        tl.fromTo(g, { rotation: 0, x: 0, y: 0, svgOrigin: "110 110" }, { rotation: -5, duration: 0.1, ease: "power2.out" }, 2.1);
+        tl.to(g, { rotation: 26, x: 66 * Math.cos(a), y: 66 * Math.sin(a), duration: 0.42, ease: "power3.inOut" }, 2.24);
+      });
+      tl.fromTo("#s4-led", { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "power2.out" }, 2.32);
+      // headline: masked rise, apex on "suara" / "ditangkap"
+      tl.fromTo("#s4-h1 .s4-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 2.12);
+      tl.fromTo("#s4-h1 .s4-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 2.5);
+      tl.to("#s4-h1", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 3.4);
+
+      // ---------- B11 36.30–39.10 (local 3.40–6.20) PERTANYAAN DIPAHAMI. ----------
+      tl.to("#s4-world", { z: 70, x: 12, rotationY: 3, duration: 2.6, ease: "power2.inOut" }, 3.35);
+      tl.to("#s4-mon", { x: -440, z: -100, opacity: 0, duration: 0.45, ease: "power3.in" }, 3.3);
+      tl.to("#s4-wave", { opacity: 0, duration: 0.3, ease: "power2.in" }, 3.3);
+      // anchored rails extend out of the aperture, the ribbon re-emerges on them, then breaks into tiles
+      tl.fromTo("#s4-rails .s4-anc", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out", stagger: 0.04 }, 3.5);
+      tl.fromTo("#s4-rails .s4-rail", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "expo.out", stagger: 0.05 }, 3.3);
+      tl.fromTo("#s4-rails .s4-rib", { scaleX: 0, opacity: 1 }, { scaleX: 1, duration: 0.32, ease: "power3.out", stagger: 0.05 }, 3.4);
+      tl.to("#s4-rails .s4-rib", { opacity: 0, duration: 0.16, ease: "power2.in", stagger: 0.03 }, 3.74);
+      const ZL = [-120, -40, 60];
+      tiles.forEach((t) => {
+        const r = +t.dataset.r, c = +t.dataset.c;
+        tl.fromTo(t, { rotationY: 80, z: ZL[r], x: 34, opacity: 0 },
+          { rotationY: 0, z: 0, x: 0, opacity: 1, duration: 0.62, ease: "expo.out" }, 3.72 + c * 0.08 + r * 0.03);
+      });
+      // headline: per-line blur-in (each line is its own gradient element)
+      tl.fromTo("#s4-h2 .s4-line:nth-child(1) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.16, ease: "power2.out" }, 3.6);
+      tl.fromTo("#s4-h2 .s4-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.16, ease: "power2.out" }, 4.05);
+      tl.to("#s4-h2", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 6.0);
+      // focus tracker passes left→right, locking each column ("diidentifikasi")
+      tl.fromTo("#s4-trk", { opacity: 0, x: 0 }, { opacity: 1, duration: 0.15, ease: "power2.out" }, 4.02);
+      [1, 2, 3].forEach((c) => tl.to("#s4-trk", { x: 132 * c, duration: 0.22, ease: "power2.inOut" }, 4.1 + 0.28 * c));
+      tl.to("#s4-trk", { opacity: 0, duration: 0.18, ease: "power2.in" }, 5.12);
+      tiles.forEach((t) => tl.fromTo(t.querySelector("b"), { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "power2.out" }, 4.18 + 0.28 * (+t.dataset.c)));
+      // rails + aperture recede as the outline card arrives ("kerangka jawaban")
+      tl.to(["#s4-apB", "#s4-apF"], { z: -260, opacity: 0, duration: 0.4, ease: "power3.in" }, 5.12);
+      tl.to("#s4-ap-sh", { opacity: 0, duration: 0.3, ease: "power2.in" }, 5.12);
+      tl.to("#s4-rails", { opacity: 0, z: -120, duration: 0.35, ease: "power3.in" }, 5.2);
+      tl.fromTo("#s4-card", { y: 230, z: -80, opacity: 0 }, { y: 0, z: 0, opacity: 1, duration: 0.6, ease: "expo.out" }, 5.27);
+      tl.fromTo("#s4-card-sh", { opacity: 0, y: 120, z: -160 }, { opacity: 0.85, y: 0, z: -160, duration: 0.6, ease: "expo.out" }, 5.3);
+      // tiles fly into the card and become its outline lines
+      tiles.forEach((t, i) => {
+        if (i === 3) return;
+        const r = +t.dataset.r, c = +t.dataset.c;
+        const tx = 300 + c * 120 + (r === 2 ? 40 : 0), ty = 860 + r * 34;
+        tl.to(t, { x: tx - (COLS[c] + 56), y: ty - (ROWS[r] + 29), z: 40, scale: 0.28, opacity: 0, duration: 0.32, ease: "power3.in" }, 5.4 + i * 0.022);
+      });
+      tl.fromTo("#s4-hd", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "expo.out" }, 5.58);
+      tl.fromTo(".s4-bl", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "expo.out", stagger: 0.07 }, 5.64);
+      // the last tile folds into the card's top-right corner on "kerangka" 38.75 (5.85)
+      tl.to(tiles[3], { x: 827 - 632, y: 773 - 800, z: 40, scale: 0.6, rotationX: 70, duration: 0.3, ease: "power3.in" }, 5.55);
+      tl.to(tiles[3], { opacity: 0, duration: 0.06, ease: "none" }, 5.83);
+      tl.fromTo("#s4-cbase", { clipPath: "polygon(0px 0px, 550px 0px, 620px 0px, 620px 70px, 620px 210px, 0px 210px)" },
+        { clipPath: "polygon(0px 0px, 550px 0px, 585px 35px, 620px 70px, 620px 210px, 0px 210px)", duration: 0.08, ease: "power2.in" }, 5.8);
+      tl.fromTo("#s4-ear", { clipPath: "polygon(0px 0px, 70px 70px, 35px 35px)" },
+        { clipPath: "polygon(0px 0px, 70px 70px, 0px 70px)", duration: 0.12, ease: "power2.out" }, 5.86);
+
+      // ---------- B12 39.10–44.83 (local 6.20–11.93) SARAN, BUKAN JAWABAN FINAL. ----------
+      tl.to("#s4-world", { z: 0, x: 0, rotationY: 0, duration: 1.8, ease: "power2.inOut" }, 6.05);
+      // origami unfold on "jawaban" 39.25 (6.35): flap swings down from behind the crease
+      tl.fromTo("#s4-flap", { rotationX: -180 }, { rotationX: 0, duration: 0.7, ease: "power3.out" }, 6.35);
+      tl.fromTo("#s4-card-sh", { height: 232 }, { height: 465, duration: 0.7, ease: "power3.out" }, 6.35);
+      tl.fromTo("#s4-flapShade", { opacity: 1 }, { opacity: 0.22, duration: 0.8, ease: "power2.out" }, 6.45);
+      tl.fromTo("#s4-cfold", { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.out" }, 6.6);
+      tl.fromTo("#s4-crease", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 6.75);
+      // corner unfolds flat
+      tl.to("#s4-ear", { clipPath: "polygon(0px 0px, 70px 70px, 35px 35px)", duration: 0.15, ease: "power2.in" }, 6.78);
+      tl.to("#s4-cbase", { clipPath: "polygon(0px 0px, 550px 0px, 620px 0px, 620px 70px, 620px 210px, 0px 210px)", duration: 0.16, ease: "power2.out" }, 6.93);
+      // DRAFT tag stamps onto the card on "tapi ingat" 40.22 (7.32)
+      tl.fromTo("#s4-tag", { scale: 1.4, rotation: -13, opacity: 0, boxShadow: "inset 0 1px 0 rgba(190,225,255,0.35), 0 3px 0 #07122b, 14px 26px 26px rgba(2,8,26,0.10)" },
+        { scale: 1, rotation: -3, opacity: 1, boxShadow: "inset 0 1px 0 rgba(190,225,255,0.35), 0 3px 0 #07122b, 0px 6px 10px rgba(2,8,26,0.35)", duration: 0.3, ease: "power4.out" }, 7.32);
+      tl.fromTo("#s4-card", { rotationZ: 0 }, { rotationZ: 0, y: 3, duration: 0.07, ease: "power2.out" }, 7.38);
+      tl.to("#s4-card", { y: 0, duration: 0.22, ease: "power2.out" }, 7.45);
+      // headline: whole-line blur-in, apex on "saran" 41.04 (8.14)
+      [8.14, 8.3, 8.46].forEach((at, i) => tl.fromTo("#s4-h3 .s4-line:nth-child(" + (i + 1) + ") .k-hl",
+        { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, at));
+      // "perlu dipahami" 42.60 (9.70): a signal bead walks the outline points
+      tl.fromTo("#s4-bead", { opacity: 0, y: 0, z: 3, scale: 0.4 }, { opacity: 1, z: 3, scale: 1, duration: 0.25, ease: "expo.out" }, 9.7);
+      tl.to("#s4-bead", { y: 364 - 133, duration: 0.95, ease: "power2.inOut" }, 9.85);
+      tl.to("#s4-bead", { opacity: 0, scale: 0.4, duration: 0.2, ease: "power2.in" }, 11.1);
+      tl.to("#s4-h3", { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power2.in" }, 11.42);
+
+      window.__timelines["s04"] = tl;
+    })();
+  </script>
+</template>

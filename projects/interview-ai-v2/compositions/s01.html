@@ -1,0 +1,332 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    /* ---------- light ---------- */
+    #s1-cone { position: absolute; left: -160px; top: -240px; width: 960px; height: 1600px; transform-origin: 0 0; transform: rotate(-20deg);
+      background: linear-gradient(180deg, rgba(190, 220, 255, 0) 0%, rgba(190, 220, 255, 0.09) 42%, rgba(190, 220, 255, 0) 100%);
+      clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); }
+    #s1-dark { position: absolute; inset: 0; background: rgb(3, 8, 24); opacity: 0; }
+    /* ---------- world layers (2.5D, differential parallax) ---------- */
+    .s1-L { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 600px 751px; }
+    #s1-desk { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s1-pool { position: absolute; left: 250px; top: 960px; width: 700px; height: 260px; }
+    #s1-lap-cast { position: absolute; left: 340px; top: 1040px; width: 640px; height: 120px; }
+    #s1-lap-contact { position: absolute; left: 300px; top: 1072px; width: 620px; height: 46px; }
+    #s1-lap { position: absolute; left: 290px; top: 600px; width: 620px; height: 494px; }
+    #s1-lap-img { position: absolute; left: 0; top: 0; width: 620px; height: 494px; }
+    #s1-scr { position: absolute; left: 357px; top: 615.5px; width: 486px; height: 271px; border-radius: 6px; overflow: hidden; }
+    #s1-scr svg, #s1-card svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+    #s1-ring1, #s1-ring2 { position: absolute; left: 0; top: 0; width: 120px; height: 120px; border-radius: 50%; border: 3px solid rgba(0, 201, 255, 0.9); opacity: 0; }
+    /* speech card (question) — front: question, back: empty answer field */
+    #s1-qw { position: absolute; left: 250px; top: 470px; width: 600px; height: 200px; perspective: 1200px; }
+    #s1-q { position: absolute; inset: 0; transform-style: preserve-3d; }
+    .s1-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; padding: 26px 32px; }
+    .s1-face .lbl { font: 700 20px/1 "Poppins", sans-serif; letter-spacing: 0.16em; color: #5a7aa3; }
+    #s1-qtext { margin-top: 14px; font: 700 38px/1.22 "Poppins", sans-serif; color: #12284f; }
+    #s1-qtext span { opacity: 0; }
+    #s1-caret { display: inline-block; width: 4px; height: 38px; background: #00a6d6; vertical-align: -6px; margin-left: 3px; }
+    #s1-q-tail { position: absolute; left: 280px; top: 196px; width: 40px; height: 24px; clip-path: polygon(0 0, 100% 0, 50% 100%); background: #e6edf5; }
+    #s1-back { transform: rotateX(180deg); }
+    #s1-back .ln { height: 3px; border-radius: 2px; background: repeating-linear-gradient(90deg, #b9c8d8 0 18px, transparent 18px 30px); margin-top: 30px; }
+    #s1-acaret { position: absolute; left: 32px; top: 70px; width: 4px; height: 40px; background: #00a6d6; opacity: 0; }
+    #s1-crease { position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: rgba(60, 90, 130, 0); }
+    #s1-q-sh { position: absolute; left: 300px; top: 700px; width: 560px; height: 120px; opacity: 0; }
+    /* extruded question mark */
+    #s1-qmw { position: absolute; left: 735px; top: 560px; width: 200px; height: 300px; perspective: 900px; }
+    #s1-qm { position: absolute; inset: 0; transform-style: preserve-3d; }
+    .s1-g { position: absolute; left: 0; top: 0; width: 200px; text-align: center; font: 700 250px/1 "Poppins", sans-serif; }
+    #s1-gface { background-image: linear-gradient(160deg, #7fe9ff 0%, #00c9ff 38%, #294b77 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #s1-qm-sh { position: absolute; left: 675px; top: 640px; width: 200px; height: 300px; }
+    #s1-qm-sh .s1-g { color: rgba(2, 8, 26, 0.5); filter: blur(10px); }
+    #s1-bead { position: absolute; left: 0; top: 0; width: 30px; height: 30px; opacity: 0; }
+    /* applicant seen from behind (foreground) */
+    #s1-person { position: absolute; left: 60px; top: 1060px; width: 490px; height: 665px; }
+    #s1-head { transform-origin: 280px 330px; }
+    /* ---------- opening: box → button → screen card (screen space) ---------- */
+    #s1-btn-sh { position: absolute; left: 0; top: 0; width: 170px; height: 46px; border-radius: 50%; background: radial-gradient(closest-side, rgba(2, 8, 26, 0.7), rgba(2, 8, 26, 0)); }
+    #s1-btn { position: absolute; left: 139px; top: 494px; width: 923px; height: 515px; transform-origin: 401px 436px;
+      clip-path: inset(361px 447px 3px 326px round 24px); }
+    #s1-btn-face { position: absolute; inset: 0; background: linear-gradient(170deg, #ffffff 0%, #f1f5fa 100%); }
+    #s1-btn-shade { position: absolute; left: 0; top: 0; width: 923px; height: 515px; background: linear-gradient(180deg, rgba(255,255,255,0) 60%, rgba(150, 175, 205, 0.35) 100%); }
+    #s1-btn-ui { position: absolute; left: 121px; top: 391px; width: 560px; height: 120px; display: flex; align-items: center; justify-content: center; gap: 20px; }
+    #s1-btn-ui .lab { font: 700 36px/1 "Poppins", sans-serif; letter-spacing: 0.04em; color: #12284f; }
+    #s1-btn-ui .lab span { display: inline-block; opacity: 0; }
+    #s1-btn-ico { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(160deg, #19b8ef, #1d5f9e); display: flex; align-items: center; justify-content: center; opacity: 0; }
+    #s1-card { position: absolute; inset: 0; opacity: 0; }
+    #s1-cursor { position: absolute; left: 0; top: 0; width: 112px; height: 114px; transform-origin: 7px 6px; opacity: 0; }
+    #s1-cursor img { width: 112px; height: 114px; display: block; filter: drop-shadow(6px 10px 8px rgba(2, 8, 26, 0.45)); }
+    /* ---------- text plane ---------- */
+    #s1-text { position: absolute; left: 90px; top: 214px; width: 900px; height: 340px; }
+    .s1-hl { position: absolute; left: 0; top: 0; width: 900px; }
+    .s1-line { display: block; overflow: hidden; padding: 0 6px 8px 0; }
+    .s1-line .k-hl { font-size: 104px; }
+    #s1-h3 .s1-line .k-hl { font-size: 88px; }
+    .s1-w { display: inline-block; margin-right: 0.24em; }
+    #s1-count { position: absolute; left: 90px; top: 186px; font: 400 22px/1 "Poppins", sans-serif; letter-spacing: 0.2em; color: #8fb0d6; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s1-cone"></div>
+    <!-- desk layer (parallax 0.85) -->
+    <div id="s1-Ld" class="s1-L">
+      <svg id="s1-desk" viewBox="0 0 1080 1920">
+        <defs>
+          <linearGradient id="s1-dtop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b315e"/><stop offset="1" stop-color="#2b4a7f"/></linearGradient>
+          <linearGradient id="s1-dfront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#36588f"/><stop offset="0.25" stop-color="#1a3263"/><stop offset="1" stop-color="#0b1838"/></linearGradient>
+          <radialGradient id="s1-dlight" cx="0.38" cy="0.35" r="0.7"><stop offset="0" stop-color="#5b80b8" stop-opacity="0.55"/><stop offset="1" stop-color="#5b80b8" stop-opacity="0"/></radialGradient>
+        </defs>
+        <path d="M120 1010 L960 1010 L1180 1300 L-100 1300 Z" fill="url(#s1-dtop)"/>
+        <path d="M120 1010 L960 1010 L1180 1300 L-100 1300 Z" fill="url(#s1-dlight)"/>
+        <path d="M120 1010 L960 1010" stroke="rgba(170,210,255,0.25)" stroke-width="2"/>
+        <path d="M-100 1300 L1180 1300 L1180 1340 L-100 1340 Z" fill="url(#s1-dfront)"/>
+      </svg>
+      <div id="s1-pool" class="k-pool"></div>
+      <div id="s1-lap-cast" class="k-cast"></div>
+      <div id="s1-lap-contact" class="k-contact"></div>
+    </div>
+    <!-- laptop layer (parallax 1.0) -->
+    <div id="s1-Ll" class="s1-L">
+      <div id="s1-lap"><img id="s1-lap-img" src="assets/icons/laptop.png" alt="" /></div>
+      <div id="s1-scr"><div id="s1-ring1"></div><div id="s1-ring2"></div></div>
+      <div id="s1-qm-sh" data-layout-ignore><div id="s1-qm-sh-in" data-layout-ignore><div class="s1-g" data-layout-ignore>?</div></div></div>
+      <div id="s1-q-sh" class="k-cast"></div>
+      <div id="s1-qw">
+        <div id="s1-q">
+          <div id="s1-front" class="s1-face k-paper">
+            <div class="lbl">PEWAWANCARA</div>
+            <div id="s1-qtext" data-layout-allow-overlap></div>
+            <div id="s1-q-tail"></div>
+          </div>
+          <div id="s1-back" class="s1-face k-paper">
+            <div class="lbl">JAWABAN KAMU</div>
+            <div class="ln"></div><div class="ln"></div><div class="ln"></div>
+            <div id="s1-acaret"></div>
+            <div id="s1-crease"></div>
+          </div>
+        </div>
+      </div>
+      <div id="s1-qmw"><div id="s1-qm"></div></div>
+      <div id="s1-bead" class="k-signal"></div>
+    </div>
+    <!-- applicant layer (parallax 1.35) -->
+    <div id="s1-Lp" class="s1-L">
+      <svg id="s1-person" viewBox="0 0 560 760">
+        <defs>
+          <linearGradient id="s1-shirt" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a2c52"/><stop offset="0.35" stop-color="#2d4675"/><stop offset="0.75" stop-color="#24395f"/><stop offset="1" stop-color="#3f6aa3"/></linearGradient>
+          <linearGradient id="s1-hair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a3756"/><stop offset="0.55" stop-color="#121a2e"/><stop offset="1" stop-color="#0a1020"/></linearGradient>
+          <linearGradient id="s1-chair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d3260"/><stop offset="1" stop-color="#091530"/></linearGradient>
+          <linearGradient id="s1-skin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9a6e57"/><stop offset="0.5" stop-color="#c39377"/><stop offset="1" stop-color="#a77a62"/></linearGradient>
+        </defs>
+        <g id="s1-body">
+          <path d="M20 760 L34 470 Q46 405 120 382 L222 350 Q280 338 338 350 L440 382 Q514 405 526 470 L540 760 Z" fill="url(#s1-shirt)"/>
+          <path d="M526 470 L540 760 L516 760 L504 478 Q496 420 446 398 Q508 412 526 470 Z" fill="#7fe0ff" opacity="0.35"/>
+          <path d="M232 348 Q280 376 328 348 L322 366 Q280 388 238 366 Z" fill="#e6edf6"/>
+          <path d="M280 386 L280 640" stroke="#13223f" stroke-width="3" opacity="0.8"/>
+        </g>
+        <g id="s1-head">
+          <rect x="246" y="262" width="68" height="96" rx="20" fill="url(#s1-skin)"/>
+          <ellipse cx="186" cy="210" rx="17" ry="27" fill="#b4846a"/>
+          <ellipse cx="374" cy="210" rx="17" ry="27" fill="#a87b62"/>
+          <ellipse cx="280" cy="186" rx="96" ry="112" fill="url(#s1-hair)"/>
+          <path d="M196 140 Q236 90 300 84 Q352 84 372 128" fill="none" stroke="#3a4a6e" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+          <path d="M210 196 Q250 160 300 160" fill="none" stroke="#2c3a5a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+          <path d="M366 140 Q382 190 368 250" fill="none" stroke="#5fd6ff" stroke-width="4" stroke-linecap="round" opacity="0.45"/>
+        </g>
+        <path d="M70 520 Q70 470 120 466 L440 466 Q490 470 490 520 L496 760 L64 760 Z" fill="url(#s1-chair)"/>
+        <path d="M120 470 L440 470" stroke="rgba(170,210,255,0.28)" stroke-width="3"/>
+        <path d="M490 520 L496 760" stroke="#00c9ff" stroke-width="3" opacity="0.35"/>
+      </svg>
+    </div>
+    <div id="s1-dark"></div>
+    <!-- opening interaction -->
+    <div id="s1-btn-sh"></div>
+    <div id="s1-btn">
+      <div id="s1-btn-face"></div>
+      <div id="s1-card"></div>
+      <div id="s1-btn-shade"></div>
+      <div id="s1-btn-ui">
+        <div id="s1-btn-ico"><svg width="36" height="26" viewBox="0 0 36 26"><rect x="1" y="3" width="22" height="20" rx="5" fill="#fff"/><path d="M24 10 L35 4 L35 22 L24 16 Z" fill="#fff"/></svg></div>
+        <div class="lab"></div>
+      </div>
+    </div>
+    <div id="s1-cursor"><img src="assets/icons/cursor.png" alt="" /></div>
+    <!-- text plane -->
+    <div id="s1-count">01 / 08</div>
+    <div id="s1-text" class="k-field">
+      <div id="s1-h1" class="s1-hl">
+        <span class="s1-line"><span class="k-hl s1-w">BAYANGIN</span><span class="k-hl s1-w">LAGI</span></span>
+        <span class="s1-line"><span class="k-hl k-white s1-w">INTERVIEW.</span></span>
+      </div>
+      <div id="s1-h2" class="s1-hl">
+        <span class="s1-line"><span class="k-hl">PERTANYAAN</span></span>
+        <span class="s1-line"><span class="k-hl k-white">SULIT.</span></span>
+      </div>
+      <div id="s1-h3" class="s1-hl">
+        <span class="s1-line"><span class="k-hl">KEPALA</span></span>
+        <span class="s1-line"><span class="k-hl">MENDADAK</span></span>
+        <span class="s1-line"><span class="k-hl k-white">KOSONG.</span></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => Array.from(document.querySelectorAll(s));
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const io = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const lerp = (a, b, k) => a + (b - a) * k;
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      if (window.__kitAlign) window.__kitAlign(document.getElementById("s1-text"));
+
+      // ----- shared video-call frame (identical in the opening card and on the laptop screen) -----
+      const CALL = '<svg viewBox="0 0 636 356" preserveAspectRatio="none"><defs>' +
+        '<linearGradient id="IDr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#284a80"/><stop offset="1" stop-color="#0f2048"/></linearGradient>' +
+        '<linearGradient id="IDf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9c4e6"/><stop offset="1" stop-color="#6f8fbb"/></linearGradient></defs>' +
+        '<rect width="636" height="356" fill="url(#IDr)"/><rect x="430" y="40" width="150" height="190" rx="10" fill="#3d64a0" opacity=".45"/>' +
+        '<rect x="440" y="50" width="62" height="170" rx="6" fill="#6f95cf" opacity=".35"/>' +
+        '<path d="M230 356 L230 168 Q230 118 280 118 L356 118 Q406 118 406 168 L406 356 Z" fill="#0b1838"/>' +
+        '<circle cx="318" cy="150" r="46" fill="url(#IDf)"/><path d="M196 356 Q204 238 318 226 Q432 238 440 356 Z" fill="url(#IDf)"/>' +
+        '<rect x="0" y="300" width="636" height="56" fill="#08132e" opacity=".35"/>' +
+        '<rect x="16" y="14" width="132" height="30" rx="15" fill="#050c20" opacity=".55"/><circle cx="34" cy="29" r="6" fill="#00c9ff"/>' +
+        '<text x="48" y="36" font-family="Poppins, sans-serif" font-weight="700" font-size="17" letter-spacing="2" fill="#cfe4fa">INTERVIEW</text></svg>';
+      $("#s1-card").innerHTML = CALL.replace(/ID/g, "s1c");
+      $("#s1-scr").insertAdjacentHTML("afterbegin", CALL.replace(/ID/g, "s1s"));
+      // ring sits around the interviewer's head (screen-local)
+      const ringPos = (el) => { el.style.left = (318 / 636 * 486 - 60).toFixed(1) + "px"; el.style.top = (150 / 356 * 271 - 60).toFixed(1) + "px"; };
+      ringPos($("#s1-ring1")); ringPos($("#s1-ring2"));
+
+      // button label letters
+      const LAB = "MULAI INTERVIEW";
+      const lab = $("#s1-btn-ui .lab");
+      LAB.split("").forEach((c) => { const s = document.createElement("span"); s.textContent = c === " " ? " " : c; s.setAttribute("data-layout-allow-overlap", ""); lab.appendChild(s); });
+      // typed question
+      const Q = "“Gimana kamu menghadapi masalah paling sulit?”";
+      const qbox = $("#s1-qtext");
+      Q.split("").forEach((ch) => { const sp = document.createElement("span"); sp.textContent = ch; sp.setAttribute("data-layout-allow-overlap", ""); qbox.appendChild(sp); });
+      const caret = document.createElement("i"); caret.id = "s1-caret"; qbox.appendChild(caret);
+      // extruded question-mark: 14 depth layers + face
+      const qm = $("#s1-qm");
+      for (let i = 14; i >= 1; i--) {
+        const g = document.createElement("div"); g.className = "s1-g"; g.textContent = "?"; g.setAttribute("data-layout-ignore", "");
+        const k = i / 14; g.style.color = "rgb(" + Math.round(18 + 30 * (1 - k)) + "," + Math.round(52 + 70 * (1 - k)) + "," + Math.round(96 + 80 * (1 - k)) + ")";
+        g.style.transform = "translateZ(" + (-i * 2.2) + "px)"; qm.appendChild(g);
+      }
+      const face = document.createElement("div"); face.className = "s1-g"; face.id = "s1-gface"; face.textContent = "?"; face.setAttribute("data-layout-allow-overlap", ""); qm.appendChild(face);
+
+      // ----- camera: one pure function of t, applied with differential parallax -----
+      const Ld = $("#s1-Ld"), Ll = $("#s1-Ll"), Lp = $("#s1-Lp"), headEl = $("#s1-head"), bodyEl = $("#s1-body");
+      function camS(t) {
+        if (t < 2.05) return 1.9;
+        if (t < 3.35) return lerp(1.9, 1.0, io(seg(t, 2.05, 3.35)));
+        if (t < 6.6) return 1.0 + 0.025 * io(seg(t, 3.35, 6.5));
+        if (t < 9.9) return lerp(1.025, 1.1, io(seg(t, 6.6, 7.4))) + 0.03 * io(seg(t, 7.4, 9.8));
+        return lerp(1.13, 1.0, io(seg(t, 9.9, 10.7)));
+      }
+      function camY(t) { // a gentle tilt: look slightly down at the answer card, back up for the hand-off
+        return lerp(0, -40, io(seg(t, 6.6, 7.4))) * (1 - io(seg(t, 9.9, 10.7)));
+      }
+      function render(t) {
+        const s = camS(t), y = camY(t);
+        const L = (f) => "translate(0px," + (y * f).toFixed(2) + "px) scale(" + (1 + (s - 1) * f).toFixed(4) + ")";
+        Ld.style.transform = L(0.85); Ll.style.transform = L(1.0);
+        const rise = 260 * (1 - eo(seg(t, 2.1, 3.3)));
+        Lp.style.transform = "translate(0px," + (y * 1.35 + rise).toFixed(2) + "px) scale(" + (1 + (s - 1) * 1.35).toFixed(4) + ")";
+        const wv = t >= 2.0 ? 1 : 0;
+        Ld.style.opacity = String(eo(seg(t, 2.05, 2.7)) * wv);
+        Lp.style.opacity = String(eo(seg(t, 2.1, 2.8)) * wv);
+        Ll.style.opacity = String(wv);
+        $("#s1-lap-img").style.opacity = String(eo(seg(t, 2.0, 2.45)));
+        // applicant acting: breathing (closed form) + head drops on "kepala", lifts a little after the blank
+        const br = Math.sin((t / 3.4) * Math.PI * 2);
+        bodyEl.setAttribute("transform", "translate(0," + (br * 1.6).toFixed(2) + ")");
+        const drop = io(seg(t, 8.62, 9.3)) * (1 - 0.4 * io(seg(t, 10.0, 10.8)));
+        headEl.setAttribute("transform", "translate(0," + (br * 1.4 + drop * 10).toFixed(2) + ") rotate(" + (drop * -5).toFixed(2) + " 280 330)");
+      }
+      const state = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(state, { t: 0 }, { t: 10.9, duration: 10.9, ease: "none", onUpdate: () => render(state.t) }, 0);
+
+      // ===== B01 0.00–3.40 =====
+      // headline: hook already on frame 0, words land with the voice
+      tl.fromTo("#s1-h1 .k-hl:nth-child(2)", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.16, ease: "power2.out" }, 0.76);
+      tl.fromTo("#s1-h1 .s1-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 0.98);
+      tl.fromTo("#s1-count", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.1);
+      tl.fromTo("#s1-cone", { opacity: 0.25 }, { opacity: 1, duration: 1.6, ease: "power2.out" }, 0.2);
+      // box tumbles in and lands (fall accelerates, lands, squash, settle)
+      tl.fromTo("#s1-btn", { y: -430, rotation: 72, scaleX: 1, scaleY: 1 }, { y: 0, rotation: 0, duration: 0.5, ease: "power2.in" }, 0.0);
+      tl.to("#s1-btn", { scaleX: 1.08, scaleY: 0.9, duration: 0.08, ease: "power2.out", transformOrigin: "401px 511px" }, 0.5);
+      tl.to("#s1-btn", { scaleX: 1, scaleY: 1, duration: 0.26, ease: "back.out(2)" }, 0.58);
+      tl.fromTo("#s1-btn-sh", { x: 455, y: 990, scale: 0.35, opacity: 0 }, { scale: 1, opacity: 0.9, duration: 0.5, ease: "power2.in" }, 0.0);
+      // square → pill (ref: morph by widening), label types in
+      tl.fromTo("#s1-btn", { clipPath: "inset(361px 447px 3px 326px round 24px)" }, { clipPath: "inset(361px 242px 3px 121px round 30px)", duration: 0.42, ease: "power3.inOut" }, 0.78);
+      tl.to("#s1-btn-sh", { scaleX: 3.4, x: 455, duration: 0.42, ease: "power3.inOut" }, 0.78);
+      tl.fromTo("#s1-btn-ico", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.6)" }, 1.0);
+      $$("#s1-btn-ui .lab span").forEach((sp, i) => tl.fromTo(sp, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 1.04 + i * 0.022));
+      // cursor glides in on an arc, hovers, clicks at 1.62
+      tl.fromTo("#s1-cursor", { x: 1010, y: 1480, rotation: -14, opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none" }, 0.95);
+      tl.to("#s1-cursor", { x: 742, duration: 0.6, ease: "power3.out" }, 0.95);
+      tl.to("#s1-cursor", { y: 952, rotation: 0, duration: 0.6, ease: "power2.inOut" }, 0.95);
+      tl.fromTo("#s1-btn-shade", { opacity: 1 }, { opacity: 0.3, duration: 0.15 }, 1.45);
+      tl.to("#s1-cursor", { scale: 0.86, duration: 0.07, ease: "power2.in" }, 1.6);
+      tl.to("#s1-cursor", { scale: 1, duration: 0.14, ease: "power2.out" }, 1.67);
+      tl.to("#s1-btn", { scale: 0.965, duration: 0.07, ease: "power2.in", transformOrigin: "401px 451px" }, 1.6);
+      tl.to("#s1-btn", { scale: 1, duration: 0.16, ease: "power2.out" }, 1.67);
+      tl.to("#s1-cursor", { x: 1080, y: 1250, opacity: 0, duration: 0.3, ease: "power3.in" }, 1.8);
+      // the button becomes the call screen: grows to the laptop screen rect (at camera scale 1.9), content swaps to the video call
+      tl.to("#s1-btn", { clipPath: "inset(0px 0px 0px 0px round 11px)", duration: 0.5, ease: "power3.inOut" }, 1.74);
+      tl.to("#s1-btn-ui", { opacity: 0, scale: 0.9, duration: 0.18, ease: "power2.in" }, 1.74);
+      tl.to("#s1-btn-sh", { opacity: 0, duration: 0.3 }, 1.74);
+      tl.fromTo("#s1-card", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 1.84);
+      tl.to("#s1-btn-shade", { opacity: 0, duration: 0.2 }, 1.84);
+      tl.to("#s1-btn", { opacity: 0, duration: 0.06, ease: "none" }, 2.22); // the identical screen inside the laptop takes over
+      // the interviewer's voice ring (just before "nanya")
+      tl.fromTo("#s1-ring1", { scale: 0.7, opacity: 0 }, { scale: 1.9, duration: 0.9, ease: "power2.out", keyframes: { opacity: [0, 0.95, 0] } }, 3.1);
+      tl.fromTo("#s1-ring2", { scale: 0.7, opacity: 0 }, { scale: 1.9, duration: 0.9, ease: "power2.out", keyframes: { opacity: [0, 0.8, 0] } }, 3.45);
+      tl.to("#s1-h1", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 3.38);
+
+      // ===== B02 3.40–7.10 =====
+      // the question card comes out of the interviewer's screen and turns toward us
+      tl.fromTo("#s1-q", { x: 0, y: 230, scale: 0.42, rotationX: 0, rotationZ: 0, opacity: 0 },
+        { y: 0, scale: 1, rotationZ: -4, opacity: 1, duration: 0.8, ease: "expo.out" }, 3.55);
+      tl.to("#s1-q", { rotationZ: -1.5, duration: 1.4, ease: "power2.inOut" }, 4.4);
+      tl.fromTo("#s1-q-sh", { opacity: 0 }, { opacity: 0.55, duration: 0.6 }, 3.8);
+      const spans = $$("#s1-qtext span");
+      spans.forEach((sp, i) => tl.set(sp, { opacity: 1 }, 4.62 + (6.45 - 4.62) * (i / spans.length)));
+      tl.fromTo("#s1-h2 .s1-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 4.62);
+      tl.fromTo("#s1-h2 .s1-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 6.0);
+      tl.fromTo("#s1-qm", { y: 110, z: -120, rotationY: -40, opacity: 0 }, { y: 0, z: 0, rotationY: -14, opacity: 1, duration: 1.0, ease: "expo.out" }, 4.9);
+      tl.fromTo("#s1-qm-sh-in", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 1.0, ease: "expo.out" }, 4.9);
+      tl.to("#s1-qm", { rotationY: -6, duration: 2.4, ease: "power2.inOut" }, 5.9);
+      tl.to("#s1-h2", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 7.0);
+      // the question card flips into an empty answer field, lowered in front of the screen
+      tl.to("#s1-q", { y: 190, rotationZ: 0, duration: 0.8, ease: "power3.inOut" }, 6.7);
+      tl.to("#s1-q", { rotationX: 180, duration: 0.7, ease: "power3.inOut" }, 6.75);
+      tl.to("#s1-q-tail", { opacity: 0, duration: 0.2 }, 6.75);
+      tl.to("#s1-q-sh", { y: 170, opacity: 0.8, duration: 0.8, ease: "power3.inOut" }, 6.7);
+      tl.fromTo("#s1-acaret", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 7.45);
+
+      // ===== B03 7.10–10.90 =====
+      tl.fromTo("#s1-h3 .s1-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.55, ease: "expo.out" }, 8.7);
+      tl.fromTo("#s1-h3 .s1-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.55, ease: "expo.out" }, 9.02);
+      tl.fromTo("#s1-h3 .s1-line:nth-child(3) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.55, ease: "expo.out" }, 9.4);
+      tl.to("#s1-acaret", { opacity: 0, duration: 0.01 }, 8.2);
+      tl.to("#s1-acaret", { opacity: 1, duration: 0.01 }, 8.7);
+      tl.to("#s1-acaret", { opacity: 0, duration: 0.01 }, 9.3);
+      // blank: the answer field creases and collapses inward (+0.15 s after "kosong")
+      tl.to("#s1-crease", { backgroundColor: "rgba(60,90,130,0.55)", duration: 0.15 }, 9.6);
+      tl.to("#s1-q", { scaleY: 0.07, scaleX: 0.84, duration: 0.42, ease: "power3.in" }, 9.62);
+      tl.to("#s1-q", { scaleX: 0.3, y: 330, opacity: 0, duration: 0.5, ease: "power3.in" }, 10.05);
+      tl.to("#s1-q-sh", { scaleX: 0.5, scaleY: 0.3, opacity: 0, duration: 0.6, ease: "power2.in" }, 9.62);
+      tl.fromTo("#s1-dark", { opacity: 0 }, { opacity: 0.28, duration: 1.1, ease: "power2.inOut" }, 8.6);
+      tl.to("#s1-cone", { opacity: 0.45, duration: 1.1, ease: "power2.inOut" }, 8.6);
+      tl.to("#s1-dark", { opacity: 0.18, duration: 0.5, ease: "power2.inOut" }, 10.3);
+      tl.to(["#s1-qm", "#s1-qm-sh-in"], { opacity: 0, duration: 0.45, ease: "power2.in" }, 10.2);
+      // "Terus," — a faint cyan bead wakes at the screen's top-right corner
+      tl.fromTo("#s1-bead", { x: 797, y: 631, scale: 0.2, opacity: 0 }, { scale: 1, opacity: 0.95, duration: 0.35, ease: "expo.out" }, 10.07);
+      tl.to("#s1-h3", { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power2.in" }, 10.62);
+      render(0);
+      window.__timelines["s01"] = tl;
+    })();
+  </script>
+</template>

@@ -1,6 +1,21 @@
-# REVIEW — AI PRENEUR · Interview Dibantu AI v1
+# REVIEW — AI PRENEUR · Interview Dibantu AI v2 (client revision of v1)
 
-Status: **draft review stage — waiting for user approval before the final render.**
+Status: **v2 draft review stage — waiting for user approval before the final render.**
+
+## v2 changes (client feedback)
+- Keyboard now in front: interview set rebuilt around the user's laptop icon on a 2.5D desk (no CSS-3D desk plane, so no
+  edge-on flicker) + an applicant seen from behind (over-the-shoulder, ref5), navy blazer, idle breathing, head drops on "kepala".
+- S01 opening uses the user's icons: white box tumbles in and lands (ref3), widens into a "MULAI INTERVIEW" button, the user's
+  cursor arcs in and clicks (1.60 s, click SFX), the button grows into the call screen and the camera pulls back to reveal the laptop.
+- Headlines: blue gradient field + key word(s) in white (`k-white`).
+- Kinetic VO text: every word appears on its spoken time (word times in production/word_times.json), current word white.
+- Global camera (#gcam): punch-ins on apex words + drift, plate follows at 30 % for parallax.
+- S02 rebuilt on the new set (ghost keyboard lifts off = "tanpa mengetik"; strips land on the SFX ticks).
+- S03 B07 like ref4: prompt box morphs open around the caret, prompt types, cursor clicks send (23.95 s, click SFX), paths draw.
+- S03–S05: 6 stiff moments replaced (board no longer starts edge-on, mic/outline card/tiles/second window arrive physically).
+- S08 B24: IZINKAN / LARANG buttons split out of the decision line; cursor hovers IZINKAN on "mengizinkan", LARANG on
+  "melarangnya", then hesitates — no click (the dilemma stays open).
+- Box icon: the supplied PNG has a white background with JPEG noise, so the box is rebuilt in CSS with the same shape/shadow.
 
 ## Creative calls
 - Locked storyboard executed as given (8 scenes / 25 beats, locked copy). No alternative storylines were built — the brief locked the film.

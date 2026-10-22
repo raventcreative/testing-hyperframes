@@ -1,229 +1,151 @@
 <template>
   <style>
     #root { position: absolute; inset: 0; overflow: hidden; }
-    /* ---------- camera + world (identical to S01 so frame 0 continues its last frame) ---------- */
-    #s2-cam, #s2-cam2 { position: absolute; left: 0; top: -120px; width: 1080px; height: 1920px; perspective: 1500px; perspective-origin: 540px 760px; }
-    #s2-world, #s2-world2 { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 540px 1200px; }
-    .s2-obj { position: absolute; transform-style: preserve-3d; }
-    #s2-desk { left: 70px; top: 880px; width: 940px; height: 640px; transform: rotateX(90deg); transform-origin: 470px 320px;
-      border-radius: 28px; background: radial-gradient(70% 60% at 38% 42%, #2a4677 0%, #1a2f58 45%, #111f40 100%);
-      box-shadow: inset 0 0 0 1px rgba(150, 200, 255, 0.10); }
-    #s2-desk-front { left: 70px; top: 1200px; width: 940px; height: 34px; transform: translateZ(320px);
-      border-radius: 0 0 14px 14px; background: linear-gradient(180deg, #31528a 0%, #142852 70%, #0b1838 100%);
-      box-shadow: inset 0 1px 0 rgba(200, 230, 255, 0.35); }
-    #s2-pool { left: 140px; top: 150px; width: 660px; height: 440px; }
-    #s2-mon-sh { left: 400px; top: 360px; width: 470px; height: 130px; }
-    #s2-mon-contact { left: 360px; top: 452px; width: 240px; height: 36px; }
-    #s2-kb-sh { left: 290px; top: 170px; width: 440px; height: 140px; }
-    #s2-card-sh { left: 260px; top: 70px; width: 520px; height: 110px; }
-    /* keyboard: static wrapper keeps S01's lift, the inner plate hinges on its rear edge */
-    #s2-kb { position: absolute; left: 0; top: 0; width: 440px; height: 150px; transform: translateZ(6px); transform-style: preserve-3d; }
-    #s2-kb-in { position: absolute; inset: 0; border-radius: 14px; transform-origin: 50% 0%;
-      background: linear-gradient(170deg, #2b4a7c, #1a3160); box-shadow: inset 0 1px 0 rgba(200, 230, 255, 0.35), 0 0 0 2px #0e1d3d; }
-    #s2-kb-in .keys { position: absolute; inset: 14px; display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(4, 1fr); gap: 6px; }
-    #s2-kb-in .keys i { display: block; border-radius: 5px; background: linear-gradient(180deg, #4a6ea6, #2d4f86); box-shadow: 0 2px 0 #142a54; }
-    #s2-kb-in .keys i.sp { grid-column: span 6; }
-    /* monitor */
-    #s2-mon { left: 200px; top: 760px; width: 680px; height: 440px; transform: translateZ(-150px); }
-    #s2-mon-body { position: absolute; left: 0; top: 0; width: 680px; height: 400px; }
-    #s2-mon-side { position: absolute; left: 666px; top: 10px; width: 28px; height: 380px; transform-origin: 0 0; transform: rotateY(90deg);
-      background: linear-gradient(180deg, #0f1c3c, #07102a); border-radius: 0 10px 10px 0; }
-    #s2-screen { position: absolute; left: 22px; top: 22px; width: 636px; height: 356px; overflow: hidden; }
-    #s2-neck { position: absolute; left: 310px; top: 398px; width: 60px; height: 42px; background: linear-gradient(90deg, #233f6e, #3b5f96 45%, #1b3460); }
-    #s2-foot { position: absolute; left: 240px; top: 430px; width: 200px; height: 14px; border-radius: 7px;
-      background: linear-gradient(180deg, #4c71a8, #1d3561); box-shadow: 0 3px 0 #0b1735; }
-    #s2-live { position: absolute; left: 22px; top: 18px; padding: 6px 14px; border-radius: 999px; background: rgba(5, 12, 32, 0.55);
-      font: 700 18px/1 "Poppins", sans-serif; letter-spacing: 0.12em; color: #cfe4fa; }
-    #s2-live b { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #00c9ff; margin-right: 8px; vertical-align: 1px; }
-    /* folded answer card (S01 end state) */
-    #s2-card-wrap { left: 210px; top: 560px; width: 660px; height: 220px; transform: translateZ(-60px); }
-    #s2-card { position: absolute; inset: 0; transform-style: preserve-3d; }
-    .s2-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; padding: 28px 34px; }
-    .s2-face .lbl { font: 700 20px/1 "Poppins", sans-serif; letter-spacing: 0.16em; color: #5a7aa3; }
-    #s2-q-back { transform: rotateX(180deg); }
-    #s2-q-back .ln { height: 3px; border-radius: 2px; background: repeating-linear-gradient(90deg, #b9c8d8 0 18px, transparent 18px 30px); margin-top: 34px; }
-    #s2-q-back .ln:first-of-type { margin-top: 30px; }
-    #s2-crease { position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: rgba(60, 90, 130, 0.55); }
-    /* floating question mark */
-    #s2-qm-wrap { left: 712px; top: 640px; width: 260px; height: 330px; transform: translateZ(90px); }
-    #s2-qm { position: absolute; inset: 0; transform-style: preserve-3d; }
-    .s2-qm-g { position: absolute; left: 0; top: 0; width: 260px; text-align: center; font: 700 300px/1 "Poppins", sans-serif; }
-    #s2-qm-face { background-image: linear-gradient(160deg, #6fe6ff 0%, #00c9ff 35%, #294b77 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    #s2-qm-shadow { left: 650px; top: 760px; width: 260px; height: 330px; transform: translateZ(-148px); }
-    #s2-qm-shadow .s2-qm-g { color: rgba(2, 8, 26, 0.55); filter: blur(10px); }
-    #s2-dark { position: absolute; inset: 0; background: rgba(3, 8, 24, 1); opacity: 0; pointer-events: none; }
-    #s2-cone { position: absolute; left: -120px; top: -200px; width: 900px; height: 1500px; transform-origin: 0 0; transform: rotate(-22deg);
-      background: linear-gradient(180deg, rgba(190, 220, 255, 0.0) 0%, rgba(190, 220, 255, 0.10) 40%, rgba(190, 220, 255, 0.0) 100%);
-      clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%); pointer-events: none; }
-
-    /* ---------- world 2: assistant objects (same camera, drawn over the dimmed desk) ---------- */
-    /* side panel docked at the monitor's top-right corner */
-    #s2-panel-wrap { left: 700px; top: 720px; width: 200px; height: 260px; transform: translateZ(-110px); }
-    #s2-panel { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 0% 50%; }
-    .s2-pl { position: absolute; inset: 0; border-radius: 22px; background: #0a142e; }
-    #s2-panel-face { position: absolute; inset: 0; border-radius: 22px; }
-    #s2-ap { position: absolute; left: 74px; top: 24px; width: 52px; height: 52px; border-radius: 50%;
-      background: radial-gradient(circle at 50% 60%, #050b1f 0%, #0b1838 70%, #1b3462 100%);
-      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(190, 225, 255, 0.25); }
-    #s2-panel-face .pl { position: absolute; left: 30px; height: 6px; border-radius: 3px; background: #24406f; }
-    #s2-panel-face .slot { position: absolute; left: 22px; right: 22px; height: 40px; border-radius: 10px;
-      background: #081127; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(190, 225, 255, 0.12); }
-    #s2-panel-sh { left: 712px; top: 744px; width: 172px; height: 236px; transform: translateZ(-147px); }
-    #s2-panel-sh .k-cast { inset: 0; }
-    /* listening bead inside the panel aperture (world copy of the screen bead) */
-    #s2-b3-wrap { left: 785px; top: 755px; width: 30px; height: 30px; transform: translateZ(-104px); }
-    #s2-b3 { position: absolute; inset: 0; }
-    /* answer strips: paper-thin cards with edge thickness */
-    .s2-strip { position: absolute; width: 380px; height: 74px; border-radius: 14px; transform-origin: 100% 50%; padding: 13px 22px 0 54px; }
-    .s2-strip .no { position: absolute; left: 20px; top: 21px; width: 20px; height: 20px; border-radius: 6px; background: #294b77;
-      box-shadow: inset 0 1px 0 rgba(200, 230, 255, 0.45); }
-    .s2-strip .lb { font: 700 17px/1 "Poppins", sans-serif; letter-spacing: 0.18em; color: #5a7aa3; }
-    .s2-strip .l1, .s2-strip .l2 { height: 6px; border-radius: 3px; background: #b4c4d6; margin-top: 9px; }
-    .s2-strip .l2 { background: #ccd7e3; margin-top: 7px; }
-    #s2-st0 { left: 330px; top: 804px; } #s2-st1 { left: 320px; top: 886px; } #s2-st2 { left: 310px; top: 968px; }
-    #s2-st0 .l1 { width: 250px; } #s2-st0 .l2 { width: 170px; }
-    #s2-st1 .l1 { width: 220px; } #s2-st1 .l2 { width: 260px; }
-    #s2-st2 .l1 { width: 270px; } #s2-st2 .l2 { width: 140px; }
-    .s2-ssh { position: absolute; width: 360px; height: 60px; border-radius: 16px; background: rgba(1, 4, 16, 0.9); filter: blur(12px); }
-    .s2-shw { width: 360px; height: 60px; transform: translateZ(-147px); }
-    .s2-ssh { left: 0; top: 0; }
-    #s2-sh0w { left: 340px; top: 816px; } #s2-sh1w { left: 330px; top: 898px; } #s2-sh2w { left: 320px; top: 980px; }
-    /* assistant concept ring: thick bezel with stacked sidewall */
-    #s2-ring-wrap { left: 310px; top: 780px; width: 460px; height: 460px; }
+    #s2-cone { position: absolute; left: -160px; top: -240px; width: 960px; height: 1600px; transform-origin: 0 0; transform: rotate(-20deg); background: linear-gradient(180deg, rgba(190, 220, 255, 0) 0%, rgba(190, 220, 255, 0.09) 42%, rgba(190, 220, 255, 0) 100%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); opacity: 0.45; }
+    #s2-dark { position: absolute; inset: 0; background: rgb(3, 8, 24); opacity: 0.18; }
+    .s2-L { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 600px 751px; }
+    #s2-desk { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s2-pool { position: absolute; left: 250px; top: 960px; width: 700px; height: 260px; }
+    #s2-lap-cast { position: absolute; left: 340px; top: 1040px; width: 640px; height: 120px; }
+    #s2-lap-contact { position: absolute; left: 300px; top: 1072px; width: 620px; height: 46px; }
+    #s2-lap { position: absolute; left: 290px; top: 600px; width: 620px; height: 494px; }
+    #s2-lap-img { position: absolute; left: 0; top: 0; width: 620px; height: 494px; }
+    #s2-scr { position: absolute; left: 357px; top: 615.5px; width: 486px; height: 271px; border-radius: 6px; overflow: hidden; }
+    #s2-scr svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+    #s2-ghost { position: absolute; left: 338.6px; top: 928.5px; width: 529.6px; height: 81.6px; transform-origin: 50% 0; opacity: 0; }
+    #s2-ghost svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+    #s2-pcast { position: absolute; left: 872px; top: 626px; width: 112px; height: 226px; opacity: 0; filter: blur(18px); }
+    #s2-panel { position: absolute; left: 862px; top: 606px; width: 112px; height: 230px; transform-origin: 0 0; opacity: 0; }
+    #s2-p-edge { position: absolute; left: 5px; top: 5px; width: 112px; height: 230px; border-radius: 20px; background: linear-gradient(180deg, #0b1532, #050b1d); }
+    #s2-p-face { position: absolute; left: 0; top: 0; width: 112px; height: 230px; border-radius: 20px; }
+    #s2-p-ap { position: absolute; left: 34px; top: 8px; width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 50% 62%, #040a1c 0%, #0a1634 70%, #1b3462 100%); box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(190, 225, 255, 0.28); }
+    .s2-slot { position: absolute; left: 0; width: 10px; height: 46px; border-radius: 0 6px 6px 0; background: #050b1d; box-shadow: inset -1px 0 0 rgba(0, 201, 255, 0.35); }
+    .s2-pl { position: absolute; left: 22px; height: 5px; border-radius: 3px; background: #24406f; }
+    #s2-person { position: absolute; left: 60px; top: 1060px; width: 490px; height: 665px; }
+    #s2-head { transform-origin: 280px 330px; }
+    #s2-rpool { position: absolute; left: 160px; top: 520px; width: 760px; height: 760px; opacity: 0; }
+    #s2-rcast { position: absolute; left: 330px; top: 700px; width: 420px; height: 420px; border-radius: 50%; background: rgba(2, 8, 26, 0.7); filter: blur(34px); opacity: 0; }
+    .s2-ssh { position: absolute; left: 0; top: 0; width: 200px; height: 56px; border-radius: 14px; background: rgba(2, 8, 26, 0.95); transform-origin: 50% 50%; opacity: 0; }
+    .s2-strip { position: absolute; left: 0; top: 0; width: 200px; height: 56px; border-radius: 12px; overflow: hidden; transform-origin: 50% 50%; opacity: 0; }
+    .s2-sin { position: absolute; left: 0; top: 0; width: 200px; height: 56px; }
+    .s2-sin .no { position: absolute; left: 14px; top: 13px; width: 16px; height: 16px; border-radius: 5px; background: #294b77; box-shadow: inset 0 1px 0 rgba(200, 230, 255, 0.45); }
+    .s2-sin .lb { position: absolute; left: 38px; top: 13px; font: 700 15px/1 "Poppins", sans-serif; letter-spacing: 0.16em; color: #5a7aa3; }
+    .s2-sin .l1, .s2-sin .l2 { position: absolute; left: 38px; height: 5px; border-radius: 3px; background: #b4c4d6; }
+    .s2-sin .l1 { top: 34px; } .s2-sin .l2 { top: 43px; background: #ccd7e3; }
+    #s2-st0 .l1 { width: 136px; } #s2-st0 .l2 { width: 96px; } #s2-st1 .l1 { width: 116px; } #s2-st1 .l2 { width: 140px; } #s2-st2 .l1 { width: 146px; } #s2-st2 .l2 { width: 80px; }
+    #s2-rwrap { position: absolute; left: 310px; top: 670px; width: 460px; height: 460px; perspective: 1400px; opacity: 0; }
     #s2-ring { position: absolute; inset: 0; transform-style: preserve-3d; }
     .s2-rl { position: absolute; inset: 0; border-radius: 50%; border: 65px solid #1a3160; }
-    #s2-ring-face { position: absolute; inset: 0; border-radius: 50%; transform: translateZ(1px);
-      background: linear-gradient(145deg, #9cbde6 0%, #5a83bb 30%, #2b4d82 62%, #16305c 100%);
-      -webkit-mask: radial-gradient(closest-side, transparent 71.3%, #000 71.8%); mask: radial-gradient(closest-side, transparent 71.3%, #000 71.8%); }
-    #s2-ring-lip { position: absolute; inset: 63px; border-radius: 50%; transform: translateZ(1.5px);
-      box-shadow: inset 0 0 0 2px rgba(5, 12, 32, 0.8), 0 0 0 1px rgba(200, 230, 255, 0.35); }
-    #s2-ring-rim { position: absolute; inset: 1px; border-radius: 50%; transform: translateZ(1.5px);
-      box-shadow: inset 2px 3px 0 rgba(225, 240, 255, 0.55), inset -2px -3px 0 rgba(0, 201, 255, 0.35); }
-    #s2-ring-cy { position: absolute; inset: 66px; border-radius: 50%; transform: translateZ(2px);
-      border: 3px solid #00c9ff; box-shadow: 0 0 14px rgba(0, 201, 255, 0.45); }
-    #s2-ring-pool { left: 160px; top: 630px; width: 760px; height: 760px; transform: translateZ(-220px); }
-    #s2-ring-floor { left: 310px; top: 1230px; width: 460px; height: 140px; transform: rotateX(90deg); }
-    #s2-ring-cast { position: absolute; left: 40px; top: 20px; width: 400px; height: 110px; border-radius: 50%; }
-    /* screen-space signals */
-    #s2-orbit { position: absolute; left: 0; top: 0; width: 0; height: 0; }
-    #s2-bead { position: absolute; left: -15px; top: -15px; width: 30px; height: 30px; }
-    #s2-caret { position: absolute; left: 0; top: 0; width: 6px; height: 64px; border-radius: 3px; background: #00c9ff;
-      box-shadow: 0 0 0 1px rgba(0, 201, 255, 0.25), 0 0 18px rgba(0, 201, 255, 0.5); }
-    /* ---------- text plane ---------- */
+    #s2-core { position: absolute; inset: 62px; border-radius: 50%; transform: translateZ(-16px) scale(0); background: radial-gradient(circle at 42% 38%, #1f3a6e 0%, #112249 55%, #08122c 100%); }
+    #s2-ring-face { position: absolute; inset: 0; border-radius: 50%; transform: translateZ(1px); background: linear-gradient(145deg, #9cbde6 0%, #5a83bb 30%, #2b4d82 62%, #16305c 100%); -webkit-mask: radial-gradient(closest-side, transparent 71.3%, #000 71.8%); mask: radial-gradient(closest-side, transparent 71.3%, #000 71.8%); }
+    #s2-ring-lip { position: absolute; inset: 63px; border-radius: 50%; transform: translateZ(1.5px); box-shadow: inset 0 0 0 2px rgba(5, 12, 32, 0.8), 0 0 0 1px rgba(200, 230, 255, 0.35); }
+    #s2-ring-rim { position: absolute; inset: 1px; border-radius: 50%; transform: translateZ(1.5px); box-shadow: inset 2px 3px 0 rgba(225, 240, 255, 0.55), inset -2px -3px 0 rgba(0, 201, 255, 0.35); }
+    #s2-ring-cy { position: absolute; inset: 66px; border-radius: 50%; transform: translateZ(2px); opacity: 0; border: 3px solid #00c9ff; box-shadow: 0 0 14px rgba(0, 201, 255, 0.45); }
+    #s2-bead { position: absolute; left: 0; top: 0; width: 30px; height: 30px; transform-origin: 0 0; opacity: 0.95; }
+    #s2-caret { position: absolute; left: 0; top: 0; width: 6px; height: 64px; border-radius: 3px; background: #00c9ff; opacity: 0; box-shadow: 0 0 0 1px rgba(0, 201, 255, 0.25), 0 0 18px rgba(0, 201, 255, 0.5); }
     #s2-text { position: absolute; left: 90px; top: 214px; width: 900px; height: 340px; }
     .s2-hl { position: absolute; left: 0; top: 0; width: 900px; }
-    .s2-line { display: block; overflow: hidden; padding: 0 6px 6px 0; }
+    .s2-line { display: block; overflow: hidden; padding: 0 6px 8px 0; }
     .s2-line .k-hl { font-size: 104px; }
     #s2-h2 .s2-line .k-hl { font-size: 96px; }
     .s2-count { position: absolute; left: 90px; top: 186px; font: 400 22px/1 "Poppins", sans-serif; letter-spacing: 0.2em; color: #8fb0d6; }
   </style>
-  <div data-hf-id="hf-53e6" id="root" data-composition-id="s02" data-width="1080" data-height="1920">
-    <div data-hf-id="hf-engm" id="s2-cone"></div>
-    <div data-hf-id="hf-69oc" id="s2-cam">
-      <div data-hf-id="hf-fhwh" id="s2-world">
-        <div data-hf-id="hf-4wiw" id="s2-desk" class="s2-obj">
-          <div data-hf-id="hf-m69e" id="s2-pool" class="k-pool"></div>
-          <div data-hf-id="hf-2h6z" id="s2-mon-sh" class="k-cast"></div>
-          <div data-hf-id="hf-5i0z" id="s2-mon-contact" class="k-contact"></div>
-          <div data-hf-id="hf-8r7q" id="s2-kb-sh" class="k-cast"></div>
-          <div data-hf-id="hf-g6nt" id="s2-card-sh" class="k-cast"></div>
-          <div data-hf-id="hf-pxag" id="s2-kb"><div data-hf-id="hf-bn70" id="s2-kb-in"><div data-hf-id="hf-rgbw" class="keys">
-            <i data-hf-id="hf-wt6k"></i><i data-hf-id="hf-zeb8"></i><i data-hf-id="hf-y7e5"></i><i data-hf-id="hf-ylp6"></i><i data-hf-id="hf-0l8b"></i><i data-hf-id="hf-0zjc"></i><i data-hf-id="hf-zsm9"></i><i data-hf-id="hf-06xa"></i><i data-hf-id="hf-26gf"></i><i data-hf-id="hf-2krg"></i><i data-hf-id="hf-oz7w"></i><i data-hf-id="hf-okwv"></i>
-            <i data-hf-id="hf-o6lu"></i><i data-hf-id="hf-jqbp"></i><i data-hf-id="hf-qkg0"></i><i data-hf-id="hf-q64z"></i><i data-hf-id="hf-prty"></i><i data-hf-id="hf-pdix"></i><i data-hf-id="hf-hqsk"></i><i data-hf-id="hf-hchj"></i><i data-hf-id="hf-8d0n"></i><i data-hf-id="hf-8rbo"></i><i data-hf-id="hf-7kel"></i><i data-hf-id="hf-7ypm"></i>
-            <i data-hf-id="hf-9y8r"></i><i data-hf-id="hf-acjs"></i><i data-hf-id="hf-95mp"></i><i data-hf-id="hf-9jxq"></i><i data-hf-id="hf-bjgv"></i><i data-hf-id="hf-bxrw"></i><i data-hf-id="hf-7lcu"></i><i data-hf-id="hf-771t"></i><i data-hf-id="hf-8dyw"></i><i data-hf-id="hf-7znv"></i><i data-hf-id="hf-604q"></i><i data-hf-id="hf-5ltp"></i>
-            <i data-hf-id="hf-6sqs"></i><i data-hf-id="hf-6efr"></i><i data-hf-id="hf-art2"></i><i data-hf-id="hf-45j9" class="sp"></i><i data-hf-id="hf-adi1"></i><i data-hf-id="hf-otn5"></i><i data-hf-id="hf-p7y6"></i>
-          </div></div></div>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s2-cone"></div>
+    <div id="s2-Ld" class="s2-L">
+      <svg id="s2-desk" viewBox="0 0 1080 1920">
+        <defs>
+          <linearGradient id="s2-dtop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b315e"/><stop offset="1" stop-color="#2b4a7f"/></linearGradient>
+          <linearGradient id="s2-dfront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#36588f"/><stop offset="0.25" stop-color="#1a3263"/><stop offset="1" stop-color="#0b1838"/></linearGradient>
+          <radialGradient id="s2-dlight" cx="0.38" cy="0.35" r="0.7"><stop offset="0" stop-color="#5b80b8" stop-opacity="0.55"/><stop offset="1" stop-color="#5b80b8" stop-opacity="0"/></radialGradient>
+        </defs>
+        <path d="M120 1010 L960 1010 L1180 1300 L-100 1300 Z" fill="url(#s2-dtop)"/>
+        <path d="M120 1010 L960 1010 L1180 1300 L-100 1300 Z" fill="url(#s2-dlight)"/>
+        <path d="M120 1010 L960 1010" stroke="rgba(170,210,255,0.25)" stroke-width="2"/>
+        <path d="M-100 1300 L1180 1300 L1180 1340 L-100 1340 Z" fill="url(#s2-dfront)"/>
+      </svg>
+      <div id="s2-pool" class="k-pool"></div>
+      <div id="s2-lap-cast" class="k-cast"></div>
+      <div id="s2-lap-contact" class="k-contact"></div>
+    </div>
+    <div id="s2-Ll" class="s2-L">
+      <div id="s2-pcast" class="k-cast"></div>
+      <div id="s2-lap"><img id="s2-lap-img" src="assets/icons/laptop.png" alt="" /></div>
+      <div id="s2-scr"></div>
+      <div id="s2-ghost" data-layout-ignore></div>
+      <div id="s2-panel" data-layout-ignore>
+        <div id="s2-p-edge"></div>
+        <div id="s2-p-face" class="k-panel">
+          <div id="s2-p-ap"></div>
+          <div class="s2-slot" style="top:39px"></div>
+          <div class="s2-slot" style="top:103px"></div>
+          <div class="s2-slot" style="top:167px"></div>
+          <div class="s2-pl" style="top:64px;width:62px"></div>
+          <div class="s2-pl" style="top:128px;width:48px"></div>
+          <div class="s2-pl" style="top:192px;width:56px"></div>
         </div>
-        <div data-hf-id="hf-qx36" id="s2-desk-front" class="s2-obj"></div>
-        <div data-hf-id="hf-3w06" id="s2-qm-shadow" class="s2-obj"><div data-hf-id="hf-loyx" id="s2-qm-sh-in"><div data-hf-id="hf-jrz7" class="s2-qm-g">?</div></div></div>
-        <div data-hf-id="hf-0apv" id="s2-mon" class="s2-obj">
-          <div data-hf-id="hf-yv07" id="s2-mon-body" class="k-panel">
-            <div data-hf-id="hf-5oaq" id="s2-screen" class="k-screen">
-              <svg data-hf-id="hf-m4j2" width="636" height="356" viewBox="0 0 636 356">
-                <defs data-hf-id="hf-mh0t">
-                  <linearGradient data-hf-id="hf-l3wl" id="s2-room" x1="0" y1="0" x2="0" y2="1"><stop data-hf-id="hf-57ej" offset="0" stop-color="#284a80"/><stop data-hf-id="hf-p5mb" offset="1" stop-color="#0f2048"/></linearGradient>
-                  <linearGradient data-hf-id="hf-dp6w" id="s2-fig" x1="0" y1="0" x2="0" y2="1"><stop data-hf-id="hf-k3eq" offset="0" stop-color="#a9c4e6"/><stop data-hf-id="hf-fid9" offset="1" stop-color="#6f8fbb"/></linearGradient>
-                </defs>
-                <rect data-hf-id="hf-druy" width="636" height="356" fill="url(#s2-room)"/>
-                <rect data-hf-id="hf-nv2l" x="430" y="40" width="150" height="190" rx="10" fill="#3d64a0" opacity=".45"/>
-                <rect data-hf-id="hf-vb0i" x="440" y="50" width="62" height="170" rx="6" fill="#6f95cf" opacity=".35"/>
-                <path data-hf-id="hf-mbtj" d="M230 356 L230 168 Q230 118 280 118 L356 118 Q406 118 406 168 L406 356 Z" fill="#0b1838"/>
-                <circle data-hf-id="hf-au8b" cx="318" cy="150" r="46" fill="url(#s2-fig)"/>
-                <path data-hf-id="hf-pcit" d="M196 356 Q204 238 318 226 Q432 238 440 356 Z" fill="url(#s2-fig)"/>
-                <rect data-hf-id="hf-k08j" x="0" y="300" width="636" height="56" fill="#08132e" opacity=".35"/>
-              </svg>
-              <div data-hf-id="hf-25do" id="s2-live"><b data-hf-id="hf-xujp"></b>INTERVIEW</div>
-            </div>
-            <div data-hf-id="hf-4jt1" id="s2-mon-side"></div>
-          </div>
-          <div data-hf-id="hf-i1s6" id="s2-neck"></div>
-          <div data-hf-id="hf-55uj" id="s2-foot"></div>
-        </div>
-        <div data-hf-id="hf-snw6" id="s2-card-wrap" class="s2-obj">
-          <div data-hf-id="hf-s77h" id="s2-card">
-            <div data-hf-id="hf-6chk" id="s2-q-front" class="s2-face k-paper"><div data-hf-id="hf-uajw" class="lbl">PEWAWANCARA</div></div>
-            <div data-hf-id="hf-wvv2" id="s2-q-back" class="s2-face k-paper">
-              <div data-hf-id="hf-i2fq" class="lbl">JAWABAN KAMU</div>
-              <div data-hf-id="hf-gmyq" class="ln"></div><div data-hf-id="hf-ru7a" class="ln"></div><div data-hf-id="hf-s8ib" class="ln"></div>
-              <div data-hf-id="hf-xw0u" id="s2-crease"></div>
-            </div>
-          </div>
-        </div>
-        <div data-hf-id="hf-ygsy" id="s2-qm-wrap" class="s2-obj"><div data-hf-id="hf-kpv5" id="s2-qm"></div></div>
       </div>
     </div>
-    <div data-hf-id="hf-lo3j" id="s2-dark"></div>
-    <div data-hf-id="hf-6h06" id="s2-cam2">
-      <div data-hf-id="hf-bi21" id="s2-world2">
-        <div data-hf-id="hf-yk5k" id="s2-ring-pool" class="s2-obj"><div data-hf-id="hf-x4cm" id="s2-ring-pool-in" class="k-pool" style="inset:0"></div></div>
-        <div data-hf-id="hf-72lt" id="s2-panel-sh" class="s2-obj"><div data-hf-id="hf-x87s" id="s2-panel-sh-in" class="k-cast" style="inset:0"></div></div>
-        <div data-hf-id="hf-aipf" id="s2-sh0w" class="s2-obj s2-shw"><div data-hf-id="hf-y7br" id="s2-sh0" class="s2-ssh"></div></div>
-        <div data-hf-id="hf-5z6g" id="s2-sh1w" class="s2-obj s2-shw"><div data-hf-id="hf-s1ly" id="s2-sh1" class="s2-ssh"></div></div>
-        <div data-hf-id="hf-74et" id="s2-sh2w" class="s2-obj s2-shw"><div data-hf-id="hf-o3hx" id="s2-sh2" class="s2-ssh"></div></div>
-        <div data-hf-id="hf-cpp0" id="s2-ring-floor" class="s2-obj"><div data-hf-id="hf-s0wl" id="s2-ring-cast" class="k-cast"></div></div>
-        <div data-hf-id="hf-y7pw" id="s2-panel-wrap" class="s2-obj">
-          <div data-hf-id="hf-26cn" id="s2-panel">
-            <div data-hf-id="hf-yzrj" class="s2-pl" style="transform:translateZ(-14px);background:#060d22"></div>
-            <div data-hf-id="hf-kwdg" class="s2-pl" style="transform:translateZ(-10px);background:#08112a"></div>
-            <div data-hf-id="hf-a7hd" class="s2-pl" style="transform:translateZ(-6px);background:#0b1631"></div>
-            <div data-hf-id="hf-1vtf" class="s2-pl" style="transform:translateZ(-3px);background:#0f1c3c"></div>
-            <div data-hf-id="hf-mmoo" id="s2-panel-face" class="k-panel">
-              <div data-hf-id="hf-djw4" id="s2-ap"></div>
-              <div data-hf-id="hf-turc" class="pl" style="top:96px;width:96px"></div>
-              <div data-hf-id="hf-ueic" class="slot" style="top:120px"></div>
-              <div data-hf-id="hf-qb8g" class="slot" style="top:168px"></div>
-              <div data-hf-id="hf-xslh" class="pl" style="top:226px;width:60px;background:#1c3561"></div>
-            </div>
-          </div>
-        </div>
-        <div data-hf-id="hf-uxat" id="s2-st0" class="s2-strip k-paper"><i data-hf-id="hf-8y1l" class="no"></i><div data-hf-id="hf-4lgp" class="lb" data-layout-allow-overlap>POIN 1</div><div data-hf-id="hf-x6ul" class="l1"></div><div data-hf-id="hf-14ym" class="l2"></div></div>
-        <div data-hf-id="hf-u5n0" id="s2-st1" class="s2-strip k-paper"><i data-hf-id="hf-xtf1" class="no"></i><div data-hf-id="hf-5sds" class="lb" data-layout-allow-overlap>POIN 2</div><div data-hf-id="hf-ippd" class="l1"></div><div data-hf-id="hf-p35u" class="l2"></div></div>
-        <div data-hf-id="hf-2tiv" id="s2-st2" class="s2-strip k-paper"><i data-hf-id="hf-z0c4" class="no"></i><div data-hf-id="hf-5e2r" class="lb" data-layout-allow-overlap>POIN 3</div><div data-hf-id="hf-jwmg" class="l1"></div><div data-hf-id="hf-phgv" class="l2"></div></div>
-        <div data-hf-id="hf-v5nm" id="s2-ring-wrap" class="s2-obj"><div data-hf-id="hf-p18h" id="s2-ring">
-          <div data-hf-id="hf-a5tt" id="s2-ring-face"></div>
-          <div data-hf-id="hf-5pw6" id="s2-ring-rim"></div>
-          <div data-hf-id="hf-714x" id="s2-ring-lip"></div>
-          <div data-hf-id="hf-p5ki" id="s2-ring-cy"></div>
-        </div></div>
-        <div data-hf-id="hf-x97b" id="s2-b3-wrap" class="s2-obj"><div data-hf-id="hf-sekz" id="s2-b3" class="k-signal"></div></div>
-      </div>
+    <div id="s2-Lp" class="s2-L">
+      <svg id="s2-person" viewBox="0 0 560 760">
+        <defs>
+          <linearGradient id="s2-shirt" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a2c52"/><stop offset="0.35" stop-color="#2d4675"/><stop offset="0.75" stop-color="#24395f"/><stop offset="1" stop-color="#3f6aa3"/></linearGradient>
+          <linearGradient id="s2-hair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a3756"/><stop offset="0.55" stop-color="#121a2e"/><stop offset="1" stop-color="#0a1020"/></linearGradient>
+          <linearGradient id="s2-chair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d3260"/><stop offset="1" stop-color="#091530"/></linearGradient>
+          <linearGradient id="s2-skin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9a6e57"/><stop offset="0.5" stop-color="#c39377"/><stop offset="1" stop-color="#a77a62"/></linearGradient>
+        </defs>
+        <g id="s2-body">
+          <path d="M20 760 L34 470 Q46 405 120 382 L222 350 Q280 338 338 350 L440 382 Q514 405 526 470 L540 760 Z" fill="url(#s2-shirt)"/>
+          <path d="M526 470 L540 760 L516 760 L504 478 Q496 420 446 398 Q508 412 526 470 Z" fill="#7fe0ff" opacity="0.35"/>
+          <path d="M232 348 Q280 376 328 348 L322 366 Q280 388 238 366 Z" fill="#e6edf6"/>
+          <path d="M280 386 L280 640" stroke="#13223f" stroke-width="3" opacity="0.8"/>
+        </g>
+        <g id="s2-head">
+          <rect x="246" y="262" width="68" height="96" rx="20" fill="url(#s2-skin)"/>
+          <ellipse cx="186" cy="210" rx="17" ry="27" fill="#b4846a"/>
+          <ellipse cx="374" cy="210" rx="17" ry="27" fill="#a87b62"/>
+          <ellipse cx="280" cy="186" rx="96" ry="112" fill="url(#s2-hair)"/>
+          <path d="M196 140 Q236 90 300 84 Q352 84 372 128" fill="none" stroke="#3a4a6e" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+          <path d="M210 196 Q250 160 300 160" fill="none" stroke="#2c3a5a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+          <path d="M366 140 Q382 190 368 250" fill="none" stroke="#5fd6ff" stroke-width="4" stroke-linecap="round" opacity="0.45"/>
+        </g>
+        <path d="M70 520 Q70 470 120 466 L440 466 Q490 470 490 520 L496 760 L64 760 Z" fill="url(#s2-chair)"/>
+        <path d="M120 470 L440 470" stroke="rgba(170,210,255,0.28)" stroke-width="3"/>
+        <path d="M490 520 L496 760" stroke="#00c9ff" stroke-width="3" opacity="0.35"/>
+      </svg>
     </div>
-    <div data-hf-id="hf-hay5" id="s2-orbit"><div data-hf-id="hf-ackm" id="s2-bead" class="k-signal"></div></div>
-    <div data-hf-id="hf-uajk" id="s2-caret"></div>
-    <div data-hf-id="hf-zd7j" id="s2-count1" class="s2-count">01 / 08</div>
-    <div data-hf-id="hf-vpsd" id="s2-count2" class="s2-count">02 / 08</div>
-    <div data-hf-id="hf-h783" id="s2-text" class="k-field">
-      <div data-hf-id="hf-swfr" id="s2-h1" class="s2-hl">
-        <span data-hf-id="hf-vt71" class="s2-line"><span data-hf-id="hf-yfir" class="k-hl">TANPA</span></span>
-        <span data-hf-id="hf-dtj5" class="s2-line"><span data-hf-id="hf-ritd" class="k-hl k-white">MENGETIK.</span></span>
+    <div id="s2-dark"></div>
+    <div id="s2-rpool" class="k-pool"></div>
+    <div id="s2-rcast"></div>
+    <div id="s2-sh0" class="s2-ssh" data-layout-ignore></div>
+    <div id="s2-sh1" class="s2-ssh" data-layout-ignore></div>
+    <div id="s2-sh2" class="s2-ssh" data-layout-ignore></div>
+    <div id="s2-st0" class="s2-strip k-paper" data-layout-ignore><div class="s2-sin"><i class="no"></i><div class="lb" data-layout-allow-overlap>POIN 1</div><div class="l1"></div><div class="l2"></div></div></div>
+    <div id="s2-st1" class="s2-strip k-paper" data-layout-ignore><div class="s2-sin"><i class="no"></i><div class="lb" data-layout-allow-overlap>POIN 2</div><div class="l1"></div><div class="l2"></div></div></div>
+    <div id="s2-st2" class="s2-strip k-paper" data-layout-ignore><div class="s2-sin"><i class="no"></i><div class="lb" data-layout-allow-overlap>POIN 3</div><div class="l1"></div><div class="l2"></div></div></div>
+    <div id="s2-rwrap" data-layout-ignore><div id="s2-ring">
+      <div id="s2-core"></div>
+      <div id="s2-ring-face"></div>
+      <div id="s2-ring-rim"></div>
+      <div id="s2-ring-lip"></div>
+      <div id="s2-ring-cy"></div>
+    </div></div>
+    <div id="s2-bead" class="k-signal" data-layout-ignore></div>
+    <div id="s2-caret" data-layout-ignore></div>
+    <div id="s2-count1" class="s2-count">01 / 08</div>
+    <div id="s2-count2" class="s2-count">02 / 08</div>
+    <div id="s2-text" class="k-field">
+      <div id="s2-h1" class="s2-hl" data-layout-allow-overlap>
+        <span class="s2-line"><span class="k-hl">TANPA</span></span>
+        <span class="s2-line"><span class="k-hl k-white">MENGETIK.</span></span>
       </div>
-      <div data-hf-id="hf-i0y4" id="s2-h2" class="s2-hl">
-        <span data-hf-id="hf-f0g8" class="s2-line"><span data-hf-id="hf-lfy1" class="k-hl">POIN JAWABAN</span></span>
-        <span data-hf-id="hf-em57" class="s2-line"><span data-hf-id="hf-zilx" class="k-hl k-white">MUNCUL.</span></span>
+      <div id="s2-h2" class="s2-hl" data-layout-allow-overlap>
+        <span class="s2-line"><span class="k-hl">POIN JAWABAN</span></span>
+        <span class="s2-line"><span class="k-hl k-white">MUNCUL.</span></span>
       </div>
-      <div data-hf-id="hf-l07p" id="s2-h3" class="s2-hl">
-        <span data-hf-id="hf-cmm2" class="s2-line"><span data-hf-id="hf-75r8" class="k-hl">ASISTEN</span></span>
-        <span data-hf-id="hf-c8b1" class="s2-line"><span data-hf-id="hf-pggb" class="k-hl k-white">AI.</span></span>
+      <div id="s2-h3" class="s2-hl" data-layout-allow-overlap>
+        <span class="s2-line"><span class="k-hl">ASISTEN</span></span>
+        <span class="s2-line"><span class="k-hl k-white">AI.</span></span>
       </div>
     </div>
   </div>
@@ -231,128 +153,190 @@
     (function () {
       window.__timelines = window.__timelines || {};
       const $ = (s) => document.querySelector(s);
-
-      // extruded question-mark glyph (same build as S01)
-      const qm = $("#s2-qm");
-      for (let i = 14; i >= 1; i--) {
-        const g = document.createElement("div"); g.className = "s2-qm-g"; g.textContent = "?";
-        const k = i / 14; const c = Math.round(18 + 30 * (1 - k)), c2 = Math.round(52 + 70 * (1 - k)), c3 = Math.round(96 + 80 * (1 - k));
-        g.style.color = "rgb(" + c + "," + c2 + "," + c3 + ")";
-        g.style.transform = "translateZ(" + (-i * 2.2) + "px)";
-        qm.appendChild(g);
-      }
-      const face = document.createElement("div"); face.className = "s2-qm-g"; face.id = "s2-qm-face"; face.textContent = "?"; qm.appendChild(face);
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const io = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const lerp = (a, b, k) => a + (b - a) * k;
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const kf = (t, P) => { // keyframe track, power-in-out between keys, holds outside
+        if (t <= P[0][0]) return P[0][1];
+        for (let i = 0; i < P.length - 1; i++) if (t < P[i + 1][0]) return lerp(P[i][1], P[i + 1][1], io(seg(t, P[i][0], P[i + 1][0])));
+        return P[P.length - 1][1];
+      };
+      const bez = (a, c, b, u) => (1 - u) * (1 - u) * a + 2 * (1 - u) * u * c + u * u * b;
+      const G0 = 10.9; // scene start (global s)
+      if (window.__kitAlign) window.__kitAlign(document.getElementById("s2-text"));
+      // ----- the same video-call frame as S01 -----
+      const CALL = '<svg viewBox="0 0 636 356" preserveAspectRatio="none"><defs>' +
+        '<linearGradient id="IDr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#284a80"/><stop offset="1" stop-color="#0f2048"/></linearGradient>' +
+        '<linearGradient id="IDf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9c4e6"/><stop offset="1" stop-color="#6f8fbb"/></linearGradient></defs>' +
+        '<rect width="636" height="356" fill="url(#IDr)"/><rect x="430" y="40" width="150" height="190" rx="10" fill="#3d64a0" opacity=".45"/>' +
+        '<rect x="440" y="50" width="62" height="170" rx="6" fill="#6f95cf" opacity=".35"/>' +
+        '<path d="M230 356 L230 168 Q230 118 280 118 L356 118 Q406 118 406 168 L406 356 Z" fill="#0b1838"/>' +
+        '<circle cx="318" cy="150" r="46" fill="url(#IDf)"/><path d="M196 356 Q204 238 318 226 Q432 238 440 356 Z" fill="url(#IDf)"/>' +
+        '<rect x="0" y="300" width="636" height="56" fill="#08132e" opacity=".35"/>' +
+        '<rect x="16" y="14" width="132" height="30" rx="15" fill="#050c20" opacity=".55"/><circle cx="34" cy="29" r="6" fill="#00c9ff"/>' +
+        '<text x="48" y="36" font-family="Poppins, sans-serif" font-weight="700" font-size="17" letter-spacing="2" fill="#cfe4fa">INTERVIEW</text></svg>';
+      $("#s2-scr").innerHTML = CALL.replace(/ID/g, "s2s");
+      // ----- keyboard ghost: wireframe of the icon's own key rects (image px, viewBox crops the key bed) -----
+      const KEYS = [[73,343,102,355],[108,343,157,355],[164,343,212,355],[219,343,268,355],[274,343,323,355],[329,343,378,355],[385,343,433,355],[440,343,489,355],[495,343,544,355],[551,343,573,355],
+        [68,360,102,374],[107,360,143,374],[147,360,183,374],[188,360,224,374],[229,360,265,374],[270,360,306,374],[311,360,346,374],[351,360,387,374],[392,360,428,374],[433,360,469,374],[474,360,510,374],[515,360,550,374],[555,360,578,374],
+        [62,379,143,396],[147,379,183,396],[188,379,224,396],[229,379,265,396],[270,379,306,396],[311,379,346,396],[351,379,387,396],[392,379,428,396],[433,379,510,396],[515,379,583,396],
+        [56,401,183,418],[188,401,224,418],[229,401,265,418],[270,401,387,418],[392,401,428,418],[433,401,469,418],[474,401,589,418]];
+      let gs = '<svg viewBox="50 338 545 84" preserveAspectRatio="none">' +
+        '<path d="M58 338.5 L587 338.5 L594 421.5 L51 421.5 Z" fill="rgba(0,201,255,0.07)" stroke="rgba(0,201,255,0.7)" stroke-width="1.4"/>';
+      KEYS.forEach((k) => { gs += '<rect x="' + (k[0] + 0.5) + '" y="' + (k[1] + 0.5) + '" width="' + (k[2] - k[0] - 1) + '" height="' + (k[3] - k[1] - 1) + '" rx="2" fill="rgba(0,201,255,0.08)" stroke="rgba(140,235,255,0.95)" stroke-width="1.4"/>'; });
+      $("#s2-ghost").innerHTML = gs + "</svg>";
       // ring sidewall: 14 stacked bezel layers, darker with depth
       const ring = $("#s2-ring");
       for (let i = 14; i >= 1; i--) {
-        const l = document.createElement("div"); l.className = "s2-rl";
-        const k = i / 14;
+        const l = document.createElement("div"); l.className = "s2-rl"; const k = i / 14;
         l.style.borderColor = "rgb(" + Math.round(34 - 22 * k) + "," + Math.round(64 - 40 * k) + "," + Math.round(118 - 66 * k) + ")";
         l.style.transform = "translateZ(" + (-i * 2.2) + "px)";
         ring.insertBefore(l, ring.firstChild);
       }
-
+      // ----- camera (local t): keyboard push → corner → corner push on "sudut" → recede -----
+      const CS = [[0.15, 1], [1.0, 1.07], [1.1, 1.07], [2.0, 1.05], [3.95, 1.05], [5.0, 1.15], [5.6, 1.15], [8.6, 0.9]];
+      const CX = [[1.1, 0], [2.0, -55], [3.95, -55], [5.0, -125], [5.6, -125], [8.6, -20]];
+      const CY = [[0.15, 0], [1.0, -45], [1.1, -45], [2.0, 30], [3.95, 30], [5.0, 70], [5.6, 70], [8.6, 40]];
+      let cam = { s: 1, x: 0, y: 0 };
+      const map = (px, py, f) => { // laptop/desk/person-layer point → screen
+        f = f == null ? 1 : f; const sf = 1 + (cam.s - 1) * f;
+        return [600 + (px - 600) * sf + cam.x * f, 751 + (py - 751) * sf + cam.y * f, sf];
+      };
+      const Ld = $("#s2-Ld"), Ll = $("#s2-Ll"), Lp = $("#s2-Lp"), headEl = $("#s2-head"), bodyEl = $("#s2-body");
+      const ghost = $("#s2-ghost"), panel = $("#s2-panel"), pcast = $("#s2-pcast");
+      const cone = $("#s2-cone"), dark = $("#s2-dark"), bead = $("#s2-bead"), caretEl = $("#s2-caret");
+      const rwrap = $("#s2-rwrap"), core = $("#s2-core"), ringCy = $("#s2-ring-cy"), rpool = $("#s2-rpool"), rcast = $("#s2-rcast");
+      const ST = [0, 1, 2].map((i) => $("#s2-st" + i)), SH = [0, 1, 2].map((i) => $("#s2-sh" + i));
+      // strips: land on the SFX ticks 13.62 / 13.86 / 14.10 (local 2.72 / 2.96 / 3.20)
+      const LAND = [2.72, 2.96, 3.20], REST_Y = [668, 732, 796], SLOT_X = 862, REST_R = 836, SW = 200, SHH = 56;
+      const AP = [918, 636]; // panel aperture centre (laptop layer)
+      const SEAT = [540, 702.5], RC = [540, 900]; // ring top seat + ring centre (screen)
+      function render(t) {
+        cam = { s: kf(t, CS), x: kf(t, CX), y: kf(t, CY) };
+        const L = (f) => "translate(" + (cam.x * f).toFixed(2) + "px," + (cam.y * f).toFixed(2) + "px) scale(" + (1 + (cam.s - 1) * f).toFixed(4) + ")";
+        Ld.style.transform = L(0.85); Ll.style.transform = L(1.0); Lp.style.transform = L(1.35);
+        const world = 1 - io(seg(t, 8.7, 9.65));
+        Ld.style.opacity = Ll.style.opacity = Lp.style.opacity = String(world);
+        const dk = kf(t, [[5.6, 0.18], [6.9, 0.5], [8.9, 0.5], [9.85, 0]]);
+        dark.style.opacity = dk.toFixed(3);
+        cone.style.opacity = kf(t, [[5.6, 0.45], [7.5, 0.15], [8.8, 0.15], [9.7, 0]]).toFixed(3);
+        // applicant acting on GLOBAL time (continuous breathing across the cut); looks up as the panel opens
+        const g = G0 + t, br = Math.sin((g / 3.4) * Math.PI * 2);
+        bodyEl.setAttribute("transform", "translate(0," + (br * 1.6).toFixed(2) + ")");
+        const drop = 0.6 - 0.4 * io(seg(t, 1.0, 1.9));
+        headEl.setAttribute("transform", "translate(0," + (br * 1.4 + drop * 10).toFixed(2) + ") rotate(" + (drop * -5).toFixed(2) + " 280 330)");
+        // B04 ghost keyboard: appears on the keys, lifts, tilts back on its rear hinge, sinks + fades (0.30–0.85)
+        const gIn = seg(t, 0.16, 0.3), gOut = io(seg(t, 0.6, 0.86));
+        const lift = -38 * eo(seg(t, 0.28, 0.5)), sink = 46 * Math.pow(seg(t, 0.6, 0.86), 2), tilt = -62 * io(seg(t, 0.4, 0.8));
+        ghost.style.opacity = (0.8 * gIn * (1 - gOut)).toFixed(3);
+        ghost.style.transform = "translateY(" + (lift + sink).toFixed(2) + "px) perspective(420px) rotateX(" + tilt.toFixed(2) + "deg)";
+        ghost.style.filter = "blur(" + (1.6 * Math.sin(Math.PI * seg(t, 0.3, 0.86))).toFixed(2) + "px)";
+        // corner panel: unfolds 0.62–1.12 (down from the corner + swings out on its bezel hinge); folds back 7.9–8.35
+        const pu = eo(seg(t, 0.62, 1.12)), pf = io(seg(t, 7.9, 8.35)), pk = pu * (1 - pf);
+        panel.style.opacity = (seg(t, 0.62, 0.72) * (1 - seg(t, 8.22, 8.35))).toFixed(3);
+        panel.style.transform = "perspective(700px) rotateY(" + (72 * (1 - pk)).toFixed(2) + "deg) scaleY(" + (0.28 + 0.72 * pk).toFixed(4) + ")";
+        pcast.style.opacity = (0.55 * pk).toFixed(3);
+        // ----- strips -----
+        for (let i = 0; i < 3; i++) {
+          const Lt = LAND[i], E = Lt - 0.5, el = ST[i], sh = SH[i];
+          if (t < E) { el.style.opacity = "0"; sh.style.opacity = "0"; continue; }
+          let w = SW, cx, cy = REST_Y[i], h = 6, rot = 0, sy = 1;
+          const u = seg(t, E, Lt);
+          if (u < 0.5) { // extrude out of the panel slot (leading edge first)
+            w = Math.max(1, SW * eo(u / 0.5)); cx = SLOT_X - w / 2; h = 34; rot = -2.2;
+          } else if (t < Lt) { // slide clear + drop onto the screen (accelerating to contact)
+            const k = (u - 0.5) / 0.5; cx = SLOT_X - 28 * io(k) - SW / 2; h = 34 - 25 * k * k; rot = -2.2;
+          } else { // landed: squash, then settle over 0.18 s
+            cx = REST_R - SW / 2; const k = seg(t, Lt, Lt + 0.18);
+            rot = -2.2 * (1 - k) * Math.cos(Math.PI * 1.5 * k); h = 9 + 5 * Math.sin(Math.PI * k) * (1 - k);
+            sy = 1 - 0.07 * Math.sin(Math.PI * seg(t, Lt, Lt + 0.09));
+          }
+          // B06: collect into one stack in the corner (5.50+)
+          const cu = seg(t, 5.5 + 0.07 * i, 6.05 + 0.07 * i), ce = io(cu);
+          if (cu > 0) {
+            cx = lerp(cx, REST_R - SW / 2 - (i - 1) * 5, ce); cy = lerp(cy, 732 - (i - 1) * 9, ce);
+            h = lerp(h, 22 + 8 * i, ce) + 26 * Math.sin(Math.PI * cu); rot = lerp(rot, 0, ce);
+          }
+          let [X, Y, sc] = map(cx, cy, 1);
+          // B06: the stack slides from the corner to behind the ring (6.45–7.30), then sinks into the core (9.2–9.45)
+          const mu = io(seg(t, 6.45 + 0.04 * i, 7.3 + 0.04 * i));
+          X = lerp(X, RC[0] - (i - 1) * 4, mu); Y = lerp(Y, RC[1] - (i - 1) * 8, mu) - 50 * Math.sin(Math.PI * mu);
+          sc = lerp(sc, 0.86, mu);
+          const sk = io(seg(t, 9.15, 9.45)); sc *= 1 - 0.45 * sk;
+          const lx = -0.15 * h * sc, ly = -0.35 * h * sc, hs = 1 + 0.003 * h;
+          el.style.width = w.toFixed(2) + "px";
+          el.style.opacity = (1 - sk).toFixed(3);
+          el.style.transform = "translate(" + (X + lx - w / 2).toFixed(2) + "px," + (Y + ly - SHH / 2).toFixed(2) + "px) rotate(" + rot.toFixed(2) + "deg) scale(" + (sc * hs).toFixed(4) + "," + (sc * hs * sy).toFixed(4) + ")";
+          el.style.filter = "blur(" + (2.2 * Math.sin(Math.PI * mu)).toFixed(2) + "px)";
+          // cast shadow on the screen: further down-right, larger, softer and fainter with height
+          sh.style.width = w.toFixed(2) + "px";
+          sh.style.opacity = (0.85 * (1 - h / 120) * (1 - 0.6 * mu) * (1 - sk)).toFixed(3);
+          sh.style.transform = "translate(" + (X - w / 2 + (0.55 * h + 3) * sc).toFixed(2) + "px," + (Y - SHH / 2 + (0.75 * h + 4) * sc).toFixed(2) + "px) scale(" + (sc * (1 + 0.004 * h)).toFixed(4) + ")";
+          sh.style.filter = "blur(" + (2.5 + 0.28 * h).toFixed(2) + "px)";
+        }
+        // ----- ring: swings out of the corner panel with motion blur (5.90–6.75) -----
+        const ru = seg(t, 5.9, 6.75), re = eo(ru);
+        const p0 = map(AP[0], 700, 1);
+        const rX = bez(p0[0], 840, RC[0], re), rY = bez(p0[1], 610, RC[1], re);
+        const coll = Math.pow(seg(t, 9.5, 9.92), 3);
+        const rS = lerp(0.22, 1, re);
+        const rRot = lerp(72, 26, re) - 22 * io(seg(t, 7.45, 9.4)) - 4 * io(seg(t, 9.4, 9.6));
+        const rBlur = ru < 0.6 ? 11 * Math.sin(Math.PI * ru / 0.6) : 0;
+        const rA = seg(t, 5.9, 6.06) * (1 - seg(t, 9.86, 9.94));
+        rwrap.style.opacity = rA.toFixed(3);
+        rwrap.style.transform = "translate(" + (rX - RC[0]).toFixed(2) + "px," + (rY - RC[1]).toFixed(2) + "px) scale(" + rS.toFixed(4) + ")";
+        rwrap.style.filter = "blur(" + rBlur.toFixed(2) + "px)";
+        ring.style.transform = "rotateY(" + rRot.toFixed(2) + "deg) scale(" + lerp(1, 6 / 460, coll).toFixed(4) + "," + lerp(1, 64 / 460, coll).toFixed(4) + ")";
+        ringCy.style.opacity = (0.9 * seg(t, 8.15, 8.35)).toFixed(3);
+        core.style.transform = "translateZ(-16px) scale(" + eo(seg(t, 9.18, 9.48)).toFixed(4) + ")";
+        const pres = seg(t, 6.2, 7.0) * (1 - seg(t, 9.3, 9.7));
+        rpool.style.opacity = (0.9 * pres).toFixed(3);
+        rcast.style.opacity = (0.55 * seg(t, 6.3, 6.9) * (1 - seg(t, 9.4, 9.7))).toFixed(3);
+        rcast.style.transform = "translate(" + (rX - RC[0] + 40).toFixed(2) + "px," + (rY - RC[1] + 64).toFixed(2) + "px) scale(" + (rS * 0.92).toFixed(4) + ")";
+        // ----- bead -----
+        let bx, by, bs, inWorld = 1;
+        const tu = io(seg(t, 0.85, 1.3)); // arc from the screen corner into the panel aperture
+        const lx0 = bez(812, 872, AP[0], tu), ly0 = bez(646, 566, AP[1], tu);
+        const dockSq = 1 - 0.16 * Math.sin(Math.PI * seg(t, 1.24, 1.5));
+        const m = map(lx0, ly0, 1); bx = m[0]; by = m[1]; bs = m[2] * dockSq;
+        const du = seg(t, 7.35, 8.15), de = io(du); // panel → ring seat (arc)
+        if (du > 0) {
+          bx = bez(bx, 760, SEAT[0], de); by = bez(by, 560, SEAT[1], de); bs = lerp(bs, 1, de);
+          bs *= 1 - 0.14 * Math.sin(Math.PI * seg(t, 8.1, 8.32));
+          inWorld = 1 - seg(t, 7.35, 7.8);
+        }
+        const fu = io(seg(t, 9.2, 9.5)); by = lerp(by, RC[1], fu); // drops to the ring's centre
+        const mo = eo(seg(t, 9.5, 9.9)); // morphs into the prompt caret
+        const bw = lerp(30, 6, mo), bh = lerp(30, 64, mo);
+        bead.style.width = bw.toFixed(2) + "px"; bead.style.height = bh.toFixed(2) + "px";
+        bead.style.borderRadius = lerp(15, 3, mo).toFixed(2) + "px";
+        bead.style.transform = "translate(" + (bx - bw * bs / 2).toFixed(2) + "px," + (by - bh * bs / 2).toFixed(2) + "px) scale(" + bs.toFixed(4) + ")";
+        bead.style.filter = "brightness(" + (1 - dk * inWorld).toFixed(3) + ")";
+        bead.style.opacity = (0.95 * (1 - seg(t, 9.84, 9.94))).toFixed(3);
+        caretEl.style.opacity = seg(t, 9.82, 9.92).toFixed(3);
+        caretEl.style.transform = "translate(537px,868px)";
+      }
+      const state = { t: 0 };
       const tl = gsap.timeline({ paused: true });
-      const WORLDS = ["#s2-world", "#s2-world2"];
-      const START = { x: 0, y: -10, z: 10, rotationX: -22 };   // S01 end camera
-
-      // ===== frame 0 = S01 last frame =====
-      tl.fromTo(WORLDS, START, Object.assign({}, START, { duration: 0.01 }), 0);
-      tl.fromTo("#s2-dark", { opacity: 0.18 }, { opacity: 0.18, duration: 0.01 }, 0);
-      tl.fromTo("#s2-card", { y: 330, z: 210, rotationX: 180, scaleY: 0.08, scaleX: 0.5 },
-        { y: 300, z: 120, rotationX: 180, scaleY: 0.08, scaleX: 0.5, duration: 0.4, ease: "power3.in" }, 0.12);
-      tl.fromTo(".s2-face", { opacity: 1 }, { opacity: 0, duration: 0.35, ease: "power3.in" }, 0.15);
-      tl.fromTo("#s2-card-sh", { scaleX: 0.55, scaleY: 0.35, opacity: 1 }, { scaleX: 0.4, scaleY: 0.25, opacity: 0, duration: 0.4, ease: "power2.in" }, 0.12);
-      tl.fromTo("#s2-orbit", { x: 721, y: 739, rotation: 0 }, { x: 813, y: 630, rotation: 360, duration: 1.05, ease: "power2.inOut" }, 0.25);
-      tl.fromTo("#s2-bead", { x: 46, rotation: 0, opacity: 0.95, scale: 1 }, { x: 0, rotation: -360, opacity: 0.95, scale: 1, duration: 1.05, ease: "power2.inOut" }, 0.25);
-      // counter 01 -> 02
+      tl.fromTo(state, { t: 0 }, { t: 10.1, duration: 10.1, ease: "none", onUpdate: () => render(state.t) }, 0);
+      // counter 01 → 02 (early)
       tl.fromTo("#s2-count1", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(6px)", duration: 0.15, ease: "power2.in" }, 0.08);
       tl.fromTo("#s2-count2", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, ease: "power2.out" }, 0.22);
-
-      // ===== B04 10.90–12.95  TANPA MENGETIK. =====
-      // the "?" steps back out of the corner (it was the problem; now the corner is needed)
-      tl.fromTo("#s2-qm", { y: 0, z: 0, rotationY: -6 }, { y: 40, z: -260, rotationY: -34, duration: 0.7, ease: "power3.in" }, 0.15);
-      tl.fromTo("#s2-qm .s2-qm-g", { opacity: 1 }, { opacity: 0, duration: 0.55, ease: "power2.in" }, 0.3);
-      tl.fromTo("#s2-qm-sh-in", { opacity: 1, x: 0 }, { opacity: 0, x: 50, duration: 0.5, ease: "power2.in" }, 0.15);
-      // keyboard hinges up on its rear edge and sinks below the desk (nobody types) — low contrast
-      tl.fromTo("#s2-kb-in", { rotationX: 0, y: 0, z: 0, opacity: 1 }, { rotationX: 78, y: -50, z: 0, opacity: 0.55, duration: 0.55, ease: "power2.inOut" }, 0.3);
-      tl.to("#s2-kb-in", { z: -190, duration: 0.5, ease: "power3.in" }, 0.85);
-      tl.fromTo("#s2-kb-sh", { opacity: 1 }, { opacity: 0, duration: 0.55, ease: "power2.inOut" }, 0.3);
-      // side panel unfolds on its hinge at the monitor's top-right corner
-      tl.fromTo("#s2-panel", { rotationY: 92 }, { rotationY: 0, duration: 0.7, ease: "expo.out" }, 0.45);
-      tl.fromTo("#s2-panel > div", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, 0.45);
-      tl.fromTo("#s2-panel-sh-in", { opacity: 0, x: -40 }, { opacity: 0.8, x: 0, duration: 0.7, ease: "expo.out" }, 0.5);
-      // listening bead lands in the panel aperture (1.30) and hands over to its in-world copy
-      tl.fromTo("#s2-b3", { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "none" }, 1.3);
-      tl.to("#s2-bead", { opacity: 0, duration: 0.12, ease: "none" }, 1.3);
-      // headline: per-word blur on the VO
+      // ===== B04 10.90–12.95  TANPA MENGETIK. — per-word blur on the VO ("tanpa" 11.16, "mengetik" 11.79) =====
       tl.fromTo("#s2-h1 .s2-line:nth-child(1) .k-hl", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out" }, 0.26);
-      tl.fromTo("#s2-h1 .s2-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out" }, 0.95);
-      tl.fromTo("#s2-h1", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 1.88);
-
-      // ===== B05 12.95–16.40  POIN JAWABAN MUNCUL. =====
-      const SZ = [-70, -45, -20];
-      [0, 1, 2].forEach((i) => {
-        const t = 2.3 + 0.24 * i;
-        tl.fromTo("#s2-st" + i, { x: 120 + 10 * i, y: 0, z: -128, scaleX: 0.25, rotationY: -16 },
-          { x: 0, y: 0, z: SZ[i], scaleX: 1, rotationY: -9, duration: 0.6, ease: "expo.out" }, t);
-        tl.fromTo("#s2-st" + i, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "none" }, t);
-        // settles separately 0.18 s after arrival
-        tl.to("#s2-st" + i, { rotationY: 0, duration: 0.32, ease: "power2.out" }, t + 0.42 + 0.18);
-        // cast shadow on the monitor face: grows, softens and slides down-right with height
-        const h = SZ[i] + 147;
-        tl.fromTo("#s2-sh" + i, { x: 120, y: 0, scale: 0.3, opacity: 0 },
-          { x: h * 0.42, y: h * 0.4, scale: 1 + h * 0.0012, opacity: 1 - h * 0.0018, duration: 0.6, ease: "expo.out" }, t);
-      });
-      tl.fromTo("#s2-h2 .s2-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.65, ease: "expo.out" }, 2.36);
-      tl.fromTo("#s2-h2 .s2-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 3.66);
+      tl.fromTo("#s2-h1 .s2-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out" }, 0.89);
+      tl.fromTo("#s2-h1", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 1.9);
+      // ===== B05 12.95–16.40  POIN JAWABAN MUNCUL. — masked rise ("poin" 13.15, "muncul" 14.30) =====
+      tl.fromTo("#s2-h2 .s2-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.65, ease: "expo.out" }, 2.25);
+      tl.fromTo("#s2-h2 .s2-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 3.4);
       tl.fromTo("#s2-h2", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 5.3);
-      // "di sudut layar": camera eases toward the corner
-      tl.to(WORLDS, { x: -18, z: 36, duration: 1.4, ease: "power2.inOut" }, 4.0);
-
-      // ===== B06 16.40–21.00  ASISTEN AI. =====
-      // strips collect into one stack at the centre; their shadows lift off the receding monitor
-      const PILE = [[350, 962, -196], [356, 970, -189], [362, 978, -182]];
-      const ORG = [[330, 804], [320, 886], [310, 968]];
-      [0, 1, 2].forEach((i) => {
-        tl.to("#s2-st" + i, { x: PILE[i][0] - ORG[i][0], y: PILE[i][1] - ORG[i][1], z: PILE[i][2], duration: 0.8, ease: "power3.inOut" }, 5.55 + 0.06 * i);
-        tl.to("#s2-sh" + i, { opacity: 0, duration: 0.35, ease: "power2.in" }, 5.55);
-      });
-      // panel folds back into the monitor edge; the bead leaves it for the ring
-      tl.to("#s2-panel", { rotationY: 92, duration: 0.45, ease: "power3.in" }, 5.75);
-      tl.to("#s2-panel > div", { opacity: 0, duration: 0.2, ease: "none" }, 6.0);
-      tl.to("#s2-panel-sh-in", { opacity: 0, duration: 0.35, ease: "power2.in" }, 5.75);
-      // desk world recedes and dims while the ring takes the stage
-      tl.to("#s2-world", { x: 0, y: 60, z: -320, duration: 1.6, ease: "power2.inOut" }, 5.6);
-      tl.to("#s2-dark", { opacity: 0.5, duration: 1.0, ease: "power2.inOut" }, 5.6);
-      tl.to("#s2-cone", { opacity: 0.12, duration: 1.4, ease: "power2.inOut" }, 5.6);
-      tl.fromTo("#s2-cam", { opacity: 1 }, { opacity: 0, duration: 1.2, ease: "power2.inOut" }, 7.8);
-      tl.to("#s2-dark", { opacity: 0, duration: 1.2, ease: "power2.inOut" }, 7.8);
-      tl.to("#s2-cone", { opacity: 0, duration: 1.2, ease: "power2.inOut" }, 7.8);
-      // ring rises in front of the stack, swinging in on Y; stack is pushed back behind it
-      tl.fromTo("#s2-ring", { x: 820, rotationY: 70 }, { x: 0, rotationY: 26, duration: 0.95, ease: "expo.out" }, 6.25);
-      tl.fromTo("#s2-ring-cy", { opacity: 0 }, { opacity: 0.9, duration: 0.25, ease: "power2.out" }, 7.95);
-      tl.fromTo("#s2-ring-pool-in", { opacity: 0, scale: 0.8 }, { opacity: 0.9, scale: 1, duration: 1.0, ease: "power2.out" }, 6.4);
-      tl.fromTo("#s2-ring-cast", { opacity: 0, x: 0, scale: 0.6 }, { opacity: 0.7, x: 40, scale: 1, duration: 0.95, ease: "expo.out" }, 6.25);
-      // bead travels from the panel into the ring's top seat (ring lit)
-      tl.to("#s2-b3", { x: -260, y: 42.5, z: 110, duration: 0.85, ease: "power3.inOut" }, 7.1);
-      // ring turns ~22°, camera dollies ~4% and levels until 20.50
-      tl.to("#s2-ring", { rotationY: 4, duration: 2.4, ease: "power2.inOut" }, 7.2);
-      tl.to("#s2-world2", { x: 0, z: 68, rotationX: -10, duration: 3.5, ease: "power2.inOut" }, 6.1);
-      // headline on "asisten" 19.05 / "AI" 19.45 — whole-line blur-in
-      tl.fromTo("#s2-h3 .s2-line:nth-child(1) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, 8.13);
-      tl.fromTo("#s2-h3 .s2-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, 8.53);
-      tl.fromTo("#s2-h3", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 9.72);
-      // ring collapses into the prompt caret (20.40–20.85)
-      [0, 1, 2].forEach((i) => { tl.to("#s2-st" + i, { opacity: 0, duration: 0.25, ease: "power2.in" }, 9.3); });
-      tl.to("#s2-ring-pool-in", { opacity: 0, duration: 0.5, ease: "power2.in" }, 9.4);
-      tl.to("#s2-ring-cast", { opacity: 0, duration: 0.4, ease: "power2.in" }, 9.4);
-      tl.to("#s2-b3", { y: 240, scale: 0.2, duration: 0.4, ease: "power3.in" }, 9.5);
-      tl.fromTo("#s2-ring", { scaleX: 1, scaleY: 1 }, { scaleX: 0.012, scaleY: 0.135, duration: 0.42, ease: "power3.in" }, 9.5);
-      tl.to("#s2-b3", { opacity: 0, duration: 0.08, ease: "none" }, 9.86);
-      tl.fromTo("#s2-ring", { opacity: 1 }, { opacity: 0, duration: 0.08, ease: "none" }, 9.9);
-      tl.fromTo("#s2-caret", { x: 537, y: 868, opacity: 0 }, { x: 537, y: 868, opacity: 1, duration: 0.08, ease: "none" }, 9.86);
-
+      // ===== B06 16.40–21.00  ASISTEN AI. — whole-line blur-in ("asisten" 19.11, "AI" 19.55) =====
+      tl.fromTo("#s2-h3 .s2-line:nth-child(1) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, 8.21);
+      tl.fromTo("#s2-h3 .s2-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, 8.65);
+      tl.fromTo("#s2-h3", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 9.78);
+      render(0);
       window.__timelines["s02"] = tl;
     })();
   </script>

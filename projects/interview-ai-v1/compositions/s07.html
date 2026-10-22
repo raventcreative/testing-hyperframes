@@ -1,0 +1,303 @@
+<template>
+  <script src="vendor/three/three.min.js"></script>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s7-dark { position: absolute; inset: 0; background: rgb(3, 8, 24); opacity: 0; }
+    #s7-pool { position: absolute; left: 0; top: 0; width: 300px; height: 180px; }
+    #s7-floorpool { position: absolute; left: 140px; top: 1080px; width: 800px; height: 330px; opacity: 0; }
+    /* B19: permission tag on a rail between two stages */
+    #s7-tagset { position: absolute; inset: 0; }
+    #s7-rail { position: absolute; left: 170px; top: 742px; width: 740px; height: 18px; border-radius: 9px; }
+    .s7-cap { position: absolute; top: 732px; width: 22px; height: 38px; border-radius: 6px; }
+    #s7-capL { left: 160px; } #s7-capR { left: 898px; }
+    #s7-rail-sh { position: absolute; left: 200px; top: 790px; width: 740px; height: 26px; }
+    .s7-stage { position: absolute; top: 1118px; width: 300px; height: 70px; }
+    .s7-stage .top { position: absolute; left: 0; top: 0; width: 300px; height: 56px; border-radius: 50%;
+      background: radial-gradient(70% 80% at 40% 35%, #3a5d92 0%, #213f70 60%, #172f58 100%);
+      box-shadow: inset 0 2px 0 rgba(200, 230, 255, 0.35); }
+    .s7-stage .side { position: absolute; left: 0; top: 28px; width: 300px; height: 42px; border-radius: 0 0 150px 150px / 0 0 28px 28px;
+      background: linear-gradient(180deg, #1b3563, #0d1d40); }
+    .s7-stage .lbl { position: absolute; left: 0; width: 300px; top: 92px; text-align: center; font: 700 24px/1 "Poppins", sans-serif;
+      letter-spacing: 0.18em; color: #a9c2de; }
+    #s7-stL { left: 110px; } #s7-stR { left: 670px; }
+    #s7-stL-sh, #s7-stR-sh { position: absolute; top: 1160px; width: 320px; height: 60px; }
+    #s7-stL-sh { left: 120px; } #s7-stR-sh { left: 680px; }
+    #s7-tag { position: absolute; left: 0; top: 0; width: 300px; height: 330px; perspective: 900px; }
+    #s7-carriage { position: absolute; left: 118px; top: 0; width: 64px; height: 30px; border-radius: 8px; }
+    #s7-cord { position: absolute; left: 148px; top: 28px; width: 4px; height: 70px; background: linear-gradient(180deg, #9fb3cc, #6c82a3); }
+    #s7-card { position: absolute; left: 10px; top: 96px; width: 280px; height: 200px; transform-style: preserve-3d; transform-origin: 140px 0; }
+    .s7-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px; }
+    .s7-face .hole { position: absolute; left: 128px; top: 14px; width: 24px; height: 24px; border-radius: 50%; background: #0d1a3d;
+      box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.5); }
+    .s7-face .t { font: 700 30px/1 "Poppins", sans-serif; letter-spacing: 0.12em; color: #12284f; margin-top: 26px; }
+    .s7-face .s { font: 400 20px/1 "Poppins", sans-serif; letter-spacing: 0.12em; color: #5a7aa3; }
+    #s7-back { transform: rotateY(180deg); }
+    #s7-tag-sh { position: absolute; left: 0; top: 0; width: 260px; height: 54px; }
+    /* B20/B21: 3D scale */
+    #s7-qsvg { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s7-labL { width: 400px; } #s7-labR { width: 440px; }
+    #s7-canvas { position: absolute; left: 0; top: 410px; width: 1080px; height: 1000px; }
+    .s7-lab { position: absolute; left: 0; top: 0; text-align: center; font: 700 40px/1 "Poppins", sans-serif; color: #eaf4ff; white-space: nowrap;
+      padding: 14px 22px 16px; border-radius: 14px; background: rgba(9, 20, 48, 0.78); border: 1px solid rgba(160, 210, 255, 0.28);
+      box-shadow: 0 14px 30px rgba(2, 8, 26, 0.45); opacity: 0; }
+    /* text plane */
+    #s7-text { position: absolute; left: 90px; top: 214px; width: 900px; height: 340px; }
+    .s7-hl { position: absolute; left: 0; top: 0; width: 900px; }
+    .s7-line { display: block; overflow: hidden; padding: 0 6px 6px 0; }
+    .s7-line .k-hl { font-size: 100px; }
+    .s7-w { display: inline-block; }
+    #s7-count { position: absolute; left: 90px; top: 186px; font: 400 22px/1 "Poppins", sans-serif; letter-spacing: 0.2em; color: #8fb0d6; }
+  </style>
+  <div id="root" data-composition-id="s07" data-width="1080" data-height="1920">
+    <div id="s7-dark"></div>
+    <div id="s7-floorpool" class="k-pool"></div>
+    <div id="s7-pool" class="k-pool"></div>
+    <svg id="s7-qsvg" viewBox="0 0 1080 1920">
+      <path id="s7-qpath" d="M396 650 C396 545 468 482 560 482 C664 482 722 546 722 628 C722 712 654 748 610 784 C578 810 560 842 560 892"
+        fill="none" stroke="#00c9ff" stroke-width="9" stroke-linecap="round" opacity="0.55"/>
+      <circle id="s7-qdot" cx="560" cy="968" r="22" fill="none" stroke="#00c9ff" stroke-width="7" opacity="0"/>
+      <circle id="s7-tracer" cx="0" cy="0" r="12" fill="#bff3ff" opacity="0"/>
+    </svg>
+    <div id="s7-tagset">
+      <div id="s7-stL-sh" class="k-contact"></div><div id="s7-stR-sh" class="k-contact"></div>
+      <div id="s7-stL" class="s7-stage"><div class="side"></div><div class="top"></div><div class="lbl">LATIHAN</div></div>
+      <div id="s7-stR" class="s7-stage"><div class="side"></div><div class="top"></div><div class="lbl">SELEKSI</div></div>
+      <div id="s7-rail-sh" class="k-cast"></div>
+      <div id="s7-rail" class="k-metal"></div>
+      <div id="s7-capL" class="s7-cap k-metal"></div><div id="s7-capR" class="s7-cap k-metal"></div>
+      <div id="s7-tag-sh" class="k-cast"></div>
+      <div id="s7-tag">
+        <div id="s7-carriage" class="k-metal"></div>
+        <div id="s7-cord"></div>
+        <div id="s7-card">
+          <div id="s7-front" class="s7-face k-paper">
+            <div class="hole"></div>
+            <svg width="56" height="56" viewBox="0 0 56 56" style="margin-top:22px"><circle cx="28" cy="28" r="25" fill="none" stroke="#1d8fc0" stroke-width="4"/>
+              <path d="M16 29 L25 38 L41 19" fill="none" stroke="#1d8fc0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="s">DIIZINKAN</div>
+          </div>
+          <div id="s7-back" class="s7-face k-paper">
+            <div class="hole"></div>
+            <svg width="64" height="58" viewBox="0 0 64 58" style="margin-top:22px"><path d="M32 4 L60 54 L4 54 Z" fill="none" stroke="#294b77" stroke-width="5" stroke-linejoin="round"/>
+              <path d="M32 22 L32 38" stroke="#294b77" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="46" r="3.4" fill="#294b77"/></svg>
+            <div class="s">TANPA IZIN</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <canvas id="s7-canvas" width="1080" height="1000"></canvas>
+    <div id="s7-labL" class="s7-lab">KEMAMPUAN KITA</div>
+    <div id="s7-labR" class="s7-lab">ATAU BANTUAN AI?</div>
+    <div id="s7-count">07 / 08</div>
+    <div id="s7-text" class="k-field">
+      <div id="s7-h1" class="s7-hl">
+        <span class="s7-line"><span class="k-hl">KALAU</span></span>
+        <span class="s7-line"><span class="k-hl">TANPA IZIN?</span></span>
+      </div>
+      <div id="s7-h3" class="s7-hl">
+        <span class="s7-line"><span class="k-hl">APA YANG</span></span>
+        <span class="s7-line"><span class="k-hl">DINILAI?</span></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const S = 62.67, DUR = 11.93; // slot overlaps S08 by 0.67 s so the scale can recede on top // scene start (global) and length
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const io = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const ei = (x) => Math.pow(clamp(x, 0, 1), 3);
+      const lerp = (a, b, k) => a + (b - a) * k;
+      const seg = (g, a, b) => clamp((g - a) / (b - a), 0, 1);
+
+      // ---------------- Three.js scale ----------------
+      const THREE = window.THREE;
+      const canvas = document.getElementById("s7-canvas");
+      const W = 1080, H = 1000, CTOP = 410;
+      let renderer = null, scene, cam, rig, beamG, tips = [], pans = [], key, HANG = 1.55, PIV_W = 3.32, pivotScreen = [540, 760];
+      const tmp = new THREE.Vector3();
+      if (THREE) {
+        renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
+        renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+        renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+        scene = new THREE.Scene();
+        // studio environment for reflections: navy room, soft white strip upper-left, cyan strip right
+        const es = new THREE.Scene();
+        es.add(new THREE.Mesh(new THREE.BoxGeometry(30, 30, 30), new THREE.MeshBasicMaterial({ color: 0x0b1534, side: THREE.BackSide })));
+        const st1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 3), new THREE.MeshBasicMaterial({ color: 0xffffff })); st1.position.set(-8, 9, 6); st1.lookAt(0, 0, 0); es.add(st1);
+        const st2 = new THREE.Mesh(new THREE.PlaneGeometry(3, 12), new THREE.MeshBasicMaterial({ color: 0x33d6ff })); st2.position.set(12, 3, -6); st2.lookAt(0, 0, 0); es.add(st2);
+        const st3 = new THREE.Mesh(new THREE.PlaneGeometry(14, 2), new THREE.MeshBasicMaterial({ color: 0x6c8cc8 })); st3.position.set(0, -2, 14); st3.lookAt(0, 0, 0); es.add(st3);
+        const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(es, 0.04).texture;
+        cam = new THREE.PerspectiveCamera(26, W / H, 0.1, 100);
+        scene.add(new THREE.HemisphereLight(0xa9c8ff, 0x0a1330, 0.35));
+        key = new THREE.DirectionalLight(0xf3f7ff, 2.6); key.position.set(-4, 7, 5); key.castShadow = true;
+        key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7 }); key.shadow.radius = 6; key.shadow.bias = -0.0004;
+        scene.add(key);
+        const rim = new THREE.DirectionalLight(0x00c9ff, 2.2); rim.position.set(4, 3, -5); scene.add(rim);
+        const fill = new THREE.DirectionalLight(0x7f9fd6, 0.5); fill.position.set(5, 1, 4); scene.add(fill);
+        const blueMetal = new THREE.MeshStandardMaterial({ color: 0x3d679e, metalness: 0.72, roughness: 0.45 });
+        const hubMetal = new THREE.MeshStandardMaterial({ color: 0x2c4a78, metalness: 0.75, roughness: 0.38 });
+        const paleSteel = new THREE.MeshStandardMaterial({ color: 0xc7d5e6, metalness: 0.8, roughness: 0.34 });
+        const chainMat = new THREE.MeshStandardMaterial({ color: 0x9fb3cc, metalness: 0.85, roughness: 0.35 });
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(24, 24), new THREE.ShadowMaterial({ opacity: 0.5 }));
+        floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor); window.__s7floor = floor;
+        rig = new THREE.Group(); scene.add(rig);
+        const ped = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.15, 0.18, 96), new THREE.MeshStandardMaterial({ color: 0x14254a, metalness: 0.3, roughness: 0.65 }));
+        ped.position.y = 0.09; ped.receiveShadow = true; ped.castShadow = true; rig.add(ped);
+        const bp = [[0, 0], [0.95, 0], [1.0, 0.05], [0.98, 0.14], [0.6, 0.22], [0.32, 0.34], [0.2, 0.42], [0, 0.42]].map((p) => new THREE.Vector2(p[0], p[1]));
+        const base = new THREE.Mesh(new THREE.LatheGeometry(bp, 96), blueMetal); base.position.y = 0.18; base.castShadow = true; base.receiveShadow = true; rig.add(base);
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 2.6, 48), blueMetal); pillar.position.y = 0.6 + 1.3; pillar.castShadow = true; rig.add(pillar);
+        const PIV_Y = 0.6 + 2.6 + 0.12; PIV_W = PIV_Y;
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(0.17, 48, 32), paleSteel); cap.position.y = PIV_Y + 0.26; cap.castShadow = true; rig.add(cap);
+        beamG = new THREE.Group(); beamG.position.y = PIV_Y; rig.add(beamG);
+        const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.38, 48), hubMetal); hub.rotation.x = Math.PI / 2; hub.castShadow = true; beamG.add(hub);
+        const face = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.4, 48), paleSteel); face.rotation.x = Math.PI / 2; beamG.add(face);
+        for (const z of [0.19, -0.19]) { const r = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.035, 16, 64), paleSteel); r.position.z = z; beamG.add(r); }
+        const HALF = 1.75;
+        const beam = new THREE.Mesh(new THREE.BoxGeometry(HALF * 2, 0.2, 0.22), blueMetal); beam.castShadow = true; beamG.add(beam);
+        const beamTop = new THREE.Mesh(new THREE.BoxGeometry(HALF * 2 - 0.12, 0.035, 0.23), paleSteel); beamTop.position.y = 0.115; beamG.add(beamTop);
+        const needle = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.6, 24), paleSteel); needle.position.y = 0.5; beamG.add(needle);
+        for (const s of [-1, 1]) {
+          const tip = new THREE.Mesh(new THREE.SphereGeometry(0.12, 32, 16), paleSteel); tip.position.x = s * HALF; tip.castShadow = true; beamG.add(tip); tips.push(tip);
+          const end = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.3, 0.26), blueMetal); end.position.x = s * (HALF - 0.04); beamG.add(end);
+        }
+        function makePan() {
+          const g = new THREE.Group(); const inner = new THREE.Group(); g.add(inner);
+          const pp = [[0, -0.02], [0.55, 0.0], [0.78, 0.12], [0.86, 0.24], [0.84, 0.26], [0.75, 0.15], [0.54, 0.04], [0, 0.02]].map((p) => new THREE.Vector2(p[0], p[1]));
+          const dish = new THREE.Mesh(new THREE.LatheGeometry(pp, 96), paleSteel); dish.castShadow = true; dish.receiveShadow = true; dish.position.y = -HANG; inner.add(dish);
+          const lip = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.024, 12, 96), blueMetal); lip.rotation.x = Math.PI / 2; lip.position.y = -HANG + 0.25; inner.add(lip);
+          const cords = [];
+          for (let k = 0; k < 3; k++) {
+            const a = k * Math.PI * 2 / 3 + Math.PI / 6;
+            const c = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 1, 8), chainMat); c.castShadow = true; c.userData.a = a; g.add(c); cords.push(c);
+          }
+          const hook = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.018, 8, 24), chainMat); g.add(hook);
+          g.userData = { inner, cords }; rig.add(g); return g;
+        }
+        pans = [makePan(), makePan()];
+      }
+      const up = THREE ? new THREE.Vector3(0, 1, 0) : null;
+      function setHang(p, hang) { // pan hangs `hang` units under its hook; cords re-fit
+        p.userData.inner.position.y = HANG - hang;
+        for (const c of p.userData.cords) {
+          const a = c.userData.a; const p1 = new THREE.Vector3(Math.cos(a) * 0.8, -hang + 0.25, Math.sin(a) * 0.8);
+          const len = p1.length(); c.scale.set(1, len, 1); c.position.copy(p1).multiplyScalar(0.5);
+          c.quaternion.setFromUnitVectors(up, p1.clone().normalize());
+        }
+      }
+      // beam angle in degrees (+ = right / AI side down), pure function of global time g
+      function beamAngle(g) {
+        if (g < 69.6) return 0;
+        if (g < 71.4) return -5 * io(seg(g, 69.6, 70.3));
+        if (g < 72.2) return lerp(-5, 8, io(seg(g, 71.4, 72.2)));
+        const k = g - 72.2, w = 4.8, z = 0.33;
+        return 1 + 7 * Math.exp(-z * w * k) * Math.cos(w * Math.sqrt(1 - z * z) * k);
+      }
+      const labL = document.getElementById("s7-labL"), labR = document.getElementById("s7-labR");
+      const labW = [400, 440];
+      function project(obj, dy) { obj.getWorldPosition(tmp); tmp.y += dy; tmp.project(cam); return [(tmp.x * 0.5 + 0.5) * W, (-tmp.y * 0.5 + 0.5) * H + CTOP]; }
+      function render3D(g) {
+        if (!renderer) return;
+        const form = seg(g, 67.1, 68.2);           // scale forms out of the tag/fulcrum
+        const vis = g >= 66.3;
+        canvas.style.opacity = vis ? String(clamp((g - 66.3) / 0.5, 0, 1) * (1 - io(seg(g, 74.0, 74.55)))) : "0";
+        const orbit = THREE.MathUtils.degToRad(lerp(-4, 4, io(seg(g, 66.9, 73.93))));
+        const dolly = lerp(1, 0.95, io(seg(g, 66.9, 72.45))) * lerp(1, 1.025, io(seg(g, 72.6, 73.93))); // 5% in, then the room opens a touch
+        const dist = 14.6 * dolly * lerp(1, 1.35, io(seg(g, 73.95, 74.6))), ty = 2.25;
+        cam.position.set(Math.sin(orbit) * dist, ty + 2.1, Math.cos(orbit) * dist); cam.lookAt(0, ty, 0);
+        const sc = lerp(0.22, 1, eo(form));
+        window.__s7floor.material.opacity = 0.5 * Math.pow(seg(g, 67.55, 68.25), 2);
+        rig.scale.setScalar(sc);
+        rig.position.y = PIV_W * (1 - sc);
+        beamG.rotation.z = -THREE.MathUtils.degToRad(beamAngle(g));
+        const drop = eo(seg(g, 67.5, 68.4));
+        const hang = lerp(0.35, 1.55, drop) + 0.06 * Math.sin(seg(g, 68.1, 68.9) * Math.PI) * (1 - seg(g, 68.1, 68.9));
+        beamG.updateMatrixWorld(true);
+        for (let i = 0; i < 2; i++) { tips[i].getWorldPosition(tmp); rig.worldToLocal(tmp); pans[i].position.copy(tmp); setHang(pans[i], hang); }
+        rig.updateMatrixWorld(true);
+        renderer.render(scene, cam);
+        { const v = new THREE.Vector3(0, PIV_W, 0); v.project(cam); pivotScreen = [(v.x * 0.5 + 0.5) * W, (-v.y * 0.5 + 0.5) * H + CTOP]; }
+        // labels: front-facing, tracking each pan, clamped inside the action-safe box
+        [labL, labR].forEach((el, i) => {
+          const [x, y] = project(pans[i].userData.inner.children[0], -0.15 * sc);
+          const lx = clamp(x - labW[i] / 2, 90, 990 - labW[i]);
+          el.style.transform = "translate(" + lx.toFixed(1) + "px," + (y + 30).toFixed(1) + "px)";
+          const on = i === 0 ? seg(g, 69.85, 70.2) : seg(g, 70.9, 71.25);
+          el.style.opacity = String(on * (1 - seg(g, 73.98, 74.25)));
+        });
+      }
+      // ---------------- B19 tag (DOM), pure function of time ----------------
+      const tagEl = document.getElementById("s7-tag"), cardEl = document.getElementById("s7-card"), tagSh = document.getElementById("s7-tag-sh");
+      const tagset = document.getElementById("s7-tagset"), pool = document.getElementById("s7-pool");
+      function renderTag(g) {
+        const appear = eo(seg(g, 62.75, 63.35));
+        // rail travel: practice stage (x=260) -> assessment stage (x=820) during "diam-diam saat seleksi"
+        const travel = io(seg(g, 63.7, 64.95));
+        let cx = lerp(260, 820, travel);
+        let cy = 742; // carriage on the rail
+        // swing from the move (damped, closed form)
+        const k = g - 64.95; let swing = 0;
+        if (g > 63.7 && g < 64.95) swing = -9 * Math.sin(seg(g, 63.7, 64.95) * Math.PI);
+        if (k > 0) swing = 6 * Math.exp(-2.6 * k) * Math.sin(7.5 * k);
+        // flip to the warning face on "tidak mengizinkan" 65.75, then a 0.3 s tension pause
+        const flip = io(seg(g, 65.6, 66.05)) * 180;
+        // become the fulcrum: slide to the pivot and shrink (66.35–66.95)
+        const toF = io(seg(g, 66.35, 66.95));
+        const fx = pivotScreen[0], fy = pivotScreen[1];
+        cx = lerp(cx, fx, toF); cy = lerp(cy, fy - 181, toF);
+        const scl = lerp(1, 0.18, toF);
+        tagEl.style.transform = "translate(" + (cx - 150).toFixed(1) + "px," + (cy - 15 + (1 - appear) * 40).toFixed(1) + "px) scale(" + scl.toFixed(3) + ")";
+        tagEl.style.transformOrigin = "150px 196px";
+        tagEl.style.opacity = String(appear * (1 - seg(g, 66.75, 67.05)));
+        cardEl.style.transform = "rotateZ(" + swing.toFixed(2) + "deg) rotateY(" + flip.toFixed(1) + "deg)";
+        // tag shadow on the floor, down-right, softer than contact (tag hangs high)
+        tagSh.style.transform = "translate(" + (cx - 90 + 40).toFixed(1) + "px," + 1196 + "px)";
+        tagSh.style.opacity = String(0.55 * appear * (1 - toF));
+        tagset.style.opacity = String(eo(seg(g, 62.7, 63.2)) * (1 - io(seg(g, 66.2, 66.9))));
+        // the light pool from S06 grows into the stage light, then widens under the scale
+        const pw = lerp(300, 820, eo(seg(g, 62.67, 63.4))), ph = lerp(180, 300, eo(seg(g, 62.67, 63.4)));
+        pool.style.transform = "translate(" + (540 - pw / 2).toFixed(1) + "px," + (lerp(1000, 1150, eo(seg(g, 62.67, 63.4))) - ph / 2).toFixed(1) + "px) scale(" + (pw / 300).toFixed(3) + "," + (ph / 180).toFixed(3) + ")";
+        pool.style.transformOrigin = "0 0";
+        pool.style.opacity = String(lerp(1, 0.8, seg(g, 62.67, 63.4)) * (1 - seg(g, 66.6, 67.4)));
+      }
+      // ---------------- B21 question outline ----------------
+      const qpath = document.getElementById("s7-qpath"), tracer = document.getElementById("s7-tracer"), qdot = document.getElementById("s7-qdot");
+      const QL = qpath.getTotalLength(); const QP = [];
+      for (let i = 0; i <= 120; i++) { const p = qpath.getPointAtLength(QL * i / 120); QP.push([p.x, p.y]); }
+      qpath.setAttribute("stroke-dasharray", QL.toFixed(1));
+      function renderQ(g) {
+        const draw = io(seg(g, 72.55, 73.35));
+        qpath.setAttribute("stroke-dashoffset", (QL * (1 - draw)).toFixed(1));
+        qpath.style.opacity = String(draw > 0 && g < 73.93 ? 1 : 0);
+        const idx = Math.round(draw * 120); const p = QP[idx];
+        tracer.setAttribute("cx", p[0].toFixed(1)); tracer.setAttribute("cy", p[1].toFixed(1));
+        tracer.setAttribute("opacity", (draw > 0 && draw < 1 ? 0.9 : 0).toString());
+        qdot.setAttribute("opacity", String(0.55 * eo(seg(g, 73.3, 73.55)) * (1 - seg(g, 73.93, 74.25))));
+      }
+      const state = { t: 0 };
+      function render() { const g = S + state.t; render3D(g); renderTag(g); renderQ(g); }
+
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(state, { t: 0 }, { t: DUR, duration: DUR, ease: "none", onUpdate: render }, 0);
+      // headlines (scene-local seconds)
+      const L = (g) => +(g - S).toFixed(3);
+      tl.fromTo("#s7-dark", { opacity: 0.42 }, { opacity: 0.14, duration: 1.2, ease: "power2.inOut" }, 0);
+      tl.to("#s7-dark", { opacity: 0, duration: 1.0, ease: "power2.inOut" }, L(73.95));
+      tl.fromTo("#s7-count", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.05);
+      tl.fromTo("#s7-h1 .s7-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, L(63.12));
+      tl.fromTo("#s7-h1 .s7-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, L(65.72));
+      tl.to("#s7-h1", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, L(66.88));
+      tl.fromTo("#s7-floorpool", { opacity: 0 }, { opacity: 0.9, duration: 1.0, ease: "power2.out" }, L(66.9));
+      tl.fromTo("#s7-h3 .s7-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.55, ease: "expo.out" }, L(72.62));
+      tl.fromTo("#s7-h3 .s7-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.55, ease: "expo.out" }, L(72.82));
+      tl.to("#s7-h3", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, L(74.02));
+      tl.to("#s7-count", { opacity: 0, duration: 0.15 }, L(73.93));
+      tl.to("#s7-floorpool", { opacity: 0, duration: 0.5, ease: "power2.in" }, L(73.98));
+      render();
+      window.__timelines["s07"] = tl;
+    })();
+  </script>
+</template>

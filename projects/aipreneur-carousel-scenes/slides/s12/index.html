@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1350" />
+<title>AIpreneur — Phone explode</title>
+<script src="vendor/gsap/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="assets/shared.css" />
+<style>
+
+.shadow { position:absolute; left:262px; top:540px; width:280px; height:60px; border-radius:50%;
+  background:radial-gradient(ellipse, rgba(18,21,50,0.30), rgba(18,21,50,0) 70%); }
+.f2d { position:absolute; left:262px; top:150px; width:280px; height:380px; }
+.iso { position:absolute; left:10px; top:-60px; width:260px; height:460px; transform-style:preserve-3d; transform:rotateX(57deg) rotateZ(-40deg); }
+.L { position:absolute; inset:0; transform-style:preserve-3d; }
+.body, .thick { position:absolute; inset:0; border-radius:40px; background:linear-gradient(160deg,#274976,#121532); }
+.screen { position:absolute; inset:12px; border-radius:30px; background:#fbfcff; box-shadow:inset 0 0 0 2px rgba(39,73,118,0.08); }
+.hdr { position:absolute; left:26px; right:26px; top:40px; height:120px; border-radius:20px; background:linear-gradient(120deg,#8fd0ff,#4f86e8 55%,#274976); filter:blur(3px); }
+.lines { position:absolute; left:30px; right:30px; top:190px; }
+.lines i { display:block; height:16px; border-radius:8px; background:#d6e0ee; margin-bottom:18px; }
+.cards { position:absolute; left:24px; right:24px; top:180px; height:140px; border-radius:18px; background:linear-gradient(160deg,#274976,#121532); }
+.cards i { position:absolute; top:22px; width:70px; height:96px; border-radius:12px; background:rgba(143,180,236,0.35); }
+.btn { position:absolute; left:50px; right:50px; bottom:56px; height:56px; border-radius:28px; background:linear-gradient(90deg,#4f86e8,#8fb4ec); filter:blur(1.5px); }
+
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="s12" data-start="0" data-duration="6" data-width="1080" data-height="1350" data-fps="30">
+  <div id="stage" class="clip" data-start="0" data-duration="6" data-track-index="0" data-track-kind="graphics" style="position:absolute;inset:0">
+    <div class="bg"></div>
+    <div class="logo" id="logo"></div>
+    <div class="eyebrow g b" id="eyebrow">SCENE · 12 DARI 16</div>
+    <div class="title" id="title"><span class="g b">Phone</span><svg class="arrow" width="78" height="52" viewBox="0 0 78 52"><defs><linearGradient id="ag" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient></defs><path d="M4 26H70M48 6l22 20-22 20" fill="none" stroke="url(#ag)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg><span class="g r">explode</span></div>
+    <div class="sub g r" id="sub">HP yang terurai jadi layer</div>
+    <div class="card" id="card">
+      <div class="panel light" id="panel">
+        <div class="shadow" id="shadow"></div>
+        <div class="f2d" id="f2d">
+          <div class="iso" data-layout-allow-overflow>
+            <div class="L" id="L0"><div class="thick" style="transform:translateZ(-3px)"></div><div class="thick" style="transform:translateZ(-6px)"></div><div class="thick" style="transform:translateZ(-9px)"></div><div class="thick" style="transform:translateZ(-12px)"></div><div class="thick" style="transform:translateZ(-15px)"></div><div class="thick" style="transform:translateZ(-18px)"></div><div class="body"></div></div>
+            <div class="L" id="L1"><div class="cards"><i style="left:22px"></i><i style="left:112px"></i><i style="left:202px;width:48px"></i></div></div>
+            <div class="L" id="L2"><div class="screen"></div></div>
+            <div class="L" id="L3"><div class="hdr"></div><div class="lines"><i></i><i style="width:80%"></i><i style="width:60%"></i></div></div>
+            <div class="L" id="L4"><div class="btn"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <div class="lbl g b">GANTI DI SCENE INI</div>
+      <div class="txt g r">HP isometrik terpecah jadi layer-layernya (layar, kartu, tombol). Layer melayang di udara, lalu nyatu lagi dengan cepat. Bayangan halus di bawahnya.</div>
+    </div>
+    <div class="foot" id="foot">
+      <div class="who"><div class="dot">FK</div><span class="g b">FREDDIE KASHAWAN</span><span class="g r">AIpreneur</span></div>
+      <div class="pg g b">13 / 18 &nbsp;&nbsp; GESER &rarr;</div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const D = 6, TAU = Math.PI * 2;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+  const tl = gsap.timeline({ paused: true });
+  const st = { t: 0 };
+
+  const L = [0, 1, 2, 3, 4].map((i) => document.getElementById("L" + i));
+  const GAP = [0, 64, 118, 176, 236];
+  const BASE = [0, 1, 2, 4, 6];
+  function ex(t) {
+    if (t < 1.5) return 0;
+    if (t < 2.5) { const p = (t - 1.5) / 1.0; return 1 - Math.pow(1 - p, 3); }
+    if (t < 4.5) return 1;
+    if (t < 4.95) { const p = (t - 4.5) / 0.45; return 1 - p * p * p; }
+    if (t < 5.5) { const p = (t - 4.95) / 0.55; return 0.06 * Math.sin(Math.PI * p) * (1 - p); }
+    return 0;
+  }
+  function render(t) {
+    const e = ex(t);
+    const hold = (t > 2.5 && t < 4.5) ? Math.sin(Math.PI * (t - 2.5) / 2) : 0;
+    L.forEach((el, i) => {
+      const z = BASE[i] + GAP[i] * e + (i ? 10 * hold * Math.sin(TAU * (t / 2) + i * 0.9) * 0.5 : 0);
+      gsap.set(el, { z: z });
+    });
+    const bob = 10 * Math.sin(TAU * t / 3);
+    gsap.set("#f2d", { y: bob + 110 * e });
+    gsap.set("#shadow", { scaleX: 1 - 0.12 * e + 0.03 * Math.sin(TAU * t / 3), opacity: 0.9 - 0.3 * e });
+  }
+
+  tl.to(st, { t: D, duration: D, ease: "none", onUpdate: () => render(st.t) }, 0);
+  render(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["s12"] = tl;
+})();
+</script>
+</body>
+</html>

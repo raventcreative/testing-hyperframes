@@ -1,0 +1,403 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    /* ---------- stage camera: drafting board ---------- */
+    #s3-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1600px; perspective-origin: 540px 760px; }
+    #s3-world { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 540px 1000px -380px; }
+    .s3-obj { position: absolute; transform-style: preserve-3d; }
+    #s3-board-wrap { left: 110px; top: 300px; width: 860px; height: 1000px; }
+    #s3-board { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 50% 100%; }
+    #s3-bsurf { position: absolute; inset: 0; border-radius: 26px;
+      background:
+        radial-gradient(55% 45% at 28% 22%, rgba(130, 180, 245, 0.20), rgba(130, 180, 245, 0) 70%),
+        repeating-linear-gradient(0deg, rgba(150, 200, 255, 0.10) 0 2px, transparent 2px 50px),
+        repeating-linear-gradient(90deg, rgba(150, 200, 255, 0.10) 0 2px, transparent 2px 50px),
+        linear-gradient(170deg, #1f3a6b 0%, #152b55 55%, #102247 100%);
+      box-shadow: inset 0 0 0 2px rgba(170, 215, 255, 0.22), inset 0 0 0 14px rgba(8, 18, 44, 0.35); }
+    #s3-bedge { position: absolute; left: 10px; top: 1000px; width: 840px; height: 26px; transform-origin: 50% 0; transform: rotateX(-90deg);
+      border-radius: 0 0 12px 12px; background: linear-gradient(180deg, #33558d 0%, #172c57 60%, #0a1734 100%); }
+    #s3-bsh { position: absolute; left: 50px; top: 70px; width: 860px; height: 1000px; transform: translateZ(-60px); border-radius: 40px; }
+    #s3-paths { position: absolute; left: 0; top: 0; width: 860px; height: 1000px; transform: translateZ(1px); overflow: visible; }
+    /* prompt card lying on the board */
+    #s3-card-wrap { left: 160px; top: 80px; width: 560px; height: 104px; transform: translateZ(3px); }
+    #s3-card { position: absolute; inset: 0; transform-origin: 40px 50%; padding: 18px 0 0 62px; }
+    #s3-card .lb { font: 700 20px/1 "Poppins", sans-serif; letter-spacing: 0.18em; color: #5a7aa3; }
+    #s3-card .bar { position: absolute; left: 62px; height: 9px; border-radius: 5px; background: #b4c4d6; transform-origin: 0 50%; }
+    #s3-card-sh { left: 186px; top: 110px; width: 540px; height: 90px; transform: translateZ(1px); }
+    /* caret standing upright on the card (billboard) */
+    #s3-bc-wrap { left: 197px; top: 76px; width: 6px; height: 64px; transform-origin: 50% 100%; transform: translateZ(4px) rotateX(-52deg); }
+    #s3-bc { position: absolute; inset: 0; border-radius: 3px; background: #00c9ff; box-shadow: 0 0 0 1px rgba(0, 201, 255, 0.25), 0 0 18px rgba(0, 201, 255, 0.5); }
+    /* abstract voice icon standing in the midground */
+    #s3-mic-wrap { left: 640px; top: 20px; width: 160px; height: 150px; transform-origin: 50% 100%; transform: translateZ(1px) rotateX(-52deg); overflow: visible; }
+    #s3-mic { position: absolute; inset: 0; }
+    #s3-mic .cap { position: absolute; left: 56px; top: 8px; width: 48px; height: 78px; border-radius: 24px; }
+    #s3-mic .grill { position: absolute; left: 66px; top: 22px; width: 28px; height: 3px; border-radius: 2px; background: rgba(10, 25, 60, 0.45); }
+    #s3-mic svg { position: absolute; left: 0; top: 0; overflow: visible; }
+    #s3-mic .base { position: absolute; left: 44px; top: 138px; width: 72px; height: 12px; border-radius: 6px; }
+    #s3-mic-sh { left: 690px; top: 150px; width: 140px; height: 46px; transform: translateZ(1px); }
+    /* volumetric nodes (pucks) */
+    .s3-nw { width: 150px; height: 150px; top: 485px; }
+    #s3-n1w { left: 55px; } #s3-n2w { left: 355px; } #s3-n3w { left: 655px; }
+    .s3-n { position: absolute; inset: 0; transform-style: preserve-3d; }
+    .s3-disc { position: absolute; inset: 0; border-radius: 50%; }
+    .s3-top { position: absolute; inset: 0; border-radius: 50%;
+      background: radial-gradient(circle at 34% 28%, #4a72aa 0%, #23427a 48%, #142a54 100%);
+      box-shadow: inset 0 0 0 2px rgba(190, 225, 255, 0.28), inset 0 0 0 16px rgba(10, 22, 52, 0.35); }
+    .s3-top .well { position: absolute; left: 41px; top: 41px; width: 68px; height: 68px; border-radius: 50%; background: #070f26;
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 0 0 4px #3a5f97; }
+    .s3-top .core { position: absolute; left: 51px; top: 51px; width: 48px; height: 48px; }
+    #s3-iris { position: absolute; left: 41px; top: 41px; width: 68px; height: 68px; border-radius: 50%;
+      background: conic-gradient(from 10deg, #2c4c80 0 60deg, #213c69 60deg 120deg, #2c4c80 120deg 180deg, #213c69 180deg 240deg, #2c4c80 240deg 300deg, #213c69 300deg 360deg); }
+    .s3-nsh { width: 170px; height: 150px; top: 498px; transform: translateZ(0.5px); }
+    #s3-n1s { left: 60px; } #s3-n2s { left: 360px; } #s3-n3s { left: 660px; }
+    .s3-nsh .k-cast { left: 24px; top: 26px; width: 160px; height: 140px; border-radius: 50%; }
+    .s3-nsh .k-contact { left: 0; top: 0; width: 168px; height: 160px; }
+    /* rail + stems + carriage */
+    #s3-rail-wrap { left: 40px; top: 707px; width: 780px; height: 26px; }
+    #s3-rail { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 0 50%; }
+    #s3-rail .rl { position: absolute; inset: 0; border-radius: 13px; }
+    #s3-rail-sh { left: 52px; top: 724px; width: 780px; height: 30px; transform: translateZ(0.5px); }
+    .s3-stem { position: absolute; top: 632px; width: 14px; height: 78px; transform: translateZ(6px); border-radius: 4px; }
+    #s3-car-wrap { left: 85px; top: 690px; width: 90px; height: 60px; }
+    #s3-car { position: absolute; inset: 0; transform-style: preserve-3d; }
+    #s3-car .cl { position: absolute; inset: 0; border-radius: 12px; }
+    #s3-car .ptr { position: absolute; left: 33px; top: -16px; width: 24px; height: 24px; }
+    #s3-car-sh { left: 98px; top: 708px; width: 100px; height: 64px; transform: translateZ(0.5px); }
+    #s3-sig-wrap { left: 119px; top: 709px; width: 22px; height: 22px; transform-origin: 50% 50%; transform: translateZ(18px) rotateX(-52deg); }
+    #s3-sig { position: absolute; inset: 0; }
+
+    /* ---------- second camera: copilot pane + interview monitor ---------- */
+    #s3-cam2 { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1500px; perspective-origin: 540px 960px; }
+    #s3-world2 { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 540px 960px; }
+    /* interview monitor = S04 frame 0 (k-panel 72–408 x 842–1078, screen 90–390 x 860–1060) */
+    #s3-mon { left: 72px; top: 842px; width: 336px; height: 280px; }
+    #s3-mon-sh { left: 34px; top: 46px; width: 330px; height: 236px; transform: translateZ(-30px); }
+    #s3-mon-ct { left: 96px; top: 252px; width: 190px; height: 26px; }
+    #s3-mon-body { position: absolute; left: 0; top: 0; width: 336px; height: 236px; border-radius: 20px; }
+    #s3-mon-side { position: absolute; left: 326px; top: 8px; width: 16px; height: 220px; transform-origin: 0 0; transform: rotateY(90deg);
+      background: linear-gradient(180deg, #0f1c3c, #07102a); border-radius: 0 8px 8px 0; }
+    #s3-screen { position: absolute; left: 18px; top: 18px; width: 300px; height: 200px; overflow: hidden; border-radius: 12px; }
+    #s3-neck { position: absolute; left: 148px; top: 236px; width: 40px; height: 22px; background: linear-gradient(90deg, #233f6e, #3b5f96 45%, #1b3460); }
+    #s3-foot { position: absolute; left: 103px; top: 254px; width: 130px; height: 10px; border-radius: 5px;
+      background: linear-gradient(180deg, #4c71a8, #1d3561); box-shadow: 0 3px 0 #0b1735; }
+    .s3-edge { position: absolute; inset: 0; border-radius: 22px; }
+    .s3-clip { position: absolute; inset: 0; overflow: hidden; border-radius: 20px; pointer-events: none; }
+    .s3-sheen { position: absolute; top: -20%; left: 0; width: 45%; height: 140%;
+      background: linear-gradient(100deg, rgba(220, 240, 255, 0) 0%, rgba(220, 240, 255, 0.16) 50%, rgba(220, 240, 255, 0) 100%); }
+    #s3-pane { left: 450px; top: 820px; width: 470px; height: 250px; transform-origin: 50% 76%; }
+    #s3-pane-face { position: absolute; inset: 0; border-radius: 22px; overflow: hidden; }
+    #s3-pane-face .lb { position: absolute; left: 28px; top: 26px; font: 700 18px/1 "Poppins", sans-serif; letter-spacing: 0.18em; color: #a9c2de; }
+    #s3-pane-face .dot { position: absolute; right: 28px; top: 24px; width: 18px; height: 18px; }
+    #s3-pane-face .ln { position: absolute; left: 28px; height: 9px; border-radius: 5px; background: #2a4778; }
+    #s3-pane-face .groove { position: absolute; left: 22px; right: 22px; top: 176px; height: 28px; border-radius: 14px; background: #081127;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(190, 225, 255, 0.12); }
+    #s3-pane-shw { left: 490px; top: 900px; width: 470px; height: 230px; transform: translateZ(-60px); }
+    #s3-pane-sh { left: 0; top: 0; width: 470px; height: 230px; }
+
+    /* ---------- screen-space signals + text ---------- */
+    #s3-caret { position: absolute; left: 0; top: 0; width: 6px; height: 64px; border-radius: 3px; background: #00c9ff; transform-origin: 0 0;
+      box-shadow: 0 0 0 1px rgba(0, 201, 255, 0.25), 0 0 18px rgba(0, 201, 255, 0.5); }
+    #s3-wave { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; pointer-events: none; }
+    .s3-lab { position: absolute; top: 1034px; width: 300px; text-align: center; font: 700 44px/1 "Poppins", sans-serif; letter-spacing: 0.05em; color: #eaf4ff; }
+    #s3-lab1 { left: 141px; } #s3-lab2 { left: 403px; } #s3-lab3 { left: 655px; }
+    #s3-focus { position: absolute; left: 0; top: 1092px; width: 120px; height: 6px; border-radius: 3px; background: #00c9ff;
+      box-shadow: 0 0 12px rgba(0, 201, 255, 0.45); }
+    #s3-text { position: absolute; left: 90px; top: 214px; width: 900px; height: 340px; }
+    .s3-hl { position: absolute; left: 0; top: 0; width: 900px; }
+    .s3-line { display: block; overflow: hidden; padding: 0 6px 6px 0; }
+    .s3-line .k-hl { font-size: 104px; }
+    .s3-count { position: absolute; left: 90px; top: 186px; font: 400 22px/1 "Poppins", sans-serif; letter-spacing: 0.2em; color: #8fb0d6; }
+  </style>
+  <div data-hf-id="hf-gr41" id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-756d" id="s3-cam">
+      <div data-hf-id="hf-kofw" id="s3-world">
+        <div data-hf-id="hf-qgni" id="s3-board-wrap" class="s3-obj">
+          <div data-hf-id="hf-7f7s" id="s3-board">
+            <div data-hf-id="hf-7d2l" id="s3-bsh" class="k-cast"></div>
+            <div data-hf-id="hf-94c2" id="s3-bsurf"></div>
+            <div data-hf-id="hf-3z99" id="s3-bedge"></div>
+            <svg data-hf-id="hf-7b6z" id="s3-paths" width="860" height="1000" viewBox="0 0 860 1000">
+              <g data-hf-id="hf-fjmb" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path data-hf-id="hf-p72x" class="s3-stub" id="s3-s1" d="M430,420 H520 Q540,420 540,440 V470" stroke="#7d9cc8" stroke-width="3"/>
+                <path data-hf-id="hf-eb5d" class="s3-stub" id="s3-s2" d="M730,410 H800" stroke="#7d9cc8" stroke-width="3"/>
+                <path data-hf-id="hf-eu4x" class="s3-stub" id="s3-s3" d="M130,480 H60" stroke="#7d9cc8" stroke-width="3"/>
+                <path data-hf-id="hf-aosk" class="s3-pth" id="s3-p0" d="M200,178 V300 Q200,320 220,320 H410 Q430,320 430,340 V560" stroke="#00c9ff" stroke-width="5"/>
+                <path data-hf-id="hf-6eqp" class="s3-pth" id="s3-p1" d="M200,300 V400 Q200,420 180,420 H150 Q130,420 130,440 V560" stroke="#00c9ff" stroke-width="5"/>
+                <path data-hf-id="hf-d5a5" class="s3-pth" id="s3-p2" d="M410,320 H710 Q730,320 730,340 V560" stroke="#00c9ff" stroke-width="5"/>
+              </g>
+              <g data-hf-id="hf-4b69" id="s3-stubends" fill="#7d9cc8">
+                <circle data-hf-id="hf-3fdt" cx="540" cy="474" r="7"/><rect data-hf-id="hf-lmxt" x="800" y="403" width="14" height="14" rx="3"/><circle data-hf-id="hf-yy2o" cx="56" cy="480" r="7"/>
+              </g>
+              <g data-hf-id="hf-u4jc" id="s3-ends" fill="none" stroke="#00c9ff" stroke-width="4">
+                <circle data-hf-id="hf-tc7m" id="s3-e1" cx="130" cy="560" r="20"/><circle data-hf-id="hf-05jk" id="s3-e2" cx="430" cy="560" r="20"/><circle data-hf-id="hf-acoi" id="s3-e3" cx="730" cy="560" r="20"/>
+              </g>
+            </svg>
+            <div data-hf-id="hf-ybuj" id="s3-card-sh" class="s3-obj"><div data-hf-id="hf-17f9" id="s3-card-sh-in" class="k-cast" style="inset:0;filter:blur(16px)"></div></div>
+            <div data-hf-id="hf-fv8a" id="s3-card-wrap" class="s3-obj">
+              <div data-hf-id="hf-oevd" id="s3-card" class="k-paper">
+                <div data-hf-id="hf-dv5g" class="lb">PROMPT</div>
+                <div data-hf-id="hf-rhys" class="bar" style="top:52px;width:330px"></div>
+                <div data-hf-id="hf-65tv" class="bar" style="top:72px;width:220px;background:#ccd7e3"></div>
+              </div>
+            </div>
+            <div data-hf-id="hf-u9zn" id="s3-bc-wrap" class="s3-obj"><div data-hf-id="hf-qjid" id="s3-bc"></div></div>
+            <div data-hf-id="hf-kffk" id="s3-mic-sh" class="s3-obj"><div data-hf-id="hf-rk3c" id="s3-mic-sh-in" class="k-cast" style="inset:0;filter:blur(14px)"></div></div>
+            <div data-hf-id="hf-70p5" id="s3-mic-wrap" class="s3-obj">
+              <div data-hf-id="hf-80ap" id="s3-mic">
+                <svg data-hf-id="hf-r2xu" width="160" height="150" viewBox="0 0 160 150">
+                  <g data-hf-id="hf-2o8v" fill="none" stroke-linecap="round">
+                    <path data-hf-id="hf-jg4g" d="M42,62 Q42,112 80,112 Q118,112 118,62" stroke="#8fb0d6" stroke-width="7"/>
+                    <path data-hf-id="hf-iu2x" d="M80,112 V140" stroke="#6f93c4" stroke-width="8"/>
+                    <path data-hf-id="hf-ljmh" class="s3-arc" d="M134,34 Q148,56 134,78" stroke="#a9c2de" stroke-width="5"/>
+                    <path data-hf-id="hf-u3j2" class="s3-arc" d="M146,22 Q168,56 146,90" stroke="#a9c2de" stroke-width="5" opacity=".6"/>
+                  </g>
+                </svg>
+                <div data-hf-id="hf-fg11" class="cap k-metal"></div>
+                <div data-hf-id="hf-vsn0" class="grill"></div><div data-hf-id="hf-gn3u" class="grill" style="top:32px"></div><div data-hf-id="hf-lbqf" class="grill" style="top:42px"></div>
+                <div data-hf-id="hf-rpwq" class="base k-metal"></div>
+              </div>
+            </div>
+            <div data-hf-id="hf-hikt" id="s3-n1s" class="s3-obj s3-nsh"><div data-hf-id="hf-pdgh" class="k-cast"></div><div data-hf-id="hf-iwso" class="k-contact"></div></div>
+            <div data-hf-id="hf-1qyg" id="s3-n2s" class="s3-obj s3-nsh"><div data-hf-id="hf-25bp" class="k-cast"></div><div data-hf-id="hf-r0g0" class="k-contact"></div></div>
+            <div data-hf-id="hf-v7o3" id="s3-n3s" class="s3-obj s3-nsh"><div data-hf-id="hf-3c8s" class="k-cast"></div><div data-hf-id="hf-ptix" class="k-contact"></div></div>
+            <div data-hf-id="hf-pkd5" id="s3-rail-sh" class="s3-obj"><div data-hf-id="hf-en69" id="s3-rail-sh-in" class="k-cast" style="inset:0;filter:blur(10px)"></div></div>
+            <div data-hf-id="hf-bocy" class="s3-stem k-metal" style="left:123px"></div>
+            <div data-hf-id="hf-pt1v" class="s3-stem k-metal" style="left:423px"></div>
+            <div data-hf-id="hf-0lsc" class="s3-stem k-metal" style="left:723px"></div>
+            <div data-hf-id="hf-teks" id="s3-rail-wrap" class="s3-obj"><div data-hf-id="hf-8zyo" id="s3-rail"></div></div>
+            <div data-hf-id="hf-wxql" id="s3-n1w" class="s3-obj s3-nw"><div data-hf-id="hf-ktav" id="s3-n1" class="s3-n"></div></div>
+            <div data-hf-id="hf-4nps" id="s3-n2w" class="s3-obj s3-nw"><div data-hf-id="hf-c5f0" id="s3-n2" class="s3-n"></div></div>
+            <div data-hf-id="hf-4e0b" id="s3-n3w" class="s3-obj s3-nw"><div data-hf-id="hf-cx2t" id="s3-n3" class="s3-n"></div></div>
+            <div data-hf-id="hf-bx5d" id="s3-car-sh" class="s3-obj"><div data-hf-id="hf-z2ck" id="s3-car-sh-in" class="k-contact" style="inset:0"></div></div>
+            <div data-hf-id="hf-ihx0" id="s3-car-wrap" class="s3-obj"><div data-hf-id="hf-hchm" id="s3-car"></div></div>
+            <div data-hf-id="hf-wvsz" id="s3-sig-wrap" class="s3-obj"><div data-hf-id="hf-p4qw" id="s3-sig" class="k-signal"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div data-hf-id="hf-60rp" id="s3-cam2">
+      <div data-hf-id="hf-ao9i" id="s3-world2">
+        <div data-hf-id="hf-p73e" id="s3-pane-shw" class="s3-obj"><div data-hf-id="hf-3gl8" id="s3-pane-sh" class="k-cast"></div></div>
+        <div data-hf-id="hf-qsvr" id="s3-mon" class="s3-obj">
+          <div data-hf-id="hf-6soo" id="s3-mon-sh" class="k-cast"></div>
+          <div data-hf-id="hf-160b" id="s3-mon-ct" class="k-contact"></div>
+          <div data-hf-id="hf-qj0p" id="s3-neck"></div>
+          <div data-hf-id="hf-u39w" id="s3-foot"></div>
+          <div data-hf-id="hf-0h14" id="s3-mon-body" class="k-panel">
+            <div data-hf-id="hf-8z95" id="s3-screen" class="k-screen">
+              <svg data-hf-id="hf-luyv" width="300" height="200" viewBox="0 0 636 356" preserveAspectRatio="xMidYMid slice"><defs data-hf-id="hf-mh0t"><linearGradient data-hf-id="hf-ko9u" id="s3-room" x1="0" y1="0" x2="0" y2="1"><stop data-hf-id="hf-57ej" offset="0" stop-color="#284a80"/><stop data-hf-id="hf-p5mb" offset="1" stop-color="#0f2048"/></linearGradient><linearGradient data-hf-id="hf-3b2l" id="s3-fig" x1="0" y1="0" x2="0" y2="1"><stop data-hf-id="hf-k3eq" offset="0" stop-color="#a9c4e6"/><stop data-hf-id="hf-fid9" offset="1" stop-color="#6f8fbb"/></linearGradient></defs><rect data-hf-id="hf-4zxl" width="636" height="356" fill="url(#s3-room)"/><rect data-hf-id="hf-nv2l" x="430" y="40" width="150" height="190" rx="10" fill="#3d64a0" opacity=".45"/><rect data-hf-id="hf-vb0i" x="440" y="50" width="62" height="170" rx="6" fill="#6f95cf" opacity=".35"/><path data-hf-id="hf-mbtj" d="M230 356 L230 168 Q230 118 280 118 L356 118 Q406 118 406 168 L406 356 Z" fill="#0b1838"/><circle data-hf-id="hf-7p1e" cx="318" cy="150" r="46" fill="url(#s3-fig)"/><path data-hf-id="hf-xvv2" d="M196 356 Q204 238 318 226 Q432 238 440 356 Z" fill="url(#s3-fig)"/><rect data-hf-id="hf-k08j" x="0" y="300" width="636" height="56" fill="#08132e" opacity=".35"/></svg>
+            </div>
+            <div data-hf-id="hf-cxtm" id="s3-mon-side"></div>
+            <div data-hf-id="hf-gamt" class="s3-clip"><div data-hf-id="hf-j7tb" id="s3-mon-sheen" class="s3-sheen"></div></div>
+          </div>
+        </div>
+        <div data-hf-id="hf-o8kl" id="s3-pane" class="s3-obj">
+          <div data-hf-id="hf-ndm3" class="s3-edge" style="transform:translateZ(-12px);background:#050b1d;border-radius:22px"></div>
+          <div data-hf-id="hf-wpo3" class="s3-edge" style="transform:translateZ(-8px);background:#07102a;border-radius:22px"></div>
+          <div data-hf-id="hf-5voz" class="s3-edge" style="transform:translateZ(-4px);background:#0b1631;border-radius:22px"></div>
+          <div data-hf-id="hf-mqhl" id="s3-pane-face" class="k-panel">
+            <div data-hf-id="hf-f5r1" class="lb">ASISTEN</div>
+            <div data-hf-id="hf-63sz" class="dot k-signal"></div>
+            <div data-hf-id="hf-m6gk" class="ln" style="top:72px;width:300px"></div>
+            <div data-hf-id="hf-tnar" class="ln" style="top:98px;width:372px"></div>
+            <div data-hf-id="hf-4h84" class="ln" style="top:124px;width:236px"></div>
+            <div data-hf-id="hf-omai" class="groove"></div>
+            <div data-hf-id="hf-6toq" class="s3-clip" style="border-radius:22px"><div data-hf-id="hf-3fml" id="s3-pane-sheen" class="s3-sheen"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <svg data-hf-id="hf-nm1g" id="s3-wave" width="1080" height="1920" viewBox="0 0 1080 1920">
+      <path data-hf-id="hf-pr78" id="s3-wpath" d="" fill="none" stroke="#00c9ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div data-hf-id="hf-gozx" id="s3-caret"></div>
+    <div data-hf-id="hf-36ro" id="s3-lab1" class="s3-lab">DENGAR</div>
+    <div data-hf-id="hf-i8n2" id="s3-lab2" class="s3-lab">PAHAMI</div>
+    <div data-hf-id="hf-qore" id="s3-lab3" class="s3-lab">SARAN</div>
+    <div data-hf-id="hf-3xrc" id="s3-focus"></div>
+    <div data-hf-id="hf-ktco" id="s3-count1" class="s3-count">02 / 08</div>
+    <div data-hf-id="hf-p0yw" id="s3-count2" class="s3-count">03 / 08</div>
+    <div data-hf-id="hf-ncq8" id="s3-text" class="k-field">
+      <div data-hf-id="hf-mdqt" id="s3-h1" class="s3-hl">
+        <span data-hf-id="hf-wdcu" class="s3-line"><span data-hf-id="hf-5dfl" class="k-hl">VIBE</span></span>
+        <span data-hf-id="hf-pqiq" class="s3-line"><span data-hf-id="hf-qtpr" class="k-hl">CODING</span></span>
+      </div>
+      <div data-hf-id="hf-u9yv" id="s3-h3" class="s3-hl">
+        <span data-hf-id="hf-q4tr" class="s3-line"><span data-hf-id="hf-mq1w" class="k-hl">CO-PILOT</span></span>
+        <span data-hf-id="hf-qj4s" class="s3-line"><span data-hf-id="hf-ppyp" class="k-hl">PRIBADI?</span></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const $ = (s) => document.querySelector(s);
+      const rgb = (a, b, k) => "rgb(" + a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(",") + ")";
+
+      // ---- static builds ----
+      // pucks: 18 stacked discs (sidewall) + lit top face with a well and a signal core
+      ["#s3-n1", "#s3-n2", "#s3-n3"].forEach((id, n) => {
+        const el = $(id);
+        for (let i = 0; i < 18; i++) {
+          const d = document.createElement("div"); d.className = "s3-disc";
+          d.style.background = rgb([10, 22, 50], [52, 86, 140], i / 17);
+          d.style.transform = "translateZ(" + (i * 2) + "px)";
+          el.appendChild(d);
+        }
+        const top = document.createElement("div"); top.className = "s3-top"; top.style.transform = "translateZ(36px)";
+        top.innerHTML = '<div class="well"></div><div class="core k-signal" id="s3-c' + (n + 1) + '"></div>' + (n === 0 ? '<div id="s3-iris"></div>' : "");
+        el.appendChild(top);
+      });
+      // rail: 4 stacked bars, metal top
+      const rail = $("#s3-rail");
+      for (let i = 0; i < 4; i++) {
+        const r = document.createElement("div"); r.className = "rl";
+        r.style.background = i === 3 ? "" : rgb([12, 26, 58], [40, 70, 120], i / 3);
+        if (i === 3) r.className = "rl k-metal";
+        r.style.transform = "translateZ(" + (i * 4 + 2) + "px)";
+        rail.appendChild(r);
+      }
+      // carriage: 7 stacked blocks + metal top + cyan pointer
+      const car = $("#s3-car");
+      for (let i = 0; i < 7; i++) {
+        const c = document.createElement("div"); c.className = "cl";
+        c.style.background = rgb([14, 28, 62], [58, 92, 146], i / 6);
+        c.style.transform = "translateZ(" + (i * 3 + 4) + "px)";
+        car.appendChild(c);
+      }
+      const ctop = document.createElement("div"); ctop.className = "cl k-metal"; ctop.style.transform = "translateZ(26px)";
+      ctop.innerHTML = '<div class="ptr k-signal" id="s3-ptr"></div>';
+      car.appendChild(ctop);
+      // path lengths for stroke drawing (static)
+      document.querySelectorAll("#s3-paths path").forEach((p) => {
+        const L = Math.ceil(p.getTotalLength()) + 2;
+        p.setAttribute("stroke-dasharray", L + " " + L); p.setAttribute("stroke-dashoffset", L); p.dataset.len = L;
+      });
+      // final waveform = S04's draw(0) exactly; the pane's flat response line shares its point structure
+      const ss = (a, b, x) => { x = Math.min(1, Math.max(0, (x - a) / (b - a))); return x * x * (3 - 2 * x); };
+      let wave = "", flat = "", n = 0;
+      for (let x = 160; x <= 920 + 0.01; x += 5) {
+        const xx = Math.min(x, 920), env = (ss(160, 200, xx) * 0.85 + 0.15) * (1 - ss(850, 920, xx));
+        wave += (wave ? " L" : "M") + xx.toFixed(1) + " " + (1010 + 26 * env * Math.sin(2 * Math.PI * (xx - 160) / 150)).toFixed(1);
+        flat += (flat ? " L" : "M") + (480 + n * 420 / 152).toFixed(1) + " 1010.0"; n++;
+      }
+      const wp = $("#s3-wpath");
+      wp.setAttribute("d", flat); wp.setAttribute("stroke-dasharray", "2400 2400");
+
+      const tl = gsap.timeline({ paused: true });
+      const len = (id) => +$(id).dataset.len;
+
+      // ===== frame 0 = S02 last frame: caret at (537,868), counter 02/08 =====
+      tl.fromTo("#s3-caret", { x: 537, y: 868, scale: 1, opacity: 1 }, { x: 376, y: 719.5, scale: 0.7, opacity: 1, duration: 0.7, ease: "power3.inOut" }, 0.35);
+      tl.fromTo("#s3-count1", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(6px)", duration: 0.15, ease: "power2.in" }, 0.08);
+      tl.fromTo("#s3-count2", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, ease: "power2.out" }, 0.22);
+
+      // ===== B07 21.00–25.20  VIBE CODING =====
+      tl.fromTo("#s3-world", { x: 0, y: 0, rotationY: 0 }, { x: 0, y: -120, rotationY: 7, duration: 2.6, ease: "power2.inOut" }, 1.4);
+      // drafting board tilts up on its near hinge beneath the caret
+      tl.fromTo("#s3-board", { rotationX: 88 }, { rotationX: 52, duration: 0.95, ease: "expo.out" }, 0.05);
+      tl.fromTo(["#s3-bsurf", "#s3-bedge"], { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.05);
+      tl.fromTo("#s3-bsh", { opacity: 0 }, { opacity: 0.8, duration: 0.6, ease: "power2.out" }, 0.3);
+      // prompt card grows out of the caret; caret hands over to its upright copy on the card
+      tl.fromTo("#s3-card", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.6, ease: "expo.out" }, 0.98);
+      tl.fromTo("#s3-card-sh-in", { opacity: 0 }, { opacity: 0.6, duration: 0.5, ease: "power2.out" }, 1.0);
+      tl.fromTo("#s3-card .bar", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "expo.out", stagger: 0.12 }, 1.25);
+      tl.fromTo("#s3-bc", { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, 1.05);
+      tl.to("#s3-caret", { opacity: 0, duration: 0.1, ease: "none" }, 1.05);
+      // abstract voice icon rises in the midground
+      tl.fromTo("#s3-mic", { y: 160, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "expo.out" }, 0.9);
+      tl.fromTo("#s3-mic-sh-in", { opacity: 0, x: -30 }, { opacity: 0.7, x: 0, duration: 0.8, ease: "expo.out" }, 0.95);
+      // headline: masked rise on "vibe" 21.62 / "coding" 21.95
+      tl.fromTo("#s3-h1 .s3-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.7, ease: "expo.out" }, 0.52);
+      tl.fromTo("#s3-h1 .s3-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.7, ease: "expo.out" }, 0.85);
+      tl.fromTo("#s3-h1", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 3.95);
+      // the caret draws branching pathways (not code)
+      tl.fromTo("#s3-p0", { attr: { "stroke-dashoffset": len("#s3-p0") } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.1, ease: "power2.inOut" }, 1.6);
+      tl.fromTo("#s3-p1", { attr: { "stroke-dashoffset": len("#s3-p1") } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.9, ease: "power2.inOut" }, 1.95);
+      tl.fromTo("#s3-p2", { attr: { "stroke-dashoffset": len("#s3-p2") } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.8, ease: "power2.inOut" }, 2.2);
+      ["#s3-s1", "#s3-s2", "#s3-s3"].forEach((id, i) => {
+        tl.fromTo(id, { attr: { "stroke-dashoffset": len(id) } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.45, ease: "power2.out" }, 2.45 + 0.15 * i);
+      });
+      tl.fromTo("#s3-stubends", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 2.9);
+      // endpoints lock on "dirancang" 24.05
+      tl.fromTo("#s3-ends circle", { opacity: 0, scale: 0.4, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.4, ease: "expo.out", stagger: 0.06 }, 3.02);
+
+      // ===== B08 25.20–29.50  DENGAR / PAHAMI / SARAN =====
+      // paths resolve into three volumetric nodes that rise out of the board
+      ["#s3-n1", "#s3-n2", "#s3-n3"].forEach((id, i) => {
+        const t = 3.3 + 0.12 * i;
+        tl.fromTo(id + " > div", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, t);
+        tl.fromTo(id, { z: -44 }, { z: 0, duration: 0.6, ease: "expo.out" }, t);
+        tl.fromTo("#s3-n" + (i + 1) + "s > div", { opacity: 0 }, { opacity: 0.85, duration: 0.5, ease: "power2.out" }, t + 0.05);
+      });
+      tl.to("#s3-ends", { opacity: 0, duration: 0.3, ease: "power2.in" }, 3.5);
+      tl.to(".s3-pth", { opacity: 0.45, duration: 0.5, ease: "power2.inOut" }, 3.9);
+      tl.to(".s3-stub, #s3-stubends", { opacity: 0.35, duration: 0.5, ease: "power2.inOut" }, 3.9);
+      // one physical rail, stems, carriage
+      tl.fromTo("#s3-rail", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "expo.out" }, 3.45);
+      tl.fromTo("#s3-rail-sh-in", { opacity: 0, scaleX: 0, transformOrigin: "0% 50%" }, { opacity: 0.7, scaleX: 1, duration: 0.6, ease: "expo.out" }, 3.45);
+      tl.fromTo(".s3-stem", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, 3.6);
+      tl.fromTo("#s3-car > div", { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, 3.7);
+      tl.fromTo("#s3-car", { x: -40, z: -34 }, { x: -40, z: 0, duration: 0.3, ease: "expo.out" }, 3.7);
+      tl.fromTo("#s3-car-sh-in", { opacity: 0, x: -40 }, { opacity: 0.8, x: -40, duration: 0.25, ease: "power2.out" }, 3.75);
+      tl.to("#s3-car", { x: 0, duration: 0.42, ease: "back.out(1.2)" }, 4.0);
+      tl.to("#s3-car-sh-in", { x: 0, duration: 0.42, ease: "back.out(1.2)" }, 4.0);
+      // listening aperture opens, then the node goes live on "mendengarkan" 25.40
+      tl.fromTo("#s3-iris", { scale: 1 }, { scale: 0.12, duration: 0.38, ease: "power3.inOut" }, 4.02);
+      tl.fromTo(".s3-top .core", { opacity: 0, scale: 0.5 }, { opacity: 0, scale: 0.5, duration: 0.01 }, 0);
+      tl.to("#s3-c1", { opacity: 1, scale: 1, duration: 0.3, ease: "expo.out" }, 4.4);
+      tl.fromTo("#s3-lab1", { opacity: 0, filter: "blur(6px)", color: "#eaf4ff" }, { opacity: 1, filter: "blur(0px)", color: "#eaf4ff", duration: 0.15, ease: "power2.out" }, 4.4);
+      tl.fromTo("#s3-focus", { x: 231, scaleX: 0, opacity: 1 }, { x: 231, scaleX: 1, opacity: 1, duration: 0.3, ease: "expo.out" }, 4.4);
+      // signal 1 -> 2, carriage follows; PAHAMI on "mengolah konteks" 26.95
+      tl.fromTo("#s3-sig", { x: 0, opacity: 0 }, { x: 0, opacity: 1, duration: 0.12, ease: "none" }, 5.15);
+      tl.to("#s3-sig", { x: 300, duration: 0.65, ease: "power2.inOut" }, 5.3);
+      tl.to("#s3-car", { x: 300, duration: 0.6, ease: "back.out(1.2)" }, 5.4);
+      tl.to("#s3-car-sh-in", { x: 300, duration: 0.6, ease: "back.out(1.2)" }, 5.4);
+      tl.to("#s3-focus", { x: 493, duration: 0.5, ease: "power3.inOut" }, 5.45);
+      tl.to("#s3-c1", { opacity: 0.45, duration: 0.3, ease: "power2.out" }, 5.95);
+      tl.to("#s3-c2", { opacity: 1, scale: 1, duration: 0.3, ease: "expo.out" }, 5.95);
+      tl.to("#s3-lab1", { color: "#7f9cc4", duration: 0.25, ease: "power2.out" }, 5.95);
+      tl.fromTo("#s3-lab2", { opacity: 0, filter: "blur(6px)", color: "#eaf4ff" }, { opacity: 1, filter: "blur(0px)", color: "#eaf4ff", duration: 0.15, ease: "power2.out" }, 5.95);
+      // signal 2 -> 3; SARAN on "saran" 28.75
+      tl.to("#s3-sig", { x: 600, duration: 0.65, ease: "power2.inOut" }, 7.1);
+      tl.to("#s3-car", { x: 600, duration: 0.6, ease: "back.out(1.2)" }, 7.2);
+      tl.to("#s3-car-sh-in", { x: 600, duration: 0.6, ease: "back.out(1.2)" }, 7.2);
+      tl.to("#s3-focus", { x: 745, duration: 0.5, ease: "power3.inOut" }, 7.25);
+      tl.to("#s3-sig", { opacity: 0, duration: 0.12, ease: "none" }, 7.75);
+      tl.to("#s3-c2", { opacity: 0.45, duration: 0.3, ease: "power2.out" }, 7.75);
+      tl.to("#s3-c3", { opacity: 1, scale: 1, duration: 0.3, ease: "expo.out" }, 7.75);
+      tl.to("#s3-lab2", { color: "#7f9cc4", duration: 0.25, ease: "power2.out" }, 7.75);
+      tl.fromTo("#s3-lab3", { opacity: 0, filter: "blur(6px)", color: "#eaf4ff" }, { opacity: 1, filter: "blur(0px)", color: "#eaf4ff", duration: 0.15, ease: "power2.out" }, 7.75);
+
+      // ===== B09 29.50–32.90  CO-PILOT PRIBADI? =====
+      tl.to(["#s3-lab1", "#s3-lab2", "#s3-lab3", "#s3-focus"], { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 8.4);
+      // last node grows toward camera, the board stage falls away
+      tl.to("#s3-n3", { z: 300, scale: 1.5, duration: 0.5, ease: "power3.in" }, 8.45);
+      tl.fromTo("#s3-cam", { opacity: 1 }, { opacity: 0, duration: 0.36, ease: "power2.in" }, 8.5);
+      // it becomes the assistant pane; the monitor slides out from behind it (pane occludes it)
+      tl.fromTo("#s3-world2", { rotationX: 10, rotationY: -5 }, { rotationX: 0, rotationY: 0, duration: 1.9, ease: "power2.inOut" }, 8.7);
+      tl.fromTo("#s3-pane", { x: 120, y: -95, z: -220, scale: 0.34, rotationY: -24 },
+        { x: 0, y: 0, z: 0, scale: 1, rotationY: 0, duration: 1.0, ease: "expo.out" }, 8.75);
+      tl.fromTo("#s3-pane > div", { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "power1.out" }, 8.78);
+      tl.fromTo("#s3-pane-sh", { opacity: 0, x: -40 }, { opacity: 0.75, x: 0, duration: 1.0, ease: "expo.out" }, 8.8);
+      tl.fromTo("#s3-mon", { x: 330, z: -150, rotationY: 14 }, { x: 0, z: 0, rotationY: 0, duration: 1.15, ease: "expo.out" }, 8.95);
+      tl.fromTo("#s3-mon > div", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, 8.95);
+      // edge highlight travels with the tilt
+      tl.fromTo(["#s3-pane-sheen", "#s3-mon-sheen"], { xPercent: -110 }, { xPercent: 240, duration: 1.9, ease: "power2.inOut" }, 8.7);
+      // response line appears in the pane's groove
+      tl.fromTo(wp, { attr: { "stroke-dashoffset": 2400 } }, { attr: { "stroke-dashoffset": 1980 }, duration: 0.45, ease: "power2.out" }, 10.05);
+      // headline: whole-line blur-in on "co-pilot" 30.95 / "pribadi" 31.40, 1.2 s hold
+      tl.fromTo("#s3-h3 .s3-line:nth-child(1) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, 9.93);
+      tl.fromTo("#s3-h3 .s3-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.16, ease: "power2.out" }, 10.36);
+      tl.fromTo("#s3-h3", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power2.in" }, 11.68);
+      // pane folds into its response line; the line curves into the waveform
+      tl.to("#s3-pane", { scaleY: 0.03, duration: 0.32, ease: "power3.in" }, 11.15);
+      tl.to("#s3-pane > div", { opacity: 0, duration: 0.08, ease: "none" }, 11.42);
+      tl.to("#s3-pane-sh", { opacity: 0, duration: 0.3, ease: "power2.in" }, 11.15);
+      tl.to(wp, { attr: { d: wave, "stroke-dashoffset": 0 }, duration: 0.65, ease: "power2.inOut" }, 11.2);
+      tl.fromTo(wp, { attr: { "stroke-dasharray": "2400 2400" } }, { attr: { d: wave, "stroke-dasharray": "none" }, duration: 0.01, ease: "none" }, 11.86);
+
+      window.__timelines["s03"] = tl;
+    })();
+  </script>
+</template>

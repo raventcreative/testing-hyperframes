@@ -1,0 +1,219 @@
+<template>
+  <script src="assets/room.js"></script>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s6-roomw { position: absolute; inset: 0; }
+    #s6-room { position: absolute; inset: 0; }
+    #s6-rdark { position: absolute; inset: 0; background: rgb(3, 8, 24); opacity: 0; }
+    /* S05 hand-off panel (440x280 centred at 540,1000) — morphs into the laptop screen */
+    #s6-hp-sh { position: absolute; left: 345px; top: 893px; width: 464px; height: 296px; opacity: 0.6; }
+    #s6-hp { position: absolute; left: 320px; top: 860px; width: 440px; height: 280px; }
+    #s6-hp-bez { position: absolute; inset: 0; }
+    #s6-hp-scr { position: absolute; left: 16px; top: 16px; right: 16px; bottom: 16px; overflow: hidden; border-radius: 16px; }
+    #s6-hp-dim { position: absolute; inset: 0; background: rgba(4, 10, 28, 0.7); }
+    #s6-hp-pool { position: absolute; left: 330px; top: 860px; width: 330px; height: 230px; opacity: 0.9; }
+    .s6-ui .s6-wv rect { transform-box: fill-box; transform-origin: 50% 50%; }
+    /* practice selector on the desk (world coords, set layer) */
+    #s6-sel { position: absolute; left: 650px; top: 996px; width: 200px; height: 104px; }
+    #s6-sel-top { position: absolute; left: 0; top: 0; width: 200px; height: 14px; clip-path: polygon(14px 0, 194px 0, 200px 14px, 8px 14px);
+      background: linear-gradient(180deg, #5a80b8, #2f5185); }
+    #s6-sel-wall { position: absolute; left: 0; top: 0; width: 8px; height: 104px; clip-path: polygon(0 6px, 8px 14px, 8px 104px, 0 94px);
+      background: linear-gradient(180deg, #1a3260, #0b1838); }
+    #s6-sel-face { position: absolute; left: 8px; top: 14px; width: 192px; height: 90px; border-radius: 0 0 12px 12px;
+      background: linear-gradient(170deg, #2f5185 0%, #1c3463 55%, #12244a 100%);
+      box-shadow: inset 0 1px 0 rgba(200, 230, 255, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.35), 0 3px 0 #0b1735; }
+    .s6-det { position: absolute; top: 9px; font: 700 13px/1 "Poppins", sans-serif; letter-spacing: 0.08em; color: #6f8fbb; }
+    #s6-detL { left: 9px; }
+    #s6-detR { right: 9px; }
+    .s6-dd { position: absolute; top: 38px; width: 9px; height: 9px; border-radius: 50%; background: #0c1a3a; }
+    .s6-ddon { position: absolute; top: 37px; width: 11px; height: 11px; opacity: 0; }
+    #s6-ddL { left: 63px; } #s6-ddLon { left: 62px; }
+    #s6-ddR { left: 121px; } #s6-ddRon { left: 120px; }
+    #s6-leverw { position: absolute; left: 92px; top: 30px; width: 8px; height: 46px; }
+    #s6-lever { position: absolute; inset: 0; transform-origin: 50% 100%; }
+    #s6-arm { position: absolute; left: 0; top: 8px; width: 8px; height: 40px; border-radius: 4px; }
+    #s6-knob { position: absolute; left: -6px; top: -4px; width: 20px; height: 20px; border-radius: 50%;
+      background: radial-gradient(circle at 36% 32%, #c9dcf2 0%, #6f93c4 40%, #2c4f84 100%); box-shadow: 0 2px 0 #0e1d3d; }
+    #s6-pivot { position: absolute; left: 84px; top: 64px; width: 24px; height: 24px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 32%, #b8cfeb 0%, #5c80b5 45%, #23457a 100%); box-shadow: 0 2px 0 #0b1735; }
+    #s6-warm { position: absolute; left: 120px; top: 930px; width: 640px; height: 260px; border-radius: 50%; opacity: 0; mix-blend-mode: screen;
+      background: radial-gradient(closest-side, rgba(255, 200, 135, 0.32), rgba(255, 190, 120, 0)); }
+    /* screen-space hand-off to S07 */
+    #s6-dark { position: absolute; inset: 0; background: rgb(3, 8, 24); opacity: 0; }
+    #s6-pool { position: absolute; left: 390px; top: 910px; width: 300px; height: 180px; opacity: 0; }
+    /* text plane */
+    #s6-count { position: absolute; left: 90px; top: 186px; font: 400 22px/1 "Poppins", sans-serif; letter-spacing: 0.2em; color: #8fb0d6; }
+    #s6-text { position: absolute; left: 90px; top: 214px; width: 900px; height: 320px; }
+    #s6-mark { position: absolute; left: -22px; top: 0; width: 920px; height: 108px; transform-origin: 0 50%; opacity: 0; }
+    #s6-mark .bar { position: absolute; inset: 4px 0 4px 0; border-radius: 12px; background: rgba(160, 205, 255, 0.075); }
+    #s6-mark .tick { position: absolute; left: 0; top: 20px; width: 5px; height: 64px; border-radius: 3px; background: #00c9ff; }
+    .s6-row { position: absolute; left: 0; width: 900px; }
+    #s6-r1 { top: 0; } #s6-r2 { top: 108px; } #s6-r3 { top: 216px; }
+    .s6-line { display: block; overflow: hidden; padding: 0 6px 6px 0; }
+    .s6-line .k-hl { font-size: 92px; }
+  </style>
+  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920">
+    <div id="s6-roomw"><div id="s6-room"></div><div id="s6-rdark"></div></div>
+    <div id="s6-hp-sh" class="k-cast"></div>
+    <div id="s6-hp"><div id="s6-hp-bez" class="k-panel"></div><div id="s6-hp-scr" class="k-screen"><div id="s6-hp-dim"></div></div></div>
+    <div id="s6-hp-pool" class="k-pool"></div>
+    <div id="s6-dark"></div>
+    <div id="s6-pool" class="k-pool"></div>
+    <div id="s6-count">06 / 08</div>
+    <div id="s6-text" class="k-field">
+      <div id="s6-mark"><div class="bar"></div><div class="tick"></div></div>
+      <div id="s6-r1" class="s6-row"><span class="s6-line"><span class="k-hl">LATIHAN.</span></span></div>
+      <div id="s6-r2" class="s6-row" style="opacity:0"><span class="s6-line"><span class="k-hl">SIMULASI.</span></span></div>
+      <div id="s6-r3" class="s6-row"><span class="s6-line"><span class="k-hl k-white">PARTNER BELAJAR.</span></span></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => Array.from(document.querySelectorAll(s));
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const io = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const lerp = (a, b, k) => a + (b - a) * k;
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      if (window.__kitAlign) window.__kitAlign(document.getElementById("s6-text"));
+
+      // ----- the room (identical to S01/S02) + practice selector and warm lamp glow in the set layer -----
+      const R = window.HFRoom.build(document.getElementById("s6-room"), "s6r");
+      const winDim = document.getElementById("s6r-winDim");
+      R.L1.insertAdjacentHTML("beforeend",
+        '<div id="s6-warm"></div><div id="s6-selg" style="position:absolute;left:0;top:0"><div class="k-cast" style="left:684px;top:1072px;width:214px;height:56px;opacity:0.6"></div>' +
+        '<div class="k-contact" style="left:636px;top:1086px;width:232px;height:26px"></div>' +
+        '<div id="s6-sel"><div id="s6-sel-top"></div><div id="s6-sel-wall"></div><div id="s6-sel-face">' +
+        '<svg width="192" height="90" viewBox="0 0 192 90" style="position:absolute;left:0;top:0"><path d="M 54 58 A 48 48 0 0 1 130 58" fill="none" stroke="#0c1a3a" stroke-width="8" stroke-linecap="round"/></svg>' +
+        '<div id="s6-detL" class="s6-det">LATIHAN</div><div id="s6-detR" class="s6-det">SIMULASI</div>' +
+        '<i id="s6-ddL" class="s6-dd"></i><i id="s6-ddR" class="s6-dd"></i><i id="s6-ddLon" class="s6-ddon k-signal"></i><i id="s6-ddRon" class="s6-ddon k-signal"></i>' +
+        '<div id="s6-leverw"><div id="s6-lever"><div id="s6-arm" class="k-metal"></div><div id="s6-knob"></div></div></div><div id="s6-pivot"></div></div></div></div>');
+
+      // ----- practice UI (abstract mock interviewer, LATIHAN badge, question slots, waveform) — two identical copies -----
+      const WH = [10, 18, 30, 16, 36, 24, 32, 14, 26, 16, 8];
+      const UI = (P) => '<svg class="s6-ui" viewBox="0 0 636 356" preserveAspectRatio="xMidYMid slice" style="position:absolute;left:0;top:0;width:100%;height:100%">' +
+        '<defs><linearGradient id="' + P + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#284a80"/><stop offset="1" stop-color="#0f2048"/></linearGradient></defs>' +
+        '<rect width="636" height="356" fill="url(#' + P + 'g)"/>' +
+        '<g fill="rgba(169,196,230,0.10)" stroke="#a9c4e6" stroke-width="4" stroke-dasharray="9 8"><circle cx="190" cy="136" r="48"/><path d="M78 356 Q88 236 190 226 Q292 236 302 356"/></g>' +
+        '<g class="s6-wv">' + WH.map((h, i) => '<rect x="' + (137 + i * 10) + '" y="' + (300 - h / 2) + '" width="6" height="' + h + '" rx="3" fill="#00c9ff"/>').join("") + '</g>' +
+        '<rect x="16" y="14" width="164" height="32" rx="16" fill="#050c20" opacity=".6"/><circle cx="35" cy="30" r="6" fill="#00c9ff"/>' +
+        '<text class="s6-bA" data-layout-allow-overlap="" x="50" y="37" font-family="Poppins, sans-serif" font-weight="700" font-size="18" letter-spacing="2" fill="#cfe4fa">LATIHAN</text>' +
+        '<text class="s6-bB" data-layout-allow-overlap="" x="50" y="37" font-family="Poppins, sans-serif" font-weight="700" font-size="18" letter-spacing="2" fill="#cfe4fa" opacity="0">SIMULASI</text>' +
+        '<rect x="356" y="62" width="256" height="236" rx="16" fill="#0b1838" opacity=".55"/>' +
+        [150, 110, 176].map((w, i) => { const y = 112 + i * 62; return '<circle cx="386" cy="' + y + '" r="10" fill="#2e4c7c"/><circle class="s6-sd" cx="386" cy="' + y + '" r="10" fill="#00c9ff" opacity="0"/>' +
+          '<rect x="408" y="' + (y - 7) + '" width="' + w + '" height="14" rx="7" fill="#2e4c7c"/><rect class="s6-sb" x="408" y="' + (y - 7) + '" width="' + w + '" height="14" rx="7" fill="#a9c4e6" opacity="0"/>'; }).join("") +
+        '<g class="s6-ck" opacity="0"><circle cx="584" cy="30" r="15" fill="none" stroke="#00c9ff" stroke-width="3"/><path d="M576 30 L582 36 L593 24" fill="none" stroke="#eaf4ff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg>';
+      $("#s6-hp-scr").insertAdjacentHTML("afterbegin", UI("s6a"));
+      R.scr.insertAdjacentHTML("afterbegin", UI("s6b"));
+      const ui = $$(".s6-ui"), bA = $$(".s6-bA"), bB = $$(".s6-bB"), sd = $$(".s6-sd"), sb = $$(".s6-sb"), ck = $$(".s6-ck");
+      const wv = $$(".s6-wv rect");
+      const hp = $("#s6-hp"), hpBez = $("#s6-hp-bez"), hpScr = $("#s6-hp-scr"), hpDim = $("#s6-hp-dim"), hpSh = $("#s6-hp-sh"), hpPool = $("#s6-hp-pool");
+      const roomw = $("#s6-roomw"), rdark = $("#s6-rdark"), warm = $("#s6-warm");
+      const setA = (els, k, v) => els.forEach((e) => e.setAttribute(k, v));
+
+      // ----- camera (pure function of t). Same differential parallax as HFRoom.cam, written out so the
+      // final push can zoom THROUGH the window pane (world 343,737 in the wall layer) -----
+      const S0 = 2.4, X0 = -110, Y0 = 157; // laptop screen = 828x462 centred at (540,1000) = the hand-off panel position
+      const O = window.HFRoom.O, W = { x: 343, y: 737 }, T = { x: 540, y: 960 };
+      function camS(t) {
+        if (t < 1.3) return S0;
+        if (t < 3.0) return lerp(S0, 1.0, io(seg(t, 1.3, 2.8)));
+        if (t < 6.2) return 1.0 + 0.05 * io(seg(t, 3.0, 6.1));
+        return lerp(1.05, 1.0, io(seg(t, 6.2, 8.0))) - 0.012 * Math.sin(Math.PI * seg(t, 8.0, 8.6));
+      }
+      const camX = (t) => lerp(X0, 0, io(seg(t, 1.3, 2.8))) - 22 * io(seg(t, 3.0, 6.1)) * (1 - io(seg(t, 6.2, 8.0))) + 14 * io(seg(t, 6.6, 8.4));
+      const camY = (t) => lerp(Y0, 30, io(seg(t, 1.3, 2.8))) - 14 * io(seg(t, 3.0, 6.1)) * (1 - io(seg(t, 6.2, 8.0))) + 10 * io(seg(t, 6.6, 8.4));
+      function layers(t) {
+        const s = camS(t), x = camX(t), y = camY(t), fy = 220 * (1 - eo(seg(t, 1.45, 2.7)));
+        const p = seg(t, 8.45, 9.4), zl = Math.log(16) * io(p);
+        [[R.L0, 0.55, 0], [R.L1, 1.0, 0], [R.L2, 1.35, fy]].forEach(([L, f, dy]) => {
+          const k = 1 + (s - 1) * f, tx = O.x * (1 - k) + x * f, ty = O.y * (1 - k) + y * f + dy;
+          const kf = k * Math.exp(zl * f / 0.55), a = io(p);
+          const ax = lerp(tx + W.x * k, T.x, a), ay = lerp(ty + W.y * k, T.y, a);
+          L.style.transformOrigin = "0 0";
+          L.style.transform = "translate(" + (ax - W.x * kf).toFixed(2) + "px," + (ay - W.y * kf).toFixed(2) + "px) scale(" + kf.toFixed(4) + ")";
+        });
+      }
+      function render(t) {
+        // hand-off panel: morph to the laptop screen rect, dim lifts, practice UI fades up, then hand over to the real screen
+        const m = io(seg(t, 0.2, 1.15)), bz = 16 * (1 - m);
+        const L = lerp(320, 540 - 414, m), Tp = lerp(860, 1000 - 231, m), Wd = lerp(440, 828, m), Hd = lerp(280, 462, m);
+        hp.style.left = (L - bz * 0).toFixed(1) + "px"; hp.style.top = Tp.toFixed(1) + "px"; hp.style.width = Wd.toFixed(1) + "px"; hp.style.height = Hd.toFixed(1) + "px";
+        hpScr.style.left = hpScr.style.top = hpScr.style.right = hpScr.style.bottom = bz.toFixed(2) + "px";
+        hpScr.style.borderRadius = lerp(16, 10, m).toFixed(1) + "px";
+        hpBez.style.opacity = String(1 - io(seg(t, 0.55, 1.1)));
+        hpDim.style.opacity = String(1 - io(seg(t, 0.3, 1.0)));
+        hp.style.opacity = String(1 - seg(t, 1.18, 1.3));
+        hpSh.style.opacity = String(0.6 * (1 - io(seg(t, 0.2, 0.75))));
+        hpPool.style.opacity = String(0.9 * (1 - io(seg(t, 0.25, 0.8))));
+        hpPool.style.transform = "scale(" + (1 + 0.6 * io(seg(t, 0.25, 0.8))).toFixed(3) + ")";
+        setA(ui, "opacity", io(seg(t, 0.45, 1.05)).toFixed(3));
+        // room reveal (L1 under the panel first, wall + applicant during the pull-back)
+        layers(t);
+        R.L1.style.opacity = String(io(seg(t, 0.8, 1.2)) * (1 - io(seg(t, 8.8, 9.12))));
+        R.L0.style.opacity = String(eo(seg(t, 1.2, 1.9)));
+        R.L2.style.opacity = String(eo(seg(t, 1.35, 2.0)) * (1 - io(seg(t, 8.68, 8.98))));
+        R.lapImg.style.opacity = String(io(seg(t, 0.8, 1.15)));
+        window.HFRoom.light(R, eo(seg(t, 2.05, 2.35)), eo(seg(t, 1.5, 2.4)) * (1 - 0.6 * seg(t, 8.8, 9.3)));
+        window.HFRoom.act(R, t + 53.13, 0.3 * io(seg(t, 6.3, 7.2)));
+        warm.style.opacity = String(io(seg(t, 6.3, 7.6)));
+        // practice screen: badge swaps on the lever click, slots light in sequence, waveform on "melatih cara bicara"
+        setA(bA, "opacity", (1 - seg(t, 2.98, 3.07)).toFixed(3)); setA(bB, "opacity", seg(t, 3.07, 3.17).toFixed(3));
+        [0, 1, 2].forEach((i) => {
+          const a = 3.22 + i * 0.32, on = eo(seg(t, a, a + 0.18));
+          const dot = on * (i === 2 ? 1 : 1 - seg(t, a + 0.32, a + 0.44)) + io(seg(t, 6.3, 6.6));
+          sb[i].setAttribute("opacity", on.toFixed(3)); sb[i + 3].setAttribute("opacity", on.toFixed(3));
+          sd[i].setAttribute("opacity", Math.min(1, dot).toFixed(3)); sd[i + 3].setAttribute("opacity", Math.min(1, dot).toFixed(3));
+        });
+        wv.forEach((r, i) => { const k = eo(seg(t, 4.43 + (i % 11) * 0.035, 4.73 + (i % 11) * 0.035)); r.style.transform = "scaleY(" + (0.08 + 0.92 * k).toFixed(3) + ")"; r.style.opacity = k.toFixed(3); });
+        setA(ck, "opacity", eo(seg(t, 7.75, 8.0)).toFixed(3));
+        // zoom through the window: glass darkens to deep navy, motion blur, room hands over to the plate + light pool
+        winDim.style.background = "rgba(3,8,24," + (0.85 * io(seg(t, 8.7, 9.25))).toFixed(3) + ")";
+        roomw.style.filter = "blur(" + (13 * io(seg(t, 8.55, 9.0))).toFixed(2) + "px)";
+        rdark.style.opacity = String(0.6 * io(seg(t, 8.85, 9.3)));
+        roomw.style.opacity = String(1 - io(seg(t, 9.12, 9.48)));
+      }
+      const state = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(state, { t: 0 }, { t: 9.54, duration: 9.54, ease: "none", onUpdate: () => render(state.t) }, 0);
+
+      // =========== B16 0.00–2.97  LATIHAN. ("latihan" 55.55 = 2.42) ===========
+      tl.fromTo("#s6-lever", { rotation: -40 }, { rotation: -40, duration: 0.01 }, 0);
+      // the practice selector slides onto the desk from the right, lands with a small settle
+      tl.fromTo("#s6-selg", { x: 230, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "expo.out" }, 2.25);
+      tl.fromTo("#s6-r1 .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.65, ease: "expo.out" }, 2.3);
+      tl.fromTo("#s6-mark", { opacity: 0, scaleX: 0.55 }, { opacity: 1, scaleX: 1, duration: 0.5, ease: "expo.out" }, 2.3);
+      tl.fromTo("#s6-detL", { color: "#6f8fbb" }, { color: "#eaf4ff", duration: 0.2, ease: "power2.out" }, 2.38);
+      tl.fromTo("#s6-ddLon", { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "power2.out" }, 2.38);
+
+      // =========== B17 2.97–6.17  SIMULASI. (lever clicks into SIMULASI at 56.20 = 3.07; SFX 56.16) ===========
+      tl.to("#s6-lever", { rotation: -44, duration: 0.1, ease: "power2.out" }, 2.76);
+      tl.to("#s6-lever", { rotation: 42, duration: 0.21, ease: "power3.in" }, 2.86);
+      tl.to("#s6-lever", { rotation: 38.5, duration: 0.08, ease: "power2.out" }, 3.07);
+      tl.to("#s6-lever", { rotation: 40, duration: 0.14, ease: "power2.inOut" }, 3.15);
+      tl.fromTo("#s6-sel", { y: 0 }, { y: 2, duration: 0.05, ease: "power2.out" }, 3.07);
+      tl.to("#s6-sel", { y: 0, duration: 0.16, ease: "power2.out" }, 3.12);
+      tl.to("#s6-detL", { color: "#6f8fbb", duration: 0.12 }, 3.0);
+      tl.to("#s6-ddLon", { opacity: 0, duration: 0.1 }, 3.0);
+      tl.fromTo("#s6-detR", { color: "#6f8fbb" }, { color: "#eaf4ff", duration: 0.12, ease: "power2.out" }, 3.07);
+      tl.fromTo("#s6-ddRon", { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "power2.out" }, 3.07);
+      tl.to("#s6-mark", { y: 108, duration: 0.22, ease: "power3.inOut" }, 2.88);
+      tl.to("#s6-r1", { opacity: 0.4, duration: 0.25, ease: "power2.out" }, 2.95);
+      tl.fromTo("#s6-r2", { opacity: 0, x: -18, filter: "blur(10px)" }, { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.3, ease: "expo.out" }, 2.94);
+
+      // =========== B18 6.17–9.54  PARTNER BELAJAR. ("partner" 60.96 = 7.83) ===========
+      tl.to("#s6-mark", { y: 216, duration: 0.24, ease: "power3.inOut" }, 7.6);
+      tl.to("#s6-r2", { opacity: 0.4, duration: 0.25, ease: "power2.out" }, 7.66);
+      tl.fromTo("#s6-r3 .k-hl", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: "expo.out" }, 7.68);
+      tl.fromTo("#s6-r3", { filter: "blur(6px)" }, { filter: "blur(0px)", duration: 0.3, ease: "power2.out" }, 7.68);
+      // hand-off to S07: list exits, plate darkens (0.42), narrow light pool settles at (540,1000)
+      tl.to(["#s6-text", "#s6-count"], { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 9.2);
+      tl.fromTo("#s6-dark", { opacity: 0 }, { opacity: 0.42, duration: 0.55, ease: "power2.inOut" }, 8.9);
+      tl.fromTo("#s6-pool", { opacity: 0, scale: 2.4 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 9.04);
+      render(0);
+      window.__timelines["s06"] = tl;
+    })();
+  </script>
+</template>

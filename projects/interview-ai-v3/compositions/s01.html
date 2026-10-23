@@ -1,0 +1,232 @@
+<template>
+  <script src="assets/room.js"></script>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s1-room { position: absolute; inset: 0; }
+    #s1-dark { position: absolute; inset: 0; background: rgb(3, 8, 24); opacity: 0; }
+    #s1-ring1, #s1-ring2 { position: absolute; left: 132px; top: 41px; width: 80px; height: 80px; border-radius: 50%; border: 2px solid rgba(0, 201, 255, 0.9); opacity: 0; }
+    /* question card (front) / empty answer field (back) — in the set layer */
+    #s1-qw { position: absolute; left: 370px; top: 520px; width: 560px; height: 184px; perspective: 1200px; }
+    #s1-q { position: absolute; inset: 0; transform-style: preserve-3d; }
+    .s1-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; padding: 24px 30px; }
+    .s1-face .lbl { font: 700 20px/1 "Poppins", sans-serif; letter-spacing: 0.16em; color: #5a7aa3; }
+    #s1-qtext { margin-top: 12px; font: 700 36px/1.22 "Poppins", sans-serif; color: #12284f; }
+    #s1-qtext span { opacity: 0; }
+    #s1-caret { display: inline-block; width: 4px; height: 36px; background: #00a6d6; vertical-align: -6px; margin-left: 3px; }
+    #s1-q-tail { position: absolute; left: 260px; top: 182px; width: 40px; height: 22px; clip-path: polygon(0 0, 100% 0, 50% 100%); background: #e6edf5; }
+    #s1-back { transform: rotateX(180deg); }
+    #s1-back .ln { height: 3px; border-radius: 2px; background: repeating-linear-gradient(90deg, #b9c8d8 0 18px, transparent 18px 30px); margin-top: 28px; }
+    #s1-acaret { position: absolute; left: 30px; top: 64px; width: 4px; height: 38px; background: #00a6d6; opacity: 0; }
+    #s1-crease { position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: rgba(60, 90, 130, 0); }
+    #s1-q-sh { position: absolute; left: 420px; top: 730px; width: 520px; height: 110px; opacity: 0; }
+    #s1-qmw { position: absolute; left: 236px; top: 548px; width: 190px; height: 280px; perspective: 900px; }
+    #s1-qm { position: absolute; inset: 0; transform-style: preserve-3d; }
+    .s1-g { position: absolute; left: 0; top: 0; width: 190px; text-align: center; font: 700 236px/1 "Poppins", sans-serif; }
+    #s1-gface { background-image: linear-gradient(160deg, #7fe9ff 0%, #00c9ff 38%, #294b77 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #s1-qm-sh { position: absolute; left: 270px; top: 640px; width: 190px; height: 280px; }
+    #s1-qm-sh .s1-g { color: rgba(2, 8, 26, 0.45); filter: blur(12px); }
+    #s1-bead { position: absolute; left: 0; top: 0; width: 26px; height: 26px; opacity: 0; }
+    /* opening: box → button → screen card (screen space). Card rect = laptop screen at camera scale 2.4 */
+    #s1-btn-sh { position: absolute; left: 0; top: 0; width: 170px; height: 46px; border-radius: 50%; background: radial-gradient(closest-side, rgba(2, 8, 26, 0.7), rgba(2, 8, 26, 0)); }
+    #s1-btn { position: absolute; left: 236px; top: 612px; width: 828px; height: 462px; transform-origin: 304px 288px;
+      clip-path: inset(213px 449px 99px 229px round 24px); }
+    #s1-btn-face { position: absolute; inset: 0; background: linear-gradient(170deg, #ffffff 0%, #f1f5fa 100%); }
+    #s1-btn-shade { position: absolute; left: 0; top: 0; width: 828px; height: 462px; background: linear-gradient(180deg, rgba(255,255,255,0) 60%, rgba(150, 175, 205, 0.35) 100%); }
+    #s1-btn-ui { position: absolute; left: 44px; top: 223px; width: 520px; height: 130px; display: flex; align-items: center; justify-content: center; gap: 20px; }
+    #s1-btn-ui .lab { font: 700 34px/1 "Poppins", sans-serif; letter-spacing: 0.04em; color: #12284f; }
+    #s1-btn-ui .lab span { display: inline-block; opacity: 0; }
+    #s1-btn-ico { width: 62px; height: 62px; border-radius: 18px; background: linear-gradient(160deg, #19b8ef, #1d5f9e); display: flex; align-items: center; justify-content: center; opacity: 0; }
+    #s1-card { position: absolute; inset: 0; opacity: 0; }
+    #s1-cursor { position: absolute; left: 0; top: 0; width: 112px; height: 114px; transform-origin: 7px 6px; opacity: 0; }
+    #s1-cursor img { width: 112px; height: 114px; display: block; filter: drop-shadow(6px 10px 8px rgba(2, 8, 26, 0.45)); }
+    /* text plane */
+    #s1-text { position: absolute; left: 90px; top: 214px; width: 900px; height: 340px; }
+    .s1-hl { position: absolute; left: 0; top: 0; width: 900px; }
+    .s1-line { display: block; overflow: hidden; padding: 0 6px 8px 0; }
+    .s1-line .k-hl { font-size: 96px; }
+    #s1-h3 .s1-line .k-hl { font-size: 76px; }
+    .s1-w { display: inline-block; margin-right: 0.24em; }
+    #s1-count { position: absolute; left: 90px; top: 186px; font: 400 22px/1 "Poppins", sans-serif; letter-spacing: 0.2em; color: #8fb0d6; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s1-room"></div>
+    <div id="s1-dark"></div>
+    <div id="s1-btn-sh"></div>
+    <div id="s1-btn">
+      <div id="s1-btn-face"></div>
+      <div id="s1-card"></div>
+      <div id="s1-btn-shade"></div>
+      <div id="s1-btn-ui">
+        <div id="s1-btn-ico"><svg width="34" height="24" viewBox="0 0 36 26"><rect x="1" y="3" width="22" height="20" rx="5" fill="#fff"/><path d="M24 10 L35 4 L35 22 L24 16 Z" fill="#fff"/></svg></div>
+        <div class="lab"></div>
+      </div>
+    </div>
+    <div id="s1-cursor"><img src="assets/icons/cursor.png" alt="" /></div>
+    <div id="s1-count">01 / 08</div>
+    <div id="s1-text" class="k-field">
+      <div id="s1-h1" class="s1-hl">
+        <span class="s1-line"><span class="k-hl s1-w">BAYANGIN</span><span class="k-hl s1-w">LAGI</span></span>
+        <span class="s1-line"><span class="k-hl k-white s1-w" data-layout-allow-overlap>INTERVIEW.</span></span>
+      </div>
+      <div id="s1-h2" class="s1-hl">
+        <span class="s1-line"><span class="k-hl">PERTANYAAN</span></span>
+        <span class="s1-line"><span class="k-hl k-white" data-layout-allow-overlap>SULIT.</span></span>
+      </div>
+      <div id="s1-h3" class="s1-hl">
+        <span class="s1-line"><span class="k-hl">KEPALA MENDADAK</span></span>
+        <span class="s1-line"><span class="k-hl k-white" data-layout-allow-overlap>KOSONG.</span></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => Array.from(document.querySelectorAll(s));
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const io = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const lerp = (a, b, k) => a + (b - a) * k;
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      if (window.__kitAlign) window.__kitAlign(document.getElementById("s1-text"));
+
+      // ----- the room (shared with S02/S06) -----
+      const R = window.HFRoom.build(document.getElementById("s1-room"), "s1r");
+      const L1 = R.L1;
+      // question card, extruded "?", ring, bead live in the set layer so they move with the laptop
+      L1.insertAdjacentHTML("beforeend",
+        '<div id="s1-qm-sh" data-layout-ignore><div id="s1-qm-sh-in" data-layout-ignore><div class="s1-g" data-layout-ignore>?</div></div></div>' +
+        '<div id="s1-q-sh" class="k-cast"></div>' +
+        '<div id="s1-qw"><div id="s1-q"><div id="s1-front" class="s1-face k-paper"><div class="lbl" data-layout-allow-overlap>PEWAWANCARA</div><div id="s1-qtext" data-layout-allow-overlap></div><div id="s1-q-tail"></div></div>' +
+        '<div id="s1-back" class="s1-face k-paper"><div class="lbl">JAWABAN KAMU</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div id="s1-acaret"></div><div id="s1-crease"></div></div></div></div>' +
+        '<div id="s1-qmw"><div id="s1-qm"></div></div><div id="s1-bead" class="k-signal"></div>');
+
+      // shared video-call frame (identical in the opening card and on the laptop screen)
+      const CALL = '<svg viewBox="0 0 636 356" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:100%;height:100%"><defs>' +
+        '<linearGradient id="IDr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#284a80"/><stop offset="1" stop-color="#0f2048"/></linearGradient>' +
+        '<linearGradient id="IDf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9c4e6"/><stop offset="1" stop-color="#6f8fbb"/></linearGradient></defs>' +
+        '<rect width="636" height="356" fill="url(#IDr)"/><rect x="430" y="40" width="150" height="190" rx="10" fill="#3d64a0" opacity=".45"/>' +
+        '<rect x="440" y="50" width="62" height="170" rx="6" fill="#6f95cf" opacity=".35"/>' +
+        '<path d="M230 356 L230 168 Q230 118 280 118 L356 118 Q406 118 406 168 L406 356 Z" fill="#0b1838"/>' +
+        '<circle cx="318" cy="150" r="46" fill="url(#IDf)"/><path d="M196 356 Q204 238 318 226 Q432 238 440 356 Z" fill="url(#IDf)"/>' +
+        '<rect x="0" y="300" width="636" height="56" fill="#08132e" opacity=".35"/>' +
+        '<rect x="16" y="14" width="132" height="30" rx="15" fill="#050c20" opacity=".55"/><circle cx="34" cy="29" r="6" fill="#00c9ff"/>' +
+        '<text data-layout-allow-overlap="" x="48" y="36" font-family="Poppins, sans-serif" font-weight="700" font-size="17" letter-spacing="2" fill="#cfe4fa">INTERVIEW</text></svg>';
+      $("#s1-card").innerHTML = CALL.replace(/ID/g, "s1c");
+      R.scr.insertAdjacentHTML("afterbegin", CALL.replace(/ID/g, "s1s") + '<div id="s1-ring1"></div><div id="s1-ring2"></div>');
+
+      const LAB = "MULAI INTERVIEW", lab = $("#s1-btn-ui .lab");
+      LAB.split("").forEach((c) => { const s = document.createElement("span"); s.textContent = c === " " ? " " : c; s.setAttribute("data-layout-allow-overlap", ""); lab.appendChild(s); });
+      const Q = "“Gimana kamu menghadapi masalah paling sulit?”", qbox = $("#s1-qtext");
+      Q.split("").forEach((ch) => { const sp = document.createElement("span"); sp.textContent = ch; sp.setAttribute("data-layout-allow-overlap", ""); qbox.appendChild(sp); });
+      const caret = document.createElement("i"); caret.id = "s1-caret"; qbox.appendChild(caret);
+      const qm = $("#s1-qm");
+      for (let i = 14; i >= 1; i--) {
+        const g = document.createElement("div"); g.className = "s1-g"; g.textContent = "?"; g.setAttribute("data-layout-ignore", "");
+        const k = i / 14; g.style.color = "rgb(" + Math.round(18 + 30 * (1 - k)) + "," + Math.round(52 + 70 * (1 - k)) + "," + Math.round(96 + 80 * (1 - k)) + ")";
+        g.style.transform = "translateZ(" + (-i * 2.2) + "px)"; qm.appendChild(g);
+      }
+      const face = document.createElement("div"); face.className = "s1-g"; face.id = "s1-gface"; face.textContent = "?"; face.setAttribute("data-layout-allow-overlap", ""); qm.appendChild(face);
+
+      // ----- camera (pure function of t): pull back from the screen, slow push, tilt toward the answer, settle for S02 -----
+      const S0 = 2.4;
+      function camS(t) {
+        if (t < 2.05) return S0;
+        if (t < 3.45) return lerp(S0, 1.0, io(seg(t, 2.05, 3.45)));
+        if (t < 6.6) return 1.0 + 0.03 * io(seg(t, 3.45, 6.5));
+        if (t < 9.9) return lerp(1.03, 1.12, io(seg(t, 6.6, 7.4))) + 0.03 * io(seg(t, 7.4, 9.8));
+        return lerp(1.15, 1.0, io(seg(t, 9.9, 10.75)));
+      }
+      const camX = (t) => lerp(0, -18, io(seg(t, 3.45, 6.5))) * (1 - io(seg(t, 6.6, 7.4)));
+      const camY = (t) => lerp(0, -30, io(seg(t, 6.6, 7.4))) * (1 - io(seg(t, 9.9, 10.75)));
+      function render(t) {
+        const vis = t >= 2.0 ? 1 : 0;
+        window.HFRoom.cam(R, camS(t), camX(t), camY(t), 220 * (1 - eo(seg(t, 2.15, 3.35))));
+        R.L0.style.opacity = String(eo(seg(t, 2.05, 2.75)) * vis);
+        R.L1.style.opacity = String(vis);
+        R.L2.style.opacity = String(eo(seg(t, 2.15, 2.85)) * vis);
+        R.lapImg.style.opacity = String(eo(seg(t, 2.0, 2.4)));
+        // the lamp clicks on as the room is revealed; the window light dims when the mind goes blank
+        const lamp = eo(seg(t, 2.75, 3.05));
+        const win = eo(seg(t, 2.3, 3.0)) * lerp(1, 0.35, io(seg(t, 8.6, 9.7))) * lerp(1, 1.8, io(seg(t, 10.2, 10.9)));
+        window.HFRoom.light(R, lamp, Math.min(1, win));
+        window.HFRoom.act(R, t, io(seg(t, 9.3, 9.9)) * (1 - 0.5 * io(seg(t, 10.2, 10.8))));
+      }
+      const state = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(state, { t: 0 }, { t: 10.9, duration: 10.9, ease: "none", onUpdate: () => render(state.t) }, 0);
+
+      // ===== B01 0.00–3.40 =====
+      tl.fromTo("#s1-h1 .k-hl:nth-child(2)", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.16, ease: "power2.out" }, 0.76);
+      tl.fromTo("#s1-h1 .s1-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 0.98);
+      tl.fromTo("#s1-count", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.1);
+      // the box tumbles in, lands, squashes, settles
+      tl.fromTo("#s1-btn", { y: -470, rotation: 72, scaleX: 1, scaleY: 1 }, { y: 0, rotation: 0, duration: 0.5, ease: "power2.in" }, 0.0);
+      tl.to("#s1-btn", { scaleX: 1.08, scaleY: 0.9, duration: 0.08, ease: "power2.out", transformOrigin: "304px 363px" }, 0.5);
+      tl.to("#s1-btn", { scaleX: 1, scaleY: 1, duration: 0.26, ease: "back.out(2)" }, 0.58);
+      tl.fromTo("#s1-btn-sh", { x: 455, y: 962, scale: 0.35, opacity: 0 }, { scale: 1, opacity: 0.9, duration: 0.5, ease: "power2.in" }, 0.0);
+      // square widens into the button, label types in
+      tl.fromTo("#s1-btn", { clipPath: "inset(213px 449px 99px 229px round 24px)" }, { clipPath: "inset(223px 264px 109px 44px round 30px)", duration: 0.42, ease: "power3.inOut" }, 0.78);
+      tl.to("#s1-btn-sh", { scaleX: 3.2, duration: 0.42, ease: "power3.inOut" }, 0.78);
+      tl.fromTo("#s1-btn-ico", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.6)" }, 1.0);
+      $$("#s1-btn-ui .lab span").forEach((sp, i) => tl.fromTo(sp, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 1.04 + i * 0.022));
+      // cursor: arc in, hover, click 1.60, exit
+      tl.fromTo("#s1-cursor", { x: 1010, y: 1480, rotation: -14, opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none" }, 0.95);
+      tl.to("#s1-cursor", { x: 720, duration: 0.6, ease: "power3.out" }, 0.95);
+      tl.to("#s1-cursor", { y: 922, rotation: 0, duration: 0.6, ease: "power2.inOut" }, 0.95);
+      tl.fromTo("#s1-btn-shade", { opacity: 1 }, { opacity: 0.3, duration: 0.15 }, 1.45);
+      tl.to("#s1-cursor", { scale: 0.86, duration: 0.07, ease: "power2.in" }, 1.6);
+      tl.to("#s1-cursor", { scale: 1, duration: 0.14, ease: "power2.out" }, 1.67);
+      tl.to("#s1-btn", { scale: 0.965, duration: 0.07, ease: "power2.in", transformOrigin: "304px 288px" }, 1.6);
+      tl.to("#s1-btn", { scale: 1, duration: 0.16, ease: "power2.out" }, 1.67);
+      tl.to("#s1-cursor", { x: 1080, y: 1250, opacity: 0, duration: 0.3, ease: "power3.in" }, 1.8);
+      // the button becomes the call screen (laptop screen rect at camera scale 2.4), then the room is revealed
+      tl.to("#s1-btn", { clipPath: "inset(0px 0px 0px 0px round 10px)", duration: 0.5, ease: "power3.inOut" }, 1.74);
+      tl.to("#s1-btn-ui", { opacity: 0, scale: 0.9, duration: 0.18, ease: "power2.in" }, 1.74);
+      tl.to("#s1-btn-sh", { opacity: 0, duration: 0.3 }, 1.74);
+      tl.fromTo("#s1-card", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 1.84);
+      tl.to("#s1-btn-shade", { opacity: 0, duration: 0.2 }, 1.84);
+      tl.to("#s1-btn", { opacity: 0, duration: 0.06, ease: "none" }, 2.22);
+      tl.fromTo("#s1-ring1", { scale: 0.7, opacity: 0 }, { scale: 1.9, duration: 0.9, ease: "power2.out", keyframes: { opacity: [0, 0.9, 0] } }, 3.1);
+      tl.fromTo("#s1-ring2", { scale: 0.7, opacity: 0 }, { scale: 1.9, duration: 0.9, ease: "power2.out", keyframes: { opacity: [0, 0.75, 0] } }, 3.45);
+      tl.to("#s1-h1", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 3.38);
+
+      // ===== B02 3.40–7.10 =====
+      tl.fromTo("#s1-q", { y: 240, scale: 0.38, rotationX: 0, rotationZ: 0, opacity: 0 },
+        { y: 0, scale: 1, rotationZ: -4, opacity: 1, duration: 0.8, ease: "expo.out" }, 3.55);
+      tl.to("#s1-q", { rotationZ: -1.5, duration: 1.4, ease: "power2.inOut" }, 4.4);
+      tl.fromTo("#s1-q-sh", { opacity: 0 }, { opacity: 0.5, duration: 0.6 }, 3.8);
+      const spans = $$("#s1-qtext span");
+      spans.forEach((sp, i) => tl.set(sp, { opacity: 1 }, 4.62 + (6.45 - 4.62) * (i / spans.length)));
+      tl.fromTo("#s1-h2 .s1-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 4.62);
+      tl.fromTo("#s1-h2 .s1-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 6.0);
+      tl.fromTo("#s1-qm", { y: 110, z: -120, rotationY: 40, opacity: 0 }, { y: 0, z: 0, rotationY: 14, opacity: 1, duration: 1.0, ease: "expo.out" }, 4.9);
+      tl.fromTo("#s1-qm-sh-in", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 1.0, ease: "expo.out" }, 4.9);
+      tl.to("#s1-qm", { rotationY: 6, duration: 2.4, ease: "power2.inOut" }, 5.9);
+      tl.to("#s1-h2", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 7.0);
+      tl.to("#s1-q", { y: 200, rotationZ: 0, duration: 0.8, ease: "power3.inOut" }, 6.7);
+      tl.to("#s1-q", { rotationX: 180, duration: 0.7, ease: "power3.inOut" }, 6.75);
+      tl.to("#s1-q-tail", { opacity: 0, duration: 0.2 }, 6.75);
+      tl.to("#s1-q-sh", { y: 160, opacity: 0.75, duration: 0.8, ease: "power3.inOut" }, 6.7);
+      tl.fromTo("#s1-acaret", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 7.45);
+
+      // ===== B03 7.10–10.90 =====
+      tl.fromTo("#s1-h3 .s1-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 8.7);
+      tl.fromTo("#s1-h3 .s1-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.55, ease: "expo.out" }, 9.4);
+      tl.to("#s1-acaret", { opacity: 0, duration: 0.01 }, 8.2);
+      tl.to("#s1-acaret", { opacity: 1, duration: 0.01 }, 8.7);
+      tl.to("#s1-acaret", { opacity: 0, duration: 0.01 }, 9.3);
+      tl.to("#s1-crease", { backgroundColor: "rgba(60,90,130,0.55)", duration: 0.15 }, 9.6);
+      tl.to("#s1-q", { scaleY: 0.07, scaleX: 0.84, duration: 0.42, ease: "power3.in" }, 9.62);
+      tl.to("#s1-q", { scaleX: 0.3, y: 330, opacity: 0, duration: 0.5, ease: "power3.in" }, 10.05);
+      tl.to("#s1-q-sh", { scaleX: 0.5, scaleY: 0.3, opacity: 0, duration: 0.6, ease: "power2.in" }, 9.62);
+      tl.fromTo("#s1-dark", { opacity: 0 }, { opacity: 0.32, duration: 1.1, ease: "power2.inOut" }, 8.6);
+      tl.to("#s1-dark", { opacity: 0.16, duration: 0.6, ease: "power2.inOut" }, 10.2);
+      tl.to(["#s1-qm", "#s1-qm-sh-in"], { opacity: 0, duration: 0.45, ease: "power2.in" }, 10.2);
+      tl.fromTo("#s1-bead", { x: 790, y: 754, scale: 0.2, opacity: 0 }, { scale: 1, opacity: 0.95, duration: 0.35, ease: "expo.out" }, 10.07);
+      tl.to("#s1-h3", { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power2.in" }, 10.62);
+      render(0);
+      window.__timelines["s01"] = tl;
+    })();
+  </script>
+</template>

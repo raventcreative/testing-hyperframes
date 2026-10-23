@@ -1,0 +1,242 @@
+<template>
+  <script src="assets/room.js"></script>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s2-room { position: absolute; inset: 0; }
+    #s2-dark { position: absolute; inset: 0; background: rgb(3, 8, 24); opacity: 0.16; }
+    #s2-navy { position: absolute; inset: 0; opacity: 0; background: radial-gradient(120% 120% at 50% 45%, #1c3260 0%, #182b55 60%, #142449 100%); }
+    /* world-layer objects (inside the room's set layer R.L1, world px) */
+    #s2-ghost { position: absolute; left: 464.5px; top: 969.1px; width: 375.9px; height: 57.9px; transform-origin: 50% 0; opacity: 0; }
+    #s2-ghost svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+    #s2-pcast { position: absolute; left: 884px; top: 732px; width: 80px; height: 176px; opacity: 0; filter: blur(14px); border-radius: 18px; }
+    #s2-panel { position: absolute; left: 874px; top: 716px; width: 80px; height: 186px; transform-origin: 0 0; opacity: 0; }
+    #s2-p-edge { position: absolute; left: 4px; top: 4px; width: 80px; height: 186px; border-radius: 16px; background: linear-gradient(180deg, #0b1532, #050b1d); }
+    #s2-p-face { position: absolute; left: 0; top: 0; width: 80px; height: 186px; border-radius: 16px; }
+    #s2-p-ap { position: absolute; left: 24px; top: 8px; width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(circle at 50% 62%, #040a1c 0%, #0a1634 70%, #1b3462 100%); box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(190, 225, 255, 0.28); }
+    .s2-slot { position: absolute; left: 0; width: 7px; height: 32px; border-radius: 0 5px 5px 0; background: #050b1d; box-shadow: inset -1px 0 0 rgba(0, 201, 255, 0.35); }
+    .s2-pl { position: absolute; left: 17px; height: 4px; border-radius: 2px; background: #24406f; }
+    .s2-ssh { position: absolute; left: 0; top: 0; width: 150px; height: 40px; border-radius: 10px; background: rgba(2, 8, 26, 0.95); opacity: 0; }
+    .s2-strip { position: absolute; left: 0; top: 0; width: 150px; height: 40px; border-radius: 9px; overflow: hidden; opacity: 0;
+      box-shadow: inset 0 1px 0 #ffffff, 0 1px 0 #d3dde8, 0 2px 0 #c3d0de, 0 3px 0 #b7c6d6; }
+    .s2-sin { position: absolute; left: 0; top: 0; width: 150px; height: 40px; }
+    .s2-sin .no { position: absolute; left: 10px; top: 9px; width: 12px; height: 12px; border-radius: 4px; background: #294b77; }
+    .s2-sin .lb { position: absolute; left: 28px; top: 9px; font: 700 11px/1 "Poppins", sans-serif; letter-spacing: 0.16em; color: #5a7aa3; }
+    .s2-sin .l1, .s2-sin .l2 { position: absolute; left: 28px; height: 4px; border-radius: 2px; background: #b4c4d6; }
+    .s2-sin .l1 { top: 25px; } .s2-sin .l2 { top: 32px; background: #ccd7e3; }
+    #s2-st0 .l1 { width: 100px; } #s2-st0 .l2 { width: 70px; } #s2-st1 .l1 { width: 86px; } #s2-st1 .l2 { width: 104px; } #s2-st2 .l1 { width: 108px; } #s2-st2 .l2 { width: 60px; }
+    #s2-wbead { position: absolute; left: 0; top: 0; width: 26px; height: 26px; opacity: 0.95; }
+    /* screen-space objects */
+    #s2-rcast { position: absolute; left: 330px; top: 700px; width: 420px; height: 420px; border-radius: 50%; background: rgba(2, 8, 26, 0.7); filter: blur(34px); opacity: 0; }
+    #s2-rwrap { position: absolute; left: 310px; top: 670px; width: 460px; height: 460px; perspective: 1400px; opacity: 0; }
+    #s2-ring { position: absolute; inset: 0; transform-style: preserve-3d; }
+    .s2-rl { position: absolute; inset: 0; border-radius: 50%; border: 65px solid #1a3160; }
+    #s2-core { position: absolute; inset: 62px; border-radius: 50%; transform: translateZ(-16px) scale(0); background: radial-gradient(circle at 42% 38%, #1f3a6e 0%, #112249 55%, #08122c 100%); }
+    #s2-ring-face { position: absolute; inset: 0; border-radius: 50%; transform: translateZ(1px); background: linear-gradient(145deg, #9cbde6 0%, #5a83bb 30%, #2b4d82 62%, #16305c 100%); -webkit-mask: radial-gradient(closest-side, transparent 71.3%, #000 71.8%); mask: radial-gradient(closest-side, transparent 71.3%, #000 71.8%); }
+    #s2-ring-lip { position: absolute; inset: 63px; border-radius: 50%; transform: translateZ(1.5px); box-shadow: inset 0 0 0 2px rgba(5, 12, 32, 0.8), 0 0 0 1px rgba(200, 230, 255, 0.35); }
+    #s2-ring-rim { position: absolute; inset: 1px; border-radius: 50%; transform: translateZ(1.5px); box-shadow: inset 2px 3px 0 rgba(225, 240, 255, 0.55), inset -2px -3px 0 rgba(0, 201, 255, 0.35); }
+    #s2-ring-cy { position: absolute; inset: 68px; border-radius: 50%; transform: translateZ(2px); opacity: 0; border: 2px solid #00c9ff; box-shadow: 0 0 8px rgba(0, 201, 255, 0.4); }
+    #s2-bead { position: absolute; left: 0; top: 0; width: 26px; height: 26px; transform-origin: 0 0; opacity: 0; }
+    #s2-caret { position: absolute; left: 0; top: 0; width: 6px; height: 64px; border-radius: 3px; background: #00c9ff; opacity: 0; box-shadow: 0 0 0 1px rgba(0, 201, 255, 0.25), 0 0 18px rgba(0, 201, 255, 0.5); }
+    #s2-text { position: absolute; left: 90px; top: 214px; width: 900px; height: 340px; }
+    .s2-hl { position: absolute; left: 0; top: 0; width: 900px; }
+    .s2-line { display: block; overflow: hidden; padding: 0 6px 8px 0; }
+    .s2-line .k-hl { font-size: 104px; }
+    #s2-h2 .s2-line .k-hl { font-size: 96px; }
+    .s2-count { position: absolute; left: 90px; top: 186px; font: 400 22px/1 "Poppins", sans-serif; letter-spacing: 0.2em; color: #8fb0d6; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s2-room"></div>
+    <div id="s2-dark"></div>
+    <div id="s2-rcast" data-layout-ignore></div>
+    <div id="s2-rwrap" data-layout-ignore><div id="s2-ring">
+      <div id="s2-core"></div><div id="s2-ring-face"></div><div id="s2-ring-rim"></div><div id="s2-ring-lip"></div><div id="s2-ring-cy"></div>
+    </div></div>
+    <div id="s2-bead" class="k-signal" data-layout-ignore></div>
+    <div id="s2-caret" data-layout-ignore></div>
+    <div id="s2-count1" class="s2-count">01 / 08</div>
+    <div id="s2-count2" class="s2-count">02 / 08</div>
+    <div id="s2-text" class="k-field">
+      <div id="s2-h1" class="s2-hl" data-layout-allow-overlap>
+        <span class="s2-line"><span class="k-hl">TANPA</span></span>
+        <span class="s2-line"><span class="k-hl k-white">MENGETIK.</span></span>
+      </div>
+      <div id="s2-h2" class="s2-hl" data-layout-allow-overlap>
+        <span class="s2-line"><span class="k-hl">POIN JAWABAN</span></span>
+        <span class="s2-line"><span class="k-hl k-white">MUNCUL.</span></span>
+      </div>
+      <div id="s2-h3" class="s2-hl" data-layout-allow-overlap>
+        <span class="s2-line"><span class="k-hl">ASISTEN</span></span>
+        <span class="s2-line"><span class="k-hl k-white">AI.</span></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const $ = (s) => document.querySelector(s);
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const io = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const lerp = (a, b, k) => a + (b - a) * k;
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const kf = (t, P) => { // keyframe track, power-in-out between keys, holds outside
+        if (t <= P[0][0]) return P[0][1];
+        for (let i = 0; i < P.length - 1; i++) if (t < P[i + 1][0]) return lerp(P[i][1], P[i + 1][1], io(seg(t, P[i][0], P[i + 1][0])));
+        return P[P.length - 1][1];
+      };
+      const bez = (a, c, b, u) => (1 - u) * (1 - u) * a + 2 * (1 - u) * u * c + u * u * b;
+      const G0 = 10.9; // scene start (global s)
+      if (window.__kitAlign) window.__kitAlign(document.getElementById("s2-text"));
+
+      // ----- the room: identical build to S01 (frame 0 = S01's last frame) -----
+      const HF = window.HFRoom, R = HF.build(document.getElementById("s2-room"), "s2r");
+      const CALL = '<svg viewBox="0 0 636 356" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:100%;height:100%"><defs>' +
+        '<linearGradient id="IDr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#284a80"/><stop offset="1" stop-color="#0f2048"/></linearGradient>' +
+        '<linearGradient id="IDf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9c4e6"/><stop offset="1" stop-color="#6f8fbb"/></linearGradient></defs>' +
+        '<rect width="636" height="356" fill="url(#IDr)"/><rect x="430" y="40" width="150" height="190" rx="10" fill="#3d64a0" opacity=".45"/>' +
+        '<rect x="440" y="50" width="62" height="170" rx="6" fill="#6f95cf" opacity=".35"/>' +
+        '<path d="M230 356 L230 168 Q230 118 280 118 L356 118 Q406 118 406 168 L406 356 Z" fill="#0b1838"/>' +
+        '<circle cx="318" cy="150" r="46" fill="url(#IDf)"/><path d="M196 356 Q204 238 318 226 Q432 238 440 356 Z" fill="url(#IDf)"/>' +
+        '<rect x="0" y="300" width="636" height="56" fill="#08132e" opacity=".35"/>' +
+        '<rect x="16" y="14" width="132" height="30" rx="15" fill="#050c20" opacity=".55"/><circle cx="34" cy="29" r="6" fill="#00c9ff"/>' +
+        '<text data-layout-allow-overlap="" x="48" y="36" font-family="Poppins, sans-serif" font-weight="700" font-size="17" letter-spacing="2" fill="#cfe4fa">INTERVIEW</text></svg>';
+      R.scr.insertAdjacentHTML("afterbegin", CALL.replace(/ID/g, "s2s") + '<div id="s2-navy"></div>');
+      // keyboard ghost (wireframe of the laptop icon's own key rects, image px), panel, strips + shadows, bead — all in the set layer
+      const KEYS = [[73,343,102,355],[108,343,157,355],[164,343,212,355],[219,343,268,355],[274,343,323,355],[329,343,378,355],[385,343,433,355],[440,343,489,355],[495,343,544,355],[551,343,573,355],
+        [68,360,102,374],[107,360,143,374],[147,360,183,374],[188,360,224,374],[229,360,265,374],[270,360,306,374],[311,360,346,374],[351,360,387,374],[392,360,428,374],[433,360,469,374],[474,360,510,374],[515,360,550,374],[555,360,578,374],
+        [62,379,143,396],[147,379,183,396],[188,379,224,396],[229,379,265,396],[270,379,306,396],[311,379,346,396],[351,379,387,396],[392,379,428,396],[433,379,510,396],[515,379,583,396],
+        [56,401,183,418],[188,401,224,418],[229,401,265,418],[270,401,387,418],[392,401,428,418],[433,401,469,418],[474,401,589,418]];
+      let gs = '<svg viewBox="50 338 545 84" preserveAspectRatio="none"><path d="M58 338.5 L587 338.5 L594 421.5 L51 421.5 Z" fill="rgba(0,201,255,0.12)" stroke="rgba(0,201,255,0.9)" stroke-width="2"/>';
+      KEYS.forEach((k) => { gs += '<rect x="' + (k[0] + 0.5) + '" y="' + (k[1] + 0.5) + '" width="' + (k[2] - k[0] - 1) + '" height="' + (k[3] - k[1] - 1) + '" rx="2" fill="rgba(0,201,255,0.14)" stroke="rgba(160,240,255,1)" stroke-width="1.8"/>'; });
+      const strip = (i) => '<div id="s2-st' + i + '" class="s2-strip k-paper" data-layout-ignore><div class="s2-sin"><i class="no"></i><div class="lb" data-layout-allow-overlap>POIN ' + (i + 1) + '</div><div class="l1"></div><div class="l2"></div></div></div>';
+      R.L1.insertAdjacentHTML("beforeend",
+        '<div id="s2-ghost" data-layout-ignore>' + gs + '</svg></div><div id="s2-pcast" class="k-cast" data-layout-ignore></div>' +
+        '<div id="s2-panel" data-layout-ignore><div id="s2-p-edge"></div><div id="s2-p-face" class="k-panel"><div id="s2-p-ap"></div>' +
+        '<div class="s2-slot" style="top:54px"></div><div class="s2-slot" style="top:96px"></div><div class="s2-slot" style="top:138px"></div>' +
+        '<div class="s2-pl" style="top:68px;width:46px"></div><div class="s2-pl" style="top:110px;width:36px"></div><div class="s2-pl" style="top:152px;width:42px"></div></div></div>' +
+        [0, 1, 2].map((i) => '<div id="s2-sh' + i + '" class="s2-ssh" data-layout-ignore></div>').join("") + [0, 1, 2].map(strip).join("") +
+        '<div id="s2-wbead" class="k-signal" data-layout-ignore></div>');
+      const ring = $("#s2-ring");
+      for (let i = 14; i >= 1; i--) { // ring sidewall: stacked bezel layers, darker with depth
+        const l = document.createElement("div"); l.className = "s2-rl"; const k = i / 14;
+        l.style.borderColor = "rgb(" + Math.round(34 - 22 * k) + "," + Math.round(64 - 40 * k) + "," + Math.round(118 - 66 * k) + ")";
+        l.style.transform = "translateZ(" + (-i * 2.2) + "px)"; ring.insertBefore(l, ring.firstChild);
+      }
+
+      // ----- camera (local t): keyboard push → screen corner → corner push on "di sudut layar" → centre the screen → zoom THROUGH it -----
+      const CS = [[0.1, 1], [0.95, 1.25], [1.15, 1.25], [2.1, 1.3], [4.05, 1.3], [5.0, 1.6], [5.6, 1.6], [6.6, 1.5], [8.7, 1.56]];
+      const CX = [[1.15, 0], [2.1, -60], [4.05, -60], [5.0, -170], [5.6, -170], [6.6, -110]];
+      const CY = [[0.1, 0], [0.95, -75], [1.15, -75], [2.1, 10], [4.05, 10], [5.0, 60], [5.6, 60], [6.6, 57]];
+      const ZA = 8.7, ZB = 9.45, ZS = 11; // zoom-through window + end scale (screen 192.5 px tall → > 1920 px)
+      let cam = { s: 1, x: 0, y: 0 };
+      const map = (px, py) => [650 + (px - 650) * cam.s + cam.x, 843 + (py - 843) * cam.s + cam.y];
+      const room = $("#s2-room"), dark = $("#s2-dark"), navy = $("#s2-navy"), ghost = $("#s2-ghost"), panel = $("#s2-panel"), pcast = $("#s2-pcast");
+      const wbead = $("#s2-wbead"), bead = $("#s2-bead"), caretEl = $("#s2-caret");
+      const rwrap = $("#s2-rwrap"), core = $("#s2-core"), ringCy = $("#s2-ring-cy"), rcast = $("#s2-rcast");
+      const ST = [0, 1, 2].map((i) => $("#s2-st" + i)), SH = [0, 1, 2].map((i) => $("#s2-sh" + i));
+      // strips land on the SFX ticks 13.62 / 13.86 / 14.10 (local 2.72 / 2.96 / 3.20); world px
+      const LAND = [2.72, 2.96, 3.2], SLOT_Y = [786, 828, 870], REST_Y = [782, 826, 870], SLOT_X = 874, REST_R = 812, SW = 150, SHH = 40;
+      const AP = [914, 740], SEAT = [540, 771], RC = [540, 900]; // panel aperture (world); ring seat + ring centre (screen)
+      function render(t) {
+        const zu = seg(t, ZA, ZB), ze = io(zu);
+        cam = { s: kf(t, CS), x: kf(t, CX), y: kf(t, CY) };
+        if (zu > 0) cam.s = cam.s * Math.pow(ZS / cam.s, ze);
+        HF.cam(R, cam.s, cam.x, cam.y, 0);
+        const zb = 10 * Math.sin(Math.PI * zu); // motion blur peaks mid-zoom
+        room.style.filter = zb > 0.05 ? "blur(" + zb.toFixed(2) + "px)" : "none";
+        R.L0.style.opacity = (1 - io(seg(t, 8.8, 9.2))).toFixed(3);
+        R.L2.style.opacity = (1 - io(seg(t, 8.75, 9.1))).toFixed(3);
+        room.style.opacity = (1 - io(seg(t, 9.3, 9.75))).toFixed(3);
+        const dk = kf(t, [[5.6, 0.16], [6.8, 0.27], [8.8, 0.27], [9.45, 0]]);
+        dark.style.opacity = dk.toFixed(3);
+        HF.light(R, 1, kf(t, [[5.6, 0.63], [6.8, 0.45]])); // lamp stays on, the room dims slightly
+        HF.act(R, G0 + t, 0.5 * (1 - io(seg(t, 0.2, 1.6))));
+        navy.style.opacity = io(seg(t, 8.2, 8.85)).toFixed(3); // the call gives way to plain navy before the zoom
+        // B04 ghost keyboard: rises off the deck, tilts back on its rear hinge, sinks + fades (0.30–0.85)
+        const gIn = seg(t, 0.16, 0.3), gOut = io(seg(t, 0.6, 0.86));
+        const lift = -44 * eo(seg(t, 0.28, 0.5)), sink = 36 * Math.pow(seg(t, 0.6, 0.86), 2), tilt = -62 * io(seg(t, 0.4, 0.8));
+        ghost.style.opacity = (1 * gIn * (1 - gOut)).toFixed(3);
+        ghost.style.transform = "translateY(" + (lift + sink).toFixed(2) + "px) perspective(320px) rotateX(" + tilt.toFixed(2) + "deg)";
+        ghost.style.filter = "blur(" + (1.2 * Math.sin(Math.PI * seg(t, 0.3, 0.86))).toFixed(2) + "px)";
+        // side panel unfolds from the screen's top-right corner (0.50–1.05), folds back after the bead leaves (7.6–8.05)
+        const pk = eo(seg(t, 0.5, 1.05)) * (1 - io(seg(t, 7.6, 8.05)));
+        panel.style.opacity = (seg(t, 0.5, 0.62) * (1 - seg(t, 7.92, 8.05))).toFixed(3);
+        panel.style.transform = "perspective(600px) rotateY(" + (70 * (1 - pk)).toFixed(2) + "deg) scaleY(" + (0.25 + 0.75 * pk).toFixed(4) + ")";
+        pcast.style.opacity = (0.5 * pk).toFixed(3);
+        // ----- strips (world px) -----
+        for (let i = 0; i < 3; i++) {
+          const Lt = LAND[i], E = Lt - 0.5, el = ST[i], sh = SH[i];
+          if (t < E || t > 7.85) { el.style.opacity = "0"; sh.style.opacity = "0"; continue; }
+          let w = SW, cx, cy = REST_Y[i], h = 6, rot = 0, sy = 1;
+          const u = seg(t, E, Lt);
+          if (u < 0.5) { w = Math.max(1, SW * eo(u / 0.5)); cx = SLOT_X - w / 2; cy = SLOT_Y[i]; h = 26; rot = -2; } // extrude, leading edge first
+          else if (t < Lt) { const k = (u - 0.5) / 0.5; cx = SLOT_X - SW / 2 - (SLOT_X - REST_R) * io(k); cy = lerp(SLOT_Y[i], REST_Y[i], k); h = 26 - 20 * k * k; rot = -2; } // slide + drop
+          else { cx = REST_R - SW / 2; const k = seg(t, Lt, Lt + 0.18); // landed: squash + settle in 0.18 s
+            rot = -2 * (1 - k) * Math.cos(Math.PI * 1.5 * k); h = 6 + 4 * Math.sin(Math.PI * k) * (1 - k); sy = 1 - 0.07 * Math.sin(Math.PI * seg(t, Lt, Lt + 0.09)); }
+          const cu = seg(t, 5.5 + 0.07 * i, 6.05 + 0.07 * i), ce = io(cu); // B06: collect into a stack
+          if (cu > 0) { cx = lerp(cx, REST_R - SW / 2 - (i - 1) * 4, ce); cy = lerp(cy, 836 - 8 * i, ce); h = lerp(h, 16 + 6 * i, ce) + 20 * Math.sin(Math.PI * cu); rot = lerp(rot, 0, ce); }
+          const mu = io(seg(t, 6.5 + 0.04 * i, 7.3 + 0.04 * i)); // the stack slides behind the ring (screen centre)
+          cx = lerp(cx, 650 - (i - 1) * 3, mu); cy = lerp(cy, 846 - 6 * i, mu); h += 24 * Math.sin(Math.PI * mu);
+          const fade = 1 - seg(t, 7.45, 7.8);
+          const lx = -0.15 * h, ly = -0.35 * h, hs = 1 + 0.003 * h;
+          el.style.width = w.toFixed(2) + "px"; el.style.opacity = fade.toFixed(3);
+          el.style.transform = "translate(" + (cx + lx - w / 2).toFixed(2) + "px," + (cy + ly - SHH / 2).toFixed(2) + "px) rotate(" + rot.toFixed(2) + "deg) scale(" + hs.toFixed(4) + "," + (hs * sy).toFixed(4) + ")";
+          el.style.filter = "blur(" + (1.6 * Math.sin(Math.PI * mu)).toFixed(2) + "px)";
+          sh.style.width = w.toFixed(2) + "px"; // cast shadow: further down-right, larger, softer, fainter with height
+          sh.style.opacity = (0.8 * (1 - h / 90) * fade).toFixed(3);
+          sh.style.transform = "translate(" + (cx - w / 2 + 0.55 * h + 2).toFixed(2) + "px," + (cy - SHH / 2 + 0.75 * h + 3).toFixed(2) + "px) scale(" + (1 + 0.005 * h).toFixed(4) + ")";
+          sh.style.filter = "blur(" + (2 + 0.3 * h).toFixed(2) + "px)";
+        }
+        // ----- ring: swings out of the corner panel with motion blur (6.00–6.80), turns to face camera, rides the zoom, collapses 9.50–9.92 -----
+        const ru = seg(t, 6.0, 6.8), re = eo(ru), p0 = map(AP[0], AP[1] + 40);
+        const rX = bez(p0[0], 860, RC[0], re), rY = bez(p0[1], 640, RC[1], re);
+        const wS = lerp(0.12, 0.65, re) * lerp(1, 1.25, ze);
+        const coll = io(seg(t, 9.5, 9.92));
+        const rRot = lerp(72, 26, re) - 26 * io(seg(t, 7.5, 8.6));
+        rwrap.style.opacity = (seg(t, 6.0, 6.12) * (1 - seg(t, 9.84, 9.93))).toFixed(3);
+        rwrap.style.transform = "translate(" + (rX - RC[0]).toFixed(2) + "px," + (rY - RC[1]).toFixed(2) + "px) scale(" + wS.toFixed(4) + ")";
+        rwrap.style.filter = ru < 0.6 ? "blur(" + (11 * Math.sin(Math.PI * ru / 0.6)).toFixed(2) + "px)" : "none";
+        ring.style.transform = "rotateY(" + rRot.toFixed(2) + "deg) scale(" + lerp(1, 6 / (460 * wS), coll).toFixed(4) + "," + lerp(1, 64 / (460 * wS), coll).toFixed(4) + ")";
+        ringCy.style.opacity = (0.9 * seg(t, 8.12, 8.32) * (1 - seg(t, 9.5, 9.7))).toFixed(3);
+        core.style.transform = "translateZ(-16px) scale(" + eo(seg(t, 7.1, 7.45)).toFixed(4) + ")";
+        rcast.style.opacity = (0.45 * seg(t, 6.3, 6.9) * (1 - seg(t, 9.2, 9.6))).toFixed(3);
+        rcast.style.transform = "translate(" + (rX - RC[0] + 30).toFixed(2) + "px," + (rY - RC[1] + 48).toFixed(2) + "px) scale(" + (wS * 0.92).toFixed(4) + ")";
+        // ----- bead: world bead (S01 seam) arcs into the panel aperture; screen bead carries it to the ring -----
+        const tu = io(seg(t, 0.55, 1.3)), dockSq = 1 - 0.16 * Math.sin(Math.PI * seg(t, 1.24, 1.5));
+        const wx = bez(803, 884, AP[0], tu), wy = bez(767, 690, AP[1], tu);
+        wbead.style.transform = "translate(" + (wx - 13).toFixed(2) + "px," + (wy - 13).toFixed(2) + "px) scale(" + dockSq.toFixed(4) + ")";
+        wbead.style.opacity = t < 7.3 ? "0.95" : "0";
+        const du = seg(t, 7.3, 8.15), de = io(du), m = map(wx, wy);
+        let bx = bez(m[0], 760, SEAT[0], de), by = bez(m[1], 600, SEAT[1], de), bs = lerp(cam.s, 1.15, de) * (1 - 0.14 * Math.sin(Math.PI * seg(t, 8.1, 8.32)));
+        by = lerp(by, RC[1], io(seg(t, 9.3, 9.55))); // drops into the ring's centre
+        const mo = eo(seg(t, 9.55, 9.92)), bw = lerp(26, 6, mo), bh = lerp(26, 64, mo); bs = lerp(bs, 1, mo);
+        bead.style.width = bw.toFixed(2) + "px"; bead.style.height = bh.toFixed(2) + "px"; bead.style.borderRadius = lerp(13, 3, mo).toFixed(2) + "px";
+        bead.style.transform = "translate(" + (bx - bw * bs / 2).toFixed(2) + "px," + (by - bh * bs / 2).toFixed(2) + "px) scale(" + bs.toFixed(4) + ")";
+        bead.style.filter = "brightness(" + lerp(1 - dk, 1, seg(t, 7.3, 7.8)).toFixed(3) + ")";
+        bead.style.opacity = t < 7.3 ? "0" : (0.95 * (1 - seg(t, 9.88, 9.96))).toFixed(3);
+        caretEl.style.opacity = seg(t, 9.86, 9.94).toFixed(3);
+        caretEl.style.transform = "translate(537px,868px)";
+      }
+      const state = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(state, { t: 0 }, { t: 10.1, duration: 10.1, ease: "none", onUpdate: () => render(state.t) }, 0);
+      // counter 01 → 02
+      tl.fromTo("#s2-count1", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(6px)", duration: 0.15, ease: "power2.in" }, 0.08);
+      tl.fromTo("#s2-count2", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, ease: "power2.out" }, 0.22);
+      // ===== B04 10.90–12.95  TANPA MENGETIK. — per-word blur on the VO ("tanpa" 11.16, "mengetik" 11.79) =====
+      tl.fromTo("#s2-h1 .s2-line:nth-child(1) .k-hl", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out" }, 0.26);
+      tl.fromTo("#s2-h1 .s2-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out" }, 0.89);
+      tl.fromTo("#s2-h1", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 1.9);
+      // ===== B05 12.95–16.40  POIN JAWABAN MUNCUL. — masked rise ("poin" 13.15, "muncul" 14.30) =====
+      tl.fromTo("#s2-h2 .s2-line:nth-child(1) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.65, ease: "expo.out" }, 2.25);
+      tl.fromTo("#s2-h2 .s2-line:nth-child(2) .k-hl", { yPercent: 105 }, { yPercent: 0, duration: 0.6, ease: "expo.out" }, 3.4);
+      tl.fromTo("#s2-h2", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 5.3);
+      // ===== B06 16.40–21.00  ASISTEN AI. — whole-line blur-in ("asisten" 19.11, "AI" 19.55) =====
+      tl.fromTo("#s2-h3 .s2-line:nth-child(1) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, 8.21);
+      tl.fromTo("#s2-h3 .s2-line:nth-child(2) .k-hl", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, 8.65);
+      tl.fromTo("#s2-h3", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 9.78);
+      render(0);
+      window.__timelines["s02"] = tl;
+    })();
+  </script>
+</template>

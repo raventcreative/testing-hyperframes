@@ -49,6 +49,7 @@ index = f"""<!doctype html>
     <meta name="viewport" content="width=1080, height=1920" />
     <title>Hypit — ElevenLabs × Mascot (AI PRENEUR)</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/mascot3d.js"></script>
     <style>
       @font-face {{ font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }}
       @font-face {{ font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }}
@@ -68,6 +69,8 @@ index = f"""<!doctype html>
       #bg-grain {{ position: absolute; inset: 0; z-index: 2; opacity: .035; pointer-events: none;
         background-image: repeating-linear-gradient(90deg, rgba(18,21,50,.35) 0 1px, rgba(18,21,50,0) 1px 4px), repeating-linear-gradient(0deg, rgba(18,21,50,.25) 0 1px, rgba(18,21,50,0) 1px 5px); }}
       .scene-host {{ z-index: 10; }}
+      #mascot {{ z-index: 40; }}
+      #fx {{ z-index: 50; }}
       #captions {{ z-index: 60; }}
     </style>
   </head>
@@ -78,6 +81,11 @@ index = f"""<!doctype html>
       <div id="bg-grain" data-layout-ignore></div>
 
 {chr(10).join(hosts)}
+
+      <!-- 3D rigged mascot overlay (one WebGL canvas, acting driven by global time) -->
+      <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{r3(D)}" data-track-index="6" data-track-kind="graphics" data-width="1080" data-height="1920"></div>
+      <!-- cut transition light/flash overlay -->
+      <div id="fx" class="clip" data-composition-id="fx" data-composition-src="compositions/fx.html" data-start="0" data-duration="{r3(D)}" data-track-index="7" data-track-kind="graphics" data-width="1080" data-height="1920"></div>
 
       <div id="captions" class="clip" data-composition-id="captions" data-composition-src="compositions/captions.html" data-start="0" data-duration="{r3(D)}" data-track-index="1" data-track-kind="captions" data-width="1080" data-height="1920"></div>
 
@@ -105,10 +113,10 @@ for gi, g in enumerate(groups):
         if wi in spans_of:
             a_, b_ = spans_of[wi]
             inner = " ".join(f'<span class="hw" id="cap-t{j}">{html.escape(words[j]["text"])}</span>' for j in range(a_, b_ + 1))
-            parts.append(f'<span class="cw hl" id="cap-h{a_}"><span class="hl-box" id="cap-b{a_}"></span><span class="hl-tx">{inner}</span></span>')
+            parts.append(f'<span class="cw hl" id="cap-h{a_}"><span class="hl-box" id="cap-b{a_}"><span class="hl-sheen" id="cap-s{a_}"><span class="hl-sheen-i"></span></span></span><span class="hl-tx">{inner}</span></span>')
             k += b_ - a_ + 1
         else:
-            parts.append(f'<span class="cw" id="cap-w{wi}">{html.escape(words[wi]["text"])}</span>')
+            parts.append(f'<span class="cw" id="cap-w{wi}"><span class="kp" id="cap-k{wi}"></span><span class="kt">{html.escape(words[wi]["text"])}</span></span>')
             k += 1
     gmark.append(f'    <div class="cap-g" id="cap-g{gi}" data-layout-allow-overlap><div class="cap-line">{" ".join(parts)}</div></div>')
 
@@ -125,14 +133,22 @@ for gi, g in enumerate(groups):
     for wi in g["word_idx"]:
         ws = max(gs + 0.01, words[wi]["start"] - 0.03)
         if wi in starts:
-            init.append(f'gsap.set("#cap-b{wi}", {{ scaleX: 0.06, opacity: 0 }});')
-            tl.append(f'tl.fromTo("#cap-b{wi}", {{ scaleX: 0.06, opacity: 0 }}, {{ scaleX: 1, opacity: 1, duration: 0.16, ease: "expo.out", immediateRender: false }}, {r3(max(gs + 0.005, ws - 0.05))});')
+            tb = max(gs + 0.005, ws - 0.05)
+            init.append(f'gsap.set("#cap-b{wi}", {{ scale: 0.35, opacity: 0, rotation: -4 }}); gsap.set("#cap-s{wi}", {{ xPercent: -160 }});')
+            tl.append(f'tl.fromTo("#cap-b{wi}", {{ scale: 0.35, opacity: 0, rotation: -4 }}, {{ scale: 1, opacity: 1, rotation: 0, duration: 0.32, ease: "back.out(2.6)", immediateRender: false }}, {r3(tb)});')
+            tl.append(f'tl.fromTo("#cap-h{wi}", {{ scale: 1 }}, {{ scale: 1.12, duration: 0.09, ease: "power2.out", immediateRender: false }}, {r3(tb + 0.1)});')
+            tl.append(f'tl.fromTo("#cap-h{wi}", {{ scale: 1.12 }}, {{ scale: 1, duration: 0.22, ease: "back.out(2)", immediateRender: false }}, {r3(tb + 0.19)});')
+            tl.append(f'tl.fromTo("#cap-s{wi}", {{ xPercent: -160 }}, {{ xPercent: 260, duration: 0.42, ease: "power2.inOut", immediateRender: false }}, {r3(tb + 0.3)});')
         if wi in hl:
-            init.append(f'gsap.set("#cap-t{wi}", {{ opacity: 0, filter: "blur(5px)" }});')
-            tl.append(f'tl.fromTo("#cap-t{wi}", {{ opacity: 0, filter: "blur(5px)" }}, {{ opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out", immediateRender: false }}, {r3(ws + 0.03)});')
+            init.append(f'gsap.set("#cap-t{wi}", {{ opacity: 0, y: 16, scale: 0.7 }});')
+            tl.append(f'tl.fromTo("#cap-t{wi}", {{ opacity: 0, y: 16, scale: 0.7 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.26, ease: "back.out(2.4)", immediateRender: false }}, {r3(ws + 0.03)});')
         else:
-            init.append(f'gsap.set("#cap-w{wi}", {{ opacity: 0, filter: "blur(6px)" }});')
-            tl.append(f'tl.fromTo("#cap-w{wi}", {{ opacity: 0, filter: "blur(6px)" }}, {{ opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out", immediateRender: false }}, {r3(ws)});')
+            init.append(f'gsap.set("#cap-w{wi}", {{ opacity: 0, y: 10, filter: "blur(6px)" }}); gsap.set("#cap-k{wi}", {{ opacity: 0, scaleX: 0.5 }});')
+            tl.append(f'tl.fromTo("#cap-w{wi}", {{ opacity: 0, y: 10, filter: "blur(6px)" }}, {{ opacity: 1, y: 0, filter: "blur(0px)", duration: 0.16, ease: "power3.out", immediateRender: false }}, {r3(ws)});')
+            we = min(ge - 0.1, words[wi]["end"])
+            if we - ws > 0.06:
+                tl.append(f'tl.fromTo("#cap-k{wi}", {{ opacity: 0, scaleX: 0.5 }}, {{ opacity: 1, scaleX: 1, duration: 0.1, ease: "power3.out", immediateRender: false }}, {r3(ws)});')
+                tl.append(f'tl.fromTo("#cap-k{wi}", {{ opacity: 1 }}, {{ opacity: 0, duration: 0.1, ease: "power2.in", immediateRender: false }}, {r3(max(ws + 0.1, we))});')
     if gi + 1 < len(groups):
         tl.append(f'tl.fromTo("#cap-g{gi}", {{ opacity: 1 }}, {{ opacity: 0, duration: 0.08, ease: "power2.in", immediateRender: false }}, {r3(ge - 0.08)});')
         tl.append(f'tl.set("#cap-g{gi}", {{ opacity: 0, visibility: "hidden" }}, {r3(ge)});')
@@ -143,11 +159,15 @@ cap = f"""<template>
     /* Caption band: y 228-384, full-width container, centred text, never translateX(-50%). */
     .cap-g {{ position: absolute; left: 70px; top: 228px; width: 940px; height: 156px; display: flex; align-items: center; justify-content: center; overflow: visible; }}
     .cap-line {{ width: 940px; text-align: center; font-size: 46px; line-height: 1.42; font-weight: 400; letter-spacing: -0.015em; color: #121532; }}
-    .cw {{ display: inline-block; white-space: nowrap; }}
-    .cw.hl {{ position: relative; font-weight: 700; color: #ffffff; padding: 2px 16px 5px; margin: 0 2px; }}
-    .hl-box {{ position: absolute; inset: 0; border-radius: 12px; background: linear-gradient(105deg, #121532 0%, #274976 100%);
+    .cw {{ display: inline-block; white-space: nowrap; position: relative; }}
+    .kp {{ position: absolute; left: -9px; right: -9px; top: 3px; bottom: 1px; border-radius: 10px; background: #dce8f6; box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 3px 8px rgba(39,73,118,.14); transform-origin: 50% 50%; }}
+    .kt {{ position: relative; }}
+    .cw.hl {{ position: relative; transform-origin: 50% 60%; font-weight: 700; color: #ffffff; padding: 2px 16px 5px; margin: 0 2px; }}
+    .hl-box {{ position: absolute; inset: 0; border-radius: 12px; overflow: hidden; background: linear-gradient(105deg, #121532 0%, #274976 100%);
       box-shadow: 0 8px 16px rgba(18,21,50,.16), inset 0 1px 0 rgba(255,255,255,.18); transform-origin: 0% 50%; }}
     .hl-tx {{ position: relative; display: inline-block; white-space: nowrap; }}
+    .hl-sheen {{ position: absolute; top: -20%; bottom: -20%; left: 0; width: 38%; }}
+    .hl-sheen-i {{ position: absolute; inset: 0; background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.42) 50%, rgba(255,255,255,0) 100%); transform: skewX(-18deg); }}
     .hw {{ display: inline-block; }}
   </style>
   <div id="root" data-composition-id="captions" data-width="1080" data-height="1920">
@@ -167,3 +187,64 @@ cap = f"""<template>
 """
 (P / "compositions/captions.html").write_text(cap)
 print("index.html + captions.html written;", len(sc["scenes"]), "scenes,", len(groups), "caption groups, D =", D)
+
+# ------------------------------------------------------------- fx.html (cut light FX)
+CUTS = [  # (time, kind, ox, oy)
+    (4.2, "zoom", 540, 470), (9.167, "whipL", 0, 0), (13.8, "zoom", 540, 820), (16.867, "push", 0, 0),
+    (20.467, "zoom", 520, 1000), (23.267, "zoom", 520, 1000), (25.133, "whipL", 0, 0), (27.967, "zoom", 420, 720),
+    (30.1, "flash", 540, 900), (31.867, "flash", 540, 900), (35.933, "zoom", 540, 760), (40.7, "whipR", 0, 0),
+    (42.867, "flash", 420, 1000), (46.867, "zoom", 400, 1050), (49.867, "flash", 540, 950), (51.767, "whipL", 0, 0),
+    (56.7, "push", 0, 0), (58.733, "zoom", 380, 1000),
+]
+fxm, fxi, fxt = [], [], []
+for i, (t, k, ox, oy) in enumerate(CUTS):
+    if k in ("zoom", "flash"):
+        fxm.append(f'    <div class="fx-flash" id="fx-{i}" style="left:{ox - 700}px;top:{oy - 700}px"></div>')
+        fxm.append(f'    <div class="fx-ring" id="fx-{i}r" style="left:{ox - 160}px;top:{oy - 160}px"></div>')
+        peak = 0.62 if k == "zoom" else 0.38
+        fxi.append(f'gsap.set("#fx-{i}", {{ opacity: 0, scale: 0.4 }}); gsap.set("#fx-{i}r", {{ opacity: 0, scale: 0.3 }});')
+        fxt.append(f'tl.fromTo("#fx-{i}", {{ opacity: 0, scale: 0.4 }}, {{ opacity: {peak}, scale: 1, duration: 0.12, ease: "power2.in", immediateRender: false }}, {r3(t - 0.12)});')
+        fxt.append(f'tl.fromTo("#fx-{i}", {{ opacity: {peak} }}, {{ opacity: 0, scale: 1.4, duration: 0.26, ease: "power2.out", immediateRender: false }}, {r3(t)});')
+        fxt.append(f'tl.fromTo("#fx-{i}r", {{ opacity: 0.8, scale: 0.3 }}, {{ opacity: 0, scale: 2.6, duration: 0.42, ease: "power3.out", immediateRender: false }}, {r3(t)});')
+    else:
+        horiz = k.startswith("whip")
+        cls = "fx-streak-h" if horiz else "fx-streak-v"
+        fxm.append(f'    <div class="{cls}" id="fx-{i}"></div>')
+        if horiz:
+            a, b = (1300, -1300) if k == "whipL" else (-1300, 1300)
+            fxi.append(f'gsap.set("#fx-{i}", {{ x: {a}, opacity: 0 }});')
+            fxt.append(f'tl.fromTo("#fx-{i}", {{ x: {a}, opacity: 0 }}, {{ x: {b}, opacity: 0.9, duration: 0.42, ease: "power2.inOut", immediateRender: false }}, {r3(t - 0.21)});')
+            fxt.append(f'tl.set("#fx-{i}", {{ opacity: 0 }}, {r3(t + 0.22)});')
+        else:
+            fxi.append(f'gsap.set("#fx-{i}", {{ y: 2200, opacity: 0 }});')
+            fxt.append(f'tl.fromTo("#fx-{i}", {{ y: 2200, opacity: 0 }}, {{ y: -2200, opacity: 0.85, duration: 0.42, ease: "power2.inOut", immediateRender: false }}, {r3(t - 0.21)});')
+            fxt.append(f'tl.set("#fx-{i}", {{ opacity: 0 }}, {r3(t + 0.22)});')
+NL = chr(10) + "      "
+fx = f"""<template>
+  <style>
+    #root {{ position: absolute; inset: 0; pointer-events: none; overflow: hidden; }}
+    .fx-flash {{ position: absolute; width: 1400px; height: 1400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(247,250,255,.7) 22%, rgba(220,232,246,.25) 48%, rgba(220,232,246,0) 70%); }}
+    .fx-ring {{ position: absolute; width: 320px; height: 320px; border-radius: 50%; border: 6px solid rgba(255,255,255,.95); box-shadow: 0 0 40px rgba(159,187,224,.8); }}
+    .fx-streak-h {{ position: absolute; left: -200px; top: 0; width: 520px; height: 1920px;
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.85) 45%, rgba(220,232,246,.9) 55%, rgba(255,255,255,0)); filter: blur(18px); }}
+    .fx-streak-v {{ position: absolute; left: 0; top: -100px; width: 1080px; height: 420px;
+      background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.85) 45%, rgba(220,232,246,.9) 55%, rgba(255,255,255,0)); filter: blur(18px); }}
+  </style>
+  <div id="root" data-composition-id="fx" data-width="1080" data-height="1920">
+{chr(10).join(fxm)}
+  </div>
+  <script>
+    (function () {{
+      window.__timelines = window.__timelines || {{}};
+      const tl = gsap.timeline({{ paused: true }});
+      {NL.join(fxi)}
+      {NL.join(fxt)}
+      tl.set({{}}, {{}}, {r3(D - 0.02)});
+      window.__timelines["fx"] = tl;
+    }})();
+  </script>
+</template>
+"""
+(P / "compositions/fx.html").write_text(fx)
+print("fx.html written;", len(CUTS), "cuts")

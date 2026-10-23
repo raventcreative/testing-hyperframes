@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1350" />
+<title>AIpreneur — Confetti burst</title>
+<script src="vendor/gsap/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="assets/shared.css" />
+<style>
+#cv { position:absolute; inset:0; }
+.cbtn { position:absolute; left:302px; top:170px; width:200px; height:200px; border-radius:50%;
+  background:linear-gradient(135deg,#7fd0ff,#4f86e8 50%,#274976); display:flex; align-items:center; justify-content:center;
+  box-shadow:0 30px 60px -18px rgba(79,134,232,0.75), inset 0 3px 0 rgba(255,255,255,0.35); z-index:2; }
+.clive { position:absolute; left:0; right:0; top:418px; text-align:center; font-size:48px; letter-spacing:-0.01em; z-index:2; }
+
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="s16" data-start="0" data-duration="6" data-width="1080" data-height="1350" data-fps="30">
+  <div id="stage" class="clip" data-start="0" data-duration="6" data-track-index="0" data-track-kind="graphics" style="position:absolute;inset:0">
+    <div class="bg"></div>
+    <div class="logo" id="logo"></div>
+    <div class="eyebrow g b" id="eyebrow">SCENE · 16 DARI 16</div>
+    <div class="title" id="title"><span class="g b">Confetti</span><svg class="arrow" width="78" height="52" viewBox="0 0 78 52"><defs><linearGradient id="ag" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient></defs><path d="M4 26H70M48 6l22 20-22 20" fill="none" stroke="url(#ag)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg><span class="g r">burst</span></div>
+    <div class="sub g r" id="sub">Centang yang meledak jadi confetti</div>
+    <div class="card" id="card">
+      <div class="panel light" id="panel">
+        <canvas id="cv" width="1608" height="1404" style="width:804px;height:702px"></canvas>
+        <div class="cbtn" id="cbtn"><svg width="86" height="66" viewBox="0 0 86 66"><path d="M8 34l22 22L78 8" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="clive"><span class="g r" id="clive">Kamu udah live</span></div>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <div class="lbl g b">GANTI DI SCENE INI</div>
+      <div class="txt g r">Tombol bulat gradasi dengan centang putih. Tombolnya pop, sekitar 70 confetti meledak keluar, berkibar lalu jatuh, dan <b class="b">&ldquo;[kata-kata kamu]&rdquo;</b> ada di bawahnya.</div>
+      <div class="used g r"><b class="b">Aku pakai:</b> &ldquo;Kamu udah live&rdquo;.</div>
+    </div>
+    <div class="foot" id="foot">
+      <div class="who"><div class="dot">FK</div><span class="g b">FREDDIE KASHAWAN</span><span class="g r">AIpreneur</span></div>
+      <div class="pg g b">17 / 18 &nbsp;&nbsp; GESER &rarr;</div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const D = 6, TAU = Math.PI * 2;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+  const tl = gsap.timeline({ paused: true });
+  const st = { t: 0 };
+
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  const W = 804, H = 702;
+  const mix = (a, b, p) => a + (b - a) * p;
+  const STOPS = [[0, [127, 208, 255]], [0.5, [79, 134, 232]], [1, [214, 228, 255]]];
+  function col(u) {
+    u = clamp(u, 0, 1);
+    const i = u < 0.5 ? 0 : 1, a = STOPS[i], b = STOPS[i + 1], p = (u - a[0]) / (b[0] - a[0]);
+    return a[1].map((c, j) => Math.round(c + (b[1][j] - c) * p));
+  }
+
+  let seed = 23;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  const COLS = ["#121532", "#274976", "#4f86e8", "#7fd0ff", "#bcd8ff", "#6c86f0", "#3a78e6"];
+  const PER = 3, POP = 0.5, BX = 402, BY = 270, K = 2.1, G = 1150;
+  const C = [...Array(72)].map(() => {
+    const a = -Math.PI / 2 + (rnd() - 0.5) * 3.0, v = 440 + rnd() * 560;
+    return { vx: Math.cos(a) * v, vy: Math.sin(a) * v, c: COLS[Math.floor(rnd() * COLS.length)], w: 13 + rnd() * 12, h: 7 + rnd() * 7,
+      circ: rnd() < 0.3, sp: (rnd() - 0.5) * 16, r0: rnd() * TAU, fl: rnd() * TAU, d: rnd() * 0.06 };
+  });
+  function drawBurst(tau) {
+    if (tau < 0) return;
+    for (const p of C) {
+      const tt = tau - p.d;
+      if (tt < 0) continue;
+      const e = 1 - Math.exp(-K * tt);
+      const x = BX + p.vx / K * e + 18 * Math.sin(p.fl + tt * 7) * Math.min(1, tt * 2);
+      const y = BY + (p.vy - G / K) / K * e + G / K * tt;
+      if (y > H + 30) continue;
+      const fade = clamp(1.4 - tt / 1.8, 0, 1);
+      ctx.save(); ctx.translate(x, y); ctx.rotate(p.r0 + p.sp * tt);
+      ctx.globalAlpha = fade; ctx.fillStyle = p.c;
+      if (p.circ) { ctx.beginPath(); ctx.arc(0, 0, p.h * 0.75, 0, TAU); ctx.fill(); }
+      else { ctx.scale(1, Math.abs(Math.cos(p.fl + tt * 9)) * 0.8 + 0.2); ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
+      ctx.restore();
+    }
+  }
+  function render(t) {
+    ctx.setTransform(2, 0, 0, 2, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const tp = t % PER;
+    drawBurst(tp - POP);
+    drawBurst(tp + PER - POP);
+    const sq = tp < POP ? smooth((tp - 0.2) / 0.3) : 0;
+    const pop = tp >= POP ? Math.exp(-6 * (tp - POP)) * Math.sin(Math.min(Math.PI, (tp - POP) * 9)) : 0;
+    gsap.set("#cbtn", { scale: 1 - 0.1 * sq + 0.16 * pop });
+    gsap.set("#clive", { opacity: 1 - 0.45 * sq });
+  }
+
+  tl.to(st, { t: D, duration: D, ease: "none", onUpdate: () => render(st.t) }, 0);
+  render(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["s16"] = tl;
+})();
+</script>
+</body>
+</html>

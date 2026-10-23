@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1350" />
+<title>AIpreneur — Grid wave</title>
+<script src="vendor/gsap/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="assets/shared.css" />
+<style>
+#cv { position:absolute; inset:0; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="s07" data-start="0" data-duration="6" data-width="1080" data-height="1350" data-fps="30">
+  <div id="stage" class="clip" data-start="0" data-duration="6" data-track-index="0" data-track-kind="graphics" style="position:absolute;inset:0">
+    <div class="bg"></div>
+    <div class="logo" id="logo"></div>
+    <div class="eyebrow g b" id="eyebrow">SCENE · 07 DARI 16</div>
+    <div class="title" id="title"><span class="g b">Grid</span><svg class="arrow" width="78" height="52" viewBox="0 0 78 52"><defs><linearGradient id="ag" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient></defs><path d="M4 26H70M48 6l22 20-22 20" fill="none" stroke="url(#ag)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg><span class="g r">wave</span></div>
+    <div class="sub g r" id="sub">Hamparan titik yang bergelombang kayak laut</div>
+    <div class="card" id="card">
+      <div class="panel light" id="panel">
+        <canvas id="cv" width="1608" height="1404" style="width:804px;height:702px"></canvas>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <div class="lbl g b">GANTI DI SCENE INI</div>
+      <div class="txt g r">Permukaan 3D dari titik-titik kecil bergelombang kayak laut tenang di atas putih. Warnanya ikut tinggi gelombang: navy di lembah, biru muda di puncak.</div>
+    </div>
+    <div class="foot" id="foot">
+      <div class="who"><div class="dot">FK</div><span class="g b">FREDDIE KASHAWAN</span><span class="g r">AIpreneur</span></div>
+      <div class="pg g b">08 / 18 &nbsp;&nbsp; GESER &rarr;</div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const D = 6, TAU = Math.PI * 2;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+  const tl = gsap.timeline({ paused: true });
+  const st = { t: 0 };
+
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  const W = 804, H = 702;
+  const mix = (a, b, p) => a + (b - a) * p;
+  const STOPS = [[0, [127, 208, 255]], [0.5, [79, 134, 232]], [1, [214, 228, 255]]];
+  function col(u) {
+    u = clamp(u, 0, 1);
+    const i = u < 0.5 ? 0 : 1, a = STOPS[i], b = STOPS[i + 1], p = (u - a[0]) / (b[0] - a[0]);
+    return a[1].map((c, j) => Math.round(c + (b[1][j] - c) * p));
+  }
+
+  const NX = 22, NZ = 15, CX = 402, HOR = 80, CAMH = 470, F = 520, DD = 500;
+  function render(t) {
+    ctx.setTransform(2, 0, 0, 2, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const ph = TAU * t / D;
+    for (let j = NZ - 1; j >= 0; j--) {
+      const Z = j / (NZ - 1) * 720;
+      const s = F / (Z + DD);
+      for (let i = 0; i < NX; i++) {
+        const X = (i / (NX - 1) - 0.5) * 1000;
+        const Y = 70 * Math.sin(0.0105 * X + ph) + 42 * Math.sin(0.0125 * Z - 2 * ph + 0.8) + 24 * Math.sin(0.008 * (X + Z) + ph + 2.1);
+        const x = CX + X * s, y = HOR + (CAMH - Y) * s;
+        if (x < -10 || x > W + 10) continue;
+        const u = clamp((Y + 110) / 220, 0, 1);
+        const c = [mix(39, 140, u), mix(73, 205, u), mix(118, 255, u)];
+        const a = 0.5 + 0.5 * clamp((s - 0.42) / 0.62, 0, 1);
+        ctx.fillStyle = "rgba(" + Math.round(c[0]) + "," + Math.round(c[1]) + "," + Math.round(c[2]) + "," + a.toFixed(3) + ")";
+        ctx.beginPath(); ctx.arc(x, y, 8.6 * s, 0, TAU); ctx.fill();
+      }
+    }
+  }
+
+  tl.to(st, { t: D, duration: D, ease: "none", onUpdate: () => render(st.t) }, 0);
+  render(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["s07"] = tl;
+})();
+</script>
+</body>
+</html>

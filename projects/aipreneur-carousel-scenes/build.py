@@ -356,7 +356,8 @@ SLIDES = [
 ]
 
 from scenes_a import SLIDES_A
-SLIDES = SLIDES_A + SLIDES
+from scenes_b import SLIDES_B
+SLIDES = SLIDES_A + SLIDES_B + SLIDES
 
 for s in SLIDES:
     if s["used"]:

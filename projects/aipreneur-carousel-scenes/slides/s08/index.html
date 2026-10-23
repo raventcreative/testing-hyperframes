@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1350" />
+<title>AIpreneur — Cards shuffle</title>
+<script src="vendor/gsap/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="assets/shared.css" />
+<style>
+
+.deck { position:absolute; left:212px; top:230px; width:380px; height:240px; }
+.pc { position:absolute; left:0; top:0; width:380px; height:240px; border-radius:24px; overflow:hidden;
+  box-shadow:0 22px 40px -16px rgba(18,21,50,0.45), 0 4px 10px rgba(18,21,50,0.12); }
+.pc .chip { position:absolute; left:34px; top:40px; width:56px; height:42px; border-radius:9px; background:linear-gradient(135deg,#f4f7fc,#aab9d1 60%,#dfe7f3); }
+.pc .n { position:absolute; left:34px; bottom:36px; font-size:32px; letter-spacing:0.12em; }
+.pc.dk .n { color:#ffffff; }
+.pc.dk .chip { opacity:0.85; }
+
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="s08" data-start="0" data-duration="6" data-width="1080" data-height="1350" data-fps="30">
+  <div id="stage" class="clip" data-start="0" data-duration="6" data-track-index="0" data-track-kind="graphics" style="position:absolute;inset:0">
+    <div class="bg"></div>
+    <div class="logo" id="logo"></div>
+    <div class="eyebrow g b" id="eyebrow">SCENE · 08 DARI 16</div>
+    <div class="title" id="title"><span class="g b">Cards</span><svg class="arrow" width="78" height="52" viewBox="0 0 78 52"><defs><linearGradient id="ag" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient></defs><path d="M4 26H70M48 6l22 20-22 20" fill="none" stroke="url(#ag)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg><span class="g r">shuffle</span></div>
+    <div class="sub g r" id="sub">Kartu yang dikocok</div>
+    <div class="card" id="card">
+      <div class="panel light" id="panel">
+        <div class="deck" id="deck"><div class="pc dk" id="c0" data-layout-allow-overlap data-layout-allow-overflow style="background:linear-gradient(125deg,#7fd0ff,#4f86e8 55%,#274976)"><div class="chip"></div><div class="n r">&bull;&bull;&bull;&bull; 4242</div></div><div class="pc dk" id="c1" data-layout-allow-overlap data-layout-allow-overflow style="background:linear-gradient(140deg,#1d2550,#121532)"><div class="chip"></div><div class="n r">&bull;&bull;&bull;&bull; 1881</div></div><div class="pc dk" id="c2" data-layout-allow-overlap data-layout-allow-overflow style="background:linear-gradient(135deg,#8ea2ff,#6c86f0 60%,#4d63d6)"><div class="chip"></div><div class="n r">&bull;&bull;&bull;&bull; 5100</div></div><div class="pc lt" id="c3" data-layout-allow-overlap data-layout-allow-overflow style="background:linear-gradient(135deg,#ffffff,#eef3fb)"><div class="chip"></div><div class="n g r">&bull;&bull;&bull;&bull; 3007</div></div><div class="pc lt" id="c4" data-layout-allow-overlap data-layout-allow-overflow style="background:linear-gradient(135deg,#dfe9f8,#b9cbe6 55%,#9fb6da)"><div class="chip"></div><div class="n g r">&bull;&bull;&bull;&bull; 9424</div></div></div>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <div class="lbl g b">GANTI DI SCENE INI</div>
+      <div class="txt g r">Tumpukan lima kartu pembayaran (desain original, tanpa logo, cuma 4 digit terakhir) terbuka kayak kipas, menutup, lalu kartu teratas meluncur keluar dan masuk ke bawah tumpukan, terus berulang.</div>
+    </div>
+    <div class="foot" id="foot">
+      <div class="who"><div class="dot">FK</div><span class="g b">FREDDIE KASHAWAN</span><span class="g r">AIpreneur</span></div>
+      <div class="pg g b">09 / 18 &nbsp;&nbsp; GESER &rarr;</div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const D = 6, TAU = Math.PI * 2;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+  const tl = gsap.timeline({ paused: true });
+  const st = { t: 0 };
+
+  const N = 5;
+  const cards = [0, 1, 2, 3, 4].map((i) => document.getElementById("c" + i));
+  const io = (p) => { p = clamp(p, 0, 1); return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; };
+  const T0 = 0.85, TD = 0.84;
+  function render(t) {
+    const F = t < 0.85 ? 1 - io((t - 0.3) / 0.55) : io((t - 5.2) / 0.65);
+    const k = clamp(Math.floor((t - T0) / TD), -1, N);
+    const done = clamp(k, 0, N);
+    const p = (k >= 0 && k < N) ? clamp((t - T0 - k * TD) / TD, 0, 1) : 0;
+    cards.forEach((el, i) => {
+      let d = ((i - done) % N + N) % N;
+      let x = 0, y = 0, r = 0, z = 0;
+      if (k >= 0 && k < N && d === 0) {
+        const e = io(p);
+        x = 430 * Math.sin(Math.PI * e); y = -30 * Math.sin(Math.PI * e); r = 14 * Math.sin(Math.PI * e);
+        d = e * (N - 1);
+        z = p < 0.5 ? 50 : -1;
+      } else if (k >= 0 && k < N) {
+        d = d - io(p);
+      }
+      const fd = d - 2;
+      const zi = z ? z : Math.round(40 - d * 5);
+      x += d * 9 - fd * 66 * F;
+      y += -d * 8 + Math.abs(fd) * 14 * F;
+      r += -fd * 9 * F;
+      gsap.set(el, { x: x, y: y, rotation: r, scale: 1 - d * 0.025, zIndex: zi });
+    });
+  }
+
+  tl.to(st, { t: D, duration: D, ease: "none", onUpdate: () => render(st.t) }, 0);
+  render(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["s08"] = tl;
+})();
+</script>
+</body>
+</html>

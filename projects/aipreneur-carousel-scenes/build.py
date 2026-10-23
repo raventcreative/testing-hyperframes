@@ -357,7 +357,8 @@ SLIDES = [
 
 from scenes_a import SLIDES_A
 from scenes_b import SLIDES_B
-SLIDES = SLIDES_A + SLIDES_B + SLIDES
+from scenes_c import SLIDES_C, build_cover
+SLIDES = SLIDES_A + SLIDES_B + SLIDES_C + SLIDES
 
 for s in SLIDES:
     if s["used"]:
@@ -370,3 +371,5 @@ for s in SLIDES:
         shutil.copytree(ROOT / sub, d / sub)
     (d / "index.html").write_text(SHELL.format(**s))
     print("wrote", d / "index.html")
+
+build_cover(ROOT)

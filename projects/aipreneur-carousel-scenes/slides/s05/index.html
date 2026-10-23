@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1350" />
+<title>AIpreneur — Line draw</title>
+<script src="vendor/gsap/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="assets/shared.css" />
+<style>
+
+.wid { position:absolute; left:36px; top:36px; right:36px; bottom:44px; border-radius:30px;
+  background:linear-gradient(170deg,#ffffff,#f7f9fd); box-shadow:0 30px 60px -24px rgba(18,21,50,0.30), 0 4px 14px rgba(39,73,118,0.08); overflow:hidden; }
+.wlab { position:absolute; left:46px; top:40px; font-size:32px; }
+.wval { position:absolute; left:44px; top:86px; font-size:70px; letter-spacing:-0.02em; line-height:1; }
+.gl { position:absolute; left:0; right:0; height:0; border-top:2px dashed rgba(39,73,118,0.13); }
+.lchip { position:absolute; right:34px; top:36px; padding:12px 24px; border-radius:16px; background:rgba(79,134,232,0.15); font-size:32px; }
+#chart { position:absolute; left:0; bottom:40px; overflow:visible; }
+
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="s05" data-start="0" data-duration="6" data-width="1080" data-height="1350" data-fps="30">
+  <div id="stage" class="clip" data-start="0" data-duration="6" data-track-index="0" data-track-kind="graphics" style="position:absolute;inset:0">
+    <div class="bg"></div>
+    <div class="logo" id="logo"></div>
+    <div class="eyebrow g b" id="eyebrow">SCENE · 05 DARI 16</div>
+    <div class="title" id="title"><span class="g b">Line</span><svg class="arrow" width="78" height="52" viewBox="0 0 78 52"><defs><linearGradient id="ag" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient></defs><path d="M4 26H70M48 6l22 20-22 20" fill="none" stroke="url(#ag)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg><span class="g r">draw</span></div>
+    <div class="sub g r" id="sub">Grafik yang menggambar dirinya sendiri</div>
+    <div class="card" id="card">
+      <div class="panel light" id="panel">
+        <div class="wid" id="wid">
+          <div class="gl" style="top:212px"></div><div class="gl" style="top:330px"></div><div class="gl" style="top:448px"></div>
+          <div class="wlab g r">Pendapatan bulanan</div>
+          <div class="wval g r" id="wval">Rp48.240.000</div>
+          <div class="lchip" id="lchip"><span class="g b">+128%</span></div>
+          <svg id="chart" width="732" height="360" viewBox="0 0 732 360">
+            <defs>
+              <linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#274976"/><stop offset="0.55" stop-color="#4f86e8"/><stop offset="1" stop-color="#7fd0ff"/></linearGradient>
+              <linearGradient id="areag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f86e8" stop-opacity="0.38"/><stop offset="1" stop-color="#4f86e8" stop-opacity="0"/></linearGradient>
+              <clipPath id="ac"><rect id="acr" x="0" y="0" width="732" height="360"/></clipPath>
+              <filter id="glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="7"/></filter>
+            </defs>
+            <path id="area" clip-path="url(#ac)" fill="url(#areag)" d="M0 300 C 90 300, 140 215, 230 220 S 340 285, 420 248 S 540 130, 610 96 S 676 30, 704 22 L 704 360 L 0 360 Z"/>
+            <path id="ln" fill="none" stroke="url(#lg)" stroke-width="8" stroke-linecap="round" d="M0 300 C 90 300, 140 215, 230 220 S 340 285, 420 248 S 540 130, 610 96 S 676 30, 704 22"/>
+            <circle id="hglow" r="22" fill="#7fd0ff" opacity="0.7" filter="url(#glow)"/>
+            <circle id="head" r="11" fill="#ffffff" stroke="#4f86e8" stroke-width="6"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <div class="lbl g b">GANTI DI SCENE INI</div>
+      <div class="txt g r">Widget revenue frosted <b class="b">&ldquo;[metrik kamu]&rdquo;</b> dengan angka live <b class="b">&ldquo;[angka kamu]&rdquo;</b>. Satu garis gradasi menggambar grafik dari kiri ke kanan dengan ujung bercahaya, area di bawahnya terisi, dan chip <b class="b">&ldquo;[+x%]&rdquo;</b> mendarat di akhir.</div>
+      <div class="used g r"><b class="b">Aku pakai:</b> Pendapatan bulanan, Rp48.240.000, +128%.</div>
+    </div>
+    <div class="foot" id="foot">
+      <div class="who"><div class="dot">FK</div><span class="g b">FREDDIE KASHAWAN</span><span class="g r">AIpreneur</span></div>
+      <div class="pg g b">06 / 18 &nbsp;&nbsp; GESER &rarr;</div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const D = 6, TAU = Math.PI * 2;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+  const tl = gsap.timeline({ paused: true });
+  const st = { t: 0 };
+
+  const ln = document.getElementById("ln"), L = ln.getTotalLength();
+  const FULL = 48240000;
+  const io = (p) => { p = clamp(p, 0, 1); return p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; };
+  const fmt = (v) => "Rp" + Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  function seg(t) {
+    if (t < 2.0) return [0, 1];
+    if (t < 2.85) return [io((t - 2.0) / 0.85), 1];
+    if (t < 3.0) return [1, 1];
+    if (t < 5.3) return [0, io((t - 3.0) / 2.3)];
+    return [0, 1];
+  }
+  function render(t) {
+    const [a, b] = seg(t);
+    ln.setAttribute("stroke-dasharray", "0 " + (a * L).toFixed(2) + " " + Math.max(0, (b - a) * L).toFixed(2) + " " + (L + 10).toFixed(1));
+    ln.setAttribute("opacity", b - a > 0.002 ? 1 : 0);
+    const x0 = ln.getPointAtLength(a * L).x, x1 = ln.getPointAtLength(b * L).x;
+    const r = document.getElementById("acr");
+    r.setAttribute("x", x0.toFixed(1)); r.setAttribute("width", Math.max(0, x1 - x0).toFixed(1));
+    const drawing = t >= 3.0 && t < 5.45;
+    const hp = ln.getPointAtLength(b * L);
+    const ho = drawing ? clamp((t - 3.0) / 0.15, 0, 1) * (t > 5.3 ? 1 - (t - 5.3) / 0.15 : 1) : (t < 2.0 || t >= 5.45 ? 1 : 0);
+    ["head", "hglow"].forEach((id) => { const c = document.getElementById(id); c.setAttribute("cx", hp.x.toFixed(1)); c.setAttribute("cy", hp.y.toFixed(1)); c.setAttribute("opacity", ((id === "hglow" ? 0.7 : 1) * clamp(ho, 0, 1) * (b > a ? 1 : 0)).toFixed(3)); });
+    let v = FULL;
+    if (t >= 2.0 && t < 3.0) v = FULL * (1 - a);
+    else if (t >= 3.0 && t < 5.3) v = FULL * Math.pow(b, 1.3);
+    document.getElementById("wval").textContent = fmt(v);
+  }
+  tl.to("#lchip", { opacity: 0, scale: 0.85, duration: 0.25, ease: "power2.in" }, 1.9);
+  tl.fromTo("#lchip", { opacity: 0, scale: 0.6, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: "back.out(2.2)", immediateRender: false }, 5.3);
+
+  tl.to(st, { t: D, duration: D, ease: "none", onUpdate: () => render(st.t) }, 0);
+  render(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["s05"] = tl;
+})();
+</script>
+</body>
+</html>

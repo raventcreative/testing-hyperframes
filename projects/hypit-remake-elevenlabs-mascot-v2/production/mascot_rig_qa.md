@@ -30,10 +30,10 @@ Implemented in the material shader using the vertex's **rest-pose position**, so
 - Face: blink closed, happy eyes, gaze L/R, brow raise, visemes AA / E / I / O / U / MBP / rest.
 - In-film: CTA close-ups at 59.0–61.05 s show distinct mouth shapes on Komen / HYPIT / Nanti / gue / bagiin and a closed smiling mouth at rest.
 
-## Lip sync
-- Only the CTA ("Komen HYPIT. Nanti gue bagiin.", 58.924–60.864 s) is lip-synced — the mascot faces the camera there; it is not the narrator elsewhere.
-- Timing source: `production/word_timing.json` (Whisper large-v3 + waveform-anchored). Indonesian grapheme→viseme mapping (a→AA, e→E, i→I, o→O, u/w→U, m/b/p→MBP, f/v→FV, others→C, "ng" merged), HYPIT spoken as "hai-pit". Coarticulated with sine blends; mouth returns to a closed smile in pauses (59.708–60.066) and after the last word.
-- Not amplitude-driven; no extra dialogue.
+## Lip sync (v3: narrator)
+- The **whole VO** is lip-synced whenever the mascot is visible (≈41 s of 61 s): `vendor/vo_words.js` (145 words, generated from `production/word_timing.json` by `tools/gen_vo_words.py`) → `buildSpeech()` / `lipAt()` in `tools/mascot3d/src/acting.js`.
+- Indonesian grapheme→viseme mapping (a→AA, e→E, i→I, o→O, u/w→U, m/b/p→MBP, f/v→FV, others→C, "ng" merged); HYPIT/Hypit spoken as "hai-pit", Claude as "klod", AI as "ei-ai". Coarticulated with sine blends; the mouth closes only in real gaps (>70 ms) and rests in a closed smile in silences.
+- Talking body language from the same timings (`talk()`): alternating hand gestures per phrase, a beat per word (stronger on caption keywords), keyword nods, head bob, body sway. Not amplitude-driven; no extra dialogue.
 
 ## Known limitations (honest)
 1. **Hands are single bones** (mitten-style chibi hands): wrists rotate, fingers do not curl — pointing is done with arm/wrist direction, not an index finger.

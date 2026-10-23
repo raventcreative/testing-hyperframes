@@ -92,7 +92,7 @@ class Layer:
             self.tl.append(f'tl.fromTo("#{eid}-f", {{ y: 0 }}, {{ y: {-float_amp}, duration: {round((t1 - t0) / n, 3)}, ease: "sine.inOut", yoyo: true, repeat: {n - 1}, immediateRender: false }}, {self.L(t0)});')
 
     def punch(self, eid, g, s=1.1):
-        self.tl.append(f'tl.fromTo("#{eid}", {{ scale: 1 }}, {{ scale: {s}, duration: 0.12, ease: "power2.out", immediateRender: false, yoyo: true, repeat: 1 }}, {self.L(g)});')
+        self.tl.append(f'tl.fromTo("#{eid}-f", {{ scale: 1 }}, {{ scale: {s}, duration: 0.12, ease: "power2.out", immediateRender: false, yoyo: true, repeat: 1 }}, {self.L(g)});')
 
     def click(self, eid, tx, ty, g, frm=(1150, 1350), leave=None):
         """cursor flies in so its fingertip lands on (tx, ty) at global g, then clicks."""
@@ -156,7 +156,7 @@ p.img("p1-player", PLAYER, 40, 470, 470, 350, extra='<div class="scan" id="p1-sc
 p.init.append('gsap.set("#p1-scan", { x: 0, opacity: 0 });')
 p.pop("p1-player", 1.62, rot=-5, rot0=-18)
 p.burst("p1-b1", 40 + 238, 470 + 96, 2.03, r=120)
-p.img("p1-film", "assets/elements/ref3_glass_film.png", 580, 450, 470, 352)
+p.img("p1-film", "assets/elements/ref3_glass_film_940.png", 580, 450, 470, 352)
 p.tl.append('tl.fromTo("#p1-film", { opacity: 0, scale: 0.5, x: 260, rotation: 14 }, { opacity: 1, scale: 1, x: 0, rotation: 4, duration: 0.5, ease: "back.out(1.8)", immediateRender: false }, 2.5);')
 p.cursor("p1-cur")
 p.click("p1-cur", 40 + 238, 470 + 96, 2.84, leave=3.55)

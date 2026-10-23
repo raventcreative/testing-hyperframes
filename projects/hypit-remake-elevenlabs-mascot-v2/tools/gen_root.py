@@ -20,12 +20,16 @@ def r3(x):
 
 # ---------------------------------------------------------------- index.html
 hosts = []
+# Each cut sits 1 ms before its frame time, so exactly one scene owns every rendered frame.
+def cut(t):
+    return 0.0 if t <= 0 else round(t - 0.001, 4)
 for s in sc["scenes"]:
     sid = s["id"]
+    s = dict(s, start=cut(s["start"]), end=(cut(s["end"]) if s["end"] < D else D))
     hosts.append(
         f'      <div id="{sid}" class="clip scene-host" data-composition-id="{sid}" '
-        f'data-composition-src="compositions/{sid}.html" data-start="{r3(s["start"])}" '
-        f'data-duration="{r3(s["end"] - s["start"])}" data-track-index="2" data-track-kind="graphics" '
+        f'data-composition-src="compositions/{sid}.html" data-start="{s["start"]}" '
+        f'data-duration="{round(s["end"] - s["start"], 4)}" data-track-index="2" data-track-kind="graphics" '
         f'data-width="1080" data-height="1920"></div>'
     )
 

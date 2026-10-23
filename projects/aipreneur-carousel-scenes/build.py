@@ -1,4 +1,4 @@
-"""Builds the 5 carousel slides (slide-09.html ... slide-13.html) from one shared shell.
+"""Builds the carousel slides (slides/sNN/index.html) from one shared shell.
 Edit copy here, then run: python3 build.py"""
 import shutil
 from pathlib import Path
@@ -354,6 +354,9 @@ SLIDES = [
          sub="Cincin yang mengorbit", panel="dark", css=S13_CSS, visual=S13_VIS, js=S13_JS,
          body="Inti biru bercahaya di atas navy gelap dengan tiga orbit miring. Bulan-bulan kecil lewat di depan dan di belakang inti.", used=""),
 ]
+
+from scenes_a import SLIDES_A
+SLIDES = SLIDES_A + SLIDES
 
 for s in SLIDES:
     if s["used"]:

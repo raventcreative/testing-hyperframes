@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1350" />
+<title>AIpreneur — Gradient flow</title>
+<script src="vendor/gsap/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="assets/shared.css" />
+<style>
+#cv { position:absolute; inset:0; }
+.panel.white { background:#ffffff; }
+.flowlbl { position:absolute; left:56px; top:44px; font-size:44px; letter-spacing:-0.01em; z-index:2; }
+
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="s02" data-start="0" data-duration="6" data-width="1080" data-height="1350" data-fps="30">
+  <div id="stage" class="clip" data-start="0" data-duration="6" data-track-index="0" data-track-kind="graphics" style="position:absolute;inset:0">
+    <div class="bg"></div>
+    <div class="logo" id="logo"></div>
+    <div class="eyebrow g b" id="eyebrow">SCENE · 02 DARI 16</div>
+    <div class="title" id="title"><span class="g b">Gradient</span><svg class="arrow" width="78" height="52" viewBox="0 0 78 52"><defs><linearGradient id="ag" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient></defs><path d="M4 26H70M48 6l22 20-22 20" fill="none" stroke="url(#ag)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg><span class="g r">flow</span></div>
+    <div class="sub g r" id="sub">Gradasi yang mengalir</div>
+    <div class="card" id="card">
+      <div class="panel white" id="panel">
+        <canvas id="cv" width="1608" height="1404" style="width:804px;height:702px"></canvas>
+        <div class="flowlbl g r" id="flowlbl">Flow</div>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <div class="lbl g b">GANTI DI SCENE INI</div>
+      <div class="txt g r">Gradasi hero miring memenuhi frame (biru es, biru langit, azure, navy). Pita warna mengalir di dalamnya kayak cairan pelan, dengan <b class="b">&ldquo;[satu kata]&rdquo;</b> teks navy kecil di pojok atas.</div>
+      <div class="used g r"><b class="b">Aku pakai:</b> &ldquo;Flow&rdquo;.</div>
+    </div>
+    <div class="foot" id="foot">
+      <div class="who"><div class="dot">FK</div><span class="g b">FREDDIE KASHAWAN</span><span class="g r">AIpreneur</span></div>
+      <div class="pg g b">03 / 18 &nbsp;&nbsp; GESER &rarr;</div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const D = 6, TAU = Math.PI * 2;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+  const tl = gsap.timeline({ paused: true });
+  const st = { t: 0 };
+
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  const W = 804, H = 702;
+  const mix = (a, b, p) => a + (b - a) * p;
+  const STOPS = [[0, [127, 208, 255]], [0.5, [79, 134, 232]], [1, [214, 228, 255]]];
+  function col(u) {
+    u = clamp(u, 0, 1);
+    const i = u < 0.5 ? 0 : 1, a = STOPS[i], b = STOPS[i + 1], p = (u - a[0]) / (b[0] - a[0]);
+    return a[1].map((c, j) => Math.round(c + (b[1][j] - c) * p));
+  }
+
+  const off = document.createElement("canvas"); off.width = 1608 + 320; off.height = 1404 + 320;
+  const oc = off.getContext("2d");
+  const M = 80;
+  const BANDS = [
+    { c: "#bcd8ff", y: 0 },
+    { c: "#6fb6ff", y: 250, a: 60, f: 0.9, s: 1, p: 0.3 },
+    { c: "#3a78e6", y: 360, a: 70, f: 1.1, s: -1, p: 1.9 },
+    { c: "#1d3a78", y: 470, a: 55, f: 0.8, s: 1, p: 3.1 },
+    { c: "#6c86f0", y: 590, a: 45, f: 1.3, s: -2, p: 4.4 },
+  ];
+  const TOPL = 240, TOPR = 22;
+  function render(t) {
+    const ph = TAU * t / D;
+    oc.setTransform(2, 0, 0, 2, 2 * M, 2 * M);
+    oc.clearRect(-M, -M, W + 2 * M, H + 2 * M);
+    oc.filter = "blur(40px)";
+    BANDS.forEach((b, k) => {
+      oc.fillStyle = b.c;
+      oc.beginPath();
+      if (k === 0) { oc.rect(-M, -M, W + 2 * M, H + 2 * M); oc.fill(); return; }
+      oc.moveTo(-M, H + M);
+      for (let x = -M; x <= W + M; x += 12) {
+        const u = x / W;
+        const y = b.y + (1 - u) * 110 + b.a * Math.sin(TAU * u * b.f + b.s * ph + b.p) + 0.4 * b.a * Math.sin(TAU * u * 2.1 - b.s * ph + b.p * 2);
+        oc.lineTo(x, y);
+      }
+      oc.lineTo(W + M, H + M); oc.closePath(); oc.fill();
+    });
+    oc.filter = "none";
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(0, TOPL * 2); ctx.lineTo(W * 2, TOPR * 2); ctx.lineTo(W * 2, H * 2); ctx.lineTo(0, H * 2); ctx.closePath(); ctx.clip();
+    ctx.drawImage(off, -2 * M, -2 * M);
+    ctx.restore();
+  }
+
+  tl.to(st, { t: D, duration: D, ease: "none", onUpdate: () => render(st.t) }, 0);
+  render(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["s02"] = tl;
+})();
+</script>
+</body>
+</html>

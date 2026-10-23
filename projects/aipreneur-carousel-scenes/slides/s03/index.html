@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1350" />
+<title>AIpreneur — Glass tilt</title>
+<script src="vendor/gsap/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="assets/shared.css" />
+<style>
+
+.blob { position:absolute; left:0; top:0; border-radius:50%; }
+#bA { width:620px; height:620px; margin:-310px 0 0 -310px; background:radial-gradient(circle, rgba(79,134,232,0.95), rgba(79,134,232,0) 68%); }
+#bB { width:520px; height:520px; margin:-260px 0 0 -260px; background:radial-gradient(circle, rgba(127,208,255,0.85), rgba(127,208,255,0) 68%); }
+#bC { width:440px; height:440px; margin:-220px 0 0 -220px; background:radial-gradient(circle, rgba(140,150,255,0.85), rgba(140,150,255,0) 68%); }
+#bD { width:360px; height:360px; margin:-180px 0 0 -180px; background:radial-gradient(circle, rgba(219,231,255,0.75), rgba(219,231,255,0) 68%); }
+.persp { position:absolute; inset:0; perspective:1400px; }
+.gcard { position:absolute; left:132px; top:196px; width:540px; height:330px; border-radius:30px; overflow:hidden;
+  background:linear-gradient(135deg, rgba(255,255,255,0.62), rgba(255,255,255,0.36));
+  border:2px solid rgba(255,255,255,0.75);
+  -webkit-backdrop-filter:blur(22px) saturate(1.3); backdrop-filter:blur(22px) saturate(1.3);
+  box-shadow:0 30px 60px -20px rgba(18,21,50,0.55), inset 0 1px 0 rgba(255,255,255,0.9); }
+.chip { position:absolute; left:48px; top:62px; width:70px; height:52px; border-radius:11px; background:linear-gradient(135deg,#f4f7fc,#aab9d1 60%,#dfe7f3); box-shadow:inset 0 0 0 1.5px rgba(39,73,118,0.25); }
+.nfc { position:absolute; right:48px; top:62px; }
+.cnum { position:absolute; left:48px; bottom:64px; font-size:42px; letter-spacing:0.12em; }
+.cexp { position:absolute; right:48px; bottom:66px; font-size:34px; letter-spacing:0.04em; }
+.sweep { position:absolute; top:-40px; left:0; width:260px; height:420px; background:linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0) 100%); }
+
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="s03" data-start="0" data-duration="6" data-width="1080" data-height="1350" data-fps="30">
+  <div id="stage" class="clip" data-start="0" data-duration="6" data-track-index="0" data-track-kind="graphics" style="position:absolute;inset:0">
+    <div class="bg"></div>
+    <div class="logo" id="logo"></div>
+    <div class="eyebrow g b" id="eyebrow">SCENE · 03 DARI 16</div>
+    <div class="title" id="title"><span class="g b">Glass</span><svg class="arrow" width="78" height="52" viewBox="0 0 78 52"><defs><linearGradient id="ag" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient></defs><path d="M4 26H70M48 6l22 20-22 20" fill="none" stroke="url(#ag)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg><span class="g r">tilt</span></div>
+    <div class="sub g r" id="sub">Kartu kaca yang miring</div>
+    <div class="card" id="card">
+      <div class="panel dark" id="panel">
+        <div class="blob" id="bA"></div><div class="blob" id="bB"></div><div class="blob" id="bC"></div><div class="blob" id="bD"></div>
+        <div class="persp">
+          <div class="gcard" id="gcard">
+            <div class="chip"></div>
+            <svg class="nfc" width="44" height="52" viewBox="0 0 44 52"><defs><linearGradient id="ng" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient></defs><g fill="none" stroke="url(#ng)" stroke-width="4" stroke-linecap="round"><path d="M8 18a12 12 0 0 1 0 16"/><path d="M18 11a22 22 0 0 1 0 30"/><path d="M28 4a32 32 0 0 1 0 44"/></g></svg>
+            <div class="cnum g r">&bull;&bull;&bull;&bull; 4242</div>
+            <div class="cexp g b">12/29</div>
+            <div class="sweep" id="sweep"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <div class="lbl g b">GANTI DI SCENE INI</div>
+      <div class="txt g r">Kartu pembayaran kaca frosted (chip, <b class="b">&ldquo;&bull;&bull;&bull;&bull; [4 digit]&rdquo;</b>, <b class="b">&ldquo;[expiry]&rdquo;</b>, tanpa logo) berputar pelan dalam 3D di atas warna yang bergerak di navy gelap, dan seberkas cahaya menyapu permukaannya.</div>
+      <div class="used g r"><b class="b">Aku pakai:</b> 4242 dan 12/29.</div>
+    </div>
+    <div class="foot" id="foot">
+      <div class="who"><div class="dot">FK</div><span class="g b">FREDDIE KASHAWAN</span><span class="g r">AIpreneur</span></div>
+      <div class="pg g b">04 / 18 &nbsp;&nbsp; GESER &rarr;</div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const D = 6, TAU = Math.PI * 2;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+  const tl = gsap.timeline({ paused: true });
+  const st = { t: 0 };
+
+  const blobs = [
+    { id: "#bA", x: 560, y: 210, ax: 120, ay: 80, n: 1, p: 0.0 },
+    { id: "#bB", x: 230, y: 420, ax: 110, ay: 90, n: 1, p: 2.1 },
+    { id: "#bC", x: 300, y: 200, ax: 90, ay: 110, n: 2, p: 4.0 },
+    { id: "#bD", x: 600, y: 520, ax: 80, ay: 70, n: 1, p: 1.2 },
+  ];
+  function render(t) {
+    const ph = TAU * t / D;
+    blobs.forEach((b) => gsap.set(b.id, { x: b.x + b.ax * Math.sin(b.n * ph + b.p), y: b.y + b.ay * Math.cos(b.n * ph + b.p * 1.3) }));
+    gsap.set("#gcard", { rotationY: 17 * Math.sin(ph), rotationX: 9 * Math.cos(ph), y: 8 * Math.sin(2 * ph) });
+    const sp = clamp((t - 2.4) / 1.1, 0, 1);
+    const e = sp < 0.5 ? 2 * sp * sp : 1 - Math.pow(-2 * sp + 2, 2) / 2;
+    gsap.set("#sweep", { x: -320 + 900 * e, rotation: 0 });
+  }
+
+  tl.to(st, { t: D, duration: D, ease: "none", onUpdate: () => render(st.t) }, 0);
+  render(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["s03"] = tl;
+})();
+</script>
+</body>
+</html>

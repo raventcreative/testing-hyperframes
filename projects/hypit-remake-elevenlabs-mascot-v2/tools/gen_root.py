@@ -133,7 +133,7 @@ for gi, g in enumerate(groups):
     for wi in g["word_idx"]:
         ws = max(gs + 0.01, words[wi]["start"] - 0.03)
         if wi in starts:
-            tb = max(gs + 0.005, ws - 0.05)
+            tb = max(gs + 0.005, ws - 0.09)
             init.append(f'gsap.set("#cap-b{wi}", {{ scale: 0.35, opacity: 0, rotation: -4 }}); gsap.set("#cap-s{wi}", {{ xPercent: -160 }});')
             tl.append(f'tl.fromTo("#cap-b{wi}", {{ scale: 0.35, opacity: 0, rotation: -4 }}, {{ scale: 1, opacity: 1, rotation: 0, duration: 0.32, ease: "back.out(2.6)", immediateRender: false }}, {r3(tb)});')
             tl.append(f'tl.fromTo("#cap-h{wi}", {{ scale: 1 }}, {{ scale: 1.12, duration: 0.09, ease: "power2.out", immediateRender: false }}, {r3(tb + 0.1)});')
@@ -141,7 +141,7 @@ for gi, g in enumerate(groups):
             tl.append(f'tl.fromTo("#cap-s{wi}", {{ xPercent: -160 }}, {{ xPercent: 260, duration: 0.42, ease: "power2.inOut", immediateRender: false }}, {r3(tb + 0.3)});')
         if wi in hl:
             init.append(f'gsap.set("#cap-t{wi}", {{ opacity: 0, y: 16, scale: 0.7 }});')
-            tl.append(f'tl.fromTo("#cap-t{wi}", {{ opacity: 0, y: 16, scale: 0.7 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.26, ease: "back.out(2.4)", immediateRender: false }}, {r3(ws + 0.03)});')
+            tl.append(f'tl.fromTo("#cap-t{wi}", {{ opacity: 0, y: 16, scale: 0.7 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.24, ease: "back.out(2.4)", immediateRender: false }}, {r3(max(gs + 0.02, ws - 0.04))});')
         else:
             init.append(f'gsap.set("#cap-w{wi}", {{ opacity: 0, y: 10, filter: "blur(6px)" }}); gsap.set("#cap-k{wi}", {{ opacity: 0, scaleX: 0.5 }});')
             tl.append(f'tl.fromTo("#cap-w{wi}", {{ opacity: 0, y: 10, filter: "blur(6px)" }}, {{ opacity: 1, y: 0, filter: "blur(0px)", duration: 0.16, ease: "power3.out", immediateRender: false }}, {r3(ws)});')

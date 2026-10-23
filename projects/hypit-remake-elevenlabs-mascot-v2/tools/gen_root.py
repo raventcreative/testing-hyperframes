@@ -33,6 +33,33 @@ for s in sc["scenes"]:
         f'data-width="1080" data-height="1920"></div>'
     )
 
+CUTS = [  # (time, kind, ox, oy)
+    (4.2, "zoom", 540, 470), (9.167, "whipL", 0, 0), (13.8, "zoom", 540, 820), (16.867, "push", 0, 0),
+    (20.467, "zoom", 520, 1000), (23.267, "zoom", 520, 1000), (25.133, "whipL", 0, 0), (27.967, "zoom", 420, 720),
+    (30.1, "flash", 540, 900), (31.867, "flash", 540, 900), (35.933, "zoom", 540, 760), (40.7, "whipR", 0, 0),
+    (42.867, "flash", 420, 1000), (46.867, "zoom", 400, 1050), (49.867, "flash", 540, 950), (51.767, "whipL", 0, 0),
+    (56.7, "push", 0, 0), (58.733, "zoom", 380, 1000),
+]
+# global stage-cam punch at every cut (on top of the per-scene wrapper transitions)
+PUNCH = []
+for (t, k, ox, oy) in CUTS:
+    rot = {"whipL": -1.4, "whipR": 1.4}.get(k, 0)
+    psc = {"zoom": 1.07, "flash": 1.05, "push": 1.04}.get(k, 1.04)
+    PUNCH.append(f'        tl.fromTo("#stage-cam", {{ scale: 1, rotation: 0 }}, {{ scale: {psc}, rotation: {rot}, duration: 0.22, ease: "power2.in", immediateRender: false }}, {r3(t - 0.22)});')
+    PUNCH.append(f'        tl.fromTo("#stage-cam", {{ scale: {psc}, rotation: {-rot * 0.5} }}, {{ scale: 1, rotation: 0, duration: 0.5, ease: "expo.out", immediateRender: false }}, {r3(t)});')
+
+# presenter windows: (blur-in start, blur full, unblur start, unblur end)
+PRESENTER = json.loads((P / "tools/presenter_windows.json").read_text())
+st = []
+for w in PRESENTER:
+    a, b, c, d = w["in0"], w["in1"], w["out0"], w["out1"]
+    if b - a < 0.05:
+        st.insert(0, f'        gsap.set("#stage", {{ filter: "blur({w.get("blur", 16)}px) saturate(0.85)", scale: {w.get("scale", 1.06)} }});')
+    else: st.append(f'        tl.fromTo("#stage", {{ filter: "blur(0px) saturate(1)", scale: 1 }}, {{ filter: "blur({w.get("blur", 16)}px) saturate(0.85)", scale: {w.get("scale", 1.06)}, duration: {r3(b - a)}, ease: "power2.inOut", immediateRender: false }}, {r3(a)});')
+    st.append(f'        tl.fromTo("#stage", {{ filter: "blur({w.get("blur", 16)}px) saturate(0.85)", scale: {w.get("scale", 1.06)} }}, {{ filter: "blur(0px) saturate(1)", scale: 1, duration: {r3(d - c)}, ease: "power2.inOut", immediateRender: false }}, {r3(c)});')
+STAGE_TWEENS = chr(10).join(st + PUNCH)
+PHOSTS = [f'      <div id="{w["id"].lower()}" class="clip presenter" data-composition-id="{w["id"].lower()}" data-composition-src="compositions/{w["id"].lower()}.html" data-start="{w["host0"]}" data-duration="{r3(w["host1"] - w["host0"])}" data-track-index="8" data-track-kind="graphics" data-width="1080" data-height="1920"></div>' for w in PRESENTER]
+
 sfx_tags = []
 _sfxp = P / "tools/sfx_plan.json"
 SFX = json.loads(_sfxp.read_text()) if _sfxp.exists() else sc.get("sfx", [])
@@ -50,6 +77,7 @@ index = f"""<!doctype html>
     <title>Hypit — ElevenLabs × Mascot (AI PRENEUR)</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
+    <script src="vendor/vo_words.js"></script>
     <style>
       @font-face {{ font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }}
       @font-face {{ font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }}
@@ -68,7 +96,10 @@ index = f"""<!doctype html>
         background: radial-gradient(ellipse 70% 42% at 50% 56%, rgba(255,255,255,.34), rgba(255,255,255,0) 70%); }}
       #bg-grain {{ position: absolute; inset: 0; z-index: 2; opacity: .035; pointer-events: none;
         background-image: repeating-linear-gradient(90deg, rgba(18,21,50,.35) 0 1px, rgba(18,21,50,0) 1px 4px), repeating-linear-gradient(0deg, rgba(18,21,50,.25) 0 1px, rgba(18,21,50,0) 1px 5px); }}
+      #stage {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; z-index: 10; transform-origin: 540px 1000px; }}
+      #stage-cam {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 960px; }}
       .scene-host {{ z-index: 10; }}
+      .presenter {{ z-index: 30; }}
       #mascot {{ z-index: 40; }}
       #fx {{ z-index: 50; }}
       #captions {{ z-index: 60; }}
@@ -80,7 +111,12 @@ index = f"""<!doctype html>
       <div id="bg-haze" data-layout-ignore></div>
       <div id="bg-grain" data-layout-ignore></div>
 
+      <!-- global stage camera: blur/zoom behind the presenter mascot + cut punches -->
+      <div id="stage" data-layout-ignore><div id="stage-cam" data-layout-ignore>
 {chr(10).join(hosts)}
+      </div></div>
+      <!-- presenter layers: veil + pop-up elements around the big mascot (tools/gen_presenter.py) -->
+{chr(10).join(PHOSTS)}
 
       <!-- 3D rigged mascot overlay (one WebGL canvas, acting driven by global time) -->
       <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{r3(D)}" data-track-index="6" data-track-kind="graphics" data-width="1080" data-height="1920"></div>
@@ -95,7 +131,11 @@ index = f"""<!doctype html>
     </div>
     <script>
       window.__timelines = window.__timelines || {{}};
-      window.__timelines["main"] = gsap.timeline({{ paused: true }});
+      (function () {{
+        const tl = gsap.timeline({{ paused: true }});
+{STAGE_TWEENS}
+        window.__timelines["main"] = tl;
+      }})();
     </script>
   </body>
 </html>
@@ -189,13 +229,6 @@ cap = f"""<template>
 print("index.html + captions.html written;", len(sc["scenes"]), "scenes,", len(groups), "caption groups, D =", D)
 
 # ------------------------------------------------------------- fx.html (cut light FX)
-CUTS = [  # (time, kind, ox, oy)
-    (4.2, "zoom", 540, 470), (9.167, "whipL", 0, 0), (13.8, "zoom", 540, 820), (16.867, "push", 0, 0),
-    (20.467, "zoom", 520, 1000), (23.267, "zoom", 520, 1000), (25.133, "whipL", 0, 0), (27.967, "zoom", 420, 720),
-    (30.1, "flash", 540, 900), (31.867, "flash", 540, 900), (35.933, "zoom", 540, 760), (40.7, "whipR", 0, 0),
-    (42.867, "flash", 420, 1000), (46.867, "zoom", 400, 1050), (49.867, "flash", 540, 950), (51.767, "whipL", 0, 0),
-    (56.7, "push", 0, 0), (58.733, "zoom", 380, 1000),
-]
 fxm, fxi, fxt = [], [], []
 for i, (t, k, ox, oy) in enumerate(CUTS):
     if k in ("zoom", "flash"):

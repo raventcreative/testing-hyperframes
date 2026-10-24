@@ -1,7 +1,15 @@
-# REVIEW — Hypit × ElevenLabs × 3D Mascot (v4 preview, NOT final)
+# REVIEW — Hypit × ElevenLabs × 3D Mascot (v5 preview, NOT final)
 
-Status: **v4 assembled preview built and QA'd; waiting for Freddie's approval before the final delivery render.**
-Preview: `out/PREVIEW_v4_hypit-pro-mascot_draft.mp4` (draft quality). Diagnostic: `out/DIAG_v4_mascot_0-17s.mp4`.
+Status: **v5 assembled preview built and QA'd; waiting for Freddie's approval before the final delivery render.**
+Preview: `out/PREVIEW_v5_hypit-motion-director_draft.mp4` (draft). Demo: `projects/motion-director-demo/out/DEMO_smart-motion-director.mp4`.
+
+## v5 (Freddie's 5th revision)
+- Eye glitch fixed: blinks removed (the GLB has no eyelid geometry; every lid overlay/squash produced artifacts) — eyes stay clean.
+- GitHub icon replaced by Freddie's 3D GitHub mark (background removed) with an orbit reveal on "GitHub" and "repo".
+- **Smart Motion Director** (`production/smart_motion_director.md`): 20-effect library with SUBTLE/STANDARD/HIGH presets,
+  auto-direction from the VO, a 10.6 s demo rendered and inspected first, then applied to the film: studio reveal,
+  snap zoom, orbit reveal, growth curve, chat takeover, checklist pop, digital zoom, dolly zoom, frame break,
+  green-screen compositing of the host and a cinematic orbit on the host in presenter shots.
 The final render runs only after an explicit "ya". Details: `production/v4_animation_lipsync.md`.
 
 ## What changed in v4 (Freddie's 4th revision)

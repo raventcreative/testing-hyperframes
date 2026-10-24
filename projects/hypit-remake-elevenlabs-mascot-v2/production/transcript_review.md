@@ -45,3 +45,9 @@ Output: `production/word_timing.json` (words, caption groups, audio facts). Scen
 
 ## Timeline length
 Video 61.100 s = 1833 frames @ 30 fps (covers the full 61.074 s MP3, nothing stretched or re-pitched). Tail after the last word: 0.236 s, plus the CTA visuals settle ~1 s before the end, so the final still is calm. Option for Freddie: add ~0.5 s silent hold at the end if you want a longer final still (the MP3 itself stays untouched).
+
+## v4 timing note
+Word timing is now measured from the audio (phone-level CTC forced alignment, `production/phoneme_timing.json`).
+Compared with the v3 estimate the word starts moved by 0.13 s on average and up to 0.55 s (largest around
+"lo kasih satu video", "Hasilnya bukan", "musik, dan aset"). v3 timing kept as `word_timing_v3_estimated.json`.
+Alignment used the spoken form; "per katanya" aligned as heard ("perkataannya"), "Claude" as "klod", "AI" as "a-i".

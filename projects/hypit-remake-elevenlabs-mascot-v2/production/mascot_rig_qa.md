@@ -44,3 +44,12 @@ Implemented in the material shader using the vertex's **rest-pose position**, so
 6. Rendering is software WebGL (SwiftShader) in this container; deterministic but slower to render.
 
 If Freddie later provides a professionally rigged GLB/FBX with finger bones and facial blendshapes (ARKit/visemes), the acting track in `compositions/mascot.html` can drive those directly for richer hands and mouths.
+
+## v4 update (supersedes the lip-sync and facial sections above where they differ)
+- Runtime model: `assets/mascot3d/mascot_rigged_v4.glb` (cleaned copy; `mascot_rigged.glb` and the Tripo source untouched).
+- Hair texture: 29 painted highlight blobs inpainted. Mouth: baked mouth painted out, cavity projected onto a fitted
+  skin surface (`facepatch.mjs`), normal map flattened there; procedural mouth drawn on clean skin.
+- Lids: skin colour sampled from the face texture around each eye; fully closed only for ≤1 frame per blink.
+- Gaze and brow texture shifts disabled (they produced the ring / doubled-brow artifacts).
+- Lip sync from the real VO: CTC phone alignment + 100 Hz energy envelope (see `production/v4_animation_lipsync.md`).
+- Body: key poses + per-bone damped springs (`tools/mascot3d/src/perform.js`).

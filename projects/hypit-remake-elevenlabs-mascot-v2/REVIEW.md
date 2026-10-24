@@ -1,32 +1,44 @@
-# REVIEW — Hypit × ElevenLabs × 3D Mascot (v3 preview, NOT final)
+# REVIEW — Hypit × ElevenLabs × 3D Mascot (v4 preview, NOT final)
 
-Status: **v3 assembled preview built and QA'd; waiting for Freddie's approval before the final delivery render.**
-Preview: `out/PREVIEW_v3_hypit-narrator_draft.mp4` (draft quality). Final render runs only after an explicit "ya".
+Status: **v4 assembled preview built and QA'd; waiting for Freddie's approval before the final delivery render.**
+Preview: `out/PREVIEW_v4_hypit-pro-mascot_draft.mp4` (draft quality). Diagnostic: `out/DIAG_v4_mascot_0-17s.mp4`.
+The final render runs only after an explicit "ya". Details: `production/v4_animation_lipsync.md`.
 
-## What changed in v3 (Freddie's 3rd revision) — details: `production/v3_narrator_presenter.md`
-- **Mascot is the narrator**: mouth lip-syncs the whole VO whenever he is on screen; talking hands alternate per phrase with a beat on every word, nods on keywords, head bob and body sway (smooth curves, no pops).
-- **Opening "hai"**: walks toward camera out of the glass-arch podium while waving, then explains in front of the blurred scene.
-- **Presenter scenes** (big mascot in front, background blurred, elements popping around him): 0–4.2, 9.05–13.8, 40.6–46.87, 56.6–58.73 — pixel cursor clicks the video player, the reference video flies into the agent workspace, "jangan" stop-hand + no-sign on someone else's content, footage/music/image chips drop into the folder + shield on "jelas", link / folder / guide pop-ups on the CTA question.
-- **Bug fixed**: the intro vault mask no longer slices through his body when he steps out.
-- **Stronger transitions**: global stage camera punch + roll at every cut on top of the zoom/whip/push wrappers; 4.2–16.87 is one continuous mascot take (peek → presenter → corner cameo).
-- 12 extra subtle SFX for the new pop-ups and clicks.
+## What changed in v4 (Freddie's 4th revision)
+- **Mouth follows the real audio.** Phone-level forced alignment of the VO (local MMS CTC aligner) showed the old
+  word timing was up to 0.55 s off — the reason the mouth looked faster than the voice. The measured timing now
+  drives lip sync, captions, SFX and every visual hit in the scenes. Mouth opening follows the VO energy; silence = closed.
+- **Clean face.** The brown/pink circles were highlight blobs painted in the model's hair texture (29 removed);
+  the baked open mouth and its cavity were replaced by clean skin + a new drawn mouth; eyelids use the real skin
+  tone; gaze/brow shifts that caused rings were dropped. New cleaned model copy: `assets/mascot3d/mascot_rigged_v4.glb`.
+- **Smooth, intentional acting.** Key poses on the spoken words, every bone settled by its own spring
+  (anticipation, overlap, follow-through), moments of stillness, nods on stressed syllables, breathing/idle.
+- **Half-body only.** Intro: walks forward from the glass arches straight into a waist-up shot waving "hai",
+  points at the video card, opens hands on "efek". Other scenes: chest-up host rising from the corner.
+- **Reference-grade motion**: 3D hinge card entrances with rack focus, blur fly-outs, 3D whip swings + motion
+  blur at whip cuts, slow 3D orbit on every scene, keyword boxes flip up and snap in, halftone film/clapper/camera
+  collage, GitHub mark flip (s02) and a 3D GitHub page card on "link repo".
+- Text/box gradient changed to **#0a0d2c → #294b77** everywhere.
 
-## Measured (v3)
-- `lint`: 0 errors; 1 warning kept (mascot.html line count).
-- `check` per range (0–8 … 56–61.05, 6 samples each): 0 errors. Warnings: WebGL "GPU stall due to ReadPixels" (software renderer notice); 4 transient caption contrast samples at ~20.6 s while the keyword boxes are mid-pop.
-- Seek determinism (forward vs reverse order, 16 timestamps incl. every presenter window): **0 changed pixels**.
-- On-screen text: VO words + the verified install command only. Pop-ups are images/icons, no new text.
+## Measured (v4)
+- `lint`: 0 errors, 0 warnings.
+- `check` per range (8 ranges × 6 samples): 0 errors. Warnings: WebGL "GPU stall due to ReadPixels"
+  (software renderer notice), caption sheen passing outside its box mid-sweep (intended, clipped).
+- Seek determinism (forward vs reverse order, 18 timestamps incl. every mascot and presenter window): 0 changed pixels.
+- On-screen text: VO words + the verified install command. Pop-ups are Freddie's images/icons.
 
 ## Not checked by anyone
-- Nobody has heard the audio (VO pronunciation flags in `production/transcript_review.md`).
-- Lip-sync interior viseme timing is estimated (±~0.1 s).
+- Nobody has listened to the full mix by ear here (pronunciation flags in `production/transcript_review.md`).
 
 ## Known limits
-1. Mouth/eyes are shader overlays (the GLB has no blendshapes or jaw); best from front / ¾.
-2. Mitten hands (single bone): no finger poses.
-3. "Hai" is a gesture — the VO has no "hai" word.
-4. The walk toward camera is staged (orthographic scale + floor line).
+1. No blendshapes/jaw in the GLB → mouth and lids are drawn on the face surface; best from front / ¾.
+2. Mitten hands (single bone), no finger poses; brows no longer animate.
+3. "Hai" is a gesture only (not in the VO).
+4. The GitHub mark and GitHub home-page screenshot are Freddie's supplied assets (third-party trademark,
+   used editorially for "repo GitHub" / "link repo").
 
 ## Regeneration
-`python3 tools/gen_vo_words.py . && python3 tools/gen_presenter.py . && python3 tools/gen_mascot.py . && python3 tools/gen_root.py .`
+`<venv>/bin/python tools/phoneme_align.py . && python3 tools/retime_v4.py . && python3 tools/apply_warp.py . &&
+python3 tools/gen_presenter.py . && python3 tools/gen_mascot.py . && python3 tools/gen_root.py .`
+Face: `node tools/mascot3d/facepatch.mjs mask|apply …` + `tools/face_texture_clean.py`.
 Bundle: from `tools/mascot3d`: `npx esbuild src/mascot.js --bundle --format=iife --minify --outfile=../../vendor/mascot3d.js`.

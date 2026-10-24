@@ -10,274 +10,191 @@
   <script>
     (function () {
       // =====================================================================================
-      // 3D MASCOT NARRATOR (v3). Source: tools/mascot_src.html → built by tools/gen_mascot.py.
-      // Whenever he is on screen his mouth lip-syncs the VO (vendor/vo_words.js) and the
-      // speech engine adds talking hands / nods / sway; each window below layers its acting.
-      // Bones: root.ry<0 turns toward screen-left; upperarm_L z+ raises his left arm (screen-right);
-      // upperarm_R z- raises his right arm (screen-left); x- swings limbs forward; head x+ = nod.
+      // 3D MASCOT — v4 performance (source: tools/mascot_src.html -> tools/gen_mascot.py).
+      // Layers: key poses on the measured VO word times -> per-bone damped springs (anticipation,
+      // overlap, follow-through, settle) -> dialogue head accents from the VO energy -> audio-driven
+      // lip sync (CTC-aligned phones x energy) -> breathing / value-noise idle -> blinks.
+      // Framing is half-body only (waist-up presenter, chest-up corner host): legs never shown.
+      // Bones: his right arm = screen-left; poses in perform.js ARM are written for his right arm.
       // =====================================================================================
       const M3 = window.Mascot3D;
-      const { track: K, osc, blink, walk, addBones, E, buildSpeech, lipAt, talk, ss, bump } = M3;
-      const S = buildSpeech(window.VO_WORDS);
+      const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump, osc, E } = M3;
+      const VW = window.VO_WORDS, D = 61.1;
+      const w = (i) => VW[i][1], we = (i) => VW[i][2];
       const canvas = document.getElementById("m-canvas");
       const xf = document.getElementById("m-xf");
-      const D = 61.1;
-      const RELAX = { upperarm_L: [0, 0, -0.16], upperarm_R: [0, 0, 0.16], forearm_L: [-0.14, 0, 0.04], forearm_R: [-0.14, 0, -0.04] };
-      const breath = (t) => ({ chest: [osc(t, -99, 999, 0.32, 0.012), 0, 0], spine: [osc(t, -99, 999, 0.32, 0.006, 0.4), 0, 0] });
-      const HAPPY = { blink: [0.33, 0.33], lower: [0.62, 0.62] };
-      const PRES = { fx: 560, fy: 1840, h: 1000, pitch: 5 };
-      const mixFace = (a, b, u) => {
-        const o = {};
-        for (const k of ["blink", "lower", "gaze", "brow", "browTilt"]) {
-          const x = a[k] || [0, 0], y = b[k] || [0, 0];
-          o[k] = [x[0] + (y[0] - x[0]) * u, x[1] + (y[1] - x[1]) * u];
-        }
-        return o;
-      };
-      const lerpView = (A, B, u) => ({ fx: A.fx + (B.fx - A.fx) * u, fy: A.fy + (B.fy - A.fy) * u, h: A.h + (B.h - A.h) * u, pitch: (A.pitch || 5) + ((B.pitch || 5) - (A.pitch || 5)) * u });
-      // gesture library (weights 0..1; negative overshoot allowed by "back" keys)
-      const G = {
-        pointR: (p) => ({ upperarm_R: [-0.38 * p, -0.1 * p, -1.02 * Math.max(0, p)], forearm_R: [0.1 * p, 0, -0.08 * p], hand_R: [0, 0, -0.12 * p], chest: [0, -0.1 * p, 0] }),
-        presentR: (p) => ({ upperarm_R: [-0.55 * p, 0, -0.75 * Math.max(0, p)], forearm_R: [-0.45 * p, 0, -0.2 * p], hand_R: [0, 0.4 * p, -0.35 * p] }),
-        presentL: (p) => ({ upperarm_L: [-0.55 * p, 0, 0.75 * Math.max(0, p)], forearm_L: [-0.45 * p, 0, 0.2 * p], hand_L: [0, -0.4 * p, 0.35 * p] }),
-        openB: (p) => {
-          const q = Math.max(0, p);
-          return { upperarm_L: [-0.55 * p, 0, 0.62 * q], upperarm_R: [-0.55 * p, 0, -0.62 * q], forearm_L: [-0.85 * q, -0.2 * q, 0.2 * q], forearm_R: [-0.85 * q, 0.2 * q, -0.2 * q], hand_L: [0, -0.55 * q, 0.3 * q], hand_R: [0, 0.55 * q, -0.3 * q], chest: [-0.05 * q, 0, 0], head: [-0.05 * q, 0, 0] };
-        },
-        waveL: (w, a, a0, a1) => ({ upperarm_L: [-0.15 * w, 0, 2.05 * w], forearm_L: [0, 0, (0.45 + osc(a, a0, a1, 2.3, 0.42)) * w], hand_L: [0, 0, osc(a, a0 + 0.05, a1, 2.3, 0.32, -0.9) * w], chest: [0, 0, 0.05 * w + osc(a, a0, a1, 1.15, 0.03)] }),
-        stopR: (p, a, a0, a1) => ({ upperarm_R: [-0.4 * p, 0, -1.0 * Math.max(0, p)], forearm_R: [-0.25 * p, 0, -1.05 * Math.max(0, p)], hand_R: [0, 0.2 * p, (-0.1 + osc(a, a0, a1, 3.0, 0.45)) * p], chest: [0, -0.06 * p, 0] }),
-      };
+      const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, D);
+      const ACC = syllableAccents(window.VO_ENV, VW, window.VO_PHONES, D);
       const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * u * (u * (u * 6 - 15) + 10); };
+      const lerpV = (A, B, u) => ({ fx: A.fx + (B.fx - A.fx) * u, fy: A.fy + (B.fy - A.fy) * u, h: A.h + (B.h - A.h) * u, pitch: 4 });
+      // framings (feet far below the frame -> half body)
+      const PRES = { fx: 540, fy: 2200, h: 1250 };         // waist-up presenter, head top ~950
+      const INTRO = { fx: 560, fy: 2010, h: 880 };         // further back in front of the arches
+      const CORNER_R = { fx: 850, fy: 2110, h: 860 };      // chest-up host, bottom-right
+      const CORNER_L = { fx: 212, fy: 2110, h: 860 };      // chest-up host, bottom-left
+      const CTA = { fx: 815, fy: 2160, h: 940 };
+      const HIDE = -1.05;                                  // root.y that puts the head below the frame
 
-      // transition helpers (mirror the scene wrapper moves at the cuts)
-      function xfIn(t, t0, kind, ox, oy) {
-        const u = one((t - t0) / 0.45), e = E.out4(u);
-        if (kind === "zoom") return { s: 1.45 + (1 - 1.45) * e, blur: 10 * (1 - e), ox, oy };
-        if (kind === "whip") return { x: 620 * (1 - e), blur: 16 * (1 - e) };
-        if (kind === "whipFromL") return { x: -620 * (1 - e), blur: 16 * (1 - e) };
-        if (kind === "push") return { y: 520 * (1 - e), blur: 12 * (1 - e) };
-        if (kind === "settle") return { s: 1.12 + (1 - 1.12) * e, ox, oy };
-        return {};
+      // ---- additive layers
+      function waveLayer(t, t0, t1, side) { // a real wave: forearm swings, wrist trails it
+        const e = sm((t - t0) / 0.25) * sm((t1 - t) / 0.3);
+        if (e <= 0) return {};
+        const ph = (t - t0) * 2 * Math.PI * 2.1;
+        const s = side === "L" ? 1 : -1;
+        return { ["forearm_" + side]: [0, 0, s * 0.42 * Math.sin(ph) * e], ["hand_" + side]: [0, 0, s * 0.3 * Math.sin(ph - 0.9) * e] };
       }
+      function shake(t, t0, t1, amp) { return osc(t, t0, t1, 3.3, amp, 0, 0.12, 0.2); }
+      function accents(t) {
+        let n = 0;
+        for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; }
+        return Math.min(1.3, n);
+      }
+      function idle(t, seed) {
+        return {
+          chest: [0.012 * Math.sin(t * 2 * Math.PI * 0.27), 0, 0],
+          spine: [0, 0.03 * vnoise(t, seed + 1, 0.3), 0.022 * vnoise(t, seed + 2, 0.27)],
+          head: [0.02 * vnoise(t, seed + 3, 0.4), 0.05 * vnoise(t, seed + 4, 0.31), 0.03 * vnoise(t, seed + 5, 0.36)],
+          forearm_L: [0.04 * vnoise(t, seed + 6, 0.45), 0, 0], forearm_R: [0.04 * vnoise(t, seed + 7, 0.42), 0, 0],
+        };
+      }
+      const add = (...ds) => { const o = {}; for (const d of ds) for (const [k, v] of Object.entries(d || {})) { const a = o[k] || [0, 0, 0]; o[k] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
+      // blink: 50 ms close, at most one fully-closed frame, 80 ms open; never fully shut longer
+      function blinkAt(t, times) {
+        let v = 0;
+        for (const b of times) {
+          const d = t - b;
+          if (d >= 0 && d < 0.05) v = Math.max(v, E.in(d / 0.05) * 0.95);
+          else if (d >= 0.05 && d < 0.083) v = Math.max(v, 0.95);
+          else if (d >= 0.083 && d < 0.17) v = Math.max(v, 0.95 * (1 - E.out((d - 0.083) / 0.087)));
+        }
+        return v;
+      }
+
+      // ---- a window = its own performance (springs start settled at the window's first pose)
+      function win(def) {
+        const loc = (k) => k.map((x) => [x[0] - def.t0, x[1], x[2]]);
+        const tr = {};
+        for (const n of ["armL", "armR", "torso", "head", "root"]) if (def[n]) tr[n] = loc(def[n]);
+        def.perf = buildPerformance(tr, def.t1 - def.t0 + 0.05);
+        def.blinks = def.blinks || [];
+        return def;
+      }
+
+      // ===================================================================== W1 INTRO (s01)
+      // Starts a little further back in front of the glass arches, comes forward to a waist-up
+      // presenter shot waving "hai" (gesture only), points at the video card on "video viral",
+      // opens both hands on "efek per katanya".
+      const W1 = win({
+        t0: 0, t1: 4.2, outK: ["zoom", 540, 460], seed: 11,
+        view(t) { return t < 1.05 ? lerpV(INTRO, PRES, sm(t / 1.05)) : lerpV(PRES, { fx: 540, fy: 2215, h: 1300 }, sm((t - 1.05) / 3.15)); },
+        armL: [[0, "low", 0.2], [0.1, "wave", 0.42], [1.62, "low", 0.45], [w(8) - 0.12, "open", 0.38], [3.95, "explain", 0.4]],
+        armR: [[0, "low", 0.2], [w(3) - 0.1, "explain", 0.4], [w(5) - 0.2, "pointUp", 0.36], [2.5, "low", 0.4], [w(8) - 0.12, "open", 0.38], [3.95, "explain", 0.4]],
+        torso: [[0, { spine: [0.04, 0, 0], chest: [0, 0, 0] }, 0.2], [0.15, { spine: [0.08, 0, 0.04], chest: [0.02, 0.08, 0] }, 0.5], [1.4, { spine: [0.02, 0, 0] }, 0.5],
+                [w(5) - 0.2, { chest: [0, -0.12, 0], spine: [0, -0.05, 0] }, 0.4], [2.55, { chest: [0, 0, 0] }, 0.4], [w(8) - 0.1, { chest: [0.07, 0, 0], spine: [0.03, 0, 0] }, 0.3], [3.7, { chest: [0, 0, 0] }, 0.5]],
+        head: [[0, [0, 0, 0], 0.2], [0.2, [0.06, 0.04, 0.12], 0.45], [1.4, [0, 0, 0], 0.4], [w(5) - 0.15, [-0.08, -0.22, 0.04], 0.35], [2.55, [0, 0, 0.0], 0.4], [w(8) - 0.05, [0.06, 0, -0.06], 0.25], [3.7, [0, 0, 0], 0.5]],
+        root: [[0, { y: 0, ry: 0.06 }, 0.2], [0.1, { ry: -0.05 }, 0.45], [0.6, { ry: 0.04 }, 0.45], [1.1, { ry: 0 }, 0.5]],
+        extra(t) { return add(waveLayer(t, 0.3, 1.55, "L")); },
+        rootExtra(t) { return { y: 0.014 * (Math.abs(Math.sin(Math.PI * one(t / 1.05) * 2))) * (1 - sm((t - 0.85) / 0.25)) }; },
+        blinks: [0.9, 2.62, 3.98],
+      });
+
+      // ============================================== W2 HYPIT → PRESENTER → CODING AGENT (4.2–16.87)
+      const W2 = win({
+        t0: 4.2, t1: 16.867, outK: null, seed: 23,
+        view(t) {
+          if (t < 9.0) return CORNER_R;
+          if (t < 9.6) return lerpV(CORNER_R, PRES, sm((t - 9.0) / 0.6));
+          if (t < 13.5) return lerpV(PRES, { fx: 540, fy: 2210, h: 1290 }, sm((t - 9.6) / 3.9));
+          if (t < 14.15) return lerpV({ fx: 540, fy: 2210, h: 1290 }, CORNER_R, sm((t - 13.5) / 0.65));
+          return CORNER_R;
+        },
+        root: [[4.2, { y: HIDE, ry: -0.35 }, 0.01], [4.28, { y: 0, ry: -0.3 }, 0.32], [w(13), { ry: -0.15 }, 0.5], [9.0, { ry: 0 }, 0.6], [13.5, { ry: -0.3 }, 0.6], [16.5, { y: HIDE }, 0.35]],
+        armR: [[4.2, "low", 0.2], [w(12) - 0.18, "present", 0.36], [5.75, "low", 0.4], [w(18) - 0.12, "explainHi", 0.4], [w(20) - 0.12, "pointUp", 0.32], [9.05, "low", 0.45],
+               [w(21) - 0.08, "explainHi", 0.35], [w(25) - 0.2, "pointUp", 0.36], [w(27) - 0.05, "low", 0.4], [w(31) - 0.12, "open", 0.36], [13.6, "low", 0.5],
+               [w(37) - 0.15, "chin", 0.45], [w(39), "low", 0.4], [w(40) - 0.12, "point", 0.3]],
+        armL: [[4.2, "low", 0.2], [w(13) - 0.1, "explain", 0.4], [w(18) - 0.12, "explain", 0.4], [w(20) - 0.1, "low", 0.4], [w(21) - 0.05, "explain", 0.4], [w(24), "low", 0.4],
+               [w(28) - 0.15, "pointUp", 0.36], [w(30) + 0.1, "low", 0.4], [w(31) - 0.12, "open", 0.36], [13.6, "low", 0.5], [w(33) - 0.05, "explain", 0.4], [w(37) - 0.1, "low", 0.45]],
+        torso: [[4.2, {}, 0.2], [w(12) - 0.15, { chest: [0.04, -0.1, 0] }, 0.4], [5.8, {}, 0.4], [w(19) - 0.1, { chest: [-0.05, 0, 0], spine: [-0.03, 0, 0] }, 0.35], [8.9, {}, 0.4],
+                [w(25) - 0.2, { chest: [0, -0.1, 0] }, 0.4], [w(28) - 0.15, { chest: [0, 0.1, 0] }, 0.4], [w(31) - 0.1, { chest: [0.05, 0, 0] }, 0.3], [13.6, {}, 0.5], [w(37), { spine: [0.06, 0, 0] }, 0.5], [16.2, {}, 0.3]],
+        head: [[4.2, [0, -0.25, 0], 0.2], [w(12) - 0.1, [0.05, -0.32, 0.06], 0.3], [5.8, [0, 0, 0], 0.4], [w(20) - 0.05, [-0.1, -0.15, 0.05], 0.3], [9.05, [0, 0, 0], 0.4],
+               [w(21), [0.04, 0, 0.08], 0.35], [w(25) - 0.15, [-0.08, -0.2, 0.03], 0.3], [w(28) - 0.1, [-0.07, 0.22, -0.03], 0.3], [w(31) - 0.05, [0.05, 0, 0], 0.3], [13.6, [0, -0.3, 0], 0.5],
+               [w(37) - 0.1, [0.06, -0.2, 0.1], 0.4], [w(40) - 0.1, [0.06, -0.35, 0], 0.3]],
+        blinks: [5.6, 7.4, 9.3, 11.0, 12.5, 14.6, 15.9],
+      });
+
+      // ============================================== W3 EDITING WORKFLOW (s06–s08)
+      const W3 = win({
+        t0: 20.467, t1: 27.967, seed: 37,
+        view: () => CORNER_R,
+        root: [[20.467, { y: HIDE, ry: -0.3 }, 0.01], [20.5, { y: 0 }, 0.32], [27.62, { y: HIDE }, 0.33]],
+        armR: [[20.467, "low", 0.2], [w(49) - 0.15, "point", 0.32], [w(51) + 0.1, "low", 0.4], [w(54) - 0.1, "palmUp", 0.35], [w(57) + 0.15, "low", 0.4], [w(59) - 0.1, "explain", 0.35], [w(62) - 0.1, "low", 0.35], [w(64) - 0.14, "point", 0.3]],
+        armL: [[20.467, "low", 0.2], [w(50) - 0.1, "explain", 0.35], [w(53) - 0.12, "explainHi", 0.36], [23.4, "low", 0.4], [w(55) - 0.05, "stop", 0.3], [w(57) + 0.1, "low", 0.4], [w(59) - 0.1, "explainHi", 0.35], [w(62), "low", 0.4]],
+        torso: [[20.467, {}, 0.2], [w(49) - 0.1, { chest: [0, -0.1, 0] }, 0.35], [w(53) - 0.1, { chest: [0.05, 0, 0] }, 0.3], [23.4, {}, 0.4], [w(59), { spine: [0.05, 0, 0.03] }, 0.5], [w(64) - 0.1, { chest: [0.06, -0.12, 0] }, 0.3]],
+        head: [[20.467, [0, -0.3, 0], 0.2], [w(49) - 0.08, [0.06, -0.38, 0], 0.25], [w(50) - 0.05, [0.02, -0.25, 0.04], 0.25], [w(51) - 0.05, [0.06, -0.12, 0], 0.25], [w(53) - 0.05, [0.04, 0, -0.05], 0.3],
+               [w(54), [0, 0, 0.06], 0.4], [w(58), [0.03, 0, 0], 0.4], [w(64) - 0.1, [0.08, -0.35, 0.04], 0.3]],
+        extra(t) { return { head: [0, shake(t, w(55) - 0.02, w(56) + 0.1, 0.13), 0] }; },
+        blinks: [21.9, 23.55, 25.05, 26.4],
+      });
+
+      // ============================================== W4 SWAP (s11), host on the LEFT
+      const W4 = win({
+        t0: 31.867, t1: 35.933, seed: 41,
+        view: () => CORNER_L,
+        root: [[31.867, { y: HIDE, ry: 0.32 }, 0.01], [31.9, { y: 0 }, 0.32], [35.6, { y: HIDE }, 0.33]],
+        armL: [[31.867, "low", 0.2], [w(75) - 0.15, "point", 0.3], [w(76) + 0.2, "low", 0.4], [w(77) - 0.12, "present", 0.32], [w(79) - 0.05, "low", 0.4], [w(81) - 0.12, "together", 0.32]],
+        armR: [[31.867, "low", 0.2], [w(74), "explain", 0.4], [w(76) - 0.05, "open", 0.25], [w(77) - 0.1, "low", 0.4], [w(81) - 0.12, "together", 0.32]],
+        torso: [[31.867, {}, 0.2], [w(76) - 0.05, { chest: [-0.1, 0, 0], spine: [-0.05, 0, 0] }, 0.18], [w(76) + 0.45, {}, 0.45]],
+        head: [[31.867, [0, 0.25, 0], 0.2], [w(75) - 0.05, [0.04, 0.32, 0.03], 0.25], [w(76) - 0.05, [-0.1, 0.18, 0.08], 0.18], [w(77), [0.03, 0.28, 0], 0.3], [w(79), [0.02, 0.1, -0.05], 0.35], [w(81), [0.05, 0, 0], 0.3]],
+        blinks: [32.9, 34.6],
+      });
+
+      // ============================================== W5 RIGHTS PRESENTER (s13–s14)
+      const W5 = win({
+        t0: 40.7, t1: 46.867, outK: ["zoom", 380, 1050], seed: 53,
+        view(t) { return lerpV(PRES, { fx: 540, fy: 2215, h: 1300 }, sm((t - 40.7) / 6.1)); },
+        root: [[40.7, { x: -1.15, y: 0, ry: 0.4 }, 0.01], [40.72, { x: 0, ry: 0.0 }, 0.42], [w(106), { ry: 0.1 }, 0.5]],
+        armR: [[40.7, "low", 0.2], [w(95) - 0.2, "stop", 0.32], [w(98) - 0.12, "pointUp", 0.32], [42.75, "low", 0.4], [w(100) - 0.1, "palmUp", 0.35], [w(103), "low", 0.4], [w(104) - 0.12, "explain", 0.32], [w(105) + 0.1, "low", 0.4], [w(108) - 0.12, "fist", 0.28]],
+        armL: [[40.7, "low", 0.2], [w(95) - 0.1, "low", 0.3], [w(102) - 0.1, "explain", 0.35], [w(104) - 0.12, "explainHi", 0.32], [w(105) + 0.1, "low", 0.35], [w(107) - 0.15, "present", 0.35]],
+        torso: [[40.7, {}, 0.2], [w(95) - 0.15, { chest: [-0.04, 0, 0], spine: [-0.03, 0, 0] }, 0.3], [w(98), { chest: [0, -0.1, 0] }, 0.35], [42.8, {}, 0.4], [w(108) - 0.1, { chest: [0.06, 0.08, 0] }, 0.3]],
+        head: [[40.7, [0, 0.2, 0], 0.2], [w(94), [0, 0, 0], 0.4], [w(98) - 0.1, [-0.08, -0.22, 0.03], 0.3], [42.8, [0, 0, 0], 0.4], [w(101) - 0.1, [-0.1, 0, 0], 0.4], [w(103), [0, 0, 0.04], 0.4],
+               [w(107) - 0.15, [-0.05, 0.25, -0.04], 0.35], [w(108) - 0.05, [0.12, 0.2, -0.04], 0.25], [46.6, [0.02, 0.1, 0], 0.3]],
+        extra(t) { return { head: [0, shake(t, w(95) + 0.02, w(97), 0.17), 0], neck: [0, shake(t, w(95) + 0.02, w(97), 0.06), 0], hand_R: [0, 0, shake(t, w(95), w(97), 0.25)] }; },
+        blinks: [41.9, 43.7, 45.3],
+      });
+
+      // ============================================== W6 BRIEF (s16)
+      const W6 = win({
+        t0: 49.867, t1: 51.767, seed: 61,
+        view: () => CORNER_R,
+        root: [[49.867, { y: HIDE, ry: -0.3 }, 0.01], [49.9, { y: 0 }, 0.32], [51.45, { y: HIDE }, 0.3]],
+        armL: [[49.867, "low", 0.2], [w(117), "explain", 0.4], [w(121) - 0.12, "together", 0.3]],
+        armR: [[49.867, "low", 0.2], [w(119) - 0.15, "point", 0.3], [w(120), "low", 0.3], [w(121) - 0.12, "together", 0.3]],
+        head: [[49.867, [0, -0.25, 0], 0.2], [w(119) - 0.1, [0.05, -0.35, 0], 0.3], [w(121) - 0.05, [0.08, -0.1, 0], 0.3]],
+        blinks: [50.5],
+      });
+
+      // ============================================== W7 CTA (s18–s19)
+      const W7 = win({
+        t0: 56.7, t1: 61.1, seed: 71,
+        view(t) { return t < 58.45 ? PRES : t < 59.0 ? lerpV(PRES, CTA, sm((t - 58.45) / 0.55)) : CTA; },
+        root: [[56.7, { y: HIDE }, 0.01], [56.72, { y: 0 }, 0.34], [58.45, { ry: -0.18 }, 0.55], [60.9, { ry: -0.1 }, 0.3]],
+        armR: [[56.7, "low", 0.2], [w(135) - 0.15, "pointUp", 0.32], [w(137), "low", 0.35], [w(139) - 0.15, "shrug", 0.3], [58.6, "low", 0.4], [w(141) - 0.2, "point", 0.3], [59.95, "low", 0.45]],
+        armL: [[56.7, "low", 0.2], [w(136) - 0.12, "present", 0.32], [w(138), "low", 0.35], [w(139) - 0.15, "shrug", 0.3], [58.6, "low", 0.4], [w(142) - 0.15, "wave", 0.38], [60.72, "low", 0.4]],
+        torso: [[56.7, {}, 0.2], [w(139) - 0.1, { chest: [-0.03, 0, 0] }, 0.3], [58.6, {}, 0.4], [w(141) - 0.15, { chest: [0.03, -0.12, 0] }, 0.3], [59.95, {}, 0.4]],
+        head: [[56.7, [0, 0, 0], 0.2], [w(135) - 0.1, [-0.08, -0.2, 0.03], 0.3], [w(136) - 0.05, [-0.06, 0.2, -0.03], 0.3], [w(139) - 0.1, [0.02, 0, 0.16], 0.3], [58.6, [0, 0, 0], 0.4],
+               [w(141) - 0.1, [0.04, -0.28, 0.06], 0.3], [59.95, [0, 0, 0.05], 0.4], [w(144), [0.05, 0, 0.08], 0.35], [60.95, [0.02, 0, 0.03], 0.3]],
+        extra(t) { return waveLayer(t, w(142) + 0.1, 60.72, "L"); },
+        blinks: [57.5, 59.85, 61.0],
+      });
+
+      const WINDOWS = [W1, W2, W3, W4, W5, W6, W7];
+
       function xfOut(t, t1, kind, ox, oy) {
         const e = E.in(one((t - (t1 - 0.27)) / 0.27));
         if (kind === "zoom") return { s: 1 + 1.5 * e, blur: 10 * e, ox, oy };
-        if (kind === "whipL") return { x: -620 * e, blur: 16 * e };
-        if (kind === "push") return { y: -520 * e, blur: 12 * e };
-        if (kind === "shrink") return { s: 1 - 0.1 * e, ox, oy };
         return {};
       }
-
-      // ========================================================================== WINDOWS
-      // W1 — INTRO PRESENTER (s01, 0–4.2): stands in front of the glass-arch podium, walks
-      //      toward camera waving "hai", then explains in front of the blurred scene:
-      //      points at the video card on "video viral", open hands on "efek per katanya".
-      const W1 = {
-        t0: 0, t1: 4.2, outK: ["zoom", 540, 460],
-        vh: K([[0, 300], [0.2, 300], [1.6, PRES.h, "io"], [4.2, PRES.h + 40, "sine"]]),
-        vfy: K([[0, 1585], [0.2, 1585], [1.6, PRES.fy, "io"], [4.2, PRES.fy + 10, "sine"]]),
-        vfx: K([[0, 540], [0.2, 540], [1.6, 600, "io"], [4.2, 610, "sine"]]),
-        waveW: K([[0, 0], [0.4, 0], [0.7, 1, "back"], [1.75, 1], [2.05, 0, "io"]]),
-        pointW: K([[0, 0], [1.72, 0], [1.92, 1, "back"], [2.45, 1], [2.72, 0, "io"]]),
-        openW: K([[0, 0], [2.72, 0], [2.95, 1, "back"], [3.62, 1], [3.9, 0, "io"]]),
-        view(a) { return { fx: this.vfx(a), fy: this.vfy(a), h: this.vh(a), pitch: 5 }; },
-        face(a) {
-          let f = { gaze: [0, 0], brow: [0.004, 0.004] };
-          f = mixFace(f, HAPPY, ss(0.45, 0.7, a) * (1 - ss(1.75, 2.0, a)));
-          f = mixFace(f, { gaze: [-0.012, -0.002], brow: [0.006, 0.006] }, this.pointW(a) > 0 ? one(this.pointW(a)) : 0);
-          f = mixFace(f, { brow: [0.011, 0.011] }, one(this.openW(a)));
-          return f;
-        },
-        pose(a, t) {
-          const w = this.waveW(a), p = this.pointW(a), o = this.openW(a);
-          const wk = walk(a, 0.2, 1.62, 4, 0.36);
-          const tk = talk(S, t, { wL: 1 - one(w) - one(o), wR: 1 - one(p) - one(o), amp: ss(1.2, 1.7, a) });
-          return {
-            root: { y: wk.bob, ry: tk.ry + 0.08 * Math.sin(a * Math.PI * 1.4) * (1 - ss(1.4, 1.7, a)) },
-            bones: addBones(RELAX, breath(a), wk.bones, tk.bones, G.waveL(w, a, 0.7, 1.75), G.pointR(p), G.openB(o)),
-          };
-        },
-      };
-
-      // W2 — HYPIT VAULT GAG → PRESENTER → CODING-AGENT CAMEO (4.2–16.867, one continuous take).
-      const A_VIEW = { fx: 875, fy: 1505, h: 600, pitch: 5 }, B_VIEW = { fx: 905, fy: 1500, h: 480, pitch: 5 };
-      const W2 = {
-        t0: 4.2, t1: 16.867, inK: ["zoom", 400, 1050], outK: ["push"],
-        // local time a = t - 4.2
-        rootX: K([[0, -0.52], [0.45, -0.52], [1.05, -0.47, "out"], [1.95, -0.47], [2.65, 0.0, "io"]]),
-        rootRz: K([[0, 0], [0.45, 0], [1.05, -0.36, "back"], [1.5, -0.32, "sine"], [1.95, -0.33], [2.4, 0.04, "io"], [2.65, 0, "out"]]),
-        rootRy: K([[0, -0.15], [1.95, -0.15], [2.65, 0.1, "io"], [4.3, -0.05, "sine"], [4.8, -0.12, "io"], [5.4, 0.0, "io"], [9.35, 0.0], [10.0, -0.42, "io"], [12.667, -0.4]]),
-        headRz: K([[0, 0], [0.6, 0], [1.1, -0.2, "back"], [1.55, 0.16, "io"], [1.95, 0.05], [2.6, 0], [4.8, 0]]),
-        headRy: K([[0, 0], [0.6, 0.0], [0.75, -0.35, "out"], [1.2, 0.05, "io"], [4.2, -0.05], [4.55, -0.3, "io"], [5.0, -0.25], [5.4, 0, "io"], [12.667, 0]]),
-        gripW: K([[0, 0], [0.8, 0], [1.1, 1, "out"], [1.9, 1], [2.25, 0, "io"]]),
-        hopY: (a) => 0.035 * bump(a, 2.85, 0.2),
-        presentVault: K([[0, 0], [4.3, 0], [4.55, 1, "back"], [4.95, 1], [5.3, 0, "io"]]),
-        // P2 presenter beats (global: player 10.45–11.75, agent 11.75–13.15, both hands 12.95–13.75)
-        pointP: K([[0, 0], [6.25, 0], [6.45, 1, "back"], [7.3, 1], [7.55, 0, "io"]]),
-        presentA: K([[0, 0], [7.55, 0], [7.75, 1, "back"], [8.7, 1], [8.95, 0, "io"]]),
-        openC: K([[0, 0], [8.75, 0], [8.95, 1, "back"], [9.3, 1], [9.65, 0, "io"]]),
-        // B cameo (global 13.8+): lean in toward the core, brows up on 'kode'
-        lean: K([[0, 0], [10.4, 0.02], [12.0, 0.14, "io"], [12.25, 0.06, "out"], [12.667, 0.04, "io"]]),
-        view(a) {
-          if (a < 4.8) return A_VIEW;
-          if (a < 5.4) return lerpView(A_VIEW, PRES, E.io((a - 4.8) / 0.6));
-          if (a < 9.35) return lerpView(PRES, { fx: PRES.fx, fy: PRES.fy + 12, h: PRES.h + 50 }, E.sine((a - 5.4) / 3.95));
-          if (a < 10.0) return lerpView({ fx: PRES.fx, fy: PRES.fy + 12, h: PRES.h + 50 }, B_VIEW, E.io((a - 9.35) / 0.65));
-          return B_VIEW;
-        },
-        clip(a) { return a < 2.7 ? 700 : null; },
-        face(a) {
-          const curious = { brow: [0.0, 0.008], gaze: [0.006, 0.0] };
-          let f = curious;
-          if (a > 0.6 && a < 1.25) f = mixFace(curious, { brow: [0.004, 0.009], gaze: [-0.011, -0.004] }, one((a - 0.6) / 0.15) * one((1.25 - a) / 0.2));
-          f = mixFace(f, HAPPY, ss(2.55, 2.8, a) * (1 - ss(3.4, 3.7, a)));
-          f = mixFace(f, Object.assign({ gaze: [-0.012, 0.0] }, HAPPY), one(this.presentVault(a)));
-          f = mixFace(f, { gaze: [-0.012, -0.003], brow: [0.006, 0.006] }, one(this.pointP(a)));
-          f = mixFace(f, { gaze: [0.012, -0.003], brow: [0.004, 0.008] }, one(this.presentA(a)));
-          f = mixFace(f, HAPPY, one(this.openC(a)));
-          if (a > 9.6) f = mixFace(f, { gaze: [-0.008, -0.004], brow: [0.01 * bump(a, 12.15, 0.35), 0.01 * bump(a, 12.15, 0.35)] }, ss(9.6, 10.0, a));
-          return f;
-        },
-        pose(a, t) {
-          const g = this.gripW(a), pv = this.presentVault(a), pp = this.pointP(a), pa = this.presentA(a), oc = this.openC(a), l = this.lean(a);
-          const wk = walk(a, 1.95, 2.65, 2, 0.4);
-          const hidden = 1 - ss(1.9, 2.6, a);
-          const busyR = one(pv) + one(pp) + one(oc), busyL = one(g) + one(pa) + one(oc);
-          const tk = talk(S, t, { wL: one(1 - busyL), wR: one(1 - busyR), amp: (1 - 0.6 * hidden) * (a > 10 ? 0.75 : 1) });
-          const grip = { upperarm_L: [-0.9 * g, 0, 1.0 * g], forearm_L: [-0.5 * g, 0, 0.55 * g], hand_L: [0, 0, 0.3 * g], spine: [0, 0, -0.08 * g] };
-          return {
-            root: { x: this.rootX(a), y: wk.bob + this.hopY(a), rz: this.rootRz(a), ry: this.rootRy(a) + tk.ry },
-            bones: addBones(RELAX, breath(a), tk.bones, grip, wk.bones, G.presentR(pv), G.pointR(pp), G.presentL(pa), G.openB(oc),
-              { head: [0, this.headRy(a), this.headRz(a)], neck: [0, this.headRy(a) * 0.3, 0], spine: [l * 0.6, 0, 0], chest: [l * 0.5, 0, 0] }),
-          };
-        },
-      };
-
-      // W3 — EDITING WORKFLOW (s06–s08, 20.467–27.967): explains while tracking each module,
-      //      shakes head on "bukan", thinks, then points at the trim handle on "edit".
-      const W3 = {
-        t0: 20.467, t1: 27.967, inK: ["zoom", 400, 1050], outK: ["zoom", 400, 760],
-        view: () => ({ fx: 905, fy: 1535, h: 520, pitch: 5 }),
-        ry: K([[0, -0.4], [2.7, -0.3, "sine"], [3.4, -0.45, "io"], [5.6, -0.35, "sine"], [7.5, -0.5, "io"]]),
-        headRy: K([[0, -0.3], [0.18, -0.36, "back"], [0.75, -0.22, "io"], [0.87, -0.26, "back"], [1.45, -0.14, "io"], [1.59, -0.18, "back"], [2.12, -0.06, "io"], [2.25, -0.1, "back"],
-                   [3.6, -0.12], [4.1, 0.05, "out"], [4.6, -0.2, "io"], [6.2, -0.1, "sine"], [6.45, -0.25, "io"], [7.5, -0.25]]),
-        lean: K([[0, 0], [3.9, 0], [4.12, -0.12, "out"], [4.6, 0.0, "io"], [5.5, 0.0], [6.1, 0.15, "io"], [6.55, 0.18, "back"], [7.5, 0.14]]),
-        point: K([[0, 0], [6.2, 0], [6.38, -0.25, "io"], [6.55, 1, "back"], [7.25, 1], [7.5, 0.85]]),
-        think: K([[0, 0], [5.3, 0], [5.7, 1, "io"], [6.3, 1], [6.6, 0, "io"]]),
-        face(a) {
-          let f = { gaze: [-0.01, -0.004] };
-          f = mixFace(f, { brow: [0.01, 0.01], gaze: [-0.004, 0.004] }, one((a - 4.05) / 0.08) * one((4.7 - a) / 0.2));
-          f = mixFace(f, { brow: [0.006, 0.011], browTilt: [0.003, -0.003], gaze: [-0.012, -0.006] }, one(this.think(a)));
-          f = mixFace(f, Object.assign({ gaze: [-0.012, -0.004] }, HAPPY), ss(6.6, 6.8, a));
-          return f;
-        },
-        pose(a, t) {
-          const p = this.point(a), l = this.lean(a), th = this.think(a);
-          const tk = talk(S, t, { wR: one(1 - Math.abs(p)), wL: one(1 - th), head: 0.7 });
-          const shake = osc(a, 3.15, 3.8, 3.4, 0.16);
-          const thinkB = { upperarm_L: [-0.25 * th, 0, 0.12 * th], forearm_L: [-0.95 * th, 0, 0.2 * th] };
-          return {
-            root: { ry: this.ry(a) + tk.ry, x: 0.02 * Math.sin(a * 0.9) },
-            bones: addBones(RELAX, breath(a), tk.bones, G.pointR(p), thinkB, { spine: [l * 0.55, 0, 0], chest: [l * 0.45, 0, 0], head: [0, this.headRy(a) + shake, 0.05], neck: [0, this.headRy(a) * 0.3, 0] }),
-          };
-        },
-      };
-
-      // W4 — SWAP (s11, 31.867–35.933): tracks each swap, surprised on "presenter", opens both hands.
-      const W4 = {
-        t0: 31.867, t1: 35.933, inK: ["settle", 540, 960], outK: ["shrink", 540, 960],
-        view: () => ({ fx: 178, fy: 1540, h: 520, pitch: 5 }),
-        ry: K([[0, 0.42], [2.9, 0.36], [3.2, 0.12, "io"], [4.067, 0.1]]),
-        headRy: K([[0, 0.05], [0.56, 0.12, "io"], [0.98, 0.2, "io"], [1.9, 0.28, "io"], [2.62, 0.36, "io"], [3.2, 0.05, "io"], [4.067, 0.0]]),
-        surprise: K([[0, 0], [1.0, 0], [1.08, 1, "out"], [1.42, 1], [1.62, 0, "io"]]),
-        present: K([[0, 0], [3.05, 0], [3.2, -0.15, "io"], [3.45, 1, "back"], [4.067, 1]]),
-        face(a) {
-          const s = this.surprise(a);
-          let f = mixFace({ gaze: [0.011, -0.003] }, { brow: [0.012, 0.012], gaze: [0.006, 0.004] }, s);
-          f = mixFace(f, Object.assign({ gaze: [0.01, -0.002] }, HAPPY), one((a - 1.6) / 0.2) * one((3.05 - a) / 0.15));
-          f = mixFace(f, HAPPY, ss(3.3, 3.45, a));
-          return f;
-        },
-        pose(a, t) {
-          const s = this.surprise(a), pn = this.present(a);
-          const hop = 0.03 * bump(a, 1.18, 0.14) + 0.015 * bump(a, 3.35, 0.15);
-          const tk = talk(S, t, { wL: one(1 - Math.abs(pn) - s), wR: one(1 - Math.abs(pn) - s), head: 0.7 });
-          const recoil = { spine: [-0.14 * s, 0, 0], head: [-0.1 * s, 0, 0], upperarm_L: [0, 0, 0.35 * s], upperarm_R: [0, 0, -0.35 * s], forearm_L: [-0.5 * s, 0, 0], forearm_R: [-0.5 * s, 0, 0] };
-          return {
-            root: { ry: this.ry(a) + tk.ry, x: -0.03 * s, y: hop },
-            bones: addBones(RELAX, breath(a), tk.bones, recoil, G.openB(pn), { head: [0, this.headRy(a), 0], neck: [0, this.headRy(a) * 0.3, 0] }),
-          };
-        },
-      };
-
-      // W5 — RIGHTS PRESENTER (s13–s14, 40.7–46.867): "jangan" stop-hand + head shake, explains
-      //      in front of the blurred scene, presents the folder + shield on "jelas".
-      const W5 = {
-        t0: 40.7, t1: 46.867, inK: ["whipFromL"], outK: ["zoom", 380, 1050],
-        stop: K([[0, 0], [0.15, 0], [0.38, 1, "back"], [1.2, 1], [1.5, 0, "io"]]),
-        presentL: K([[0, 0], [5.15, 0], [5.38, 1, "back"], [5.95, 1], [6.167, 0.6, "io"]]),
-        view(a) { return lerpView(PRES, { fx: PRES.fx - 20, fy: PRES.fy + 20, h: PRES.h + 70 }, E.sine(one(a / 6.167))); },
-        face(a) {
-          let f = { gaze: [0, 0] };
-          f = mixFace(f, { brow: [-0.004, -0.004], browTilt: [0.004, -0.004] }, one(this.stop(a)));
-          f = mixFace(f, { gaze: [0, 0.008], brow: [0.006, 0.006] }, ss(2.2, 2.5, a) * (1 - ss(4.0, 4.3, a)));
-          f = mixFace(f, Object.assign({ gaze: [0.012, 0.004] }, HAPPY), ss(5.2, 5.4, a));
-          return f;
-        },
-        pose(a, t) {
-          const st = this.stop(a), pl = this.presentL(a);
-          const tk = talk(S, t, { wR: one(1 - st), wL: one(1 - pl) });
-          const shake = osc(a, 0.25, 1.15, 3.2, 0.22);
-          const nod = 0.18 * bump(a, 5.55, 0.22);
-          return {
-            root: { ry: tk.ry + 0.1 * one(pl) },
-            bones: addBones(RELAX, breath(a), tk.bones, G.stopR(st, a, 0.35, 1.15), G.presentL(pl), { head: [nod - 0.08 * ss(2.2, 2.5, a) * (1 - ss(4.0, 4.3, a)), shake, 0], neck: [0, shake * 0.3, 0] }),
-          };
-        },
-      };
-
-      // W6 — BRIEF CAMEO (s16, 49.867–51.767): explains, nods on "brief".
-      const W6 = {
-        t0: 49.867, t1: 51.767, inK: ["settle", 540, 960], outK: ["whipL"],
-        view: () => ({ fx: 905, fy: 1490, h: 470, pitch: 5 }),
-        face(a) { return mixFace({ gaze: [-0.01, -0.004] }, HAPPY, ss(1.5, 1.62, a)); },
-        pose(a, t) {
-          const tk = talk(S, t, { amp: 0.85, head: 0.8 });
-          return { root: { ry: -0.45 + tk.ry }, bones: addBones(RELAX, breath(a), tk.bones, { spine: [0.05, 0, 0], head: [0.2 * bump(a, 1.5, 0.22), -0.08, 0] }) };
-        },
-      };
-
-      // W7 — CTA (s18–s19, 56.7–61.1): asks the question as presenter, then steps aside to the
-      //      comment bubble: points at it on "HYPIT", waves, calm closed-mouth final pose.
-      const G_VIEW = { fx: 855, fy: 1670, h: 720, pitch: 4 };
-      const W7 = {
-        t0: 56.7, t1: 61.1, inK: ["push"], outK: null,
-        shrug: K([[0, 0], [1.25, 0], [1.45, 1, "back"], [1.8, 1], [2.05, 0, "io"]]),
-        ry: K([[0, 0], [1.8, 0], [2.3, -0.18, "io"], [4.4, -0.12, "sine"]]),
-        point: K([[0, 0], [2.43, 0], [2.5, -0.2, "io"], [2.63, 1, "back"], [3.15, 1], [3.35, 0, "io"]]),
-        waveW: K([[0, 0], [3.33, 0], [3.48, 1, "back"], [3.88, 1], [4.08, 0, "io"]]),
-        view(a) { return a < 1.8 ? PRES : a < 2.35 ? lerpView(PRES, G_VIEW, E.io((a - 1.8) / 0.55)) : G_VIEW; },
-        face(a) {
-          let f = { gaze: [0, 0], brow: [0.004, 0.004] };
-          f = mixFace(f, { brow: [0.011, 0.011] }, one(this.shrug(a)));
-          f = mixFace(f, { gaze: [-0.012, 0.0], brow: [0.008, 0.008] }, one(this.point(a)));
-          f = mixFace(f, HAPPY, one(this.waveW(a)) * 0.8);
-          return f;
-        },
-        pose(a, t) {
-          const sh = this.shrug(a), p = this.point(a), w = this.waveW(a);
-          const tk = talk(S, t, { wL: one(1 - sh - w), wR: one(1 - sh - Math.abs(p)), amp: a > 2 ? 0.8 : 1 });
-          const shrugB = { upperarm_L: [-0.4 * sh, 0, 0.55 * one(sh)], upperarm_R: [-0.4 * sh, 0, -0.55 * one(sh)], forearm_L: [-0.9 * sh, 0, 0.3 * sh], forearm_R: [-0.9 * sh, 0, -0.3 * sh], hand_L: [0, -0.6 * sh, 0.3 * sh], hand_R: [0, 0.6 * sh, -0.3 * sh], spine: [0, 0, 0] };
-          const settle = ss(4.15, 4.4, a);
-          return {
-            root: { ry: this.ry(a) + tk.ry * (1 - settle), y: 0.02 * bump(a, 2.2, 0.2) },
-            bones: addBones(RELAX, breath(a), tk.bones, shrugB, G.pointR(p), G.waveL(w, a, 3.48, 3.88), { head: [0.03, -0.04, 0.12 * one(sh)] }),
-          };
-        },
-      };
-
-      const WINDOWS = [W1, W2, W3, W4, W5, W6, W7];
-      WINDOWS.forEach((w, i) => (w.seed = i + 1));
 
       // ============================================================================ RENDER
       let mascot = null, lastVisible = null;
@@ -285,41 +202,35 @@
         const c = WINDOWS.find((k) => t >= k.t0 - 0.001 && t < k.t1 - 0.001);
         if (!c) {
           if (lastVisible !== false) { mascot.setState({ visible: false }); mascot.render(); lastVisible = false; }
-          xf.style.transform = "none"; xf.style.filter = "none"; canvas.style.clipPath = "none";
+          xf.style.transform = "none"; xf.style.filter = "none";
           canvas.style.visibility = "hidden";
           return;
         }
         lastVisible = true;
         canvas.style.visibility = "visible";
-        const a = t - c.t0;
-        const st = c.pose(a, t);
-        const f = c.face(a, t);
-        const b = blink(t, c.t0, c.t1, c.seed);
-        const base = f.blink || [0, 0];
-        f.blink = [Math.max(base[0], b), Math.max(base[1], b)];
-        // the narrator's mouth follows the VO whenever he is visible
-        f.mouthMix = 1;
-        f.mouth = lipAt(S, t);
-        st.face = f;
-        mascot.setView(c.view(a));
-        mascot.setState(st);
+        const P = c.perf(t - c.t0);
+        const acc = accents(t);
+        const bones = add(P.bones, idle(t, c.seed), c.extra ? c.extra(t) : {}, { head: [0.06 * acc, 0, 0], neck: [0.02 * acc, 0, 0], chest: [0.015 * acc, 0, 0] });
+        const re = c.rootExtra ? c.rootExtra(t - c.t0) : {};
+        const root = { x: P.root.x + (re.x || 0), y: P.root.y + (re.y || 0), ry: P.root.ry + 0.03 * vnoise(t, c.seed + 9, 0.22), rz: P.root.rz, s: P.root.s };
+        const b = blinkAt(t, c.blinks);
+        const face = { blink: [b, b], mouthMix: 1, mouth: mouthAt(t) };
+        mascot.setView(c.view(t));
+        mascot.setState({ root, bones, face });
         mascot.render();
         let tr = {};
-        if (c.inK && a < 0.5) tr = xfIn(t, c.t0, c.inK[0], c.inK[1], c.inK[2]);
         if (c.outK && t > c.t1 - 0.28) tr = xfOut(t, c.t1, c.outK[0], c.outK[1], c.outK[2]);
         const ox = tr.ox == null ? 540 : tr.ox, oy = tr.oy == null ? 960 : tr.oy;
         xf.style.transformOrigin = ox + "px " + oy + "px";
-        xf.style.transform = "translate(" + (tr.x || 0) + "px," + (tr.y || 0) + "px) scale(" + (tr.s == null ? 1 : tr.s) + ")";
+        xf.style.transform = "scale(" + (tr.s == null ? 1 : tr.s) + ")";
         xf.style.filter = tr.blur ? "blur(" + tr.blur.toFixed(2) + "px)" : "none";
-        const cx = c.clip ? c.clip(a) : null;
-        canvas.style.clipPath = cx == null ? "none" : "inset(0 0 0 " + cx + "px)";
       }
 
       window.__hf = window.__hf || {};
       window.__hf.buildReady = window.__hf.buildReady || {};
-      // facial control calibration (generated by tools/mascot3d/facejac.mjs → assets/mascot3d/face_config.json)
+      // facial calibration (tools/mascot3d/facejac.mjs); GLB = v4 cleaned copy (tools/mascot3d/facepatch.mjs)
       const FACE = {"eyeA":{"c":[-0.099,0.583],"r":[0.049,0.039],"J":[-0.012594276485253965,0.5728894913572795,0.5928449952437722,0.008744878544633893]},"eyeB":{"c":[0.1,0.584],"r":[0.046,0.04],"J":[0.6644280491730516,0.030130365931821397,0.015549679888023958,-0.6054649097597234]},"browA":{"c":[-0.085,0.675],"J":[-0.04070834735419224,0.5537413339891137,0.591952051964936,0.06466756331213208]},"browB":{"c":[0.089,0.674],"J":[-0.1673063019885604,0.6553582065976762,0.5221243728997077,0.18775902203022735]},"mouth":{"c":[0.001,0.521],"r":[0.0266,0.0164]},"skin":[243,207,186],"skinEye":[246,214,195]};
-      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_rigged.glb", face: FACE, width: 1080, height: 1920 })
+      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_rigged_v4.glb", face: FACE, width: 1080, height: 1920 })
         .then((m) => { mascot = m; apply(0); });
       window.__hf.buildReady["mascot"] = ready;
       window.addEventListener("hf-seek", (e) => {

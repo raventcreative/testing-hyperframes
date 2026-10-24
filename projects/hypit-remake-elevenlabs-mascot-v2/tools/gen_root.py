@@ -44,14 +44,23 @@ CUTS = [  # (time, kind, ox, oy)
 PUNCH = []
 for (t, k, ox, oy) in CUTS:
     rot = {"whipL": -1.4, "whipR": 1.4}.get(k, 0)
-    psc = {"zoom": 1.07, "flash": 1.05, "push": 1.04}.get(k, 1.04)
-    PUNCH.append(f'        tl.fromTo("#stage-cam", {{ scale: 1, rotation: 0 }}, {{ scale: {psc}, rotation: {rot}, duration: 0.22, ease: "power2.in", immediateRender: false }}, {r3(t - 0.22)});')
-    PUNCH.append(f'        tl.fromTo("#stage-cam", {{ scale: {psc}, rotation: {-rot * 0.5} }}, {{ scale: 1, rotation: 0, duration: 0.5, ease: "expo.out", immediateRender: false }}, {r3(t)});')
+    ry = {"whipL": 22, "whipR": -22}.get(k, 0)          # 3D swing on whips (reference-style card turn)
+    psc = {"zoom": 1.09, "flash": 1.05, "push": 1.04}.get(k, 1.04)
+    PUNCH.append(f'        tl.fromTo("#stage-cam", {{ scale: 1, rotation: 0, rotationY: 0, filter: "blur(0px)" }}, {{ scale: {psc}, rotation: {rot}, rotationY: {ry}, filter: "blur(5px)", transformPerspective: 1600, duration: 0.22, ease: "power2.in", immediateRender: false }}, {r3(t - 0.22)});')
+    PUNCH.append(f'        tl.fromTo("#stage-cam", {{ scale: {psc}, rotation: {-rot * 0.5}, rotationY: {-ry * 0.6}, filter: "blur(5px)" }}, {{ scale: 1, rotation: 0, rotationY: 0, filter: "blur(0px)", transformPerspective: 1600, duration: 0.5, ease: "expo.out", immediateRender: false }}, {r3(t)});')
+ORBIT = []
+for k, sc_ in enumerate(sc["scenes"]):
+    a_, b_ = sc_["start"], sc_["end"]
+    sgn = 1 if k % 2 == 0 else -1
+    ORBIT.append(f'        tl.fromTo("#stage-orbit", {{ rotationY: {-3.5 * sgn}, rotationX: 2.5 }}, {{ rotationY: {3.5 * sgn}, rotationX: -1.5, transformPerspective: 1800, duration: {r3(b_ - a_)}, ease: "sine.inOut", immediateRender: false }}, {r3(a_)});')
+PUNCH += ORBIT
 
 # presenter windows: (blur-in start, blur full, unblur start, unblur end)
 PRESENTER = json.loads((P / "tools/presenter_windows.json").read_text())
 st = []
 for w in PRESENTER:
+    if w.get('noblur'):
+        continue
     a, b, c, d = w["in0"], w["in1"], w["out0"], w["out1"]
     if b - a < 0.05:
         st.insert(0, f'        gsap.set("#stage", {{ filter: "blur({w.get("blur", 16)}px) saturate(0.85)", scale: {w.get("scale", 1.06)} }});')
@@ -63,10 +72,25 @@ PHOSTS = [f'      <div id="{w["id"].lower()}" class="clip presenter" data-compos
 sfx_tags = []
 _sfxp = P / "tools/sfx_plan.json"
 SFX = json.loads(_sfxp.read_text()) if _sfxp.exists() else sc.get("sfx", [])
+# drop exact duplicates, then give every cue a lane that is free at its start (no layered cues on one lane)
+_seen, _sfx = set(), []
+for fx in SFX:
+    k = (fx["file"], round(fx["t"], 2))
+    if k not in _seen:
+        _seen.add(k); _sfx.append(fx)
+SFX = _sfx
+_lanes = {}
+def _lane(t0, t1):
+    for ln in [4, 5, 9, 10, 11, 12]:
+        if _lanes.get(ln, -1) <= t0:
+            _lanes[ln] = t1
+            return ln
+    return 12
 for i, fx in enumerate(SFX):
+    fx["lane"] = _lane(fx["t"], fx["t"] + fx["dur"])
     sfx_tags.append(
         f'      <audio id="sfx-{i:02d}" class="clip" src="assets/sfx/{fx["file"]}" data-start="{r3(fx["t"])}" '
-        f'data-duration="{r3(fx["dur"])}" data-track-index="{4 + (i % 2)}" data-volume="{fx["vol"]}"></audio>'
+        f'data-duration="{r3(fx["dur"])}" data-track-index="{fx["lane"]}" data-volume="{fx["vol"]}"></audio>'
     )
 
 index = f"""<!doctype html>
@@ -78,13 +102,14 @@ index = f"""<!doctype html>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
+    <script src="vendor/timewarp.js"></script>
     <style>
       @font-face {{ font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }}
       @font-face {{ font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }}
       @font-face {{ font-family: "Poppins"; src: url("assets/fonts/poppins-latin-800-normal.woff2") format("woff2"); font-weight: 800; font-style: normal; font-display: block; }}
       :root {{
-        --navy-deep: #121532; --navy-mid: #274976; --white: #ffffff; --ice: #f7faff; --rim: #dce8f6; --graphite: #26354e;
-        --hero-grad: linear-gradient(105deg, #121532 0%, #274976 100%);
+        --navy-deep: #0a0d2c; --navy-mid: #294b77; --white: #ffffff; --ice: #f7faff; --rim: #dce8f6; --graphite: #26354e;
+        --hero-grad: linear-gradient(105deg, #0a0d2c 0%, #294b77 100%);
       }}
       * {{ margin: 0; padding: 0; box-sizing: border-box; }}
       html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: #f7faff; }}
@@ -95,9 +120,10 @@ index = f"""<!doctype html>
       #bg-haze {{ position: absolute; inset: 0; z-index: 1; pointer-events: none;
         background: radial-gradient(ellipse 70% 42% at 50% 56%, rgba(255,255,255,.34), rgba(255,255,255,0) 70%); }}
       #bg-grain {{ position: absolute; inset: 0; z-index: 2; opacity: .035; pointer-events: none;
-        background-image: repeating-linear-gradient(90deg, rgba(18,21,50,.35) 0 1px, rgba(18,21,50,0) 1px 4px), repeating-linear-gradient(0deg, rgba(18,21,50,.25) 0 1px, rgba(18,21,50,0) 1px 5px); }}
+        background-image: repeating-linear-gradient(90deg, rgba(10,13,44,.35) 0 1px, rgba(10,13,44,0) 1px 4px), repeating-linear-gradient(0deg, rgba(10,13,44,.25) 0 1px, rgba(10,13,44,0) 1px 5px); }}
       #stage {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; z-index: 10; transform-origin: 540px 1000px; }}
       #stage-cam {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 960px; }}
+      #stage-orbit {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 1000px; }}
       .scene-host {{ z-index: 10; }}
       .presenter {{ z-index: 30; }}
       #mascot {{ z-index: 40; }}
@@ -112,9 +138,9 @@ index = f"""<!doctype html>
       <div id="bg-grain" data-layout-ignore></div>
 
       <!-- global stage camera: blur/zoom behind the presenter mascot + cut punches -->
-      <div id="stage" data-layout-ignore><div id="stage-cam" data-layout-ignore>
+      <div id="stage" data-layout-ignore><div id="stage-cam" data-layout-ignore><div id="stage-orbit" data-layout-ignore>
 {chr(10).join(hosts)}
-      </div></div>
+      </div></div></div>
       <!-- presenter layers: veil + pop-up elements around the big mascot (tools/gen_presenter.py) -->
 {chr(10).join(PHOSTS)}
 
@@ -174,14 +200,14 @@ for gi, g in enumerate(groups):
         ws = max(gs + 0.01, words[wi]["start"] - 0.03)
         if wi in starts:
             tb = max(gs + 0.005, ws - 0.09)
-            init.append(f'gsap.set("#cap-b{wi}", {{ scale: 0.35, opacity: 0, rotation: -4 }}); gsap.set("#cap-s{wi}", {{ xPercent: -160 }});')
-            tl.append(f'tl.fromTo("#cap-b{wi}", {{ scale: 0.35, opacity: 0, rotation: -4 }}, {{ scale: 1, opacity: 1, rotation: 0, duration: 0.32, ease: "back.out(2.6)", immediateRender: false }}, {r3(tb)});')
+            init.append(f'gsap.set("#cap-b{wi}", {{ scale: 0.35, opacity: 0, rotation: -4, rotationX: -85, transformPerspective: 500 }}); gsap.set("#cap-s{wi}", {{ xPercent: -160 }});')
+            tl.append(f'tl.fromTo("#cap-b{wi}", {{ scale: 0.35, opacity: 0, rotation: -4, rotationX: -85, transformPerspective: 500 }}, {{ scale: 1, opacity: 1, rotation: 0, rotationX: 0, transformPerspective: 500, duration: 0.34, ease: "back.out(2.2)", immediateRender: false }}, {r3(tb)});')
             tl.append(f'tl.fromTo("#cap-h{wi}", {{ scale: 1 }}, {{ scale: 1.12, duration: 0.09, ease: "power2.out", immediateRender: false }}, {r3(tb + 0.1)});')
             tl.append(f'tl.fromTo("#cap-h{wi}", {{ scale: 1.12 }}, {{ scale: 1, duration: 0.22, ease: "back.out(2)", immediateRender: false }}, {r3(tb + 0.19)});')
             tl.append(f'tl.fromTo("#cap-s{wi}", {{ xPercent: -160 }}, {{ xPercent: 260, duration: 0.42, ease: "power2.inOut", immediateRender: false }}, {r3(tb + 0.3)});')
         if wi in hl:
-            init.append(f'gsap.set("#cap-t{wi}", {{ opacity: 0, y: 16, scale: 0.7 }});')
-            tl.append(f'tl.fromTo("#cap-t{wi}", {{ opacity: 0, y: 16, scale: 0.7 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.24, ease: "back.out(2.4)", immediateRender: false }}, {r3(max(gs + 0.02, ws - 0.04))});')
+            init.append(f'gsap.set("#cap-t{wi}", {{ opacity: 0, scale: 1.75, filter: "blur(10px)" }});')
+            tl.append(f'tl.fromTo("#cap-t{wi}", {{ opacity: 0, scale: 1.75, filter: "blur(10px)" }}, {{ opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.24, ease: "expo.out", immediateRender: false }}, {r3(max(gs + 0.02, ws - 0.04))});')
         else:
             init.append(f'gsap.set("#cap-w{wi}", {{ opacity: 0, y: 10, filter: "blur(6px)" }}); gsap.set("#cap-k{wi}", {{ opacity: 0, scaleX: 0.5 }});')
             tl.append(f'tl.fromTo("#cap-w{wi}", {{ opacity: 0, y: 10, filter: "blur(6px)" }}, {{ opacity: 1, y: 0, filter: "blur(0px)", duration: 0.16, ease: "power3.out", immediateRender: false }}, {r3(ws)});')
@@ -198,13 +224,13 @@ cap = f"""<template>
     #root {{ position: absolute; inset: 0; pointer-events: none; font-family: "Poppins", sans-serif; }}
     /* Caption band: y 228-384, full-width container, centred text, never translateX(-50%). */
     .cap-g {{ position: absolute; left: 70px; top: 228px; width: 940px; height: 156px; display: flex; align-items: center; justify-content: center; overflow: visible; }}
-    .cap-line {{ width: 940px; text-align: center; font-size: 46px; line-height: 1.42; font-weight: 400; letter-spacing: -0.015em; color: #121532; }}
+    .cap-line {{ width: 940px; text-align: center; font-size: 46px; line-height: 1.42; font-weight: 400; letter-spacing: -0.015em; color: #0a0d2c; }}
     .cw {{ display: inline-block; white-space: nowrap; position: relative; }}
     .kp {{ position: absolute; left: -9px; right: -9px; top: 3px; bottom: 1px; border-radius: 10px; background: #dce8f6; box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 3px 8px rgba(39,73,118,.14); transform-origin: 50% 50%; }}
     .kt {{ position: relative; }}
     .cw.hl {{ position: relative; transform-origin: 50% 60%; font-weight: 700; color: #ffffff; padding: 2px 16px 5px; margin: 0 2px; }}
-    .hl-box {{ position: absolute; inset: 0; border-radius: 12px; overflow: hidden; background: linear-gradient(105deg, #121532 0%, #274976 100%);
-      box-shadow: 0 8px 16px rgba(18,21,50,.16), inset 0 1px 0 rgba(255,255,255,.18); transform-origin: 0% 50%; }}
+    .hl-box {{ position: absolute; inset: 0; border-radius: 12px; overflow: hidden; background: linear-gradient(105deg, #0a0d2c 0%, #294b77 100%);
+      box-shadow: 0 8px 16px rgba(10,13,44,.16), inset 0 1px 0 rgba(255,255,255,.18); transform-origin: 0% 50%; }}
     .hl-tx {{ position: relative; display: inline-block; white-space: nowrap; }}
     .hl-sheen {{ position: absolute; top: -20%; bottom: -20%; left: 0; width: 38%; }}
     .hl-sheen-i {{ position: absolute; inset: 0; background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.42) 50%, rgba(255,255,255,0) 100%); transform: skewX(-18deg); }}

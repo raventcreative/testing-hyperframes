@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import * as Acting from './acting.js';
+import * as Perform from './perform.js';
 
 const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
 
@@ -31,21 +32,32 @@ vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 g
     if (dot(ds, ds) > 0.72) s = vec3(0.86, 0.87, 0.90);
     col = mix(col, s, smoothstep(0.72, 0.55, e));
   }
-  // lids (upper from top, lower from bottom) inside the enlarged cover ellipse
-  vec2 dc = (p - E.xy) / (E.zw * vec2(1.16, 1.22));
+  // lids (v4): skin colour sampled from the face texture just above / below the eye (no flat disc),
+  // asymmetric cover (taller on top so the painted upper lashes are hidden when closed), and a curved
+  // dark lash line that becomes the closed-eye "smile" curve.
+  vec2 dc = (p - E.xy) / (E.zw * vec2(1.34, 1.0));
+  dc.y /= (dc.y > 0.0 ? 1.5 : 1.22);
   float ec = dot(dc, dc);
   if (ec < 1.0 && (blink > 0.001 || lower > 0.001)) {
     float arc = sqrt(max(0.0, 1.0 - dc.x * dc.x));
-    float yu = (1.0 - 2.0 * blink) * arc;
-    float yl = -(1.0 - 2.0 * lower) * arc;
-    float covered = max(smoothstep(yu - 0.03, yu + 0.03, dc.y), smoothstep(yl + 0.03, yl - 0.03, dc.y));
-    float edge = smoothstep(1.0, 0.78, ec);
-    col = mix(col, uSkinEye * mix(0.94, 1.0, smoothstep(0.0, 0.3, abs(dc.y - yu))), covered * edge);
+    float yu = mix(1.0, -0.28, blink) * arc;                          // upper lid travels to a line below centre
+    float yl = -mix(1.0, 0.28, max(lower, smoothstep(0.75, 1.0, blink))) * arc; // lower lid meets it when fully closed
+    float aa = fwidth(dc.y) * 1.5 + 1e-4;
+    float covered = max(smoothstep(yu - aa, yu + aa, dc.y), smoothstep(yl + aa, yl - aa, dc.y));
+    float edge = smoothstep(1.0, 0.62, ec);
+    vec3 up = texture2D(map, baseUv + jmul(J, E.xy + vec2(0.0, 1.62 * E.w) - p)).rgb;
+    vec3 upL = texture2D(map, baseUv + jmul(J, E.xy + vec2(-0.6 * E.z, 1.5 * E.w) - p)).rgb;
+    vec3 upR = texture2D(map, baseUv + jmul(J, E.xy + vec2(0.6 * E.z, 1.5 * E.w) - p)).rgb;
+    vec3 dn = texture2D(map, baseUv + jmul(J, E.xy + vec2(0.0, -1.35 * E.w) - p)).rgb;
+    vec3 lidTop = (up + upL + upR) / 3.0;
+    vec3 lid = mix(mix(dn, lidTop, 0.7), lidTop, smoothstep(-0.9, 0.2, dc.y));
+    lid *= mix(0.93, 1.0, smoothstep(0.0, 0.25, abs(dc.y - yu)));   // soft crease shadow at the lid edge
+    col = mix(col, lid, covered * edge);
     gCover = max(gCover, covered * edge);
-    // lash line on the upper lid edge
-    float lw2 = mix(0.07, 0.13, smoothstep(0.6, 1.0, blink));
-    float lash = smoothstep(lw2, lw2 * 0.35, abs(dc.y - yu)) * step(0.02, blink) * smoothstep(0.98, 0.7, abs(dc.x));
-    col = mix(col, vec3(0.045, 0.028, 0.024), lash * edge);
+    // lash line on the upper lid edge (thicker when closed), tapered at the corners
+    float lw2 = mix(0.05, 0.085, smoothstep(0.5, 1.0, blink));
+    float lash = smoothstep(lw2 + aa, lw2 * 0.3, abs(dc.y - yu)) * step(0.02, blink) * smoothstep(0.97, 0.6, abs(dc.x));
+    col = mix(col, vec3(0.07, 0.045, 0.04), lash);
   }
   return col;
 }
@@ -61,31 +73,41 @@ vec3 browLayer(vec3 col, vec2 p, vec4 Bc, vec4 J, float raise, float tilt, vec2 
   return mix(col, s, w);
 }
 vec3 mouthLayer(vec3 col, vec2 p){
+  // v4: the baked mouth was painted out of the texture and the cavity filled (facepatch.mjs),
+  // so the procedural mouth is drawn straight onto clean skin. uMouth = (halfWidth, open, smile, tongue)
   if (uMouthMix <= 0.001) return col;
   vec2 q = p - uMC.xy;
-  // 1) cover the baked mouth with skin
-  vec2 dc = (p - vec2(uMC.x, uMC.z)) / vec2(0.047, 0.034);
-  float cov = smoothstep(1.0, 0.72, dot(dc, dc));
-  col = mix(col, uSkin, cov * uMouthMix);
-  gCover = max(gCover, cov * uMouthMix * 0.85);
-  // 2) procedural mouth: uMouth = (halfWidth, open, cornerCurve, tongue)
   float hw = uMouth.x, op = uMouth.y, cv = uMouth.z;
   float x = q.x / hw;
-  if (abs(x) < 1.0) {
-    float yu = cv * x * x;
-    float yl = yu - op * sqrt(max(0.0, 1.0 - x * x));
-    float lw = mix(0.0028, 0.0013, x * x);
-    vec3 inside = vec3(0.32, 0.055, 0.06);
-    if (q.y < yu && q.y > yl) {
-      float tg = smoothstep(yl + (yu - yl) * 0.55, yl + (yu - yl) * 0.35, q.y) * uMouth.w;
-      inside = mix(inside, vec3(0.86, 0.33, 0.31), tg);
-      col = mix(col, inside, uMouthMix);
-    }
-    float ln = smoothstep(lw, lw * 0.4, abs(q.y - yu));
-    if (op > 0.002) ln = max(ln, smoothstep(lw * 0.9, lw * 0.3, abs(q.y - yl)) * 0.85);
-    col = mix(col, vec3(0.20, 0.035, 0.035), ln * uMouthMix);
+  if (abs(x) > 1.25) return col;
+  float aa = fwidth(q.y) * 1.25 + 1e-5;
+  float xc = clamp(x, -1.0, 1.0);
+  float s = sqrt(max(0.0, 1.0 - xc * xc));
+  float yu = cv * xc * xc + op * 0.10 * s;           // upper lip edge (smile curve, lifts a little when open)
+  float yl = cv * xc * xc - op * pow(s, 0.85);        // lower lip edge
+  vec3 c = col;
+  if (op > 0.0015) {
+    float inside = smoothstep(-aa, aa, yu - q.y) * smoothstep(-aa, aa, q.y - yl) * smoothstep(1.0 + aa / hw, 1.0 - aa / hw, abs(x));
+    float d = clamp((yu - q.y) / max(1e-4, yu - yl), 0.0, 1.0);
+    vec3 cav = mix(vec3(0.30, 0.045, 0.05), vec3(0.40, 0.075, 0.075), smoothstep(0.2, 1.0, d));
+    float teeth = smoothstep(0.30 + aa / op, 0.30 - aa / op, d) * smoothstep(0.009, 0.016, op) * smoothstep(0.92, 0.55, abs(x));
+    cav = mix(cav, vec3(0.97, 0.955, 0.94), teeth * 0.92);
+    float tg = smoothstep(0.55, 0.8, d) * uMouth.w * smoothstep(0.95, 0.4, abs(x));
+    cav = mix(cav, vec3(0.88, 0.38, 0.36), tg);
+    c = mix(c, cav, inside);
+    // soft lip rim around the opening
+    float rim = smoothstep(aa * 2.2, 0.0, abs(q.y - yu)) + smoothstep(aa * 2.2, 0.0, abs(q.y - yl)) * 0.7;
+    c = mix(c, vec3(0.36, 0.09, 0.09), clamp(rim, 0.0, 1.0) * 0.6 * smoothstep(1.02, 0.85, abs(x)));
+  } else {
+    // closed: a soft smile line with tapered corners
+    float lw = mix(0.0019, 0.0008, xc * xc);
+    float ln = smoothstep(lw + aa, lw * 0.25, abs(q.y - yu)) * smoothstep(1.05, 0.88, abs(x));
+    c = mix(c, vec3(0.42, 0.13, 0.12), ln);
   }
-  return col;
+  // faint lower-lip blush that keeps the mouth from looking drawn-on
+  vec2 lb = vec2(q.x / (hw * 0.75), (q.y - (yl - 0.004)) / 0.004);
+  c = mix(c, c * vec3(1.0, 0.93, 0.92), smoothstep(1.0, 0.3, dot(lb, lb)) * 0.35);
+  return mix(col, c, uMouthMix);
 }
 `;
 
@@ -95,7 +117,7 @@ export class Mascot {
     await m.init(canvas, opts);
     return m;
   }
-  async init(canvas, { url, face, width = 1080, height = 1920 }) {
+  async init(canvas, { url, face, width = 1080, height = 1920, envIntensity = 0.45 }) {
     this.W = width; this.H = height;
     const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true, premultipliedAlpha: true }));
     r.setPixelRatio(1); r.setSize(width, height, false);
@@ -104,7 +126,7 @@ export class Mascot {
     const scene = (this.scene = new THREE.Scene());
     const pm = new THREE.PMREMGenerator(r);
     scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environmentIntensity = 0.45;
+    scene.environmentIntensity = envIntensity;
     scene.add(new THREE.HemisphereLight(0xf4f8ff, 0x9fb0cc, 1.15));
     const key = new THREE.DirectionalLight(0xfff6ee, 1.9); key.position.set(-1.2, 2.2, 2.0); scene.add(key);   // upper-left key
     const rim = new THREE.DirectionalLight(0xcfe0ff, 1.1); rim.position.set(1.4, 1.2, -1.6); scene.add(rim);    // cool rim
@@ -157,20 +179,21 @@ export class Mascot {
     c = mouthLayer(c, fp);
     sampledDiffuseColor.rgb = c;
   }
-  if (uDebug > 0.5 && vFM > 0.5) sampledDiffuseColor.rgb = mix(sampledDiffuseColor.rgb, vec3(1.0, 0.0, 0.0), 0.55);
+  if (uDebug > 0.5 && uDebug < 1.5 && vFM > 0.5) sampledDiffuseColor.rgb = mix(sampledDiffuseColor.rgb, vec3(1.0, 0.0, 0.0), 0.55);
   diffuseColor *= sampledDiffuseColor;
 #endif`)
         .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.85, gCover);')
+        .replace('#include <dithering_fragment>', '#include <dithering_fragment>\nif (uDebug > 1.5) gl_FragColor = vec4(vMapUv, 0.0, 1.0);')
         .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = normalize(mix(normal, normalize(uHeadNM * normalize(vRest - uHeadC)), gCover));');
     };
-    mat.customProgramCacheKey = () => 'mascot-face-v5';
+    mat.customProgramCacheKey = () => 'mascot-face-v9';
     mat.needsUpdate = true;
     if (mat.roughness !== undefined) { mat.roughness = Math.max(mat.roughness, 0.55); mat.metalness = 0; }
 
     // soft contact shadow (follows the root on the floor)
     const sc = document.createElement('canvas'); sc.width = sc.height = 128;
     const g = sc.getContext('2d'); const grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-    grd.addColorStop(0, 'rgba(18,21,50,0.42)'); grd.addColorStop(0.5, 'rgba(18,21,50,0.16)'); grd.addColorStop(1, 'rgba(18,21,50,0)');
+    grd.addColorStop(0, 'rgba(10,13,44,0.42)'); grd.addColorStop(0.5, 'rgba(10,13,44,0.16)'); grd.addColorStop(1, 'rgba(10,13,44,0)');
     g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
     const st = new THREE.CanvasTexture(sc); st.colorSpace = THREE.SRGBColorSpace;
     this.shadow = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 0.36), new THREE.MeshBasicMaterial({ map: st, transparent: true, depthWrite: false }));
@@ -207,7 +230,7 @@ export class Mascot {
     u.uBlink.value.set(...(f.blink || [0, 0])); u.uLower.value.set(...(f.lower || [0, 0]));
     u.uGaze.value.set(...(f.gaze || [0, 0])); u.uBrow.value.set(...(f.brow || [0, 0]));
     u.uBrowTilt.value.set(...(f.browTilt || [0, 0]));
-    u.uMouthMix.value = f.mouthMix || 0; u.uDebug.value = s.debug ? 1 : 0;
+    u.uMouthMix.value = f.mouthMix || 0; u.uDebug.value = s.debug === 'uv' ? 2 : s.debug ? 1 : 0;
     const mo = f.mouth || [0.026, 0, 0.004, 0.6]; u.uMouth.value.set(mo[0], mo[1], mo[2], mo[3]);
     this.visible = s.visible !== false;
   }
@@ -220,4 +243,4 @@ export class Mascot {
     if (this.visible) this.renderer.render(this.scene, this.cam);
   }
 }
-window.Mascot3D = { Mascot, ...Acting };
+window.Mascot3D = { Mascot, ...Acting, ...Perform };

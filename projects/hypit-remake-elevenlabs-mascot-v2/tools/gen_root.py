@@ -66,7 +66,10 @@ for w in PRESENTER:
         st.insert(0, f'        gsap.set("#stage", {{ filter: "blur({w.get("blur", 16)}px) saturate(0.85)", scale: {w.get("scale", 1.06)} }});')
     else: st.append(f'        tl.fromTo("#stage", {{ filter: "blur(0px) saturate(1)", scale: 1 }}, {{ filter: "blur({w.get("blur", 16)}px) saturate(0.85)", scale: {w.get("scale", 1.06)}, duration: {r3(b - a)}, ease: "power2.inOut", immediateRender: false }}, {r3(a)});')
     st.append(f'        tl.fromTo("#stage", {{ filter: "blur({w.get("blur", 16)}px) saturate(0.85)", scale: {w.get("scale", 1.06)} }}, {{ filter: "blur(0px) saturate(1)", scale: 1, duration: {r3(d - c)}, ease: "power2.inOut", immediateRender: false }}, {r3(c)});')
-STAGE_TWEENS = chr(10).join(st + PUNCH)
+# Smart Motion Director camera moves (snap / digital / dolly zoom) on #world / #stage-dir
+_camp = P / "production/director_camera.json"
+DIRCAM = [f'        MD.fx.{c["fx"]}({{ tl }}, {json.dumps(c["opts"])});' for c in (json.loads(_camp.read_text()) if _camp.exists() else [])]
+STAGE_TWEENS = chr(10).join(st + PUNCH + DIRCAM)
 PHOSTS = [f'      <div id="{w["id"].lower()}" class="clip presenter" data-composition-id="{w["id"].lower()}" data-composition-src="compositions/{w["id"].lower()}.html" data-start="{w["host0"]}" data-duration="{r3(w["host1"] - w["host0"])}" data-track-index="8" data-track-kind="graphics" data-width="1080" data-height="1920"></div>' for w in PRESENTER]
 
 sfx_tags = []
@@ -90,7 +93,7 @@ for i, fx in enumerate(SFX):
     fx["lane"] = _lane(fx["t"], fx["t"] + fx["dur"])
     sfx_tags.append(
         f'      <audio id="sfx-{i:02d}" class="clip" src="assets/sfx/{fx["file"]}" data-start="{r3(fx["t"])}" '
-        f'data-duration="{r3(fx["dur"])}" data-track-index="{fx["lane"]}" data-volume="{fx["vol"]}"></audio>'
+        f'data-duration="{r3(min(fx["dur"], D - fx["t"] - 0.005))}" data-track-index="{fx["lane"]}" data-volume="{fx["vol"]}"></audio>'
     )
 
 index = f"""<!doctype html>
@@ -103,6 +106,7 @@ index = f"""<!doctype html>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/timewarp.js"></script>
+    <script src="vendor/motion-director.js"></script>
     <style>
       @font-face {{ font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }}
       @font-face {{ font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }}
@@ -123,9 +127,12 @@ index = f"""<!doctype html>
         background-image: repeating-linear-gradient(90deg, rgba(10,13,44,.35) 0 1px, rgba(10,13,44,0) 1px 4px), repeating-linear-gradient(0deg, rgba(10,13,44,.25) 0 1px, rgba(10,13,44,0) 1px 5px); }}
       #stage {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; z-index: 10; transform-origin: 540px 1000px; }}
       #stage-cam {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 960px; }}
+      #world {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; z-index: 10; transform-origin: 540px 900px; }}
+      #stage-dir {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 1000px; }}
+      #director {{ z-index: 35 !important; position: absolute !important; }}
       #stage-orbit {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 1000px; }}
       .scene-host {{ z-index: 10; }}
-      .presenter {{ z-index: 30; }}
+      .presenter {{ z-index: 30 !important; position: absolute !important; }}
       #mascot {{ z-index: 40; }}
       #fx {{ z-index: 50; }}
       #captions {{ z-index: 60; }}
@@ -137,12 +144,17 @@ index = f"""<!doctype html>
       <div id="bg-haze" data-layout-ignore></div>
       <div id="bg-grain" data-layout-ignore></div>
 
-      <!-- global stage camera: blur/zoom behind the presenter mascot + cut punches -->
-      <div id="stage" data-layout-ignore><div id="stage-cam" data-layout-ignore><div id="stage-orbit" data-layout-ignore>
+      <!-- #world = everything the camera moves (snap / digital zoom); the 3D host, fx and captions stay in front -->
+      <div id="world" data-layout-ignore>
+      <!-- global stage camera: blur/zoom behind the presenter mascot + cut punches; #stage-dir = director dolly -->
+      <div id="stage" data-layout-ignore><div id="stage-cam" data-layout-ignore><div id="stage-dir" data-layout-ignore><div id="stage-orbit" data-layout-ignore>
 {chr(10).join(hosts)}
-      </div></div></div>
+      </div></div></div></div>
       <!-- presenter layers: veil + pop-up elements around the big mascot (tools/gen_presenter.py) -->
 {chr(10).join(PHOSTS)}
+      <!-- Smart Motion Director overlay effects (tools/motion_director.py -> tools/gen_director.py) -->
+      <div id="director" class="clip" data-composition-id="director" data-composition-src="compositions/director.html" data-start="0" data-duration="{r3(D)}" data-track-index="9" data-track-kind="graphics" data-width="1080" data-height="1920"></div>
+      </div>
 
       <!-- 3D rigged mascot overlay (one WebGL canvas, acting driven by global time) -->
       <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{r3(D)}" data-track-index="6" data-track-kind="graphics" data-width="1080" data-height="1920"></div>

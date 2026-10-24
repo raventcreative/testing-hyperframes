@@ -1,0 +1,63 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #dm-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  </style>
+  <div id="root" data-composition-id="demomascot" data-width="1080" data-height="1920">
+    <canvas id="dm-canvas" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas>
+  </div>
+  <script>
+    (function () {
+      // Demo mascot: the same v4 performance engine as the film (springs + audio lip sync),
+      // VO window offset 9.167 s, a slow camera orbit on the 3D character (Cinematic Orbit),
+      // light-wrap compositing (Green Screen) and a Frame Escape clip in the last beat.
+      const OFF = 9.167, D = 10.6;
+      const M3 = window.Mascot3D;
+      const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump, osc } = M3;
+      const VW = window.VO_WORDS, w = (i) => VW[i][1];
+      const canvas = document.getElementById("dm-canvas");
+      const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, 61.1);
+      const ACC = syllableAccents(window.VO_ENV, VW, window.VO_PHONES, 61.1);
+      const sm = (u) => { u = Math.max(0, Math.min(1, u)); return u * u * u * (u * (u * 6 - 15) + 10); };
+      const lerpV = (A, B, u) => ({ fx: A.fx + (B.fx - A.fx) * u, fy: A.fy + (B.fy - A.fy) * u, h: A.h + (B.h - A.h) * u });
+      const PRES = { fx: 540, fy: 2200, h: 1250 }, FRAMED = { fx: 540, fy: 2160, h: 1270 };
+      const L = (k) => k.map((x) => [x[0] - OFF, x[1], x[2]]);
+      const perf = buildPerformance({
+        armR: L([[OFF, "low", 0.2], [w(21) - 0.1, "explainHi", 0.35], [w(23), "low", 0.4], [w(28) - 0.15, "pointUp", 0.32], [w(30), "low", 0.4], [w(31) - 0.12, "open", 0.3], [13.75, "low", 0.4],
+                 [w(37) - 0.15, "pointUp", 0.3], [w(39), "low", 0.35], [w(40) - 0.1, "fist", 0.25], [16.75, "low", 0.35], [w(42) - 0.15, "pointUp", 0.3], [w(44), "low", 0.4], [w(46) - 0.1, "together", 0.35]]),
+        armL: L([[OFF, "low", 0.2], [w(25) - 0.15, "pointUp", 0.32], [w(27), "low", 0.4], [w(31) - 0.12, "open", 0.3], [13.75, "low", 0.4], [w(33), "explain", 0.4], [w(36), "low", 0.4],
+                 [16.6, "pointUp", 0.3], [17.0, "low", 0.4], [w(46) - 0.1, "together", 0.35]]),
+        torso: L([[OFF, {}, 0.2], [w(25) - 0.1, { chest: [0, 0.1, 0] }, 0.35], [w(28) - 0.1, { chest: [0, -0.1, 0] }, 0.35], [w(31) - 0.1, { chest: [0.05, 0, 0] }, 0.3], [13.8, {}, 0.4],
+                 [w(40) - 0.1, { chest: [0.06, 0, 0], spine: [0.03, 0, 0] }, 0.25], [16.8, {}, 0.4], [w(42) - 0.1, { chest: [-0.04, 0, 0] }, 0.3], [18.2, {}, 0.4]]),
+        head: L([[OFF, [0, 0, 0], 0.2], [w(21), [0.04, 0, 0.08], 0.35], [w(25) - 0.1, [-0.08, 0.22, -0.03], 0.3], [w(28) - 0.1, [-0.08, -0.22, 0.03], 0.3], [w(31) - 0.05, [0.04, 0, 0], 0.3],
+                 [14.2, [-0.06, -0.12, 0.05], 0.4], [w(40) - 0.05, [0.08, 0, -0.04], 0.25], [w(42) - 0.1, [-0.12, 0, 0.04], 0.3], [w(46) - 0.1, [0.02, 0, 0.06], 0.35]]),
+      }, D + 0.05);
+      function accents(t) { let n = 0; for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; } return Math.min(1.3, n); }
+      const add = (...ds) => { const o = {}; for (const d of ds) for (const [k, v] of Object.entries(d || {})) { const a = o[k] || [0, 0, 0]; o[k] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
+      let mascot = null;
+      function apply(t) {
+        const g = t + OFF, P = perf(t), acc = accents(g);
+        const bones = add(P.bones, { chest: [0.012 * Math.sin(t * 1.7), 0, 0], spine: [0, 0.03 * vnoise(t, 3, 0.3), 0.022 * vnoise(t, 4, 0.27)], head: [0.02 * vnoise(t, 5, 0.4) + 0.06 * acc, 0.05 * vnoise(t, 6, 0.31), 0.03 * vnoise(t, 7, 0.36)] });
+        const view = t < 7.7 ? PRES : lerpV(PRES, FRAMED, sm((t - 7.7) / 0.5));
+        view.pitch = 4;
+        view.yaw = 6 * Math.sin((t / D) * Math.PI * 2 * 0.6);   // Cinematic Orbit on the 3D character
+        mascot.setView(view);
+        mascot.setState({ root: { ry: P.root.ry + 0.03 * vnoise(t, 9, 0.22) }, bones, face: { blink: [0, 0], mouthMix: 1, mouth: mouthAt(g) } });
+        mascot.render();
+        // Frame Escape: body clipped by the glass frame (x 110-970, y >= 1010); head/hands may leave through the top
+        const e = sm((t - 7.75) / 0.35);
+        // keep: everything above the frame's top edge (y < 1010) + the frame interior; the frame grows in with e
+        const x0 = 110 * e, x1 = 1080 - 110 * e;
+        canvas.style.clipPath = e > 0 ? "polygon(0px 0px, 1080px 0px, 1080px 1010px, " + x1 + "px 1010px, " + x1 + "px 1920px, " + x0 + "px 1920px, " + x0 + "px 1010px, 0px 1010px)" : "none";
+      }
+      MD.fx.greenScreen({}, { target: canvas, strength: 1 });
+      window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+      const FACE = {"eyeA":{"c":[-0.099,0.583],"r":[0.049,0.039],"J":[-0.012594276485253965,0.5728894913572795,0.5928449952437722,0.008744878544633893]},"eyeB":{"c":[0.1,0.584],"r":[0.046,0.04],"J":[0.6644280491730516,0.030130365931821397,0.015549679888023958,-0.6054649097597234]},"browA":{"c":[-0.085,0.675],"J":[-0.04070834735419224,0.5537413339891137,0.591952051964936,0.06466756331213208]},"browB":{"c":[0.089,0.674],"J":[-0.1673063019885604,0.6553582065976762,0.5221243728997077,0.18775902203022735]},"mouth":{"c":[0.001,0.521],"r":[0.0266,0.0164]},"skin":[243,207,186],"skinEye":[246,214,195]};
+      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_rigged_v4.glb", face: FACE, width: 1080, height: 1920 }).then((m) => { mascot = m; apply(0); });
+      window.__hf.buildReady["demomascot"] = ready;
+      window.addEventListener("hf-seek", (e) => { const t = e.detail.time; if (mascot) apply(t); else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t))); });
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02); window.__timelines["demomascot"] = tl;
+    })();
+  </script>
+</template>

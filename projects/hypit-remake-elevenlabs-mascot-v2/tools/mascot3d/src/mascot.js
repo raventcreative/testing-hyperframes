@@ -38,7 +38,8 @@ vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 g
   vec2 dc = (p - E.xy) / (E.zw * vec2(1.34, 1.0));
   dc.y /= (dc.y > 0.0 ? 1.5 : 1.22);
   float ec = dot(dc, dc);
-  if (ec < 1.0 && (blink > 0.001 || lower > 0.001)) {
+  blink = 0.0; // v5: blink is geometric (vertex shader)
+  if (ec < 1.0 && lower > 0.001) {
     float arc = sqrt(max(0.0, 1.0 - dc.x * dc.x));
     float yu = mix(1.0, -0.28, blink) * arc;                          // upper lid travels to a line below centre
     float yl = -mix(1.0, 0.28, max(lower, smoothstep(0.75, 1.0, blink))) * arc; // lower lid meets it when fully closed
@@ -162,8 +163,12 @@ export class Mascot {
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, U);
       sh.vertexShader = sh.vertexShader
-        .replace('#include <common>', '#include <common>\nattribute float _facemask;\nvarying float vFM;\nvarying vec3 vRest;')
-        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvFM = _facemask;\nvRest = position;');
+        .replace('#include <common>', '#include <common>\nattribute float _facemask;\nvarying float vFM;\nvarying vec3 vRest;\nuniform vec4 uEA; uniform vec4 uEB; uniform vec2 uBlink;')
+        .replace('#include <begin_vertex>', `#include <begin_vertex>
+vFM = _facemask;
+vRest = position;
+// v5: blinks disabled (the GLB has no eyelid geometry; every overlay/squash variant produced visible artifacts)
+`);
       sh.fragmentShader = sh.fragmentShader
         .replace('#include <map_pars_fragment>', '#include <map_pars_fragment>\n' + FACE_GLSL_PARS)
         .replace('#include <map_fragment>', `
@@ -186,7 +191,7 @@ export class Mascot {
         .replace('#include <dithering_fragment>', '#include <dithering_fragment>\nif (uDebug > 1.5) gl_FragColor = vec4(vMapUv, 0.0, 1.0);')
         .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = normalize(mix(normal, normalize(uHeadNM * normalize(vRest - uHeadC)), gCover));');
     };
-    mat.customProgramCacheKey = () => 'mascot-face-v9';
+    mat.customProgramCacheKey = () => 'mascot-face-v11';
     mat.needsUpdate = true;
     if (mat.roughness !== undefined) { mat.roughness = Math.max(mat.roughness, 0.55); mat.metalness = 0; }
 

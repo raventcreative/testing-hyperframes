@@ -52,7 +52,7 @@ ORBIT = []
 for k, sc_ in enumerate(sc["scenes"]):
     a_, b_ = sc_["start"], sc_["end"]
     sgn = 1 if k % 2 == 0 else -1
-    ORBIT.append(f'        tl.fromTo("#stage-orbit", {{ rotationY: {-3.5 * sgn}, rotationX: 2.5 }}, {{ rotationY: {3.5 * sgn}, rotationX: -1.5, transformPerspective: 1800, duration: {r3(b_ - a_)}, ease: "sine.inOut", immediateRender: false }}, {r3(a_)});')
+    ORBIT.append(f'        tl.fromTo("#stage-orbit", {{ rotationY: {-3.5 * sgn}, rotationX: 2.5 }}, {{ rotationY: {3.5 * sgn}, rotationX: -1.5, transformPerspective: 1800, duration: {r3(b_ - a_ - 0.002)}, ease: "sine.inOut", immediateRender: false }}, {r3(a_)});')
 PUNCH += ORBIT
 
 # presenter windows: (blur-in start, blur full, unblur start, unblur end)

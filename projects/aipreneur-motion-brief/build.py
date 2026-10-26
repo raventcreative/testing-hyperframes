@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 APTS = json.loads((ROOT / "apts.json").read_text())
-TOTAL = 10
+TOTAL = 15
 
 SHELL = """<!doctype html>
 <html lang="id">
@@ -107,7 +107,7 @@ S1_BODY = """    <div class="btitle"><span class="w b">Motion</span> <span class
     <div class="bsub w r">Paste ini dulu, lalu tambahkan <span class="c b">satu scene</span> di akhir.</div>
     <div class="strip"><div class="f"><i></i>motion-brief.md</div><span class="w r">Buat motion graphic. Ikuti brief ini persis:</span></div>
 """ + "\n".join(_cells) + """
-    <div class="nxt"><span class="hb">9 scene</span> <span class="w r">yang aku pakai ada di slide berikutnya</span> <span class="c b">&rarr;</span></div>
+    <div class="nxt"><span class="hb">14 scene</span> <span class="w r">yang aku pakai ada di slide berikutnya</span> <span class="c b">&rarr;</span></div>
 """
 S1_JS = """
   const SC = %s;
@@ -387,6 +387,8 @@ SLIDES = [
 
 import scenes2
 SLIDES += scenes2.make(scene_body)
+import scenes3
+SLIDES += scenes3.make(scene_body)
 
 if __name__ == "__main__":
     for s in SLIDES:

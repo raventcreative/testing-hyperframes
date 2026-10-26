@@ -1,643 +1,477 @@
-"""Builds the 5-slide 'Agent Architecture' carousel into slides/sN/index.html.
-Run: python3 build.py"""
+"""Agent Architecture carousel, v2 layouts (own composition, not a copy of the reference).
+Run: python3 build.py  ->  slides/sN/index.html"""
 import math
 import shutil
 from pathlib import Path
 
+from common import SHELL, mini_harness, mini_loop, mini_graph, box
+
 ROOT = Path(__file__).parent
 
-SHELL = """<!doctype html>
-<html lang="id">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=1080, height=1350" />
-<title>AIpreneur — %%NAME%%</title>
-<script src="vendor/gsap/dist/gsap.min.js"></script>
-<script src="assets/minis.js"></script>
-<link rel="stylesheet" href="assets/shared.css" />
-<style>
-%%CSS%%
-</style>
-</head>
-<body>
-<div id="root" data-composition-id="%%CID%%" data-start="0" data-duration="7" data-width="1080" data-height="1350" data-fps="30">
-  <div id="stage" class="clip" data-start="0" data-duration="7" data-track-index="0" data-track-kind="graphics" style="position:absolute;inset:0">
-    <div class="bg"></div>
-    <div class="logo" id="logo"></div>
-    <div class="eyebrow g b" id="eyebrow">%%EYEBROW%%</div>
-%%BODY%%
-    <div class="foot" id="foot">
-      <div class="who"><div class="av">FK</div><span class="g b">Freddie Kashawan</span></div>
-      <div class="pg g b">%%RIGHT%%</div>
-    </div>
-    <div class="strip"></div>
-  </div>
-</div>
-<script>
-(function () {
-  const D = 7, TAU = Math.PI * 2;
-  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-  const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
-  const env = (t, a, b, f) => { f = f || 0.18; return smooth((t - a) / f) * (1 - smooth((t - b) / f)); };
-  const mixc = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
-  const $ = (id) => document.getElementById(id);
-  const WHITE = [255, 255, 255], ICE = [219, 231, 255], ICE2 = [196, 216, 252], NAVY = [18, 21, 50], AZ = [79, 134, 232];
-  function hl(el, k, base) {
-    k = clamp(k, 0, 1); base = base || WHITE;
-    el.style.background = "rgb(" + mixc(base, base === WHITE ? ICE : ICE2, k) + ")";
-    el.style.borderColor = "rgb(" + mixc(NAVY, AZ, k) + ")";
-    el.style.boxShadow = k > 0.01 ? "0 0 0 " + (5 * k).toFixed(1) + "px rgba(79,134,232," + (0.2 * k).toFixed(3) + "), 0 14px 28px -12px rgba(79,134,232," + (0.75 * k).toFixed(3) + ")" : "none";
-  }
-  function glow(el, k) {
-    k = clamp(k, 0, 1);
-    el.style.boxShadow = k > 0.01 ? "0 0 0 " + (6 * k).toFixed(1) + "px rgba(79,134,232," + (0.28 * k).toFixed(3) + "), 0 16px 30px -10px rgba(79,134,232," + (0.8 * k).toFixed(3) + ")" : "none";
-  }
-  const pcache = {};
-  function along(id, p) {
-    if (!pcache[id]) { const el = $(id); pcache[id] = { el, L: el.getTotalLength() }; }
-    const r = pcache[id];
-    return r.el.getPointAtLength(clamp(p, 0, 1) * r.L);
-  }
-  function dot(id, pathId, p, o) {
-    const pt = along(pathId, p), c = $(id);
-    c.setAttribute("cx", pt.x.toFixed(1)); c.setAttribute("cy", pt.y.toFixed(1)); c.setAttribute("opacity", clamp(o, 0, 1).toFixed(3));
-  }
-  const tl = gsap.timeline({ paused: true });
-  const st = { t: 0 };
-%%JS%%
-  tl.to(st, { t: D, duration: D, ease: "none", onUpdate: () => render(st.t) }, 0);
-  render(0);
-  window.__timelines = window.__timelines || {};
-  window.__timelines["%%CID%%"] = tl;
-})();
-</script>
-</body>
-</html>
-"""
 
-INK_DEF = '<linearGradient id="{p}-ink" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient>'
+def hb(s, extra=""):
+    return f'<span class="hb" {extra}>{s}</span>'
 
 
-def txt(x, y, s, size, p, bold=True, anchor="middle", extra=""):
-    return f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{700 if bold else 400}" text-anchor="{anchor}" fill="url(#{p}-ink)" {extra}>{s}</text>'
-
-
-def spill(cx, cy, w, h, label, p, size=12, dark=False):
-    x, y = cx - w / 2, cy - h / 2
-    if dark:
-        return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{h/2}" fill="url(#{p}-ink)"/>'
-                f'<text x="{cx}" y="{cy + size*0.36}" font-size="{size}" font-weight="700" text-anchor="middle" fill="#fff" letter-spacing="1">{label}</text>')
-    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{h/2}" fill="#fff" stroke="#121532" stroke-width="2"/>'
-            + txt(cx, cy + size * 0.36, label, size, p, extra='letter-spacing="1"'))
-
-
-def mini_harness(p, size):
-    s = [f'<svg width="{size}" height="{size}" viewBox="0 0 300 300"><defs>{INK_DEF.format(p=p)}</defs>']
-    s.append('<rect x="78" y="78" width="144" height="144" fill="none" stroke="#121532" stroke-width="2" stroke-dasharray="6 5"/>')
-    br = []
-    for (x, y, dx, dy) in [(60, 60, 1, 1), (240, 60, -1, 1), (60, 240, 1, -1), (240, 240, -1, -1)]:
-        br.append(f'<path d="M{x} {y + 26*dy} V{y} H{x + 26*dx}" fill="none" stroke="#4f86e8" stroke-width="5" stroke-linecap="round"/>')
-    s.append(f'<g id="{p}-br">{"".join(br)}</g>')
-    routes = ["M150 44 V105", "M58 150 H105", "M242 150 H195", "M150 256 V195"]
-    for i, d in enumerate(routes):
-        s.append(f'<path id="{p}-r{i}" d="{d}" stroke="#121532" stroke-width="2" fill="none"/>')
-    s.append(f'<rect id="{p}-llm" x="105" y="105" width="90" height="90" rx="18" fill="#dbe7ff" stroke="#121532" stroke-width="3"/>')
-    s.append(txt(150, 159, "LLM", 26, p))
-    s.append(spill(150, 30, 74, 26, "TOOLS", p))
-    s.append(spill(150, 270, 74, 26, "EVALS", p))
-    s.append(spill(36, 150, 68, 26, "RULES", p))
-    s.append(spill(262, 150, 76, 26, "MEMORY", p, size=11))
-    for i in range(4):
-        s.append(f'<circle id="{p}-d{i}" r="6" fill="#4f86e8" stroke="#fff" stroke-width="2" opacity="0"/>')
-    s.append("</svg>")
-    return "".join(s)
-
-
-def mini_loop(p, size):
-    s = [f'<svg width="{size}" height="{size}" viewBox="0 0 300 300"><defs>{INK_DEF.format(p=p)}</defs>']
-    s.append('<circle cx="150" cy="150" r="95" fill="none" stroke="#e1e9f6" stroke-width="14"/>')
-    s.append('<circle cx="150" cy="150" r="95" fill="none" stroke="#121532" stroke-width="1.6" stroke-dasharray="2 6" opacity="0.6"/>')
-    s.append(f'<circle id="{p}-arc" cx="150" cy="150" r="95" fill="none" stroke="#4f86e8" stroke-width="7" stroke-linecap="round" transform="rotate(-90 150 150)"/>')
-    for i, (x, y) in enumerate([(150, 55), (245, 150), (150, 245), (55, 150)]):
-        s.append(f'<circle id="{p}-n{i}" cx="{x}" cy="{y}" r="8" fill="#fff" stroke="#121532" stroke-width="2.5"/>')
-    s.append(txt(150, 36, "PLAN", 13, p))
-    s.append(txt(268, 155, "ACT", 13, p, anchor="start"))
-    s.append(txt(150, 276, "CHECK", 13, p))
-    s.append(txt(32, 155, "FIX", 13, p, anchor="end"))
-    s.append(spill(150, 142, 92, 32, "AGENT", p, size=14, dark=True))
-    s.append(txt(150, 182, "SAMPAI SELESAI", 10, p, extra='letter-spacing="1.2"'))
-    s.append(f'<circle id="{p}-hd" r="9" fill="#ffffff" stroke="#4f86e8" stroke-width="4"/>')
-    s.append("</svg>")
-    return "".join(s)
-
-
-def mini_graph(p, size):
-    s = [f'<svg width="{size}" height="{size}" viewBox="0 0 300 300"><defs>{INK_DEF.format(p=p)}</defs>']
-    edges = ["M150 42 C150 65,95 62,95 85", "M150 42 C150 65,205 62,205 85", "M95 115 C95 140,60 135,60 160",
-             "M95 115 C95 140,150 135,150 160", "M205 115 C205 140,150 135,150 160", "M205 115 C205 140,240 135,240 160",
-             "M60 190 C60 225,150 215,150 240", "M150 190 V240", "M240 190 C240 225,150 215,150 240"]
-    for d in edges:
-        s.append(f'<path d="{d}" stroke="#121532" stroke-width="2" fill="none"/>')
-    s.append(f'<path id="{p}-retry" d="M256 175 C292 160,292 112,221 100" stroke="#4f86e8" stroke-width="2" fill="none" stroke-dasharray="4 4"/>')
-    s.append(txt(287, 138, "RETRY", 9, p, bold=True, extra='transform="rotate(90 287 138)" letter-spacing="1.5"'))
-    s.append(f'<path id="{p}-ra" d="M150 42 C150 65,95 62,95 85 L95 115 C95 140,150 135,150 160 L150 240" fill="none" stroke="none"/>')
-    s.append(f'<path id="{p}-rb" d="M150 42 C150 65,205 62,205 85 L205 115 C205 140,240 135,240 160 L240 190 C240 225,150 215,150 240" fill="none" stroke="none"/>')
-    s.append(spill(150, 30, 74, 26, "START", p, dark=True))
-    for i, (x, y) in enumerate([(95, 100), (205, 100), (60, 175), (150, 175), (240, 175)]):
-        s.append(f'<rect id="{p}-n{i}" x="{x-15}" y="{y-15}" width="30" height="30" rx="7" fill="#fff" stroke="#121532" stroke-width="2.5"/>'
-                 f'<circle cx="{x}" cy="{y}" r="4" fill="#121532"/>')
-    s.append(f'<g id="{p}-n5" opacity="0.82"><rect x="116" y="240" width="68" height="26" rx="13" fill="#4f86e8"/>'
-             f'<text x="150" y="257.5" font-size="12" font-weight="700" text-anchor="middle" fill="#fff" letter-spacing="1">END</text></g>')
-    s.append(f'<circle id="{p}-tk" r="7" fill="#4f86e8" stroke="#fff" stroke-width="2.5"/>')
-    s.append(f'<circle id="{p}-rt" r="4" fill="#4f86e8" opacity="0"/>')
-    s.append("</svg>")
-    return "".join(s)
-
-
-def box(id_, x, y, w, h, t, s="", cls=""):
-    sub = f'<div class="s g r">{s}</div>' if s else ""
-    tcls = "t" if "eval" in cls else "t g"
-    scls = "s" if "eval" in cls else "s g r"
-    sub = f'<div class="{scls}">{s}</div>' if s else ""
-    return f'    <div class="box {cls}" id="{id_}" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px"><div class="{tcls}">{t}</div>{sub}</div>'
-
-
-# ======================================================================== S1 cover
+# ======================================================================== S1 cover: headline top-left, 3 stacked row cards
 S1_CSS = """
-.card .kick { position:absolute; left:26px; top:334px; font-size:16px; letter-spacing:0.18em; }
-.card .nm { position:absolute; left:24px; top:360px; font-size:50px; letter-spacing:-0.03em; }
-.card .ds { position:absolute; left:26px; top:430px; font-size:20px; }
-.card .dg { position:absolute; left:8px; top:10px; }
+.row { position:absolute; left:64px; width:952px; height:236px; background:#fff; border:3px solid #121532; border-radius:26px; overflow:hidden; }
+.row .strip { position:absolute; left:0; top:0; bottom:0; width:14px; background:linear-gradient(180deg,#121532,#274976); }
+.row .dg { position:absolute; left:34px; top:10px; }
+.row .kick { position:absolute; left:290px; top:34px; font-size:16px; letter-spacing:0.2em; }
+.row .nm { position:absolute; left:288px; top:56px; font-size:56px; letter-spacing:-0.03em; line-height:1.2; }
+.row .ds { position:absolute; left:290px; top:128px; font-size:22px; }
+.row .ch { position:absolute; left:290px; top:170px; height:40px; padding:0 18px; border-radius:20px; border:2px solid rgba(18,21,50,0.16); font-size:17px; display:flex; align-items:center; }
+.row .no { position:absolute; right:34px; top:40px; font-size:132px; line-height:1; letter-spacing:-0.04em; opacity:0.13; }
 """
-_cards = [("h", 74, "#274976", "THE SCAFFOLD", "Harness", "membungkus model", mini_harness),
-          ("l", 392, "#4f86e8", "THE CYCLE", "Loop", "ulang sampai selesai", mini_loop),
-          ("g", 710, "#121532", "THE MAP", "Graph", "atur tiap langkah", mini_graph)]
-S1_BODY = "".join(
-    f'    <div class="card" id="c{p}" style="left:{x}px;top:170px;width:296px;height:490px;box-shadow:12px 12px 0 {sh}">'
-    f'<div class="dg">{fn(p, 274)}</div><div class="kick g b">{k}</div><div class="nm g b">{n}</div><div class="ds g r">{d}</div></div>\n'
-    for p, x, sh, k, n, d, fn in _cards)
-S1_BODY += """    <div class="vs" style="left:353px;top:400px">vs</div>
-    <div class="vs" style="left:671px;top:400px">vs</div>
-    <div class="headline" style="top:712px;font-size:104px;line-height:1.15"><span class="g b">Harness</span> <span class="g r dim">vs</span> <span class="g b">Loop</span> <span class="g r dim">vs</span></div>
-    <div class="headline" style="top:830px;font-size:104px;line-height:1.15"><span class="hlbar"><span class="g b">Graph Engineering.</span></span></div>
-    <div class="headline" style="top:985px;font-size:34px"><span class="g r">3 cara membangun AI agent.</span> <span class="g b">Kamu pakai yang mana? &rarr;</span></div>
-    <div style="position:absolute;left:0;right:0;top:1066px;display:flex;justify-content:center;gap:14px">
-      <div class="chip" style="position:static"><span class="g r">context + tools</span></div>
-      <div class="chip" style="position:static"><span class="g r">plan &rarr; act &rarr; check</span></div>
-      <div class="chip" style="position:static"><span class="g r">nodes + edges</span></div>
-    </div>
-"""
+_rows = [("h", 430, "01", "THE SCAFFOLD", "Harness", "membungkus model", "context + tools", mini_harness),
+         ("l", 686, "02", "THE CYCLE", "Loop", "ulang sampai selesai", "plan &rarr; act &rarr; check", mini_loop),
+         ("g", 942, "03", "THE MAP", "Graph", "atur tiap langkah", "nodes + edges", mini_graph)]
+S1_BODY = f"""    <div class="htitle" style="top:118px;font-size:80px"><span class="g b">Harness</span> <span class="g r dim">vs</span> <span class="g b">Loop</span> <span class="g r dim">vs</span></div>
+    <div class="htitle" style="top:218px;font-size:80px">{hb("Graph Engineering.")}</div>
+    <div class="lsub" style="top:346px;font-size:29px"><span class="g r">3 cara membangun AI agent.</span> {hb("Kamu pakai yang mana? &rarr;", 'style="font-size:27px"')}</div>
+""" + "".join(
+    f'    <div class="row" id="r{p}" style="top:{y}px"><div class="strip"></div><div class="dg">{fn(p, 214)}</div>'
+    f'<div class="kick g b">{k}</div><div class="nm g b">{n}</div><div class="ds g r">{d}</div>'
+    f'<div class="ch"><span class="g r">{c}</span></div><div class="no g b">{no}</div></div>\n'
+    for p, y, no, k, n, d, c, fn in _rows)
 S1_JS = """
-  function render(t) { Minis.harness("h", t); Minis.loop("l", t); Minis.graph("g", t); }
-"""
-
-# ======================================================================== S2 harness
-S2_CSS = """
-.eq { position:absolute; top:198px; left:0; right:0; display:flex; justify-content:center; align-items:center; gap:18px; font-size:28px; }
-.eq .p { height:58px; padding:0 30px; border-radius:29px; border:3px solid #121532; display:flex; align-items:center; background:#fff; }
-.eq .p.m { background:#dbe7ff; }
-.eq .p.h { background:linear-gradient(100deg,#121532,#274976); border-color:transparent; color:#fff; }
-.sub2 { position:absolute; left:70px; right:70px; top:284px; text-align:center; font-size:24px; line-height:1.45; }
-#model { position:absolute; left:410px; top:630px; width:260px; height:200px; border-radius:26px; border:4px solid #121532; background:#dbe7ff; }
-#model .mt { position:absolute; left:0; right:0; top:34px; text-align:center; font-size:60px; line-height:1; letter-spacing:-0.01em; }
-#model .ms { position:absolute; left:0; right:0; top:104px; text-align:center; font-size:17px; }
-.status { position:absolute; left:50%; top:142px; height:32px; margin-left:-90px; width:180px; border-radius:16px; background:linear-gradient(100deg,#121532,#274976); }
-.status span { position:absolute; left:0; right:0; top:0; line-height:32px; text-align:center; color:#fff; font-weight:700; font-size:14px; letter-spacing:0.14em; opacity:0; }
-#fail { position:absolute; left:732px; top:902px; width:30px; height:30px; border-radius:50%; background:linear-gradient(100deg,#121532,#274976); color:#fff; font-size:17px; font-weight:700; display:flex; align-items:center; justify-content:center; opacity:0; z-index:4; }
-.retry { position:absolute; left:330px; top:850px; font-size:15px; }
-#wires { position:absolute; left:0; top:0; }
-"""
-S2_BODY = """    <div class="headline" style="top:96px;font-size:80px;line-height:1.2"><span class="g b">Harness</span> <span class="hlbar"><span class="g r">Engineering</span></span></div>
-    <div class="eq"><div class="p"><span class="g b">Agent</span></div><span class="g r">=</span><div class="p m"><span class="g b">Model</span></div><span class="g r">+</span><div class="p h b">Harness</div></div>
-    <div class="sub2"><span class="g r">Model yang berpikir. Harness yang menentukan </span><span class="g b">apa yang dilihat</span><span class="g r">, </span><span class="g b">apa yang bisa disentuh</span><span class="g r">, dan </span><span class="g b">bagaimana hasilnya dicek.</span></div>
-    <div class="frame" style="left:64px;top:412px;width:952px;height:698px;box-shadow:12px 12px 0 #4f86e8"></div>
-    <div class="band" style="left:92px;top:445px;width:896px;height:116px"></div>
-    <div class="band" style="left:92px;top:898px;width:896px;height:104px"></div>
-    <div class="lbl g b" style="left:114px;top:470px">GUIDES</div><div class="lbl" style="left:114px;top:496px"><span class="g r" style="margin-left:0">yang diikuti</span></div>
-    <div class="lbl g b" style="left:96px;top:586px">CONTEXT<span class="r">yang dilihat</span></div>
-    <div class="lbl g b" style="left:738px;top:586px">TOOLS<span class="r">yang disentuh</span></div>
-    <div class="lbl g b" style="left:96px;top:866px">SENSORS<span class="r">cara dicek</span></div>
-    <svg id="wires" width="1080" height="1350">
-      <g fill="none" stroke="#121532" stroke-width="2.5">
-        <path d="M540 440 V630"/>
-        <path id="c0" d="M342 653 C380 653,376 730,410 730"/><path id="c1" d="M342 731 C376 731,376 730,410 730"/><path id="c2" d="M342 809 C380 809,376 730,410 730"/>
-        <path id="t0" d="M670 730 C704 730,700 653,738 653"/><path id="t1" d="M670 730 C704 730,704 731,738 731"/><path id="t2" d="M670 730 C704 730,700 809,738 809"/>
-        <path id="oc" d="M600 830 V915"/>
-        <path d="M352 950 H520"/><path d="M750 950 H800"/><path d="M885 842 V915"/>
-        <path id="vo" d="M232 985 V1062 H330 V1090"/>
-      </g>
-      <g fill="none" stroke="#4f86e8" stroke-width="2.5" stroke-dasharray="6 6">
-        <path id="g0" d="M410 541 C410 590,470 590,470 630"/><path id="g1" d="M690 541 C690 585,610 590,610 630"/><path id="g2" d="M885 541 V566 H660 C642 566,640 590,640 630"/>
-        <path id="rt" d="M540 915 V830"/>
-      </g>
-      <g fill="#4f86e8" stroke="#fff" stroke-width="2.5">
-        <circle id="dc0" r="7" opacity="0"/><circle id="dc1" r="7" opacity="0"/><circle id="dc2" r="7" opacity="0"/>
-        <circle id="dg0" r="7" opacity="0"/><circle id="dg1" r="7" opacity="0"/><circle id="dg2" r="7" opacity="0"/>
-        <circle id="dt0" r="7" opacity="0"/><circle id="dt1" r="7" opacity="0"/><circle id="dt2" r="7" opacity="0"/>
-        <circle id="doc" r="7" opacity="0"/><circle id="drt" r="7" opacity="0"/><circle id="dvo" r="7" opacity="0"/>
-      </g>
-    </svg>
-""" + "\n".join([
-    box("bsys", 300, 470, 220, 70, "System prompt", "peran + aturan"),
-    box("bagt", 600, 470, 180, 70, "AGENTS.md", "konvensi tim"),
-    box("bcon", 800, 470, 170, 70, "Constraints", "batas keras"),
-    box("bmem", 92, 620, 250, 66, "Memory", "sesi sebelumnya"),
-    box("bret", 92, 698, 250, 66, "Retrieval", "dokumen yang tepat"),
-    box("bfil", 92, 776, 250, 66, "Files &amp; state", "working set"),
-    box("btoo", 738, 620, 250, 66, "Tool registry", "yang bisa dipanggil"),
-    box("bsan", 738, 698, 250, 66, "Sandbox", "eksekusi aman"),
-    box("bper", 738, 776, 250, 66, "Permissions", "izin sebelum berisiko"),
-    box("btes", 112, 915, 240, 70, "Tests &amp; evals", "berhasil?"),
-    box("bout", 520, 915, 230, 70, "Output checks", "schema + lint"),
-    box("btra", 800, 915, 170, 70, "Traces", "log tiap langkah"),
-]) + """
-    <div id="model"><div class="mt g b">MODEL</div><div class="ms g r">berpikir + memutuskan</div>
-      <div class="status"><span id="s0">MEMBACA</span><span id="s1">BERPIKIR</span><span id="s2">PAKAI TOOLS</span><span id="s3">MENGECEK</span><span id="s4">MEMPERBAIKI</span><span id="s5">MENGIRIM</span></div></div>
-    <div id="fail">&times;</div>
-    <div class="retry g r">&#8635; retry + feedback</div>
-    <div class="tag" style="left:92px;top:395px">THE HARNESS</div>
-    <div class="pill" style="left:445px;top:392px;width:190px"><span class="g b">USER TASK &darr;</span></div>
-    <div class="pill" id="pver" style="left:205px;top:1090px;width:250px"><span class="g b">&#10003; VERIFIED OUTPUT</span></div>
-    <div class="headline" style="top:1160px;font-size:36px"><span class="g b">Model sama.</span> <span class="g r dim">Harness lebih baik.</span> <span class="hlbar"><span class="g b">Agent lebih baik.</span></span></div>
-"""
-S2_JS = """
-  const PH = [0, 1.15, 2.3, 3.45, 4.6, 5.75, 7];
-  const ctxB = ["bmem", "bret", "bfil"].map($), tooB = ["btoo", "bsan", "bper"].map($), guiB = ["bsys", "bagt", "bcon"].map($);
-  const model = $("model");
-  function flow(ids, paths, t0, rev) {
-    ids.forEach((id, i) => {
-      const q = (st.t - t0 - 0.1 - i * 0.1) / 0.75;
-      const o = q > 0 && q < 1 ? Math.min(1, q * 6) * (1 - smooth((q - 0.85) / 0.15)) : 0;
-      dot(id, paths[i], rev ? 1 - smooth(q) : smooth(q), o);
+  const rows = ["rh", "rl", "rg"].map($);
+  function render(t) {
+    Minis.harness("h", t); Minis.loop("l", t); Minis.graph("g", t);
+    rows.forEach((el, i) => {
+      const ph = ((t / 7 * 3) % 3 + 3) % 3, d = Math.min(Math.abs(ph - i - 0.5), 3 - Math.abs(ph - i - 0.5));
+      const k = clamp(1 - d / 0.9, 0, 1);
+      el.style.boxShadow = "0 " + (18 * k).toFixed(1) + "px " + (40 * k).toFixed(1) + "px -16px rgba(79,134,232," + (0.7 * k).toFixed(3) + ")";
+      el.style.borderColor = "rgb(" + mixc(NAVY, AZ, k) + ")";
     });
   }
+"""
+
+# ======================================================================== S2 harness: vertical layered stack
+RY = {"gui": 445, "ctx": 557, "mdl": 669, "too": 817, "sen": 929}
+BX = [300, 535, 770]
+
+
+def _row(key, label, sub, items, h=84):
+    y = RY[key]
+    out = [f'    <div class="secl g" style="left:92px;top:{y + 18}px">{label}</div>',
+           f'    <div class="lbl" style="left:92px;top:{y + 44}px"><span class="g r" style="margin:0;font-size:15px">{sub}</span></div>']
+    for i, (bid, t, s) in enumerate(items):
+        out.append(box(bid, BX[i], y, 220, h, t, s))
+    return "\n".join(out)
+
+
+S2_CSS = """
+.eq2 { position:absolute; left:63px; top:216px; display:flex; align-items:center; gap:14px; font-size:26px; }
+.eq2 .p { height:54px; padding:0 26px; border-radius:27px; border:3px solid #121532; display:flex; align-items:center; background:#fff; }
+.eq2 .p.m { background:#dbe7ff; }
+.eq2 .p.h { background:linear-gradient(100deg,#121532,#274976); border-color:transparent; color:#fff; font-weight:700; }
+#mdl { position:absolute; left:300px; top:669px; width:690px; height:120px; border-radius:22px; background:linear-gradient(100deg,#121532,#274976); color:#fff; }
+#mdl .mt { position:absolute; left:34px; top:18px; font-size:54px; font-weight:700; line-height:1.1; letter-spacing:-0.01em; }
+#mdl .ms { position:absolute; left:36px; top:80px; font-size:17px; opacity:0.85; }
+#mdl .stat { position:absolute; right:26px; top:38px; width:250px; height:44px; border-radius:22px; background:#fff; }
+#mdl .stat span { position:absolute; left:0; right:0; top:0; line-height:44px; text-align:center; font-weight:700; font-size:16px; letter-spacing:0.14em; opacity:0; }
+#spine { position:absolute; left:0; top:0; }
+#fail { position:absolute; left:968px; top:917px; width:32px; height:32px; border-radius:50%; background:linear-gradient(100deg,#121532,#274976); color:#fff; font-size:18px; font-weight:700; display:flex; align-items:center; justify-content:center; opacity:0; z-index:4; }
+#pass { position:absolute; left:968px; top:917px; width:32px; height:32px; border-radius:50%; background:#4f86e8; color:#fff; font-size:16px; font-weight:700; display:flex; align-items:center; justify-content:center; opacity:0; z-index:4; }
+"""
+_spine_nodes = "".join(f'<circle id="sn{i}" cx="268" cy="{y + (60 if k == "mdl" else 42)}" r="9" fill="#fff" stroke="#121532" stroke-width="2.5"/>'
+                       for i, (k, y) in enumerate(RY.items()))
+S2_BODY = f"""    <div class="htitle"><span class="g b">Harness</span> {hb("Engineering")}</div>
+    <div class="eq2"><div class="p"><span class="g b">Agent</span></div><span class="g r">=</span><div class="p m"><span class="g b">Model</span></div><span class="g r">+</span><div class="p h">Harness</div></div>
+    <div class="lsub" style="top:292px;font-size:24px"><span class="g r">Model yang berpikir. Harness yang menentukan </span><span class="g b">apa yang dilihat</span><span class="g r">, </span><span class="g b">apa yang bisa disentuh</span><span class="g r">, dan </span><span class="g b">bagaimana hasilnya dicek.</span></div>
+    <div class="frame" style="left:64px;top:410px;width:952px;height:648px;box-shadow:-12px 12px 0 #4f86e8"></div>
+    <svg id="spine" width="1080" height="1350">
+      <path d="M268 430 V1040" stroke="#121532" stroke-width="2.5" fill="none"/>
+      <path d="M1006 971 V729" stroke="#4f86e8" stroke-width="2.5" fill="none" stroke-dasharray="6 6"/>
+      <path id="rt" d="M990 971 C1006 971,1006 960,1006 945 V755 C1006 740,1006 729,990 729" fill="none" stroke="none"/>
+      <text x="1030" y="850" font-size="14" font-weight="700" fill="#274976" transform="rotate(90 1030 850)" text-anchor="middle" letter-spacing="2">RETRY + FEEDBACK</text>
+      {_spine_nodes}
+      <circle id="tok" cx="268" cy="430" r="11" fill="#4f86e8" stroke="#fff" stroke-width="3"/>
+      <circle id="rtok" r="9" fill="#4f86e8" stroke="#fff" stroke-width="3" opacity="0"/>
+    </svg>
+""" + "\n".join([
+    _row("gui", "GUIDES", "yang diikuti", [("bsys", "System prompt", "peran + aturan"), ("bagt", "AGENTS.md", "konvensi tim"), ("bcon", "Constraints", "batas keras")]),
+    _row("ctx", "CONTEXT", "yang dilihat", [("bmem", "Memory", "sesi sebelumnya"), ("bret", "Retrieval", "dokumen yang tepat"), ("bfil", "Files &amp; state", "working set")]),
+    '    <div class="secl g" style="left:92px;top:705px">MODEL</div><div class="lbl" style="left:92px;top:731px"><span class="g r" style="margin:0;font-size:15px">otak agent</span></div>',
+    _row("too", "TOOLS", "yang disentuh", [("btoo", "Tool registry", "yang bisa dipanggil"), ("bsan", "Sandbox", "eksekusi aman"), ("bper", "Permissions", "izin sebelum berisiko")]),
+    _row("sen", "SENSORS", "cara dicek", [("btes", "Tests &amp; evals", "berhasil?"), ("btra", "Traces", "log tiap langkah"), ("bout", "Output checks", "schema + lint")]),
+]) + """
+    <div id="mdl"><div class="mt">MODEL</div><div class="ms">berpikir + memutuskan</div>
+      <div class="stat"><span class="g" id="s0">BACA ATURAN</span><span class="g" id="s1">BACA CONTEXT</span><span class="g" id="s2">BERPIKIR</span><span class="g" id="s3">PAKAI TOOLS</span><span class="g" id="s4">MENGECEK</span><span class="g" id="s5">MEMPERBAIKI</span><span class="g" id="s6">MENGIRIM</span></div></div>
+    <div id="fail">&times;</div><div id="pass">&#10003;</div>
+    <div class="tag" style="left:92px;top:393px">THE HARNESS</div>
+    <div class="pill" id="ptask" style="left:400px;top:390px;width:200px"><span class="g b">USER TASK &darr;</span></div>
+    <div class="pill" id="pver" style="left:143px;top:1038px;width:250px"><span class="g b">&#10003; VERIFIED OUTPUT</span></div>
+    <div class="lsub" style="top:1104px;font-size:34px"><span class="g b">Model sama.</span> <span class="g r dim">Harness lebih baik.</span> """ + hb("Agent lebih baik.") + """</div>
+"""
+S2_JS = """
+  const ROWS = { 0: ["bsys", "bagt", "bcon"], 1: ["bmem", "bret", "bfil"], 3: ["btoo", "bsan", "bper"] };
+  const CY = [487, 599, 729, 859, 971];
   function render(t) {
-    const ph = PH.findIndex((v, i) => t >= v && t < PH[i + 1]);
-    for (let i = 0; i < 6; i++) gsap.set("#s" + i, { opacity: i === ph ? 1 : 0 });
-    const e = (i) => env(t, PH[i], PH[i + 1] - 0.05);
-    ctxB.forEach((el) => hl(el, e(0)));
-    guiB.forEach((el) => hl(el, e(1)));
-    tooB.forEach((el) => hl(el, e(2)));
-    hl($("bout"), Math.max(e(3), e(5)));
-    hl($("btes"), e(5));
-    hl($("btra"), e(2) * 0.6 + e(5) * 0.6);
-    const pulse = 0.5 + 0.5 * Math.sin(TAU * t * 1.6);
-    model.style.boxShadow = "0 0 0 " + (8 * Math.max(e(1), e(4)) * (0.6 + 0.4 * pulse)).toFixed(1) + "px rgba(79,134,232,0.25), 0 20px 40px -16px rgba(79,134,232," + (0.3 + 0.5 * Math.max(e(1), e(4))).toFixed(3) + ")";
-    model.style.borderColor = "rgb(" + mixc(NAVY, AZ, Math.max(e(1), e(4))) + ")";
-    flow(["dc0", "dc1", "dc2"], ["c0", "c1", "c2"], PH[0]);
-    flow(["dg0", "dg1", "dg2"], ["g0", "g1", "g2"], PH[1]);
-    flow(["dt0", "dt1", "dt2"], ["t0", "t1", "t2"], PH[2]);
-    flow(["doc"], ["oc"], PH[3]);
-    flow(["drt"], ["rt"], PH[4] + 0.15);
-    flow(["dvo"], ["vo"], PH[5] + 0.2);
-    gsap.set("#fail", { opacity: env(t, 3.9, PH[4] - 0.05, 0.12), scale: 0.6 + 0.4 * smooth((t - 3.9) / 0.15) });
-    glow($("pver"), env(t, 6.3, 7.2));
+    const ph = Math.min(6, Math.floor(t));
+    const f = t - ph;
+    for (let i = 0; i < 7; i++) gsap.set("#s" + i, { opacity: i === ph ? 1 : 0 });
+    const e = (i) => env(t, i, i + 0.95, 0.15);
+    [0, 1, 3].forEach((r) => ROWS[r].forEach((id) => hl($(id), e(r))));
+    hl($("btes"), Math.max(e(4), e(6) * 0.9)); hl($("bout"), Math.max(e(4), e(6))); hl($("btra"), Math.max(e(4), e(6)) * 0.7);
+    const mk = Math.max(e(2), e(5));
+    $("mdl").style.boxShadow = "0 0 0 " + (8 * mk).toFixed(1) + "px rgba(79,134,232,0.28), 0 22px 44px -14px rgba(79,134,232," + (0.25 + 0.6 * mk).toFixed(3) + ")";
+    let y, o = 1;
+    if (t < 0.3) y = 430 + (CY[0] - 430) * smooth(t / 0.3);
+    else if (ph <= 4) y = ph === 0 ? CY[0] : CY[ph - 1] + (CY[ph] - CY[ph - 1]) * smooth(f / 0.35);
+    else if (ph === 5) { y = CY[4]; o = 1 - smooth(f / 0.1); }
+    else { y = f < 0.45 ? CY[4] : CY[4] + (1050 - CY[4]) * smooth((f - 0.45) / 0.35); o = smooth(f / 0.1); }
+    $("tok").setAttribute("cy", y.toFixed(1)); $("tok").setAttribute("opacity", o.toFixed(3));
+    for (let i = 0; i < 5; i++) $("sn" + i).setAttribute("fill", (y >= CY[i] - 1 && !(ph === 5 && i === 4)) ? "#4f86e8" : "#ffffff");
+    const rq = (t - 5.05) / 0.6;
+    dot("rtok", "rt", smooth(rq), rq > 0 && rq < 1.15 ? 1 - smooth((rq - 1) / 0.15) : 0);
+    gsap.set("#fail", { opacity: env(t, 4.45, 5.0, 0.1) }); gsap.set("#pass", { opacity: env(t, 6.2, 6.95, 0.1) });
+    glow($("pver"), env(t, 6.75, 7.3, 0.12)); glow($("ptask"), env(t, -0.2, 0.35, 0.12));
   }
 """
 
-# ======================================================================== S3 loop
-CX, CY, R = 540, 690, 215
-ANG = [-90, -18, 54, 126, 198]
-
-
-def _pt(a, r=R):
-    return CX + r * math.cos(math.radians(a)), CY + r * math.sin(math.radians(a))
-
-
-_chev = []
-for a in [-54, 18, 90, 162, 234]:
-    x, y = _pt(a)
-    _chev.append(f'<path d="M-6 -7 L4 0 L-6 7" transform="translate({x:.1f} {y:.1f}) rotate({a + 90})" fill="none" stroke="#121532" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>')
-_marks = "".join(f'<circle id="mk{i}" cx="{_pt(a)[0]:.1f}" cy="{_pt(a)[1]:.1f}" r="11" fill="#fff" stroke="#121532" stroke-width="3"/>' for i, a in enumerate(ANG))
+# ======================================================================== S3 loop: counter panel + vertical step list
+STEP_Y = [400, 474, 548, 622, 696]
+_steps = [("01", "OBSERVE", "state + error"), ("02", "REASON", "rencanakan langkah"), ("03", "ACT", "edit &middot; run &middot; tools"),
+          ("04", "CHECK", "tests &middot; evals"), ("05", "DECIDE", "goal? stop : loop")]
 S3_CSS = """
-.code { position:absolute; left:50%; top:196px; transform:translateX(-50%); height:60px; padding:0 30px; border-radius:16px; background:#fff; border:2.5px solid #121532; display:flex; align-items:center; font-size:25px; white-space:nowrap; box-shadow:6px 6px 0 #4f86e8; }
-.sub3 { position:absolute; left:70px; right:70px; top:284px; text-align:center; font-size:25px; line-height:1.45; }
-#ring { position:absolute; left:0; top:0; }
-.disc { position:absolute; left:410px; top:560px; width:260px; height:260px; border-radius:50%; background:#fff; border:3px solid #121532; box-shadow:0 20px 50px -20px rgba(18,21,50,0.35); }
-.disc .k { position:absolute; left:0; right:0; top:44px; text-align:center; font-size:15px; letter-spacing:0.24em; }
-.disc .n { position:absolute; left:58px; top:62px; width:110px; height:96px; overflow:hidden; }
-.disc .n span { position:absolute; right:0; top:0; font-size:86px; line-height:96px; letter-spacing:-0.03em; }
-.disc .of { position:absolute; left:170px; top:116px; font-size:24px; }
-.disc .gl { position:absolute; left:0; right:0; top:166px; text-align:center; font-size:15px; }
-.bar { position:absolute; left:40px; width:180px; top:194px; height:12px; border-radius:6px; background:#e1e9f6; overflow:hidden; }
-.bar i { position:absolute; left:0; top:0; bottom:0; width:180px; border-radius:6px; background:linear-gradient(90deg,#274976,#4f86e8); transform-origin:0 50%; }
-.dots3 { position:absolute; left:0; right:0; top:216px; display:flex; justify-content:center; gap:9px; }
-.dots3 b { width:12px; height:12px; border-radius:50%; border:2px solid #274976; background:#fff; }
-.sc { position:absolute; width:226px; height:86px; background:#fff; border:2.5px solid #121532; border-radius:16px; padding:10px 16px; }
-.sc .no { font-size:14px; }
-.sc .t { font-size:25px; line-height:1.1; letter-spacing:0.02em; }
-.sc .s { font-size:14px; opacity:0.85; }
-.donep { position:absolute; left:84px; top:420px; width:160px; height:58px; border-radius:29px; border:3px solid #121532; background:#fff; font-size:22px; letter-spacing:0.14em; display:flex; align-items:center; justify-content:center; }
-#doneOn { position:absolute; left:84px; top:420px; width:160px; height:58px; border-radius:29px; background:linear-gradient(100deg,#121532,#274976); color:#fff; font-weight:700; font-size:22px; letter-spacing:0.14em; display:flex; align-items:center; justify-content:center; opacity:0; }
-.dchip { position:absolute; left:200px; top:571px; height:30px; padding:0 12px; border-radius:15px; font-weight:700; font-size:13px; letter-spacing:0.12em; display:flex; align-items:center; color:#fff; background:linear-gradient(100deg,#121532,#274976); opacity:0; z-index:3; }
-.panel3 { position:absolute; top:990px; height:172px; background:#fff; border:2.5px solid #121532; border-radius:20px; padding:16px 22px; }
-.panel3 .h { font-size:16px; letter-spacing:0.18em; margin-bottom:8px; }
-.panel3 .row { display:flex; align-items:center; gap:12px; font-size:20px; height:36px; white-space:nowrap; }
-.panel3 .ic { width:28px; height:28px; border-radius:8px; background:#dbe7ff; border:2px solid #274976; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; }
+.code2 { position:absolute; left:63px; top:214px; height:58px; padding:0 26px; border-radius:12px; background:linear-gradient(100deg,#121532,#274976); color:#fff; display:flex; align-items:center; font-size:24px; white-space:nowrap; }
+.code2 b { color:#9cc2ff; margin-right:10px; }
+#ip { position:absolute; left:64px; top:400px; width:300px; height:358px; border-radius:26px; background:linear-gradient(160deg,#121532,#274976); color:#fff; box-shadow:0 26px 50px -22px rgba(18,21,50,0.55); }
+#ip .k { position:absolute; left:30px; top:30px; font-size:16px; letter-spacing:0.24em; font-weight:700; opacity:0.85; }
+#ip .n { position:absolute; left:26px; top:62px; width:170px; height:140px; overflow:hidden; }
+#ip .n span { position:absolute; left:0; top:0; font-size:124px; line-height:140px; font-weight:700; letter-spacing:-0.04em; }
+#ip .of { position:absolute; left:196px; top:150px; font-size:28px; opacity:0.75; }
+#ip .gl { position:absolute; left:30px; top:226px; font-size:17px; opacity:0.9; }
+#ip .bar { position:absolute; left:30px; top:262px; width:240px; height:12px; border-radius:6px; background:rgba(255,255,255,0.2); overflow:hidden; }
+#ip .bar i { position:absolute; left:0; top:0; bottom:0; width:240px; background:#fff; border-radius:6px; transform-origin:0 50%; }
+#ip .dots { position:absolute; left:30px; top:300px; display:flex; gap:10px; }
+#ip .dots b { width:14px; height:14px; border-radius:50%; border:2px solid #fff; }
+.st { position:absolute; left:392px; width:560px; height:62px; background:#fff; border:2.5px solid #121532; border-radius:16px; }
+.st .num { position:absolute; left:14px; top:12px; width:34px; height:34px; border-radius:50%; background:linear-gradient(100deg,#121532,#274976); color:#fff; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.st .nm { position:absolute; left:64px; top:13px; font-size:25px; letter-spacing:0.03em; }
+.st .ds { position:absolute; right:20px; top:18px; font-size:17px; }
+#ring3 { position:absolute; left:0; top:0; }
+.dn { position:absolute; left:806px; top:784px; width:146px; height:46px; border-radius:23px; border:3px solid #121532; background:#fff; font-size:19px; letter-spacing:0.14em; display:flex; align-items:center; justify-content:center; }
+#dnOn { position:absolute; left:806px; top:784px; width:146px; height:46px; border-radius:23px; background:linear-gradient(100deg,#121532,#274976); color:#fff; font-weight:700; font-size:19px; letter-spacing:0.14em; display:flex; align-items:center; justify-content:center; opacity:0; }
+.mini { position:absolute; width:304px; height:76px; background:#fff; border:2.5px solid #121532; border-radius:16px; }
+.mini .ic { position:absolute; left:14px; top:18px; width:38px; height:38px; border-radius:10px; background:linear-gradient(100deg,#121532,#274976); color:#fff; font-weight:700; font-size:17px; display:flex; align-items:center; justify-content:center; }
+.mini .a { position:absolute; left:66px; top:10px; font-size:20px; }
+.mini .c { position:absolute; left:66px; top:40px; font-size:16px; white-space:nowrap; }
 """
 
 
-def _sc(i, x, y, no, t, s):
-    return f'    <div class="sc" id="sc{i}" style="left:{x}px;top:{y}px"><div class="no g r">{no}</div><div class="t g b">{t}</div><div class="s g r">{s}</div></div>'
+def _mini(id_, x, y, ic, a, c):
+    return f'    <div class="mini" id="{id_}" style="left:{x}px;top:{y}px"><div class="ic">{ic}</div><div class="a g b">{a}</div><div class="c g r">{c}</div></div>'
 
 
-S3_BODY = f"""    <div class="headline" style="top:96px;font-size:80px;line-height:1.2"><span class="g b">Loop</span> <span class="hlbar"><span class="g r">Engineering</span></span></div>
-    <div class="code"><span class="g b">while</span><span class="g r">&nbsp;(!goal_met) {{ observe &rarr; reason &rarr; act &rarr; check }}</span></div>
-    <div class="sub3"><span class="g r">Berhenti nge-prompt tiap langkah. Desain loop-nya: </span><span class="g b">goal yang jelas</span><span class="g r">, </span><span class="g b">cek tiap putaran</span><span class="g r">, dan </span><span class="g b">batas keras.</span></div>
-    <svg id="ring" width="1080" height="1350">
-      <circle cx="{CX}" cy="{CY}" r="{R}" fill="none" stroke="rgba(219,231,255,0.8)" stroke-width="40"/>
-      <circle cx="{CX}" cy="{CY}" r="{R}" fill="none" stroke="#121532" stroke-width="2.2" stroke-dasharray="2 8" stroke-linecap="round" opacity="0.7"/>
-      {''.join(_chev)}
-      <circle id="parc" cx="{CX}" cy="{CY}" r="{R}" fill="none" stroke="#4f86e8" stroke-width="7" stroke-linecap="round" transform="rotate(-90 {CX} {CY})"/>
-      <path id="dn" d="M296 600 L196 478" fill="none" stroke="#4f86e8" stroke-width="2.5" stroke-dasharray="6 6"/>
-      {_marks}
-      <circle id="hd" r="12" fill="#fff" stroke="#4f86e8" stroke-width="5"/>
-      <circle id="dtk" r="8" fill="#4f86e8" stroke="#fff" stroke-width="2.5" opacity="0"/>
+S3_BODY = f"""    <div class="htitle"><span class="g b">Loop</span> {hb("Engineering")}</div>
+    <div class="code2"><b>while</b>(!goal_met) {{ observe &rarr; reason &rarr; act &rarr; check }}</div>
+    <div class="lsub" style="top:292px;font-size:24px"><span class="g r">Berhenti nge-prompt tiap langkah. Desain loop-nya: </span><span class="g b">goal yang jelas</span><span class="g r">, </span><span class="g b">cek tiap putaran</span><span class="g r">, dan </span><span class="g b">batas keras.</span></div>
+    <div id="ip"><div class="k">ITERASI</div>
+      <div class="n" data-layout-allow-overflow data-layout-allow-overlap><span id="it0">01</span><span id="it1">02</span><span id="it2">03</span></div><div class="of">/ 10</div>
+      <div class="gl">tests passing <b id="pass">0/12</b></div><div class="bar"><i id="barf"></i></div>
+      <div class="dots"><b id="lp0"></b><b id="lp1"></b><b id="lp2"></b></div></div>
+    <svg id="ring3" width="1080" height="1350">
+      <path d="M952 727 H972 C988 727,992 715,992 700 V458 C992 443,988 431,972 431 H962" fill="none" stroke="#4f86e8" stroke-width="2.5" stroke-dasharray="6 6"/>
+      <path d="M966 424 L956 431 L966 438" fill="none" stroke="#4f86e8" stroke-width="2.5" stroke-linecap="round"/>
+      <path id="ret" d="M952 727 H972 C988 727,992 715,992 700 V458 C992 443,988 431,972 431 H952" fill="none" stroke="none"/>
+      <path d="M879 758 V784" stroke="#121532" stroke-width="2.5" stroke-dasharray="4 4"/>
+      <path id="dnp" d="M879 758 V800" fill="none" stroke="none"/>
+      <circle id="rtk" r="9" fill="#4f86e8" stroke="#fff" stroke-width="3" opacity="0"/>
     </svg>
-""" + "\n".join([
-    _sc(0, 427, 384, "01", "OBSERVE", "state + error"),
-    _sc(1, 786, 584, "02", "REASON", "rencanakan langkah"),
-    _sc(2, 700, 884, "03", "ACT", "edit &middot; run &middot; tools"),
-    _sc(3, 154, 884, "04", "CHECK", "tests &middot; evals"),
-    _sc(4, 70, 584, "05", "DECIDE", "goal? stop : loop"),
-]) + """
-    <div class="lbl" style="left:90px;top:388px;font-size:15px;letter-spacing:0.02em;font-weight:400"><span class="g r" style="margin:0;font-size:15px">keluar saat goal tercapai</span></div>
-    <div class="donep"><span class="g b">DONE &#10003;</span></div><div id="doneOn">DONE &#10003;</div>
-    <div class="dchip" id="chLoop">LOOP &#8635;</div><div class="dchip" id="chStop">STOP &#10003;</div>
-    <div class="disc"><div class="k g b">ITERASI</div>
-      <div class="n"><span class="g b" id="it0">01</span><span class="g b" id="it1">02</span><span class="g b" id="it2">03</span></div><div class="of g r">/ 10</div>
-      <div class="gl"><span class="g r">goal: tests passing </span><span class="g b" id="pass">0/12</span></div>
-      <div class="bar"><i id="barf"></i></div>
-      <div class="dots3"><b id="lp0"></b><b id="lp1"></b><b id="lp2"></b></div></div>
-    <div class="panel3" style="left:64px;width:456px;box-shadow:9px 9px 0 #4f86e8"><div class="h g b">STOP CONDITIONS</div>
-      <div class="row"><div class="ic"><span class="g b">&#10003;</span></div><span class="g b">Goal:</span><span class="g r">semua test hijau</span></div>
-      <div class="row"><div class="ic"><span class="g b">&#8635;</span></div><span class="g b">Max</span><span class="g r">10 putaran / 30 menit</span></div>
-      <div class="row"><div class="ic"><span class="g b">$</span></div><span class="g b">Hard</span><span class="g r">token budget</span></div></div>
-    <div class="panel3" style="left:552px;width:464px;box-shadow:9px 9px 0 #121532"><div class="h g b">MEMORY ANTAR PUTARAN</div>
-      <div class="row"><div class="ic"><span class="g b">&#9998;</span></div><span class="g r">progress.md</span><span class="g b">yang sudah selesai</span></div>
-      <div class="row"><div class="ic"><span class="g b">&#8916;</span></div><span class="g r">git commit</span><span class="g b">tiap putaran</span></div>
-      <div class="row"><div class="ic"><span class="g b">&#9675;</span></div><span class="g b">Context baru tiap putaran</span></div></div>
-    <div class="headline" style="top:1196px;font-size:36px"><span class="g b">Prompt memulai.</span> <span class="hlbar"><span class="g b">Loop menyelesaikan.</span></span></div>
+""" + "\n".join(f'    <div class="st" id="st{i}" style="top:{STEP_Y[i]}px"><div class="num">{n}</div><div class="nm g b">{a}</div><div class="ds g r">{d}</div></div>'
+                for i, (n, a, d) in enumerate(_steps)) + f"""
+    <div class="lbl" style="left:560px;top:796px"><span class="g r" style="margin:0;font-size:16px">keluar saat goal tercapai &rarr;</span></div>
+    <div class="dn"><span class="g b">DONE &#10003;</span></div><div id="dnOn">DONE &#10003;</div>
+    <div class="secl g" style="left:64px;top:850px">STOP CONDITIONS</div>
+{_mini("m0", 64, 880, "&#10003;", "Goal", "semua test hijau")}
+{_mini("m1", 388, 880, "&#8635;", "Max", "10 putaran / 30 menit")}
+{_mini("m2", 712, 880, "$", "Hard", "token budget")}
+    <div class="secl g" style="left:64px;top:978px">MEMORY ANTAR PUTARAN</div>
+{_mini("m3", 64, 1008, "&#9998;", "progress.md", "yang sudah selesai")}
+{_mini("m4", 388, 1008, "&#8916;", "git commit", "tiap putaran")}
+{_mini("m5", 712, 1008, "&#9675;", "Context baru", "tiap putaran")}
+    <div class="lsub" style="top:1120px;font-size:34px"><span class="g b">Prompt memulai.</span> {hb("Loop menyelesaikan.")}</div>
 """
-S3_JS = f"""
-  const CX = {CX}, CY = {CY}, R = {R}, C = 2 * Math.PI * R;
-  const ANG = {ANG}, F = [0, 0.2, 0.4, 0.6, 0.8];
-  const sc = [0, 1, 2, 3, 4].map((i) => $("sc" + i));
-  function render(t) {{
-    const lap = t < 6 ? Math.floor(t / 2) : 2;
-    const frac = t < 6 ? (t % 2) / 2 : 1;
-    const a = (-90 + 360 * frac) * Math.PI / 180;
-    $("parc").setAttribute("stroke-dasharray", (frac * C).toFixed(1) + " " + C.toFixed(1));
-    const hd = $("hd");
-    hd.setAttribute("cx", (CX + R * Math.cos(a)).toFixed(1)); hd.setAttribute("cy", (CY + R * Math.sin(a)).toFixed(1));
-    hd.setAttribute("opacity", t < 6 ? 1 : 1 - smooth((t - 6) / 0.2));
-    const idx = Math.min(4, Math.floor(frac * 5 + 1e-6));
-    sc.forEach((el, i) => hl(el, t < 6 ? (i === idx ? smooth((frac - F[i]) * 5 / 0.25) : 0) : (i === 4 ? 1 - smooth((t - 6.5) / 0.3) : 0)));
-    F.forEach((f, i) => $("mk" + i).setAttribute("fill", frac >= f && !(t >= 6.6) ? "#4f86e8" : "#ffffff"));
-    for (let i = 0; i < 3; i++) gsap.set("#it" + i, {{ yPercent: i === lap ? 0 : (i < lap ? -110 : 110) }});
-    const passing = lap * 4 + (frac >= 0.6 ? 4 : 0);
-    $("pass").textContent = passing + "/12";
-    const prevPass = lap * 4, k = smooth((frac - 0.6) * 5 / 0.6);
-    const shown = frac >= 0.6 ? prevPass + 4 * k : prevPass;
-    gsap.set("#barf", {{ scaleX: Math.max(0.001, shown / 12) }});
-    for (let i = 0; i < 3; i++) $("lp" + i).style.background = (i < lap || (i === lap && frac >= 0.8)) ? "#4f86e8" : "#ffffff";
-    const atDecide = frac >= 0.8 && t < 6.9;
-    gsap.set("#chLoop", {{ opacity: atDecide && lap < 2 ? 1 : 0 }});
-    gsap.set("#chStop", {{ opacity: atDecide && lap === 2 ? 1 : 0 }});
-    const dq = (t - 6.0) / 0.45;
-    dot("dtk", "dn", smooth(dq), dq > 0 && dq < 1.2 ? 1 - smooth((dq - 1) / 0.2) : 0);
-    const dk = smooth((t - 6.35) / 0.2) * (1 - smooth((t - 6.85) / 0.12));
-    gsap.set("#doneOn", {{ opacity: dk, scale: 1 + 0.06 * Math.sin(Math.PI * clamp((t - 6.35) / 0.3, 0, 1)) }});
-  }}
+S3_JS = """
+  const sts = [0, 1, 2, 3, 4].map((i) => $("st" + i));
+  function render(t) {
+    const lap = t < 6 ? Math.floor(t / 2) : 2, frac = t < 6 ? (t % 2) / 2 : 1;
+    const idx = Math.min(4, Math.floor(frac / 0.18));
+    sts.forEach((el, i) => hl(el, t < 6 ? (i === idx && frac < 0.9 ? smooth((frac - i * 0.18) / 0.05) : 0) : (i === 4 ? 1 - smooth((t - 6.5) / 0.3) : 0)));
+    for (let i = 0; i < 3; i++) gsap.set("#it" + i, { yPercent: i === lap ? 0 : (i < lap ? -110 : 110) });
+    const done = lap * 4 + (frac >= 0.54 ? 4 * smooth((frac - 0.54) / 0.12) : 0);
+    $("pass").textContent = Math.round(lap * 4 + (frac >= 0.6 ? 4 : 0)) + "/12";
+    gsap.set("#barf", { scaleX: Math.max(0.001, done / 12) });
+    for (let i = 0; i < 3; i++) $("lp" + i).style.background = (i < lap || (i === lap && frac >= 0.72)) ? "#ffffff" : "transparent";
+    const rq = (frac - 0.9) / 0.1;
+    const back = t < 6 && lap < 2 && rq > 0;
+    if (back) dot("rtk", "ret", smooth(rq), 1);
+    else { const dq = (t - 6.0) / 0.35; dot("rtk", "dnp", smooth(dq), dq > 0 && dq < 1.2 ? 1 - smooth((dq - 1) / 0.2) : 0); }
+    const dk = smooth((t - 6.3) / 0.2) * (1 - smooth((t - 6.85) / 0.12));
+    gsap.set("#dnOn", { opacity: dk });
+    hl($("m0"), dk); hl($("m1"), env(t, 0.05, 0.6, 0.15) * 0.8);
+    let gk = 0; for (let l = 0; l < 3; l++) gk = Math.max(gk, env(t, l * 2 + 1.44, l * 2 + 1.9, 0.1));
+    hl($("m3"), gk); hl($("m4"), gk); hl($("m5"), env(t, 0, 0.35, 0.1) + env(t, 2, 2.35, 0.1) + env(t, 4, 4.35, 0.1));
+  }
 """
 
-# ======================================================================== S4 graph
-R1 = [(540, 427), (540, 502), (540, 600), (250, 600), (250, 712), (250, 822), (250, 912), (250, 978), (540, 978)]
-K1 = [(0.2, 0), (0.55, 1), (0.85, 1), (1.15, 2), (1.35, 3), (1.55, 4), (1.9, 4), (2.15, 5), (2.55, 5), (2.8, 6), (3.0, 6), (3.15, 7), (3.35, 8)]
-R2 = [(540, 427), (540, 502), (540, 600), (650, 600), (650, 712), (650, 768), (760, 768), (760, 822), (760, 916), (860, 916),
-      (960, 916), (960, 822), (860, 822), (760, 822), (760, 916), (760, 978), (540, 978)]
-K2 = [(3.55, 0), (3.8, 1), (4.0, 1), (4.2, 2), (4.3, 3), (4.5, 4), (4.7, 4), (4.8, 5), (4.9, 6), (5.05, 7), (5.25, 7), (5.45, 8), (5.7, 8),
-      (5.8, 9), (5.9, 10), (6.0, 11), (6.1, 12), (6.2, 13), (6.35, 13), (6.5, 14), (6.6, 14), (6.7, 15), (6.85, 16)]
-R3 = [(540, 600), (870, 600), (870, 712), (870, 768), (760, 768)]
-K3 = [(4.2, 0), (4.45, 1), (4.6, 2), (4.7, 2), (4.8, 3), (4.9, 4)]
-N1 = {0: "nst", 1: "ncl", 2: "nrt", 4: "npo", 5: "nhu", 6: "nrf", 8: "nen"}
-N2 = {0: "nst", 1: "ncl", 2: "nrt", 4: "nsd", 7: "ndr", 8: "nqc", 13: "ndr", 14: "nqc", 16: "nen"}
-N3 = {2: "npt"}
-S4_CSS = """
-.sub4 { position:absolute; left:60px; right:60px; top:206px; text-align:center; font-size:24px; line-height:1.45; }
-.leg { position:absolute; top:298px; left:0; right:0; display:flex; justify-content:center; gap:10px; }
-.leg div { height:44px; padding:0 16px; border-radius:22px; background:#fff; border:2px solid rgba(18,21,50,0.14); display:flex; align-items:center; gap:9px; font-size:17px; }
-.leg i { width:18px; height:18px; border-radius:5px; border:2.5px solid #121532; display:inline-block; }
-#gw { position:absolute; left:0; top:0; }
-.ticket { position:absolute; left:372px; top:752px; width:268px; height:104px; border-radius:16px; background:#fff; border:2px solid rgba(18,21,50,0.16); padding:12px 16px; }
-.ticket .h { font-size:13px; letter-spacing:0.14em; }
-.ticket .q { font-size:18px; line-height:1.3; margin-top:4px; }
-.qchip { position:absolute; left:868px; top:868px; height:28px; padding:0 10px; border-radius:14px; font-size:14px; font-weight:700; display:flex; align-items:center; opacity:0; background:#dbe7ff; border:2px solid #4f86e8; z-index:3; white-space:nowrap; }
-.state { position:absolute; left:64px; top:1040px; width:952px; height:124px; border-radius:20px; background:rgba(219,231,255,0.7); border:2.5px solid #121532; padding:12px 20px; }
-.state .h { font-size:16px; letter-spacing:0.18em; }
-.state .cp { position:absolute; right:22px; top:13px; font-size:15px; }
-.cells { position:absolute; left:20px; right:20px; top:46px; display:flex; gap:12px; }
-.cell { flex:1; height:62px; border-radius:12px; background:#fff; border:2px solid rgba(18,21,50,0.14); padding:6px 14px; }
-.cell .k { font-size:13px; }
-.cell .v { font-size:19px; white-space:nowrap; }
-.pillx { position:absolute; height:44px; border-radius:22px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:17px; letter-spacing:0.16em; background:linear-gradient(100deg,#121532,#274976); }
-.diam { position:absolute; left:512px; top:572px; width:56px; height:56px; }
-.cpk { position:absolute; width:24px; height:24px; border-radius:6px; background:#121532; }
-.cpk::after { content:""; position:absolute; left:7px; top:7px; width:10px; height:10px; border-radius:3px; background:#8fb4ec; }
-.elab { position:absolute; font-size:15px; padding:2px 10px; border-radius:10px; background:#fff; border:1.5px solid rgba(18,21,50,0.15); white-space:nowrap; }
-"""
+# ======================================================================== S4 graph: left-to-right flow
+NODES = {"nst": (112, 655), "ncl": (245, 655), "nrt": (360, 655), "npo": (525, 520), "nhu": (700, 520), "nrf": (872, 520),
+         "nsd": (525, 742), "npt": (525, 836), "ndr": (700, 790), "nqc": (872, 790), "nen": (975, 655)}
+DWELL = {"nhu": 0.45, "nqc": 0.3}
+
+
+def _route(pts, t0, speed=None, t1=None):
+    seg = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(pts, pts[1:])]
+    L = sum(seg)
+    dw = [DWELL.get(p[2], 0.2) if p[2] else 0 for p in pts]
+    dw[0] = 0.15
+    if speed is None:
+        speed = L / ((t1 - t0) - sum(dw))
+    t, K, arr, s = t0, [], [], 0.0
+    F = [0.0]
+    for d in seg:
+        s += d
+        F.append(round(s / L, 5))
+    for i, p in enumerate(pts):
+        if i:
+            t += seg[i - 1] / speed
+        K.append([round(t, 3), i])
+        if p[2]:
+            arr.append((p[2], round(t, 3)))
+        if dw[i]:
+            t += dw[i]
+            K.append([round(t, 3), i])
+    N = {str(i): p[2] for i, p in enumerate(pts) if p[2]}
+    return F, K, N, arr, speed
+
+
+def P(name):
+    x, y = NODES[name]
+    return (x, y, name)
+
+
+R1 = [P("nst"), P("ncl"), P("nrt"), (360, 520, None), P("npo"), P("nhu"), P("nrf"), (975, 520, None), P("nen")]
+R2 = [P("nst"), P("ncl"), P("nrt"), (360, 790, None), (415, 790, None), (415, 742, None), P("nsd"), (612, 742, None), (612, 790, None),
+      P("ndr"), P("nqc"), (872, 880, None), (700, 880, None), P("ndr"), P("nqc"), (975, 790, None), P("nen")]
+F1, K1, N1, A1, _ = _route(R1, 0.15, t1=3.35)
+F2, K2, N2, A2, SP2 = _route(R2, 3.55, t1=6.85)
+t_router_out = [k[0] for k in K2 if k[1] == 2][-1]
+R3 = [(360, 655, None), (360, 790, None), (415, 790, None), (415, 836, None), P("npt"), (612, 836, None), (612, 790, None), (700, 790, None)]
+F3, K3, N3, A3, _ = _route(R3, t_router_out, speed=SP2)
+
+
+def _arr(A, name, n=0):
+    return [t for nm, t in A if nm == name][n]
+
+
+EVENTS = [
+    [0.0, None, None, 0],
+    [_arr(A1, "ncl") + 0.1, 0, '"refund"', 1], [_arr(A1, "npo") + 0.1, 1, "policy_ok: true", 2],
+    [_arr(A1, "nhu") + 0.35, 2, "human: approved", 3], [_arr(A1, "nrf") + 0.1, 3, "refunded &#10003;", 4],
+    [3.5, None, None, 0],
+    [_arr(A2, "ncl") + 0.1, 0, '"question"', 1], [_arr(A2, "ndr") + 0.05, 1, "docs: 2 &middot; tickets: 3", 2],
+    [_arr(A2, "ndr") + 0.15, 2, "draft v1", 3], [_arr(A2, "ndr", 1) + 0.1, 2, "draft v2", 4], [_arr(A2, "nen") + 0.02, 3, "terkirim &#10003;", 5],
+]
+QF = (_arr(A2, "nqc"), _arr(A2, "nqc") + 0.45)
+QP = (_arr(A2, "nqc", 1), _arr(A2, "nqc", 1) + 0.45)
 
 
 def _poly(pts):
-    return "M" + " L".join(f"{x} {y}" for x, y in pts)
+    return "M" + " L".join(f"{p[0]} {p[1]}" for p in pts)
 
 
-S4_BODY = ("""    <div class="headline" style="top:96px;font-size:80px;line-height:1.2"><span class="g b">Graph</span> <span class="hlbar"><span class="g r">Engineering</span></span></div>
-    <div class="sub4"><span class="g b">Node</span><span class="g r"> mengerjakan tugas. </span><span class="g b">Edge</span><span class="g r"> menentukan apa yang jalan berikutnya. </span><span class="g b">Shared state</span><span class="g r"> membawa semuanya di antara mereka.</span></div>
-    <div class="leg">
-      <div><i style="background:#dbe7ff"></i><span class="g r">LLM</span></div><div><i></i><span class="g r">Tool</span></div>
-      <div><i style="border-style:dashed"></i><span class="g r">Human</span></div><div><i style="transform:rotate(45deg) scale(0.8);background:#121532"></i><span class="g r">Router</span></div>
-      <div><i style="background:#121532"></i><span class="g r">Eval</span></div><div><i style="background:#121532;box-shadow:inset 0 0 0 4px #121532, inset 0 0 0 9px #8fb4ec"></i><span class="g r">Checkpoint</span></div>
-    </div>
-    <div class="frame" style="left:64px;top:380px;width:952px;height:636px;box-shadow:12px 12px 0 #4f86e8"></div>
-    <div class="tag" style="left:92px;top:363px">CONTOH &middot; SUPPORT AGENT</div>
-    <svg id="gw" width="1080" height="1350">
+def _nb(id_, w, t, s, cls=""):
+    x, y = NODES[id_]
+    return box(id_, x - w // 2, y - 32, w, 64, t, s, cls)
+
+
+S4_CSS = """
+.box { padding:6px 12px; }
+.box .t { font-size:18px; }
+.box .s { font-size:13px; }
+.tix { position:absolute; left:64px; top:298px; width:952px; height:74px; border-radius:18px; background:#fff; border:2px solid rgba(18,21,50,0.16); }
+.tix .tg { position:absolute; left:14px; top:17px; height:38px; width:250px; border-radius:19px; background:linear-gradient(100deg,#121532,#274976); color:#fff; font-weight:700; font-size:15px; letter-spacing:0.14em; }
+.tix .tg span { position:absolute; left:0; right:0; line-height:38px; text-align:center; }
+.tix .q { position:absolute; left:284px; top:20px; font-size:23px; white-space:nowrap; }
+#gw2 { position:absolute; left:0; top:0; }
+.pillx { position:absolute; height:40px; border-radius:20px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:15px; letter-spacing:0.14em; background:linear-gradient(100deg,#121532,#274976); }
+.diam2 { position:absolute; left:334px; top:629px; width:52px; height:52px; }
+.elab { position:absolute; font-size:15px; padding:2px 10px; border-radius:10px; background:#fff; border:1.5px solid rgba(18,21,50,0.15); white-space:nowrap; }
+.qchip { position:absolute; left:830px; top:706px; height:30px; padding:0 12px; border-radius:15px; font-size:14px; font-weight:700; display:flex; align-items:center; opacity:0; z-index:3; white-space:nowrap; background:linear-gradient(100deg,#121532,#274976); color:#fff; }
+.ss { position:absolute; left:64px; top:956px; width:952px; height:148px; border-radius:20px; background:rgba(255,255,255,0.9); border:2.5px solid #121532; }
+.ss .h { position:absolute; left:22px; top:16px; font-size:16px; letter-spacing:0.18em; font-weight:700; }
+.ss .cp { position:absolute; right:22px; top:16px; font-size:15px; }
+.kv { position:absolute; width:444px; height:42px; border-radius:12px; background:#eef3fb; border:2px solid transparent; }
+.kv .k { position:absolute; left:16px; top:9px; font-size:16px; }
+.kv .v { position:absolute; right:16px; top:7px; font-size:19px; white-space:nowrap; }
+"""
+S4_BODY = f"""    <div class="htitle"><span class="g b">Graph</span> {hb("Engineering")}</div>
+    <div class="lsub" style="top:204px;font-size:24px"><span class="g b">Node</span><span class="g r"> mengerjakan tugas. </span><span class="g b">Edge</span><span class="g r"> menentukan apa yang jalan berikutnya. </span><span class="g b">Shared state</span><span class="g r"> membawa semuanya di antara mereka.</span></div>
+    <div class="tix"><div class="tg"><span id="th1">TIKET MASUK &middot; RUN 1</span><span id="th2" style="opacity:0">TIKET MASUK &middot; RUN 2</span></div>
+      <div class="q g r" id="tq1">&ldquo;Aku kena charge dua kali. Tolong refund.&rdquo;</div><div class="q g r" id="tq2" style="opacity:0">&ldquo;Gimana cara export data ke CSV?&rdquo;</div></div>
+    <div class="frame" style="left:64px;top:404px;width:952px;height:524px;box-shadow:-12px 12px 0 #4f86e8"></div>
+    <div class="tag" style="left:92px;top:387px">CONTOH &middot; SUPPORT AGENT</div>
+    <svg id="gw2" width="1080" height="1350">
       <g fill="none" stroke="#121532" stroke-width="2.5">
-        <path d="M540 449 V470"/><path d="M540 534 V572"/>
-        <path d="M512 600 H250 V680"/><path d="M568 600 H870 V680"/><path d="M650 600 V680"/>
-        <path d="M250 744 V790"/><path d="M250 854 V880"/><path d="M250 944 V978 H480"/>
-        <path d="M650 744 V768 H870 V744"/><path d="M760 768 V790"/>
-        <path d="M760 854 V884"/><path d="M760 948 V978 H600"/>
+        <path d="M154 655 H170"/><path d="M320 655 H334"/>
+        <path d="M360 629 V520 H450"/><path d="M360 681 V790 H415"/><path d="M415 742 V836"/><path d="M415 742 H450"/><path d="M415 836 H450"/>
+        <path d="M600 520 H615"/><path d="M785 520 H797"/><path d="M947 520 H975 V635"/>
+        <path d="M600 742 H612 V836 H600"/><path d="M612 790 H625"/><path d="M775 790 H797"/><path d="M947 790 H975 V675"/>
       </g>
-      <path d="M860 916 H960 V822 H860" fill="none" stroke="#4f86e8" stroke-width="2.5" stroke-dasharray="6 6"/>
-      <path id="r1" d="%%R1%%" fill="none" stroke="none"/><path id="r2" d="%%R2%%" fill="none" stroke="none"/><path id="r3" d="%%R3%%" fill="none" stroke="none"/>
+      <path d="M872 822 V880 H700 V822" fill="none" stroke="#4f86e8" stroke-width="2.5" stroke-dasharray="6 6"/>
+      <path id="r1" d="{_poly(R1)}" fill="none" stroke="none"/><path id="r2" d="{_poly(R2)}" fill="none" stroke="none"/><path id="r3" d="{_poly(R3)}" fill="none" stroke="none"/>
       <circle id="tk1" r="9" fill="#4f86e8" stroke="#fff" stroke-width="3" opacity="0"/>
       <circle id="tk2" r="9" fill="#4f86e8" stroke="#fff" stroke-width="3" opacity="0"/>
       <circle id="tk3" r="9" fill="#4f86e8" stroke="#fff" stroke-width="3" opacity="0"/>
     </svg>
-    <div class="pillx" id="nst" style="left:480px;top:405px;width:120px">START</div>
-    <div class="pillx" id="nen" style="left:480px;top:956px;width:120px">END</div>
-    <svg class="diam" id="nrt" viewBox="0 0 56 56"><path id="nrtp" d="M28 2 L54 28 L28 54 L2 28 Z" fill="#121532"/></svg>
-    <div class="cpk" style="left:528px;top:541px"></div><div class="cpk" style="left:238px;top:755px"></div><div class="cpk" style="left:748px;top:857px"></div>
-    <div class="elab" style="left:388px;top:572px"><span class="g r">refund</span></div>
-    <div class="elab" style="left:612px;top:572px"><span class="g r">question</span></div>
-    <div class="elab" style="left:440px;top:640px"><span class="g r">route(state.intent) &rarr;</span></div>
-    <div class="elab" style="left:712px;top:632px"><span class="g r">parallel &rArr;</span></div>
-    <div class="elab" style="left:905px;top:856px"><span class="g r">retry</span></div>
+    <div class="pillx" id="nst" style="left:70px;top:635px;width:84px">START</div>
+    <div class="pillx" id="nen" style="left:940px;top:635px;width:70px">END</div>
+    <svg class="diam2" id="nrt" viewBox="0 0 52 52"><path id="nrtp" d="M26 2 L50 26 L26 50 L2 26 Z" fill="#121532"/></svg>
+    <div class="elab" style="left:296px;top:560px"><span class="g r">refund</span></div>
+    <div class="elab" style="left:280px;top:735px"><span class="g r">question</span></div>
+    <div class="elab" style="left:170px;top:700px"><span class="g r">route(state.intent)</span></div>
+    <div class="elab" style="left:432px;top:880px"><span class="g r">parallel &rArr;</span></div>
+    <div class="elab" style="left:752px;top:866px"><span class="g r">retry</span></div>
 """ + "\n".join([
-    box("ncl", 440, 470, 200, 64, "Classify ticket", "llm &middot; tentukan intent", "llm"),
-    box("npo", 150, 680, 200, 64, "Check policy", "tool &middot; eligible?"),
-    box("nhu", 124, 790, 252, 64, "&#10074;&#10074; Human approval", "interrupt &middot; menunggu", "human"),
-    box("nrf", 150, 880, 200, 64, "Issue refund", "tool &middot; payments"),
-    box("nsd", 560, 680, 180, 64, "Search docs", "tool &middot; retrieval"),
-    box("npt", 780, 680, 180, 64, "Past tickets", "tool &middot; history"),
-    box("ndr", 660, 790, 200, 64, "Draft reply", "llm &middot; gabungkan", "llm"),
-    box("nqc", 660, 884, 200, 64, "Quality check", "eval &middot; score &ge; 0.85", "eval"),
-]) + """
-    <div class="ticket"><div class="h g b" id="th1">TIKET MASUK &middot; RUN 1</div><div class="h g b abs" id="th2" style="top:12px;left:16px;opacity:0">TIKET MASUK &middot; RUN 2</div>
-      <div class="q g r" id="tq1">&ldquo;Aku kena charge dua kali. Tolong refund.&rdquo;</div><div class="q g r abs" id="tq2" style="top:34px;left:16px;right:16px;opacity:0">&ldquo;Gimana cara export data ke CSV?&rdquo;</div></div>
-    <div class="qchip" id="qf"><span class="g b">&lt; 0.85 &times;</span></div><div class="qchip" id="qp"><span class="g b">&ge; 0.85 &#10003;</span></div>
-    <div class="state"><div class="h g b">SHARED STATE</div><div class="cp g r" id="cpn">checkpoint #0 &middot; tersimpan</div>
-      <div class="cells">
-        <div class="cell" id="ce0"><div class="k g r">intent</div><div class="v g b" id="sv0">&mdash;</div></div>
-        <div class="cell" id="ce1"><div class="k g r">context</div><div class="v g b" id="sv1">&mdash;</div></div>
-        <div class="cell" id="ce2"><div class="k g r">review</div><div class="v g b" id="sv2">&mdash;</div></div>
-        <div class="cell" id="ce3"><div class="k g r">result</div><div class="v g b" id="sv3">&mdash;</div></div>
-      </div></div>
-    <div class="headline" style="top:1196px;font-size:36px"><span class="g b">Prompt menyarankan.</span> <span class="hlbar"><span class="g b">Edge yang memaksa.</span></span></div>
-""").replace("%%R1%%", _poly(R1)).replace("%%R2%%", _poly(R2)).replace("%%R3%%", _poly(R3))
-
-
-def _cum(pts):
-    out, s = [0.0], 0.0
-    for (a, b), (c, d) in zip(pts, pts[1:]):
-        s += math.hypot(c - a, d - b)
-        out.append(s)
-    return [round(v / s, 5) for v in out]
-
-
-S4_JS = """
+    _nb("ncl", 150, "Classify", "llm &middot; intent", "llm"),
+    _nb("npo", 150, "Check policy", "tool &middot; eligible?"),
+    _nb("nhu", 170, "&#10074;&#10074; Approval", "human &middot; menunggu", "human"),
+    _nb("nrf", 150, "Issue refund", "tool &middot; payments"),
+    _nb("nsd", 150, "Search docs", "tool &middot; retrieval"),
+    _nb("npt", 150, "Past tickets", "tool &middot; history"),
+    _nb("ndr", 150, "Draft reply", "llm &middot; gabungkan", "llm"),
+    _nb("nqc", 150, "Quality check", "eval &middot; &ge; 0.85", "eval"),
+]) + f"""
+    <div class="qchip" id="qf">&lt; 0.85 &times; retry</div><div class="qchip" id="qp">&ge; 0.85 &#10003;</div>
+    <div class="ss"><div class="h g">SHARED STATE</div><div class="cp g r" id="cpn">checkpoint #0 &middot; tersimpan</div>
+      <div class="kv" id="ce0" style="left:20px;top:46px"><div class="k g r">intent</div><div class="v g b" id="sv0">&mdash;</div></div>
+      <div class="kv" id="ce1" style="left:484px;top:46px"><div class="k g r">context</div><div class="v g b" id="sv1">&mdash;</div></div>
+      <div class="kv" id="ce2" style="left:20px;top:96px"><div class="k g r">review</div><div class="v g b" id="sv2">&mdash;</div></div>
+      <div class="kv" id="ce3" style="left:484px;top:96px"><div class="k g r">result</div><div class="v g b" id="sv3">&mdash;</div></div></div>
+    <div class="lsub" style="top:1150px;font-size:34px"><span class="g b">Prompt menyarankan.</span> {hb("Edge yang memaksa.")}</div>
+"""
+_ev = ",\n    ".join(f'[{e[0]}, {"null" if e[1] is None else e[1]}, {"null" if e[2] is None else repr(e[2]).replace(chr(39), chr(96))}, {e[3]}]' for e in EVENTS)
+S4_JS = f"""
   const RUNS = [
-    { path: "r1", tok: "tk1", F: %%F1%%, K: %%K1%%, N: %%N1%% },
-    { path: "r2", tok: "tk2", F: %%F2%%, K: %%K2%%, N: %%N2%% },
-    { path: "r3", tok: "tk3", F: %%F3%%, K: %%K3%%, N: %%N3%% },
+    {{ path: "r1", tok: "tk1", F: {F1}, K: {K1}, N: {str(N1).replace("'", '"')} }},
+    {{ path: "r2", tok: "tk2", F: {F2}, K: {K2}, N: {str(N2).replace("'", '"')} }},
+    {{ path: "r3", tok: "tk3", F: {F3}, K: {K3}, N: {str(N3).replace("'", '"')} }},
   ];
-  const BASE = { ncl: ICE, ndr: ICE };
   const EV = [
-    [0.0, null, ["\\u2014", "\\u2014", "\\u2014", "\\u2014"], 0],
-    [0.6, 0, "\\"refund\\"", 1], [1.6, 1, "policy_ok: true", 2], [2.2, 2, "human: approved", 3], [2.85, 3, "refunded \\u2713", 4],
-    [3.5, null, ["\\u2014", "\\u2014", "\\u2014", "\\u2014"], 0],
-    [3.85, 0, "\\"question\\"", 1], [4.95, 1, "docs: 2 \\u00b7 tickets: 3", 2], [5.3, 2, "draft v1", 3], [6.3, 2, "draft v2", 4], [6.8, 3, "terkirim \\u2713", 5],
+    {_ev}
   ];
-  function prog(K, F, t) {
+  const QF = {list(QF)}, QP = {list(QP)};
+  const BASE = {{ ncl: ICE, ndr: ICE }};
+  function prog(K, F, t) {{
     if (t < K[0][0] || t > K[K.length - 1][0] + 0.25) return null;
-    for (let i = 0; i < K.length - 1; i++) {
+    for (let i = 0; i < K.length - 1; i++) {{
       const [ta, ia] = K[i], [tb, ib] = K[i + 1];
-      if (t >= ta && t <= tb) { const k = (t - ta) / (tb - ta); return F[ia] + (F[ib] - F[ia]) * k; }
-    }
+      if (t >= ta && t <= tb) {{ const k = tb > ta ? (t - ta) / (tb - ta) : 1; return F[ia] + (F[ib] - F[ia]) * k; }}
+    }}
     return F[K[K.length - 1][1]];
-  }
+  }}
   const nodeIds = ["nst", "ncl", "npo", "nhu", "nrf", "nsd", "npt", "ndr", "nqc", "nen", "nrt"];
-  function render(t) {
-    const act = {};
-    RUNS.forEach((r) => {
-      const p = prog(r.K, r.F, t);
-      const o = p === null ? 0 : Math.min(1, (t - r.K[0][0]) * 8) * (1 - smooth((t - r.K[r.K.length - 1][0]) / 0.25));
+  function render(t) {{
+    const act = {{}};
+    RUNS.forEach((r) => {{
+      const p = prog(r.K, r.F, t), last = r.K[r.K.length - 1][0];
+      const o = p === null ? 0 : Math.min(1, (t - r.K[0][0]) * 8) * (1 - smooth((t - last) / 0.25));
       dot(r.tok, r.path, p === null ? 0 : p, o);
-      const seen = {};
-      r.K.forEach(([tk, ix]) => { const id = r.N[ix]; if (!id) return; const s = seen[id + ix] || (seen[id + ix] = [tk, tk]); s[0] = Math.min(s[0], tk); s[1] = Math.max(s[1], tk); });
-      Object.keys(seen).forEach((key) => { const id = key.replace(/[0-9]+$/, ""); const [a, b] = seen[key]; act[id] = Math.max(act[id] || 0, env(t, a - 0.05, b + 0.3, 0.12)); });
-    });
-    nodeIds.forEach((id) => {
+      const span = {{}};
+      r.K.forEach(([tk, ix]) => {{ const id = r.N[ix]; if (!id) return; const key = id + "|" + ix; const s = span[key] || (span[key] = [tk, tk]); s[1] = Math.max(s[1], tk); }});
+      Object.keys(span).forEach((key) => {{ const id = key.split("|")[0], [a, b] = span[key]; act[id] = Math.max(act[id] || 0, env(t, a - 0.05, b + 0.3, 0.12)); }});
+    }});
+    nodeIds.forEach((id) => {{
       const k = act[id] || 0, el = $(id);
       if (id === "nst" || id === "nen" || id === "nqc") glow(el, k);
       else if (id === "nrt") $("nrtp").setAttribute("fill", "rgb(" + mixc(NAVY, AZ, k) + ")");
       else hl(el, k, BASE[id] || WHITE);
-    });
+    }});
     const run2 = t >= 3.45;
-    gsap.set(["#th1", "#tq1"], { opacity: run2 ? 0 : 1 }); gsap.set(["#th2", "#tq2"], { opacity: run2 ? 1 : 0 });
+    gsap.set(["#th1", "#tq1"], {{ opacity: run2 ? 0 : 1 }}); gsap.set(["#th2", "#tq2"], {{ opacity: run2 ? 1 : 0 }});
     let vals = ["\\u2014", "\\u2014", "\\u2014", "\\u2014"], cp = 0; const last = [-9, -9, -9, -9];
-    EV.forEach(([te, ci, v, n]) => { if (t < te) return; if (ci === null) { vals = v.slice(); cp = n; last.fill(-9); } else { vals[ci] = v; last[ci] = te; cp = n; } });
-    for (let i = 0; i < 4; i++) {
-      $("sv" + i).textContent = vals[i];
-      const k = env(t, last[i], last[i] + 0.8, 0.1);
-      const c = $("ce" + i);
-      c.style.borderColor = "rgba(" + mixc([200, 205, 220], AZ, k) + ",1)"; c.style.background = "rgb(" + mixc(WHITE, ICE, k) + ")";
-    }
+    EV.forEach(([te, ci, v, n]) => {{ if (t < te) return; if (ci === null) {{ vals = ["\\u2014", "\\u2014", "\\u2014", "\\u2014"]; cp = n; last.fill(-9); }} else {{ vals[ci] = v; last[ci] = te; cp = n; }} }});
+    for (let i = 0; i < 4; i++) {{
+      $("sv" + i).innerHTML = vals[i];
+      const k = env(t, last[i], last[i] + 0.8, 0.1), c = $("ce" + i);
+      c.style.borderColor = "rgba(79,134,232," + k.toFixed(3) + ")"; c.style.background = "rgb(" + mixc([238, 243, 251], ICE2, k) + ")";
+    }}
     $("cpn").textContent = "checkpoint #" + cp + " \\u00b7 tersimpan";
-    gsap.set("#qf", { opacity: env(t, 5.5, 5.85, 0.08) }); gsap.set("#qp", { opacity: env(t, 6.6, 6.95, 0.08) });
-  }
-""".replace("%%F1%%", str(_cum(R1))).replace("%%F2%%", str(_cum(R2))).replace("%%F3%%", str(_cum(R3))) \
-   .replace("%%K1%%", str([list(k) for k in K1])).replace("%%K2%%", str([list(k) for k in K2])).replace("%%K3%%", str([list(k) for k in K3])) \
-   .replace("%%N1%%", str({str(k): v for k, v in N1.items()}).replace("'", '"')) \
-   .replace("%%N2%%", str({str(k): v for k, v in N2.items()}).replace("'", '"')) \
-   .replace("%%N3%%", str({str(k): v for k, v in N3.items()}).replace("'", '"'))
+    gsap.set("#qf", {{ opacity: env(t, QF[0], QF[1], 0.08) }}); gsap.set("#qp", {{ opacity: env(t, QP[0], QP[1], 0.08) }});
+  }}
+"""
 
-# ======================================================================== S5 CTA
+# ======================================================================== S5 CTA: split layout
 S5_CSS = """
-.mc { position:absolute; top:130px; width:268px; height:300px; background:#fff; border:3px solid #121532; border-radius:24px; }
-.mc .dg { position:absolute; left:19px; top:4px; }
-.mc .lb { position:absolute; left:0; right:0; bottom:16px; text-align:center; font-size:30px; }
-.mc .lb .r { font-size:17px; margin-right:6px; }
-.comment { position:absolute; left:0; right:0; top:486px; text-align:center; font-size:58px; letter-spacing:-0.02em; }
-#send { position:absolute; left:250px; top:576px; width:580px; height:210px; border-radius:38px; background:#dbe7ff; border:5px solid #121532; box-shadow:14px 14px 0 #4f86e8; display:flex; align-items:center; justify-content:center; }
-#send span { font-size:180px; line-height:1; letter-spacing:-0.02em; margin-top:14px; }
-.dm { position:absolute; left:0; right:0; top:826px; text-align:center; font-size:34px; }
-#inp { position:absolute; left:150px; top:908px; width:780px; height:84px; border-radius:42px; background:#fff; border:3px solid #121532; }
+.mc2 { position:absolute; left:600px; width:416px; height:200px; background:#fff; border:3px solid #121532; border-radius:24px; overflow:hidden; }
+.mc2 .dg { position:absolute; left:12px; top:10px; }
+.mc2 .no { position:absolute; left:212px; top:44px; font-size:18px; letter-spacing:0.14em; }
+.mc2 .nm { position:absolute; left:210px; top:68px; font-size:44px; letter-spacing:-0.02em; line-height:1.15; }
+.mc2 .ds { position:absolute; left:212px; top:126px; font-size:17px; }
+.cm { position:absolute; left:63px; top:372px; font-size:66px; letter-spacing:-0.03em; }
+#send { position:absolute; left:63px; top:466px; width:492px; height:196px; border-radius:30px; background:linear-gradient(110deg,#121532,#274976); box-shadow:12px 14px 0 #4f86e8; display:flex; align-items:center; justify-content:center; }
+#send span { color:#fff; font-weight:700; font-size:150px; line-height:1; letter-spacing:-0.02em; margin-top:12px; }
+.dm2 { position:absolute; left:63px; top:706px; width:500px; font-size:31px; line-height:1.4; }
+.arrowd { position:absolute; left:63px; top:900px; font-size:22px; letter-spacing:0.16em; }
+#inp { position:absolute; left:64px; top:1010px; width:620px; height:84px; border-radius:42px; background:#fff; border:3px solid #121532; }
 #inp .av { position:absolute; left:14px; top:13px; width:52px; height:52px; box-shadow:none; }
-.ph { position:absolute; left:86px; top:0; line-height:78px; font-size:28px; }
-.typed { position:absolute; left:86px; top:0; line-height:78px; font-size:28px; display:flex; }
+.ph { position:absolute; left:86px; top:0; line-height:78px; font-size:27px; }
+.typed { position:absolute; left:86px; top:0; line-height:78px; font-size:27px; display:flex; }
 .typed span { opacity:0; }
 #caret { width:3px; height:34px; margin-top:22px; margin-left:3px; background:#274976; opacity:0; }
-#sbtn { position:absolute; right:14px; top:13px; width:52px; height:52px; border-radius:50%; background:#eef3fb; display:flex; align-items:center; justify-content:center; }
 #sbtnOn { position:absolute; right:14px; top:13px; width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,#4f86e8,#274976); display:flex; align-items:center; justify-content:center; opacity:0; }
-#fol { position:absolute; left:150px; top:1032px; width:780px; height:150px; border-radius:26px; background:#fff; border:3px solid #121532; box-shadow:10px 10px 0 #121532; }
-#fol .av { position:absolute; left:26px; top:31px; width:88px; height:88px; font-size:28px; }
-#fol .n { position:absolute; left:140px; top:30px; font-size:32px; }
-#fol .d { position:absolute; left:140px; top:80px; font-size:18px; line-height:1.35; width:400px; }
-.fb { position:absolute; right:26px; top:47px; height:56px; width:172px; border-radius:28px; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; }
+#sbtn { position:absolute; right:14px; top:13px; width:52px; height:52px; border-radius:50%; background:#eef3fb; display:flex; align-items:center; justify-content:center; }
+.fb { position:absolute; left:706px; top:1010px; width:310px; height:84px; border-radius:42px; display:flex; align-items:center; justify-content:center; font-size:25px; font-weight:700; }
 #fb1 { background:linear-gradient(100deg,#121532,#274976); color:#fff; }
-#fb2 { background:#fff; border:2.5px solid #121532; opacity:0; }
+#fb2 { background:#fff; border:3px solid #121532; opacity:0; }
+.fsub { position:absolute; left:706px; top:1108px; width:310px; text-align:center; font-size:17px; }
 """
-S5_BODY = (
-    f'    <div class="mc" style="left:116px;box-shadow:9px 9px 0 #274976"><div class="dg">{mini_harness("a", 226)}</div><div class="lb"><span class="g r">01</span><span class="g b">Harness</span></div></div>\n'
-    f'    <div class="mc" style="left:406px;box-shadow:9px 9px 0 #4f86e8"><div class="dg">{mini_loop("b", 226)}</div><div class="lb"><span class="g r">02</span><span class="g b">Loop</span></div></div>\n'
-    f'    <div class="mc" style="left:696px;box-shadow:9px 9px 0 #121532"><div class="dg">{mini_graph("c", 226)}</div><div class="lb"><span class="g r">03</span><span class="g b">Graph</span></div></div>\n'
-    """    <div class="vs" style="left:375px;top:372px">vs</div><div class="vs" style="left:665px;top:372px">vs</div>
-    <div class="comment g b">Comment</div>
-    <div id="send"><span class="g b">SEND</span></div>
-    <div class="dm"><span class="g r">dan aku DM link buat paham </span><span class="hlbar"><span class="g b">ketiganya</span></span><span class="g r"> &rarr;</span></div>
+_mc = [("a", 330, "01", "Harness", "membungkus model", mini_harness), ("b", 550, "02", "Loop", "ulang sampai selesai", mini_loop),
+       ("c", 770, "03", "Graph", "atur tiap langkah", mini_graph)]
+S5_BODY = f"""    <div class="htitle" style="top:116px;font-size:58px"><span class="g r">Mau paham lebih dalam</span></div>
+    <div class="htitle" style="top:196px;font-size:58px">{hb("Harness, Loop &amp; Graph?")}</div>
+""" + "".join(f'    <div class="mc2" id="mc{p}" style="top:{y}px"><div class="dg">{fn(p, 180)}</div><div class="no g b">{no}</div><div class="nm g b">{n}</div><div class="ds g r">{d}</div></div>\n'
+              for p, y, no, n, d, fn in _mc) + """    <div class="cm g b">Comment</div>
+    <div id="send"><span>SEND</span></div>
+    <div class="dm2"><span class="g r">dan aku DM link materinya biar kamu paham </span><span class="g b">ketiganya.</span></div>
+    <div class="arrowd g b">KETIK DI KOLOM KOMENTAR &darr;</div>
     <div id="inp"><div class="av">FK</div><div class="ph g r dim" id="ph">Tambah komentar...</div>
       <div class="typed"><span class="g b" id="k0">S</span><span class="g b" id="k1">E</span><span class="g b" id="k2">N</span><span class="g b" id="k3">D</span><i id="caret"></i></div>
       <div id="sbtn"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 11 L21 3 L14 21 L11 13 Z" fill="none" stroke="#274976" stroke-width="2.2" stroke-linejoin="round"/></svg></div>
       <div id="sbtnOn"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 11 L21 3 L14 21 L11 13 Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></div></div>
-    <div id="fol"><div class="av">FK</div><div class="n g b">Follow Freddie Kashawan</div><div class="d g r">AI agent, Claude &amp; workflow bisnis, dijelaskan visual.</div>
-      <div class="fb" id="fb1">+ Follow</div><div class="fb" id="fb2"><span class="g b">Following &#10003;</span></div></div>
-""")
+    <div class="fb" id="fb1">+ Follow</div><div class="fb" id="fb2"><span class="g b">Following &#10003;</span></div>
+    <div class="fsub g r">AI agent &amp; workflow bisnis, dijelaskan visual.</div>
+"""
 S5_JS = """
+  const mcs = ["mca", "mcb", "mcc"].map($);
   function render(t) {
     Minis.harness("a", t); Minis.loop("b", t); Minis.graph("c", t);
     const beat = (t % 1.75) / 1.75;
-    gsap.set("#send", { rotation: -2.5, scale: 1 + 0.035 * Math.exp(-7 * beat) * Math.sin(Math.PI * Math.min(1, beat * 5)) });
+    gsap.set("#send", { rotation: -3, scale: 1 + 0.035 * Math.exp(-7 * beat) * Math.sin(Math.PI * Math.min(1, beat * 5)) });
+    mcs.forEach((el, i) => { const k = env(t, 3.4 + i * 0.35, 3.4 + i * 0.35 + 0.5, 0.15); el.style.borderColor = "rgb(" + mixc(NAVY, AZ, k) + ")"; el.style.boxShadow = "0 " + (16 * k).toFixed(1) + "px 34px -14px rgba(79,134,232," + (0.7 * k).toFixed(3) + ")"; });
     const typing = t >= 0.6 && t < 2.35;
     for (let i = 0; i < 4; i++) gsap.set("#k" + i, { opacity: typing && t >= 0.7 + i * 0.17 ? 1 : 0 });
     gsap.set("#ph", { opacity: typing ? 0 : 1 });
     gsap.set("#caret", { opacity: typing && Math.floor(t * 3.2) % 2 === 0 ? 1 : 0 });
-    const on = t >= 1.4 && t < 2.35;
-    gsap.set("#sbtnOn", { opacity: on ? 1 : 0, scale: t > 2.05 && t < 2.25 ? 0.86 : 1 });
+    gsap.set("#sbtnOn", { opacity: t >= 1.4 && t < 2.35 ? 1 : 0, scale: t > 2.05 && t < 2.25 ? 0.86 : 1 });
     $("inp").style.borderColor = typing ? "#4f86e8" : "#121532";
     $("inp").style.boxShadow = typing ? "0 0 0 6px rgba(79,134,232,0.18)" : "none";
     const f = smooth((t - 2.8) / 0.2) * (1 - smooth((t - 6.6) / 0.2));
-    gsap.set("#fb1", { opacity: 1 - f, scale: 1 - 0.08 * f });
-    gsap.set("#fb2", { opacity: f, scale: 0.92 + 0.08 * f + 0.06 * Math.sin(Math.PI * clamp((t - 2.8) / 0.35, 0, 1)) });
+    gsap.set("#fb1", { opacity: 1 - f, scale: 1 - 0.06 * f });
+    gsap.set("#fb2", { opacity: f, scale: 0.94 + 0.06 * f + 0.05 * Math.sin(Math.PI * clamp((t - 2.8) / 0.35, 0, 1)) });
   }
 """
 
 SLIDES = [
     dict(cid="s1", name="Cover", eyebrow="AGENT ARCHITECTURE", right="GESER &rarr;", css=S1_CSS, body=S1_BODY, js=S1_JS),
-    dict(cid="s2", name="Harness", eyebrow="THE SCAFFOLD &middot; HARNESS", right="GESER &rarr;", css=S2_CSS, body=S2_BODY, js=S2_JS),
-    dict(cid="s3", name="Loop", eyebrow="THE CYCLE &middot; LOOP", right="GESER &rarr;", css=S3_CSS, body=S3_BODY, js=S3_JS),
-    dict(cid="s4", name="Graph", eyebrow="THE MAP &middot; GRAPH", right="GESER &rarr;", css=S4_CSS, body=S4_BODY, js=S4_JS),
+    dict(cid="s2", name="Harness", eyebrow="01 &middot; THE SCAFFOLD", right="GESER &rarr;", css=S2_CSS, body=S2_BODY, js=S2_JS),
+    dict(cid="s3", name="Loop", eyebrow="02 &middot; THE CYCLE", right="GESER &rarr;", css=S3_CSS, body=S3_BODY, js=S3_JS),
+    dict(cid="s4", name="Graph", eyebrow="03 &middot; THE MAP", right="GESER &rarr;", css=S4_CSS, body=S4_BODY, js=S4_JS),
     dict(cid="s5", name="CTA", eyebrow="MAU LEBIH DALAM?", right="SAVE &middot; SHARE", css=S5_CSS, body=S5_BODY, js=S5_JS),
 ]
 

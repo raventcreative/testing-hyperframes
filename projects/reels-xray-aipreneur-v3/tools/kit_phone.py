@@ -132,7 +132,7 @@ def gears_motion(S, pre, a, b, kebuka=4.38):
             if t1 <= SPIN0:
                 continue
             ease = "power2.in" if t1 <= 3.24 and t0 >= SPIN0 else "none"
-            S.ft(sel, {"rotation": gear_angle(name, t0, kebuka)}, {"rotation": gear_angle(name, t1, kebuka)}, t0, t1 - t0, ease)
+            S.ft(sel, {"rotation": gear_angle(name, t0, kebuka)}, {"rotation": gear_angle(name, t1, kebuka)}, t0, t1 - t0 - 0.0015, ease)
     # the big balance wheel ticks back and forth (a bridge crosses it, so it oscillates instead of spinning);
     # sampled every 1/15 s (linear between samples) so S01 and S02 meet exactly
     sel = f"#{pre}-g3"
@@ -140,7 +140,7 @@ def gears_motion(S, pre, a, b, kebuka=4.38):
     t = max(a, SPIN0)
     while t < b - 1e-4:
         t1 = min(b, t + 1 / 15)
-        S.ft(sel, {"rotation": balance_angle(t)}, {"rotation": balance_angle(t1)}, t, t1 - t, "none")
+        S.ft(sel, {"rotation": balance_angle(t)}, {"rotation": balance_angle(t1)}, t, t1 - t - 0.0015, "none")
         t = t1
 
 

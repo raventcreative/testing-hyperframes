@@ -1,4 +1,18 @@
-# REVIEW — REELS X-RAY (AIpreneur V3) — draft preview, NOT final
+# REVIEW — REELS X-RAY (AIpreneur V3) — v2 draft preview, NOT final
+
+## v2 (26 Oct) — user elements + REF-H upgrade
+- User elements dissected and animated part by part: mechanical phone (S01–S02: body, 5 rotating gear sprites,
+  rebuilt 3D glass plane posed with matrix3d), camera rail (S04: rail rebuilt under the cart, dolly glides on the rail
+  vector), navy dial (S08: needle/hub/gears re-animated inside the dial's affine), Google logo + user's Claude Code
+  screen (S06: REF-M search-bar morph -> line match -> screen unfolds, typing, send). Private "Blocked" session
+  names were removed from the screenshot.
+- REF-H global layers (pastel plate, 54 px grid, haze, motes, grain) and the bible's caption word-rise.
+- Genuine AI PRENEUR logo lockup on a porcelain plate in the final still frame.
+- VO-safe SFX: high-passed variants, peak on apex, ducked against the measured VO, typing as one clip per span.
+- Docs: production/REFERENCE_MOTION_ATLAS.md, production/MOTION_BLUEPRINT.md.
+- QA v2: lint 0 errors; check 4 ranges 0 errors, contrast 54/54; 0 overlapping same-property tweens.
+
+---
 
 Status: assembled preview built and QA'd; **waiting for Freddie's approval before the final delivery render.**
 Preview: `out/PREVIEW_reels-xray-aipreneur-v3_draft.mp4` (draft quality).
@@ -26,7 +40,6 @@ a slow camera orbit around the host. Scene mechanics (hinges, rails, presses) ca
 
 ## Not checked / limits
 - Nobody has listened to the full mix by ear here.
-- No AIpreneur logo file was supplied -> no brand plate in the CTA (the brief allows only a genuine logo).
 - The mascot has no eyelids/blendshapes: mouth drawn on the face surface, no blinks, mitten hands.
 - White light bursts read softly on the ivory ground; navy rings/edges carry most apex contrast.
 - Scene notes from the build: s13's family shot holds ~0.5 s; s17's lid->bubble is a quick crossfade.

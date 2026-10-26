@@ -12,7 +12,7 @@ from kit_phone import phone_rig, Placement, glass_point, gears_motion, apex_h, b
 from scenes.s01 import screen_html
 
 SFX = [(4.06, "whoosh", 0.06), (4.40, "click", 0.10), (4.95, "whoosh", 0.07)]
-PLACE = Placement(0.85, (590.5, 635.5), (590, 937))      # body + open glass fit the hero zone (top ~440)
+PLACE = Placement(0.85, (590.5, 635.5), (590, 956))      # body + open glass fit the hero zone (top ~440)
 
 
 # ------------------------------------------------------------------ CSS math for the glass child transform

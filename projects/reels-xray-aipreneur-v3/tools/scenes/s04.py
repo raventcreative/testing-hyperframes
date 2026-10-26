@@ -124,12 +124,11 @@ def build(S):
                      f'<div class="abs" id="{s}-pe{k}" style="{box(-3, -3, PW_ + 2, PH_ + 2)}border-radius:17px;border:3px solid #ffffff;box-shadow:0 0 18px rgba(172,198,231,1)"></div></div>')
     # ---------------- near plane: blurred film strip + glass ring
     S.near.append(f'<div class="abs p3" style="{box(0, 0, 1080, 1920)}transform:translateZ(280px) scale(.86)">'
-                  f'<div class="abs" style="{box(940, 1330, 220, 70)}border-radius:10px;background:repeating-linear-gradient(90deg,#3a6299 0 22px,#cbdbf4 22px 30px);opacity:.75;filter:blur(5px)"></div>'
                   f'<div class="abs" style="{box(-40, 700, 170, 170)}border-radius:50%;border:12px solid rgba(255,255,255,.75);filter:blur(5px)"></div></div>')
     apex(S, S.near, f"{s}-ap", 590, 720, W19 + 0.04, size=760, sparks=8, seed=41, op=0.65)
 
     # ---------------- motion
-    T_ALIGN = W19 + 0.42          # planes align into one frame
+    T_ALIGN = W19 + 0.52          # planes align into one frame
     T_WIND = 9.98                 # rail winds onto the spool
     # viewer camera: crane up from the rail, track with the dolly (parallax), square-on for the aligned frame, push to spool
     S.cam([(t0, {"z": 300, "x": -60, "y": 40, "rotationY": 6, "rotationX": -6}, None),

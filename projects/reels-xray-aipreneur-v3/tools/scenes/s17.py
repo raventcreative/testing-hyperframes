@@ -4,7 +4,7 @@ folder rises carrying the user's 3D GitHub mark (orbit reveal on "repo"), a mini
 the prompt sheet lands on "prompt"; a highlight runs from the repo to the prompt. The lid then lifts off and folds
 into the comment bubble's start pose (hand-off to S18)."""
 from xk import box, screw, shadow, rivets_line, apex, minireel, minireel_anim, r3
-from kit_e import folder, iris, bubble, front, BX, BY, BW, BH
+from kit_e import folder, iris_grad, bubble, front, BX, BY, BW, BH
 
 SFX = [(50.52, "sparkle", 0.08), (51.30, "pop", 0.1)]
 
@@ -78,16 +78,18 @@ def build(S):
     S.near.append(f'<div class="abs p3" style="{box(0, 0, 1080, 1920)}transform:translateZ(260px) scale(.87)">'
                   f'<div class="abs" style="{box(920, 1240, 220, 220)}border-radius:50%;border:14px solid rgba(255,255,255,.7);filter:blur(5px)"></div></div>')
     apex(S, S.near, f"{s}-ap", 470, 690, WR + 0.08, size=420, sparks=6, seed=17, op=0.65)
-    S.near.append(front(iris(f"{s}-iris", 590, 930, 214) +
+    S.near.append(front(iris_grad(f"{s}-iris") +
                         f'<div class="abs" id="{s}-iring" style="{box(590 - 115, 930 - 115, 230, 230)}border-radius:50%;border:17px solid #f7f9fd;'
                         f'box-shadow:inset 0 0 0 2.5px #294b77,0 0 0 2px #acc6e7,0 18px 30px -12px rgba(28,51,84,.4)"></div>', origin=S.persp_origin))
 
     # ---------------- motion
     t0 = S.t0
-    for nm, sc in (("iris", 7), ("iring", 7)):
-        S.init(f"#{s}-{nm}", {"scale": 1, "opacity": 1})
-        S.ft(f"#{s}-{nm}", {"scale": 1}, {"scale": sc}, t0 + 0.02, 0.36, "power3.in")
-        S.ft(f"#{s}-{nm}", {"opacity": 1}, {"opacity": 0}, t0 + 0.26, 0.12, "power1.in")
+    S.init(f"#{s}-iris", {"--r": "107px", "opacity": 1})
+    S.ft(f"#{s}-iris", {"--r": "107px"}, {"--r": "800px"}, t0 + 0.02, 0.36, "power3.in")
+    S.ft(f"#{s}-iris", {"opacity": 1}, {"opacity": 0}, t0 + 0.26, 0.12, "power1.in")
+    S.init(f"#{s}-iring", {"scale": 1, "opacity": 1})
+    S.ft(f"#{s}-iring", {"scale": 1}, {"scale": 7.48}, t0 + 0.02, 0.36, "power3.in")
+    S.ft(f"#{s}-iring", {"opacity": 1}, {"opacity": 0}, t0 + 0.26, 0.12, "power1.in")
     S.init(f"#{s}-lid", {"rotationX": 90, "transformOrigin": "50% 0%", "opacity": 1})
     S.ft(f"#{s}-lid", {"rotationX": 90}, {"rotationX": 199}, t0 + 0.04, 0.5, "back.out(1.5)")
     S.ft(f"#{s}-lid", {"rotationX": 199}, {"rotationX": 192}, WB + 0.12, 0.2, "power2.in")

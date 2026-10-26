@@ -5,7 +5,7 @@ seam aligns, "sinkron" -> word markers slide onto the waveform peaks (apex), "su
 centres and becomes an iris (ivory closes around it) = hand-off into S17."""
 import math
 from xk import box, screw, shadow, rivets_line, apex, minireel, r3
-from kit_e import magnifier, check_svg, iris, front
+from kit_e import magnifier, check_svg, iris_grad, front
 
 SFX = [(46.92, "click", 0.1), (48.80, "sparkle", 0.08)]
 
@@ -167,7 +167,7 @@ def build(S):
 
 
     # iris last in the near plane (covers everything), with the porcelain lens ring on top of it
-    S.near.append(front(iris(f"{s}-iris", 590, 930, 214) +
+    S.near.append(front(iris_grad(f"{s}-iris") +
                         f'<div class="abs" id="{s}-iring" style="{box(590 - 115, 930 - 115, 230, 230)}border-radius:50%;border:17px solid #f7f9fd;'
                         f'box-shadow:inset 0 0 0 2.5px #294b77,0 0 0 2px #acc6e7,0 18px 30px -12px rgba(28,51,84,.4)"></div>', origin=S.persp_origin))
     for nm in ("iris", "iring"):

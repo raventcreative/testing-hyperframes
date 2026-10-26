@@ -110,6 +110,10 @@ def build(S):
                   f'<div class="abs" style="{box(980, 520, 190, 190)}border-radius:50%;border:14px solid rgba(255,255,255,.75);box-shadow:0 0 0 2px rgba(172,198,231,.5);filter:blur(5px)"></div>'
                   f'<div class="abs glass" style="{box(-90, 760, 160, 260)}border-radius:30px;filter:blur(4px)"></div></div>')
     apex(S, S.near, f"{s}-ap", 590, 820, LOCK + 0.03, size=820, sparks=10, seed=33)
+    for k in range(2):
+        S.near.append(f'<div class="abs" id="{s}-sw{k}" style="{box(590 - 200, 830 - 200, 400, 400)}border-radius:50%;border:{6 - 2 * k}px solid rgba(58,98,153,.7);box-shadow:0 0 0 6px rgba(203,219,244,.6),inset 0 0 0 4px rgba(255,255,255,.8)"></div>')
+        S.init(f"#{s}-sw{k}", {"opacity": 0, "scale": 0.4})
+        S.ft(f"#{s}-sw{k}", {"opacity": 0.95, "scale": 0.4}, {"opacity": 0, "scale": 2.1 + 0.5 * k}, LOCK + 0.02 + 0.08 * k, 0.6 + 0.1 * k, "power3.out")
 
     # ================= motion
     S.cam([(T0, {"z": 110, "x": 0, "y": 30, "rotationX": 3, "rotationY": -4}, None),
@@ -141,13 +145,13 @@ def build(S):
     S.ft(f"#{s}-R-dash", {"opacity": 1, "scale": 1}, {"opacity": 0, "scale": 1.06}, LOCK - 0.04, 0.3, "power2.out")
     S.init(f"#{s}-L-dash", {"opacity": 0})
     # the edited parts fly in from the camera and dock onto the skeleton (staggered, different arcs)
-    S.keys(f"#{s}-R-pw", [(T0, {"x": 300, "y": -40, "z": 260, "rotation": 14, "rotationY": -40}, None),
-                          (W61 - 0.05, {"x": 120, "y": -20, "z": 120, "rotation": 6, "rotationY": -20}, "sine.inOut"),
-                          (LOCK - 0.12, {"x": 0, "y": 0, "z": 0, "rotation": 0, "rotationY": 0}, "power3.inOut")])
-    S.keys(f"#{s}-R-bw", [(T0, {"x": 330, "y": 140, "z": 230, "rotation": -10, "rotationX": 50}, None),
-                          (W61 + 0.05, {"x": 140, "y": 60, "z": 110, "rotation": -4, "rotationX": 20}, "sine.inOut"),
-                          (LOCK - 0.06, {"x": 0, "y": 0, "z": 0, "rotation": 0, "rotationX": 0}, "power3.inOut")])
-    for k, (dx, dy) in enumerate(((-240, 150), (-300, 60), (-200, -60))):
+    S.keys(f"#{s}-R-pw", [(T0, {"x": 250, "y": 30, "z": 230, "rotation": 14, "rotationY": -40, "scale": 1.5}, None),
+                          (W61 - 0.05, {"x": 110, "y": 10, "z": 110, "rotation": 6, "rotationY": -20, "scale": 1.15}, "sine.inOut"),
+                          (LOCK - 0.12, {"x": 0, "y": 0, "z": 0, "rotation": 0, "rotationY": 0, "scale": 1}, "power3.inOut")])
+    S.keys(f"#{s}-R-bw", [(T0, {"x": 300, "y": -150, "z": 220, "rotation": -10, "rotationX": 50, "scale": 1.5}, None),
+                          (W61 + 0.05, {"x": 130, "y": -60, "z": 100, "rotation": -4, "rotationX": 20, "scale": 1.15}, "sine.inOut"),
+                          (LOCK - 0.06, {"x": 0, "y": 0, "z": 0, "rotation": 0, "rotationX": 0, "scale": 1}, "power3.inOut")])
+    for k, (dx, dy) in enumerate(((-250, -40), (-300, -110), (-210, -190))):
         S.keys(f"#{s}-R-pin{k}", [(T0, {"x": dx, "y": dy, "z": 200, "rotation": 90, "scale": 1.4}, None),
                                   (W61 + 0.1 + k * 0.08, {"x": dx * 0.3, "y": dy * 0.3, "z": 60, "rotation": 30}, "sine.inOut"),
                                   (LOCK - 0.16 + k * 0.05, {"x": 0, "y": 0, "z": 0, "rotation": 0, "scale": 1}, "back.out(2.4)")])
@@ -189,6 +193,6 @@ def build(S):
     S.init(f"#{s}-rsh", {"scaleX": 0.55, "opacity": 0.9})
     S.ft(f"#{s}-rsh", {"scaleX": 0.55}, {"scaleX": 1.15}, SPLIT, 0.66, "power3.inOut")
     # master template plate rises at the end
-    S.init(f"#{s}-tpl", {"y": 520, "rotationX": 30})
-    S.ft(f"#{s}-tpl", {"y": 520, "rotationX": 30}, {"y": 0, "rotationX": 14}, T1 - 0.62, 0.62, "power3.out")
+    S.init(f"#{s}-tpl", {"y": 780, "rotationX": 30})
+    S.ft(f"#{s}-tpl", {"y": 780, "rotationX": 30}, {"y": 0, "rotationX": 14}, T1 - 0.62, 0.62, "power3.out")
     SFX.extend([(W61 + 0.02, "whoosh", 0.06), (LOCK + 0.01, "click", 0.15), (W68 + 0.02, "sparkle", 0.07)])

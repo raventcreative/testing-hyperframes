@@ -32,7 +32,7 @@ def build(S):
     letters = "EDITOR"
     row = "".join(f'<div class="p3" id="{s}-L{k}w" style="position:relative;display:inline-block;margin:0 1px">{letter_extrude(f"{s}-L{k}", ch, 138)}</div>' for k, ch in enumerate(letters))
     inner = (f'<div class="abs p3" style="{box(22, 22, BW - 44, BH - 44)}display:flex;align-items:center;justify-content:center;padding-top:6px;transform:translateZ(20px)">{row}</div>'
-             f'<div class="abs" id="{s}-sw" style="{box(-160, 20, 110, BH - 40)}background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.45),rgba(255,255,255,0));transform:translateZ(30px)"></div>')
+             f'<div class="abs" id="{s}-sw" style="{box(-160, 20, 110, BH - 40)}background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.45),rgba(255,255,255,0))"></div>')
     S.mid.append(bubble(s, inner))
     # selection corners around the bubble
     m = 26
@@ -60,22 +60,23 @@ def build(S):
     # bubble unfolds (continues S17's rotationX 62 pose) and settles on the pedestal
     S.init(f"#{s}-bub", {"rotationX": 40, "y": 0, "scale": 1, "transformOrigin": "50% 100%"})
     S.ft(f"#{s}-bub", {"rotationX": 40}, {"rotationX": -4}, t0, 0.42, "power2.out")
-    S.ft(f"#{s}-bub", {"rotationX": -4}, {"rotationX": 0}, t0 + 0.4, 0.3, "sine.inOut")
+    S.ft(f"#{s}-bub", {"rotationX": -4}, {"rotationX": 0}, t0 + 0.425, 0.3, "sine.inOut")
     S.init(f"#{s}-bsh", {"scaleX": 0.7, "opacity": 0.5})
     S.ft(f"#{s}-bsh", {"scaleX": 0.7, "opacity": 0.5}, {"scaleX": 1, "opacity": 0.9}, t0, 0.45, "power2.out")
     # EDITOR lands letter by letter (drop from the camera, flip upright, tiny settle)
     for k in range(len(letters)):
         at = WE - 0.08 + k * 0.055
-        S.init(f"#{s}-L{k}", {"y": -110, "z": 180, "rotationX": -75, "scale": 1.25, "opacity": 0})
-        S.ft(f"#{s}-L{k}", {"opacity": 0}, {"opacity": 1}, at, 0.08, "power1.out")
-        S.ft(f"#{s}-L{k}", {"y": -110, "z": 180, "rotationX": -75, "scale": 1.25}, {"y": 0, "z": 0, "rotationX": 0, "scale": 1}, at, 0.34, "back.out(1.9)")
+        # hinge up from lying flat toward the camera (origin at the baseline) -> never cuts through the glass
+        S.init(f"#{s}-L{k}", {"rotationX": -92, "y": 24, "scale": 1.15, "opacity": 0, "transformOrigin": "50% 86%"})
+        S.ft(f"#{s}-L{k}", {"opacity": 0}, {"opacity": 1}, at, 0.06, "power1.out")
+        S.ft(f"#{s}-L{k}", {"rotationX": -92, "y": 24, "scale": 1.15}, {"rotationX": 0, "y": 0, "scale": 1}, at, 0.36, "back.out(1.7)")
     # selection corners lock in once the word is complete
     for nm, (dx, dy) in {"tl": (-30, -30), "tr": (30, -30), "bl": (-30, 30), "br": (30, 30)}.items():
         S.init(f"#{s}-c{nm}", {"opacity": 0, "x": dx, "y": dy})
         S.ft(f"#{s}-c{nm}", {"opacity": 0, "x": dx, "y": dy}, {"opacity": 1, "x": 0, "y": 0}, WE + 0.3, 0.32, "back.out(2.2)")
     # glass sweep across the bubble
-    S.init(f"#{s}-sw", {"x": 0})
-    S.ft(f"#{s}-sw", {"x": 0}, {"x": BW + 220}, WE + 0.5, 0.75, "power2.inOut")
+    S.init(f"#{s}-sw", {"x": 0, "z": 30})
+    S.ft(f"#{s}-sw", {"x": 0, "z": 30}, {"x": BW + 220, "z": 30}, WE + 0.5, 0.75, "power2.inOut")
     # repo folder pops beside the bubble on "Gue bagiin", GitHub mark turns to face us
     S.init(f"#{s}-fw", {"y": 60, "scale": 0.4, "opacity": 0, "rotation": 8})
     S.ft(f"#{s}-fw", {"opacity": 0}, {"opacity": 1}, WG - 0.05, 0.1, "power1.out")

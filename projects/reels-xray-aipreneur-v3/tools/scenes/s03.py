@@ -125,7 +125,7 @@ def build(S):
         S.ft(cid, {"z": -40, "y": 30, "opacity": 0, "rotationX": -35}, {"z": 70 + 22 * (k % 2), "y": -6, "opacity": 1, "rotationX": 0},
              W10 - 0.04 + dl, 0.42 + 0.08 * (k % 3), "back.out(1.6)")
         S.ft(cid, {"z": 70 + 22 * (k % 2), "y": -6, "rotationX": 0}, {"z": 92 + 30 * (k % 2), "y": -18 - 6 * k, "rotationX": 4},
-             W10 + 0.5 + dl, t1 - W10 - 0.5 - dl, "sine.inOut")
+             W10 + dl + 0.62, t1 - W10 - 0.62 - dl, "sine.inOut")
         S.init(f"#{s}-lsh{k}", {"opacity": 0, "scaleX": 0.4})
         S.ft(f"#{s}-lsh{k}", {"opacity": 0, "scaleX": 0.4}, {"opacity": 1, "scaleX": 1}, W10 + dl, 0.45, "power2.out")
     # card sheet unfolds card by card on "kartu"; connectors extend from the plate

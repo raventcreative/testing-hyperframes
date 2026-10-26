@@ -100,7 +100,7 @@ def build(S):
     # phone turns to 3/4 so the layer stack reads in depth
     S.keys(f"#{s}-phone", [(t0, {"rotationY": -8, "rotationX": 2, "transformOrigin": "50% 50%"}, None),
                            (W8, {"rotationY": -5, "rotationX": 2}, "sine.inOut"),
-                           (W9 + 0.5, {"rotationY": -40, "rotationX": 6}, "power3.inOut"),
+                           (W9 + 0.3, {"rotationY": -38, "rotationX": 6}, "power3.inOut"),
                            (t1 - 0.42, {"rotationY": -36, "rotationX": 5}, "sine.inOut"),
                            (t1, {"rotationY": -4, "rotationX": 0}, "power3.in")])
     # bezel holds S01's split state (slow drift)
@@ -139,12 +139,14 @@ def build(S):
         bz = base_z[k]
         ox, oy = open_xy[k]
         S.init(pid, {"z": bz, "x": 0, "y": 0, "rotationY": 0})
-        S.ft(pid, {"z": bz, "x": 0, "y": 0, "rotationY": 0}, {"z": open_z[k], "x": ox, "y": oy, "rotationY": 6 + k * 2},
-             W9 - 0.02 + k * 0.05, 0.62, "expo.out")
-        drift = {"z": open_z[k] + 18 * (k + 1), "x": ox + 6 * k, "y": oy - 8, "rotationY": 8 + k * 2}
-        S.ft(pid, {"z": open_z[k], "x": ox, "y": oy, "rotationY": 6 + k * 2}, drift, W9 + 0.6 + k * 0.05, t1 - 0.42 - (W9 + 0.6 + k * 0.05), "sine.inOut")
-        if k == 3:   # hand-off: the type plate flies to the camera, square-on, centred (S03 opens on it)
-            S.ft(pid, drift, {"z": 420, "x": 0, "y": -60, "rotationY": 0}, t1 - 0.42, 0.42, "power3.in")
+        opened = {"z": open_z[k], "x": ox, "y": oy, "rotationY": 6 + k * 2}
+        if k < 3:
+            S.ft(pid, {"z": bz, "x": 0, "y": 0, "rotationY": 0}, opened, W9 - 0.02 + k * 0.05, 0.62, "expo.out")
+            drift = {"z": open_z[k] + 18 * (k + 1), "x": ox + 6 * k, "y": oy - 8, "rotationY": 8 + k * 2}
+            S.ft(pid, opened, drift, W9 + 0.6 + k * 0.05, t1 - (W9 + 0.6 + k * 0.05), "sine.inOut")
+        else:        # hand-off: the type plate opens, then flies to the camera square-on (S03 opens on it)
+            S.ft(pid, {"z": bz, "x": 0, "y": 0, "rotationY": 0}, opened, W9 + 0.13, t1 - 0.42 - (W9 + 0.13), "expo.out")
+            S.ft(pid, opened, {"z": 420, "x": 0, "y": -60, "rotationY": 0}, t1 - 0.42, 0.42, "power3.in")
     for k in range(3):   # the back layers recede so the type plate owns the hand-off
         S.init(f"#{s}-L{k}", {"opacity": 1})
         S.ft(f"#{s}-L{k}", {"opacity": 1}, {"opacity": 0.35}, t1 - 0.4, 0.35, "power1.in")

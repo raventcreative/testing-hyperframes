@@ -118,3 +118,9 @@ def front(inner, z=400, origin=(590, 560)):
     k = (2000 - z) / 2000
     return (f'<div class="abs p3" style="left:0;top:0;width:1080px;height:1920px;transform-origin:{origin[0]}px {origin[1]}px;'
             f'transform:translateZ({z}px) scale({r3(k)})">{inner}</div>')
+
+
+def iris_grad(id_, cx=590, cy=930, color="242,246,251"):
+    """viewport-sized iris: everything outside a circle of radius var(--r) is covered (tween '--r')."""
+    return (f'<div class="abs" id="{id_}" style="left:0;top:0;width:1080px;height:1920px;--r:107px;'
+            f'background:radial-gradient(circle at {cx}px {cy}px, rgba({color},0) 0, rgba({color},0) calc(var(--r) - 1.5px), rgb({color}) var(--r))"></div>')

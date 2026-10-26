@@ -16,6 +16,9 @@ for k, f in FILES.items():
 cues = []
 for p in sorted((P / "tools/scenes").glob("s[0-9][0-9].py")):
     spec = importlib.util.spec_from_file_location(p.stem, p); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+    if not getattr(m, "SFX", None) and hasattr(m, "build"):   # some scenes fill SFX inside build()
+        import xk
+        m.build(xk.Scene(p.stem))
     for (t, name, vol) in getattr(m, "SFX", [])[:3]:
         cues.append((p.stem, float(t), name, float(vol)))
 for c in json.loads((P / "production/director_camera.json").read_text()):

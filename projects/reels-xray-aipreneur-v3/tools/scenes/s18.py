@@ -40,7 +40,7 @@ def build(S):
         S.mid.append(f'<div class="corner {nm}" id="{s}-c{nm}" style="left:{x}px;top:{y}px;width:34px;height:34px;border-width:0;{"border-top-width:6px;" if nm[0] == "t" else "border-bottom-width:6px;"}{"border-left-width:6px;" if nm[1] == "l" else "border-right-width:6px;"}"></div>')
     # repo folder beside the bubble (GitHub mark as a background image -> no duplicate <img> with S17)
     S.mid.append(shadow(820, 1112, 200, 40, 0.8, id_=f"{s}-fsh"))
-    S.mid.append(f'<div class="abs p3" id="{s}-fw" style="{box(836, 986, 170, 140)}">{folder(s + "-fd", 0, 0, 170, 140, mark_id=s + "-gh", mark_mode="bg")}</div>')
+    S.mid.append(f'<div class="abs p3" id="{s}-fw" style="{box(752, 1004, 150, 124)}">{folder(s + "-fd", 0, 0, 150, 124, mark_id=s + "-gh", mark_mode="bg")}</div>')
 
     # ---------------- near plane: bokeh ring + seeded resting sparkles
     S.near.append(f'<div class="abs p3" style="{box(0, 0, 1080, 1920)}transform:translateZ(260px) scale(.87)">'

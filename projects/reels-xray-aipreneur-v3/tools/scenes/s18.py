@@ -92,3 +92,27 @@ def build(S):
     S.cam([(t0, {"z": 150, "x": 0, "y": 0, "rotationY": 0, "rotationX": 0}, None),
            (WE + 0.1, {"z": 172, "rotationY": -1.5, "rotationX": 0.6}, "power2.out"),
            (END, {"z": 185, "rotationY": 0, "rotationX": 0}, "sine.inOut")])
+
+
+_build_cta = build
+
+
+def build(S):
+    """CTA + brand lockup: the genuine AI PRENEUR logo (assets/brand/ai_preneur_logo_trimmed.png, width only)
+    on a porcelain plate below the pedestal, landing on "Gue bagiin" and still from END."""
+    _build_cta(S)
+    s = S.id
+    WG = S.W(118)
+    PX0, PY0, PW0, PH0 = 345, 452, 490, 96
+    S.mid.append(shadow(PX0 + 30, PY0 + PH0 - 20, PW0 - 40, 44, 0.6, id_=f"{s}-lsh"))
+    S.mid.append(f'<div class="abs" id="{s}-plate" style="{box(PX0, PY0, PW0, PH0)}border-radius:26px;'
+                 f'background:linear-gradient(175deg,#ffffff,#f4f7fb);border:2px solid rgba(41,75,119,.10);'
+                 f'box-shadow:0 2px 0 rgba(255,255,255,.9) inset,0 40px 70px -24px rgba(28,51,84,.38),0 10px 22px rgba(28,51,84,.12);overflow:hidden">'
+                 f'<img src="assets/brand/ai_preneur_logo_trimmed.png" alt="AI PRENEUR" style="position:absolute;left:{(PW0 - 400) / 2}px;top:{(PH0 - 55) / 2}px;width:400px" />'
+                 f'<div class="abs" id="{s}-lsheen" style="{box(-180, -20, 120, PH0 + 40)}background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,255,255,.75),rgba(255,255,255,0))"></div></div>')
+    S.init(f"#{s}-plate", {"y": -40, "opacity": 0, "scale": 0.94})
+    S.ft(f"#{s}-plate", {"y": -40, "opacity": 0, "scale": 0.94}, {"y": 0, "opacity": 1, "scale": 1}, WG - 0.04, 0.42, "power3.out")
+    S.init(f"#{s}-lsh", {"opacity": 0, "scaleX": 0.7})
+    S.ft(f"#{s}-lsh", {"opacity": 0, "scaleX": 0.7}, {"opacity": 0.75, "scaleX": 1}, WG - 0.04, 0.42, "power3.out")
+    S.init(f"#{s}-lsheen", {"x": 0})
+    S.ft(f"#{s}-lsheen", {"x": 0}, {"x": PW0 + 320}, WG + 0.32, 0.5, "power2.inOut")

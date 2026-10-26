@@ -24,18 +24,19 @@ for s in sc["scenes"]:
     hosts.append(f'        <div id="{s["id"]}" class="clip scene-host" data-composition-id="{s["id"]}" data-composition-src="compositions/{s["id"]}.html" '
                  f'data-start="{r3(a)}" data-duration="{r3(b - a)}" data-track-index="2" data-track-kind="graphics" data-width="1080" data-height="1920"></div>')
 
-# ---- floating atmospheric particles (seeded), three depths
-R = Rng(20261026)
+# ---- REF-H ambient layers (house style bible §5): 22 seeded glass motes rising, drifting haze, grid, stepped grain
+R = Rng(20261021)
 parts, ptl = [], []
-for k in range(38):
-    depth = k % 3
-    sz = [3, 5, 9][depth] + R.u(0, 2)
-    x, y = R.u(20, 1060), R.u(120, 1880)
-    op = [0.5, 0.85, 0.4][depth]
-    parts.append(f'      <div class="pt" id="pt{k}" style="left:{r3(x)}px;top:{r3(y)}px;width:{r3(sz)}px;height:{r3(sz)}px;opacity:{op}"></div>')
-    dy = -[60, 120, 220][depth] - R.u(0, 60)
-    dx = R.u(-30, 30)
-    ptl.append(f'        tl.fromTo("#pt{k}", {{ x: 0, y: 0 }}, {{ x: {r3(dx)}, y: {r3(dy)}, duration: {r3(D)}, ease: "none", immediateRender: false }}, 0);')
+for k in range(22):
+    sz = 4 + R.u(0, 9)
+    x, y = R.u(0, 1080), 300 + R.u(0, 1500)
+    parts.append(f'      <div class="mote" id="mote{k}" style="left:{r3(x)}px;top:{r3(y)}px;width:{r3(sz)}px;height:{r3(sz)}px;opacity:{r3(0.3 + R.u(0, 0.45))}"></div>')
+    ptl.append(f'        tl.fromTo("#mote{k}", {{ y: 0 }}, {{ y: {r3(-(120 + R.u(0, 240)))}, duration: {r3(D)}, ease: "none", immediateRender: false }}, 0);')
+H = round(D / 2, 3)
+ptl += [f'        tl.fromTo("#haze-a", {{ x: 0, y: 0 }}, {{ x: 70, y: 60, duration: {H}, ease: "sine.inOut", yoyo: true, repeat: 1, immediateRender: false }}, 0);',
+        f'        tl.fromTo("#haze-b", {{ x: 0, y: 0 }}, {{ x: -90, y: -50, duration: {H}, ease: "sine.inOut", yoyo: true, repeat: 1, immediateRender: false }}, 0);',
+        f'        tl.fromTo("#bggrid", {{ x: 0, y: 0 }}, {{ x: 27, y: 27, duration: {r3(D)}, ease: "none", immediateRender: false }}, 0);',
+        f'        tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {r3(D)}, ease: "steps({int(D * 10)})", immediateRender: false }}, 0);']
 
 # ---- SFX
 sfx_tags = []
@@ -72,19 +73,19 @@ index = f"""<!doctype html>
       html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fc; }}
       body {{ font-family: "Montserrat", sans-serif; font-synthesis: none; color: #202b3b; -webkit-font-smoothing: antialiased; }}
       #main {{ position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; }}
-      /* Ice-Ivory ground: paper -> ice white, key light upper-left */
-      #bg {{ position: absolute; inset: 0; z-index: 0;
-        background: radial-gradient(ellipse 80% 55% at 22% 18%, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 70%),
-                    radial-gradient(ellipse 90% 60% at 70% 92%, rgba(203,219,244,.55) 0%, rgba(203,219,244,0) 70%),
-                    linear-gradient(180deg, #fffefb 0%, #f4f7fc 45%, #e8f0fb 100%); }}
-      #bg-grid {{ position: absolute; inset: 0; z-index: 1; opacity: .9;
-        background-image: linear-gradient(rgba(41,75,119,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(41,75,119,.045) 1px, transparent 1px),
-                          linear-gradient(rgba(41,75,119,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(41,75,119,.035) 1px, transparent 1px);
-        background-size: 48px 48px, 48px 48px, 240px 240px, 240px 240px; background-position: 6px 0, 6px 0, 6px 0, 6px 0; }}
-      #bg-vig {{ position: absolute; inset: 0; z-index: 2; background: radial-gradient(ellipse 85% 70% at 50% 45%, rgba(232,240,251,0) 55%, rgba(172,198,231,.22) 100%); }}
-      .pt {{ position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 0 1px rgba(203,219,244,.7); z-index: 3; }}
+      /* REF-H ground (house style bible §5): supplied pastel plate + 54 px paper grid + drifting haze + motes + grain */
+      #bg {{ position: absolute; inset: 0; z-index: 0; overflow: hidden; }}
+      #bg .plate {{ position: absolute; inset: 0; background: url(assets/brand/pastel_background_1080x1920.png) center / cover no-repeat; }}
+      #bggrid {{ position: absolute; inset: -60px;
+        background: repeating-linear-gradient(90deg, rgba(41,75,119,0.055) 0 1px, transparent 1px 54px), repeating-linear-gradient(0deg, rgba(41,75,119,0.055) 0 1px, transparent 1px 54px);
+        -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 52%, #000 30%, transparent 85%); mask-image: radial-gradient(ellipse 75% 60% at 50% 52%, #000 30%, transparent 85%); }}
+      .haze {{ position: absolute; border-radius: 50%; }}
+      #haze-a {{ left: -260px; top: -120px; width: 900px; height: 900px; background: radial-gradient(circle, rgba(172,198,231,0.5), rgba(172,198,231,0) 68%); }}
+      #haze-b {{ left: 420px; top: 1240px; width: 1000px; height: 1000px; background: radial-gradient(circle, rgba(203,219,244,0.55), rgba(203,219,244,0) 68%); }}
+      #haze-c {{ left: 140px; top: 560px; width: 800px; height: 800px; background: radial-gradient(circle, rgba(255,255,255,0.8), rgba(255,255,255,0) 66%); }}
+      .mote {{ position: absolute; background: url(assets/brand/mote_64.png) center / 100% 100% no-repeat; z-index: 3; }}
       #world {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; z-index: 10; transform-origin: 590px 930px; }}
-      #grain {{ position: absolute; inset: 0; z-index: 70; opacity: .05; background-image: url("assets/elements/grain.png"); background-size: 256px 256px; pointer-events: none; }}
+      #grain {{ position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; z-index: 70; opacity: .5; background: url(assets/brand/grain_256.png); pointer-events: none; }}
       .scene-host {{ z-index: 10; }}
       #mascot {{ z-index: 40 !important; position: absolute !important; }}
       #captions {{ z-index: 60 !important; position: absolute !important; }}
@@ -92,9 +93,7 @@ index = f"""<!doctype html>
   </head>
   <body>
     <div id="main" data-composition-id="main" data-start="0" data-duration="{r3(D)}" data-width="1080" data-height="1920" data-fps="30">
-      <div id="bg" data-layout-ignore></div>
-      <div id="bg-grid" data-layout-ignore></div>
-      <div id="bg-vig" data-layout-ignore></div>
+      <div id="bg" data-layout-ignore><div class="plate"></div><div id="bggrid"></div><div id="haze-a" class="haze"></div><div id="haze-b" class="haze"></div><div id="haze-c" class="haze"></div></div>
 {chr(10).join(parts)}
       <!-- #world = everything the director camera moves (snap / digital zoom); host, captions and grain stay put -->
       <div id="world" data-layout-ignore>
@@ -131,35 +130,30 @@ for gi, g in enumerate(groups):
     parts_ = []
     for wi in g["word_idx"]:
         t = html.escape(words[wi]["text"])
-        if wi in hl:
-            parts_.append(f'<span class="cw kw" id="cw{wi}"><span class="mk" id="mk{wi}"></span><span class="tx">{t}</span></span>')
-        else:
-            parts_.append(f'<span class="cw" id="cw{wi}"><span class="tx">{t}</span></span>')
+        parts_.append(f'<span class="m"><span class="w{" key" if wi in hl else ""}" id="cw{wi}">{t}</span></span>')
     marks.append(f'    <div class="cg" id="cg{gi}"><div class="cl">{" ".join(parts_)}</div></div>')
     gs, ge = g["start"], min(g["end"], D)
     init.append(f'gsap.set("#cg{gi}", {{ opacity: {1 if gs <= 0 else 0} }});')
     if gs > 0:
         tl.append(f'tl.set("#cg{gi}", {{ opacity: 1 }}, {r3(gs)});')
     for wi in g["word_idx"]:
-        ws = max(gs + 0.005, words[wi]["start"] - 0.04)
-        init.append(f'gsap.set("#cw{wi}", {{ opacity: 0, y: 16, filter: "blur(5px)" }});')
-        tl.append(f'tl.fromTo("#cw{wi}", {{ opacity: 0, y: 16, filter: "blur(5px)" }}, {{ opacity: 1, y: 0, filter: "blur(0px)", duration: 0.2, ease: "power3.out", immediateRender: false }}, {r3(ws)});')
-        if wi in hl:
-            init.append(f'gsap.set("#mk{wi}", {{ scaleX: 0 }});')
-            tl.append(f'tl.fromTo("#mk{wi}", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.26, ease: "power3.inOut", immediateRender: false }}, {r3(ws + 0.06)});')
+        ws = max(gs + 0.01, words[wi]["start"] - 0.08)
+        init.append(f'gsap.set("#cw{wi}", {{ yPercent: 110, opacity: 0 }});')
+        tl.append(f'tl.set("#cw{wi}", {{ opacity: 1 }}, {r3(ws)});')
+        tl.append(f'tl.fromTo("#cw{wi}", {{ yPercent: 110 }}, {{ yPercent: 0, duration: 0.34, ease: "power4.out", immediateRender: false }}, {r3(ws)});')
     if gi + 1 < len(groups):
-        tl.append(f'tl.fromTo("#cg{gi}", {{ opacity: 1 }}, {{ opacity: 0, duration: 0.07, ease: "power1.in", immediateRender: false }}, {r3(ge - 0.07)});')
+        tl.append(f'tl.set("#cg{gi}", {{ opacity: 0 }}, {r3(ge)});')
 
 cap = f"""<template>
   <style>
     #root {{ position: absolute; inset: 0; pointer-events: none; }}
-    /* caption band y 232-380, centred, max two lines (Montserrat 700 46 px, ink; keywords navy on an ice-blue marker) */
-    .cg {{ position: absolute; left: 80px; top: 232px; width: 920px; height: 148px; display: flex; align-items: center; justify-content: center; }}
-    .cl {{ width: 920px; text-align: center; font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 46px; line-height: 1.28; letter-spacing: -0.01em; color: #202b3b; text-shadow: 0 0 10px rgba(255,254,251,.95), 0 0 22px rgba(255,254,251,.8); }}
-    .cw {{ display: inline-block; position: relative; white-space: nowrap; }}
-    .cw .tx {{ position: relative; }}
-    .kw {{ color: #294b77; }}
-    .mk {{ position: absolute; left: -6px; right: -6px; top: 52%; height: 40%; border-radius: 6px; background: #cbdbf4; transform-origin: 0% 50%; }}
+    /* REF-H caption (bible §5.7): top 232, sides 70, centred, Montserrat 700 46/1.22, ink; each word rises out of an
+       overflow mask; key words navy + ice highlighter. One block per phrase (1–2 lines). */
+    .cg {{ position: absolute; left: 70px; top: 232px; width: 940px; height: 148px; display: flex; align-items: flex-start; justify-content: center; }}
+    .cl {{ width: 940px; text-align: center; font: 700 46px/1.22 Montserrat, sans-serif; letter-spacing: -0.01em; color: #202b3b; }}
+    .m {{ display: inline-block; overflow: hidden; vertical-align: top; padding: 0.04em 0.06em 0.14em; margin: -0.04em -0.06em -0.14em; }}
+    .w {{ display: inline-block; }}
+    .key {{ color: #294b77; background: linear-gradient(transparent 62%, rgba(172,198,231,0.75) 62%, rgba(172,198,231,0.75) 92%, transparent 92%); }}
   </style>
   <div id="root" data-composition-id="captions" data-width="1080" data-height="1920">
 {chr(10).join(marks)}

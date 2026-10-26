@@ -42,7 +42,7 @@ def check_svg(id_, size, stroke="#1c3354"):
 
 def letter_extrude(id_, ch, size, layers=9, step=1.7):
     """one dimensional letter: navy front (white top highlight) + deeper navy sidewall."""
-    out = [f'<div id="{id_}" class="abs p3" style="left:0;top:0;white-space:nowrap">']
+    out = [f'<div id="{id_}" class="p3" style="position:relative;display:inline-block;white-space:nowrap">']
     for k in range(layers, 0, -1):
         col = "#13243d" if k > layers * 0.5 else "#1c3354"
         out.append(f'<div style="position:absolute;left:0;top:0;font:900 {size}px Montserrat;letter-spacing:0;color:{col};transform:translateZ({r3(-k * step)}px)">{ch}</div>')
@@ -63,8 +63,10 @@ def folder(p, x, y, w, h, mark=True, mark_id=None, mark_mode="img"):
             inner = f'<img src="{GH}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain" />'
         else:
             inner = f'<div style="position:absolute;inset:0;background:url({GH}) center/contain no-repeat"></div>'
-        m = (f'<div class="abs" id="{mid}-w" style="{box(w / 2 - ms * 0.45, h * 0.24, ms * 0.9, ms)}">'
-             f'<div class="abs" id="{mid}" style="{box(0, 0, ms * 0.9, ms)}">{inner}</div></div>')
+        bs = ms * 1.02
+        m = (f'<div class="abs por" style="{box(w / 2 - bs / 2, h * 0.27, bs, bs)}border-radius:50%;box-shadow:inset 1.5px 1.5px 0 #fff,inset -1.5px -2px 0 rgba(172,198,231,.7),0 6px 10px -4px rgba(10,20,40,.45)"></div>'
+             f'<div class="abs" id="{mid}-w" style="{box(w / 2 - ms * 0.36, h * 0.27 + bs * 0.1, ms * 0.72, ms * 0.8)}">'
+             f'<div class="abs" id="{mid}" style="{box(0, 0, ms * 0.72, ms * 0.8)}">{inner}</div></div>')
     return (f'<div class="abs" id="{p}" style="{box(x, y, w, h)}">'
             f'<div class="abs" style="{box(0, 0, tab_w, h * 0.2)}border-radius:{r3(h * 0.06)}px {r3(h * 0.08)}px 0 0;background:linear-gradient(180deg,#3a6299,#294b77)"></div>'
             f'<div class="abs navy-side" style="{box(0, h * 0.1, w, h * 0.9)}border-radius:{r3(h * 0.05)}px;box-shadow:0 18px 26px -14px rgba(28,51,84,.5)"></div>'
@@ -82,3 +84,37 @@ def iris(id_, cx, cy, hole, color="#f2f6fb"):
     B = 2300
     return (f'<div class="abs" id="{id_}" style="{box(cx - hole / 2 - B, cy - hole / 2 - B, hole + 2 * B, hole + 2 * B)}'
             f'border-radius:50%;border:{B}px solid {color};box-sizing:border-box"></div>')
+
+
+# comment bubble shared by S17 (end pose) and S18 (unfolds): global box BX..BX+BW, BY..BY+BH, tail bottom-left
+BX, BY, BW, BH = 290, 640, 680, 390
+
+
+def bubble(p, inner=""):
+    """porcelain shell + glass face + navy sidewall + tail. Wrapper #{p}-bub is absolutely placed at (BX, BY);
+    tween it with rotationX (transformOrigin 50% 100%) / y / scale. `inner` goes on the glass face."""
+    tail = (f'<svg class="abs" width="200" height="140" viewBox="0 0 200 140" style="left:40px;top:{BH - 40}px;overflow:visible">'
+            f'<defs><linearGradient id="{p}-tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9e4f4"/></linearGradient></defs>'
+            f'<path d="M30 0 L150 0 C120 40 70 86 6 122 C30 84 40 44 30 0 Z" fill="url(#{p}-tg)" stroke="#acc6e7" stroke-width="2"/>'
+            f'<path d="M44 10 C46 40 40 70 26 98" fill="none" stroke="rgba(255,255,255,.95)" stroke-width="3" stroke-linecap="round"/></svg>')
+    tail_side = (f'<svg class="abs" width="200" height="140" viewBox="0 0 200 140" style="left:46px;top:{BH - 34}px;overflow:visible;transform:translateZ(-14px)">'
+                 f'<path d="M30 0 L150 0 C120 40 70 86 6 122 C30 84 40 44 30 0 Z" fill="#1c3354"/></svg>')
+    slabs = "".join(f'<div class="abs" style="{box(0, 0, BW, BH)}border-radius:64px;background:{"#1c3354" if k > 5 else "#294b77" if k > 2 else "#3a6299"};transform:translateZ({-k * 2.2}px)"></div>' for k in range(8, 0, -1))
+    return (f'<div class="abs p3" id="{p}-bub" style="{box(BX, BY, BW, BH)}">'
+            + slabs + tail_side +
+            f'<div class="abs por" style="{box(0, 0, BW, BH)}border-radius:64px"></div>'
+            + tail +
+            f'<div class="abs" style="{box(22, 22, BW - 44, BH - 44)}border-radius:46px;background:linear-gradient(160deg,rgba(255,255,255,.92) 0%,rgba(232,240,251,.85) 50%,rgba(203,219,244,.75) 100%);'
+            f'box-shadow:inset 0 0 0 2px rgba(255,255,255,.95),inset 0 0 0 4px rgba(172,198,231,.55),inset 0 -10px 24px rgba(172,198,231,.35)"></div>'
+            f'<div class="abs" style="{box(46, 34, BW * 0.5, 10)}border-radius:5px;background:linear-gradient(90deg,rgba(255,255,255,.95),rgba(255,255,255,0))"></div>'
+            f'<div class="screw" style="left:{BW - 52}px;top:30px;width:12px;height:12px;--r:30deg"></div>'
+            f'<div class="screw" style="left:{BW - 52}px;top:{BH - 42}px;width:12px;height:12px;--r:-40deg"></div>'
+            + inner + '</div>')
+
+
+def front(inner, z=400, origin=(590, 560)):
+    """wrap overlay pieces in a plane pushed toward the camera (z) and scaled back (perspective 2000) so they keep
+    their screen position/size but always sort IN FRONT of 3D geometry (preserve-3d sorts by depth, not DOM order)."""
+    k = (2000 - z) / 2000
+    return (f'<div class="abs p3" style="left:0;top:0;width:1080px;height:1920px;transform-origin:{origin[0]}px {origin[1]}px;'
+            f'transform:translateZ({z}px) scale({r3(k)})">{inner}</div>')

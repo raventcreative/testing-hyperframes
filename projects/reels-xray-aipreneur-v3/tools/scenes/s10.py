@@ -50,7 +50,7 @@ def build(S):
                  + "".join(f'<div class="abs" style="{box(230 + k * 180, 400, 3, 1040)}background:rgba(203,219,244,.5)"></div>' for k in range(5))
                  + '</div>')
     # ---------------- hero: cabinet
-    S.mid.append(shadow(200, CY + CH - 10, 780, 120, 1.0, id_=f"{s}-csh"))
+    S.mid.append(f'<div class="abs p3" style="{box(0, 0, 1080, 1920)}transform:translateZ(-160px) scale(1.08)">{shadow(200, CY + CH + 10, 780, 120, 1.0, id_=f"{s}-csh")}</div>')
     feet = "".join(f'<div class="abs navy-side" style="{box(fx, CH - 6, 46, 40)}border-radius:0 0 12px 12px"></div>' for fx in (40, CW - 86))
     # interior (navy, with module slots)
     slots, mods = [], []

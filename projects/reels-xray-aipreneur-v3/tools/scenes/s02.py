@@ -144,7 +144,7 @@ def build(S):
         drift = {"z": open_z[k] + 18 * (k + 1), "x": ox + 6 * k, "y": oy - 8, "rotationY": 8 + k * 2}
         S.ft(pid, {"z": open_z[k], "x": ox, "y": oy, "rotationY": 6 + k * 2}, drift, W9 + 0.6 + k * 0.05, t1 - 0.42 - (W9 + 0.6 + k * 0.05), "sine.inOut")
         if k == 3:   # hand-off: the type plate flies to the camera, square-on, centred (S03 opens on it)
-            S.ft(pid, drift, {"z": 330, "x": 0, "y": -55, "rotationY": 0}, t1 - 0.42, 0.42, "power3.in")
+            S.ft(pid, drift, {"z": 420, "x": 0, "y": -60, "rotationY": 0}, t1 - 0.42, 0.42, "power3.in")
     for k in range(3):   # the back layers recede so the type plate owns the hand-off
         S.init(f"#{s}-L{k}", {"opacity": 1})
         S.ft(f"#{s}-L{k}", {"opacity": 1}, {"opacity": 0.35}, t1 - 0.4, 0.35, "power1.in")

@@ -62,8 +62,8 @@ def build(S):
     # output port
     m.append(f'<div class="abs por" style="{box(MX + MW / 2 - 40, MY + MH + 30, 80, 26)}border-radius:6px 6px 14px 14px"></div>')
     # project cartridge (enters the slot on "proyek"), clipped by a slot mask
-    m.append(f'<div class="abs" style="{box(MX + MW / 2 - 80, 360, 160, MY + 21 - 360)}overflow:hidden">'
-             f'<div class="abs por" id="{s}-cart" style="{box(25, 0, 110, 92)}border-radius:12px">'
+    m.append(f'<div class="abs" style="{box(MX + MW / 2 - 80, 420, 160, MY + 21 - 420)}overflow:hidden">'
+             f'<div class="abs por" id="{s}-cart" style="{box(25, 0, 110, 80)}border-radius:12px">'
              f'<div class="abs navy-side" style="{box(0, 30, 110, 22)}"></div>'
              f'<div class="abs" style="{box(14, 58, 50, 6)}border-radius:3px;background:#9fd8c4"></div>'
              f'<div class="abs" style="{box(14, 10, 70, 6)}border-radius:3px;background:#cbdbf4"></div>'
@@ -148,14 +148,17 @@ def build(S):
 
     # ============================================================ motion
     # camera: on the machine -> track D1 -> D2 -> D3 -> pull back to the family
-    S.cam([(S.t0, {"x": -700, "y": 40, "z": 160, "rotationY": 0, "rotationX": 0}, None),
-           (wKer + 0.1, {"z": 260, "y": 10}, "sine.inOut"),
-           (wEdu - 0.05, {"x": 0, "y": -110, "z": 40, "rotationY": 3}, "power3.inOut"),
-           (wPromo - 0.12, {"x": -700, "y": -110, "z": 40, "rotationY": -2}, "power3.inOut"),
-           (wIkl - 0.1, {"x": -1400, "y": -110, "z": 40, "rotationY": 2}, "power3.inOut"),
-           (wIkl + 0.35, {"x": -1400, "y": -110, "z": 70, "rotationY": 0}, "sine.out"),
-           (S.t1 - 0.12, {"x": -700, "y": 170, "z": -1650, "rotationY": 0}, "power3.inOut"),
-           (S.t1, {"z": -1600}, "sine.out")])
+    S.cam([(S.t0, {"x": -700, "y": 40, "z": 560, "rotationY": 0, "rotationX": 0}, None),
+           (wKer - 0.05, {"z": 640, "y": 30}, "sine.inOut"),
+           (wEdu - 0.62, {"z": 300, "y": 0}, "power2.inOut"),
+           (wEdu - 0.08, {"x": 0, "y": -110, "z": 60, "rotationY": 3}, "power3.inOut"),
+           (wPromo - 0.35, {"x": 30, "z": 90, "rotationY": 1.5}, "sine.inOut"),
+           (wPromo - 0.02, {"x": -700, "z": 60, "rotationY": -2}, "power3.inOut"),
+           (wIkl - 0.5, {"x": -730, "z": 90, "rotationY": -1}, "sine.inOut"),
+           (wIkl - 0.08, {"x": -1400, "z": 60, "rotationY": 2}, "power3.inOut"),
+           (wIkl + 0.32, {"x": -1420, "z": 90, "rotationY": 0}, "sine.out"),
+           (S.t1 - 0.1, {"x": -700, "y": 210, "z": -1300, "rotationY": 0}, "power3.inOut"),
+           (S.t1, {"z": -1270}, "sine.out")])
     # leds: off until the cartridge locks
     for k in range(3):
         S.init(f"#{s}-mlo{k}", {"opacity": 0})
@@ -167,8 +170,8 @@ def build(S):
                           (S.t1, {"rotation": 88}, "sine.inOut")])
     # cartridge drop into the slot
     S.init(f"#{s}-cart", {"y": -110, "opacity": 0})
-    S.ft(f"#{s}-cart", {"y": -110, "opacity": 0}, {"y": 14, "opacity": 1}, wPro - 0.55, 0.4, "power2.out")
-    S.ft(f"#{s}-cart", {"y": 14, "opacity": 1}, {"y": 170, "opacity": 1}, wPro - 0.05, 0.3, "power3.in")
+    S.ft(f"#{s}-cart", {"y": -110, "opacity": 0}, {"y": 8, "opacity": 1}, wPro - 0.55, 0.4, "power2.out")
+    S.ft(f"#{s}-cart", {"y": 8, "opacity": 1}, {"y": 120, "opacity": 1}, wPro - 0.05, 0.3, "power3.in")
     # skeleton draws on "kerangka"
     for k in range(3):
         S.init(f"#{s}-sk{k}", {"opacity": 0, "scale": 0.86})

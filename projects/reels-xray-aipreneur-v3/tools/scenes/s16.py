@@ -5,7 +5,7 @@ seam aligns, "sinkron" -> word markers slide onto the waveform peaks (apex), "su
 centres and becomes an iris (ivory closes around it) = hand-off into S17."""
 import math
 from xk import box, screw, shadow, rivets_line, apex, minireel, r3
-from kit_e import magnifier, check_svg, iris
+from kit_e import magnifier, check_svg, iris, front
 
 SFX = [(46.92, "click", 0.1), (48.80, "sparkle", 0.08)]
 
@@ -159,17 +159,23 @@ def build(S):
     S.ft(f"#{s}-ck-p", {"strokeDashoffset": 60}, {"strokeDashoffset": 0}, WSU + 0.04, 0.3, "power2.out")
 
     # ---------------- iris: ivory closes around the centred lens (hand-off to S17)
-    S.near.append(iris(f"{s}-iris", 590, 930, 214))
-    S.init(f"#{s}-iris", {"opacity": 0})
-    S.ft(f"#{s}-iris", {"opacity": 0}, {"opacity": 1}, S.t1 - 0.3, 0.26, "power2.in")
 
     # ---------------- near plane: out-of-focus ruler + glass corner
     S.near.append(f'<div class="abs p3" style="{box(0, 0, 1080, 1920)}transform:translateZ(260px) scale(.87)">'
                   f'<div class="abs" style="{box(900, 1300, 260, 30)}border-radius:8px;background:repeating-linear-gradient(90deg,#ffffff 0 10px,#dbe6f6 10px 12px);filter:blur(4px);opacity:.85"></div>'
                   f'<div class="abs" style="{box(-60, 420, 150, 150)}border-radius:30px;border:10px solid rgba(255,255,255,.7);filter:blur(5px)"></div></div>')
 
+
+    # iris last in the near plane (covers everything), with the porcelain lens ring on top of it
+    S.near.append(front(iris(f"{s}-iris", 590, 930, 214) +
+                        f'<div class="abs" id="{s}-iring" style="{box(590 - 115, 930 - 115, 230, 230)}border-radius:50%;border:17px solid #f7f9fd;'
+                        f'box-shadow:inset 0 0 0 2.5px #294b77,0 0 0 2px #acc6e7,0 18px 30px -12px rgba(28,51,84,.4)"></div>', origin=S.persp_origin))
+    for nm in ("iris", "iring"):
+        S.init(f"#{s}-{nm}", {"opacity": 0})
+        S.ft(f"#{s}-{nm}", {"opacity": 0}, {"opacity": 1}, S.t1 - 0.3, 0.26, "power2.in")
+
     # ---------------- camera follows the inspection, returns to neutral for the iris
-    S.cam([(S.t0, {"z": 40, "x": 0, "y": 0, "rotationY": -2, "rotationX": 0}, None),
-           (WV, {"z": 90, "x": 10, "y": 10, "rotationY": 1}, "sine.inOut"),
-           (WS + 0.2, {"z": 100, "x": -30, "y": -50, "rotationY": 2.5, "rotationX": 1.5}, "sine.inOut"),
+    S.cam([(S.t0, {"z": 120, "x": 0, "y": 0, "rotationY": -2, "rotationX": 0}, None),
+           (WV, {"z": 170, "x": 10, "y": 10, "rotationY": 1}, "sine.inOut"),
+           (WS + 0.2, {"z": 180, "x": -30, "y": -50, "rotationY": 2.5, "rotationX": 1.5}, "sine.inOut"),
            (S.t1 - 0.35, {"z": 0, "x": 0, "y": 0, "rotationY": 0, "rotationX": 0}, "power2.inOut")])

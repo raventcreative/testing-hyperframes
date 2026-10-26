@@ -68,3 +68,10 @@ def chain(x, y, n, step=13):
 
 def vent_lines(x, y, w, n, gap=10, col="rgba(41,75,119,.35)"):
     return "".join(f'<div class="abs" style="{box(x, y + k * gap, w, 3)}border-radius:2px;background:{col}"></div>' for k in range(n))
+
+
+def chain_rod(x, y, h, w=9):
+    """light porcelain chain drawn as alternating links (one element)."""
+    return (f'<div class="abs" style="{box(x - w / 2, y, w, h)}border-radius:4px;'
+            f'background:repeating-linear-gradient(180deg,#e8f0fb 0 9px,#9fb6d6 9px 11px,#cbdbf4 11px 13px,#9fb6d6 13px 15px);'
+            f'box-shadow:1px 1px 2px rgba(28,51,84,.25)"></div>')

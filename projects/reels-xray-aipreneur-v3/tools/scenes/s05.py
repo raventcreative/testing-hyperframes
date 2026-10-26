@@ -42,8 +42,9 @@ def build(S):
     POS = [(-110, 50, -6), (0, -30, 4), (115, 22, -3)]
     for k in range(3):
         pid = f"{s}-pl{k}"
-        plates.append(f'<div class="abs glass" id="{pid}" style="{box(190, 130, 440, 300)}border-radius:16px">'
-                      f'{code_lines(pid + "-c", 30, 34, 380, 10, seed=11 + k * 7, gap=24, h=8)}'
+        plates.append(f'<div class="abs glass" id="{pid}" style="{box(190, 130, 440, 300)}border-radius:16px;border-color:rgba(58,98,153,.45);background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(232,240,251,.55))">'
+                      f'<div class="abs" style="{box(0, 0, 440, 22)}border-radius:16px 16px 0 0;background:linear-gradient(90deg,#294b77,#3a6299)"></div>'
+                      f'{code_lines(pid + "-c", 30, 40, 380, 10, seed=11 + k * 7, gap=24, h=8)}'
                       f'<div class="pin" id="{pid}-p1" style="left:10px;top:10px"></div><div class="pin" id="{pid}-p2" style="left:420px;top:10px"></div>'
                       f'<div class="pin" id="{pid}-p3" style="left:10px;top:280px"></div><div class="pin" id="{pid}-p4" style="left:420px;top:280px"></div></div>')
     spool = lambda nm: (f'<div class="abs p3" id="{s}-{nm}" style="{box(BW / 2 - 24, -26, 48, BH + 52)}">'

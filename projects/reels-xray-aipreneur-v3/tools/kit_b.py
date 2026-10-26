@@ -110,3 +110,12 @@ def film_frame(id_, x, y, w, h, variant=0):
             f'<div class="abs" style="{box(20, 10, w - 40, h - 20)}border-radius:5px;background:{pic}"></div>'
             f'<div class="abs" style="{box(w - 46, 18, 16, 16)}border-radius:50%;background:{dot}"></div>'
             f'<div class="abs" style="{box(28, h - 26, (w - 56) * 0.6, 6)}border-radius:3px;background:rgba(255,255,255,.75)"></div></div>')
+
+
+def gear_side(id_, size, teeth, dx=7, dy=9, col="#294b77"):
+    """navy sidewall for a porcelain gear: same outline, offset down-right, drawn BEHIND the gear_svg."""
+    from xk import gear_path
+    R = size / 2
+    p = gear_path(R - 1, R * 0.84, teeth, R, R)
+    return (f'<svg id="{id_}" width="{size}" height="{size}" viewBox="0 0 {size} {size}" style="position:absolute;left:{dx}px;top:{dy}px;overflow:visible">'
+            f'<path d="{p}" fill="{col}"/><circle cx="{R}" cy="{R}" r="{r3(R * 0.84)}" fill="#1c3354"/></svg>')

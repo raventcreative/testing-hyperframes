@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 APTS = json.loads((ROOT / "apts.json").read_text())
-TOTAL = 15
+TOTAL = 19
 
 SHELL = """<!doctype html>
 <html lang="id">
@@ -29,8 +29,9 @@ SHELL = """<!doctype html>
     <div class="eyebrow">%%EYEBROW%%</div>
 %%BODY%%
     <div class="foot"><div class="who"><div class="av">FK</div><span>Freddie Kashawan</span></div>
-      <div class="pg"><span class="c">%%PAGE%% / %%TOTAL%%</span>GESER &rarr;</div></div>
+      <div class="pg"><span class="c">%%PAGE%% / %%TOTAL%%</span>%%RIGHT%%</div></div>
   </div>
+%%EXTRA%%
 </div>
 <script>
 (function () {
@@ -107,7 +108,7 @@ S1_BODY = """    <div class="btitle"><span class="w b">Motion</span> <span class
     <div class="bsub w r">Paste ini dulu, lalu tambahkan <span class="c b">satu scene</span> di akhir.</div>
     <div class="strip"><div class="f"><i></i>motion-brief.md</div><span class="w r">Buat motion graphic. Ikuti brief ini persis:</span></div>
 """ + "\n".join(_cells) + """
-    <div class="nxt"><span class="hb">14 scene</span> <span class="w r">yang aku pakai ada di slide berikutnya</span> <span class="c b">&rarr;</span></div>
+    <div class="nxt"><span class="hb">16 scene</span> <span class="w r">yang aku pakai ada di slide berikutnya</span> <span class="c b">&rarr;</span></div>
 """
 S1_JS = """
   const SC = %s;
@@ -389,11 +390,18 @@ import scenes2
 SLIDES += scenes2.make(scene_body)
 import scenes3
 SLIDES += scenes3.make(scene_body)
+import scenes4
+_cover, _tail = scenes4.make(scene_body)
+SLIDES = [_cover] + SLIDES + _tail
+for _i, _s in enumerate(SLIDES):
+    _s["page"] = f"{_i + 1:02d}"
+    _s.setdefault("right", "GESER &rarr;")
+    _s.setdefault("extra", "")
 
 if __name__ == "__main__":
     for s in SLIDES:
         html = SHELL
-        for k in ("cid", "name", "eyebrow", "page", "css", "body", "js"):
+        for k in ("cid", "name", "eyebrow", "page", "css", "body", "js", "right", "extra"):
             html = html.replace("%%" + k.upper() + "%%", s[k])
         html = html.replace("%%TOTAL%%", f"{TOTAL:02d}")
         d = ROOT / "slides" / s["cid"]
@@ -402,5 +410,7 @@ if __name__ == "__main__":
             if (d / sub).exists():
                 shutil.rmtree(d / sub)
             shutil.copytree(ROOT / sub, d / sub)
+        if s["cid"] == "s0" and (ROOT / "cover_tiles").exists():
+            shutil.copytree(ROOT / "cover_tiles", d / "assets" / "tiles")
         (d / "index.html").write_text(html)
         print("wrote", d / "index.html")

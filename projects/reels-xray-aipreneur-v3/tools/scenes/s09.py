@@ -14,7 +14,7 @@ SC = 560 / DS                         # opening scale: drum = S08 wheel (560 px 
 
 def build(S):
     s = S.id
-    S.persp_origin = (590, 620)
+    S.persp_origin = (DX, DY)       # zoom-out pivots on the drum (S08 zooms into the dial at the same spot)
     W43, W44, W46 = S.W(43), S.W(44), S.W(46)    # FFmpeg 20.32, nge-render 21.00, MP4 21.76
     end = S.t1
     backdrop(S, seed=9)
@@ -66,13 +66,16 @@ def build(S):
     S.keys(f"#{s}-rig", [(S.t0, {"x": 590 - DX, "y": 930 - DY, "scale": SC, "transformOrigin": f"{DX}px {DY}px"}, None),
                          (S.t0 + 0.08, {"x": 590 - DX, "y": 930 - DY, "scale": SC * 0.985}, "none"),
                          (W43 + 0.55, {"x": 0, "y": 0, "scale": 1}, "expo.inOut")])
-    S.cam([(S.t0, {"z": 0, "rotationY": 0, "y": 0}, None),
+    S.cam([(S.t0, {"z": 1250, "rotationY": 0, "y": 0}, None),      # ZOOM OUT from the dial close-up into the press
+           (S.t0 + 0.55, {"z": 0}, "power3.out"),
            (W46 - 0.05, {"z": 30, "rotationY": -3}, "sine.inOut"),
            (W46 + 0.25, {"z": 60}, "power3.out"),
            (end - 0.45, {"z": 50, "rotationY": -1}, "sine.inOut"),
            (end, {"z": 20, "y": -120}, "power2.in")])
     S.ft(f"#{s}-drum", {"rotation": 120}, {"rotation": 120 + 45 * 9}, S.t0, end - S.t0, "power1.inOut")
-    S.init(f"#{s}-drum", {"rotation": 120})   # = S08 wheel's final angle (840 deg)
+    S.init(f"#{s}-drum", {"rotation": 120})
+    S.init(f"#{s}-mid", {"filter": "blur(9px)"})
+    S.ft(f"#{s}-mid", {"filter": "blur(9px)"}, {"filter": "blur(0px)"}, S.t0, 0.22, "power2.out")   # = S08 wheel's final angle (840 deg)
     S.init(f"#{s}-g2", {"rotation": 0})
     S.ft(f"#{s}-g2", {"rotation": 0}, {"rotation": -45 * 9 * 40 / 24}, S.t0, end - S.t0, "power1.inOut")
     spin_roller(S, f"#{s}-r1", W43, end, 220)

@@ -105,7 +105,9 @@ def build(S):
                           (W42 + 0.07, {"scale": 1.04}, "power2.out"),
                           (W42 + 0.22, {"scale": 1.0}, "power2.inOut"),
                           (end - 0.34, {"scale": 1.0, "rotation": 0}, "none"),
-                          (end, {"scale": OPEN, "rotation": 22}, "power3.in")])
+                          (end, {"scale": 3.6, "rotation": 38}, "power3.in")])      # ZOOM IN through the dial (S09 zooms out)
+    S.init(f"#{s}-mid", {"filter": "blur(0px)"})
+    S.ft(f"#{s}-mid", {"filter": "blur(0px)"}, {"filter": "blur(9px)"}, end - 0.13, 0.13, "power2.in")
     S.init(f"#{s}-csh", {"scaleX": OPEN, "opacity": 0.4})
     S.ft(f"#{s}-csh", {"scaleX": OPEN, "opacity": 0.4}, {"scaleX": 1, "opacity": 0.75}, S.t0, 0.42, "power3.out")
 

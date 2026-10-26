@@ -58,7 +58,7 @@ def build(S):
     cx, cy = META["contact"]
     lens = META["lens"]
     # ------------------------------------------------ dolly travel (photo px along the rail, toward the viewer)
-    TRAVEL = 215
+    TRAVEL = 300
     ux, uy = META["rail_dir"]
     dx, dy = -ux * TRAVEL * PS, -uy * TRAVEL * PS            # screen offset of the move
     w_now = 159.8 - 0.0562 * (cx - 360)
@@ -94,8 +94,8 @@ def build(S):
     lr = lens["rx"] * PS
     lcx, lcy = lens["cx"] * PS, lens["cy"] * PS
     drawn_lens = (f'<div class="abs" id="{s}-dlens" style="{box(lcx - lr * 1.08, lcy - lr * 1.08, lr * 2.16, lr * 2.16)}border-radius:50%;'
-                  f'background:radial-gradient(circle at 50% 50%,#132643 0%,#1c3354 34%,#0f1c33 52%,#294b77 60%,#1c3354 72%,#3a6299 80%,#13233d 86%,#0e1a2e 100%);'
-                  f'box-shadow:inset 0 0 0 3px rgba(203,219,244,.55)">'
+                  f'background:radial-gradient(circle at 50% 50%,rgba(15,28,51,0) 0%,rgba(15,28,51,0) 46%,rgba(58,98,153,.28) 62%,rgba(159,216,196,.18) 74%,rgba(15,28,51,.3) 90%,rgba(15,28,51,0) 100%);'
+                  f'box-shadow:inset 0 0 0 2px rgba(203,219,244,.45)">'
                   f'<div class="abs" style="{box(lr * 0.42, lr * 0.32, lr * 0.62, lr * 0.3)}border-radius:50%;background:rgba(255,255,255,.55);filter:blur(2px);transform:rotate(-28deg)"></div>'
                   f'<div class="abs" style="{box(lr * 1.3, lr * 1.32, lr * 0.3, lr * 0.16)}border-radius:50%;background:rgba(172,198,231,.6);filter:blur(1px);transform:rotate(-28deg)"></div></div>')
     rig = (f'<div class="abs p3" id="{s}-rig" style="{box(OX, OY, RIGW, RIGW)}">'
@@ -119,9 +119,9 @@ def build(S):
         # a layer stack in depth (sky farthest) hanging upper-right, behind/beside the rig
         z = -330 + 140 * k
         mag = F / (F - z)
-        tx, ty = 790 + 34 * k, 640 + 14 * k                 # where the layer should appear on screen (cam at rest)
+        tx, ty = 770 + 40 * k, 650 + 16 * k                 # where the layer should appear on screen (cam at rest)
         wx, wy = O[0] + (tx - O[0]) / mag, O[1] + (ty - O[1]) / mag
-        HANG.append({"x": r3(wx - 540), "y": r3(wy - 960), "z": z, "rotationY": -10, "rotationX": -2, "scale": r3(0.84 / mag), "opacity": 1})
+        HANG.append({"x": r3(wx - 540), "y": r3(wy - 960), "z": z, "rotationY": -10, "rotationX": -2, "scale": r3(1.0 / mag), "opacity": 1})
     for k, nm in enumerate(LAYERS):
         edge = ["rgba(58,98,153,.5)", "rgba(58,98,153,.6)", "rgba(41,75,119,.7)", "rgba(41,75,119,.85)"][k]
         wires = (f'<div class="abs" style="{box(34, -120, 2, 120)}background:linear-gradient(180deg,rgba(41,75,119,0),rgba(41,75,119,.55))"></div>'
@@ -129,7 +129,7 @@ def build(S):
                  f'<div class="rivet" style="left:31px;top:-4px"></div><div class="rivet" style="left:{PW_ - 39}px;top:-4px"></div>')
         S.mid.append(f'<div class="abs" id="{s}-lw{k}" style="{box(540 - PW_ / 2, 960 - PH_ / 2, PW_, PH_)}">'
                      f'<div class="abs" id="{s}-ly{k}" style="{box(0, 0, PW_, PH_)}border-radius:16px;border:2px solid {edge};'
-                     f'background:linear-gradient(135deg,rgba(255,255,255,.42),rgba(232,240,251,.22));box-shadow:0 26px 40px -24px rgba(28,51,84,.35)">'
+                     f'background:linear-gradient(135deg,rgba(255,255,255,.6),rgba(232,240,251,.38));box-shadow:0 26px 40px -24px rgba(28,51,84,.35)">'
                      f'<div class="abs" id="{s}-li{k}" style="{box(0, 0, PW_, PH_)}">{layer_inner(nm, PW_, PH_)}</div>{wires}'
                      f'<div class="abs" id="{s}-le{k}" style="{box(-3, -3, PW_ + 2, PH_ + 2)}border-radius:17px;border:3px solid #ffffff;box-shadow:0 0 18px rgba(172,198,231,1)"></div></div></div>')
 
@@ -146,17 +146,17 @@ def build(S):
     T_ALIGN = W19 + 0.52        # one composed frame (9.76)
     T_PUSH = 9.96               # zoom-through into the lens
     # viewer camera: tight on the rail (continues S03's track) -> pull back -> track the dolly -> square-on -> push into lens
-    mag_end = 3.7
+    mag_end = 4.2
     zf = F * (1 - 1 / mag_end)
-    txf = (548 - O[0]) / mag_end + O[0] - LX
-    tyf = (770 - O[1]) / mag_end + O[1] - LY
+    txf = (548 - O[0]) / mag_end + O[0] - LX + 14     # +14 / -13: measured correction on the rendered frame
+    tyf = (770 - O[1]) / mag_end + O[1] - LY - 13
     S.cam([(t0, {"z": 420, "x": 10, "y": 46, "rotationY": -6, "rotationX": 3}, None),
-           (W14 + 0.05, {"z": 40, "x": 0, "y": 0, "rotationY": -6, "rotationX": 1}, "power3.out"),
-           (W16 + 0.15, {"z": 60, "x": 40, "y": -10, "rotationY": 6, "rotationX": 0}, "sine.inOut"),       # tracking the dolly
-           (W19, {"z": 70, "x": 30, "y": -10, "rotationY": 9}, "sine.inOut"),
+           (W15 + 0.02, {"z": 40, "x": 0, "y": 0, "rotationY": -6, "rotationX": 1}, "power2.inOut"),
+           (W16 + 0.15, {"z": 60, "x": 12, "y": -10, "rotationY": 6, "rotationX": 0}, "sine.inOut"),       # tracking the dolly
+           (W19, {"z": 70, "x": 6, "y": -10, "rotationY": 9}, "sine.inOut"),
            (T_ALIGN + 0.12, {"z": 90, "x": 20, "y": 0, "rotationY": 0, "rotationX": 0}, "power3.inOut"),
            (T_PUSH, {"z": 140, "x": 30, "y": 0}, "sine.inOut"),
-           (t1, {"z": r3(zf), "x": r3(txf), "y": r3(tyf), "rotationY": 0, "rotationX": 0}, "power3.in")])
+           (t1 - 0.025, {"z": r3(zf), "x": r3(txf), "y": r3(tyf), "rotationY": 0, "rotationX": 0}, "power3.in")])
     # dolly: parked a touch further back -> anticipation pull -> glide toward us (accelerate / decelerate) -> settle
     cxs, cys = ccx - OX, ccy - OY
     S.keys(f"#{s}-dolly", [(t0, {"x": r3(pre_x), "y": r3(pre_y), "scale": 0.985, "transformOrigin": f"{r3(cxs)}px {r3(cys)}px"}, None),
@@ -180,7 +180,7 @@ def build(S):
     S.ft(f"#{s}-glint", {"opacity": 1, "scale": 1, "rotation": 45}, {"opacity": 0, "scale": 0.3, "rotation": 90}, W15 + 0.14, 0.32, "power2.in")
     # drawn lens takes over from the photo lens for the push (crisp at any size)
     S.init(f"#{s}-dlens", {"opacity": 0})
-    S.ft(f"#{s}-dlens", {"opacity": 0}, {"opacity": 1}, T_PUSH + 0.05, 0.16, "power1.out")
+    S.ft(f"#{s}-dlens", {"opacity": 0}, {"opacity": 1}, T_PUSH + 0.12, 0.2, "power1.out")
     # layers: hang -> drift (parallax comes from the camera) -> edge glow -> burst -> compose -> fade through
     for k in range(4):
         pid = f"#{s}-lw{k}"
@@ -189,7 +189,7 @@ def build(S):
         S.init(pid, base)
         S.ft(pid, base, drift, t0, W19 - 0.04 - t0, "sine.inOut")
         burst = {"x": r3(-345 + 222 * k), "y": r3(-390 + (k % 2) * 46), "z": 80 + 40 * k, "rotationY": r3(-20 + 13 * k), "rotationX": -4, "scale": 0.56}
-        S.ft(pid, drift, burst, W19 - 0.04, 0.34, "expo.out")
+        S.ft(pid, drift, burst, W19 - 0.04, 0.31, "expo.out")
         # composed frame: all layers at one depth, centred over the final lens position
         zc = 200 + 2 * k
         magc = F / (F - zc)
@@ -212,4 +212,4 @@ def build(S):
         S.ft(f"#{s}-bk{k}", {"x": 0, "y": 0}, {"x": (-1) ** k * 18, "y": -24}, t0, t1 - t0, "sine.inOut")
     # exposure flash: the lens fills the frame and blooms to ivory right before the cut
     S.init(f"#{s}-exp", {"opacity": 0})
-    S.ft(f"#{s}-exp", {"opacity": 0}, {"opacity": 1}, t1 - 0.13, 0.12, "power2.in")
+    S.ft(f"#{s}-exp", {"opacity": 0}, {"opacity": 0.8}, t1 - 0.075, 0.07, "power2.in")

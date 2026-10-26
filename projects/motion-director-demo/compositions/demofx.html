@@ -1,0 +1,74 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 900px; }
+    .plate { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 45% at 50% 52%, rgba(255,255,255,.5), rgba(255,255,255,0) 70%); }
+    #d-arch { position: absolute; left: 40px; top: 430px; width: 1000px; height: 1440px; border-radius: 56px; overflow: hidden; box-shadow: 0 40px 80px rgba(10,13,44,.28); }
+    #d-arch img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 14% 50%; }
+    #d-veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(247,250,255,.25), rgba(247,250,255,.55)); }
+    .gh-wrap { position: absolute; left: 395px; top: 420px; width: 290px; height: 321px; }
+    .gh-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 24px 30px rgba(10,13,44,.35)); }
+    .gh-glint { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(255,255,255,0) 35%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 65%);
+      -webkit-mask: url(assets/elements/ref15_github_mark_3d.png) center / contain no-repeat; mask: url(assets/elements/ref15_github_mark_3d.png) center / contain no-repeat; }
+    #d-frame { position: absolute; left: 110px; top: 1010px; width: 860px; height: 960px; border-radius: 48px;
+      background: linear-gradient(165deg, rgba(255,255,255,.7), rgba(214,229,248,.55)); box-shadow: inset 0 0 0 4px rgba(255,255,255,.95), 0 30px 60px rgba(10,13,44,.2); }
+  </style>
+  <div id="root" data-composition-id="demofx" data-width="1080" data-height="1920">
+    <!-- A: studio + chat takeover -->
+    <div class="cam" id="dA" data-layout-ignore><div class="plate"></div><div id="d-arch"><img src="assets/elements/ref8_glass_arches.jpg" alt="" /><div id="d-veil"></div></div></div>
+    <!-- B: checklist -->
+    <div class="cam" id="dB" data-layout-ignore><div class="plate"></div><img id="dB-ws" src="assets/elements/ref4_app_ui.png" alt="" style="position:absolute;left:-60px;top:820px;width:1200px;opacity:.55;filter:blur(18px)" /></div>
+    <!-- C: orbit reveal + headline + frame escape -->
+    <div class="cam" id="dC" data-layout-ignore><div class="plate"></div><div id="d-frame"></div>
+      <div class="gh-wrap" id="d-gh"><img src="assets/elements/ref15_github_mark_3d.png" alt="" /><div class="gh-glint" id="d-glint"></div></div></div>
+  </div>
+  <script>
+    (function () {
+      // Demo of the Smart Motion Director library (vendor/motion-director.js). Times are local;
+      // the demo window starts at VO 9.167 s, so word times are VO_WORDS[i][1] - OFF.
+      const OFF = 9.167, W = (i) => +(window.VO_WORDS[i][1] - OFF).toFixed(3);
+      const R = document.querySelector('[data-composition-id="demofx"]');
+      const tl = gsap.timeline({ paused: true });
+      const ctxA = { tl, root: document.getElementById("dA") };
+      const ctxB = { tl, root: document.getElementById("dB") };
+      const ctxC = { tl, root: document.getElementById("dC") };
+      gsap.set(["#dB", "#dC"], { opacity: 0 });
+      gsap.set("#d-frame", { opacity: 0 });
+
+      // ---- A. Studio Reveal (HIGH) -> Liquid Glass chat -> Chat Takeover -> Snap Zoom -> Zoom Through Cut
+      MD.fx.studioReveal(ctxA, { at: 0, dur: 1.0, preset: "HIGH", target: "#d-arch" });
+      tl.fromTo("#d-arch", { filter: "blur(0px)" }, { filter: "blur(14px)", duration: 0.6, ease: "power2.inOut", immediateRender: false }, 1.0);
+      MD.fx.cinematicOrbit(ctxA, { target: "#dA", at: 0, dur: 4.6, angle: 4, preset: "SUBTLE" });
+      MD.fx.chatTakeover(ctxA, {
+        x: 60, y: 420, w: 960, h: 520, at: W(21) - 0.02, preset: "STANDARD", dir: "L",
+        messages: [
+          { side: "R", type: "video", src: "assets/elements/ref5_player_phone.png", at: W(25) - 0.08 },
+          { side: "L", type: "typing", at: W(28) - 0.05 },
+          { side: "L", type: "code", w: 150, h: 70, at: W(30) },
+        ],
+        takeoverAt: W(31) - 0.05, takeover: { x: 40, y: 400, w: 1000, h: 560, src: "assets/elements/ref4_app_ui.png", imgW: "88%" },
+      });
+      MD.fx.zoomThroughCut(ctxA, { target: "#dA", at: 4.633, origin: "540px 690px", preset: "STANDARD", next: "#dB" });
+      tl.set("#dB", { opacity: 1 }, 4.633);
+
+      // ---- B. Checklist Pop on "proses / teknis / kode"
+      MD.fx.checklistPop(ctxB, { x: 150, y: 430, w: 780, h: 330, at: W(37) - 0.55, preset: "STANDARD", dir: "R", rowH: 76,
+        items: [{ label: "proses", at: W(37) }, { label: "teknis", at: W(38) }, { label: "kode", at: W(40) }] });
+      MD.fx.snapZoom(ctxB, { target: "#dB", at: W(40), amount: 0.1, origin: "540px 600px", preset: "STANDARD", hold: 0.3, release: 0.4 });
+      // ---- Zoom Portal into C from the mascot's raised hand
+      MD.fx.zoomPortal(ctxB, { next: "#dC", x: 540, y: 760, at: 7.95, dur: 0.55, preset: "STANDARD" });
+      tl.set("#dC", { opacity: 1 }, 7.67);
+      tl.set("#dB", { opacity: 0 }, 8.3);
+
+      // ---- C. Orbit Reveal of the 3D GitHub mark on "Hypit", Frame Escape set, Dynamic Headline
+      tl.fromTo("#d-frame", { opacity: 0, y: 120 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out", immediateRender: false }, 7.8);
+      MD.fx.orbitReveal(ctxC, { target: "#d-gh", glint: "#d-glint", at: W(42) - 0.15, preset: "HIGH", restY: 10, until: W(46) - 0.25 });
+      tl.fromTo("#d-gh", { y: 0 }, { y: -12, duration: 0.6, ease: "sine.inOut", yoyo: true, repeat: 1, immediateRender: false }, W(42) + 0.6);
+      MD.fx.dynamicHeadline(ctxC, { x: 40, y: 560, w: 1000, preset: "HIGH", words: [{ text: "menyusun", at: W(46) - 0.04 }, { text: "struktur", at: W(47) - 0.04, big: true }] });
+
+      tl.set({}, {}, 10.58);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["demofx"] = tl;
+    })();
+  </script>
+</template>

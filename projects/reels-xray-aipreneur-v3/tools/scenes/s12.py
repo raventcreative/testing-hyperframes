@@ -128,8 +128,7 @@ def build(S):
                        (LOCK - 0.05, {"rotationY": -2, "rotationX": 1}, "power2.inOut"),
                        (LOCK + 0.08, {"scale": 1.035, "rotationY": 0, "rotationX": 0}, "power4.out"),
                        (LOCK + 0.36, {"scale": 1}, "power2.inOut"),
-                       (SPLIT, {"x": 0}, "none"),
-                       (SPLIT + 0.62, {"x": 190, "rotationY": -12, "z": 10}, "power3.inOut"),
+                       (SPLIT + 0.64, {"x": 190, "rotationY": -12, "z": 10}, "power3.inOut"),
                        (W68 + 0.4, {"rotationY": -8}, "sine.inOut"),
                        (T1, {"x": 210, "y": 300, "z": -40, "scale": 0.74, "rotationY": 0, "rotationX": 18}, "power3.in")])
     S.keys(f"#{s}-L", [(T0, {"x": 0, "z": -60, "scale": 0.001, "rotationY": 0}, None),

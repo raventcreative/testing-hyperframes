@@ -93,8 +93,8 @@ def build(S):
 
     # ---------------- motion
     # camera: continues S01's push (closer), dolly forward, then dive into the front type plate
-    S.cam([(t0, {"z": 70, "x": 0, "y": 0, "rotationY": 2, "rotationX": 0}, None),
-           (W8, {"z": 115, "rotationY": 0, "rotationX": 1}, "sine.inOut"),
+    S.cam([(t0, {"z": 430, "x": -60, "y": 40, "rotationY": 5, "rotationX": 0}, None),
+           (W8, {"z": 115, "x": 0, "y": 0, "rotationY": 0, "rotationX": 1}, "power3.out"),
            (W9 + 0.45, {"z": 140, "x": -40, "rotationY": -3, "rotationX": 2}, "power2.out"),
            (t1, {"z": 170, "x": 0, "y": 0, "rotationY": 0, "rotationX": 0}, "power2.in")])
     # phone turns to 3/4 so the layer stack reads in depth

@@ -5,13 +5,13 @@ Geometry contracts live in `tools/scenes/kit.py` (screen px, 1080×1920). "A end
 | Cut (s) | A end state | B start state | Matching geometry | Lens / camera path | Purpose |
 |---|---|---|---|---|---|
 | S00→S01 3.40 | chips collapsed into the plain clip panel, camera pushing in | the same panel, flat, effect-free | `PANEL` (90,300,900×1180, r36), mascot MED clipped inside | push-in continues, settles to lock-off | "this is the boring source" |
-| S01→S02 4.97 | panel border rounds and shrinks into a tilted ellipse around the head | orbit ring | `ORBIT` centre (540,760), Ø1000, scaleY .28, −8° | lock-off → slow orbit to 3/4 (yaw −14) | frame comes alive |
+| S01→S02 4.97 | panel border rounds and shrinks into a tilted ellipse around the head | orbit ring | `ORBIT_A` (kit_a.py) centre (540,650), Ø980, scaleY .26, −8° (raised above the eyes) | lock-off → slow orbit to 3/4 (yaw −14) | frame comes alive |
 | S02→S03 6.87 | the round 'Aa' icon flies forward, grows | chat avatar circle | `AVATAR` (166,436) Ø96 | camera holds, UI scales from the avatar | icon becomes a conversation |
 | S03→S04 8.20 | preview bubble with the live mascot inside | picture frame opening, same mascot framing | `PREVIEW` (250,640,560×700, r28) + `PREVIEW_VIEW` | frame tilts back (rotX 18°) and recedes, mascot un-clips forward | the frame becomes physical, he escapes it |
 | S04→S05 9.23 | receded frame corners | viewfinder corners | `VF` (150,360,780×1040) | anticipation pull-back → 0.28 s snap push → settle | the frame becomes the lens |
 | S05→S06 11.43 | reticle circle shrinks to beside the eye | first check disc | `CHECK0` (700,578) Ø64 | CU → 3/4 medium (re-frame) | target becomes a tick |
-| S06→S07 13.17 | last pill stretches into a full-width strip | headline strip | `STRIP` (−40,1000,1160×96) | slight dutch, lateral drift | list turns into headlines |
-| S07→S08 14.13 | centre strip curls into a ring | portal ring | `RING` (540,1050) Ø560 | push through the ring, ring passes the lens | headline becomes a door |
+| S06→S07 13.17 | last pill stretches into a full-width strip | headline strip | `STRIP_B` (kit_b.py) (−40,400,1160×96), above the head | slight dutch, lateral drift | list turns into headlines |
+| S07→S08 14.13 | centre strip curls into a ring | portal ring | `RING_B` (kit_b.py) centre (820,860) Ø480, beside the head; mascot framed left | push through the ring, ring passes the lens | headline becomes a door |
 | S08→S09 15.23 | inside of the ring = graph world fills the frame | graph world (`graph_world()` identical markup) | full frame | continue forward, then tilt up following the curve | exit through the graph |
 | S09→S10 17.43 | curve tip glowing at the top-right | glowing studio cable start | `CABLE0` (1040,420) | follow the cable down to the stands | data line powers the studio |
 | S10→S11 20.07 | key-light beam narrows to a lit rectangle | editor monitor | `MONITOR` (110,300,860×640, r24) | tilt down over the timeline | light opens the edit |
@@ -35,3 +35,11 @@ S05 snap 10.16 · S08 portal pass ≈14.95 · S12 paper flip 23.92 (soft) · S18
 
 ## Seek safety
 All motion = `tl.set` init + `fromTo(..., immediateRender:false)` on paused registered timelines; mascot framing on a private timeline seeked inside the `hf-seek` handler; no `gsap.from`, no left/top/width/height tweens, no random, no timers, finite repeats.
+
+## Built notes (deviations from the first contract draft)
+- S01/S02 orbit ring raised to y 650 (at 760 it crossed the eyes). S06→S07 strip and S07→S08 ring moved off the face (y 400 / beside the head).
+- S08 ends with the graph world filling the frame and the mascot hidden; S09 brings him out of the shrinking portal.
+- S15: `backdrop-filter` does not sample the WebGL canvas in render, so the liquid-glass refraction is simulated (frosted band, bent highlight, caustic lines) — honest simulation, as briefed.
+- S18 shards are copies of our own S17 last frame (self-shot `city_end`); the live S19 framing sits underneath and is revealed as the shards fall.
+- S21: mascot hidden (the 20-name board fills the frame).
+- Mascot track: replayed forward from 0 on every seek (order-independent; verified sorted vs shuffled seeks = 0 % pixel difference).

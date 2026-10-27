@@ -1,11 +1,13 @@
 # Storyboard — 82 s, 1920 × 1080, 30 fps
 
+Revision 2: realistic relief map + clouds at national/travel altitude, cloud fly-through on every descent, Sentinel-2 satellite close-up with the official city boundary drawn on at each landing, motion-driven sound design.
+
 All times global seconds. Exact camera states: `CAMERA.md` (generated). Every city block: arrive → marker lands (0.5 s) → three photos unfold 0.2 s apart → all three held together ≥ 3.5 s → frames retract to the cluster → camera departs.
 
 | Shot | Time | Camera | On screen | Sound |
 |---|---|---|---|---|
-| S01 Indonesia opening | 0.0–4.0 | Archipelago visible at frame 0 at 1.14× national zoom, pulls back to the full national framing by 3.0 s, then begins its descent | "INDONESIA" (Indian Ocean, SW of Sumatra); a navy light trace runs along Java toward East Java (1.15–3.3 s); locator ring at Surabaya | whoosh-short on the descent |
-| S02 Surabaya | 4.0–13.0 | descends 3.0 → 5.6 s; holds; departs 11.72 west | marker lands 5.6; SURABAYA; Masjid Nasional Al-Akbar (hero, upper-left), Tugu Pahlawan (portrait, right), Patung Suro dan Boyo (lower-left) | click-soft, key tick, pop |
+| S01 Indonesia opening | 0.0–4.0 | Archipelago (relief + cloud systems) visible at frame 0 at 1.14× national zoom, pulls back to the full national framing by 3.0 s, then begins its descent through a cloud bank | "INDONESIA" (Indian Ocean, SW of Sumatra); a white light trace runs along Java toward East Java (1.15–3.3 s); locator ring at Surabaya | air bed, pen-trace, whoosh |
+| S02 Surabaya | 4.0–13.0 | descends 3.0 → 5.6 s through clouds onto the satellite mosaic; holds; departs 11.72 west | marker lands 5.6, Kota Surabaya boundary draws on; SURABAYA; Masjid Nasional Al-Akbar (hero, upper-left), Tugu Pahlawan (portrait, right), Patung Suro dan Boyo (lower-left) | click-soft, key tick, pop |
 | S03 Jakarta | 13.0–22.0 | low arc west along Java, lands 14.6; departs 20.72 north-west | Monumen Nasional (portrait hero, right), Museum Fatahillah, Kota Tua (upper-left), Bundaran HI (lower-left) | whoosh, click, tick, pop |
 | S04 Medan | 22.0–31.0 | rises to show Sumatra, glides NW, lands 23.6 | Istana Maimun (hero, upper-left), Masjid Raya Al-Mashun (portrait, right), Tjong A Fie Mansion (lower-left) | cinematic whoosh |
 | S05 Bali | 31.0–40.0 | longest move: pulls out to Sumatra–Java–Kalimantan altitude, travels SE, lands 32.75 on a view that fits the island | Bali island highlight + halo ellipse (regional, no point); BALI under the island; Pura Ulun Danu Beratan (top), Tanah Lot (hero, left), Garuda Wisnu Kencana (portrait, right). Trails stop at the halo edge | cinematic whoosh |

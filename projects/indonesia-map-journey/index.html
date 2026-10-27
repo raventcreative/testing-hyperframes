@@ -7,6 +7,9 @@
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="assets/maps/geo.js"></script>
     <script src="data/plan.js"></script>
+    <script src="data/tiles.js"></script>
+    <script src="data/sat.js"></script>
+    <script src="assets/maps/bounds.js"></script>
     <style>
       @font-face { font-family: "Montserrat"; font-weight: 400; src: url("assets/fonts/montserrat-latin-400-normal.woff2") format("woff2"); }
       @font-face { font-family: "Montserrat"; font-weight: 600; src: url("assets/fonts/montserrat-latin-600-normal.woff2") format("woff2"); }
@@ -22,12 +25,12 @@
       #map { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
       #ov { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
       #haze { position: absolute; inset: 0; pointer-events: none;
-        background: radial-gradient(ellipse 78% 74% at 50% 50%, rgba(251,252,254,0) 58%, rgba(251,252,254,0.42) 100%); }
-      #grain { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; opacity: 0.5; display: block; }
-      #mapcredit { position: absolute; left: 96px; bottom: 34px; font: 400 13px/1.3 Montserrat, sans-serif; color: var(--navy-2); letter-spacing: 0.03em; opacity: 0.85; }
-      .mk-lbl { font: 600 26px Montserrat, sans-serif; letter-spacing: 0.12em; fill: var(--ink); paint-order: stroke; stroke: rgba(251,252,254,0.92); stroke-width: 6px; stroke-linejoin: round; }
-      .mk-lead { stroke: var(--navy); stroke-width: 1.2; fill: none; }
-      #lbl-indonesia { font: 700 30px Montserrat, sans-serif; letter-spacing: 0.62em; fill: var(--navy); }
+        background: radial-gradient(ellipse 80% 78% at 50% 48%, rgba(10,22,40,0) 55%, rgba(10,22,40,0.30) 100%); }
+      #grain { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; opacity: 0.35; display: block; }
+      #mapcredit { position: absolute; left: 96px; bottom: 30px; max-width: 1500px; font: 400 12px/1.35 Montserrat, sans-serif; color: #FBFCFE; letter-spacing: 0.03em; opacity: 0.78; text-shadow: 0 1px 3px rgba(10,22,40,0.85); }
+      .mk-lbl { font: 700 26px Montserrat, sans-serif; letter-spacing: 0.12em; fill: #FBFCFE; paint-order: stroke; stroke: rgba(10,22,40,0.78); stroke-width: 6px; stroke-linejoin: round; }
+      .mk-lead { stroke: #FBFCFE; stroke-width: 1.4; fill: none; filter: drop-shadow(0 0 2px rgba(10,22,40,0.8)); }
+      #lbl-indonesia { font: 700 30px Montserrat, sans-serif; letter-spacing: 0.62em; fill: #FBFCFE; paint-order: stroke; stroke: rgba(14,32,58,0.55); stroke-width: 5px; stroke-linejoin: round; }
       .scene-host { z-index: 5; }
     </style>
   </head>
@@ -38,9 +41,9 @@
         <svg id="ov" viewBox="0 0 1920 1080">
           <defs>
             <radialGradient id="mj-halo" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#294B77" stop-opacity="0.20" />
-              <stop offset="55%" stop-color="#3A6299" stop-opacity="0.08" />
-              <stop offset="100%" stop-color="#3A6299" stop-opacity="0" />
+              <stop offset="0%" stop-color="#FBFCFE" stop-opacity="0.30" />
+              <stop offset="55%" stop-color="#CBDBF4" stop-opacity="0.10" />
+              <stop offset="100%" stop-color="#CBDBF4" stop-opacity="0" />
             </radialGradient>
           </defs>
           <text id="lbl-indonesia" text-anchor="middle" opacity="0">INDONESIA</text>
@@ -48,7 +51,7 @@
         </svg>
         <div id="haze"></div>
         <img id="grain" src="assets/maps/grain.png" alt="" />
-        <div id="mapcredit" data-layout-ignore>Peta: Natural Earth (domain publik) · Garis menunjukkan urutan video, bukan rute perjalanan</div>
+        <div id="mapcredit" data-layout-ignore>Relief: AWS Terrain Tiles (SRTM/NASA, GMTED2010/USGS, ETOPO1/NOAA) · Citra: Copernicus Sentinel-2 · Batas wilayah: BPS/OCHA via geoBoundaries (CC BY 3.0 IGO) · Natural Earth · Garis = urutan video, bukan rute perjalanan</div>
       </div>
       <div id="sc-surabaya" class="clip scene-host" data-composition-id="surabaya" data-composition-src="compositions/surabaya.html" data-start="4" data-duration="9" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
       <div id="sc-jakarta" class="clip scene-host" data-composition-id="jakarta" data-composition-src="compositions/jakarta.html" data-start="13" data-duration="9" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
@@ -58,41 +61,110 @@
       <div id="sc-bandung" class="clip scene-host" data-composition-id="bandung" data-composition-src="compositions/bandung.html" data-start="54" data-duration="8" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
       <div id="sc-yogyakarta" class="clip scene-host" data-composition-id="yogyakarta" data-composition-src="compositions/yogyakarta.html" data-start="62" data-duration="8" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
       <div id="sc-makassar" class="clip scene-host" data-composition-id="makassar" data-composition-src="compositions/makassar.html" data-start="70" data-duration="8" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
-      <audio id="sfx0" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="3.990" data-duration="0.575" data-track-index="10" data-volume="0.32" data-track-kind="audio"></audio>
-      <audio id="sfx1" class="clip" src="assets/sfx/click-soft.mp3" data-start="5.620" data-duration="0.370" data-track-index="11" data-volume="0.5" data-track-kind="audio"></audio>
-      <audio id="sfx2" class="clip" src="assets/sfx/key-press.mp3" data-start="6.150" data-duration="0.400" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
-      <audio id="sfx3" class="clip" src="assets/sfx/pop.mp3" data-start="6.200" data-duration="0.720" data-track-index="10" data-volume="0.2" data-track-kind="audio"></audio>
-      <audio id="sfx4" class="clip" src="assets/sfx/whoosh.mp3" data-start="12.836" data-duration="0.575" data-track-index="11" data-volume="0.32" data-track-kind="audio"></audio>
-      <audio id="sfx5" class="clip" src="assets/sfx/click-soft.mp3" data-start="14.620" data-duration="0.370" data-track-index="12" data-volume="0.5" data-track-kind="audio"></audio>
-      <audio id="sfx6" class="clip" src="assets/sfx/key-press.mp3" data-start="15.150" data-duration="0.400" data-track-index="10" data-volume="0.16" data-track-kind="audio"></audio>
-      <audio id="sfx7" class="clip" src="assets/sfx/pop.mp3" data-start="15.200" data-duration="0.720" data-track-index="11" data-volume="0.2" data-track-kind="audio"></audio>
-      <audio id="sfx8" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="19.516" data-duration="4.400" data-track-index="12" data-volume="0.3" data-track-kind="audio"></audio>
-      <audio id="sfx9" class="clip" src="assets/sfx/click-soft.mp3" data-start="23.620" data-duration="0.370" data-track-index="10" data-volume="0.5" data-track-kind="audio"></audio>
-      <audio id="sfx10" class="clip" src="assets/sfx/key-press.mp3" data-start="24.150" data-duration="0.400" data-track-index="11" data-volume="0.16" data-track-kind="audio"></audio>
-      <audio id="sfx11" class="clip" src="assets/sfx/pop.mp3" data-start="24.200" data-duration="0.720" data-track-index="12" data-volume="0.2" data-track-kind="audio"></audio>
-      <audio id="sfx12" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="28.584" data-duration="4.400" data-track-index="10" data-volume="0.3" data-track-kind="audio"></audio>
-      <audio id="sfx13" class="clip" src="assets/sfx/click-soft.mp3" data-start="32.770" data-duration="0.370" data-track-index="11" data-volume="0.5" data-track-kind="audio"></audio>
-      <audio id="sfx14" class="clip" src="assets/sfx/key-press.mp3" data-start="33.300" data-duration="0.400" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
-      <audio id="sfx15" class="clip" src="assets/sfx/pop.mp3" data-start="33.350" data-duration="0.720" data-track-index="10" data-volume="0.2" data-track-kind="audio"></audio>
-      <audio id="sfx16" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="39.836" data-duration="0.575" data-track-index="11" data-volume="0.32" data-track-kind="audio"></audio>
-      <audio id="sfx17" class="clip" src="assets/sfx/click-soft.mp3" data-start="41.620" data-duration="0.370" data-track-index="12" data-volume="0.5" data-track-kind="audio"></audio>
-      <audio id="sfx18" class="clip" src="assets/sfx/key-press.mp3" data-start="42.150" data-duration="0.400" data-track-index="10" data-volume="0.16" data-track-kind="audio"></audio>
-      <audio id="sfx19" class="clip" src="assets/sfx/pop.mp3" data-start="42.200" data-duration="0.720" data-track-index="11" data-volume="0.2" data-track-kind="audio"></audio>
-      <audio id="sfx20" class="clip" src="assets/sfx/whoosh.mp3" data-start="48.656" data-duration="0.575" data-track-index="12" data-volume="0.32" data-track-kind="audio"></audio>
-      <audio id="sfx21" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="53.900" data-duration="0.575" data-track-index="10" data-volume="0.32" data-track-kind="audio"></audio>
-      <audio id="sfx22" class="clip" src="assets/sfx/click-soft.mp3" data-start="55.420" data-duration="0.370" data-track-index="11" data-volume="0.5" data-track-kind="audio"></audio>
-      <audio id="sfx23" class="clip" src="assets/sfx/key-press.mp3" data-start="55.950" data-duration="0.400" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
-      <audio id="sfx24" class="clip" src="assets/sfx/pop.mp3" data-start="56.000" data-duration="0.720" data-track-index="10" data-volume="0.2" data-track-kind="audio"></audio>
-      <audio id="sfx25" class="clip" src="assets/sfx/whoosh.mp3" data-start="61.856" data-duration="0.575" data-track-index="11" data-volume="0.32" data-track-kind="audio"></audio>
-      <audio id="sfx26" class="clip" src="assets/sfx/click-soft.mp3" data-start="63.420" data-duration="0.370" data-track-index="12" data-volume="0.5" data-track-kind="audio"></audio>
-      <audio id="sfx27" class="clip" src="assets/sfx/key-press.mp3" data-start="63.950" data-duration="0.400" data-track-index="10" data-volume="0.16" data-track-kind="audio"></audio>
-      <audio id="sfx28" class="clip" src="assets/sfx/pop.mp3" data-start="64.200" data-duration="0.720" data-track-index="11" data-volume="0.2" data-track-kind="audio"></audio>
-      <audio id="sfx29" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="69.856" data-duration="0.575" data-track-index="12" data-volume="0.32" data-track-kind="audio"></audio>
-      <audio id="sfx30" class="clip" src="assets/sfx/click-soft.mp3" data-start="71.420" data-duration="0.370" data-track-index="10" data-volume="0.5" data-track-kind="audio"></audio>
-      <audio id="sfx31" class="clip" src="assets/sfx/key-press.mp3" data-start="71.950" data-duration="0.400" data-track-index="11" data-volume="0.16" data-track-kind="audio"></audio>
-      <audio id="sfx32" class="clip" src="assets/sfx/pop.mp3" data-start="72.000" data-duration="0.720" data-track-index="12" data-volume="0.2" data-track-kind="audio"></audio>
-      <audio id="sfx33" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="75.716" data-duration="4.400" data-track-index="10" data-volume="0.3" data-track-kind="audio"></audio>
-      <audio id="sfx34" class="clip" src="assets/sfx/chime.mp3" data-start="79.850" data-duration="2.100" data-track-index="11" data-volume="0.28" data-track-kind="audio"></audio>
+      <audio id="sfx0" class="clip" src="assets/sfx/bed_air.wav" data-start="0.000" data-duration="82.000" data-track-index="10" data-volume="0.85" data-track-kind="audio"></audio>
+      <audio id="sfx1" class="clip" src="assets/sfx/trace.wav" data-start="1.200" data-duration="1.150" data-track-index="11" data-volume="0.1" data-track-kind="audio"></audio>
+      <audio id="sfx2" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="3.990" data-duration="0.575" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx3" class="clip" src="assets/sfx/trace.wav" data-start="5.480" data-duration="1.150" data-track-index="13" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx4" class="clip" src="assets/sfx/impact-bass-1.mp3" data-start="5.550" data-duration="1.600" data-track-index="14" data-volume="0.09" data-track-kind="audio"></audio>
+      <audio id="sfx5" class="clip" src="assets/sfx/click-soft.mp3" data-start="5.620" data-duration="0.370" data-track-index="15" data-volume="0.6" data-track-kind="audio"></audio>
+      <audio id="sfx6" class="clip" src="assets/sfx/tick_a.wav" data-start="6.120" data-duration="0.400" data-track-index="10" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx7" class="clip" src="assets/sfx/swish_a.wav" data-start="6.200" data-duration="0.600" data-track-index="11" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx8" class="clip" src="assets/sfx/pop.mp3" data-start="6.240" data-duration="0.720" data-track-index="12" data-volume="0.12" data-track-kind="audio"></audio>
+      <audio id="sfx9" class="clip" src="assets/sfx/tick_b.wav" data-start="6.320" data-duration="0.400" data-track-index="13" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx10" class="clip" src="assets/sfx/swish_b.wav" data-start="6.400" data-duration="0.600" data-track-index="14" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx11" class="clip" src="assets/sfx/tick_c.wav" data-start="6.520" data-duration="0.400" data-track-index="15" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx12" class="clip" src="assets/sfx/swish_c.wav" data-start="6.600" data-duration="0.600" data-track-index="10" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx13" class="clip" src="assets/sfx/swish_back.wav" data-start="11.320" data-duration="0.450" data-track-index="11" data-volume="0.4" data-track-kind="audio"></audio>
+      <audio id="sfx14" class="clip" src="assets/sfx/whoosh.mp3" data-start="12.836" data-duration="0.575" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx15" class="clip" src="assets/sfx/trace.wav" data-start="14.480" data-duration="1.150" data-track-index="13" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx16" class="clip" src="assets/sfx/impact-bass-2.mp3" data-start="14.550" data-duration="1.600" data-track-index="14" data-volume="0.09" data-track-kind="audio"></audio>
+      <audio id="sfx17" class="clip" src="assets/sfx/click-soft.mp3" data-start="14.620" data-duration="0.370" data-track-index="15" data-volume="0.6" data-track-kind="audio"></audio>
+      <audio id="sfx18" class="clip" src="assets/sfx/tick_b.wav" data-start="15.120" data-duration="0.400" data-track-index="10" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx19" class="clip" src="assets/sfx/swish_b.wav" data-start="15.200" data-duration="0.600" data-track-index="11" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx20" class="clip" src="assets/sfx/pop.mp3" data-start="15.240" data-duration="0.720" data-track-index="12" data-volume="0.12" data-track-kind="audio"></audio>
+      <audio id="sfx21" class="clip" src="assets/sfx/tick_c.wav" data-start="15.320" data-duration="0.400" data-track-index="13" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx22" class="clip" src="assets/sfx/swish_c.wav" data-start="15.400" data-duration="0.600" data-track-index="14" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx23" class="clip" src="assets/sfx/tick_a.wav" data-start="15.520" data-duration="0.400" data-track-index="15" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx24" class="clip" src="assets/sfx/swish_a.wav" data-start="15.600" data-duration="0.600" data-track-index="10" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx25" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="19.516" data-duration="4.400" data-track-index="11" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx26" class="clip" src="assets/sfx/swish_back.wav" data-start="20.320" data-duration="0.450" data-track-index="12" data-volume="0.4" data-track-kind="audio"></audio>
+      <audio id="sfx27" class="clip" src="assets/sfx/trace.wav" data-start="23.480" data-duration="1.150" data-track-index="13" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx28" class="clip" src="assets/sfx/impact-bass-1.mp3" data-start="23.550" data-duration="1.600" data-track-index="14" data-volume="0.09" data-track-kind="audio"></audio>
+      <audio id="sfx29" class="clip" src="assets/sfx/click-soft.mp3" data-start="23.620" data-duration="0.370" data-track-index="15" data-volume="0.6" data-track-kind="audio"></audio>
+      <audio id="sfx30" class="clip" src="assets/sfx/tick_c.wav" data-start="24.120" data-duration="0.400" data-track-index="10" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx31" class="clip" src="assets/sfx/swish_c.wav" data-start="24.200" data-duration="0.600" data-track-index="11" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx32" class="clip" src="assets/sfx/pop.mp3" data-start="24.240" data-duration="0.720" data-track-index="12" data-volume="0.12" data-track-kind="audio"></audio>
+      <audio id="sfx33" class="clip" src="assets/sfx/tick_a.wav" data-start="24.320" data-duration="0.400" data-track-index="13" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx34" class="clip" src="assets/sfx/swish_a.wav" data-start="24.400" data-duration="0.600" data-track-index="14" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx35" class="clip" src="assets/sfx/tick_b.wav" data-start="24.520" data-duration="0.400" data-track-index="15" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx36" class="clip" src="assets/sfx/swish_b.wav" data-start="24.600" data-duration="0.600" data-track-index="10" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx37" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="28.584" data-duration="4.400" data-track-index="11" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx38" class="clip" src="assets/sfx/swish_back.wav" data-start="29.320" data-duration="0.450" data-track-index="12" data-volume="0.4" data-track-kind="audio"></audio>
+      <audio id="sfx39" class="clip" src="assets/sfx/trace.wav" data-start="32.630" data-duration="1.150" data-track-index="13" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx40" class="clip" src="assets/sfx/impact-bass-2.mp3" data-start="32.700" data-duration="1.600" data-track-index="14" data-volume="0.09" data-track-kind="audio"></audio>
+      <audio id="sfx41" class="clip" src="assets/sfx/click-soft.mp3" data-start="32.770" data-duration="0.370" data-track-index="15" data-volume="0.6" data-track-kind="audio"></audio>
+      <audio id="sfx42" class="clip" src="assets/sfx/tick_a.wav" data-start="33.270" data-duration="0.400" data-track-index="10" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx43" class="clip" src="assets/sfx/swish_a.wav" data-start="33.350" data-duration="0.600" data-track-index="11" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx44" class="clip" src="assets/sfx/pop.mp3" data-start="33.390" data-duration="0.720" data-track-index="12" data-volume="0.12" data-track-kind="audio"></audio>
+      <audio id="sfx45" class="clip" src="assets/sfx/tick_b.wav" data-start="33.470" data-duration="0.400" data-track-index="13" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx46" class="clip" src="assets/sfx/swish_b.wav" data-start="33.550" data-duration="0.600" data-track-index="14" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx47" class="clip" src="assets/sfx/tick_c.wav" data-start="33.670" data-duration="0.400" data-track-index="15" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx48" class="clip" src="assets/sfx/swish_c.wav" data-start="33.750" data-duration="0.600" data-track-index="10" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx49" class="clip" src="assets/sfx/swish_back.wav" data-start="38.320" data-duration="0.450" data-track-index="11" data-volume="0.4" data-track-kind="audio"></audio>
+      <audio id="sfx50" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="39.836" data-duration="0.575" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx51" class="clip" src="assets/sfx/trace.wav" data-start="41.480" data-duration="1.150" data-track-index="13" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx52" class="clip" src="assets/sfx/impact-bass-1.mp3" data-start="41.550" data-duration="1.600" data-track-index="14" data-volume="0.09" data-track-kind="audio"></audio>
+      <audio id="sfx53" class="clip" src="assets/sfx/click-soft.mp3" data-start="41.620" data-duration="0.370" data-track-index="15" data-volume="0.6" data-track-kind="audio"></audio>
+      <audio id="sfx54" class="clip" src="assets/sfx/tick_b.wav" data-start="42.120" data-duration="0.400" data-track-index="10" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx55" class="clip" src="assets/sfx/swish_b.wav" data-start="42.200" data-duration="0.600" data-track-index="11" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx56" class="clip" src="assets/sfx/pop.mp3" data-start="42.240" data-duration="0.720" data-track-index="12" data-volume="0.12" data-track-kind="audio"></audio>
+      <audio id="sfx57" class="clip" src="assets/sfx/tick_c.wav" data-start="42.320" data-duration="0.400" data-track-index="13" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx58" class="clip" src="assets/sfx/swish_c.wav" data-start="42.400" data-duration="0.600" data-track-index="14" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx59" class="clip" src="assets/sfx/tick_a.wav" data-start="42.520" data-duration="0.400" data-track-index="15" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx60" class="clip" src="assets/sfx/swish_a.wav" data-start="42.600" data-duration="0.600" data-track-index="10" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx61" class="clip" src="assets/sfx/swish_back.wav" data-start="47.320" data-duration="0.450" data-track-index="11" data-volume="0.4" data-track-kind="audio"></audio>
+      <audio id="sfx62" class="clip" src="assets/sfx/whoosh.mp3" data-start="48.656" data-duration="0.575" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx63" class="clip" src="assets/sfx/click-soft.mp3" data-start="52.550" data-duration="0.370" data-track-index="13" data-volume="0.28" data-track-kind="audio"></audio>
+      <audio id="sfx64" class="clip" src="assets/sfx/click-soft.mp3" data-start="53.550" data-duration="0.370" data-track-index="14" data-volume="0.28" data-track-kind="audio"></audio>
+      <audio id="sfx65" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="53.900" data-duration="0.575" data-track-index="15" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx66" class="clip" src="assets/sfx/trace.wav" data-start="55.280" data-duration="1.150" data-track-index="10" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx67" class="clip" src="assets/sfx/impact-bass-2.mp3" data-start="55.350" data-duration="1.600" data-track-index="11" data-volume="0.09" data-track-kind="audio"></audio>
+      <audio id="sfx68" class="clip" src="assets/sfx/click-soft.mp3" data-start="55.420" data-duration="0.370" data-track-index="12" data-volume="0.6" data-track-kind="audio"></audio>
+      <audio id="sfx69" class="clip" src="assets/sfx/tick_c.wav" data-start="55.920" data-duration="0.400" data-track-index="13" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx70" class="clip" src="assets/sfx/swish_c.wav" data-start="56.000" data-duration="0.600" data-track-index="14" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx71" class="clip" src="assets/sfx/pop.mp3" data-start="56.040" data-duration="0.720" data-track-index="15" data-volume="0.12" data-track-kind="audio"></audio>
+      <audio id="sfx72" class="clip" src="assets/sfx/tick_a.wav" data-start="56.120" data-duration="0.400" data-track-index="10" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx73" class="clip" src="assets/sfx/swish_a.wav" data-start="56.200" data-duration="0.600" data-track-index="11" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx74" class="clip" src="assets/sfx/tick_b.wav" data-start="56.320" data-duration="0.400" data-track-index="12" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx75" class="clip" src="assets/sfx/swish_b.wav" data-start="56.400" data-duration="0.600" data-track-index="13" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx76" class="clip" src="assets/sfx/swish_back.wav" data-start="60.520" data-duration="0.450" data-track-index="14" data-volume="0.4" data-track-kind="audio"></audio>
+      <audio id="sfx77" class="clip" src="assets/sfx/whoosh.mp3" data-start="61.856" data-duration="0.575" data-track-index="15" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx78" class="clip" src="assets/sfx/trace.wav" data-start="63.280" data-duration="1.150" data-track-index="10" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx79" class="clip" src="assets/sfx/impact-bass-1.mp3" data-start="63.350" data-duration="1.600" data-track-index="11" data-volume="0.09" data-track-kind="audio"></audio>
+      <audio id="sfx80" class="clip" src="assets/sfx/click-soft.mp3" data-start="63.420" data-duration="0.370" data-track-index="12" data-volume="0.6" data-track-kind="audio"></audio>
+      <audio id="sfx81" class="clip" src="assets/sfx/tick_a.wav" data-start="63.920" data-duration="0.400" data-track-index="13" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx82" class="clip" src="assets/sfx/swish_a.wav" data-start="64.000" data-duration="0.600" data-track-index="14" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx83" class="clip" src="assets/sfx/tick_b.wav" data-start="64.120" data-duration="0.400" data-track-index="15" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx84" class="clip" src="assets/sfx/swish_b.wav" data-start="64.200" data-duration="0.600" data-track-index="10" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx85" class="clip" src="assets/sfx/pop.mp3" data-start="64.240" data-duration="0.720" data-track-index="11" data-volume="0.12" data-track-kind="audio"></audio>
+      <audio id="sfx86" class="clip" src="assets/sfx/tick_c.wav" data-start="64.320" data-duration="0.400" data-track-index="12" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx87" class="clip" src="assets/sfx/swish_c.wav" data-start="64.400" data-duration="0.600" data-track-index="13" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx88" class="clip" src="assets/sfx/swish_back.wav" data-start="68.520" data-duration="0.450" data-track-index="14" data-volume="0.4" data-track-kind="audio"></audio>
+      <audio id="sfx89" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="69.856" data-duration="0.575" data-track-index="15" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx90" class="clip" src="assets/sfx/trace.wav" data-start="71.280" data-duration="1.150" data-track-index="10" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx91" class="clip" src="assets/sfx/impact-bass-2.mp3" data-start="71.350" data-duration="1.600" data-track-index="11" data-volume="0.09" data-track-kind="audio"></audio>
+      <audio id="sfx92" class="clip" src="assets/sfx/click-soft.mp3" data-start="71.420" data-duration="0.370" data-track-index="12" data-volume="0.6" data-track-kind="audio"></audio>
+      <audio id="sfx93" class="clip" src="assets/sfx/tick_b.wav" data-start="71.920" data-duration="0.400" data-track-index="13" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx94" class="clip" src="assets/sfx/swish_b.wav" data-start="72.000" data-duration="0.600" data-track-index="14" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx95" class="clip" src="assets/sfx/pop.mp3" data-start="72.040" data-duration="0.720" data-track-index="15" data-volume="0.12" data-track-kind="audio"></audio>
+      <audio id="sfx96" class="clip" src="assets/sfx/tick_c.wav" data-start="72.120" data-duration="0.400" data-track-index="10" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx97" class="clip" src="assets/sfx/swish_c.wav" data-start="72.200" data-duration="0.600" data-track-index="11" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx98" class="clip" src="assets/sfx/tick_a.wav" data-start="72.320" data-duration="0.400" data-track-index="12" data-volume="0.55" data-track-kind="audio"></audio>
+      <audio id="sfx99" class="clip" src="assets/sfx/swish_a.wav" data-start="72.400" data-duration="0.600" data-track-index="13" data-volume="0.42" data-track-kind="audio"></audio>
+      <audio id="sfx100" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="75.716" data-duration="4.400" data-track-index="14" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx101" class="clip" src="assets/sfx/swish_back.wav" data-start="76.520" data-duration="0.450" data-track-index="15" data-volume="0.4" data-track-kind="audio"></audio>
+      <audio id="sfx102" class="clip" src="assets/sfx/impact-bass-2.mp3" data-start="79.550" data-duration="2.400" data-track-index="10" data-volume="0.12" data-track-kind="audio"></audio>
+      <audio id="sfx103" class="clip" src="assets/sfx/chime.mp3" data-start="79.850" data-duration="2.100" data-track-index="11" data-volume="0.24" data-track-kind="audio"></audio>
     </div>
     <script>
       (function () {
@@ -127,12 +199,7 @@
         const bb = G.baliBBox;
         const [bx0, by1] = proj(bb[0] - 0.03, bb[1] - 0.03), [bx1, by0] = proj(bb[2] + 0.03, bb[3] + 0.03);
         const inBali = (r) => { for (let i = 0; i < r.length; i += 2) { const x = r[i] / Q, y = r[i + 1] / Q; if (x < bx0 || x > bx1 || y < by0 || y > by1) return false; } return true; };
-        const mkSet = (tol) => ({
-          b200: mkPath(G.b200, null, tol), b1000: mkPath(G.b1000, null, tol), b3000: mkPath(G.b3000, null, tol),
-          other: mkPath(G.other, null, tol), idn: mkPath(G.idn, null, tol), bali: mkPath(G.idn, inBali),
-        });
-        const PATH_FULL = mkSet(0), PATH_LOD = mkSet(0.4); // 0.4 base px = 1.2 screen px at k = 3
-        let PATH = PATH_FULL;
+        const PATH = { other: mkPath(G.other, null, 0.3) };
 
         // ---------- camera: van Wijk & Nuij smooth zoom-pan (altitude grows with distance) ----------
         function zoomPath(a, b, rho) {
@@ -174,7 +241,7 @@
         const CITY = PL.cities.map((c) => {
           const g = mk("g", { id: "mk-" + c.id, opacity: 0 }, layer);
           const halo = mk("circle", { r: 78, fill: "url(#mj-halo)" }, g);
-          const pulse = mk("circle", { r: 10, fill: "none", stroke: "#294B77", "stroke-width": 1.6, opacity: 0 }, g);
+          const pulse = mk("circle", { r: 10, fill: "none", stroke: "#FBFCFE", "stroke-width": 2, opacity: 0 }, g);
           const dot = mk("circle", { r: 9, fill: c.island ? "#FBFCFE" : "#294B77", stroke: c.island ? "#294B77" : "#FBFCFE", "stroke-width": c.island ? 2.8 : 3 }, g);
           const lg = mk("g", { id: "lb-" + c.id, opacity: 0 }, layer);
           const lead = mk("path", { class: "mk-lead", d: "" }, lg);
@@ -228,56 +295,212 @@
           ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = 2.2 / k; ctx.strokeStyle = "#294B77"; ctx.stroke(); ctx.globalAlpha = 1;
         }
 
+
+        // ---------- realistic basemap: relief tile pyramid + per-destination Sentinel-2 mosaics ----------
+        const TILESET = new Set(window.__TILES || []);
+        const SAT = window.__SAT || {};
+        const BND = window.__BOUNDS || {};
+        const M0 = M(G.LAT0);
+        const IMG = new Map();
+        function img(src) {
+          let e = IMG.get(src);
+          if (!e) {
+            const im = new Image(); im.decoding = "sync"; im.src = src;
+            e = { im, ok: false, p: null };
+            e.p = im.decode().then(() => { e.ok = true; }, () => { e.ok = false; });
+            IMG.set(src, e);
+          }
+          return e;
+        }
+        const levelFor = (k) => Math.max(4, Math.min(10, Math.round(Math.log2((G.S * k * 360) / 256))));
+        const tileX2W = (x, z) => ((x / 2 ** z) * 360 - 180 - G.LON0) * G.S;
+        const tileY2W = (y, z) => (M0 - Math.PI * (1 - (2 * y) / 2 ** z)) * G.S * DEG;
+        const w2tileX = (X, z) => ((X / G.S + G.LON0 + 180) / 360) * 2 ** z;
+        const w2tileY = (Y, z) => ((1 - (M0 - Y / (G.S * DEG)) / Math.PI) / 2) * 2 ** z;
+        function tilesFor(C, k) {
+          const z = levelFor(k), out = [];
+          const X0 = C.ux - W / 2 / k, X1 = C.ux + W / 2 / k, Y0 = C.uy - H / 2 / k, Y1 = C.uy + H / 2 / k;
+          for (let x = Math.floor(w2tileX(X0, z)); x <= Math.floor(w2tileX(X1, z)); x++)
+            for (let y = Math.floor(w2tileY(Y0, z)); y <= Math.floor(w2tileY(Y1, z)); y++) out.push([z, x, y]);
+          return out;
+        }
+        function drawTile(z, x, y, k, tx, ty, need) {
+          // exact tile when baked & decoded; otherwise the nearest decoded ancestor's sub-rectangle
+          for (let up = 0; up <= 4; up++) {
+            const zz = z - up, xx = x >> up, yy = y >> up, key = `${zz}/${xx}/${yy}`;
+            if (!TILESET.has(key)) continue;
+            const e = img(`assets/tiles/${key}.webp`);
+            if (up === 0 && need) need.push(e);
+            if (!e.ok) continue;
+            const n = 1 << up, sx = (x - (xx << up)) * (256 / n), sy = (y - (yy << up)) * (256 / n);
+            const dx0 = tileX2W(x, z) * k + tx, dy0 = tileY2W(y, z) * k + ty, dx1 = tileX2W(x + 1, z) * k + tx, dy1 = tileY2W(y + 1, z) * k + ty;
+            ctx.drawImage(e.im, sx, sy, 256 / n, 256 / n, Math.floor(dx0), Math.floor(dy0), Math.ceil(dx1) - Math.floor(dx0) + 1, Math.ceil(dy1) - Math.floor(dy0) + 1);
+            return;
+          }
+        }
+        function satAlpha(c, C, k) {
+          const s = SAT[c.id]; if (!s) return 0;
+          const kh = s.kHold, d = Math.hypot(C.ux - c.w[0], C.uy - c.w[1]);
+          if (d > 1.6 * c.span * G.S) return 0;
+          const u = clamp((k / kh - 0.55) / 0.3);
+          return u * u * (3 - 2 * u);
+        }
+
+        // ---------- clouds: seeded field at altitude; perspective parallax, fly-through, ground shadows ----------
+        function mulberry32(a) { return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+        const rnd = mulberry32(20261027);
+        const FCL = 1000; // camera focal: altitude A = FCL / k
+        const CLOUD_SPR = Array.from({ length: 10 }, (_, i) => img(`assets/clouds/c${i}.png`));
+        const SHADOW_SPR = Array.from({ length: 10 }, (_, i) => img(`assets/clouds/s${i}.png`));
+        const CLOUDS = [];
+        {
+          const finalK = W / PL.NATIONAL.w;
+          const keepClear = PL.cities.map((c) => proj(c.lon, c.lat));
+          // cloud systems: clusters of cumulus (more over the islands' mountains), not an even sprinkle
+          const centers = [];
+          for (let i = 0; i < 46; i++) centers.push([91 + rnd() * 53, -13 + rnd() * 22, 0.35 + rnd() * 1.2, 3 + Math.floor(rnd() * 9)]);
+          for (const [clon, clat, spread, n] of centers) {
+            for (let j = 0; j < n; j++) {
+              const lon = clon + (rnd() - 0.5) * spread * 2, lat = clat + (rnd() - 0.5) * spread * 1.2;
+              const [x, y] = proj(lon, lat);
+              const h = 160 + Math.pow(rnd(), 1.6) * 300, size = 14 + Math.pow(rnd(), 2.2) * 62, spr = Math.floor(rnd() * 10), rot = rnd() * Math.PI * 2;
+              const sc = FCL / (FCL / finalK - h);
+              const sx = (x - PL.NATIONAL.ux) * sc + W / 2, sy = (y - PL.NATIONAL.uy) * sc + H / 2;
+              const blocked = keepClear.some(([mx, my]) => Math.hypot(sx - ((mx - PL.NATIONAL.ux) * finalK + W / 2), sy - ((my - PL.NATIONAL.uy) * finalK + H / 2)) < size * sc * 0.55 + 70);
+              if (blocked) continue;
+              CLOUDS.push({ x, y, h, size, spr, rot, a: 0.62 + rnd() * 0.33 });
+            }
+          }
+        }
+        // fly-through banks: a few clouds stacked above each destination, alive only during its descent
+        for (const tr of PL.travel) {
+          const city = PL.cities.find((c) => c.id === tr.to); if (!city) continue;
+          const [cx0, cy0] = proj(city.lon, city.lat);
+          const r2 = mulberry32(Math.round(cx0 * 31 + cy0 * 17));
+          for (let j = 0; j < 9; j++) {
+            const ang = r2() * Math.PI * 2, d = (j < 3 ? 0.15 : 0.55 + r2() * 1.4) * city.span * G.S;
+            const Ah = FCL / (W / (city.span * G.S));
+            CLOUDS.push({ x: cx0 + Math.cos(ang) * d, y: cy0 + Math.sin(ang) * d * 0.7, h: Math.max(40, Ah * 1.7) + r2() * Ah * 3.2, size: (0.5 + r2() * 0.9) * city.span * G.S * 0.55,
+              spr: Math.floor(r2() * 10), rot: r2() * Math.PI * 2, a: 0.75 + r2() * 0.2, win: [tr.t0 + 0.15, tr.t1 + 0.1], noShadow: true });
+          }
+        }
+        const windAt = (t) => { const tt = Math.min(t, 79.8); return 0.32 * tt - (t > 79.8 ? 0 : 0); };
+        function drawClouds(C, k, t, shadows) {
+          const A = FCL / k, wind = windAt(t);
+          for (const c of CLOUDS) {
+            const gate = c.win ? clamp((t - c.win[0]) / 0.5) * clamp((c.win[1] - t) / 0.3) : 1;
+            if (gate <= 0) continue;
+            const cx = c.x + (c.win ? 0 : wind), cy = c.y + (c.win ? 0 : wind * 0.25);
+            if (shadows) {
+              if (c.noShadow) continue;
+              const e = SHADOW_SPR[c.spr]; if (!e.ok) continue;
+              const gx = (cx + c.h * 0.05 - C.ux) * k + W / 2, gy = (cy + c.h * 0.07 - C.uy) * k + H / 2, gs = c.size * k * 1.05;
+              if (gx + gs < 0 || gx - gs > W || gy + gs < 0 || gy - gs > H) continue;
+              const fa = clamp((A - c.h * 0.35) / (c.h * 0.6));
+              if (fa <= 0) continue;
+              ctx.globalAlpha = 0.2 * c.a * fa * clamp((k - 1.6) / 2.5);
+              ctx.save(); ctx.translate(gx, gy); ctx.rotate(c.rot); ctx.drawImage(e.im, -gs, -gs, gs * 2, gs * 2); ctx.restore();
+              continue;
+            }
+            if (A <= c.h * 1.02) continue;
+            const e = CLOUD_SPR[c.spr]; if (!e.ok) continue;
+            const sc = FCL / (A - c.h), sx = (cx - C.ux) * sc + W / 2, sy = (cy - C.uy) * sc + H / 2, ss = c.size * sc;
+            if (sx + ss < 0 || sx - ss > W || sy + ss < 0 || sy - ss > H) continue;
+            const near = (A - c.h) / A; // 1 = far below the camera, 0 = at the lens
+            const fa = clamp((near - 0.06) / 0.22) * clamp((ss * 2 - 120) / 260 + 1) * (ss > 2600 ? 0 : 1);
+            if (fa <= 0) continue;
+            ctx.globalAlpha = c.a * fa * gate;
+            ctx.save(); ctx.translate(sx, sy); ctx.rotate(c.rot); ctx.drawImage(e.im, -ss, -ss, ss * 2, ss * 2); ctx.restore();
+          }
+          ctx.globalAlpha = 1;
+        }
+
+        // ---------- official boundaries (draw-on at arrival) ----------
+        function ringPaths(rings) {
+          return rings.map((r) => {
+            const p = new Path2D(); let L = 0;
+            p.moveTo(r[0] / Q, r[1] / Q);
+            for (let i = 2; i < r.length; i += 2) { p.lineTo(r[i] / Q, r[i + 1] / Q); L += Math.hypot((r[i] - r[i - 2]) / Q, (r[i + 1] - r[i - 1]) / Q); }
+            L += Math.hypot((r[0] - r[r.length - 2]) / Q, (r[1] - r[r.length - 1]) / Q);
+            p.closePath();
+            return { p, L };
+          });
+        }
+        const BPATH = {};
+        for (const c of PL.cities) {
+          const b = BND[c.id]; if (!b) continue;
+          const fill = new Path2D(); b.outer.forEach((r) => { fill.moveTo(r[0] / Q, r[1] / Q); for (let i = 2; i < r.length; i += 2) fill.lineTo(r[i] / Q, r[i + 1] / Q); fill.closePath(); });
+          BPATH[c.id] = { fill, rings: ringPaths(b.outer), parts: (b.parts || []).flatMap((pr) => ringPaths(pr)) };
+        }
+        const LAKES = mkPath((BND.lakes || []));
+        const BORDERS = (() => { const p = new Path2D(); for (const r of BND.borders || []) { p.moveTo(r[0] / Q, r[1] / Q); for (let i = 2; i < r.length; i += 2) p.lineTo(r[i] / Q, r[i + 1] / Q); } return p; })();
+        function drawBoundary(c, t, k) {
+          const B = BPATH[c.id]; if (!B) return;
+          const on = clamp((t - (c.A - 0.15)) / 1.1), fade = 1 - clamp((t - c.depart) / 0.9);
+          if (on <= 0 || fade <= 0) return;
+          const draw = 1 - Math.pow(1 - on, 3);
+          ctx.globalAlpha = fade;
+          ctx.fillStyle = `rgba(172,198,231,${(0.26 * clamp((t - (c.A + 0.2)) / 0.6)).toFixed(3)})`; ctx.fill(B.fill, "evenodd");
+          ctx.lineJoin = "round"; ctx.lineCap = "round";
+          for (const part of B.parts) { ctx.setLineDash([]); ctx.strokeStyle = `rgba(251,252,254,${(0.45 * clamp((t - (c.A + 0.5)) / 0.5)).toFixed(3)})`; ctx.lineWidth = 1 / k; ctx.stroke(part.p); }
+          for (const r of B.rings) {
+            ctx.setLineDash([r.L * draw, r.L * 2]);
+            ctx.strokeStyle = "rgba(14,30,54,0.55)"; ctx.lineWidth = 6.5 / k; ctx.stroke(r.p);
+            ctx.strokeStyle = "#FBFCFE"; ctx.lineWidth = 2.6 / k; ctx.stroke(r.p);
+          }
+          ctx.setLineDash([]); ctx.globalAlpha = 1;
+        }
+        // assets to wait for before a frame is captured
+        function framePromises(t) {
+          const C = cam(t), k = W / C.w, need = [];
+          for (const [z, x, y] of tilesFor(C, k)) { const key = `${z}/${x}/${y}`; if (TILESET.has(key)) need.push(img(`assets/tiles/${key}.webp`)); }
+          for (const c of CITY) if (satAlpha(c, C, k) > 0) need.push(img(SAT[c.id].file));
+          return need.filter((e) => !e.ok).map((e) => e.p);
+        }
+        const kNatPre0 = W / PL.NATIONAL.w;
+
         function renderAt(t) {
           const C = cam(t), k = W / C.w, tx = W / 2 - C.ux * k, ty = H / 2 - C.uy * k;
-          PATH = k < 3 ? PATH_LOD : PATH_FULL;
 
-          // ocean + bathymetry (deeper = slightly deeper ice)
+          // relief basemap (tiles) -----------------------------------------------------------
           ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.filter = "none";
-          ctx.fillStyle = "#E4EDF9"; ctx.fillRect(0, 0, W, H);
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = "#1F4E86"; ctx.fillRect(0, 0, W, H);
+          for (const [z, x, y] of tilesFor(C, k)) drawTile(z, x, y, k, tx, ty, null);
+          // relief-mode overlays: lakes, a light veil over neighbouring countries, land borders (all fade out up close)
           ctx.setTransform(k, 0, 0, k, tx, ty);
-          ctx.fillStyle = "#DBE6F6"; ctx.fill(PATH.b200, "evenodd");
-          ctx.fillStyle = "#D3E0F3"; ctx.fill(PATH.b1000, "evenodd");
-          ctx.fillStyle = "#CAD9EF"; ctx.fill(PATH.b3000, "evenodd");
-          // pale surf rim, then land with a soft contact shadow
-          ctx.lineJoin = "round";
-          ctx.strokeStyle = "rgba(251,252,254,0.55)"; ctx.lineWidth = 7 / k; ctx.stroke(PATH.idn); ctx.stroke(PATH.other);
-          // contact shadow: two offset fills (no shadowBlur: too slow in software raster)
-          ctx.save(); ctx.translate(0, 4.5 / k); ctx.fillStyle = "rgba(32,43,59,0.06)"; ctx.fill(PATH.other); ctx.fill(PATH.idn); ctx.restore();
-          ctx.save(); ctx.translate(0, 2.2 / k); ctx.fillStyle = "rgba(32,43,59,0.08)"; ctx.fill(PATH.other); ctx.fill(PATH.idn); ctx.restore();
-          ctx.fillStyle = "#EDF1F6"; ctx.fill(PATH.other);
-          ctx.fillStyle = "#FBFCFE"; ctx.fill(PATH.idn);
-          ctx.strokeStyle = "rgba(58,98,153,0.30)"; ctx.lineWidth = 0.8 / k; ctx.stroke(PATH.other);
-          ctx.strokeStyle = "rgba(41,75,119,0.58)"; ctx.lineWidth = 1.05 / k; ctx.stroke(PATH.idn);
-
-          // Bali regional highlight (island, not a point)
-          const bali = CITY.find((c) => c.island);
-          const ba = clamp((t - (bali.A - 0.45)) / 0.7) * (1 - clamp((t - bali.depart) / 0.7));
-          if (ba > 0) {
-            ctx.globalAlpha = ba;
-            ctx.fillStyle = "#D6E3F7"; ctx.fill(PATH.bali);
-            ctx.strokeStyle = "#294B77"; ctx.lineWidth = 1.8 / k; ctx.stroke(PATH.bali);
-            if (bali.ell) {
-              ctx.setTransform(1, 0, 0, 1, 0, 0);
-              ctx.setTransform(k, 0, 0, k, tx, ty);
-              const hk = W / bali.state.w; // holding zoom
-              const ecx = bali.state.ux + (bali.ell.cx - W / 2) / hk, ecy = bali.state.uy + (bali.ell.cy - H / 2) / hk;
-              ctx.setLineDash([3 / k, 6 / k]); ctx.lineWidth = 1.3 / k; ctx.strokeStyle = "rgba(41,75,119,0.7)";
-              ctx.beginPath(); ctx.ellipse(ecx, ecy, bali.ell.rx / hk, bali.ell.ry / hk, 0, 0, Math.PI * 2); ctx.stroke();
-              ctx.setLineDash([]);
-            }
+          const far = 1 - clamp((k - 2.2) / 3);
+          ctx.fillStyle = "rgba(92,166,204,0.95)"; ctx.fill(LAKES);
+          if (far > 0) {
+            ctx.globalAlpha = far;
+            ctx.fillStyle = "rgba(236,242,248,0.20)"; ctx.fill(PATH.other);
+            ctx.strokeStyle = "rgba(251,252,254,0.55)"; ctx.lineWidth = 1.1 / k; ctx.setLineDash([4 / k, 3 / k]); ctx.stroke(BORDERS); ctx.setLineDash([]);
             ctx.globalAlpha = 1;
           }
-          ctx.filter = "none";
+          // cloud shadows on the ground
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          drawClouds(C, k, t, true);
+          // Sentinel-2 close-ups crossfade in during each descent
+          for (const c of CITY) {
+            const sa = satAlpha(c, C, k); if (sa <= 0) continue;
+            const s = SAT[c.id], e = img(s.file); if (!e.ok) continue;
+            const [X0, Y0, X1, Y1] = s.world;
+            ctx.globalAlpha = sa; ctx.drawImage(e.im, X0 * k + tx, Y0 * k + ty, (X1 - X0) * k, (Y1 - Y0) * k); ctx.globalAlpha = 1;
+          }
+          // atmospheric haze grows with altitude
+          const alt = clamp(Math.log(40 / k) / Math.log(40 / kNatPre0));
+          ctx.fillStyle = `rgba(200,220,242,${(0.10 * alt).toFixed(3)})`; ctx.fillRect(0, 0, W, H);
+          // official boundaries
+          ctx.setTransform(k, 0, 0, k, tx, ty);
+          for (const c of CITY) drawBoundary(c, t, k);
 
           // opening light trace along Java toward East Java
           const lt0 = 1.15, lt1 = 3.15;
           if (t > lt0 && t < 3.9) {
             const h = travelEase((t - lt0) / (lt1 - lt0)), tail = Math.max(0, h - 0.32), fade = 1 - clamp((t - 3.3) / 0.6);
             ctx.lineCap = "round";
-            ctx.globalAlpha = 0.35 * fade; ctx.strokeStyle = "#ACC6E7"; ctx.lineWidth = 6 / k; strokeCurve(javaTrace.a, javaTrace.c, javaTrace.b, tail, h, k);
-            ctx.globalAlpha = 0.9 * fade; ctx.strokeStyle = "#294B77"; ctx.lineWidth = 1.8 / k; strokeCurve(javaTrace.a, javaTrace.c, javaTrace.b, Math.max(tail, h - 0.12), h, k);
+            ctx.globalAlpha = 0.45 * fade; ctx.strokeStyle = "#CBDBF4"; ctx.lineWidth = 7 / k; strokeCurve(javaTrace.a, javaTrace.c, javaTrace.b, tail, h, k);
+            ctx.globalAlpha = 0.95 * fade; ctx.strokeStyle = "#FBFCFE"; ctx.lineWidth = 2.2 / k; strokeCurve(javaTrace.a, javaTrace.c, javaTrace.b, Math.max(tail, h - 0.12), h, k);
             ctx.globalAlpha = 1;
           }
 
@@ -287,10 +510,12 @@
             const p = travelEase((t - r.t0) / (r.t1 - r.t0));
             if (p <= 0) continue;
             const [u0, u1] = trimRoute(r, k), pe = u0 + (u1 - u0) * p;
-            ctx.setLineDash([7 / k, 6 / k]); ctx.strokeStyle = "rgba(41,75,119,0.55)"; ctx.lineWidth = 1.6 / k;
+            ctx.setLineDash([]); ctx.strokeStyle = "rgba(10,24,44,0.35)"; ctx.lineWidth = 4 / k;
+            strokeCurve(r.a, r.c, r.b, u0, pe, k);
+            ctx.setLineDash([7 / k, 6 / k]); ctx.strokeStyle = "rgba(251,252,254,0.85)"; ctx.lineWidth = 1.7 / k;
             strokeCurve(r.a, r.c, r.b, u0, pe, k);
             ctx.setLineDash([]);
-            if (p < 1) { ctx.strokeStyle = "#294B77"; ctx.lineWidth = 2.2 / k; strokeCurve(r.a, r.c, r.b, Math.max(u0, pe - 0.14), pe, k); }
+            if (p < 1) { ctx.strokeStyle = "#FBFCFE"; ctx.lineWidth = 2.6 / k; strokeCurve(r.a, r.c, r.b, Math.max(u0, pe - 0.14), pe, k); }
           }
           // locator rings at route tips / opening trace tip, until the marker lands
           for (const c of CITY) {
@@ -305,10 +530,11 @@
             const pulseStart = c.id === "bandung" ? 52.55 : appear + 0.1;
             for (let n = 0; n < (c.island ? 0 : c.id === "bandung" ? 2 : 1); n++) {
               const u = (t - (pulseStart + n * 1.0)) / 1.0;
-              if (u > 0 && u < 1) { ctx.globalAlpha = 0.6 * (1 - u) * a; ctx.beginPath(); ctx.arc(c.w[0], c.w[1], (8 + 30 * cubicOut(u)) / k, 0, Math.PI * 2); ctx.lineWidth = 1.5 / k; ctx.strokeStyle = "#294B77"; ctx.stroke(); ctx.globalAlpha = 1; }
+              if (u > 0 && u < 1) { ctx.globalAlpha = 0.8 * (1 - u) * a; ctx.beginPath(); ctx.arc(c.w[0], c.w[1], (8 + 30 * cubicOut(u)) / k, 0, Math.PI * 2); ctx.lineWidth = 1.8 / k; ctx.strokeStyle = "#FBFCFE"; ctx.stroke(); ctx.globalAlpha = 1; }
             }
           }
           ctx.setTransform(1, 0, 0, 1, 0, 0);
+          drawClouds(C, k, t, false);
 
           // ---------- overlay ----------
           const zf = clamp((1.7 * kNat - k) / (0.6 * kNat));
@@ -349,8 +575,17 @@
           indo.setAttribute("x", (indoW[0] * k + tx).toFixed(1)); indo.setAttribute("y", (indoW[1] * k + ty).toFixed(1));
         }
 
-        window.addEventListener("hf-seek", (e) => renderAt(e.detail.time));
+        window.addEventListener("hf-seek", (e) => {
+          const t = e.detail.time;
+          renderAt(t);
+          const p = framePromises(t);
+          if (p.length && e.detail.waitUntil) e.detail.waitUntil(Promise.all(p).then(() => renderAt(t)));
+        });
+        window.__hf = window.__hf || {};
+        window.__hf.buildReady = window.__hf.buildReady || {};
+        window.__hf.buildReady["mj-map"] = Promise.all([...CLOUD_SPR, ...SHADOW_SPR].map((e) => e.p).concat(framePromises(0))).then(() => renderAt(0));
         window.__mjRender = renderAt;
+        window.__mjCam = cam;
         const proxy = { t: 0 };
         const tl = gsap.timeline({ paused: true });
         tl.to(proxy, { t: PL.duration, duration: PL.duration, ease: "none", onUpdate: () => renderAt(proxy.t) }, 0);

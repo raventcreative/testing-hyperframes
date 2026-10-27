@@ -206,10 +206,10 @@ function cityHtml(c) {
     .${ns}-cr { margin-top: 5px; font-weight: 400; font-size: 13px; line-height: 1.1; color: #3A6299; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.02em; }
     .${ns}-title { position: absolute; left: ${Math.round(c.titleRect.x)}px; top: ${Math.round(ty - TITLE_PX * 0.62)}px; width: ${Math.round(c.titleRect.w)}px;
       text-align: ${ta === "middle" ? "center" : ta === "end" ? "right" : "left"}; white-space: nowrap;
-      font-weight: 700; font-size: ${TITLE_PX}px; line-height: 1.2; letter-spacing: ${TRACK}em; color: #202B3B;
-      text-shadow: 0 0 18px rgba(251,252,254,0.95), 0 0 4px rgba(251,252,254,0.9); }
+      font-weight: 700; font-size: ${TITLE_PX}px; line-height: 1.2; letter-spacing: ${TRACK}em; color: #FBFCFE;
+      text-shadow: 0 2px 14px rgba(8,18,34,0.85), 0 0 3px rgba(8,18,34,0.9); }
     .${ns}-ch { display: inline-block; opacity: 0; }
-    .${ns}-rule { position: absolute; left: ${Math.round(ta === "middle" ? tx - 36 : ta === "start" ? tx + 3 : tx - 75)}px; top: ${Math.round(ty + TITLE_PX * 0.72)}px; width: 72px; height: 2px; background: #294B77; transform-origin: ${ta === "end" ? "100%" : ta === "start" ? "0%" : "50%"} 50%; opacity: 0; }
+    .${ns}-rule { position: absolute; left: ${Math.round(ta === "middle" ? tx - 36 : ta === "start" ? tx + 3 : tx - 75)}px; top: ${Math.round(ty + TITLE_PX * 0.72)}px; width: 72px; height: 3px; background: #FBFCFE; box-shadow: 0 1px 6px rgba(8,18,34,0.7); transform-origin: ${ta === "end" ? "100%" : ta === "start" ? "0%" : "50%"} 50%; opacity: 0; }
   </style>
   <div id="root" data-composition-id="${c.id}" data-width="1920" data-height="1080" data-layout-allow-overlap>
     <svg class="${ns}-svg" viewBox="0 0 1920 1080">
@@ -256,7 +256,7 @@ for (const c of cities) fs.writeFileSync(`compositions/${c.id}.html`, cityHtml(c
 // ---- plan.js for the root composition ----
 const outPlan = {
   W, H, NATIONAL, OPEN, pullEnd: plan.opening.pullEnd, duration: plan.duration,
-  cities: cities.map((c) => ({ id: c.id, title: c.title, lon: c.lon, lat: c.lat, A: c.A, depart: c.depart, hold: c.hold, start: c.start, dur: c.dur, island: c.anchor === "island", state: c.state, P: c.P, ell: c.ell ?? null })),
+  cities: cities.map((c) => ({ id: c.id, title: c.title, lon: c.lon, lat: c.lat, span: c.span, A: c.A, depart: c.depart, hold: c.hold, start: c.start, dur: c.dur, island: c.anchor === "island", state: c.state, P: c.P, ell: c.ell ?? null })),
   travel: travel.map(({ to, from, t0, t1, rho, a, b }) => ({ to, from, t0, t1, rho, a, b })),
   routes: routes.map(({ from, to, t0, t1, bend, a, b }) => ({ from, to, t0, t1, bend, a, b })),
   overviews: plan.overviews,
@@ -275,30 +275,40 @@ fs.writeFileSync("CAMERA.md", lines.join("\n") + "\n");
 
 // ---- index.html from template ----
 const hosts = cities.map((c) => `      <div id="sc-${c.id}" class="clip scene-host" data-composition-id="${c.id}" data-composition-src="compositions/${c.id}.html" data-start="${c.start}" data-duration="${c.dur}" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>`).join("\n");
-// ---- sound cues (bundled Pixabay SFX; each cue has a cause on screen) ----
+// ---- sound design: motion-driven air bed (tools/make_sound.py) + a sound for every visible action ----
 {
-  const cues = [];
-  const longT = travel.filter((t) => t.t1 - t.t0 >= 2.85);
+  const cues = [{ file: "assets/sfx/bed_air.wav", t: 0, d: 82, v: 0.85, why: "air bed: altitude + camera speed + cloud layer" }];
   let alt = 0;
   for (const t of travel) {
-    const fast = t.t0 + 0.45 * (t.t1 - t.t0); // fastest frame of the travel ease
-    if (longT.includes(t) && t.rho >= 1.3) cues.push({ file: "assets/sfx/whoosh-cinematic.mp3", t: fast - 2.5, d: 4.4, v: 0.3, why: `travel ${t.from}->${t.to}` });
-    else cues.push({ file: alt++ % 2 ? "assets/sfx/whoosh.mp3" : "assets/sfx/whoosh-short.mp3", t: fast - 0.18, d: 0.575, v: 0.32, why: `travel ${t.from}->${t.to}` });
+    const fast = t.t0 + 0.45 * (t.t1 - t.t0);
+    if (t.t1 - t.t0 >= 2.85 && t.rho >= 1.3) cues.push({ file: "assets/sfx/whoosh-cinematic.mp3", t: fast - 2.5, d: 4.4, v: 0.2, why: `travel ${t.from}->${t.to}` });
+    else cues.push({ file: alt++ % 2 ? "assets/sfx/whoosh.mp3" : "assets/sfx/whoosh-short.mp3", t: fast - 0.18, d: 0.575, v: 0.16, why: `travel ${t.from}->${t.to}` });
   }
-  for (const c of cities) {
-    cues.push({ file: "assets/sfx/click-soft.mp3", t: c.A + 0.02, d: 0.37, v: 0.5, why: `${c.id} marker lands` });
-    cues.push({ file: "assets/sfx/key-press.mp3", t: c.reveal + 0.05, d: 0.4, v: 0.16, why: `${c.id} connector tick` });
-    const hero = c.slots.findIndex((s) => s.role === "hero");
-    cues.push({ file: "assets/sfx/pop.mp3", t: c.reveal + Math.max(0, hero) * 0.2 + 0.1, d: 0.72, v: 0.2, why: `${c.id} hero frame unfolds` });
-  }
-  cues.push({ file: "assets/sfx/chime.mp3", t: 79.85, d: 2.1, v: 0.28, why: "closing resolve on the final map" });
+  cues.push({ file: "assets/sfx/trace.wav", t: 1.2, d: 1.15, v: 0.1, why: "opening light trace along Java" });
+  const ticks = ["tick_a", "tick_b", "tick_c"], swishes = ["swish_a", "swish_b", "swish_c"];
+  cities.forEach((c, ci) => {
+    cues.push({ file: "assets/sfx/click-soft.mp3", t: c.A + 0.02, d: 0.37, v: 0.6, why: `${c.id} marker lands` });
+    cues.push({ file: ci % 2 ? "assets/sfx/impact-bass-2.mp3" : "assets/sfx/impact-bass-1.mp3", t: c.A - 0.05, d: 1.6, v: 0.09, why: `${c.id} landing weight` });
+    cues.push({ file: "assets/sfx/trace.wav", t: c.A - 0.12, d: 1.15, v: 0.2, why: `${c.id} boundary draws on` });
+    c.slots.forEach((slot, i) => {
+      const t0 = c.reveal + i * 0.2;
+      cues.push({ file: `assets/sfx/${ticks[(i + ci) % 3]}.wav`, t: t0 + 0.02, d: 0.4, v: 0.55, why: `${c.id} connector ${i}` });
+      cues.push({ file: `assets/sfx/${swishes[(i + ci) % 3]}.wav`, t: t0 + 0.1, d: 0.6, v: 0.42, why: `${c.id} frame ${i} unfolds` });
+    });
+    const hero = Math.max(0, c.slots.findIndex((s) => s.role === "hero"));
+    cues.push({ file: "assets/sfx/pop.mp3", t: c.reveal + hero * 0.2 + 0.14, d: 0.72, v: 0.12, why: `${c.id} hero frame lands` });
+    cues.push({ file: "assets/sfx/swish_back.wav", t: c.hold + 0.02, d: 0.45, v: 0.4, why: `${c.id} frames retract` });
+  });
+  for (const tp of [52.55, 53.55]) cues.push({ file: "assets/sfx/click-soft.mp3", t: tp, d: 0.37, v: 0.28, why: "Bandung locator pulse" });
+  cues.push({ file: "assets/sfx/impact-bass-2.mp3", t: 79.55, d: 2.4, v: 0.12, why: "final map settles" });
+  cues.push({ file: "assets/sfx/chime.mp3", t: 79.85, d: 2.1, v: 0.24, why: "closing resolve on the final map" });
   cues.sort((a, b) => a.t - b.t);
   fs.writeFileSync("data/sfx.json", JSON.stringify(cues, null, 1));
 }
 let audio = "";
 if (fs.existsSync("data/sfx.json")) {
   const sfx = JSON.parse(fs.readFileSync("data/sfx.json", "utf8"));
-  audio = sfx.map((s, i) => `      <audio id="sfx${i}" class="clip" src="${s.file}" data-start="${s.t.toFixed(3)}" data-duration="${s.d.toFixed(3)}" data-track-index="${10 + (i % 3)}" data-volume="${s.v}" data-track-kind="audio"></audio>`).join("\n");
+  audio = sfx.map((s, i) => `      <audio id="sfx${i}" class="clip" src="${s.file}" data-start="${s.t.toFixed(3)}" data-duration="${s.d.toFixed(3)}" data-track-index="${10 + (i % 6)}" data-volume="${s.v}" data-track-kind="audio"></audio>`).join("\n");
 }
 const tpl = fs.readFileSync("tools/index.template.html", "utf8");
 fs.writeFileSync("index.html", tpl.replace("<!--HOSTS-->", hosts).replace("<!--AUDIO-->", audio));

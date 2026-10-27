@@ -2,7 +2,11 @@
 
 ## Map data
 
-- Natural Earth 10m (admin 0 countries, admin 1 provinces, populated places, bathymetry 200/1000/3000 m). Public domain. https://www.naturalearthdata.com/ (via github.com/nvkelso/natural-earth-vector)
+- Relief & bathymetry: AWS Terrain Tiles (Terrarium), s3://elevation-tiles-prod — sources include SRTM (NASA/USGS), GMTED2010 (USGS), ETOPO1 (NOAA), and others listed at https://github.com/tilezen/joerd/blob/master/docs/attribution.md . Hillshade + hypsometric/bathymetric tint computed in tools/bake_tiles.py.
+- Satellite close-ups: contains modified Copernicus Sentinel data (2020–2024), Sentinel-2 L2A via AWS Open Data (s3://sentinel-cogs). Cloud-masked (SCL) median mosaics computed in tools/bake_satellite.py; scene list in data/sat.json.
+- City / province boundaries: geoBoundaries gbOpen IDN ADM2 & ADM1 (source: BPS – Statistics Indonesia, WFP, OCHA ROAP), CC BY 3.0 IGO. Jakarta = union of the five Kota Administrasi (Kepulauan Seribu not included).
+- Natural Earth 10m (country polygons and land borders, populated places, lakes). Public domain. https://www.naturalearthdata.com/ (via github.com/nvkelso/natural-earth-vector)
+- Clouds are procedural (seeded noise, tools/make_clouds.py) — decorative, not weather data.
 - Destination anchors: Natural Earth populated places (city points). Bali anchor: centroid of the main Bali island polygon (Natural Earth 10m), used as a regional anchor, not a landmark position.
 - Lines between destinations show the order of the video, not travel routes.
 
@@ -43,4 +47,5 @@ Photos were resized and cropped inside frames; no other changes. CC BY-SA photos
 
 ## Sound
 
-- See assets/sfx/CREDITS.md if sound effects are included.
+- Bundled HyperFrames SFX (Pixabay Content License): see assets/sfx/CREDITS.md.
+- bed_air, swish_*, trace, tick_* were synthesised / derived for this film (tools/make_sound.py).

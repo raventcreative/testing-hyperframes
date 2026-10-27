@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="id" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <!-- generated from tools/index.template.html by tools/build.mjs: edit the template, then run `node tools/build.mjs` -->
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="assets/maps/geo.js"></script>
+    <script src="data/plan.js"></script>
+    <style>
+      @font-face { font-family: "Montserrat"; font-weight: 400; src: url("assets/fonts/montserrat-latin-400-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Montserrat"; font-weight: 600; src: url("assets/fonts/montserrat-latin-600-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Montserrat"; font-weight: 700; src: url("assets/fonts/montserrat-latin-700-normal.woff2") format("woff2"); }
+      :root {
+        --ink: #202b3b; --navy: #294b77; --navy-2: #3a6299; --ice: #acc6e7;
+        --pale: #cbdbf4; --surface: #e8f0fb; --white: #fbfcfe;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--surface); }
+      #main { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--surface); font-family: Montserrat, sans-serif; }
+      #world { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+      #map { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      #ov { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+      #haze { position: absolute; inset: 0; pointer-events: none;
+        background: radial-gradient(ellipse 78% 74% at 50% 50%, rgba(251,252,254,0) 58%, rgba(251,252,254,0.42) 100%); }
+      #grain { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; opacity: 0.5; display: block; }
+      #mapcredit { position: absolute; left: 96px; bottom: 34px; font: 400 13px/1.3 Montserrat, sans-serif; color: var(--navy-2); letter-spacing: 0.03em; opacity: 0.85; }
+      .mk-lbl { font: 600 26px Montserrat, sans-serif; letter-spacing: 0.12em; fill: var(--ink); paint-order: stroke; stroke: rgba(251,252,254,0.92); stroke-width: 6px; stroke-linejoin: round; }
+      .mk-lead { stroke: var(--navy); stroke-width: 1.2; fill: none; }
+      #lbl-indonesia { font: 700 30px Montserrat, sans-serif; letter-spacing: 0.62em; fill: var(--navy); }
+      .scene-host { z-index: 5; }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="82" data-width="1920" data-height="1080" data-fps="30">
+      <div id="world" class="clip" data-start="0" data-duration="82" data-track-index="0" data-track-kind="graphics" data-layout-allow-overlap>
+        <canvas id="map" width="1920" height="1080"></canvas>
+        <svg id="ov" viewBox="0 0 1920 1080">
+          <defs>
+            <radialGradient id="mj-halo" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#294B77" stop-opacity="0.20" />
+              <stop offset="55%" stop-color="#3A6299" stop-opacity="0.08" />
+              <stop offset="100%" stop-color="#3A6299" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+          <text id="lbl-indonesia" text-anchor="middle" opacity="0">INDONESIA</text>
+          <g id="mk-layer"></g>
+        </svg>
+        <div id="haze"></div>
+        <img id="grain" src="assets/maps/grain.png" alt="" />
+        <div id="mapcredit" data-layout-ignore>Peta: Natural Earth (domain publik) · Garis menunjukkan urutan video, bukan rute perjalanan</div>
+      </div>
+      <div id="sc-surabaya" class="clip scene-host" data-composition-id="surabaya" data-composition-src="compositions/surabaya.html" data-start="4" data-duration="9" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="sc-jakarta" class="clip scene-host" data-composition-id="jakarta" data-composition-src="compositions/jakarta.html" data-start="13" data-duration="9" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="sc-medan" class="clip scene-host" data-composition-id="medan" data-composition-src="compositions/medan.html" data-start="22" data-duration="9" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="sc-bali" class="clip scene-host" data-composition-id="bali" data-composition-src="compositions/bali.html" data-start="31" data-duration="9" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="sc-solo" class="clip scene-host" data-composition-id="solo" data-composition-src="compositions/solo.html" data-start="40" data-duration="9" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="sc-bandung" class="clip scene-host" data-composition-id="bandung" data-composition-src="compositions/bandung.html" data-start="54" data-duration="8" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="sc-yogyakarta" class="clip scene-host" data-composition-id="yogyakarta" data-composition-src="compositions/yogyakarta.html" data-start="62" data-duration="8" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="sc-makassar" class="clip scene-host" data-composition-id="makassar" data-composition-src="compositions/makassar.html" data-start="70" data-duration="8" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <audio id="sfx0" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="3.990" data-duration="0.575" data-track-index="10" data-volume="0.32" data-track-kind="audio"></audio>
+      <audio id="sfx1" class="clip" src="assets/sfx/click-soft.mp3" data-start="5.620" data-duration="0.370" data-track-index="11" data-volume="0.5" data-track-kind="audio"></audio>
+      <audio id="sfx2" class="clip" src="assets/sfx/key-press.mp3" data-start="6.150" data-duration="0.400" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx3" class="clip" src="assets/sfx/pop.mp3" data-start="6.200" data-duration="0.720" data-track-index="10" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx4" class="clip" src="assets/sfx/whoosh.mp3" data-start="12.836" data-duration="0.575" data-track-index="11" data-volume="0.32" data-track-kind="audio"></audio>
+      <audio id="sfx5" class="clip" src="assets/sfx/click-soft.mp3" data-start="14.620" data-duration="0.370" data-track-index="12" data-volume="0.5" data-track-kind="audio"></audio>
+      <audio id="sfx6" class="clip" src="assets/sfx/key-press.mp3" data-start="15.150" data-duration="0.400" data-track-index="10" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx7" class="clip" src="assets/sfx/pop.mp3" data-start="15.200" data-duration="0.720" data-track-index="11" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx8" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="19.516" data-duration="4.400" data-track-index="12" data-volume="0.3" data-track-kind="audio"></audio>
+      <audio id="sfx9" class="clip" src="assets/sfx/click-soft.mp3" data-start="23.620" data-duration="0.370" data-track-index="10" data-volume="0.5" data-track-kind="audio"></audio>
+      <audio id="sfx10" class="clip" src="assets/sfx/key-press.mp3" data-start="24.150" data-duration="0.400" data-track-index="11" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx11" class="clip" src="assets/sfx/pop.mp3" data-start="24.200" data-duration="0.720" data-track-index="12" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx12" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="28.584" data-duration="4.400" data-track-index="10" data-volume="0.3" data-track-kind="audio"></audio>
+      <audio id="sfx13" class="clip" src="assets/sfx/click-soft.mp3" data-start="32.770" data-duration="0.370" data-track-index="11" data-volume="0.5" data-track-kind="audio"></audio>
+      <audio id="sfx14" class="clip" src="assets/sfx/key-press.mp3" data-start="33.300" data-duration="0.400" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx15" class="clip" src="assets/sfx/pop.mp3" data-start="33.350" data-duration="0.720" data-track-index="10" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx16" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="39.836" data-duration="0.575" data-track-index="11" data-volume="0.32" data-track-kind="audio"></audio>
+      <audio id="sfx17" class="clip" src="assets/sfx/click-soft.mp3" data-start="41.620" data-duration="0.370" data-track-index="12" data-volume="0.5" data-track-kind="audio"></audio>
+      <audio id="sfx18" class="clip" src="assets/sfx/key-press.mp3" data-start="42.150" data-duration="0.400" data-track-index="10" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx19" class="clip" src="assets/sfx/pop.mp3" data-start="42.200" data-duration="0.720" data-track-index="11" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx20" class="clip" src="assets/sfx/whoosh.mp3" data-start="48.656" data-duration="0.575" data-track-index="12" data-volume="0.32" data-track-kind="audio"></audio>
+      <audio id="sfx21" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="53.900" data-duration="0.575" data-track-index="10" data-volume="0.32" data-track-kind="audio"></audio>
+      <audio id="sfx22" class="clip" src="assets/sfx/click-soft.mp3" data-start="55.420" data-duration="0.370" data-track-index="11" data-volume="0.5" data-track-kind="audio"></audio>
+      <audio id="sfx23" class="clip" src="assets/sfx/key-press.mp3" data-start="55.950" data-duration="0.400" data-track-index="12" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx24" class="clip" src="assets/sfx/pop.mp3" data-start="56.000" data-duration="0.720" data-track-index="10" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx25" class="clip" src="assets/sfx/whoosh.mp3" data-start="61.856" data-duration="0.575" data-track-index="11" data-volume="0.32" data-track-kind="audio"></audio>
+      <audio id="sfx26" class="clip" src="assets/sfx/click-soft.mp3" data-start="63.420" data-duration="0.370" data-track-index="12" data-volume="0.5" data-track-kind="audio"></audio>
+      <audio id="sfx27" class="clip" src="assets/sfx/key-press.mp3" data-start="63.950" data-duration="0.400" data-track-index="10" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx28" class="clip" src="assets/sfx/pop.mp3" data-start="64.200" data-duration="0.720" data-track-index="11" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx29" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="69.856" data-duration="0.575" data-track-index="12" data-volume="0.32" data-track-kind="audio"></audio>
+      <audio id="sfx30" class="clip" src="assets/sfx/click-soft.mp3" data-start="71.420" data-duration="0.370" data-track-index="10" data-volume="0.5" data-track-kind="audio"></audio>
+      <audio id="sfx31" class="clip" src="assets/sfx/key-press.mp3" data-start="71.950" data-duration="0.400" data-track-index="11" data-volume="0.16" data-track-kind="audio"></audio>
+      <audio id="sfx32" class="clip" src="assets/sfx/pop.mp3" data-start="72.000" data-duration="0.720" data-track-index="12" data-volume="0.2" data-track-kind="audio"></audio>
+      <audio id="sfx33" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="75.716" data-duration="4.400" data-track-index="10" data-volume="0.3" data-track-kind="audio"></audio>
+      <audio id="sfx34" class="clip" src="assets/sfx/chime.mp3" data-start="79.850" data-duration="2.100" data-track-index="11" data-volume="0.28" data-track-kind="audio"></audio>
+    </div>
+    <script>
+      (function () {
+        const G = window.__GEO, PL = window.__PLAN;
+        const W = PL.W, H = PL.H, Q = G.Q, DEG = 180 / Math.PI;
+        const M = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+        const proj = (lon, lat) => [(lon - G.LON0) * G.S, (M(G.LAT0) - M(lat)) * G.S * DEG];
+        const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+        const expoOut = (u) => (u >= 1 ? 1 : 1 - Math.pow(2, -10 * u));
+        const cubicOut = (u) => 1 - Math.pow(1 - u, 3);
+        const sineIO = (u) => 0.5 - 0.5 * Math.cos(Math.PI * u);
+        // travel ease: quick acceleration, long deceleration before the reveal
+        const travelEase = (t) => { const u = Math.pow(clamp(t), 0.82); return u * u * u * (u * (6 * u - 15) + 10); };
+
+        // ---------- geometry -> Path2D (world = base px) ----------
+        // tol > 0: radial-distance simplification for far zooms (LOD); deterministic
+        function mkPath(rings, filter, tol = 0) {
+          const p = new Path2D(), t2 = tol * tol;
+          for (const r of rings) {
+            if (filter && !filter(r)) continue;
+            let lx = r[0] / Q, ly = r[1] / Q, n = 1;
+            p.moveTo(lx, ly);
+            for (let i = 2; i < r.length; i += 2) {
+              const x = r[i] / Q, y = r[i + 1] / Q;
+              if (tol && (x - lx) * (x - lx) + (y - ly) * (y - ly) < t2 && i < r.length - 2) continue;
+              p.lineTo(x, y); lx = x; ly = y; n++;
+            }
+            p.closePath();
+          }
+          return p;
+        }
+        const bb = G.baliBBox;
+        const [bx0, by1] = proj(bb[0] - 0.03, bb[1] - 0.03), [bx1, by0] = proj(bb[2] + 0.03, bb[3] + 0.03);
+        const inBali = (r) => { for (let i = 0; i < r.length; i += 2) { const x = r[i] / Q, y = r[i + 1] / Q; if (x < bx0 || x > bx1 || y < by0 || y > by1) return false; } return true; };
+        const mkSet = (tol) => ({
+          b200: mkPath(G.b200, null, tol), b1000: mkPath(G.b1000, null, tol), b3000: mkPath(G.b3000, null, tol),
+          other: mkPath(G.other, null, tol), idn: mkPath(G.idn, null, tol), bali: mkPath(G.idn, inBali),
+        });
+        const PATH_FULL = mkSet(0), PATH_LOD = mkSet(0.4); // 0.4 base px = 1.2 screen px at k = 3
+        let PATH = PATH_FULL;
+
+        // ---------- camera: van Wijk & Nuij smooth zoom-pan (altitude grows with distance) ----------
+        function zoomPath(a, b, rho) {
+          const ux0 = a.ux, uy0 = a.uy, w0 = a.w, ux1 = b.ux, uy1 = b.uy, w1 = b.w;
+          const dx = ux1 - ux0, dy = uy1 - uy0, d2 = dx * dx + dy * dy, r2 = rho * rho, r4 = r2 * r2;
+          if (d2 < 1e-9) {
+            const S = Math.log(w1 / w0) / rho;
+            return (t) => ({ ux: ux0 + t * dx, uy: uy0 + t * dy, w: w0 * Math.exp(rho * t * S) });
+          }
+          const d1 = Math.sqrt(d2);
+          const b0 = (w1 * w1 - w0 * w0 + r4 * d2) / (2 * w0 * r2 * d1), b1 = (w1 * w1 - w0 * w0 - r4 * d2) / (2 * w1 * r2 * d1);
+          const R0 = Math.log(Math.sqrt(b0 * b0 + 1) - b0), R1 = Math.log(Math.sqrt(b1 * b1 + 1) - b1);
+          const S = (R1 - R0) / rho, ch = Math.cosh(R0), sh = Math.sinh(R0);
+          return (t) => {
+            const s = t * S, u = (w0 / (r2 * d1)) * (ch * Math.tanh(rho * s + R0) - sh);
+            return { ux: ux0 + u * dx, uy: uy0 + u * dy, w: (w0 * ch) / Math.cosh(rho * s + R0) };
+          };
+        }
+        const SEG = PL.travel.map((s) => ({ ...s, f: zoomPath(s.a, s.b, s.rho) }));
+        function cam(t) {
+          if (t < PL.pullEnd) {
+            const e = cubicOut(clamp(t / PL.pullEnd));
+            return { ux: PL.OPEN.ux, uy: PL.OPEN.uy, w: PL.OPEN.w * Math.pow(PL.NATIONAL.w / PL.OPEN.w, e) };
+          }
+          let last = PL.NATIONAL;
+          for (const s of SEG) {
+            if (t >= s.t1) { last = s.b; continue; }
+            if (t >= s.t0) return s.f(travelEase((t - s.t0) / (s.t1 - s.t0)));
+            break;
+          }
+          return last;
+        }
+        const kNat = W / PL.NATIONAL.w;
+
+        // ---------- overlay markers (built once, ids stable) ----------
+        const NS = "http://www.w3.org/2000/svg";
+        const layer = document.getElementById("mk-layer");
+        const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+        const CITY = PL.cities.map((c) => {
+          const g = mk("g", { id: "mk-" + c.id, opacity: 0 }, layer);
+          const halo = mk("circle", { r: 78, fill: "url(#mj-halo)" }, g);
+          const pulse = mk("circle", { r: 10, fill: "none", stroke: "#294B77", "stroke-width": 1.6, opacity: 0 }, g);
+          const dot = mk("circle", { r: 9, fill: c.island ? "#FBFCFE" : "#294B77", stroke: c.island ? "#294B77" : "#FBFCFE", "stroke-width": c.island ? 2.8 : 3 }, g);
+          const lg = mk("g", { id: "lb-" + c.id, opacity: 0 }, layer);
+          const lead = mk("path", { class: "mk-lead", d: "" }, lg);
+          const off = PL.labelOffsets[c.id];
+          const txt = mk("text", { class: "mk-lbl", "text-anchor": off[2] }, lg);
+          txt.textContent = c.title === "SOLO / SURAKARTA" ? "SOLO" : c.title;
+          return { ...c, w: proj(c.lon, c.lat), g, halo, pulse, dot, lg, lead, txt, off };
+        });
+        const indo = document.getElementById("lbl-indonesia");
+        const indoW = proj(100.6, -8.9);
+
+        // ---------- the frame ----------
+        const canvas = document.getElementById("map");
+        const ctx = canvas.getContext("2d");
+        const javaTrace = { a: proj(105.25, -6.78), c: proj(108.9, -7.95), b: proj(112.749, -7.247) };
+        const qpt = (a, c, b, u) => [(1 - u) * (1 - u) * a[0] + 2 * (1 - u) * u * c[0] + u * u * b[0], (1 - u) * (1 - u) * a[1] + 2 * (1 - u) * u * c[1] + u * u * b[1]];
+        function routeCtrl(r) {
+          const mx = (r.a[0] + r.b[0]) / 2, my = (r.a[1] + r.b[1]) / 2, dx = r.b[0] - r.a[0], dy = r.b[1] - r.a[1];
+          return [mx - dy * r.bend, my + dx * r.bend];
+        }
+        PL.routes.forEach((r) => (r.c = routeCtrl(r)));
+        const kNatPre = W / PL.NATIONAL.w;
+        // routes touching Bali stop at the island halo (a region, not a point); halo shrinks to the ring marker at national zoom
+        const BALI = PL.cities.find((c) => c.island);
+        BALI.w0 = proj(BALI.lon, BALI.lat);
+        const BH = (function () {
+          const hk = W / BALI.state.w;
+          return { hk, cx: BALI.state.ux + (BALI.ell.cx - W / 2) / hk, cy: BALI.state.uy + (BALI.ell.cy - H / 2) / hk, rx: BALI.ell.rx / hk, ry: BALI.ell.ry / hk };
+        })();
+        function trimRoute(r, k) {
+          let u0 = 0, u1 = 1;
+          if (r.to !== BALI.id && r.from !== BALI.id) return [u0, u1];
+          const f = clamp(Math.log(k / (2 * kNatPre)) / Math.log(BH.hk / (2 * kNatPre)));
+          const rx = Math.max(BH.rx * f, 11 / k), ry = Math.max(BH.ry * f, 11 / k);
+          const cx = BH.cx + (BALI.w0[0] - BH.cx) * (1 - f), cy = BH.cy + (BALI.w0[1] - BH.cy) * (1 - f);
+          const inside = (p) => ((p[0] - cx) / rx) ** 2 + ((p[1] - cy) / ry) ** 2 < 1;
+          if (r.to === BALI.id) { let lo = 0, hi = 1; for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; inside(qpt(r.a, r.c, r.b, m)) ? (hi = m) : (lo = m); } u1 = lo; }
+          if (r.from === BALI.id) { let lo = 0, hi = 1; for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; inside(qpt(r.a, r.c, r.b, m)) ? (lo = m) : (hi = m); } u0 = hi; }
+          return [u0, u1];
+        }
+        const windowAlpha = (t, a, b, fi = 0.4, fo = 0.4) => clamp((t - a) / fi) * clamp((b - t) / fo);
+
+        function strokeCurve(a, c, b, u0, u1, k) {
+          const n = Math.max(2, Math.ceil(64 * (u1 - u0)));
+          ctx.beginPath();
+          for (let i = 0; i <= n; i++) { const p = qpt(a, c, b, u0 + ((u1 - u0) * i) / n); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+          ctx.stroke();
+        }
+        function ring(x, y, r, k, alpha, fill = "#FBFCFE") {
+          ctx.globalAlpha = alpha; ctx.beginPath(); ctx.arc(x, y, r / k, 0, Math.PI * 2);
+          ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = 2.2 / k; ctx.strokeStyle = "#294B77"; ctx.stroke(); ctx.globalAlpha = 1;
+        }
+
+        function renderAt(t) {
+          const C = cam(t), k = W / C.w, tx = W / 2 - C.ux * k, ty = H / 2 - C.uy * k;
+          PATH = k < 3 ? PATH_LOD : PATH_FULL;
+
+          // ocean + bathymetry (deeper = slightly deeper ice)
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.filter = "none";
+          ctx.fillStyle = "#E4EDF9"; ctx.fillRect(0, 0, W, H);
+          ctx.setTransform(k, 0, 0, k, tx, ty);
+          ctx.fillStyle = "#DBE6F6"; ctx.fill(PATH.b200, "evenodd");
+          ctx.fillStyle = "#D3E0F3"; ctx.fill(PATH.b1000, "evenodd");
+          ctx.fillStyle = "#CAD9EF"; ctx.fill(PATH.b3000, "evenodd");
+          // pale surf rim, then land with a soft contact shadow
+          ctx.lineJoin = "round";
+          ctx.strokeStyle = "rgba(251,252,254,0.55)"; ctx.lineWidth = 7 / k; ctx.stroke(PATH.idn); ctx.stroke(PATH.other);
+          // contact shadow: two offset fills (no shadowBlur: too slow in software raster)
+          ctx.save(); ctx.translate(0, 4.5 / k); ctx.fillStyle = "rgba(32,43,59,0.06)"; ctx.fill(PATH.other); ctx.fill(PATH.idn); ctx.restore();
+          ctx.save(); ctx.translate(0, 2.2 / k); ctx.fillStyle = "rgba(32,43,59,0.08)"; ctx.fill(PATH.other); ctx.fill(PATH.idn); ctx.restore();
+          ctx.fillStyle = "#EDF1F6"; ctx.fill(PATH.other);
+          ctx.fillStyle = "#FBFCFE"; ctx.fill(PATH.idn);
+          ctx.strokeStyle = "rgba(58,98,153,0.30)"; ctx.lineWidth = 0.8 / k; ctx.stroke(PATH.other);
+          ctx.strokeStyle = "rgba(41,75,119,0.58)"; ctx.lineWidth = 1.05 / k; ctx.stroke(PATH.idn);
+
+          // Bali regional highlight (island, not a point)
+          const bali = CITY.find((c) => c.island);
+          const ba = clamp((t - (bali.A - 0.45)) / 0.7) * (1 - clamp((t - bali.depart) / 0.7));
+          if (ba > 0) {
+            ctx.globalAlpha = ba;
+            ctx.fillStyle = "#D6E3F7"; ctx.fill(PATH.bali);
+            ctx.strokeStyle = "#294B77"; ctx.lineWidth = 1.8 / k; ctx.stroke(PATH.bali);
+            if (bali.ell) {
+              ctx.setTransform(1, 0, 0, 1, 0, 0);
+              ctx.setTransform(k, 0, 0, k, tx, ty);
+              const hk = W / bali.state.w; // holding zoom
+              const ecx = bali.state.ux + (bali.ell.cx - W / 2) / hk, ecy = bali.state.uy + (bali.ell.cy - H / 2) / hk;
+              ctx.setLineDash([3 / k, 6 / k]); ctx.lineWidth = 1.3 / k; ctx.strokeStyle = "rgba(41,75,119,0.7)";
+              ctx.beginPath(); ctx.ellipse(ecx, ecy, bali.ell.rx / hk, bali.ell.ry / hk, 0, 0, Math.PI * 2); ctx.stroke();
+              ctx.setLineDash([]);
+            }
+            ctx.globalAlpha = 1;
+          }
+          ctx.filter = "none";
+
+          // opening light trace along Java toward East Java
+          const lt0 = 1.15, lt1 = 3.15;
+          if (t > lt0 && t < 3.9) {
+            const h = travelEase((t - lt0) / (lt1 - lt0)), tail = Math.max(0, h - 0.32), fade = 1 - clamp((t - 3.3) / 0.6);
+            ctx.lineCap = "round";
+            ctx.globalAlpha = 0.35 * fade; ctx.strokeStyle = "#ACC6E7"; ctx.lineWidth = 6 / k; strokeCurve(javaTrace.a, javaTrace.c, javaTrace.b, tail, h, k);
+            ctx.globalAlpha = 0.9 * fade; ctx.strokeStyle = "#294B77"; ctx.lineWidth = 1.8 / k; strokeCurve(javaTrace.a, javaTrace.c, javaTrace.b, Math.max(tail, h - 0.12), h, k);
+            ctx.globalAlpha = 1;
+          }
+
+          // sequence trails (dashed when complete), leading point = next locator ring
+          ctx.lineCap = "round";
+          for (const r of PL.routes) {
+            const p = travelEase((t - r.t0) / (r.t1 - r.t0));
+            if (p <= 0) continue;
+            const [u0, u1] = trimRoute(r, k), pe = u0 + (u1 - u0) * p;
+            ctx.setLineDash([7 / k, 6 / k]); ctx.strokeStyle = "rgba(41,75,119,0.55)"; ctx.lineWidth = 1.6 / k;
+            strokeCurve(r.a, r.c, r.b, u0, pe, k);
+            ctx.setLineDash([]);
+            if (p < 1) { ctx.strokeStyle = "#294B77"; ctx.lineWidth = 2.2 / k; strokeCurve(r.a, r.c, r.b, Math.max(u0, pe - 0.14), pe, k); }
+          }
+          // locator rings at route tips / opening trace tip, until the marker lands
+          for (const c of CITY) {
+            const r = PL.routes.find((q) => q.to === c.id);
+            const appear = r ? r.t1 - 0.25 : 3.0;
+            if (t < appear || t > c.A + 0.15) continue;
+            const a = clamp((t - appear) / 0.25) * (1 - clamp((t - (c.A - 0.1)) / 0.25));
+            const tu = r ? trimRoute(r, k) : null;
+            const tip = r ? qpt(r.a, r.c, r.b, tu[0] + (tu[1] - tu[0]) * travelEase((t - r.t0) / (r.t1 - r.t0))) : c.w;
+            ring(tip[0], tip[1], 7, k, a);
+            // gentle locator pulse (one or two, finite)
+            const pulseStart = c.id === "bandung" ? 52.55 : appear + 0.1;
+            for (let n = 0; n < (c.island ? 0 : c.id === "bandung" ? 2 : 1); n++) {
+              const u = (t - (pulseStart + n * 1.0)) / 1.0;
+              if (u > 0 && u < 1) { ctx.globalAlpha = 0.6 * (1 - u) * a; ctx.beginPath(); ctx.arc(c.w[0], c.w[1], (8 + 30 * cubicOut(u)) / k, 0, Math.PI * 2); ctx.lineWidth = 1.5 / k; ctx.strokeStyle = "#294B77"; ctx.stroke(); ctx.globalAlpha = 1; }
+            }
+          }
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+          // ---------- overlay ----------
+          const zf = clamp((1.7 * kNat - k) / (0.6 * kNat));
+          const sizeF = 0.8 + 0.2 * clamp(Math.log(k / kNat) / Math.log(8));
+          CITY.forEach((c, i) => {
+            const x = c.w[0] * k + tx, y = c.w[1] * k + ty;
+            const u = (t - (c.A - 0.2)) / 0.55;
+            if (u <= 0) { c.g.setAttribute("opacity", 0); c.lg.setAttribute("opacity", 0); return; }
+            const land = expoOut(clamp(u)), visited = clamp((t - (c.depart - 0.3)) / 0.5);
+            const dy = -18 * (1 - land);
+            c.g.setAttribute("opacity", clamp(u * 3).toFixed(3));
+            c.g.setAttribute("transform", `translate(${x.toFixed(2)} ${(y + dy).toFixed(2)})`);
+            const activeR = c.island ? 0 : 9.5;
+            const visR = c.island ? 7.5 : 6.5;
+            let r = (activeR + (visR - activeR) * sineIO(visited)) * sizeF * (0.4 + 0.6 * land);
+            if (c.island && visited <= 0) r = 0;
+            c.dot.setAttribute("r", Math.max(0, r).toFixed(2));
+            c.dot.setAttribute("opacity", c.island ? visited.toFixed(3) : 1);
+            c.halo.setAttribute("opacity", c.island ? 0 : ((1 - visited) * land).toFixed(3));
+            const pu = (t - (c.A + 0.1)) / 0.9;
+            if (!c.island && pu > 0 && pu < 1) { c.pulse.setAttribute("r", (10 + 40 * cubicOut(pu)).toFixed(2)); c.pulse.setAttribute("opacity", (0.6 * (1 - pu)).toFixed(3)); }
+            else c.pulse.setAttribute("opacity", 0);
+            // national-view labels with leader lines
+            let la = 0;
+            for (const o of PL.overviews) la = Math.max(la, windowAlpha(t, o.labelsFrom + i * 0.07, o.labelsTo, 0.35, 0.35));
+            la *= zf * (t >= c.depart ? 1 : 0);
+            c.lg.setAttribute("opacity", la.toFixed(3));
+            if (la > 0) {
+              const [ox, oy, anchor] = c.off, L = Math.hypot(ox, oy);
+              const sx = x + (ox / L) * 11, sy = y + (oy / L) * 11, ex = x + ox, ey = y + oy;
+              c.lead.setAttribute("d", `M${sx.toFixed(1)} ${sy.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)}`);
+              const lx = ex + (anchor === "start" ? 8 : anchor === "end" ? -8 : 0), ly = ey + (oy < 0 ? -8 : oy > 30 ? 26 : 8);
+              c.txt.setAttribute("x", lx.toFixed(1)); c.txt.setAttribute("y", ly.toFixed(1));
+            }
+          });
+          const ia = zf * Math.max(windowAlpha(t, -1, 3.2, 0.4, 0.5), windowAlpha(t, 50.1, 53.1, 0.5, 0.4), windowAlpha(t, 79.25, 999, 0.6, 0.4));
+          indo.setAttribute("opacity", (0.82 * ia).toFixed(3));
+          indo.setAttribute("x", (indoW[0] * k + tx).toFixed(1)); indo.setAttribute("y", (indoW[1] * k + ty).toFixed(1));
+        }
+
+        window.addEventListener("hf-seek", (e) => renderAt(e.detail.time));
+        window.__mjRender = renderAt;
+        const proxy = { t: 0 };
+        const tl = gsap.timeline({ paused: true });
+        tl.to(proxy, { t: PL.duration, duration: PL.duration, ease: "none", onUpdate: () => renderAt(proxy.t) }, 0);
+        renderAt(0);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

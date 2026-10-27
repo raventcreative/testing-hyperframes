@@ -1,0 +1,87 @@
+"""S25 — CTA: KOMEN EDIT (46.27–51.40)
+VO: "Mau daftar dua puluh efek, breakdown scene, dan prompt yang bisa lo pakai? Komen EDIT. Gue kirim."
+Opens on S24's card stack at the centre; the stack unfolds into three deliverable chips on their words (Daftar 20 efek,
+Breakdown scene, Prompt). Camera pans to the mascot centre. "Komen": the chips lift away and a smoked-glass comment card
+lands; "EDIT" pops in cyan Bold - HERO APEX. "Gue kirim.": a small send arrow leaves the card. The last ~0.5 s is a
+calm, complete brand frame (logo final sheen runs in the root), no fade to black."""
+from xk import box, r3, CYAN, apex, check_svg
+from kit import SELF, HALF, blur_wrap, talk
+
+STACK = (465, 300, 150, 267)
+CHIPS = [("Daftar <span style='color:#00D0FE'>20</span> efek", 134), ("Breakdown scene", 138), ("Prompt", 141)]
+CHIP_W = [330, 340, 200]
+CHIP_X = [84, 84 + 330 + 18, 84 + 330 + 18 + 340 + 18]
+CHIP_Y = [236, 236, 236]
+CARD = (90, 372, 900, 360)
+
+
+def build(S):
+    s = S.id
+    t0, t1 = S.t0, S.t1
+    W146, W147, W148 = S.W(146), S.W(147), S.W(148)
+    stx, sty, stw, sth = STACK
+    # ---------------------------------------------------------------- back: the stack (from S24)
+    for k, n in enumerate(["orbit", "paper", "cover", "city", "phone"]):
+        S.back.append(f'<div class="abs" id="{s}-st{k}" style="{box(stx, sty, stw, sth)}border-radius:14px;overflow:hidden;box-shadow:0 0 0 2px rgba(255,255,255,.25),0 18px 30px -14px rgba(3,8,28,.85)">'
+                      f'<img src="{SELF}/{n}.jpg" alt="" style="position:absolute;left:0;top:0;width:{stw}px;height:{sth}px" /></div>')
+    # ---------------------------------------------------------------- front: chips, comment card
+    for k, (label, wi) in enumerate(CHIPS):
+        w = CHIP_W[k]
+        S.front.append(f'<div class="abs pill acrylic" id="{s}-ch{k}" style="{box(CHIP_X[k], CHIP_Y[k], w, 66)}">'
+                       f'<div class="abs" style="left:10px;top:10px;width:46px;height:46px;border-radius:23px;background:rgba(3,10,30,.55)">'
+                       f'<div class="abs" style="left:9px;top:9px;width:28px;height:28px">{check_svg(f"{s}-cc{k}", CYAN, 3.6)}</div></div>'
+                       f'<div class="abs" style="left:62px;top:0;width:{w - 72}px;font:700 27px/66px Poppins;color:#fff;white-space:nowrap;text-align:center">{label}</div></div>')
+    cx, cy, cw, chh = CARD
+    S.front.append(f'<div class="abs smoked" id="{s}-card" style="{box(cx, cy, cw, chh)}border-radius:40px">'
+                   f'<div class="abs" style="left:40px;top:40px;width:76px;height:76px;border-radius:38px;background:linear-gradient(150deg,#4a74ab,#183563);box-shadow:inset 0 0 0 3px rgba(0,208,254,.8)"></div>'
+                   f'<div class="abs" style="left:138px;top:44px;width:300px;height:16px;border-radius:8px;background:rgba(255,255,255,.28)"></div>'
+                   f'<div class="abs" style="left:138px;top:78px;width:200px;height:14px;border-radius:7px;background:rgba(255,255,255,.16)"></div>'
+                   f'<div class="abs" id="{s}-komen" style="left:40px;top:150px;width:300px;font:700 64px/1 Poppins;color:#fff">Komen</div>'
+                   f'<div class="abs" id="{s}-edit" style="left:300px;top:112px;width:560px;font:700 190px/1 Poppins;color:{CYAN};letter-spacing:-0.02em;'
+                   f'text-shadow:0 0 30px rgba(0,208,254,.45), 0 6px 20px rgba(3,8,28,.6)">EDIT</div>'
+                   f'<div class="abs" id="{s}-send" style="left:{cw - 130}px;top:40px;width:80px;height:80px;border-radius:40px;background:{CYAN}">'
+                   f'<svg viewBox="0 0 48 48" style="position:absolute;left:16px;top:16px;width:48px;height:48px"><path d="M6 24 L42 8 L32 42 L24 28 Z" fill="#0b1636"/><path d="M24 28 L42 8" stroke="{CYAN}" stroke-width="2.5"/></svg></div></div>')
+    apex(S, S.front, f"{s}-ap", 640, 492, W147 + 0.06, size=760, sparks=10, seed=2501, op=0.55)
+
+    # ---------------------------------------------------------------- motion
+    # stack unfolds into the chips (cards fan out, fade behind the chips)
+    for k in range(5):
+        a = {"x": 0, "y": 0, "rotation": (-6, -3, 0, 3, 6)[k], "opacity": 1, "scale": 1}
+        S.init(f"#{s}-st{k}", a)
+        S.ft(f"#{s}-st{k}", dict(a), {"x": (k - 2) * 170, "y": 40, "rotation": (k - 2) * 9, "opacity": 0, "scale": 0.8}, t0 + 0.05 + k * 0.03, 0.45, "power3.inOut")
+    for k, (label, wi) in enumerate(CHIPS):
+        b = S.W(wi) - 0.06
+        S.init(f"#{s}-ch{k}", {"opacity": 0, "scale": 0.6, "y": 30})
+        S.ft(f"#{s}-ch{k}", {"opacity": 0, "scale": 0.6, "y": 30}, {"opacity": 1, "scale": 1, "y": 0}, b, 0.34, "back.out(2)")
+        S.init(f"#{s}-cc{k}", {"attr": {"stroke-dashoffset": 1}})
+        S.ft(f"#{s}-cc{k}", {"attr": {"stroke-dashoffset": 1}}, {"attr": {"stroke-dashoffset": 0}}, b + 0.25, 0.24, "power2.out")
+        S.fx(b + 0.02, "pop", 0.06)
+        S.ft(f"#{s}-ch{k}", {"opacity": 1, "y": 0}, {"opacity": 0, "y": -80}, W146 - 0.34 + k * 0.03, 0.2, "power2.in")
+    # comment card lands, EDIT pops (apex), send arrow
+    S.init(f"#{s}-card", {"opacity": 0, "y": 70, "scale": 0.92})
+    S.ft(f"#{s}-card", {"opacity": 0, "y": 70, "scale": 0.92}, {"opacity": 1, "y": 0, "scale": 1}, W146 - 0.04, 0.36, "power3.out")
+    S.init(f"#{s}-komen", {"opacity": 0, "x": -30})
+    S.ft(f"#{s}-komen", {"opacity": 0, "x": -30}, {"opacity": 1, "x": 0}, W146 + 0.02, 0.28, "power3.out")
+    S.init(f"#{s}-edit", {"opacity": 0, "scale": 0.55, "transformOrigin": "30% 60%"})
+    S.ft(f"#{s}-edit", {"opacity": 0, "scale": 0.55}, {"opacity": 1, "scale": 1}, W147 - 0.04, 0.4, "back.out(2.4)")
+    S.init(f"#{s}-send", {"scale": 0, "rotation": -30, "x": 0})
+    S.ft(f"#{s}-send", {"scale": 0, "rotation": -30, "x": 0}, {"scale": 1, "rotation": 0, "x": 0}, W148 - 0.05, 0.3, "back.out(2.4)")
+    S.ft(f"#{s}-send", {"x": 0}, {"x": 16}, W148 + 0.3, 0.25, "power2.out")
+    S.fx(W146 - 0.02, "whoosh", 0.05)
+    S.fx(W147 + 0.02, "sparkle", 0.07)
+    S.fx(W148 + 0.02, "click", 0.05)
+
+    # ---------------------------------------------------------------- mascot: half-body explaining the offer (background soft),
+    # steps back on "Komen" so the EDIT card reads, then points at you
+    blur_wrap(S)
+    S.init(f"#{s}-bgblur", {"filter": "blur(16px) brightness(0.62) saturate(0.9)"})
+    v1 = {"fx": 540, "fy": 1900, "h": 1120, "yaw": 0, "pitch": 5}
+    back = W146 - 0.3
+    S.mv([(t0, dict(HALF, yaw=-2), None), (S.W(138), dict(HALF, yaw=6), "sine.inOut"), (back, dict(HALF, yaw=-2), "sine.inOut"),
+          (back + 0.45, v1, "power3.inOut"), (S.WE(149) + 0.05, dict(v1, yaw=0), "sine.inOut"), (t1, v1, "none")])
+    for tr, keys in talk(S, 133, 145, seed=4, rest=False).items():
+        S.act(tr, keys)
+    S.act("armL", [(W146 - 0.14, "pointUp", 0.3), (W148, "present", 0.35), (S.WE(149) + 0.05, "low", 0.4)])
+    S.act("armR", [(W146, "low", 0.35), (W148 - 0.05, "wave", 0.3), (S.WE(149), "low", 0.4)])
+    S.act("head", [(W146, [-0.12, 0.14, 0], 0.3), (W147, [0.06, 0.02, 0], 0.22), (W148, [-0.02, 0, 0.04], 0.35), (S.WE(149) + 0.05, [0, 0, 0], 0.4)])
+    S.act("torso", [(W146 - 0.05, {}, 0.3), (W147 - 0.05, {"chest": [0.06, 0, 0]}, 0.25), (W148, {}, 0.4)])

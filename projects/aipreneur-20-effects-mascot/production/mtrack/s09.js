@@ -1,0 +1,6 @@
+vt.set(V, {"fx": 540, "fy": 1720, "h": 1150, "yaw": -6, "pitch": 5}, 18.467);
+vt.fromTo(V, {"fx": 540, "fy": 1720, "h": 1150, "yaw": -6, "pitch": 5}, {"fx": 540, "fy": 1720, "h": 1150, "yaw": 10, "pitch": 5, "duration": 0.993, "ease": "power2.inOut", "immediateRender": false}, 18.467);
+vt.fromTo(V, {"fx": 540, "fy": 1720, "h": 1150, "yaw": 10, "pitch": 5}, {"fx": 540, "fy": 1720, "h": 1150, "yaw": 14, "pitch": 5, "duration": 1.407, "ease": "sine.inOut", "immediateRender": false}, 19.46);
+vt.set("#m-xf", {"scale": 0.42, "y": -320, "opacity": 0, "transformOrigin": "540px 1720px", "filter": "drop-shadow(0px 0px 0px rgba(0,208,254,0))"}, 18.467);
+vt.fromTo("#m-xf", {"scale": 0.42, "y": -320, "opacity": 0, "transformOrigin": "540px 1720px", "filter": "drop-shadow(0px 0px 0px rgba(0,208,254,0))"}, {"scale": 0.42, "y": -320, "opacity": 1, "transformOrigin": "540px 1720px", "filter": "drop-shadow(0px 0px 0px rgba(0,208,254,0))", "duration": 0.08, "ease": "none", "immediateRender": false}, 18.467);
+vt.fromTo("#m-xf", {"scale": 0.42, "y": -320, "opacity": 1, "transformOrigin": "540px 1720px", "filter": "drop-shadow(0px 0px 0px rgba(0,208,254,0))"}, {"scale": 1.0, "y": 0, "opacity": 1, "transformOrigin": "540px 1720px", "filter": "drop-shadow(0px 0px 0px rgba(0,208,254,0))", "duration": 0.533, "ease": "power3.out", "immediateRender": false}, 18.547);

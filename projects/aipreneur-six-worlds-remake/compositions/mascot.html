@@ -1,0 +1,182 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #m-xf { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 960px; }
+    #m-clip { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #m-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  </style>
+  <div id="root" data-composition-id="mascot" data-width="1080" data-height="1920">
+    <div id="m-xf" data-layout-ignore data-layout-allow-occlusion><div id="m-clip" data-layout-ignore data-layout-allow-occlusion><canvas id="m-canvas" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas></div></div>
+  </div>
+  <script>
+    (function () {
+      // =====================================================================================
+      // 3D MASCOT (SIX WORLDS) (source: tools/mascot_src.html -> tools/gen_mascot.py).
+      // The user's rigged GLB (19 joints, 0 morph targets) rendered live in one WebGL canvas.
+      // Framing per scene = a real camera change (setView: feet px, figure px, yaw/pitch), never a CSS
+      // upscale of a rendered bitmap. Wrapper #m-xf / #m-clip carry the per-effect compositing (clip to a
+      // frame, phone screen, avatar circle, paper outline ...). All of it lives on a private timeline `vt`
+      // that is seeked with the frame time inside the hf-seek handler -> deterministic, order-independent.
+      // Acting: key poses on measured VO words -> damped springs; lip sync = CTC phones x VO energy
+      // (low-passed, never ahead of the voice). No blinks: the GLB has no eyelid geometry.
+      // =====================================================================================
+      const M3 = window.Mascot3D;
+      const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump, osc } = M3;
+      const VW = window.VO_WORDS, D = 40.4;
+      const w = (i) => VW[i][1], we = (i) => VW[i][2];
+      const canvas = document.getElementById("m-canvas");
+      const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, D);
+      const ACC = syllableAccents(window.VO_ENV, VW, window.VO_PHONES, D);
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * u * (u * (u * 6 - 15) + 10); };
+      const H = (rx, ry, rz) => [rx, ry, rz];
+      const add = (...ds) => { const o = {}; for (const d of ds) for (const [k, v] of Object.entries(d || {})) { const a = o[k] || [0, 0, 0]; o[k] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
+      function accents(t) {
+        let n = 0;
+        for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; }
+        return Math.min(1.3, n);
+      }
+      function idle(t, seed) {
+        return {
+          chest: [0.012 * Math.sin(t * 2 * Math.PI * 0.27), 0, 0],
+          spine: [0, 0.03 * vnoise(t, seed + 1, 0.3), 0.022 * vnoise(t, seed + 2, 0.27)],
+          head: [0.02 * vnoise(t, seed + 3, 0.4), 0.05 * vnoise(t, seed + 4, 0.31), 0.03 * vnoise(t, seed + 5, 0.36)],
+          forearm_L: [0.04 * vnoise(t, seed + 6, 0.45), 0, 0], forearm_R: [0.04 * vnoise(t, seed + 7, 0.42), 0, 0],
+        };
+      }
+
+      // ---------------------------------------------------------------- per-scene framing / compositing track
+      const V = { fx: 540, fy: 2050, h: 1700, yaw: 0, pitch: 5, vis: 1, rx: 0, rz: 0, ry: 0, ty: 0 };
+      const vt = gsap.timeline({ paused: true });
+      const RESET = {"V": {"fx": 540, "fy": 1800, "h": 1470, "yaw": 0, "pitch": 5, "vis": 1, "rx": 0, "rz": 0, "ry": 0, "ty": 0}, "X": {"x": 0, "y": 0, "scale": 1, "rotation": 0, "rotationX": 0, "rotationY": 0, "opacity": 1, "transformPerspective": 1400, "filter": "drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, "C": {"clipPath": "inset(-400px -400px -400px -400px round 0px)"}};
+      // ---- s01 1 VIDEO · 6 GAYA (0.0-5.0333)
+      vt.set(V, RESET.V, 0); vt.set("#m-xf", RESET.X, 0); vt.set("#m-clip", RESET.C, 0);
+      vt.set(V, {"fx": 300, "fy": 1790, "h": 1240, "yaw": 22, "pitch": 5}, 0);
+      vt.fromTo(V, {"fx": 300, "fy": 1790, "h": 1240, "yaw": 22, "pitch": 5}, {"fx": 290, "fy": 1790, "h": 1240, "yaw": 26, "pitch": 5, "duration": 4.16, "ease": "sine.inOut", "immediateRender": false}, 0);
+      vt.fromTo(V, {"fx": 290, "fy": 1790, "h": 1240, "yaw": 26, "pitch": 5}, {"fx": 225, "fy": 1795, "h": 1010, "yaw": -8, "pitch": 5, "duration": 0.873, "ease": "power2.inOut", "immediateRender": false}, 4.16);
+      // ---- s02 EDITORIAL SPLIT (5.0333-7.7667)
+      vt.set(V, RESET.V, 5.033); vt.set("#m-xf", RESET.X, 5.033); vt.set("#m-clip", RESET.C, 5.033);
+      vt.set(V, {"fx": 225, "fy": 1795, "h": 1010, "yaw": -8, "pitch": 5}, 5.033);
+      vt.fromTo(V, {"fx": 225, "fy": 1795, "h": 1010, "yaw": -8, "pitch": 5}, {"fx": 225, "fy": 1795, "h": 1010, "yaw": -16, "pitch": 5, "duration": 0.407, "ease": "sine.inOut", "immediateRender": false}, 5.033);
+      vt.fromTo(V, {"fx": 225, "fy": 1795, "h": 1010, "yaw": -16, "pitch": 5}, {"fx": 225, "fy": 1795, "h": 1010, "yaw": -18, "pitch": 5, "duration": 1.28, "ease": "sine.inOut", "immediateRender": false}, 5.44);
+      vt.set("#m-xf", {"x": 0, "scale": 1, "transformOrigin": "225px 1300px"}, 5.033);
+      vt.fromTo("#m-xf", {"x": 0, "scale": 1, "transformOrigin": "225px 1300px"}, {"x": 0, "scale": 1, "transformOrigin": "225px 1300px", "duration": 1.687, "ease": "none", "immediateRender": false}, 5.033);
+      vt.fromTo("#m-xf", {"x": 0, "scale": 1, "transformOrigin": "225px 1300px"}, {"x": -760, "scale": 1.7, "transformOrigin": "225px 1300px", "duration": 0.32, "ease": "power3.in", "immediateRender": false}, 6.72);
+      vt.set(V, {"vis": 0}, 7.06);
+      // ---- s03 OVER THE SHOULDER (7.7667-12.6667)
+      vt.set(V, RESET.V, 7.767); vt.set("#m-xf", RESET.X, 7.767); vt.set("#m-clip", RESET.C, 7.767);
+      vt.set(V, {"fx": 1010, "fy": 2520, "h": 1300, "yaw": 142, "pitch": 6}, 7.767);
+      vt.fromTo(V, {"fx": 1010, "fy": 2520, "h": 1300, "yaw": 142, "pitch": 6}, {"fx": 905, "fy": 1935, "h": 1260, "yaw": 156, "pitch": 6, "duration": 0.75, "ease": "power3.out", "immediateRender": false}, 7.767);
+      vt.fromTo(V, {"fx": 905, "fy": 1935, "h": 1260, "yaw": 156, "pitch": 6}, {"fx": 880, "fy": 1925, "h": 1240, "yaw": 164, "pitch": 6, "duration": 2.263, "ease": "sine.inOut", "immediateRender": false}, 8.517);
+      vt.fromTo(V, {"fx": 880, "fy": 1925, "h": 1240, "yaw": 164, "pitch": 6}, {"fx": 880, "fy": 1925, "h": 1240, "yaw": 164, "pitch": 6, "duration": 0.77, "ease": "none", "immediateRender": false}, 10.78);
+      vt.fromTo(V, {"fx": 880, "fy": 1925, "h": 1240, "yaw": 164, "pitch": 6}, {"fx": 980, "fy": 2700, "h": 1240, "yaw": 164, "pitch": 6, "duration": 0.45, "ease": "power3.in", "immediateRender": false}, 11.55);
+      vt.set(V, {"vis": 0}, 12.02);
+      // ---- s04 BACKDROP WORD (12.6667-17.1)
+      vt.set(V, RESET.V, 12.667); vt.set("#m-xf", RESET.X, 12.667); vt.set("#m-clip", RESET.C, 12.667);
+      vt.set(V, {"vis": 0}, 12.667);
+      vt.set(V, {"vis": 1}, 12.767);
+      vt.set(V, {"fx": 1250, "fy": 2120, "h": 1500, "yaw": -26, "pitch": 4}, 12.767);
+      vt.fromTo(V, {"fx": 1250, "fy": 2120, "h": 1500, "yaw": -26, "pitch": 4}, {"fx": 640, "fy": 1840, "h": 1000, "yaw": -14, "pitch": 5, "duration": 0.55, "ease": "power3.out", "immediateRender": false}, 12.767);
+      vt.fromTo(V, {"fx": 640, "fy": 1840, "h": 1000, "yaw": -14, "pitch": 5}, {"fx": 600, "fy": 1840, "h": 1000, "yaw": -2, "pitch": 5, "duration": 1.243, "ease": "sine.inOut", "immediateRender": false}, 13.317);
+      vt.fromTo(V, {"fx": 600, "fy": 1840, "h": 1000, "yaw": -2, "pitch": 5}, {"fx": 650, "fy": 1880, "h": 1080, "yaw": 6, "pitch": 5, "duration": 0.84, "ease": "sine.inOut", "immediateRender": false}, 14.56);
+      vt.fromTo(V, {"fx": 650, "fy": 1880, "h": 1080, "yaw": 6, "pitch": 5}, {"fx": 1520, "fy": 2350, "h": 1750, "yaw": 26, "pitch": 4, "duration": 1.09, "ease": "power2.in", "immediateRender": false}, 15.4);
+      vt.set(V, {"vis": 0}, 16.5);
+      // ---- s05 GLASS WIDGETS (17.1-18.8333)
+      vt.set(V, RESET.V, 17.1); vt.set("#m-xf", RESET.X, 17.1); vt.set("#m-clip", RESET.C, 17.1);
+      vt.set(V, {"vis": 1}, 17.1);
+      vt.set(V, {"fx": -120, "fy": 1830, "h": 1120, "yaw": 30, "pitch": 5}, 17.1);
+      vt.fromTo(V, {"fx": -120, "fy": 1830, "h": 1120, "yaw": 30, "pitch": 5}, {"fx": 230, "fy": 1830, "h": 1120, "yaw": 16, "pitch": 5, "duration": 0.45, "ease": "power3.out", "immediateRender": false}, 17.1);
+      vt.fromTo(V, {"fx": 230, "fy": 1830, "h": 1120, "yaw": 16, "pitch": 5}, {"fx": 230, "fy": 1830, "h": 1120, "yaw": 22, "pitch": 5, "duration": 0.51, "ease": "sine.inOut", "immediateRender": false}, 17.55);
+      vt.fromTo(V, {"fx": 230, "fy": 1830, "h": 1120, "yaw": 22, "pitch": 5}, {"fx": 240, "fy": 1830, "h": 1120, "yaw": 26, "pitch": 5, "duration": 0.773, "ease": "sine.inOut", "immediateRender": false}, 18.06);
+      // ---- s06 SPOTLIGHT (18.8333-20.6333)
+      vt.set(V, RESET.V, 18.833); vt.set("#m-xf", RESET.X, 18.833); vt.set("#m-clip", RESET.C, 18.833);
+      vt.set(V, {"fx": 240, "fy": 1830, "h": 1120, "yaw": 26, "pitch": 5}, 18.833);
+      vt.fromTo(V, {"fx": 240, "fy": 1830, "h": 1120, "yaw": 26, "pitch": 5}, {"fx": 470, "fy": 1720, "h": 1150, "yaw": 16, "pitch": 5, "duration": 0.42, "ease": "power3.inOut", "immediateRender": false}, 18.833);
+      vt.fromTo(V, {"fx": 470, "fy": 1720, "h": 1150, "yaw": 16, "pitch": 5}, {"fx": 470, "fy": 1720, "h": 1150, "yaw": 6, "pitch": 5, "duration": 0.087, "ease": "sine.inOut", "immediateRender": false}, 19.253);
+      vt.fromTo(V, {"fx": 470, "fy": 1720, "h": 1150, "yaw": 6, "pitch": 5}, {"fx": 470, "fy": 1720, "h": 1150, "yaw": 0, "pitch": 6, "duration": 1.293, "ease": "sine.inOut", "immediateRender": false}, 19.34);
+      vt.set("#m-xf", {"filter": "brightness(0.82) drop-shadow(0px 0px 0px rgba(0,208,254,0))"}, 18.833);
+      vt.fromTo("#m-xf", {"filter": "brightness(0.82) drop-shadow(0px 0px 0px rgba(0,208,254,0))"}, {"filter": "brightness(0.82) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "duration": 0.357, "ease": "none", "immediateRender": false}, 18.833);
+      vt.fromTo("#m-xf", {"filter": "brightness(0.82) drop-shadow(0px 0px 0px rgba(0,208,254,0))"}, {"filter": "brightness(1.14) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "duration": 0.17, "ease": "power2.out", "immediateRender": false}, 19.19);
+      vt.fromTo("#m-xf", {"filter": "brightness(1.14) drop-shadow(0px 0px 0px rgba(0,208,254,0))"}, {"filter": "brightness(1.05) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "duration": 0.43, "ease": "power2.inOut", "immediateRender": false}, 19.36);
+      // ---- s07 COLOR GRADE (20.6333-23.5667)
+      vt.set(V, RESET.V, 20.633); vt.set("#m-xf", RESET.X, 20.633); vt.set("#m-clip", RESET.C, 20.633);
+      vt.set(V, {"fx": 470, "fy": 1720, "h": 1150, "yaw": 0, "pitch": 6}, 20.633);
+      vt.fromTo(V, {"fx": 470, "fy": 1720, "h": 1150, "yaw": 0, "pitch": 6}, {"fx": 250, "fy": 1700, "h": 800, "yaw": 14, "pitch": 5, "duration": 0.45, "ease": "power3.inOut", "immediateRender": false}, 20.633);
+      vt.fromTo(V, {"fx": 250, "fy": 1700, "h": 800, "yaw": 14, "pitch": 5}, {"fx": 250, "fy": 1700, "h": 800, "yaw": 18, "pitch": 5, "duration": 1.297, "ease": "sine.inOut", "immediateRender": false}, 21.083);
+      vt.fromTo(V, {"fx": 250, "fy": 1700, "h": 800, "yaw": 18, "pitch": 5}, {"fx": 250, "fy": 1700, "h": 800, "yaw": 12, "pitch": 5, "duration": 1.187, "ease": "sine.inOut", "immediateRender": false}, 22.38);
+      // ---- s08 RAHASIANYA (23.5667-29.9)
+      vt.set(V, RESET.V, 23.567); vt.set("#m-xf", RESET.X, 23.567); vt.set("#m-clip", RESET.C, 23.567);
+      vt.set(V, {"fx": 540, "fy": 1700, "h": 900, "yaw": 0, "pitch": 6}, 23.567);
+      vt.fromTo(V, {"fx": 540, "fy": 1700, "h": 900, "yaw": 0, "pitch": 6}, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -4, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 23.567);
+      vt.fromTo(V, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -4, "pitch": 4}, {"fx": 540, "fy": 2446, "h": 2156, "yaw": 5, "pitch": 4, "duration": 0.953, "ease": "sine.inOut", "immediateRender": false}, 24.067);
+      vt.fromTo(V, {"fx": 540, "fy": 2446, "h": 2156, "yaw": 5, "pitch": 4}, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -2, "pitch": 4, "duration": 1.76, "ease": "sine.inOut", "immediateRender": false}, 25.02);
+      vt.fromTo(V, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -2, "pitch": 4}, {"fx": 840, "fy": 1880, "h": 700, "yaw": -18, "pitch": 6, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 26.78);
+      vt.fromTo(V, {"fx": 840, "fy": 1880, "h": 700, "yaw": -18, "pitch": 6}, {"fx": 840, "fy": 1880, "h": 700, "yaw": -24, "pitch": 6, "duration": 2.62, "ease": "sine.inOut", "immediateRender": false}, 27.28);
+      // ---- s09 CARA BIKINNYA (29.9-36.2)
+      vt.set(V, RESET.V, 29.9); vt.set("#m-xf", RESET.X, 29.9); vt.set("#m-clip", RESET.C, 29.9);
+      vt.set(V, {"fx": 540, "fy": 2253, "h": 1832.6, "yaw": 6, "pitch": 4}, 29.9);
+      vt.fromTo(V, {"fx": 540, "fy": 2253, "h": 1832.6, "yaw": 6, "pitch": 4}, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -3, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 29.9);
+      vt.fromTo(V, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -3, "pitch": 4}, {"fx": 540, "fy": 2446, "h": 2156, "yaw": 4, "pitch": 4, "duration": 0.76, "ease": "sine.inOut", "immediateRender": false}, 30.4);
+      vt.fromTo(V, {"fx": 540, "fy": 2446, "h": 2156, "yaw": 4, "pitch": 4}, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -2, "pitch": 4, "duration": 2.22, "ease": "sine.inOut", "immediateRender": false}, 31.16);
+      vt.fromTo(V, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -2, "pitch": 4}, {"fx": 200, "fy": 2030, "h": 980, "yaw": 26, "pitch": 6, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 33.38);
+      vt.fromTo(V, {"fx": 200, "fy": 2030, "h": 980, "yaw": 26, "pitch": 6}, {"fx": 200, "fy": 2030, "h": 980, "yaw": 30, "pitch": 6, "duration": 2.32, "ease": "sine.inOut", "immediateRender": false}, 33.88);
+      // ---- s10 KOMEN CLAUDE (36.2-40.4)
+      vt.set(V, RESET.V, 36.2); vt.set("#m-xf", RESET.X, 36.2); vt.set("#m-clip", RESET.C, 36.2);
+      vt.set(V, {"fx": 540, "fy": 2253, "h": 1832.6, "yaw": 10, "pitch": 4}, 36.2);
+      vt.fromTo(V, {"fx": 540, "fy": 2253, "h": 1832.6, "yaw": 10, "pitch": 4}, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -3, "pitch": 4, "duration": 0.45, "ease": "power3.inOut", "immediateRender": false}, 36.2);
+      vt.fromTo(V, {"fx": 540, "fy": 2446, "h": 2156, "yaw": -3, "pitch": 4}, {"fx": 540, "fy": 2446, "h": 2156, "yaw": 4, "pitch": 4, "duration": 0.47, "ease": "sine.inOut", "immediateRender": false}, 36.65);
+      vt.fromTo(V, {"fx": 540, "fy": 2446, "h": 2156, "yaw": 4, "pitch": 4}, {"fx": 540, "fy": 2446, "h": 2156, "yaw": 0, "pitch": 4, "duration": 0.9, "ease": "sine.inOut", "immediateRender": false}, 37.12);
+      vt.fromTo(V, {"fx": 540, "fy": 2446, "h": 2156, "yaw": 0, "pitch": 4}, {"fx": 180, "fy": 2120, "h": 980, "yaw": 22, "pitch": 6, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 38.02);
+      vt.fromTo(V, {"fx": 180, "fy": 2120, "h": 980, "yaw": 22, "pitch": 6}, {"fx": 180, "fy": 2120, "h": 980, "yaw": 18, "pitch": 6, "duration": 1.25, "ease": "sine.inOut", "immediateRender": false}, 38.52);
+      vt.fromTo(V, {"fx": 180, "fy": 2120, "h": 980, "yaw": 18, "pitch": 6}, {"fx": 180, "fy": 2120, "h": 980, "yaw": 18, "pitch": 6, "duration": 0.63, "ease": "none", "immediateRender": false}, 39.77);
+      vt.set({}, {}, D);
+      vt.shiftChildren(0.01);   // nothing sits at exactly 0, so a forward replay from 0 always applies the frame-zero sets
+
+      // ---------------------------------------------------------------- acting (one continuous performance)
+      const PERF0 = buildPerformance({"armL": [[0.0, "low", 0.3], [1.2, "present", 0.32], [2.16, "low", 0.4], [3.08, "explain", 0.3], [4.18, "point", 0.24], [4.933, "low", 0.4], [4.95, "present", 0.3], [5.033, "low", 0.2], [5.69, "point", 0.32], [6.33, "pointUp", 0.28], [7.767, "low", 0.2], [9.71, "present", 0.32], [10.68, "pointUp", 0.3], [11.74, "low", 0.4], [12.69, "explain", 0.3], [12.767, "low", 0.3], [13.14, "low", 0.35], [15.3, "open", 0.3], [16.34, "low", 0.4], [17.06, "present", 0.3], [17.1, "low", 0.3], [17.96, "open", 0.3], [18.853, "low", 0.3], [19.68, "open", 0.28], [20.04, "present", 0.3], [20.633, "present", 0.3], [20.86, "fist", 0.22], [21.7, "present", 0.3], [22.24, "fist", 0.22], [23.06, "present", 0.3], [23.247, "point", 0.3], [23.52, "explain", 0.3], [24.38, "palmUp", 0.3], [24.88, "together", 0.3], [25.78, "open", 0.3], [26.88, "low", 0.4], [29.84, "together", 0.3], [30.44, "open", 0.3], [31.02, "explainHi", 0.3], [31.64, "explain", 0.3], [32.38, "palmUp", 0.3], [33.48, "low", 0.35], [33.8, "point", 0.3], [34.88, "pointUp", 0.3], [36.05, "low", 0.4], [36.14, "palmUp", 0.3], [36.56, "together", 0.3], [36.98, "open", 0.3], [38.12, "low", 0.35], [38.47, "point", 0.28], [39.38, "present", 0.35], [39.82, "low", 0.4]], "armR": [[0.0, "low", 0.3], [0.06, "palmUp", 0.3], [0.78, "low", 0.4], [3.2, "open", 0.32], [3.88, "low", 0.4], [5.033, "low", 0.2], [5.1, "open", 0.32], [5.74, "low", 0.4], [6.28, "explain", 0.3], [7.767, "low", 0.2], [7.86, "explain", 0.35], [8.84, "low", 0.4], [12.767, "low", 0.3], [12.98, "point", 0.3], [14.06, "present", 0.35], [15.18, "low", 0.4], [17.1, "low", 0.3], [17.72, "palmUp", 0.3], [18.26, "low", 0.4], [18.853, "low", 0.3], [19.68, "open", 0.28], [20.39, "low", 0.4], [20.633, "low", 0.3], [21.8, "explain", 0.3], [23.04, "low", 0.4], [23.56, "low", 0.32], [24.42, "explain", 0.32], [24.92, "together", 0.32], [25.82, "palmUp", 0.32], [26.88, "low", 0.4], [27.3, "point", 0.3], [28.68, "pointUp", 0.3], [29.7, "low", 0.4], [29.88, "together", 0.32], [30.48, "palmUp", 0.32], [31.06, "open", 0.32], [31.68, "low", 0.32], [32.42, "explain", 0.32], [33.48, "low", 0.4], [36.18, "explain", 0.32], [36.6, "together", 0.32], [37.02, "palmUp", 0.32], [38.12, "low", 0.4], [39.33, "open", 0.3], [39.77, "low", 0.4]], "head": [[0.0, [-0.08, 0.22, 0.14], 0.3], [0.16, [-0.05, 0.3, 0.1], 0.35], [1.34, [0.02, 0.36, 0.0], 0.35], [2.8, [-0.06, 0.18, 0.06], 0.35], [3.2, [-0.02, 0.32, -0.05], 0.35], [4.36, [0.05, 0.4, 0.0], 0.25], [5.033, [0.0, 0.3, 0.02], 0.4], [5.033, [-0.04, 0.22, 0.02], 0.3], [5.1, [-0.08, 0.32, 0.03], 0.28], [5.64, [-0.14, 0.26, -0.02], 0.35], [6.28, [-0.1, 0.3, 0.0], 0.3], [7.767, [-0.12, -0.18, 0.0], 0.35], [8.64, [-0.16, -0.24, 0.02], 0.35], [9.86, [-0.1, -0.3, 0.0], 0.3], [10.78, [-0.12, -0.36, -0.03], 0.3], [12.74, [-0.2, -0.22, 0.02], 0.35], [12.767, [-0.18, -0.3, 0.04], 0.4], [13.04, [-0.12, -0.42, 0.0], 0.3], [13.86, [-0.06, -0.26, 0.03], 0.35], [14.88, [-0.08, -0.36, 0.0], 0.3], [15.4, [0.0, 0.1, 0.0], 0.4], [17.1, [-0.05, 0.3, 0.0], 0.3], [17.18, [-0.1, 0.36, 0.03], 0.3], [17.72, [-0.14, 0.24, 0.0], 0.3], [18.01, [-0.06, 0.48, -0.04], 0.3], [18.853, [0.02, 0.18, 0], 0.3], [18.9, [-0.2, -0.32, 0.06], 0.35], [19.76, [-0.1, -0.06, 0.02], 0.3], [20.26, [-0.06, 0.18, -0.04], 0.3], [20.633, [0.04, 0.18, -0.04], 0.3], [20.94, [0.12, 0.28, 0], 0.3], [21.6, [-0.04, 0.34, 0.02], 0.3], [22.38, [0.06, 0.3, -0.03], 0.25], [22.89, [-0.08, 0.3, 0.04], 0.25], [23.247, [-0.16, 0.22, 0], 0.3], [23.6, [-0.03, 0.12, 0.05], 0.28], [24.0, [-0.07, -0.12, -0.05], 0.28], [24.46, [-0.07, 0.12, 0.05], 0.28], [24.58, [-0.03, -0.12, -0.05], 0.28], [24.96, [-0.07, 0.12, 0.05], 0.28], [25.58, [-0.07, -0.12, -0.05], 0.28], [25.86, [-0.03, 0.12, 0.05], 0.28], [25.98, [-0.07, -0.12, -0.05], 0.28], [26.88, [-0.1, -0.2, 0.0], 0.4], [27.82, [-0.18, -0.32, 0.02], 0.5], [28.68, [-0.06, -0.36, -0.03], 0.5], [29.8, [-0.04, -0.1, 0], 0.4], [29.92, [-0.03, 0.12, 0.05], 0.28], [30.32, [-0.07, -0.12, -0.05], 0.28], [30.52, [-0.07, 0.12, 0.05], 0.28], [30.98, [-0.03, -0.12, -0.05], 0.28], [31.1, [-0.07, 0.12, 0.05], 0.28], [31.4, [-0.07, -0.12, -0.05], 0.28], [31.72, [-0.03, 0.12, 0.05], 0.28], [32.02, [-0.07, -0.12, -0.05], 0.28], [32.46, [-0.07, 0.12, 0.05], 0.28], [32.76, [-0.03, -0.12, -0.05], 0.28], [33.48, [-0.12, 0.3, 0], 0.4], [34.28, [-0.2, 0.36, 0.02], 0.4], [35.5, [-0.05, 0.12, 0.05], 0.3], [36.1, [0, 0.2, 0], 0.4], [36.22, [-0.03, -0.12, -0.05], 0.28], [36.4, [-0.07, 0.12, 0.05], 0.28], [36.64, [-0.07, -0.12, -0.05], 0.28], [36.9, [-0.03, 0.12, 0.05], 0.28], [37.06, [-0.07, -0.12, -0.05], 0.28], [37.46, [-0.07, 0.12, 0.05], 0.28], [38.12, [-0.06, 0.28, 0], 0.35], [38.62, [0.04, 0.3, -0.03], 0.3], [39.22, [-0.04, 0.0, 0.05], 0.35], [39.82, [0, 0.06, 0], 0.4]], "torso": [[0.0, {"chest": [0, 0.08, 0.03]}, 0.3], [4.21, {"chest": [0.06, 0.14, 0], "spine": [0.04, 0, 0]}, 0.25], [5.033, {}, 0.4], [5.033, {"chest": [0, 0.1, 0]}, 0.3], [5.1, {"chest": [0.04, 0.16, 0]}, 0.3], [6.28, {"chest": [0.06, 0.12, 0]}, 0.3], [7.767, {"chest": [0.02, -0.06, 0]}, 0.35], [9.86, {"chest": [0.05, -0.1, 0]}, 0.35], [12.767, {"chest": [0.0, -0.1, 0.0]}, 0.4], [13.09, {"chest": [0.03, -0.16, 0.0]}, 0.3], [15.4, {}, 0.4], [17.1, {"chest": [0.0, 0.08, 0.0]}, 0.4], [18.01, {"chest": [-0.04, 0.16, 0.0]}, 0.3], [18.853, {"chest": [0.02, 0.06, 0]}, 0.3], [19.24, {"chest": [-0.08, -0.04, 0], "spine": [-0.04, 0, 0]}, 0.3], [19.74, {"chest": [-0.1, 0, 0], "spine": [-0.05, 0, 0]}, 0.25], [20.633, {"chest": [0.04, 0.08, 0]}, 0.3], [20.94, {"chest": [0.05, -0.1, 0]}, 0.3], [21.6, {"chest": [0.03, 0.06, 0]}, 0.3], [22.32, {"chest": [0.05, -0.12, 0]}, 0.3], [22.94, {"chest": [0, 0.06, 0]}, 0.3], [23.58, {"chest": [0.04, 0.06, 0.02]}, 0.35], [24.56, {"chest": [0.04, -0.06, -0.02]}, 0.35], [25.84, {"chest": [0.04, 0.06, 0.02]}, 0.35], [26.88, {"chest": [0, -0.08, 0]}, 0.4], [29.9, {"chest": [0.04, 0.06, 0.02]}, 0.35], [30.96, {"chest": [0.04, -0.06, -0.02]}, 0.35], [31.7, {"chest": [0.04, 0.06, 0.02]}, 0.35], [32.74, {"chest": [0.04, -0.06, -0.02]}, 0.35], [33.48, {"chest": [0.03, 0.12, 0]}, 0.4], [36.2, {"chest": [0.04, -0.06, -0.02]}, 0.35], [36.88, {"chest": [0.04, 0.06, 0.02]}, 0.35], [38.12, {"chest": [0.03, 0.1, 0]}, 0.4], [39.77, {}, 0.4]], "root": [[0.02, {"y": 0, "ry": 0, "rz": 0}, 0.4], [5.033, {"ry": 0.3}, 0.3], [6.28, {"ry": 0.38}, 0.4], [7.767, {"ry": -0.1}, 0.3], [9.86, {"ry": -0.16}, 0.4], [12.767, {"ry": -0.15}, 0.4], [15.4, {"ry": 0.1}, 0.5], [17.1, {"ry": 0.12}, 0.4], [18.853, {"y": 0, "ry": 0.1}, 0.3], [19.24, {"y": 0.008, "ry": 0}, 0.25], [19.54, {"y": 0}, 0.3], [20.653, {"y": 0, "ry": 0, "rz": 0}, 0.4], [23.587, {"y": 0, "ry": 0, "rz": 0}, 0.4], [29.92, {"y": 0, "ry": 0, "rz": 0}, 0.4], [36.22, {"y": 0, "ry": 0, "rz": 0}, 0.4]]}, D + 0.05);
+      const PERF = (t) => PERF0(t);
+      const EXTRA = (t) => ({});
+
+
+      let mascot = null;
+      function apply(t) {
+        vt.seek(0, false); vt.seek(t + 0.01, false);   // always replay forward: chained tweens resolve in time order whatever the seek history
+        if (V.vis <= 0.001) { canvas.style.visibility = "hidden"; return; }
+        canvas.style.visibility = "visible";
+        const Pf = PERF(t);
+        const acc = accents(t);
+        const still = 1 - sm((t - (D - 0.55)) / 0.4);
+        const id = idle(t, 17); for (const k in id) id[k] = id[k].map((x) => x * still);
+        const bones = add(Pf.bones, id, EXTRA(t), { head: [0.05 * acc * still, 0, 0], neck: [0.02 * acc * still, 0, 0] });
+        const root = { x: Pf.root.x, y: Pf.root.y + V.ty, ry: Pf.root.ry + V.ry + 0.025 * vnoise(t, 26, 0.22) * still, rz: Pf.root.rz + V.rz, rx: V.rx, s: Pf.root.s };
+        mascot.setView({ fx: V.fx, fy: V.fy, h: V.h, yaw: V.yaw, pitch: V.pitch });
+        mascot.setState({ root, bones, face: { blink: [0, 0], mouthMix: 1, mouth: mouthAt(t) } });
+        mascot.render();
+      }
+
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      const FACE = {"eyeA":{"c":[-0.099,0.583],"r":[0.049,0.039],"J":[-0.012594276485253965,0.5728894913572795,0.5928449952437722,0.008744878544633893]},"eyeB":{"c":[0.1,0.584],"r":[0.046,0.04],"J":[0.6644280491730516,0.030130365931821397,0.015549679888023958,-0.6054649097597234]},"browA":{"c":[-0.085,0.675],"J":[-0.04070834735419224,0.5537413339891137,0.591952051964936,0.06466756331213208]},"browB":{"c":[0.089,0.674],"J":[-0.1673063019885604,0.6553582065976762,0.5221243728997077,0.18775902203022735]},"mouth":{"c":[0.001,0.521],"r":[0.0266,0.0164]},"skin":[243,207,186],"skinEye":[246,214,195]};
+      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_rigged_v4.glb", face: FACE, width: 1080, height: 1920, envIntensity: 0.55 })
+        .then((m) => {
+          mascot = m;
+          // pale studio lighting (brand plate is cool white): soft key upper-left (renderer default), cool-white rim behind-right
+          for (const o of m.scene.children) {
+            if (!o.isDirectionalLight) continue;
+            if (o.position.z < 0) { o.intensity = 1.5; o.color.setRGB(0.86, 0.92, 1.0); o.position.set(1.5, 1.4, -1.5); }
+          }
+          apply(0);
+        });
+      window.__hf.buildReady["mascot"] = ready;
+      window.addEventListener("hf-seek", (e) => {
+        const t = e.detail.time;
+        if (mascot) apply(t);
+        else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t)));
+      });
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.set({}, {}, D - 0.02);
+      window.__timelines["mascot"] = tl;
+    })();
+  </script>
+</template>

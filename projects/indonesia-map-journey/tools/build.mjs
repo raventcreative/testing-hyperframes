@@ -305,10 +305,27 @@ const hosts = cities.map((c) => `      <div id="sc-${c.id}" class="clip scene-ho
   cues.sort((a, b) => a.t - b.t);
   fs.writeFileSync("data/sfx.json", JSON.stringify(cues, null, 1));
 }
+// master gain: measured mix was -21.4 LUFS / -5.6 dBTP; +4.5 dB lands near -17 LUFS with ~-1 dBTP headroom
+const MASTER_GAIN = 1.68;
 let audio = "";
 if (fs.existsSync("data/sfx.json")) {
+  const { execSync } = await import("node:child_process");
   const sfx = JSON.parse(fs.readFileSync("data/sfx.json", "utf8"));
-  audio = sfx.map((s, i) => `      <audio id="sfx${i}" class="clip" src="${s.file}" data-start="${s.t.toFixed(3)}" data-duration="${s.d.toFixed(3)}" data-track-index="${10 + (i % 6)}" data-volume="${s.v}" data-track-kind="audio"></audio>`).join("\n");
+  const durOf = {};
+  for (const s of sfx) {
+    if (durOf[s.file] === undefined)
+      durOf[s.file] = parseFloat(execSync(`ffprobe -v error -show_entries format=duration -of csv=p=0 "${s.file}"`).toString());
+  }
+  // slot = real media length (capped by the cue's intended length); pack cues into lanes so no lane overlaps
+  const lanes = [];
+  audio = sfx.map((s, i) => {
+    const d = Math.min(s.d, durOf[s.file]) - 0.001;
+    const t0 = Math.max(0, s.t);
+    let lane = lanes.findIndex((end) => end <= t0);
+    if (lane < 0) { lanes.push(0); lane = lanes.length - 1; }
+    lanes[lane] = t0 + d + 0.01;
+    return `      <audio id="sfx${i}" class="clip" src="${s.file}" data-start="${t0.toFixed(3)}" data-duration="${d.toFixed(3)}" data-track-index="${10 + lane}" data-volume="${(s.v * MASTER_GAIN).toFixed(3)}" data-track-kind="audio"></audio>`;
+  }).join("\n");
 }
 const tpl = fs.readFileSync("tools/index.template.html", "utf8");
 fs.writeFileSync("index.html", tpl.replace("<!--HOSTS-->", hosts).replace("<!--AUDIO-->", audio));

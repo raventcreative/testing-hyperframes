@@ -3,20 +3,122 @@
   <style>
     #e2-root { position: absolute; inset: 0; overflow: hidden; }
     .e2-layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; }
+    #e2-wall { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; }
+    .e2-card { position: absolute; left: 0; top: 0; width: 290px; height: 206px; border-radius: 18px; overflow: hidden; opacity: 0; }
+    .e2-vid { box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.18), 0 18px 34px rgba(2,8,26,0.55); }
+    .e2-vid .sc { position: absolute; inset: 0; }
+    .e2-vid .play { position: absolute; left: 50%; top: 46%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%;
+      background: rgba(255,255,255,0.94); box-shadow: 0 6px 18px rgba(2,8,26,0.35); }
+    .e2-vid .play::after { content: ""; position: absolute; left: 23px; top: 17px; border-left: 19px solid #0d1a3d; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+    .e2-vid .dur { position: absolute; right: 12px; bottom: 12px; padding: 3px 10px; border-radius: 8px; background: rgba(7,15,38,0.78);
+      font: 700 17px/1.3 "Poppins", sans-serif; color: #fff; }
+    .e2-vid .bar { position: absolute; left: 0; bottom: 0; height: 5px; background: #00c9ff; }
+    .e2-txt { padding: 20px 22px; }
+    .e2-txt .tag { display: inline-block; padding: 3px 11px; border-radius: 7px; background: #0d1a3d; color: #00c9ff;
+      font: 700 14px/1.4 "Poppins", sans-serif; letter-spacing: 0.1em; }
+    .e2-txt .hd { margin-top: 12px; font: 700 30px/1.12 "Poppins", sans-serif; color: #0d1a3d; letter-spacing: -0.01em; }
+    .e2-txt .ln { position: absolute; left: 22px; bottom: 34px; height: 9px; width: 150px; border-radius: 5px; background: #c7d4e3; }
+    .e2-txt .ln.s { bottom: 18px; width: 96px; background: #dde6f0; }
+    .e2-txt .ic { position: absolute; right: 18px; bottom: 16px; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(150deg,#00c9ff,#294b77); }
+    #e2-line { position: absolute; left: 60px; right: 60px; top: 1158px; text-align: center; font: 700 72px/1.1 "Poppins", sans-serif;
+      color: #fff; letter-spacing: -0.02em; text-shadow: 0 6px 26px rgba(2,8,26,0.85); opacity: 0; }
+    #e2-line .hl { color: #00c9ff; }
   </style>
   <div id="e2-root" data-composition-id="e02" data-width="1080" data-height="1350">
     <div id="e2-bd" class="e2-layer"></div>
+    <div id="e2-dim" class="e2-layer" style="opacity:0;background:radial-gradient(ellipse 70% 60% at 50% 45%, rgba(9,20,52,0.55), rgba(4,9,26,0.88))"></div>
+    <div id="e2-back" class="e2-layer" data-layout-ignore><div id="e2-wall"></div></div>
+    <div id="e2-shadow" class="e2-layer" data-layout-ignore style="opacity:0"></div>
     <div id="e2-figwrap" class="e2-layer"></div>
+    <div id="e2-front" class="e2-layer" data-layout-ignore>
+      <div style="position:absolute;left:0;top:1060px;width:1080px;height:290px;background:linear-gradient(180deg,rgba(4,9,26,0),rgba(4,9,26,0.7))" id="e2-fade"></div>
+    </div>
+    <div id="e2-line"><span class="hl">120 konten</span> sebulan.</div>
     <div id="e2-chrome" class="e2-layer"></div>
   </div>
   <script>
     (function () {
       window.__timelines = window.__timelines || {};
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const ei = (x) => Math.pow(clamp(x, 0, 1), 3);
+      const eback = (x) => { x = clamp(x, 0, 1); const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
       const H = window.HFP;
       document.getElementById("e2-bd").innerHTML = H.backdropHTML("e2b");
       const R = H.mount(document.getElementById("e2-figwrap"), "e2f");
       document.getElementById("e2-chrome").innerHTML = H.chromeHTML("e2c", 2, "Couch Wall");
-      function render(t) { H.animate(R, t); }
+      // soft cast shadow of the body on the wall (silhouette offset down-right)
+      document.getElementById("e2-shadow").innerHTML =
+        '<svg viewBox="0 0 640 1000" style="position:absolute;left:246px;top:398px;width:640px;height:1000px;overflow:visible;filter:blur(10px)"><path d="' + H.SIL + '" fill="#01040f" opacity="0.6"/></svg>';
+
+      // 4 rows x 3 cols, checkerboard of video thumbnails and text cards
+      const VID = [
+        { g: "linear-gradient(150deg,#00c9ff,#294b77)", d: "0:28", p: 0.62 },
+        { g: "linear-gradient(150deg,#ffd166,#ef8354)", d: "0:45", p: 0.35 },
+        { g: "linear-gradient(150deg,#7f5af0,#2cb1bc)", d: "1:02", p: 0.8 },
+        { g: "linear-gradient(150deg,#2ec4b6,#0b3c5d)", d: "0:15", p: 0.24 },
+        { g: "linear-gradient(150deg,#f15bb5,#3a0ca3)", d: "0:39", p: 0.5 },
+        { g: "linear-gradient(150deg,#4cc9f0,#3a0ca3)", d: "0:52", p: 0.7 }];
+      const TXT = [
+        { tag: "HOOK", hd: "Hook 3 detik<br>bikin stop scroll" }, { tag: "PROMPT", hd: "5 prompt AI<br>buat Reels" },
+        { tag: "SCRIPT", hd: "Script 60 detik<br>tanpa mikir" }, { tag: "IDE", hd: "30 ide konten<br>sekali duduk" },
+        { tag: "CAPTION", hd: "Caption yang<br>bikin DM rame" }, { tag: "CAROUSEL", hd: "Template<br>carousel laku" }];
+      // simple "scene" art inside a thumbnail (deterministic shapes)
+      const SCENES = [
+        '<svg class="sc" viewBox="0 0 290 206"><circle cx="70" cy="60" r="26" fill="#fff" opacity="0.25"/><path d="M0 170 L80 110 L140 150 L210 90 L290 140 L290 206 L0 206Z" fill="#071a3a" opacity="0.35"/></svg>',
+        '<svg class="sc" viewBox="0 0 290 206"><rect x="30" y="30" width="96" height="120" rx="12" fill="#fff" opacity="0.22"/><rect x="146" y="58" width="116" height="16" rx="8" fill="#fff" opacity="0.3"/><rect x="146" y="86" width="80" height="16" rx="8" fill="#fff" opacity="0.2"/></svg>',
+        '<svg class="sc" viewBox="0 0 290 206"><path d="M24 160 L84 120 L130 136 L196 70 L266 46" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/></svg>',
+        '<svg class="sc" viewBox="0 0 290 206"><circle cx="145" cy="210" r="120" fill="#fff" opacity="0.12"/><circle cx="230" cy="44" r="18" fill="#fff" opacity="0.3"/></svg>',
+        '<svg class="sc" viewBox="0 0 290 206"><rect x="0" y="0" width="145" height="206" fill="#fff" opacity="0.1"/><circle cx="72" cy="80" r="30" fill="#fff" opacity="0.22"/><rect x="40" y="122" width="64" height="70" rx="28" fill="#fff" opacity="0.18"/></svg>',
+        '<svg class="sc" viewBox="0 0 290 206"><path d="M0 120 Q72 80 145 120 T290 120 L290 206 L0 206Z" fill="#fff" opacity="0.16"/><path d="M0 150 Q72 110 145 150 T290 150 L290 206 L0 206Z" fill="#fff" opacity="0.12"/></svg>'];
+      const CW = 290, CH = 206, XS = [60, 395, 730], Y0 = 150, GY = 232;
+      const TILT = [-2.6, 1.8, -1.2, 2.9, -2.1, 1.1, 2.4, -2.8, 1.5, -1.7, 2.2, -2.4]; // fixed ±3°
+      const wall = document.getElementById("e2-wall");
+      const cards = [];
+      let vi = 0, ti = 0;
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) {
+        const d = document.createElement("div");
+        const isVid = (r + c) % 2 === 0;
+        if (isVid) {
+          const v = VID[vi], s = SCENES[vi % SCENES.length]; vi++;
+          d.className = "e2-card e2-vid";
+          d.style.background = v.g;
+          d.innerHTML = s + '<div class="play"></div><div class="dur">' + v.d + '</div><div class="bar" style="width:' + Math.round(v.p * 100) + '%"></div>';
+        } else {
+          const x = TXT[ti]; ti++;
+          d.className = "e2-card e2-txt k-card";
+          d.innerHTML = '<span class="tag">' + x.tag + '</span><div class="hd">' + x.hd + '</div><div class="ic"></div>';
+        }
+        wall.appendChild(d);
+        const fx = XS[c] + CW / 2, fy = Y0 + r * GY + CH / 2;
+        cards.push({ el: d, fx, fy, rot: TILT[r * 3 + c], dist: Math.hypot(fx - 540, (fy - 520) * 1.2) });
+      }
+      // appear one by one from the centre outward (0.035 s apart); fold back in reverse for the loop
+      const order = cards.slice().sort((a, b) => a.dist - b.dist);
+      order.forEach((k, i) => { k.tin = 0.3 + i * 0.035; k.tout = 3.3 + (order.length - 1 - i) * 0.025; });
+      const CX = 540, CY = 560;
+      const dim = document.getElementById("e2-dim"), sh = document.getElementById("e2-shadow");
+      const line = document.getElementById("e2-line");
+      function render(t) {
+        H.animate(R, t);
+        const on = eo(seg(t, 0.25, 0.6)) * (1 - ei(seg(t, 3.45, 3.9)));
+        dim.style.opacity = on.toFixed(3); sh.style.opacity = on.toFixed(3);
+        // slow push on the wall while it holds (parallax against the body)
+        const push = 1 + 0.03 * seg(t, 0.6, 3.4);
+        wall.style.transform = "translate(540px,560px) scale(" + push.toFixed(4) + ") translate(-540px,-560px)";
+        for (const k of cards) {
+          const a = seg(t, k.tin, k.tin + 0.34), b = seg(t, k.tout, k.tout + 0.26);
+          const pin = eback(a), pos = eo(a) * (1 - ei(b));
+          const sc = (0.35 + 0.65 * pin) * (1 - 0.6 * ei(b));
+          const x = CX + (k.fx - CX) * pos, y = CY + (k.fy - CY) * pos;
+          k.el.style.transform = "translate(" + (x - CW / 2).toFixed(1) + "px," + (y - CH / 2).toFixed(1) + "px) rotate(" + (k.rot * (0.4 + 0.6 * pos)).toFixed(2) + "deg) scale(" + sc.toFixed(3) + ")";
+          k.el.style.opacity = (clamp(a * 3, 0, 1) * (1 - b)).toFixed(3);
+        }
+        const c = eo(seg(t, 0.75, 1.15)) * (1 - seg(t, 3.35, 3.65));
+        line.style.opacity = c.toFixed(3);
+        line.style.transform = "translateY(" + ((1 - c) * 24).toFixed(1) + "px) scale(" + (0.94 + 0.06 * c).toFixed(3) + ")";
+      }
       const state = { t: 0 };
       const tl = gsap.timeline({ paused: true });
       tl.fromTo(state, { t: 0 }, { t: 4, duration: 4, ease: "none", onUpdate: () => render(state.t) }, 0);

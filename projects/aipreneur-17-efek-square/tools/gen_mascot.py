@@ -14,8 +14,9 @@ RESET_X = {"x": 0, "y": 0, "scale": 1, "rotation": 0, "rotationX": 0, "rotationY
            "filter": "drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 540px"}
 RESET_C = {"clipPath": CLIP_NONE}
 lines = []
-tracks = {k: [] for k in ("armL", "armR", "head", "torso", "root")}
+perfs = []
 for si, s in enumerate(SCENES["scenes"]):
+    tracks = {k: [] for k in ("armL", "armR", "head", "torso", "root")}
     t = r3(s["start"])
     lines.append(f"      // ---- {s['id']} {s['label']} ({s['start']}-{s['end']})")
     lines.append(f"      vt.set(V, RESET.V, {t}); vt.set(\"#m-xf\", RESET.X, {t}); vt.set(\"#m-clip\", RESET.C, {t});")
@@ -51,10 +52,20 @@ for si, s in enumerate(SCENES["scenes"]):
             tracks[tr].append([s["start"] + 0.05, {}, 0.4])
         elif tr == "root":
             tracks[tr].append([s["start"] + 0.02, {"y": 0, "ry": 0, "rz": 0}, 0.4])
-for tr in tracks:
-    tracks[tr].sort(key=lambda k: k[0])
-acting = (f"      const PERF0 = buildPerformance({js(tracks)}, D + 0.05);\n"
-          "      const PERF = (t) => PERF0(t);\n")
+    # one spring simulation PER CLIP (clips are cut into separate files): keys shifted to clip time, any key at the
+    # clip start is moved to -1 s so the springs start settled on that pose (frame 0 never shows the previous clip's gesture)
+    loc = {}
+    for tr, ks in tracks.items():
+        out = []
+        for t, v, d in sorted(ks, key=lambda k: k[0]):
+            lt = t - s["start"]
+            out.append([-1.0 if lt <= 0.05 else round(lt, 4), v, d])
+        loc[tr] = out
+    perfs.append(f"buildPerformance({js(loc)}, {r3(s['end'] - s['start'] + 0.05)})")
+starts = [s["start"] for s in SCENES["scenes"]]
+acting = ("      const PERFS = [\n        " + ",\n        ".join(perfs) + "\n      ];\n"
+          f"      const P_START = {js(starts)};\n"
+          "      const PERF = (t) => { let i = 0; while (i + 1 < P_START.length && t >= P_START[i + 1] - 1e-6) i++; return PERFS[i](t - P_START[i]); };\n")
 extra = P / "tools/mascot_extra.js"
 acting += extra.read_text() if extra.exists() else "      const EXTRA = (t) => ({});\n"
 cfg = {"__DUR__": str(D), "__RESET__": js({"V": RESET_V, "X": RESET_X, "C": RESET_C}),
@@ -64,4 +75,4 @@ src = (P / "tools/mascot_src.html").read_text()
 for k, v in cfg.items():
     src = src.replace(k, v)
 (P / "compositions/mascot.html").write_text(src)
-print("mascot.html written,", len(lines), "track lines,", {k: len(v) for k, v in tracks.items()}, "acting keys")
+print("mascot.html written,", len(lines), "track lines,", len(perfs), "clip performances")

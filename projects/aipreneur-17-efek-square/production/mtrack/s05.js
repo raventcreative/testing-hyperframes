@@ -1,1 +1,18 @@
-
+vt.set(V, {"fx": 540, "fy": 1180, "h": 1050, "yaw": -4, "pitch": 5}, 20);
+vt.fromTo(V, {"fx": 540, "fy": 1180, "h": 1050, "yaw": -4, "pitch": 5}, {"fx": 540, "fy": 1180, "h": 1050, "yaw": 0, "pitch": 5, "duration": 0.45, "ease": "sine.inOut", "immediateRender": false}, 20);
+vt.fromTo(V, {"fx": 540, "fy": 1180, "h": 1050, "yaw": 0, "pitch": 5}, {"fx": 540.0, "fy": 1532.8, "h": 1785.0, "yaw": 0, "pitch": 5, "duration": 0.1, "ease": "power3.out", "immediateRender": false}, 20.45);
+vt.fromTo(V, {"fx": 540.0, "fy": 1532.8, "h": 1785.0, "yaw": 0, "pitch": 5}, {"fx": 540.0, "fy": 1532.8, "h": 1785.0, "yaw": -2, "pitch": 5, "duration": 1.5, "ease": "sine.inOut", "immediateRender": false}, 20.55);
+vt.fromTo(V, {"fx": 540.0, "fy": 1532.8, "h": 1785.0, "yaw": -2, "pitch": 5}, {"fx": 540, "fy": 1180, "h": 1050, "yaw": 5, "pitch": 5, "duration": 0.28, "ease": "power3.inOut", "immediateRender": false}, 22.05);
+vt.fromTo(V, {"fx": 540, "fy": 1180, "h": 1050, "yaw": 5, "pitch": 5}, {"fx": 540, "fy": 1180, "h": 1050, "yaw": 5, "pitch": 5, "duration": 0.42, "ease": "none", "immediateRender": false}, 22.33);
+vt.fromTo(V, {"fx": 540, "fy": 1180, "h": 1050, "yaw": 5, "pitch": 5}, {"fx": 540.0, "fy": 1532.8, "h": 1785.0, "yaw": 2, "pitch": 5, "duration": 0.1, "ease": "power3.out", "immediateRender": false}, 22.75);
+vt.fromTo(V, {"fx": 540.0, "fy": 1532.8, "h": 1785.0, "yaw": 2, "pitch": 5}, {"fx": 540.0, "fy": 1532.8, "h": 1785.0, "yaw": -1, "pitch": 5, "duration": 2.15, "ease": "sine.inOut", "immediateRender": false}, 22.85);
+vt.set("#m-xf", {"x": 0}, 20.55);
+vt.fromTo("#m-xf", {"x": 0}, {"x": 3, "duration": 0.038, "ease": "none", "immediateRender": false}, 20.55);
+vt.fromTo("#m-xf", {"x": 3}, {"x": -3, "duration": 0.037, "ease": "none", "immediateRender": false}, 20.588);
+vt.fromTo("#m-xf", {"x": -3}, {"x": 3, "duration": 0.038, "ease": "none", "immediateRender": false}, 20.625);
+vt.fromTo("#m-xf", {"x": 3}, {"x": 0, "duration": 0.037, "ease": "none", "immediateRender": false}, 20.663);
+vt.set("#m-xf", {"x": 0}, 22.85);
+vt.fromTo("#m-xf", {"x": 0}, {"x": 3, "duration": 0.038, "ease": "none", "immediateRender": false}, 22.85);
+vt.fromTo("#m-xf", {"x": 3}, {"x": -3, "duration": 0.037, "ease": "none", "immediateRender": false}, 22.888);
+vt.fromTo("#m-xf", {"x": -3}, {"x": 3, "duration": 0.038, "ease": "none", "immediateRender": false}, 22.925);
+vt.fromTo("#m-xf", {"x": 3}, {"x": 0, "duration": 0.037, "ease": "none", "immediateRender": false}, 22.963);

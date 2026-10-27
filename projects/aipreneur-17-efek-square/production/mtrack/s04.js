@@ -1,1 +1,10 @@
-
+vt.set("#m-clip", {"clipPath": "polygon(306px 486px, 774px 486px, 774px 486px, 774px 486px, 774px 1180px, 306px 1180px, 306px 486px, 306px 486px)"}, 15);
+vt.set("#m-clip", {"clipPath": "polygon(-400px -400px, 1480px -400px, 1480px 486px, 774px 486px, 774px 1180px, 306px 1180px, 306px 486px, -400px 486px)"}, 15.6);
+vt.set(V, {"fx": 540, "fy": 1060, "h": 560, "yaw": 0, "pitch": 5}, 15);
+vt.fromTo(V, {"fx": 540, "fy": 1060, "h": 560, "yaw": 0, "pitch": 5}, {"fx": 540, "fy": 1066, "h": 560, "yaw": 0, "pitch": 5, "duration": 0.6, "ease": "sine.inOut", "immediateRender": false}, 15);
+vt.fromTo(V, {"fx": 540, "fy": 1066, "h": 560, "yaw": 0, "pitch": 5}, {"fx": 540, "fy": 1020, "h": 1000, "yaw": 0, "pitch": 5, "duration": 0.24, "ease": "power3.out", "immediateRender": false}, 15.6);
+vt.fromTo(V, {"fx": 540, "fy": 1020, "h": 1000, "yaw": 0, "pitch": 5}, {"fx": 540, "fy": 980, "h": 1000, "yaw": 0, "pitch": 5, "duration": 0.3, "ease": "back.out(1.8)", "immediateRender": false}, 15.84);
+vt.fromTo(V, {"fx": 540, "fy": 980, "h": 1000, "yaw": 0, "pitch": 5}, {"fx": 540, "fy": 980, "h": 1000, "yaw": 3, "pitch": 5, "duration": 3.86, "ease": "sine.inOut", "immediateRender": false}, 16.14);
+vt.set("#m-xf", {"filter": "drop-shadow(0px 0px 0px rgba(5,8,25,0))"}, 15);
+vt.fromTo("#m-xf", {"filter": "drop-shadow(0px 0px 0px rgba(5,8,25,0))"}, {"filter": "drop-shadow(0px 0px 0px rgba(5,8,25,0))", "duration": 0.6, "ease": "none", "immediateRender": false}, 15);
+vt.fromTo("#m-xf", {"filter": "drop-shadow(0px 0px 0px rgba(5,8,25,0))"}, {"filter": "drop-shadow(0px 22px 18px rgba(5,8,25,0.6))", "duration": 0.3, "ease": "power2.out", "immediateRender": false}, 15.6);

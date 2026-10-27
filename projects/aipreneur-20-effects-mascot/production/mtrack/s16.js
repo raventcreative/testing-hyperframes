@@ -1,0 +1,9 @@
+vt.set(V, {"fx": 540, "fy": 1800, "h": 1470, "yaw": 0, "pitch": 5}, 32.967);
+vt.fromTo(V, {"fx": 540, "fy": 1800, "h": 1470, "yaw": 0, "pitch": 5}, {"fx": 540, "fy": 1937.296, "h": 1700, "yaw": 0, "pitch": 5, "duration": 0.413, "ease": "sine.inOut", "immediateRender": false}, 32.967);
+vt.fromTo(V, {"fx": 540, "fy": 1937.296, "h": 1700, "yaw": 0, "pitch": 5}, {"fx": 236.0, "fy": 3272.0, "h": 3920, "yaw": 0, "pitch": 3, "duration": 0.62, "ease": "power3.in", "immediateRender": false}, 33.38);
+vt.fromTo(V, {"fx": 236.0, "fy": 3272.0, "h": 3920, "yaw": 0, "pitch": 3}, {"fx": 43.7, "fy": 4734.7, "h": 6400, "yaw": 0, "pitch": 3, "duration": 0.29, "ease": "power2.out", "immediateRender": false}, 34);
+vt.fromTo(V, {"fx": 43.7, "fy": 4734.7, "h": 6400, "yaw": 0, "pitch": 3}, {"fx": -49.4, "fy": 5442.4, "h": 7600, "yaw": 0, "pitch": 3, "duration": 0.343, "ease": "power1.in", "immediateRender": false}, 34.29);
+vt.set("#m-xf", {"filter": "blur(0px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, 32.967);
+vt.fromTo("#m-xf", {"filter": "blur(0px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, {"filter": "blur(0px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px", "duration": 0.673, "ease": "none", "immediateRender": false}, 32.967);
+vt.fromTo("#m-xf", {"filter": "blur(0px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, {"filter": "blur(6px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px", "duration": 0.3, "ease": "power2.in", "immediateRender": false}, 33.64);
+vt.fromTo("#m-xf", {"filter": "blur(6px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, {"filter": "blur(0px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px", "duration": 0.2, "ease": "power2.out", "immediateRender": false}, 33.94);

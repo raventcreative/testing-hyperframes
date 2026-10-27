@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1350" />
+<title>AIpreneur — Shape morph</title>
+<script src="vendor/gsap/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="assets/shared.css" />
+<style>
+
+#sv { position:absolute; inset:0; }
+.slabs { position:absolute; left:0; right:0; top:46px; height:44px; }
+.slab { position:absolute; left:0; right:0; text-align:center; font-size:30px; letter-spacing:0.32em; opacity:0; }
+#shape { filter: drop-shadow(0 26px 34px rgba(79,134,232,0.35)); }
+
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="s06" data-start="0" data-duration="6" data-width="1080" data-height="1350" data-fps="30">
+  <div id="stage" class="clip" data-start="0" data-duration="6" data-track-index="0" data-track-kind="graphics" style="position:absolute;inset:0">
+    <div class="bg"></div>
+    <div class="logo" id="logo"></div>
+    <div class="eyebrow g b" id="eyebrow">SCENE · 06 DARI 16</div>
+    <div class="title" id="title"><span class="g b">Shape</span><svg class="arrow" width="78" height="52" viewBox="0 0 78 52"><defs><linearGradient id="ag" x1="0" x2="1"><stop offset="0" stop-color="#121532"/><stop offset="1" stop-color="#274976"/></linearGradient></defs><path d="M4 26H70M48 6l22 20-22 20" fill="none" stroke="url(#ag)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg><span class="g r">morph</span></div>
+    <div class="sub g r" id="sub">Bentuk yang terus berubah</div>
+    <div class="card" id="card">
+      <div class="panel light" id="panel">
+        <div class="slabs">
+          <div class="slab g b" id="lab0">LINGKARAN</div>
+          <div class="slab g b" id="lab1">KOTAK</div>
+          <div class="slab g b" id="lab2">BINTANG</div>
+          <div class="slab g b" id="lab3">BLOB</div>
+        </div>
+        <svg id="sv" width="804" height="702" viewBox="0 0 804 702">
+          <defs>
+            <linearGradient id="fillg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#9ad4ff" /><stop offset="0.5" stop-color="#4f86e8" /><stop offset="1" stop-color="#233f8a" />
+            </linearGradient>
+            <radialGradient id="gloss" cx="32%" cy="26%" r="55%"><stop offset="0" stop-color="#fff" stop-opacity="0.55" /><stop offset="1" stop-color="#fff" stop-opacity="0" /></radialGradient>
+            <radialGradient id="shg"><stop offset="0" stop-color="#121532" stop-opacity="0.28" /><stop offset="1" stop-color="#121532" stop-opacity="0" /></radialGradient>
+          </defs>
+          <ellipse id="shd" cx="402" cy="610" rx="190" ry="26" fill="url(#shg)" />
+          <path id="shape" fill="url(#fillg)" />
+          <path id="glossp" fill="url(#gloss)" />
+        </svg>
+      </div>
+    </div>
+    <div class="swap" id="swap">
+      <div class="lbl g b">GANTI DI SCENE INI</div>
+      <div class="txt g r">Satu bentuk gradasi glossy (biru muda ke navy) memantul dari lingkaran ke kotak, ke bintang, ke blob lembut, lalu balik lagi ke lingkaran. Label kecil di atasnya menyebut tiap bentuk. Bayangan halus di bawahnya.</div>
+    </div>
+    <div class="foot" id="foot">
+      <div class="who"><div class="dot">FK</div><span class="g b">FREDDIE KASHAWAN</span><span class="g r">AIpreneur</span></div>
+      <div class="pg g b">07 / 18 &nbsp;&nbsp; GESER &rarr;</div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const D = 6, TAU = Math.PI * 2;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = (p) => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+  const tl = gsap.timeline({ paused: true });
+  const st = { t: 0 };
+
+  const M = 240, BASE = 205, CX = 402, CY = 350;
+  const SH = [
+    (a) => 1,
+    (a) => 0.9 * Math.pow(Math.pow(Math.abs(Math.cos(a)), 4.5) + Math.pow(Math.abs(Math.sin(a)), 4.5), -1 / 4.5),
+    (a) => { const k = (Math.cos(5 * (a + Math.PI / 2)) + 1) / 2; return 0.62 + 0.5 * Math.pow(k, 1.6); },
+    (a) => 0.94 * (1 + 0.13 * Math.sin(3 * a + 0.6) + 0.07 * Math.cos(5 * a - 1) + 0.05 * Math.sin(2 * a)),
+  ];
+  const TBL = SH.map((f) => [...Array(M)].map((_, i) => f(TAU * i / M)));
+  const STEPS = [[0.5, 0, 1], [1.9, 1, 2], [3.3, 2, 3], [4.7, 3, 0]];
+  const el = gsap.parseEase("elastic.out(1,0.42)");
+  const shapeEl = document.getElementById("shape"), glossEl = document.getElementById("glossp");
+  const labs = [0, 1, 2, 3].map((i) => document.getElementById("lab" + i));
+  function state(t) {
+    let from = 0, to = 0, p = 1;
+    for (const [s, a, b] of STEPS) if (t >= s) { from = a; to = b; p = clamp((t - s) / 1.1, 0, 1); }
+    return { from, to, e: el(p), p };
+  }
+  function pathFor(r, sc, dx, dy) {
+    let d = "";
+    for (let i = 0; i < M; i++) {
+      const a = TAU * i / M, rr = BASE * r[i] * sc;
+      d += (i ? "L" : "M") + (CX + dx + rr * Math.cos(a)).toFixed(1) + " " + (CY + dy + rr * Math.sin(a)).toFixed(1);
+    }
+    return d + "Z";
+  }
+  function render(t) {
+    const s = state(t), A = TBL[s.from], B = TBL[s.to];
+    const r = A.map((v, i) => v + (B[i] - v) * s.e);
+    const bob = 8 * Math.sin(TAU * t / 3);
+    shapeEl.setAttribute("d", pathFor(r, 1, 0, bob));
+    glossEl.setAttribute("d", pathFor(r, 0.86, -14, bob - 16));
+    const avg = r.reduce((x, y) => x + y, 0) / M;
+    const sd = document.getElementById("shd");
+    sd.setAttribute("rx", (175 * avg - 4 * Math.sin(TAU * t / 3)).toFixed(1));
+    sd.setAttribute("opacity", (0.9 - 0.15 * Math.sin(TAU * t / 3)).toFixed(3));
+    const cur = s.p < 0.12 ? s.from : s.to;
+    const fade = (cur === s.to && s.from !== s.to) ? clamp((s.p - 0.12) / 0.15, 0, 1) : 1;
+    labs.forEach((l, i) => { const o = i === cur ? fade : 0; gsap.set(l, { opacity: o, y: (1 - o) * 10 }); });
+  }
+
+  tl.to(st, { t: D, duration: D, ease: "none", onUpdate: () => render(st.t) }, 0);
+  render(0);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["s06"] = tl;
+})();
+</script>
+</body>
+</html>

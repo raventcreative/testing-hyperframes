@@ -6,7 +6,7 @@
     #e13-sheet { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; visibility: hidden; }
     .e13-box { position: absolute; display: flex; align-items: center; justify-content: center; opacity: 0;
       box-shadow: 0 2px 0 rgba(0,0,0,0.08), 0 10px 16px rgba(40,30,10,0.28); }
-    #e13-strip { position: absolute; left: 170px; top: 1168px; width: 740px; height: 92px; opacity: 0;
+    #e13-strip { position: absolute; left: 170px; top: 1196px; width: 740px; height: 92px; opacity: 0;
       background: #fffdf7; box-shadow: 0 10px 18px rgba(40,30,10,0.28); display: flex; align-items: center; justify-content: center;
       font: 700 46px/1 Poppins, sans-serif; color: #0d1a3d; letter-spacing: -0.01em; }
     #e13-strip .hl { background: #00c9ff; color: #0d1a3d; padding: 2px 12px 4px; margin: 0 2px 0 4px; }
@@ -44,16 +44,23 @@
           <path d="M920 900 L970 950 M970 900 L920 950"/><path d="M928 1010 L978 1060 M978 1010 L928 1060" opacity="0.7"/>
           <path d="M60 470 C90 450 120 490 150 470 C180 450 210 490 240 470" />
         </g>
-        <path id="e13-under" d="M262 398 C380 410 520 386 640 400 C720 410 780 394 830 402" fill="none" stroke="#24346e" stroke-width="6" stroke-linecap="round" opacity="0.85"/>
+        <path id="e13-under" d="M262 398 C380 410 520 386 640 400 C720 410 780 394 830 402" fill="none" stroke="#24346e" stroke-width="6" stroke-linecap="round" opacity="0"/>
         <!-- torn navy band that carries the brand chrome -->
         <path d="M0 0 H1080 V122 L1040 134 L1000 120 L956 138 L910 124 L866 136 L820 120 L776 134 L730 122 L686 138 L640 124 L596 136 L552 120 L506 134 L462 122 L418 138 L372 124 L328 136 L282 120 L238 134 L194 122 L150 138 L106 124 L60 136 L0 124 Z" fill="#0d1a3d" filter="url(#e13-sh)"/>
       </svg>
     </div>
+    <svg width="0" height="0" style="position:absolute;left:0;top:0"><defs>
+          <!-- paper cut-out: 14px white border grown from the mascot's alpha (radius 18 local = 14 px at scale 0.78) + paper lift shadow -->
+          <filter id="e13-cutf" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+            <feMorphology in="SourceAlpha" operator="dilate" radius="18" result="d"/>
+            <feFlood flood-color="#fffdf8"/><feComposite in2="d" operator="in" result="w"/>
+            <feMerge result="m"><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+            <feDropShadow in="m" dx="8" dy="12" stdDeviation="7" flood-color="#1c1404" flood-opacity="0.38"/>
+          </filter>
+    </defs></svg>
     <div id="e13-figwrap" class="e13-layer">
-      <svg id="e13-cut" viewBox="0 0 640 1000" style="position:absolute;left:220px;top:380px;width:640px;height:1000px;overflow:visible;visibility:hidden">
-        <defs><filter id="e13-cs" x="-15%" y="-10%" width="130%" height="125%"><feDropShadow dx="7" dy="10" stdDeviation="6" flood-color="#1c1404" flood-opacity="0.38"/></filter></defs>
-        <path id="e13-sil" fill="#fffdf8" stroke="#fffdf8" stroke-width="28" stroke-linejoin="round" filter="url(#e13-cs)"/>
-      </svg>
+      <video id="e13-mascot" class="clip" data-start="0" data-duration="4" src="assets/mascot/mascot_talk_loop_1x.webm" muted playsinline
+        style="position:absolute;left:0;top:0;width:1080px;height:1350px"></video>
     </div>
     <div id="e13-front" class="e13-layer" data-layout-ignore>
       <div id="e13-l0" class="e13-box" style="left:244px;top:178px;width:128px;height:166px;background:#00c9ff;color:#0d1a3d;font:700 132px/1 Poppins,sans-serif">1</div>
@@ -77,21 +84,18 @@
       const H = window.HFP;
       const $ = (id) => document.getElementById(id);
       $("e13-bd").innerHTML = H.backdropHTML("e13b");
-      const R = H.mount($("e13-figwrap"), "e13f");
       $("e13-chrome").innerHTML = H.chromeHTML("e13c", 13, "Paper Cut");
-      $("e13-sil").setAttribute("d", H.SIL);
 
       // stop motion: everything in the paper world advances on 12 fps "twos"
       const step = (t) => Math.floor(t * 12 + 1e-6) / 12;
       const WIG = [0.9, -0.7, 0.4, -1.0, 0.8, -0.3, 1.0, -0.9, 0.5, -0.6];   // degrees, one value per 0.1 s
       const JIG = [[1, 0], [-1, 1], [0, -1], [1, 1], [-1, 0], [0, 1], [1, -1], [-1, -1], [0, 0], [1, 0]];
       const LET = [[-6, 0.62], [5, 0.72], [-3, 0.82], [8, 0.92]];             // [tilt°, drop time]
-      const sheet = $("e13-sheet"), fw = $("e13-figwrap"), cut = $("e13-cut"), strip = $("e13-strip");
+      const sheet = $("e13-sheet"), fw = $("e13-figwrap"), strip = $("e13-strip");
       const IN0 = 0.28, IN1 = 0.6, OUT0 = 3.5, OUT1 = 3.8;
       function render(t) {
         const tq = step(t);
         const paper = t >= IN0 && t < OUT1;
-        H.animate(R, paper ? tq : t);
         // sheet slides down over the room in 4 stop-motion steps, and back up at the end
         const sIn = eo(seg(tq, IN0, IN1)), sOut = eo(seg(tq, OUT0, OUT1));
         const sy = -1390 * (1 - sIn) - 1390 * sOut;
@@ -99,7 +103,7 @@
         sheet.style.transform = "translateY(" + sy.toFixed(1) + "px) rotate(" + (paper && sIn < 1 ? -0.6 : 0) + "deg)";
         // the presenter becomes a cut-out once the sheet has landed
         const cutOn = tq >= IN0 + 0.25 && tq < OUT0 + 0.08;
-        cut.style.visibility = cutOn ? "visible" : "hidden";
+        fw.style.filter = cutOn ? "url(#e13-cutf)" : "none";
         let rot = 0, jx = 0, jy = 0, sc = 1;
         if (cutOn) {
           const k = Math.floor(t / 0.1) % 10;
@@ -107,8 +111,9 @@
           const age = tq - (IN0 + 0.25);
           sc = age < 0.09 ? 1.035 : 1;                                       // one-frame "slap" when it lands
         }
-        fw.style.transformOrigin = "540px 1250px";
-        fw.style.transform = "translate(" + jx + "px," + jy + "px) rotate(" + rot + "deg) scale(" + sc + ")";
+        // default mascot framing (scale 0.78 about the feet) + stop-motion wobble about the feet
+        fw.style.transformOrigin = "540px 1204px";
+        fw.style.transform = "translate(" + jx + "px," + (jy - 44) + "px) rotate(" + rot + "deg) scale(" + (0.78 * sc).toFixed(4) + ")";
         // ransom-note boxes drop in one by one (2-frame slap from 1.5x), leave together before the sheet lifts
         for (let i = 0; i < 4; i++) {
           const el = $("e13-l" + i), [tilt, t0] = LET[i];

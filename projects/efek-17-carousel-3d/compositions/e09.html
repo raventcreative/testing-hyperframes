@@ -12,14 +12,15 @@
     /* shot B: tighter framing on a different set */
     #e9-B { opacity: 0; }
     #e9-Bbg { position: absolute; inset: 0; background: linear-gradient(180deg, #0c1f52 0%, #081738 55%, #050c22 100%); }
-    #e9-Bglow { position: absolute; left: 90px; top: 260px; width: 900px; height: 900px; border-radius: 50%;
+    #e9-Bglow { position: absolute; left: 40px; top: 150px; width: 1000px; height: 1000px; border-radius: 50%;
       background: radial-gradient(closest-side, rgba(0, 201, 255, 0.34), rgba(0, 201, 255, 0.08) 60%, rgba(0, 201, 255, 0)); }
     #e9-Bstripes { position: absolute; inset: 0; opacity: 0.5;
       background: repeating-linear-gradient(105deg, rgba(127, 216, 255, 0) 0px, rgba(127, 216, 255, 0) 120px, rgba(127, 216, 255, 0.05) 120px, rgba(127, 216, 255, 0.05) 124px); }
-    #e9-cut { position: absolute; left: 0; top: 122px; width: 1080px; text-align: center; font: 700 300px/300px Poppins, sans-serif; letter-spacing: -0.02em;
+    #e9-cut { position: absolute; left: 0; top: 880px; width: 1080px; text-align: center; font: 700 230px/230px Poppins, sans-serif; letter-spacing: -0.02em; filter: drop-shadow(0 14px 26px rgba(2, 8, 26, 0.6));
       background: linear-gradient(180deg, #ffffff 0%, #7fe3ff 45%, #00c9ff 70%, #294b77 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    #e9-Bfloor { position: absolute; left: 0; top: 1180px; width: 1080px; height: 170px; background: linear-gradient(180deg, rgba(3, 8, 24, 0), rgba(3, 8, 24, 0.7)); }
-    #e9-Bfig { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; transform-origin: 540px 600px; transform: translateY(104px) scale(1.58); }
+    #e9-Bfloor { position: absolute; left: 0; top: 1090px; width: 1080px; height: 260px; background: linear-gradient(180deg, rgba(3, 8, 24, 0), rgba(3, 8, 24, 0.82) 60%, rgba(3, 8, 24, 0.9)); }
+    /* tighter framing of the same mascot loop (2x plate, scale 1.3 about the eyes) */
+    #e9-Bfig { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; transform-origin: 540px 620px; transform: translateY(64px) scale(1.3); }
     #e9-Bvig { position: absolute; inset: 0; background: radial-gradient(ellipse 75% 70% at 50% 48%, rgba(2, 6, 20, 0) 55%, rgba(2, 6, 20, 0.55) 100%); }
     #e9-flash { position: absolute; inset: 0; background: #ffffff; opacity: 0; }
   </style>
@@ -27,7 +28,7 @@
     <!-- SHOT A: standard framing + the big word we zoom through -->
     <div id="e9-A" class="e9-shot" data-layout-ignore>
       <div id="e9-bd" class="e9-layer"></div>
-      <div id="e9-figwrap" class="e9-layer"></div>
+      <div id="e9-figwrap" class="e9-layer"><video id="e9-mascot" class="clip" data-start="0" data-duration="4" src="assets/mascot/mascot_talk_loop_1x.webm" muted playsinline style="position:absolute;left:0;top:0;width:1080px;height:1350px"></video></div>
       <div id="e9-word">
         <div class="e9-l" style="left:72px">Z</div>
         <div class="e9-l" style="left:250px">O</div>
@@ -40,10 +41,10 @@
       <div id="e9-Bbg"></div>
       <div id="e9-Bstripes"></div>
       <div id="e9-Bglow"></div>
-      <div id="e9-cut">CUT</div>
-      <div id="e9-Bfig"></div>
+      <div id="e9-Bfig"><video id="e9-mascotB" class="clip" data-start="0" data-duration="4" src="assets/mascot/mascot_talk_loop_2x.webm" muted playsinline style="position:absolute;left:0;top:0;width:1080px;height:1350px"></video></div>
       <div id="e9-Bfloor"></div>
       <div id="e9-Bvig"></div>
+      <div id="e9-cut">CUT</div>
     </div>
     <div id="e9-flash" class="e9-layer"></div>
     <div id="e9-cap" class="k-cap" style="opacity:0">Ganti kalimat, <span class="hl">ganti shot</span>.</div>
@@ -61,8 +62,9 @@
       const H = window.HFP;
       const $ = (id) => document.getElementById(id);
       $("e9-bd").innerHTML = H.backdropHTML("e9b");
-      const RA = H.mount($("e9-figwrap"), "e9f");
-      const RB = H.mount($("e9-Bfig"), "e9g");               // second presenter for the "next shot"
+      // shot A: default mascot framing (feet on y 1160); shot B uses the 2x plate of the same loop
+      $("e9-figwrap").style.transformOrigin = "540px 1204px";
+      $("e9-figwrap").style.transform = "translate(0px,-44px) scale(0.78)";
       $("e9-chrome").innerHTML = H.chromeHTML("e9c", 9, "Zoom Cut");
 
       const A = $("e9-A"), B = $("e9-B"), word = $("e9-word"), flash = $("e9-flash"), cap = $("e9-cap"), cut = $("e9-cut");
@@ -74,7 +76,6 @@
       const W_IN = 0.2, Z0 = 1.05, Z1 = 1.30, FL = 0.06, B_IN = 0.30, BACK = 3.5;
 
       function render(t) {
-        H.animate(RA, t); H.animate(RB, t + 0.9);
         // --- word pops in letter by letter
         for (let i = 0; i < 4; i++) {
           const p = seg(t, W_IN + i * 0.05, W_IN + i * 0.05 + 0.22);

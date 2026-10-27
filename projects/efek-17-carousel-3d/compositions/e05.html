@@ -3,7 +3,7 @@
   <style>
     #e5-root { position: absolute; inset: 0; overflow: hidden; background: #070f26; }
     .e5-layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; }
-    #e5-cam { transform-origin: 540px 588px; }
+    #e5-cam { transform-origin: 540px 704px; }
     #e5-vig { background: radial-gradient(ellipse 62% 52% at 50% 46%, rgba(3,8,24,0) 40%, rgba(3,8,24,0.78) 100%); opacity: 0; }
     #e5-flash { background: #ffffff; opacity: 0; }
     .e5-br { position: absolute; width: 74px; height: 74px; border-color: rgba(255,255,255,0.85); border-style: solid; border-width: 0; }
@@ -19,7 +19,8 @@
   <div id="e5-root" data-composition-id="e05" data-width="1080" data-height="1350">
     <div id="e5-cam" class="e5-layer">
       <div id="e5-bd" class="e5-layer"></div>
-      <div id="e5-figwrap" class="e5-layer"></div>
+      <div id="e5-figwrap" class="e5-layer"><video id="e5-mascot" class="clip" data-start="0" data-duration="4" src="assets/mascot/mascot_talk_loop_2x.webm" muted playsinline
+        style="position:absolute;left:0;top:0;width:1080px;height:1350px"></video></div>
     </div>
     <div id="e5-vig" class="e5-layer" data-layout-ignore></div>
     <div id="e5-front" class="e5-layer" data-layout-ignore>
@@ -46,13 +47,13 @@
       const $ = (id) => document.getElementById(id);
       const H = window.HFP;
       $("e5-bd").innerHTML = H.backdropHTML("e5b");
-      const R = H.mount($("e5-figwrap"), "e5f");
+      // 3D mascot, default framing; the 2x plate keeps it sharp when the camera punches in (0.78 × 1.7 ≈ 1.33)
+      $("e5-figwrap").style.transform = "translate(0px,-44px) scale(0.78)"; $("e5-figwrap").style.transformOrigin = "540px 1204px";
       $("e5-chrome").innerHTML = H.chromeHTML("e5c", 5, "Digital Zoom");
       const cam = $("e5-cam"), vig = $("e5-vig"), flash = $("e5-flash"), key = $("e5-key"), sub = $("e5-sub"), cap = $("e5-cap"), rx = $("e5-x");
       const BR = [0, 1, 2, 3].map((i) => $("e5-b" + i));
-      const T0 = 1.0;                       // the keyword beat: punch in 1.0 → 1.7 in 0.1 s
+      const T0 = 1.0;                       // the keyword beat: punch in 1.0 → 1.7 in 0.1 s, anchored on the eyes (y≈704)
       function render(t) {
-        H.animate(R, t);
         const punch = eo(seg(t, T0, T0 + 0.1));
         const back = eio(seg(t, 3.22, 3.58));
         const drift = 0.04 * seg(t, T0 + 0.1, 3.22);  // tiny push while holding keeps it alive

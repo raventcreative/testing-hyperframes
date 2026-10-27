@@ -1,0 +1,121 @@
+<template>
+  <script src="assets/presenter.js"></script>
+  <style>
+    #e9-root { position: absolute; inset: 0; overflow: hidden; background: #070f26; }
+    .e9-layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; }
+    .e9-shot { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; overflow: hidden; }
+    /* shot A word: letters placed on fixed centres so the zoom origin (2nd "O") is exact */
+    #e9-word { position: absolute; left: 0; top: 840px; width: 1080px; height: 240px; transform-origin: 602px 120px; }
+    .e9-l { position: absolute; top: 0; width: 300px; height: 240px; text-align: center; font: 700 240px/240px Poppins, sans-serif; letter-spacing: 0;
+      color: #ffffff; opacity: 0; text-shadow: 0 10px 30px rgba(2, 8, 26, 0.55), 0 2px 0 rgba(2, 8, 26, 0.35); }
+    .e9-l.tg { color: #00c9ff; text-shadow: 0 0 34px rgba(0, 201, 255, 0.55), 0 10px 30px rgba(2, 8, 26, 0.5); }
+    /* shot B: tighter framing on a different set */
+    #e9-B { opacity: 0; }
+    #e9-Bbg { position: absolute; inset: 0; background: linear-gradient(180deg, #0c1f52 0%, #081738 55%, #050c22 100%); }
+    #e9-Bglow { position: absolute; left: 90px; top: 260px; width: 900px; height: 900px; border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(0, 201, 255, 0.34), rgba(0, 201, 255, 0.08) 60%, rgba(0, 201, 255, 0)); }
+    #e9-Bstripes { position: absolute; inset: 0; opacity: 0.5;
+      background: repeating-linear-gradient(105deg, rgba(127, 216, 255, 0) 0px, rgba(127, 216, 255, 0) 120px, rgba(127, 216, 255, 0.05) 120px, rgba(127, 216, 255, 0.05) 124px); }
+    #e9-cut { position: absolute; left: 0; top: 122px; width: 1080px; text-align: center; font: 700 300px/300px Poppins, sans-serif; letter-spacing: -0.02em;
+      background: linear-gradient(180deg, #ffffff 0%, #7fe3ff 45%, #00c9ff 70%, #294b77 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #e9-Bfloor { position: absolute; left: 0; top: 1180px; width: 1080px; height: 170px; background: linear-gradient(180deg, rgba(3, 8, 24, 0), rgba(3, 8, 24, 0.7)); }
+    #e9-Bfig { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; transform-origin: 540px 600px; transform: translateY(104px) scale(1.58); }
+    #e9-Bvig { position: absolute; inset: 0; background: radial-gradient(ellipse 75% 70% at 50% 48%, rgba(2, 6, 20, 0) 55%, rgba(2, 6, 20, 0.55) 100%); }
+    #e9-flash { position: absolute; inset: 0; background: #ffffff; opacity: 0; }
+  </style>
+  <div id="e9-root" data-composition-id="e09" data-width="1080" data-height="1350">
+    <!-- SHOT A: standard framing + the big word we zoom through -->
+    <div id="e9-A" class="e9-shot" data-layout-ignore>
+      <div id="e9-bd" class="e9-layer"></div>
+      <div id="e9-figwrap" class="e9-layer"></div>
+      <div id="e9-word">
+        <div class="e9-l" style="left:72px">Z</div>
+        <div class="e9-l" style="left:250px">O</div>
+        <div class="e9-l tg" style="left:452px">O</div>
+        <div class="e9-l" style="left:669px">M</div>
+      </div>
+    </div>
+    <!-- SHOT B: next shot, closer + different set, word "CUT" behind the head -->
+    <div id="e9-B" class="e9-shot" data-layout-ignore>
+      <div id="e9-Bbg"></div>
+      <div id="e9-Bstripes"></div>
+      <div id="e9-Bglow"></div>
+      <div id="e9-cut">CUT</div>
+      <div id="e9-Bfig"></div>
+      <div id="e9-Bfloor"></div>
+      <div id="e9-Bvig"></div>
+    </div>
+    <div id="e9-flash" class="e9-layer"></div>
+    <div id="e9-cap" class="k-cap" style="opacity:0">Ganti kalimat, <span class="hl">ganti shot</span>.</div>
+    <div id="e9-chrome" class="e9-layer"></div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
+      const eio = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      const expoIn = (x) => { x = clamp(x, 0, 1); return x === 0 ? 0 : Math.pow(2, 10 * x - 10); };
+      const back = (x) => { x = clamp(x, 0, 1); const c = 1.8; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+      const H = window.HFP;
+      const $ = (id) => document.getElementById(id);
+      $("e9-bd").innerHTML = H.backdropHTML("e9b");
+      const RA = H.mount($("e9-figwrap"), "e9f");
+      const RB = H.mount($("e9-Bfig"), "e9g");               // second presenter for the "next shot"
+      $("e9-chrome").innerHTML = H.chromeHTML("e9c", 9, "Zoom Cut");
+
+      const A = $("e9-A"), B = $("e9-B"), word = $("e9-word"), flash = $("e9-flash"), cap = $("e9-cap"), cut = $("e9-cut");
+      const letters = Array.from(word.children);
+      const OX = 602, OY = 960;                                  // centre of the cyan "O" (frame coords)
+      A.style.transformOrigin = OX + "px " + OY + "px";
+      B.style.transformOrigin = "540px 640px";
+
+      const W_IN = 0.2, Z0 = 1.05, Z1 = 1.30, FL = 0.06, B_IN = 0.30, BACK = 3.5;
+
+      function render(t) {
+        H.animate(RA, t); H.animate(RB, t + 0.9);
+        // --- word pops in letter by letter
+        for (let i = 0; i < 4; i++) {
+          const p = seg(t, W_IN + i * 0.05, W_IN + i * 0.05 + 0.22);
+          letters[i].style.opacity = clamp(p * 3, 0, 1).toFixed(3);
+          letters[i].style.transform = "translateY(" + ((1 - eo(p)) * 40).toFixed(1) + "px) scale(" + (1.3 - 0.3 * back(p)).toFixed(3) + ")";
+        }
+        // --- zoom through the word: 1x -> 16x in 0.25 s (camera pushes in too)
+        const pre = eio(seg(t, 0.55, Z0)) * 0.05;                  // slow creep before the punch
+        const z = expoIn(seg(t, Z0, Z1));
+        const camS = 1 + pre + 2.2 * z;
+        const wordTotal = (1 + pre) * (1 + 15 * z);
+        const wordRel = wordTotal / camS;
+        // shot A comes back after the return cut at 3.5 s: scale 1.15 -> 1
+        const ret = eo(seg(t, BACK, BACK + 0.32));
+        const showA = t < Z1 || t >= BACK;
+        const sA = t >= BACK ? 1.15 - 0.15 * ret : camS;
+        A.style.opacity = showA ? "1" : "0";
+        A.style.transform = "scale(" + sA.toFixed(4) + ")";
+        word.style.transform = "scale(" + wordRel.toFixed(4) + ")";
+        word.style.opacity = t >= BACK ? "0" : "1";
+        // --- shot B: enters 1.25 -> 1 in 0.3 s, then a slow push
+        const bp = eo(seg(t, Z1, Z1 + B_IN));
+        const push = eio(seg(t, Z1 + B_IN, BACK)) * 0.035;
+        B.style.opacity = t >= Z1 && t < BACK ? "1" : "0";
+        B.style.transform = "scale(" + (1.25 - 0.25 * bp + push).toFixed(4) + ")";
+        const cp = seg(t, Z1 + 0.08, Z1 + 0.5);
+        cut.style.letterSpacing = (0.12 - 0.14 * eo(cp)).toFixed(3) + "em";
+        // --- white flash, 0.06 s full then a fast decay (both cuts)
+        const f1 = t >= Z1 && t < Z1 + FL ? 1 : clamp(1 - (t - Z1 - FL) / 0.09, 0, 1) * (t >= Z1 ? 1 : 0);
+        const f0 = t >= Z1 - 0.06 && t < Z1 ? seg(t, Z1 - 0.06, Z1) * 0.7 : 0;   // brighten into the cut
+        const f2 = t >= BACK && t < BACK + FL ? 1 : clamp(1 - (t - BACK - FL) / 0.09, 0, 1) * (t >= BACK ? 1 : 0);
+        flash.style.opacity = Math.max(f0, f1, f2).toFixed(3);
+        // caption lives in shot B
+        const c = eo(seg(t, 1.6, 1.9)) * (1 - seg(t, BACK - 0.12, BACK));
+        cap.style.opacity = c.toFixed(3); cap.style.transform = "translateY(" + ((1 - c) * 18).toFixed(1) + "px)";
+      }
+      const state = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(state, { t: 0 }, { t: 4, duration: 4, ease: "none", onUpdate: () => render(state.t) }, 0);
+      render(0);
+      window.__timelines["e09"] = tl;
+    })();
+  </script>
+</template>

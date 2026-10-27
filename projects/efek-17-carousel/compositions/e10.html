@@ -1,0 +1,177 @@
+<template>
+  <script src="assets/presenter.js"></script>
+  <style>
+    #e10-root { position: absolute; inset: 0; overflow: hidden; }
+    .e10-layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; }
+    #e10-panel { position: absolute; left: 60px; top: 160px; width: 960px; height: 640px; border-radius: 30px; opacity: 0;
+      background: linear-gradient(165deg, #10224e 0%, #070f26 70%);
+      box-shadow: inset 0 0 0 1.5px rgba(127,216,255,0.26), inset 0 1px 0 rgba(255,255,255,0.08), 0 30px 60px rgba(2,8,26,0.55); }
+    #e10-head { position: absolute; left: 44px; top: 30px; font-family: Poppins, sans-serif; }
+    #e10-head .t { font-weight: 700; font-size: 20px; letter-spacing: 0.16em; color: #7f93b3; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+    #e10-head .t i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #00c9ff; box-shadow: 0 0 12px #00c9ff; }
+    #e10-head .n { font-weight: 700; font-size: 58px; line-height: 1.05; color: #ffffff; letter-spacing: -0.01em; margin-top: 4px; }
+    #e10-head .n span { font-size: 26px; color: #a9c2de; font-weight: 400; letter-spacing: 0; margin-left: 8px; }
+    .e10-day { position: absolute; width: 80px; margin-left: -40px; text-align: center; font: 700 19px/1 Poppins, sans-serif; letter-spacing: 0.12em; color: #7f93b3; }
+    #e10-pill { position: absolute; left: 0; top: 0; height: 52px; padding: 0 20px 0 16px; border-radius: 26px; display: flex; align-items: center; gap: 8px;
+      background: #00c9ff; color: #071a3a; font: 700 30px/1 Poppins, sans-serif; letter-spacing: -0.01em; opacity: 0;
+      box-shadow: 0 10px 26px rgba(0,201,255,0.35), 0 4px 10px rgba(2,8,26,0.5); }
+  </style>
+  <div id="e10-root" data-composition-id="e10" data-width="1080" data-height="1350">
+    <div id="e10-bd" class="e10-layer"></div>
+    <div id="e10-back" class="e10-layer" data-layout-ignore>
+      <div id="e10-panel">
+        <div id="e10-head"><div class="t"><i></i>Views · 7 hari</div><div class="n"><b id="e10-num">0</b><span>views</span></div></div>
+      </div>
+      <svg id="e10-chart" viewBox="0 0 1080 1350" style="position:absolute;left:0;top:0;width:1080px;height:1350px;overflow:visible">
+        <defs>
+          <linearGradient id="e10-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#00c9ff" stop-opacity="0.42"/><stop offset="1" stop-color="#00c9ff" stop-opacity="0"/></linearGradient>
+          <clipPath id="e10-clip"><rect id="e10-cliprect" x="60" y="160" width="0" height="640"/></clipPath>
+          <filter id="e10-glow" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+          <filter id="e10-shblur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="16"/></filter>
+        </defs>
+        <g id="e10-grid"></g>
+        <path id="e10-fill" fill="url(#e10-area)" clip-path="url(#e10-clip)"/>
+        <path id="e10-lineGlow" fill="none" stroke="#00c9ff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="0.45" filter="url(#e10-glow)"/>
+        <path id="e10-line" fill="none" stroke="#00c9ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <g id="e10-dots"></g>
+        <g id="e10-tip" opacity="0">
+          <circle id="e10-ring" r="14" fill="none" stroke="#00c9ff" stroke-width="3"/>
+          <circle r="13" fill="#00c9ff"/><circle r="5.5" fill="#ffffff"/>
+        </g>
+        <!-- body shadow cast onto the panel (light from the right) -->
+        <g id="e10-shadow" opacity="0" filter="url(#e10-shblur)">
+          <path id="e10-shpath" fill="#020817"/>
+        </g>
+      </svg>
+      <div id="e10-days"></div>
+      <div id="e10-pill"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M3 16 L9 10 L13 13 L19 5 M13 5 H19 V11" fill="none" stroke="#071a3a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>+312%</div>
+    </div>
+    <div id="e10-figwrap" class="e10-layer"></div>
+    <div id="e10-cap" class="k-cap" style="opacity:0">Views naik <span class="hl">312%</span>.</div>
+    <div id="e10-chrome" class="e10-layer"></div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const ei = (x) => Math.pow(clamp(x, 0, 1), 3);
+      const eio = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      const back = (x) => { x = clamp(x, 0, 1); const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+      const H = window.HFP;
+      const $ = (id) => document.getElementById(id);
+      $("e10-bd").innerHTML = H.backdropHTML("e10b");
+      const R = H.mount($("e10-figwrap"), "e10f");
+      $("e10-chrome").innerHTML = H.chromeHTML("e10c", 10, "Chart Grow");
+      const NS = "http://www.w3.org/2000/svg";
+
+      // 7 weekly points (frame coords). Middle point sits behind the face on purpose: the chart lives BEHIND the body.
+      const DAYS = ["SEN", "SEL", "RAB", "KAM", "JUM", "SAB", "MIN"];
+      const PX = DAYS.map((_, i) => 104 + i * 144);
+      const PY = [700, 668, 684, 606, 556, 466, 352];
+      const BASE = 762;
+      // Catmull-Rom → cubic bezier for a smooth, honest curve through every point
+      let d = "M" + PX[0] + " " + PY[0];
+      const SEGS = [];
+      for (let i = 0; i < 6; i++) {
+        const x0 = PX[Math.max(0, i - 1)], y0 = PY[Math.max(0, i - 1)], x1 = PX[i], y1 = PY[i], x2 = PX[i + 1], y2 = PY[i + 1];
+        const x3 = PX[Math.min(6, i + 2)], y3 = PY[Math.min(6, i + 2)], k = 0.18;
+        const c = [x1, y1, x1 + (x2 - x0) * k, y1 + (y2 - y0) * k, x2 - (x3 - x1) * k, y2 - (y3 - y1) * k, x2, y2];
+        SEGS.push(c);
+        d += " C" + c.slice(2).map((v) => v.toFixed(1)).join(" ");
+      }
+      $("e10-line").setAttribute("d", d); $("e10-lineGlow").setAttribute("d", d);
+      $("e10-fill").setAttribute("d", d + " L" + PX[6] + " " + BASE + " L" + PX[0] + " " + BASE + " Z");
+      // sample the curve analytically (no DOM measuring): dense polyline + arc length
+      const PTS = [[PX[0], PY[0]]];
+      for (const c of SEGS) for (let k = 1; k <= 60; k++) {
+        const u = k / 60, a = (1 - u) * (1 - u) * (1 - u), b = 3 * (1 - u) * (1 - u) * u, e = 3 * (1 - u) * u * u, f = u * u * u;
+        PTS.push([a * c[0] + b * c[2] + e * c[4] + f * c[6], a * c[1] + b * c[3] + e * c[5] + f * c[7]]);
+      }
+      const CUM = [0];
+      for (let k = 1; k < PTS.length; k++) CUM.push(CUM[k - 1] + Math.hypot(PTS[k][0] - PTS[k - 1][0], PTS[k][1] - PTS[k - 1][1]));
+      const L = CUM[CUM.length - 1];
+      // grid: horizontal guides + baseline + faint column guides
+      let g = "";
+      for (const y of [362, 462, 562, 662]) g += `<path d="M100 ${y} H980" stroke="#7fa7d6" stroke-opacity="0.12" stroke-width="2" stroke-dasharray="2 10" stroke-linecap="round"/>`;
+      g += `<path d="M100 ${BASE} H980" stroke="#7fa7d6" stroke-opacity="0.35" stroke-width="2"/>`;
+      for (let i = 0; i < 7; i++) g += `<path d="M${PX[i]} ${PY[i] + 18} V${BASE}" stroke="#7fa7d6" stroke-opacity="0.10" stroke-width="2"/>`;
+      $("e10-grid").innerHTML = g;
+      const dots = [], days = [];
+      for (let i = 0; i < 7; i++) {
+        const c = document.createElementNS(NS, "g");
+        c.innerHTML = `<circle r="11" fill="#0a1736"/><circle r="7" fill="#00c9ff"/>`;
+        $("e10-dots").appendChild(c); dots.push(c);
+        const lb = document.createElement("div"); lb.className = "e10-day"; lb.textContent = DAYS[i];
+        lb.style.left = PX[i] + "px"; lb.style.top = (PY[i] - 46) + "px"; $("e10-days").appendChild(lb); days.push(lb);
+      }
+      days[6].style.top = (PY[6] - 50) + "px";
+      days[4].style.left = (PX[4] + 30) + "px"; days[3].style.left = (PX[3] - 6) + "px";
+      // body silhouette, offset left/down as a soft cast shadow on the panel
+      $("e10-shpath").setAttribute("d", H.SIL);
+      $("e10-shpath").setAttribute("transform", "translate(" + (H.BOX.x - 34) + "," + (H.BOX.y + 14) + ")");
+      const tipAt = (p) => {
+        const target = clamp(p, 0, 1) * L; let lo = 0, hi = CUM.length - 1;
+        while (hi - lo > 1) { const m = (lo + hi) >> 1; if (CUM[m] < target) lo = m; else hi = m; }
+        const r = (target - CUM[lo]) / Math.max(1e-6, CUM[hi] - CUM[lo]);
+        return [PTS[lo][0] + (PTS[hi][0] - PTS[lo][0]) * r, PTS[lo][1] + (PTS[hi][1] - PTS[lo][1]) * r];
+      };
+
+      const panel = $("e10-panel"), pill = $("e10-pill"), cap = $("e10-cap");
+      const T_IN = 0.12, T_DRAW = 0.6, DUR = 0.55, T_OUT = 3.38;
+      function render(t) {
+        H.animate(R, t);
+        const pin = eo(seg(t, T_IN, T_IN + 0.42)), pout = ei(seg(t, T_OUT + 0.12, T_OUT + 0.5));
+        const pv = pin * (1 - pout);
+        panel.style.opacity = pv.toFixed(3);
+        panel.style.transform = "translateY(" + ((1 - pin) * 34 + pout * 24).toFixed(1) + "px) scale(" + (0.965 + 0.035 * pin).toFixed(4) + ")";
+        $("e10-grid").setAttribute("opacity", pv.toFixed(3));
+        $("e10-shadow").setAttribute("opacity", (0.75 * pv).toFixed(3));
+        // draw left → right in 0.55 s, retract quickly before the loop
+        const draw = eio(seg(t, T_DRAW, T_DRAW + DUR)) * (1 - ei(seg(t, T_OUT, T_OUT + 0.32)));
+        const dash = L.toFixed(1) + " " + (L + 10).toFixed(1);
+        for (const id of ["e10-line", "e10-lineGlow"]) { const el = $(id); el.setAttribute("stroke-dasharray", dash); el.setAttribute("stroke-dashoffset", (L * (1 - draw)).toFixed(1)); el.setAttribute("opacity", draw > 0.002 ? (id === "e10-line" ? "1" : "0.45") : "0"); }
+        const tip = tipAt(draw);
+        $("e10-cliprect").setAttribute("width", Math.max(0, tip[0] - 60).toFixed(1));
+        $("e10-fill").setAttribute("opacity", (pv).toFixed(3));
+        for (let i = 0; i < 7; i++) {
+          const reached = tip[0] >= PX[i] - 2 && draw > 0.002;
+          const since = reached ? 1 : 0;
+          // pop each weekly dot the moment the line passes it
+          const tReach = T_DRAW + DUR * (i / 6) * 0.98;
+          const pop = reached ? back(seg(t, tReach, tReach + 0.22)) : 0;
+          const s = i === 6 ? 0 : Math.max(0, pop) * (1 - ei(seg(t, T_OUT, T_OUT + 0.25)));
+          dots[i].setAttribute("transform", "translate(" + PX[i] + "," + PY[i] + ") scale(" + s.toFixed(3) + ")");
+          const lit = eo(seg(t, tReach, tReach + 0.2)) * pv * since;
+          days[i].style.opacity = (pv * (0.45 + 0.55 * lit)).toFixed(3);
+          days[i].style.color = lit > 0.5 ? (i === 6 ? "#00c9ff" : "#eaf4ff") : "#7f93b3";
+        }
+        // end: round dot + small label
+        const tEnd = T_DRAW + DUR;
+        const endPop = back(seg(t, tEnd - 0.04, tEnd + 0.26)) * (1 - ei(seg(t, T_OUT, T_OUT + 0.22)));
+        $("e10-tip").setAttribute("opacity", draw > 0.002 ? "1" : "0");
+        const tipScale = draw >= 0.999 ? Math.max(0.55, endPop) : 0.55;
+        $("e10-tip").setAttribute("transform", "translate(" + tip[0].toFixed(1) + "," + tip[1].toFixed(1) + ") scale(" + tipScale.toFixed(3) + ")");
+        const ph = ((t - tEnd) % 1.1 + 1.1) % 1.1 / 1.1;
+        $("e10-ring").setAttribute("r", (14 + ph * 26).toFixed(1));
+        $("e10-ring").setAttribute("opacity", (t > tEnd ? (1 - ph) * 0.8 : 0).toFixed(3));
+        const pp = back(seg(t, tEnd + 0.04, tEnd + 0.36)), po = ei(seg(t, T_OUT - 0.05, T_OUT + 0.2));
+        pill.style.opacity = (clamp(pp * 3, 0, 1) * (1 - po)).toFixed(3);
+        pill.style.transform = "translate(" + (PX[6] - 186) + "px," + (PY[6] - 128) + "px) scale(" + (0.5 + 0.5 * Math.max(0, pp)).toFixed(3) + ")";
+        pill.style.transformOrigin = "100% 100%";
+        // header counter runs with the line
+        const v = 48.2 * eio(seg(t, T_DRAW, T_DRAW + DUR + 0.15));
+        $("e10-num").textContent = v < 0.05 ? "0" : v.toFixed(1).replace(".", ",") + "K";
+        const c = eo(seg(t, 0.95, 1.3)) * (1 - seg(t, 3.45, 3.8));
+        cap.style.opacity = c.toFixed(3); cap.style.transform = "translateY(" + ((1 - c) * 18).toFixed(1) + "px)";
+      }
+      const state = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(state, { t: 0 }, { t: 4, duration: 4, ease: "none", onUpdate: () => render(state.t) }, 0);
+      render(0);
+      window.__timelines["e10"] = tl;
+    })();
+  </script>
+</template>

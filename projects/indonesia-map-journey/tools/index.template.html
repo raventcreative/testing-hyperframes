@@ -23,7 +23,7 @@
       #ov { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
       #haze { position: absolute; inset: 0; pointer-events: none;
         background: radial-gradient(ellipse 78% 74% at 50% 50%, rgba(251,252,254,0) 58%, rgba(251,252,254,0.42) 100%); }
-      #grain { position: absolute; inset: 0; width: 1920px; height: 1080px; pointer-events: none; opacity: 0.07; mix-blend-mode: multiply; }
+      #grain { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; opacity: 0.5; display: block; }
       #mapcredit { position: absolute; left: 96px; bottom: 34px; font: 400 13px/1.3 Montserrat, sans-serif; color: var(--navy-2); letter-spacing: 0.03em; opacity: 0.85; }
       .mk-lbl { font: 600 26px Montserrat, sans-serif; letter-spacing: 0.12em; fill: var(--ink); paint-order: stroke; stroke: rgba(251,252,254,0.92); stroke-width: 6px; stroke-linejoin: round; }
       .mk-lead { stroke: var(--navy); stroke-width: 1.2; fill: none; }
@@ -47,13 +47,7 @@
           <g id="mk-layer"></g>
         </svg>
         <div id="haze"></div>
-        <svg id="grain" viewBox="0 0 1920 1080" preserveAspectRatio="none">
-          <filter id="mj-grain-f" x="0" y="0" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" stitchTiles="stitch" />
-            <feColorMatrix type="matrix" values="0 0 0 0 0.16  0 0 0 0 0.24  0 0 0 0 0.36  0 0 0 0.9 0" />
-          </filter>
-          <rect width="1920" height="1080" filter="url(#mj-grain-f)" />
-        </svg>
+        <img id="grain" src="assets/maps/grain.png" alt="" />
         <div id="mapcredit" data-layout-ignore>Peta: Natural Earth (domain publik) · Garis menunjukkan urutan video, bukan rute perjalanan</div>
       </div>
 <!--HOSTS-->
@@ -73,12 +67,18 @@
         const travelEase = (t) => { const u = Math.pow(clamp(t), 0.82); return u * u * u * (u * (6 * u - 15) + 10); };
 
         // ---------- geometry -> Path2D (world = base px) ----------
-        function mkPath(rings, filter) {
-          const p = new Path2D();
+        // tol > 0: radial-distance simplification for far zooms (LOD); deterministic
+        function mkPath(rings, filter, tol = 0) {
+          const p = new Path2D(), t2 = tol * tol;
           for (const r of rings) {
             if (filter && !filter(r)) continue;
-            p.moveTo(r[0] / Q, r[1] / Q);
-            for (let i = 2; i < r.length; i += 2) p.lineTo(r[i] / Q, r[i + 1] / Q);
+            let lx = r[0] / Q, ly = r[1] / Q, n = 1;
+            p.moveTo(lx, ly);
+            for (let i = 2; i < r.length; i += 2) {
+              const x = r[i] / Q, y = r[i + 1] / Q;
+              if (tol && (x - lx) * (x - lx) + (y - ly) * (y - ly) < t2 && i < r.length - 2) continue;
+              p.lineTo(x, y); lx = x; ly = y; n++;
+            }
             p.closePath();
           }
           return p;
@@ -86,10 +86,12 @@
         const bb = G.baliBBox;
         const [bx0, by1] = proj(bb[0] - 0.03, bb[1] - 0.03), [bx1, by0] = proj(bb[2] + 0.03, bb[3] + 0.03);
         const inBali = (r) => { for (let i = 0; i < r.length; i += 2) { const x = r[i] / Q, y = r[i + 1] / Q; if (x < bx0 || x > bx1 || y < by0 || y > by1) return false; } return true; };
-        const PATH = {
-          b200: mkPath(G.b200), b1000: mkPath(G.b1000), b3000: mkPath(G.b3000),
-          other: mkPath(G.other), idn: mkPath(G.idn), bali: mkPath(G.idn, inBali),
-        };
+        const mkSet = (tol) => ({
+          b200: mkPath(G.b200, null, tol), b1000: mkPath(G.b1000, null, tol), b3000: mkPath(G.b3000, null, tol),
+          other: mkPath(G.other, null, tol), idn: mkPath(G.idn, null, tol), bali: mkPath(G.idn, inBali),
+        });
+        const PATH_FULL = mkSet(0), PATH_LOD = mkSet(0.4); // 0.4 base px = 1.2 screen px at k = 3
+        let PATH = PATH_FULL;
 
         // ---------- camera: van Wijk & Nuij smooth zoom-pan (altitude grows with distance) ----------
         function zoomPath(a, b, rho) {
@@ -187,27 +189,24 @@
 
         function renderAt(t) {
           const C = cam(t), k = W / C.w, tx = W / 2 - C.ux * k, ty = H / 2 - C.uy * k;
-          const P0 = cam(Math.max(0, t - 1 / 30)), k0 = W / P0.w;
-          const speed = Math.abs(Math.log(k / k0)) * 900 + Math.hypot(C.ux - P0.ux, C.uy - P0.uy) * k; // screen px per frame
-          const blur = clamp((speed - 28) / 30, 0, 1.6);
+          PATH = k < 3 ? PATH_LOD : PATH_FULL;
 
           // ocean + bathymetry (deeper = slightly deeper ice)
           ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.filter = "none";
           ctx.fillStyle = "#E4EDF9"; ctx.fillRect(0, 0, W, H);
           ctx.setTransform(k, 0, 0, k, tx, ty);
-          if (blur > 0.05) ctx.filter = `blur(${blur.toFixed(2)}px)`;
           ctx.fillStyle = "#DBE6F6"; ctx.fill(PATH.b200, "evenodd");
           ctx.fillStyle = "#D3E0F3"; ctx.fill(PATH.b1000, "evenodd");
           ctx.fillStyle = "#CAD9EF"; ctx.fill(PATH.b3000, "evenodd");
           // pale surf rim, then land with a soft contact shadow
           ctx.lineJoin = "round";
           ctx.strokeStyle = "rgba(251,252,254,0.55)"; ctx.lineWidth = 7 / k; ctx.stroke(PATH.idn); ctx.stroke(PATH.other);
-          ctx.save();
-          ctx.shadowColor = "rgba(32,43,59,0.16)"; ctx.shadowBlur = 12; ctx.shadowOffsetY = 4;
+          // contact shadow: two offset fills (no shadowBlur: too slow in software raster)
+          ctx.save(); ctx.translate(0, 4.5 / k); ctx.fillStyle = "rgba(32,43,59,0.06)"; ctx.fill(PATH.other); ctx.fill(PATH.idn); ctx.restore();
+          ctx.save(); ctx.translate(0, 2.2 / k); ctx.fillStyle = "rgba(32,43,59,0.08)"; ctx.fill(PATH.other); ctx.fill(PATH.idn); ctx.restore();
           ctx.fillStyle = "#EDF1F6"; ctx.fill(PATH.other);
           ctx.fillStyle = "#FBFCFE"; ctx.fill(PATH.idn);
-          ctx.restore();
           ctx.strokeStyle = "rgba(58,98,153,0.30)"; ctx.lineWidth = 0.8 / k; ctx.stroke(PATH.other);
           ctx.strokeStyle = "rgba(41,75,119,0.58)"; ctx.lineWidth = 1.05 / k; ctx.stroke(PATH.idn);
 

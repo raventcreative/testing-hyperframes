@@ -1,0 +1,92 @@
+<template>
+  <script src="assets/presenter.js"></script>
+  <style>
+    #e17-root { position: absolute; inset: 0; overflow: hidden; }
+    .e17-layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; }
+    #e17-tint { background: radial-gradient(ellipse 760px 420px at 540px 420px, rgba(4,10,30,0.05), rgba(4,10,30,0.62)); opacity: 0; }
+    #e17-glow { position: absolute; left: 90px; top: 250px; width: 900px; height: 360px; border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(0,201,255,0.34), rgba(41,75,119,0.18) 55%, rgba(41,75,119,0)); opacity: 0; }
+    #e17-stage { position: absolute; left: 0; top: 330px; width: 1080px; height: 200px; perspective: 1300px; perspective-origin: 540px 90px; }
+    #e17-word { position: absolute; left: 0; top: 0; width: 1080px; height: 200px; transform-style: preserve-3d; }
+    .e17-t { position: absolute; left: 0; top: 0; width: 1080px; text-align: center; white-space: nowrap;
+      font: 700 168px/200px "Poppins", sans-serif; letter-spacing: -0.02em; padding-left: 0; }
+    .e17-ex { color: rgba(170,225,255,0.035); -webkit-text-stroke: 1.5px rgba(150,215,255,0.22); }
+    #e17-face { color: transparent; -webkit-text-stroke: 2.5px rgba(255,255,255,0.92);
+      background: linear-gradient(170deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.16) 42%, rgba(160,225,255,0.10) 60%, rgba(200,240,255,0.42) 100%);
+      -webkit-background-clip: text; background-clip: text; }
+    #e17-spec { color: transparent;
+      background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 42%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0) 58%, rgba(255,255,255,0) 100%);
+      background-size: 300% 100%; background-repeat: no-repeat; -webkit-background-clip: text; background-clip: text; }
+    #e17-shtxt { position: absolute; left: 0; top: 352px; width: 1080px; height: 200px; perspective: 1300px; perspective-origin: 540px 90px; }
+    #e17-shword { color: transparent; text-shadow: 0 26px 34px rgba(1,6,20,0.7); }
+  </style>
+  <div id="e17-root" data-composition-id="e17" data-width="1080" data-height="1350">
+    <div id="e17-bd" class="e17-layer"></div>
+    <div id="e17-tint" class="e17-layer"></div>
+    <div id="e17-back" class="e17-layer" data-layout-ignore>
+      <div id="e17-glow"></div>
+      <div id="e17-shtxt"><div id="e17-shword" class="e17-t">AIPRENEUR</div></div>
+      <div id="e17-stage"><div id="e17-word"></div></div>
+      <svg id="e17-shadow" class="e17-layer" viewBox="0 0 1080 1350" style="opacity:0">
+        <defs><filter id="e17-blur" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="12"/></filter></defs>
+        <path id="e17-silsh" fill="#020818" fill-opacity="0.6" filter="url(#e17-blur)" transform="translate(246,398)"/>
+      </svg>
+    </div>
+    <div id="e17-figwrap" class="e17-layer"></div>
+    <div id="e17-cap" class="k-cap" style="opacity:0">Kesan <span class="hl">premium</span>, instan.</div>
+    <div id="e17-chrome" class="e17-layer"></div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const ei = (x) => Math.pow(clamp(x, 0, 1), 3);
+      const es = (x) => 0.5 - 0.5 * Math.cos(Math.PI * clamp(x, 0, 1));
+      const H = window.HFP;
+      const $ = (id) => document.getElementById("e17-" + id);
+      $("bd").innerHTML = H.backdropHTML("e17b");
+      const R = H.mount($("figwrap"), "e17f");
+      $("chrome").innerHTML = H.chromeHTML("e17c", 17, "Glass Type");
+      $("silsh").setAttribute("d", H.SIL);
+
+      // glass slab: 7 faint extrusion copies stepping back in z, then the glass face and a specular sweep on top
+      const WORD = "AIPRENEUR", DEPTH = 7, STEP = 3.2;
+      let html = "";
+      for (let i = DEPTH; i >= 1; i--) html += `<div class="e17-t e17-ex" style="transform:translateZ(${(-i * STEP).toFixed(1)}px)">${WORD}</div>`;
+      html += `<div id="e17-face" class="e17-t">${WORD}</div><div id="e17-spec" class="e17-t" style="transform:translateZ(0.5px)">${WORD}</div>`;
+      $("word").innerHTML = html;
+      const layers = Array.from($("word").children);
+
+      function render(t) {
+        H.animate(R, t);
+        const inn = eo(seg(t, 0.25, 0.7)), out = ei(seg(t, 3.4, 3.85));
+        const vis = inn * (1 - out);
+        $("tint").style.opacity = (eo(seg(t, 0.1, 0.5)) * (1 - out)).toFixed(3);
+        $("glow").style.opacity = vis.toFixed(3);
+        // slow 3D turn −24° → −2° across the effect
+        const ry = -24 + 22 * es(seg(t, 0.25, 3.45));
+        const rx = 9 - 4 * es(seg(t, 0.25, 3.45));
+        const z = -120 * (1 - inn) - 80 * out, y = 26 * (1 - inn);
+        const tf = "translateY(" + y.toFixed(1) + "px) translateZ(" + z.toFixed(1) + "px) rotateX(" + rx.toFixed(2) + "deg) rotateY(" + ry.toFixed(2) + "deg)";
+        $("word").style.transform = tf;
+        $("shword").style.transform = "translateY(" + y.toFixed(1) + "px) translateZ(" + z.toFixed(1) + "px) rotateX(" + rx.toFixed(2) + "deg) rotateY(" + ry.toFixed(2) + "deg)";
+        $("shword").style.opacity = (vis * 0.9).toFixed(3);
+        layers.forEach((el) => { el.style.opacity = vis.toFixed(3); });
+        // specular highlight sweeps across while it turns
+        const sp = es(seg(t, 0.7, 2.6));
+        $("spec").style.backgroundPosition = (100 - sp * 100).toFixed(1) + "% 0";
+        $("spec").style.opacity = (vis * (0.25 + 0.75 * Math.sin(Math.PI * sp))).toFixed(3);
+        $("shadow").style.opacity = vis.toFixed(3);
+        const cap = $("cap"), c = eo(seg(t, 0.45, 0.75)) * (1 - seg(t, 3.5, 3.8));
+        cap.style.opacity = c.toFixed(3); cap.style.transform = "translateY(" + ((1 - c) * 18).toFixed(1) + "px)";
+      }
+      const state = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(state, { t: 0 }, { t: 4, duration: 4, ease: "none", onUpdate: () => render(state.t) }, 0);
+      render(0);
+      window.__timelines["e17"] = tl;
+    })();
+  </script>
+</template>

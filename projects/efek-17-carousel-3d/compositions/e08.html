@@ -1,0 +1,103 @@
+<template>
+  <script src="assets/presenter.js"></script>
+  <style>
+    #e8-root { position: absolute; inset: 0; overflow: hidden; }
+    .e8-layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; }
+    #e8-dim { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(4, 10, 30, 0.10), rgba(4, 10, 30, 0.45)); }
+    .e8-p { position: absolute; left: 0; top: 0; opacity: 0; box-sizing: border-box; font-family: Poppins, sans-serif; }
+    /* newspaper clipping */
+    .e8-art { padding: 16px 18px 14px; border-radius: 3px; color: #10183a;
+      background: linear-gradient(172deg, #fbf8f1 0%, #f1ece0 70%, #e6e0d1 100%); }
+    .e8-art .ms { display: flex; justify-content: space-between; font-weight: 700; font-size: 11px; letter-spacing: 0.16em; color: #5b647e;
+      border-bottom: 2px solid #10183a; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; }
+    .e8-art .hd { font-weight: 700; font-size: 27px; line-height: 1.12; letter-spacing: -0.015em; }
+    .e8-art .hd em { font-style: normal; color: #0a8fd6; }
+    .e8-art .im { height: 70px; border-radius: 2px; margin: 12px 0 10px; background: linear-gradient(140deg, #294b77, #00c9ff); position: relative; overflow: hidden; }
+    .e8-art .ln { height: 7px; border-radius: 2px; background: #c9c2b2; margin-top: 8px; }
+    .e8-art .ln.s { width: 64%; }
+    .e8-art .fold { position: absolute; left: 0; right: 0; top: 52%; height: 2px; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.07), rgba(0,0,0,0)); }
+    /* sticky note */
+    .e8-st { padding: 22px 20px; color: #04203a; display: flex; flex-direction: column; justify-content: center;
+      background: linear-gradient(160deg, #5ee0ff 0%, #00c9ff 55%, #00b2ea 100%); border-radius: 2px 2px 18px 2px; }
+    .e8-st .big { font-weight: 700; font-size: 40px; line-height: 1; letter-spacing: -0.02em; }
+    .e8-st .sm { font-weight: 700; font-size: 25px; line-height: 1.15; letter-spacing: -0.01em; }
+    .e8-st .tg { font-weight: 400; font-size: 15px; margin-top: 8px; opacity: 0.8; }
+    .e8-st::after { content: ""; position: absolute; right: 0; bottom: 0; width: 26px; height: 26px; border-radius: 0 0 18px 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0) 50%, rgba(2,40,70,0.25) 50%); }
+    .e8-tape { position: absolute; left: 50%; top: -14px; width: 92px; height: 28px; margin-left: -46px; background: rgba(236, 244, 255, 0.55);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+    .e8-pin { position: absolute; left: 50%; top: 10px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffffff, #7fd8ff 40%, #0a6fa6 100%); box-shadow: 2px 4px 5px rgba(2, 8, 26, 0.45); }
+  </style>
+  <div id="e8-root" data-composition-id="e08" data-width="1080" data-height="1350">
+    <div id="e8-bd" class="e8-layer"></div>
+    <div id="e8-back" class="e8-layer" data-layout-ignore><div id="e8-dim"></div></div>
+    <div id="e8-figwrap" class="e8-layer"><video id="e8-mascot" class="clip" data-start="0" data-duration="4" src="assets/mascot/mascot_talk_loop_1x.webm" muted playsinline style="position:absolute;left:0;top:0;width:1080px;height:1350px"></video></div>
+    <div id="e8-front" class="e8-layer" data-layout-ignore></div>
+    <div id="e8-cap" class="k-cap" style="opacity:0">Semua lagi <span class="hl">ngomongin AI</span>.</div>
+    <div id="e8-chrome" class="e8-layer"></div>
+  </div>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
+      const ei = (x) => Math.pow(clamp(x, 0, 1), 3);
+      const H = window.HFP;
+      const $ = (id) => document.getElementById(id);
+      $("e8-bd").innerHTML = H.backdropHTML("e8b");
+      $("e8-figwrap").style.transformOrigin = "540px 1204px";
+      $("e8-figwrap").style.transform = "translate(0px,-44px) scale(0.78)";
+      $("e8-chrome").innerHTML = H.chromeHTML("e8c", 8, "Headline Wall");
+
+      const art = (src, hd, opt) => `<div class="fold"></div><div class="ms"><span>${src}</span><span>2026</span></div><div class="hd">${hd}</div>` +
+        (opt.img ? '<div class="im"><svg viewBox="0 0 260 70" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%"><path d="M0 58 L50 40 L92 48 L150 22 L200 30 L260 6" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/></svg></div>' : "") +
+        '<div class="ln"></div><div class="ln"></div><div class="ln s"></div>' + (opt.tape ? '<div class="e8-tape"></div>' : '<div class="e8-pin"></div>');
+      // 7 papers: left / above head / right, all behind the body. order = pop order
+      const P = [
+        { x: 70, y: 150, w: 300, h: 206, r: -5, k: "a", html: art("Tekno Harian", "AI Bikin Kreator <em>10x</em> Lebih Cepat", { tape: 1 }) },
+        { x: 422, y: 168, w: 196, h: 196, r: 4, k: "s", html: '<div class="big">+312%</div><div class="tg">reach sebulan</div><div class="e8-pin" style="top:-4px"></div>' },
+        { x: 664, y: 146, w: 300, h: 210, r: 6, k: "a", html: art("Bisnis Kini", "Video Pendek Kuasai Feed <em>2026</em>", {}) },
+        { x: 56, y: 440, w: 240, h: 300, r: 4, k: "a", html: art("Kabar UMKM", "UMKM Ramai-Ramai Pakai <em>AI</em>", { img: 1 }) },
+        { x: 770, y: 420, w: 204, h: 204, r: -7, k: "s", html: '<div class="sm">Tim kecil,<br>konten jalan.</div><div class="e8-tape" style="top:-12px;width:80px;margin-left:-40px"></div>' },
+        { x: 712, y: 700, w: 282, h: 214, r: 3, k: "a", html: art("Kreator.id", "Konsisten Posting Tanpa <em>Burnout</em>", { tape: 1 }) },
+        { x: 96, y: 866, w: 206, h: 196, r: -4, k: "s", html: '<div class="sm">Mulai pakai AI hari ini.</div><div class="e8-pin" style="top:6px"></div>' },
+      ];
+      const host = $("e8-back"), els = [];
+      P.forEach((p) => {
+        const d = document.createElement("div");
+        d.className = "e8-p " + (p.k === "a" ? "e8-art" : "e8-st");
+        d.style.width = p.w + "px"; d.style.height = p.h + "px";
+        d.innerHTML = p.html; host.appendChild(d); els.push(d);
+      });
+      const dim = $("e8-dim"), cap = $("e8-cap");
+      const T0 = 0.35, GAP = 0.06, DUR = 0.24;
+
+      function render(t) {
+        dim.style.opacity = (eo(seg(t, 0.25, 0.6)) * (1 - seg(t, 3.5, 3.9))).toFixed(3);
+        for (let i = 0; i < P.length; i++) {
+          const p = P[i], e = els[i];
+          const a = T0 + i * GAP, inP = seg(t, a, a + DUR);
+          const o0 = 3.42 + (P.length - 1 - i) * 0.05, outP = ei(seg(t, o0, o0 + 0.2));   // peel off in reverse order
+          const k = eo(inP);
+          const sc = (1.4 - 0.4 * k) * (1 - 0.12 * outP);
+          const lift = 1 - k;                                                   // 1 = still in the air
+          const rot = p.r + lift * (p.r > 0 ? 5 : -5) + outP * (p.r > 0 ? 6 : -6);
+          e.style.opacity = (clamp(inP * 4, 0, 1) * (1 - outP)).toFixed(3);
+          e.style.transform = "translate(" + p.x + "px," + (p.y + outP * 40).toFixed(1) + "px) rotate(" + rot.toFixed(2) + "deg) scale(" + sc.toFixed(3) + ")";
+          // shadow tightens as the paper lands on the wall
+          const sy = 6 + lift * 30, sb = 10 + lift * 40, so = 0.5 - lift * 0.2;
+          e.style.boxShadow = "0 " + sy.toFixed(1) + "px " + sb.toFixed(1) + "px rgba(2,8,26," + so.toFixed(3) + "), 0 1px 2px rgba(2,8,26,0.35)";
+        }
+        const c = eo(seg(t, 0.85, 1.2)) * (1 - seg(t, 3.45, 3.8));
+        cap.style.opacity = c.toFixed(3); cap.style.transform = "translateY(" + ((1 - c) * 18).toFixed(1) + "px)";
+      }
+      const state = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(state, { t: 0 }, { t: 4, duration: 4, ease: "none", onUpdate: () => render(state.t) }, 0);
+      render(0);
+      window.__timelines["e08"] = tl;
+    })();
+  </script>
+</template>

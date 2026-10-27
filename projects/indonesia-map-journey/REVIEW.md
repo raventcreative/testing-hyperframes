@@ -20,6 +20,11 @@ Status: **structure, camera, map, markers, routes, timing and sound are built an
 - Generator layout check: no card overlaps, no connector crossing a card or title, all cards inside the 80 px safe margin.
 - Photo read windows: 9 s blocks ≈ 4.0 s with all three open; 8 s blocks ≈ 3.5 s.
 
+- Draft render (`out/draft-review-placeholders.mp4`, `--quality draft`, local, free): ffprobe → H.264 1920 × 1080, 30/1 fps, 82.000 s, 2460 frames; AAC 48 kHz 82.000 s. Last frame = full national map with eight markers (mean luma 222, not black); 80.7 s vs last frame differ only by encoder noise → still ending.
+- Audio (`hyperframes audio`): −27 LUFS integrated, true peak −10 dBTP, no clipping (SFX only, no music bed — quiet by design).
+- Render speed: first attempt ~1 frame/s (software Chrome; canvas blur filter + shadowBlur). Removed both (contact shadow now two offset fills, grain a static PNG): 2460 frames in ~5.5 min.
+- Fixed after the first draft: grain too coarse (now 1920 px, alpha ≤ 22/255 at 50 %); a straight "coastline" at the bottom edge was the data clip box → map data now clipped at 80–160°E, 26°S–22°N so clip edges never reach the screen.
+
 ## Not checked / cannot be checked yet
 - Real photos: content, crop, landmark visibility, label accuracy (Pasar Gede interior?, Fort Rotterdam building?).
 - Sound was measured (cue timing), not heard. No music: none supplied.

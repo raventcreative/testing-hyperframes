@@ -122,9 +122,9 @@ def build(S):
 
     # ---------------------------------------------------------------- mascot: plays in the monitor, then released to WIDE (S12 start)
     v_end = dict(WIDE, yaw=-10)
-    S.mv([(t0, MON_VIEW, None), (W59, dict(MON_VIEW, yaw=-4), "sine.inOut"), (out0, dict(MON_VIEW, yaw=-8), "sine.inOut"), (t1, v_end, "power3.inOut")])
-    S.mc([(t0, {"clipPath": clip_rect(mx, my, mw, mh, mr)}, None), (out0, {"clipPath": clip_rect(mx, my, mw, mh, mr)}, "none"),
-          (t1 - 0.05, {"clipPath": CLIP_NONE}, "power3.in")])
+    S.mv([(t0, MON_VIEW, None), (W59, dict(MON_VIEW, yaw=-4), "sine.inOut"), (out0 + 0.1, dict(MON_VIEW, yaw=-8), "sine.inOut"), (t1, v_end, "power3.inOut")])
+    S.mc([(t0, {"clipPath": clip_rect(mx, my, mw, mh, mr)}, None), (out0 - 0.04, {"clipPath": clip_rect(mx, my, mw, mh, mr)}, "none"),
+          (out0 + 0.14, {"clipPath": CLIP_NONE}, "power2.in")])
     S.mx([(t0, {"filter": NO_FILTER}, None)])
     # acting: presents the B-roll stacking, points at the timeline, follows the paper clip
     S.act("armL", [(t0 + 0.02, "low", 0.3), (W54 - 0.1, "present", 0.32), (W58, "low", 0.4), (W60 - 0.1, "point", 0.3), (W62 + 0.1, "low", 0.4)])

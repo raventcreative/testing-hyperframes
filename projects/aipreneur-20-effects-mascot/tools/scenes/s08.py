@@ -44,8 +44,8 @@ def build(S):
     S.ft(f"#{s}-ring", {"x": 0, "y": 0, "scale": 1, "rotation": 18}, {"x": 540 - rcx, "y": 960 - rcy, "scale": SC, "rotation": 40}, p0, p1 - p0, "power2.in")
     S.tset(f"#{s}-ring", {"opacity": 0}, p1)
     # inside the portal the world comes toward us (ends at identity = S09)
-    S.init(f"#{s}-gwz", {"scale": 1.35, "y": -330, "transformOrigin": f"{rcx}px {rcy}px"})
-    S.ft(f"#{s}-gwz", {"scale": 1.35, "y": -330}, {"scale": 1, "y": 0}, t0 + 0.04, p1 - t0 - 0.04, "power2.inOut")
+    S.init(f"#{s}-gwz", {"scale": 1.35, "y": -480, "transformOrigin": f"{rcx}px {rcy}px"})
+    S.ft(f"#{s}-gwz", {"scale": 1.35, "y": -480}, {"scale": 1, "y": 0}, t0 + 0.04, p1 - t0 - 0.04, "power2.inOut")
     for k in range(10):
         a = 2 * math.pi * (k + 0.35) / 10
         S.init(f"#{s}-st{k}", {"opacity": 0, "scaleX": 0.2, "rotation": r3(math.degrees(a)), "x": r3(260 * math.cos(a)), "y": r3(260 * math.sin(a)), "transformOrigin": "0px 1.5px"})

@@ -20,13 +20,41 @@ def curve_pts(n=48):
     return pts
 
 
+def curve_svg(s, drawn=False):
+    """the growth curve (area fill in a clip wrapper #{s}-areaw, glow, line). Shared with S10 (drawn=True)."""
+    pts = curve_pts()
+    off = 0 if drawn else 1
+    clip = "inset(0px 0px 0px 0px)" if drawn else "inset(0px 1080px 0px 0px)"
+    svg = '<svg class="abs" style="left:0;top:0;width:1080px;height:1920px;overflow:visible" viewBox="0 0 1080 1920">'
+    return (f'<div class="abs" id="{s}-areaw" style="left:0;top:0;width:1080px;height:1920px;clip-path:{clip}">{svg}'
+            f'<defs><linearGradient id="{s}-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00D0FE" stop-opacity=".30"/>'
+            f'<stop offset="1" stop-color="#00D0FE" stop-opacity="0"/></linearGradient></defs>'
+            f'<path d="{area}" fill="url(#{s}-fill)"/></svg></div>{svg}'
+            f'<defs><linearGradient id="{s}-stroke" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#5fe3ff"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs>'
+            f'<path id="{s}-glow" d="{d}" fill="none" stroke="#00D0FE" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" opacity=".28" '
+            f'style="filter:blur(10px)" pathLength="1" stroke-dasharray="1" stroke-dashoffset="{off}"/>'
+            f'<path id="{s}-line" d="{d}" fill="none" stroke="url(#{s}-stroke)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" '
+            f'pathLength="1" stroke-dasharray="1" stroke-dashoffset="{off}"/></svg>')
+
+
+NODES = [0.16, 0.34, 0.52, 0.68, 0.82, 0.93]
+
+
+def node_html(s, k, u, lit=False):
+    pts = curve_pts()
+    i = int(u * (len(pts) - 1))
+    x, y = pts[i]
+    st = "" if not lit else ""
+    return (f'<div class="abs" id="{s}-n{k}" style="{box(x - 17, y - 17, 34, 34)}border-radius:50%;background:radial-gradient(circle at 38% 34%,#ffffff 0%,#9ff0ff 40%,#00D0FE 75%);'
+            f'box-shadow:0 0 0 5px rgba(0,208,254,.25),0 0 22px rgba(0,208,254,.85)"></div>'
+            f'<div class="abs" id="{s}-nd{k}" style="{box(x - 3, y + 17, 6, 1720 - y - 17)}background:linear-gradient(180deg,rgba(0,208,254,.55),rgba(0,208,254,0))"></div>')
+
+
 def build(S):
     s = S.id
     t0, t1 = S.t0, S.t1
     W41, W42, W43, W44, W46, W47 = S.W(41), S.W(42), S.W(43), S.W(44), S.W(46), S.W(47)  # lalu 15.32 keluar 15.54 lewat 15.86 grafik 16.12 sedang 16.60 naik 16.84
     pts = curve_pts()
-    d = "M" + " L".join(f"{r3(x)},{r3(y)}" for x, y in pts)
-    area = d + f" L{CABLE0[0]},1720 L{X0},1720 Z"
     # arc-length fractions for node timing
     L = [0.0]
     for a, b in zip(pts, pts[1:]):
@@ -35,28 +63,18 @@ def build(S):
     draw0, draw1 = W43 - 0.05, W47 + 0.18          # the curve draws over "lewat grafik yang sedang naik"
 
     # ---------------------------------------------------------------- back: graph world + curve (behind the mascot)
-    S.back.append(f'<div class="abs" id="{s}-world" style="{box(0, 0, 1080, 1920)}">' + graph_world(s) +
-                  f'<svg class="abs" style="left:0;top:0;width:1080px;height:1920px;overflow:visible" viewBox="0 0 1080 1920">'
-                  f'<defs><linearGradient id="{s}-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00D0FE" stop-opacity=".30"/>'
-                  f'<stop offset="1" stop-color="#00D0FE" stop-opacity="0"/></linearGradient>'
-                  f'<linearGradient id="{s}-stroke" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#5fe3ff"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs>'
-                  f'<path id="{s}-area" d="{area}" fill="url(#{s}-fill)"/>'
-                  f'<path id="{s}-glow" d="{d}" fill="none" stroke="#00D0FE" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" opacity=".28" '
-                  f'style="filter:blur(10px)" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>'
-                  f'<path id="{s}-line" d="{d}" fill="none" stroke="url(#{s}-stroke)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" '
-                  f'pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>')
-    nodes = [0.16, 0.34, 0.52, 0.68, 0.82, 0.93]
+    S.back.append(f'<div class="abs" id="{s}-world" style="{box(0, 0, 1080, 1920)}">' + graph_world(s) + curve_svg(s, drawn=False))
     node_t = []
-    for k, u in enumerate(nodes):
+    nodes_html = ""
+    for k, u in enumerate(NODES):
         i = int(u * (len(pts) - 1))
-        x, y = pts[i]
         frac = L[i] / tot
-        node_t.append(draw0 + (draw1 - draw0) * (1 - (1 - frac) ** 1.6))   # matches power-out-ish draw below
-        S.back.append(f'<div class="abs" id="{s}-n{k}" style="{box(x - 17, y - 17, 34, 34)}border-radius:50%;background:radial-gradient(circle at 38% 34%,#ffffff 0%,#9ff0ff 40%,#00D0FE 75%);'
-                      f'box-shadow:0 0 0 5px rgba(0,208,254,.25),0 0 22px rgba(0,208,254,.85)"></div>')
-        S.back.append(f'<div class="abs" id="{s}-nd{k}" style="{box(x - 3, y + 17, 6, 1720 - y - 17)}background:linear-gradient(180deg,rgba(0,208,254,.55),rgba(0,208,254,0))"></div>')
+        node_t.append(draw0 + (draw1 - draw0) * (1 - (1 - frac) ** 1.6))   # matches the power1.out draw below
+        nodes_html += node_html(s, k, u)
+    # nodes live inside the moving world (same transform as the curve)
     # glowing tip at CABLE0 (hand-off)
-    S.back.append(f'<div class="abs" id="{s}-tip" style="{box(CABLE0[0] - 30, CABLE0[1] - 30, 60, 60)}border-radius:50%;background:radial-gradient(circle,#ffffff 0%,#9ff0ff 35%,rgba(0,208,254,0) 70%)"></div>')
+    tip = f'<div class="abs" id="{s}-tip" style="{box(CABLE0[0] - 30, CABLE0[1] - 30, 60, 60)}border-radius:50%;background:radial-gradient(circle,#ffffff 0%,#9ff0ff 35%,rgba(0,208,254,0) 70%)"></div>'
+    S.back[-1] = S.back[-1][:-len("</div>")] + nodes_html + tip + "</div>"
     # portal ring remnant shrinking behind the mascot (we just came out of it)
     S.back.append(f'<div class="abs" id="{s}-ring" style="{box(540 - 280, 1050 - 280, 560, 560)}border-radius:50%;border:16px solid #c3ccd8;'
                   f'box-shadow:inset 0 0 0 5px rgba(0,208,254,.8),0 0 30px rgba(0,208,254,.45)"></div>')
@@ -68,16 +86,16 @@ def build(S):
 
     # ---------------------------------------------------------------- motion
     # world tilts down slowly (camera looks up the curve); mascot stays framed (world-only move)
-    S.init(f"#{s}-world", {"y": 0, "scale": 1.06, "transformOrigin": "540px 1100px"})
-    S.ft(f"#{s}-world", {"y": 0, "scale": 1.06}, {"y": 70, "scale": 1.0}, t0, t1 - t0, "sine.inOut")
+    S.init(f"#{s}-world", {"y": -70, "scale": 1.1, "transformOrigin": "540px 1100px"})
+    S.ft(f"#{s}-world", {"y": -70, "scale": 1.1}, {"y": 0, "scale": 1.0}, t0, t1 - t0, "sine.inOut")
     S.init(f"#{s}-ring", {"scale": 1.0, "opacity": 1})
     S.ft(f"#{s}-ring", {"scale": 1.0, "opacity": 1}, {"scale": 0.25, "opacity": 0}, t0, 0.5, "power3.in")
     S.init(f"#{s}-line", {"attr": {"stroke-dashoffset": 1}})
     S.ft(f"#{s}-line", {"attr": {"stroke-dashoffset": 1}}, {"attr": {"stroke-dashoffset": 0}}, draw0, draw1 - draw0, "power1.out")
     S.init(f"#{s}-glow", {"attr": {"stroke-dashoffset": 1}})
     S.ft(f"#{s}-glow", {"attr": {"stroke-dashoffset": 1}}, {"attr": {"stroke-dashoffset": 0}}, draw0 + 0.04, draw1 - draw0, "power1.out")
-    S.init(f"#{s}-area", {"opacity": 0, "y": 120})
-    S.ft(f"#{s}-area", {"opacity": 0, "y": 120}, {"opacity": 1, "y": 0}, draw0 + 0.2, draw1 - draw0, "power2.out")
+    S.init(f"#{s}-areaw", {"clipPath": "inset(0px 1080px 0px 0px)"})
+    S.ft(f"#{s}-areaw", {"clipPath": "inset(0px 1080px 0px 0px)"}, {"clipPath": "inset(0px 0px 0px 0px)"}, draw0, draw1 - draw0, "power1.out")
     for k, tn in enumerate(node_t):
         S.init(f"#{s}-n{k}", {"scale": 0, "opacity": 0})
         S.ft(f"#{s}-n{k}", {"scale": 0, "opacity": 0}, {"scale": 1, "opacity": 1}, tn, 0.22, "back.out(2.6)")

@@ -8,6 +8,7 @@ Hand-off: everything dims except the key-light rectangle, which narrows into the
 inside it -> S11's editor monitor."""
 from xk import box, r3, apex, CYAN, clip_rect, CLIP_NONE
 from kit import WIDE, MED, NO_FILTER, CABLE0, MONITOR, graph_world
+from s09 import curve_svg, node_html, NODES
 
 FLT = "brightness({b}) drop-shadow(0px 0px 0px rgba(0,208,254,0))"
 MON_VIEW = {"fx": 540, "fy": 1458, "h": 1128, "yaw": -10, "pitch": 4}   # == S11 monitor framing
@@ -38,12 +39,15 @@ def build(S):
     LX, RX = 150, 930
     # ---------------------------------------------------------------- back: graph world (fading) -> dark studio cyc
     S.back.append(graph_world(s))
+    # S09's finished curve (identical geometry), fades with the graph world as the studio goes dark
+    S.back.append(f'<div class="abs" id="{s}-crv" style="{box(0, 0, 1080, 1920)}">' + curve_svg(s, drawn=True)
+                  + "".join(node_html(s, k, u) for k, u in enumerate(NODES)) + "</div>")
     S.back.append(f'<div class="abs" id="{s}-cyc" style="{box(0, 0, 1080, 1920)}background:linear-gradient(180deg,#07112a 0%,#0c1c40 55%,#132a55 70%,#0a1532 100%)"></div>')
     S.back.append(f'<div class="abs" id="{s}-cycl" style="{box(0, 0, 1080, 1920)}background:radial-gradient(ellipse 55% 42% at 50% 52%,rgba(80,140,220,.55),rgba(80,140,220,0) 70%),'
                   f'linear-gradient(180deg,rgba(0,0,0,0) 60%,rgba(120,170,230,.12) 72%,rgba(0,0,0,0) 90%)"></div>')
     # STUDIO sign on the back wall (cyan LED letters)
-    S.back.append(f'<div class="abs" id="{s}-sign" style="{box(340, 300, 400, 90)}border-radius:14px;border:2px solid rgba(0,208,254,.5);'
-                  f'font:700 58px/86px Poppins;letter-spacing:.32em;text-indent:.32em;text-align:center;color:{CYAN};text-shadow:0 0 18px rgba(0,208,254,.9),0 0 4px #fff">STUDIO</div>')
+    S.back.append(f'<div class="abs" id="{s}-sign" style="{box(340, 228, 400, 84)}border-radius:14px;border:2px solid rgba(0,208,254,.5);'
+                  f'font:700 56px/80px Poppins;letter-spacing:.32em;text-indent:.32em;text-align:center;color:{CYAN};text-shadow:0 0 18px rgba(0,208,254,.9),0 0 4px #fff">STUDIO</div>')
     # cable: from the curve tip down the right stand and along the floor to the left stand
     cable = f"M{CABLE0[0]},{CABLE0[1]} C1060,600 {RX + 40},700 {RX + 10},900 L{RX + 10},1700 C{RX - 60},1760 700,1745 540,1745 L{LX + 20},1745 C{LX - 10},1745 {LX - 10},1720 {LX - 8},1700"
     S.back.append(f'<svg class="abs" style="left:0;top:0;width:1080px;height:1920px;overflow:visible" viewBox="0 0 1080 1920">'
@@ -66,6 +70,8 @@ def build(S):
     apex(S, S.front, f"{s}-ap", 540, 760, on + 0.05, size=900, ring=False, sparks=0, seed=1001, op=0.32)
 
     # ---------------------------------------------------------------- motion
+    S.init(f"#{s}-crv", {"opacity": 1})
+    S.ft(f"#{s}-crv", {"opacity": 1}, {"opacity": 0}, t0 + 0.12, 0.45, "power2.in")
     S.init(f"#{s}-cyc", {"opacity": 0})
     S.ft(f"#{s}-cyc", {"opacity": 0}, {"opacity": 1}, t0 + 0.05, 0.5, "power2.inOut")
     S.init(f"#{s}-cycl", {"opacity": 0})
@@ -103,7 +109,9 @@ def build(S):
     S.init(f"#{s}-mrim", {"opacity": 0, "scale": 1.7, "transformOrigin": f"{mw / 2 + 3}px {mh / 2 + 3}px"})
     S.ft(f"#{s}-mrim", {"opacity": 0, "scale": 1.7}, {"opacity": 1, "scale": 1}, m0, 0.3, "power3.inOut")
     for k in range(2):
-        S.ft(f"#{s}-bm{k}", {"opacity": 1}, {"opacity": 0.2}, m0, 0.3, "power2.in")
+        S.ft(f"#{s}-bm{k}", {"opacity": 1}, {"opacity": 0}, m0, 0.26, "power2.in")
+        S.ft(f"#{s}-st{k}", {"opacity": 1}, {"opacity": 0}, m0, 0.26, "power2.in")
+    S.ft(f"#{s}-pool", {"opacity": 1}, {"opacity": 0}, m0, 0.26, "power2.in")
 
     # ---------------------------------------------------------------- mascot: dims, gets lit, WIDE -> MED 3/4 -> monitor framing
     v0 = dict(WIDE, yaw=14)

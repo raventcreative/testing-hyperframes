@@ -29,7 +29,14 @@ def glass(id_, w, h, r, extra=""):
     return (f'<div class="abs" id="{id_}" style="{box(0, 0, w, h)}{extra}">'
             f'<div class="abs" style="{box(0, 0, w, h)}border-radius:{r}px;-webkit-backdrop-filter:blur(7px) saturate(1.7) brightness(1.14) contrast(1.05);'
             f'backdrop-filter:blur(7px) saturate(1.7) brightness(1.14) contrast(1.05);'
-            f'background:linear-gradient(90deg,rgba(255,255,255,.20) 0%,rgba(190,240,255,.05) 18%,rgba(255,255,255,0) 50%,rgba(0,208,254,.06) 82%,rgba(255,255,255,.22) 100%)"></div>'
+            f'background:linear-gradient(90deg,rgba(255,255,255,.26) 0%,rgba(190,240,255,.10) 14%,rgba(170,215,255,.20) 34%,rgba(200,235,255,.30) 50%,'
+            f'rgba(170,215,255,.20) 66%,rgba(0,208,254,.12) 86%,rgba(255,255,255,.26) 100%)"></div>'
+            # simulated refraction: a bent, brightened band (where the image would be displaced) + soft caustic lines
+            f'<div class="abs" style="{box(w * 0.3, 0, w * 0.4, h)}border-radius:{r}px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(225,245,255,.22),rgba(255,255,255,0));filter:blur(6px)"></div>'
+            f'<svg class="abs" style="left:0;top:0;width:{w}px;height:{h}px;overflow:visible" viewBox="0 0 {w} {h}">'
+            + "".join(f'<path d="M{r3(w * f)},{r3(h * 0.08)} C{r3(w * (f + 0.12))},{r3(h * 0.35)} {r3(w * (f - 0.1))},{r3(h * 0.62)} {r3(w * (f + 0.05))},{r3(h * 0.92)}" '
+                      f'fill="none" stroke="rgba(220,248,255,{a})" stroke-width="{sw}"/>' for f, a, sw in ((0.28, 0.35, 2), (0.5, 0.22, 1.5), (0.7, 0.3, 2)))
+            + '</svg>'
             f'<div class="abs" style="{box(0, 0, w, h)}border-radius:{r}px;box-shadow:inset 10px 0 18px -6px rgba(255,255,255,.75),inset -12px 0 22px -8px rgba(0,208,254,.65),'
             f'inset 0 0 0 2px rgba(255,255,255,.55),0 40px 70px -30px rgba(3,8,28,.8)"></div>'
             f'<div class="abs" style="{box(w * 0.16, h * 0.06, w * 0.16, h * 0.62)}border-radius:{r3(w * 0.08)}px;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0));'
@@ -58,7 +65,7 @@ def build(S):
     S.front.append(f'<div class="abs" id="{s}-slab" style="{box(-SW / 2, SY, SW, SH)}">' + glass(f"{s}-sg", SW, SH, 215) +
                    f'<div class="abs" style="{box(-6, 40, 14, SH - 80)}border-radius:7px;background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.9),rgba(190,245,255,.8),rgba(255,255,255,0));filter:blur(3px)"></div></div>')
     lx, ly, ld = LENS
-    S.front.append(f'<div class="abs" id="{s}-ldim" style="{box(lx - ld / 2, ly - ld / 2, ld, ld)}border-radius:50%;box-shadow:0 0 0 2400px rgba(4,9,26,.55)"></div>')
+    S.front.append(f'<div class="abs" id="{s}-ldim" style="{box(lx - ld / 2, ly - ld / 2, ld, ld)}border-radius:50%;box-shadow:0 0 0 2400px rgba(4,9,26,.72)"></div>')
     S.front.append(f'<div class="abs" id="{s}-lens" style="{box(lx - ld / 2, ly - ld / 2, ld, ld)}">' + glass(f"{s}-lg", ld, ld, ld / 2) +
                    f'<div class="abs metal" style="{box(-10, -10, ld + 20, ld + 20)}border-radius:50%;background:none;box-shadow:inset 0 0 0 9px #c3ccd8,inset 0 0 0 11px rgba(40,52,75,.6),0 0 24px rgba(0,208,254,.35)"></div></div>')
 
@@ -88,7 +95,7 @@ def build(S):
     S.tset(f"#{s}-lens", {"opacity": 1}, l0)
     S.ft(f"#{s}-lens", {"x": -lx - 330, "scaleX": 0.8, "scaleY": 2.9, "rotation": 7}, {"x": 0, "scaleX": 1, "scaleY": 1, "rotation": 0}, l0, 0.5, "power3.out")
     S.init(f"#{s}-ldim", {"opacity": 0})
-    S.ft(f"#{s}-ldim", {"opacity": 0}, {"opacity": 1}, l0 + 0.3, t1 - l0 - 0.3, "power2.in")
+    S.ft(f"#{s}-ldim", {"opacity": 0}, {"opacity": 1}, l0 + 0.25, t1 - l0 - 0.27, "sine.inOut")
     # cover push (1.035) relaxes to 1 as the world is freed (mirrored on the mascot wrapper)
     S.cam([(t0, {"scale": 1.035}, None), (t0 + 0.3, {"scale": 1.035}, "none"), (t_160 + 0.1, {"scale": 1.0}, "sine.inOut")])
 

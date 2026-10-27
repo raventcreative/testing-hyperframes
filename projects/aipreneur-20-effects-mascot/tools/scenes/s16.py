@@ -8,7 +8,7 @@ import math
 from xk import box, r3, CYAN
 from kit import MED, NO_FILTER, LENS
 
-EYE_X = 0.1                    # model-space x of the eye we push into (eyeB, face calibration)
+EYE_X = 0.082                    # model-space x of the eye we push into (eyeB, face calibration)
 EYE_U = 0.584
 
 
@@ -48,10 +48,12 @@ def build(S):
     # ---------------------------------------------------------------- motion
     o0, o1 = W77 - 0.02, W78 + 0.12                     # iris opens on "Kita zoom"
     for k in range(8):
-        S.init(f"#{s}-b{k}", {"y": 0})
-        S.ft(f"#{s}-b{k}", {"y": 0}, {"y": 900}, o0, o1 - o0, "power3.inOut")
-    S.init(f"#{s}-iris", {"rotation": 0, "transformOrigin": f"{cx}px {cy}px"})
-    S.ft(f"#{s}-iris", {"rotation": 0}, {"rotation": -28}, o0, o1 - o0, "power3.inOut")
+        S.init(f"#{s}-b{k}", {"y": 160})
+        S.ft(f"#{s}-b{k}", {"y": 160}, {"y": 0}, t0, 0.12, "power3.out")          # blades close onto the lens rim
+        S.ft(f"#{s}-b{k}", {"y": 0}, {"y": 900}, o0 + 0.1, o1 - o0 - 0.1, "power3.inOut")
+    S.init(f"#{s}-iris", {"rotation": 8, "opacity": 0.75, "transformOrigin": f"{cx}px {cy}px"})
+    S.ft(f"#{s}-iris", {"rotation": 8, "opacity": 0.75}, {"rotation": 0, "opacity": 1}, t0, 0.12, "power3.out")
+    S.ft(f"#{s}-iris", {"rotation": 0}, {"rotation": -28}, o0 + 0.1, o1 - o0 - 0.1, "power3.inOut")
     S.init(f"#{s}-irim", {"opacity": 1, "scale": 1})
     S.ft(f"#{s}-irim", {"opacity": 1, "scale": 1}, {"opacity": 0, "scale": 2.6}, o0, 0.4, "power2.in")
     S.init(f"#{s}-tun", {"opacity": 0, "scale": 0.4})
@@ -59,7 +61,7 @@ def build(S):
     S.ft(f"#{s}-tun", {"opacity": 1, "scale": 1.2}, {"opacity": 0, "scale": 3.4}, W79 + 0.05, 0.4, "power3.in")
     # the thin frame flies at the lens and passes it ("menembus")
     p0, p1 = W79 - 0.06, W80 + 0.02
-    S.init(f"#{s}-fr", {"opacity": 0, "scale": 0.35, "transformOrigin": f"{cx}px {cy}px"})
+    S.init(f"#{s}-fr", {"opacity": 0, "scale": 0.35, "transformOrigin": "330px 430px"})
     S.ft(f"#{s}-fr", {"opacity": 0, "scale": 0.35}, {"opacity": 1, "scale": 0.6}, W78 + 0.04, p0 - W78 - 0.04, "power2.out")
     S.ft(f"#{s}-fr", {"opacity": 1, "scale": 0.6}, {"opacity": 0.9, "scale": 4.2}, p0, p1 - p0, "power3.in")
     S.tset(f"#{s}-fr", {"opacity": 0}, p1)

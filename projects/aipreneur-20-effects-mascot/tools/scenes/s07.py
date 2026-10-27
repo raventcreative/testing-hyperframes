@@ -47,7 +47,7 @@ def build(S):
          {"x": rcx - scx, "y": rcy - scy, "scaleX": rd / sw, "rotation": 0, "opacity": 0}, pan, 0.28, "power3.in")
     # crossing bands (x travel + a jolt on "berhamburan")
     cross = [("b1", -9, 760, -620, W35 - 0.05, 0.56), ("b2", 7, -760, 520, W35 - 0.02, 0.5),
-             ("f1", -5, -1500, 240, W36 - 0.06, 0.3), ("f2", 3, 1200, 60, W36 + 0.02, 0.2)]
+             ("f1", -5, -1500, 240, W36 - 0.06, 0.28), ("f2", 3, 1200, 60, W36 + 0.02, 0.2)]
     for (i, rot, xa, xb, at, dur) in cross:
         S.init(f"#{s}-{i}", {"x": xa, "rotation": rot, "opacity": 1})
         S.ft(f"#{s}-{i}", {"x": xa}, {"x": xb}, at, dur, "power3.out")

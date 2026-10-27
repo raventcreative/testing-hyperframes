@@ -57,10 +57,10 @@ def build(S):
     # ---------------------------------------------------------------- mascot
     def big(v, k):     # the same view seen through a k x zoom about the frame centre
         return dict(v, fx=540 + k * (v["fx"] - 540), fy=540 + k * (v["fy"] - 540), h=v["h"] * k)
-    S.mv([(t0, A_VIEW, None), (tc, A_VIEW, "none"), (tc + 0.004, big(B_VIEW, 1.25), "none"), (tc + 0.304, B_VIEW, "power3.out"),
+    S.mv([(t0, A_VIEW, None), (tc, A_VIEW, "none"), (tc + 0.01, big(B_VIEW, 1.25), "none"), (tc + 0.31, B_VIEW, "power3.out"),
           (t1, dict(B_VIEW, yaw=-8), "sine.inOut")])
     S.mx([(t0, {"scale": 1, "x": 0, "y": 0}, None), (tz, zoom_props(1.06), "sine.inOut"), (tc, zoom_props(16), "power3.in"),
-          (tc + 0.004, {"scale": 1, "x": 0, "y": 0}, "none")])
+          (tc + 0.01, {"scale": 1, "x": 0, "y": 0}, "none")])
     S.act("armR", [(t0, "present", 0.01), (tz - 0.3, "pointUp", 0.25), (tc + 0.05, "open", 0.3), (tc + 1.6, "explain", 0.35), (t1 - 0.6, "low", 0.4)])
     S.act("armL", [(t0, "low", 0.01), (tc + 0.05, "wave", 0.3), (tc + 1.4, "low", 0.45)])
     S.act("head", [(t0, [-0.08, -0.22, 0.02], 0.01), (tz - 0.3, [-0.14, -0.3, 0.04], 0.3), (tc + 0.05, [0.0, -0.12, -0.03], 0.3),

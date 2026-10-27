@@ -57,7 +57,7 @@ def build(S):
         ua = k / NS
         ub = ua + 0.55 / NS * 1.6
         S.init(f"#{s}-t{k}", dict(tie(ua), opacity=0))
-        S.ft(f"#{s}-t{k}", dict(tie(ua), opacity=0), tie(ua), t0 + 0.08 + k * 0.015, 0.12, "power2.out")
+        S.tset(f"#{s}-t{k}", {"opacity": 1}, t0 + 0.06 + k * 0.008)
         S.ft(f"#{s}-t{k}", tie(ua), tie(min(1.0, ub)), d0, d1 - d0, "power1.inOut")
     # dolly zoom: background layers shrink toward the vanishing point by depth; subject constant
     depth = {"sun": 0.55, "a1": 0.74, "a0": 0.78, "a3": 0.86, "a2": 0.88}

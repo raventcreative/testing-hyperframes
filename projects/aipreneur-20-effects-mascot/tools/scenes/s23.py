@@ -83,7 +83,14 @@ def build(S):
             S.init(f"#{s}-a{k}", {"scaleX": 0, "transformOrigin": "0% 50%"})
             S.ft(f"#{s}-a{k}", {"scaleX": 0}, {"scaleX": 1}, b + 0.12, 0.3, "power2.out")
         S.fx(b + 0.02, "click", 0.05)
-    # hand-off: the PREVIEW card widens (S24 montage)
+    # hand-off: the panel and chain clear while the PREVIEW card widens (S24 montage)
+    for sel in (f"#{s}-panel", f"#{s}-code"):
+        S.ft(sel, {"opacity": 1}, {"opacity": 0}, t1 - 0.26, 0.24, "power2.in")
+    for k in range(4):
+        S.ft(f"#{s}-nh{k}", {"opacity": 1}, {"opacity": 0}, t1 - 0.26, 0.22, "power2.in")
+        S.ft(f"#{s}-n{k}", {"opacity": 1}, {"opacity": 0}, t1 - 0.26, 0.22, "power2.in")
+    for k in range(3):
+        S.ft(f"#{s}-a{k}", {"opacity": 1}, {"opacity": 0}, t1 - 0.26, 0.22, "power2.in")
     S.ft(f"#{s}-card", {"scale": sw / cw, "x": sx - cx, "y": sy - cy}, {"scale": sw / cw * 1.08, "x": sx - cx - 10, "y": sy - cy - 10}, t1 - 0.3, 0.3, "power2.in")
 
     # ---------------------------------------------------------------- mascot: below, hands the brief over

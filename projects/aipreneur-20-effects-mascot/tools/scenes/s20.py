@@ -34,7 +34,7 @@ def build(S):
     # screen recess + screen content (mini header like the real video)
     body.append(f'<div class="abs" style="{box(ins - 2, ins - 2, sw + 4, sh + 4)}border-radius:{sr + 2}px;background:#03081a;transform:translateZ(-1px)"></div>')
     body.append(f'<div class="abs" style="{box(ins, ins, sw, sh)}border-radius:{sr}px;overflow:hidden;background:radial-gradient(ellipse at 30% 25%,#2a5c99 0%,#13305f 45%,#08132e 100%)">'
-                f'<div class="abs" style="left:30px;top:74px;width:150px;font:700 13px/16px Poppins;color:#fff;letter-spacing:.06em">AI PRENEUR</div>'
+                f'<img src="assets/brand/logo_trim.png" alt="" style="position:absolute;left:30px;top:76px;width:120px;height:11.5px" />'
                 f'<div class="abs" style="left:30px;top:100px;width:34px;height:34px;border-radius:17px;border:1.5px solid {CYAN};font:700 14px/31px Poppins;color:#fff;text-align:center">19</div>'
                 f'<div class="abs" style="left:74px;top:102px;width:300px;font:700 20px/30px Poppins;color:#fff">PHONE MOCKUP</div>'
                 + "".join(f'<div class="abs" style="left:{74 + i * 10}px;top:136px;width:5px;height:5px;border-radius:3px;background:{CYAN if i < 19 else "rgba(255,255,255,.3)"}"></div>' for i in range(20))

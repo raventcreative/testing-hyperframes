@@ -8,8 +8,8 @@ import math
 from xk import box, r3, CYAN
 from kit import MED, NO_FILTER, LENS
 
-EYE_X = 0.082                    # model-space x of the eye we push into (eyeB, face calibration)
-EYE_U = 0.584
+EYE_X = 0.076                    # model-space x of the eye we push into (eyeB, face calibration)
+EYE_U = 0.578
 
 
 def eye_view(h, pitch=3, ey=960, ex=540):
@@ -51,8 +51,8 @@ def build(S):
         S.init(f"#{s}-b{k}", {"y": 160})
         S.ft(f"#{s}-b{k}", {"y": 160}, {"y": 0}, t0, 0.12, "power3.out")          # blades close onto the lens rim
         S.ft(f"#{s}-b{k}", {"y": 0}, {"y": 900}, o0 + 0.1, o1 - o0 - 0.1, "power3.inOut")
-    S.init(f"#{s}-iris", {"rotation": 8, "opacity": 0.75, "transformOrigin": f"{cx}px {cy}px"})
-    S.ft(f"#{s}-iris", {"rotation": 8, "opacity": 0.75}, {"rotation": 0, "opacity": 1}, t0, 0.12, "power3.out")
+    S.init(f"#{s}-iris", {"rotation": 8, "transformOrigin": f"{cx}px {cy}px"})
+    S.ft(f"#{s}-iris", {"rotation": 8}, {"rotation": 0}, t0, 0.12, "power3.out")
     S.ft(f"#{s}-iris", {"rotation": 0}, {"rotation": -28}, o0 + 0.1, o1 - o0 - 0.1, "power3.inOut")
     S.init(f"#{s}-irim", {"opacity": 1, "scale": 1})
     S.ft(f"#{s}-irim", {"opacity": 1, "scale": 1}, {"opacity": 0, "scale": 2.6}, o0, 0.4, "power2.in")

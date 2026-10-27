@@ -63,7 +63,7 @@ def build(S):
     # B-roll clips in V2 (appear as the tiles drop in) + the paper clip
     for k, (cx, cw) in enumerate(CLIPS_V2):
         S.front.append(f'<div class="abs" id="{s}-c{k}" style="{box(cx, ROW["V2"] + 6, cw, 52)}border-radius:9px;overflow:hidden;background:#1d3b6a;box-shadow:inset 0 0 0 2px rgba(255,255,255,.55)">'
-                       + "".join(f'<img src="{SELF}/{TILES[k][0]}.jpg" alt="" style="position:absolute;left:{j * 30}px;top:0;width:30px;height:52px;object-fit:cover;opacity:.9"/>' for j in range(5)) + '</div>')
+                       + f'<div class="abs" style="left:0;top:0;width:{cw}px;height:52px;opacity:.9;background:url({SELF}/{TILES[k][0]}.jpg) 0 50% / 30px 52px repeat-x"></div></div>')
     px, py, pw, ph = PAPER
     # the paper clip IS the S12 floor strip, transformed down into the timeline slot (origin 0 0)
     S.front.append(paper_strip(f"{s}-paper", -40, FLOOR_Y - 10, 1160, 70))
@@ -123,8 +123,8 @@ def build(S):
     # ---------------------------------------------------------------- mascot: plays in the monitor, then released to WIDE (S12 start)
     v_end = dict(WIDE, yaw=-10)
     S.mv([(t0, MON_VIEW, None), (W59, dict(MON_VIEW, yaw=-4), "sine.inOut"), (out0 + 0.1, dict(MON_VIEW, yaw=-8), "sine.inOut"), (t1, v_end, "power3.inOut")])
-    S.mc([(t0, {"clipPath": clip_rect(mx, my, mw, mh, mr)}, None), (out0 - 0.04, {"clipPath": clip_rect(mx, my, mw, mh, mr)}, "none"),
-          (out0 + 0.14, {"clipPath": CLIP_NONE}, "power2.in")])
+    S.mc([(t0, {"clipPath": clip_rect(mx, my, mw, mh, mr)}, None)])
+    S.mc([(out0 - 0.04, {"clipPath": clip_rect(mx, my, mw, mh, mr)}, None), (out0 + 0.14, {"clipPath": CLIP_NONE}, "power2.in")])
     S.mx([(t0, {"filter": NO_FILTER}, None)])
     # acting: presents the B-roll stacking, points at the timeline, follows the paper clip
     S.act("armL", [(t0 + 0.02, "low", 0.3), (W54 - 0.1, "present", 0.32), (W58, "low", 0.4), (W60 - 0.1, "point", 0.3), (W62 + 0.1, "low", 0.4)])

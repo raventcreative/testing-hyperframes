@@ -85,7 +85,7 @@ index = f"""<!doctype html>
       <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{r3(D)}" data-track-index="3" data-width="1080" data-height="1920"></div>
 {chr(10).join(front)}
       <div id="hud" class="clip" data-composition-id="hud" data-composition-src="compositions/hud.html" data-start="0" data-duration="{r3(D)}" data-track-index="6" data-width="1080" data-height="1920"></div>
-      <div id="captions" class="clip" data-composition-id="captions" data-composition-src="compositions/captions.html" data-start="0" data-duration="{r3(D)}" data-track-index="7" data-width="1080" data-height="1920"></div>
+      <div id="captions" class="clip" data-composition-id="captions" data-composition-src="compositions/captions.html" data-start="0" data-duration="{r3(D)}" data-track-index="7" data-track-kind="captions" data-width="1080" data-height="1920"></div>
       <!-- genuine AIpreneur logo (alpha-trimmed copy), never recoloured: the sheen is a band clipped to the glyphs -->
       <div id="logo" data-layout-ignore><div id="logo-glow"></div><img src="assets/brand/logo_trim.png" alt="AIpreneur" /><div id="logo-mask"><div id="logo-band"></div></div></div>
       <div id="grain" data-layout-ignore></div>
@@ -179,9 +179,11 @@ for s in SC:
         hm.append(f'    <div class="abs hmask" style="left:64px;top:128px;width:76px;height:76px;overflow:hidden"><div id="hn-{i}" class="abs" style="left:0;top:0;width:76px;height:76px;'
                   f'font:700 32px/76px Poppins, sans-serif;text-align:center;color:#fff">{n:02d}</div></div>')
         hm.append(f'    <div class="abs hmask" style="left:160px;top:124px;width:860px;height:66px;overflow:hidden"><div id="hl-{i}" class="abs" style="left:0;top:0;width:860px;'
-                  f'font:700 46px/66px Poppins, sans-serif;color:#fff;letter-spacing:.01em;white-space:nowrap">{html.escape(EFFECTS[n - 1].upper())}</div></div>')
+                  f'font:700 46px/66px Poppins, sans-serif;color:#fff;letter-spacing:.01em;white-space:nowrap;text-shadow:0 2px 12px rgba(3,8,28,.85),0 0 3px rgba(3,8,28,.8)">{html.escape(EFFECTS[n - 1].upper())}</div></div>')
         for sel, dly in ((f"#hn-{i}", 0.0), (f"#hl-{i}", 0.04)):
-            hinit.append(f'gsap.set("{sel}", {{ yPercent: 110 }});')
+            hinit.append(f'gsap.set("{sel}", {{ yPercent: 110, opacity: 0 }});')
+            htl.append(f'tl.set("{sel}", {{ opacity: 1 }}, {r3(s["start"] + dly)});')
+            htl.append(f'tl.set("{sel}", {{ opacity: 0 }}, {r3((s["end"] if s is not last else s["end"] - 0.25) + 0.26)});') if s["end"] + 0.26 < D else None
             htl.append(f'tl.fromTo("{sel}", {{ yPercent: 110 }}, {{ yPercent: 0, duration: 0.26, ease: "power3.inOut", immediateRender: false }}, {r3(s["start"] + dly)});')
             if s is not last:
                 htl.append(f'tl.fromTo("{sel}", {{ yPercent: 0 }}, {{ yPercent: -110, duration: 0.24, ease: "power3.inOut", immediateRender: false }}, {r3(s["end"])});')
@@ -193,8 +195,11 @@ for s in SC:
     elif s["id"] not in ("s00",):
         y = 128
         hm.append(f'    <div class="abs hmask" style="left:64px;top:{y}px;width:900px;height:56px;overflow:hidden"><div id="hl-{i}" class="abs" style="left:0;top:0;width:900px;'
-                  f'font:700 34px/56px Poppins, sans-serif;color:{CYAN};letter-spacing:.06em;white-space:nowrap">{html.escape(s["label"])}</div></div>')
-        hinit.append(f'gsap.set("#hl-{i}", {{ yPercent: 110 }});')
+                  f'font:700 34px/56px Poppins, sans-serif;color:{CYAN};letter-spacing:.06em;white-space:nowrap;text-shadow:0 2px 12px rgba(3,8,28,.85),0 0 3px rgba(3,8,28,.8)">{html.escape(s["label"])}</div></div>')
+        hinit.append(f'gsap.set("#hl-{i}", {{ yPercent: 110, opacity: 0 }});')
+        htl.append(f'tl.set("#hl-{i}", {{ opacity: 1 }}, {r3(s["start"] + 0.05)});')
+        if s["end"] < D - 0.01:
+            htl.append(f'tl.set("#hl-{i}", {{ opacity: 0 }}, {r3(s["end"] + 0.2)});')
         htl.append(f'tl.fromTo("#hl-{i}", {{ yPercent: 110 }}, {{ yPercent: 0, duration: 0.3, ease: "power4.out", immediateRender: false }}, {r3(s["start"] + 0.05)});')
         if s["end"] < D - 0.01:
             htl.append(f'tl.fromTo("#hl-{i}", {{ yPercent: 0 }}, {{ yPercent: -110, duration: 0.24, ease: "power3.inOut", immediateRender: false }}, {r3(s["end"])});')

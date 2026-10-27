@@ -10,8 +10,8 @@ from kit import SELF
 STACK = (465, 300, 150, 267)
 CHIPS = [("Daftar <span style='color:#00D0FE'>20</span> efek", 134), ("Breakdown scene", 138), ("Prompt", 141)]
 CHIP_W = [430, 420, 280]
-CHIP_Y = [300, 400, 500]
-CARD = (90, 300, 900, 360)
+CHIP_Y = [340, 440, 540]
+CARD = (90, 372, 900, 360)
 
 
 def build(S):
@@ -40,7 +40,7 @@ def build(S):
                    f'text-shadow:0 0 30px rgba(0,208,254,.45), 0 6px 20px rgba(3,8,28,.6)">EDIT</div>'
                    f'<div class="abs" id="{s}-send" style="left:{cw - 130}px;top:40px;width:80px;height:80px;border-radius:40px;background:{CYAN}">'
                    f'<svg viewBox="0 0 48 48" style="position:absolute;left:16px;top:16px;width:48px;height:48px"><path d="M6 24 L42 8 L32 42 L24 28 Z" fill="#0b1636"/><path d="M24 28 L42 8" stroke="{CYAN}" stroke-width="2.5"/></svg></div></div>')
-    apex(S, S.front, f"{s}-ap", 640, 420, W147 + 0.06, size=760, sparks=10, seed=2501, op=0.55)
+    apex(S, S.front, f"{s}-ap", 640, 492, W147 + 0.06, size=760, sparks=10, seed=2501, op=0.55)
 
     # ---------------------------------------------------------------- motion
     # stack unfolds into the chips (cards fan out, fade behind the chips)
@@ -55,7 +55,7 @@ def build(S):
         S.init(f"#{s}-cc{k}", {"attr": {"stroke-dashoffset": 1}})
         S.ft(f"#{s}-cc{k}", {"attr": {"stroke-dashoffset": 1}}, {"attr": {"stroke-dashoffset": 0}}, b + 0.25, 0.24, "power2.out")
         S.fx(b + 0.02, "pop", 0.06)
-        S.ft(f"#{s}-ch{k}", {"opacity": 1, "y": 0}, {"opacity": 0, "y": -80}, W146 - 0.16 + k * 0.03, 0.22, "power2.in")
+        S.ft(f"#{s}-ch{k}", {"opacity": 1, "y": 0}, {"opacity": 0, "y": -80}, W146 - 0.34 + k * 0.03, 0.2, "power2.in")
     # comment card lands, EDIT pops (apex), send arrow
     S.init(f"#{s}-card", {"opacity": 0, "y": 70, "scale": 0.92})
     S.ft(f"#{s}-card", {"opacity": 0, "y": 70, "scale": 0.92}, {"opacity": 1, "y": 0, "scale": 1}, W146 - 0.04, 0.36, "power3.out")

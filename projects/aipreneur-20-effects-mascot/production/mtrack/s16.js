@@ -1,8 +1,8 @@
 vt.set(V, {"fx": 540, "fy": 1800, "h": 1470, "yaw": 0, "pitch": 5}, 28.3);
 vt.fromTo(V, {"fx": 540, "fy": 1800, "h": 1470, "yaw": 0, "pitch": 5}, {"fx": 540, "fy": 1937.296, "h": 1700, "yaw": 0, "pitch": 5, "duration": 0.36, "ease": "sine.inOut", "immediateRender": false}, 28.3);
-vt.fromTo(V, {"fx": 540, "fy": 1937.296, "h": 1700, "yaw": 0, "pitch": 5}, {"fx": 140.0, "fy": 3296.0, "h": 3920, "yaw": 0, "pitch": 3, "duration": 0.52, "ease": "power3.in", "immediateRender": false}, 28.66);
-vt.fromTo(V, {"fx": 140.0, "fy": 3296.0, "h": 3920, "yaw": 0, "pitch": 3}, {"fx": -113.1, "fy": 4773.9, "h": 6400, "yaw": 0, "pitch": 3, "duration": 0.27, "ease": "power2.out", "immediateRender": false}, 29.18);
-vt.fromTo(V, {"fx": -113.1, "fy": 4773.9, "h": 6400, "yaw": 0, "pitch": 3}, {"fx": -235.5, "fy": 5489.0, "h": 7600, "yaw": 0, "pitch": 3, "duration": 0.25, "ease": "power1.in", "immediateRender": false}, 29.45);
+vt.fromTo(V, {"fx": 540, "fy": 1937.296, "h": 1700, "yaw": 0, "pitch": 5}, {"fx": 236.0, "fy": 3272.0, "h": 3920, "yaw": 0, "pitch": 3, "duration": 0.52, "ease": "power3.in", "immediateRender": false}, 28.66);
+vt.fromTo(V, {"fx": 236.0, "fy": 3272.0, "h": 3920, "yaw": 0, "pitch": 3}, {"fx": 43.7, "fy": 4734.7, "h": 6400, "yaw": 0, "pitch": 3, "duration": 0.27, "ease": "power2.out", "immediateRender": false}, 29.18);
+vt.fromTo(V, {"fx": 43.7, "fy": 4734.7, "h": 6400, "yaw": 0, "pitch": 3}, {"fx": -49.4, "fy": 5442.4, "h": 7600, "yaw": 0, "pitch": 3, "duration": 0.25, "ease": "power1.in", "immediateRender": false}, 29.45);
 vt.set("#m-xf", {"filter": "blur(0px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, 28.3);
 vt.fromTo("#m-xf", {"filter": "blur(0px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, {"filter": "blur(0px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px", "duration": 0.52, "ease": "none", "immediateRender": false}, 28.3);
 vt.fromTo("#m-xf", {"filter": "blur(0px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, {"filter": "blur(6px) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px", "duration": 0.3, "ease": "power2.in", "immediateRender": false}, 28.82);

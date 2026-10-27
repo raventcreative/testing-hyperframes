@@ -23,6 +23,8 @@ def curve_pts(n=48):
 def curve_svg(s, drawn=False):
     """the growth curve (area fill in a clip wrapper #{s}-areaw, glow, line). Shared with S10 (drawn=True)."""
     pts = curve_pts()
+    d = "M" + " L".join(f"{r3(x)},{r3(y)}" for x, y in pts)
+    area = d + f" L{CABLE0[0]},1720 L{X0},1720 Z"
     off = 0 if drawn else 1
     clip = "inset(0px 0px 0px 0px)" if drawn else "inset(0px 1080px 0px 0px)"
     svg = '<svg class="abs" style="left:0;top:0;width:1080px;height:1920px;overflow:visible" viewBox="0 0 1080 1920">'
@@ -63,7 +65,7 @@ def build(S):
     draw0, draw1 = W43 - 0.05, W47 + 0.18          # the curve draws over "lewat grafik yang sedang naik"
 
     # ---------------------------------------------------------------- back: graph world + curve (behind the mascot)
-    S.back.append(f'<div class="abs" id="{s}-world" style="{box(0, 0, 1080, 1920)}">' + graph_world(s) + curve_svg(s, drawn=False))
+    world = f'<div class="abs" id="{s}-world" style="{box(0, 0, 1080, 1920)}">' + graph_world(s) + curve_svg(s, drawn=False)
     node_t = []
     nodes_html = ""
     for k, u in enumerate(NODES):
@@ -74,7 +76,7 @@ def build(S):
     # nodes live inside the moving world (same transform as the curve)
     # glowing tip at CABLE0 (hand-off)
     tip = f'<div class="abs" id="{s}-tip" style="{box(CABLE0[0] - 30, CABLE0[1] - 30, 60, 60)}border-radius:50%;background:radial-gradient(circle,#ffffff 0%,#9ff0ff 35%,rgba(0,208,254,0) 70%)"></div>'
-    S.back[-1] = S.back[-1][:-len("</div>")] + nodes_html + tip + "</div>"
+    S.back.append(world + nodes_html + tip + "</div>")
     # portal ring remnant shrinking behind the mascot (we just came out of it)
     S.back.append(f'<div class="abs" id="{s}-ring" style="{box(540 - 280, 1050 - 280, 560, 560)}border-radius:50%;border:16px solid #c3ccd8;'
                   f'box-shadow:inset 0 0 0 5px rgba(0,208,254,.8),0 0 30px rgba(0,208,254,.45)"></div>')

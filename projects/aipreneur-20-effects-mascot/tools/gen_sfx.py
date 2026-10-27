@@ -4,7 +4,7 @@ Sources: production/sfx/sNN.json (S.fx cues written by every scene build).
   1. VO-safe files (tools/sfx_prep.py -> assets/sfx/vo_safe/, high-passed away from the voice).
   2. Peak on the visual apex: each cue starts so the sound's measured peak lands on its apex.
   3. Ducked by the real VO level (x0.5 above -22 dB, x0.7 above -32 dB).
-  4. Typing ticks merge into one trimmed typing clip.  5. Density: max 2 non-typing cues per 0.45 s.
+  4. Typing ticks merge into one trimmed typing clip.  5. Density: max 1 non-typing cue per 0.5 s (the stronger one wins).
 Library: HyperFrames bundled SFX (Pixabay Content License, assets/sfx/CREDITS.md)."""
 import json, subprocess
 from pathlib import Path
@@ -64,11 +64,11 @@ for (src, apex, name, vol, span_d) in merged:
     lvl = vo_level(t, t + min(d, 0.3))
     duck = 0.5 if lvl > -22 else 0.7 if lvl > -32 else 1.0
     out.append({"src": src, "cue": name, "apex": round(apex, 3), "t": round(t, 3), "file": f"vo_safe/{name}.wav",
-                "dur": round(d, 3), "vol": round(min(vol, 0.12) * duck, 3), "vo_db": round(lvl, 1), "duck": duck})
+                "dur": round(d, 3), "vol": round(min(vol, 0.1) * duck, 3), "vo_db": round(lvl, 1), "duck": duck})
 final = []
 for c in out:
-    near = [x for x in final if x["cue"] != "type" and abs(x["apex"] - c["apex"]) < 0.45]
-    if c["cue"] != "type" and len(near) >= 2:
+    near = [x for x in final if x["cue"] != "type" and abs(x["apex"] - c["apex"]) < 0.5]
+    if c["cue"] != "type" and len(near) >= 1:
         weakest = min(near + [c], key=lambda x: x["vol"])
         if weakest is c:
             continue

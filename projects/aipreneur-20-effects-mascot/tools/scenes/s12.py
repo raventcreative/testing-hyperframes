@@ -46,7 +46,7 @@ def build(S):
     for k, i in enumerate(("fg0", "fg1")):
         S.init(f"#{s}-{i}", {"y": 300})
         S.ft(f"#{s}-{i}", {"y": 300}, {"y": 0}, t0 + 0.12 + k * 0.05, 0.45, "back.out(1.4)")
-        S.ft(f"#{s}-{i}", {"y": 0}, {"y": 26}, t0 + 0.6, t1 - t0 - 0.6, "sine.inOut")
+        S.ft(f"#{s}-{i}", {"y": 0}, {"y": 26}, t0 + 0.65, t1 - t0 - 0.65, "sine.inOut")
     S.init(f"#{s}-star", {"scale": 0, "rotation": -90})
     S.ft(f"#{s}-star", {"scale": 0, "rotation": -90}, {"scale": 1, "rotation": 0}, flip + 0.15, 0.35, "back.out(2.4)")
     S.cam([(t0, {"y": 0, "scale": 1.0}, None), (t1, {"y": -14, "scale": 1.02}, "sine.inOut")])

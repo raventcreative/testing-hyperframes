@@ -1,22 +1,88 @@
 <template>
   <script src="assets/presenter.js"></script>
   <style>
-    #e15-root { position: absolute; inset: 0; overflow: hidden; }
+    #e15-root { position: absolute; inset: 0; overflow: hidden; background: #070f26; }
     .e15-layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; }
+    #e15-zoom, .e15-ghost { transform-origin: 540px 640px; }
+    .e15-ghost { opacity: 0; }
+    #e15-vig { background: radial-gradient(ellipse 560px 640px at 540px 660px, rgba(3,8,26,0) 40%, rgba(3,8,26,0.85) 100%); opacity: 0.35; }
+    .e15-meter { position: absolute; top: 880px; width: 176px; padding: 18px 18px 20px; font-family: "Poppins", sans-serif; opacity: 0; }
+    .e15-meter .lb { font: 700 17px/1 "Poppins", sans-serif; letter-spacing: 0.16em; color: #a9c2de; }
+    .e15-meter .vl { font: 700 46px/1 "Poppins", sans-serif; color: #ffffff; margin-top: 12px; letter-spacing: -0.02em; }
+    .e15-meter .bar { height: 6px; border-radius: 3px; background: rgba(169,194,222,0.22); margin-top: 14px; position: relative; overflow: hidden; }
+    .e15-meter .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: #00c9ff; }
   </style>
   <div id="e15-root" data-composition-id="e15" data-width="1080" data-height="1350">
-    <div id="e15-bd" class="e15-layer"></div>
+    <div id="e15-zoom" class="e15-layer">
+      <div id="e15-bd" class="e15-layer"></div>
+      <svg id="e15-tunnel" class="e15-layer" viewBox="0 0 1080 1350" data-layout-ignore></svg>
+    </div>
+    <div id="e15-g1" class="e15-layer e15-ghost"></div>
+    <div id="e15-g2" class="e15-layer e15-ghost"></div>
+    <div id="e15-g3" class="e15-layer e15-ghost"></div>
+    <div id="e15-vig" class="e15-layer"></div>
     <div id="e15-figwrap" class="e15-layer"></div>
+    <div id="e15-mL" class="e15-meter k-dark" style="left:60px">
+      <div class="lb">LATAR</div><div class="vl" id="e15-vL">1.00×</div><div class="bar"><i id="e15-bL" style="width:64.5%"></i></div>
+    </div>
+    <div id="e15-mR" class="e15-meter k-dark" style="right:60px">
+      <div class="lb">BADAN</div><div class="vl">1.00×</div><div class="bar"><i style="width:64.5%;background:#a9c2de"></i></div>
+    </div>
+    <div id="e15-cap" class="k-cap" style="opacity:0">Ga jago <span class="hl">ngedit</span>?</div>
     <div id="e15-chrome" class="e15-layer"></div>
   </div>
   <script>
     (function () {
       window.__timelines = window.__timelines || {};
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const eio = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
       const H = window.HFP;
-      document.getElementById("e15-bd").innerHTML = H.backdropHTML("e15b");
-      const R = H.mount(document.getElementById("e15-figwrap"), "e15f");
-      document.getElementById("e15-chrome").innerHTML = H.chromeHTML("e15c", 15, "Vertigo");
-      function render(t) { H.animate(R, t); }
+      const $ = (id) => document.getElementById("e15-" + id);
+      $("bd").innerHTML = H.backdropHTML("e15b");
+      const R = H.mount($("figwrap"), "e15f");
+      $("chrome").innerHTML = H.chromeHTML("e15c", 15, "Vertigo");
+
+      // perspective guides baked into the backdrop: receding wall frames + floor rays to a vanishing point behind the head
+      const VP = { x: 540, y: 640 };
+      let g = "";
+      [[0.34, 0.24], [0.52, 0.2], [0.72, 0.16], [0.94, 0.12]].forEach(([k, o]) => {
+        const w = 1080 * k, h = 1350 * k;
+        g += `<rect x="${(VP.x - w / 2).toFixed(1)}" y="${(VP.y - h * 0.48).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${(18 * k).toFixed(1)}" fill="none" stroke="#7fd8ff" stroke-width="2" opacity="${o}"/>`;
+      });
+      for (let i = -6; i <= 6; i++) {
+        const xb = VP.x + i * 150;
+        g += `<line x1="${(VP.x + i * 22).toFixed(1)}" y1="1130" x2="${xb}" y2="1350" stroke="#7fd8ff" stroke-width="2" opacity="0.14"/>`;
+      }
+      g += `<line x1="0" y1="1180" x2="1080" y2="1180" stroke="#7fd8ff" stroke-width="2" opacity="0.08"/><line x1="0" y1="1250" x2="1080" y2="1250" stroke="#7fd8ff" stroke-width="2" opacity="0.1"/>`;
+      $("tunnel").innerHTML = g;
+
+      // zoom-blur ghosts: two trailing copies of the backdrop (where it was 22 / 44 / 66 ms ago), only visible while moving
+      $("g1").innerHTML = H.backdropHTML("e15g1"); $("g2").innerHTML = H.backdropHTML("e15g2"); $("g3").innerHTML = H.backdropHTML("e15g3");
+
+      // backdrop scale: 1 → 1.55 in 0.85 s, hold, back out for the loop
+      const IN = [0.5, 1.35], OUT = [2.45, 3.3];
+      const scaleAt = (t) => 1 + 0.55 * (eio(seg(t, IN[0], IN[1])) - eio(seg(t, OUT[0], OUT[1])));
+      function render(t) {
+        H.animate(R, t);
+        const s = scaleAt(t);
+        const v = Math.abs(scaleAt(t + 0.02) - scaleAt(t - 0.02)) / 0.04;   // scale velocity (max ≈ 0.97/s)
+        $("zoom").style.transform = "scale(" + s.toFixed(4) + ")";
+        $("vig").style.opacity = (0.35 + 0.5 * (s - 1) / 0.55).toFixed(3);
+        [["g1", 0.022, 0.34], ["g2", 0.044, 0.24], ["g3", 0.066, 0.15]].forEach(([id, d, o]) => {
+          $(id).style.transform = "scale(" + scaleAt(t - d).toFixed(4) + ")";
+          $(id).style.opacity = (clamp(v * 1.4 - 0.1, 0, 1) * o).toFixed(3);
+        });
+        // meters: backdrop value counts up, body stays 1.00×
+        const m = eo(seg(t, 0.2, 0.5)) * (1 - seg(t, 3.5, 3.8));
+        for (const id of ["mL", "mR"]) { $(id).style.opacity = m.toFixed(3); $(id).style.transform = "translateY(" + ((1 - m) * 16).toFixed(1) + "px)"; }
+        $("vL").textContent = s.toFixed(2) + "×";
+        $("vL").style.color = s > 1.005 ? "#00c9ff" : "#ffffff";
+        $("bL").style.width = (s / 1.55 * 100).toFixed(1) + "%";
+        const cap = $("cap"), c = eo(seg(t, 0.3, 0.6)) * (1 - seg(t, 3.5, 3.8));
+        cap.style.opacity = c.toFixed(3); cap.style.transform = "translateY(" + ((1 - c) * 18).toFixed(1) + "px)";
+      }
       const state = { t: 0 };
       const tl = gsap.timeline({ paused: true });
       tl.fromTo(state, { t: 0 }, { t: 4, duration: 4, ease: "none", onUpdate: () => render(state.t) }, 0);

@@ -13,9 +13,9 @@ from xk import box, r3
 from kit import tx
 from kit_b import LETTERS, letter, floor, gap_glass, rims, C_OPEN, L_OPEN, GAP_C, LY, LH
 
-C_CX, C_CY = 135, 710          # C box centre (15..255 x 470..950)
-START = {"scale": 1.083, "x": 105, "y": 70}     # C mapped onto LETTER_C (90,520,300,520)
-PUSH = {"scale": 1.083, "x": 185, "y": 70}      # gap (195..335) mapped onto GAP (380..520 x 520..1040)
+C_CX, C_CY = 145, 720          # C box centre (45..245 x 520..920)
+START = {"scaleX": 1.45, "scaleY": 1.3, "x": 89, "y": 65}   # C mapped onto LETTER_C (90,520,300,520) = S03's last C
+PUSH = {"scale": 1.3, "x": 185, "y": 60}        # gap (195..335 x 520..920) mapped onto GAP (≈380..520 x 520..1040)
 
 
 def build(S):
@@ -35,7 +35,7 @@ def build(S):
     # ---------------------------------------------------------------- camera on the sign
     go = W30
     S.keys(f"#{s}-camA", [(t0, dict(START, transformOrigin=f"{C_CX}px {C_CY}px"), None),
-                          (t0 + 0.5, {"scale": 1, "x": 0, "y": 0}, "power3.out"),
+                          (t0 + 0.5, {"scaleX": 1, "scaleY": 1, "x": 0, "y": 0}, "power3.out"),
                           (go, {"x": -24}, "sine.inOut"),
                           (W35 + 0.3, {"x": 0}, "power2.inOut")])
     S.keys(f"#{s}-camB", [(t0, {"scale": 1, "x": 0, "y": 0, "transformOrigin": f"{GAP_C[0]}px {GAP_C[1]}px"}, None),

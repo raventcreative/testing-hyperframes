@@ -10,14 +10,14 @@ the glass as a long light line; at the cut a bright horizontal beam line spans t
 into the stage light."""
 from xk import box, r3
 from kit import GLINT_Y, tx, badge, shadow
-from kit_b import LETTERS, letter, gap_glass, rims, GAP_C, LH, C_OPEN, L_OPEN
+from kit_b import LETTERS, letter, gap_glass, rims, GAP_C, LH, C_OPEN, L_OPEN, BEAM_CSS
 
-PUSH = {"scale": 1.083, "x": 185, "y": 70, "transformOrigin": f"{GAP_C[0]}px {GAP_C[1]}px"}   # = S04 end
+PUSH = {"scale": 1.3, "x": 185, "y": 60, "transformOrigin": f"{GAP_C[0]}px {GAP_C[1]}px"}   # = S04 end
 HERO = (430, GLINT_Y, 600, 520)        # hero panel (x, y, w, h); its top edge carries the glint
 FAR = (690, 300, 300, 170)             # small far panel (top right, above the hero)
 NEAR = (70, 330, 300, 150)             # near panel (top left, above the head)
-# gap glass in group coords (kit_b.gap_glass): x 169..361, y 440..1000 -> screen through PUSH
-GX0, GX1, GY0, GY1 = 169, 361, 440, 1000
+# gap glass in group coords (kit_b.gap_glass): x 169..361, y LY-30..LY+LH+30 -> screen through PUSH
+GX0, GX1, GY0, GY1 = 169, 361, 490, 950
 
 
 def to_screen(x, y):
@@ -44,7 +44,7 @@ def build(S):
     hx, hy, hw, hh = HERO
     # ---------------------------------------------------------------- S04 end state: parted C | glass | L (exits on its rails)
     sign = [gap_glass(f"{s}-gg")]
-    for ch, x, w in LETTERS[:2]:
+    for ch, x, w in LETTERS:
         sign.append(letter(f"{s}-{ch}", ch, x, w))
     sign.append(rims(f"{s}-rim"))
     S.back.append(f'<div class="abs" id="{s}-sign" style="{box(0, 0, 1080, 1920)}">' + "".join(sign) + "</div>")
@@ -67,9 +67,9 @@ def build(S):
     S.back.append(pane(f"{s}-hero", hx, hy, hw, hh, inner=hero_in, radius=30))
     S.back.append(pane(f"{s}-near", *NEAR, inner=near_in, radius=22))
     # the glint + the light line it becomes (back layer, behind the mascot)
-    S.back.append(f'<div class="abs glint" id="{s}-gl" style="{box(hx - 40, GLINT_Y - 3, 240, 6)}border-radius:3px"></div>')
-    S.back.append(f'<div class="abs glint" id="{s}-beamR" style="{box(hx, GLINT_Y - 3, 1080 - hx + 40, 6)}border-radius:3px"></div>')
-    S.back.append(f'<div class="abs glint" id="{s}-beamL" style="{box(-40, GLINT_Y - 3, hx + 40, 6)}border-radius:3px"></div>')
+    S.back.append(f'<div class="abs" id="{s}-gl" style="{box(hx - 40, GLINT_Y - 4, 240, 8)}border-radius:4px;{BEAM_CSS}"></div>')
+    S.back.append(f'<div class="abs" id="{s}-beamR" style="{box(hx, GLINT_Y - 4, 1080 - hx + 40, 8)}border-radius:4px;{BEAM_CSS}"></div>')
+    S.back.append(f'<div class="abs" id="{s}-beamL" style="{box(-40, GLINT_Y - 4, hx + 40, 8)}border-radius:4px;{BEAM_CSS}"></div>')
 
     # ---------------------------------------------------------------- motion
     # sign: hold S04's end transform, then the C and L slide out of frame on their rails
@@ -78,6 +78,9 @@ def build(S):
     S.ft(f"#{s}-C", {"x": C_OPEN, "rotationY": -16}, {"x": C_OPEN - 520, "rotationY": -30}, t0 + 0.04, 0.42, "power3.in")
     S.init(f"#{s}-L", {"x": L_OPEN, "rotationY": 12, "transformOrigin": "100% 50%", "transformPerspective": 1200})
     S.ft(f"#{s}-L", {"x": L_OPEN, "rotationY": 12}, {"x": L_OPEN + 900, "rotationY": 24}, t0 + 0.04, 0.42, "power3.in")
+    for k, (ch, x, w) in enumerate(LETTERS[2:]):     # the rest of the sign rides the same rail out of frame
+        S.init(f"#{s}-{ch}", {"x": 0})
+        S.ft(f"#{s}-{ch}", {"x": 0}, {"x": 900}, t0 + 0.02 + k * 0.01, 0.42, "power3.in")
     for k in range(2):
         S.init(f"#{s}-rim-r{k}", {"opacity": 1})
         S.ft(f"#{s}-rim-r{k}", {"opacity": 1}, {"opacity": 0}, t0 + 0.1, 0.2, "power2.in")

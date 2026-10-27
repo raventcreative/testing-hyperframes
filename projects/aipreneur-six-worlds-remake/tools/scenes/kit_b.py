@@ -2,18 +2,18 @@
 
 The giant word is matte navy dimensional signage: each letter is an SVG stroke glyph (custom condensed block letters),
 extruded by stacking darker copies offset down-right (key light upper-left), with a floor contact shadow.
-Layout (pulled-out, identity): letters 480 tall standing on a floor line at y 950."""
+Layout (pulled-out, identity): letters 400 tall standing on a floor line at y 920."""
 from xk import box, r3
 
-LH = 480                      # letter height
-LY = 470                      # letter top (floor line = LY + LH = 950)
-T = 64                        # stroke thickness
-LETTERS = [("C", 15, 240), ("L", 265, 130), ("A", 405, 172), ("U", 587, 160), ("D", 757, 168), ("E", 935, 130)]
-EXTRUDE = 14                  # stacked side layers
-STEP = 1.7                    # px per layer (down-right)
-# parting on "terbuka": C slides left, L slides right -> gap 195..335 (140 x 480), centre (265, 710)
-C_OPEN, L_OPEN = -60, 70
-GAP_C = (265, 710)
+LH = 400                      # letter height
+LY = 520                      # letter top (floor line = LY + LH = 920)
+T = 54                        # stroke thickness
+LETTERS = [("C", 45, 200), ("L", 275, 110), ("A", 415, 145), ("U", 590, 135), ("D", 755, 140), ("E", 925, 110)]
+EXTRUDE = 12                  # stacked side layers
+STEP = 1.6                    # px per layer (down-right)
+# parting on "terbuka": C slides left, L slides right -> gap 195..335 (140 x 400), centre (265, 720)
+C_OPEN, L_OPEN = -50, 60
+GAP_C = (265, 720)
 
 
 def glyph_path(ch, w):
@@ -71,12 +71,17 @@ def gap_glass(pid):
     """the translucent glass pane that sits behind the letters and shows through the C|L gap (group coords)."""
     gx0, gx1 = 195 - 26, 335 + 26
     return (f'<div class="abs" id="{pid}" style="{box(gx0, LY - 30, gx1 - gx0, LH + 60)}">'
-            f'<div class="abs glass" style="left:0;top:0;width:{gx1 - gx0}px;height:{LH + 60}px;border-radius:18px"></div>'
+            f'<div class="abs glass" style="left:0;top:0;width:{gx1 - gx0}px;height:{LH + 60}px;border-radius:18px;background:linear-gradient(150deg,rgba(190,212,245,.75),rgba(150,182,228,.5) 55%,rgba(205,222,247,.6))"></div>'
             f'<div class="abs" id="{pid}-band" style="left:0;top:0;width:{gx1 - gx0}px;height:120px;'
             f'background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.75),rgba(255,255,255,0))"></div></div>')
 
 
+# light line on a pale plate: white core + cool halo (a pure white glow disappears on the user's off-white background)
+BEAM_CSS = ("background:linear-gradient(90deg,rgba(255,255,255,0),#ffffff 12%,#ffffff 88%,rgba(255,255,255,0));"
+            "box-shadow:0 0 0 1px rgba(90,140,215,.35),0 0 14px 3px rgba(90,140,215,.7),0 0 34px 8px rgba(150,190,240,.55);")
+
+
 def rims(pid):
     """bright glass rims along the C's right edge and the L's left edge once parted (group coords)."""
-    return (f'<div class="abs glint" id="{pid}-r0" style="{box(193, LY + 6, 5, LH - 12)}border-radius:3px"></div>'
-            f'<div class="abs glint" id="{pid}-r1" style="{box(333, LY + 6, 5, LH - 12)}border-radius:3px"></div>')
+    return (f'<div class="abs" id="{pid}-r0" style="{box(192, LY + 6, 6, LH - 12)}border-radius:3px;{BEAM_CSS}"></div>'
+            f'<div class="abs" id="{pid}-r1" style="{box(332, LY + 6, 6, LH - 12)}border-radius:3px;{BEAM_CSS}"></div>')

@@ -7,7 +7,7 @@ the light lands and he brightens; "muncul": confident open hero pose, held. Beat
 light and a thin luminous iris forms at IRIS (S07 opens on it and turns it into the colour-grade dial)."""
 from xk import box, r3, Rng
 from kit import WIDE, GLINT_Y, NO_FILTER
-from kit_c import IRIS_C as IRIS, S06_END
+from kit_c import IRIS_C as IRIS, S06_END, S05_END
 
 LAMP = (330, 336)                      # beam apex (lamp lens)
 FLOOR = (480, 1726)                    # beam centre on the floor
@@ -94,8 +94,9 @@ def build(S):
     S.ft(f"#{s}-irisc", {"opacity": 1, "scale": 1}, {"opacity": 0.35, "scale": 0.8}, ir + 0.12, t1 - ir - 0.14, "power2.out")
 
     # ---------------------------------------------------------------- mascot: full body on stage, turns into the beam, hero pose
-    v = dict(S06_END, yaw=16, pitch=5)
-    S.mv([(t0, v, None), (on, dict(S06_END, yaw=6, pitch=5), "power2.inOut"), (t1, S06_END, "sine.inOut")])
+    # continues S05's framing, then the camera settles on the stage while the beam opens
+    S.mv([(t0, S05_END, None), (t0 + 0.42, dict(S06_END, yaw=16, pitch=5), "power3.inOut"),
+          (on + 0.1, dict(S06_END, yaw=6, pitch=5), "sine.inOut"), (t1, S06_END, "sine.inOut")])
     S.mx([(t0, {"filter": FLT.format(b=0.82)}, None), (on - 0.05, {"filter": FLT.format(b=0.82)}, "none"),
           (on + 0.12, {"filter": FLT.format(b=1.14)}, "power2.out"), (on + 0.55, {"filter": FLT.format(b=1.05)}, "power2.inOut")])
     S.act("head", [(t0 + 0.02, [0.02, 0.18, 0], 0.3), (W39 - 0.02, [-0.2, -0.32, 0.06], 0.35),     # looks up into the lamp

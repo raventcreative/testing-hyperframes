@@ -8,6 +8,7 @@ Hand-off: the dial lifts to the centre and becomes a thin navy ring with 6 deten
 from xk import box, r3
 from kit import SELF
 from kit_c import IRIS_C, S06_END, S07_VIEW, DIAL, CARD, RING_END
+from s06 import CONE
 
 BEFORE = "saturate(0.25) contrast(0.8) brightness(1.08)"
 AFTER = "saturate(1.06) contrast(1.05)"
@@ -21,6 +22,11 @@ def build(S):
     dx, dy, dd = DIAL
     ix, iy, idm = IRIS_C
     rx, ry, rd = RING_END
+    # ---------------------------------------------------------------- back: S06's stage light lingers and lifts (continuity)
+    S.back.append(f'<div class="abs" id="{s}-dim" style="{box(0, 0, 1080, 1920)}'
+                  f'background:radial-gradient(ellipse 78% 62% at 50% 56%, rgba(10,13,44,.52) 0%, rgba(10,13,44,.40) 46%, rgba(10,13,44,.10) 82%, rgba(10,13,44,0) 100%)"></div>')
+    S.back.append(f'<div class="abs" id="{s}-cone" style="{box(0, 0, 1080, 1920)}clip-path:{CONE};'
+                  f'background:linear-gradient(160deg, rgba(255,255,255,.92) 0%, rgba(236,243,255,.55) 30%, rgba(222,234,252,.30) 70%, rgba(222,234,252,.12) 100%);filter:blur(6px)"></div>')
     # ---------------------------------------------------------------- back: the graded frame card (same still, two grades)
     img_w = cw * 1.5
     img_h = img_w * 1920 / 1080
@@ -28,7 +34,8 @@ def build(S):
 
     def still(id_, flt, clip=""):
         return (f'<div class="abs" id="{id_}" style="{box(0, 0, cw, ch)}overflow:hidden;border-radius:22px;{clip}">'
-                f'<img src="{SELF}/spot_full.jpg" alt="" style="position:absolute;left:{r3(ox)}px;top:{r3(oy)}px;width:{r3(img_w)}px;height:{r3(img_h)}px;filter:{flt}" /></div>')
+                f'<div class="abs" style="left:{r3(ox)}px;top:{r3(oy)}px;width:{r3(img_w)}px;height:{r3(img_h)}px;'
+                f'background:url({SELF}/spot_full.jpg) 0 0 / 100% 100% no-repeat;filter:{flt}"></div></div>')
     S.back.append(f'<div class="abs" id="{s}-cardsh" style="{box(cx + 30, cy + ch - 30, cw - 20, 90)}border-radius:50%;'
                   f'background:radial-gradient(ellipse at 50% 50%, rgba(10,13,44,.32) 0%, rgba(10,13,44,0) 70%)"></div>')
     S.back.append(f'<div class="abs" id="{s}-card" style="{box(cx, cy, cw, ch)}border-radius:22px;'
@@ -65,6 +72,9 @@ def build(S):
 
     # ---------------------------------------------------------------- motion
     open_ = t0 + 0.06
+    for sel in (f"#{s}-dim", f"#{s}-cone"):
+        S.init(sel, {"opacity": 1})
+        S.ft(sel, {"opacity": 1}, {"opacity": 0}, t0, 0.42, "power2.inOut")
     # iris drops into the hand and turns into the dial
     S.init(f"#{s}-iris", {"x": 0, "y": 0, "scale": 1, "opacity": 1})
     S.ft(f"#{s}-iris", {"x": 0, "y": 0, "scale": 1}, {"x": dx - ix, "y": dy - iy, "scale": dd / idm}, t0, 0.4, "power3.inOut")

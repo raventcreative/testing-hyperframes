@@ -7,8 +7,8 @@ TIME:    82 s × 30 = 2460 frames. No music (none supplied), no voice-over.
 LOOK:    ground = rebuilt cartography, never screenshots.
          ocean #E4EDF9 → bathymetry >200 m #DBE6F6, >1000 m #D3E0F3, >3000 m #CAD9EF (Natural Earth depth polygons = the real "depth" layer).
          Indonesia land #FBFCFE, coast stroke #294B77 @ 58 %, 1.05 px; neighbours #EDF1F6, stroke #3A6299 @ 30 %.
-         land contact shadow rgba(32,43,59,.16) blur 12 px offset 4 px; surf rim 7 px #FBFCFE @ 55 %.
-         haze = radial edge veil #FBFCFE 0 → 42 %; paper grain 7 % multiply (static feTurbulence, seed 7).
+         land contact shadow = two offset fills (2.2 px @ 8 %, 4.5 px @ 6 %); surf rim 7 px #FBFCFE @ 55 %.
+         haze = radial edge veil #FBFCFE 0 → 42 %; paper grain = static 1920 px PNG (seed 7), alpha ≤ 22/255 at 50 %.
          ink #202B3B, navy #294B77 (markers, connectors, routes), secondary #3A6299 (credits), ice #ACC6E7.
          Montserrat 700 44 px +0.16 em for destination names; 600 26 px (min 22) landmark labels; 400 13 px credits.
          Photographs keep natural colour, white 10 px mat, 6 px radius, shadow 0 18 38 −10 rgba(32,43,59,.30).
@@ -16,7 +16,7 @@ OBJECTS: the archipelago (Natural Earth 10m), city markers (navy dot 9.5 px + wh
          Bali = regional island highlight + dashed halo ellipse (no point pin), visited markers 6.5 px (Bali = hollow ring),
          sequence trail (dashed navy 1.6 px) whose leading point is the next locator ring, photo frames with label + credit.
 MOTION:  camera = van Wijk–Nuij smooth zoom-pan (altitude rises with distance; rho 1.05 for Java hops → 1.65 Medan→Bali),
-         travel ease = smootherstep(t^0.82) (quick lift, long deceleration); brief canvas blur ≤ 1.6 px only above 28 px/frame.
+         travel ease = smootherstep(t^0.82) (quick lift, long deceleration); no motion blur (canvas blur too slow in software render, and every frame stays sharp).
          camera dead still from marker landing to departure (connectors stay attached).
          title per letter 0.32 s, 0.035 s stagger, blur 5 → 0 px, no translate. connector draw 0.30 s power2.out.
          frame unfold 0.70 s expo.out from the connector endpoint (scale 0.06 → 1, rotateY ±14° → 0), stagger 0.20 s.

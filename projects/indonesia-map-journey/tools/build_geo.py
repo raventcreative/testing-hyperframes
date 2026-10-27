@@ -7,7 +7,7 @@ Projection (shared by map, routes, markers, labels):
 import json, math, sys, os
 NE, OUT = sys.argv[1], sys.argv[2]
 S, LON0, LAT0 = 40.0, 88.0, 12.0
-BBOX = (88.0, -16.0, 150.0, 12.0)  # lon0, lat0, lon1, lat1
+BBOX = (80.0, -26.0, 160.0, 22.0)  # lon0, lat0, lon1, lat1 (clip edges stay off-screen)
 Q = 20  # quantization: 1 unit = 1/20 base px
 TOL = 0.0012  # DP tolerance in degrees (~130 m)
 

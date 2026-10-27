@@ -22,7 +22,7 @@ def build(S):
     W2, W3, W5, W6, W7 = S.W(2), S.W(3), S.W(5), S.W(6), S.W(7)   # polos .68  Dua 1.36  efek 1.82  Lihat 2.32  hasilnya 2.58
     plain = W2 - 0.06
     pb0, pb1 = W3 - 0.1, W3 + 0.22          # pull back
-    pi0, pi1 = 2.92, t1                     # push back in (lands on the S01 panel)
+    pi0, pi1 = t1 - 0.48, t1                     # push back in (lands on the S01 panel)
     # ---------------------------------------------------------------- back: plain panel group (scales with the camera pull)
     S.back.append(f'<div class="abs" id="{s}-pg" style="{box(0, 0, 1080, 1920)}">{panel_bg(f"{s}-pbg")}</div>')
     # micro previews: self-shots cropped pixel-exact to the panel rect
@@ -71,9 +71,10 @@ def build(S):
         b = W3 + 0.02 + k * 0.022
         S.ft(sel, {"x": 0, "y": 26, "scale": 0, "opacity": 0}, dict(at(a0), scale=1, opacity=1), b, 0.36, "back.out(1.7)")
         prev = at(a0)
-        for j, (tt, dd) in enumerate(((W6, 12), (W6 + 0.2, 24), (W6 + 0.4, 34))):
+        seg = (pi0 - 0.01 - W6) / 3
+        for j, dd in enumerate((12, 24, 34)):
             nxt = at(a0 + dd)
-            S.ft(sel, prev, nxt, tt, 0.2, "none")
+            S.ft(sel, prev, nxt, W6 + j * seg, seg, "none")
             prev = nxt
         S.ft(sel, dict(prev, scale=1, opacity=1), {"x": 0, "y": 26, "scale": 0.2, "opacity": 0}, pi0 + k * 0.008, 0.3, "power3.in")
     S.init(f"#{s}-big", {"opacity": 0, "y": 40})
@@ -88,11 +89,11 @@ def build(S):
           (pb0, {"scale": 1}, "none"), (pb1, {"scale": PULL}, "power3.out"),
           (pi0, {"scale": PULL}, "none"), (pi1, {"scale": 1}, "power2.in")])
     # acting: present the plain clip, point up at the 20 chips, open hands on "Lihat hasilnya"
-    S.act("armL", [(0.0, "low", 0.2), (W3 - 0.14, "pointUp", 0.3), (W5 + 0.2, "low", 0.4), (W6 - 0.12, "present", 0.32), (2.95, "low", 0.4)])
-    S.act("armR", [(0.0, "low", 0.2), (W6 - 0.1, "open", 0.32), (2.95, "low", 0.4)])
+    S.act("armL", [(0.0, "low", 0.2), (W3 - 0.14, "pointUp", 0.3), (W5 + 0.2, "low", 0.4), (W6 - 0.12, "present", 0.32), (t1 - 0.45, "low", 0.4)])
+    S.act("armR", [(0.0, "low", 0.2), (W6 - 0.1, "open", 0.32), (t1 - 0.45, "low", 0.4)])
     S.act("head", [(0.0, [0, 0, 0], 0.2), (plain, [-0.04, 0.06, 0.03], 0.3), (W3 - 0.05, [-0.12, 0.2, 0.0], 0.3),
                    (W6 - 0.05, [0.04, -0.06, -0.03], 0.3), (W7, [-0.02, 0.04, 0.02], 0.35)])
-    S.act("torso", [(0.0, {}, 0.2), (W3 - 0.1, {"chest": [-0.04, 0.06, 0]}, 0.35), (W6, {"chest": [0.04, 0, 0]}, 0.35), (2.95, {}, 0.4)])
+    S.act("torso", [(0.0, {}, 0.2), (W3 - 0.1, {"chest": [-0.04, 0.06, 0]}, 0.35), (W6, {"chest": [0.04, 0, 0]}, 0.35), (t1 - 0.45, {}, 0.4)])
     for k in range(3):
         S.fx(cuts[k] + 0.01, "click", 0.07)
     S.fx(W3 + 0.04, "whoosh", 0.06)

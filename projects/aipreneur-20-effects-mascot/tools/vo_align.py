@@ -14,7 +14,7 @@ import numpy as np
 from ctc_forced_aligner import AlignmentSingleton, generate_emissions, get_alignments, get_spans, load_audio
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-AUDIO = P / "assets/audio/vo_20effects_elevenlabs.mp3"
+AUDIO = P / "assets/audio/vo_20effects_elevenlabs_v2.mp3"
 SCRIPT = """Satu klip polos. Dua puluh efek. Lihat hasilnya.
 Karakter ini awalnya cuma diam. Lalu ikon mengorbit kepalanya. Chat mengambil alih layar. Dia keluar dari frame, dan kamera langsung menghantam close-up.
 Checklist muncul satu per satu. Judul berhamburan. Kamera masuk ke portal, lalu keluar lewat grafik yang sedang naik.
@@ -43,7 +43,7 @@ def spoken(w):
 sp_txt = [spoken(w) for w in words]
 
 model = AlignmentSingleton(model_path=str(Path.home() / ".cache/ctc_forced_aligner/model.onnx"))
-cache = Path.home() / ".cache/ctc_forced_aligner/fx20_vo_emissions.npz"
+cache = Path.home() / ".cache/ctc_forced_aligner/fx20_vo2_emissions.npz"
 if cache.exists():
     z = np.load(cache); emissions, stride = z["e"], int(z["s"])
 else:
@@ -125,7 +125,7 @@ for gi, g in enumerate(merged):
 for gi, g in enumerate(cap):
     g["end"] = cap[gi + 1]["start"] if gi + 1 < len(cap) else round(DUR, 3)
 
-res = {"audio": "assets/audio/vo_20effects_elevenlabs.mp3", "audio_duration": round(DUR, 3),
+res = {"audio": "assets/audio/vo_20effects_elevenlabs_v2.mp3", "audio_duration": round(DUR, 3),
        "method": "MMS-300m CTC forced alignment (local) on the spoken form; start = first phone - 20 ms; end = first 30 ms < -40 dB",
        "pronunciation_overrides": PRON, "words": out_words, "caption_groups": cap,
        "speech_onset": out_words[0]["start"], "last_word_end": out_words[-1]["end"]}

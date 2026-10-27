@@ -22,8 +22,8 @@ def build(S):
     s = S.id
     t0, t1 = S.t0, S.t1
     W13, W14, W15, W16 = S.W(13), S.W(14), S.W(15), S.W(16)    # Lalu 5.04, ikon 5.30, mengorbit 5.62, kepalanya 6.06
-    o0, o1 = t0 + 0.37, 6.46
-    fly0, fly1 = 6.48, t1 - 0.02
+    o0, o1 = t0 + 0.37, t1 - 0.407
+    fly0, fly1 = t1 - 0.387, t1 - 0.02
     N = 30
     S.back.append(ring(f"{s}-rb"))
     S.front.append(ring(f"{s}-rf", half="front"))
@@ -52,7 +52,7 @@ def build(S):
             pa, _ = pose(a0 + ang[k])
             pb, fb = pose(a0 + ang[k + 1])
             for side in "bf":
-                S.ft(f"#{s}-{side}{name}", pa, pb, times[k], times[k + 1] - times[k], "none")
+                S.ft(f"#{s}-{side}{name}", pa, pb, times[k], times[k + 1] - times[k] - 0.002, "none")
             mid_front = math.sin(math.radians(a0 + (ang[k] + ang[k + 1]) / 2)) > 0
             if mid_front != state:
                 S.tset(f"#{s}-f{name}", {"opacity": 1 if mid_front else 0}, times[k])
@@ -68,13 +68,13 @@ def build(S):
             S.ft(f"#{s}-faa", pe, {"x": r3(ax - OX), "y": r3(ay - OY), "scale": r3(ad / D0)}, fly0, fly1 - fly0, "power3.inOut")
         else:
             side = "f" if fe else "b"
-            S.ft(f"#{s}-{side}{name}", dict(pe, opacity=1), dict(pe, scale=0.2, opacity=0), 6.47 + 0.03 * CH.index((name, a0)), 0.24, "power2.in")
+            S.ft(f"#{s}-{side}{name}", dict(pe, opacity=1), dict(pe, scale=0.2, opacity=0), t1 - 0.397 + 0.03 * CH.index((name, a0)), 0.24, "power2.in")
     for sel in (f"#{s}-rb", f"#{s}-rf"):
         S.init(sel, {"opacity": 1})
-        S.ft(sel, {"opacity": 1}, {"opacity": 0}, 6.4, 0.32, "power2.in")
+        S.ft(sel, {"opacity": 1}, {"opacity": 0}, t1 - 0.467, 0.32, "power2.in")
 
     # ---------------------------------------------------------------- mascot: medium -> 3/4, head follows the 'Aa' chip
-    S.mv([(t0, dict(MED), None), (6.3, dict(MED, yaw=-14, pitch=6), "sine.inOut"), (t1, dict(MED, yaw=-14, pitch=6), "none")])
+    S.mv([(t0, dict(MED), None), (t0 + 1.33, dict(MED, yaw=-14, pitch=6), "sine.inOut"), (t1, dict(MED, yaw=-14, pitch=6), "none")])
     S.act("head", head_keys + [(fly0, [-0.12, 0.3, 0.06], 0.3)])
     S.act("armL", [(t0, "low", 0.3)])
     S.act("armR", [(t0, "low", 0.3), (W14 - 0.14, "pointUp", 0.3), (W15 + 0.3, "explain", 0.35), (W16 + 0.2, "low", 0.4), (fly0, "present", 0.3)])

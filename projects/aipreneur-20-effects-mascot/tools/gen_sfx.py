@@ -21,7 +21,7 @@ for n in NAMES:
     a = np.abs(pcm(P / f"assets/sfx/vo_safe/{n}.wav"))
     env = np.convolve(a, np.ones(160) / 160, mode="same")
     info[n] = (round(float(np.argmax(env)) / 16000, 4), round(len(a) / 16000, 3))
-vo = pcm(P / "assets/audio/vo_20effects_elevenlabs.mp3")
+vo = pcm(P / "assets/audio/vo_20effects_elevenlabs_v2.mp3")
 hop = 160
 vdb = 20 * np.log10(np.sqrt(np.mean(vo[: len(vo) // hop * hop].reshape(-1, hop) ** 2, axis=1)) + 1e-6)
 def vo_level(t0, t1):

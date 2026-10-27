@@ -6,7 +6,7 @@ import subprocess, numpy as np
 from faster_whisper import WhisperModel
 P = Path(sys.argv[1]).resolve()
 m = WhisperModel(sys.argv[2] if len(sys.argv) > 2 else "small", device="cpu", compute_type="int8")
-raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(P / "assets/audio/vo_20effects_elevenlabs.mp3"), "-ac", "1", "-ar", "16000", "-f", "f32le", "-"], capture_output=True, check=True).stdout
+raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(P / "assets/audio/vo_20effects_elevenlabs_v2.mp3"), "-ac", "1", "-ar", "16000", "-f", "f32le", "-"], capture_output=True, check=True).stdout
 segs, info = m.transcribe(np.frombuffer(raw, dtype=np.float32), language="id", word_timestamps=True, beam_size=5,
                           initial_prompt="Satu klip polos. Dua puluh efek. Chat, frame, close-up, checklist, portal, studio, B-roll, timeline, Claude Code, prompt, EDIT.")
 words = []

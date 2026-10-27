@@ -36,7 +36,7 @@ for i, fx in enumerate(sorted(SFX, key=lambda x: x["t"])):
                     f'data-track-index="{lane(fx["t"], fx["t"] + d)}" data-volume="{fx["vol"]}"></audio>')
 
 # logo sheen: ~0.45 s glyph-clipped white-cyan band every ~9 s + once on the final CTA
-SHEEN = [1.0, 10.1, 19.2, 28.4, 37.5, 46.6, round(D - 1.15, 2)]
+SHEEN = [1.0, 10.2, 19.6, 29.0, 38.4, 47.6, round(D - 1.15, 2)]
 LW, LH = 265, round(265 * 115 / 1195, 2)
 ltl = [f'        tl.fromTo("#logo-band", {{ x: 0 }}, {{ x: {LW + 200}, duration: 0.45, ease: "power2.inOut", immediateRender: false }}, {t});' for t in SHEEN]
 ltl += [f'        tl.fromTo("#logo-glow", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.2, ease: "sine.out", immediateRender: false }}, {t});'
@@ -90,7 +90,7 @@ index = f"""<!doctype html>
       <div id="logo" data-layout-ignore><div id="logo-glow"></div><img src="assets/brand/logo_trim.png" alt="AIpreneur" /><div id="logo-mask"><div id="logo-band"></div></div></div>
       <div id="grain" data-layout-ignore></div>
       <!-- the one voice-over: user's ElevenLabs file, untouched. NO background music. -->
-      <audio id="vo" class="clip" src="assets/audio/vo_20effects_elevenlabs.mp3" data-start="0" data-duration="{r3(wt["audio_duration"])}" data-track-index="8" data-volume="1"></audio>
+      <audio id="vo" class="clip" src="assets/audio/vo_20effects_elevenlabs_v2.mp3" data-start="0" data-duration="{r3(wt["audio_duration"])}" data-track-index="8" data-volume="1"></audio>
 {chr(10).join(sfx_tags)}
     </div>
     <script>

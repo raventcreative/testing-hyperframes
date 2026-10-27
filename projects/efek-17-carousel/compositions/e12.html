@@ -1,22 +1,150 @@
 <template>
   <script src="assets/presenter.js"></script>
   <style>
-    #e12-root { position: absolute; inset: 0; overflow: hidden; }
+    #e12-root { position: absolute; inset: 0; overflow: hidden; font-family: Poppins, sans-serif; }
     .e12-layer { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; }
+    #e12-green { background: radial-gradient(760px 820px at 560px 640px, #2fd463 0%, #14b347 48%, #0b8a35 100%); }
+    #e12-app { background: linear-gradient(180deg, #f3f7fc 0%, #e6eef7 100%); }
+    #e12-appbar { position: absolute; left: 0; top: 0; width: 1080px; height: 134px; background: linear-gradient(180deg, #0d1a3d, #10224e);
+      box-shadow: 0 10px 30px rgba(13,26,61,0.25); }
+    .e12-blob { position: absolute; border-radius: 50%; }
+    .e12-in { opacity: 0; }
+    #e12-tlabel { position: absolute; left: 64px; top: 172px; font: 700 20px/1 Poppins, sans-serif; letter-spacing: 0.16em; color: #294b77; display: flex; align-items: center; gap: 12px; }
+    #e12-tlabel i { width: 12px; height: 12px; border-radius: 50%; background: #00c9ff; box-shadow: 0 0 0 5px rgba(0,201,255,0.18); }
+    #e12-timer { position: absolute; left: 56px; top: 190px; font: 700 176px/1 Poppins, sans-serif; color: #0d1a3d; letter-spacing: -0.04em; }
+    #e12-tbar { position: absolute; left: 64px; top: 392px; width: 470px; height: 10px; border-radius: 5px; background: #d3deeb; overflow: hidden; }
+    #e12-tfill { position: absolute; left: 0; top: 0; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #294b77, #00c9ff); }
+    #e12-tasks { position: absolute; left: 60px; top: 444px; width: 500px; height: 372px; border-radius: 26px; background: #ffffff;
+      box-shadow: 0 1px 0 #fff inset, 0 2px 0 #d5dfeb, 0 24px 50px rgba(13,26,61,0.16); }
+    .e12-row { position: absolute; left: 26px; width: 448px; height: 78px; display: flex; align-items: center; gap: 18px; font: 700 27px/1.15 Poppins, sans-serif; color: #0d1a3d; }
+    .e12-box { width: 40px; height: 40px; border-radius: 12px; flex: none; position: relative; }
+    .e12-tag { margin-left: auto; height: 34px; padding: 0 14px; border-radius: 17px; font: 700 16px/34px Poppins, sans-serif; letter-spacing: 0.04em; }
+    #e12-line { position: absolute; left: 64px; top: 862px; width: 420px; font: 700 44px/1.18 Poppins, sans-serif; color: #0d1a3d; letter-spacing: -0.015em; }
+    #e12-line .hl { color: #00a6d6; }
+    #e12-player { position: absolute; left: 60px; top: 1092px; width: 400px; height: 92px; border-radius: 22px; background: #0d1a3d;
+      box-shadow: 0 18px 36px rgba(13,26,61,0.3); display: flex; align-items: center; gap: 16px; padding: 0 22px; }
+    #e12-sweep { position: absolute; left: 0; top: 0; width: 10px; height: 1350px; margin-left: -5px; opacity: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0), #ffffff 45%, #ffffff 55%, rgba(255,255,255,0)); box-shadow: 0 0 30px 8px rgba(0,201,255,0.7); }
+    #e12-keytag { position: absolute; left: 60px; top: 1190px; height: 60px; padding: 0 24px 0 18px; border-radius: 30px; background: rgba(7,15,38,0.82);
+      display: flex; align-items: center; gap: 12px; font: 700 26px/1 Poppins, sans-serif; color: #fff; opacity: 0; box-shadow: inset 0 0 0 1.5px rgba(127,216,255,0.35); }
+    #e12-keytag i { width: 14px; height: 14px; border-radius: 50%; background: #00c9ff; box-shadow: 0 0 10px #00c9ff; }
   </style>
   <div id="e12-root" data-composition-id="e12" data-width="1080" data-height="1350">
     <div id="e12-bd" class="e12-layer"></div>
-    <div id="e12-figwrap" class="e12-layer"></div>
+    <div id="e12-green" class="e12-layer" data-layout-ignore></div>
+    <div id="e12-app" class="e12-layer" data-layout-ignore>
+      <div class="e12-blob" style="left:640px;top:150px;width:520px;height:520px;background:radial-gradient(closest-side,rgba(0,201,255,0.22),rgba(0,201,255,0))"></div>
+      <div class="e12-blob" style="left:-160px;top:880px;width:520px;height:520px;background:radial-gradient(closest-side,rgba(41,75,119,0.14),rgba(41,75,119,0))"></div>
+      <div id="e12-appbar"></div>
+      <div id="e12-tlabel" class="e12-in"><i></i>SESI FOKUS · 2/4</div>
+      <div id="e12-timer" class="e12-in">49:57</div>
+      <div id="e12-tbar" class="e12-in"><div id="e12-tfill"></div></div>
+      <div id="e12-tasks" class="e12-in">
+        <div style="position:absolute;left:28px;top:26px;font:700 20px/1 Poppins,sans-serif;letter-spacing:0.14em;color:#7f93b3">TUGAS HARI INI</div>
+        <div style="position:absolute;right:28px;top:22px;font:700 22px/1 Poppins,sans-serif;color:#294b77" id="e12-count">1/3</div>
+        <div id="e12-rows"></div>
+      </div>
+      <div id="e12-line" class="e12-in">Satu sesi, <span class="hl">3 konten</span> beres.</div>
+      <div id="e12-player" class="e12-in">
+        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(150deg,#00c9ff,#294b77);flex:none;position:relative">
+          <div style="position:absolute;left:21px;top:16px;border-left:15px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent"></div></div>
+        <div style="flex:1"><div style="font:700 21px/1.2 Poppins,sans-serif;color:#fff">Lo-fi fokus</div>
+          <svg width="250" height="22" viewBox="0 0 250 22" style="display:block;margin-top:6px"><g id="e12-eq"></g></svg></div>
+      </div>
+    </div>
+    <div id="e12-sweep"></div>
+    <div id="e12-figwrap" class="e12-layer">
+      <svg id="e12-shadow" viewBox="0 0 640 1000" style="position:absolute;left:220px;top:380px;width:640px;height:1000px;overflow:visible;opacity:0">
+        <defs><filter id="e12-sb" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="18"/></filter></defs>
+        <path id="e12-shp" fill="#0d1a3d" filter="url(#e12-sb)" transform="translate(-40,26)"/>
+      </svg>
+    </div>
+    <div id="e12-keytag"><i></i>Latar dihapus</div>
     <div id="e12-chrome" class="e12-layer"></div>
   </div>
   <script>
     (function () {
       window.__timelines = window.__timelines || {};
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 4);
+      const eio = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      const back = (x) => { x = clamp(x, 0, 1); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
       const H = window.HFP;
-      document.getElementById("e12-bd").innerHTML = H.backdropHTML("e12b");
-      const R = H.mount(document.getElementById("e12-figwrap"), "e12f");
-      document.getElementById("e12-chrome").innerHTML = H.chromeHTML("e12c", 12, "Green Screen");
-      function render(t) { H.animate(R, t); }
+      const $ = (id) => document.getElementById(id);
+      $("e12-bd").innerHTML = H.backdropHTML("e12b");
+      const R = H.mount($("e12-figwrap"), "e12f");
+      $("e12-chrome").innerHTML = H.chromeHTML("e12c", 12, "Green Screen");
+      $("e12-shp").setAttribute("d", H.SIL);
+
+      const ROWS = [["Rekam 3 video", 0], ["Edit pakai AI", 1], ["Upload & jadwal", 2]];
+      $("e12-rows").innerHTML = ROWS.map((r, i) => `<div class="e12-row" id="e12-row${i}" style="top:${86 + i * 90}px">
+          <div class="e12-box" id="e12-box${i}"></div><span id="e12-txt${i}">${r[0]}</span>
+          ${i === 1 ? '<span class="e12-tag" id="e12-tag1" style="background:rgba(0,201,255,0.14);color:#0089b8">JALAN</span>' : ""}</div>` +
+        (i < 2 ? `<div style="position:absolute;left:26px;right:26px;top:${86 + i * 90 + 84}px;height:2px;background:#edf2f8"></div>` : "")).join("");
+      const CK = '<svg width="40" height="40" viewBox="0 0 40 40" style="position:absolute;left:0;top:0"><path d="M11 20.5 L17.5 27 L29 13.5" fill="none" stroke="#ffffff" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const setBox = (i, done, active) => {
+        const b = $("e12-box" + i);
+        b.style.background = done ? "#00c9ff" : "#ffffff";
+        b.style.boxShadow = done ? "0 6px 14px rgba(0,201,255,0.35)" : active ? "inset 0 0 0 3px #00c9ff" : "inset 0 0 0 3px #c7d4e3";
+        b.innerHTML = done ? CK : "";
+        $("e12-txt" + i).style.color = done ? "#7f93b3" : "#0d1a3d";
+        $("e12-txt" + i).style.textDecoration = done ? "line-through" : "none";
+      };
+      let eq = "";
+      for (let i = 0; i < 25; i++) eq += `<rect x="${i * 10}" width="5" rx="2.5" fill="#00c9ff"/>`;
+      $("e12-eq").innerHTML = eq;
+      const eqBars = Array.from($("e12-eq").children);
+
+      const green = $("e12-green"), app = $("e12-app"), sweep = $("e12-sweep"), fw = $("e12-figwrap"), key = $("e12-keytag");
+      const STAG = [["e12-tlabel", 1.02], ["e12-timer", 1.06], ["e12-tbar", 1.14], ["e12-tasks", 1.18], ["e12-line", 1.4], ["e12-player", 1.5]];
+      function render(t) {
+        H.animate(R, t);
+        // wipes: room → green (0.25–0.55), green → app (0.85–1.2); exit: both peel back right → left (3.35–3.7)
+        const g = eio(seg(t, 0.25, 0.55)), a = eio(seg(t, 0.85, 1.2)), ex = eio(seg(t, 3.35, 3.7));
+        const gx = 1080 * g * (1 - ex), ax = 1080 * a * (1 - ex);
+        green.style.clipPath = "inset(0 " + (1080 - gx).toFixed(1) + "px 0 0)";
+        app.style.clipPath = "inset(0 " + (1080 - ax).toFixed(1) + "px 0 0)";
+        green.style.visibility = gx > 0.5 ? "visible" : "hidden";
+        app.style.visibility = ax > 0.5 ? "visible" : "hidden";
+        let sx = -1, so = 0;
+        if (t > 0.25 && t < 0.55) { sx = gx; so = Math.sin(Math.PI * seg(t, 0.25, 0.55)); }
+        else if (t > 0.85 && t < 1.2) { sx = ax; so = Math.sin(Math.PI * seg(t, 0.85, 1.2)); }
+        else if (t > 3.35 && t < 3.7) { sx = ax; so = Math.sin(Math.PI * seg(t, 3.35, 3.7)); }
+        sweep.style.left = sx.toFixed(1) + "px"; sweep.style.opacity = (sx >= 0 ? clamp(so * 1.6, 0, 1) : 0).toFixed(3);
+        // presenter: re-placed lower & to the right so the timer and list read clearly
+        const mv = eio(seg(t, 0.5, 0.98)) * (1 - eio(seg(t, 3.35, 3.85)));
+        const s = 1 - 0.1 * mv, dx = 200 * mv, dy = 40 * mv;
+        fw.style.transformOrigin = "540px 1350px";
+        fw.style.transform = "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) scale(" + s.toFixed(4) + ")";
+        $("e12-shadow").style.opacity = (0.32 * a * (1 - ex)).toFixed(3);
+        const k = eo(seg(t, 0.45, 0.62)) * (1 - seg(t, 0.92, 1.05));
+        key.style.opacity = k.toFixed(3); key.style.transform = "translateY(" + ((1 - k) * 14).toFixed(1) + "px)";
+        // app content staggers in after the key, leaves together before the peel
+        for (const [id, t0] of STAG) {
+          const p = back(seg(t, t0, t0 + 0.4)), o = eo(seg(t, t0, t0 + 0.25)) * (1 - seg(t, 3.22, 3.4));
+          const el = $(id); el.style.opacity = o.toFixed(3);
+          el.style.transform = "translateY(" + ((1 - p) * 30).toFixed(1) + "px)";
+        }
+        for (let i = 0; i < 3; i++) {
+          const t0 = 1.28 + i * 0.08, o = eo(seg(t, t0, t0 + 0.25));
+          const row = $("e12-row" + i); row.style.opacity = o.toFixed(3); row.style.transform = "translateX(" + ((1 - o) * -20).toFixed(1) + "px)";
+        }
+        const done1 = t >= 2.25;
+        setBox(0, true, false); setBox(1, done1, !done1); setBox(2, false, done1);
+        const pop = done1 ? back(seg(t, 2.25, 2.5)) : 1;
+        $("e12-box1").style.transform = "scale(" + (done1 ? 0.6 + 0.4 * pop : 1).toFixed(3) + ")";
+        $("e12-tag1").style.opacity = done1 ? (1 - seg(t, 2.25, 2.4)).toFixed(3) : "1";
+        $("e12-count").textContent = done1 ? "2/3" : "1/3";
+        // countdown: 49:57 → ticks once per second
+        const sec = 57 - Math.max(0, Math.floor(t - 1.0));
+        $("e12-timer").textContent = "49:" + String(sec).padStart(2, "0");
+        $("e12-tfill").style.width = (470 * (0.36 + 0.01 * (57 - sec))).toFixed(1) + "px";
+        for (let i = 0; i < eqBars.length; i++) {
+          const h = 5 + 15 * (0.5 + 0.5 * Math.sin(t * 7.3 + i * 1.7) * Math.cos(t * 3.1 + i * 0.6));
+          eqBars[i].setAttribute("y", (11 - h / 2).toFixed(1)); eqBars[i].setAttribute("height", h.toFixed(1));
+        }
+      }
       const state = { t: 0 };
       const tl = gsap.timeline({ paused: true });
       tl.fromTo(state, { t: 0 }, { t: 4, duration: 4, ease: "none", onUpdate: () => render(state.t) }, 0);

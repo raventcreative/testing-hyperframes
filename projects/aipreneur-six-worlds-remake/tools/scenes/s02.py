@@ -53,8 +53,9 @@ def build(S):
         S.init(sel, {"y": h + DEPTH + 2})
         S.ft(sel, {"y": h + DEPTH + 2}, {"y": 0}, W9 - 0.04 + STARTS[k], DURS[k], EASES[k])
     # bar #03 settles a touch later with a tiny secondary rise on "tumbuh" (it is the hero)
-    S.ft(f"#{s}-b{HERO}-in", {"y": 0}, {"y": -14}, W10 + 0.12, 0.3, "power2.out")
-    S.ft(f"#{s}-b{HERO}-in", {"y": -14}, {"y": 0}, W10 + 0.42, 0.28, "power2.inOut")
+    r_end = W9 - 0.04 + STARTS[HERO] + DURS[HERO] + 0.02
+    S.ft(f"#{s}-b{HERO}-in", {"y": 0}, {"y": -14}, r_end, 0.24, "power2.out")
+    S.ft(f"#{s}-b{HERO}-in", {"y": -14}, {"y": 0}, r_end + 0.25, 0.26, "power2.inOut")
 
     # camera: anticipation push on "kamera", fly-through bar #03 on "menembusnya"
     bx = cx + bar_x(HERO) + BAR_W / 2

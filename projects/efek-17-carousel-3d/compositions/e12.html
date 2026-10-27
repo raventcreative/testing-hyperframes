@@ -14,9 +14,9 @@
     #e12-timer { position: absolute; left: 56px; top: 190px; font: 700 176px/1 Poppins, sans-serif; color: #0d1a3d; letter-spacing: -0.04em; }
     #e12-tbar { position: absolute; left: 64px; top: 392px; width: 470px; height: 10px; border-radius: 5px; background: #d3deeb; overflow: hidden; }
     #e12-tfill { position: absolute; left: 0; top: 0; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #294b77, #00c9ff); }
-    #e12-tasks { position: absolute; left: 60px; top: 444px; width: 500px; height: 372px; border-radius: 26px; background: #ffffff;
+    #e12-tasks { position: absolute; left: 60px; top: 444px; width: 470px; height: 372px; border-radius: 26px; background: #ffffff;
       box-shadow: 0 1px 0 #fff inset, 0 2px 0 #d5dfeb, 0 24px 50px rgba(13,26,61,0.16); }
-    .e12-row { position: absolute; left: 26px; width: 448px; height: 78px; display: flex; align-items: center; gap: 18px; font: 700 27px/1.15 Poppins, sans-serif; color: #0d1a3d; }
+    .e12-row { position: absolute; left: 26px; width: 418px; height: 78px; display: flex; align-items: center; gap: 18px; font: 700 27px/1.15 Poppins, sans-serif; color: #0d1a3d; }
     .e12-box { width: 40px; height: 40px; border-radius: 12px; flex: none; position: relative; }
     .e12-tag { margin-left: auto; height: 34px; padding: 0 14px; border-radius: 17px; font: 700 16px/34px Poppins, sans-serif; letter-spacing: 0.04em; }
     #e12-line { position: absolute; left: 64px; top: 862px; width: 420px; font: 700 44px/1.18 Poppins, sans-serif; color: #0d1a3d; letter-spacing: -0.015em; }
@@ -60,10 +60,8 @@
     </div>
     <div id="e12-sweep"></div>
     <div id="e12-figwrap" class="e12-layer">
-      <svg id="e12-shadow" viewBox="0 0 640 1000" style="position:absolute;left:220px;top:380px;width:640px;height:1000px;overflow:visible;opacity:0">
-        <defs><filter id="e12-sb" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="18"/></filter></defs>
-        <path id="e12-shp" fill="#0d1a3d" filter="url(#e12-sb)" transform="translate(-40,26)"/>
-      </svg>
+      <video id="e12-mascot" class="clip" data-start="0" data-duration="4" src="assets/mascot/mascot_talk_loop_1x.webm" muted playsinline
+        style="position:absolute;left:0;top:0;width:1080px;height:1350px"></video>
     </div>
     <div id="e12-keytag"><i></i>Latar dihapus</div>
     <div id="e12-chrome" class="e12-layer"></div>
@@ -79,9 +77,7 @@
       const H = window.HFP;
       const $ = (id) => document.getElementById(id);
       $("e12-bd").innerHTML = H.backdropHTML("e12b");
-      const R = H.mount($("e12-figwrap"), "e12f");
       $("e12-chrome").innerHTML = H.chromeHTML("e12c", 12, "Green Screen");
-      $("e12-shp").setAttribute("d", H.SIL);
 
       const ROWS = [["Rekam 3 video", 0], ["Edit pakai AI", 1], ["Upload & jadwal", 2]];
       $("e12-rows").innerHTML = ROWS.map((r, i) => `<div class="e12-row" id="e12-row${i}" style="top:${86 + i * 90}px">
@@ -105,7 +101,6 @@
       const green = $("e12-green"), app = $("e12-app"), sweep = $("e12-sweep"), fw = $("e12-figwrap"), key = $("e12-keytag");
       const STAG = [["e12-tlabel", 1.02], ["e12-timer", 1.06], ["e12-tbar", 1.14], ["e12-focus", 1.1], ["e12-tasks", 1.18], ["e12-line", 1.4], ["e12-player", 1.5]];
       function render(t) {
-        H.animate(R, t);
         // wipes: room → green (0.25–0.55), green → app (0.85–1.2); exit: both peel back right → left (3.35–3.7)
         const g = eio(seg(t, 0.25, 0.55)), a = eio(seg(t, 0.85, 1.2)), ex = eio(seg(t, 3.35, 3.7));
         const gx = 1080 * g * (1 - ex), ax = 1080 * a * (1 - ex);
@@ -120,10 +115,12 @@
         sweep.style.left = sx.toFixed(1) + "px"; sweep.style.opacity = (sx >= 0 ? clamp(so * 1.6, 0, 1) : 0).toFixed(3);
         // presenter: re-placed lower & to the right so the timer and list read clearly
         const mv = eio(seg(t, 0.5, 0.98)) * (1 - eio(seg(t, 3.35, 3.85)));
-        const s = 1 - 0.1 * mv, dx = 200 * mv, dy = 40 * mv;
-        fw.style.transformOrigin = "540px 1350px";
+        // default framing (scale 0.78, feet y 1160) → app framing (scale 0.66, feet y 1250, centred x 760)
+        const s = 0.78 - 0.12 * mv, dx = 220 * mv, dy = -44 + 90 * mv;
+        fw.style.transformOrigin = "540px 1204px";
         fw.style.transform = "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) scale(" + s.toFixed(4) + ")";
-        $("e12-shadow").style.opacity = (0.32 * a * (1 - ex)).toFixed(3);
+        const sh = a * (1 - ex);
+        fw.style.filter = sh > 0.01 ? "drop-shadow(-22px 16px 16px rgba(13,26,61," + (0.3 * sh).toFixed(3) + "))" : "none";
         const k = eo(seg(t, 0.45, 0.62)) * (1 - seg(t, 0.92, 1.05));
         key.style.opacity = k.toFixed(3); key.style.transform = "translateY(" + ((1 - k) * 14).toFixed(1) + "px)";
         // app content staggers in after the key, leaves together before the peel

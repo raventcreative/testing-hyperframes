@@ -6,7 +6,7 @@ import os, subprocess, sys, shutil
 from pathlib import Path
 from PIL import Image
 P = Path(__file__).resolve().parents[1]
-SHOTS = {"orbit": 7.683, "chat": 9.821, "escape": 11.148, "snap": 13.135, "checks": 15.479, "headline": 16.871, "portal": 17.925, "growth": 20.503, "studio": 23.742, "broll": 27.181, "paper": 28.836, "dolly": 29.933, "cover": 30.866, "glass": 32.545, "zoomthru": 33.919, "city": 35.67, "city_end": 35.88, "break": 36.347, "dzoom": 37.354, "phone": 37.97, "check20": 41.232}
+SHOTS = {"editorial": 6.6, "ots": 10.9, "word": 15.2, "glass": 18.3, "spot": 20.15, "grade": 23.1}
 names = sys.argv[1:] or list(SHOTS)
 out = P / "assets/elements/selfshots"; out.mkdir(parents=True, exist_ok=True)
 tmp = Path(os.environ.get("SELFSHOT_TMP", "/tmp/claude-0/selfshots")); shutil.rmtree(tmp, ignore_errors=True)

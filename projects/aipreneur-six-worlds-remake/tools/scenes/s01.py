@@ -77,18 +77,17 @@ def build(S):
         z = (0, 40, 14, 60, 24, 70)[k]
         S.ft(f"#{s}-sl{k}", {"y": 0, "opacity": 1, "rotation": 0}, {"y": 260 + 40 * k, "opacity": 0, "rotation": 6 + k}, go + 0.03 * k, 0.4, "power2.in")
     S.ft(f"#{s}-thr", {"opacity": 1}, {"opacity": 0}, go, 0.2, "power2.in")
-    S.ft(f"#{s}-sl0", {"opacity": 1}, {"opacity": 0}, t1 - 0.16, 0.14, "none")
-    S.ft(f"#{s}-panel", {"rotationY": -10, "rotationX": 2, "x": 0}, {"rotationY": 0, "rotationX": 0, "x": 0}, go, t1 - go - 0.05, "power3.inOut")
+    S.ft(f"#{s}-panel", {"rotationY": -10, "rotationX": 2, "x": 0, "opacity": 1}, {"rotationY": 0, "rotationX": 0, "x": 0, "opacity": 0}, go, 0.3, "power2.in")
     S.ft(f"#{s}-psh", {"opacity": 0.55}, {"opacity": 0}, go, 0.3, "power2.in")
     # slab: starts as slot #01's rect and grows into CHART
     x0, y0, w0, h0 = SLOTS[0]
     S.init(f"#{s}-slab", {"opacity": 0, "x": x0 - cx, "y": y0 - cy, "scaleX": w0 / cw, "scaleY": h0 / ch, "transformOrigin": "0% 0%"})
-    S.tset(f"#{s}-slab", {"opacity": 1}, t1 - 0.16)
+    S.tset(f"#{s}-slab", {"opacity": 1}, go + 0.1)
     S.ft(f"#{s}-slab", {"x": x0 - cx, "y": y0 - cy, "scaleX": w0 / cw, "scaleY": h0 / ch}, {"x": 0, "y": 0, "scaleX": 1, "scaleY": 1}, go + 0.1, t1 - go - 0.12, "power3.inOut")
 
     # ---------------------------------------------------------------- mascot: curious, left third; taps on "Lihat"
     v = {"fx": 300, "fy": 1790, "h": 1240, "yaw": 22, "pitch": 5}
-    S.mv([(t0, v, None), (W8 - 0.2, dict(v, fx=290, yaw=26), "sine.inOut"), (t1, dict(v, fx=280, h=1180, yaw=24), "power2.inOut")])
+    S.mv([(t0, v, None), (W8 - 0.2, dict(v, fx=290, yaw=26), "sine.inOut"), (t1, {"fx": 225, "fy": 1795, "h": 1010, "yaw": -8, "pitch": 5}, "power2.inOut")])
     S.act("head", [(t0, [-0.08, 0.22, 0.14], 0.3), (S.W(0), [-0.05, 0.3, 0.1], 0.35), (W2, [0.02, 0.36, 0.0], 0.35), (W5, [-0.06, 0.18, 0.06], 0.35),
                    (W6, [-0.02, 0.32, -0.05], 0.35), (W8, [0.05, 0.4, 0.0], 0.25), (t1, [0.0, 0.3, 0.02], 0.4)])
     S.act("armL", [(t0, "low", 0.3), (W2 - 0.14, "present", 0.32), (W4 + 0.2, "low", 0.4), (W6 - 0.12, "explain", 0.3), (W8 - 0.18, "point", 0.24), (t1 - 0.1, "low", 0.4)])

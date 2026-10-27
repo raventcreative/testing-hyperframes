@@ -91,7 +91,7 @@ def graph_world(s, op=1.0):
 # ======================================================================= EXPLAIN MODE (user revision)
 # When the mascot is explaining (not demonstrating an effect): he dollies forward to a half-body shot, the scene
 # behind him goes soft (blur + dim), and he talks with his hands and head.
-HALF = {"fx": 540, "fy": 1925, "h": 1700, "yaw": 0, "pitch": 4}      # head + torso (chibi half-body): face ≈ y 910, shirt print ≈ y 1290 (clear above the captions)
+HALF = {"fx": 540, "fy": 2446, "h": 2156, "yaw": 0, "pitch": 4}      # true half-body (waist up): hair top ≈ y 290, face ≈ y 1160, mouth ≈ y 1300, waist at the frame bottom
 BLUR_ON = "blur(16px) brightness(0.62) saturate(0.9)"
 BLUR_OFF = "blur(0px) brightness(1) saturate(1)"
 GESTURES = [("explain", "low"), ("palmUp", "explain"), ("together", "together"), ("open", "palmUp"), ("explainHi", "open")]

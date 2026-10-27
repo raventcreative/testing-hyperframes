@@ -46,7 +46,7 @@ def build(S):
     back = W85 - 0.3
     blur_out(S, back, 0.45)
     S.init(f"#{s}-h1", {"opacity": 0, "y": 30})
-    S.ft(f"#{s}-h1", {"opacity": 0, "y": 30}, {"opacity": 1, "y": 0}, back + 0.15, 0.35, "power3.out")
+    S.ft(f"#{s}-h1", {"opacity": 0, "y": 30}, {"opacity": 1, "y": 0}, back + 0.42, 0.3, "power3.out")
     S.init(f"#{s}-h2", {"opacity": 0, "scale": 0.7, "transformOrigin": "0% 50%"})
     S.ft(f"#{s}-h2", {"opacity": 0, "scale": 0.7}, {"opacity": 1, "scale": 1}, W86 - 0.05, 0.36, "back.out(2.2)")
     S.init(f"#{s}-sub", {"opacity": 0, "y": 16})
@@ -56,7 +56,7 @@ def build(S):
 
     # ---------------------------------------------------------------- mascot: asks (half-body) -> lower left pointing at the CTA
     low = {"fx": 180, "fy": 2120, "h": 980, "yaw": 22, "pitch": 6}
-    S.mv([(t0, dict(HALF, fy=HALF["fy"] + 400, yaw=10), None), (t0 + 0.45, dict(HALF, yaw=-3), "power3.inOut"), (W83, dict(HALF, yaw=4), "sine.inOut"),
+    S.mv([(t0, dict(HALF, fy=2253, h=HALF["h"] * 0.85, yaw=10), None), (t0 + 0.45, dict(HALF, yaw=-3), "power3.inOut"), (W83, dict(HALF, yaw=4), "sine.inOut"),
           (back, dict(HALF, yaw=0), "sine.inOut"), (back + 0.5, low, "power3.inOut"), (S.WE(88), dict(low, yaw=18), "sine.inOut"), (t1, dict(low, yaw=18), "none")])
     talk(S, 79, 84, seed=1, rest=False)
     S.act("armL", [(back + 0.1, "low", 0.35), (W86 - 0.15, "point", 0.28), (W88, "present", 0.35), (S.WE(88) + 0.05, "low", 0.4)])

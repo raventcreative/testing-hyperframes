@@ -73,8 +73,8 @@ def build(S):
     S.ft(f"#{s}-ph", {"x": tl_w * 0.42}, {"x": tl_w * 0.62}, W73, 0.5, "power2.inOut")
     S.ft(f"#{s}-ph", {"x": tl_w * 0.62}, {"x": tl_w * 0.97}, W75 + 0.2, t1 - W75 - 0.5, "none")
     S.init(f"#{s}-cur", {"x": 160, "y": 120, "opacity": 0})
-    S.tset(f"#{s}-cur", {"opacity": 1}, back + 0.3)
-    S.ft(f"#{s}-cur", {"x": 160, "y": 120}, {"x": 0, "y": 0}, back + 0.3, 0.4, "power3.out")
+    S.tset(f"#{s}-cur", {"opacity": 1}, back + 0.02)
+    S.ft(f"#{s}-cur", {"x": 160, "y": 120}, {"x": 0, "y": 0}, back + 0.02, 0.28, "power3.out")
     S.ft(f"#{s}-cur", {"x": 0, "y": 0}, {"x": tl_w * 0.2, "y": -60}, W73, 0.5, "power2.inOut")
     S.ft(f"#{s}-b3", {"x": 0, "y": 0}, {"x": 18, "y": -6}, W75, 0.12, "power2.out")
     S.ft(f"#{s}-b3", {"x": 18, "y": -6}, {"x": 0, "y": 0}, W75 + 0.14, 0.14, "back.out(3)")
@@ -93,7 +93,7 @@ def build(S):
 
     # ---------------------------------------------------------------- mascot: explain (half-body) -> small left foreground pointing at the timeline
     small = {"fx": 200, "fy": 2030, "h": 980, "yaw": 26, "pitch": 6}
-    S.mv([(t0, dict(HALF, fy=HALF["fy"] + 500, h=HALF["h"] * 0.8, yaw=6), None), (t0 + 0.5, dict(HALF, yaw=-3), "power3.inOut"),
+    S.mv([(t0, dict(HALF, fy=2253, h=HALF["h"] * 0.85, yaw=6), None), (t0 + 0.5, dict(HALF, yaw=-3), "power3.inOut"),
           (W67, dict(HALF, yaw=4), "sine.inOut"), (back, dict(HALF, yaw=-2), "sine.inOut"), (back + 0.5, small, "power3.inOut"), (t1, dict(small, yaw=30), "sine.inOut")])
     talk(S, 63, 72, seed=2, rest=False)
     S.act("armL", [(back + 0.1, "low", 0.35), (W73 + 0.1, "point", 0.3), (W76, "pointUp", 0.3), (t1 - 0.15, "low", 0.4)])

@@ -5,12 +5,13 @@ Breakdown scene, Prompt). Camera pans to the mascot centre. "Komen": the chips l
 lands; "EDIT" pops in cyan Bold - HERO APEX. "Gue kirim.": a small send arrow leaves the card. The last ~0.5 s is a
 calm, complete brand frame (logo final sheen runs in the root), no fade to black."""
 from xk import box, r3, CYAN, apex, check_svg
-from kit import SELF
+from kit import SELF, HALF, blur_wrap, talk
 
 STACK = (465, 300, 150, 267)
 CHIPS = [("Daftar <span style='color:#00D0FE'>20</span> efek", 134), ("Breakdown scene", 138), ("Prompt", 141)]
-CHIP_W = [430, 420, 280]
-CHIP_Y = [340, 440, 540]
+CHIP_W = [330, 340, 200]
+CHIP_X = [84, 84 + 330 + 18, 84 + 330 + 18 + 340 + 18]
+CHIP_Y = [236, 236, 236]
 CARD = (90, 372, 900, 360)
 
 
@@ -26,10 +27,10 @@ def build(S):
     # ---------------------------------------------------------------- front: chips, comment card
     for k, (label, wi) in enumerate(CHIPS):
         w = CHIP_W[k]
-        S.front.append(f'<div class="abs pill acrylic" id="{s}-ch{k}" style="{box(540 - w / 2, CHIP_Y[k], w, 80)}">'
-                       f'<div class="abs" style="left:14px;top:14px;width:52px;height:52px;border-radius:26px;background:rgba(3,10,30,.55)">'
-                       f'<div class="abs" style="left:9px;top:9px;width:34px;height:34px">{check_svg(f"{s}-cc{k}", CYAN, 3.6)}</div></div>'
-                       f'<div class="abs" style="left:80px;top:0;width:{w - 96}px;font:700 34px/80px Poppins;color:#fff;white-space:nowrap;text-align:center">{label}</div></div>')
+        S.front.append(f'<div class="abs pill acrylic" id="{s}-ch{k}" style="{box(CHIP_X[k], CHIP_Y[k], w, 66)}">'
+                       f'<div class="abs" style="left:10px;top:10px;width:46px;height:46px;border-radius:23px;background:rgba(3,10,30,.55)">'
+                       f'<div class="abs" style="left:9px;top:9px;width:28px;height:28px">{check_svg(f"{s}-cc{k}", CYAN, 3.6)}</div></div>'
+                       f'<div class="abs" style="left:62px;top:0;width:{w - 72}px;font:700 27px/66px Poppins;color:#fff;white-space:nowrap;text-align:center">{label}</div></div>')
     cx, cy, cw, chh = CARD
     S.front.append(f'<div class="abs smoked" id="{s}-card" style="{box(cx, cy, cw, chh)}border-radius:40px">'
                    f'<div class="abs" style="left:40px;top:40px;width:76px;height:76px;border-radius:38px;background:linear-gradient(150deg,#4a74ab,#183563);box-shadow:inset 0 0 0 3px rgba(0,208,254,.8)"></div>'
@@ -70,14 +71,17 @@ def build(S):
     S.fx(W147 + 0.02, "sparkle", 0.07)
     S.fx(W148 + 0.02, "click", 0.05)
 
-    # ---------------------------------------------------------------- mascot: pans to centre, points at the card, then at you
-    v0 = {"fx": 300, "fy": 1850, "h": 1000, "yaw": 14, "pitch": 5}
+    # ---------------------------------------------------------------- mascot: half-body explaining the offer (background soft),
+    # steps back on "Komen" so the EDIT card reads, then points at you
+    blur_wrap(S)
+    S.init(f"#{s}-bgblur", {"filter": "blur(16px) brightness(0.62) saturate(0.9)"})
     v1 = {"fx": 540, "fy": 1900, "h": 1120, "yaw": 0, "pitch": 5}
-    S.mv([(t0, v0, None), (t0 + 0.6, v1, "power3.inOut"), (W146, dict(v1, yaw=-4), "sine.inOut"), (t1 - 0.6, dict(v1, yaw=0), "sine.inOut"), (t1, dict(v1, yaw=0), "none")])
-    S.act("armL", [(t0, "low", 0.3), (S.W(134) - 0.12, "explain", 0.3), (S.W(138) - 0.12, "palmUp", 0.3), (S.W(141) - 0.12, "explainHi", 0.3),
-                   (S.W(145), "low", 0.35), (W146 - 0.14, "pointUp", 0.3), (W148, "present", 0.35), (S.WE(149) + 0.05, "low", 0.4)])
-    S.act("armR", [(t0, "low", 0.3), (S.W(136), "open", 0.3), (S.W(139) + 0.1, "low", 0.35), (S.W(145) - 0.1, "shrug", 0.3), (W146, "low", 0.35),
-                   (W148 - 0.05, "wave", 0.3), (S.WE(149), "low", 0.4)])
-    S.act("head", [(t0, [-0.04, 0.1, 0], 0.4), (S.W(134), [0.04, -0.06, 0.03], 0.3), (S.W(138), [0, 0.08, -0.03], 0.3), (S.W(141), [0.05, 0, 0.02], 0.3),
-                   (S.W(145), [-0.08, 0.02, 0.08], 0.3), (W146, [-0.12, 0.14, 0], 0.3), (W147, [0.06, 0.02, 0], 0.22), (W148, [-0.02, 0, 0.04], 0.35), (S.WE(149) + 0.05, [0, 0, 0], 0.4)])
-    S.act("torso", [(t0, {}, 0.4), (W147 - 0.05, {"chest": [0.06, 0, 0]}, 0.25), (W148, {}, 0.4)])
+    back = W146 - 0.3
+    S.mv([(t0, dict(HALF, yaw=-2), None), (S.W(138), dict(HALF, yaw=6), "sine.inOut"), (back, dict(HALF, yaw=-2), "sine.inOut"),
+          (back + 0.45, v1, "power3.inOut"), (S.WE(149) + 0.05, dict(v1, yaw=0), "sine.inOut"), (t1, v1, "none")])
+    for tr, keys in talk(S, 133, 145, seed=4, rest=False).items():
+        S.act(tr, keys)
+    S.act("armL", [(W146 - 0.14, "pointUp", 0.3), (W148, "present", 0.35), (S.WE(149) + 0.05, "low", 0.4)])
+    S.act("armR", [(W146, "low", 0.35), (W148 - 0.05, "wave", 0.3), (S.WE(149), "low", 0.4)])
+    S.act("head", [(W146, [-0.12, 0.14, 0], 0.3), (W147, [0.06, 0.02, 0], 0.22), (W148, [-0.02, 0, 0.04], 0.35), (S.WE(149) + 0.05, [0, 0, 0], 0.4)])
+    S.act("torso", [(W146 - 0.05, {}, 0.3), (W147 - 0.05, {"chest": [0.06, 0, 0]}, 0.25), (W148, {}, 0.4)])

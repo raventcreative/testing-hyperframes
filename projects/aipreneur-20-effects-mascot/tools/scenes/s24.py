@@ -5,7 +5,7 @@ checks pop on the right - Arahan visual, Timing, Pengecekan hasil - each with a 
 the code builds it, a person directs and reviews. Mascot medium-left, nodding to each check.
 Hand-off: on "hasil." the montage cards fly together into one stack at the centre (S25 opens on it)."""
 from xk import box, r3, CYAN, check_svg
-from kit import SELF
+from kit import SELF, HALF, blur_wrap, talk
 
 THUMBS = ["orbit", "paper", "cover", "city", "phone"]
 TW, TH = 150, 267
@@ -14,7 +14,9 @@ TX = [75 + k * (TW + 45) for k in range(5)]
 START = (720, 322, 291, 518)      # S23 end: preview card rect (approx.)
 STACK = (465, 300, 150, 267)      # S25 start: stack at the centre
 CHECKS = [("Arahan visual", "eye"), ("Timing", "wave"), ("Pengecekan hasil", "check")]
-CK_X, CK_Y, CK_W, CK_H, CK_G = 540, 640, 490, 116, 30
+CK_Y, CK_H = 236, 66
+CK_W = [318, 200, 372]
+CK_X = [84, 84 + 318 + 16, 84 + 318 + 16 + 200 + 16]
 
 
 def icon(kind):
@@ -41,12 +43,12 @@ def build(S):
     S.back.append(f'<div class="abs acrylic pill" id="{s}-badge" style="{box(400, TY + TH + 24, 280, 64)}font:700 30px/60px Poppins;color:#fff;text-align:center;letter-spacing:.04em">20/20 <span style="color:{CYAN}">SELESAI</span></div>')
     # ---------------------------------------------------------------- front: three human checks (right column)
     for k, (label, ic) in enumerate(CHECKS):
-        y = CK_Y + k * (CK_H + CK_G)
-        S.front.append(f'<div class="abs smoked" id="{s}-k{k}" style="{box(CK_X, y, CK_W, CK_H)}border-radius:26px">'
-                       f'<div class="abs" style="left:24px;top:34px;width:48px;height:48px">{icon(ic)}</div>'
-                       f'<div class="abs" style="left:92px;top:0;width:300px;font:700 30px/{CK_H}px Poppins;color:#fff;white-space:nowrap">{label}</div>'
-                       f'<div class="abs" style="left:{CK_W - 82}px;top:30px;width:56px;height:56px;border-radius:28px;border:2px solid rgba(0,208,254,.7)">'
-                       f'<div class="abs" style="left:9px;top:9px;width:38px;height:38px">{check_svg(f"{s}-kc{k}", CYAN, 3.4)}</div></div></div>')
+        x, w = CK_X[k], CK_W[k]
+        S.front.append(f'<div class="abs smoked pill" id="{s}-k{k}" style="{box(x, CK_Y, w, CK_H)}">'
+                       f'<div class="abs" style="left:16px;top:15px;width:36px;height:36px;transform:scale(.75);transform-origin:0 0">{icon(ic)}</div>'
+                       f'<div class="abs" style="left:56px;top:0;width:{w - 110}px;font:700 26px/{CK_H}px Poppins;color:#fff;white-space:nowrap">{label}</div>'
+                       f'<div class="abs" style="left:{w - 50}px;top:15px;width:36px;height:36px;border-radius:18px;border:2px solid rgba(0,208,254,.7)">'
+                       f'<div class="abs" style="left:5px;top:5px;width:24px;height:24px">{check_svg(f"{s}-kc{k}", CYAN, 3.6)}</div></div></div>')
     # ---------------------------------------------------------------- motion
     sx, sy, sw, sh = START
     for k in range(5):
@@ -56,8 +58,8 @@ def build(S):
     S.init(f"#{s}-badge", {"opacity": 0, "scale": 0.7})
     S.ft(f"#{s}-badge", {"opacity": 0, "scale": 0.7}, {"opacity": 1, "scale": 1}, t0 + 0.4, 0.3, "back.out(2.2)")
     for k, b in enumerate((W127, W129, W131)):
-        S.init(f"#{s}-k{k}", {"x": 80, "opacity": 0})
-        S.ft(f"#{s}-k{k}", {"x": 80, "opacity": 0}, {"x": 0, "opacity": 1}, b - 0.08, 0.32, "back.out(1.6)")
+        S.init(f"#{s}-k{k}", {"y": -30, "opacity": 0, "scale": 0.8})
+        S.ft(f"#{s}-k{k}", {"y": -30, "opacity": 0, "scale": 0.8}, {"y": 0, "opacity": 1, "scale": 1}, b - 0.08, 0.32, "back.out(1.8)")
         S.init(f"#{s}-kc{k}", {"attr": {"stroke-dashoffset": 1}})
         S.ft(f"#{s}-kc{k}", {"attr": {"stroke-dashoffset": 1}}, {"attr": {"stroke-dashoffset": 0}}, b + 0.22, 0.24, "power2.out")
         S.fx(b + 0.22, "ping" if k == 2 else "click", 0.05)
@@ -68,13 +70,12 @@ def build(S):
         S.ft(f"#{s}-t{k}", {"x": 0, "y": 0, "rotation": (-4, -2, 0, 2, 4)[k]}, {"x": stx - TX[k], "y": sty - TY, "rotation": (-6, -3, 0, 3, 6)[k]}, go + k * 0.03, 0.4, "power3.inOut")
     S.ft(f"#{s}-badge", {"opacity": 1}, {"opacity": 0}, go, 0.2, "power2.in")
     for k in range(3):
-        S.ft(f"#{s}-k{k}", {"x": 0, "opacity": 1}, {"x": 120, "opacity": 0}, go + 0.1 + k * 0.04, 0.26, "power2.in")
+        S.ft(f"#{s}-k{k}", {"y": 0, "opacity": 1}, {"y": -40, "opacity": 0}, go + 0.1 + k * 0.04, 0.26, "power2.in")
     S.fx(go, "whoosh", 0.05)
 
-    # ---------------------------------------------------------------- mascot: medium-left, nods to each check
-    v = {"fx": 300, "fy": 1850, "h": 1000, "yaw": 14, "pitch": 5}
-    S.mv([(t0, dict(v, yaw=8), None), (W131, dict(v, yaw=16), "sine.inOut"), (t1, dict(v, yaw=14), "sine.inOut")])
-    S.act("armL", [(t0, "low", 0.3), (W127 - 0.14, "explain", 0.3), (W129 - 0.12, "palmUp", 0.3), (W131 - 0.12, "point", 0.3), (W132 + 0.25, "low", 0.4)])
-    S.act("armR", [(t0, "low", 0.3), (W127, "explain", 0.35), (S.W(128) + 0.1, "low", 0.4), (W131, "open", 0.3), (t1 - 0.1, "low", 0.35)])
-    S.act("head", [(t0, [-0.06, 0.16, 0], 0.3), (W127, [0.06, 0.22, 0.02], 0.25), (W127 + 0.3, [-0.04, 0.2, 0], 0.3),
-                   (W129, [0.07, 0.24, -0.02], 0.25), (W129 + 0.3, [-0.04, 0.18, 0], 0.3), (W131, [0.08, 0.26, 0.02], 0.25), (W132, [-0.06, 0.1, 0], 0.35)])
+    # ---------------------------------------------------------------- mascot: explaining, half-body, centre; montage soft behind
+    blur_wrap(S)
+    S.ft(f"#{s}-bgblur", {"filter": "blur(0px) brightness(1) saturate(1)"}, {"filter": "blur(16px) brightness(0.62) saturate(0.9)"}, t0, 0.45, "power2.inOut")
+    S.mv([(t0, {"fx": 540, "fy": 1760, "h": 800, "yaw": -4, "pitch": 6}, None), (t0 + 0.45, dict(HALF, yaw=-6), "power3.inOut"), (S.W(129), dict(HALF, yaw=5), "sine.inOut"), (t1, dict(HALF, yaw=-2), "sine.inOut")])
+    for tr, keys in talk(S, 125, 132, seed=3).items():
+        S.act(tr, keys)

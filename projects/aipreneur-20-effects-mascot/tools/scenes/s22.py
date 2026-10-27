@@ -7,7 +7,7 @@ with sleepers under the dolly card. "Rel itu membawa kita ke scene berikutnya": 
 rail into the cover card, which then comes forward to the centre (hand-off: S23 opens with that card).
 The mascot (full body, small, centred below the diagram) points the way and follows the dolly with his head."""
 from xk import box, r3, CYAN
-from kit import SELF
+from kit import SELF, HALF, blur_wrap, BLUR_ON, BLUR_OFF
 
 CW, CH = 264, 470
 CY = 290
@@ -101,8 +101,12 @@ def build(S):
 
     # ---------------------------------------------------------------- mascot: small, full body under the diagram, guiding
     v = {"fx": 540, "fy": 1760, "h": 800, "yaw": 0, "pitch": 6}
-    S.mv([(t0, dict(v, yaw=-6), None), (W107, dict(v, yaw=8), "sine.inOut"), (t1, dict(v, yaw=4), "sine.inOut")])
-    S.mx([(t0, {"y": 60, "opacity": 0}, None), (t0 + 0.35, {"y": 0, "opacity": 1}, "power3.out")])
+    # continues S21's half-body explanation, then dollies back so the diagram can be read (background sharpens)
+    S.mv([(t0, dict(HALF, yaw=4), None), (t0 + 0.45, dict(v, yaw=-6), "power3.inOut"), (W107, dict(v, yaw=8), "sine.inOut"), (t1, dict(v, yaw=4), "sine.inOut")])
+    blur_wrap(S)
+    S.init(f"#{s}-bgblur", {"filter": BLUR_ON})
+    S.ft(f"#{s}-bgblur", {"filter": BLUR_ON}, {"filter": BLUR_OFF}, t0, 0.45, "power2.inOut")
+    S.tset(f"#{s}-bgblur", {"filter": "none"}, t0 + 0.47)
     S.act("armR", [(t0, "low", 0.3), (W101 - 0.15, "pointUp", 0.3), (W103 + 0.2, "low", 0.4), (S.W(114) - 0.3, "low", 0.4)])
     S.act("armL", [(t0, "low", 0.3), (W105 - 0.15, "pointUp", 0.3), (W107 - 0.1, "point", 0.35), (W113 + 0.2, "present", 0.35)])
     S.act("head", [(t0, [-0.12, -0.28, 0.02], 0.3), (W103, [-0.14, -0.05, 0], 0.4), (W105, [-0.16, 0.12, 0], 0.35),

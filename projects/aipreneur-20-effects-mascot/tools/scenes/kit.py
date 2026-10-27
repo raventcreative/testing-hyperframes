@@ -86,3 +86,53 @@ def graph_world(s, op=1.0):
             f'<div class="abs" style="left:0;top:1120px;width:1080px;height:120px;background:radial-gradient(ellipse at 50% 50%,rgba(0,208,254,.35),rgba(0,208,254,0) 70%)"></div>'
             f'<div class="abs" style="left:0;top:0;width:1080px;height:1920px;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:60px 60px;'
             f'-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0) 62%);mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0) 62%)"></div></div>')
+
+
+# ======================================================================= EXPLAIN MODE (user revision)
+# When the mascot is explaining (not demonstrating an effect): he dollies forward to a half-body shot, the scene
+# behind him goes soft (blur + dim), and he talks with his hands and head.
+HALF = {"fx": 540, "fy": 1925, "h": 1700, "yaw": 0, "pitch": 4}      # head + torso (chibi half-body): face ≈ y 910, shirt print ≈ y 1290 (clear above the captions)
+BLUR_ON = "blur(16px) brightness(0.62) saturate(0.9)"
+BLUR_OFF = "blur(0px) brightness(1) saturate(1)"
+GESTURES = [("explain", "low"), ("palmUp", "explain"), ("together", "together"), ("open", "palmUp"), ("explainHi", "open")]
+
+
+def blur_wrap(S):
+    """wrap everything already in S.back into one element (#<id>-bgblur) so the whole back layer can go soft."""
+    S.back[:] = [f'<div class="abs" id="{S.id}-bgblur" style="left:0;top:0;width:1080px;height:1920px">'] + S.back + ["</div>"]
+    S.init(f"#{S.id}-bgblur", {"filter": "none"})
+
+
+def blur_bg(S, t_in, t_out=None, dur=0.45):
+    """soften the back layer between t_in and t_out (call blur_wrap(S) first)."""
+    sel = f"#{S.id}-bgblur"
+    S.ft(sel, {"filter": BLUR_OFF}, {"filter": BLUR_ON}, t_in, dur, "power2.inOut")
+    if t_out is not None:
+        S.ft(sel, {"filter": BLUR_ON}, {"filter": BLUR_OFF}, t_out, dur, "power2.inOut")
+        S.tset(sel, {"filter": "none"}, t_out + dur + 0.01)
+
+
+def talk(S, i0, i1, seed=0, both=True, rest=True):
+    """explaining gestures on the VO words i0..i1 (inclusive): alternate two-hand beats on stressed / key words,
+    nods and small head tilts on every other word, return to rest after the phrase."""
+    from xk import WORDS
+    arm_l, arm_r, head, torso = [], [], [], []
+    k = seed
+    for n, i in enumerate(range(i0, i1 + 1)):
+        w = WORDS[i]
+        if n % 2 == 0:
+            gl, gr = GESTURES[k % len(GESTURES)]
+            arm_l.append((w["start"] - 0.14, gl, 0.3))
+            if both:
+                arm_r.append((w["start"] - 0.1, gr, 0.32))
+            k += 1
+        sgn = 1 if (n + seed) % 2 == 0 else -1
+        head.append((w["start"] - 0.06, [-0.07 + 0.04 * (n % 3 == 0), 0.12 * sgn, 0.05 * sgn], 0.28))
+        if n % 3 == 0:
+            torso.append((w["start"] - 0.08, {"chest": [0.04, 0.06 * sgn, 0.02 * sgn]}, 0.35))
+    end = WORDS[i1]["end"] + 0.2
+    if rest:
+        arm_l.append((end, "low", 0.4)); head.append((end, [0, 0, 0], 0.4)); torso.append((end, {}, 0.4))
+        if both:
+            arm_r.append((end, "low", 0.4))
+    return {"armL": arm_l, "armR": arm_r, "head": head, "torso": torso}

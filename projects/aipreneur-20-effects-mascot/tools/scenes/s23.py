@@ -5,7 +5,7 @@ preview slot. Conceptual code (NOT an official UI) types in, line by line, on th
 FOOTAGE -> BRIEF -> CODED SCENES -> PREVIEW lights node by node. The mascot hands the brief over (present gesture).
 Honest framing: it is a diagram of the workflow, not a recording of a product."""
 from xk import box, r3, CYAN
-from kit import SELF
+from kit import SELF, HALF, blur_wrap, blur_bg, talk
 
 PX, PY, PW, PH = 70, 262, 940, 590
 SLOT = (PX + PW - 300, PY + 70, 270, 480)      # preview slot inside the panel
@@ -93,10 +93,17 @@ def build(S):
         S.ft(f"#{s}-a{k}", {"opacity": 1}, {"opacity": 0}, t1 - 0.26, 0.22, "power2.in")
     S.ft(f"#{s}-card", {"scale": sw / cw, "x": sx - cx, "y": sy - cy}, {"scale": sw / cw * 1.08, "x": sx - cx - 10, "y": sy - cy - 10}, t1 - 0.3, 0.3, "power2.in")
 
-    # ---------------------------------------------------------------- mascot: below, hands the brief over
+    # ---------------------------------------------------------------- mascot: explains half-body first ("Semua bisa kita rancang di"),
+    # background soft; on "Claude Code" he steps back so the code + chain read sharp, and hands the brief over
     v = {"fx": 540, "fy": 1760, "h": 800, "yaw": 4, "pitch": 6}
-    S.mv([(t0, v, None), (t1, dict(v, yaw=-4), "sine.inOut")])
-    S.act("armL", [(t0, "present", 0.3), (W117 - 0.15, "present", 0.3), (W119 - 0.12, "pointUp", 0.3), (W122, "explain", 0.35), (W124 - 0.1, "low", 0.4)])
-    S.act("armR", [(t0, "low", 0.3), (W117 - 0.1, "palmUp", 0.3), (W120 + 0.2, "low", 0.4), (W124 - 0.12, "explain", 0.3), (t1 - 0.2, "low", 0.4)])
-    S.act("head", [(t0, [-0.14, 0.08, 0.02], 0.3), (W117, [-0.18, -0.06, 0], 0.35), (W119, [-0.2, 0.18, -0.02], 0.35),
-                   (W122, [-0.06, 0.02, 0.04], 0.35), (W124, [-0.08, -0.08, 0], 0.35)])
+    back = W119 - 0.32
+    S.mv([(t0, dict(HALF, yaw=-3), None), (back, dict(HALF, yaw=3), "sine.inOut"), (back + 0.45, v, "power3.inOut"), (t1, dict(v, yaw=-4), "sine.inOut")])
+    blur_wrap(S)
+    S.init(f"#{s}-bgblur", {"filter": "blur(16px) brightness(0.62) saturate(0.9)"})
+    S.ft(f"#{s}-bgblur", {"filter": "blur(16px) brightness(0.62) saturate(0.9)"}, {"filter": "blur(0px) brightness(1) saturate(1)"}, back, 0.45, "power2.inOut")
+    S.tset(f"#{s}-bgblur", {"filter": "none"}, back + 0.47)
+    for tr, keys in talk(S, 114, 118, seed=2, rest=False).items():
+        S.act(tr, keys)
+    S.act("armL", [(W119 - 0.12, "pointUp", 0.3), (W122, "explain", 0.35), (W124 - 0.1, "low", 0.4)])
+    S.act("armR", [(W120 + 0.2, "low", 0.4), (W124 - 0.12, "explain", 0.3), (t1 - 0.2, "low", 0.4)])
+    S.act("head", [(W119, [-0.2, 0.18, -0.02], 0.35), (W122, [-0.06, 0.02, 0.04], 0.35), (W124, [-0.08, -0.08, 0], 0.35)])

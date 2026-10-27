@@ -7,7 +7,7 @@ order - the value is the chain, not the items. Hand-off: the board falls away an
 single horizontal cyan line across the frame at y 1000 (S22 starts from that line). Mascot: off-screen here
 (the board fills the frame; he returns in S22)."""
 from xk import box, r3, CYAN, EFFECTS, check_svg
-from kit import BOARD
+from kit import BOARD, HALF, blur_wrap, blur_bg, talk
 from kit_d import board_surface
 
 LINE_Y = 1000
@@ -84,8 +84,15 @@ def build(S):
     S.ft(f"#{s}-bw", {"opacity": 1, "scale": 1, "y": 0}, {"opacity": 0, "scale": 0.94, "y": 60}, W100 + 0.2, t1 - W100 - 0.24, "power2.in")
     S.ft(f"#{s}-list", {"opacity": 1}, {"opacity": 0}, W100 + 0.18, 0.28, "power2.in")
 
-    # ---------------------------------------------------------------- mascot: off-screen in this scene
+    # ---------------------------------------------------------------- mascot: off-screen while the board fills the frame;
+    # "bukan efeknya satu-satu" is an explanation -> he dollies in half-body, the board goes soft behind him
+    blur_wrap(S)
+    blur_bg(S, W98 - 0.1)
     S.mset("V", {"vis": 0}, t0)
+    S.mset("V", {"vis": 1}, W98 - 0.12)
+    S.mv([(W98 - 0.12, dict(HALF, fy=HALF["fy"] + 900, yaw=-10), None), (W98 + 0.38, dict(HALF, yaw=-4), "power3.out"), (t1, dict(HALF, yaw=4), "sine.inOut")])
+    for tr, keys in talk(S, 98, 100, seed=1).items():
+        S.act(tr, keys)
     for k in range(4):
         S.fx(ck0 + step * (5 * k + 2), "key", 0.035)
     S.fx(W97 + 0.02, "whoosh", 0.05)

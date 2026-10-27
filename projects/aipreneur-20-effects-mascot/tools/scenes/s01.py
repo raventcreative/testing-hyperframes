@@ -22,7 +22,7 @@ def build(S):
     S.ft(f"#{s}-pbd", dict(radii(PR, PR), scaleX=1, scaleY=1, x=0, y=0, rotation=0),
          dict(radii(PW / 2, PH / 2), **RING_FROM_PANEL), m0, t1 - m0, "power3.inOut")
     S.init(f"#{s}-pbg", {"opacity": 1, "scale": 1, "transformOrigin": "50% 50%"})
-    S.ft(f"#{s}-pbg", {"opacity": 1, "scale": 1}, {"opacity": 0, "scale": 0.96}, m0 + 0.04, t1 - m0 - 0.04, "power2.in")
+    S.ft(f"#{s}-pbg", {"opacity": 1, "scale": 1}, {"opacity": 0, "scale": 0.96}, m0, t1 - m0 - 0.06, "power2.out")
     S.init(f"#{s}-plb", {"opacity": 1})
     S.ft(f"#{s}-plb", {"opacity": 1}, {"opacity": 0}, m0, 0.12, "none")
 

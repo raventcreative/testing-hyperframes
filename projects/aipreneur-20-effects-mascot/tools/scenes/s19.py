@@ -50,8 +50,8 @@ def build(S):
     S.keys(f"#{s}-focus", [(t0, {"scale": 1.0, "opacity": 0.0, "transformOrigin": f"{fx_}px {fy_ - 15}px"}, None),
                            (t0 + 0.12, {"opacity": 1}, "power2.out"),
                            (st1, {"scale": 1.0}, "none"), (st1 + 0.05, {"scale": 1.14}, "power2.out"), (st1 + 0.16, {"scale": 1.0}, "power3.out"),
-                           (st2, {"scale": 1.0}, "none"), (st2 + 0.05, {"scale": 1.14}, "power2.out"), (st2 + 0.16, {"scale": 1.0}, "power3.out"),
-                           (c0, {"opacity": 1}, "none"), (c0 + 0.08, {"opacity": 0}, "power1.in")])
+                           (st2, {"scale": 1.0}, "none"), (st2 + 0.05, {"scale": 1.14}, "power2.out"), (st2 + 0.12, {"scale": 1.0}, "power3.out"),
+                           (st2 + 0.13, {"opacity": 1}, "none"), (st2 + 0.2, {"opacity": 0}, "power1.in")])
     S.init(f"#{s}-ui", {"opacity": 1})
     S.ft(f"#{s}-ui", {"opacity": 1}, {"opacity": 0}, c0, 0.08, "power1.in")
     # corner guides close into the phone outline

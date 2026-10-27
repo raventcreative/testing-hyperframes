@@ -27,16 +27,19 @@ def build(S):
     click = W20 + 0.02
     out0 = t1 - 0.24                       # chat UI falls away
     lx, ly = QX - CX, QY - CY              # preview hole in panel-local coords
-    hole = f'path(evenodd, "{rrect(0, 0, CW, CH_, CR)} {rrect(lx, ly, QW, QH, QR)}")'
     bx, by, bw, bh = 160, 100, 620, 950    # reply bubble (local)
-    panel = (f'<div class="abs" id="{s}-panel" style="{box(CX, CY, CW, CH_)}clip-path:{hole}">'
-             f'<div class="abs" style="left:0;top:0;width:{CW}px;height:{CH_}px;border-radius:{CR}px;'
-             f'background:linear-gradient(155deg,rgba(44,74,122,.96) 0%,rgba(16,32,66,.97) 55%,rgba(8,18,44,.98) 100%);'
-             f'border:2px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3), inset 0 0 60px rgba(0,208,254,.06)"></div>'
-             f'<div class="abs" style="left:0;top:0;width:{CW}px;height:260px;border-radius:{CR}px {CR}px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,0))"></div>'
+    # opaque smoked panel with a rounded cut-out at the preview: the cut-out's huge box-shadow IS the panel fill
+    # (clipped by the panel's rounded overflow) -> the live mascot shows through the hole only
+    panel = (f'<div class="abs" id="{s}-panel" style="{box(CX, CY, CW, CH_)}border-radius:{CR}px;overflow:hidden">'
+             f'<div class="abs" style="left:{lx}px;top:{ly}px;width:{QW}px;height:{QH}px;border-radius:{QR}px;box-shadow:0 0 0 1600px rgba(17,34,68,.975)"></div>'
+             f'<div class="abs" style="left:0;top:0;width:{CW}px;height:300px;background:linear-gradient(180deg,rgba(120,170,235,.16),rgba(120,170,235,0))"></div>'
+             f'<div class="abs" style="left:0;top:{CH_ - 300}px;width:{CW}px;height:300px;background:linear-gradient(0deg,rgba(3,8,28,.35),rgba(3,8,28,0))"></div>'
+             f'<div class="abs" style="left:0;top:0;width:{CW}px;height:{CH_}px;border-radius:{CR}px;border:2px solid rgba(255,255,255,.24);'
+             f'box-shadow:inset 0 1px 0 rgba(255,255,255,.3)"></div>'
              f'<div class="abs" style="left:40px;top:26px;width:200px;font:700 30px/44px Poppins, sans-serif;color:#fff">'
              f'<span style="display:inline-block;width:12px;height:12px;border-radius:6px;background:{CYAN};margin-right:12px;vertical-align:2px"></span>Chat</div>'
-             f'<div class="abs" style="left:{bx}px;top:{by}px;width:{bw}px;height:{bh}px;border-radius:30px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)" id="{s}-rb"></div>'
+             f'<div class="abs" id="{s}-rb" style="left:{bx}px;top:{by}px;width:{bw}px;height:{bh}px;border-radius:30px;border:1.5px solid rgba(255,255,255,.2)"></div>'
+             f'<div class="abs" style="left:{bx}px;top:{by}px;width:{bw}px;height:{ly - by - 20}px;border-radius:30px 30px 10px 10px;background:rgba(255,255,255,.06)"></div>'
              f'<div class="abs acrylic" id="{s}-ub" style="left:{CW - 490}px;top:22px;width:450px;height:68px;border-radius:34px 34px 8px 34px;'
              f'font:400 30px/66px Poppins, sans-serif;color:#fff;text-align:center">Satu klip polos.</div>'
              + "".join(f'<div class="abs" id="{s}-d{k}" style="left:{bx + 34 + k * 26}px;top:{by + 44}px;width:14px;height:14px;border-radius:7px;background:#fff"></div>' for k in range(3))
@@ -76,7 +79,7 @@ def build(S):
     S.ft(f"#{s}-av", {"opacity": 1, "scale": 1}, {"opacity": 0, "scale": 0.7}, out0 - 0.02, 0.2, "power2.in")
     # cursor glides to the preview and clicks
     S.init(f"#{s}-cur", {"x": 980, "y": 1330, "opacity": 0, "scale": 1, "transformOrigin": "15% 10%"})
-    S.ft(f"#{s}-cur", {"x": 980, "y": 1330, "opacity": 0}, {"x": 980, "y": 1330, "opacity": 1}, W19 - 0.12, 0.08, "none")
+    S.ft(f"#{s}-cur", {"opacity": 0}, {"opacity": 1}, W19 - 0.12, 0.08, "none")
     S.ft(f"#{s}-cur", {"x": 980, "y": 1330}, {"x": 690, "y": 1140}, W19 - 0.06, click - W19 + 0.04, "power3.inOut")
     S.ft(f"#{s}-cur", {"scale": 1}, {"scale": 0.82}, click - 0.03, 0.05, "power2.in")
     S.ft(f"#{s}-cur", {"scale": 0.82}, {"scale": 1}, click + 0.03, 0.12, "power2.out")

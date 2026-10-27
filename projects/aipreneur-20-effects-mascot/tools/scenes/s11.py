@@ -25,7 +25,7 @@ def build(S):
     # B-roll 20.16 menumpuk 20.48 atas 20.98 video 21.20 lalu 21.64 timeline 21.88 editornya 22.28 terbuka 22.72
     mx, my, mw, mh, mr = MONITOR
     tx, ty, tw, th = TL
-    out0 = t1 - 0.46                  # editor folds away
+    out0 = t1 - 0.44                  # editor folds away
     # ---------------------------------------------------------------- back: studio glow inside the monitor, monitor body
     S.back.append(f'<div class="abs" id="{s}-amb" style="{box(0, 0, 1080, 1920)}background:radial-gradient(ellipse 60% 30% at 50% 30%,rgba(60,120,200,.35),rgba(60,120,200,0) 70%)"></div>')
     S.back.append(f'<div class="abs" id="{s}-mon" style="{box(mx, my, mw, mh)}border-radius:{mr}px;overflow:hidden;'
@@ -89,7 +89,7 @@ def build(S):
         c = {"x": r3(cx + cw / 2 - (x + TW / 2)), "y": r3(ROW["V2"] + 32 - (y + TH / 2)), "rotation": 0, "scale": 0.25, "opacity": 0}
         S.ft(sel, b, c, W61 - 0.02 + 0.07 * k, 0.34, "power3.in")
         S.init(f"#{s}-c{k}", {"opacity": 0, "scaleX": 0.3, "transformOrigin": "0% 50%"})
-        S.ft(f"#{s}-c{k}", {"opacity": 0, "scaleX": 0.3}, {"opacity": 1, "scaleX": 1}, W61 + 0.28 + 0.07 * k, 0.22, "power3.out")
+        S.ft(f"#{s}-c{k}", {"opacity": 0, "scaleX": 0.3}, {"opacity": 1, "scaleX": 1}, W61 + 0.26 + 0.06 * k, 0.18, "power3.out")
     # timeline unfolds ("timeline editornya terbuka") and tilts back (camera over the timeline)
     S.init(f"#{s}-tl", {"opacity": 0, "scaleY": 0.05, "rotationX": 0, "transformOrigin": "50% 0%", "transformPerspective": 1300})
     S.ft(f"#{s}-tl", {"opacity": 0, "scaleY": 0.05}, {"opacity": 1, "scaleY": 1}, W60 - 0.04, 0.38, "power3.out")
@@ -104,7 +104,7 @@ def build(S):
     pd = {"x": 0, "y": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1}
     S.init(f"#{s}-paper", dict(pa, transformOrigin="0% 0%"))
     S.ft(f"#{s}-paper", pa, pb, W61 + 0.2, 0.2, "power2.out")
-    S.ft(f"#{s}-paper", pb, pc, W62 + 0.08, 0.26, "power3.out")
+    S.ft(f"#{s}-paper", pb, pc, W62 + 0.04, 0.2, "power3.out")
     S.ft(f"#{s}-paper", pc, pd, out0 + 0.04, t1 - out0 - 0.06, "power3.inOut")
     S.init(f"#{s}-cur", {"opacity": 0, "x": 160, "y": 160})
     S.ft(f"#{s}-cur", {"opacity": 0, "x": 160, "y": 160}, {"opacity": 1, "x": 0, "y": 0}, W61 + 0.08, 0.32, "power3.out")

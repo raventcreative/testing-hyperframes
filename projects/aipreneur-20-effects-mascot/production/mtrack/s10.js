@@ -1,1 +1,13 @@
-
+vt.set(V, {"fx": 540, "fy": 1720, "h": 1150, "yaw": 14, "pitch": 5}, 17.433);
+vt.fromTo(V, {"fx": 540, "fy": 1720, "h": 1150, "yaw": 14, "pitch": 5}, {"fx": 540, "fy": 1720, "h": 1150, "yaw": 4, "pitch": 5, "duration": 0.627, "ease": "sine.inOut", "immediateRender": false}, 17.433);
+vt.fromTo(V, {"fx": 540, "fy": 1720, "h": 1150, "yaw": 4, "pitch": 5}, {"fx": 540, "fy": 1800, "h": 1470, "yaw": -16, "pitch": 5, "duration": 1.09, "ease": "power3.inOut", "immediateRender": false}, 18.06);
+vt.fromTo(V, {"fx": 540, "fy": 1800, "h": 1470, "yaw": -16, "pitch": 5}, {"fx": 540, "fy": 1800, "h": 1470, "yaw": -12, "pitch": 5, "duration": 0.557, "ease": "sine.inOut", "immediateRender": false}, 19.15);
+vt.fromTo(V, {"fx": 540, "fy": 1800, "h": 1470, "yaw": -12, "pitch": 5}, {"fx": 540, "fy": 1458, "h": 1128, "yaw": -10, "pitch": 4, "duration": 0.36, "ease": "power3.inOut", "immediateRender": false}, 19.707);
+vt.set("#m-xf", {"filter": "brightness(1) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, 17.433);
+vt.fromTo("#m-xf", {"filter": "brightness(1) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, {"filter": "brightness(0.42) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px", "duration": 0.5, "ease": "power2.inOut", "immediateRender": false}, 17.433);
+vt.fromTo("#m-xf", {"filter": "brightness(0.42) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, {"filter": "brightness(0.42) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px", "duration": 1.167, "ease": "none", "immediateRender": false}, 17.933);
+vt.fromTo("#m-xf", {"filter": "brightness(0.42) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, {"filter": "brightness(1.2) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px", "duration": 0.1, "ease": "power2.out", "immediateRender": false}, 19.1);
+vt.fromTo("#m-xf", {"filter": "brightness(1.2) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, {"filter": "brightness(1.0) drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px", "duration": 0.4, "ease": "power2.inOut", "immediateRender": false}, 19.2);
+vt.set("#m-clip", {"clipPath": "inset(-400px -400px -400px -400px round 0px)"}, 17.433);
+vt.fromTo("#m-clip", {"clipPath": "inset(-400px -400px -400px -400px round 0px)"}, {"clipPath": "inset(-400px -400px -400px -400px round 0px)", "duration": 2.273, "ease": "none", "immediateRender": false}, 17.433);
+vt.fromTo("#m-clip", {"clipPath": "inset(-400px -400px -400px -400px round 0px)"}, {"clipPath": "inset(300px 110px 980px 110px round 24px)", "duration": 0.36, "ease": "power3.inOut", "immediateRender": false}, 19.707);

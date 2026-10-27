@@ -13,7 +13,7 @@ from kit_a import panel_bg, panel_border, panel_label, PX, PY, PW, PH, PR
 PREV = [("orbit", "01", "ORBIT"), ("paper", "11", "PAPER CUTOUT"), ("break", "17", "FRAME BREAK")]
 ORG = (540, 700)                 # pull-back origin (panel + mascot scale around it)
 PULL = 0.66
-RC, RX, RY = (540, 800), 420, 430   # chip ring
+RC, RX, RY = (540, 790), 420, 410   # chip ring
 
 
 def build(S):
@@ -32,7 +32,7 @@ def build(S):
     # ---------------------------------------------------------------- front: border/label (scale group), preview tags, chips, big type
     S.front.append(f'<div class="abs" id="{s}-pf" style="{box(0, 0, 1080, 1920)}">{panel_border(f"{s}-pbd")}{panel_label(f"{s}-plb")}</div>')
     for k, (name, n, lab) in enumerate(PREV):
-        S.front.append(f'<div class="abs acrylic chip" id="{s}-tag{k}" style="{box(PX + 34, PY + PH - 110, 60 + 20 * len(lab), 64)}font-size:26px;gap:12px">'
+        S.front.append(f'<div class="abs acrylic chip" id="{s}-tag{k}" style="{box(PX + 34, PY + PH - 200, 60 + 20 * len(lab), 64)}font-size:26px;gap:12px">'
                        f'<span style="color:{CYAN}">{n}</span><span>{lab}</span></div>')
     for k in range(20):
         a = math.radians(-90 + k * 18)

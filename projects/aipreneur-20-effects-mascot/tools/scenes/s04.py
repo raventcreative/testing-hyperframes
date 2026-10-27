@@ -21,7 +21,7 @@ def build(S):
     # ---------------------------------------------------------------- front: viewfinder corners (S05 opening state)
     vx, vy, vw, vh = VF
     S.front.append(f'<div class="abs" id="{s}-vf" style="{box(0, 0, 1080, 1920)}">' + corner_frame(f"{s}-vf", vx, vy, vw, vh, arm=90, th=6) + "</div>")
-    S.front.append(f'<div class="abs glowline" id="{s}-edge" style="{box(x - 40, y - 38, w + 80, 4)}"></div>')
+    S.back.append(f'<div class="abs glowline" id="{s}-edge" style="{box(x - 40, y - 38, w + 80, 4)}"></div>')
 
     # ---------------------------------------------------------------- motion
     S.keys(f"#{s}-fr", [(t0, {"rotationX": 0, "scale": 1.0, "y": 0, "opacity": 1, "transformOrigin": "50% 100%"}, None),
@@ -49,8 +49,8 @@ def build(S):
     # acting: lean in, small hop over the frame edge, arms open, settle
     S.act("torso", [(t0 + 0.02, {}, 0.3), (W22 - 0.06, {"chest": [0.09, 0, 0], "spine": [0.05, 0, 0]}, 0.25), (W24 - 0.05, {}, 0.35)])
     S.act("root", [(t0 + 0.02, {"y": 0, "ry": 0, "rz": 0}, 0.3), (W22 + 0.04, {"y": 0.025, "rz": -0.02}, 0.2), (W22 + 0.3, {"y": 0, "rz": 0}, 0.25)])
-    S.act("armL", [(t0 + 0.02, "low", 0.3), (W22 - 0.04, "open", 0.28), (W24 - 0.02, "low", 0.4)])
-    S.act("armR", [(t0 + 0.02, "low", 0.3), (W22 - 0.02, "open", 0.28), (W24, "low", 0.4)])
+    S.act("armL", [(t0 + 0.02, "low", 0.3), (W22 - 0.04, "present", 0.3), (W24 - 0.02, "low", 0.4)])
+    S.act("armR", [(t0 + 0.02, "low", 0.3), (W22 - 0.02, "explain", 0.32), (W24, "low", 0.4)])
     S.act("head", [(t0 + 0.02, [-0.03, 0, 0], 0.3), (W22 + 0.05, [0.05, 0.06, -0.03], 0.3), (W24, [0, -0.04, 0.02], 0.35)])
     S.fx(W22 + 0.02, "whoosh", 0.06)
     S.fx(W22 + 0.36, "pop", 0.05)

@@ -8,7 +8,8 @@ from xk import box, r3, CYAN
 STRIP_B = (-40, 400, 1160, 96)
 RING_B = (820, 860, 480)            # centre x, y, diameter (hole Ø424)
 PORTAL_VIEW = {"fx": 330, "fy": 1780, "h": 1180, "yaw": -16, "pitch": 5}
-CHECK_VIEW = {"fx": 360, "fy": 1760, "h": 1250, "yaw": -20, "pitch": 5}   # S06 (3/4, looking screen-right)
+CHECK_VIEW = {"fx": 320, "fy": 1820, "h": 1380, "yaw": -20, "pitch": 5}   # S06 (3/4, looking screen-right)
+CHECK_END = {"fx": 320, "fy": 1840, "h": 1420, "yaw": -25, "pitch": 5}    # S06 end == S07 start
 STORM_VIEW = {"fx": 540, "fy": 1780, "h": 1180, "yaw": 0, "pitch": 5}     # S07 centre
 
 

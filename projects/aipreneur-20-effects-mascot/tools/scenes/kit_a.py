@@ -1,10 +1,13 @@
 """Private helpers for S00-S03 (plain clip panel, orbit ring, icon chips)."""
 import math
 from xk import box, r3, CYAN
-from kit import PANEL, ORBIT
+from kit import PANEL
 
 PX, PY, PW, PH, PR = PANEL
-OX, OY, OD, OSY, OROT = ORBIT
+# orbit ring: raised to hair/forehead level (kit.ORBIT's y 760 put the near half across the eyes) and widened to
+# clear the hair silhouette. Shared only by S01 (morph target) and S02.
+ORBIT_A = (540, 650, 980, 0.26, -8)
+OX, OY, OD, OSY, OROT = ORBIT_A
 # the panel border morphs into the orbit ring: scale + offset that maps the PANEL box onto the ring ellipse
 RING_FROM_PANEL = {"scaleX": r3(OD / PW), "scaleY": r3(OD * OSY / PH), "x": r3(OX - (PX + PW / 2)), "y": r3(OY - (PY + PH / 2)), "rotation": OROT}
 CORNERS = ("borderTopLeftRadius", "borderTopRightRadius", "borderBottomLeftRadius", "borderBottomRightRadius")

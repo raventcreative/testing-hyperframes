@@ -10,7 +10,7 @@ from kit import MED, AVATAR
 from kit_a import ring, chip, orbit_xy, OX, OY
 
 CH = [("wave", 150), ("aa", 60), ("img", 240), ("cur", 330)]     # icon, start angle (deg); 'Aa' ends at 150 deg (front-left)
-D0 = 84
+D0 = 104
 TURN = 450.0
 
 

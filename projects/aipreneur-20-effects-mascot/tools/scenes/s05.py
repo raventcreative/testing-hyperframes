@@ -29,19 +29,19 @@ def build(S):
     ticks = "".join(f'<div class="abs" style="{b}background:rgba(255,255,255,.9)"></div>' for b in (
         box(R / 2 - 1.5, -16, 3, 22), box(R / 2 - 1.5, R - 6, 3, 22), box(-16, R / 2 - 1.5, 22, 3), box(R - 6, R / 2 - 1.5, 22, 3)))
     S.front.append(f'<div class="abs" id="{s}-ret" style="{box(540 - R / 2, 922 - R / 2, R, R)}">'
-                   f'<div class="abs" id="{s}-rring" style="left:0;top:0;width:{R}px;height:{R}px"><div class="abs" style="left:0;top:0;width:{R}px;height:{R}px;border-radius:50%;border:3px solid rgba(255,255,255,.85);'
-                   f'box-shadow:0 0 10px rgba(0,208,254,.5)"></div>{ticks}</div>'
+                   f'<div class="abs" id="{s}-rring" style="left:0;top:0;width:{R}px;height:{R}px"><div class="abs" style="left:0;top:0;width:{R}px;height:{R}px;border-radius:50%;border:3px solid rgba(255,255,255,.6);'
+                   f'box-shadow:0 0 10px rgba(0,208,254,.35)"></div>{ticks}</div>'
                    f'<div class="abs acrylic" id="{s}-disc" style="left:0;top:0;width:{R}px;height:{R}px;border-radius:50%;background:{CYAN};border:0"></div></div>')
-    apex(S, S.front, f"{s}-ap", 540, 960, snap + 0.2, size=1100, sparks=10, seed=505, op=0.4)
+    apex(S, S.front, f"{s}-ap", 540, 960, snap + 0.2, size=1100, sparks=10, seed=505, op=0.32)
 
     # ---------------------------------------------------------------- mascot: creep -> anticipation -> SNAP -> settle -> hold
     med = view(1470, 922)
     S.mv([(t0, med, None),
           (snap - 0.15, view(1540, 922, yaw=3), "sine.inOut"),           # slow creep on "kamera langsung"
           (snap, view(1430, 924, yaw=2), "power2.out"),                   # anticipation pull-back
-          (snap + 0.28, view(2260, 958, yaw=-2, pitch=4), "power4.out"),  # the snap
-          (snap + 0.44, dict(CU), "sine.inOut"),                          # settle (tiny overshoot back)
-          (t1, view(2160, 960, yaw=-4, pitch=4), "sine.inOut")])          # held close-up, slow drift
+          (snap + 0.28, view(3200, 990, yaw=-2, pitch=4), "power4.out"),  # the snap
+          (snap + 0.44, view(3020, 985, yaw=-2, pitch=4), "sine.inOut"),  # settle (tiny overshoot back)
+          (t1, view(3100, 985, yaw=-5, pitch=4), "sine.inOut")])          # held close-up, slow drift
     S.mx([(t0, {"filter": F0}, None), (snap, {"filter": F0}, "none"),
           (snap + 0.1, {"filter": F1}, "power2.in"), (snap + 0.3, {"filter": F0}, "power2.out")])
 
@@ -52,11 +52,11 @@ def build(S):
     S.ft(f"#{s}-vf", {"scale": 0.9, "opacity": 1}, {"scale": 0.94, "opacity": 0}, t1 - 0.34, 0.3, "power2.in")
     S.init(f"#{s}-ret", {"x": 0, "y": 0, "scale": 1, "opacity": 0})
     S.ft(f"#{s}-ret", {"opacity": 0, "scale": 1.3}, {"opacity": 1, "scale": 1}, t0 + 0.02, 0.24, "power3.out")
-    S.ft(f"#{s}-ret", {"x": 0, "y": 0, "scale": 1}, {"x": 0, "y": 36, "scale": 0.62}, snap, 0.28, "power4.out")
+    S.ft(f"#{s}-ret", {"x": 0, "y": 0, "scale": 1}, {"x": 0, "y": 64, "scale": 0.62}, snap, 0.28, "power4.out")
     S.ft(f"#{s}-ret", {"scale": 0.62}, {"scale": 0.72}, snap + 0.28, 0.16, "sine.inOut")
     # hand-off: reticle travels beside the eye and becomes the cyan check disc (CHECK0)
     cx, cy, d = CHECK0
-    S.ft(f"#{s}-ret", {"x": 0, "y": 36, "scale": 0.72}, {"x": cx - 540, "y": cy - 922, "scale": d / R}, t1 - 0.36, 0.32, "power3.inOut")
+    S.ft(f"#{s}-ret", {"x": 0, "y": 64, "scale": 0.72}, {"x": cx - 540, "y": cy - 922, "scale": d / R}, t1 - 0.36, 0.32, "power3.inOut")
     S.init(f"#{s}-rring", {"opacity": 1})
     S.ft(f"#{s}-rring", {"opacity": 1}, {"opacity": 0}, t1 - 0.18, 0.14, "power1.in")
     S.init(f"#{s}-disc", {"opacity": 0})

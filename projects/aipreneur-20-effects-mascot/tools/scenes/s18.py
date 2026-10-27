@@ -35,13 +35,12 @@ def build(S):
         sep = 5 + 5 * ring
         a = {"x": 0, "y": 0, "rotation": 0, "rotationX": 0, "rotationY": 0, "scale": 1, "opacity": 1, "filter": GLOW0,
              "transformOrigin": f"{r3(cx)}px {r3(cy)}px", "transformPerspective": 1200}
-        b = {"x": r3(dx * sep), "y": r3(dy * sep), "rotation": r3(G.u(-2, 2)), "rotationX": 0, "rotationY": 0, "scale": 1, "opacity": 1, "filter": GLOW1}
+        b = {"x": r3(dx * sep), "y": r3(dy * sep), "rotation": r3(G.u(-2, 2)), "rotationX": 0, "rotationY": 0, "scale": 1, "filter": GLOW1}
         # 2) fall toward lower-left, one consistent direction, inner first
         dist = math.hypot(cx - ORIGIN[0], cy - ORIGIN[1])
         delay = 0.03 * ring + min(0.08, dist / 9000) + G.u(0, 0.03)
         c = {"x": r3(dx * sep * 4 - G.u(260, 520)), "y": r3(dy * sep * 3 + G.u(700, 1150)), "rotation": r3(-G.u(18, 55)),
-             "rotationX": r3(G.u(25, 70)), "rotationY": r3(-G.u(10, 40)), "scale": r3(G.u(1.05, 1.25)), "opacity": 1, "filter": GLOW1}
-        d = dict(c, opacity=0)
+             "rotationX": r3(G.u(25, 70)), "rotationY": r3(-G.u(10, 40)), "scale": r3(G.u(1.05, 1.25)), "filter": GLOW1}
         S.init(f"#{s}-pw{k}", a)
         S.ft(f"#{s}-pw{k}", {kk: a[kk] for kk in b}, b, crack, 0.08, "power3.out")
         S.ft(f"#{s}-pw{k}", b, c, fall + delay, 0.3, "power2.in")

@@ -1,0 +1,14 @@
+vt.set(V, {"fx": 900, "fy": 1890, "h": 820, "yaw": -42, "pitch": 6}, 21.6);
+vt.fromTo(V, {"fx": 900, "fy": 1890, "h": 820, "yaw": -42, "pitch": 6}, {"fx": 1000, "fy": 1890, "h": 820, "yaw": -60, "pitch": 6, "duration": 0.75, "ease": "power2.in", "immediateRender": false}, 21.6);
+vt.fromTo(V, {"fx": 1000, "fy": 1890, "h": 820, "yaw": -60, "pitch": 6}, {"fx": 1250, "fy": 2000, "h": 760, "yaw": -40, "pitch": 6, "duration": 0.01, "ease": "none", "immediateRender": false}, 22.35);
+vt.fromTo(V, {"fx": 1250, "fy": 2000, "h": 760, "yaw": -40, "pitch": 6}, {"fx": 560, "fy": 2000, "h": 760, "yaw": 10, "pitch": 6, "duration": 1.32, "ease": "power3.out", "immediateRender": false}, 22.36);
+vt.fromTo(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 10, "pitch": 6}, {"fx": 560, "fy": 2000, "h": 760, "yaw": 28, "pitch": 6, "duration": 0.54, "ease": "sine.inOut", "immediateRender": false}, 23.68);
+vt.fromTo(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 28, "pitch": 6}, {"fx": 560, "fy": 2000, "h": 760, "yaw": -18, "pitch": 6, "duration": 1.28, "ease": "sine.inOut", "immediateRender": false}, 24.22);
+vt.fromTo(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": -18, "pitch": 6}, {"fx": 560, "fy": 2000, "h": 760, "yaw": -26, "pitch": 6, "duration": 1.02, "ease": "sine.inOut", "immediateRender": false}, 25.5);
+vt.fromTo(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": -26, "pitch": 6}, {"fx": 560, "fy": 2000, "h": 760, "yaw": 0, "pitch": 6, "duration": 1.2, "ease": "sine.inOut", "immediateRender": false}, 26.52);
+vt.set(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 0, "pitch": 6}, 27.72);
+vt.fromTo(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 0, "pitch": 6}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 27.72);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 1.29, "ease": "sine.inOut", "immediateRender": false}, 28.22);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4}, {"fx": 560, "fy": 2000, "h": 760, "yaw": 12, "pitch": 6, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 29.51);
+vt.set(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 12, "pitch": 6}, 30.01);
+vt.fromTo(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 12, "pitch": 6}, {"fx": 560, "fy": 2000, "h": 760, "yaw": 24, "pitch": 6, "duration": 0.823, "ease": "sine.inOut", "immediateRender": false}, 30.01);

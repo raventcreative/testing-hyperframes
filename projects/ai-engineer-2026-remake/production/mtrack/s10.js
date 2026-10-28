@@ -1,0 +1,12 @@
+vt.set(V, {"fx": 905, "fy": 1760, "h": 760, "yaw": -20, "pitch": 6}, 67.433);
+vt.fromTo(V, {"fx": 905, "fy": 1760, "h": 760, "yaw": -20, "pitch": 6}, {"fx": 905, "fy": 1760, "h": 760, "yaw": -34, "pitch": 6, "duration": 0.887, "ease": "sine.inOut", "immediateRender": false}, 67.433);
+vt.fromTo(V, {"fx": 905, "fy": 1760, "h": 760, "yaw": -34, "pitch": 6}, {"fx": 905, "fy": 1760, "h": 760, "yaw": -28, "pitch": 6, "duration": 0.9, "ease": "sine.inOut", "immediateRender": false}, 68.32);
+vt.set(V, {"fx": 905, "fy": 1760, "h": 760, "yaw": -28, "pitch": 6}, 69.22);
+vt.fromTo(V, {"fx": 905, "fy": 1760, "h": 760, "yaw": -28, "pitch": 6}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 69.22);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4, "duration": 0.91, "ease": "sine.inOut", "immediateRender": false}, 69.72);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 0.91, "ease": "sine.inOut", "immediateRender": false}, 70.63);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4}, {"fx": 905, "fy": 1760, "h": 760, "yaw": -28, "pitch": 6, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 71.54);
+vt.set(V, {"fx": 905, "fy": 1760, "h": 760, "yaw": -28, "pitch": 6}, 72.04);
+vt.fromTo(V, {"fx": 905, "fy": 1760, "h": 760, "yaw": -28, "pitch": 6}, {"fx": 880, "fy": 1760, "h": 760, "yaw": -40, "pitch": 6, "duration": 0.91, "ease": "power2.inOut", "immediateRender": false}, 72.04);
+vt.fromTo(V, {"fx": 880, "fy": 1760, "h": 760, "yaw": -40, "pitch": 6}, {"fx": 905, "fy": 1760, "h": 760, "yaw": -30, "pitch": 6, "duration": 0.6, "ease": "power2.out", "immediateRender": false}, 72.95);
+vt.fromTo(V, {"fx": 905, "fy": 1760, "h": 760, "yaw": -30, "pitch": 6}, {"fx": 905, "fy": 1760, "h": 760, "yaw": -26, "pitch": 6, "duration": 2.817, "ease": "sine.inOut", "immediateRender": false}, 73.55);

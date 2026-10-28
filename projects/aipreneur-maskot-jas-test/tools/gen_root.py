@@ -21,6 +21,8 @@ index = f"""<!doctype html>
     <meta name="viewport" content="width=1080, height=1080" />
     <title>AIpreneur — Maskot Jas (tes)</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/mascot3d.js"></script>
+    <script src="vendor/vo_words.js"></script>
     <link rel="stylesheet" href="vendor/fx.css" />
     <style>
       * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -29,7 +31,7 @@ index = f"""<!doctype html>
       #main {{ position: relative; width: 1080px; height: 1080px; overflow: hidden; isolation: isolate; background: #eef4fc; }}
       #bg {{ position: absolute; inset: 0; z-index: 0; background: url(assets/brand/bg_1080.png) 0 0 / 1080px 1080px no-repeat; }}
       .host-back {{ z-index: 10 !important; position: absolute !important; }}
-      #puppet {{ z-index: 40 !important; position: absolute !important; }}
+      #mascot {{ z-index: 40 !important; position: absolute !important; }}
       .host-front {{ z-index: 50 !important; position: absolute !important; }}
       #grain {{ position: absolute; left: -64px; top: -64px; width: 1208px; height: 1208px; z-index: 80; opacity: .3; background: url(assets/brand/grain_256.png); pointer-events: none; }}
     </style>
@@ -38,7 +40,7 @@ index = f"""<!doctype html>
     <div id="main" data-composition-id="main" data-start="0" data-duration="{r3(D)}" data-width="1080" data-height="1080" data-fps="30">
       <div id="bg" data-layout-ignore></div>
 {chr(10).join(hosts["back"])}
-      <div id="puppet" class="clip" data-composition-id="puppet" data-composition-src="compositions/puppet.html" data-start="0" data-duration="{r3(D)}" data-track-index="3" data-width="1080" data-height="1080"></div>
+      <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{r3(D)}" data-track-index="3" data-width="1080" data-height="1080"></div>
 {chr(10).join(hosts["front"])}
       <div id="grain" data-layout-ignore></div>
     </div>

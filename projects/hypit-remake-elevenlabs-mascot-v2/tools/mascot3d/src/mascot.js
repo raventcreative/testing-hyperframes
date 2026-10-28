@@ -118,7 +118,7 @@ export class Mascot {
     await m.init(canvas, opts);
     return m;
   }
-  async init(canvas, { url, face, width = 1080, height = 1920, envIntensity = 0.45 }) {
+  async init(canvas, { url, face, width = 1080, height = 1920, envIntensity = 0.45, decals = [] }) {
     this.W = width; this.H = height;
     const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true, premultipliedAlpha: true }));
     r.setPixelRatio(1); r.setSize(width, height, false);
@@ -143,6 +143,31 @@ export class Mascot {
     this.rest = {};
     for (const [n, b] of Object.entries(this.bones)) this.rest[n] = b.position.clone();
     this.mesh.frustumCulled = false;
+    // optional surface decals (e.g. a crisp logo on the jacket): a curved grid that follows the rest-pose surface
+    // (z sampled offline), parented to a bone so it moves with the body. Texture is high-res, independent of the atlas.
+    this.root.updateMatrixWorld(true);
+    for (const d of decals) {
+      const tex = await new THREE.TextureLoader().loadAsync(d.url);
+      tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+      const [x0, x1, y0, y1] = d.box, Z = d.zgrid, ny = Z.length, nx = Z[0].length;
+      const pos = [], uv = [], ix = [];
+      for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+        const u = i / (nx - 1), v = j / (ny - 1);
+        pos.push(x0 + (x1 - x0) * u, y1 - (y1 - y0) * v, Z[j][i] + (d.offset || 0.0012)); uv.push(u, 1 - v);
+      }
+      for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) { const a = j * nx + i; ix.push(a, a + nx, a + 1, a + 1, a + nx, a + nx + 1); }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+      g.setIndex(ix); g.computeVertexNormals();
+      const mat = new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: d.roughness ?? 0.55, metalness: 0, depthWrite: false,
+        polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+      const mesh = new THREE.Mesh(g, mat); mesh.frustumCulled = false; mesh.renderOrder = 2;
+      const bone = this.bones[d.bone || 'chest'];
+      bone.add(mesh);
+      // geometry is authored in rest object space: express it in the bone's frame
+      const inv = new THREE.Matrix4().copy(bone.matrixWorld).invert().multiply(this.mesh.matrixWorld);
+      mesh.applyMatrix4(inv);
+    }
 
     // facial controls through a surface-following shader patch
     const F = face, mat = this.mesh.material;

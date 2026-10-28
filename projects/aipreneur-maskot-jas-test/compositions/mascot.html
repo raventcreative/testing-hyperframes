@@ -1,0 +1,111 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #m-xf { position: absolute; left: 0; top: 0; width: 1080px; height: 1080px; transform-origin: 540px 540px; }
+    #m-clip { position: absolute; left: 0; top: 0; width: 1080px; height: 1080px; }
+    #m-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1080px; }
+  </style>
+  <div id="root" data-composition-id="mascot" data-width="1080" data-height="1080">
+    <!-- silhouette filters for the effects (always mounted): f-paper = 14px white paper border + thin shadow;
+         f-boil0..2 = hand-drawn 7px white outline, three boiled versions (cycled every 0.1 s) -->
+    <svg width="0" height="0" style="position:absolute;left:0;top:0" aria-hidden="true" data-layout-ignore><defs><filter id="f-paper" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="14" result="d"/><feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/><feGaussianBlur in="d" stdDeviation="5" result="sb"/><feOffset in="sb" dx="5" dy="9" result="so"/><feFlood flood-color="#0A0D2C" flood-opacity="0.32"/><feComposite in2="so" operator="in" result="sh"/><feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="f-boil0" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="13" result="o"/><feMorphology in="SourceAlpha" operator="dilate" radius="6" result="i"/><feComposite in="o" in2="i" operator="out" result="ring"/><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="ring" in2="n" scale="12" xChannelSelector="R" yChannelSelector="G" result="rd"/><feFlood flood-color="#ffffff"/><feComposite in2="rd" operator="in" result="wr"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="wr"/></feMerge></filter><filter id="f-boil1" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="13" result="o"/><feMorphology in="SourceAlpha" operator="dilate" radius="6" result="i"/><feComposite in="o" in2="i" operator="out" result="ring"/><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="20" result="n"/><feDisplacementMap in="ring" in2="n" scale="12" xChannelSelector="R" yChannelSelector="G" result="rd"/><feFlood flood-color="#ffffff"/><feComposite in2="rd" operator="in" result="wr"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="wr"/></feMerge></filter><filter id="f-boil2" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="13" result="o"/><feMorphology in="SourceAlpha" operator="dilate" radius="6" result="i"/><feComposite in="o" in2="i" operator="out" result="ring"/><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="33" result="n"/><feDisplacementMap in="ring" in2="n" scale="12" xChannelSelector="R" yChannelSelector="G" result="rd"/><feFlood flood-color="#ffffff"/><feComposite in2="rd" operator="in" result="wr"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="wr"/></feMerge></filter></defs></svg>
+    <div id="m-xf" data-layout-ignore data-layout-allow-occlusion><div id="m-clip" data-layout-ignore data-layout-allow-occlusion><canvas id="m-canvas" width="1080" height="1080" data-layout-ignore data-layout-allow-occlusion></canvas></div></div>
+  </div>
+  <script>
+    (function () {
+      // =====================================================================================
+      // 3D MASCOT (17 EFEK, 1080x1080, no VO) (source: tools/mascot_src.html -> tools/gen_mascot.py).
+      // The user's rigged GLB (19 joints, 0 morph targets) rendered live in one WebGL canvas.
+      // Framing per scene = a real camera change (setView: feet px, figure px, yaw/pitch), never a CSS
+      // upscale of a rendered bitmap. Wrapper #m-xf / #m-clip carry the per-effect compositing (clip to a
+      // frame, phone screen, avatar circle, paper outline ...). All of it lives on a private timeline `vt`
+      // that is seeked with the frame time inside the hf-seek handler -> deterministic, order-independent.
+      // Acting: key poses on measured VO words -> damped springs; lip sync = CTC phones x VO energy
+      // (low-passed, never ahead of the voice). No blinks: the GLB has no eyelid geometry.
+      // =====================================================================================
+      const M3 = window.Mascot3D;
+      const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump, osc } = M3;
+      const VW = window.VO_WORDS, D = 6.0;
+      const canvas = document.getElementById("m-canvas");
+      const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, D);
+      const ACC = syllableAccents(window.VO_ENV, VW, window.VO_PHONES, D);
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * u * (u * (u * 6 - 15) + 10); };
+      const H = (rx, ry, rz) => [rx, ry, rz];
+      const add = (...ds) => { const o = {}; for (const d of ds) for (const [k, v] of Object.entries(d || {})) { const a = o[k] || [0, 0, 0]; o[k] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
+      function accents(t) {
+        let n = 0;
+        for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; }
+        return Math.min(1.3, n);
+      }
+      function idle(t, seed) {
+        return {
+          chest: [0.012 * Math.sin(t * 2 * Math.PI * 0.27), 0, 0],
+          spine: [0, 0.03 * vnoise(t, seed + 1, 0.3), 0.022 * vnoise(t, seed + 2, 0.27)],
+          head: [0.02 * vnoise(t, seed + 3, 0.4), 0.05 * vnoise(t, seed + 4, 0.31), 0.03 * vnoise(t, seed + 5, 0.36)],
+          forearm_L: [0.04 * vnoise(t, seed + 6, 0.45), 0, 0], forearm_R: [0.04 * vnoise(t, seed + 7, 0.42), 0, 0],
+        };
+      }
+
+      // ---------------------------------------------------------------- per-scene framing / compositing track
+      const V = { fx: 540, fy: 2050, h: 1700, yaw: 0, pitch: 5, vis: 1, rx: 0, rz: 0, ry: 0, ty: 0 };
+      const vt = gsap.timeline({ paused: true });
+      const RESET = {"V": {"fx": 540, "fy": 1180, "h": 1050, "yaw": 0, "pitch": 5, "vis": 1, "rx": 0, "rz": 0, "ry": 0, "ty": 0}, "X": {"x": 0, "y": 0, "scale": 1, "rotation": 0, "rotationX": 0, "rotationY": 0, "opacity": 1, "transformPerspective": 1400, "filter": "drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 540px"}, "C": {"clipPath": "inset(-400px -400px -400px -400px round 0px)"}};
+      // ---- s01 orbit_maskot_jas (0.0-6.0)
+      vt.set(V, RESET.V, 0); vt.set("#m-xf", RESET.X, 0); vt.set("#m-clip", RESET.C, 0);
+      vt.set(V, {"fx": 540, "fy": 1120, "h": 950, "yaw": 0, "pitch": 5}, 0);
+      vt.fromTo(V, {"fx": 540, "fy": 1120, "h": 950, "yaw": 0, "pitch": 5}, {"fx": 540, "fy": 1110, "h": 950, "yaw": 0, "pitch": 5, "duration": 6.0, "ease": "sine.inOut", "immediateRender": false}, 0);
+      vt.set({}, {}, D);
+      vt.shiftChildren(0.01);   // nothing sits at exactly 0, so a forward replay from 0 always applies the frame-zero sets
+
+      // ---------------------------------------------------------------- acting (one continuous performance)
+      const PERFS = [
+        buildPerformance({"armL": [[-1.0, "low", 0.3], [0.35, "open", 0.45], [2.4, "palmUp", 0.4], [3.6, "open", 0.4], [5.25, "low", 0.5]], "armR": [[-1.0, "low", 0.3], [0.35, "wave", 0.4], [2.3, "palmUp", 0.45], [3.8, "open", 0.4], [5.3, "low", 0.5]], "head": [[-1.0, [0, 0, 0], 0.3], [0.5, [-0.05, 0.22, 0.03], 0.5], [1.4, [-0.08, -0.22, -0.03], 0.55], [2.3, [-0.03, 0.2, 0.04], 0.55], [3.2, [-0.08, -0.2, -0.03], 0.55], [4.1, [-0.04, 0.05, 0], 0.5], [5.4, [0, 0, 0], 0.5]], "torso": [[0.4, {"chest": [0.03, 0.05, 0]}, 0.5], [2.5, {"chest": [0.03, -0.05, 0]}, 0.6], [5.3, {}, 0.5]], "root": [[-1.0, {"y": 0, "ry": 0, "rz": 0}, 0.4]]}, 6.05)
+      ];
+      const P_START = [0.0];
+      const PERF = (t) => { let i = 0; while (i + 1 < P_START.length && t >= P_START[i + 1] - 1e-6) i++; return PERFS[i](t - P_START[i]); };
+      const EXTRA = (t) => ({});
+
+
+      let mascot = null;
+      function apply(t) {
+        vt.seek(0, false); vt.seek(t + 0.01, false);   // always replay forward: chained tweens resolve in time order whatever the seek history
+        if (V.vis <= 0.001) { canvas.style.visibility = "hidden"; return; }
+        canvas.style.visibility = "visible";
+        const Pf = PERF(t);
+        const acc = accents(t);
+        const still = 1;
+        const id = idle(t, 17); for (const k in id) id[k] = id[k].map((x) => x * still);
+        const bones = add(Pf.bones, id, EXTRA(t), { head: [0.05 * acc * still, 0, 0], neck: [0.02 * acc * still, 0, 0] });
+        const root = { x: Pf.root.x, y: Pf.root.y + V.ty, ry: Pf.root.ry + V.ry + 0.025 * vnoise(t, 26, 0.22) * still, rz: Pf.root.rz + V.rz, rx: V.rx, s: Pf.root.s };
+        mascot.setView({ fx: V.fx, fy: V.fy, h: V.h, yaw: V.yaw, pitch: V.pitch });
+        mascot.setState({ root, bones, face: { blink: [0, 0], mouthMix: 1, mouth: mouthAt(t) } });
+        mascot.render();
+      }
+
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      const FACE = {"eyeA": {"c": [-0.092, 0.61], "r": [0.046, 0.043], "n": 342, "J": [-0.5336967759799437, -0.28820078688328604, -0.268287467476241, 0.470917329866912], "uv0": [0.5292386999728376, 0.6906347412065819], "maxErr": 0.004345373923906243}, "eyeB": {"c": [0.09, 0.61], "r": [0.046, 0.043], "n": 300, "J": [0.04822944782772251, 0.5662669253962098, 0.5541335765620371, -0.06820683649427815], "uv0": [0.42705736136431593, 0.5341455954673026], "maxErr": 0.004831577660740092}, "browA": {"c": [-0.1, 0.685], "n": 159, "J": [-0.07096926544759027, -0.6418050568828617, -0.537970800309979, 0.044819526176582615], "uv0": [0.3604761501043635, 0.43754822708222063], "maxErr": 0.003525871724613734}, "browB": {"c": [0.1, 0.685], "n": 208, "J": [0.017615134358538797, 0.6154301051445743, 0.5129490551050531, -0.05825256492017922], "uv0": [0.4666055387057057, 0.5343228862618117], "maxErr": 0.0038512208764781403}, "mouth": {"c": [0, 0.549], "r": [0.026, 0.016]}, "skin": [250, 236, 226], "skinEye": [251, 240, 232]};
+      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_jas_rigged.glb", face: FACE, decals: [{"url": "assets/mascot3d/logo_decal.png", "bone": "chest", "box": [-0.107, -0.023, 0.37646, 0.38554], "zgrid": [[0.07449, 0.07807, 0.08101, 0.0841, 0.08674, 0.08914, 0.09117, 0.09343, 0.095, 0.09644, 0.09802, 0.09929, 0.10055, 0.10181, 0.10287, 0.10361, 0.10419, 0.10467, 0.10516, 0.1052, 0.10527, 0.1048, 0.10488, 0.10949], [0.0743, 0.07791, 0.08116, 0.08404, 0.08733, 0.09024, 0.09152, 0.09398, 0.09548, 0.09739, 0.09869, 0.10013, 0.10207, 0.10252, 0.10337, 0.10437, 0.10516, 0.10544, 0.10564, 0.1057, 0.10574, 0.10558, 0.10521, 0.10808], [0.07376, 0.07778, 0.0811, 0.08425, 0.08727, 0.09024, 0.09183, 0.09415, 0.09573, 0.09739, 0.09891, 0.10032, 0.1021, 0.10252, 0.10385, 0.10454, 0.10534, 0.10558, 0.10575, 0.10578, 0.10578, 0.1057, 0.10545, 0.10506], [0.07317, 0.07713, 0.0811, 0.08405, 0.08705, 0.08968, 0.09193, 0.094, 0.09587, 0.09742, 0.0991, 0.10032, 0.10215, 0.10265, 0.10386, 0.10478, 0.10552, 0.10578, 0.10584, 0.10585, 0.10582, 0.10569, 0.10545, 0.10518], [0.07211, 0.07617, 0.08006, 0.08367, 0.08672, 0.08923, 0.09196, 0.09404, 0.09595, 0.09773, 0.09902, 0.10033, 0.1021, 0.10281, 0.10425, 0.10478, 0.10561, 0.10593, 0.10593, 0.1059, 0.10582, 0.10561, 0.10545, 0.10522]], "offset": 0.0015}], width: 1080, height: 1080, envIntensity: 0.55 })
+        .then((m) => {
+          mascot = m;
+          // pale studio lighting (brand plate is cool white): soft key upper-left (renderer default), cool-white rim behind-right
+          for (const o of m.scene.children) {
+            if (!o.isDirectionalLight) continue;
+            if (o.position.z < 0) { o.intensity = 1.5; o.color.setRGB(0.86, 0.92, 1.0); o.position.set(1.5, 1.4, -1.5); }
+          }
+          apply(0);
+        });
+      window.__hf.buildReady["mascot"] = ready;
+      window.addEventListener("hf-seek", (e) => {
+        const t = e.detail.time;
+        if (mascot) apply(t);
+        else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t)));
+      });
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.set({}, {}, D - 0.02);
+      window.__timelines["mascot"] = tl;
+    })();
+  </script>
+</template>

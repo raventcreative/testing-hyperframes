@@ -65,7 +65,7 @@ def build(S):
         if k:
             S.ft(sel, {"opacity": 1}, {"opacity": 0.28}, sek + 0.35, 0.3, "power2.inOut")
     S.init(f"#{s}-hl", {"opacity": 0, "scale": 1.4})
-    S.ft(f"#{s}-hl", {"opacity": 0, "scale": 1.4}, {"opacity": 1, "scale": 1}, sek + 0.4, 0.35, "back.out(2)")
+    S.ft(f"#{s}-hl", {"opacity": 0, "scale": 1.4}, {"opacity": 1, "scale": 1}, sek + 0.4, max(0.1, min(0.35, W(204) - 0.3 - sek - 0.42)), "back.out(2)")
     S.fx(sem, "click", 0.05)
     S.fx(sek + 0.4, "ping", 0.05)
     back = W(204) - 0.3

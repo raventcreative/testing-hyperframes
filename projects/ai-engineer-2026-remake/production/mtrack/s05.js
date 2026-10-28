@@ -1,0 +1,11 @@
+vt.set(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 24, "pitch": 6}, 30.833);
+vt.fromTo(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 24, "pitch": 6}, {"fx": 560, "fy": 2000, "h": 760, "yaw": 0, "pitch": 6, "duration": 0.6, "ease": "sine.inOut", "immediateRender": false}, 30.833);
+vt.set(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 0, "pitch": 6}, 32.48);
+vt.fromTo(V, {"fx": 560, "fy": 2000, "h": 760, "yaw": 0, "pitch": 6}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 32.48);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4, "duration": 1.5, "ease": "sine.inOut", "immediateRender": false}, 32.98);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 1.5, "ease": "sine.inOut", "immediateRender": false}, 34.48);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4}, {"fx": 905, "fy": 1890, "h": 740, "yaw": -26, "pitch": 6, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 35.98);
+vt.set(V, {"fx": 905, "fy": 1890, "h": 740, "yaw": -26, "pitch": 6}, 36.48);
+vt.fromTo(V, {"fx": 905, "fy": 1890, "h": 740, "yaw": -26, "pitch": 6}, {"fx": 905, "fy": 1890, "h": 740, "yaw": -32, "pitch": 6, "duration": 1.1, "ease": "sine.inOut", "immediateRender": false}, 36.48);
+vt.fromTo(V, {"fx": 905, "fy": 1890, "h": 740, "yaw": -32, "pitch": 6}, {"fx": 880, "fy": 1890, "h": 740, "yaw": -40, "pitch": 6, "duration": 0.9, "ease": "power2.out", "immediateRender": false}, 37.58);
+vt.fromTo(V, {"fx": 880, "fy": 1890, "h": 740, "yaw": -40, "pitch": 6}, {"fx": 885, "fy": 1890, "h": 740, "yaw": -36, "pitch": 6, "duration": 0.787, "ease": "sine.inOut", "immediateRender": false}, 38.48);

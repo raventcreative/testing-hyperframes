@@ -92,7 +92,7 @@ def build(S):
     S.fx(pil + 0.15, "click", 0.08)
     # machine lifts a touch and settles smaller (keeps its centre x = the core); shadow follows
     S.init(f"#{s}-mach", {"scale": 1, "y": 0, "transformOrigin": f"{MW / 2}px 0px"})
-    S.ft(f"#{s}-mach", {"scale": 1, "y": 0}, {"scale": 1.02, "y": -14}, pil + 0.15, 0.2, "power2.out")
+    S.ft(f"#{s}-mach", {"scale": 1, "y": 0}, {"scale": 1.02, "y": -14}, pil + 0.15, max(0.05, min(0.2, jal - 0.06 - pil - 0.15)), "power2.out")
     S.ft(f"#{s}-mach", {"scale": 1.02, "y": -14}, {"scale": SHRINK, "y": 10}, jal - 0.05, 0.55, "power3.inOut")
     for sel in (f"#{s}-msh", f"#{s}-plinth"):
         S.init(sel, {"scaleX": 1, "transformOrigin": "50% 50%"})

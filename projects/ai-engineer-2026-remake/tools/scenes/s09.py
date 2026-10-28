@@ -150,15 +150,15 @@ def build(S):
     S.init(f"#{s}-arch", {"opacity": 1, "scale": 1, "transformOrigin": "540px 900px"})
     S.ft(f"#{s}-arch", {"opacity": 1, "scale": 1}, {"opacity": 0.35, "scale": 0.94}, W(134), 0.6, "power2.inOut")
     S.ft(f"#{s}-arch", {"opacity": 0.35, "scale": 0.94}, {"opacity": 0, "scale": 0.9}, t_out + 0.3, 0.5, "power2.in")
-    pop_chip(S, f"#{s}-c1", W(137) - 0.05, t_out - 0.1, -2)
-    draw_arrow(S, f"{s}-a1", W(137) + 0.25, t_out - 0.1)
-    pop_chip(S, f"#{s}-c2", W(134) - 0.05, t_out - 0.1, 2)
+    pop_chip(S, f"#{s}-c1", W(136) - 0.05, t_out + 0.12, -2)
+    draw_arrow(S, f"{s}-a1", W(136) + 0.3, t_out + 0.12)
+    pop_chip(S, f"#{s}-c2", W(134) - 0.05, t_out + 0.12, 2)
     S.fx(W(134), "pop", 0.04)
     S.fx(W(137) + 0.3, "click", 0.05)
 
     # ---------------------------------------------------------------- mascot
     side = dict(SIDE_R, fx=945, fy=1830, h=820, yaw=-26)
-    end = {"fx": 935, "fy": 1890, "h": 790, "yaw": -30, "pitch": 6}
+    end = {"fx": 900, "fy": 1900, "h": 780, "yaw": -30, "pitch": 6}
     S.mv([(t0, dict(side, yaw=-14), None), (rag, dict(side, yaw=-30), "sine.inOut"), (W(128), dict(side, yaw=-34), "sine.inOut")])
     S.act("armR", [(t0, "low", 0.3), (t0 + 0.2, "open", 0.35), (rag - 0.1, "present", 0.3), (W(127) - 0.2, "point", 0.3), (rl - 0.15, "pointUp", 0.3)])
     S.act("armL", [(t0, "low", 0.3), (t0 + 0.3, "explain", 0.35), (W(127), "low", 0.4), (rl, "palmUp", 0.3)])

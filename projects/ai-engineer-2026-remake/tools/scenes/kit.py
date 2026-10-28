@@ -150,8 +150,8 @@ def cable(id_, d, w=10, color="#1c3561", glow=False, dash=True):
     extra = ' pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"' if dash else ""
     g = (f'<path d="{d}" fill="none" stroke="rgba(120,170,240,.55)" stroke-width="{w + 10}" stroke-linecap="round" opacity=".5"/>' if glow else "")
     return (f'<svg class="abs" style="left:0;top:0;width:1080px;height:1920px;overflow:visible" viewBox="0 0 1080 1920">{g}'
-            f'<path d="{d}" fill="none" stroke="#0A0D2C" stroke-opacity=".18" stroke-width="{w + 4}" stroke-linecap="round" transform="translate(4 8)"/>'
-            f'<path id="{id_}" d="{d}" fill="none" stroke="{color}" stroke-width="{w}" stroke-linecap="round"{extra}/></svg>')
+            f'<path id="{id_}" d="{d}" fill="none" stroke="{color}" stroke-width="{w}" stroke-linecap="round"{extra} '
+            f'style="filter:drop-shadow(4px 8px 1px rgba(10,13,44,.18))"/></svg>')   # shadow follows the drawn length
 
 
 def grid_floor(id_, y=FLOOR_Y, depth=900, op=0.05):

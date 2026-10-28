@@ -13,7 +13,7 @@ def node(id_, cx, cy, d=56):
             f'background:radial-gradient(circle at 36% 30%,#ffffff 0%,rgba(230,238,250,.9) 32%,rgba(170,195,230,.75) 70%,rgba(110,145,195,.8) 100%);'
             f'box-shadow:inset 0 2px 0 rgba(255,255,255,.95),0 10px 18px -8px rgba(10,13,44,.5),0 0 0 1.5px rgba(255,255,255,.9)">'
             f'<div class="abs" style="left:{d * .3}px;top:{d * .3}px;width:{d * .4}px;height:{d * .4}px;border-radius:50%;'
-            f'background:radial-gradient(circle at 40% 35%,#4c79b8 0%,#1c3561 60%,#0A0D2C 100%)"></div></div>')
+            f'background:linear-gradient(150deg,#4c79b8 0%,#1c3561 60%,#0A0D2C 100%)"></div></div>')
 
 
 def plate(id_, x, y, w, h, r=40):

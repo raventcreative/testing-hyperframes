@@ -185,7 +185,7 @@ for s_ in SC:
         continue
     n = s_["fx"]
     inner = (f'<span class="tx" style="font:700 30px/48px Poppins, sans-serif;letter-spacing:.02em;margin-right:12px">{html.escape(s_["label"])}</span>'
-             f'<span class="badge" style="font:700 26px/1 Poppins, sans-serif;padding:9px 12px;border-radius:10px">{n:02d}/10</span>')
+             f'<span class="badge" style="font:700 28px/1 Poppins, sans-serif;padding:9px 12px;border-radius:10px">{n:02d}/10</span>')
     hm.append(f'    <div class="abs hmask" style="left:{RX - 760}px;top:{HY}px;width:760px;height:52px;overflow:hidden"><div id="hl-{i_}" class="abs" style="left:0;top:0;width:760px;height:52px;white-space:nowrap;display:flex;align-items:center;justify-content:flex-end">{inner}</div></div>')
     hinit.append(f'gsap.set("#hl-{i_}", {{ yPercent: 110, opacity: 0 }});')
     htl.append(f'tl.set("#hl-{i_}", {{ opacity: 1 }}, {r3(s_["start"])});')

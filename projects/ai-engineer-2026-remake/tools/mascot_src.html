@@ -57,8 +57,24 @@ __TRACK__
 __ACTING__
 
       let mascot = null;
+      // continuity between scenes: for CUT_BLEND s after each cut the camera view glides from where the previous scene
+      // left the mascot to where the new scene wants him (no position jump at the cut)
+      const CUTS = __CUTS__, CUT_BLEND = 0.5;
+      const VKEYS = ["fx", "fy", "h", "yaw", "pitch"];
       function apply(t) {
+        let blendFrom = null, bw = 0;
+        for (let i = CUTS.length - 1; i >= 0; i--) {
+          const c = CUTS[i];
+          if (t >= c && t < c + CUT_BLEND) {
+            vt.seek(0, false); vt.seek(c - 0.002 + 0.01, false);
+            blendFrom = {}; for (const k of VKEYS) blendFrom[k] = V[k];
+            bw = 1 - sm((t - c) / CUT_BLEND);
+            break;
+          }
+          if (t >= c) break;
+        }
         vt.seek(0, false); vt.seek(t + 0.01, false);   // always replay forward: chained tweens resolve in time order whatever the seek history
+        if (blendFrom && V.vis > 0.001) for (const k of VKEYS) V[k] = V[k] + (blendFrom[k] - V[k]) * bw;
         if (V.vis <= 0.001) { canvas.style.visibility = "hidden"; return; }
         canvas.style.visibility = "visible";
         const Pf = PERF(t);

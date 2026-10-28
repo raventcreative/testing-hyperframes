@@ -83,12 +83,12 @@ def build(S):
     S.back.append(f'<div class="abs" id="{s}-bead" style="{box(312, 1180, 46, 46)}border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#9fc4ff 35%,#294B77 75%,#0A0D2C);'
                   f'box-shadow:0 10px 16px -6px rgba(10,13,44,.6)"></div>')
     blur_wrap(S)
-    ids = [c[0] for c in chip_row(S, f"{s}-k", [("AI", ICON["bolt"], 61, False), ("butuh sistem", ICON["server"], 64, True)], 444, size=32, gap=80)]
+    ids = [c[0] for c in chip_row(S, f"{s}-k", [("AI", ICON["bolt"], 61, False), ("butuh sistem", ICON["server"], 63, True)], 444, size=32, gap=80)]
     S.front.append(f'<svg class="abs" style="left:0;top:0;width:1080px;height:600px;overflow:visible" viewBox="0 0 1080 600">'
                    f'<path id="{s}-ar" d="M372 484 H448 M430 468 L449 484 L430 500" fill="none" stroke="#294B77" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>')
 
     # ---------------------------------------------------------------- motion
-    exp_in, exp_out = W(60) - 0.3, W(65) - 0.25
+    exp_in, exp_out = W(60) - 0.3, W(66) - 0.3
     S.cam([(t0, {"x": 420, "y": 40, "scale": 1.05}, None), (W(49), {"x": 0, "y": 0, "scale": 1}, "power3.inOut"),
            (W(51), {"x": 0, "y": 0, "scale": 1}, "none"), (W(59) + 0.5, {"x": 0, "y": -30, "scale": 1.04}, "sine.inOut"),
            (t1 - 0.5, {"x": 0, "y": -30, "scale": 1.04}, "none"), (t1, {"x": 0, "y": -340, "scale": 1.12}, "power2.in")])

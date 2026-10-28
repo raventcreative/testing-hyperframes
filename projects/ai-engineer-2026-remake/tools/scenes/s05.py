@@ -53,10 +53,12 @@ def build(S):
         S.back.append(f'<div class="abs" id="{s}-b{k}" style="{box(x - 15, y - 15, 30, 30)}border-radius:50%;'
                       f'background:radial-gradient(circle at 35% 30%,#ffffff,#9fc4ff 35%,#294B77 75%,#0A0D2C);box-shadow:0 6px 10px -4px rgba(10,13,44,.6)"></div>')
     blur_wrap(S)
-    ids = [c[0] for c in chip_row(S, f"{s}-k", [("data", ICON["db"], 72, False), ("melatih", ICON["gauge"], 75, False), ("menguji", ICON["check"], 77, True)], 444, size=30, gap=60)]
+    row = chip_row(S, f"{s}-k", [("data", ICON["db"], 72, False), ("melatih", ICON["gauge"], 75, False), ("menguji", ICON["check"], 77, True)], 444, size=30, gap=60)
+    ids = [c[0] for c in row]
+    axs = [row[0][1] + row[0][2] + 10, row[1][1] + row[1][2] + 10]
     S.front.append(f'<svg class="abs" style="left:0;top:0;width:1080px;height:600px;overflow:visible" viewBox="0 0 1080 600">'
                    + "".join(f'<path id="{s}-ar{k}" d="M{x} 484 H{x + 40} M{x + 26} 470 L{x + 41} 484 L{x + 26} 498" fill="none" stroke="#294B77" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>'
-                             for k, x in enumerate((0, 0))) + '</svg>')
+                             for k, x in enumerate(axs)) + '</svg>')
 
     # ---------------------------------------------------------------- motion
     exp_in, exp_out = W(70) - 0.3, W(79) - 0.3
@@ -101,11 +103,12 @@ def build(S):
     # ---------------------------------------------------------------- mascot: centre -> explain -> lower right, inspects the error
     s04_end = {"fx": 560, "fy": 2000, "h": 760, "yaw": 24, "pitch": 6}
     rt = {"fx": 905, "fy": 1890, "h": 740, "yaw": -26, "pitch": 6}
-    S.mv([(t0, s04_end, None), (t0 + 0.6, dict(s04_end, yaw=0), "sine.inOut")])
-    S.act("armL", [(t0, "low", 0.3), (t0 + 0.35, "pointUp", 0.3), (W(68) + 0.3, "open", 0.3)])
-    S.act("armR", [(t0, "low", 0.3), (W(68), "palmUp", 0.3)])
-    S.act("head", [(t0, [-0.2, 0.1, 0], 0.3), (t0 + 0.6, [0.12, 0.05, 0], 0.35), (W(68), [-0.08, -0.12, 0.04], 0.3)])
-    explain(S, exp_in, exp_out, 70, 78, seed=4, enter=dict(s04_end, yaw=0), leave=rt)
+    S.mv([(t0, s04_end, None), (t0 + 0.7, dict(rt, yaw=-30), "power3.inOut"), (W(70) - 0.32, dict(rt, yaw=-20), "sine.inOut")])
+    S.act("armR", [(t0 + 0.4, "pointUp", 0.3), (W(68) + 0.3, "point", 0.3)])
+    S.act("armL", [(t0, "low", 0.3), (W(68) + 0.2, "open", 0.3)])
+    S.act("armR", [(t0, "low", 0.3)])
+    S.act("head", [(t0, [-0.2, 0.1, 0], 0.3), (t0 + 0.6, [-0.12, -0.3, 0], 0.35), (W(68), [-0.1, -0.4, 0.04], 0.3)])
+    explain(S, exp_in, exp_out, 70, 78, seed=4, enter=dict(rt, yaw=-20), leave=rt)
     S.mv([(exp_out + 0.5, rt, None), (W(82), dict(rt, yaw=-32), "sine.inOut"), (W(84) + 0.1, dict(rt, yaw=-40, fx=880), "power2.out"),
           (t1, dict(rt, yaw=-36, fx=885), "sine.inOut")])
     S.act("armR", [(exp_out + 0.2, "low", 0.35), (W(80), "point", 0.3), (W(82), "low", 0.35), (W(84) - 0.2, "point", 0.22), (t1 - 0.1, "point", 0.3)])

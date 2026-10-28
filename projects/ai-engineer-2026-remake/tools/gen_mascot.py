@@ -60,7 +60,8 @@ extra = P / "tools/mascot_extra.js"
 acting += extra.read_text() if extra.exists() else "      const EXTRA = (t) => ({});\n"
 cfg = {"__DUR__": str(D), "__RESET__": js({"V": RESET_V, "X": RESET_X, "C": RESET_C}),
        "__TRACK__": "\n".join(lines), "__ACTING__": acting,
-       "__FACE__": (P / "tools/mascot_face.json").read_text().strip(), "__DECALS__": (P / "tools/decals.json").read_text().strip()}
+       "__FACE__": (P / "tools/mascot_face.json").read_text().strip(), "__DECALS__": (P / "tools/decals.json").read_text().strip(),
+       "__CUTS__": js([s["start"] for s in SCENES["scenes"][1:]])}
 src = (P / "tools/mascot_src.html").read_text()
 for k, v in cfg.items():
     src = src.replace(k, v)

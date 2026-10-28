@@ -69,7 +69,7 @@ function armDist(x, y, z) {
 }
 // torso vertices fused to the inner sleeve (armpit band): they share a little of the upper-arm motion so the
 // fused seam stretches over a wide area instead of one long sliver
-function seamBand(x, y, z) { return false; }   // replaced by the seam cut below
+function seamBand(x, y, z) { return Math.abs(x) > 0.095 && y > 0.33 && y < 0.42 && z < 0.05 && armDist(x, y, z) < 0.08; }   // armpit side/back only (never the front chest / logo)
 function isArm(x, y, z) {
   const ax = Math.abs(x);
   if (y > 0.17 && y < 0.315) return ax > 0.132;
@@ -96,6 +96,25 @@ function allowed(x, y, z, arm) {
 // cleanly when it lifts (no stretched cloth strap). The shoulder top (y >= 0.40) stays continuous (blended).
 let ARMV = new Uint8Array(N);
 for (let v = 0; v < N; v++) ARMV[v] = isArm(P[3*v], P[3*v+1], P[3*v+2]) ? 1 : 0;
+// label smoothing: majority vote over surface neighbours (UV-seam twins joined) in the arm/torso junction band,
+// so the seam cut runs as a smooth armhole line instead of a saw-tooth (no ragged edge when the arm lifts)
+{
+  const nbr = Array.from({ length: N }, () => new Set());
+  for (let t = 0; t < IDX.length; t += 3) { const a = IDX[t], b = IDX[t+1], c = IDX[t+2]; nbr[a].add(b).add(c); nbr[b].add(a).add(c); nbr[c].add(a).add(b); }
+  const twin = new Map();
+  for (let v = 0; v < N; v++) { const k = `${Math.round(P[3*v]*1e4)},${Math.round(P[3*v+1]*1e4)},${Math.round(P[3*v+2]*1e4)}`; const u = twin.get(k); if (u === undefined) twin.set(k, v); else { for (const w of nbr[v]) nbr[u].add(w); for (const w of nbr[u]) nbr[v].add(w); } }
+  // 2-ring neighbourhoods for a wider vote
+  for (let it = 0; it < 6; it++) {
+    const nx = Uint8Array.from(ARMV); let ch = 0;
+    for (let v = 0; v < N; v++) {
+      const y = P[3*v+1]; if (y < 0.26 || y > 0.43 || Math.abs(P[3*v]) < 0.08) continue;
+      let a = ARMV[v] ? 1 : 0, n = 1;
+      for (const u of nbr[v]) { a += ARMV[u]; n++; for (const w of nbr[u]) { a += ARMV[w] * 0.5; n += 0.5; } }
+      const lab = a / n > 0.5 ? 1 : 0; if (lab !== ARMV[v]) { nx[v] = lab; ch++; }
+    }
+    ARMV = nx; if (!ch) break;
+  }
+}
 // label clean-up: islands of one label enclosed by the other (sleeve scraps tagged torso, jacket scraps tagged arm)
 // take the label of what surrounds them, so nothing is left hanging when the arm moves
 for (let pass = 0; pass < 2; pass++) {
@@ -164,8 +183,8 @@ for (let v = 0; v < N; v++) {
 }
 for (let v = 0; v < N; v++) {
   const x = P[3*v], y = P[3*v+1], z = P[3*v+2];
-  if (isArm(x, y, z) || !seamBand(x, y, z) || y > 0.395) continue;
-  const d = armDist(x, y, z), share = 0.55 * Math.min(1, Math.max(0, (0.09 - d) / 0.035));
+  if (ARMV[v] || !seamBand(x, y, z)) continue;
+  const d = armDist(x, y, z), share = 0.4 * Math.min(1, Math.max(0, (0.08 - d) / 0.03));
   const ua = idxOf[`upperarm_${x >= 0 ? 'L' : 'R'}`];
   for (let k = 0; k < nb; k++) W[v * nb + k] *= (1 - share);
   W[v * nb + ua] += share;

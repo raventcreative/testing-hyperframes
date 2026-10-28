@@ -85,16 +85,16 @@ def build(S):
     # mascot: stands in the eye of the orbit, opens his arms, follows the cards with his head
     S.mv([(t0, V, None), (t1, dict(V, yaw=0, fy=V["fy"] - 10), "sine.inOut")])
     # pose set verified on the suit mascot (no wide sideways abduction: the sleeve seam stays closed)
-    WA = {"upperarm": [-1.0, 0, -0.5], "forearm": [-0.9, 0, -0.55], "hand": [0, 0, 0.1]}
-    WB = {"upperarm": [-1.0, 0, -0.5], "forearm": [-0.9, 0, -0.15], "hand": [0, 0, -0.1]}
+    WA = {"upperarm": [-0.8, 0, -0.15], "forearm": [-1.5, 0, -0.4], "hand": [0, 0, 0.15]}
+    WB = {"upperarm": [-0.8, 0, -0.15], "forearm": [-1.5, 0, 0.05], "hand": [0, 0, -0.15]}
     PT = {"upperarm": [-1.15, -0.1, -0.35], "forearm": [-0.15, 0, -0.1], "hand": [0, 0, -0.1]}
     wave = [(t0, "low", 0.3), (t0 + 0.3, WA, 0.4)]
     t = t0 + 0.75
     k = 0
     while t < t0 + 1.95:
         wave.append((t, WB if k % 2 == 0 else WA, 0.24)); t += 0.27; k += 1
-    S.act("armR", wave + [(t0 + 2.15, "explain", 0.4), (t0 + 3.0, "palmUp", 0.4), (t0 + 3.85, PT, 0.4), (t0 + 4.6, "explainHi", 0.4), (t1 - 0.7, "low", 0.5)])
-    S.act("armL", [(t0, "low", 0.3), (t0 + 2.25, "explain", 0.4), (t0 + 3.1, "palmUp", 0.4), (t0 + 3.9, "together", 0.4), (t0 + 4.65, "explain", 0.4), (t1 - 0.65, "low", 0.5)])
+    S.act("armR", wave + [(t0 + 2.15, "explain", 0.4), (t0 + 3.0, "palmUp", 0.4), (t0 + 3.85, "explain", 0.4), (t0 + 4.6, "palmUp", 0.4), (t1 - 0.7, "low", 0.5)])
+    S.act("armL", [(t0, "low", 0.3), (t0 + 2.25, "explain", 0.4), (t0 + 3.1, "palmUp", 0.4), (t0 + 3.9, "palmUp", 0.4), (t0 + 4.65, "explain", 0.4), (t1 - 0.65, "low", 0.5)])
     S.act("head", [(t0, [0, 0, 0], 0.3), (t0 + 0.5, [-0.05, 0.22, 0.03], 0.5), (t0 + 1.4, [-0.08, -0.22, -0.03], 0.55),
                    (t0 + 2.3, [-0.03, 0.2, 0.04], 0.55), (t0 + 3.2, [-0.08, -0.2, -0.03], 0.55), (t0 + 4.1, [-0.04, 0.05, 0], 0.5), (t1 - 0.6, [0, 0, 0], 0.5)])
     S.act("torso", [(t0 + 0.4, {"chest": [0.03, 0.05, 0]}, 0.5), (t0 + 2.5, {"chest": [0.03, -0.05, 0]}, 0.6), (t1 - 0.7, {}, 0.5)])

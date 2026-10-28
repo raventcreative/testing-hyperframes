@@ -18,9 +18,9 @@ uniform vec4 uBA; uniform vec4 uBB;      // brow centre xy, half-size xy
 uniform vec4 uJBA; uniform vec4 uJBB;
 uniform vec2 uBlink; uniform vec2 uLower; uniform vec2 uGaze; uniform vec2 uBrow; uniform vec2 uBrowTilt;
 uniform float uMouthMix; uniform vec4 uMouth; uniform vec3 uMC; uniform vec3 uSkin; uniform vec3 uSkinEye;
-float gCover = 0.0;
+float gCover = 0.0; float gLid = 0.0; float gLidShade = 1.0; float gLash = 0.0;
 uniform float uDebug;
-uniform mat3 uHeadNM; uniform vec3 uHeadC;
+uniform mat3 uHeadNM; uniform vec3 uHeadC; uniform float uCoverN; uniform vec3 uLidLit;
 vec2 jmul(vec4 J, vec2 d){ return vec2(J.x*d.x + J.y*d.y, J.z*d.x + J.w*d.y); }
 vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 gaze, vec2 baseUv){
   vec2 d = (p - E.xy) / E.zw;
@@ -47,16 +47,19 @@ vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 g
       float yl = mix(-1.02, -0.2, smoothstep(0.55, 1.0, b)) * arc;           // lower lid edge
       float aa = fwidth(ny) * 1.2 + 1e-4;
       float covered = max(smoothstep(yu - aa, yu + aa, ny), smoothstep(yl + aa, yl - aa, ny));
-      float edge = smoothstep(1.0, 0.86, ee);
+      float edge = smoothstep(1.0, 0.5, ee);
       vec3 lid = uSkinEye * mix(0.965, 1.0, smoothstep(-1.0, 0.6, ny));   // measured eye-ring skin, faint top-light gradient
       lid *= mix(0.9, 1.0, smoothstep(0.0, 0.3, abs(ny - yu)));                 // soft crease under the lid edge
       col = mix(col, lid, covered * edge);
       gCover = max(gCover, covered * edge);
+      gLid = max(gLid, covered * edge);
+      gLidShade = mix(0.985, 1.0, smoothstep(-1.0, 0.7, ny)) * mix(0.95, 1.0, smoothstep(0.0, 0.25, abs(ny - yu)));
       // lash line on the moving lid edge (grows as the lid closes), tapered at the corners, lifted at the outer tip
       float lw = mix(0.0, 0.11, smoothstep(0.25, 0.9, b));
       float tip = smoothstep(0.55, 1.0, abs(nx)) * 0.06 * b;
       float lash = smoothstep(lw + aa, lw * 0.35, abs(ny - (yu + tip))) * smoothstep(1.0, 0.72, abs(nx));
       col = mix(col, vec3(0.06, 0.04, 0.035), lash * step(0.001, lw));
+      gLash = max(gLash, lash * step(0.001, lw));
     }
   }
   return col;
@@ -179,7 +182,7 @@ export class Mascot {
       uJBA: { value: new THREE.Vector4(...F.browA.J) }, uJBB: { value: new THREE.Vector4(...F.browB.J) },
       uBlink: { value: new THREE.Vector2() }, uLower: { value: new THREE.Vector2() },
       uGaze: { value: new THREE.Vector2() }, uBrow: { value: new THREE.Vector2() }, uBrowTilt: { value: new THREE.Vector2() },
-      uMouthMix: { value: 0 }, uDebug: { value: 0 }, uHeadNM: { value: new THREE.Matrix3() }, uHeadC: { value: new THREE.Vector3(0, 0.6, -0.04) }, uMouth: { value: new THREE.Vector4(0.026, 0, 0.004, 0.6) },
+      uMouthMix: { value: 0 }, uDebug: { value: 0 }, uHeadNM: { value: new THREE.Matrix3() }, uHeadC: { value: new THREE.Vector3(...(F.headC || [0, 0.6, -0.04])) }, uCoverN: { value: F.coverNormal ?? 1 }, uLidLit: { value: new THREE.Vector3(...(F.lidLit || [0.98, 0.95, 0.93])) }, uMouth: { value: new THREE.Vector4(0.026, 0, 0.004, 0.6) },
       uMC: { value: new THREE.Vector3(F.mouth.c[0], F.mouth.c[1] + 0.0135, F.mouth.c[1]) },
       uSkin: { value: new THREE.Vector3(lin(F.skin[0]), lin(F.skin[1]), lin(F.skin[2])) },
       uSkinEye: { value: new THREE.Vector3(lin(F.skinEye[0]), lin(F.skinEye[1]), lin(F.skinEye[2])) },
@@ -212,10 +215,11 @@ vRest = position;
   diffuseColor *= sampledDiffuseColor;
 #endif`)
         .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.85, gCover);')
-        .replace('#include <dithering_fragment>', '#include <dithering_fragment>\nif (uDebug > 1.5) gl_FragColor = vec4(vMapUv, 0.0, 1.0);')
-        .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = normalize(mix(normal, normalize(uHeadNM * normalize(vRest - uHeadC)), gCover));');
+        .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, 0.0, gCover);')
+        .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n// lids are painted after lighting (flat skin, no eyeball relief / gloss), lash line on top\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uLidLit * gLidShade, gLid);\ngl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.16, 0.11, 0.1), gLash);\nif (uDebug > 1.5) gl_FragColor = vec4(vMapUv, 0.0, 1.0);')
+        .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = normalize(mix(normal, mix(nonPerturbedNormal, normalize(uHeadNM * normalize(vRest - uHeadC)), uCoverN), gCover));');
     };
-    mat.customProgramCacheKey = () => 'mascot-face-v12-lids';
+    mat.customProgramCacheKey = () => 'mascot-face-v15-lids';
     mat.needsUpdate = true;
     if (mat.roughness !== undefined) { mat.roughness = Math.max(mat.roughness, 0.55); mat.metalness = 0; }
 

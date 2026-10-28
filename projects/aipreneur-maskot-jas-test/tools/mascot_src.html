@@ -21,7 +21,7 @@
       // frame, phone screen, avatar circle, paper outline ...). All of it lives on a private timeline `vt`
       // that is seeked with the frame time inside the hf-seek handler -> deterministic, order-independent.
       // Acting: key poses on measured VO words -> damped springs; lip sync = CTC phones x VO energy
-      // (low-passed, never ahead of the voice). No blinks: the GLB has no eyelid geometry.
+      // (low-passed, never ahead of the voice). Blinks: shader eyelids (skin lid + lash line), seeded schedule.
       // =====================================================================================
       const M3 = window.Mascot3D;
       const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump, osc } = M3;
@@ -70,14 +70,15 @@ __ACTING__
         const bones = add(Pf.bones, id, EXTRA(t), { head: [0.05 * acc * still, 0, 0], neck: [0.02 * acc * still, 0, 0] });
         const root = { x: Pf.root.x, y: Pf.root.y + V.ty, ry: Pf.root.ry + V.ry + 0.025 * vnoise(t, 26, 0.22) * still, rz: Pf.root.rz + V.rz, rx: V.rx, s: Pf.root.s };
         mascot.setView({ fx: V.fx, fy: V.fy, h: V.h, yaw: V.yaw, pitch: V.pitch });
-        mascot.setState({ root, bones, face: { blink: [0, 0], mouthMix: 1, mouth: mouthAt(t) } });
+        const bl = M3.blink(t, 0, D, 3);
+        mascot.setState({ root, bones, face: { blink: [bl, bl], mouthMix: 1, mouth: mouthAt(t) } });
         mascot.render();
       }
 
       window.__hf = window.__hf || {};
       window.__hf.buildReady = window.__hf.buildReady || {};
       const FACE = __FACE__;
-      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_jas_rigged.glb", face: FACE, decals: __DECALS__, width: 1080, height: 1080, envIntensity: 0.55 })
+      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_jas2_rigged.glb", face: FACE, decals: __DECALS__, width: 1080, height: 1080, envIntensity: 0.55 })
         .then((m) => {
           mascot = m;
           // pale studio lighting (brand plate is cool white): soft key upper-left (renderer default), cool-white rim behind-right

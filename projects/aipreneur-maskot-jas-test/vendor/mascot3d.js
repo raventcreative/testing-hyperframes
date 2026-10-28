@@ -3844,33 +3844,32 @@ vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 g
     if (dot(ds, ds) > 0.72) s = vec3(0.86, 0.87, 0.90);
     col = mix(col, s, smoothstep(0.72, 0.55, e));
   }
-  // lids (v4): skin colour sampled from the face texture just above / below the eye (no flat disc),
-  // asymmetric cover (taller on top so the painted upper lashes are hidden when closed), and a curved
-  // dark lash line that becomes the closed-eye "smile" curve.
-  vec2 dc = (p - E.xy) / (E.zw * vec2(1.34, 1.0));
-  dc.y /= (dc.y > 0.0 ? 1.5 : 1.22);
-  float ec = dot(dc, dc);
-  blink = 0.0; // v5: blink is geometric (vertex shader)
-  if (ec < 1.0 && lower > 0.001) {
-    float arc = sqrt(max(0.0, 1.0 - dc.x * dc.x));
-    float yu = mix(1.0, -0.28, blink) * arc;                          // upper lid travels to a line below centre
-    float yl = -mix(1.0, 0.28, max(lower, smoothstep(0.75, 1.0, blink))) * arc; // lower lid meets it when fully closed
-    float aa = fwidth(dc.y) * 1.5 + 1e-4;
-    float covered = max(smoothstep(yu - aa, yu + aa, dc.y), smoothstep(yl + aa, yl - aa, dc.y));
-    float edge = smoothstep(1.0, 0.62, ec);
-    vec3 up = texture2D(map, baseUv + jmul(J, E.xy + vec2(0.0, 1.62 * E.w) - p)).rgb;
-    vec3 upL = texture2D(map, baseUv + jmul(J, E.xy + vec2(-0.6 * E.z, 1.5 * E.w) - p)).rgb;
-    vec3 upR = texture2D(map, baseUv + jmul(J, E.xy + vec2(0.6 * E.z, 1.5 * E.w) - p)).rgb;
-    vec3 dn = texture2D(map, baseUv + jmul(J, E.xy + vec2(0.0, -1.35 * E.w) - p)).rgb;
-    vec3 lidTop = (up + upL + upR) / 3.0;
-    vec3 lid = mix(mix(dn, lidTop, 0.7), lidTop, smoothstep(-0.9, 0.2, dc.y));
-    lid *= mix(0.93, 1.0, smoothstep(0.0, 0.25, abs(dc.y - yu)));   // soft crease shadow at the lid edge
-    col = mix(col, lid, covered * edge);
-    gCover = max(gCover, covered * edge);
-    // lash line on the upper lid edge (thicker when closed), tapered at the corners
-    float lw2 = mix(0.05, 0.085, smoothstep(0.5, 1.0, blink));
-    float lash = smoothstep(lw2 + aa, lw2 * 0.3, abs(dc.y - yu)) * step(0.02, blink) * smoothstep(0.97, 0.6, abs(dc.x));
-    col = mix(col, vec3(0.07, 0.045, 0.04), lash);
+  // lids (v6, suit mascot): an upper lid of sampled cheek skin sweeps down over the painted eye (incl. its upper
+  // lashes) and a lower lid rises to meet it; the meeting line is a soft downward arc drawn as a thick lash line.
+  // Shape in eye-normalised space: wider than the eye (x 1.42 r), taller on top (lashes) than below.
+  if (blink > 0.001) {
+    float nx = (p.x - E.x) / (E.z * 1.42);
+    float dy = p.y - (E.y + 0.004);
+    float ny = dy / (dy > 0.0 ? E.w * 1.78 : E.w * 1.32);
+    float ee = nx * nx + ny * ny;
+    if (ee < 1.0) {
+      float arc = sqrt(max(0.0, 1.0 - nx * nx));
+      float b = smoothstep(0.0, 1.0, blink);
+      float yu = mix(1.02, -0.2, b) * arc;                                   // upper lid edge
+      float yl = mix(-1.02, -0.2, smoothstep(0.55, 1.0, b)) * arc;           // lower lid edge
+      float aa = fwidth(ny) * 1.2 + 1e-4;
+      float covered = max(smoothstep(yu - aa, yu + aa, ny), smoothstep(yl + aa, yl - aa, ny));
+      float edge = smoothstep(1.0, 0.86, ee);
+      vec3 lid = uSkinEye * mix(0.965, 1.0, smoothstep(-1.0, 0.6, ny));   // measured eye-ring skin, faint top-light gradient
+      lid *= mix(0.9, 1.0, smoothstep(0.0, 0.3, abs(ny - yu)));                 // soft crease under the lid edge
+      col = mix(col, lid, covered * edge);
+      gCover = max(gCover, covered * edge);
+      // lash line on the moving lid edge (grows as the lid closes), tapered at the corners, lifted at the outer tip
+      float lw = mix(0.0, 0.11, smoothstep(0.25, 0.9, b));
+      float tip = smoothstep(0.55, 1.0, abs(nx)) * 0.06 * b;
+      float lash = smoothstep(lw + aa, lw * 0.35, abs(ny - (yu + tip))) * smoothstep(1.0, 0.72, abs(nx));
+      col = mix(col, vec3(0.06, 0.04, 0.035), lash * step(0.001, lw));
+    }
   }
   return col;
 }
@@ -3949,7 +3948,7 @@ vRest = position;
 #endif`).replace("#include <roughnessmap_fragment>",`#include <roughnessmap_fragment>
 roughnessFactor = mix(roughnessFactor, 0.85, gCover);`).replace("#include <dithering_fragment>",`#include <dithering_fragment>
 if (uDebug > 1.5) gl_FragColor = vec4(vMapUv, 0.0, 1.0);`).replace("#include <normal_fragment_maps>",`#include <normal_fragment_maps>
-normal = normalize(mix(normal, normalize(uHeadNM * normalize(vRest - uHeadC)), gCover));`)},m.customProgramCacheKey=()=>"mascot-face-v11",m.needsUpdate=!0,m.roughness!==void 0&&(m.roughness=Math.max(m.roughness,.55),m.metalness=0);let b=document.createElement("canvas");b.width=b.height=128;let S=b.getContext("2d"),v=S.createRadialGradient(64,64,0,64,64,64);v.addColorStop(0,"rgba(10,13,44,0.42)"),v.addColorStop(.5,"rgba(10,13,44,0.16)"),v.addColorStop(1,"rgba(10,13,44,0)"),S.fillStyle=v,S.fillRect(0,0,128,128);let P=new Dr(b);P.colorSpace=ct,this.shadow=new qe(new Xi(.62,.36),new Ct({map:P,transparent:!0,depthWrite:!1})),this.shadow.rotation.x=-Math.PI/2,this.shadow.position.y=.002,this.shadow.renderOrder=-1,l.add(this.shadow),c.compile(l,this.cam)}setView({fx:e,fy:t,h:n,yaw:s=0,pitch:r=6}){let o=n/.98,a=this.cam;a.left=-e/o,a.right=(this.W-e)/o,a.top=t/o,a.bottom=-(this.H-t)/o;let c=s*Math.PI/180,l=r*Math.PI/180;a.position.set(Math.sin(c)*Math.cos(l)*4,Math.sin(l)*4,Math.cos(c)*Math.cos(l)*4),a.up.set(0,1,0),a.lookAt(0,0,0),a.updateProjectionMatrix()}setState(e){let t=e.root||{},n=this.rigRoot;n.position.set(t.x||0,t.y||0,t.z||0),n.rotation.set(t.rx||0,t.ry||0,t.rz||0,"YXZ");let s=t.s==null?1:t.s;n.scale.set(s*(t.sx||1),s*(t.sy||1),s*(t.sx||1));for(let[l,h]of Object.entries(this.bones)){let u=e.bones&&e.bones[l]||[0,0,0];h.rotation.set(u[0],u[1],u[2],"XYZ"),h.position.copy(this.rest[l])}this.shadow.position.x=t.x||0,this.shadow.position.z=(t.z||0)+.03;let r=Math.max(0,t.y||0);this.shadow.scale.setScalar(Math.max(.55,1-r*2.2)*s),this.shadow.material.opacity=Math.max(.35,1-r*3);let o=e.face||{},a=this.u;a.uBlink.value.set(...o.blink||[0,0]),a.uLower.value.set(...o.lower||[0,0]),a.uGaze.value.set(...o.gaze||[0,0]),a.uBrow.value.set(...o.brow||[0,0]),a.uBrowTilt.value.set(...o.browTilt||[0,0]),a.uMouthMix.value=o.mouthMix||0,a.uDebug.value=e.debug==="uv"?2:e.debug?1:0;let c=o.mouth||[.026,0,.004,.6];a.uMouth.value.set(c[0],c[1],c[2],c[3]),this.visible=e.visible!==!1}render(){this.root.updateMatrixWorld(!0),this.cam.updateMatrixWorld(!0);let e=this.bones.head,t=new we().multiplyMatrices(this.cam.matrixWorldInverse,e.matrixWorld);this.u.uHeadNM.value.setFromMatrix4(t),this.renderer.clear(),this.visible&&this.renderer.render(this.scene,this.cam)}};window.Mascot3D={Mascot:Oc,...Uc,...Nc};})();
+normal = normalize(mix(normal, normalize(uHeadNM * normalize(vRest - uHeadC)), gCover));`)},m.customProgramCacheKey=()=>"mascot-face-v12-lids",m.needsUpdate=!0,m.roughness!==void 0&&(m.roughness=Math.max(m.roughness,.55),m.metalness=0);let b=document.createElement("canvas");b.width=b.height=128;let S=b.getContext("2d"),v=S.createRadialGradient(64,64,0,64,64,64);v.addColorStop(0,"rgba(10,13,44,0.42)"),v.addColorStop(.5,"rgba(10,13,44,0.16)"),v.addColorStop(1,"rgba(10,13,44,0)"),S.fillStyle=v,S.fillRect(0,0,128,128);let P=new Dr(b);P.colorSpace=ct,this.shadow=new qe(new Xi(.62,.36),new Ct({map:P,transparent:!0,depthWrite:!1})),this.shadow.rotation.x=-Math.PI/2,this.shadow.position.y=.002,this.shadow.renderOrder=-1,l.add(this.shadow),c.compile(l,this.cam)}setView({fx:e,fy:t,h:n,yaw:s=0,pitch:r=6}){let o=n/.98,a=this.cam;a.left=-e/o,a.right=(this.W-e)/o,a.top=t/o,a.bottom=-(this.H-t)/o;let c=s*Math.PI/180,l=r*Math.PI/180;a.position.set(Math.sin(c)*Math.cos(l)*4,Math.sin(l)*4,Math.cos(c)*Math.cos(l)*4),a.up.set(0,1,0),a.lookAt(0,0,0),a.updateProjectionMatrix()}setState(e){let t=e.root||{},n=this.rigRoot;n.position.set(t.x||0,t.y||0,t.z||0),n.rotation.set(t.rx||0,t.ry||0,t.rz||0,"YXZ");let s=t.s==null?1:t.s;n.scale.set(s*(t.sx||1),s*(t.sy||1),s*(t.sx||1));for(let[l,h]of Object.entries(this.bones)){let u=e.bones&&e.bones[l]||[0,0,0];h.rotation.set(u[0],u[1],u[2],"XYZ"),h.position.copy(this.rest[l])}this.shadow.position.x=t.x||0,this.shadow.position.z=(t.z||0)+.03;let r=Math.max(0,t.y||0);this.shadow.scale.setScalar(Math.max(.55,1-r*2.2)*s),this.shadow.material.opacity=Math.max(.35,1-r*3);let o=e.face||{},a=this.u;a.uBlink.value.set(...o.blink||[0,0]),a.uLower.value.set(...o.lower||[0,0]),a.uGaze.value.set(...o.gaze||[0,0]),a.uBrow.value.set(...o.brow||[0,0]),a.uBrowTilt.value.set(...o.browTilt||[0,0]),a.uMouthMix.value=o.mouthMix||0,a.uDebug.value=e.debug==="uv"?2:e.debug?1:0;let c=o.mouth||[.026,0,.004,.6];a.uMouth.value.set(c[0],c[1],c[2],c[3]),this.visible=e.visible!==!1}render(){this.root.updateMatrixWorld(!0),this.cam.updateMatrixWorld(!0);let e=this.bones.head,t=new we().multiplyMatrices(this.cam.matrixWorldInverse,e.matrixWorld);this.u.uHeadNM.value.setFromMatrix4(t),this.renderer.clear(),this.visible&&this.renderer.render(this.scene,this.cam)}};window.Mascot3D={Mascot:Oc,...Uc,...Nc};})();
 /*! Bundled license information:
 
 three/build/three.module.js:

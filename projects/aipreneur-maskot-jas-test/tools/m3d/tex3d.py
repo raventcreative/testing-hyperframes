@@ -1,11 +1,14 @@
 """Helpers: mesh arrays exported by export.mjs + UV-space rasterisation (texel -> 3D surface point)."""
 import numpy as np
 from pathlib import Path
+import glob as _g
 from PIL import Image
-SRC = Path(__file__).resolve().parents[2] / "mascot3d_src"
+import os
+SRC = Path(os.environ.get("M3D_SRC", str(Path(__file__).resolve().parents[2] / "mascot3d_v2")))
 P = np.fromfile(SRC / "jas_pos.bin", np.float32).reshape(-1, 3)
 UV = np.fromfile(SRC / "jas_uv.bin", np.float32).reshape(-1, 2)
 IDX = np.fromfile(SRC / "jas_idx.bin", np.uint32).reshape(-1, 3)
+BASE = Path(_g.glob(str(SRC / "jas_*basecolor.webp"))[0])
 
 
 def tris_in_box(x0, x1, y0, y1, zmin=-9):

@@ -32,33 +32,32 @@ vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 g
     if (dot(ds, ds) > 0.72) s = vec3(0.86, 0.87, 0.90);
     col = mix(col, s, smoothstep(0.72, 0.55, e));
   }
-  // lids (v4): skin colour sampled from the face texture just above / below the eye (no flat disc),
-  // asymmetric cover (taller on top so the painted upper lashes are hidden when closed), and a curved
-  // dark lash line that becomes the closed-eye "smile" curve.
-  vec2 dc = (p - E.xy) / (E.zw * vec2(1.34, 1.0));
-  dc.y /= (dc.y > 0.0 ? 1.5 : 1.22);
-  float ec = dot(dc, dc);
-  blink = 0.0; // v5: blink is geometric (vertex shader)
-  if (ec < 1.0 && lower > 0.001) {
-    float arc = sqrt(max(0.0, 1.0 - dc.x * dc.x));
-    float yu = mix(1.0, -0.28, blink) * arc;                          // upper lid travels to a line below centre
-    float yl = -mix(1.0, 0.28, max(lower, smoothstep(0.75, 1.0, blink))) * arc; // lower lid meets it when fully closed
-    float aa = fwidth(dc.y) * 1.5 + 1e-4;
-    float covered = max(smoothstep(yu - aa, yu + aa, dc.y), smoothstep(yl + aa, yl - aa, dc.y));
-    float edge = smoothstep(1.0, 0.62, ec);
-    vec3 up = texture2D(map, baseUv + jmul(J, E.xy + vec2(0.0, 1.62 * E.w) - p)).rgb;
-    vec3 upL = texture2D(map, baseUv + jmul(J, E.xy + vec2(-0.6 * E.z, 1.5 * E.w) - p)).rgb;
-    vec3 upR = texture2D(map, baseUv + jmul(J, E.xy + vec2(0.6 * E.z, 1.5 * E.w) - p)).rgb;
-    vec3 dn = texture2D(map, baseUv + jmul(J, E.xy + vec2(0.0, -1.35 * E.w) - p)).rgb;
-    vec3 lidTop = (up + upL + upR) / 3.0;
-    vec3 lid = mix(mix(dn, lidTop, 0.7), lidTop, smoothstep(-0.9, 0.2, dc.y));
-    lid *= mix(0.93, 1.0, smoothstep(0.0, 0.25, abs(dc.y - yu)));   // soft crease shadow at the lid edge
-    col = mix(col, lid, covered * edge);
-    gCover = max(gCover, covered * edge);
-    // lash line on the upper lid edge (thicker when closed), tapered at the corners
-    float lw2 = mix(0.05, 0.085, smoothstep(0.5, 1.0, blink));
-    float lash = smoothstep(lw2 + aa, lw2 * 0.3, abs(dc.y - yu)) * step(0.02, blink) * smoothstep(0.97, 0.6, abs(dc.x));
-    col = mix(col, vec3(0.07, 0.045, 0.04), lash);
+  // lids (v6, suit mascot): an upper lid of sampled cheek skin sweeps down over the painted eye (incl. its upper
+  // lashes) and a lower lid rises to meet it; the meeting line is a soft downward arc drawn as a thick lash line.
+  // Shape in eye-normalised space: wider than the eye (x 1.42 r), taller on top (lashes) than below.
+  if (blink > 0.001) {
+    float nx = (p.x - E.x) / (E.z * 1.42);
+    float dy = p.y - (E.y + 0.004);
+    float ny = dy / (dy > 0.0 ? E.w * 1.78 : E.w * 1.32);
+    float ee = nx * nx + ny * ny;
+    if (ee < 1.0) {
+      float arc = sqrt(max(0.0, 1.0 - nx * nx));
+      float b = smoothstep(0.0, 1.0, blink);
+      float yu = mix(1.02, -0.2, b) * arc;                                   // upper lid edge
+      float yl = mix(-1.02, -0.2, smoothstep(0.55, 1.0, b)) * arc;           // lower lid edge
+      float aa = fwidth(ny) * 1.2 + 1e-4;
+      float covered = max(smoothstep(yu - aa, yu + aa, ny), smoothstep(yl + aa, yl - aa, ny));
+      float edge = smoothstep(1.0, 0.86, ee);
+      vec3 lid = uSkinEye * mix(0.965, 1.0, smoothstep(-1.0, 0.6, ny));   // measured eye-ring skin, faint top-light gradient
+      lid *= mix(0.9, 1.0, smoothstep(0.0, 0.3, abs(ny - yu)));                 // soft crease under the lid edge
+      col = mix(col, lid, covered * edge);
+      gCover = max(gCover, covered * edge);
+      // lash line on the moving lid edge (grows as the lid closes), tapered at the corners, lifted at the outer tip
+      float lw = mix(0.0, 0.11, smoothstep(0.25, 0.9, b));
+      float tip = smoothstep(0.55, 1.0, abs(nx)) * 0.06 * b;
+      float lash = smoothstep(lw + aa, lw * 0.35, abs(ny - (yu + tip))) * smoothstep(1.0, 0.72, abs(nx));
+      col = mix(col, vec3(0.06, 0.04, 0.035), lash * step(0.001, lw));
+    }
   }
   return col;
 }
@@ -216,7 +215,7 @@ vRest = position;
         .replace('#include <dithering_fragment>', '#include <dithering_fragment>\nif (uDebug > 1.5) gl_FragColor = vec4(vMapUv, 0.0, 1.0);')
         .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = normalize(mix(normal, normalize(uHeadNM * normalize(vRest - uHeadC)), gCover));');
     };
-    mat.customProgramCacheKey = () => 'mascot-face-v11';
+    mat.customProgramCacheKey = () => 'mascot-face-v12-lids';
     mat.needsUpdate = true;
     if (mat.roughness !== undefined) { mat.roughness = Math.max(mat.roughness, 0.55); mat.metalness = 0; }
 

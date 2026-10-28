@@ -1,0 +1,4 @@
+      // walk-in at the very start (SC01: the mascot strides forward to camera and says hi)
+      const WALK = [0.0, 1.45, 4, 0.36];
+      const EXTRA = (t) => M3.walk(t, WALK[0], WALK[1], WALK[2], WALK[3]).bones;
+      const BOB = (t) => M3.walk(t, WALK[0], WALK[1], WALK[2], WALK[3]).bob;

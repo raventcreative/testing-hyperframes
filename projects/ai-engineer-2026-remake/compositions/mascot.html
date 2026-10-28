@@ -1,0 +1,147 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #m-xf { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 960px; }
+    #m-clip { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #m-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  </style>
+  <div id="root" data-composition-id="mascot" data-width="1080" data-height="1920">
+    <div id="m-xf" data-layout-ignore data-layout-allow-occlusion><div id="m-clip" data-layout-ignore data-layout-allow-occlusion><canvas id="m-canvas" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas></div></div>
+  </div>
+  <script>
+    (function () {
+      // =====================================================================================
+      // 3D MASCOT (AI ENGINEER 2026 — suit mascot) (source: tools/mascot_src.html -> tools/gen_mascot.py).
+      // The user's rigged GLB (19 joints, 0 morph targets) rendered live in one WebGL canvas.
+      // Framing per scene = a real camera change (setView: feet px, figure px, yaw/pitch), never a CSS
+      // upscale of a rendered bitmap. Wrapper #m-xf / #m-clip carry the per-effect compositing (clip to a
+      // frame, phone screen, avatar circle, paper outline ...). All of it lives on a private timeline `vt`
+      // that is seeked with the frame time inside the hf-seek handler -> deterministic, order-independent.
+      // Acting: key poses on measured VO words -> damped springs; lip sync = CTC phones x VO energy
+      // (low-passed, never ahead of the voice). Blinks: shader eyelids (skin lid + lash line), seeded schedule.
+      // =====================================================================================
+      const M3 = window.Mascot3D;
+      const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump, osc } = M3;
+      const VW = window.VO_WORDS, D = 113.3333;
+      const w = (i) => VW[i][1], we = (i) => VW[i][2];
+      const canvas = document.getElementById("m-canvas");
+      const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, D);
+      const ACC = syllableAccents(window.VO_ENV, VW, window.VO_PHONES, D);
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * u * (u * (u * 6 - 15) + 10); };
+      const H = (rx, ry, rz) => [rx, ry, rz];
+      const add = (...ds) => { const o = {}; for (const d of ds) for (const [k, v] of Object.entries(d || {})) { const a = o[k] || [0, 0, 0]; o[k] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
+      function accents(t) {
+        let n = 0;
+        for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; }
+        return Math.min(1.3, n);
+      }
+      function idle(t, seed) {
+        return {
+          chest: [0.012 * Math.sin(t * 2 * Math.PI * 0.27), 0, 0],
+          spine: [0, 0.03 * vnoise(t, seed + 1, 0.3), 0.022 * vnoise(t, seed + 2, 0.27)],
+          head: [0.02 * vnoise(t, seed + 3, 0.4), 0.05 * vnoise(t, seed + 4, 0.31), 0.03 * vnoise(t, seed + 5, 0.36)],
+          forearm_L: [0.04 * vnoise(t, seed + 6, 0.45), 0, 0], forearm_R: [0.04 * vnoise(t, seed + 7, 0.42), 0, 0],
+        };
+      }
+
+      // ---------------------------------------------------------------- per-scene framing / compositing track
+      const V = { fx: 540, fy: 2050, h: 1700, yaw: 0, pitch: 5, vis: 1, rx: 0, rz: 0, ry: 0, ty: 0 };
+      const vt = gsap.timeline({ paused: true });
+      const RESET = {"V": {"fx": 540, "fy": 1800, "h": 1470, "yaw": 0, "pitch": 5, "vis": 1, "rx": 0, "rz": 0, "ry": 0, "ty": 0}, "X": {"x": 0, "y": 0, "scale": 1, "rotation": 0, "rotationX": 0, "rotationY": 0, "opacity": 1, "transformPerspective": 1400, "filter": "drop-shadow(0px 0px 0px rgba(0,208,254,0))", "transformOrigin": "540px 960px"}, "C": {"clipPath": "inset(-400px -400px -400px -400px round 0px)"}};
+      // ---- s01 HOOK (0.0-8.0)
+      vt.set(V, RESET.V, 0); vt.set("#m-xf", RESET.X, 0); vt.set("#m-clip", RESET.C, 0);
+      vt.set(V, {"fx": 400, "fy": 1500, "h": 640, "yaw": 0, "pitch": 6}, 0);
+      vt.fromTo(V, {"fx": 400, "fy": 1500, "h": 640, "yaw": 0, "pitch": 6}, {"fx": 330, "fy": 1820, "h": 1180, "yaw": 14, "pitch": 5, "duration": 1.45, "ease": "power1.inOut", "immediateRender": false}, 0);
+      vt.set(V, {"fx": 330, "fy": 1820, "h": 1180, "yaw": 14, "pitch": 5}, 1.54);
+      vt.fromTo(V, {"fx": 330, "fy": 1820, "h": 1180, "yaw": 14, "pitch": 5}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 1.54);
+      vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4, "duration": 1.06, "ease": "sine.inOut", "immediateRender": false}, 2.04);
+      vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 1.06, "ease": "sine.inOut", "immediateRender": false}, 3.1);
+      vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4}, {"fx": 250, "fy": 1800, "h": 1080, "yaw": 26, "pitch": 6, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 4.16);
+      vt.set(V, {"fx": 250, "fy": 1800, "h": 1080, "yaw": 26, "pitch": 6}, 4.66);
+      vt.fromTo(V, {"fx": 250, "fy": 1800, "h": 1080, "yaw": 26, "pitch": 6}, {"fx": 250, "fy": 1800, "h": 1080, "yaw": 30, "pitch": 6, "duration": 2.2, "ease": "sine.inOut", "immediateRender": false}, 4.66);
+      vt.fromTo(V, {"fx": 250, "fy": 1800, "h": 1080, "yaw": 30, "pitch": 6}, {"fx": 290, "fy": 1800, "h": 1080, "yaw": 36, "pitch": 6, "duration": 0.4, "ease": "power3.out", "immediateRender": false}, 6.86);
+      vt.fromTo(V, {"fx": 290, "fy": 1800, "h": 1080, "yaw": 36, "pitch": 6}, {"fx": 290, "fy": 1800, "h": 1080, "yaw": 30, "pitch": 6, "duration": 0.74, "ease": "sine.inOut", "immediateRender": false}, 7.26);
+      // ---- s02 10 KOMPONEN (8.0-13.3)
+      vt.set(V, RESET.V, 8); vt.set("#m-xf", RESET.X, 8); vt.set("#m-clip", RESET.C, 8);
+      // ---- s03 PYTHON (13.3-21.6)
+      vt.set(V, RESET.V, 13.3); vt.set("#m-xf", RESET.X, 13.3); vt.set("#m-clip", RESET.C, 13.3);
+      // ---- s04 SOFTWARE ENGINEERING (21.6-30.8333)
+      vt.set(V, RESET.V, 21.6); vt.set("#m-xf", RESET.X, 21.6); vt.set("#m-clip", RESET.C, 21.6);
+      // ---- s05 MACHINE LEARNING (30.8333-39.2667)
+      vt.set(V, RESET.V, 30.833); vt.set("#m-xf", RESET.X, 30.833); vt.set("#m-clip", RESET.C, 30.833);
+      // ---- s06 DEEP LEARNING (39.2667-45.1)
+      vt.set(V, RESET.V, 39.267); vt.set("#m-xf", RESET.X, 39.267); vt.set("#m-clip", RESET.C, 39.267);
+      // ---- s07 LLM (45.1-51.5333)
+      vt.set(V, RESET.V, 45.1); vt.set("#m-xf", RESET.X, 45.1); vt.set("#m-clip", RESET.C, 45.1);
+      // ---- s08 AI APPLICATION (51.5333-59.4333)
+      vt.set(V, RESET.V, 51.533); vt.set("#m-xf", RESET.X, 51.533); vt.set("#m-clip", RESET.C, 51.533);
+      // ---- s09 RAG (59.4333-67.4333)
+      vt.set(V, RESET.V, 59.433); vt.set("#m-xf", RESET.X, 59.433); vt.set("#m-clip", RESET.C, 59.433);
+      // ---- s10 AI AGENT (67.4333-76.3667)
+      vt.set(V, RESET.V, 67.433); vt.set("#m-xf", RESET.X, 67.433); vt.set("#m-clip", RESET.C, 67.433);
+      // ---- s11 EVALUATION (76.3667-83.2667)
+      vt.set(V, RESET.V, 76.367); vt.set("#m-xf", RESET.X, 76.367); vt.set("#m-clip", RESET.C, 76.367);
+      // ---- s12 PRODUCTION (83.2667-90.1333)
+      vt.set(V, RESET.V, 83.267); vt.set("#m-xf", RESET.X, 83.267); vt.set("#m-clip", RESET.C, 83.267);
+      // ---- s13 PILIH JALUR (90.1333-96.4667)
+      vt.set(V, RESET.V, 90.133); vt.set("#m-xf", RESET.X, 90.133); vt.set("#m-clip", RESET.C, 90.133);
+      // ---- s14 SATU PROYEK DULU (96.4667-102.8667)
+      vt.set(V, RESET.V, 96.467); vt.set("#m-xf", RESET.X, 96.467); vt.set("#m-clip", RESET.C, 96.467);
+      // ---- s15 SISTEM AI YANG BEKERJA (102.8667-113.3333)
+      vt.set(V, RESET.V, 102.867); vt.set("#m-xf", RESET.X, 102.867); vt.set("#m-clip", RESET.C, 102.867);
+      vt.set({}, {}, D);
+      vt.shiftChildren(0.01);   // nothing sits at exactly 0, so a forward replay from 0 always applies the frame-zero sets
+
+      // ---------------------------------------------------------------- acting (one continuous performance)
+      const PERF0 = buildPerformance({"armL": [[0.0, "low", 0.3], [1.7, "palmUp", 0.3], [2.46, "together", 0.3], [2.94, "open", 0.3], [4.23, "low", 0.4], [4.41, "low", 0.4], [5.2, "point", 0.35], [6.18, "low", 0.4], [6.91, "stop", 0.22], [7.31, "present", 0.3], [8.02, "low", 0.4], [9.1, "explain", 0.3], [9.3, "palmUp", 0.3], [9.66, "low", 0.4], [9.94, "low", 0.4], [13.32, "low", 0.4], [13.96, "explain", 0.3], [14.79, "low", 0.4], [17.7, "palmUp", 0.3], [18.59, "low", 0.4], [21.62, "low", 0.4], [22.66, "explain", 0.3], [23.59, "low", 0.4], [29.76, "palmUp", 0.3], [30.51, "low", 0.4], [30.853, "low", 0.4], [31.84, "explain", 0.3], [32.57, "low", 0.4], [38.24, "palmUp", 0.3], [39.02, "low", 0.4], [39.287, "low", 0.4], [40.24, "explain", 0.3], [40.97, "low", 0.4], [43.92, "palmUp", 0.3], [44.9, "low", 0.4], [45.12, "low", 0.4], [45.72, "explain", 0.3], [46.66, "low", 0.4], [48.46, "palmUp", 0.3], [49.4, "low", 0.4], [51.553, "low", 0.4], [52.6, "explain", 0.3], [53.61, "low", 0.4], [58.36, "palmUp", 0.3], [59.19, "low", 0.4], [59.453, "low", 0.4], [60.14, "explain", 0.3], [60.86, "low", 0.4], [63.54, "palmUp", 0.3], [64.42, "low", 0.4], [67.453, "low", 0.4], [68.68, "explain", 0.3], [69.32, "low", 0.4], [70.44, "palmUp", 0.3], [71.28, "low", 0.4], [76.387, "low", 0.4], [77.1, "explain", 0.3], [78.25, "low", 0.4], [80.42, "palmUp", 0.3], [81.13, "low", 0.4], [83.287, "low", 0.4], [83.9, "explain", 0.3], [84.91, "low", 0.4], [88.06, "palmUp", 0.3], [89.06, "low", 0.4], [90.153, "low", 0.4], [91.14, "explain", 0.3], [91.86, "low", 0.4], [92.62, "palmUp", 0.3], [93.28, "low", 0.4], [96.487, "low", 0.4], [99.08, "explain", 0.3], [99.54, "palmUp", 0.3], [99.64, "low", 0.4], [100.37, "low", 0.4], [102.887, "low", 0.4], [108.82, "explain", 0.3], [109.63, "low", 0.4], [110.28, "palmUp", 0.3], [110.96, "low", 0.4]], "armR": [[0.0, "low", 0.3], [0.35, "wave", 0.35], [0.75, {"upperarm": [-0.15, 0, -2.05], "forearm": [0, 0, -0.15], "hand": [0, 0, 0.2]}, 0.22], [1.0, "wave", 0.22], [1.25, {"upperarm": [-0.15, 0, -2.05], "forearm": [0, 0, -0.15], "hand": [0, 0, 0.2]}, 0.22], [1.5, "wave", 0.25], [1.74, "explain", 0.32], [2.5, "together", 0.32], [2.98, "palmUp", 0.32], [4.23, "low", 0.4], [4.41, "low", 0.4], [6.96, "open", 0.25], [7.7, "low", 0.4], [8.02, "low", 0.4], [10.6, "open", 0.3], [11.43, "low", 0.4], [13.32, "low", 0.4], [20.68, "open", 0.3], [21.42, "low", 0.4], [21.62, "low", 0.4], [29.8, "open", 0.3], [30.56, "low", 0.4], [30.853, "low", 0.4], [38.28, "open", 0.3], [39.07, "low", 0.4], [39.287, "low", 0.4], [43.96, "open", 0.3], [44.95, "low", 0.4], [45.12, "low", 0.4], [48.5, "open", 0.3], [49.45, "low", 0.4], [51.553, "low", 0.4], [58.4, "open", 0.3], [59.24, "low", 0.4], [59.453, "low", 0.4], [63.58, "open", 0.3], [64.47, "low", 0.4], [67.453, "low", 0.4], [74.9, "open", 0.3], [75.65, "low", 0.4], [76.387, "low", 0.4], [80.46, "open", 0.3], [81.18, "low", 0.4], [83.287, "low", 0.4], [88.1, "open", 0.3], [89.11, "low", 0.4], [90.153, "low", 0.4], [95.44, "open", 0.3], [96.25, "low", 0.4], [96.487, "low", 0.4], [99.58, "open", 0.3], [100.42, "low", 0.4], [102.887, "low", 0.4], [112.2, "open", 0.3], [112.98, "low", 0.4]], "head": [[0.0, [0.02, 0.1, 0.06], 0.3], [0.5, [-0.06, 0.14, 0.1], 0.35], [1.78, [-0.03, -0.12, -0.05], 0.28], [2.02, [-0.07, 0.12, 0.05], 0.28], [2.54, [-0.07, -0.12, -0.05], 0.28], [2.72, [-0.03, 0.12, 0.05], 0.28], [3.02, [-0.07, -0.12, -0.05], 0.28], [3.3, [-0.07, 0.12, 0.05], 0.28], [4.23, [0, 0, 0], 0.4], [4.36, [0.12, 0.3, 0], 0.4], [5.88, [-0.05, 0.36, 0.02], 0.4], [7.06, [-0.12, 0.4, 0.05], 0.22], [7.56, [0.05, 0.3, 0], 0.4], [8.03, [-0.04, -0.08, -0.03], 0.3], [8.63, [-0.04, 0.08, 0.03], 0.3], [9.19, [-0.04, -0.08, -0.03], 0.3], [9.69, [-0.04, 0.08, 0.03], 0.3], [10.65, [-0.04, -0.08, -0.03], 0.3], [11.87, [-0.04, 0.08, 0.03], 0.3], [12.51, [-0.04, -0.08, -0.03], 0.3], [13.33, [-0.04, 0.08, 0.03], 0.3], [14.91, [-0.04, -0.08, -0.03], 0.3], [15.99, [-0.04, 0.08, 0.03], 0.3], [17.05, [-0.04, -0.08, -0.03], 0.3], [17.79, [-0.04, 0.08, 0.03], 0.3], [18.97, [-0.04, -0.08, -0.03], 0.3], [19.51, [-0.04, 0.08, 0.03], 0.3], [20.11, [-0.04, -0.08, -0.03], 0.3], [21.63, [-0.04, -0.08, -0.03], 0.3], [22.75, [-0.04, 0.08, 0.03], 0.3], [24.17, [-0.04, -0.08, -0.03], 0.3], [25.45, [-0.04, 0.08, 0.03], 0.3], [26.17, [-0.04, -0.08, -0.03], 0.3], [26.95, [-0.04, 0.08, 0.03], 0.3], [27.97, [-0.04, -0.08, -0.03], 0.3], [28.77, [-0.04, 0.08, 0.03], 0.3], [29.41, [-0.04, -0.08, -0.03], 0.3], [29.85, [-0.04, 0.08, 0.03], 0.3], [30.87, [-0.04, 0.08, 0.03], 0.3], [31.93, [-0.04, -0.08, -0.03], 0.3], [33.21, [-0.04, 0.08, 0.03], 0.3], [33.73, [-0.04, -0.08, -0.03], 0.3], [34.45, [-0.04, 0.08, 0.03], 0.3], [35.11, [-0.04, -0.08, -0.03], 0.3], [36.23, [-0.04, 0.08, 0.03], 0.3], [36.95, [-0.04, -0.08, -0.03], 0.3], [37.91, [-0.04, 0.08, 0.03], 0.3], [39.31, [-0.04, -0.08, -0.03], 0.3], [40.33, [-0.04, 0.08, 0.03], 0.3], [41.45, [-0.04, -0.08, -0.03], 0.3], [42.41, [-0.04, 0.08, 0.03], 0.3], [43.21, [-0.04, -0.08, -0.03], 0.3], [44.01, [-0.04, 0.08, 0.03], 0.3], [45.13, [-0.04, 0.08, 0.03], 0.3], [46.79, [-0.04, -0.08, -0.03], 0.3], [47.85, [-0.04, 0.08, 0.03], 0.3], [49.15, [-0.04, -0.08, -0.03], 0.3], [49.71, [-0.04, 0.08, 0.03], 0.3], [50.51, [-0.04, -0.08, -0.03], 0.3], [51.57, [-0.04, -0.08, -0.03], 0.3], [52.69, [-0.04, 0.08, 0.03], 0.3], [54.23, [-0.04, -0.08, -0.03], 0.3], [54.83, [-0.04, 0.08, 0.03], 0.3], [55.93, [-0.04, -0.08, -0.03], 0.3], [56.75, [-0.04, 0.08, 0.03], 0.3], [57.47, [-0.04, -0.08, -0.03], 0.3], [58.27, [-0.04, 0.08, 0.03], 0.3], [59.45, [-0.04, 0.08, 0.03], 0.3], [61.03, [-0.04, -0.08, -0.03], 0.3], [62.05, [-0.04, 0.08, 0.03], 0.3], [62.77, [-0.04, -0.08, -0.03], 0.3], [63.49, [-0.04, 0.08, 0.03], 0.3], [64.43, [-0.04, -0.08, -0.03], 0.3], [65.15, [-0.04, 0.08, 0.03], 0.3], [65.79, [-0.04, -0.08, -0.03], 0.3], [66.25, [-0.04, 0.08, 0.03], 0.3], [67.45, [-0.04, -0.08, -0.03], 0.3], [68.77, [-0.04, 0.08, 0.03], 0.3], [69.71, [-0.04, -0.08, -0.03], 0.3], [70.37, [-0.04, 0.08, 0.03], 0.3], [71.01, [-0.04, -0.08, -0.03], 0.3], [71.79, [-0.04, 0.08, 0.03], 0.3], [72.29, [-0.04, -0.08, -0.03], 0.3], [72.85, [-0.04, 0.08, 0.03], 0.3], [74.01, [-0.04, -0.08, -0.03], 0.3], [74.95, [-0.04, 0.08, 0.03], 0.3], [76.41, [-0.04, 0.08, 0.03], 0.3], [78.41, [-0.04, -0.08, -0.03], 0.3], [78.91, [-0.04, 0.08, 0.03], 0.3], [79.75, [-0.04, -0.08, -0.03], 0.3], [80.37, [-0.04, 0.08, 0.03], 0.3], [81.05, [-0.04, -0.08, -0.03], 0.3], [82.25, [-0.04, 0.08, 0.03], 0.3], [83.29, [-0.04, -0.08, -0.03], 0.3], [85.03, [-0.04, 0.08, 0.03], 0.3], [86.37, [-0.04, -0.08, -0.03], 0.3], [87.35, [-0.04, 0.08, 0.03], 0.3], [88.81, [-0.04, -0.08, -0.03], 0.3], [90.17, [-0.04, 0.08, 0.03], 0.3], [90.97, [-0.04, -0.08, -0.03], 0.3], [92.17, [-0.04, 0.08, 0.03], 0.3], [92.71, [-0.04, -0.08, -0.03], 0.3], [93.75, [-0.04, 0.08, 0.03], 0.3], [94.51, [-0.04, -0.08, -0.03], 0.3], [95.25, [-0.04, 0.08, 0.03], 0.3], [96.49, [-0.04, -0.08, -0.03], 0.3], [96.99, [-0.04, 0.08, 0.03], 0.3], [97.69, [-0.04, -0.08, -0.03], 0.3], [98.99, [-0.04, 0.08, 0.03], 0.3], [99.37, [-0.04, -0.08, -0.03], 0.3], [100.21, [-0.04, 0.08, 0.03], 0.3], [100.89, [-0.04, -0.08, -0.03], 0.3], [101.89, [-0.04, 0.08, 0.03], 0.3], [102.91, [-0.04, 0.08, 0.03], 0.3], [103.55, [-0.04, -0.08, -0.03], 0.3], [104.47, [-0.04, 0.08, 0.03], 0.3], [104.85, [-0.04, -0.08, -0.03], 0.3], [105.41, [-0.04, 0.08, 0.03], 0.3], [106.45, [-0.04, -0.08, -0.03], 0.3], [106.97, [-0.04, 0.08, 0.03], 0.3], [107.69, [-0.04, -0.08, -0.03], 0.3], [108.29, [-0.04, 0.08, 0.03], 0.3], [109.99, [-0.04, -0.08, -0.03], 0.3], [110.71, [-0.04, 0.08, 0.03], 0.3], [111.57, [-0.04, -0.08, -0.03], 0.3], [112.25, [-0.04, 0.08, 0.03], 0.3]], "torso": [[1.76, {"chest": [0.04, -0.06, -0.02]}, 0.35], [2.7, {"chest": [0.04, 0.06, 0.02]}, 0.35], [4.23, {}, 0.4], [7.01, {"chest": [0.05, 0.14, 0]}, 0.25], [7.8, {}, 0.4], [8.05, {}, 0.4], [13.35, {}, 0.4], [21.65, {}, 0.4], [30.883, {}, 0.4], [39.317, {}, 0.4], [45.15, {}, 0.4], [51.583, {}, 0.4], [59.483, {}, 0.4], [67.483, {}, 0.4], [76.417, {}, 0.4], [83.317, {}, 0.4], [90.183, {}, 0.4], [96.517, {}, 0.4], [102.917, {}, 0.4]], "root": [[0.02, {"y": 0, "ry": 0, "rz": 0}, 0.4], [8.02, {"y": 0, "ry": 0, "rz": 0}, 0.4], [13.32, {"y": 0, "ry": 0, "rz": 0}, 0.4], [21.62, {"y": 0, "ry": 0, "rz": 0}, 0.4], [30.853, {"y": 0, "ry": 0, "rz": 0}, 0.4], [39.287, {"y": 0, "ry": 0, "rz": 0}, 0.4], [45.12, {"y": 0, "ry": 0, "rz": 0}, 0.4], [51.553, {"y": 0, "ry": 0, "rz": 0}, 0.4], [59.453, {"y": 0, "ry": 0, "rz": 0}, 0.4], [67.453, {"y": 0, "ry": 0, "rz": 0}, 0.4], [76.387, {"y": 0, "ry": 0, "rz": 0}, 0.4], [83.287, {"y": 0, "ry": 0, "rz": 0}, 0.4], [90.153, {"y": 0, "ry": 0, "rz": 0}, 0.4], [96.487, {"y": 0, "ry": 0, "rz": 0}, 0.4], [102.887, {"y": 0, "ry": 0, "rz": 0}, 0.4]]}, D + 0.05);
+      const PERF = (t) => PERF0(t);
+      // walk-in at the very start (SC01: the mascot strides forward to camera and says hi)
+      const WALK = [0.0, 1.45, 4, 0.36];
+      const EXTRA = (t) => M3.walk(t, WALK[0], WALK[1], WALK[2], WALK[3]).bones;
+      const BOB = (t) => M3.walk(t, WALK[0], WALK[1], WALK[2], WALK[3]).bob;
+
+
+      let mascot = null;
+      function apply(t) {
+        vt.seek(0, false); vt.seek(t + 0.01, false);   // always replay forward: chained tweens resolve in time order whatever the seek history
+        if (V.vis <= 0.001) { canvas.style.visibility = "hidden"; return; }
+        canvas.style.visibility = "visible";
+        const Pf = PERF(t);
+        const acc = accents(t);
+        const still = 1 - sm((t - (D - 0.55)) / 0.4);
+        const id = idle(t, 17); for (const k in id) id[k] = id[k].map((x) => x * still);
+        const bones = add(Pf.bones, id, EXTRA(t), { head: [0.05 * acc * still, 0, 0], neck: [0.02 * acc * still, 0, 0] });
+        const root = { x: Pf.root.x, y: Pf.root.y + V.ty + (typeof BOB === "function" ? BOB(t) : 0), ry: Pf.root.ry + V.ry + 0.025 * vnoise(t, 26, 0.22) * still, rz: Pf.root.rz + V.rz, rx: V.rx, s: Pf.root.s };
+        mascot.setView({ fx: V.fx, fy: V.fy, h: V.h, yaw: V.yaw, pitch: V.pitch });
+        const bl = M3.blink(t, 0, D, 3);
+        mascot.setState({ root, bones, face: { blink: [bl, bl], mouthMix: 1, mouth: mouthAt(t) } });
+        mascot.render();
+      }
+
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      const FACE = {"eyeA": {"c": [-0.091, 0.596], "r": [0.041, 0.034], "n": 353, "J": [0.501902014664568, 0.3058644764492779, 0.31492775648751825, -0.45368656945286867], "uv0": [0.6329136916135797, 0.6167098020913924], "maxErr": 0.0036461724365613934}, "eyeB": {"c": [0.091, 0.596], "r": [0.041, 0.034], "n": 314, "J": [0.5531481820783309, -0.06940733125286289, -0.09477173331419797, -0.50676866629024], "uv0": [0.12400006458426988, 0.8611821189190194], "maxErr": 0.0027490191426305663}, "browA": {"c": [-0.09, 0.68], "n": 220, "J": [0.43032968628827967, 0.4395125734173528, 0.3509255033313767, -0.4757895147614257], "uv0": [0.6630106631964469, 0.5809780534200836], "maxErr": 0.00419788015547399}, "browB": {"c": [0.09, 0.68], "n": 139, "J": [0.551195290778699, 0.07861077303028692, 0.10209079281772793, -0.6884262463697145], "uv0": [0.8350338410474651, 0.9447655044668104], "maxErr": 0.0018073554690903224}, "mouth": {"c": [0, 0.548], "r": [0.026, 0.016]}, "skin": [252, 240, 232], "skinEye": [252, 240, 230], "coverNormal": 0, "lidLit": [0.992, 0.975, 0.968]};
+      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_jas2_rigged.glb", face: FACE, decals: [{"url": "assets/mascot3d/logo_decal.png", "bone": "chest", "box": [-0.098, -0.026, 0.37211, 0.37989], "zgrid": [[0.08087, 0.08404, 0.08699, 0.08956, 0.09213, 0.09443, 0.09632, 0.09816, 0.09999, 0.10171, 0.103, 0.10434, 0.10568, 0.10699, 0.10813, 0.10911, 0.11001, 0.1109, 0.11179, 0.1125, 0.11305, 0.1136, 0.11403, 0.11428], [0.08051, 0.08349, 0.08659, 0.08969, 0.09209, 0.09435, 0.09643, 0.09842, 0.10026, 0.10176, 0.10328, 0.10472, 0.10605, 0.10738, 0.10843, 0.10947, 0.11041, 0.11129, 0.1123, 0.11285, 0.11339, 0.11394, 0.11442, 0.11483], [0.07996, 0.08326, 0.08624, 0.08922, 0.092, 0.09428, 0.09649, 0.09844, 0.10028, 0.10181, 0.10332, 0.10483, 0.10611, 0.10765, 0.10871, 0.10976, 0.11082, 0.11176, 0.11251, 0.11319, 0.11383, 0.11437, 0.11481, 0.11523], [0.07929, 0.08271, 0.08569, 0.08898, 0.09192, 0.09424, 0.09648, 0.09854, 0.1003, 0.10209, 0.10361, 0.10511, 0.10649, 0.10764, 0.10873, 0.11003, 0.11109, 0.11208, 0.11279, 0.11353, 0.11417, 0.11471, 0.11527, 0.11563], [0.07862, 0.08215, 0.08546, 0.08844, 0.09175, 0.09407, 0.0963, 0.09856, 0.10031, 0.10213, 0.10365, 0.10511, 0.10676, 0.10791, 0.10901, 0.11005, 0.11108, 0.11229, 0.11308, 0.11376, 0.1145, 0.11506, 0.11561, 0.11614]], "offset": 0.0012}], width: 1080, height: 1920, envIntensity: 0.55 })
+        .then((m) => {
+          mascot = m;
+          // pale studio lighting (brand plate is cool white): soft key upper-left (renderer default), cool-white rim behind-right
+          for (const o of m.scene.children) {
+            if (!o.isDirectionalLight) continue;
+            if (o.position.z < 0) { o.intensity = 1.5; o.color.setRGB(0.86, 0.92, 1.0); o.position.set(1.5, 1.4, -1.5); }
+          }
+          apply(0);
+        });
+      window.__hf.buildReady["mascot"] = ready;
+      window.addEventListener("hf-seek", (e) => {
+        const t = e.detail.time;
+        if (mascot) apply(t);
+        else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t)));
+      });
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.set({}, {}, D - 0.02);
+      window.__timelines["mascot"] = tl;
+    })();
+  </script>
+</template>

@@ -44,16 +44,23 @@ def clean(box, zmin, is_bad, grid=0.0004, dil=2, iters=400):
 t0 = tex3d.tris_in_box(-0.06, 0.06, 0.52, 0.575, 0.12); _tx, _ty, _ = tex3d.raster_uv(t0, S)
 skin = np.median(tex[_ty, _tx], 0); print("mouth-area skin", skin)
 clean((-0.045, 0.045, 0.53, 0.566), 0.12, lambda c: np.abs(c - skin).sum(1) > 55)
-# hands: the baked hand skin is much darker / more orange than the face -> pull it toward the face tone, keep shading
+# hands: the baked texture has a white "glove" highlight on the back of the hand and orange fingers.
+# Every hand texel past the shirt cuff (measured along the wrist->fingertip axis) is re-coloured to one skin tone
+# that matches the face; only the luminance (shading) of the original is kept, compressed so nothing goes white.
+W0 = np.array([0.188, 0.296]); TIP = np.array([0.232, 0.215]); AXD = (TIP - W0) / np.linalg.norm(TIP - W0)
+SKIN_HAND = np.array([247, 214, 197.0])
 for sgn in (1, -1):
-    tx, ty, xyz = tex3d.raster_uv(tex3d.tris_in_box(min(sgn * 0.14, sgn * 0.3), max(sgn * 0.14, sgn * 0.3), 0.17, 0.298, -1), S)
-    k = (np.abs(xyz[:, 0]) > 0.14) & (xyz[:, 1] < 0.297)
-    tx, ty = tx[k], ty[k]
+    tx, ty, xyz = tex3d.raster_uv(tex3d.tris_in_box(min(sgn * 0.12, sgn * 0.3), max(sgn * 0.12, sgn * 0.3), 0.17, 0.33, -1), S)
+    t = (np.stack([np.abs(xyz[:, 0]), xyz[:, 1]], 1) - W0) @ AXD
+    c0 = tex[ty, tx]; mx, mn = c0.max(1), c0.min(1); sat = (mx - mn) / np.maximum(mx, 1)
+    k = (t > 0.018) | ((t > 0.0) & (sat > 0.16))           # + skin-coloured texels tucked inside the cuff
+    tx, ty, t = tx[k], ty[k], np.where(t[k] > 0.018, t[k], 0.03)
     c = tex[ty, tx]
-    mx, mn = c.max(1), c.min(1); sat = (mx - mn) / np.maximum(mx, 1)
-    skinpx = (sat > 0.12) & (mx > 60)                       # leaves the white cuff alone
-    gain = np.array([238, 205, 188.0]) / np.array([194, 138, 121.0])
-    w = 0.85 * skinpx[:, None]
-    tex[ty, tx] = c * (1 - w) + np.clip(c * gain, 0, 255) * w
-    print("hand texels tinted", int(skinpx.sum()))
+    L = c @ np.array([0.299, 0.587, 0.114])
+    lo, hi = np.percentile(L, 5), np.percentile(L, 97)
+    sh = np.clip((L - lo) / max(1, hi - lo), 0, 1)
+    new = SKIN_HAND * (0.74 + 0.3 * sh)[:, None]
+    w = np.clip((t - 0.018) / 0.008, 0, 1)[:, None]          # feather into the cuff edge
+    tex[ty, tx] = c * (1 - w) + np.clip(new, 0, 255) * w
+    print("hand texels recoloured", len(tx))
 Image.fromarray(np.clip(tex, 0, 255).astype(np.uint8)).save(OUT / "basecolor_v2_clean.png")

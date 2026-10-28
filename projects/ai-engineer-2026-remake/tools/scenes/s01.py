@@ -102,8 +102,8 @@ def build(S):
     S.mv([(t_out + 0.5, side, None), (amb - 0.3, dict(side, yaw=30), "sine.inOut"), (amb + 0.1, dict(side, fx=290, yaw=36), "power3.out"),
           (t1, dict(side, fx=290, yaw=30), "sine.inOut")])
     # hi! wave while walking in, then the explain talk (from explain()), then reach + catch
-    S.act("armR", [(t0, "low", 0.3), (t0 + 0.35, "wave", 0.35), (t0 + 0.75, {"upperarm": [-0.15, 0, -2.05], "forearm": [0, 0, -0.15], "hand": [0, 0, 0.2]}, 0.22),
-                   (t0 + 1.0, "wave", 0.22), (t0 + 1.25, {"upperarm": [-0.15, 0, -2.05], "forearm": [0, 0, -0.15], "hand": [0, 0, 0.2]}, 0.22),
+    S.act("armR", [(t0, "low", 0.3), (t0 + 0.35, "wave", 0.35), (t0 + 0.75, {"upperarm": [-0.85, 0, -0.25], "forearm": [-1.45, 0, 0.1], "hand": [0, 0, -0.15]}, 0.22),
+                   (t0 + 1.0, "wave", 0.22), (t0 + 1.25, {"upperarm": [-0.85, 0, -0.25], "forearm": [-1.45, 0, 0.1], "hand": [0, 0, -0.15]}, 0.22),
                    (t0 + 1.5, "wave", 0.25)])
     S.act("armL", [(t0, "low", 0.3)])
     S.act("head", [(t0, [0.02, 0.1, 0.06], 0.3), (t0 + 0.5, [-0.06, 0.14, 0.1], 0.35)])

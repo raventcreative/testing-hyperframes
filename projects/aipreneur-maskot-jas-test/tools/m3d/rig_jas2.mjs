@@ -167,6 +167,64 @@ for (let pass = 0; pass < 2; pass++) {
   for (const m of root.listMaterials()) m.setDoubleSided(true);   // the opened seam shows the dark jacket lining, never the background
   console.log('seam cut: triangles', cut, 'duplicated verts', src.length);
 }
+// ---- seam hem: the cut leaves two open edges (sleeve side + jacket side). Smooth each opening into a clean curve
+// (no saw-tooth) and tuck it a few mm inward (sleeve edge into the sleeve, jacket edge into the body) so a lifted arm
+// shows a tidy hem, never a ragged fringe.
+{
+  const key = (v) => `${Math.round(P[3*v]*1e5)},${Math.round(P[3*v+1]*1e5)},${Math.round(P[3*v+2]*1e5)},${ARMV[v]}`;
+  const canon = new Int32Array(N); const first = new Map(); const members = new Map();
+  for (let v = 0; v < N; v++) { const k = key(v); let c = first.get(k); if (c === undefined) { c = v; first.set(k, v); members.set(v, []); } canon[v] = c; members.get(c).push(v); }
+  const ecount = new Map(); const ek = (a, b) => a < b ? a * 4194304 + b : b * 4194304 + a;
+  for (let t = 0; t < IDX.length; t += 3) for (let k = 0; k < 3; k++) {
+    const a = canon[IDX[t + k]], b = canon[IDX[t + (k + 1) % 3]]; if (a === b) continue;
+    const e = ek(a, b); ecount.set(e, (ecount.get(e) || 0) + 1);
+  }
+  const inBand = (c) => { const y = P[3*c+1], ax = Math.abs(P[3*c]); return y > 0.28 && y < 0.415 && ax > 0.08 && ax < 0.155; };   // armpit only (not cuffs, not the hem)
+  const bn = new Map();
+  for (const [e, n] of ecount) {
+    if (n !== 1) continue;
+    const a = Math.floor(e / 4194304), b = e % 4194304;
+    if (!inBand(a) || !inBand(b)) continue;
+    if (!bn.has(a)) bn.set(a, []); if (!bn.has(b)) bn.set(b, []);
+    bn.get(a).push(b); bn.get(b).push(a);
+  }
+  const pos = (c) => [P[3*c], P[3*c+1], P[3*c+2]];
+  const setAll = (c, q) => { for (const v of members.get(c)) { P[3*v] = q[0]; P[3*v+1] = q[1]; P[3*v+2] = q[2]; } };
+  // 1) smooth the opening curves (1D Laplacian along the boundary)
+  for (let it = 0; it < 25; it++) {
+    const nx = new Map();
+    for (const [c, nb] of bn) { if (nb.length !== 2) continue; const a = pos(nb[0]), b = pos(nb[1]), q = pos(c);
+      nx.set(c, [0.5*q[0] + 0.25*(a[0]+b[0]), 0.5*q[1] + 0.25*(a[1]+b[1]), 0.5*q[2] + 0.25*(a[2]+b[2])]); }
+    for (const [c, q] of nx) setAll(c, q);
+  }
+  // 2) tuck inward
+  const closestOnAxis = (q) => { const ax = Math.abs(q[0]), sg = q[0] >= 0 ? 1 : -1; let best = null, bd = 9;
+    for (let i = 0; i < AXIS.length - 1; i++) { const A = [AXIS[i][0], AXIS[i][1], ZA], B = [AXIS[i+1][0], AXIS[i+1][1], ZA];
+      const ab = [B[0]-A[0], B[1]-A[1], B[2]-A[2]], ap = [ax-A[0], q[1]-A[1], q[2]-A[2]];
+      let t = (ap[0]*ab[0]+ap[1]*ab[1]+ap[2]*ab[2]) / (ab[0]**2+ab[1]**2+ab[2]**2); t = Math.max(0, Math.min(1, t));
+      const c = [A[0]+ab[0]*t, A[1]+ab[1]*t, A[2]+ab[2]*t]; const d = Math.hypot(ax-c[0], q[1]-c[1], q[2]-c[2]);
+      if (d < bd) { bd = d; best = [sg * c[0], c[1], c[2]]; } }
+    return best; };
+  let tucked = 0;
+  for (const c of bn.keys()) {
+    const q = pos(c); let tgt;
+    if (ARMV[c]) tgt = closestOnAxis(q); else tgt = [q[0] * 0.55, q[1], Z];
+    const d = [tgt[0]-q[0], tgt[1]-q[1], tgt[2]-q[2]], L = Math.hypot(...d) || 1, amt = ARMV[c] ? 0.006 : 0.009;
+    setAll(c, [q[0] + d[0]/L*amt, q[1] + d[1]/L*amt, q[2] + d[2]/L*amt]); tucked++;
+  }
+  // 3) relax two rings next to the opening so the tuck has no crease
+  const nbr = new Map();
+  for (let t = 0; t < IDX.length; t += 3) for (let k = 0; k < 3; k++) { const a = canon[IDX[t+k]], b = canon[IDX[t+(k+1)%3]];
+    if (a === b) continue; if (!nbr.has(a)) nbr.set(a, new Set()); if (!nbr.has(b)) nbr.set(b, new Set()); nbr.get(a).add(b); nbr.get(b).add(a); }
+  let ring = new Set(bn.keys()); const zone = new Set();
+  for (let r = 0; r < 2; r++) { const nx = new Set(); for (const c of ring) for (const u of nbr.get(c) || []) if (!bn.has(u) && ARMV[u] === ARMV[c] && !zone.has(u)) { zone.add(u); nx.add(u); } ring = nx; }
+  for (let it = 0; it < 4; it++) { const nx = new Map();
+    for (const c of zone) { let a = [0,0,0], n = 0; for (const u of nbr.get(c)) { const q = pos(u); a[0]+=q[0]; a[1]+=q[1]; a[2]+=q[2]; n++; }
+      const q = pos(c); nx.set(c, [0.5*q[0]+0.5*a[0]/n, 0.5*q[1]+0.5*a[1]/n, 0.5*q[2]+0.5*a[2]/n]); }
+    for (const [c, q] of nx) setAll(c, q); }
+  prim.getAttribute('POSITION').setArray(P);
+  console.log('seam hem: boundary verts', bn.size, 'tucked', tucked, 'relaxed', zone.size);
+}
 const nb = B.length;
 let W = new Float32Array(N * nb);
 for (let v = 0; v < N; v++) {

@@ -12,15 +12,17 @@ const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0
 const FACE_GLSL_PARS = /* glsl */ `
 varying float vFM;
 varying vec3 vRest;
+varying vec3 vLidN;
 uniform vec4 uEA; uniform vec4 uEB;      // eye centre xy, radius xy (A = screen-left, B = screen-right)
 uniform vec4 uJA; uniform vec4 uJB;      // dUV/dxy per eye (du/dx du/dy dv/dx dv/dy)
 uniform vec4 uBA; uniform vec4 uBB;      // brow centre xy, half-size xy
 uniform vec4 uJBA; uniform vec4 uJBB;
 uniform vec2 uBlink; uniform vec2 uLower; uniform vec2 uGaze; uniform vec2 uBrow; uniform vec2 uBrowTilt;
 uniform float uMouthMix; uniform vec4 uMouth; uniform vec3 uMC; uniform vec3 uSkin; uniform vec3 uSkinEye;
+vec2 gRimUV = vec2(0.0); float gRimOK = 0.0;
 float gCover = 0.0; float gLid = 0.0; float gLidShade = 1.0; float gLash = 0.0;
 uniform float uDebug;
-uniform mat3 uHeadNM; uniform vec3 uHeadC; uniform float uCoverN; uniform vec3 uLidLit;
+uniform mat3 uHeadNM; uniform vec3 uHeadC; uniform float uCoverN; uniform vec3 uLidLit; uniform float uFaceSmooth;
 vec2 jmul(vec4 J, vec2 d){ return vec2(J.x*d.x + J.y*d.y, J.z*d.x + J.w*d.y); }
 vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 gaze, vec2 baseUv){
   vec2 d = (p - E.xy) / E.zw;
@@ -34,28 +36,53 @@ vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 g
   }
   // lids (v6, suit mascot): an upper lid of sampled cheek skin sweeps down over the painted eye (incl. its upper
   // lashes) and a lower lid rises to meet it; the meeting line is a soft downward arc drawn as a thick lash line.
-  // Shape in eye-normalised space: wider than the eye (x 1.42 r), taller on top (lashes) than below.
   if (blink > 0.001) {
-    float nx = (p.x - E.x) / (E.z * 1.42);
+    // v18: rounded-square lid (superellipse, p=3) sized to the painted eye incl. the outer lash flick
+    float outer = (p.x - E.x) * sign(E.x) > 0.0 ? 1.0 : 0.0;
+    float sx = E.z * mix(1.5, 1.8, outer);
+    float nx = (p.x - E.x) / sx;
     float dy = p.y - (E.y + 0.004);
-    float ny = dy / (dy > 0.0 ? E.w * 1.78 : E.w * 1.32);
-    float ee = nx * nx + ny * ny;
-    if (ee < 1.0) {
-      float arc = sqrt(max(0.0, 1.0 - nx * nx));
+    float sy = dy > 0.0 ? E.w * 1.9 : E.w * 1.6;
+    float ny = dy / sy;
+    float ee = pow(abs(nx), 3.0) + pow(abs(ny), 3.0);
+    if (ee < 1.6) {
       float b = smoothstep(0.0, 1.0, blink);
-      float yu = mix(1.02, -0.2, b) * arc;                                   // upper lid edge
-      float yl = mix(-1.02, -0.2, smoothstep(0.55, 1.0, b)) * arc;           // lower lid edge
       float aa = fwidth(ny) * 1.2 + 1e-4;
-      float covered = max(smoothstep(yu - aa, yu + aa, ny), smoothstep(yl + aa, yl - aa, ny));
-      float edge = smoothstep(1.0, 0.5, ee);
-      vec3 lid = uSkinEye * mix(0.965, 1.0, smoothstep(-1.0, 0.6, ny));   // measured eye-ring skin, faint top-light gradient
-      lid *= mix(0.9, 1.0, smoothstep(0.0, 0.3, abs(ny - yu)));                 // soft crease under the lid edge
+      float yu = 2.0, covered;
+      if (ee < 1.0) {
+        float arc = pow(max(0.0, 1.0 - pow(abs(nx), 3.0)), 1.0 / 3.0);
+        yu = mix(1.02, -0.2, b) * arc;                                       // upper lid edge
+        float yl = mix(-1.02, -0.2, smoothstep(0.55, 1.0, b)) * arc;         // lower lid edge
+        covered = max(smoothstep(yu - aa, yu + aa, ny), smoothstep(yl + aa, yl - aa, ny));
+      } else {
+        // just outside the lid: plain skin, faded to the lid colour so the lid never shows an outline
+        // (dark texels are kept only above the lid, where the brow is)
+        covered = smoothstep(0.1, 0.5, b) * mix(1.0, smoothstep(0.2, 0.45, dot(col, vec3(0.3, 0.55, 0.15))), smoothstep(0.6, 0.95, ny));
+      }
+      float edge = smoothstep(1.6, 1.0, ee);
+      // lid skin: at the rim it takes the nearest skin texel just outside the lid along the ray from the eye centre
+      // (lash / brow / eye-white texels are skipped), easing to the ring colour toward the centre
+      vec2 dir = vec2(nx, ny) / max(pow(ee, 1.0 / 3.0), 1e-3);
+      vec3 rimC = uSkinEye; bool found = false;
+      for (int k = 0; k < 4; k++) {
+        vec2 t = dir * max(1.03 + 0.09 * float(k), pow(ee, 1.0 / 3.0) + 0.02);
+        vec2 q = vec2(E.x + t.x * sx, E.y + 0.004 + t.y * (t.y > 0.0 ? E.w * 1.9 : E.w * 1.6));
+        vec3 sc = texture2D(map, baseUv + jmul(J, q - p)).rgb;
+        bool skin = dot(sc, vec3(0.3, 0.55, 0.15)) > 0.5 && sc.r - sc.b > 0.04;
+        if (!found && skin) { rimC = sc; found = true; gRimUV = baseUv + jmul(J, q - p); gRimOK = 1.0; }
+      }
+      rimC = mix(uSkinEye, rimC, 1.0 - smoothstep(0.15, 0.4, length(rimC - uSkinEye)));
+      vec3 lid = mix(uSkinEye, rimC, smoothstep(0.3, 0.95, ee));
+      if (ee < 1.0) {
+        lid *= mix(0.975, 1.0, smoothstep(-1.0, 0.6, ny));                     // faint top-light gradient
+        lid *= mix(0.93, 1.0, smoothstep(0.0, 0.3, abs(ny - yu)));              // soft crease under the lid edge
+      }
       col = mix(col, lid, covered * edge);
-      gCover = max(gCover, covered * edge);
-      gLid = max(gLid, covered * edge);
-      gLidShade = mix(0.985, 1.0, smoothstep(-1.0, 0.7, ny)) * mix(0.95, 1.0, smoothstep(0.0, 0.25, abs(ny - yu)));
+      float ein = covered * step(ee, 1.0);
+      gCover = max(gCover, ein);
+      gLid = max(gLid, ein);
       // lash line on the moving lid edge (grows as the lid closes), tapered at the corners, lifted at the outer tip
-      float lw = mix(0.0, 0.11, smoothstep(0.25, 0.9, b));
+      float lw = ee < 1.0 ? mix(0.0, 0.11, smoothstep(0.25, 0.9, b)) : 0.0;
       float tip = smoothstep(0.55, 1.0, abs(nx)) * 0.06 * b;
       float lash = smoothstep(lw + aa, lw * 0.35, abs(ny - (yu + tip))) * smoothstep(1.0, 0.72, abs(nx));
       col = mix(col, vec3(0.06, 0.04, 0.035), lash * step(0.001, lw));
@@ -113,6 +140,98 @@ vec3 mouthLayer(vec3 col, vec2 p){
   return mix(col, c, uMouthMix);
 }
 `;
+
+
+// v18: smooth shading normals for the face skin (welded Laplacian) and, under each eyelid, the normal of a quadratic
+// surface fitted to the skin ring around the eye, so a closed lid is lit exactly like the skin around it (the eye
+// geometry itself is a bumpy relief). Stored as attribute _lidN (rest object space).
+const LID_S = [1.5, 1.8, 1.9, 1.6];   // lid superellipse scale (eye radii): inner x, outer x, above, below
+function lidEE(E, x, y) {   // superellipse "radius" (p=3) in lid units, same shape as the shader lid
+  const out = (x - E.c[0]) * Math.sign(E.c[0]) > 0;
+  const nx = (x - E.c[0]) / (E.r[0] * (out ? LID_S[1] : LID_S[0])), dy = y - (E.c[1] + 0.004);
+  const ny = dy / (dy > 0 ? E.r[1] * LID_S[2] : E.r[1] * LID_S[3]);
+  return Math.cbrt(Math.abs(nx) ** 3 + Math.abs(ny) ** 3);
+}
+function solve6(A, b) {   // gaussian elimination, 6x6
+  const n = 6, M = A.map((r, i) => [...r, b[i]]);
+  for (let c = 0; c < n; c++) {
+    let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+    [M[c], M[p]] = [M[p], M[c]]; if (Math.abs(M[c][c]) < 1e-14) return null;
+    for (let r = 0; r < n; r++) if (r !== c) { const f = M[r][c] / M[c][c]; for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k]; }
+  }
+  return M.map((r, i) => r[n] / r[i]);
+}
+function buildLidNormals(geo, F) {
+  const ga = geo.attributes, n = ga.position.count;
+  const P = new Float32Array(n * 3), N = new Float32Array(n * 3), FMa = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    P[3 * i] = ga.position.getX(i); P[3 * i + 1] = ga.position.getY(i); P[3 * i + 2] = ga.position.getZ(i);
+    N[3 * i] = ga.normal.getX(i); N[3 * i + 1] = ga.normal.getY(i); N[3 * i + 2] = ga.normal.getZ(i);
+    FMa[i] = ga._facemask.getX(i);
+  }
+  // the outer lash flick sits on vertices outside the baked face mask: flag every front-facing vertex inside the
+  // lid region as face so the lid (and the face shading) reaches them
+  let flipped = 0;
+  for (let i = 0; i < n; i++) {
+    if (FMa[i] >= 0.5 || P[3 * i + 2] < 0.1 || N[3 * i + 2] < 0.15) continue;
+    if (Math.min(lidEE(F.eyeA, P[3 * i], P[3 * i + 1]), lidEE(F.eyeB, P[3 * i], P[3 * i + 1])) < 1.2) { FMa[i] = 1; ga._facemask.setX(i, 1); flipped++; }
+  }
+  if (flipped) ga._facemask.needsUpdate = true;
+  const out = new Float32Array(N);
+  const canon = new Int32Array(n), seen = new Map();
+  for (let i = 0; i < n; i++) {
+    const k = Math.round(P[3 * i] * 1e5) + ',' + Math.round(P[3 * i + 1] * 1e5) + ',' + Math.round(P[3 * i + 2] * 1e5);
+    let c = seen.get(k); if (c === undefined) { c = i; seen.set(k, i); } canon[i] = c;
+  }
+  const face = new Uint8Array(n); for (let i = 0; i < n; i++) if (FMa[i] > 0.5) face[canon[i]] = 1;
+  const nb = new Map(), border = new Uint8Array(n), idx = geo.index ? geo.index.array : Uint32Array.from({ length: n }, (_, i) => i);
+  const link = (u, v) => { let s = nb.get(u); if (!s) nb.set(u, (s = new Set())); s.add(v); };
+  for (let t = 0; t < idx.length; t += 3) for (let a = 0; a < 3; a++) {
+    const u = canon[idx[t + a]], v = canon[idx[t + (a + 1) % 3]];
+    if (face[u] && face[v]) { link(u, v); link(v, u); } else if (face[u] || face[v]) { border[face[u] ? u : v] = 1; }
+  }
+  let cur = new Map();
+  for (let i = 0; i < n; i++) { const c = canon[i]; if (!face[c]) continue; let a = cur.get(c); if (!a) cur.set(c, (a = [0, 0, 0])); a[0] += N[3 * i]; a[1] += N[3 * i + 1]; a[2] += N[3 * i + 2]; }
+  const nrm = (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; a[0] /= l; a[1] /= l; a[2] /= l; return a; };
+  for (const a of cur.values()) nrm(a);
+  for (let it = 0; it < 10; it++) {
+    const nx = new Map();
+    for (const [c, a] of cur) {
+      if (border[c]) { nx.set(c, a); continue; }
+      const s = [a[0], a[1], a[2]]; const ns = nb.get(c); let k = 0, q = [0, 0, 0];
+      if (ns) for (const v of ns) { const b = cur.get(v); if (b) { q[0] += b[0]; q[1] += b[1]; q[2] += b[2]; k++; } }
+      if (k) { s[0] = 0.4 * s[0] + 0.6 * q[0] / k; s[1] = 0.4 * s[1] + 0.6 * q[1] / k; s[2] = 0.4 * s[2] + 0.6 * q[2] / k; }
+      nx.set(c, nrm(s));
+    }
+    cur = nx;
+  }
+  for (const E of [F.eyeA, F.eyeB]) {
+    let ring = [];
+    for (const [c, a] of cur) { const e = lidEE(E, P[3 * c], P[3 * c + 1]); if (e > 1.15 && e < 1.75 && a[2] > 0.25) ring.push(c); }
+    let coef = null;
+    for (let pass = 0; pass < 4; pass++) {
+      const A = Array.from({ length: 6 }, () => new Array(6).fill(0)), b = new Array(6).fill(0);
+      for (const c of ring) {
+        const x = P[3 * c] - E.c[0], y = P[3 * c + 1] - E.c[1], z = P[3 * c + 2];
+        const f = [1, x, y, x * x, x * y, y * y];
+        for (let r = 0; r < 6; r++) { b[r] += f[r] * z; for (let k = 0; k < 6; k++) A[r][k] += f[r] * f[k]; }
+      }
+      coef = solve6(A, b); if (!coef) break;
+      const res = (c) => { const x = P[3 * c] - E.c[0], y = P[3 * c + 1] - E.c[1]; return Math.abs(P[3 * c + 2] - (coef[0] + coef[1] * x + coef[2] * y + coef[3] * x * x + coef[4] * x * y + coef[5] * y * y)); };
+      ring = ring.filter((c) => res(c) < [0.01, 0.005, 0.003, 0.002][pass]);
+    }
+    if (!coef) continue;
+    for (const [c, a] of cur) {
+      const e = lidEE(E, P[3 * c], P[3 * c + 1]); if (e > 1.25) continue;
+      const x = P[3 * c] - E.c[0], y = P[3 * c + 1] - E.c[1];
+      const fn = nrm([-(coef[1] + 2 * coef[3] * x + coef[4] * y), -(coef[2] + coef[4] * x + 2 * coef[5] * y), 1]);
+      const t = Math.min(1, Math.max(0, (1.25 - e) / 0.3)), w = t * t * (3 - 2 * t);
+      cur.set(c, nrm([a[0] + (fn[0] - a[0]) * w, a[1] + (fn[1] - a[1]) * w, a[2] + (fn[2] - a[2]) * w]));
+    }
+  }
+  for (let i = 0; i < n; i++) { const a = cur.get(canon[i]); if (a) { out[3 * i] = a[0]; out[3 * i + 1] = a[1]; out[3 * i + 2] = a[2]; } }
+  geo.setAttribute('_lidN', new THREE.BufferAttribute(out, 3));
+}
 
 export class Mascot {
   static async create(canvas, opts) {
@@ -173,6 +292,7 @@ export class Mascot {
 
     // facial controls through a surface-following shader patch
     const F = face, mat = this.mesh.material;
+    buildLidNormals(this.mesh.geometry, F);
     const U = (this.u = {
       uEA: { value: new THREE.Vector4(F.eyeA.c[0], F.eyeA.c[1], F.eyeA.r[0], F.eyeA.r[1]) },
       uEB: { value: new THREE.Vector4(F.eyeB.c[0], F.eyeB.c[1], F.eyeB.r[0], F.eyeB.r[1]) },
@@ -183,14 +303,15 @@ export class Mascot {
       uBlink: { value: new THREE.Vector2() }, uLower: { value: new THREE.Vector2() },
       uGaze: { value: new THREE.Vector2() }, uBrow: { value: new THREE.Vector2() }, uBrowTilt: { value: new THREE.Vector2() },
       uMouthMix: { value: 0 }, uDebug: { value: 0 }, uHeadNM: { value: new THREE.Matrix3() }, uHeadC: { value: new THREE.Vector3(...(F.headC || [0, 0.6, -0.04])) }, uCoverN: { value: F.coverNormal ?? 1 }, uLidLit: { value: new THREE.Vector3(...(F.lidLit || [0.98, 0.95, 0.93])) }, uMouth: { value: new THREE.Vector4(0.026, 0, 0.004, 0.6) },
-      uMC: { value: new THREE.Vector3(F.mouth.c[0], F.mouth.c[1] + 0.0135, F.mouth.c[1]) },
+      uMC: { value: new THREE.Vector3(F.mouth.c[0], F.mouth.c[1] + (F.mouthDy ?? 0.0135), F.mouth.c[1]) }, uFaceSmooth: { value: F.faceSmooth ?? 0 },
       uSkin: { value: new THREE.Vector3(lin(F.skin[0]), lin(F.skin[1]), lin(F.skin[2])) },
       uSkinEye: { value: new THREE.Vector3(lin(F.skinEye[0]), lin(F.skinEye[1]), lin(F.skinEye[2])) },
     });
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, U);
       sh.vertexShader = sh.vertexShader
-        .replace('#include <common>', '#include <common>\nattribute float _facemask;\nvarying float vFM;\nvarying vec3 vRest;\nuniform vec4 uEA; uniform vec4 uEB; uniform vec2 uBlink;')
+        .replace('#include <common>', '#include <common>\nattribute float _facemask;\nvarying float vFM;\nvarying vec3 vRest;\nuniform vec4 uEA; uniform vec4 uEB; uniform vec2 uBlink;\nattribute vec3 _lidN;\nvarying vec3 vLidN;')
+        .replace('#include <defaultnormal_vertex>', '#include <defaultnormal_vertex>\n#ifdef USE_SKINNING\nvLidN = normalMatrix * (skinMatrix * vec4(_lidN, 0.0)).xyz;\n#else\nvLidN = normalMatrix * _lidN;\n#endif')
         .replace('#include <begin_vertex>', `#include <begin_vertex>
 vFM = _facemask;
 vRest = position;
@@ -214,12 +335,12 @@ vRest = position;
   if (uDebug > 0.5 && uDebug < 1.5 && vFM > 0.5) sampledDiffuseColor.rgb = mix(sampledDiffuseColor.rgb, vec3(1.0, 0.0, 0.0), 0.55);
   diffuseColor *= sampledDiffuseColor;
 #endif`)
-        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.85, gCover);')
-        .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, 0.0, gCover);')
-        .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n// lids are painted after lighting (flat skin, no eyeball relief / gloss), lash line on top\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uLidLit * gLidShade, gLid);\ngl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.16, 0.11, 0.1), gLash);\nif (uDebug > 1.5) gl_FragColor = vec4(vMapUv, 0.0, 1.0);')
-        .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = normalize(mix(normal, mix(nonPerturbedNormal, normalize(uHeadNM * normalize(vRest - uHeadC)), uCoverN), gCover));');
+        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, max(roughnessFactor, 0.5), step(0.5, vFM) * uFaceSmooth);\n#ifdef USE_ROUGHNESSMAP\nif (gRimOK > 0.5) { vec4 rimMR = texture2D(roughnessMap, gRimUV); roughnessFactor = mix(roughnessFactor, max(rimMR.g * roughness, 0.5), gCover); }\n#endif')
+        .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\n#ifdef USE_METALNESSMAP\nif (gRimOK > 0.5) { metalnessFactor = mix(metalnessFactor, texture2D(metalnessMap, gRimUV).b * metalness, gCover); }\n#endif')
+        .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n// v18: lids are lit like skin (smooth fitted normal, see buildLidNormals); only the lash line is laid on top\n// highlight shoulder: roll bright values off softly (hue kept) so pale skin never clips to flat white\n{ float mx = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b));\n  if (mx > 0.78) gl_FragColor.rgb *= (0.78 + 0.2 * (1.0 - exp(-(mx - 0.78) / 0.2))) / mx; }\ngl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.16, 0.11, 0.1), gLash);\nif (uDebug > 1.5) gl_FragColor = vec4(vMapUv, 0.0, 1.0);')
+        .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nfloat sNl = length(vLidN);\nif (vFM > 0.5 && sNl > 1e-5) {\n  vec3 sN = (vLidN / sNl) * faceDirection;\n  normal = normalize(mix(normal, sN, uFaceSmooth));\n  normal = normalize(mix(normal, sN, gCover));\n}');
     };
-    mat.customProgramCacheKey = () => 'mascot-face-v15-lids';
+    mat.customProgramCacheKey = () => 'mascot-face-v18g';
     mat.needsUpdate = true;
     if (mat.roughness !== undefined) { mat.roughness = Math.max(mat.roughness, 0.55); mat.metalness = 0; }
 

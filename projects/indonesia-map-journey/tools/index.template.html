@@ -28,7 +28,7 @@
         background: radial-gradient(ellipse 80% 78% at 50% 48%, rgba(10,22,40,0) 55%, rgba(10,22,40,0.30) 100%); }
       #grain { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; opacity: 0.35; display: block; }
       #mapcredit { position: absolute; left: 96px; bottom: 30px; max-width: 1500px; font: 400 12px/1.35 Montserrat, sans-serif; color: #FBFCFE; letter-spacing: 0.03em; opacity: 0.78; text-shadow: 0 1px 3px rgba(10,22,40,0.85); }
-      .mk-lbl { font: 700 26px Montserrat, sans-serif; letter-spacing: 0.12em; fill: #FBFCFE; paint-order: stroke; stroke: rgba(10,22,40,0.78); stroke-width: 6px; stroke-linejoin: round; }
+      .mk-lbl { font: 700 28px Montserrat, sans-serif; letter-spacing: 0.12em; fill: #FBFCFE; paint-order: stroke; stroke: rgba(10,22,40,0.78); stroke-width: 6px; stroke-linejoin: round; }
       .mk-lead { stroke: #FBFCFE; stroke-width: 1.4; fill: none; filter: drop-shadow(0 0 2px rgba(10,22,40,0.8)); }
       #lbl-indonesia { font: 700 30px Montserrat, sans-serif; letter-spacing: 0.62em; fill: #FBFCFE; paint-order: stroke; stroke: rgba(14,32,58,0.55); stroke-width: 5px; stroke-linejoin: round; }
       .scene-host { z-index: 5; }
@@ -228,11 +228,19 @@
             return;
           }
         }
+        // a destination's satellite is only eligible from the start of the travel into it to the end of the travel out of it
+        const SATWIN = {};
+        for (const c of PL.cities) {
+          const tin = PL.travel.find((tr) => tr.to === c.id), tout = PL.travel.find((tr) => tr.from === c.id);
+          SATWIN[c.id] = [tin ? tin.t0 : 0, tout ? tout.t1 : PL.duration];
+        }
+        let FRAME_T = 0;
         function satAlpha(c, C, k) {
           const s = SAT[c.id]; if (!s) return 0;
+          const win = SATWIN[c.id]; if (FRAME_T < win[0] || FRAME_T > win[1]) return 0;
           const kh = s.kHold, d = Math.hypot(C.ux - c.w[0], C.uy - c.w[1]);
-          if (d > 1.6 * c.span * G.S) return 0;
-          const u = clamp((k / kh - 0.55) / 0.3);
+          if (d > ((s.kFrom ?? 0.52) > 0.6 ? 0.35 : 1.6) * c.span * G.S) return 0;
+          const f0 = (s.kFrom ?? 0.52) + 0.03, u = clamp((k / kh - f0) / Math.min(0.3, 0.97 - f0));
           return u * u * (3 - 2 * u);
         }
 
@@ -342,6 +350,7 @@
         }
         // assets to wait for before a frame is captured
         function framePromises(t) {
+          FRAME_T = t;
           const C = cam(t), k = W / C.w, need = [];
           for (const [z, x, y] of tilesFor(C, k)) { const key = `${z}/${x}/${y}`; if (TILESET.has(key)) need.push(img(`assets/tiles/${key}.webp`)); }
           for (const c of CITY) if (satAlpha(c, C, k) > 0) need.push(img(SAT[c.id].file));
@@ -350,6 +359,7 @@
         const kNatPre0 = W / PL.NATIONAL.w;
 
         function renderAt(t) {
+          FRAME_T = t;
           const C = cam(t), k = W / C.w, tx = W / 2 - C.ux * k, ty = H / 2 - C.uy * k;
 
           // relief basemap (tiles) -----------------------------------------------------------

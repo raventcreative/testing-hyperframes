@@ -21,6 +21,9 @@ BUCKET = "https://sentinel-cogs.s3.us-west-2.amazonaws.com"
 S, LON0, LAT0, W, H, R = 40.0, 88.0, 12.0, 1920, 1080, 6378137.0
 M0 = math.log(math.tan(math.pi / 4 + math.radians(LAT0) / 2))
 YEARS = range(2020, 2025)
+SAT_FROM = {"bali": 0.86}
+AOI_OVERRIDE = {"bali": (114.25, -9.05, 115.95, -7.85)}
+DENSITY = {"bali": 2.0}  # regional view: satellite only in the last part of the descent
 MONTHS = {"medan": [1, 2, 3, 7], "makassar": [7, 8, 9, 10], "default": [7, 8, 9, 10]}
 os.environ.setdefault("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
 os.environ.setdefault("CPL_VSIL_CURL_ALLOWED_EXTENSIONS", ".tif")
@@ -46,14 +49,29 @@ def world_to_merc(X, Y):  # world (base px) -> EPSG:3857 metres
 
 
 def list_prefixes(prefix):
+    cfn = os.path.join(ROOT, ".cache", "s2list", prefix.replace("/", "_") + ".json")
+    if os.path.exists(cfn):
+        return json.load(open(cfn))
     xml = get(f"{BUCKET}/?list-type=2&prefix={prefix}&delimiter=/").decode()
-    return re.findall(r"<Prefix>([^<]+/)</Prefix>", xml)[1:]
+    out = re.findall(r"<Prefix>([^<]+/)</Prefix>", xml)[1:]
+    os.makedirs(os.path.dirname(cfn), exist_ok=True)
+    json.dump(out, open(cfn, "w"))
+    return out
+
+
+META_CACHE = os.path.join(ROOT, ".cache", "s2meta")
 
 
 def scene_meta(prefix):
     name = prefix.rstrip("/").split("/")[-1]
+    cfn = os.path.join(META_CACHE, name + ".json")
     try:
-        d = json.loads(get(f"{BUCKET}/{prefix}{name}.json"))
+        if os.path.exists(cfn):
+            d = json.load(open(cfn))
+        else:
+            d = json.loads(get(f"{BUCKET}/{prefix}{name}.json"))
+            os.makedirs(META_CACHE, exist_ok=True)
+            json.dump({"properties": d["properties"]}, open(cfn, "w"))
     except Exception:
         return None
     p = d["properties"]
@@ -76,6 +94,16 @@ def best_scenes(tile, months, n=40):
 
 
 def read_into(url, dst_shape, dst_transform, resampling, src_res_target=None):
+    for attempt in range(4):
+        try:
+            return _read_into(url, dst_shape, dst_transform, resampling)
+        except Exception:
+            if attempt == 3:
+                raise
+            import time; time.sleep(2 * (attempt + 1))
+
+
+def _read_into(url, dst_shape, dst_transform, resampling):
     """Windowed, overview-aware read straight into the destination Web Mercator grid."""
     from rasterio.vrt import WarpedVRT
     from rasterio.windows import from_bounds
@@ -98,14 +126,20 @@ def bake(city, frames, plan):
         k = W / w
         cx = (c["lon"] - LON0) * S
         cy = (M0 - math.log(math.tan(math.pi / 4 + math.radians(c["lat"]) / 2))) * S * 180 / math.pi
-        near = math.hypot(ux - cx, uy - cy) < 1.6 * c["span"] * S
-        if k < 0.52 * kh or not near or not (c["start"] - 2.5 <= t <= c["start"] + c["dur"] + 2.5):
+        f0 = SAT_FROM.get(city, 0.52)
+        near = math.hypot(ux - cx, uy - cy) < (0.35 if city in SAT_FROM else 1.6) * c["span"] * S
+        if k < f0 * kh or not near or not (c["start"] - 2.5 <= t <= c["start"] + c["dur"] + 2.5):
             continue
         xs += [ux - w / 2, ux + w / 2]; ys += [uy - H / 2 / k, uy + H / 2 / k]
     X0, X1, Y0, Y1 = min(xs), max(xs), min(ys), max(ys)
+    if city in AOI_OVERRIDE:  # lon0, lat0, lon1, lat1 (regional views: imagery only around the destination itself)
+        lo_a, la_a, lo_b, la_b = AOI_OVERRIDE[city]
+        X0, X1 = (lo_a - LON0) * S, (lo_b - LON0) * S
+        Y0, Y1 = (M0 - math.log(math.tan(math.pi / 4 + math.radians(la_b) / 2))) * S * 180 / math.pi, (M0 - math.log(math.tan(math.pi / 4 + math.radians(la_a) / 2))) * S * 180 / math.pi
     mx = (X1 - X0) * 0.03; my = (Y1 - Y0) * 0.03
     X0, X1, Y0, Y1 = X0 - mx, X1 + mx, Y0 - my, Y1 + my
-    wpx, hpx = int((X1 - X0) * kh), int((Y1 - Y0) * kh)
+    dens = DENSITY.get(city, 1.0)
+    wpx, hpx = int((X1 - X0) * kh * dens), int((Y1 - Y0) * kh * dens)
     scale = min(1.0, 5200 / max(wpx, hpx))  # cap the texture size
     wpx, hpx = int(wpx * scale), int(hpx * scale)
     mx0, my1 = world_to_merc(X0, Y0); mx1, my0 = world_to_merc(X1, Y1)
@@ -194,13 +228,15 @@ def bake(city, frames, plan):
         used += info
     # fill swath-edge holes from other passes in each tile's candidate pool (colour-matched on a ring around the hole)
     from scipy.ndimage import binary_dilation
-    for tl in sorted(tiles):
-        if have.all():
+    for tl in (sorted(tiles) if city not in SAT_FROM else []):  # regional views: holes are open sea, patched by tools/patch_holes.py --window
+        if (~have).sum() < 0.002 * have.size:
             break
+        tries = 0
         for sc in [x for x in pools.get(tl, []) if x not in bests[tl]]:
             holes = ~have
-            if holes.sum() < 200:
+            if holes.sum() < 0.002 * have.size or tries >= 8:
                 break
+            tries += 1
             try:
                 scl = read_into(f"{BUCKET}/{sc['prefix']}SCL.tif", (hpx, wpx), tr, Resampling.nearest)[0]
             except Exception:
@@ -210,7 +246,10 @@ def bake(city, frames, plan):
                 continue
             ys, xs = np.nonzero(m)
             y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-            tci = read_into(f"{BUCKET}/{sc['prefix']}TCI.tif", (y1 - y0, x1 - x0), tr * Affine.translation(x0, y0), Resampling.bilinear)
+            try:
+                tci = read_into(f"{BUCKET}/{sc['prefix']}TCI.tif", (y1 - y0, x1 - x0), tr * Affine.translation(x0, y0), Resampling.bilinear)
+            except Exception:
+                continue
             img = tci.transpose(1, 2, 0).astype(np.float32)
             mc = m[y0:y1, x0:x1] & (img.sum(-1) > 0)
             ring = binary_dilation(mc, iterations=25) & have[y0:y1, x0:x1] & (img.sum(-1) > 0)
@@ -233,7 +272,7 @@ def bake(city, frames, plan):
     os.makedirs(os.path.join(ROOT, "assets", "sat"), exist_ok=True)
     rgba = Image.fromarray(img).convert("RGBA"); rgba.putalpha(alpha)
     rgba.save(os.path.join(ROOT, "assets", "sat", f"{city}.webp"), "WEBP", quality=86, method=4)
-    return dict(id=city, file=f"assets/sat/{city}.webp", world=[X0, Y0, X1, Y1], px=[wpx, hpx], kHold=kh,
+    return dict(id=city, file=f"assets/sat/{city}.webp", world=[X0, Y0, X1, Y1], px=[wpx, hpx], kHold=kh, kFrom=SAT_FROM.get(city, 0.52),
                 coverage=round(float(have.mean()), 4), scenes=used)
 
 
@@ -248,4 +287,4 @@ if __name__ == "__main__":
         print(cid, "coverage", man[cid]["coverage"], flush=True)
         json.dump(man, open(man_fn, "w"), indent=1)
     with open(os.path.join(ROOT, "data", "sat.js"), "w") as fh:
-        fh.write("/* generated by tools/bake_satellite.py */\nwindow.__SAT=" + json.dumps({k: {kk: v[kk] for kk in ("file", "world", "px", "kHold")} for k, v in man.items()}) + ";\n")
+        fh.write("/* generated by tools/bake_satellite.py */\nwindow.__SAT=" + json.dumps({k: {kk: v.get(kk, 0.52) if kk == "kFrom" else v[kk] for kk in ("file", "world", "px", "kHold", "kFrom")} for k, v in man.items()}) + ";\n")

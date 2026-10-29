@@ -80,12 +80,12 @@ __ACTING__
         const Pf = PERF(t);
         const acc = accents(t);
         const still = 1 - sm((t - (D - 0.55)) / 0.4);
-        const id = idle(t, 17); for (const k in id) id[k] = id[k].map((x) => x * still);
-        const bones = add(Pf.bones, id, EXTRA(t), { head: [0.05 * acc * still, 0, 0], neck: [0.02 * acc * still, 0, 0] });
-        const root = { x: Pf.root.x, y: Pf.root.y + V.ty + (typeof BOB === "function" ? BOB(t) : 0), ry: Pf.root.ry + V.ry + 0.025 * vnoise(t, 26, 0.22) * still, rz: Pf.root.rz + V.rz, rx: V.rx, s: Pf.root.s };
-        mascot.setView({ fx: V.fx, fy: V.fy, h: V.h, yaw: V.yaw, pitch: V.pitch });
-        const bl = M3.blink(t, 0, D, 3);
-        mascot.setState({ root, bones, face: { blink: [bl, bl], mouthMix: 1, mouth: mouthAt(t) } });
+        const id = M3.micro(t, 17, vnoise); for (const k in id) id[k] = id[k].map((x) => x * still);
+        const bones = add(Pf.bones, id, EXTRA(t), { head: [0.03 * acc * still, 0, 0], neck: [0.012 * acc * still, 0, 0] });
+        const root = { x: Pf.root.x, y: Pf.root.y + V.ty + (typeof BOB === "function" ? BOB(t) : 0), ry: Pf.root.ry + V.ry + 0.008 * vnoise(t, 26, 0.18) * still, rz: Pf.root.rz + V.rz, rx: V.rx, s: Pf.root.s };
+        mascot.setView({ fx: V.fx, fy: V.fy, h: V.h, yaw: V.yaw * 0.1, pitch: V.pitch });   // user rule: he always faces the viewer (scene yaws kept only as a hint)
+        const bl = M3.blink(t, 0, D, 3, DIR.blinks);
+        mascot.setState({ root, bones, face: { blink: [bl, bl], gaze: DIR.gaze(t), mouthMix: 1, mouth: mouthAt(t) } });
         mascot.render();
       }
 

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>MasterPajak AI — website preview motion</title>
+<style>
+@font-face { font-family: Rubik; src: url(fonts/rubik-latin-400-normal.woff2); font-weight: 400; }
+@font-face { font-family: Rubik; src: url(fonts/rubik-latin-500-normal.woff2); font-weight: 500; }
+@font-face { font-family: Rubik; src: url(fonts/rubik-latin-600-normal.woff2); font-weight: 600; }
+@font-face { font-family: Rubik; src: url(fonts/rubik-latin-700-normal.woff2); font-weight: 700; }
+@font-face { font-family: Rubik; src: url(fonts/rubik-latin-800-normal.woff2); font-weight: 800; }
+:root {
+  --navy: #212C5F; --ink: #161D3A; --deep: #131B40; --soft: #26367A; --yellow: #FED111;
+  --muted: #5A6180; --line: #E6E8EF; --surface: #F3F4F8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: transparent; font-family: Rubik, sans-serif; -webkit-font-smoothing: antialiased; }
+body.green { background: #00FF00; }
+
+#stage { position: absolute; inset: 0; perspective: 2600px; perspective-origin: 960px 520px; }
+#win { position: absolute; left: 240px; top: 68px; width: 1440px; height: 944px; transform-style: preserve-3d; transform-origin: 720px 472px; will-change: transform; }
+#frame { position: absolute; inset: 0; border-radius: 22px; background: #fff; overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(22, 29, 58, 0.10), inset 0 1px 0 rgba(255,255,255,0.9); }
+#chrome { position: absolute; left: 0; top: 0; right: 0; height: 44px; background: linear-gradient(#F7F8FB, #EEF0F5); border-bottom: 1px solid #E1E4EC; }
+#chrome .dot { position: absolute; top: 16px; width: 12px; height: 12px; border-radius: 6px; background: #CDD1DC; }
+#chrome .url { position: absolute; left: 50%; top: 9px; transform: translateX(-50%); width: 420px; height: 26px; border-radius: 13px; background: #fff;
+  box-shadow: inset 0 0 0 1px #E1E4EC; font-size: 13.5px; color: #4A5170; display: flex; align-items: center; justify-content: center; gap: 7px; letter-spacing: .2px; }
+#viewport { position: absolute; left: 0; top: 44px; width: 1440px; height: 900px; overflow: hidden; background: #fff; }
+#page { position: absolute; left: 0; top: 0; width: 1440px; height: 1330px; will-change: transform; }
+#nav { position: absolute; left: 0; top: 0; width: 1440px; height: 58px; background: #FFFFFF; border-bottom: 1px solid #ECEEF3; z-index: 5; }
+.abs { position: absolute; }
+.mark { width: 30px; height: 30px; }
+.navlink { font-size: 15px; color: #5A6180; }
+.btn-navy { background: var(--navy); color: #fff; border-radius: 6px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn-line { border: 1.5px solid var(--navy); color: var(--ink); border-radius: 6px; font-weight: 600; display: flex; align-items: center; justify-content: center; background: #fff; }
+h1.hero { font-weight: 700; font-size: 52px; line-height: 57px; color: var(--ink); letter-spacing: -1.2px; }
+.hl { position: relative; display: inline-block; z-index: 0; }
+.hl i { position: absolute; left: -2px; right: -2px; bottom: 5px; height: 17px; background: var(--yellow); z-index: -1; transform-origin: 0 50%; }
+p.lead { font-size: 17.5px; line-height: 30px; color: #4E5573; width: 440px; }
+.check { font-size: 13.5px; color: #4E5573; display: flex; align-items: center; gap: 7px; }
+.check svg { width: 14px; height: 14px; }
+#video { border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #24306C 0%, #1A2452 55%, #131B40 100%); }
+#video .stripes { position: absolute; inset: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,0.035) 0 22px, transparent 22px 44px); }
+#video .glow { position: absolute; left: 30%; top: -20%; width: 70%; height: 90%; background: radial-gradient(closest-side, rgba(70,90,190,0.45), transparent); }
+.eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: 3px; color: var(--navy); }
+h2.sec { font-weight: 700; font-size: 45px; letter-spacing: -1px; color: var(--ink); white-space: nowrap; }
+h2.sec .blue { color: var(--soft); }
+.bubble { background: #fff; border: 1px solid #E3E6EE; border-radius: 10px; font-size: 13.5px; line-height: 21px; color: #2B3250; padding: 12px 16px; box-shadow: 0 6px 18px rgba(20,30,70,0.06); }
+
+/* overlay layer (lives in window space, floats in front of the page) */
+.callout { position: absolute; width: 440px; padding: 24px 28px 26px; border-radius: 20px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(33,44,95,0.10), 0 24px 60px rgba(19,27,64,0.22), 0 6px 16px rgba(19,27,64,0.10); transform-style: preserve-3d; }
+.callout .tag { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; letter-spacing: 2.4px; color: var(--navy); background: #FFF6CC; border-radius: 999px; padding: 6px 12px 6px 8px; }
+.callout .tag b { width: 16px; height: 16px; border-radius: 8px; background: var(--yellow); display: inline-block; }
+.callout h3 { margin-top: 14px; font-size: 31px; line-height: 36px; font-weight: 700; color: var(--ink); letter-spacing: -.4px; }
+.callout p { margin-top: 9px; font-size: 18px; line-height: 26px; color: #4E5573; }
+.callout .bar { position: absolute; left: 24px; right: 24px; bottom: 0; height: 4px; border-radius: 2px 2px 0 0; background: var(--navy); transform-origin: 0 50%; }
+.callout .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 30%; background: var(--yellow); }
+.lift { position: absolute; pointer-events: none; }
+.ring { position: absolute; border-radius: 50%; border: 3px solid var(--yellow); }
+#cursor { position: absolute; left: 0; top: 0; width: 34px; height: 40px; transform-origin: 4px 3px; }
+svg.conn { position: absolute; left: 0; top: 0; width: 1440px; height: 944px; overflow: visible; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="win">
+    <div id="frame">
+      <div id="chrome">
+        <div class="dot" style="left:18px"></div><div class="dot" style="left:38px"></div><div class="dot" style="left:58px"></div>
+        <div class="url"><svg width="11" height="13" viewBox="0 0 11 13"><rect x="1" y="5.5" width="9" height="7" rx="1.6" fill="#4A5170"/><path d="M3 5.6V4a2.5 2.5 0 015 0v1.6" stroke="#4A5170" stroke-width="1.5" fill="none"/></svg>masterpajak.ai</div>
+      </div>
+      <div id="viewport">
+        <div id="page">
+          <!-- HERO -->
+          <div class="abs" id="h-l1" style="left:236px;top:120px"><h1 class="hero">Konsultan pajak</h1></div>
+          <div class="abs" id="h-l2" style="left:236px;top:177px"><h1 class="hero">24 jam, <span class="hl"><i id="m1"></i>harga</span></h1></div>
+          <div class="abs" id="h-l3" style="left:236px;top:234px"><h1 class="hero"><span class="hl"><i id="m2"></i>ratusan ribu.</span></h1></div>
+          <p class="lead abs" id="lead" style="left:236px;top:318px">Cukup foto nota dan unggah ke sistem. MasterPajak AI yang membukukan, menghitung pajak, dan menyiapkan laporan siap unggah ke Coretax, 24/7.</p>
+          <div class="abs btn-navy" id="b-buy" style="left:237px;top:428px;width:166px;height:46px;font-size:16.5px">Beli sekarang <svg width="13" height="12" viewBox="0 0 13 12"><path d="M1 6h10M7 2l4 4-4 4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="abs btn-line" id="b-calc" style="left:419px;top:427px;width:186px;height:48px;font-size:16.5px">Hitung pajak gratis</div>
+          <div class="abs" id="hr" style="left:236px;top:503px;width:437px;height:1px;background:#E3E6EE"></div>
+          <div class="abs" id="checks" style="left:236px;top:528px;display:flex;gap:20px">
+            <div class="check" id="c1"><svg viewBox="0 0 14 14"><path d="M2 7.4l3.2 3.1L12 3.6" stroke="#212C5F" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Diawasi Master Pajak</div>
+            <div class="check" id="c2"><svg viewBox="0 0 14 14"><path d="M2 7.4l3.2 3.1L12 3.6" stroke="#212C5F" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Siap Coretax</div>
+            <div class="check" id="c3"><svg viewBox="0 0 14 14"><path d="M2 7.4l3.2 3.1L12 3.6" stroke="#212C5F" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Garansi 7 hari</div>
+          </div>
+          <div class="abs" id="video" style="left:745px;top:202px;width:459px;height:258px">
+            <div class="stripes"></div><div class="glow"></div>
+            <div class="abs" style="left:184px;top:51px;width:91px;height:91px;border-radius:50%;background:rgba(255,255,255,0.10);box-shadow:0 0 0 1px rgba(255,255,255,0.08)"></div>
+            <div class="abs" id="play" style="left:193px;top:60px;width:73px;height:73px;border-radius:50%;background:#FED111;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 9px rgba(20,24,40,0.55)">
+              <svg width="26" height="28" viewBox="0 0 26 28"><path d="M5 3.5v21a1.6 1.6 0 002.4 1.4l17-10.5a1.6 1.6 0 000-2.8l-17-10.5A1.6 1.6 0 005 3.5z" fill="#131B40"/></svg></div>
+            <div class="abs" style="left:0;width:459px;top:156px;text-align:center;color:#fff;font-weight:700;font-size:16.5px">Video demo MasterPajak AI</div>
+            <div class="abs" style="left:0;width:459px;top:185px;text-align:center;color:rgba(255,255,255,0.85);font-size:13.5px">Segera tersedia</div>
+          </div>
+
+          <!-- SECTION 2 -->
+          <div class="abs eyebrow" id="eyebrow" style="left:0;width:1440px;top:752px;text-align:center">MASTERPAJAK AI</div>
+          <div class="abs" id="h2" style="left:0;width:1440px;top:782px;text-align:center"><h2 class="sec">Jualan jalan terus, <span class="hl blue"><i id="m3"></i>pajaknya AI yang urus.</span></h2></div>
+          <div class="abs" id="mascotWrap" style="left:555px;top:878px;width:330px;height:400px">
+            <svg class="abs" style="left:0;top:0" width="330" height="400" viewBox="0 0 330 400">
+              <defs>
+                <radialGradient id="disc" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#F7F8FB"/><stop offset="1" stop-color="#EEF0F5"/></radialGradient>
+                <linearGradient id="headG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E9ECF3"/></linearGradient>
+                <linearGradient id="bodyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3772"/><stop offset="1" stop-color="#1A2350"/></linearGradient>
+                <radialGradient id="shadow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="rgba(20,28,60,0.20)"/><stop offset="1" stop-color="rgba(20,28,60,0)"/></radialGradient>
+              </defs>
+              <circle cx="165" cy="188" r="160" fill="url(#disc)"/>
+              <circle cx="165" cy="188" r="146" fill="none" stroke="#D3D7E2" stroke-width="1.4" stroke-dasharray="4 5"/>
+              <ellipse cx="165" cy="378" rx="80" ry="9" fill="url(#shadow)"/>
+            </svg>
+            <svg class="abs" id="robot" style="left:0;top:0" width="330" height="400" viewBox="0 0 330 400">
+              <g id="rbAll">
+                <line x1="165" y1="24" x2="165" y2="56" stroke="#C9CEDB" stroke-width="4" stroke-linecap="round"/>
+                <circle id="antenna" cx="165" cy="20" r="8.5" fill="#FED111"/>
+                <rect x="95" y="52" width="140" height="112" rx="50" fill="url(#headG)" stroke="#E1E4EC"/>
+                <rect x="82" y="92" width="14" height="38" rx="6" fill="#212C5F"/>
+                <rect x="234" y="92" width="14" height="38" rx="6" fill="#212C5F"/>
+                <rect x="109" y="74" width="112" height="70" rx="30" fill="#161D3A"/>
+                <g id="eyes"><circle cx="143" cy="103" r="10.5" fill="#FED111"/><circle cx="187" cy="103" r="10.5" fill="#FED111"/></g>
+                <path d="M152 124q13 9 26 0" stroke="#FED111" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <rect x="152" y="162" width="26" height="12" rx="4" fill="#161D3A"/>
+                <rect id="armL" x="78" y="196" width="30" height="96" rx="15" fill="#212C5F"/>
+                <rect id="armR" x="222" y="196" width="30" height="96" rx="15" fill="#212C5F"/>
+                <circle cx="93" cy="300" r="13" fill="#F1F3F8" stroke="#DDE1EA"/>
+                <circle cx="237" cy="300" r="13" fill="#F1F3F8" stroke="#DDE1EA"/>
+                <rect x="104" y="172" width="122" height="152" rx="40" fill="url(#bodyG)"/>
+                <rect x="138" y="210" width="54" height="54" rx="14" fill="#141B40"/>
+                <path d="M150 252V222l15 17" stroke="#FFFFFF" stroke-width="6.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M165 239l15-17v30" stroke="#FED111" stroke-width="6.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="165" cy="300" r="4" fill="#C3A20E"/>
+              </g>
+            </svg>
+          </div>
+          <div class="abs bubble" id="bubble" style="left:792px;top:892px;width:212px">Halo! Saya Master, asisten pajak AI Anda.</div>
+        </div>
+        <!-- sticky nav -->
+        <div id="nav">
+          <svg class="abs mark" style="left:236px;top:14px" viewBox="0 0 100 100"><path d="M14 86V14l36 43" stroke="#212C5F" stroke-width="17" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 57l36-43v72" stroke="#FED111" stroke-width="17" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="abs" style="left:278px;top:16px;font-size:21px;font-weight:600;color:var(--navy)">MasterPajak AI</div>
+          <div class="abs navlink" style="left:660px;top:19px">Kalkulator gratis</div>
+          <div class="abs navlink" style="left:798px;top:19px">Klinik Master</div>
+          <div class="abs navlink" style="left:911px;top:19px">Harga</div>
+          <div class="abs navlink" style="left:974px;top:19px">FAQ</div>
+          <div class="abs" style="left:1034px;top:20px;font-size:13.5px;font-weight:600;color:var(--ink)">Masuk</div>
+          <div class="abs btn-navy" id="b-nav" style="left:1096px;top:13px;width:108px;height:31px;font-size:13.5px;border-radius:5px">Beli sekarang</div>
+        </div>
+      </div>
+    </div>
+    <!-- window-space overlays -->
+    <svg class="conn" id="conn"><path id="connPath" d="" stroke="#FED111" stroke-width="3" fill="none" stroke-linecap="round"/><circle id="connDot" r="6" fill="#FED111" stroke="#212C5F" stroke-width="2.5"/></svg>
+    <div id="liftLayer"></div>
+    <div class="callout" id="callout"><div class="tag"><b></b><span id="cTag">FITUR 01</span></div><h3 id="cTitle"></h3><p id="cDesc"></p><div class="bar"><i></i></div></div>
+    <div class="ring" id="ring"></div>
+    <svg id="cursor" viewBox="0 0 34 40"><path d="M4 3l0 28 7.6-6.8 5.2 11.6 5.6-2.5-5.2-11.4 10.4-0.6z" fill="#fff" stroke="#161D3A" stroke-width="2.4" stroke-linejoin="round"/></svg>
+  </div>
+</div>
+<script type="module" src="main.js"></script>
+</body>
+</html>

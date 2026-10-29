@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import * as Acting from './acting.js';
 import * as Perform from './perform.js';
+import * as Direct from './direct.js';
 
 const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
 
@@ -397,4 +398,4 @@ vRest = position;
     if (this.visible) this.renderer.render(this.scene, this.cam);
   }
 }
-window.Mascot3D = { Mascot, ...Acting, ...Perform };
+window.Mascot3D = { Mascot, ...Acting, ...Perform, ...Direct };

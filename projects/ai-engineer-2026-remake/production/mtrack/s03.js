@@ -1,9 +1,9 @@
 vt.set(V, {"fx": 930, "fy": 1900, "h": 780, "yaw": -40, "pitch": 6}, 13.3);
 vt.fromTo(V, {"fx": 930, "fy": 1900, "h": 780, "yaw": -40, "pitch": 6}, {"fx": 930, "fy": 1900, "h": 780, "yaw": -30, "pitch": 6, "duration": 0.8, "ease": "sine.inOut", "immediateRender": false}, 13.3);
 vt.set(V, {"fx": 930, "fy": 1900, "h": 780, "yaw": -20, "pitch": 6}, 14.66);
-vt.fromTo(V, {"fx": 930, "fy": 1900, "h": 780, "yaw": -20, "pitch": 6}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 14.66);
-vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4, "duration": 1.65, "ease": "sine.inOut", "immediateRender": false}, 15.16);
-vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 1.65, "ease": "sine.inOut", "immediateRender": false}, 16.81);
+vt.fromTo(V, {"fx": 930, "fy": 1900, "h": 780, "yaw": -20, "pitch": 6}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0.0, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 14.66);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0.0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 1.65, "ease": "sine.inOut", "immediateRender": false}, 15.16);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 1.65, "ease": "sine.inOut", "immediateRender": false}, 16.81);
 vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4}, {"fx": 900, "fy": 1890, "h": 820, "yaw": -32, "pitch": 6, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 18.46);
 vt.set(V, {"fx": 900, "fy": 1890, "h": 820, "yaw": -32, "pitch": 6}, 18.96);
 vt.fromTo(V, {"fx": 900, "fy": 1890, "h": 820, "yaw": -32, "pitch": 6}, {"fx": 900, "fy": 1890, "h": 820, "yaw": -36, "pitch": 6, "duration": 1.2, "ease": "sine.inOut", "immediateRender": false}, 18.96);

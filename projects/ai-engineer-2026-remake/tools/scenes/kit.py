@@ -11,8 +11,8 @@ EXPLAIN_BAND = (420, 548)   # free band between the caption card and his hair: e
 HALF_IN = dict(HALF, fy=2080, h=1420)                                 # entry pose for the dolly-in to HALF (no caption overlap)
 MED = {"fx": 540, "fy": 1960, "h": 1420, "yaw": 0, "pitch": 5}       # medium: knees-up, hair top ~540
 WIDE = {"fx": 540, "fy": 1640, "h": 980, "yaw": 0, "pitch": 5}       # full body on the workbench floor (feet ~1640)
-SIDE_L = {"fx": 230, "fy": 1700, "h": 880, "yaw": 24, "pitch": 6}    # demonstrating: small, lower-left, turned to the machine
-SIDE_R = {"fx": 850, "fy": 1700, "h": 880, "yaw": -24, "pitch": 6}   # demonstrating: small, lower-right
+SIDE_L = {"fx": 230, "fy": 1700, "h": 880, "yaw": 0, "pitch": 6}    # demonstrating: small, lower-left, turned to the machine
+SIDE_R = {"fx": 850, "fy": 1700, "h": 880, "yaw": 0, "pitch": 6}   # demonstrating: small, lower-right
 FLOOR_Y = 1640
 CORE = (540, 1080)          # the AI core always sits at screen centre x (continuity anchor)
 NO_FILTER = "drop-shadow(0px 0px 0px rgba(0,208,254,0))"
@@ -66,7 +66,7 @@ def talk(S, i0, i1, seed=0, both=True, rest=True, every=2):
             S.act(tr, keys)
 
 
-def explain(S, t_in, t_out, i0, i1, seed=0, enter=None, leave=None, yaw_sway=4):
+def explain(S, t_in, t_out, i0, i1, seed=0, enter=None, leave=None, yaw_sway=0):
     """full explain beat: dolly in to HALF at t_in (from `enter` view), talk on words i0..i1, then (if leave) step back
     to `leave` at t_out. Background must be blur_wrap'ed; blurs in with the dolly, sharpens as he steps back."""
     enter = enter or HALF_IN

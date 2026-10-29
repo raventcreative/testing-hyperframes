@@ -196,16 +196,16 @@ body{{font-family:"Poppins",sans-serif;-webkit-font-smoothing:antialiased}}
   const tracks = {{
     armR: [[0, PO.rest, 0.3], [4.36, PO.open, 0.45], [4.98, PO.restIn, 0.5]],          // his right arm -> screen-left (the broken path)
     armL: [[0, PO.rest, 0.3], [4.5, PO.restIn, 0.55]],
-    head: [[0, [0, 0, 0], 0.3], [4.12, [-0.07, -0.24, -0.04], 0.36], [4.86, [0.0, 0.04, 0.04], 0.42], [5.12, [0.07, 0.03, 0.02], 0.16], [5.28, [0.0, 0.03, 0.02], 0.25]],
-    torso: [[0, {{}}, 0.3], [4.24, {{ chest: [0.02, -0.09, -0.015], spine: [0.015, -0.035, 0] }}, 0.45], [4.95, {{ chest: [0.012, 0.015, 0] }}, 0.5]],
-    root: [[0, {{ x: 0, y: 0, ry: 0, rz: 0 }}, 0.3], [4.3, {{ ry: -0.05 }}, 0.5], [4.95, {{ ry: 0.0, rz: 0.008 }}, 0.6]],
+    head: [[0, [0, 0, 0], 0.3], [4.12, [-0.05, -0.04, -0.04], 0.36], [4.86, [0.0, 0.04, 0.04], 0.42], [5.12, [0.07, 0.03, 0.02], 0.16], [5.28, [0.0, 0.03, 0.02], 0.25]],
+    torso: [[0, {{}}, 0.3], [4.24, {{ chest: [0.02, -0.03, -0.015], spine: [0.015, -0.01, 0] }}, 0.45], [4.95, {{ chest: [0.012, 0.015, 0] }}, 0.5]],
+    root: [[0, {{ x: 0, y: 0, ry: 0, rz: 0 }}, 0.3], [4.3, {{ ry: 0 }}, 0.5], [4.95, {{ ry: 0.0, rz: 0.008 }}, 0.6]],
   }};
   const perf = M3.buildPerformance(tracks, D + 0.05);
-  const gk = [[0, 0, 0], [4.02, -1, 0.75], [4.76, 0, 0]];
+  const gk = [[0, 0, 0]];
   const ss = (u) => {{ u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); }};
   function gaze(t) {{ let i = 0; while (i < gk.length - 1 && gk[i + 1][0] <= t) i++; const a = gk[i], p = gk[i - 1] || a, u = ss((t - a[0]) / 0.14);
     return [0.0036 * (p[1] + (a[1] - p[1]) * u), 0.0026 * (p[2] + (a[2] - p[2]) * u)]; }}
-  const V0 = {{ fx: 540, fy: 2700, h: 1500, yaw: 0, pitch: 4 }}, V1 = {{ fx: 540, fy: 2150, h: 1560, yaw: -4, pitch: 4 }}, V2 = {{ fx: 540, fy: 2150, h: 1580, yaw: 0, pitch: 4 }};
+  const V0 = {{ fx: 540, fy: 2700, h: 1500, yaw: 0, pitch: 4 }}, V1 = {{ fx: 540, fy: 2150, h: 1560, yaw: 0, pitch: 4 }}, V2 = {{ fx: 540, fy: 2150, h: 1580, yaw: 0, pitch: 4 }};
   const eo = (u) => 1 - Math.pow(1 - Math.max(0, Math.min(1, u)), 3);
   function view(t) {{
     const u = eo((t - 4.08) / 0.55), w = ss((t - 4.7) / 0.8);

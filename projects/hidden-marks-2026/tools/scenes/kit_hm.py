@@ -5,6 +5,10 @@ brushed aluminium / frosted glass / printed paper. Key light upper-left, contact
 from xk import box, r3
 from kit import MAT, NAVY, chip, part, HALF, HALF_IN, MED, WIDE, SIDE_L, SIDE_R, blur_wrap, blur_in, blur_out  # noqa: F401
 
+# the audience is in front: side placements keep the body almost square to camera (kit's 24 deg turned him sideways)
+SIDE_L = dict(SIDE_L, yaw=0)
+SIDE_R = dict(SIDE_R, yaw=0)
+
 INK = "linear-gradient(100deg,#0A0D2C 0%,#294B77 100%)"
 GLOW_REST = "0 0 0 1px rgba(170,205,255,.22), 0 0 14px rgba(41,75,119,.22), 0 18px 30px -16px rgba(10,13,44,.45)"
 GLOW_PEAK = "0 0 0 2px rgba(200,225,255,.6), 0 0 26px rgba(80,135,215,.30), 0 18px 30px -16px rgba(10,13,44,.45)"

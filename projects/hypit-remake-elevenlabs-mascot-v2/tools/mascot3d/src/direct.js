@@ -87,6 +87,8 @@ export function direct(words, D, opts = {}) {
     else { last.words.push(w); last.e = w.e; }
   }
   const HS = opts.headSign ?? 1, GS = opts.gazeSign ?? 1, EN = opts.energy ?? 1;
+  // the audience is in front: turns toward a prop are short glances (scaled by `look`) and he comes back to camera
+  const LOOK = opts.look ?? 0;   // 0 = face and eyes stay on the viewer (user rule); hands still point at props
   const quiet = opts.quiet ?? 0.28;
   const intents = (opts.intents || []).slice().sort((a, b) => a.t - b.t);
   const tracks = { armL: [[0, 'rest', 0.4]], armR: [[0, 'rest', 0.4]], head: [[0, [0, 0, 0], 0.4]], torso: [[0, {}, 0.4]], root: [[0, { x: 0, y: 0, ry: 0, rz: 0 }, 0.4]] };
@@ -131,14 +133,15 @@ export function direct(words, D, opts = {}) {
       if (gap > 1.0 || !next) { armKey(side, end + 0.55, 'rest', 0.6); armKey(offSide, end + 0.5, 'rest', 0.6); }
     } else if (gap > 1.2) { armKey('left', end + 0.3, 'rest', 0.6); armKey('right', end + 0.35, 'rest', 0.6); }
     // head leads the arm; nods on keywords; returns toward camera while still talking
-    const [hx, hy, hz] = A.head;
+    const [hx, hy0, hz] = A.head; const hy = hy0 * LOOK;
+    const back = A.look ?? 0.32;
     const lead = apex - 0.42;
     tracks.head.push([lead, [hx * EN, HS * sgn * hy * EN, sgn * hz * EN], 0.38]);
-    if (A.look) tracks.head.push([apex + A.look, [hx * 0.4, HS * sgn * hy * 0.3, sgn * hz * 0.5], 0.5]);
+    tracks.head.push([apex + back, [hx * 0.4, 0, sgn * hz * 0.5], 0.45]);   // back to the viewer
     for (const w of ph.words) if (w.key || A.nod) {
       if (w.s < apex - 0.1) continue;
-      tracks.head.push([w.s - 0.05, [hx + 0.07 * (A.nod ? 1 : 0.6), HS * sgn * hy * 0.5, sgn * hz * 0.6], 0.16]);
-      tracks.head.push([w.s + 0.16, [hx * 0.6, HS * sgn * hy * 0.45, sgn * hz * 0.5], 0.3]);
+      tracks.head.push([w.s - 0.05, [hx + 0.07 * (A.nod ? 1 : 0.6), 0, sgn * hz * 0.6], 0.16]);
+      tracks.head.push([w.s + 0.16, [hx * 0.6, 0, sgn * hz * 0.5], 0.3]);
       if (!A.nod) break;
     }
     if (act === 'emphasize' && /\b(jangan|bukan|gak|nggak|tidak)\b/.test(text)) {   // small "no" head shake
@@ -146,15 +149,16 @@ export function direct(words, D, opts = {}) {
       [[0, 0.07], [0.16, -0.07], [0.32, 0.04], [0.46, 0]].forEach(([d, y]) => tracks.head.push([t0 + d, [hx, HS * y, 0], 0.15]));
     }
     if (gap > 0.7) tracks.head.push([end + 0.2, [0, 0, 0], 0.6]);
-    if (Math.abs(hy) > 0.12) blinks.push(lead + 0.02);                          // people blink on big head turns
+    if (Math.abs(hy0) > 0.15) blinks.push(lead + 0.02);                          // people blink on big head turns
     // eyes lead the head
     const [gx, gy] = A.gaze;
-    gazeKeys.push([lead - 0.12, GS * sgn * gx, gy]);
-    if (A.look) gazeKeys.push([apex + A.look - 0.1, 0, 0]);
-    if (A.swap) { gazeKeys.push([apex + A.swap - 0.12, -GS * sgn * gx, gy]); tracks.head.push([apex + A.swap - 0.08, [hx, -HS * sgn * hy * 0.8, -sgn * hz], 0.4]); }
+    gazeKeys.push([lead - 0.12, GS * sgn * gx * LOOK * 1.3, gy * 0.6 * LOOK]);
+    gazeKeys.push([apex + back - 0.12, 0, 0]);
+    if (A.swap) { gazeKeys.push([apex + A.swap - 0.12, -GS * sgn * gx * LOOK * 1.3, gy * 0.6]); gazeKeys.push([apex + A.swap + 0.3, 0, 0]);
+      tracks.head.push([apex + A.swap - 0.08, [hx, -HS * sgn * hy * 0.8, -sgn * hz], 0.4]); tracks.head.push([apex + A.swap + 0.42, [hx * 0.4, 0, 0], 0.45]); }
     if (gap > 0.6) gazeKeys.push([end + 0.1, 0, 0]);
     // torso follows the arm (chest toward the gesture), weight shifts between lines
-    const ch = A.chest * EN;
+    const ch = A.chest * EN * 0.6;
     tracks.torso.push([apex - 0.3, { chest: [0.02 * EN, HS * sgn * ch, sgn * 0.015], spine: [0.015, HS * sgn * ch * 0.4, 0], hips: [0, 0, 0] }, 0.5]);
     if (A.swap) tracks.torso.push([apex + A.swap - 0.1, { chest: [0.02, -HS * sgn * ch, -sgn * 0.015], spine: [0.015, -HS * sgn * ch * 0.4, 0] }, 0.5]);
     if (gap > 0.7) tracks.torso.push([end + 0.25, {}, 0.7]);

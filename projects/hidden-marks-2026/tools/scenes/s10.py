@@ -24,7 +24,7 @@ def build(S):
     S.ft(f"#{s}-q", {"opacity": 0, "scale": 0.6}, {"opacity": 1, "scale": 1}, W(112), 0.35, "back.out(1.8)")
     # mascot: watches from the right, then steps forward for the disclaimer
     S.mv([(S.t0, dict(SIDE_R, fx=910, fy=1820, h=860), None), (W(114) - 0.2, dict(SIDE_R, fx=910, fy=1820, h=860), None),
-          (W(114) + 0.35, dict(HALF, yaw=-3), "power3.inOut"), (S.t1, dict(HALF, yaw=2), "sine.inOut")])
+          (W(114) + 0.35, dict(HALF, yaw=0), "power3.inOut"), (S.t1, dict(HALF, yaw=0), "sine.inOut")])
     blur_in(S, W(114) - 0.1, 0.45)
     stamp_in(S, f"{s}-st", W(115))
     S.intent(W(109), "thinking", "left")

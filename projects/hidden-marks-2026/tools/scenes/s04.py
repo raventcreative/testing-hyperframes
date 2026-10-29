@@ -38,7 +38,7 @@ def build(S):
     # he rises into frame from below (no wrapper opacity fade: a partially transparent 3D-filtered WebGL layer
     # stalls Chrome's software compositor during capture)
     S.mv([(S.t0, dict(HALF_IN, fy=3500, vis=1), None), (W(48) - 0.5, dict(HALF_IN, fy=3500, vis=1), None),
-          (W(48) - 0.02, dict(HALF, yaw=-3), "power3.out"), (S.t1, dict(HALF, yaw=2), "sine.inOut")])
+          (W(48) - 0.02, dict(HALF, yaw=0), "power3.out"), (S.t1, dict(HALF, yaw=0), "sine.inOut")])
     # background softens by fading the pixel plate (a CSS blur on this huge 3D plate stalls Chrome's software renderer)
     S.ft(m, {"opacity": 1}, {"opacity": 0.42}, W(48) - 0.45, 0.45, "power2.inOut")
     stamp_in(S, f"{s}-st", W(50))

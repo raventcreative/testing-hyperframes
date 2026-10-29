@@ -18,7 +18,6 @@ def build(S):
     S.back.append(f'<div class="abs" id="{s}-macro" style="{box(-60, 420, 1200, 1300)}border-radius:40px;{ART}overflow:hidden">'
                   f'<div class="abs" style="inset:0;{BIG_PIX}"></div><div class="abs" id="{s}-sig" style="inset:0;{BIG_SIG}"></div></div>')
     S.back.append(chip(f"{s}-lab", 250, 1500, "WATERMARK DI KONTEN", dark=True, size=34))
-    blur_wrap(S)
     S.front.append(f'<div class="abs" id="{s}-badge" style="{box(720, 380, 200, 124)}border-radius:16px;{MAT["porcelain"]}">'
                    f'<div class="abs" style="left:18px;top:16px;font:700 32px/1 Poppins;color:#0A0D2C">C2PA</div>'
                    f'<div class="abs" style="left:18px;top:62px;width:130px;height:10px;border-radius:5px;background:rgba(41,75,119,.3)"></div></div>')
@@ -36,10 +35,12 @@ def build(S):
     S.init(f"#{s}-lab", {"opacity": 0, "y": 30})
     S.ft(f"#{s}-lab", {"opacity": 0, "y": 30}, {"opacity": 1, "y": 0}, W(42), 0.4, "power3.out")
     # mascot steps in front, background softens
-    S.mv([(S.t0, dict(HALF_IN, vis=0), None), (W(48) - 0.5, dict(HALF_IN, vis=1), None), (W(48) - 0.05, dict(HALF, yaw=-3), "power3.inOut"),
-          (S.t1, dict(HALF, yaw=2), "sine.inOut")])
-    S.mx([(S.t0, {"opacity": 0}, None), (W(48) - 0.5, {"opacity": 0}, None), (W(48) - 0.2, {"opacity": 1}, "power2.out")])
-    blur_in(S, W(48) - 0.45, 0.45)
+    # he rises into frame from below (no wrapper opacity fade: a partially transparent 3D-filtered WebGL layer
+    # stalls Chrome's software compositor during capture)
+    S.mv([(S.t0, dict(HALF_IN, fy=3500, vis=1), None), (W(48) - 0.5, dict(HALF_IN, fy=3500, vis=1), None),
+          (W(48) - 0.02, dict(HALF, yaw=-3), "power3.out"), (S.t1, dict(HALF, yaw=2), "sine.inOut")])
+    # background softens by fading the pixel plate (a CSS blur on this huge 3D plate stalls Chrome's software renderer)
+    S.ft(m, {"opacity": 1}, {"opacity": 0.42}, W(48) - 0.45, 0.45, "power2.inOut")
     stamp_in(S, f"{s}-st", W(50))
     # the label is thrown away ... the lattice stays
     b = f"#{s}-badge"

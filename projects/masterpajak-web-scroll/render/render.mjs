@@ -63,8 +63,8 @@ if (opt('stills')) {
 const sel = SUB > 1 ? `tmix=frames=${SUB},select='not(mod(n+1\\,${SUB}))',` : '';
 const fc = [
   `[0:v]scale=${W}:${H}:flags=lanczos,format=rgba,premultiply=inplace=1,${sel}unpremultiply=inplace=1,setpts=N/${FPS}/TB,split[a][b]`,
-  `color=c=0x00FF00:s=${W}x${H}:r=${FPS}[g]`,
-  `[g][a]overlay=format=rgb:shortest=1,scale=out_color_matrix=bt709:out_range=tv,format=yuv420p[green]`,
+  `color=c=0x00FF00:s=${W}x${H}:r=${FPS}:d=${DUR}[g]`,
+  `[g][a]overlay=format=rgb:eof_action=repeat,scale=out_color_matrix=bt709:out_range=tv,format=yuv420p[green]`,
   `[b]format=yuva420p[alpha]`,
 ].join(';');
 const mp4 = path.join(OUT, `${NAME}${Q === 'draft' ? '_DRAFT' : ''}.mp4`);

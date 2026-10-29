@@ -14,9 +14,14 @@ def frame(f, t):
     png = subprocess.run(['ffmpeg', '-v', 'error', '-ss', f'{t:.3f}', '-i', f, '-frames:v', '1', '-f', 'image2pipe', '-vcodec', 'png', '-'], capture_output=True, check=True).stdout
     return Image.open(io.BytesIO(png)).convert('RGB')
 
+size = '1080x1080'
+files = sys.argv[1:]
+if files and files[0].startswith('--size='):
+    size = files[0].split('=', 1)[1]; files = files[1:]
+SW, SH = map(int, size.split('x'))
 rows = []
 ok_all = True
-for f in sys.argv[1:]:
+for f in files:
     p = probe(f)
     v = [s for s in p['streams'] if s['codec_type'] == 'video']
     a = [s for s in p['streams'] if s['codec_type'] == 'audio']
@@ -30,7 +35,7 @@ for f in sys.argv[1:]:
     playable = dec.returncode == 0 and not dec.stderr.strip()
     # green purity: sample border pixels at 9 times
     worst = 0
-    pts = [(4, 4), (1075, 4), (4, 1075), (1075, 1075), (540, 4), (4, 540), (1075, 540), (540, 1075)]
+    pts = [(4, 4), (SW - 5, 4), (4, SH - 5), (SW - 5, SH - 5), (SW // 2, 4), (4, SH // 2), (SW - 5, SH // 2), (SW // 2, SH - 5)]
     for k in range(9):
         im = frame(f, dur * k / 9)
         for (x, y) in pts:
@@ -40,7 +45,7 @@ for f in sys.argv[1:]:
     f0_bad = sum(1 for px in f0.getdata() if max(px[0], 255 - px[1], px[2]) > 3)
     checks = {
         'mp4/h264': p['format']['format_name'].startswith('mov') and s['codec_name'] == 'h264',
-        '1080x1080': s['width'] == 1080 and s['height'] == 1080,
+        size: s['width'] == SW and s['height'] == SH,
         '60fps': abs(fps - 60) < 1e-6,
         'no audio': len(a) == 0 and len(o) == 0,
         'playable': playable,

@@ -28,10 +28,11 @@ else:
         frames.append((p.split('/')[-1].rsplit('.', 1)[0], Image.open(p).convert('RGB')))
 
 T = a.tile
+TH = round(T * frames[0][1].height / frames[0][1].width)  # keep the source aspect ratio
 cols = a.cols
 rows = (len(frames) + cols - 1) // cols
 head = 44 if a.title else 0
-sheet = Image.new('RGB', (cols * T, rows * (T + 26) + head), (24, 28, 52))
+sheet = Image.new('RGB', (cols * T, rows * (TH + 26) + head), (24, 28, 52))
 d = ImageDraw.Draw(sheet)
 try:
     font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 15)
@@ -41,8 +42,8 @@ except Exception:
 if a.title:
     d.text((12, 10), a.title, fill=(254, 209, 17), font=big)
 for i, (label, im) in enumerate(frames):
-    x, y = (i % cols) * T, (i // cols) * (T + 26) + head
-    sheet.paste(im.resize((T, T), Image.LANCZOS), (x, y))
-    d.text((x + 8, y + T + 4), label, fill=(255, 255, 255), font=font)
+    x, y = (i % cols) * T, (i // cols) * (TH + 26) + head
+    sheet.paste(im.resize((T, TH), Image.LANCZOS), (x, y))
+    d.text((x + 8, y + TH + 4), label, fill=(255, 255, 255), font=font)
 sheet.save(a.out, quality=90)
 print('wrote', a.out, sheet.size)

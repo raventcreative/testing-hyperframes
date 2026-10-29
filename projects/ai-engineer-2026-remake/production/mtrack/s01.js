@@ -1,9 +1,9 @@
 vt.set(V, {"fx": 400, "fy": 1500, "h": 640, "yaw": 0, "pitch": 6}, 0);
 vt.fromTo(V, {"fx": 400, "fy": 1500, "h": 640, "yaw": 0, "pitch": 6}, {"fx": 330, "fy": 1820, "h": 1180, "yaw": 14, "pitch": 5, "duration": 1.45, "ease": "power1.inOut", "immediateRender": false}, 0);
 vt.set(V, {"fx": 330, "fy": 1820, "h": 1180, "yaw": 14, "pitch": 5}, 1.54);
-vt.fromTo(V, {"fx": 330, "fy": 1820, "h": 1180, "yaw": 14, "pitch": 5}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 1.54);
-vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": -2.0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4, "duration": 1.06, "ease": "sine.inOut", "immediateRender": false}, 2.04);
-vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 4, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 1.06, "ease": "sine.inOut", "immediateRender": false}, 3.1);
+vt.fromTo(V, {"fx": 330, "fy": 1820, "h": 1180, "yaw": 14, "pitch": 5}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0.0, "pitch": 4, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 1.54);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0.0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 1.06, "ease": "sine.inOut", "immediateRender": false}, 2.04);
+vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4}, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4, "duration": 1.06, "ease": "sine.inOut", "immediateRender": false}, 3.1);
 vt.fromTo(V, {"fx": 540, "fy": 2230, "h": 1660, "yaw": 0, "pitch": 4}, {"fx": 250, "fy": 1800, "h": 1080, "yaw": 26, "pitch": 6, "duration": 0.5, "ease": "power3.inOut", "immediateRender": false}, 4.16);
 vt.set(V, {"fx": 250, "fy": 1800, "h": 1080, "yaw": 26, "pitch": 6}, 4.66);
 vt.fromTo(V, {"fx": 250, "fy": 1800, "h": 1080, "yaw": 26, "pitch": 6}, {"fx": 250, "fy": 1800, "h": 1080, "yaw": 30, "pitch": 6, "duration": 2.2, "ease": "sine.inOut", "immediateRender": false}, 4.66);

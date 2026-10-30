@@ -57,7 +57,7 @@ html = f"""<template>
     #wfull {{ position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }}
     #pipf {{ position: absolute; left: {PX - 6}px; top: {PY - 6}px; width: {PW + 12}px; height: {r3(PH + 12)}px; border-radius: 30px; opacity: 0;
       border: 2px solid rgba(0,201,255,.85); box-shadow: 0 0 0 1px rgba(255,255,255,.25) inset, 0 0 28px rgba(0,201,255,.35), 0 40px 70px -30px rgba(0,0,0,.8); }}
-    #pipl {{ position: absolute; left: 0; top: {PY - 76}px; width: 1080px; text-align: center; opacity: 0; }}
+    #pipl {{ position: absolute; left: 0; top: {PY - 66}px; width: 1080px; text-align: center; opacity: 0; }}
     #pipl span {{ display: inline-block; font: 700 34px/1 Poppins, sans-serif; letter-spacing: .14em; color: #fff; padding: 10px 22px; border-radius: 12px;
       background: rgba(6,14,38,.55); border: 1px solid rgba(0,201,255,.45); }}
   </style>

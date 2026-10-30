@@ -37,7 +37,12 @@ for i, fx in enumerate(sorted(SFX, key=lambda x: x["t"])):
 
 # logo sheen: ~0.45 s glyph-clipped white-cyan band every ~9 s + once on the final CTA
 SHEEN = [1.3] + [round(1.3 + 8.2 * k, 2) for k in range(1, 14) if 1.3 + 8.2 * k < D - 2] + [round(D - 0.95, 2)]
-LW, LH = 204, round(204 * 112 / 1158, 2)
+# corner watermark: supplied wordmark (logo_trim.png 1199x119) top-left, clear of the Reels top bar; hides when the S7 lockup lands
+LW, LH = 270, round(270 * 119 / 1199, 2)
+LX, LY = 60, 108
+S7 = next(s for s in SC if s["id"] == "s07")["start"]
+LOGO_OFF = round(S7 + 0.75, 3)
+SHEEN = [t for t in SHEEN if t < LOGO_OFF - 0.6][:-1] if SHEEN[-1] >= LOGO_OFF - 0.6 else SHEEN
 
 index = f"""<!doctype html>
 <html lang="id" data-resolution="portrait">
@@ -65,6 +70,12 @@ index = f"""<!doctype html>
       .host-front {{ z-index: 50 !important; position: absolute !important; }}
       #hud {{ z-index: 60 !important; position: absolute !important; }}
       #captions {{ z-index: 62 !important; position: absolute !important; }}
+      #clogo {{ position: absolute; left: {LX}px; top: {LY}px; width: {LW}px; height: {LH}px; z-index: 70; pointer-events: none; opacity: 0;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }}
+      #clogo img {{ position: absolute; left: 0; top: 0; width: {LW}px; height: {LH}px; }}
+      #clogo .mk {{ position: absolute; inset: 0; overflow: hidden; -webkit-mask: url(assets/brand/logo_trim.png) 0 0/{LW}px {LH}px no-repeat; mask: url(assets/brand/logo_trim.png) 0 0/{LW}px {LH}px no-repeat; }}
+      #clband {{ position: absolute; left: -90px; top: -10px; width: 70px; height: {r3(LH + 20)}px; transform: skewX(-20deg);
+        background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.95) 45%, rgba(0,201,255,.9) 60%, rgba(255,255,255,0)); }}
       #grain {{ position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; z-index: 80; opacity: .18; background: url(assets/brand/grain_256.png); pointer-events: none; }}
     </style>
   </head>
@@ -78,6 +89,7 @@ index = f"""<!doctype html>
       <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{r3(D)}" data-track-index="3" data-width="1080" data-height="1920"></div>
 {chr(10).join(front)}
       <div id="captions" class="clip" data-composition-id="captions" data-composition-src="compositions/captions.html" data-start="0" data-duration="{r3(D)}" data-track-index="7" data-track-kind="captions" data-width="1080" data-height="1920"></div>
+      <div id="clogo" data-layout-ignore><img src="assets/brand/logo_trim.png" alt="AIpreneur"><div class="mk"><div id="clband"></div></div></div>
       <div id="grain" data-layout-ignore></div>
       <!-- the one voice-over: user's ElevenLabs file, untouched. NO background music. -->
       <audio id="vo" class="clip" src="assets/audio/voiceover_final.mp3" data-start="0" data-duration="{r3(wt["audio_duration"])}" data-track-index="8" data-volume="1"></audio>
@@ -89,6 +101,9 @@ index = f"""<!doctype html>
         const tl = gsap.timeline({{ paused: true }});
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {r3(D)}, ease: "steps({int(D * 12)})", immediateRender: false }}, 0);
 
+        tl.fromTo("#clogo", {{ opacity: 0, x: -18 }}, {{ opacity: 1, x: 0, duration: 0.5, ease: "power3.out", immediateRender: false }}, 0.15);
+        {(chr(10) + '        ').join(f'tl.fromTo("#clband", {{ x: 0 }}, {{ x: {LW + 180}, duration: 0.45, ease: "power2.inOut", immediateRender: false }}, {t});' for t in SHEEN)}
+        tl.to("#clogo", {{ opacity: 0, x: -12, duration: 0.3, ease: "power2.in" }}, {r3(LOGO_OFF - 0.3)});
         tl.set({{}}, {{}}, {r3(D - 0.01)});
         window.__timelines["main"] = tl;
       }})();

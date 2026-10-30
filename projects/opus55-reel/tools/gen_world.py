@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """compositions/world.html — the POCKET UNIVERSE layer (global time; mounted 0..D, z between scenes and mascot).
-One Three.js render per frame (vendor/world3d.js) feeds three 2D canvases from the SAME pixels and clock:
+One Three.js render per frame (vendor/world3d_v2.js) feeds three 2D canvases from the SAME pixels and clock:
   #wfull  full frame (S4 aperture -> S5 full screen -> shrinks into the sharp PiP in S6 -> lands in the laptop in S7)
   #wbg    the same frame downsampled + blurred (S6 live background)
 The PiP is #wfull itself, clipped to a 16:9 band and scaled into the edge-lit frame (no second copy, no drift).
@@ -30,6 +30,8 @@ APER = "inset(1150px 340px 470px 340px round 18px)"       # aperture opened insi
 FULL = "inset(0px 0px 0px 0px round 0px)"
 BAND = f"inset({BAND_Y}px 0px {1920 - BAND_Y - BAND_H}px 0px round {r3(26 / K)}px)"
 s06, s07 = S["s06"]["start"], S["s07"]["start"]
+GP = sc.get("gap") or {"cut": s06, "gap": 0}
+SHOW0, SHOW1 = r3(GP["cut"] - WT0), r3(s06 - WT0)   # showcase window on the world clock
 tl = [
     f'tl.set("#wwrap", {{ visibility: "visible" }}, {ON});',
     f'tl.fromTo("#wwrap", {{ clipPath: "{APER}" }}, {{ clipPath: "{FULL}", duration: 0.62, ease: "power3.inOut", immediateRender: false }}, {ON + 0.05});',
@@ -86,7 +88,7 @@ html = f"""<template>
         bg.fillStyle = "rgba(6,14,38,0.30)"; bg.fillRect(0, 0, 270, 480);
       }}
       window.__hf = window.__hf || {{}}; window.__hf.buildReady = window.__hf.buildReady || {{}};
-      const ready = window.World3D.World.create(gl, {{ width: 1080, height: 1920 }}).then((w) => {{ world = w; }});
+      const ready = window.World3D.World.create(gl, {{ width: 1080, height: 1920, show: [{SHOW0}, {SHOW1}] }}).then((w) => {{ world = w; }});
       window.__hf.buildReady["world"] = ready;
       window.addEventListener("hf-seek", (e) => {{
         const t = e.detail.time;

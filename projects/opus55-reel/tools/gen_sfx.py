@@ -24,7 +24,14 @@ for n in NAMES:
 vo = pcm(P / "assets/audio/voiceover_final.mp3")
 hop = 160
 vdb = 20 * np.log10(np.sqrt(np.mean(vo[: len(vo) // hop * hop].reshape(-1, hop) ** 2, axis=1)) + 1e-6)
+GP = json.loads((P / "production/gap.json").read_text()) if (P / "production/gap.json").exists() else None
+def amap(t):   # video time -> VO file time (None inside the showcase gap)
+    if not GP or t < GP["cut"]: return t
+    return None if t < GP["cut"] + GP["gap"] else t - GP["gap"]
 def vo_level(t0, t1):
+    a0, a1 = amap(t0), amap(t1)
+    if a0 is None or a1 is None or a1 <= a0: return -90.0
+    t0, t1 = a0, a1
     a, b = max(0, int(t0 * 100)), max(int(t0 * 100) + 1, int(t1 * 100))
     seg = vdb[a:b]
     return float(np.percentile(seg, 75)) if len(seg) else -90.0

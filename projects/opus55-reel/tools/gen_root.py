@@ -35,6 +35,20 @@ for i, fx in enumerate(sorted(SFX, key=lambda x: x["t"])):
     sfx_tags.append(f'      <audio id="sfx{i:02d}" class="clip" src="assets/sfx/{fx["file"]}" data-start="{r3(fx["t"])}" data-duration="{r3(d)}" '
                     f'data-track-index="{lane(fx["t"], fx["t"] + d)}" data-volume="{fx["vol"]}"></audio>')
 
+# showcase sound design (tools/gen_showcase_sfx.py) — plain clips with edge fades
+EX = json.loads((P / "production/sfx_extra.json").read_text()) if (P / "production/sfx_extra.json").exists() else []
+for j, fx in enumerate(EX):
+    d = min(fx["dur"], D - fx["t"] - 0.005)
+    sfx_tags.append(f'      <audio id="sx{j:02d}" class="clip" src="assets/sfx/{fx["file"]}" data-start="{r3(fx["t"])}" data-duration="{r3(d)}" '
+                    f'data-track-index="{lane(fx["t"], fx["t"] + d)}" data-volume="{fx["vol"]}"' + (f' data-fade-in="{fx["fi"]}"' if fx["fi"] else '') + (f' data-fade-out="{fx["fo"]}"' if fx["fo"] else '') + '></audio>')
+# VO: one clip, or two clips of the same untouched file around the showcase gap (tools/insert_gap.py)
+GP = wt.get("gap")
+if GP:
+    c, g, A = GP["cut"], GP["gap"], wt["audio_duration"]
+    VO_TAGS = (f'      <audio id="vo" class="clip" src="assets/audio/voiceover_final.mp3" data-start="0" data-duration="{r3(c)}" data-track-index="8" data-volume="1"></audio>\n'
+               f'      <audio id="vo2" class="clip" src="assets/audio/voiceover_final.mp3" data-start="{r3(c + g)}" data-media-start="{r3(c)}" data-duration="{r3(A - c)}" data-track-index="8" data-volume="1"></audio>')
+else:
+    VO_TAGS = f'      <audio id="vo" class="clip" src="assets/audio/voiceover_final.mp3" data-start="0" data-duration="{r3(wt["audio_duration"])}" data-track-index="8" data-volume="1"></audio>'
 # logo sheen: ~0.45 s glyph-clipped white-cyan band every ~9 s + once on the final CTA
 SHEEN = [1.3] + [round(1.3 + 8.2 * k, 2) for k in range(1, 14) if 1.3 + 8.2 * k < D - 2] + [round(D - 0.95, 2)]
 # corner watermark: supplied wordmark (logo_trim.png 1199x119) top-left, clear of the Reels top bar; hides when the S7 lockup lands
@@ -52,7 +66,7 @@ index = f"""<!doctype html>
     <title>AIpreneur — Claude Opus 5.5 Reel</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
-    <script src="vendor/world3d.js"></script>
+    <script src="vendor/world3d_v2.js"></script>
     <script src="vendor/vo_words.js"></script>
     <link rel="stylesheet" href="vendor/fx.css" />
     <style>
@@ -92,7 +106,7 @@ index = f"""<!doctype html>
       <div id="clogo" data-layout-ignore><img src="assets/brand/logo_trim.png" alt="AIpreneur"><div class="mk"><div id="clband"></div></div></div>
       <div id="grain" data-layout-ignore></div>
       <!-- the one voice-over: user's ElevenLabs file, untouched. NO background music. -->
-      <audio id="vo" class="clip" src="assets/audio/voiceover_final.mp3" data-start="0" data-duration="{r3(wt["audio_duration"])}" data-track-index="8" data-volume="1"></audio>
+{VO_TAGS}
 {chr(10).join(sfx_tags)}
     </div>
     <script>

@@ -1,0 +1,118 @@
+<html data-composition-variables='[
+  {"id":"preset","type":"enum","label":"Acting preset","default":"orbit-host","options":[{"value":"orbit-host","label":"Orbit host (10 s)"},{"value":"idle","label":"Idle / standing"}]},
+  {"id":"heightPx","type":"number","label":"Mascot height","default":840,"min":300,"max":1700,"step":10,"unit":"px"},
+  {"id":"centerX","type":"number","label":"Feet centre X","default":540,"min":0,"max":1080,"step":1,"unit":"px"},
+  {"id":"feetY","type":"number","label":"Feet Y (ground line)","default":1210,"min":0,"max":1920,"step":1,"unit":"px"},
+  {"id":"shadowOpacity","type":"number","label":"Contact shadow","default":0.55,"min":0,"max":1,"step":0.05}
+]'>
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #mp-shadow { position: absolute; left: 0; top: 0; width: 300px; height: 56px; border-radius: 50%;
+      background: radial-gradient(ellipse at 50% 50%, rgba(3,6,20,.85) 0%, rgba(3,6,20,.45) 38%, rgba(3,6,20,0) 70%); }
+    #mp-ao { position: absolute; left: 0; top: 0; width: 210px; height: 22px; border-radius: 50%;
+      background: radial-gradient(ellipse at 50% 50%, rgba(2,4,14,.9) 0%, rgba(2,4,14,0) 70%); }
+    #mp-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  </style>
+  <div id="root" data-composition-id="mascot" data-width="1080" data-height="1920">
+    <div id="mp-shadow" data-layout-ignore></div>
+    <div id="mp-ao" data-layout-ignore></div>
+    <canvas id="mp-canvas" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas>
+  </div>
+  <script>
+    (function () {
+      // MasterPajak mascot — 2.5D puppet of the supplied PNG (vendor/mp-puppet.js + vendor/masterpajak-rig.js).
+      // Acting = keyed pose channels on a private GSAP timeline `vt`, sampled at the frame time in hf-seek
+      // (+ deterministic breathing, micro-sway and arm follow-through). Presets are plain data: add one to PRESETS.
+      const V = Object.assign({ preset: "orbit-host", heightPx: 840, centerX: 540, feetY: 1210, shadowOpacity: 0.55 },
+        (window.__hyperframes && window.__hyperframes.getVariables && window.__hyperframes.getVariables()) || {});
+      const root = document.getElementById("root");
+      const host = root.closest("[data-start]");
+      const D = parseFloat(host?.getAttribute("data-duration")) || 10;
+      const T0 = parseFloat(host?.getAttribute("data-start")) || 0; // hf-seek carries global time
+
+      // channel: [[time, value, ease?], ...] — each key is reached AT its time, travelling from the previous key.
+      // armR = character's RIGHT arm (screen-left). up/bend in degrees outward. Angles kept <= 50° (clean mesh).
+      const PRESETS = {
+        "orbit-host": {
+          opacity:   [[0.05, 0], [0.75, 1, "power2.out"]],
+          scale:     [[0.0, 0.965], [1.2, 1, "power3.out"]],
+          headRoll:  [[0, 0], [0.35, 0], [1.15, -4, "sine.inOut"], [2.2, -3.5], [3.0, -1.5, "sine.inOut"], [4.3, 3, "sine.inOut"], [5.5, 1.5, "sine.inOut"], [6.3, -2.5, "sine.inOut"], [7.3, 0, "sine.inOut"]],
+          headYaw:   [[0, 0], [1.2, 0], [2.0, -5, "sine.inOut"], [3.0, 1, "sine.inOut"], [4.4, 7.5, "sine.inOut"], [5.5, 4.5, "sine.inOut"], [6.4, -2.5, "sine.inOut"], [7.4, 0, "sine.inOut"]],
+          headPitch: [[0, 0], [1.3, 0], [2.2, -5, "sine.inOut"], [3.2, -2, "sine.inOut"], [4.5, 0, "sine.inOut"], [9.0, 0], [9.3, 7, "power2.inOut"], [9.78, 0, "power2.out"]],
+          headY:     [[0, 0], [9.0, 0], [9.3, 4, "power2.inOut"], [9.78, 0, "power2.out"]],
+          armR_up:   [[0, 0], [0.55, 0], [1.45, 38, "power2.inOut"], [2.05, 45, "sine.inOut"], [2.8, 34, "sine.inOut"], [3.6, 34], [5.3, 4, "sine.inOut"], [5.5, 4], [6.35, 32, "power2.inOut"], [7.0, 30, "sine.inOut"], [7.9, 3, "sine.inOut"]],
+          armR_bend: [[0, 0], [0.55, 0], [1.45, 14, "power2.inOut"], [1.85, 22, "sine.inOut"], [2.25, 10, "sine.inOut"], [2.8, 16, "sine.inOut"], [3.6, 16], [5.3, 2, "sine.inOut"], [5.5, 2], [6.35, 18, "power2.inOut"], [7.0, 16], [7.9, 1, "sine.inOut"]],
+          armR_lift: [[0, 0], [0.55, 0], [1.45, 4, "power2.inOut"], [3.6, 3], [5.3, 0, "sine.inOut"], [5.5, 0], [6.35, 3, "power2.inOut"], [7.0, 3], [7.9, 0, "sine.inOut"]],
+          armL_up:   [[0, 0], [1.6, 0], [2.6, 8, "sine.inOut"], [3.6, 8], [5.0, 3, "sine.inOut"], [5.65, 3], [6.5, 21, "power2.inOut"], [7.0, 19, "sine.inOut"], [8.0, 3, "sine.inOut"]],
+          armL_bend: [[0, 0], [1.6, 0], [2.6, 6, "sine.inOut"], [3.6, 6], [5.0, 1, "sine.inOut"], [5.65, 1], [6.5, 12, "power2.inOut"], [7.0, 11], [8.0, 1, "sine.inOut"]],
+          armL_lift: [[0, 0], [5.65, 0], [6.5, 2, "power2.inOut"], [7.0, 2], [8.0, 0, "sine.inOut"]],
+          chestRot:  [[0, 0], [0.55, 0], [1.45, 1.2, "sine.inOut"], [2.8, 1.2], [3.6, 0.6, "sine.inOut"], [5.3, -0.8, "sine.inOut"], [6.4, 0.5, "sine.inOut"], [7.0, 0.5], [8.0, 0, "sine.inOut"]],
+          chestX:    [[0, 0], [0.55, 0], [1.45, 2, "sine.inOut"], [3.6, 2], [5.3, -2, "sine.inOut"], [6.4, 1, "sine.inOut"], [8.0, 0, "sine.inOut"]],
+        },
+        "idle": {
+          opacity: [[0, 1]], scale: [[0, 1]],
+        },
+      };
+      const CH = ["opacity", "scale", "headRoll", "headYaw", "headPitch", "headY", "armR_up", "armR_bend", "armR_lift", "armL_up", "armL_bend", "armL_lift", "chestRot", "chestX"];
+      const DEF = { opacity: 1, scale: 1 };
+      const A = {};
+      const vt = gsap.timeline({ paused: true });
+      const preset = PRESETS[V.preset] || PRESETS["orbit-host"];
+      for (const ch of CH) {
+        const keys = preset[ch] || [[0, DEF[ch] ?? 0]];
+        A[ch] = keys[0][1];
+        for (let i = 1; i < keys.length; i++) {
+          const [t0] = keys[i - 1], [t1, v, ease] = keys[i];
+          vt.to(A, { [ch]: v, duration: Math.max(0.001, t1 - t0), ease: ease || "none" }, t0);
+        }
+      }
+      vt.set({}, {}, D);
+      const sample = (t) => { vt.seek(0, false); vt.seek(Math.max(0, t), false); return Object.assign({}, A); };
+
+      const TAU = Math.PI * 2;
+      function pose(t) {
+        const a = sample(t), lag = sample(t - 0.12);
+        const breath = Math.sin(TAU * (t / 3.6) - 0.6);
+        return {
+          opacity: a.opacity, scale: a.scale,
+          breath,
+          headRoll: a.headRoll + 0.45 * Math.sin(TAU * t / 5.3 + 0.7) + 0.25 * (lag.chestRot - a.chestRot),
+          headYaw: a.headYaw + 0.6 * Math.sin(TAU * t / 4.7 + 1.3),
+          headPitch: a.headPitch + 0.35 * Math.sin(TAU * t / 3.6 - 1.2),
+          headY: a.headY + 0.8 * breath,
+          chestRot: a.chestRot, chestX: a.chestX, chestY: -0.6 * breath,
+          armR: { up: a.armR_up + 0.6 * breath, bend: a.armR_bend + 0.3 * (lag.armR_up - a.armR_up), lift: a.armR_lift + 0.8 * breath },
+          armL: { up: a.armL_up + 0.6 * breath, bend: a.armL_bend + 0.3 * (lag.armL_up - a.armL_up), lift: a.armL_lift + 0.8 * breath },
+        };
+      }
+
+      // contact shadow follows the reveal (on the composition timeline -> visible in Studio)
+      const sh = document.getElementById("mp-shadow"), ao = document.getElementById("mp-ao");
+      const k = V.heightPx / 840;
+      gsap.set(sh, { x: V.centerX - 150, y: V.feetY - 28, scale: k, transformOrigin: "50% 50%" });
+      gsap.set(ao, { x: V.centerX - 105, y: V.feetY - 12, scale: k, transformOrigin: "50% 50%" });
+
+      const canvas = document.getElementById("mp-canvas");
+      let puppet = null;
+      function apply(t) { if (puppet) puppet.render(pose(t)); }
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      const ready = MPPuppet.create(canvas, { rig: window.MP_RIG, base: "assets/mascot/", height: V.heightPx, feet: [V.centerX, V.feetY] })
+        .then((p) => { puppet = p; apply(0); });
+      window.__hf.buildReady["mascot"] = ready;
+      window.addEventListener("hf-seek", (e) => {
+        const t = e.detail.time - T0;
+        if (puppet) apply(t);
+        else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t)));
+      });
+
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo([sh, ao], { opacity: 0 }, { opacity: V.shadowOpacity, duration: 0.8, ease: "power2.out" }, 0.1);
+      tl.set({}, {}, D - 0.001);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["mascot"] = tl;
+    })();
+  </script>
+</template>
+</html>

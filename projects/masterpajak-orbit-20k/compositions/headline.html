@@ -1,0 +1,65 @@
+<html data-composition-variables='[
+  {"id":"accent","type":"string","label":"Accent word","default":"20K"},
+  {"id":"main","type":"string","label":"Main word","default":"EFEK"},
+  {"id":"accentColor","type":"color","label":"Accent colour","default":"#F9CA18"},
+  {"id":"mainColor","type":"color","label":"Main colour","default":"#FFFFFF"},
+  {"id":"centerY","type":"number","label":"Baseline block centre Y","default":1408,"step":1,"unit":"px"},
+  {"id":"fontSize","type":"number","label":"Size","default":150,"step":1,"unit":"px"},
+  {"id":"revealAt","type":"number","label":"Reveal start","default":5.5,"step":0.05,"unit":"s"},
+  {"id":"exitAt","type":"number","label":"Exit start","default":9.3,"step":0.05,"unit":"s"}
+]'>
+<template>
+  <style>
+    @font-face { font-family: "MP Montserrat"; font-weight: 900; src: url("assets/fonts/montserrat-latin-900-normal.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #hl { position: absolute; left: 0; width: 1080px; display: flex; justify-content: center; align-items: center; gap: .26em;
+      font-family: "MP Montserrat", "Montserrat", sans-serif; font-weight: 900; line-height: 1; letter-spacing: .015em; white-space: nowrap; }
+    .hl-w { display: flex; overflow: hidden; padding: .3em .35em .5em; margin: -.3em -.35em -.5em; } /* room for the soft shadow: the mask must not crop it */
+    .hl-c { display: inline-block; will-change: transform, opacity;
+      text-shadow: 0 5px 0 rgba(6,12,38,.55), 0 18px 40px rgba(0,0,0,.42); }
+    #hl-acc .hl-c { text-shadow: 0 5px 0 rgba(90,62,0,.55), 0 0 28px rgba(249,202,24,.28), 0 18px 40px rgba(0,0,0,.42); }
+    #hl-line { position: absolute; left: 540px; height: 4px; width: 132px; margin-left: -66px; border-radius: 4px;
+      background: linear-gradient(90deg, rgba(249,202,24,0), #F9CA18 30%, #F9CA18 70%, rgba(249,202,24,0)); }
+  </style>
+  <div id="root" data-composition-id="headline" data-width="1080" data-height="1920">
+    <div id="hl"><div class="hl-w" id="hl-acc"></div><div class="hl-w" id="hl-main"></div></div>
+    <div id="hl-line"></div>
+  </div>
+  <script>
+    (function () {
+      const V = Object.assign({ accent: "20K", main: "EFEK", accentColor: "#F9CA18", mainColor: "#FFFFFF", centerY: 1408, fontSize: 150, revealAt: 5.5, exitAt: 9.3 },
+        (window.__hyperframes && window.__hyperframes.getVariables && window.__hyperframes.getVariables()) || {});
+      const root = document.getElementById("root");
+      const host = root.closest("[data-start]");
+      const D = parseFloat(host?.getAttribute("data-duration")) || 10;
+      const hl = document.getElementById("hl");
+      hl.style.fontSize = V.fontSize + "px";
+      hl.style.top = (V.centerY - V.fontSize * 0.5) + "px";
+      hl.style.height = V.fontSize + "px";
+      const line = document.getElementById("hl-line");
+      line.style.top = (V.centerY + V.fontSize * 0.62) + "px";
+      const fill = (id, text, color) => {
+        const w = document.getElementById(id);
+        for (const ch of String(text)) { const s = document.createElement("span"); s.className = "hl-c"; s.textContent = ch; s.style.color = color; w.appendChild(s); }
+        return [...w.children];
+      };
+      const acc = fill("hl-acc", V.accent, V.accentColor), main = fill("hl-main", V.main, V.mainColor);
+      const all = acc.concat(main);
+      const R = +V.revealAt, X = +V.exitAt;
+      const tl = gsap.timeline({ paused: true });
+      // upward masked reveal with a little depth (rotationX settles flat), accent leads, main follows
+      tl.fromTo(acc, { yPercent: 165, rotationX: -50, opacity: 0, transformPerspective: 700, transformOrigin: "50% 100%" },
+        { yPercent: 0, rotationX: 0, opacity: 1, duration: 0.75, ease: "power4.out", stagger: 0.06 }, R);
+      tl.fromTo(main, { yPercent: 165, rotationX: -50, opacity: 0, transformPerspective: 700, transformOrigin: "50% 100%" },
+        { yPercent: 0, rotationX: 0, opacity: 1, duration: 0.75, ease: "power4.out", stagger: 0.05 }, R + 0.22);
+      tl.fromTo(line, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, R + 0.55);
+      // exit: lift and fade, finished before the last frame
+      tl.to(all, { yPercent: -22, opacity: 0, duration: 0.42, ease: "power2.in", stagger: 0.025 }, X);
+      tl.to(line, { scaleX: 0, opacity: 0, duration: 0.35, ease: "power2.in" }, X);
+      tl.set({}, {}, D - 0.001);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["headline"] = tl;
+    })();
+  </script>
+</template>
+</html>

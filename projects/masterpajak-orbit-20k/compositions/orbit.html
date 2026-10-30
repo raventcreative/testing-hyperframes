@@ -1,0 +1,148 @@
+<html data-composition-variables='[
+  {"id":"count","type":"number","label":"Capsule count","default":20,"min":3,"max":40,"step":1},
+  {"id":"labels","type":"string","label":"Labels (comma list, empty = 01..N)","default":""},
+  {"id":"cx","type":"number","label":"Orbit centre X","default":540,"step":1,"unit":"px"},
+  {"id":"cy","type":"number","label":"Orbit centre Y","default":790,"step":1,"unit":"px"},
+  {"id":"rx","type":"number","label":"Radius X","default":410,"min":50,"max":540,"step":1,"unit":"px"},
+  {"id":"ry","type":"number","label":"Radius Y","default":480,"min":50,"max":960,"step":1,"unit":"px"},
+  {"id":"turns","type":"number","label":"Total rotation (turns, clockwise)","default":1,"min":0,"max":5,"step":0.05},
+  {"id":"speedKeys","type":"string","label":"Speed profile [[t,relSpeed],...] (s)","default":"[[3.0,0],[3.9,1],[5.3,1],[6.0,0.45],[7.0,0.45],[8.5,0]]"},
+  {"id":"buildStart","type":"number","label":"Build start","default":1.2,"step":0.05,"unit":"s"},
+  {"id":"buildEnd","type":"number","label":"Build end (all visible)","default":3.0,"step":0.05,"unit":"s"},
+  {"id":"exitStart","type":"number","label":"Retract start","default":9.0,"step":0.05,"unit":"s"},
+  {"id":"capW","type":"number","label":"Capsule width","default":112,"step":1,"unit":"px"},
+  {"id":"capH","type":"number","label":"Capsule height","default":56,"step":1,"unit":"px"},
+  {"id":"fontSize","type":"number","label":"Number size","default":28,"step":1,"unit":"px"},
+  {"id":"depth","type":"number","label":"Depth scale (bottom vs top)","default":0.04,"min":0,"max":0.3,"step":0.01},
+  {"id":"fillTop","type":"color","label":"Fill top","default":"rgba(48,68,136,0.74)"},
+  {"id":"fillBottom","type":"color","label":"Fill bottom","default":"rgba(14,22,58,0.88)"},
+  {"id":"border","type":"color","label":"Border","default":"#F9CA18"},
+  {"id":"text","type":"color","label":"Number colour","default":"#FFFFFF"},
+  {"id":"glow","type":"color","label":"Glow","default":"rgba(249,202,24,0.26)"}
+]'>
+<template>
+  <style>
+    @font-face { font-family: "MP Montserrat"; font-weight: 800; src: url("assets/fonts/montserrat-latin-800-normal.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #orb-track { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    .cap { position: absolute; left: 0; top: 0; will-change: transform, opacity; }
+    .cap-in { position: absolute; left: 0; top: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+      border-radius: 999px; border: 2px solid var(--b);
+      background: linear-gradient(180deg, var(--ft) 0%, var(--fb) 100%);
+      box-shadow: inset 0 1.5px 0 rgba(255,255,255,.24), inset 0 -8px 14px rgba(0,0,0,.30),
+                  0 10px 22px rgba(3,7,24,.45), 0 0 16px var(--g); }
+    .cap-in::before { content: ""; position: absolute; left: 14%; right: 14%; top: 3px; height: 34%; border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0)); }
+    .cap-num { position: relative; font-family: "MP Montserrat", "Montserrat", sans-serif; font-weight: 800; color: var(--tx);
+      letter-spacing: .04em; font-variant-numeric: tabular-nums; line-height: 1; text-shadow: 0 2px 6px rgba(0,0,0,.35); }
+    .cap-flash { position: absolute; inset: -6px; border-radius: 999px; box-shadow: 0 0 26px 4px var(--g), 0 0 0 2px rgba(255,236,160,.85); opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="orbit" data-width="1080" data-height="1920" data-layout-allow-overflow data-layout-allow-overlap>
+    <svg id="orb-track" viewBox="0 0 1080 1920" data-layout-ignore>
+      <path id="orb-ring" d="" pathLength="1" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1.6" />
+      <ellipse id="orb-ring2" cx="540" cy="790" rx="380" ry="450" fill="none" stroke="rgba(249,202,24,0.16)" stroke-width="1" stroke-dasharray="2 10" />
+    </svg>
+    <div id="orb-caps" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      // Reusable orbital capsule ring. Every visible property is a pure function of the composition time
+      // (layout(t) in one proxy tween's onUpdate). Capsules are translated along the ellipse — never rotated —
+      // so the numbers stay upright by construction. Clockwise, arc-length-even spacing.
+      const V = Object.assign({}, (window.__hyperframes && window.__hyperframes.getVariables && window.__hyperframes.getVariables()) || {});
+      const num = (k, d) => (V[k] === undefined || V[k] === "" ? d : +V[k]);
+      const str = (k, d) => (V[k] === undefined || V[k] === "" ? d : String(V[k]));
+      const N = Math.round(num("count", 20)), CX = num("cx", 540), CY = num("cy", 790), RX = num("rx", 410), RY = num("ry", 480);
+      const TURNS = num("turns", 1), B0 = num("buildStart", 1.2), B1 = num("buildEnd", 3.0), X0 = num("exitStart", 9.0);
+      const CW = num("capW", 112), CHh = num("capH", 56), FS = num("fontSize", 28), DEPTH = num("depth", 0.04);
+      let SPEED; try { SPEED = JSON.parse(str("speedKeys", "[[3.0,0],[3.9,1],[5.3,1],[6.0,0.45],[7.0,0.45],[8.5,0]]")); } catch (e) { SPEED = [[3, 0], [3.9, 1], [5.3, 1], [6, 0.45], [7, 0.45], [8.5, 0]]; }
+      const labels = str("labels", "") ? str("labels", "").split(",").map((s) => s.trim()) : Array.from({ length: N }, (_, i) => String(i + 1).padStart(2, "0"));
+
+      const root = document.getElementById("root");
+      const host = root.closest("[data-start]");
+      const D = parseFloat(host?.getAttribute("data-duration")) || 10;
+      root.style.setProperty("--ft", str("fillTop", "rgba(48,68,136,0.74)"));
+      root.style.setProperty("--fb", str("fillBottom", "rgba(14,22,58,0.88)"));
+      root.style.setProperty("--b", str("border", "#F9CA18"));
+      root.style.setProperty("--tx", str("text", "#FFFFFF"));
+      root.style.setProperty("--g", str("glow", "rgba(249,202,24,0.26)"));
+      document.getElementById("orb-ring").setAttribute("d",
+        `M ${CX} ${CY - RY} A ${RX} ${RY} 0 1 1 ${CX} ${CY + RY} A ${RX} ${RY} 0 1 1 ${CX} ${CY - RY}`); // starts 12 o'clock, clockwise
+      { const e = document.getElementById("orb-ring2"); e.setAttribute("cx", CX); e.setAttribute("cy", CY); e.setAttribute("rx", RX - 30); e.setAttribute("ry", RY - 30); }
+
+      // capsules (generated from `count`; stable ids cap-01..)
+      const wrap = document.getElementById("orb-caps");
+      const caps = [];
+      for (let i = 0; i < N; i++) {
+        const c = document.createElement("div"); c.className = "cap"; c.id = "cap-" + String(i + 1).padStart(2, "0");
+        c.innerHTML = '<div class="cap-in"><div class="cap-flash"></div><span class="cap-num"></span></div>';
+        const inn = c.firstChild; inn.style.width = CW + "px"; inn.style.height = CHh + "px"; inn.style.left = -CW / 2 + "px"; inn.style.top = -CHh / 2 + "px";
+        const n = c.querySelector(".cap-num"); n.textContent = labels[i] ?? ""; n.style.fontSize = FS + "px";
+        wrap.appendChild(c);
+        caps.push({ el: c, flash: c.querySelector(".cap-flash") });
+      }
+
+      // arc-length table of the ellipse, phi measured clockwise from 12 o'clock
+      const M = 2048, phi = new Float64Array(M + 1), len = new Float64Array(M + 1);
+      for (let j = 0; j <= M; j++) {
+        phi[j] = (j / M) * Math.PI * 2;
+        if (j) { const a = phi[j - 1], b = phi[j]; len[j] = len[j - 1] + Math.hypot(RX * (Math.sin(b) - Math.sin(a)), RY * (Math.cos(b) - Math.cos(a))); }
+      }
+      const P = len[M];
+      function at(s) { // s in turns [0,1) -> point on the ellipse
+        s = ((s % 1) + 1) % 1; const L = s * P; let lo = 0, hi = M;
+        while (hi - lo > 1) { const m = (lo + hi) >> 1; if (len[m] < L) lo = m; else hi = m; }
+        const f = (L - len[lo]) / Math.max(1e-9, len[hi] - len[lo]), ph = phi[lo] + f * (phi[hi] - phi[lo]);
+        return [Math.sin(ph), -Math.cos(ph)];
+      }
+
+      // rotation angle (turns) = normalised integral of the speed profile (smoothstep between keys)
+      const sm = (u) => u * u * (3 - 2 * u);
+      function speed(t) {
+        if (t <= SPEED[0][0]) return SPEED[0][1];
+        for (let i = 1; i < SPEED.length; i++) if (t <= SPEED[i][0]) { const [t0, v0] = SPEED[i - 1], [t1, v1] = SPEED[i]; return v0 + (v1 - v0) * sm((t - t0) / (t1 - t0)); }
+        return SPEED[SPEED.length - 1][1];
+      }
+      const DT = 0.001, steps = Math.ceil(D / DT) + 2, cum = new Float64Array(steps + 1);
+      for (let j = 1; j <= steps; j++) cum[j] = cum[j - 1] + speed((j - 0.5) * DT) * DT;
+      const TOT = cum[steps] || 1;
+      const angle = (t) => { const x = Math.max(0, t) / DT, j = Math.min(steps - 1, Math.floor(x)); return TURNS * (cum[j] + (cum[j + 1] - cum[j]) * (x - j)) / TOT; };
+
+      const clamp = (x) => Math.max(0, Math.min(1, x));
+      const eOut = gsap.parseEase("power3.out"), eBack = gsap.parseEase("back.out(1.35)"), eIn = gsap.parseEase("power2.in");
+      const ENTER = 0.42, stagger = N > 1 ? (B1 - B0 - ENTER) / (N - 1) : 0, XSTAG = 0.021, XDUR = 0.36;
+      function layout(t) {
+        const th = angle(t);
+        for (let i = 0; i < N; i++) {
+          const pIn = clamp((t - (B0 + i * stagger)) / ENTER);
+          const pX = eIn(clamp((t - (X0 + i * XSTAG)) / XDUR));
+          const [ux, uy] = at(i / N + th);
+          const rf = (0.86 + 0.14 * eOut(pIn)) * (1 - 0.2 * pX);
+          const x = CX + ux * RX * rf, y = CY + uy * RY * rf;
+          const sc = (0.55 + 0.45 * eBack(pIn)) * (1 - 0.55 * pX) * (1 + DEPTH * uy);
+          const op = clamp(pIn * 2.4) * (1 - pX);
+          const c = caps[i];
+          c.el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(${sc.toFixed(4)})`;
+          c.el.style.opacity = op.toFixed(4);
+          c.el.style.zIndex = String(1000 + Math.round(uy * 100));
+          // arrival flash: peaks as the capsule lands, decays in ~0.4 s
+          const f = t - (B0 + i * stagger + ENTER * 0.55);
+          c.flash.style.opacity = (f < -0.12 ? 0 : f < 0 ? (f + 0.12) / 0.12 : Math.exp(-f / 0.16)).toFixed(4);
+        }
+      }
+
+      const ring = document.getElementById("orb-ring"), ring2 = document.getElementById("orb-ring2");
+      const tl = gsap.timeline({ paused: true });
+      const proxy = { t: 0 };
+      tl.to(proxy, { t: D, duration: D, ease: "none", onUpdate: () => layout(proxy.t) }, 0);
+      // track ring draws itself clockwise from 12 o'clock while the capsules arrive, fades with the retract
+      tl.fromTo(ring, { attr: { "stroke-dasharray": "0 1" }, opacity: 0 }, { attr: { "stroke-dasharray": "1 0" }, opacity: 1, duration: B1 - B0, ease: "power2.inOut" }, B0);
+      tl.fromTo(ring2, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power1.out" }, B0 + 0.6);
+      tl.to([ring, ring2], { opacity: 0, duration: 0.6, ease: "power2.in" }, X0 + 0.1);
+      layout(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["orbit"] = tl;
+    })();
+  </script>
+</template>
+</html>

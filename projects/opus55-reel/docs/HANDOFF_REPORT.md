@@ -29,3 +29,8 @@ Recreated: generic dark search page (two public result lines), Claude home with 
 - Search page uses a generic recreation (coloured wordmark letters in a system font), not Google's assets.
 - Music: none (no licensed track in the project); SFX are the bundled Pixabay-licensed set, ducked under the VO.
 - The mascot GLB has no finger bones: pointing reads as an open directing hand.
+
+## Final delivery
+- `out/ai_preneur_claude_opus55_mascot_reel_1080x1920.mp4` — 1080×1920, 30 fps, 882 frames, 29.4 s, H.264 + AAC (VO peak −1.1 dB). Local render only (no cloud).
+- Revision after draft: AIpreneur wordmark watermark top-left (x 60, y 108, 270 px wide, below the Reels/TikTok top bar), light sheen ~every 8 s, hands off to the centred S7 lockup at 26.4 s. PiP label "CLAUDE OPUS 5.5" lowered 10 px to clear it.
+- QA: all 6 segment boundaries checked frame-to-frame (no jumps); mascot faces camera throughout; no private UI.

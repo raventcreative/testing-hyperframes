@@ -7,7 +7,7 @@ later. Run after tools/vo_align.py (it rewrites the un-gapped originals, kept he
 import json, re, shutil
 from pathlib import Path
 P = Path(__file__).resolve().parents[1]
-CUT, GAP = 18.06, 11.0          # silence 17.82..18.34 s; showcase length
+CUT, GAP = 18.06, 17.0          # silence 17.82..18.34 s; showcase length
 SHOW_SCENE = "s05"              # the scene that holds the showcase (extended by GAP)
 
 prod = P / "production"

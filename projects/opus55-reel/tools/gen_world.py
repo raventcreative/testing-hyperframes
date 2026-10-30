@@ -32,6 +32,7 @@ BAND = f"inset({BAND_Y}px 0px {1920 - BAND_Y - BAND_H}px 0px round {r3(26 / K)}p
 s06, s07 = S["s06"]["start"], S["s07"]["start"]
 GP = sc.get("gap") or {"cut": s06, "gap": 0}
 SHOW0, SHOW1 = r3(GP["cut"] - WT0), r3(s06 - WT0)   # showcase window on the world clock
+IN0, IN1 = r3(float(SHOW0) + 2.25), r3(float(SHOW1) - 3.2)          # the real-scale city plays inside this window
 tl = [
     f'tl.set("#wwrap", {{ visibility: "visible" }}, {ON});',
     f'tl.fromTo("#wwrap", {{ clipPath: "{APER}" }}, {{ clipPath: "{FULL}", duration: 0.62, ease: "power3.inOut", immediateRender: false }}, {ON + 0.05});',
@@ -88,7 +89,7 @@ html = f"""<template>
         bg.fillStyle = "rgba(6,14,38,0.30)"; bg.fillRect(0, 0, 270, 480);
       }}
       window.__hf = window.__hf || {{}}; window.__hf.buildReady = window.__hf.buildReady || {{}};
-      const ready = window.World3D.World.create(gl, {{ width: 1080, height: 1920, show: [{SHOW0}, {SHOW1}] }}).then((w) => {{ world = w; }});
+      const ready = window.World3D.World.create(gl, {{ width: 1080, height: 1920, show: [{SHOW0}, {SHOW1}], inner: [{IN0}, {IN1}], base: "assets/3d/", draco: "vendor/draco/" }}).then((w) => {{ world = w; }});
       window.__hf.buildReady["world"] = ready;
       window.addEventListener("hf-seek", (e) => {{
         const t = e.detail.time;

@@ -12,6 +12,8 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { City, GradeShader } from './city.js';
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const ss = (a, b, t) => { const u = clamp((t - a) / (b - a)); return u * u * (3 - 2 * u); };
@@ -85,9 +87,11 @@ function sparkMat(size) {
 }
 
 export class World {
-  static async create(canvas, opts) { const w = new World(); w.init(canvas, opts); return w; }
-  init(canvas, { width = 1080, height = 1920, show = [5.15, 16.2] } = {}) {
-    this.W = width; this.H = height; this.SHOW = show;
+  static async create(canvas, opts = {}) { const w = new World(); w.init(canvas, opts);
+    if (opts.inner) w.city = await City.create(w.renderer, { width: w.W, height: w.H, base: opts.base, draco: opts.draco });
+    return w; }
+  init(canvas, { width = 1080, height = 1920, show = [5.15, 16.2], inner = null } = {}) {
+    this.W = width; this.H = height; this.SHOW = show; this.IN = inner || [show[0] + 2.25, show[1] - 3.2];
     const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, preserveDrawingBuffer: true }));
     r.setPixelRatio(1); r.setSize(width, height, false);
     r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.1;
@@ -570,6 +574,7 @@ export class World {
     comp.addPass(new RenderPass(scene, this.cam));
     this.bloom = new UnrealBloomPass(new THREE.Vector2(width / 2, height / 2), 0.45, 0.55, 0.86); comp.addPass(this.bloom);
     comp.addPass(new OutputPass());
+    this.grade = new ShaderPass(GradeShader); Object.assign(this.grade.uniforms.uSat, { value: 1.05 }); this.grade.uniforms.uVig.value = 0.22; this.grade.uniforms.uGrain.value = 0.025; comp.addPass(this.grade);
     this._lastLife = -1; this._lastGrowTrees = -1;
     this._v = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
     r.compile(scene, this.cam);
@@ -587,21 +592,15 @@ export class World {
     const Wy = this.world.position.y, a = 0.62 + 0.045 * (t - this.SHOW[1]);
     return [new THREE.Vector3(Math.sin(a) * 3.15, Wy + 0.38 + 0.03 * Math.sin(t * 0.5), Math.cos(a) * 3.15), new THREE.Vector3(0, Wy - 0.08, 0)];
   }
-  showKeys() {   // [time, space, pos, target, fov] ; 'L' = island-local, 'W' = world
-    const [s0, s1] = this.SHOW, d = s1 - s0, at = (u) => s0 + u * d;
+  showKeys() {   // [time, space, pos, target, fov] ; 'L' = island-local, 'W' = world. The city (inner) plays between IN0 and IN1.
+    const [s0, s1] = this.SHOW, [i0, i1] = this.IN;
     return [
-      [at(0.0), 'P'],
-      [at(0.1), 'L', [-0.1, 0.72, 1.4], [-0.45, 0.05, 0.2], 50],
-      [at(0.21), 'L', [-0.45, 0.33, 0.9], [-0.45, 0.08, 0.4], 56],
-      [at(0.3), 'L', [-0.45, 0.075, 0.6], [-0.45, 0.075, 0.08], 62],
-      [at(0.42), 'L', [-0.45, 0.068, 0.12], [-0.45, 0.085, -0.4], 64],
-      [at(0.51), 'L', [-0.44, 0.33, -0.5], [-0.05, 0.14, -0.55], 58],
-      [at(0.59), 'L', [-0.12, 0.3, -0.5], [0.08, 0.2, -0.68], 55],
-      [at(0.65), 'L', [0.62, 0.6, -0.12], [1.3, 0.12, -0.3], 56],
-      [at(0.7), 'L', [1.55, 0.38, 0.12], [1.0, -0.22, -0.48], 56],
-      [at(0.79), 'L', [2.8, -0.3, -1.3], [0.55, -0.3, -0.25], 54],
-      [at(0.89), 'W', [3.3, 1.0, 2.2], [0, 0.98, 0], 52],
-      [at(1.0), 'Q'],
+      [s0, 'P'],
+      [s0 + 0.55 * (i0 - s0), 'L', [-0.1, 0.72, 1.4], [-0.45, 0.05, 0.2], 50],
+      [i0, 'L', [-0.45, 0.2, 0.3], [-0.45, 0.02, -0.15], 58],
+      [i1, 'L', [-0.32, 0.45, 0.6], [-0.3, 0.1, 0.0], 56],
+      [i1 + 0.5 * (s1 - i1), 'W', [3.3, 1.0, 2.2], [0, 0.98, 0], 52],
+      [s1, 'Q'],
     ];
   }
   camAt(t) {
@@ -630,15 +629,17 @@ export class World {
 
   // ---------------------------------------------------------------- render(t)
   render(t) {
-    const [S0, S1] = this.SHOW, sd = S1 - S0;
+    const [S0, S1] = this.SHOW, sd = S1 - S0, [I0, I1] = this.IN;
+    if (this.city && t >= I0 && t < I1) { this.city.render(t - I0, (1 - ss(I0, I0 + 0.6, t)) + ss(I1 - 0.5, I1, t)); return; }
+    this.grade.uniforms.uFlash.value = t < I0 ? ss(I0 - 0.45, I0, t) : t >= I1 ? 1 - ss(I1, I1 + 0.6, t) : 0; this.grade.uniforms.uTime.value = t;
     const life = ss(3.3, 4.9, t), grow = eo((t - 2.35) / 1.3);
-    const tod = ss(S0 + 0.3 * sd, S0 + 0.6 * sd, t) * 0.5 + ss(S0 + 0.6 * sd, S0 + 0.8 * sd, t) * 0.5;   // 0 day -> .5 sunset -> 1 night
+    const tod = this.city ? ss(I0, I1 - 0.5, t) : ss(S0 + 0.3 * sd, S0 + 0.6 * sd, t) * 0.5 + ss(S0 + 0.6 * sd, S0 + 0.8 * sd, t) * 0.5;   // 0 day -> .5 sunset -> 1 night
     const night = ss(0.45, 0.95, tod), dusk = ss(0, 0.5, tod) * (1 - ss(0.5, 0.95, tod));
-    const lift = eio((t - (S0 + 0.6 * sd)) / (0.3 * sd));
+    const lift = this.city ? eio((t - (I1 - 4)) / 4.6) : eio((t - (S0 + 0.6 * sd)) / (0.3 * sd));
     this.uTime.value = t; this.uNight.value = night * 1.05; this.uGrow.value = grow;
     // astronaut: walk in, reach, awe; later looks up at the rising island
     const wk = ss(0, 1.45, t), walking = t < 1.45 ? Math.sin(t * Math.PI * 2 * 1.6) : 0;
-    const A = this.astro; A.visible = !(t > S0 + 0.12 * sd && t < S0 + 0.83 * sd); A.position.set(-1.45 + 0.4 * wk, t < 1.45 ? Math.abs(Math.sin(t * Math.PI * 1.6 * 2)) * 0.02 : 0, -1.45 + 0.45 * wk); A.rotation.y = 0.8;
+    const A = this.astro; A.visible = this.city ? !(t > I0 - 0.5 && t < I1 + 1.2) : !(t > S0 + 0.12 * sd && t < S0 + 0.83 * sd); A.position.set(-1.45 + 0.4 * wk, t < 1.45 ? Math.abs(Math.sin(t * Math.PI * 1.6 * 2)) * 0.02 : 0, -1.45 + 0.45 * wk); A.rotation.y = 0.8;
     this.legL.sh.rotation.x = 0.45 * walking * (1 - ss(1.2, 1.45, t)); this.legR.sh.rotation.x = -0.45 * walking * (1 - ss(1.2, 1.45, t));
     this.legL.el.rotation.x = Math.max(0, -walking) * 0.4; this.legR.el.rotation.x = Math.max(0, walking) * 0.4;
     const reach = ss(1.35, 1.95, t) * (1 - ss(2.25, 2.8, t)), awe = ss(2.2, 3.0, t), look = lift;
@@ -772,7 +773,7 @@ export class World {
     // camera
     const [cp, cq, fov] = this.camAt(t);
     this.cam.position.copy(cp); this.cam.lookAt(cq);
-    const near = t > S0 + 0.18 * sd && t < S0 + 0.62 * sd ? 0.003 : 0.03;
+    const near = this.city ? (t > I0 - 0.9 && t < I1 + 1.0 ? 0.003 : 0.03) : t > S0 + 0.18 * sd && t < S0 + 0.62 * sd ? 0.003 : 0.03;
     if (this.cam.fov !== fov || this.cam.near !== near) { this.cam.fov = fov; this.cam.near = near; this.cam.updateProjectionMatrix(); }
     this.composer.render();
   }

@@ -1,0 +1,85 @@
+<template>
+  <script src="assets/brand_icons.js"></script>
+  <script src="assets/data.js"></script>
+  <script src="assets/kit.js"></script>
+  <div id="s6-root" data-composition-id="s6" data-width="1080" data-height="1350" style="position:absolute;inset:0;overflow:hidden">
+    <div id="s6-host" class="k-full" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      // CTA — the 3D Claude spark bursts out, "42 hires. / Start with one.", STACK is typed into the comment box,
+      // the five department cards rise as a fanned deck with their mascots hopping in turn.
+      window.__timelines = window.__timelines || {};
+      const K = window.K, S = window.STACK;
+      const host = document.getElementById("s6-host");
+      const CW = 180, CH = 244, X0 = 60, GAP = (960 - 5 * CW) / 4, CY = 1010;
+      let cards = "";
+      S.order.forEach((k, i) => {
+        const d = S.depts[k];
+        cards += `<div id="s6-cw${i}" style="position:absolute;left:${X0 + i * (CW + GAP)}px;top:${CY}px;width:${CW}px;height:${CH}px;perspective:900px">
+          <div id="s6-c${i}" style="position:absolute;inset:0;border-radius:22px;background:linear-gradient(170deg,${d.accent}30,rgba(255,255,255,0.04));box-shadow:inset 0 0 0 1.5px ${d.accent}88,0 20px 40px rgba(2,6,24,0.45)">
+            <div class="k-txt" style="position:absolute;left:0;right:0;top:16px;text-align:center;font-weight:700;font-size:20px;letter-spacing:0.2em;color:${d.accent}">${d.key}</div>
+            <img id="s6-ma${i}" class="k-pix" src="assets/mascots/${d.mascots[0]}" style="position:absolute;left:${CW / 2 - 46}px;top:${parseInt(d.mascots[0]) >= 7 ? 56 : 46}px;width:92px"/>
+            <img id="s6-mb${i}" class="k-pix" src="assets/mascots/${d.mascots[1]}" style="position:absolute;left:${CW / 2 - 46}px;top:${parseInt(d.mascots[1]) >= 7 ? 136 : 122}px;width:92px"/>
+            <div class="k-txt" style="position:absolute;left:0;right:0;top:214px;text-align:center;font-size:16px;color:rgba(222,232,255,0.75)">${d.count} add-ons</div>
+          </div></div>`;
+      });
+      host.innerHTML = `
+        ${K.bgHTML("s6b", "#d97757")}
+        <div id="s6-burst" style="position:absolute;left:340px;top:60px;width:400px;height:400px;border-radius:50%;box-shadow:0 0 0 3px rgba(217,119,87,0.6);opacity:0"></div>
+        <div style="position:absolute;left:430px;top:150px">${K.spark3dHTML("s6-sp", 220)}</div>
+        <div id="s6-h1" class="k-txt" style="position:absolute;left:0;right:0;top:418px;text-align:center;font-weight:700;font-size:128px;line-height:1;letter-spacing:-0.045em;color:#fff">42 hires.</div>
+        <div id="s6-h2" class="k-txt" style="position:absolute;left:0;right:0;top:548px;text-align:center;font-weight:700;font-size:112px;line-height:1.02;letter-spacing:-0.045em;padding-bottom:10px">
+          <span id="s6-h2s" style="background:linear-gradient(100deg,#4da3ff 0%,#bfe1ff 45%,#4da3ff 90%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent">Start with one.</span></div>
+        <div id="s6-p" class="k-txt" style="position:absolute;left:150px;right:150px;top:712px;text-align:center;font-size:27px;line-height:1.45;color:rgba(222,232,255,0.72)">
+          I'll send you <b style="font-weight:700;color:#fff">every install step for all 42</b>, with the command and the official link for each one.</div>
+        <div id="s6-cta" class="k-txt" style="position:absolute;left:0;right:0;top:858px;display:flex;align-items:center;justify-content:center;gap:22px;font-weight:700;font-size:44px;letter-spacing:-0.02em;color:#fff">
+          <span>Comment</span>
+          <span id="s6-box" style="position:relative;display:inline-flex;align-items:center;height:92px;width:250px;padding:0 26px;border-radius:20px;background:rgba(77,163,255,0.12);box-shadow:inset 0 0 0 3px #4da3ff,0 0 40px rgba(77,163,255,0.35);
+            font-weight:700;font-size:52px;letter-spacing:0.16em;color:#bfe1ff"><span id="s6-typed"></span><span id="s6-caret" style="display:inline-block;width:4px;height:52px;margin-left:6px;background:#bfe1ff"></span></span>
+          <span>and I'll send it over.</span></div>
+        ${cards}
+        ${K.chromeHTML("s6c", 5, 6)}`;
+      const $ = (s) => document.getElementById("s6-" + s);
+      function render(t) {
+        const { seg, eo, eo4, back } = K;
+        K.bg("s6b", t); K.chrome("s6c", t);
+        const sp = back(seg(t, 0.05, 0.6), 2.0);
+        $("sp").style.transform = `scale(${sp.toFixed(3)})`; $("sp").style.opacity = seg(t, 0.05, 0.15).toFixed(3);
+        K.spark3d("s6-sp", t, { spin: 80, ry0: 30 });
+        // shockwave rings from the spark (every 2 s)
+        const u = (t % 2) / 2, b = $("burst");
+        b.style.transform = `scale(${(0.35 + 0.9 * eo(u)).toFixed(3)})`; b.style.opacity = (t > 0.4 ? 0.8 * (1 - u) : 0).toFixed(3);
+        const a1 = eo4(seg(t, 0.35, 0.85)), a2 = eo4(seg(t, 0.55, 1.05));
+        $("h1").style.opacity = a1.toFixed(3); $("h1").style.transform = `translateY(${((1 - a1) * 60).toFixed(1)}px) scale(${(0.92 + 0.08 * a1).toFixed(3)})`;
+        $("h2").style.opacity = a2.toFixed(3); $("h2").style.transform = `translateY(${((1 - a2) * 60).toFixed(1)}px)`;
+        $("h2s").style.backgroundPosition = `${(100 - ((t * 24) % 200)).toFixed(1)}% 0`;
+        const ap = eo(seg(t, 0.85, 1.3)); $("p").style.opacity = ap.toFixed(3); $("p").style.transform = `translateY(${((1 - ap) * 20).toFixed(1)}px)`;
+        const ac = eo(seg(t, 1.1, 1.5)); $("cta").style.opacity = ac.toFixed(3); $("cta").style.transform = `translateY(${((1 - ac) * 24).toFixed(1)}px)`;
+        // type STACK, caret blinks, box pulses
+        const word = "STACK", nch = Math.max(0, Math.min(5, Math.floor((t - 1.55) / 0.12) + 1));
+        $("typed").textContent = t < 1.55 ? "" : word.slice(0, nch);
+        $("caret").style.opacity = Math.floor(t * 2.4) % 2 === 0 ? "1" : "0";
+        const pulse = t > 2.3 ? 0.5 + 0.5 * Math.sin((t - 2.3) * 3) : 0;
+        $("box").style.boxShadow = `inset 0 0 0 3px #4da3ff,0 0 ${(30 + 30 * pulse).toFixed(0)}px rgba(77,163,255,${(0.3 + 0.3 * pulse).toFixed(2)})`;
+        // department deck rises, mascots hop in sequence
+        for (let i = 0; i < 5; i++) {
+          const c0 = 1.5 + i * 0.1, f = eo4(seg(t, c0, c0 + 0.6));
+          $("c" + i).style.transform = `rotateX(${((1 - f) * -70).toFixed(2)}deg)`;
+          const lift = Math.max(0, Math.sin(Math.PI * seg(t, 2.8 + i * 0.4, 3.4 + i * 0.4))) * 16;
+          $("cw" + i).style.transform = `translateY(${((1 - f) * 120 - lift).toFixed(1)}px) rotate(${((i - 2) * 2.2 * f).toFixed(2)}deg)`;
+          $("cw" + i).style.opacity = seg(t, c0, c0 + 0.15).toFixed(3);
+          ["ma", "mb"].forEach((m, j) => {
+            const h = t > c0 + 0.6 ? K.hop(t, 2.0, i * 0.4 + j * 1.0, 12) : { y: 0, sx: 1, sy: 1 };
+            $(m + i).style.transform = `translateY(${h.y.toFixed(1)}px) scale(${h.sx.toFixed(3)},${h.sy.toFixed(3)})`;
+          });
+        }
+      }
+      const st = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(st, { t: 0 }, { t: 6, duration: 6, ease: "none", onUpdate: () => render(st.t) }, 0);
+      render(0);
+      window.__timelines["s6"] = tl;
+    })();
+  </script>
+</template>

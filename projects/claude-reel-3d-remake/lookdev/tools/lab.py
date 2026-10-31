@@ -11,7 +11,7 @@ decals = (P / "tools/decals.json").read_text().strip()
 D = spec["D"]
 html = f"""<!doctype html>
 <html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=1080, height=1920">
-<script src="vendor/gsap/dist/gsap.min.js"></script><script src="vendor/mascot3d.js"></script>
+<script src="vendor/gsap/dist/gsap.min.js"></script><script>window.MASCOT_TEX_CLEAN = true;</script><script src="vendor/mascot3d.js"></script>
 <style>*{{margin:0;padding:0}}html,body{{width:1080px;height:1920px;overflow:hidden;background:#eef4fc}}
 #main{{position:relative;width:1080px;height:1920px;overflow:hidden;background:url(assets/bg_1080x1920.png) 0 0/1080px 1920px}}
 #c{{position:absolute;left:0;top:0;width:1080px;height:1920px}}
@@ -46,7 +46,7 @@ function apply(t) {{
   mascot.render();
 }}
 window.__hf = window.__hf || {{}}; window.__hf.buildReady = window.__hf.buildReady || {{}};
-const ready = M3.Mascot.create(document.getElementById('c'), {{ url: 'assets/mascot3d/mascot_jas3_rigged.glb', face: {face}, decals: {decals}, width: 1080, height: 1920, envIntensity: 0.55 }})
+const ready = M3.Mascot.create(document.getElementById('c'), {{ url: 'assets/mascot3d/mascot_jas3_clean.glb', face: {face}, decals: {decals}, width: 1080, height: 1920, envIntensity: 0.55 }})
   .then((m) => {{ mascot = m; for (const o of m.scene.children) {{ if (o.isDirectionalLight && o.position.z < 0) {{ o.intensity = 1.5; o.color.setRGB(0.86, 0.92, 1.0); o.position.set(1.5, 1.4, -1.5); }} }} apply(0); }});
 window.__hf.buildReady['main'] = ready;
 window.addEventListener('hf-seek', (e) => {{ const t = e.detail.time; if (mascot) apply(t); else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t))); }});

@@ -265,6 +265,12 @@ export class Mascot {
     this.rest = {};
     for (const [n, b] of Object.entries(this.bones)) this.rest[n] = b.position.clone();
     this.mesh.frustumCulled = false;
+    // opt-in (window.MASCOT_TEX_CLEAN): the Tripo atlas packs unrelated charts edge to edge with no gutters, so mipmapped
+    // minification blends hair/skin texels into jacket edges ("frayed fibre" fringe). Sampling the base level only removes it.
+    if (typeof window !== 'undefined' && window.MASCOT_TEX_CLEAN) {
+      const m = this.mesh.material;
+      for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap']) { const tx = m[k]; if (!tx) continue; tx.generateMipmaps = false; tx.minFilter = THREE.LinearFilter; tx.anisotropy = 1; tx.needsUpdate = true; }
+    }
     // optional surface decals (e.g. a crisp logo on the jacket): a curved grid that follows the rest-pose surface
     // (z sampled offline), parented to a bone so it moves with the body. Texture is high-res, independent of the atlas.
     this.root.updateMatrixWorld(true);

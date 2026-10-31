@@ -1,0 +1,83 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #m-canvas { position: absolute; left: 0; top: 0; width: 2160px; height: 2700px; }
+  </style>
+  <div id="root" data-composition-id="mascot" data-width="2160" data-height="2700">
+    <canvas id="m-canvas" width="2160" height="2700" data-layout-ignore data-layout-allow-occlusion></canvas>
+  </div>
+  <script>
+    (function () {
+      // NEWEST AIpreneur mascot (black suit, mascot_jas3_rigged.glb + chest logo decal, same face/eyelid setup and
+      // acting director as projects/opus55-reel), talking + one-hand gestures + blinks, as a seamless 4.0 s loop.
+      const M3 = window.Mascot3D, D = 4;
+      const canvas = document.getElementById("m-canvas");
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * u * (u * (u * 6 - 15) + 10); };
+      // synthetic speech: words + vowel phones + energy (no audio; drives the director and the lip track)
+      const WORDS = ["Gila", "AI", "sekarang", "bisa", "bikin", "efek", "video", "sendiri"];
+      const V = "aiaeaiaieeiioeii";
+      const VW = [], phones = [], env = new Array(D * 100 + 2).fill(0);
+      let t0 = 0.22, k = 0;
+      for (let wi = 0; wi < WORDS.length; wi++) {
+        const ws = t0, nsyl = Math.max(1, Math.round(WORDS[wi].length / 3));
+        for (let s = 0; s < nsyl; s++) {
+          const d = 0.11;
+          phones.push([V[k % V.length], t0, t0 + d]);
+          for (let i = Math.floor(t0 * 100); i < Math.ceil((t0 + d) * 100) && i < env.length; i++) env[i] = 88;
+          t0 += d + 0.05; k++;
+        }
+        VW.push([WORDS[wi], ws, t0 - 0.05, wi === 1 || wi === 5 ? 1 : 0]);
+        t0 += wi === 3 ? 0.28 : 0.07;
+      }
+      const mouthAt = M3.buildLipTrack(phones, env, D);
+      const DIR = M3.direct(VW, D, { intents: [{ t: 0.35, action: "present", side: "right" }, { t: 1.55, action: "emphasize", side: "left" }, { t: 2.35, action: "explain", side: "right" }], seed: 5, quiet: 0.25 });
+      const PERF = M3.buildPerformance(DIR.tracks, D + 0.05);
+      const add = (...ds) => { const o = {}; for (const d of ds) for (const [kk, v] of Object.entries(d || {})) { const a = o[kk] || [0, 0, 0]; o[kk] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
+      // loop window: every moving term fades to its frame-0 value at both ends of the 4 s loop
+      const win = (t) => sm(t / 0.45) * (1 - sm((t - 3.35) / 0.55));
+      const VIEW = { fx: 1080, fy: 2384, h: 2000, yaw: 0, pitch: 5 };
+      let mascot = null;
+      const P0 = () => PERF(0);
+      function apply(t) {
+        const w = win(t), Pf = PERF(t), Pz = P0();
+        // blend toward the frame-0 pose outside the window so frame 0 == frame 4
+        const bones = {};
+        for (const kk of new Set([...Object.keys(Pf.bones), ...Object.keys(Pz.bones)])) {
+          const a = Pz.bones[kk] || [0, 0, 0], b = Pf.bones[kk] || [0, 0, 0];
+          bones[kk] = [a[0] + (b[0] - a[0]) * w, a[1] + (b[1] - a[1]) * w, a[2] + (b[2] - a[2]) * w];
+        }
+        const id = M3.micro(t, 17, M3.vnoise); for (const kk in id) id[kk] = id[kk].map((x) => x * w);
+        const B = add(bones, id);
+        const root = { x: Pz.root.x + (Pf.root.x - Pz.root.x) * w, y: Pz.root.y + (Pf.root.y - Pz.root.y) * w, ry: (Pf.root.ry || 0) * w, rz: (Pf.root.rz || 0) * w, rx: 0, s: 1 };
+        const bl = M3.blink(t, 0, D, 3, DIR.blinks);
+        const g = DIR.gaze(t); const gaze = Array.isArray(g) ? g.map((x) => x * w) : g;
+        mascot.setView(VIEW);
+        mascot.setState({ root, bones: B, face: { blink: [bl * w, bl * w], gaze, mouthMix: 1, mouth: mouthAt(t) } });
+        mascot.render();
+      }
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      const FACE = {"eyeA": {"c": [-0.091, 0.596], "r": [0.041, 0.034], "n": 757, "J": [0.4997633976754324, 0.3065330127591157, 0.314518943050391, -0.453702164567319], "uv0": [0.6328573151105054, 0.6167170084324972], "maxErr": 0.003818576762005663}, "eyeB": {"c": [0.091, 0.596], "r": [0.041, 0.034], "n": 753, "J": [0.5500133280433187, -0.06824460818744192, -0.09499495020823343, -0.5077214816509605], "uv0": [0.12402271349668496, 0.8611807690751265], "maxErr": 0.0028305745008792753}, "browA": {"c": [-0.09, 0.68], "n": 510, "J": [0.43108254869646895, 0.4376875904621281, 0.3523513551101368, -0.4754305212249294], "uv0": [0.6629852372177631, 0.5810053999225538], "maxErr": 0.004289199391581338}, "browB": {"c": [0.09, 0.68], "n": 362, "J": [0.5552915360962205, 0.08489039751259354, 0.1020935044591921, -0.6884358006120392], "uv0": [0.8350086373766634, 0.9448922678325264], "maxErr": 0.0020738571975070096}, "mouth": {"c": [0, 0.548], "r": [0.026, 0.016]}, "skin": [252, 240, 232], "skinEye": [252, 244, 234], "coverNormal": 0, "lidLit": [0.992, 0.975, 0.968], "mouthDy": 0.0, "faceSmooth": 1.0, "headC": [0, 0.7, -0.02]};
+      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_jas3_rigged.glb", face: FACE, decals: [{"url": "assets/mascot3d/logo_decal.png", "bone": "chest", "box": [-0.098, -0.026, 0.37211, 0.37989], "zgrid": [[0.08087, 0.08404, 0.08699, 0.08956, 0.09213, 0.09443, 0.09632, 0.09816, 0.09999, 0.10171, 0.103, 0.10434, 0.10568, 0.10699, 0.10813, 0.10911, 0.11001, 0.1109, 0.11179, 0.1125, 0.11305, 0.1136, 0.11403, 0.11428], [0.08051, 0.08349, 0.08659, 0.08969, 0.09209, 0.09435, 0.09643, 0.09842, 0.10026, 0.10176, 0.10328, 0.10472, 0.10605, 0.10738, 0.10843, 0.10947, 0.11041, 0.11129, 0.1123, 0.11285, 0.11339, 0.11394, 0.11442, 0.11483], [0.07996, 0.08326, 0.08624, 0.08922, 0.092, 0.09428, 0.09649, 0.09844, 0.10028, 0.10181, 0.10332, 0.10483, 0.10611, 0.10765, 0.10871, 0.10976, 0.11082, 0.11176, 0.11251, 0.11319, 0.11383, 0.11437, 0.11481, 0.11523], [0.07929, 0.08271, 0.08569, 0.08898, 0.09192, 0.09424, 0.09648, 0.09854, 0.1003, 0.10209, 0.10361, 0.10511, 0.10649, 0.10764, 0.10873, 0.11003, 0.11109, 0.11208, 0.11279, 0.11353, 0.11417, 0.11471, 0.11527, 0.11563], [0.07862, 0.08215, 0.08546, 0.08844, 0.09175, 0.09407, 0.0963, 0.09856, 0.10031, 0.10213, 0.10365, 0.10511, 0.10676, 0.10791, 0.10901, 0.11005, 0.11108, 0.11229, 0.11308, 0.11376, 0.1145, 0.11506, 0.11561, 0.11614]], "offset": 0.0012}], width: 2160, height: 2700, envIntensity: 0.55 })
+        .then((m) => {
+          mascot = m;
+          for (const o of m.scene.children) {
+            if (!o.isDirectionalLight) continue;
+            if (o.position.z < 0) { o.intensity = 2.4; o.color.setRGB(0.62, 0.9, 1.0); o.position.set(1.6, 1.5, -1.4); }
+          }
+          apply(0);
+        });
+      window.__hf.buildReady["mascot"] = ready;
+      window.addEventListener("hf-seek", (e) => {
+        const t = e.detail.time;
+        if (mascot) apply(t);
+        else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t)));
+      });
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.set({}, {}, D - 0.02);
+      window.__timelines["mascot"] = tl;
+    })();
+  </script>
+</template>

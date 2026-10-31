@@ -55,11 +55,11 @@
   // ---------------------------------------------------------------- background: #0a0d2c → #294b77 + grid + soft spark glow
   function bgHTML(P, accent) {
     return `
-<div id="${P}-bg" class="k-full" style="background:linear-gradient(160deg,#0a0d2c 0%,#13204a 48%,#294b77 100%)">
+<div id="${P}-bg" class="k-full" style="background:#0a0d2c url(assets/background/bg_user.png) center/1080px 1350px no-repeat">
   <div id="${P}-grid" class="k-full" style="opacity:0.55;background-image:linear-gradient(rgba(255,255,255,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.045) 1px,transparent 1px);background-size:54px 54px;background-position:-1px -1px"></div>
-  <div class="k-full" style="background:radial-gradient(60% 45% at 85% 8%,${accent || "#d97757"}2e,transparent 70%),radial-gradient(70% 50% at 10% 100%,rgba(41,75,119,0.55),transparent 70%)"></div>
+  <div class="k-full" style="background:radial-gradient(60% 45% at 85% 8%,${accent || "#d97757"}2e,transparent 70%),radial-gradient(70% 50% at 10% 100%,rgba(41,75,119,0.0),transparent 70%)"></div>
   <div id="${P}-bgspark" style="position:absolute;left:760px;top:-150px;width:520px;height:520px;opacity:0.10">${sparkSVG("#d97757")}</div>
-  <div class="k-full" style="box-shadow:inset 0 0 220px rgba(4,6,24,0.7)"></div>
+  <div class="k-full" style="box-shadow:inset 0 0 160px rgba(4,6,24,0.35)"></div>
 </div>`;
   }
   function sparkSVG(fill) {

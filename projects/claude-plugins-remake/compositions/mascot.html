@@ -1,0 +1,115 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #m-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  </style>
+  <div id="root" data-composition-id="mascot" data-width="1080" data-height="1920">
+    <canvas id="m-canvas" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas>
+  </div>
+  <script>
+    (function () {
+      // 3D suit mascot (mascot_jas3_rigged.glb) rendered live in one WebGL canvas.
+      // Framing = orthographic camera (setView: feet px, figure height px). Hook: small full body far back,
+      // walks forward to a half-body framing at the bottom; the upper frame stays free for the explanation panel.
+      // Acting = shared director on the measured VO words; lip sync = letters x VO energy.
+      const M3 = window.Mascot3D;
+      const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump } = M3;
+      const VW = window.VO_WORDS, PH = window.VO_PHR, D = 48.4;
+      const canvas = document.getElementById("m-canvas");
+      const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, D);
+      const ACC = syllableAccents(window.VO_ENV, VW, window.VO_PHONES, D);
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
+      const ease3 = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const add = (...ds) => { const o = {}; for (const d of ds) for (const [k, v] of Object.entries(d || {})) { const a = o[k] || [0, 0, 0]; o[k] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
+      function accents(t) {
+        let n = 0;
+        for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; }
+        return Math.min(1.3, n);
+      }
+
+      // ------------------------------------------------------------ framing (pure function of t)
+      const FAR = { fx: 540, fy: 1790, h: 560 }, HALF = { fx: 540, fy: 2200, h: 1080 };
+      const W0 = PH.hook[1].start + 0.2, W1 = PH.hook[2].end - 0.1;     // walk-in during "Ini 30 plugin ... kerjaannya"
+      const CTA0 = PH.cta[0].start - 0.2;
+      const NAMES = PH.cats.map((c) => c.label.start).concat(PH.outro.map((o) => o.start));
+      const SMALL = PH.cats.flatMap((c) => c.names.map((n) => n.start));
+      function view(t) {
+        const u = ease3((t - W0) / (W1 - W0));
+        let fx = FAR.fx + (HALF.fx - FAR.fx) * u, fy = FAR.fy + (HALF.fy - FAR.fy) * u, h = FAR.h + (HALF.h - FAR.h) * u;
+        // hook: tiny drift; "Pantes nggak nempel" = recoil step back
+        fy += -14 * bump(t, PH.hook[0].start + 0.3, 0.35) * (1 - u);
+        // codes: lean-in punch on every code name, slow breathing push
+        let p = 0;
+        for (const n of NAMES) { const d = t - (n - 0.05); if (d > 0 && d < 1.6) p += Math.sin(Math.min(1, d / 0.22) * Math.PI / 2) * Math.exp(-Math.max(0, d - 0.22) * 2.6); }
+        for (const n of SMALL) { const d = t - (n - 0.03); if (d > 0 && d < 0.8) p += 0.3 * Math.sin(Math.min(1, d / 0.15) * Math.PI / 2) * Math.exp(-Math.max(0, d - 0.15) * 4); }
+        const live = sm((t - W1) / 0.6) * (1 - sm((t - CTA0) / 0.5));
+        h += live * (48 * p + 18 * Math.sin(t * 0.9)); fy += live * (26 * p + 8 * Math.sin(t * 0.9));
+        fx += live * 16 * Math.sin(t * 0.55 + 0.7);
+        // CTA: pull back a little so both hands read
+        const c = ease3((t - CTA0) / 0.7);
+        h += c * -60; fy += c * -40;
+        return { fx, fy, h, yaw: 0, pitch: 4 };
+      }
+
+      // ------------------------------------------------------------ acting
+      const intents = [
+        { t: PH.hook[0].start + 0.05, action: "emphasize", side: "left" },
+        { t: PH.hook[1].start, action: "present", side: "right" },
+        { t: W0 + 0.4, action: "idle" },
+        { t: PH.hook[2].start + 0.3, action: "reveal" },
+      ];
+      const ROT = ["pointFwd", "explain", "present", "emphasize", "pointFwd"];
+      PH.cats.forEach((c, ci) => {
+        intents.push({ t: c.label.start - 0.05, action: ci % 2 ? "present" : "reveal", side: ci % 2 ? "left" : "right" });
+        c.names.forEach((n, k) => { if (k % 2 === 0) intents.push({ t: n.start - 0.05, action: ROT[(ci + k / 2) % ROT.length], side: (ci + k / 2) % 2 ? "left" : "right" }); });
+      });
+      intents.push({ t: PH.outro[0].start, action: "emphasize", side: "right" }, { t: PH.outro[1].start, action: "pointFwd", side: "left" },
+        { t: PH.outro[2].start, action: "explain", side: "right" });
+      intents.push({ t: PH.cta[0].start, action: "cta", side: "right" }, { t: PH.cta[1].start + 0.9, action: "welcome", side: "left" });
+      const DIR = M3.direct(VW, D, { intents, seed: 5, quiet: 0.2, look: 0 });
+      const PERF = buildPerformance(DIR.tracks, D + 0.05);
+      const walk = (t) => M3.walk(t, W0, W1, 4, 0.36);
+
+      let mascot = null;
+      function apply(t) {
+        const Pf = PERF(t), acc = accents(t);
+        const still = 1 - sm((t - (D - 0.5)) / 0.4);
+        const id = M3.micro(t, 17, vnoise); for (const k in id) id[k] = id[k].map((x) => x * still);
+        const wk = walk(t);
+        const bones = add(Pf.bones, id, wk.bones, { head: [0.03 * acc * still, 0, 0], neck: [0.012 * acc * still, 0, 0] });
+        const root = { x: Pf.root.x, y: Pf.root.y + wk.bob, ry: Pf.root.ry + 0.012 * vnoise(t, 26, 0.18) * still, rz: Pf.root.rz, rx: 0, s: Pf.root.s };
+        mascot.setView(view(t));
+        const bl = M3.blink(t, 0, D, 3, DIR.blinks);
+        mascot.setState({ root, bones, face: { blink: [bl, bl], gaze: DIR.gaze(t), mouthMix: 1, mouth: mouthAt(t) } });
+        mascot.render();
+      }
+
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      const FACE = {"eyeA": {"c": [-0.091, 0.596], "r": [0.041, 0.034], "n": 757, "J": [0.4997633976754324, 0.3065330127591157, 0.314518943050391, -0.453702164567319], "uv0": [0.6328573151105054, 0.6167170084324972], "maxErr": 0.003818576762005663}, "eyeB": {"c": [0.091, 0.596], "r": [0.041, 0.034], "n": 753, "J": [0.5500133280433187, -0.06824460818744192, -0.09499495020823343, -0.5077214816509605], "uv0": [0.12402271349668496, 0.8611807690751265], "maxErr": 0.0028305745008792753}, "browA": {"c": [-0.09, 0.68], "n": 510, "J": [0.43108254869646895, 0.4376875904621281, 0.3523513551101368, -0.4754305212249294], "uv0": [0.6629852372177631, 0.5810053999225538], "maxErr": 0.004289199391581338}, "browB": {"c": [0.09, 0.68], "n": 362, "J": [0.5552915360962205, 0.08489039751259354, 0.1020935044591921, -0.6884358006120392], "uv0": [0.8350086373766634, 0.9448922678325264], "maxErr": 0.0020738571975070096}, "mouth": {"c": [0, 0.548], "r": [0.026, 0.016]}, "skin": [252, 240, 232], "skinEye": [252, 244, 234], "coverNormal": 0, "lidLit": [0.992, 0.975, 0.968], "mouthDy": 0.0, "faceSmooth": 1.0, "headC": [0, 0.7, -0.02]};
+      const DECALS = [{"url": "assets/mascot3d/logo_decal.png", "bone": "chest", "box": [-0.098, -0.026, 0.37211, 0.37989], "zgrid": [[0.08087, 0.08404, 0.08699, 0.08956, 0.09213, 0.09443, 0.09632, 0.09816, 0.09999, 0.10171, 0.103, 0.10434, 0.10568, 0.10699, 0.10813, 0.10911, 0.11001, 0.1109, 0.11179, 0.1125, 0.11305, 0.1136, 0.11403, 0.11428], [0.08051, 0.08349, 0.08659, 0.08969, 0.09209, 0.09435, 0.09643, 0.09842, 0.10026, 0.10176, 0.10328, 0.10472, 0.10605, 0.10738, 0.10843, 0.10947, 0.11041, 0.11129, 0.1123, 0.11285, 0.11339, 0.11394, 0.11442, 0.11483], [0.07996, 0.08326, 0.08624, 0.08922, 0.092, 0.09428, 0.09649, 0.09844, 0.10028, 0.10181, 0.10332, 0.10483, 0.10611, 0.10765, 0.10871, 0.10976, 0.11082, 0.11176, 0.11251, 0.11319, 0.11383, 0.11437, 0.11481, 0.11523], [0.07929, 0.08271, 0.08569, 0.08898, 0.09192, 0.09424, 0.09648, 0.09854, 0.1003, 0.10209, 0.10361, 0.10511, 0.10649, 0.10764, 0.10873, 0.11003, 0.11109, 0.11208, 0.11279, 0.11353, 0.11417, 0.11471, 0.11527, 0.11563], [0.07862, 0.08215, 0.08546, 0.08844, 0.09175, 0.09407, 0.0963, 0.09856, 0.10031, 0.10213, 0.10365, 0.10511, 0.10676, 0.10791, 0.10901, 0.11005, 0.11108, 0.11229, 0.11308, 0.11376, 0.1145, 0.11506, 0.11561, 0.11614]], "offset": 0.0012}];
+      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_jas3_rigged.glb", face: FACE, decals: DECALS, width: 1080, height: 1920, envIntensity: 0.75 })
+        .then((m) => {
+          mascot = m;
+          // brand plate is deep blue: cyan rim from behind-right, soft cool key
+          for (const o of m.scene.children) {
+            if (!o.isDirectionalLight) continue;
+            if (o.position.z < 0) { o.intensity = 1.5; o.color.setRGB(1.0, 0.97, 0.93); o.position.set(1.6, 1.5, -1.4); }
+          }
+          if (m.shadow) m.shadow.visible = false;
+          apply(0);
+        });
+      window.__hf.buildReady["mascot"] = ready;
+      window.addEventListener("hf-seek", (e) => {
+        const t = e.detail.time;
+        if (mascot) apply(t);
+        else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t)));
+      });
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.set({}, {}, D - 0.02);
+      window.__timelines["mascot"] = tl;
+    })();
+  </script>
+</template>

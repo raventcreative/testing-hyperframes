@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — 15 Kode Visual (remake)</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/mascot3d.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/visuals.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --c: #01ccf7; --w: #ffffff; --navy: #061334; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0a1a44; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: #fff; -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #0a1a44; }
+      .abs { position: absolute; }
+      b, .b { font-weight: 700; }
+      .cy { color: var(--c); }
+      /* ---------------- background stack */
+      #bg { position: absolute; inset: 0; z-index: 0; background: url(assets/brand/bg_1080x1920.png) 0 0 / 1080px 1920px no-repeat; }
+      #bgfx { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+      .orb { position: absolute; border-radius: 50%; mix-blend-mode: screen; }
+      #orbA { left: -260px; top: 120px; width: 900px; height: 900px; background: radial-gradient(circle, rgba(1,204,247,.30) 0%, rgba(1,204,247,0) 62%); }
+      #orbB { left: 480px; top: 1050px; width: 1000px; height: 1000px; background: radial-gradient(circle, rgba(70,140,255,.28) 0%, rgba(70,140,255,0) 62%); }
+      #floorWrap { position: absolute; left: 0; top: 1180px; width: 1080px; height: 740px; overflow: hidden; perspective: 620px; perspective-origin: 540px 0px;
+        -webkit-mask: linear-gradient(180deg, transparent 0%, #000 38%, #000 100%); mask: linear-gradient(180deg, transparent 0%, #000 38%, #000 100%); }
+      #floor { position: absolute; left: -760px; top: 0; width: 2600px; height: 1700px; transform-origin: 50% 0%; transform: rotateX(74deg);
+        background-image: linear-gradient(rgba(1,204,247,.55) 2px, transparent 2px), linear-gradient(90deg, rgba(1,204,247,.55) 2px, transparent 2px);
+        background-size: 110px 110px; opacity: .22; }
+      #halo { position: absolute; left: 90px; top: 1080px; width: 900px; height: 900px; border-radius: 50%; z-index: 3;
+        background: radial-gradient(circle, rgba(1,204,247,.32) 0%, rgba(1,204,247,.08) 40%, rgba(1,204,247,0) 66%); opacity: 0; }
+      .pt { position: absolute; border-radius: 50%; background: #bff3ff; box-shadow: 0 0 12px rgba(1,204,247,.9); }
+      #ghost { position: absolute; right: -40px; top: 360px; width: 900px; height: 600px; z-index: 4; pointer-events: none; }
+      .gn { position: absolute; right: 0; top: 0; font-weight: 700; font-size: 560px; line-height: 1; letter-spacing: -20px; color: transparent;
+        -webkit-text-stroke: 3px rgba(1,204,247,.38); opacity: 0; }
+      #mascot { z-index: 30 !important; position: absolute !important; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      /* ---------------- hook */
+      .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; }
+      .w { display: inline-block; opacity: 0; }
+      #wall { position: absolute; left: 150px; top: 610px; width: 780px; height: 470px; border-radius: 30px; overflow: hidden;
+        background: rgba(6,19,52,.55); border: 2px solid rgba(255,255,255,.14); box-shadow: 0 30px 80px rgba(0,0,0,.35); opacity: 0; }
+      #wallq { position: absolute; right: 26px; top: 22px; padding: 14px 26px; border-radius: 26px 26px 6px 26px; background: rgba(1,204,247,.9);
+        color: #061334; font-size: 28px; font-weight: 700; z-index: 2; }
+      #wallrows { position: absolute; left: 30px; top: 100px; width: 720px; }
+      .bar { position: absolute; left: 0; height: 14px; border-radius: 7px; background: rgba(255,255,255,.34); }
+      #wallfade { position: absolute; left: 0; right: 0; bottom: 0; height: 160px; background: linear-gradient(180deg, rgba(6,19,52,0), rgba(6,19,52,.9)); z-index: 2; }
+      #tags { position: absolute; left: 0; top: 0; width: 1080px; height: 1100px; }
+      .tag { position: absolute; left: 0; top: 0; padding: 12px 26px; border-radius: 40px; font-size: 34px; font-weight: 700; white-space: nowrap;
+        background: rgba(6,19,52,.7); border: 2px solid rgba(1,204,247,.7); color: #fff; box-shadow: 0 0 24px rgba(1,204,247,.35); opacity: 0; }
+      .tag i { font-style: normal; color: var(--c); }
+      #h15 { position: absolute; left: 0; top: 200px; width: 1080px; height: 420px; text-align: center; }
+      .n15 { position: absolute; left: 0; width: 1080px; top: 0; font-size: 400px; line-height: 420px; font-weight: 700; color: var(--c); letter-spacing: -14px;
+        text-shadow: 0 0 60px rgba(1,204,247,.55); opacity: 0; }
+      .vis { font-size: 210px; font-weight: 700; letter-spacing: -6px; line-height: 1; }
+      #ring { position: absolute; left: 290px; top: 230px; width: 500px; height: 500px; border-radius: 50%; border: 6px solid var(--c); opacity: 0;
+        box-shadow: 0 0 40px rgba(1,204,247,.8), inset 0 0 40px rgba(1,204,247,.6); }
+      /* ---------------- panel */
+      #panel { position: absolute; inset: 0; }
+      #chip { position: absolute; left: 90px; top: 112px; height: 52px; padding: 0 24px; border-radius: 26px; background: var(--c); color: #061334;
+        font-size: 25px; font-weight: 700; line-height: 52px; letter-spacing: 2px; opacity: 0; }
+      #count { position: absolute; right: 90px; top: 104px; height: 64px; width: 260px; overflow: hidden; text-align: right; opacity: 0; }
+      .cn { position: absolute; right: 0; top: 0; font-size: 44px; line-height: 64px; font-weight: 400; color: rgba(255,255,255,.8); opacity: 0; }
+      .cn b { color: var(--c); font-size: 52px; }
+      #prog { position: absolute; left: 90px; top: 188px; width: 900px; height: 10px; }
+      .seg { position: absolute; top: 0; width: 52.5px; height: 10px; border-radius: 5px; background: rgba(255,255,255,.16); overflow: hidden; opacity: 0; }
+      .seg i { position: absolute; inset: 0; background: var(--c); box-shadow: 0 0 12px var(--c); transform-origin: 0 50%; transform: scaleX(0); }
+      #pill { position: absolute; left: 90px; top: 232px; width: 900px; height: 124px; border-radius: 62px; background: rgba(6,19,52,.62);
+        border: 2px solid rgba(1,204,247,.55); box-shadow: 0 0 0 6px rgba(1,204,247,.07), 0 24px 60px rgba(0,0,0,.3); transform-origin: 50% 50%; opacity: 0; }
+      #pslash { position: absolute; left: 22px; top: 21px; width: 78px; height: 78px; border-radius: 50%; border: 2px solid rgba(1,204,247,.6);
+        font-size: 30px; font-weight: 700; line-height: 74px; text-align: center; color: var(--c); }
+      #ptopic { position: absolute; left: 116px; top: 0; height: 120px; line-height: 120px; font-size: 30px; color: rgba(255,255,255,.55); white-space: nowrap; }
+      .pl { position: absolute; left: 250px; top: 0; height: 120px; line-height: 120px; font-size: 60px; font-weight: 700; white-space: nowrap; color: #fff; }
+      .pl s { text-decoration: none; display: none; }
+      .pl s.sl { color: var(--c); }
+      .caret { display: inline-block; width: 5px; height: 64px; margin-left: 6px; vertical-align: -10px; background: var(--c); box-shadow: 0 0 10px var(--c); }
+      #psend { position: absolute; right: 20px; top: 20px; width: 80px; height: 80px; border-radius: 50%; background: var(--c);
+        box-shadow: 0 0 26px rgba(1,204,247,.7); }
+      #psend svg { position: absolute; left: 20px; top: 20px; }
+      #expls { position: absolute; left: 60px; top: 386px; width: 960px; height: 150px; }
+      .ex { position: absolute; left: 0; top: 0; width: 960px; text-align: center; font-size: 50px; line-height: 66px; font-weight: 400; }
+      .ex .w.k { font-weight: 700; color: var(--c); }
+      #cards { position: absolute; left: 90px; top: 560px; width: 900px; height: 450px; perspective: 1600px; }
+      .card { position: absolute; left: 0; top: 0; width: 900px; height: 450px; border-radius: 34px; overflow: hidden; opacity: 0;
+        background: linear-gradient(160deg, rgba(10,32,84,.82), rgba(4,14,44,.78)); border: 2px solid rgba(1,204,247,.4);
+        box-shadow: 0 30px 80px rgba(0,0,0,.4), inset 0 0 60px rgba(1,204,247,.08); }
+      .card svg { position: absolute; left: 0; top: 0; }
+      .card .scan { position: absolute; left: 0; top: 0; width: 900px; height: 90px; opacity: 0;
+        background: linear-gradient(180deg, rgba(1,204,247,0), rgba(1,204,247,.35) 80%, rgba(220,250,255,.95) 100%); }
+      .card .ctag { position: absolute; right: 22px; top: 18px; font-size: 22px; font-weight: 700; color: rgba(1,204,247,.85); letter-spacing: 1px; }
+      /* ---------------- CTA */
+      #cta { position: absolute; inset: 0; }
+      #dmc { position: absolute; left: 90px; top: 790px; width: 900px; height: 176px; border-radius: 36px; opacity: 0;
+        background: rgba(255,255,255,.96); box-shadow: 0 30px 80px rgba(0,0,0,.35); color: #061334; }
+      #dmc .ic { position: absolute; left: 30px; top: 33px; width: 110px; height: 110px; border-radius: 50%; background: var(--c); }
+      #dmc .t1 { position: absolute; left: 170px; top: 32px; font-size: 46px; font-weight: 700; line-height: 60px; }
+      #dmc .t2 { position: absolute; left: 170px; top: 96px; font-size: 32px; line-height: 44px; color: rgba(6,19,52,.65); }
+      #cbox { position: absolute; left: 90px; top: 600px; width: 900px; height: 136px; border-radius: 68px; opacity: 0;
+        background: rgba(6,19,52,.65); border: 2px solid rgba(1,204,247,.6); box-shadow: 0 0 0 6px rgba(1,204,247,.08); }
+      #cav { position: absolute; left: 24px; top: 24px; width: 88px; height: 88px; border-radius: 50%; background: rgba(255,255,255,.14);
+        font-size: 24px; line-height: 88px; text-align: center; color: rgba(255,255,255,.8); }
+      #ctype { position: absolute; left: 140px; top: 0; height: 132px; line-height: 132px; font-size: 64px; font-weight: 700; color: var(--c); white-space: nowrap; }
+      #ctype s { text-decoration: none; display: none; }
+      #ph { position: absolute; left: 140px; top: 0; height: 132px; line-height: 132px; font-size: 34px; color: rgba(255,255,255,.45); }
+      #csend { position: absolute; right: 24px; top: 24px; width: 88px; height: 88px; border-radius: 50%; background: var(--c); box-shadow: 0 0 26px rgba(1,204,247,.7); }
+      #csend svg { position: absolute; left: 22px; top: 22px; }
+      .pc { position: absolute; left: 0; top: 0; width: 120px; height: 76px; border-radius: 14px; background: rgba(6,19,52,.85); border: 2px solid var(--c);
+        font-size: 22px; font-weight: 700; line-height: 72px; text-align: center; color: #fff; opacity: 0; }
+      #logo { position: absolute; left: 360px; top: 1010px; width: 360px; height: 35.7px; opacity: 0; filter: drop-shadow(0 4px 12px rgba(0,0,0,.45)); }
+      #logo img { width: 360px; height: 35.7px; }
+      /* ---------------- fx */
+      #fx { position: absolute; inset: 0; z-index: 80; pointer-events: none; }
+      #flash { position: absolute; inset: 0; background: #e8fbff; opacity: 0; mix-blend-mode: screen; }
+      #sweep { position: absolute; left: -900px; top: -400px; width: 520px; height: 2800px; transform: rotate(18deg); opacity: 0;
+        background: linear-gradient(90deg, rgba(1,204,247,0), rgba(1,204,247,.22) 40%, rgba(255,255,255,.35) 50%, rgba(1,204,247,.22) 60%, rgba(1,204,247,0)); }
+      .gl { position: absolute; left: 0; width: 1080px; background: rgba(1,204,247,.18); mix-blend-mode: screen; opacity: 0; }
+      #vig { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 45%, rgba(0,0,0,0) 55%, rgba(2,8,28,.55) 100%); }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; opacity: .12; background: url(assets/brand/grain_256.png); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="44.6" data-width="1080" data-height="1920" data-fps="30">
+      <div id="bg" data-layout-ignore></div>
+      <div id="bgfx" data-layout-ignore>
+        <div id="orbA" class="orb"></div><div id="orbB" class="orb"></div>
+        <div id="floorWrap"><div id="floor"></div></div>
+        <div id="pts"></div>
+      </div>
+      <div id="halo" data-layout-ignore></div>
+      <div id="ghost" data-layout-ignore></div>
+      <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="44.6" data-track-index="3" data-width="1080" data-height="1920"></div>
+      <div id="ui" data-layout-ignore>
+        <!-- HOOK -->
+        <div id="hook" class="abs" style="inset:0">
+          <div id="wall"><div id="wallq">jelasin materi ini dong</div><div id="wallrows"></div><div id="wallfade"></div></div>
+          <div id="h1" class="abs" style="inset:0">
+            <div class="ctr" style="top:180px;font-size:62px;line-height:80px"><span class="w">Lu</span> <span class="w">masih</span> <span class="w">belajar</span> <span class="w">dari</span></div>
+            <div class="ctr b cy" style="top:262px;font-size:138px;line-height:170px;letter-spacing:-3px;text-shadow:0 0 40px rgba(1,204,247,.45)"><span class="w">teks</span> <span class="w">panjang</span></div>
+            <div class="ctr b" style="top:438px;font-size:84px;line-height:100px"><span class="w">di</span> <span class="w">ChatGPT?</span></div>
+          </div>
+          <div id="h2a" class="abs" style="inset:0">
+            <div class="ctr" style="top:250px;font-size:74px;line-height:90px"><span class="w">Pantes</span></div>
+            <div class="ctr b" style="top:340px;font-size:132px;line-height:150px;letter-spacing:-3px"><span class="w">nggak</span></div>
+            <div class="ctr b cy" style="top:480px;font-size:150px;line-height:170px;letter-spacing:-4px;text-shadow:0 0 50px rgba(1,204,247,.5)"><span class="w">nempel.</span></div>
+          </div>
+          <div id="h2b" class="abs" style="inset:0">
+            <div id="tags"></div>
+            <div class="ctr" style="top:120px;font-size:54px;line-height:70px"><span class="w">Ketik</span> <span class="w">salah</span> <span class="w">satu</span> <span class="w">dari</span></div>
+            <div id="h15"></div>
+            <div class="ctr b" style="top:640px;font-size:86px;line-height:100px;letter-spacing:10px"><span class="w">KODE</span> <span class="w">INI</span></div>
+          </div>
+          <div id="h34" class="abs" style="inset:0">
+            <div id="ring"></div>
+            <div class="ctr" style="top:250px;font-size:66px;line-height:84px"><span class="w">materi</span> <span class="w">apa</span> <span class="w">pun</span></div>
+            <div class="ctr" style="top:250px;font-size:66px;line-height:84px"><span class="w">langsung</span> <span class="w">jadi</span></div>
+            <div class="ctr vis" id="visA" style="top:360px;color:rgba(255,255,255,.9);opacity:0">VISUAL.</div>
+            <div class="ctr vis" id="visB" style="top:360px;color:rgba(70,140,255,.9);opacity:0">VISUAL.</div>
+            <div class="ctr vis cy" style="top:360px;text-shadow:0 0 60px rgba(1,204,247,.6)"><span class="w">VISUAL.</span></div>
+          </div>
+        </div>
+        <!-- PANEL -->
+        <div id="panel">
+          <div id="chip">15 KODE VISUAL</div>
+          <div id="count"></div>
+          <div id="prog"></div>
+          <div id="pill">
+            <div id="pslash">AI</div>
+            <div id="ptopic">topik +</div>
+            <div id="plines"></div>
+            <div id="psend"><svg width="40" height="40" viewBox="0 0 40 40"><path d="M8 20h22M21 10l10 10-10 10" stroke="#061334" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div id="expls"></div>
+          <div id="cards"></div>
+        </div>
+        <!-- CTA -->
+        <div id="cta">
+          <div class="ctr" style="top:150px;font-size:84px;line-height:100px"><span class="w">Komen</span></div>
+          <div class="ctr b cy" style="top:236px;font-size:200px;line-height:220px;letter-spacing:-5px;text-shadow:0 0 60px rgba(1,204,247,.6)"><span class="w">PROMPT</span></div>
+          <div class="ctr" style="top:470px;font-size:46px;line-height:60px"><span class="w">15 full prompt</span> <span class="w">langsung ke</span> <span class="w b cy">DM</span></div>
+          <div id="cbox"><div id="cav">kamu</div><div id="ph">Tambahkan komentar…</div><div id="ctype"></div>
+            <div id="csend"><svg width="44" height="44" viewBox="0 0 44 44"><path d="M6 22L38 6 30 38 21 25z" fill="#061334"/></svg></div></div>
+          <div id="pcs"></div>
+          <div id="dmc"><div class="ic"><svg width="110" height="110" viewBox="0 0 110 110"><path d="M30 56l17 16 34-36" stroke="#061334" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="t1">Terkirim ke DM</div><div class="t2">15 full prompt visual · baru saja</div></div>
+          <div id="logo"><img src="assets/brand/logo_trim.png" alt="AIpreneur"></div>
+        </div>
+      </div>
+      <div id="fx" data-layout-ignore>
+        <div id="slices"></div>
+        <div id="sweep"></div>
+        <div id="flash"></div>
+        <div id="vig"></div>
+        <div id="grain"></div>
+      </div>
+      <!--AUDIO-->
+      <audio id="vo" class="clip" src="assets/audio/vo_tight.wav" data-start="0" data-duration="43.95" data-track-index="8" data-volume="1"></audio>
+      <audio id="sfx00" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="0.0" data-duration="0.574" data-track-index="10" data-volume="0.1"></audio>
+      <audio id="sfx01" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="2.39" data-duration="0.720" data-track-index="11" data-volume="0.12"></audio>
+      <audio id="sfx02" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="2.41" data-duration="0.574" data-track-index="12" data-volume="0.1"></audio>
+      <audio id="sfx03" class="clip" src="assets/sfx/vo_safe/type.wav" data-start="4.36" data-duration="1.500" data-track-index="13" data-volume="0.05"></audio>
+      <audio id="sfx04" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="4.91" data-duration="0.720" data-track-index="14" data-volume="0.1"></audio>
+      <audio id="sfx05" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="6.04" data-duration="0.574" data-track-index="15" data-volume="0.08"></audio>
+      <audio id="sfx06" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="6.9" data-duration="0.574" data-track-index="10" data-volume="0.09"></audio>
+      <audio id="sfx07" class="clip" src="assets/sfx/vo_safe/sparkle.wav" data-start="6.93" data-duration="1.800" data-track-index="11" data-volume="0.1"></audio>
+      <audio id="sfx08" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="7.36" data-duration="0.400" data-track-index="12" data-volume="0.07"></audio>
+      <audio id="sfx09" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="7.99" data-duration="0.365" data-track-index="13" data-volume="0.07"></audio>
+      <audio id="sfx10" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="8.03" data-duration="0.574" data-track-index="14" data-volume="0.06"></audio>
+      <audio id="sfx11" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="9.65" data-duration="0.400" data-track-index="15" data-volume="0.07"></audio>
+      <audio id="sfx12" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="10.21" data-duration="0.365" data-track-index="10" data-volume="0.07"></audio>
+      <audio id="sfx13" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="10.25" data-duration="0.720" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sfx14" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="11.74" data-duration="0.400" data-track-index="12" data-volume="0.07"></audio>
+      <audio id="sfx15" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="12.36" data-duration="0.365" data-track-index="13" data-volume="0.07"></audio>
+      <audio id="sfx16" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="12.4" data-duration="0.574" data-track-index="14" data-volume="0.06"></audio>
+      <audio id="sfx17" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="13.63" data-duration="0.400" data-track-index="15" data-volume="0.07"></audio>
+      <audio id="sfx18" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="14.61" data-duration="0.365" data-track-index="10" data-volume="0.07"></audio>
+      <audio id="sfx19" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="14.65" data-duration="0.720" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sfx20" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="16.24" data-duration="0.400" data-track-index="12" data-volume="0.07"></audio>
+      <audio id="sfx21" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="16.78" data-duration="0.365" data-track-index="13" data-volume="0.07"></audio>
+      <audio id="sfx22" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="16.82" data-duration="0.574" data-track-index="14" data-volume="0.06"></audio>
+      <audio id="sfx23" class="clip" src="assets/sfx/vo_safe/sparkle.wav" data-start="16.87" data-duration="1.800" data-track-index="15" data-volume="0.06"></audio>
+      <audio id="sfx24" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="18.22" data-duration="0.400" data-track-index="10" data-volume="0.07"></audio>
+      <audio id="sfx25" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="18.98" data-duration="0.365" data-track-index="11" data-volume="0.07"></audio>
+      <audio id="sfx26" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="19.02" data-duration="0.720" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sfx27" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="20.5" data-duration="0.400" data-track-index="13" data-volume="0.07"></audio>
+      <audio id="sfx28" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="21.1" data-duration="0.365" data-track-index="14" data-volume="0.07"></audio>
+      <audio id="sfx29" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="21.14" data-duration="0.574" data-track-index="15" data-volume="0.06"></audio>
+      <audio id="sfx30" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="22.86" data-duration="0.400" data-track-index="10" data-volume="0.07"></audio>
+      <audio id="sfx31" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="23.43" data-duration="0.365" data-track-index="11" data-volume="0.07"></audio>
+      <audio id="sfx32" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="23.47" data-duration="0.720" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sfx33" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="25.04" data-duration="0.400" data-track-index="13" data-volume="0.07"></audio>
+      <audio id="sfx34" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="25.59" data-duration="0.365" data-track-index="14" data-volume="0.07"></audio>
+      <audio id="sfx35" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="25.63" data-duration="0.574" data-track-index="15" data-volume="0.06"></audio>
+      <audio id="sfx36" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="27.38" data-duration="0.400" data-track-index="10" data-volume="0.07"></audio>
+      <audio id="sfx37" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="28.0" data-duration="0.365" data-track-index="11" data-volume="0.07"></audio>
+      <audio id="sfx38" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="28.04" data-duration="0.720" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sfx39" class="clip" src="assets/sfx/vo_safe/sparkle.wav" data-start="28.09" data-duration="1.800" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sfx40" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="29.62" data-duration="0.400" data-track-index="14" data-volume="0.07"></audio>
+      <audio id="sfx41" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="30.37" data-duration="0.365" data-track-index="15" data-volume="0.07"></audio>
+      <audio id="sfx42" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="30.41" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sfx43" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="31.74" data-duration="0.400" data-track-index="11" data-volume="0.07"></audio>
+      <audio id="sfx44" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="32.28" data-duration="0.365" data-track-index="12" data-volume="0.07"></audio>
+      <audio id="sfx45" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="32.32" data-duration="0.720" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sfx46" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="34.17" data-duration="0.400" data-track-index="14" data-volume="0.07"></audio>
+      <audio id="sfx47" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="34.98" data-duration="0.365" data-track-index="15" data-volume="0.07"></audio>
+      <audio id="sfx48" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="35.02" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sfx49" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="36.5" data-duration="0.400" data-track-index="11" data-volume="0.07"></audio>
+      <audio id="sfx50" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="36.93" data-duration="0.365" data-track-index="12" data-volume="0.07"></audio>
+      <audio id="sfx51" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="36.97" data-duration="0.720" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sfx52" class="clip" src="assets/sfx/vo_safe/key.wav" data-start="38.5" data-duration="0.400" data-track-index="14" data-volume="0.07"></audio>
+      <audio id="sfx53" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="39.1" data-duration="0.365" data-track-index="15" data-volume="0.07"></audio>
+      <audio id="sfx54" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="39.14" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sfx55" class="clip" src="assets/sfx/vo_safe/sparkle.wav" data-start="39.19" data-duration="1.800" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sfx56" class="clip" src="assets/sfx/vo_safe/whoosh.wav" data-start="40.4" data-duration="0.574" data-track-index="12" data-volume="0.1"></audio>
+      <audio id="sfx57" class="clip" src="assets/sfx/vo_safe/pop.wav" data-start="41.14" data-duration="0.720" data-track-index="13" data-volume="0.12"></audio>
+      <audio id="sfx58" class="clip" src="assets/sfx/vo_safe/type.wav" data-start="41.18" data-duration="1.500" data-track-index="14" data-volume="0.04"></audio>
+      <audio id="sfx59" class="clip" src="assets/sfx/vo_safe/click.wav" data-start="41.41" data-duration="0.365" data-track-index="15" data-volume="0.09"></audio>
+      <audio id="sfx60" class="clip" src="assets/sfx/vo_safe/ping.wav" data-start="41.63" data-duration="1.320" data-track-index="10" data-volume="0.1"></audio>
+      <audio id="sfx61" class="clip" src="assets/sfx/vo_safe/sparkle.wav" data-start="43.4" data-duration="1.200" data-track-index="11" data-volume="0.09"></audio>
+      <!--/AUDIO-->
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const D = 44.6, PH = window.VO_PHR, VW = window.VO_WORDS, VIS = window.VISUALS;
+        const C = PH.codes;
+        const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+        let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        // word time by text, searching from a phrase's first word
+        const wt = (ph, txt, end) => { for (let k = ph.w0; k <= ph.w1; k++) if (VW[k][0].replace(/[.,?]/g, "") === txt) return end ? VW[k][2] : VW[k][1]; throw new Error("word " + txt); };
+        const H = PH.hook, CT = PH.cta;
+        const popWord = (el, at, k = 1) => ft(el, { opacity: 0, scale: 1.45 * k, y: 18, filter: "blur(10px)" }, { opacity: 1, scale: 1, y: 0, filter: "blur(0px)", duration: 0.28, ease: "back.out(2)" }, at);
+        const outGroup = (el, at, d = 0.22) => ft(el, { opacity: 1, scale: 1, filter: "blur(0px)" }, { opacity: 0, scale: 1.12, filter: "blur(12px)", duration: d, ease: "power2.in" }, at);
+
+        // ================================================= background life
+        ft("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: D, ease: "steps(535)" }, 0);
+        ft("#orbA", { x: 0, y: 0 }, { x: 160, y: 240, duration: D, ease: "sine.inOut" }, 0);
+        ft("#orbB", { x: 0, y: 0 }, { x: -220, y: -300, duration: D, ease: "sine.inOut" }, 0);
+        ft("#floor", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px 1650px", duration: D, ease: "none" }, 0);
+        const pts = $("#pts");
+        for (let i = 0; i < 28; i++) {
+          const p = document.createElement("div"); p.className = "pt"; const s = 3 + rnd() * 6;
+          Object.assign(p.style, { width: s + "px", height: s + "px", left: (rnd() * 1060) + "px", top: "0px", opacity: (0.25 + rnd() * 0.5).toFixed(2) });
+          pts.appendChild(p);
+          const per = 9 + rnd() * 8, off = rnd() * per;
+          ft(p, { y: 1960 - off / per * 2000 }, { y: -40 - off / per * 2000 - 2000 * (D / per), duration: D, ease: "none" }, 0);
+        }
+        // walk-in floor rush + halo once the mascot arrives
+        const W0 = H[1].start + 1.15, W1 = H[1].end + 0.05;
+        ft("#floor", { opacity: 0.22 }, { opacity: 0.4, duration: (W1 - W0) / 2, ease: "sine.in", yoyo: true, repeat: 1 }, W0);
+        ft("#halo", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }, W1 - 0.4);
+
+        // ================================================= HOOK 1: wall of text
+        const rows = $("#wallrows");
+        for (let i = 0; i < 46; i++) {
+          const b = document.createElement("div"); b.className = "bar";
+          const w = i % 7 === 6 ? 200 + rnd() * 160 : 520 + rnd() * 200;
+          Object.assign(b.style, { top: (i * 30) + "px", width: w + "px" });
+          rows.appendChild(b);
+        }
+        ft("#wall", { opacity: 0, y: 60, rotationX: 24, transformPerspective: 1200 }, { opacity: 1, y: 0, rotationX: 10, duration: 0.45, ease: "power3.out" }, 0);
+        ft("#wallrows", { y: 0 }, { y: -900, duration: 2.6, ease: "power1.in" }, 0.1);
+        st("#wall", { opacity: 1 }, 0);
+        const h1w = $$("#h1 .w");
+        // frame 0 already reads: first word lands at t=0
+        st(h1w[0], { opacity: 1 }, 0); ft(h1w[0], { scale: 1.6, filter: "blur(8px)" }, { scale: 1, filter: "blur(0px)", duration: 0.3, ease: "back.out(2)" }, 0);
+        ["masih", "belajar", "dari", "teks", "panjang", "di", "ChatGPT?"].forEach((x, i) => popWord(h1w[i + 1], wt(H[0], x.replace("?", "")) - 0.04, i >= 3 && i <= 4 ? 1.3 : 1));
+        ft("#h1 .ctr:nth-child(2)", { x: 0 }, { x: 0, keyframes: [{ x: -10 }, { x: 8 }, { x: 0 }], duration: 0.25 }, wt(H[0], "panjang") + 0.1);
+        // HOOK 2a: "Pantes nggak nempel." -> wall shatters, shake
+        const T2 = H[1].start;
+        outGroup("#h1", T2 - 0.12, 0.16);
+        $$(".bar").forEach((b, i) => {
+          const dx = (rnd() - 0.5) * 500, r = (rnd() - 0.5) * 140;
+          ft(b, { x: 0, y: 0, rotation: 0, opacity: 1 }, { x: dx, y: 900 + rnd() * 700, rotation: r, opacity: 0, duration: 0.9 + rnd() * 0.4, ease: "power2.in" }, T2 + 0.02 + rnd() * 0.18);
+        });
+        ft("#wallq", { opacity: 1, y: 0 }, { opacity: 0, y: -40, duration: 0.3, ease: "power2.in" }, T2);
+        ft("#wall", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.94, duration: 0.5, ease: "power2.in" }, T2 + 0.3);
+        ft("#ui", { x: 0, y: 0 }, { keyframes: [{ x: -16, y: 8 }, { x: 14, y: -10 }, { x: -9, y: 6 }, { x: 6, y: -3 }, { x: 0, y: 0 }], duration: 0.38, ease: "none" }, T2);
+        ft("#flash", { opacity: 0.0 }, { opacity: 0.35, duration: 0.05, yoyo: true, repeat: 1 }, T2);
+        const h2a = $$("#h2a .w");
+        popWord(h2a[0], wt(H[1], "Pantes") - 0.03); popWord(h2a[1], wt(H[1], "nggak") - 0.03, 1.2); popWord(h2a[2], wt(H[1], "nempel") - 0.03, 1.3);
+        const TK = wt(H[1], "Ketik");
+        outGroup("#h2a", TK - 0.16, 0.16);
+        // HOOK 2b: 15 counter + orbiting code tags
+        const h2b = $$("#h2b .w");
+        ["Ketik", "salah", "satu", "dari"].forEach((x, i) => popWord(h2b[i], wt(H[1], x) - 0.04));
+        const h15 = $("#h15");
+        const TL5 = wt(H[1], "lima"), TKO = wt(H[1], "kode");
+        const nums = ["03", "07", "11", "15"];
+        nums.forEach((n, i) => {
+          const d = document.createElement("div"); d.className = "n15"; d.textContent = n; h15.appendChild(d);
+          const a = TL5 - 0.05 + i * ((TKO - TL5) / 4);
+          if (i < 3) { ft(d, { opacity: 0, y: 140 }, { opacity: 1, y: 0, duration: 0.08, ease: "none" }, a); ft(d, { opacity: 1, y: 0 }, { opacity: 0, y: -140, duration: 0.08, ease: "none" }, a + (TKO - TL5) / 4 - 0.02); }
+          else ft(d, { opacity: 0, y: 140, scale: 1 }, { opacity: 1, y: 0, scale: 1, duration: 0.12, ease: "back.out(2.5)" }, a);
+        });
+        const last15 = h15.lastChild;
+        ft(last15, { scale: 1.25 }, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.5)" }, TKO - 0.05);
+        ft("#flash", { opacity: 0 }, { opacity: 0.28, duration: 0.05, yoyo: true, repeat: 1 }, TKO - 0.05);
+        popWord(h2b[4], TKO - 0.03, 1.2); popWord(h2b[5], wt(H[1], "ini") - 0.03, 1.2);
+        // tags: 15 code names on a tilted ellipse around the counter
+        const tagsEl = $("#tags"), tagEls = [];
+        C.forEach((c, i) => { const t = document.createElement("div"); t.className = "tag"; t.innerHTML = "<i>/</i>" + c.key; tagsEl.appendChild(t); tagEls.push(t); });
+        const orb = { a: 0, r: 0, o: 0 };
+        const placeTags = () => tagEls.forEach((t, i) => {
+          const th = orb.a + i * (Math.PI * 2 / 15), sx = Math.cos(th), sy = Math.sin(th);
+          const depth = (sy + 1) / 2, sc = 0.6 + 0.5 * depth;
+          gsap.set(t, { x: 540 + sx * 450 * orb.r - 120, y: 420 + sy * 150 * orb.r - 30, scale: sc * (0.4 + 0.6 * orb.r), opacity: orb.o * (0.35 + 0.65 * depth), zIndex: Math.round(depth * 100) });
+        });
+        ft(orb, { a: -0.6 }, { a: Math.PI * 1.7, duration: H[2].end - TL5 + 0.4, ease: "none", onUpdate: placeTags }, TL5 - 0.3);
+        ft(orb, { r: 0.2, o: 0 }, { r: 1, o: 1, duration: 0.5, ease: "back.out(1.4)", onUpdate: placeTags }, TL5 - 0.3);
+        // HOOK 3/4: "materi apa pun" -> tags collapse -> "langsung jadi VISUAL."
+        const T3 = H[2].start, T4 = H[3].start, TV = wt(H[3], "visual");
+        ft("#h2b .ctr, #h15", { opacity: 1, y: 0 }, { opacity: 0, y: -60, duration: 0.2, ease: "power2.in", stagger: 0.02 }, T3 - 0.12);
+        const h34 = $$("#h34 .w");
+        ["materi", "apa", "pun"].forEach((x, i) => popWord(h34[i], wt(H[2], x) - 0.04));
+        ft(orb, { r: 1, o: 1 }, { r: 0, o: 0, duration: 0.45, ease: "power3.in", onUpdate: placeTags, immediateRender: false }, T4 - 0.2);
+        ft($$("#h34 .ctr")[0], { opacity: 1 }, { opacity: 0, duration: 0.1 }, T4 - 0.08);
+        ["langsung", "jadi"].forEach((x, i) => popWord(h34[3 + i], wt(H[3], x) - 0.04));
+        ft(h34[5], { opacity: 0, scale: 2.4, filter: "blur(20px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.32, ease: "expo.out" }, TV - 0.05);
+        ft("#visA", { opacity: 0.9, x: 0 }, { keyframes: [{ x: -26, opacity: 0.8 }, { x: 18 }, { x: -8 }, { x: 0, opacity: 0 }], duration: 0.5, ease: "none" }, TV);
+        ft("#visB", { opacity: 0.9, x: 0 }, { keyframes: [{ x: 26, opacity: 0.8 }, { x: -18 }, { x: 8 }, { x: 0, opacity: 0 }], duration: 0.5, ease: "none" }, TV);
+        ft("#ring", { opacity: 1, scale: 0.2 }, { opacity: 0, scale: 2.4, duration: 0.7, ease: "power2.out" }, TV);
+        ft("#flash", { opacity: 0 }, { opacity: 0.5, duration: 0.05, yoyo: true, repeat: 1 }, TV);
+        const TP = C[0].name - 0.48;
+        ft("#hook", { opacity: 1, scale: 1, filter: "blur(0px)" }, { opacity: 0, scale: 1.5, filter: "blur(16px)", duration: 0.28, ease: "power2.in" }, TP - 0.1);
+
+        // ================================================= PANEL shell
+        ft("#chip", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, TP);
+        ft("#count", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, TP);
+        ft("#pill", { opacity: 0, scaleX: 0.15, scaleY: 0.6 }, { opacity: 1, scaleX: 1, scaleY: 1, duration: 0.42, ease: "expo.out" }, TP + 0.04);
+        const prog = $("#prog"), segs = [];
+        for (let i = 0; i < 15; i++) { const s = document.createElement("div"); s.className = "seg"; s.style.left = (i * 60.5) + "px"; s.innerHTML = "<i></i>"; prog.appendChild(s); segs.push(s); }
+        ft(segs, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.25, ease: "power2.out", stagger: 0.015 }, TP + 0.05);
+        ft("#ghost", { opacity: 0 }, { opacity: 1, duration: 0.3 }, TP);
+        // caret blink (deterministic)
+        const plines = $("#plines"), countEl = $("#count"), ghost = $("#ghost"), expls = $("#expls"), cards = $("#cards");
+        const HL = [[3, 4], [2, 3], [1, 2], [2, 3], [2, 3, 4], [3], [3, 4], [1, 2, 3], [3, 4], [3], [3], [4], [2], [1, 3], [2, 3]];
+        const TRANS = ["scan", "flip", "zoom", "slide", "drop"];
+        const CTA0 = CT[0].start - 0.35;
+        C.forEach((c, i) => {
+          const next = i < 14 ? C[i + 1].name : CTA0 + 0.1;
+          const tIn = c.name - 0.14, tOut = next - 0.2;
+          // --- typed code in the prompt pill
+          const ln = document.createElement("div"); ln.className = "pl";
+          if (c.key.length > 11) ln.style.fontSize = "50px";
+          const txt = "/" + c.key;
+          ln.innerHTML = Array.from(txt).map((ch, k) => `<s${k === 0 ? ' class="sl"' : ""}>${ch}</s>`).join("") + '<span class="caret"></span>';
+          plines.appendChild(ln);
+          const chars = $$("s", ln);
+          const typeDur = Math.max(0.3, c.nameEnd - c.name + 0.05);
+          chars.forEach((ch, k) => st(ch, { display: "inline" }, tIn + (k / chars.length) * typeDur));
+          ft(ln, { opacity: 1, y: 0 }, { opacity: 0, y: -50, duration: 0.16, ease: "power2.in" }, tOut);
+          st(ln, { opacity: 0 }, 0);
+          st(ln, { opacity: 1 }, tIn - 0.01);
+          // send pulse
+          ft("#psend", { scale: 1 }, { keyframes: [{ scale: 0.8 }, { scale: 1.12 }, { scale: 1 }], duration: 0.3, ease: "none" }, c.nameEnd - 0.04);
+          ft("#pill", { boxShadow: "0 0 0 6px rgba(1,204,247,.07), 0 24px 60px rgba(0,0,0,.3)" }, { keyframes: [{ boxShadow: "0 0 0 18px rgba(1,204,247,.28), 0 24px 60px rgba(0,0,0,.3)" }, { boxShadow: "0 0 0 6px rgba(1,204,247,.07), 0 24px 60px rgba(0,0,0,.3)" }], duration: 0.45, ease: "none" }, c.nameEnd - 0.04);
+          // --- progress + counter + ghost number
+          ft($("i", segs[i]), { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.out" }, c.name);
+          const nn = String(i + 1).padStart(2, "0");
+          const cn = document.createElement("div"); cn.className = "cn"; cn.innerHTML = `<b>${nn}</b> / 15`; countEl.appendChild(cn);
+          ft(cn, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, c.name - 0.05);
+          if (i < 14) ft(cn, { opacity: 1, y: 0 }, { opacity: 0, y: -50, duration: 0.18, ease: "power2.in" }, next - 0.07);
+          const g = document.createElement("div"); g.className = "gn"; g.textContent = nn; ghost.appendChild(g);
+          ft(g, { opacity: 0, scale: 1.5, x: 120 }, { opacity: 1, scale: 1, x: 0, duration: 0.5, ease: "expo.out" }, c.name - 0.05);
+          ft(g, { rotation: 0, y: 0 }, { rotation: -4, y: -30, duration: next - c.name, ease: "none" }, c.name - 0.05);
+          ft(g, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, tOut);
+          // --- explanation, word by word (keywords bold cyan)
+          const ex = document.createElement("div"); ex.className = "ex";
+          const ph = PH.codes[i];
+          const wl = ph.text.split(" ");
+          ex.innerHTML = wl.map((w, k) => `<span class="w${HL[i].includes(k) ? " k" : ""}">${w}</span>`).join(" ");
+          expls.appendChild(ex);
+          const ews = $$(".w", ex);
+          // find the explanation's words in VO_WORDS (they follow the code name)
+          let k0 = VW.findIndex((w) => Math.abs(w[1] - c.expl) < 0.02);
+          ews.forEach((we, k) => ft(we, { opacity: 0, y: 34, scale: HL[i].includes(k) ? 1.35 : 1 }, { opacity: 1, y: 0, scale: 1, duration: 0.26, ease: "back.out(2)" }, VW[k0 + k][1] - 0.05));
+          ft(ex, { opacity: 1, y: 0 }, { opacity: 0, y: -40, duration: 0.18, ease: "power2.in" }, tOut);
+          // --- generated visual card
+          const card = document.createElement("div"); card.className = "card";
+          card.innerHTML = VIS[i].svg + `<div class="ctag">/${c.key}</div><div class="scan"></div>`;
+          cards.appendChild(card);
+          const tc = c.nameEnd + 0.02, tr = TRANS[i % TRANS.length];
+          if (tr === "scan") ft(card, { opacity: 1, clipPath: "inset(0% 0% 100% 0% round 34px)" }, { clipPath: "inset(0% 0% 0% 0% round 34px)", duration: 0.55, ease: "power2.inOut" }, tc);
+          if (tr === "flip") ft(card, { opacity: 0, rotationY: -85, x: -60 }, { opacity: 1, rotationY: 0, x: 0, duration: 0.55, ease: "power3.out" }, tc);
+          if (tr === "zoom") ft(card, { opacity: 0, scale: 0.55, filter: "blur(16px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, tc);
+          if (tr === "slide") ft(card, { opacity: 0, x: 380, skewX: -16 }, { opacity: 1, x: 0, skewX: 0, duration: 0.5, ease: "expo.out" }, tc);
+          if (tr === "drop") ft(card, { opacity: 0, y: -160, rotation: -7 }, { opacity: 1, y: 0, rotation: 0, duration: 0.6, ease: "back.out(1.7)" }, tc);
+          ft($(".scan", card), { opacity: 1, y: -90 }, { opacity: 0.0, y: 450, duration: 0.7, ease: "power1.inOut" }, tc + 0.05);
+          VIS[i].build(tl, card, tc + 0.15, tOut - tc - 0.15);
+          // glitch out
+          ft(card, { x: 0, opacity: 1 }, { keyframes: [{ x: -22, opacity: 0.8 }, { x: 16, opacity: 0.5 }, { x: -6, opacity: 0 }], duration: 0.2, ease: "none" }, tOut);
+          // panel punch on every code
+          ft("#panel", { scale: 1 }, { keyframes: [{ scale: 1.018 }, { scale: 1 }], duration: 0.35, ease: "none", transformOrigin: "540px 300px" }, c.name);
+          // milestone sweep at 5/10/15
+          if ((i + 1) % 5 === 0) ft("#sweep", { x: 0, opacity: 1 }, { x: 2400, opacity: 1, duration: 0.7, ease: "power2.inOut" }, tc);
+        });
+        ft(".caret", { opacity: 1 }, { opacity: 0, duration: 0.01, repeat: Math.floor((D - TP) / 0.5), repeatDelay: 0.24, yoyo: true }, TP);
+        // RGB glitch slices on code transitions
+        const slices = $("#slices"), SL = [];
+        for (let k = 0; k < 6; k++) { const s = document.createElement("div"); s.className = "gl"; s.style.top = (80 + rnd() * 900) + "px"; s.style.height = (10 + rnd() * 40) + "px"; slices.appendChild(s); SL.push(s); }
+        C.forEach((c, i) => { if (i === 0) return; SL.forEach((s, k) => ft(s, { opacity: 0.9, x: (rnd() - 0.5) * 120 }, { opacity: 0, x: 0, duration: 0.14, ease: "none" }, c.name - 0.2 + k * 0.012)); });
+
+        // ================================================= CTA
+        ft("#panel", { opacity: 1, y: 0, filter: "blur(0px)" }, { opacity: 0, y: -80, filter: "blur(10px)", duration: 0.3, ease: "power2.in" }, CTA0);
+        ft("#ghost", { opacity: 1 }, { opacity: 0, duration: 0.3 }, CTA0);
+        const ctw = $$("#cta .w");
+        popWord(ctw[0], wt(CT[0], "Komen") - 0.05);
+        ft(ctw[1], { opacity: 0, scale: 2.6, filter: "blur(18px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.35, ease: "expo.out" }, wt(CT[0], "PROMPT") - 0.05);
+        ft("#flash", { opacity: 0 }, { opacity: 0.35, duration: 0.05, yoyo: true, repeat: 1 }, wt(CT[0], "PROMPT") - 0.02);
+        ft("#cbox", { opacity: 0, y: 60, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, CT[0].start - 0.15);
+        const ctype = $("#ctype"); ctype.innerHTML = Array.from("PROMPT").map((ch) => `<s>${ch}</s>`).join("");
+        const TPr = wt(CT[0], "PROMPT"), TPe = wt(CT[0], "PROMPT", true);
+        st("#ph", { opacity: 1 }, 0); st("#ph", { opacity: 0 }, TPr - 0.02);
+        $$("s", ctype).forEach((ch, k) => st(ch, { display: "inline" }, TPr + k * (TPe - TPr) / 6));
+        ft("#csend", { scale: 1 }, { keyframes: [{ scale: 0.78 }, { scale: 1.15 }, { scale: 1 }], duration: 0.32, ease: "none" }, CT[1].start - 0.05);
+        // 15 prompt cards fly from the comment box into the DM card
+        const TLB = wt(CT[1], "lima"), TKI = wt(CT[1], "kirim"), TDM = wt(CT[1], "DM");
+        const pcs = $("#pcs");
+        for (let k = 0; k < 15; k++) {
+          const p = document.createElement("div"); p.className = "pc"; p.textContent = "/" + String(k + 1).padStart(2, "0"); pcs.appendChild(p);
+          const sx = 760, sy = 630, ex2 = 120 + (k % 5) * 170, ey2 = 360 + Math.floor(k / 5) * 0;
+          const t0 = TLB - 0.1 + k * 0.06;
+          ft(p, { x: sx, y: sy, opacity: 0, scale: 0.4, rotation: 0 }, { x: 150 + (k % 8) * 100, y: 1000 + Math.floor(k / 8) * 90, opacity: 1, scale: 1, rotation: (rnd() - 0.5) * 30, duration: 0.35, ease: "power3.out" }, t0);
+          ft(p, { scale: 1, opacity: 1 }, { x: 140, y: 840, scale: 0.2, opacity: 0, rotation: 0, duration: 0.35, ease: "power3.in" }, TDM - 0.45 + k * 0.02);
+        }
+        ft("#dmc", { opacity: 0, y: -220, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.8)" }, TKI - 0.05);
+        ft("#dmc .ic", { scale: 1 }, { keyframes: [{ scale: 1.25 }, { scale: 1 }], duration: 0.35, ease: "none" }, TDM);
+        popWord(ctw[2], wt(CT[1], "full") - 0.05); popWord(ctw[3], wt(CT[1], "langsung") - 0.05); popWord(ctw[4], TDM - 0.05, 1.3);
+        ft("#sweep", { x: 0, opacity: 1 }, { x: 2400, opacity: 1, duration: 0.8, ease: "power2.inOut" }, TDM);
+        ft("#logo", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, CT[1].end - 0.2);
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

@@ -119,7 +119,8 @@ index = f"""<!doctype html>
 (P / "index.html").write_text(index)
 
 # ------------------------------------------------------------------ captions: white Poppins on a navy plate, keywords cyan
-groups = [g for g in wt["caption_groups"] if g["start"] < D]
+NOCAP = json.loads((P / "production/nocap.json").read_text()) if (P / "production/nocap.json").exists() else []
+groups = [g for g in wt["caption_groups"] if g["start"] < D and not any(a <= words[g["word_idx"][0]]["start"] < b for a, b in NOCAP)]
 marks, init, tl = [], [], []
 for gi, g in enumerate(groups):
     hl = set(g["highlight"])
@@ -131,6 +132,7 @@ for gi, g in enumerate(groups):
     marks.append(f'    <div class="cg" id="cg{gi}"><div class="cl" id="cgc{gi}">{" ".join(ps)}</div></div>')
     gs, ge = g["start"], min(g["end"], D)
     init.append(f'gsap.set("#cg{gi}", {{ opacity: 0 }});')
+    gs = max(gs, words[g["word_idx"][0]]["start"] - 0.08)
     tl.append(f'tl.set("#cg{gi}", {{ opacity: 1 }}, {r3(max(0.0, gs))});')
     init.append(f'gsap.set("#cgc{gi}", {{ scale: 0.96, opacity: 0 }});')
     tl.append(f'tl.fromTo("#cgc{gi}", {{ scale: 0.96, opacity: 0 }}, {{ scale: 1, opacity: 1, duration: 0.18, ease: "power2.out", immediateRender: false }}, {r3(max(0.0, gs))});')
@@ -139,8 +141,8 @@ for gi, g in enumerate(groups):
         init.append(f'gsap.set("#cw{wi}", {{ yPercent: 110, opacity: 0 }});')
         tl.append(f'tl.set("#cw{wi}", {{ opacity: 1 }}, {r3(ws)});')
         tl.append(f'tl.fromTo("#cw{wi}", {{ yPercent: 110 }}, {{ yPercent: 0, duration: 0.3, ease: "power4.out", immediateRender: false }}, {r3(ws)});')
-    if gi + 1 < len(groups):
-        tl.append(f'tl.set("#cg{gi}", {{ opacity: 0 }}, {r3(ge)});')
+    if gi + 1 < len(groups) or any(a <= ge < b for a, b in NOCAP):
+        tl.append(f'tl.set("#cg{gi}", {{ opacity: 0 }}, {r3(min(ge, words[g["word_idx"][-1]]["end"] + 0.35))});')
 cap = f"""<template>
   <style>
     #root {{ position: absolute; inset: 0; pointer-events: none; }}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>Cover Reels — 7 Prompt Motion</title>
+<!-- Minimal, high-end Reels cover 1080x1920: one headline, one example frame, the mascot, lots of negative space.
+     Key content sits inside the centred 4:5 grid crop (y 285-1635).
+     Render: node thumbnail/render_thumb.cjs <pose t> <out.png> [mouth t]   (static server on :8765 at project root) -->
+<script src="../vendor/gsap/dist/gsap.min.js"></script>
+<script src="../vendor/mascot3d.js"></script>
+<script src="../vendor/vo_words.js"></script>
+<style>
+  @font-face { font-family: "Poppins"; src: url("../assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+  @font-face { font-family: "Poppins"; src: url("../assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #050a1c; font-family: "Poppins", sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #main { position: relative; width: 1080px; height: 1920px; overflow: hidden;
+    background: radial-gradient(ellipse 70% 40% at 50% 74%, rgba(1,204,247,.16) 0%, rgba(1,204,247,0) 70%), linear-gradient(180deg, #040818 0%, #08142f 55%, #050a1c 100%); }
+  .abs { position: absolute; }
+  .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; }
+  #logo { left: 450px; top: 330px; width: 180px; height: 17.9px; opacity: .9; }
+  #rule { left: 510px; top: 380px; width: 60px; height: 2px; background: #01ccf7; }
+  #l1 { top: 430px; font-size: 64px; line-height: 76px; font-weight: 400; color: rgba(255,255,255,.88); letter-spacing: 1px; }
+  #l1 b { color: #01ccf7; font-weight: 700; }
+  #l2 { top: 500px; font-size: 196px; line-height: 200px; font-weight: 700; letter-spacing: -8px; }
+  #l2 i { font-style: normal; color: #01ccf7; }
+  #l3 { top: 720px; font-size: 22px; letter-spacing: 10px; color: rgba(255,255,255,.55); }
+  #frame { left: 300px; top: 820px; width: 480px; height: 270px; border-radius: 22px; overflow: hidden; transform: rotate(-4deg);
+    box-shadow: 0 0 0 1.5px rgba(1,204,247,.5), 0 40px 80px rgba(0,0,0,.6), 0 0 60px rgba(1,204,247,.2); }
+  #frame img { width: 100%; height: 100%; object-fit: cover; }
+  #m { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  #cta { top: 1790px; font-size: 26px; letter-spacing: 6px; color: rgba(255,255,255,.7); }
+  #cta b { color: #01ccf7; }
+  #grain { inset: 0; opacity: .08; background: url(../assets/brand/grain_256.png); }
+  #vig { inset: 0; background: radial-gradient(ellipse 90% 75% at 50% 50%, rgba(0,0,0,0) 60%, rgba(0,0,0,.45) 100%); }
+</style>
+</head>
+<body>
+<div id="main">
+  <img id="logo" class="abs" src="../assets/brand/logo_trim.png" alt="AIpreneur">
+  <div id="rule" class="abs"></div>
+  <div id="l1" class="ctr"><b>7</b> prompt</div>
+  <div id="l2" class="ctr">motion<i>.</i></div>
+  <div id="l3" class="ctr">SATU PROMPT · SATU VIDEO</div>
+  <div id="frame" class="abs"><img src="still_jumat.jpg" alt=""></div>
+  <canvas id="m" width="1080" height="1920"></canvas>
+  <div id="vig" class="abs"></div><div id="grain" class="abs"></div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search), Tp = parseFloat(q.get("t") || "21");
+  const M3 = window.Mascot3D, VW = window.VO_WORDS, PH = window.VO_PHR, D = 41.2;
+  const W0 = PH.hook[2].start + 0.2;
+  const intents = [{ t: PH.hook[0].start + 0.05, action: "present", side: "right" }, { t: PH.hook[1].start, action: "emphasize", side: "left" }, { t: W0 + 0.3, action: "idle" }, { t: PH.hook[2].end - 1.4, action: "reveal" }];
+  const ROT = ["pointFwd", "present", "explain", "pointFwd", "emphasize", "present", "pointFwd"];
+  PH.items.forEach((c, i) => { intents.push({ t: c.label.start - 0.05, action: ROT[i % ROT.length], side: i % 2 ? "left" : "right" }); intents.push({ t: c.desc.start + 0.2, action: "explain", side: i % 2 ? "right" : "left" }); });
+  intents.push({ t: PH.cta[0].start, action: "cta", side: "right" }, { t: PH.cta[1].start + 1.0, action: "welcome", side: "left" });
+  const DIR = M3.direct(VW, D, { intents, seed: 5, quiet: 0.2, look: 0 });
+  const PERF = M3.buildPerformance(DIR.tracks, D + 0.05);
+  const FACE = {"eyeA": {"c": [-0.091, 0.596], "r": [0.041, 0.034], "n": 757, "J": [0.4997633976754324, 0.3065330127591157, 0.314518943050391, -0.453702164567319], "uv0": [0.6328573151105054, 0.6167170084324972], "maxErr": 0.003818576762005663}, "eyeB": {"c": [0.091, 0.596], "r": [0.041, 0.034], "n": 753, "J": [0.5500133280433187, -0.06824460818744192, -0.09499495020823343, -0.5077214816509605], "uv0": [0.12402271349668496, 0.8611807690751265], "maxErr": 0.0028305745008792753}, "browA": {"c": [-0.09, 0.68], "n": 510, "J": [0.43108254869646895, 0.4376875904621281, 0.3523513551101368, -0.4754305212249294], "uv0": [0.6629852372177631, 0.5810053999225538], "maxErr": 0.004289199391581338}, "browB": {"c": [0.09, 0.68], "n": 362, "J": [0.5552915360962205, 0.08489039751259354, 0.1020935044591921, -0.6884358006120392], "uv0": [0.8350086373766634, 0.9448922678325264], "maxErr": 0.0020738571975070096}, "mouth": {"c": [0, 0.548], "r": [0.026, 0.016]}, "skin": [252, 240, 232], "skinEye": [252, 244, 234], "coverNormal": 0, "lidLit": [0.992, 0.975, 0.968], "mouthDy": 0.0, "faceSmooth": 1.0, "headC": [0, 0.7, -0.02]};
+  window.THUMB_READY = fetch("../tools/decals.json").then((r) => r.json()).then((decals) => {
+    decals.forEach((d) => { d.url = "../" + d.url; });
+    return M3.Mascot.create(document.getElementById("m"), { url: "../assets/mascot3d/mascot_jas3_rigged.glb", face: FACE, decals, width: 1080, height: 1920, envIntensity: 0.6 });
+  }).then((m) => {
+    for (const o of m.scene.children) if (o.isDirectionalLight && o.position.z < 0) { o.intensity = 2.1; o.color.setRGB(0.45, 0.85, 1.0); o.position.set(1.6, 1.5, -1.4); }
+    if (m.shadow) m.shadow.visible = false;
+    const Pf = PERF(Tp);
+    m.setView({ fx: 540, fy: 2075, h: 960, yaw: 0, pitch: 4 });
+    m.setState({ root: { x: Pf.root.x, y: Pf.root.y, ry: Pf.root.ry, rz: Pf.root.rz, rx: 0, s: Pf.root.s }, bones: Pf.bones,
+      face: { blink: [0, 0], gaze: [0, 0], mouthMix: 1, mouth: M3.buildLipTrack(window.VO_PHONES, window.VO_ENV, D)(parseFloat(q.get("mt") || Tp)) } });
+    m.render();
+    return document.fonts.ready;
+  });
+</script>
+</body>
+</html>

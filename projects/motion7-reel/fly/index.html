@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1280, height=720" />
+    <title>AIpreneur — 3D page flythrough</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1280px; height: 720px; overflow: hidden; background: #f4f6f8; }
+      body { font-family: "Poppins", sans-serif; -webkit-font-smoothing: antialiased; }
+      /* bright studio floor: #f9fbfb in the middle, #f2f3f6 in the corners */
+      #main { position: relative; width: 1280px; height: 720px; overflow: hidden; background: radial-gradient(ellipse 75% 75% at 50% 50%, #f9fbfb 0%, #f2f3f6 100%); }
+      .cam { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% 36%; }
+      .rig { position: absolute; left: 640px; top: 300px; width: 0; height: 0; transform-style: preserve-3d; }
+      .tilt { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
+      .page { position: absolute; left: -600px; top: 0; width: 1200px; height: 12615px; border-radius: 24px; overflow: hidden;
+        background: url(assets/page_full.jpg) 0 0 / 1200px 12615px no-repeat;
+        box-shadow: 0 30px 90px rgba(26,33,51,.28), 0 6px 18px rgba(26,33,51,.18); transform-style: preserve-3d; }
+      .tile { position: absolute; width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, #0a0d2c, #294b77);
+        box-shadow: 0 18px 30px rgba(26,33,51,.35); color: #fff; font-weight: 700; font-size: 26px; line-height: 64px; text-align: center; letter-spacing: -1px; }
+      .tile i { font-style: normal; color: #01ccf7; }
+      .near { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; pointer-events: none;
+        -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px);
+        -webkit-mask: linear-gradient(180deg, transparent 0%, #000 85%); mask: linear-gradient(180deg, transparent 0%, #000 85%); }
+      .far { position: absolute; left: 0; right: 0; top: 0; height: 170px; pointer-events: none;
+        -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+        -webkit-mask: linear-gradient(0deg, transparent 0%, #000 90%); mask: linear-gradient(0deg, transparent 0%, #000 90%); }
+      .haze { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(242,243,246,.55) 0%, rgba(242,243,246,0) 30%); }
+      /* end card */
+      .badge { position: absolute; left: 50%; top: 34px; transform: translateX(-50%); height: 42px; padding: 0 18px 0 8px; border-radius: 21px; background: #fff;
+        box-shadow: 0 6px 18px rgba(26,33,51,.12); font-size: 17px; font-weight: 700; line-height: 42px; color: #0a0d2c; white-space: nowrap; opacity: 0; }
+      .badge span { display: inline-block; width: 28px; height: 28px; margin: 7px 10px 0 0; vertical-align: top; border-radius: 9px; background: linear-gradient(135deg, #0a0d2c, #294b77);
+        color: #01ccf7; font-size: 13px; line-height: 28px; text-align: center; }
+      .t1 { position: absolute; left: 0; width: 1280px; top: 92px; text-align: center; font-size: 56px; line-height: 64px; font-weight: 700; color: #0a0d2c; letter-spacing: -1.5px; white-space: nowrap; }
+      .t2 { position: absolute; left: 0; width: 1280px; top: 156px; text-align: center; font-size: 60px; line-height: 70px; font-family: Georgia, "DejaVu Serif", serif; font-style: italic; color: #8b8b92; white-space: nowrap; }
+      .w { display: inline-block; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="5.4" data-width="1280" data-height="720" data-fps="30">
+      <div class="cam"><div class="rig"><div class="tilt"><div class="page">
+        <div class="tile" style="left:1010px;top:40px">A<i>I</i></div><div class="tile" style="left:1100px;top:130px">A<i>I</i></div>
+        <div class="tile" style="left:110px;top:60px">A<i>I</i></div><div class="tile" style="left:40px;top:170px">A<i>I</i></div>
+      </div></div></div></div>
+      <div class="haze"></div><div class="far"></div><div class="near"></div>
+      <div class="badge"><span>AI</span>AIPRENEUR</div>
+      <div class="t1"><span class="w">Modal</span> <span class="w">ratusan</span> <span class="w">ribu,</span></div>
+      <div class="t2"><span class="w">hemat</span> <span class="w">ratusan</span> <span class="w">juta.</span></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const PH = 12615;
+        // initial camera: low over the hero, 56° tilt
+        gsap.set(".tilt", { rotationX: 56 });
+        gsap.set(".page", { y: -260 });
+        gsap.set(".rig", { scale: 1, y: 0 });
+        gsap.set(".tile", { z: 26 });
+        // FLIGHT 0-3.05: one speed curve (ease in, steady cruise, ease out) down the page
+        ft(".page", { y: -260 }, { y: -1100, duration: 0.9, ease: "power2.in" }, 0);
+        ft(".page", { y: -1100 }, { y: -5600, duration: 1.75, ease: "none" }, 0.9);
+        ft(".page", { y: -5600 }, { y: -6500, duration: 0.55, ease: "power2.out" }, 2.65);
+        // tiles lift off and trail
+        ft(".tile", { z: 26, rotationX: 0 }, { z: 220, rotationX: -40, duration: 0.8, ease: "power2.out", stagger: 0.06 }, 0.1);
+        ft(".rig", { z: 0 }, { z: -260, duration: 3.1, ease: "power1.out" }, 0);
+        // RISE 3.0-3.55: tilt flattens, zoom out to the whole page as one strip
+        ft(".tilt", { rotationX: 56 }, { rotationX: 0, duration: 0.55, ease: "power2.inOut" }, 3.0);
+        ft(".rig", { scale: 1, y: 0, z: -260 }, { scale: 0.075, y: 0, z: 0, duration: 0.55, ease: "power2.inOut" }, 3.0);
+        ft(".page", { y: -6500 }, { y: -PH / 2, duration: 0.55, ease: "power2.inOut" }, 3.0);
+        ft([".near", ".far", ".haze"], { opacity: 1 }, { opacity: 0, duration: 0.35 }, 3.0);
+        // overhead creep
+        ft(".rig", { scale: 0.075 }, { scale: 0.078, duration: 0.2, ease: "none" }, 3.55);
+        // DIVE 3.75-4.25: grow into the hero; everything below it fades away; lands as a card
+        ft(".rig", { scale: 0.078, y: 0 }, { scale: 0.62, y: 180, duration: 0.5, ease: "power2.inOut" }, 3.75);
+        ft(".page", { y: -PH / 2 }, { y: -350, duration: 0.5, ease: "power2.inOut" }, 3.75);
+        ft(".page", { clipPath: "inset(0px 0px 0px 0px round 24px)" }, { clipPath: "inset(0px 0px 11915px 0px round 38px)", duration: 0.5, ease: "power2.inOut" }, 3.75);
+        ft(".tile", { opacity: 1 }, { opacity: 0, duration: 0.2 }, 3.75);
+        // END CARD 4.25-5.4: badge + two-part line, card creeps closer
+        ft(".badge", { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, 4.25);
+        gsap.utils.toArray(".t1 .w").forEach((w, k) => ft(w, { opacity: 0, y: 16, filter: "blur(12px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.34, ease: "power3.out" }, 4.32 + k * 0.06));
+        gsap.utils.toArray(".t2 .w").forEach((w, k) => ft(w, { opacity: 0, y: 16, filter: "blur(12px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.34, ease: "power3.out" }, 4.55 + k * 0.05));
+        ft(".rig", { scale: 0.62 }, { scale: 0.635, duration: 1.15, ease: "none" }, 4.25);
+        tl.set({}, {}, 5.39);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

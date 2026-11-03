@@ -10,7 +10,7 @@ const path = require('path');
   await p.waitForTimeout(300);
   const s = await p.$$('.slide');
   for (let i = 0; i < s.length; i++) {
-    await s[i].screenshot({ path: path.join(dir, 'out', `slide-0${i + 1}.png`) });
+    await s[i].screenshot({ path: path.join(dir, 'out', `slide-${String(i + 1).padStart(2, "0")}.png`) });
   }
   await b.close();
 })();

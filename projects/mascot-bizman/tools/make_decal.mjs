@@ -24,10 +24,10 @@ function zAt(x, y) {
   }
   return best;
 }
-const nx = 40, ny = 6, Z = [];
+const nx = 56, ny = 9, Z = [];
 for (let j = 0; j < ny; j++) { const row = []; for (let i = 0; i < nx; i++) row.push(+zAt(x0 + (x1 - x0) * i / (nx - 1), y1 - (y1 - y0) * j / (ny - 1)).toFixed(5)); Z.push(row); }
-// light smoothing across x so cloth noise does not ripple the print
-const Zs = Z.map((r) => r.map((v, i) => { let s = 0, n = 0; for (let k = -2; k <= 2; k++) if (r[i + k] !== undefined) { s += r[i + k]; n++; } return +(s / n).toFixed(5); }));
-const dec = [{ url, bone: 'chest', box: [x0, x1, +y0.toFixed(5), +y1.toFixed(5)], zgrid: Zs, offset: 0.0016, emissive: 0.55, roughness: 0.6 }];
+// exact front surface (no smoothing: averaging a curved surface sinks the print into the cloth at the sides)
+const Zs = Z;
+const dec = [{ url, bone: 'chest', box: [x0, x1, +y0.toFixed(5), +y1.toFixed(5)], zgrid: Zs, offset: 0.0011, emissive: 0.55, roughness: 0.6, skinned: true }];
 fs.writeFileSync(out, JSON.stringify(dec));
 console.log('box', dec[0].box, 'z range', Math.min(...Zs.flat()), Math.max(...Zs.flat()));

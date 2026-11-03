@@ -47,6 +47,21 @@ skin = np.median(tex[_ty[ring], _tx[ring]], 0); print("mouth-area skin", skin)
 clean((-0.05, 0.05, 0.527, 0.567), 0.17,
       lambda c, p: (np.abs(c - skin).sum(1) > 34) & (((p[:, 0] / 0.045) ** 2 + ((p[:, 1] - 0.547) / 0.017) ** 2) < 1))
 
+# ---- neck: the bake left streaky dark-orange stripes on the neck skin (visible between chin and collar).
+# Re-colour every neck-skin texel to one skin tone (slightly darker: it sits in the head's shadow), keeping a
+# compressed version of the original luminance so the form still reads.
+tx, ty, xyz = tex3d.raster_uv(tex3d.tris_in_box(-0.09, 0.09, 0.445, 0.52, -1), S)
+r = np.hypot(xyz[:, 0], xyz[:, 2] - 0.01)
+c = tex[ty, tx]; L = c @ np.array([0.299, 0.587, 0.114])
+neck = (r < 0.075) & (xyz[:, 1] > 0.445) & (xyz[:, 1] < 0.505) & (c[:, 0] - c[:, 2] > 35) & (c[:, 0] > 90)
+if neck.any():
+    lo, hi = np.percentile(L[neck], 5), np.percentile(L[neck], 95)
+    sh = np.clip((L[neck] - lo) / max(1, hi - lo), 0, 1)
+    NECK = np.array([236, 182, 140.0])
+    new = NECK * (0.86 + 0.14 * sh)[:, None]
+    tex[ty[neck], tx[neck]] = new
+print("neck texels recoloured", int(neck.sum()))
+
 # ---- seam padding (push-pull dilation outside the UV charts)
 cov = np.zeros((S, S), bool)
 uvp = tex3d.UV * (S - 1)

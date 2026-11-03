@@ -9,7 +9,7 @@
   const q = new URLSearchParams(location.search);
   const M3 = window.Mascot3D, { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump } = M3;
   const VW = window.VO_WORDS, PH = window.VO_PHR, D = 41.2;
-  const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, D);
+  const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, D, { smooth: 1 });
   const ACC = syllableAccents(window.VO_ENV, VW, window.VO_PHONES, D);
   const one = (x) => Math.max(0, Math.min(1, x)), sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
   const add = (...ds) => { const o = {}; for (const d of ds) for (const [k, v] of Object.entries(d || {})) { const a = o[k] || [0, 0, 0]; o[k] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
@@ -22,7 +22,7 @@
   PH.items.forEach((c, i) => { intents.push({ t: c.label.start - 0.05, action: ROT[i % ROT.length], side: i % 2 ? "left" : "right" }); intents.push({ t: c.desc.start + 0.2, action: "explain", side: i % 2 ? "right" : "left" }); });
   intents.push({ t: PH.cta[0].start, action: "cta", side: "right" }, { t: PH.cta[1].start + 1.0, action: "welcome", side: "left" });
   const DIR = M3.direct(VW, D, { intents, seed: 5, quiet: 0.2, look: 0 });
-  const PERF = buildPerformance(DIR.tracks, D + 0.05);
+  const PERF = buildPerformance(DIR.tracks, D + 0.05, { smooth: 1 });
   const V = { half: [{ fx: 540, fy: 2200, h: 1080 }, [140, 1080, 800, 840]], full: [{ fx: 540, fy: 1800, h: 1500 }, [140, 280, 800, 1560]],
               face: [{ fx: 540, fy: 3300, h: 3000 }, [140, 1050, 800, 700]], chest: [{ fx: 540, fy: 2500, h: 2600 }, [140, 1150, 800, 600]] };
   const [VIEW, CROP] = V[q.get('view') || 'half'];

@@ -173,8 +173,9 @@ const VIS = {
 };
 const CLOSE = new Set(['m', 'b', 'p']);
 const ROUND = new Set(['w', 'u', 'o']);
-export function buildLipTrack(phones, env, D) {
+export function buildLipTrack(phones, env, D, opts = {}) {
   const N = Math.ceil(D * HZ) + 2;
+  const SM = Math.max(0, Math.min(1, opts.smooth || 0));   // 1 = softer, rounder lip motion (lower low-pass corners)
   const W = new Float32Array(N), O = new Float32Array(N), Sm = new Float32Array(N), T = new Float32Array(N);
   const envAt = (t) => {
     const f = t * 100, i = Math.max(0, Math.min(env.length - 2, Math.floor(f))), u = f - i;
@@ -217,7 +218,7 @@ export function buildLipTrack(phones, env, D) {
   };
   // zero-phase: forward + backward pass (no time shift relative to the audio)
   const zp = (arr, w) => { lp(arr, w); arr.reverse(); lp(arr, w); arr.reverse(); };
-  zp(O, 60); zp(W, 44); zp(Sm, 30); zp(T, 30);
+  zp(O, 60 - 22 * SM); zp(W, 44 - 14 * SM); zp(Sm, 30 - 8 * SM); zp(T, 30 - 8 * SM);
   return function mouthAt(t) {
     const f = Math.max(0, Math.min(N - 1.001, t * HZ)), i = Math.floor(f), u = f - i;
     const g = (a) => a[i] + (a[i + 1] - a[i]) * u;

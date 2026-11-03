@@ -82,7 +82,9 @@ function isArm(x, y, z) {
 }
 function allowed(x, y, z, arm) {
   const ax = Math.abs(x), side = x >= 0 ? 'L' : 'R';
-  if (y > 0.49) return ['head'];
+  // the jaw / chin underside reaches down to y 0.465 in front of the neck: it is head (rigid), never neck/chest,
+  // otherwise it stretches into a ragged edge when the head nods
+  if (y > 0.49 || (y > 0.465 && Math.hypot(x, z - 0.01) > 0.105)) return ['head'];
   if (y > 0.455) return ['neck', 'head', 'chest'];
   if (arm) return y > 0.39 ? [`upperarm_${side}`, `forearm_${side}`, `shoulder_${side}`, 'chest'] : [`upperarm_${side}`, `forearm_${side}`, `hand_${side}`];
   if (y > 0.40 && ax > 0.07) return ['chest', `shoulder_${side}`, `upperarm_${side}`, 'neck'];

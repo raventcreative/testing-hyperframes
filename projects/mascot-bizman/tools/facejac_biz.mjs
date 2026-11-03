@@ -22,12 +22,12 @@ function fit(cx, cy, r) {
   return { n: rows.length, J: [cu[0], cu[1], cv[0], cv[1]], uv0: [cu[2], cv[2]], maxErr: err };
 }
 const cfg = {
-  eyeA: { c: [-0.1017, 0.6033], r: [0.036, 0.031], ...fit(-0.1017, 0.6033, 0.05) },  // screen-left eye (character's right)
-  eyeB: { c: [0.10, 0.602], r: [0.036, 0.031], ...fit(0.10, 0.602, 0.05) },        // screen-right eye (character's left)
+  eyeA: { c: [-0.1017, 0.6033], r: [0.037, 0.034], ...fit(-0.1017, 0.6033, 0.05) },  // screen-left eye (character's right)
+  eyeB: { c: [0.10, 0.602], r: [0.037, 0.034], ...fit(0.10, 0.602, 0.05) },        // screen-right eye (character's left)
   browA: { c: [-0.101, 0.689], ...fit(-0.101, 0.689, 0.04) },
   browB: { c: [0.10, 0.689], ...fit(0.10, 0.689, 0.04) },
   mouth: { c: [0.0, 0.547], r: [0.03, 0.016] },
-  skin: [253, 200, 156], skinEye: [253, 198, 152], coverNormal: 0, lidLit: [1, 1, 1], mouthDy: 0.0, faceSmooth: 1.0, headC: [0, 0.72, 0.0],
+  skin: [253, 200, 156], skinEye: [243, 186, 141], coverNormal: 0, lidLit: [1, 1, 1], mouthDy: 0.0, faceSmooth: 1.0, lidRing: 1.5, browNy: 0.98, headC: [0, 0.72, 0.0],
 };
 console.log(JSON.stringify(cfg, null, 1));
 fs.writeFileSync(process.argv[3], JSON.stringify(cfg, null, 1));

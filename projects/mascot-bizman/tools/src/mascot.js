@@ -23,7 +23,7 @@ uniform float uMouthMix; uniform vec4 uMouth; uniform vec3 uMC; uniform vec3 uSk
 vec2 gRimUV = vec2(0.0); float gRimOK = 0.0;
 float gCover = 0.0; float gLid = 0.0; float gLidShade = 1.0; float gLash = 0.0;
 uniform float uDebug;
-uniform mat3 uHeadNM; uniform vec3 uHeadC; uniform float uCoverN; uniform vec3 uLidLit; uniform float uFaceSmooth;
+uniform mat3 uHeadNM; uniform vec3 uHeadC; uniform float uCoverN; uniform vec3 uLidLit; uniform float uFaceSmooth; uniform float uLidRing; uniform float uBrowNy;
 vec2 jmul(vec4 J, vec2 d){ return vec2(J.x*d.x + J.y*d.y, J.z*d.x + J.w*d.y); }
 vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 gaze, vec2 baseUv){
   vec2 d = (p - E.xy) / E.zw;
@@ -46,7 +46,7 @@ vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 g
     float sy = dy > 0.0 ? E.w * 1.9 : E.w * 1.6;
     float ny = dy / sy;
     float ee = pow(abs(nx), 3.0) + pow(abs(ny), 3.0);
-    if (ee < 1.6) {
+    if (ee < uLidRing) {
       float b = smoothstep(0.0, 1.0, blink);
       float aa = fwidth(ny) * 1.2 + 1e-4;
       float yu = 2.0, covered;
@@ -58,9 +58,12 @@ vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 g
       } else {
         // just outside the lid: plain skin, faded to the lid colour so the lid never shows an outline
         // (dark texels are kept only above the lid, where the brow is)
-        covered = smoothstep(0.1, 0.5, b) * mix(1.0, smoothstep(0.2, 0.45, dot(col, vec3(0.3, 0.55, 0.15))), smoothstep(0.6, 0.95, ny));
+        covered = smoothstep(0.1, 0.5, b) * mix(1.0, smoothstep(0.2, 0.45, dot(col, vec3(0.3, 0.55, 0.15))), smoothstep(uBrowNy, uBrowNy + 0.1, ny));
+        // v19: in the ring only eye-white / lash texels are covered; real skin (incl. cheek blush) stays untouched
+        float skinness = smoothstep(0.02, 0.1, col.r - col.b) * smoothstep(0.22, 0.38, dot(col, vec3(0.3, 0.55, 0.15))) * (1.0 - smoothstep(0.66, 0.76, dot(col, vec3(0.3, 0.55, 0.15))));
+        covered *= 1.0 - skinness;
       }
-      float edge = smoothstep(1.6, 1.0, ee);
+      float edge = smoothstep(uLidRing, 1.0, ee);
       // lid skin: at the rim it takes the nearest skin texel just outside the lid along the ray from the eye centre
       // (lash / brow / eye-white texels are skipped), easing to the ring colour toward the centre
       vec2 dir = vec2(nx, ny) / max(pow(ee, 1.0 / 3.0), 1e-3);
@@ -74,6 +77,9 @@ vec3 eyeLayer(vec3 col, vec2 p, vec4 E, vec4 J, float blink, float lower, vec2 g
       }
       rimC = mix(uSkinEye, rimC, 1.0 - smoothstep(0.15, 0.4, length(rimC - uSkinEye)));
       vec3 lid = mix(uSkinEye, rimC, smoothstep(0.3, 0.95, ee));
+      // v19: toward the lid edge, wherever the texel underneath is already skin, keep that real skin -> no seam line
+      { float skn = smoothstep(0.02, 0.1, col.r - col.b) * smoothstep(0.22, 0.38, dot(col, vec3(0.3, 0.55, 0.15))) * (1.0 - smoothstep(0.66, 0.76, dot(col, vec3(0.3, 0.55, 0.15))));
+        lid = mix(lid, col, skn * smoothstep(0.45, 1.0, ee)); }
       if (ee < 1.0) {
         lid *= mix(0.975, 1.0, smoothstep(-1.0, 0.6, ny));                     // faint top-light gradient
         lid *= mix(0.93, 1.0, smoothstep(0.0, 0.3, abs(ny - yu)));              // soft crease under the lid edge
@@ -291,6 +297,29 @@ export class Mascot {
         polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
       // optional self-glow so a white print stays crisp white under the key light (not shaded grey)
       if (d.emissive) { mat.emissive = new THREE.Color(0xffffff); mat.emissiveMap = tex; mat.emissiveIntensity = d.emissive; }
+      if (d.skinned) {
+        // skinned print: every decal vertex copies the skin weights of the jacket surface right under it, so the print
+        // stretches / bends exactly like the cloth (never floats off the jacket when the chest, shoulder or arm moves)
+        const BP = this.mesh.geometry.attributes.position, SI = this.mesh.geometry.attributes.skinIndex, SW = this.mesh.geometry.attributes.skinWeight;
+        const nv = pos.length / 3, si = new Float32Array(nv * 4), sw = new Float32Array(nv * 4);
+        const cand = [];
+        for (let v = 0; v < BP.count; v++) { const x = BP.getX(v), y = BP.getY(v); if (x > x0 - 0.02 && x < x1 + 0.02 && y > y0 - 0.02 && y < y1 + 0.02 && BP.getZ(v) > 0.02) cand.push(v); }
+        for (let k = 0; k < nv; k++) {
+          const px = pos[3 * k], py = pos[3 * k + 1], pz = pos[3 * k + 2];
+          const near = cand.map((v) => [Math.hypot(BP.getX(v) - px, BP.getY(v) - py, BP.getZ(v) - pz), v]).sort((a, b) => a[0] - b[0]).slice(0, 6);
+          const acc = new Map();
+          for (const [dd, v] of near) { const w0 = 1 / Math.pow(dd + 0.002, 2); for (let j = 0; j < 4; j++) { const b = SI.getComponent(v, j), w = SW.getComponent(v, j) * w0; if (w > 0) acc.set(b, (acc.get(b) || 0) + w); } }
+          const top = [...acc].sort((a, b) => b[1] - a[1]).slice(0, 4); const s = top.reduce((a, b) => a + b[1], 0) || 1;
+          top.forEach(([b, w], j) => { si[4 * k + j] = b; sw[4 * k + j] = w / s; });
+        }
+        g.setAttribute('skinIndex', new THREE.Float32BufferAttribute(si, 4)); g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(sw, 4));
+        const sm = new THREE.SkinnedMesh(g, mat); sm.frustumCulled = false; sm.renderOrder = 2;
+        this.mesh.parent.add(sm);
+        sm.position.copy(this.mesh.position); sm.quaternion.copy(this.mesh.quaternion); sm.scale.copy(this.mesh.scale);
+        sm.updateMatrixWorld(true);
+        sm.bind(this.mesh.skeleton, this.mesh.bindMatrix);
+        continue;
+      }
       const mesh = new THREE.Mesh(g, mat); mesh.frustumCulled = false; mesh.renderOrder = 2;
       const bone = this.bones[d.bone || 'chest'];
       bone.add(mesh);
@@ -312,7 +341,7 @@ export class Mascot {
       uBlink: { value: new THREE.Vector2() }, uLower: { value: new THREE.Vector2() },
       uGaze: { value: new THREE.Vector2() }, uBrow: { value: new THREE.Vector2() }, uBrowTilt: { value: new THREE.Vector2() },
       uMouthMix: { value: 0 }, uDebug: { value: 0 }, uHeadNM: { value: new THREE.Matrix3() }, uHeadC: { value: new THREE.Vector3(...(F.headC || [0, 0.6, -0.04])) }, uCoverN: { value: F.coverNormal ?? 1 }, uLidLit: { value: new THREE.Vector3(...(F.lidLit || [0.98, 0.95, 0.93])) }, uMouth: { value: new THREE.Vector4(0.026, 0, 0.004, 0.6) },
-      uMC: { value: new THREE.Vector3(F.mouth.c[0], F.mouth.c[1] + (F.mouthDy ?? 0.0135), F.mouth.c[1]) }, uFaceSmooth: { value: F.faceSmooth ?? 0 },
+      uMC: { value: new THREE.Vector3(F.mouth.c[0], F.mouth.c[1] + (F.mouthDy ?? 0.0135), F.mouth.c[1]) }, uFaceSmooth: { value: F.faceSmooth ?? 0 }, uLidRing: { value: F.lidRing ?? 1.6 }, uBrowNy: { value: F.browNy ?? 0.6 },   // lid-ring height (lid units) where the brow starts: dark texels above it are kept   // lid fade ring (1 = hard edge at the lid)
       uSkin: { value: new THREE.Vector3(lin(F.skin[0]), lin(F.skin[1]), lin(F.skin[2])) },
       uSkinEye: { value: new THREE.Vector3(lin(F.skinEye[0]), lin(F.skinEye[1]), lin(F.skinEye[2])) },
     });
@@ -349,7 +378,7 @@ vRest = position;
         .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n// v18: lids are lit like skin (smooth fitted normal, see buildLidNormals); only the lash line is laid on top\n// highlight shoulder: roll bright values off softly (hue kept) so pale skin never clips to flat white\n{ float mx = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b));\n  if (mx > 0.78) gl_FragColor.rgb *= (0.78 + 0.2 * (1.0 - exp(-(mx - 0.78) / 0.2))) / mx; }\ngl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.16, 0.11, 0.1), gLash);\nif (uDebug > 1.5) gl_FragColor = vec4(vMapUv, 0.0, 1.0);')
         .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nfloat sNl = length(vLidN);\nif (vFM > 0.5 && sNl > 1e-5) {\n  vec3 sN = (vLidN / sNl) * faceDirection;\n  normal = normalize(mix(normal, sN, uFaceSmooth));\n  normal = normalize(mix(normal, sN, gCover));\n}');
     };
-    mat.customProgramCacheKey = () => 'mascot-face-v18g';
+    mat.customProgramCacheKey = () => 'mascot-face-v19';
     mat.needsUpdate = true;
     if (mat.roughness !== undefined) { mat.roughness = Math.max(mat.roughness, 0.55); mat.metalness = 0; }
 

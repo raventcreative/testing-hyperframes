@@ -1,0 +1,55 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#0a1430}canvas{display:block}#m{position:absolute;left:-9999px}</style></head>
+<body><canvas id="out"></canvas><canvas id="m" width="1080" height="1920"></canvas>
+<script src="mascot3d.js"></script>
+<script src="vo_words.js"></script>
+<script>
+  // QA sheet: ?glb=..&face=..&decals=..&ts=1,2,3&view=half|full|face&cols=4&scale=0.5&debug=0&blink=0
+  // Same acting as motion7-reel/compositions/mascot.html (director on the VO words), sampled at the listed times.
+  const q = new URLSearchParams(location.search);
+  const M3 = window.Mascot3D, { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump } = M3;
+  const VW = window.VO_WORDS, PH = window.VO_PHR, D = 41.2;
+  const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, D);
+  const ACC = syllableAccents(window.VO_ENV, VW, window.VO_PHONES, D);
+  const one = (x) => Math.max(0, Math.min(1, x)), sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
+  const add = (...ds) => { const o = {}; for (const d of ds) for (const [k, v] of Object.entries(d || {})) { const a = o[k] || [0, 0, 0]; o[k] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
+  function accents(t) { let n = 0; for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; } return Math.min(1.3, n); }
+  const W0 = PH.hook[2].start + 0.2, W1 = PH.hook[2].end - 0.2;
+  const intents = [
+    { t: PH.hook[0].start + 0.05, action: "present", side: "right" }, { t: PH.hook[1].start, action: "emphasize", side: "left" },
+    { t: W0 + 0.3, action: "idle" }, { t: PH.hook[2].end - 1.4, action: "reveal" } ];
+  const ROT = ["pointFwd", "present", "explain", "pointFwd", "emphasize", "present", "pointFwd"];
+  PH.items.forEach((c, i) => { intents.push({ t: c.label.start - 0.05, action: ROT[i % ROT.length], side: i % 2 ? "left" : "right" }); intents.push({ t: c.desc.start + 0.2, action: "explain", side: i % 2 ? "right" : "left" }); });
+  intents.push({ t: PH.cta[0].start, action: "cta", side: "right" }, { t: PH.cta[1].start + 1.0, action: "welcome", side: "left" });
+  const DIR = M3.direct(VW, D, { intents, seed: 5, quiet: 0.2, look: 0 });
+  const PERF = buildPerformance(DIR.tracks, D + 0.05);
+  const V = { half: [{ fx: 540, fy: 2200, h: 1080 }, [140, 1080, 800, 840]], full: [{ fx: 540, fy: 1800, h: 1500 }, [140, 280, 800, 1560]],
+              face: [{ fx: 540, fy: 3300, h: 3000 }, [140, 1050, 800, 700]], chest: [{ fx: 540, fy: 2500, h: 2600 }, [140, 1150, 800, 600]] };
+  const [VIEW, CROP] = V[q.get('view') || 'half'];
+  const ts = (q.get('ts') || '0').split(',').map(Number), cols = +(q.get('cols') || 4), sc = +(q.get('scale') || 0.5);
+  const out = document.getElementById('out'), tw = CROP[2] * sc, th = CROP[3] * sc;
+  out.width = tw * Math.min(cols, ts.length); out.height = th * Math.ceil(ts.length / cols);
+  const g = out.getContext('2d'); g.fillStyle = '#0a1430'; g.fillRect(0, 0, out.width, out.height);
+  const poseOverride = q.get('pose') ? JSON.parse(q.get('pose')) : null;
+  window.READY = fetch(q.get('decals')).then((r) => r.json()).then((decals) => Promise.all([fetch(q.get('face')).then((r) => r.json()), decals]))
+    .then(([face, decals]) => M3.Mascot.create(document.getElementById('m'), { url: q.get('glb'), face, decals, width: 1080, height: 1920, envIntensity: 0.6 }))
+    .then((m) => {
+      for (const o of m.scene.children) if (o.isDirectionalLight && o.position.z < 0) { o.intensity = 2.1; o.color.setRGB(0.45, 0.85, 1.0); o.position.set(1.6, 1.5, -1.4); }
+      if (m.shadow) m.shadow.visible = false;
+      ts.forEach((t, i) => {
+        const Pf = PERF(t), acc = accents(t);
+        const id = M3.micro(t, 17, vnoise);
+        const wk = M3.walk(t, W0, W1, 4, 0.36);
+        let bones = add(Pf.bones, id, wk.bones, { head: [0.03 * acc, 0, 0], neck: [0.012 * acc, 0, 0] });
+        let root = { x: Pf.root.x, y: Pf.root.y + wk.bob, ry: Pf.root.ry, rz: Pf.root.rz, rx: 0, s: Pf.root.s };
+        if (poseOverride) { bones = poseOverride[i] || {}; root = {}; }
+        m.setView({ ...VIEW, yaw: +(q.get('yaw') || 0), pitch: 4 });
+        const bl = q.get('blink') ? +q.get('blink') : M3.blink(t, 0, D, 3, DIR.blinks);
+        m.setState({ root, bones, debug: q.get('debug') === '1', face: { blink: [bl, bl], gaze: DIR.gaze(t), mouthMix: 1, mouth: mouthAt(t) } });
+        m.render();
+        g.drawImage(document.getElementById('m'), CROP[0], CROP[1], CROP[2], CROP[3], (i % cols) * tw, Math.floor(i / cols) * th, tw, th);
+        g.fillStyle = '#7fe3ff'; g.font = '16px sans-serif'; g.fillText(t.toFixed(2), (i % cols) * tw + 6, Math.floor(i / cols) * th + 18);
+      });
+      return true;
+    });
+</script></body></html>

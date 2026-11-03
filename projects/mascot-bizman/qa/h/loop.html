@@ -1,0 +1,43 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent}canvas{display:block}</style></head>
+<body><canvas id="m" width="1080" height="1350"></canvas>
+<script src="mascot3d.js"></script>
+<script>
+  // Seamless 4 s dance loop at 120 bpm (beat = 0.5 s) for the "mascot music video" example clip.
+  // Every motion is periodic in 4 s (multiples of 0.25 Hz) -> frame 120 == frame 0. ?f=<frame index>
+  const q = new URLSearchParams(location.search), M3 = window.Mascot3D;
+  const TAU = Math.PI * 2, L = 4;
+  const sn = (t, per, ph = 0) => Math.sin(TAU * (t / per + ph));
+  const beat = (t) => { const u = (t % 0.5) / 0.5; return Math.pow(Math.sin(Math.PI * u), 2); };   // 0 on the beat, 1 between
+  function state(t) {
+    const b = beat(t), sw = sn(t, 1), sw2 = sn(t, 2);    // sway 1 s, arm pump alternates every 1 s
+    const pumpR = Math.max(0, sn(t, 1)), pumpL = Math.max(0, -sn(t, 1));
+    const arm = (side, k) => {
+      const s = side === 'R' ? 1 : -1;
+      // fist pump in front of the chest: upperarm raise + forward twist, forearm flex
+      return {
+        ['upperarm_' + side]: [0.02 - 0.55 * k - 0.1 * b, s * (0.0 + 0.9 * k), s * (0.16 - 0.1 * k)],
+        ['forearm_' + side]: [-0.32 - 1.0 * k - 0.15 * b, 0, s * (-0.06 + 0.2 * k)],
+        ['hand_' + side]: [0.1 * k, s * 0.1, s * -0.05],
+      };
+    };
+    const bones = {
+      ...arm('R', 0.25 + 0.75 * pumpR), ...arm('L', 0.25 + 0.75 * pumpL),
+      hips: [0, 0.09 * sw, 0.035 * sw], spine: [0.03 * b, -0.05 * sw, -0.02 * sw], chest: [0.02 * b, -0.06 * sw, -0.025 * sw],
+      neck: [0.03 * b, 0.04 * sw, 0], head: [-0.06 + 0.1 * b, 0.12 * sw2, 0.08 * sw],
+      shoulder_R: [0, 0, 0.05 * pumpR], shoulder_L: [0, 0, -0.05 * pumpL],
+      thigh_R: [-0.12 * b, 0, 0], shin_R: [0.22 * b, 0, 0], foot_R: [-0.1 * b, 0, 0],
+      thigh_L: [-0.12 * b, 0, 0], shin_L: [0.22 * b, 0, 0], foot_L: [-0.1 * b, 0, 0],
+    };
+    // knees bend between beats -> body dips; keep feet planted by lowering the root
+    const root = { x: 0.012 * sw, y: -0.012 * b, ry: 0.1 * sw2, rz: 0.03 * sw, s: 1 };
+    const sing = Math.max(0, sn(t, 0.5, 0.15));
+    const mouth = [0.03 + 0.008 * sing, 0.004 + 0.024 * sing, 0.006, 0.4];
+    const bl = Math.max(0, 1 - Math.abs(t - 2.6) / 0.09);
+    return { root, bones, face: { blink: [bl, bl], gaze: [0, 0], mouthMix: 1, mouth } };
+  }
+  window.READY = Promise.all([fetch(q.get('face')).then((r) => r.json()), fetch(q.get('decals')).then((r) => r.json())])
+    .then(([face, decals]) => M3.Mascot.create(document.getElementById('m'), { url: q.get('glb'), face, decals, width: 1080, height: 1350, envIntensity: 0.6 }))
+    .then((m) => { window.M = m; if (m.shadow) m.shadow.visible = true; return true; });
+  window.renderFrame = (f) => { const m = window.M; m.setView({ fx: 540, fy: 1260, h: 1140, yaw: 0, pitch: 4 }); m.setState(state((f / 30) % L)); m.render(); };
+</script></body></html>

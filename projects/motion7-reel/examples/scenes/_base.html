@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1280, height=720" />
+    <title>AIpreneur example {{ID}}</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --c: #01ccf7; --n0: #0a0d2c; --n1: #294b77; --grad: linear-gradient(135deg, #0a0d2c 0%, #294b77 100%); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1280px; height: 720px; overflow: hidden; background: #0a0d2c; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1280px; height: 720px; overflow: hidden; }
+      .abs { position: absolute; }
+      .ctr { position: absolute; left: 0; width: 1280px; text-align: center; white-space: nowrap; }
+      .caret { display: inline-block; width: 3px; height: 1em; margin-left: 3px; vertical-align: -0.12em; background: currentColor; }
+      {{CSS}}
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="{{DUR}}" data-width="1280" data-height="720" data-fps="30">
+      {{HTML}}
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const D = {{DUR}};
+        const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        let seed = 9; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+        // typewriter: characters start hidden (CSS) and appear one by one
+        const typeIn = (el, text, t0, cps) => {
+          el.innerHTML = Array.from(text).map((c) => `<s style="text-decoration:none;display:none">${c}</s>`).join("") + '<i class="caret"></i>';
+          $$("s", el).forEach((c, k) => ft(c, { display: "none" }, { display: "inline", duration: 0.01 }, t0 + k / cps));
+          return t0 + text.length / cps;
+        };
+        {{JS}}
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

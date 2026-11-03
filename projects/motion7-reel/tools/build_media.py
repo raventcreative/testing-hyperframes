@@ -8,7 +8,8 @@ WT = json.loads((P / "production/word_timing.json").read_text()); ph, words = WT
 H = [p for p in ph if p["kind"] == "hook"]; L = [p for p in ph if p["kind"] == "label"]; N = [p for p in ph if p["kind"] == "name"]
 DS = [p for p in ph if p["kind"] == "desc"]; CT = [p for p in ph if p["kind"] == "cta"]
 D = 41.2
-CLIPS = ["assets/clips/ex01_aipreneur.mp4"] + [f"assets/clips/ex0{n}.mp4" for n in range(2, 8)]
+CLIPS = ["assets/clips/ex01_aipreneur.mp4"] + [f"assets/clips/e0{n}_aipreneur.mp4" for n in range(2, 8)]
+MONT = [1.2, 1.7, 2.4, 3.3, 2.0, 2.2, 1.5]   # most telling moment of each clip for the hook montage
 WIN = [(L[k]["start"] - 0.2, (L[k + 1]["start"] - 0.2) if k < 6 else CT[0]["start"] - 0.25) for k in range(7)]
 r = lambda x: round(x, 3)
 bg, fr = [], []
@@ -17,7 +18,7 @@ for k, (a, b) in enumerate(WIN):
     bg.append(f'      <video id="bg-ex{k+1}" class="clip bvid" src="{CLIPS[k]}" data-start="{r(a)}" data-duration="{d}" data-track-index="1" muted playsinline></video>')
     fr.append(f'            <video id="frame-ex{k+1}" class="clip fvid" src="{CLIPS[k]}" data-start="{r(a)}" data-duration="{d}" data-track-index="4" muted playsinline></video>')
 for k in range(7):
-    a = 0.08 + k * 0.28; ms = 1.2 if k == 0 else 2.5
+    a = 0.08 + k * 0.28; ms = MONT[k]
     fr.append(f'            <video id="montage-{k+1}" class="clip mont" src="{CLIPS[k]}" data-start="{r(a)}" data-duration="0.28" data-media-start="{ms}" data-track-index="5" muted playsinline></video>')
 bg.append(f'      <video id="bg-hook" class="clip bvid" src="{CLIPS[6]}" data-start="0" data-duration="{r(H[1]["start"])}" data-media-start="1" data-track-index="2" muted playsinline></video>')
 def wt(p, txt, n=1):

@@ -1,0 +1,42 @@
+@@META
+dur=5
+@@CSS
+#main { background: radial-gradient(ellipse 80% 70% at 50% 100%, #ffe1cf 0%, #fff7f2 45%, #ffffff 80%); }
+.hl { position: absolute; left: 0; top: 70px; width: 1280px; text-align: center; font-size: 66px; line-height: 80px; font-weight: 700; color: #0a0d2c; white-space: nowrap; letter-spacing: -1.5px; }
+.hl .w { display: inline-block; opacity: 0; }
+.hl .g { color: #e0732a; }
+.avs { display: inline-block; vertical-align: -8px; margin: 0 6px; }
+.avs img { width: 64px; height: 64px; border-radius: 32px; object-fit: cover; object-position: 50% 20%; border: 4px solid #fff; margin-left: -18px; box-shadow: 0 6px 14px rgba(0,0,0,.18); }
+.avs img:first-child { margin-left: 0; }
+.stage { position: absolute; left: 0; top: 248px; width: 1280px; height: 520px; perspective: 1400px; }
+.phn { position: absolute; left: 550px; top: 10px; width: 180px; height: 360px; border-radius: 30px; background: #111; padding: 6px; box-shadow: 0 30px 60px rgba(60,30,20,.35); transform-style: preserve-3d; }
+.phn img { width: 168px; height: 348px; border-radius: 24px; object-fit: cover; object-position: 50% 25%; display: block; }
+.rx { position: absolute; height: 44px; padding: 0 16px; border-radius: 22px; background: #fff; box-shadow: 0 10px 24px rgba(60,30,20,.22); font-size: 18px; font-weight: 700; line-height: 44px; color: #0a0d2c; white-space: nowrap; opacity: 0; z-index: 20; }
+.rx b { color: #e5486e; }
+.tag { position: absolute; left: 0; top: 676px; width: 1280px; text-align: center; font-size: 20px; letter-spacing: 6px; color: #b5562f; font-weight: 700; opacity: 0; }
+@@HTML
+<div class="hl"><span class="w">Biarin</span> <span class="w avs"><img src="assets/testi1.jpg"><img src="assets/testi2.jpg"><img src="assets/testi3.jpg"><img src="assets/ugc_face.jpg"></span> <span class="w g">kreator AI</span><br><span class="w">jualan</span> <span class="w">produkmu.</span></div>
+<div class="stage" id="stg"></div>
+<div class="rx" style="left:230px;top:380px"><b>♥</b> 12,4rb</div>
+<div class="rx" style="left:920px;top:340px">🔥 FYP hari ini</div>
+<div class="rx" style="left:300px;top:590px">+380 order</div>
+<div class="rx" style="left:860px;top:580px">"auto checkout!" 😍</div>
+<div class="tag">SLIDESHOW · VIDEO REAKSI · UGC</div>
+@@JS
+// headline with an inline avatar stack, then a coverflow swipe of phones; reactions pop as each phone passes the middle
+$$(".hl .w").forEach((w, k) => ft(w, { opacity: 0, y: 30, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.35, ease: "power3.out" }, 0.1 + k * 0.12));
+$$(".avs img").forEach((im, k) => ft(im, { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.3, ease: "back.out(2.5)" }, 0.3 + k * 0.07));
+const IM = ["ugc_face", "testi1", "ugc_product", "testi2", "testi3", "testi4", "ugc_face"];
+const stg = $("#stg");
+const P = IM.map((n) => { const d = document.createElement("div"); d.className = "phn"; d.innerHTML = `<img src="assets/${n}.jpg">`; stg.appendChild(d); return d; });
+// position of a phone at slot s (0 = centre): coverflow
+const pose = (s) => ({ x: s * 230, z: -Math.abs(s) * 180, rotationY: -s * 32, opacity: Math.abs(s) > 2.6 ? 0 : 1, scale: s === 0 ? 1.12 : 1, zIndex: 10 - Math.round(Math.abs(s)) });
+const STEPS = [0.9, 1.55, 2.2, 2.85, 3.5];
+P.forEach((p, i) => {
+  let s = i - 1;
+  ft(p, Object.assign(pose(s + 0.6), { opacity: 0 }), Object.assign(pose(s), { duration: 0.6, ease: "expo.out" }), 0.5 + i * 0.05);
+  STEPS.forEach((t) => { ft(p, pose(s), Object.assign(pose(s - 1), { duration: 0.5, ease: "power3.inOut" }), t); s -= 1; });
+});
+$$(".rx").forEach((r, k) => ft(r, { opacity: 0, scale: 0.4, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: "back.out(2.5)" }, 1.2 + k * 0.6));
+$$(".rx").forEach((r, k) => ft(r, { y: 0 }, { y: -10, duration: 0.8, ease: "sine.inOut", yoyo: true, repeat: 3 }, 1.6 + k * 0.6));
+ft(".tag", { opacity: 0, letterSpacing: "20px" }, { opacity: 1, letterSpacing: "6px", duration: 0.6, ease: "expo.out" }, 3.9);

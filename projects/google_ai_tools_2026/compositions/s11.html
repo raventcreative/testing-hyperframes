@@ -475,6 +475,9 @@
           tl.fromTo(q(".s11-fg2"), { x: 0, y: 0 }, { x: -90, y: 60, duration: DUR, ease: "none" }, 0);
           tl.fromTo(q(".s11-fg3"), { x: 0, y: 0 }, { x: -50, y: 40, duration: DUR, ease: "none" }, 0);
           tl.fromTo(q(".s11-floor"), { scaleX: 0.85, opacity: 0.6 }, { scaleX: 1, opacity: 1, duration: 0.6, ease: "power2.out" }, 0);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl; // register LAST
         })();

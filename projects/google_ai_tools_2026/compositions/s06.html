@@ -350,6 +350,9 @@
             tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 },
               { x: dx, y: dy, scale: s, opacity: 0, rotation: 90, duration: 0.7, ease: "power3.out", immediateRender: false }, A + i * 0.01);
           });
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

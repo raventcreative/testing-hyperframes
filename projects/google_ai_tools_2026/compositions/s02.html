@@ -438,7 +438,6 @@
             tl.fromTo(c.sh, { x: 6, y: 8, scale: 0.98, opacity: 0.85 }, { x: 46, y: 58, scale: 1.55, opacity: 0.32, duration: 0.26, ease: "power2.out", immediateRender: false }, A - 0.02);
             tl.fromTo(q("#s02-sr" + i), { opacity: 0.95, scale: 0.4 }, { opacity: 0, scale: 1.8, duration: 0.6, ease: "power2.out", immediateRender: false }, A);
             tl.fromTo(ledOn[i], { opacity: 1 }, { opacity: 0, duration: 0.14, ease: "power2.out", immediateRender: false }, A + 0.02);
-            tl.fromTo(R.querySelector("#s02-pip" + i), { attr: { fill: "#cbdbf4" } }, { attr: { fill: "#6b7077" }, duration: 0.12, ease: "none", immediateRender: false }, A + 0.02);
             tl.fromTo(c.tag, { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.3, ease: "back.out(2)", immediateRender: false }, A + 0.12 + n * 0.04);
             // "sedang" (0.81): hover; seal stamps onto the enamel face
             tl.fromTo(c.lift, { z: 124 }, { z: 140, duration: T.pensi - T.sedang, ease: "sine.inOut", immediateRender: false }, T.sedang);
@@ -449,8 +448,9 @@
             const c = carts[i];
             tl.fromTo(c.tag, { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.32, ease: "back.out(2.2)", immediateRender: false }, A + 0.05 + n * 0.05);
             tl.fromTo(c.sheen, { x: 0 }, { x: 230, duration: 0.45, ease: "power2.inOut", immediateRender: false }, A + 0.02 + n * 0.05);
-            tl.fromTo(R.querySelector("#s02-pip" + i), { attr: { fill: "#cbdbf4" } }, { attr: { fill: "#ffffff" }, duration: 0.12, ease: "none", immediateRender: false }, A + 0.02);
           });
+          // hub status pips: two go graphite, three go bright (one tween per pip)
+          TH.forEach((th, i) => tl.fromTo(R.querySelector("#s02-pip" + i), { attr: { fill: "#cbdbf4" } }, { attr: { fill: RET.includes(i) ? "#6b7077" : "#ffffff" }, duration: 0.12, ease: "none", immediateRender: false }, A + 0.02));
           tl.fromTo(q("#s02-punch"), { scale: 1, transformOrigin: "50% 54%" }, { scale: 1.04, duration: 0.1, ease: "power2.out", immediateRender: false }, A);
           tl.fromTo(q("#s02-punch"), { scale: 1.04 }, { scale: 1, duration: 0.3, ease: "back.out(2)", immediateRender: false }, A + 0.1);
           tl.fromTo(q("#s02-flick"), { opacity: 0 }, { opacity: 0.32, duration: 0.05, ease: "none", immediateRender: false }, A - 0.02);
@@ -496,6 +496,9 @@
           });
           tl.fromTo(q("#s02-spin"), { rotation: 0 }, { rotation: SPIN_DEG, duration: DUR - T.spin, ease: "power2.in", immediateRender: false }, T.spin);
           tl.fromTo(q("#s02-coreglow"), { opacity: 0.55, scale: 0.9 }, { opacity: 0.85, scale: 1.1, duration: 0.4, ease: "power2.out", immediateRender: false }, P0);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

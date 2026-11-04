@@ -234,6 +234,9 @@
           tl.to(q("#s17-sheen"), { x: 1250, duration: 0.3, ease: "power2.inOut" }, A + 0.03);
           // T.still → DUR: intentionally no tweens. Final frame = calm still lockup.
           tl.set({}, {}, DUR);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl; // register LAST
         })();

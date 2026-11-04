@@ -223,6 +223,9 @@
           tl.to(img, { y: -40, duration: DUR - A - 0.15, ease: "power2.inOut" }, A + 0.15);
           tl.fromTo(hoop, { opacity: 0, scale: 0.25 }, { opacity: 1, scale: 1.2, duration: 0.2, ease: "power2.out", immediateRender: false }, A + 0.2);
           tl.to(hoop, { scale: 4.2, opacity: 0.95, duration: DUR - A - 0.4, ease: "power2.in" }, A + 0.4);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

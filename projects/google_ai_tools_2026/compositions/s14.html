@@ -431,6 +431,9 @@
           tl.fromTo(q("#s14-tY"), { scale: 1 }, { scale: 1.04, duration: 0.1, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, T.y2026);
           tl.fromTo(q("#s14-tileSheen"), { x: 0 }, { x: 1300, duration: 0.7, ease: "power2.inOut", immediateRender: false }, T.y2026 + 0.02);
           spC.forEach(([sp, dx, dy, s], i) => tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 }, { x: dx, y: dy * 0.6, scale: s * 0.7, opacity: 0, rotation: 90, duration: 0.6, ease: "power3.out", immediateRender: false }, T.y2026 + i * 0.012));
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

@@ -248,12 +248,12 @@
           };
           const rings = [];
           RINGY.forEach((y) => {
-            // each half stands up out of the board (rotationX -90); the inner element opens/closes in the ring's own plane
+            // two chrome half-loops per ring, lifted above the sheets; the inner element opens/closes
             const oa = mk("div", "s15-ring", q("#s15-rings"), "left:99px;top:" + y + "px");
             const ob = mk("div", "s15-ring", q("#s15-rings"), "left:161px;top:" + y + "px");
             const a = mk("div", "s15-ring", oa), b = mk("div", "s15-ring", ob);
             a.innerHTML = ringSVG(0); b.innerHTML = ringSVG(1);
-            tl.set([oa, ob], { z: 4, rotationX: -48 }, 0);
+            tl.set([oa, ob], { z: 26 }, 0);
             tl.set([a, b], { rotation: 0, x: 0 }, 0);
             rings.push([a, b]);
           });
@@ -352,6 +352,9 @@
             tl.to(b, { rotation: 0, x: 0, duration: 0.16, ease: "back.out(2)" }, T.lama + 0.2 + i * 0.02);
           });
           tl.to(q("#s15-lever"), { rotation: 0, duration: 0.14, ease: "back.out(2)" }, T.lama + 0.2);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

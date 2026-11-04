@@ -418,6 +418,9 @@
           // shared exit: the hub's light builds as the camera dives
           tl.fromTo(q("#s01-beam"), { opacity: 0.3, scaleY: 0.9 }, { opacity: 0.7, scaleY: 1.1, duration: DUR - T.dive, ease: "power2.in", immediateRender: false }, T.dive);
           tl.fromTo(q("#s01-flick"), { opacity: 0 }, { opacity: 0.45, duration: DUR - T.dive, ease: "power3.in", immediateRender: false }, T.dive);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

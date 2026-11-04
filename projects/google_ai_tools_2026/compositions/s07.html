@@ -320,6 +320,9 @@
           tl.fromTo(q("#s07-rimB"), { attr: { r: 1514 } }, { attr: { r: 194 }, duration: XD, ease: "power1.in" }, X0);
           tl.fromTo(q("#s07-irisTicks"), { scale: 5 }, { scale: 0.6, svgOrigin: PX + " " + PY, duration: XD, ease: "power1.in" }, X0);
           tl.fromTo(q("#s07-blades"), { rotation: -40 }, { rotation: 0, svgOrigin: PX + " " + PY, duration: XD, ease: "power1.in" }, X0);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

@@ -363,6 +363,9 @@
           tl.fromTo(q("#s04-wash"), { opacity: 0 }, { opacity: 0.8, duration: DUR - X0 - 0.06, ease: "power2.in", immediateRender: false }, X0 + 0.06);
           tl.fromTo(q("#s04-ticks"), { rotation: 6 }, { rotation: 60, duration: DUR - X0, ease: "power2.in", immediateRender: false }, X0);
           tl.fromTo(q("#s04-glow"), { opacity: 0.25 }, { opacity: 0, duration: 0.2, ease: "none", immediateRender: false }, X0);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

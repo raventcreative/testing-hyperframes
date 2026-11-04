@@ -227,7 +227,7 @@
           tl.fromTo(q("#s08-blades"), { rotation: 0 }, { rotation: -40, svgOrigin: IX + " " + IY, duration: OD, ease: "power2.out" }, 0);
           tl.to(q(".s08-iris"), { opacity: 0, duration: 0.01 }, OD);
           // ---- camera / planes ----
-          tl.fromTo(q(".s08-world"), { scale: 1.0 }, { scale: 1.04, duration: DUR, ease: "none", immediateRender: false }, 0);
+          tl.fromTo(q(".s08-world"), { scale: 0.92 }, { scale: 0.955, duration: DUR, ease: "none", immediateRender: false }, 0);   // QA: keep the machine inside x 50-1030
           tl.fromTo(q(".s08-farP"), { y: 0, x: 0 }, { y: -50, x: 16, duration: DUR, ease: "none" }, 0);
           tl.fromTo(q("#s08-rings"), { rotation: -6 }, { rotation: 10, svgOrigin: "540 860", duration: DUR, ease: "none" }, 0);
           tl.fromTo(q(".s08-nearP"), { y: 0, x: 0 }, { y: -160, x: -26, duration: DUR, ease: "none" }, 0);
@@ -274,6 +274,9 @@
             tl.to(sp, { opacity: 0, scale: 0.2, rotation: 90, y: -30, duration: 0.3, ease: "power2.in" }, A + 0.16 + i * 0.01); });
           // settle: gentle breathing after the lock
           tl.to(slots, { y: (i) => (i % 2 ? -4 : 4), duration: DUR - A - 0.2, ease: "sine.inOut" }, A + 0.2);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

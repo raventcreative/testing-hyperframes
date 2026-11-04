@@ -235,8 +235,8 @@
               <ellipse cx="62" cy="96" rx="40" ry="9" fill="rgba(28,51,84,0.22)" />
               <circle cx="57" cy="57" r="48" fill="#8fa9cc" />
               <circle cx="53" cy="52" r="48" fill="#ffffff" stroke="${ring}" stroke-width="2" />
-              <circle cx="53" cy="52" r="36" fill="url(#g)" />
-              <defs><radialGradient id="g" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="${c1}" /><stop offset="1" stop-color="${c2}" /></radialGradient></defs>
+              <circle cx="53" cy="52" r="36" fill="url(#s05-g)" />
+              <defs><radialGradient id="s05-g" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="${c1}" /><stop offset="1" stop-color="${c2}" /></radialGradient></defs>
               <path d="M28 40 A30 30 0 0 1 48 22" stroke="#ffffff" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.6" />
               <circle cx="53" cy="10" r="3" fill="#acc6e7" /></svg>`;
           const tile = (inner) => `<svg viewBox="0 0 150 112" width="150" height="112" style="overflow:visible">
@@ -262,7 +262,7 @@
           };
           const toks = TOKS.map(([html, w, h, src, deg], i) => {
             const el = document.createElement("div");
-            el.className = "s05-tok"; el.innerHTML = html.replace(/id="g"/g, 'id="s05-tg' + i + '"').replace(/url\(#g\)/g, "url(#s05-tg" + i + ")");
+            el.className = "s05-tok"; el.innerHTML = html.replace(/id="s05-g"/g, 'id="s05-tg' + i + '"').replace(/url\(#g\)/g, "url(#s05-tg" + i + ")");
             el.style.width = w + "px"; el.style.height = h + "px";
             tokRoot.appendChild(el);
             return { el, w, h, src: { x: src[0] - w / 2, y: src[1] - h / 2 }, deg };
@@ -300,7 +300,7 @@
           tl.set(sparks.map((s) => s[0]), { opacity: 0 }, 0);
 
           // ---------- camera + planes ----------
-          tl.fromTo(world, { scale: 1 }, { scale: 1.065, duration: DUR, ease: "sine.inOut", immediateRender: false }, 0);
+          tl.fromTo(world, { scale: 0.93 }, { scale: 0.99, duration: DUR, ease: "sine.inOut", immediateRender: false }, 0);   // QA: orbiting tokens stay inside the frame
           tl.fromTo("#s05-far", { y: 0, x: 0 }, { y: -50, x: 14, duration: DUR, ease: "none", immediateRender: false }, 0);
           tl.fromTo("#s05-near", { y: 80 }, { y: -170, duration: DUR, ease: "none", immediateRender: false }, 0);
 
@@ -368,6 +368,9 @@
               { x: dx, y: dy, scale: s, opacity: 0, rotation: 90, duration: 0.7, ease: "power3.out", immediateRender: false }, A + i * 0.01);
           });
           tl.fromTo(q("#s05-cone"), { opacity: 0.85 }, { opacity: 0.3, duration: 0.6, ease: "power2.inOut", immediateRender: false }, A + 0.4);
+          // seek-order safety: a backward seek first rewinds to 0, then plays forward to the target, so every frame
+          // equals a clean forward render (chained fromTo tweens on one property otherwise depend on where the seek came from)
+          (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
 
           window.__timelines[ID] = tl;
         })();

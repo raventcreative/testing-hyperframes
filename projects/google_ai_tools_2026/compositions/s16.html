@@ -2,61 +2,285 @@
 <html>
   <head><meta charset="UTF-8" /></head>
   <body>
-    <!--
-      HOUSE STYLE SCENE TEMPLATE (Ice-Ivory Illustrated Diorama)
-      1. Copy to compositions/sNN.html and replace every "s16" with the scene id (s01, s02, ...).
-      2. Replace the placeholder hero (.s16-hero) with ONE detailed illustrated metaphor (SVG + CSS).
-      3. Keep the shared FX helpers (contact shadow, spotlight cone, far bokeh, apex burst) and retime them
-         to the scene's spoken words (scene-local seconds, 0 = scene start).
-      Rules: production/SCENE_CONTRACT (doc 12). No full-screen opaque background. Text only = spoken words.
-    -->
+    <!-- S16 "Mau link tiga tools yang masih aktif, plus contoh promptnya?"
+         Hero: massive pearlescent resource box. Lid swings open, three embossed porcelain plaques carrying
+         REAL footage crops (Pomelli / Stitch / Antigravity identifiers) fall into its three raised sections,
+         status LEDs turn on at "aktif", an abstract folded prompt sheet rises on "plus", unfolds on "contoh",
+         sparkle APEX on "promptnya?". -->
     <template>
       <style>
         #root { position: absolute; inset: 0; overflow: hidden; }
         .s16-abs { position: absolute; }
-        /* far plane: soft blurred porcelain discs (depth cue) */
-        .s16-far { border-radius: 50%; filter: blur(7px); opacity: 0.65;
+        .s16-svg { position: absolute; left: 0; top: 0; overflow: visible; }
+        #s16-key { left: -200px; top: 300px; width: 1200px; height: 1200px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,0.92), rgba(255,255,255,0) 63%); }
+        #s16-halo { left: 120px; top: 360px; width: 840px; height: 840px; }
+        .s16-far { border-radius: 50%; filter: blur(7px); opacity: 0.7;
           background: radial-gradient(circle at 35% 30%, #ffffff, #e8f0fb 45%, #acc6e7 100%); box-shadow: 0 30px 50px -20px rgba(28,51,84,0.3); }
-        /* key light pool behind the hero */
-        .s16-key { left: -120px; top: 330px; width: 1100px; height: 1100px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0) 64%); }
-        /* spotlight cone (use on the key moment) */
-        .s16-cone { left: 190px; top: 400px; width: 700px; height: 820px; clip-path: polygon(41% 0, 59% 0, 100% 100%, 0 100%);
-          background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.6) 55%, rgba(255,255,255,0.85)); filter: blur(8px);
+        .s16-ftile { width: 120px; height: 150px; border-radius: 20px; filter: blur(3px); opacity: 0.75;
+          background: linear-gradient(165deg, #ffffff, #e3ecf8); border: 2px solid rgba(255,255,255,0.95);
+          box-shadow: 0 24px 40px -18px rgba(28,51,84,0.4); }
+        .s16-ftile i { position: absolute; left: 14px; right: 14px; top: 16px; height: 56px; border-radius: 10px; background: linear-gradient(140deg, #cbdbf4, #8fa9cf); }
+        .s16-ftile b { position: absolute; left: 14px; top: 86px; width: 70px; height: 8px; border-radius: 4px; background: #cbdbf4; }
+        #s16-cone { left: 160px; top: 380px; width: 760px; height: 900px; clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+          background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.55) 55%, rgba(255,255,255,0.8)); filter: blur(10px);
           -webkit-mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 96%); mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 96%); }
-        /* HERO placeholder — replace with the illustrated metaphor */
-        .s16-hero { left: 240px; top: 640px; width: 600px; height: 520px; border-radius: 34px;
-          background: linear-gradient(172deg, #ffffff, #eef3fa); border: 2px solid rgba(41,75,119,0.10);
-          box-shadow: 0 2px 0 rgba(255,255,255,0.9) inset, 0 40px 70px -24px rgba(28,51,84,0.38), 0 10px 22px rgba(28,51,84,0.12); }
-        .s16-hero-inner { position: absolute; left: 60px; top: 70px; right: 60px; height: 260px; border-radius: 22px;
-          background: linear-gradient(135deg, #3a6299, #294b77 55%, #1f3a5f); box-shadow: inset 0 2px 0 rgba(255,255,255,0.25); }
-        /* contact shadow on the ground (light from upper-left -> shadow slightly right/below) */
-        .s16-shadow { left: 270px; top: 1150px; width: 580px; height: 80px; border-radius: 50%;
-          background: radial-gradient(ellipse, rgba(28,51,84,0.45), rgba(28,51,84,0.14) 45%, rgba(28,51,84,0) 72%); }
-        /* apex FX kit */
-        .s16-glow { left: 240px; top: 600px; width: 600px; height: 600px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(255,255,255,1), rgba(255,247,226,0.7) 30%, rgba(242,196,109,0.15) 52%, rgba(242,196,109,0) 70%); }
-        .s16-shock { left: 340px; top: 700px; width: 400px; height: 400px; border-radius: 50%;
+        #s16-shadow-wide { left: 90px; top: 1330px; width: 1000px; height: 170px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(28,51,84,0.22), rgba(28,51,84,0.07) 50%, rgba(28,51,84,0) 72%); }
+        #s16-shadow { left: 150px; top: 1352px; width: 820px; height: 76px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(28,51,84,0.55), rgba(28,51,84,0.16) 45%, rgba(28,51,84,0) 72%); }
+        #s16-hero { left: 100px; top: 600px; width: 880px; height: 880px; }
+        #s16-box { left: 0; top: 0; width: 880px; height: 880px; }
+        /* lid (hinged on the back edge) */
+        #s16-lid { left: 90px; top: -130px; width: 700px; height: 400px; }
+        #s16-lidclip { left: 0; top: 0; width: 700px; height: 400px; border-radius: 26px; overflow: hidden; }
+        #s16-lidglint { left: -220px; top: -80px; width: 120px; height: 600px;
+          background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.85), rgba(255,255,255,0)); }
+        #s16-lglow { left: 150px; top: -260px; width: 580px; height: 580px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,1), rgba(255,247,226,0.75) 30%, rgba(242,196,109,0.16) 52%, rgba(242,196,109,0) 70%); }
+        /* folded prompt sheet */
+        #s16-sheet { left: 260px; top: -160px; width: 360px; height: 270px; filter: drop-shadow(0 22px 22px rgba(28,51,84,0.28)); }
+        .s16-pan { position: absolute; top: 0; width: 120px; height: 270px; overflow: hidden;
+          background: linear-gradient(176deg, #fffefb, #f7f5ef); border: 1px solid rgba(46,46,46,0.08); }
+        #s16-panL { left: 0; border-radius: 14px 0 0 14px; }
+        #s16-panC { left: 120px; }
+        #s16-panR { left: 240px; border-radius: 0 14px 14px 0; }
+        .s16-pshade { position: absolute; inset: 0; }
+        #s16-panL .s16-pshade { background: linear-gradient(90deg, rgba(41,75,119,0) 40%, rgba(41,75,119,0.14)); }
+        #s16-panR .s16-pshade { background: linear-gradient(90deg, rgba(41,75,119,0.12), rgba(41,75,119,0) 60%); }
+        .s16-ln { position: absolute; height: 9px; border-radius: 5px; background: #cfd9e7; }
+        /* plaques */
+        .s16-plq { position: absolute; top: 214px; width: 196px; height: 250px; }
+        .s16-plq-edge { position: absolute; left: 5px; top: -11px; width: 196px; height: 250px; border-radius: 24px;
+          background: linear-gradient(170deg, #e9f0fa, #b9cce6); }
+        .s16-plq-body { position: absolute; inset: 0; border-radius: 24px; overflow: hidden;
+          background: linear-gradient(165deg, #ffffff, #f2f6fb 52%, #dde7f4);
+          border: 2px solid rgba(255,255,255,0.95);
+          box-shadow: inset 0 3px 0 #ffffff, inset -4px -5px 10px rgba(41,75,119,0.16), 0 18px 26px -12px rgba(28,51,84,0.5), 0 4px 8px rgba(28,51,84,0.12); }
+        .s16-win { position: absolute; left: 10px; top: 12px; width: 176px; height: 82px; border-radius: 14px; overflow: hidden;
+          border: 3px solid #ffffff; box-shadow: 0 0 0 1.5px rgba(41,75,119,0.22), inset 0 3px 8px rgba(0,0,0,0.35); }
+        .s16-crop { position: absolute; overflow: hidden; }
+        .s16-crop img { position: absolute; display: block; max-width: none; }
+        .s16-wglass { position: absolute; inset: 0; border-radius: 11px;
+          background: linear-gradient(125deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.0) 34%, rgba(255,255,255,0) 72%, rgba(255,255,255,0.14) 100%);
+          box-shadow: inset 0 2px 6px rgba(0,0,0,0.35), inset 0 -1px 0 rgba(255,255,255,0.4); }
+        .s16-led { position: absolute; left: 16px; top: 106px; width: 16px; height: 16px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 35%, #ffffff, #c9d4e3 70%); box-shadow: inset 0 0 0 1.5px rgba(41,75,119,0.22); }
+        .s16-ledon { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ecfbf5, #9fd8c4 60%, #6fbca3);
+          box-shadow: 0 0 10px rgba(159,216,196,0.95); }
+        .s16-lring { position: absolute; left: 8px; top: 98px; width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(159,216,196,0.95); }
+        .s16-tog { position: absolute; left: 146px; top: 106px; width: 36px; height: 17px; border-radius: 9px; background: #dbe4f0;
+          box-shadow: inset 0 1px 3px rgba(28,51,84,0.25); overflow: hidden; }
+        .s16-togon { position: absolute; inset: 0; background: linear-gradient(90deg, #9fd8c4, #7cc7ad); }
+        .s16-knob { position: absolute; left: 2px; top: 2px; width: 13px; height: 13px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 3px rgba(28,51,84,0.4); }
+        .s16-pb { position: absolute; height: 7px; border-radius: 4px; background: #cbdbf4; }
+        .s16-screw { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffffff, #b9cce6);
+          box-shadow: inset 0 0 0 1.2px rgba(41,75,119,0.32); }
+        .s16-puff { position: absolute; width: 220px; height: 54px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.95);
+          box-shadow: 0 0 18px rgba(172,198,231,0.9); }
+        /* apex fx */
+        #s16-glow { left: 210px; top: 255px; width: 660px; height: 660px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,1), rgba(255,247,226,0.7) 30%, rgba(242,196,109,0.14) 52%, rgba(242,196,109,0) 70%); }
+        #s16-shock { left: 340px; top: 385px; width: 400px; height: 400px; border-radius: 50%;
           border: 5px solid rgba(255,255,255,0.95); box-shadow: 0 0 30px rgba(172,198,231,0.9), inset 0 0 24px rgba(172,198,231,0.7); }
-        .s16-spark { width: 56px; height: 56px; }
-        .s16-check { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-          background: linear-gradient(160deg, #bfe9da, #9fd8c4); border: 3px solid #ffffff; box-shadow: 0 10px 18px -6px rgba(28,51,84,0.4); }
+        .s16-spark { width: 64px; height: 64px; filter: drop-shadow(0 0 6px rgba(172,198,231,0.9)); }
+        .s16-fmote { border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffffff, rgba(203,219,244,0.8) 60%, rgba(172,198,231,0)); filter: blur(2px); }
+        .s16-bokeh { border-radius: 50%; filter: blur(14px); background: radial-gradient(circle at 40% 35%, rgba(255,255,255,0.95), rgba(203,219,244,0.7) 55%, rgba(172,198,231,0)); }
       </style>
       <div id="root" data-composition-id="s16" data-width="1080" data-height="1920">
-        <div class="s16-abs s16-key"></div>
-        <div class="s16-abs s16-far" style="left:70px;top:780px;width:110px;height:110px"></div>
-        <div class="s16-abs s16-far" style="left:905px;top:860px;width:84px;height:84px"></div>
-        <div class="s16-abs s16-far" style="left:920px;top:1230px;width:120px;height:120px"></div>
-        <div class="s16-abs s16-cone"></div>
-        <div class="s16-abs s16-world" style="inset:0">
-          <div class="s16-abs s16-shadow"></div>
-          <div class="s16-abs s16-glow"></div>
-          <div class="s16-abs s16-hero"><div class="s16-hero-inner"></div></div>
-          <div class="s16-abs s16-shock"></div>
-          <div class="s16-abs s16-check" style="left:792px;top:612px">
-            <svg width="34" height="34" viewBox="0 0 34 34"><path d="M7 18 L14 25 L27 10" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="0" height="0" style="position:absolute">
+          <defs>
+            <linearGradient id="s16-gFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" /><stop offset="0.4" stop-color="#f1f5fb" /><stop offset="1" stop-color="#cddbee" /></linearGradient>
+            <linearGradient id="s16-gIri" x1="0" y1="0" x2="1" y2="0.35">
+              <stop offset="0" stop-color="#ffffff" stop-opacity="0" /><stop offset="0.22" stop-color="#d5f0e6" stop-opacity="0.3" />
+              <stop offset="0.42" stop-color="#ffffff" stop-opacity="0" /><stop offset="0.62" stop-color="#cbdbf4" stop-opacity="0.4" />
+              <stop offset="0.8" stop-color="#fbeed2" stop-opacity="0.25" /><stop offset="1" stop-color="#ffffff" stop-opacity="0" /></linearGradient>
+            <linearGradient id="s16-gSide" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cfdcef" /><stop offset="1" stop-color="#8eaad2" /></linearGradient>
+            <linearGradient id="s16-gRim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#e9f0f9" /></linearGradient>
+            <linearGradient id="s16-gIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7f9cc6" /><stop offset="1" stop-color="#b9cce6" /></linearGradient>
+            <linearGradient id="s16-gFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b3c7e3" /><stop offset="1" stop-color="#dce6f4" /></linearGradient>
+            <linearGradient id="s16-gAO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#294b77" stop-opacity="0" /><stop offset="1" stop-color="#294b77" stop-opacity="0.22" /></linearGradient>
+            <linearGradient id="s16-gNavy" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a74ad" /><stop offset="0.55" stop-color="#294b77" /><stop offset="1" stop-color="#1c3354" /></linearGradient>
+            <linearGradient id="s16-gGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.85" /><stop offset="1" stop-color="#cbdbf4" stop-opacity="0.45" /></linearGradient>
+            <linearGradient id="s16-gLid" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#fbfcfe" /><stop offset="1" stop-color="#e2eaf6" /></linearGradient>
+            <linearGradient id="s16-gHinge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" /><stop offset="0.5" stop-color="#b9cce6" /><stop offset="1" stop-color="#7f9fcb" /></linearGradient>
+            <radialGradient id="s16-gScrew" cx="0.35" cy="0.35" r="0.7"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#b9cce6" /></radialGradient>
+            <radialGradient id="s16-gMint" cx="0.35" cy="0.35" r="0.7"><stop offset="0" stop-color="#effcf7" /><stop offset="0.6" stop-color="#9fd8c4" /><stop offset="1" stop-color="#6fbca3" /></radialGradient>
+            <pattern id="s16-grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0 H0 V24" fill="none" stroke="rgba(41,75,119,0.075)" stroke-width="1" /></pattern>
+            <pattern id="s16-gridL" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0 H0 V28" fill="none" stroke="rgba(41,75,119,0.07)" stroke-width="1" /></pattern>
+          </defs>
+        </svg>
+
+        <div id="s16-key" class="s16-abs"></div>
+        <!-- FAR PLANE -->
+        <div id="s16-far" class="s16-abs" style="inset:0">
+          <div id="s16-halo" class="s16-abs">
+            <svg class="s16-svg" width="840" height="840" viewBox="0 0 840 840">
+              <circle cx="420" cy="420" r="410" fill="none" stroke="rgba(41,75,119,0.08)" stroke-width="2" />
+              <circle cx="420" cy="420" r="372" fill="none" stroke="rgba(41,75,119,0.11)" stroke-width="1.5" stroke-dasharray="3 10" />
+              <circle cx="420" cy="420" r="318" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.9)" stroke-width="3" />
+              <path d="M420 20 V820 M20 420 H820" stroke="rgba(41,75,119,0.05)" stroke-width="1.5" />
+              <g id="s16-hticks"></g>
+            </svg>
           </div>
+          <div class="s16-abs s16-far" style="left:60px;top:760px;width:110px;height:110px"></div>
+          <div class="s16-abs s16-far" style="left:915px;top:690px;width:84px;height:84px"></div>
+          <div class="s16-abs s16-far" style="left:930px;top:1240px;width:120px;height:120px"></div>
+          <div class="s16-abs s16-far" style="left:40px;top:1300px;width:70px;height:70px"></div>
+          <div class="s16-abs s16-ftile" style="left:30px;top:470px"><i></i><b></b></div>
+          <div class="s16-abs s16-ftile" style="left:935px;top:930px"><i></i><b></b></div>
         </div>
+        <div id="s16-cone" class="s16-abs"></div>
+
+        <!-- HERO PLANE -->
+        <div id="s16-world" class="s16-abs" style="inset:0">
+          <div id="s16-shadow-wide" class="s16-abs"></div>
+          <div id="s16-shadow" class="s16-abs"></div>
+          <div id="s16-hero" class="s16-abs">
+            <div id="s16-box" class="s16-abs">
+              <!-- LID -->
+              <div id="s16-lid" class="s16-abs">
+                <svg class="s16-svg" width="700" height="400" viewBox="0 0 700 400">
+                  <polygon points="0,6 700,6 714,-30 16,-30" fill="#e6eef9" />
+                  <polygon points="16,-30 714,-30 714,-26 16,-26" fill="#ffffff" />
+                  <polygon points="700,6 714,-30 714,368 700,400" fill="url(#s16-gSide)" />
+                  <rect x="0" y="0" width="700" height="400" rx="26" fill="url(#s16-gLid)" stroke="rgba(41,75,119,0.12)" stroke-width="2" />
+                  <rect x="3" y="3" width="694" height="394" rx="24" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.9" />
+                  <rect x="28" y="28" width="644" height="320" rx="18" fill="url(#s16-gridL)" stroke="rgba(41,75,119,0.10)" stroke-width="1.5" />
+                  <rect x="70" y="58" width="560" height="236" rx="18" fill="url(#s16-gGlass)" stroke="#ffffff" stroke-width="2.5" />
+                  <g fill="none" stroke="rgba(41,75,119,0.13)" stroke-width="1.5">
+                    <circle cx="350" cy="176" r="96" /><circle cx="350" cy="176" r="64" stroke-dasharray="4 7" />
+                    <path d="M350 64 V288 M120 176 H580" />
+                    <path d="M110 80 h40 M110 80 v30 M590 80 h-40 M590 80 v30 M110 272 h40 M110 272 v-30 M590 272 h-40 M590 272 v-30" stroke="rgba(41,75,119,0.25)" stroke-width="3" stroke-linecap="round" />
+                  </g>
+                  <g id="s16-lticks"></g>
+                  <rect x="270" y="318" width="160" height="14" rx="7" fill="url(#s16-gNavy)" />
+                  <rect x="276" y="320" width="148" height="3" rx="1.5" fill="rgba(255,255,255,0.45)" />
+                  <circle cx="22" cy="22" r="7" fill="url(#s16-gScrew)" stroke="rgba(41,75,119,0.3)" />
+                  <circle cx="678" cy="22" r="7" fill="url(#s16-gScrew)" stroke="rgba(41,75,119,0.3)" />
+                  <circle cx="22" cy="376" r="7" fill="url(#s16-gScrew)" stroke="rgba(41,75,119,0.3)" />
+                  <circle cx="678" cy="376" r="7" fill="url(#s16-gScrew)" stroke="rgba(41,75,119,0.3)" />
+                </svg>
+                <div id="s16-lidclip" class="s16-abs"><div id="s16-lidglint" class="s16-abs"></div></div>
+              </div>
+
+              <!-- BACK OF BOX: rim, interior, dividers, hinges -->
+              <svg class="s16-svg" width="880" height="880" viewBox="0 0 880 880">
+                <polygon points="90,270 790,270 762,286 112,286" fill="url(#s16-gRim)" />
+                <polygon points="66,404 716,404 762,286 112,286" fill="url(#s16-gFloor)" />
+                <rect x="112" y="286" width="650" height="64" fill="url(#s16-gIn)" />
+                <rect x="112" y="286" width="650" height="64" fill="url(#s16-grid)" />
+                <polygon points="66,404 112,286 112,350 66,468" fill="#bccfe8" />
+                <polygon points="112,350 762,350 716,468 66,468" fill="url(#s16-gFloor)" opacity="0.9" />
+                <!-- three raised sections (pedestals) -->
+                <g id="s16-peds">
+                  <polygon points="96,392 268,392 296,350 124,350" fill="#f4f8fd" stroke="#ffffff" stroke-width="2" />
+                  <polygon points="313,392 485,392 513,350 341,350" fill="#f4f8fd" stroke="#ffffff" stroke-width="2" />
+                  <polygon points="530,392 702,392 730,350 558,350" fill="#f4f8fd" stroke="#ffffff" stroke-width="2" />
+                </g>
+                <!-- translucent ice-glass dividers -->
+                <polygon points="283,404 329,286 329,336 283,454" fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.95)" stroke-width="2" />
+                <polygon points="500,404 546,286 546,336 500,454" fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.95)" stroke-width="2" />
+                <!-- hinges on the back edge -->
+                <rect x="170" y="258" width="86" height="22" rx="11" fill="url(#s16-gHinge)" stroke="rgba(41,75,119,0.25)" />
+                <rect x="397" y="258" width="86" height="22" rx="11" fill="url(#s16-gHinge)" stroke="rgba(41,75,119,0.25)" />
+                <rect x="624" y="258" width="86" height="22" rx="11" fill="url(#s16-gHinge)" stroke="rgba(41,75,119,0.25)" />
+              </svg>
+            </div>
+
+            <div id="s16-lglow" class="s16-abs"></div>
+
+            <!-- PROMPT SHEET (abstract lines only) -->
+            <div id="s16-sheet" class="s16-abs">
+              <div id="s16-panL" class="s16-pan">
+                <div class="s16-ln" style="left:16px;top:28px;width:70px"></div>
+                <div class="s16-ln" style="left:16px;top:48px;width:88px"></div>
+                <div class="s16-ln" style="left:16px;top:68px;width:58px"></div>
+                <div class="s16-abs" style="left:16px;top:96px;width:88px;height:64px;border-radius:10px;background:linear-gradient(140deg,#e8f0fb,#cbdbf4);border:1.5px solid #ffffff"></div>
+                <div class="s16-ln" style="left:16px;top:176px;width:80px"></div>
+                <div class="s16-ln" style="left:16px;top:196px;width:62px"></div>
+                <div class="s16-ln" style="left:16px;top:216px;width:84px"></div>
+                <div class="s16-pshade"></div>
+              </div>
+              <div id="s16-panC" class="s16-pan">
+                <div class="s16-abs" style="left:38px;top:18px;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4a74ad,#1c3354);box-shadow:0 6px 12px -4px rgba(28,51,84,0.5)">
+                  <svg width="44" height="44" viewBox="0 0 44 44"><path d="M22 9 C23 18 26 21 35 22 C26 23 23 26 22 35 C21 26 18 23 9 22 C18 21 21 18 22 9Z" fill="#ffffff" /></svg>
+                </div>
+                <div class="s16-ln" style="left:14px;top:80px;width:92px;background:#294b77;opacity:0.85"></div>
+                <div class="s16-ln" style="left:14px;top:100px;width:78px"></div>
+                <div class="s16-ln" style="left:14px;top:120px;width:92px"></div>
+                <div class="s16-ln" style="left:14px;top:140px;width:66px"></div>
+                <div class="s16-ln" style="left:14px;top:160px;width:86px"></div>
+                <div class="s16-ln" style="left:14px;top:180px;width:52px"></div>
+                <div class="s16-abs" style="left:14px;top:208px;width:92px;height:34px;border-radius:17px;background:linear-gradient(90deg,#e8f0fb,#cbdbf4);border:1.5px solid #ffffff"></div>
+              </div>
+              <div id="s16-panR" class="s16-pan">
+                <div class="s16-ln" style="left:16px;top:28px;width:84px"></div>
+                <div class="s16-ln" style="left:16px;top:48px;width:60px"></div>
+                <div class="s16-abs" style="left:16px;top:74px;width:12px;height:12px;border-radius:50%;background:#acc6e7"></div>
+                <div class="s16-ln" style="left:36px;top:76px;width:62px"></div>
+                <div class="s16-abs" style="left:16px;top:96px;width:12px;height:12px;border-radius:50%;background:#acc6e7"></div>
+                <div class="s16-ln" style="left:36px;top:98px;width:50px"></div>
+                <div class="s16-abs" style="left:16px;top:118px;width:12px;height:12px;border-radius:50%;background:#acc6e7"></div>
+                <div class="s16-ln" style="left:36px;top:120px;width:68px"></div>
+                <div class="s16-ln" style="left:16px;top:150px;width:88px"></div>
+                <div class="s16-ln" style="left:16px;top:170px;width:70px"></div>
+                <div class="s16-ln" style="left:16px;top:190px;width:82px"></div>
+                <div class="s16-abs" style="left:66px;top:220px;width:38px;height:24px;border-radius:12px;background:linear-gradient(135deg,#3a6299,#1f3a5f)"></div>
+                <div class="s16-pshade"></div>
+              </div>
+            </div>
+
+            <!-- PLAQUES (real footage identifiers) -->
+            <div id="s16-plaques"></div>
+
+            <!-- FRONT OF BOX -->
+            <svg id="s16-front" class="s16-svg" width="880" height="880" viewBox="0 0 880 880">
+              <polygon points="40,420 90,270 112,286 66,404" fill="#f4f8fd" />
+              <polygon points="740,420 790,270 762,286 716,404" fill="#e3ecf7" />
+              <polygon points="40,420 740,420 716,404 66,404" fill="url(#s16-gRim)" />
+              <path d="M66 404 H716" stroke="rgba(41,75,119,0.18)" stroke-width="1.5" />
+              <!-- right side face -->
+              <polygon points="740,420 790,270 790,622 740,778" fill="url(#s16-gSide)" />
+              <g stroke="rgba(255,255,255,0.55)" stroke-width="2"><path d="M748 470 L782 368" /><path d="M748 560 L782 458" /><path d="M748 650 L782 548" /></g>
+              <path d="M741 422 L741 776" stroke="#ffffff" stroke-width="2.5" opacity="0.9" />
+              <!-- front face -->
+              <path d="M40 420 H740 V750 Q740 780 710 780 H70 Q40 780 40 750 Z" fill="url(#s16-gFront)" />
+              <path d="M40 420 H740 V750 Q740 780 710 780 H70 Q40 780 40 750 Z" fill="url(#s16-gIri)" />
+              <path d="M40 420 H740 V750 Q740 780 710 780 H70 Q40 780 40 750 Z" fill="url(#s16-gAO)" />
+              <path d="M42 423 H738" stroke="#ffffff" stroke-width="3.5" />
+              <rect x="70" y="452" width="640" height="298" rx="20" fill="url(#s16-grid)" stroke="rgba(41,75,119,0.10)" stroke-width="1.5" />
+              <rect x="72" y="454" width="636" height="294" rx="18" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.8" />
+              <!-- clasp -->
+              <rect x="330" y="410" width="120" height="70" rx="18" fill="url(#s16-gNavy)" />
+              <rect x="338" y="414" width="104" height="4" rx="2" fill="rgba(255,255,255,0.5)" />
+              <circle cx="390" cy="448" r="12" fill="#e8f0fb" stroke="#ffffff" stroke-width="2" />
+              <rect x="387" y="448" width="6" height="14" rx="3" fill="#294b77" />
+              <!-- frosted glass status strip with 3 wells -->
+              <rect x="110" y="540" width="560" height="74" rx="37" fill="url(#s16-gGlass)" stroke="#ffffff" stroke-width="2.5" />
+              <rect x="110" y="540" width="560" height="74" rx="37" fill="none" stroke="rgba(41,75,119,0.12)" stroke-width="1" />
+              <g id="s16-wells"></g>
+              <!-- engraved grooves -->
+              <path d="M84 650 H696" stroke="rgba(41,75,119,0.14)" stroke-width="2" /><path d="M84 653 H696" stroke="#ffffff" stroke-width="1.5" />
+              <path d="M84 668 H696" stroke="rgba(41,75,119,0.10)" stroke-width="1.5" stroke-dasharray="2 8" />
+              <rect x="84" y="690" width="612" height="40" rx="20" fill="url(#s16-gNavy)" />
+              <rect x="96" y="693" width="588" height="4" rx="2" fill="rgba(255,255,255,0.4)" />
+              <g id="s16-bticks"></g>
+              <circle cx="66" cy="446" r="7" fill="url(#s16-gScrew)" stroke="rgba(41,75,119,0.3)" />
+              <circle cx="714" cy="446" r="7" fill="url(#s16-gScrew)" stroke="rgba(41,75,119,0.3)" />
+              <circle cx="66" cy="754" r="7" fill="url(#s16-gScrew)" stroke="rgba(41,75,119,0.3)" />
+              <circle cx="714" cy="754" r="7" fill="url(#s16-gScrew)" stroke="rgba(41,75,119,0.3)" />
+              <!-- feet -->
+              <rect x="92" y="774" width="96" height="16" rx="8" fill="#a9bfdf" />
+              <rect x="592" y="774" width="96" height="16" rx="8" fill="#a9bfdf" />
+            </svg>
+          </div>
+          <div id="s16-glow" class="s16-abs"></div>
+          <div id="s16-shock" class="s16-abs"></div>
+          <div id="s16-sparks"></div>
+        </div>
+        <!-- NEAR PLANE -->
+        <div id="s16-fg" class="s16-abs" style="inset:0"></div>
       </div>
       <script>
         (function () {
@@ -64,45 +288,174 @@
           const R = document.querySelector('[data-composition-id="' + ID + '"]');
           const q = (s) => R.querySelector(s), qa = (s) => R.querySelectorAll(s);
           const tl = gsap.timeline({ paused: true });
-          const DUR = 3.0333;                 // = host slot data-duration
-          const T = { apex: 1.2 };         // scene-local word times (key action lands on the word)
-
-          // seeded PRNG for sparkle placement (never Math.random)
-          let seed = 7;
+          const NS = "http://www.w3.org/2000/svg";
+          const DUR = 3.0333;
+          // scene-local word starts (verified): Mau .13 link .39 tiga .55 tools .82 yang .97 masih 1.24 aktif 1.52 plus 1.86 contoh 2.10 promptnya 2.42
+          const T = { tiga: 0.55, tools: 0.82, third: 1.10, aktif: 1.52, plus: 1.86, contoh: 2.10, apex: 2.42 };
+          let seed = 1616;
           const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-          const STAR = '<svg viewBox="0 0 40 40" width="100%" height="100%"><path d="M20 2 C21 14 26 19 38 20 C26 21 21 26 20 38 C19 26 14 21 2 20 C14 19 19 14 20 2Z" fill="#ffffff" stroke="#acc6e7" stroke-width="1.5"/></svg>';
-          const sparks = [];
-          for (let i = 0; i < 10; i++) {
-            const sp = document.createElement("div");
-            sp.className = "s16-abs s16-spark"; sp.innerHTML = STAR;
-            sp.style.left = 515 + "px"; sp.style.top = 875 + "px";
-            q(".s16-world").appendChild(sp);
-            const a = (i / 10) * Math.PI * 2 + rnd() * 0.4, r = 220 + rnd() * 160;
-            sparks.push([sp, Math.cos(a) * r, Math.sin(a) * r]);
-          }
+          const mk = (cls, parent, css, html) => { const e = document.createElement("div"); e.className = cls; if (css) e.style.cssText = css; if (html) e.innerHTML = html; parent.appendChild(e); return e; };
+          const line = (g, x1, y1, x2, y2, stroke, w) => { const l = document.createElementNS(NS, "line"); l.setAttribute("x1", x1.toFixed(1)); l.setAttribute("y1", y1.toFixed(1)); l.setAttribute("x2", x2.toFixed(1)); l.setAttribute("y2", y2.toFixed(1)); l.setAttribute("stroke", stroke); l.setAttribute("stroke-width", w); g.appendChild(l); return l; };
 
-          // initial hidden states (set FIRST; later fromTo tweens use immediateRender:false)
-          tl.set([q(".s16-shock"), q(".s16-glow"), q(".s16-cone")], { opacity: 0 }, 0);
-          tl.set(q(".s16-check"), { scale: 0 }, 0);
-          tl.set(sparks.map((s) => s[0]), { opacity: 0 }, 0);
+          // halo ticks (far plane ornament)
+          const ht = q("#s16-hticks");
+          for (let i = 0; i < 72; i++) { const a = (i / 72) * Math.PI * 2, r2 = i % 6 === 0 ? 384 : 394; line(ht, 420 + Math.cos(a) * 404, 420 + Math.sin(a) * 404, 420 + Math.cos(a) * r2, 420 + Math.sin(a) * r2, "rgba(41,75,119,0.15)", i % 6 === 0 ? 3 : 1.5); }
+          // lid ornament ticks
+          const lt = q("#s16-lticks");
+          for (let i = 0; i < 48; i++) { const a = (i / 48) * Math.PI * 2, r1 = 108, r2 = i % 4 === 0 ? 120 : 114; line(lt, 350 + Math.cos(a) * r1, 176 + Math.sin(a) * r1, 350 + Math.cos(a) * r2, 176 + Math.sin(a) * r2, "rgba(41,75,119,0.22)", i % 4 === 0 ? 2.5 : 1.2); }
 
-          // frame 0 is never empty: hero already rising, slow push-in all scene
-          tl.fromTo(q(".s16-world"), { scale: 1 }, { scale: 1.07, duration: DUR, ease: "none" }, 0);
-          tl.fromTo(q(".s16-hero"), { y: 60, rotation: -2 }, { y: 0, rotation: 0, duration: 0.5, ease: "power3.out" }, 0);
-          tl.fromTo(q(".s16-shadow"), { scaleX: 0.8, opacity: 0.5 }, { scaleX: 1, opacity: 1, duration: 0.5, ease: "power3.out" }, 0);
-          tl.fromTo(qa(".s16-far"), { y: 0 }, { y: -40, duration: DUR, ease: "none" }, 0);   // far plane parallax (slower)
-          tl.fromTo(q(".s16-cone"), { opacity: 0 }, { opacity: 0.9, duration: 0.4, ease: "power2.out", immediateRender: false }, T.apex - 0.3);
-
-          // APEX on the spoken word: glow + shockwave + sparkles + scale punch + mint check
-          tl.fromTo(q(".s16-glow"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1.1, duration: 0.25, ease: "power2.out", immediateRender: false }, T.apex - 0.03);
-          tl.to(q(".s16-glow"), { opacity: 0.35, duration: 0.8, ease: "power2.out" }, T.apex + 0.25);
-          tl.fromTo(q(".s16-shock"), { opacity: 0.95, scale: 0.4 }, { opacity: 0, scale: 1.8, duration: 0.6, ease: "power2.out", immediateRender: false }, T.apex);
-          tl.fromTo(q(".s16-hero"), { scale: 1 }, { scale: 1.045, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, T.apex);
-          tl.fromTo(q(".s16-check"), { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.4, ease: "back.out(1.8)", immediateRender: false }, T.apex + 0.05);
-          sparks.forEach(([sp, dx, dy], i) => {
-            tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 },
-              { x: dx, y: dy, scale: 0.6 + (i % 3) * 0.25, opacity: 0, rotation: 90, duration: 0.7, ease: "power3.out", immediateRender: false }, T.apex + i * 0.012);
+          // front status wells (3) + tick marks
+          const wells = q("#s16-wells"), fLeds = [];
+          [175, 390, 605].forEach((cx) => {
+            const c = document.createElementNS(NS, "circle"); c.setAttribute("cx", cx); c.setAttribute("cy", 577); c.setAttribute("r", 15); c.setAttribute("fill", "#dbe4f0"); c.setAttribute("stroke", "rgba(41,75,119,0.22)"); c.setAttribute("stroke-width", "1.5"); wells.appendChild(c);
+            const on = document.createElementNS(NS, "circle"); on.setAttribute("cx", cx); on.setAttribute("cy", 577); on.setAttribute("r", 10); on.setAttribute("fill", "url(#s16-gMint)"); wells.appendChild(on); fLeds.push(on);
+            for (let k = -2; k <= 2; k++) if (k) line(wells, cx + k * 14 + (k > 0 ? 18 : -18), 600, cx + k * 14 + (k > 0 ? 18 : -18), 606, "rgba(41,75,119,0.25)", 1.5);
+            line(wells, cx + 26, 570, cx + 80, 570, "rgba(41,75,119,0.16)", 5).setAttribute("stroke-linecap", "round");
+            line(wells, cx + 26, 584, cx + 62, 584, "rgba(41,75,119,0.10)", 5).setAttribute("stroke-linecap", "round");
           });
+
+          const bt = q("#s16-bticks");
+          for (let i = 0; i < 40; i++) { const x = 130 + i * 13.3; line(bt, x, 712, x, i % 5 === 0 ? 722 : 718, "rgba(203,219,244,0.7)", i % 5 === 0 ? 2 : 1.2); }
+          [110, 670].forEach((cx) => { const c = document.createElementNS(NS, "circle"); c.setAttribute("cx", cx); c.setAttribute("cy", 710); c.setAttribute("r", 6); c.setAttribute("fill", "url(#s16-gScrew)"); bt.appendChild(c); });
+
+          // ---------- PLAQUES with REAL footage crops ----------
+          // crop(src, srcW, cropX, cropY, cropW, cropH, bg) -> fits crop into the 170x76 inner window, centred
+          const WIN_W = 170, WIN_H = 76;
+          const P = [
+            { src: "assets/footage/pom_title.jpg", sw: 1560, cx: 400, cy: 480, cw: 770, ch: 330, bg: "#161c00", x: 102, r0: -14, rf: -4, y0: -300 },   // 'Pomelli' wordmark
+            { src: "assets/footage/stitch_prompt.jpg", sw: 1419, cx: 375, cy: 22, cw: 850, ch: 340, bg: "#000000", x: 319, r0: 10, rf: 0, y0: -360 }, // 'Design at the speed of AI'
+            { src: "assets/footage/anti_wordmark.jpg", sw: 1920, cx: 140, cy: 256, cw: 1630, ch: 356, bg: "#ffffff", x: 536, r0: 16, rf: 4, y0: -330 }, // 'Antigravity' wordmark
+          ];
+          const pw = q("#s16-plaques");
+          const plaques = P.map((p, i) => {
+            const el = mk("s16-plq", pw, `left:${p.x}px`);
+            mk("s16-plq-edge", el);
+            const body = mk("s16-plq-body", el);
+            const win = mk("s16-win", body, `background:${p.bg}`);
+            const s = Math.min(WIN_W / p.cw, WIN_H / p.ch);
+            const w = p.cw * s, h = p.ch * s;
+            const crop = mk("s16-crop", win, `left:${((WIN_W - w) / 2).toFixed(2)}px;top:${((WIN_H - h) / 2).toFixed(2)}px;width:${w.toFixed(2)}px;height:${h.toFixed(2)}px`);
+            const img = document.createElement("img");
+            img.src = p.src; img.alt = "";
+            img.style.cssText = `width:${(p.sw * s).toFixed(2)}px;left:${(-p.cx * s).toFixed(2)}px;top:${(-p.cy * s).toFixed(2)}px`;
+            crop.appendChild(img);
+            mk("s16-wglass", win);
+            const led = mk("s16-led", body); const ledOn = mk("s16-ledon", led);
+            const ring = mk("s16-abs s16-lring", body);
+            const tog = mk("s16-tog", body); const togOn = mk("s16-togon", tog); const knob = mk("s16-knob", tog);
+            mk("s16-pb", body, "left:42px;top:104px;width:88px");
+            mk("s16-pb", body, "left:42px;top:118px;width:58px;background:#dfe7f2");
+            mk("s16-pb", body, "left:16px;top:142px;width:164px;height:5px;background:#e3eaf4");
+            mk("s16-pb", body, "left:16px;top:156px;width:120px;height:5px;background:#e3eaf4");
+            mk("s16-screw", body, "left:93px;top:170px");
+            const puff = mk("s16-abs s16-puff", q("#s16-hero"), `left:${p.x + 98 - 110}px;top:${376}px`);
+            return { el, crop, ledOn, ring, togOn, knob, puff, p };
+          });
+
+          // sparkles (seeded), placed around the prompt sheet (screen ~540,585)
+          const STAR = (fill) => `<svg viewBox="0 0 40 40" width="100%" height="100%"><path d="M20 2 C21 14 26 19 38 20 C26 21 21 26 20 38 C19 26 14 21 2 20 C14 19 19 14 20 2Z" fill="${fill}" stroke="rgba(41,75,119,0.35)" stroke-width="1.5"/></svg>`;
+          const sparks = [];
+          for (let i = 0; i < 14; i++) {
+            const sp = mk("s16-abs s16-spark", q("#s16-sparks"), "left:508px;top:553px", STAR(i % 5 === 2 ? "#f2c46d" : "#ffffff"));
+            const a = (i / 14) * Math.PI * 2 + rnd() * 0.35;
+            const rx = 250 + rnd() * 120, ry = 150 + rnd() * 70;
+            let dy = Math.sin(a) * ry; if (dy < -170) dy = -170;
+            sparks.push([sp, Math.cos(a) * rx, dy, 0.7 + rnd() * 0.7]);
+          }
+          // near-plane motes and bokeh
+          const fg = q("#s16-fg"), motes = [];
+          for (let i = 0; i < 9; i++) {
+            const s = 10 + rnd() * 20;
+            motes.push(mk("s16-abs s16-fmote", fg, `left:${(60 + rnd() * 960).toFixed(0)}px;top:${(470 + rnd() * 1000).toFixed(0)}px;width:${s.toFixed(0)}px;height:${s.toFixed(0)}px;opacity:${(0.45 + rnd() * 0.4).toFixed(2)}`));
+          }
+          const bok = [mk("s16-abs s16-bokeh", fg, "left:-70px;top:1420px;width:230px;height:230px;opacity:0.8"), mk("s16-abs s16-bokeh", fg, "left:900px;top:430px;width:170px;height:170px;opacity:0.65")];
+
+          // ---------- initial states (set FIRST) ----------
+          const LID = q("#s16-lid"), SH = q("#s16-sheet");
+          tl.set(q("#s16-world"), { transformOrigin: "540px 960px" }, 0);
+          tl.set(LID, { transformOrigin: "50% 100%", transformPerspective: 1500 }, 0);
+          tl.set(q("#s16-box"), { transformOrigin: "50% 89%" }, 0);
+          tl.set(q("#s16-hero"), { transformOrigin: "50% 90%" }, 0);
+          tl.set(SH, { opacity: 0, transformOrigin: "50% 60%" }, 0);
+          tl.set(q("#s16-panL"), { transformOrigin: "100% 50%", transformPerspective: 900 }, 0);
+          tl.set(q("#s16-panR"), { transformOrigin: "0% 50%", transformPerspective: 900 }, 0);
+          tl.set(q("#s16-lidglint"), { rotation: 18, x: 0 }, 0);
+          tl.set([q("#s16-glow"), q("#s16-shock"), q("#s16-cone"), q("#s16-lglow")], { opacity: 0 }, 0);
+          tl.set(fLeds, { opacity: 0 }, 0);
+          plaques.forEach((pl) => {
+            tl.set(pl.el, { transformOrigin: "50% 100%" }, 0);
+            tl.set([pl.ledOn, pl.togOn], { opacity: 0 }, 0);
+            tl.set(pl.ring, { opacity: 0, scale: 0.5 }, 0);
+            tl.set(pl.puff, { opacity: 0, scale: 0.4 }, 0);
+          });
+          tl.set(sparks.map((s) => s[0]), { opacity: 0, scale: 0 }, 0);
+
+          // ---------- camera + ambient (continuous) ----------
+          tl.fromTo(q("#s16-world"), { scale: 1 }, { scale: 1.065, duration: DUR, ease: "none" }, 0);
+          tl.fromTo(q("#s16-far"), { y: 0 }, { y: -36, duration: DUR, ease: "none" }, 0);
+          tl.fromTo(q("#s16-halo"), { rotation: -8, scale: 1.12 }, { rotation: 10, scale: 1, duration: DUR, ease: "power2.out" }, 0);
+          tl.fromTo(q("#s16-key"), { x: -30 }, { x: 30, duration: DUR, ease: "sine.out" }, 0);
+          motes.forEach((m, i) => tl.fromTo(m, { x: 0, y: 0 }, { x: i % 2 ? 26 : -20, y: -(60 + i * 12), duration: DUR, ease: "none" }, 0));
+          bok.forEach((b, i) => tl.fromTo(b, { x: 0, y: 0 }, { x: i ? -40 : 50, y: i ? 30 : -60, duration: DUR, ease: "none" }, 0));
+          plaques.forEach((pl, i) => tl.fromTo(pl.crop, { scale: 1.0 }, { scale: 1.07, duration: DUR, ease: "none" }, 0));
+
+          // ---------- entry: box rises, lid swings open (frame 0 already moving) ----------
+          tl.fromTo(q("#s16-hero"), { y: -60, rotation: -1.5 }, { y: 0, rotation: 0, duration: 0.5, ease: "power2.out" }, 0);
+          tl.fromTo(q("#s16-shadow"), { scaleX: 0.8, opacity: 0.45 }, { scaleX: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, 0);
+          tl.fromTo(q("#s16-shadow-wide"), { scaleX: 0.85, opacity: 0.5 }, { scaleX: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, 0);
+          tl.fromTo(LID, { rotationX: -66 }, { rotationX: 7, duration: 0.55, ease: "back.out(1.5)" }, 0);
+          tl.to(q("#s16-lidglint"), { x: 1100, duration: 0.7, ease: "power2.inOut" }, 0.35);
+
+          // ---------- plaques fall into the three raised sections ----------
+          const LAND = [T.tiga, T.tools, T.third];
+          plaques.forEach((pl, i) => {
+            const L = LAND[i];
+            tl.fromTo(pl.el, { y: pl.p.y0, rotation: pl.p.r0 }, { y: 0, rotation: pl.p.rf, duration: L, ease: "power2.in", immediateRender: false }, 0);
+            tl.to(pl.el, { y: -14, duration: 0.09, ease: "power2.out" }, L);
+            tl.to(pl.el, { y: 0, duration: 0.14, ease: "power2.in" }, L + 0.09);
+            tl.fromTo(pl.puff, { opacity: 0.9, scale: 0.4 }, { opacity: 0, scale: 1.35, duration: 0.4, ease: "power2.out", immediateRender: false }, L);
+            tl.fromTo(q("#s16-box"), { scaleY: 1, scaleX: 1 }, { scaleY: 0.985, scaleX: 1.006, duration: 0.06, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, L);
+          });
+
+          // ---------- "aktif" 1.52: status LEDs + toggles switch on ----------
+          plaques.forEach((pl, i) => {
+            const t0 = T.aktif + i * 0.05;
+            tl.fromTo(pl.ledOn, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "power2.out", immediateRender: false }, t0);
+            tl.fromTo(pl.ring, { opacity: 1, scale: 0.5 }, { opacity: 0, scale: 1.8, duration: 0.45, ease: "power2.out", immediateRender: false }, t0);
+            tl.fromTo(pl.togOn, { opacity: 0 }, { opacity: 1, duration: 0.18, ease: "power2.out", immediateRender: false }, t0);
+            tl.fromTo(pl.knob, { x: 0 }, { x: 19, duration: 0.22, ease: "back.out(2)", immediateRender: false }, t0);
+            tl.to(pl.el, { y: -10, duration: 0.14, ease: "power2.out" }, t0);
+            tl.to(pl.el, { y: 0, duration: 0.22, ease: "power2.inOut" }, t0 + 0.14);
+            tl.fromTo(fLeds[i], { opacity: 0 }, { opacity: 1, duration: 0.14, ease: "power2.out", immediateRender: false }, t0);
+          });
+
+          // ---------- "plus" 1.86: prompt sheet rises out of the box (folded) ----------
+          tl.set(SH, { opacity: 1 }, T.plus - 0.04);
+          tl.fromTo(SH, { y: 300, scale: 0.6, rotation: -3 }, { y: 0, scale: 1, rotation: 0, duration: 0.34, ease: "power3.out", immediateRender: false }, T.plus - 0.04);
+          tl.fromTo(q("#s16-panL"), { rotationY: -86 }, { rotationY: -82, duration: 0.2, ease: "none", immediateRender: false }, T.plus - 0.04);
+          tl.fromTo(q("#s16-panR"), { rotationY: 86 }, { rotationY: 82, duration: 0.2, ease: "none", immediateRender: false }, T.plus - 0.04);
+          tl.fromTo(q("#s16-cone"), { opacity: 0 }, { opacity: 0.85, duration: 0.4, ease: "power2.out", immediateRender: false }, T.plus);
+
+          // ---------- "contoh" 2.10: sheet unfolds ----------
+          tl.to(q("#s16-panL"), { rotationY: 10, duration: 0.3, ease: "back.out(1.4)" }, T.contoh - 0.04);
+          tl.to(q("#s16-panR"), { rotationY: -10, duration: 0.3, ease: "back.out(1.4)" }, T.contoh - 0.02);
+
+          // ---------- APEX "promptnya?" 2.42 ----------
+          const A = T.apex;
+          tl.fromTo(q("#s16-lglow"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1.08, duration: 0.25, ease: "power2.out", immediateRender: false }, A - 0.03);
+          tl.to(q("#s16-lglow"), { opacity: 0.45, duration: 0.5, ease: "power2.out" }, A + 0.24);
+          tl.fromTo(q("#s16-glow"), { opacity: 0, scale: 0.6 }, { opacity: 0.55, scale: 1.1, duration: 0.25, ease: "power2.out", immediateRender: false }, A - 0.03);
+          tl.to(q("#s16-glow"), { opacity: 0.12, duration: 0.5, ease: "power2.out" }, A + 0.24);
+          tl.fromTo(q("#s16-shock"), { opacity: 0.95, scale: 0.4 }, { opacity: 0, scale: 1.8, duration: 0.58, ease: "power2.out", immediateRender: false }, A);
+          tl.fromTo(SH, { scale: 1 }, { scale: 1.06, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, A);
+          tl.fromTo(q("#s16-box"), { scale: 1 }, { scale: 1.03, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, A + 0.02);
+          sparks.forEach(([sp, dx, dy, s], i) => {
+            tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 },
+              { x: dx, y: dy, scale: s, opacity: 0, rotation: 90, duration: 0.58, ease: "power3.out", immediateRender: false }, A + i * 0.008);
+          });
+          tl.fromTo(q("#s16-lidglint"), { x: 0 }, { x: 1100, duration: 0.5, ease: "power2.inOut", immediateRender: false }, A - 0.05);
+          // settle + gentle float
+          tl.to(SH, { y: -8, duration: DUR - A - 0.26, ease: "sine.inOut" }, A + 0.26);
 
           window.__timelines[ID] = tl; // register LAST
         })();

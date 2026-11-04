@@ -2,60 +2,323 @@
 <html>
   <head><meta charset="UTF-8" /></head>
   <body>
-    <!--
-      HOUSE STYLE SCENE TEMPLATE (Ice-Ivory Illustrated Diorama)
-      1. Copy to compositions/sNN.html and replace every "s13" with the scene id (s01, s02, ...).
-      2. Replace the placeholder hero (.s13-hero) with ONE detailed illustrated metaphor (SVG + CSS).
-      3. Keep the shared FX helpers (contact shadow, spotlight cone, far bokeh, apex burst) and retime them
-         to the scene's spoken words (scene-local seconds, 0 = scene start).
-      Rules: production/SCENE_CONTRACT (doc 12). No full-screen opaque background. Text only = spoken words.
-    -->
+    <!-- S13 "Mixboard sudah ditutup sejak 28 September 2026." — archive cabinet: the MIXBOARD drawer slams CLOSED
+         (past tense), grey seals clamp, a cool-grey archive seal is stamped, the paper date wheels lock on 28 / SEPTEMBER / 2026. -->
     <template>
       <style>
         #root { position: absolute; inset: 0; overflow: hidden; }
         .s13-abs { position: absolute; }
-        /* far plane: soft blurred porcelain discs (depth cue) */
+        /* ---------- far plane ---------- */
+        .s13-beam { left: -300px; top: -260px; width: 820px; height: 2000px; transform-origin: 50% 0%;
+          background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.7) 30%, rgba(232,240,251,0.3) 70%, rgba(255,255,255,0));
+          clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); filter: blur(26px); }
+        .s13-key { left: 40px; top: 420px; width: 1000px; height: 1000px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,0.92), rgba(232,240,251,0.5) 42%, rgba(232,240,251,0) 70%); }
+        .s13-shelf { border-radius: 22px; filter: blur(7px); opacity: 0.55;
+          background: linear-gradient(170deg, #ffffff, #e2eaf6 60%, #c8d7ec); box-shadow: 0 30px 40px -20px rgba(28,51,84,0.35); }
+        .s13-shelf i { position: absolute; left: 14%; right: 14%; height: 6px; border-radius: 3px; background: rgba(41,75,119,0.22); }
         .s13-far { border-radius: 50%; filter: blur(7px); opacity: 0.65;
           background: radial-gradient(circle at 35% 30%, #ffffff, #e8f0fb 45%, #acc6e7 100%); box-shadow: 0 30px 50px -20px rgba(28,51,84,0.3); }
-        /* key light pool behind the hero */
-        .s13-key { left: -120px; top: 330px; width: 1100px; height: 1100px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0) 64%); }
-        /* spotlight cone (use on the key moment) */
-        .s13-cone { left: 190px; top: 400px; width: 700px; height: 820px; clip-path: polygon(41% 0, 59% 0, 100% 100%, 0 100%);
-          background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.6) 55%, rgba(255,255,255,0.85)); filter: blur(8px);
-          -webkit-mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 96%); mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 96%); }
-        /* HERO placeholder — replace with the illustrated metaphor */
-        .s13-hero { left: 240px; top: 640px; width: 600px; height: 520px; border-radius: 34px;
-          background: linear-gradient(172deg, #ffffff, #eef3fa); border: 2px solid rgba(41,75,119,0.10);
-          box-shadow: 0 2px 0 rgba(255,255,255,0.9) inset, 0 40px 70px -24px rgba(28,51,84,0.38), 0 10px 22px rgba(28,51,84,0.12); }
-        .s13-hero-inner { position: absolute; left: 60px; top: 70px; right: 60px; height: 260px; border-radius: 22px;
-          background: linear-gradient(135deg, #3a6299, #294b77 55%, #1f3a5f); box-shadow: inset 0 2px 0 rgba(255,255,255,0.25); }
-        /* contact shadow on the ground (light from upper-left -> shadow slightly right/below) */
-        .s13-shadow { left: 270px; top: 1150px; width: 580px; height: 80px; border-radius: 50%;
-          background: radial-gradient(ellipse, rgba(28,51,84,0.45), rgba(28,51,84,0.14) 45%, rgba(28,51,84,0) 72%); }
-        /* apex FX kit */
-        .s13-glow { left: 240px; top: 600px; width: 600px; height: 600px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(255,255,255,1), rgba(255,247,226,0.7) 30%, rgba(242,196,109,0.15) 52%, rgba(242,196,109,0) 70%); }
-        .s13-shock { left: 340px; top: 700px; width: 400px; height: 400px; border-radius: 50%;
+        .s13-floor { left: 60px; top: 1380px; width: 960px; height: 150px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(28,51,84,0.22), rgba(28,51,84,0.08) 45%, rgba(28,51,84,0) 72%); }
+        /* ---------- camera ---------- */
+        .s13-cam { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% 42%; }
+        .s13-world { position: absolute; inset: 0; transform-style: preserve-3d; }
+        .s13-rig { position: absolute; inset: 0; }
+        .s13-svg { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+        .s13-contact { left: 150px; top: 1424px; width: 840px; height: 60px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(28,51,84,0.55), rgba(28,51,84,0.18) 45%, rgba(28,51,84,0) 72%); }
+        /* drawer fronts */
+        .s13-front { border-radius: 18px; background: linear-gradient(176deg, #ffffff 0%, #f8fafd 40%, #edf2f9 100%);
+          border: 1.5px solid rgba(41,75,119,0.16);
+          box-shadow: inset 0 3px 0 rgba(255,255,255,1), inset 0 -4px 8px rgba(41,75,119,0.10), inset 3px 0 0 rgba(255,255,255,0.9), 0 8px 14px -6px rgba(28,51,84,0.35), 0 2px 3px rgba(28,51,84,0.12); }
+        .s13-front::after { content: ""; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border-radius: 18px;
+          background: linear-gradient(118deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 70%, rgba(41,75,119,0.05) 100%); pointer-events: none; }
+        .s13-pull { height: 30px; border-radius: 15px;
+          background: linear-gradient(180deg, #ffffff 0%, #dfe6ef 35%, #a9b6c7 70%, #e9eef5 100%);
+          box-shadow: 0 8px 10px -4px rgba(28,51,84,0.45), inset 0 1px 0 #fff, inset 0 -2px 2px rgba(28,51,84,0.25); }
+        .s13-pull::before, .s13-pull::after { content: ""; position: absolute; top: 6px; width: 18px; height: 18px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #fff, #c7d1de 60%, #8795a8); box-shadow: 0 1px 2px rgba(28,51,84,0.4); }
+        .s13-pull::before { left: 6px; } .s13-pull::after { right: 6px; }
+        .s13-screw { width: 12px; height: 12px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #ffffff, #cbd5e2 55%, #7d8ca2); box-shadow: 0 1px 2px rgba(28,51,84,0.4); }
+        .s13-screw::after { content: ""; position: absolute; left: 2px; top: 5px; width: 8px; height: 2px; background: rgba(28,51,84,0.5); transform: rotate(35deg); }
+        .s13-lbl { border-radius: 12px; background: linear-gradient(180deg, #eef2f7, #f9fbfd);
+          box-shadow: inset 0 3px 6px rgba(28,51,84,0.22), inset 0 -1px 0 rgba(255,255,255,1), 0 1px 0 rgba(255,255,255,1);
+          border: 2px solid rgba(160,174,194,0.55); }
+        .s13-engr { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center;
+          font-family: Montserrat, sans-serif; font-weight: 900; font-size: 74px; letter-spacing: 0.05em; line-height: 1; padding-left: 0.05em;
+          color: #2b4a75; text-shadow: 0 2px 0 rgba(255,255,255,0.95), 0 -1.5px 0 rgba(15,30,52,0.55), 0 0 1px rgba(15,30,52,0.4); }
+        .s13-sheen { position: absolute; left: -200px; top: -40px; width: 150px; height: 200px; transform: skewX(-20deg);
+          background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.85) 50%, rgba(255,255,255,0)); }
+        .s13-tag { border-radius: 8px; background: linear-gradient(178deg, #fffefb, #f3f1ea);
+          box-shadow: 0 6px 10px -4px rgba(28,51,84,0.35), 0 1px 2px rgba(28,51,84,0.15), inset 0 1px 0 #fff; }
+        .s13-tline { position: absolute; height: 6px; border-radius: 3px; background: rgba(46,46,46,0.14); }
+        /* tray (inside of the pulled drawer) */
+        .s13-tray { left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 712px; }
+        .s13-lamp { width: 22px; height: 22px; border-radius: 50%; }
+        /* seals (hasps) */
+        .s13-hasp { width: 70px; height: 128px; transform-origin: 50% 0%; }
+        .s13-hplate { position: absolute; left: 0; top: 0; width: 70px; height: 128px; border-radius: 14px 14px 30px 30px;
+          background: linear-gradient(160deg, #f4f6f9 0%, #c5ced9 35%, #8b98a9 70%, #b9c3cf 100%);
+          box-shadow: inset 0 2px 0 rgba(255,255,255,0.95), inset 0 -3px 5px rgba(28,51,84,0.35), 0 10px 14px -6px rgba(28,51,84,0.5); }
+        .s13-hknuckle { position: absolute; left: 6px; top: -10px; width: 58px; height: 20px; border-radius: 10px;
+          background: linear-gradient(180deg, #ffffff, #b8c2cf 55%, #7d8a9c); box-shadow: 0 3px 4px rgba(28,51,84,0.4); }
+        .s13-hseal { position: absolute; left: 7px; top: 58px; width: 56px; height: 56px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #f1e2c4 0%, #c9a978 35%, #9a7b51 72%, #6f5638 100%);
+          box-shadow: inset 0 -3px 5px rgba(60,40,15,0.45), inset 0 2px 2px rgba(255,255,255,0.7), 0 4px 6px rgba(28,51,84,0.45); }
+        .s13-hseal::before { content: ""; position: absolute; left: 9px; top: 9px; width: 38px; height: 38px; border-radius: 50%;
+          border: 2px dashed rgba(70,50,25,0.5); }
+        .s13-hseal::after { content: ""; position: absolute; left: 20px; top: 24px; width: 16px; height: 12px; border-radius: 2px;
+          background: rgba(70,50,25,0.55); box-shadow: 0 -7px 0 -3px rgba(70,50,25,0.0); }
+        .s13-shackle { position: absolute; left: 24px; top: 16px; width: 12px; height: 12px; border: 2.5px solid rgba(70,50,25,0.55); border-bottom: 0; border-radius: 6px 6px 0 0; }
+        /* date register */
+        .s13-reg { border-radius: 16px; overflow: hidden;
+          background: linear-gradient(180deg, #d5dde8, #eef2f7);
+          box-shadow: inset 0 6px 12px rgba(28,51,84,0.35), inset 0 -2px 0 rgba(255,255,255,0.9), 0 0 0 5px #ffffff, 0 0 0 7px rgba(160,174,194,0.6), 0 8px 16px -4px rgba(28,51,84,0.35); }
+        .s13-drum { position: absolute; top: 14px; height: 156px; border-radius: 10px; overflow: hidden;
+          background: #fffefb; box-shadow: 0 2px 4px rgba(28,51,84,0.3); }
+        .s13-strip { position: absolute; left: 0; top: 0; width: 100%; }
+        .s13-cell { position: relative; height: 156px; display: flex; align-items: center; justify-content: center;
+          font-family: Montserrat, sans-serif; font-weight: 900; color: #2b3c55; letter-spacing: -0.01em; line-height: 1; }
+        .s13-cell i { display: block; height: 10px; border-radius: 5px; background: rgba(46,46,46,0.14); }
+        .s13-curv { position: absolute; inset: 0; pointer-events: none;
+          background: linear-gradient(180deg, rgba(28,51,84,0.42) 0%, rgba(28,51,84,0.08) 22%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0) 60%, rgba(28,51,84,0.08) 78%, rgba(28,51,84,0.42) 100%); }
+        .s13-lockbar { position: absolute; left: 14px; right: 14px; top: 172px; height: 7px; border-radius: 4px;
+          background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(203,219,244,0.75)); box-shadow: 0 2px 6px rgba(28,51,84,0.25); }
+        /* stamp imprint */
+        .s13-imp { width: 150px; height: 150px; margin-left: -75px; margin-top: -75px; }
+        .s13-impsh { width: 170px; height: 170px; margin-left: -85px; margin-top: -85px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(28,51,84,0.45), rgba(28,51,84,0.15) 50%, rgba(28,51,84,0) 70%); }
+        /* fx */
+        .s13-fx { position: absolute; inset: 0; pointer-events: none; }
+        .s13-glow { width: 640px; height: 640px; margin-left: -320px; margin-top: -320px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,1), rgba(232,240,251,0.75) 30%, rgba(172,198,231,0.2) 52%, rgba(172,198,231,0) 70%); }
+        .s13-shock { width: 400px; height: 400px; margin-left: -200px; margin-top: -200px; border-radius: 50%;
           border: 5px solid rgba(255,255,255,0.95); box-shadow: 0 0 30px rgba(172,198,231,0.9), inset 0 0 24px rgba(172,198,231,0.7); }
-        .s13-spark { width: 56px; height: 56px; }
-        .s13-check { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-          background: linear-gradient(160deg, #bfe9da, #9fd8c4); border: 3px solid #ffffff; box-shadow: 0 10px 18px -6px rgba(28,51,84,0.4); }
+        .s13-spk { width: 0; height: 0; }
+        .s13-spk svg { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; overflow: visible; }
+        .s13-dust { width: 26px; height: 26px; margin-left: -13px; margin-top: -13px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(214,222,233,0.95), rgba(190,201,216,0.5) 50%, rgba(190,201,216,0) 72%); }
+        .s13-fg { border-radius: 50%; filter: blur(12px);
+          background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(203,219,244,0.7) 50%, rgba(172,198,231,0)); }
+        .s13-mote { width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle, #ffffff, rgba(203,219,244,0.6) 60%, rgba(203,219,244,0)); }
       </style>
       <div id="root" data-composition-id="s13" data-width="1080" data-height="1920">
+        <!-- far plane -->
+        <div class="s13-abs s13-beam" id="s13-beam"></div>
         <div class="s13-abs s13-key"></div>
-        <div class="s13-abs s13-far" style="left:70px;top:780px;width:110px;height:110px"></div>
-        <div class="s13-abs s13-far" style="left:905px;top:860px;width:84px;height:84px"></div>
-        <div class="s13-abs s13-far" style="left:920px;top:1230px;width:120px;height:120px"></div>
-        <div class="s13-abs s13-cone"></div>
-        <div class="s13-abs s13-world" style="inset:0">
-          <div class="s13-abs s13-shadow"></div>
-          <div class="s13-abs s13-glow"></div>
-          <div class="s13-abs s13-hero"><div class="s13-hero-inner"></div></div>
-          <div class="s13-abs s13-shock"></div>
-          <div class="s13-abs s13-check" style="left:792px;top:612px">
-            <svg width="34" height="34" viewBox="0 0 34 34"><path d="M7 18 L14 25 L27 10" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="s13-abs" id="s13-farp" style="inset:0">
+          <div class="s13-abs s13-shelf" style="left:-60px;top:560px;width:190px;height:560px"><i style="top:120px"></i><i style="top:260px"></i><i style="top:400px"></i></div>
+          <div class="s13-abs s13-shelf" style="left:950px;top:640px;width:200px;height:520px"><i style="top:110px"></i><i style="top:240px"></i><i style="top:370px"></i></div>
+          <div class="s13-abs s13-far" style="left:90px;top:440px;width:110px;height:110px"></div>
+          <div class="s13-abs s13-far" style="left:900px;top:470px;width:80px;height:80px"></div>
+          <div class="s13-abs s13-far" style="left:30px;top:1250px;width:130px;height:130px"></div>
+          <div class="s13-abs s13-far" style="left:930px;top:1260px;width:100px;height:100px"></div>
+        </div>
+        <div class="s13-abs s13-floor"></div>
+
+        <div class="s13-cam">
+          <div class="s13-world" id="s13-world">
+            <div class="s13-abs s13-contact" id="s13-contact"></div>
+            <div class="s13-rig" id="s13-rig">
+              <!-- cabinet body -->
+              <svg class="s13-svg" viewBox="0 0 1080 1920">
+                <defs>
+                  <linearGradient id="s13-gFront" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#ffffff" /><stop offset="0.45" stop-color="#f6f8fb" /><stop offset="1" stop-color="#e3eaf4" />
+                  </linearGradient>
+                  <linearGradient id="s13-gTop" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#eef3fa" />
+                  </linearGradient>
+                  <linearGradient id="s13-gSide" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#d9e3f0" /><stop offset="1" stop-color="#b8c8de" />
+                  </linearGradient>
+                  <linearGradient id="s13-gRecess" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#9fb2cc" /><stop offset="0.25" stop-color="#c3d1e3" /><stop offset="1" stop-color="#d6e0ec" />
+                  </linearGradient>
+                  <linearGradient id="s13-gPlinth" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#d7e1ee" />
+                  </linearGradient>
+                  <linearGradient id="s13-gBox" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#fffefb" /><stop offset="1" stop-color="#e9edf3" />
+                  </linearGradient>
+                </defs>
+                <!-- plinth -->
+                <path d="M128 1398 L952 1398 L990 1372 L166 1372 Z" fill="#eef3fa" />
+                <rect x="128" y="1398" width="824" height="40" rx="12" fill="url(#s13-gPlinth)" stroke="rgba(41,75,119,0.15)" stroke-width="1.5" />
+                <path d="M952 1398 L990 1372 L990 1414 L952 1438 Z" fill="#b9c9de" />
+                <rect x="140" y="1401" width="800" height="3" rx="1.5" fill="#ffffff" />
+                <!-- top face + boxes on top -->
+                <path d="M150 540 L930 540 L968 508 L188 508 Z" fill="url(#s13-gTop)" stroke="rgba(41,75,119,0.12)" stroke-width="1.5" />
+                <!-- right side face -->
+                <path d="M930 540 L968 508 L968 1372 L930 1398 Z" fill="url(#s13-gSide)" />
+                <path d="M968 508 L968 1372" stroke="rgba(255,255,255,0.8)" stroke-width="2" />
+                <g fill="none" stroke="rgba(41,75,119,0.12)" stroke-width="2">
+                  <path d="M934 590 L964 566" /><path d="M934 740 L964 716" /><path d="M934 1080 L964 1056" />
+                </g>
+                <!-- front face -->
+                <rect x="150" y="540" width="780" height="858" rx="22" fill="url(#s13-gFront)" stroke="rgba(41,75,119,0.16)" stroke-width="2" />
+                <rect x="153" y="542" width="774" height="4" rx="2" fill="#ffffff" />
+                <!-- recesses -->
+                <rect x="184" y="570" width="712" height="120" rx="16" fill="url(#s13-gRecess)" />
+                <rect x="184" y="710" width="712" height="328" rx="18" fill="url(#s13-gRecess)" />
+                <rect x="184" y="1058" width="712" height="320" rx="18" fill="url(#s13-gRecess)" />
+                <rect x="184" y="710" width="712" height="16" rx="8" fill="rgba(28,51,84,0.35)" />
+                <!-- rivets on the frame -->
+                <g id="s13-rivets"></g>
+                <!-- boxes on top of the cabinet (back plane props) -->
+                <g transform="translate(0,0)">
+                  <path d="M640 452 L800 452 L826 430 L666 430 Z" fill="#ffffff" stroke="rgba(41,75,119,0.12)" />
+                  <path d="M800 452 L826 430 L826 504 L800 526 Z" fill="#c6d4e6" />
+                  <rect x="640" y="452" width="160" height="74" rx="6" fill="url(#s13-gBox)" stroke="rgba(41,75,119,0.14)" stroke-width="1.5" />
+                  <rect x="680" y="474" width="80" height="22" rx="5" fill="#e6ecf4" stroke="rgba(41,75,119,0.2)" />
+                  <rect x="692" y="483" width="56" height="4" rx="2" fill="rgba(41,75,119,0.25)" />
+                  <path d="M250 480 L370 480 L392 462 L272 462 Z" fill="#fbfcfe" stroke="rgba(41,75,119,0.12)" />
+                  <path d="M370 480 L392 462 L392 508 L370 526 Z" fill="#c6d4e6" />
+                  <rect x="250" y="480" width="120" height="46" rx="5" fill="url(#s13-gBox)" stroke="rgba(41,75,119,0.14)" stroke-width="1.5" />
+                  <rect x="236" y="430" width="150" height="40" rx="4" fill="#fffefb" stroke="rgba(46,46,46,0.1)" transform="rotate(-4 310 450)" />
+                  <rect x="246" y="420" width="140" height="38" rx="4" fill="#f7f5ef" stroke="rgba(46,46,46,0.1)" transform="rotate(3 316 440)" />
+                </g>
+              </svg>
+
+              <!-- drawer A (archived, slim) -->
+              <div class="s13-abs s13-front" style="left:190px;top:576px;width:700px;height:108px">
+                <div class="s13-abs s13-lbl" style="left:248px;top:24px;width:204px;height:58px">
+                  <div class="s13-abs" style="left:28px;top:16px;width:120px;height:7px;border-radius:4px;background:rgba(41,75,119,0.22)"></div>
+                  <div class="s13-abs" style="left:28px;top:31px;width:80px;height:7px;border-radius:4px;background:rgba(41,75,119,0.14)"></div>
+                </div>
+                <div class="s13-abs s13-pull" style="left:60px;top:40px;width:120px"></div>
+                <div class="s13-abs s13-pull" style="left:520px;top:40px;width:120px"></div>
+                <div class="s13-abs s13-lamp" id="s13-lamp" style="left:658px;top:16px;background:radial-gradient(circle at 35% 30%,#ffffff,#9fd8c4 55%,#6fb39b);box-shadow:0 0 12px rgba(159,216,196,0.9),0 2px 3px rgba(28,51,84,0.35)"></div>
+                <div class="s13-abs s13-lamp" id="s13-lampOff" style="left:658px;top:16px;background:radial-gradient(circle at 35% 30%,#ffffff,#b8c2cf 55%,#7d8a9c);box-shadow:0 2px 3px rgba(28,51,84,0.35)"></div>
+              </div>
+
+              <!-- drawer C: date register (paper date wheels) -->
+              <div class="s13-abs s13-front" id="s13-dC" style="left:190px;top:1064px;width:700px;height:308px">
+                <div class="s13-abs s13-screw" style="left:14px;top:14px"></div><div class="s13-abs s13-screw" style="right:14px;top:14px"></div>
+                <div class="s13-abs s13-screw" style="left:14px;bottom:14px"></div><div class="s13-abs s13-screw" style="right:14px;bottom:14px"></div>
+                <div class="s13-abs s13-reg" id="s13-reg" style="left:20px;top:62px;width:660px;height:184px">
+                  <div class="s13-drum" id="s13-drD" style="left:14px;width:150px"><div class="s13-strip"></div><div class="s13-curv"></div></div>
+                  <div class="s13-drum" id="s13-drM" style="left:174px;width:306px"><div class="s13-strip"></div><div class="s13-curv"></div></div>
+                  <div class="s13-drum" id="s13-drY" style="left:490px;width:156px"><div class="s13-strip"></div><div class="s13-curv"></div></div>
+                  <div class="s13-lockbar" id="s13-lockbar" style="opacity:0.0"></div>
+                  <div class="s13-sheen" id="s13-regSheen" style="top:-20px;height:240px"></div>
+                </div>
+                <div class="s13-abs" style="left:250px;top:268px;width:200px;height:8px;border-radius:4px;background:rgba(41,75,119,0.12)"></div>
+                <div class="s13-abs" style="left:300px;top:20px;width:100px;height:22px;border-radius:11px;background:linear-gradient(180deg,#ffffff,#dfe6ef);box-shadow:0 3px 5px -1px rgba(28,51,84,0.35),inset 0 -1px 2px rgba(28,51,84,0.2)"></div>
+              </div>
+
+              <!-- drawer B: tray (visible inside of the pulled-out drawer) -->
+              <div class="s13-abs s13-tray" id="s13-tray">
+                <svg class="s13-svg" viewBox="0 0 1080 1920">
+                  <defs>
+                    <linearGradient id="s13-gFloor" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#b9c8dc" /><stop offset="0.4" stop-color="#e3eaf3" /><stop offset="1" stop-color="#f6f8fb" />
+                    </linearGradient>
+                    <linearGradient id="s13-gWallL" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#dfe7f1" />
+                    </linearGradient>
+                    <linearGradient id="s13-gWallR" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0" stop-color="#c9d6e7" /><stop offset="1" stop-color="#e9eff7" />
+                    </linearGradient>
+                    <linearGradient id="s13-gGlass" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="rgba(255,255,255,0.92)" /><stop offset="0.5" stop-color="rgba(222,233,248,0.84)" /><stop offset="1" stop-color="rgba(190,209,235,0.82)" />
+                    </linearGradient>
+                  </defs>
+                  <!-- floor: far edge = slot top (y 712, x 186-894), near edge = plate top (y 904, x 116-964) -->
+                  <path d="M196 716 L884 716 L944 904 L136 904 Z" fill="url(#s13-gFloor)" />
+                  <path d="M186 712 L216 712 L170 904 L116 904 Z" fill="url(#s13-gWallL)" />
+                  <path d="M864 712 L894 712 L964 904 L910 904 Z" fill="url(#s13-gWallR)" />
+                  <!-- divider + folders lying in the tray -->
+                  <g id="s13-trayStuff">
+                    <path d="M240 730 L420 730 L404 790 L214 790 Z" fill="#fffefb" stroke="rgba(46,46,46,0.12)" />
+                    <path d="M230 744 L410 744 L394 804 L204 804 Z" fill="#f6f4ee" stroke="rgba(46,46,46,0.12)" />
+                    <path d="M262 736 L310 736 L306 726 L268 726 Z" fill="#cbdbf4" />
+                    <path d="M252 750 L292 750 L288 740 L258 740 Z" fill="#acc6e7" />
+                    <path d="M680 734 L842 734 L866 800 L700 800 Z" fill="#fffefb" stroke="rgba(46,46,46,0.12)" />
+                    <path d="M780 740 L830 740 L834 730 L786 730 Z" fill="#cbdbf4" />
+                    <g stroke="rgba(46,46,46,0.14)" stroke-width="5" stroke-linecap="round">
+                      <path d="M246 764 L360 764" /><path d="M240 778 L330 778" /><path d="M712 756 L820 756" /><path d="M716 772 L800 772" />
+                    </g>
+                  </g>
+                  <!-- icon tile (abstract board mosaic) lying in the tray, foreshortened -->
+                  <g id="s13-icon">
+                    <path d="M418 748 L662 748 L690 880 L390 880 Z" fill="#ffffff" stroke="rgba(41,75,119,0.25)" stroke-width="2" />
+                    <path d="M440 760 L532 760 L528 806 L430 806 Z" fill="#294b77" />
+                    <path d="M546 760 L640 760 L650 806 L548 806 Z" fill="#acc6e7" />
+                    <path d="M428 816 L527 816 L522 868 L414 868 Z" fill="#9fd8c4" />
+                    <path d="M549 816 L652 816 L666 868 L551 868 Z" fill="#3a6299" />
+                    <path d="M598 775 C599 782 602 785 610 786 C602 787 599 790 598 797 C597 790 594 787 586 786 C594 785 597 782 598 775 Z" fill="#ffffff" />
+                  </g>
+                  <!-- frosted glass shutter (slides from the back over the icon) -->
+                  <g id="s13-glass">
+                    <path d="M196 716 L884 716 L944 904 L136 904 Z" fill="url(#s13-gGlass)" stroke="rgba(255,255,255,0.95)" stroke-width="4" />
+                    <path d="M300 716 L380 716 L300 904 L200 904 Z" fill="rgba(255,255,255,0.45)" />
+                    <path d="M420 716 L450 716 L380 904 L340 904 Z" fill="rgba(255,255,255,0.35)" />
+                    <path d="M206 726 L874 726" stroke="rgba(41,75,119,0.18)" stroke-width="2" />
+                    <rect x="470" y="880" width="140" height="12" rx="6" fill="rgba(41,75,119,0.25)" />
+                  </g>
+                </svg>
+              </div>
+              <!-- shadow cast by the pulled drawer onto the lower front -->
+              <div class="s13-abs" id="s13-dshadow" style="left:130px;top:1180px;width:860px;height:200px;border-radius:40%;background:radial-gradient(ellipse at 50% 20%,rgba(28,51,84,0.4),rgba(28,51,84,0.12) 50%,rgba(28,51,84,0) 72%)"></div>
+
+              <!-- drawer B front plate (MIXBOARD) -->
+              <div class="s13-abs s13-front" id="s13-plate" style="left:192px;top:718px;width:696px;height:312px">
+                <div class="s13-abs" style="left:0;top:-4px;width:696px;height:10px;border-radius:6px;background:linear-gradient(180deg,#ffffff,#e4ebf4)"></div>
+                <div class="s13-abs s13-lbl" style="left:86px;top:30px;width:524px;height:118px;overflow:hidden">
+                  <div class="s13-engr" id="s13-engr">MIXBOARD</div>
+                  <div class="s13-sheen" id="s13-lblSheen"></div>
+                </div>
+                <div class="s13-abs s13-screw" style="left:62px;top:40px"></div><div class="s13-abs s13-screw" style="left:62px;top:124px"></div>
+                <div class="s13-abs s13-screw" style="left:622px;top:40px"></div><div class="s13-abs s13-screw" style="left:622px;top:124px"></div>
+                <div class="s13-abs s13-pull" style="left:44px;top:214px;width:130px"></div>
+                <div class="s13-abs s13-pull" style="left:522px;top:214px;width:130px"></div>
+                <!-- archive paper tag (stamp target) -->
+                <div class="s13-abs s13-tag" style="left:208px;top:172px;width:280px;height:118px">
+                  <div class="s13-abs" style="left:14px;top:48px;width:20px;height:20px;border-radius:50%;background:#dfe6ef;box-shadow:inset 0 2px 3px rgba(28,51,84,0.35)"></div>
+                  <div class="s13-tline" style="left:46px;top:22px;width:80px"></div>
+                  <div class="s13-tline" style="left:46px;top:88px;width:60px"></div>
+                  <div class="s13-tline" style="left:196px;top:22px;width:62px"></div>
+                  <div class="s13-tline" style="left:204px;top:88px;width:54px"></div>
+                  <div class="s13-abs" style="left:0;right:0;top:0;height:5px;border-radius:8px 8px 0 0;background:#cbdbf4"></div>
+                </div>
+              </div>
+              <!-- stamp imprint (cool grey archive seal) on the tag -->
+              <div class="s13-abs s13-impsh" id="s13-impsh" style="left:540px;top:949px"></div>
+              <div class="s13-abs s13-imp" id="s13-imp" style="left:540px;top:949px">
+                <svg viewBox="0 0 150 150" width="150" height="150">
+                  <g fill="none" stroke="#5f6d80" stroke-linecap="round">
+                    <circle cx="75" cy="75" r="66" stroke-width="7" />
+                    <circle cx="75" cy="75" r="52" stroke-width="2.5" stroke-dasharray="3 6" />
+                    <circle cx="75" cy="75" r="40" stroke-width="3.5" />
+                  </g>
+                  <g fill="#5f6d80">
+                    <rect x="57" y="72" width="36" height="26" rx="5" />
+                    <path d="M63 72 V64 a12 12 0 0 1 24 0 V72 h-6 V64 a6 6 0 0 0 -12 0 V72 Z" />
+                    <rect x="16" y="71" width="16" height="8" rx="4" /><rect x="118" y="71" width="16" height="8" rx="4" />
+                  </g>
+                  <circle cx="75" cy="85" r="3.5" fill="#fffefb" />
+                </svg>
+              </div>
+
+              <!-- grey/bronze seals (hasps) clamp over the closed drawer -->
+              <div class="s13-abs s13-hasp" id="s13-haspL" style="left:200px;top:700px"><div class="s13-hknuckle"></div><div class="s13-hplate"></div><div class="s13-hseal"><div class="s13-shackle"></div></div></div>
+              <div class="s13-abs s13-hasp" id="s13-haspR" style="left:810px;top:700px"><div class="s13-hknuckle"></div><div class="s13-hplate"></div><div class="s13-hseal"><div class="s13-shackle"></div></div></div>
+            </div>
           </div>
+        </div>
+
+        <div class="s13-fx" id="s13-fx">
+          <div class="s13-abs s13-glow" id="s13-glow" style="left:540px;top:900px"></div>
+          <div class="s13-abs s13-shock" id="s13-shock" style="left:540px;top:900px"></div>
+          <div class="s13-abs s13-shock" id="s13-shock2" style="left:540px;top:949px"></div>
+          <div id="s13-dusts"></div>
+          <div id="s13-spks"></div>
+          <div id="s13-motes"></div>
+          <div class="s13-abs s13-fg" id="s13-fg1" style="left:-70px;top:1500px;width:240px;height:240px"></div>
+          <div class="s13-abs s13-fg" id="s13-fg2" style="left:930px;top:420px;width:150px;height:150px"></div>
         </div>
       </div>
       <script>
@@ -64,47 +327,157 @@
           const R = document.querySelector('[data-composition-id="' + ID + '"]');
           const q = (s) => R.querySelector(s), qa = (s) => R.querySelectorAll(s);
           const tl = gsap.timeline({ paused: true });
-          const DUR = 4.1;                 // = host slot data-duration
-          const T = { apex: 1.2 };         // scene-local word times (key action lands on the word)
-
-          // seeded PRNG for sparkle placement (never Math.random)
-          let seed = 7;
+          const DUR = 4.1;
+          // verified local word starts
+          const T = { mixboard: 0.06, sudah: 0.31, ditutup: 0.64, sejak: 1.14, d28: 1.52, sept: 2.2, y2026: 2.78 };
+          const mk = (tag, cls, parent, css) => { const e = document.createElement(tag); if (cls) e.className = cls; if (css) e.style.cssText = css; parent.appendChild(e); return e; };
+          let seed = 1313;
           const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-          const STAR = '<svg viewBox="0 0 40 40" width="100%" height="100%"><path d="M20 2 C21 14 26 19 38 20 C26 21 21 26 20 38 C19 26 14 21 2 20 C14 19 19 14 20 2Z" fill="#ffffff" stroke="#acc6e7" stroke-width="1.5"/></svg>';
-          const sparks = [];
-          for (let i = 0; i < 10; i++) {
-            const sp = document.createElement("div");
-            sp.className = "s13-abs s13-spark"; sp.innerHTML = STAR;
-            sp.style.left = 515 + "px"; sp.style.top = 875 + "px";
-            q(".s13-world").appendChild(sp);
-            const a = (i / 10) * Math.PI * 2 + rnd() * 0.4, r = 220 + rnd() * 160;
-            sparks.push([sp, Math.cos(a) * r, Math.sin(a) * r]);
-          }
+          const NS = "http://www.w3.org/2000/svg";
 
-          // initial hidden states (set FIRST; later fromTo tweens use immediateRender:false)
-          tl.set([q(".s13-shock"), q(".s13-glow"), q(".s13-cone")], { opacity: 0 }, 0);
-          tl.set(q(".s13-check"), { scale: 0 }, 0);
-          tl.set(sparks.map((s) => s[0]), { opacity: 0 }, 0);
-
-          // frame 0 is never empty: hero already rising, slow push-in all scene
-          tl.fromTo(q(".s13-world"), { scale: 1 }, { scale: 1.07, duration: DUR, ease: "none" }, 0);
-          tl.fromTo(q(".s13-hero"), { y: 60, rotation: -2 }, { y: 0, rotation: 0, duration: 0.5, ease: "power3.out" }, 0);
-          tl.fromTo(q(".s13-shadow"), { scaleX: 0.8, opacity: 0.5 }, { scaleX: 1, opacity: 1, duration: 0.5, ease: "power3.out" }, 0);
-          tl.fromTo(qa(".s13-far"), { y: 0 }, { y: -40, duration: DUR, ease: "none" }, 0);   // far plane parallax (slower)
-          tl.fromTo(q(".s13-cone"), { opacity: 0 }, { opacity: 0.9, duration: 0.4, ease: "power2.out", immediateRender: false }, T.apex - 0.3);
-
-          // APEX on the spoken word: glow + shockwave + sparkles + scale punch + mint check
-          tl.fromTo(q(".s13-glow"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1.1, duration: 0.25, ease: "power2.out", immediateRender: false }, T.apex - 0.03);
-          tl.to(q(".s13-glow"), { opacity: 0.35, duration: 0.8, ease: "power2.out" }, T.apex + 0.25);
-          tl.fromTo(q(".s13-shock"), { opacity: 0.95, scale: 0.4 }, { opacity: 0, scale: 1.8, duration: 0.6, ease: "power2.out", immediateRender: false }, T.apex);
-          tl.fromTo(q(".s13-hero"), { scale: 1 }, { scale: 1.045, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, T.apex);
-          tl.fromTo(q(".s13-check"), { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.4, ease: "back.out(1.8)", immediateRender: false }, T.apex + 0.05);
-          sparks.forEach(([sp, dx, dy], i) => {
-            tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 },
-              { x: dx, y: dy, scale: 0.6 + (i % 3) * 0.25, opacity: 0, rotation: 90, duration: 0.7, ease: "power3.out", immediateRender: false }, T.apex + i * 0.012);
+          // ---------- rivets around the cabinet frame ----------
+          const rv = q("#s13-rivets");
+          [[166, 556], [914, 556], [166, 1382], [914, 1382], [166, 700], [914, 700], [166, 1048], [914, 1048]].forEach(([x, y]) => {
+            const c = document.createElementNS(NS, "circle"); c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", 5);
+            c.setAttribute("fill", "#c9d3e0"); c.setAttribute("stroke", "rgba(28,51,84,0.35)"); c.setAttribute("stroke-width", "1.2"); rv.appendChild(c);
           });
 
-          window.__timelines[ID] = tl; // register LAST
+          // ---------- paper date wheels ----------
+          const drum = (sel, final, size, n) => {
+            const d = q(sel), st = d.querySelector(".s13-strip"), w = parseFloat(d.style.width);
+            for (let i = 0; i < n; i++) {
+              const c = mk("div", "s13-cell", st);
+              const bw = (0.35 + rnd() * 0.4) * w;
+              mk("i", "", c, "width:" + bw.toFixed(0) + "px");
+            }
+            const c = mk("div", "s13-cell", st, "font-size:" + size + "px"); c.textContent = final;
+            return { st, n };
+          };
+          const dD = drum("#s13-drD", "28", 98, 6), dM = drum("#s13-drM", "SEPTEMBER", 40, 6), dY = drum("#s13-drY", "2026", 54, 6);
+          const roll = (o, start, land) => {
+            tl.set(o.st, { y: 0 }, 0);
+            tl.fromTo(o.st, { y: 0 }, { y: -156 * (o.n - 0.12), duration: land - start - 0.07, ease: "power2.in", immediateRender: false }, start);
+            tl.to(o.st, { y: -156 * o.n - 10, duration: 0.05, ease: "none" }, land - 0.07);
+            tl.to(o.st, { y: -156 * o.n, duration: 0.25, ease: "back.out(2.4)" }, land - 0.02);
+          };
+          roll(dD, T.d28 - 0.42, T.d28);
+          roll(dM, T.sept - 0.4, T.sept);
+          roll(dY, T.y2026 - 0.4, T.y2026);
+
+          // ---------- sparks / dust / motes ----------
+          const STAR = '<svg viewBox="0 0 40 40"><path d="M20 2 C21 14 26 19 38 20 C26 21 21 26 20 38 C19 26 14 21 2 20 C14 19 19 14 20 2Z" fill="#ffffff" stroke="#acc6e7" stroke-width="1.5"/></svg>';
+          const mkSparks = (n, cx, cy, r0, r1) => {
+            const arr = [];
+            for (let i = 0; i < n; i++) {
+              const sp = mk("div", "s13-abs s13-spk", q("#s13-spks"), "left:" + cx + "px;top:" + cy + "px");
+              sp.innerHTML = STAR;
+              const a = (i / n) * Math.PI * 2 + rnd() * 0.5, r = r0 + rnd() * (r1 - r0);
+              arr.push([sp, Math.cos(a) * r, Math.sin(a) * r * 0.85, 0.45 + rnd() * 0.6]);
+            }
+            return arr;
+          };
+          const sparksA = mkSparks(14, 540, 949, 170, 330);
+          const sparksB = mkSparks(10, 540, 1218, 140, 300);
+          const dusts = [];
+          for (let i = 0; i < 16; i++) {
+            const side = i % 4;
+            let x, y, dx, dy;
+            if (side === 0) { x = 200 + rnd() * 680; y = 712; dx = (rnd() - 0.5) * 80; dy = -40 - rnd() * 70; }
+            else if (side === 1) { x = 186; y = 740 + rnd() * 280; dx = -60 - rnd() * 80; dy = (rnd() - 0.5) * 60; }
+            else if (side === 2) { x = 894; y = 740 + rnd() * 280; dx = 60 + rnd() * 80; dy = (rnd() - 0.5) * 60; }
+            else { x = 200 + rnd() * 680; y = 1036; dx = (rnd() - 0.5) * 90; dy = 30 + rnd() * 50; }
+            const d = mk("div", "s13-abs s13-dust", q("#s13-dusts"), "left:" + x.toFixed(0) + "px;top:" + y.toFixed(0) + "px");
+            dusts.push([d, dx, dy, 1.2 + rnd() * 1.6]);
+          }
+          const motes = [];
+          for (let i = 0; i < 14; i++) {
+            const m = mk("div", "s13-abs s13-mote", q("#s13-motes"), "left:" + (80 + rnd() * 920).toFixed(0) + "px;top:" + (430 + rnd() * 1150).toFixed(0) + "px;opacity:" + (0.4 + rnd() * 0.5).toFixed(2));
+            const s = 0.6 + rnd() * 1.4;
+            tl.set(m, { scale: s }, 0);
+            tl.fromTo(m, { x: 0, y: 0 }, { x: (rnd() - 0.5) * 50, y: -30 - rnd() * 60, duration: DUR, ease: "none" }, 0);
+            motes.push(m);
+          }
+
+          // ---------- initial states ----------
+          const plate = q("#s13-plate"), tray = q("#s13-tray"), rig = q("#s13-rig"), world = q("#s13-world");
+          const glass = q("#s13-glass"), icon = q("#s13-icon");
+          tl.set([q("#s13-glow"), q("#s13-shock"), q("#s13-shock2"), q("#s13-imp"), q("#s13-impsh"), q("#s13-lampOff")], { opacity: 0 }, 0);
+          tl.set(sparksA.concat(sparksB).map((s) => s[0]), { opacity: 0 }, 0);
+          tl.set(dusts.map((d) => d[0]), { opacity: 0 }, 0);
+          // drawer pulled out (toward camera): plate bigger + lower, tray visible
+          tl.set(plate, { transformOrigin: "50% 50%", y: 220, scale: 1.22 }, 0);
+          tl.set(tray, { scaleY: 1, scaleX: 1 }, 0);
+          tl.set(glass, { y: -200, opacity: 0 }, 0);
+          tl.set(q("#s13-dshadow"), { opacity: 1 }, 0);
+          tl.set(world, { transformOrigin: "540px 1040px" }, 0);
+          tl.set(rig, { transformOrigin: "540px 1150px" }, 0);
+          tl.set([q("#s13-haspL"), q("#s13-haspR")], { rotationX: -100, opacity: 0, transformPerspective: 600 }, 0);
+          tl.set(q("#s13-lblSheen"), { x: 0 }, 0);
+          tl.set(q("#s13-regSheen"), { x: 0 }, 0);
+
+          // ---------- entry (frame 0 already populated) ----------
+          tl.fromTo(world, { scale: 1 }, { scale: 1.06, duration: DUR, ease: "none" }, 0);
+          tl.fromTo(rig, { y: 90, rotationX: 10, rotationY: -8, opacity: 0.85 }, { y: 0, rotationX: 0, rotationY: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0);
+          tl.fromTo(q("#s13-contact"), { scaleX: 0.75, opacity: 0.4 }, { scaleX: 1, opacity: 1, duration: 0.5, ease: "power3.out" }, 0);
+          tl.fromTo(q("#s13-farp"), { y: 0 }, { y: -36, duration: DUR, ease: "none" }, 0);
+          tl.fromTo(q("#s13-beam"), { rotation: -4 }, { rotation: 3, duration: DUR, ease: "sine.inOut" }, 0);
+          tl.fromTo([q("#s13-fg1"), q("#s13-fg2")], { y: 0 }, { y: -110, duration: DUR, ease: "none" }, 0);
+          // "Mixboard": engraved label glints
+          tl.fromTo(q("#s13-lblSheen"), { x: 0 }, { x: 900, duration: 0.55, ease: "power2.inOut", immediateRender: false }, T.mixboard + 0.02);
+
+          // "sudah": frosted glass shutter slides over the icon, icon blurs
+          tl.to(glass, { y: 0, opacity: 1, duration: 0.3, ease: "power3.out" }, T.sudah - 0.03);
+          tl.fromTo(icon, { filter: "blur(0px)" }, { filter: "blur(4px)", duration: 0.3, ease: "power2.out", immediateRender: false }, T.sudah);
+
+          // "ditutup": drawer slams shut (lands on the word)
+          const close0 = T.ditutup - 0.24;
+          tl.to(plate, { y: 0, scale: 1, duration: 0.24, ease: "power3.in" }, close0);
+          tl.to(tray, { scaleY: 0.02, scaleX: 0.9, duration: 0.24, ease: "power3.in" }, close0);
+          tl.set(tray, { opacity: 0 }, T.ditutup);
+          tl.to(q("#s13-dshadow"), { opacity: 0, duration: 0.24, ease: "power2.in" }, close0);
+          // impact: shake + dust + shock + glow + punch
+          const shake = [[-7, 3], [6, -2], [-4, 2], [3, -1], [-1.5, 0.5], [0, 0]];
+          shake.forEach(([x, y], i) => tl.to(rig, { x, y, duration: 0.035, ease: "none" }, T.ditutup + i * 0.035));
+          tl.fromTo(q("#s13-shock"), { opacity: 0.95, scale: 0.4 }, { opacity: 0, scale: 1.9, duration: 0.6, ease: "power2.out", immediateRender: false }, T.ditutup);
+          tl.fromTo(q("#s13-glow"), { opacity: 0, scale: 0.6 }, { opacity: 0.85, scale: 1.1, duration: 0.2, ease: "power2.out", immediateRender: false }, T.ditutup - 0.03);
+          tl.to(q("#s13-glow"), { opacity: 0, duration: 0.6, ease: "power2.out" }, T.ditutup + 0.22);
+          dusts.forEach(([d, dx, dy, s], i) => {
+            tl.fromTo(d, { opacity: 0.9, x: 0, y: 0, scale: 0.4 }, { opacity: 0, x: dx, y: dy, scale: s, duration: 0.7 + (i % 3) * 0.1, ease: "power2.out", immediateRender: false }, T.ditutup + 0.01);
+          });
+          // engraved label cools to archive grey (closed, past)
+          tl.fromTo(q("#s13-engr"), { color: "#2b4a75" }, { color: "#5a687c", duration: 0.5, ease: "power2.out", immediateRender: false }, T.ditutup + 0.05);
+          // status lamp turns cool grey (now inactive)
+          tl.to(q("#s13-lamp"), { opacity: 0, duration: 0.15, ease: "none" }, T.ditutup + 0.05);
+          tl.to(q("#s13-lampOff"), { opacity: 1, duration: 0.15, ease: "none" }, T.ditutup + 0.05);
+          // grey/bronze seals clamp down over the seam
+          tl.to(q("#s13-haspL"), { rotationX: 0, opacity: 1, duration: 0.34, ease: "back.out(1.7)" }, T.ditutup + 0.08);
+          tl.to(q("#s13-haspR"), { rotationX: 0, opacity: 1, duration: 0.34, ease: "back.out(1.7)" }, T.ditutup + 0.16);
+
+          // "28": archive seal is stamped onto the tag (APEX) — slam from the camera
+          tl.fromTo(q("#s13-impsh"), { opacity: 0, scale: 2.4 }, { opacity: 0.9, scale: 1, duration: 0.2, ease: "power3.in", immediateRender: false }, T.d28 - 0.2);
+          tl.to(q("#s13-impsh"), { opacity: 0, scale: 1.2, duration: 0.3, ease: "power2.out" }, T.d28);
+          tl.fromTo(q("#s13-imp"), { opacity: 0, scale: 1.9, rotation: -18 }, { opacity: 0.9, scale: 1, rotation: -8, duration: 0.2, ease: "power3.in", immediateRender: false }, T.d28 - 0.2);
+          tl.to(q("#s13-imp"), { opacity: 0.8, duration: 0.6, ease: "power1.out" }, T.d28 + 0.2);
+          tl.fromTo(q("#s13-shock2"), { opacity: 0.95, scale: 0.35 }, { opacity: 0, scale: 1.8, duration: 0.6, ease: "power2.out", immediateRender: false }, T.d28);
+          tl.fromTo(q("#s13-glow"), { opacity: 0, scale: 0.5, x: 0, y: 49 }, { opacity: 0.9, scale: 0.9, x: 0, y: 49, duration: 0.18, ease: "power2.out", immediateRender: false }, T.d28 - 0.03);
+          tl.to(q("#s13-glow"), { opacity: 0, duration: 0.7, ease: "power2.out" }, T.d28 + 0.2);
+          tl.fromTo(rig, { scale: 1 }, { scale: 1.035, duration: 0.11, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, T.d28);
+          sparksA.forEach(([sp, dx, dy, s], i) => {
+            tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 }, { x: dx, y: dy, scale: s, opacity: 0, rotation: 90, duration: 0.7, ease: "power3.out", immediateRender: false }, T.d28 + i * 0.01);
+          });
+
+          // "September" / "2026": date wheels lock; final lock bar + sheen + small sparkle on 2026
+          tl.fromTo(q("#s13-lockbar"), { opacity: 0, scaleX: 0.2 }, { opacity: 1, scaleX: 1, duration: 0.28, ease: "power3.out", immediateRender: false }, T.y2026);
+          tl.fromTo(q("#s13-regSheen"), { x: 0 }, { x: 960, duration: 0.6, ease: "power2.inOut", immediateRender: false }, T.y2026 + 0.02);
+          tl.fromTo(q("#s13-dC"), { scale: 1 }, { scale: 1.03, duration: 0.1, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, T.y2026);
+          sparksB.forEach(([sp, dx, dy, s], i) => {
+            tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 }, { x: dx, y: dy * 0.6, scale: s * 0.8, opacity: 0, rotation: 90, duration: 0.65, ease: "power3.out", immediateRender: false }, T.y2026 + i * 0.012);
+          });
+          // calm hold to the cut: slow seal sheen breathe
+          tl.to(q("#s13-lblSheen"), { x: 0, duration: 0.01 }, 3.0);
+          tl.to(q("#s13-lblSheen"), { x: 900, duration: 0.7, ease: "power2.inOut" }, 3.2);
+
+          window.__timelines[ID] = tl;
         })();
       </script>
     </template>

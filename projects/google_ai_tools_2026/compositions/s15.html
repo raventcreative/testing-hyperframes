@@ -2,60 +2,185 @@
 <html>
   <head><meta charset="UTF-8" /></head>
   <body>
-    <!--
-      HOUSE STYLE SCENE TEMPLATE (Ice-Ivory Illustrated Diorama)
-      1. Copy to compositions/sNN.html and replace every "s15" with the scene id (s01, s02, ...).
-      2. Replace the placeholder hero (.s15-hero) with ONE detailed illustrated metaphor (SVG + CSS).
-      3. Keep the shared FX helpers (contact shadow, spotlight cone, far bokeh, apex burst) and retime them
-         to the scene's spoken words (scene-local seconds, 0 = scene start).
-      Rules: production/SCENE_CONTRACT (doc 12). No full-screen opaque background. Text only = spoken words.
-    -->
+    <!-- S15 "Jadi, jangan asal simpan daftar AI yang sudah lama." — a huge porcelain ring binder: the rings snap open on "jangan",
+         the outdated list sheets (abstract lines only) are yanked out from under three keeper chips on "sudah lama";
+         the three navy/ice chips stay and drop into their wells. -->
     <template>
       <style>
         #root { position: absolute; inset: 0; overflow: hidden; }
         .s15-abs { position: absolute; }
-        /* far plane: soft blurred porcelain discs (depth cue) */
+        /* far plane */
+        .s15-beam { left: -280px; top: -240px; width: 800px; height: 2000px; transform-origin: 50% 0%;
+          background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.7) 30%, rgba(232,240,251,0.3) 70%, rgba(255,255,255,0));
+          clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); filter: blur(26px); }
+        .s15-key { left: 40px; top: 420px; width: 1000px; height: 1000px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,0.92), rgba(232,240,251,0.5) 42%, rgba(232,240,251,0) 70%); }
         .s15-far { border-radius: 50%; filter: blur(7px); opacity: 0.65;
           background: radial-gradient(circle at 35% 30%, #ffffff, #e8f0fb 45%, #acc6e7 100%); box-shadow: 0 30px 50px -20px rgba(28,51,84,0.3); }
-        /* key light pool behind the hero */
-        .s15-key { left: -120px; top: 330px; width: 1100px; height: 1100px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0) 64%); }
-        /* spotlight cone (use on the key moment) */
-        .s15-cone { left: 190px; top: 400px; width: 700px; height: 820px; clip-path: polygon(41% 0, 59% 0, 100% 100%, 0 100%);
-          background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.6) 55%, rgba(255,255,255,0.85)); filter: blur(8px);
-          -webkit-mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 96%); mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 96%); }
-        /* HERO placeholder — replace with the illustrated metaphor */
-        .s15-hero { left: 240px; top: 640px; width: 600px; height: 520px; border-radius: 34px;
-          background: linear-gradient(172deg, #ffffff, #eef3fa); border: 2px solid rgba(41,75,119,0.10);
-          box-shadow: 0 2px 0 rgba(255,255,255,0.9) inset, 0 40px 70px -24px rgba(28,51,84,0.38), 0 10px 22px rgba(28,51,84,0.12); }
-        .s15-hero-inner { position: absolute; left: 60px; top: 70px; right: 60px; height: 260px; border-radius: 22px;
-          background: linear-gradient(135deg, #3a6299, #294b77 55%, #1f3a5f); box-shadow: inset 0 2px 0 rgba(255,255,255,0.25); }
-        /* contact shadow on the ground (light from upper-left -> shadow slightly right/below) */
-        .s15-shadow { left: 270px; top: 1150px; width: 580px; height: 80px; border-radius: 50%;
-          background: radial-gradient(ellipse, rgba(28,51,84,0.45), rgba(28,51,84,0.14) 45%, rgba(28,51,84,0) 72%); }
-        /* apex FX kit */
-        .s15-glow { left: 240px; top: 600px; width: 600px; height: 600px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(255,255,255,1), rgba(255,247,226,0.7) 30%, rgba(242,196,109,0.15) 52%, rgba(242,196,109,0) 70%); }
-        .s15-shock { left: 340px; top: 700px; width: 400px; height: 400px; border-radius: 50%;
+        .s15-farSheet { border-radius: 10px; filter: blur(6px); opacity: 0.5; background: linear-gradient(175deg, #fffefb, #ebe8df); box-shadow: 0 20px 30px -14px rgba(28,51,84,0.3); }
+        .s15-floor { left: 60px; top: 1360px; width: 960px; height: 180px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(28,51,84,0.22), rgba(28,51,84,0.08) 45%, rgba(28,51,84,0) 72%); }
+        /* camera */
+        .s15-cam { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% 40%; }
+        .s15-world { position: absolute; inset: 0; transform-style: preserve-3d; }
+        .s15-plane { position: absolute; left: 150px; top: 470px; width: 780px; height: 1000px; transform-style: preserve-3d; }
+        .s15-thick { position: absolute; inset: 0; border-radius: 34px; background: linear-gradient(160deg, #c9d6e8, #9fb3cf); }
+        .s15-board { position: absolute; inset: 0; border-radius: 34px;
+          background: linear-gradient(160deg, #ffffff 0%, #f7f9fc 40%, #e7edf6 100%);
+          border: 2px solid rgba(41,75,119,0.14);
+          box-shadow: inset 0 3px 0 #fff, inset 0 -6px 14px rgba(41,75,119,0.12), inset 4px 0 0 rgba(255,255,255,0.9); }
+        .s15-groove { position: absolute; left: 150px; top: 34px; right: 26px; bottom: 34px; border-radius: 22px;
+          border: 2px dashed rgba(41,75,119,0.16); box-shadow: inset 0 2px 4px rgba(28,51,84,0.08); }
+        .s15-emb { position: absolute; left: 180px; top: 70px; right: 60px; bottom: 70px; border-radius: 18px; opacity: 0.8;
+          background: repeating-linear-gradient(90deg, rgba(41,75,119,0.05) 0 1px, transparent 1px 40px), repeating-linear-gradient(0deg, rgba(41,75,119,0.05) 0 1px, transparent 1px 40px); }
+        .s15-corner { position: absolute; width: 64px; height: 64px;
+          background: linear-gradient(135deg, #ffffff, #c6d0dd 50%, #8b98aa); box-shadow: 0 2px 4px rgba(28,51,84,0.35); }
+        .s15-spine { position: absolute; left: 0; top: 0; width: 64px; height: 1000px; border-radius: 34px 0 0 34px;
+          background: linear-gradient(90deg, #1c3354 0%, #294b77 40%, #3a6299 75%, #294b77 100%);
+          box-shadow: inset -3px 0 6px rgba(0,0,0,0.25), inset 2px 0 0 rgba(255,255,255,0.25); }
+        .s15-spine i { position: absolute; left: 10px; right: 10px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.18); }
+        .s15-mech { position: absolute; left: 78px; top: 110px; width: 74px; height: 780px; border-radius: 37px;
+          background: linear-gradient(90deg, #8d9ab0 0%, #e9eef4 30%, #ffffff 45%, #c3cdda 70%, #7f8da3 100%);
+          box-shadow: 0 6px 10px -3px rgba(28,51,84,0.45), inset 0 2px 0 rgba(255,255,255,0.9); }
+        .s15-rivet { position: absolute; left: 30px; width: 14px; height: 14px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #ffffff, #b6c1cf 60%, #6e7c92); box-shadow: 0 1px 2px rgba(28,51,84,0.5); }
+        .s15-well { position: absolute; width: 166px; height: 166px; border-radius: 38px;
+          background: linear-gradient(160deg, #dfe7f2, #f4f7fb); box-shadow: inset 0 6px 12px rgba(28,51,84,0.25), inset 0 -2px 0 rgba(255,255,255,0.95), 0 1px 0 #fff; }
+        /* sheets */
+        .s15-sheet { position: absolute; left: 116px; top: 52px; width: 600px; height: 896px; border-radius: 10px;
+          background: linear-gradient(176deg, #fffdf7 0%, #f8f4ea 60%, #f1ecdf 100%);
+          box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 6px 10px -4px rgba(28,51,84,0.3), 0 1px 2px rgba(28,51,84,0.2); }
+        .s15-hole { position: absolute; left: 22px; width: 30px; height: 30px; border-radius: 50%;
+          background: radial-gradient(circle at 50% 40%, #e6ecf4, #cfd9e6); box-shadow: inset 0 3px 4px rgba(28,51,84,0.35); }
+        .s15-row { position: absolute; left: 92px; height: 34px; }
+        .s15-box { position: absolute; left: 0; top: 4px; width: 26px; height: 26px; border-radius: 7px; border: 3px solid rgba(46,46,46,0.2); }
+        .s15-ln { position: absolute; left: 46px; top: 11px; height: 12px; border-radius: 6px; background: rgba(46,46,46,0.15); }
+        .s15-strike { position: absolute; left: 40px; top: 16px; height: 2.5px; background: rgba(46,46,46,0.35); border-radius: 2px; }
+        .s15-hdr { position: absolute; left: 92px; top: 64px; width: 250px; height: 22px; border-radius: 11px; background: rgba(46,46,46,0.2); }
+        .s15-hdr2 { position: absolute; left: 92px; top: 100px; width: 150px; height: 12px; border-radius: 6px; background: rgba(46,46,46,0.12); }
+        .s15-tab { position: absolute; right: -50px; width: 62px; height: 92px; border-radius: 0 14px 14px 0;
+          box-shadow: 4px 4px 8px -3px rgba(28,51,84,0.35), inset 0 2px 0 rgba(255,255,255,0.6); }
+        .s15-tab i { position: absolute; left: 22px; top: 22px; width: 8px; height: 48px; border-radius: 4px; background: rgba(255,255,255,0.75); }
+        .s15-dog { position: absolute; right: 0; bottom: 0; width: 70px; height: 70px; border-radius: 0 0 10px 0;
+          background: linear-gradient(315deg, rgba(0,0,0,0) 50%, #e8e2d3 50%, #fbf8f1 100%); box-shadow: -3px -3px 6px -2px rgba(28,51,84,0.25); }
+        .s15-stain { position: absolute; border-radius: 50%; border: 5px solid rgba(160,140,100,0.08); }
+        .s15-scan { position: absolute; left: 80px; width: 470px; height: 40px; border-radius: 12px;
+          background: linear-gradient(90deg, rgba(172,198,231,0), rgba(172,198,231,0.55) 30%, rgba(172,198,231,0.55) 70%, rgba(172,198,231,0)); }
+        /* chips */
+        .s15-chip { position: absolute; width: 150px; height: 150px; transform-style: preserve-3d; }
+        .s15-csh { position: absolute; left: -10px; top: 6px; width: 170px; height: 170px; border-radius: 44px;
+          background: radial-gradient(ellipse at 55% 55%, rgba(28,51,84,0.55), rgba(28,51,84,0.18) 50%, rgba(28,51,84,0) 72%); }
+        .s15-cl { position: absolute; inset: 0; border-radius: 36px; }
+        .s15-cface { position: absolute; inset: 0; border-radius: 36px; overflow: hidden; }
+        .s15-cface.s15-navy { background: linear-gradient(150deg, #5b80b5 0%, #3a6299 30%, #294b77 65%, #1c3354 100%);
+          box-shadow: inset 0 3px 0 rgba(255,255,255,0.45), inset 0 -5px 8px rgba(0,0,0,0.3), inset 0 0 0 4px rgba(203,219,244,0.55); }
+        .s15-cface.s15-ice { background: linear-gradient(150deg, #ffffff 0%, #e8f0fb 35%, #cbdbf4 70%, #acc6e7 100%);
+          box-shadow: inset 0 3px 0 #fff, inset 0 -5px 8px rgba(41,75,119,0.25), inset 0 0 0 4px rgba(255,255,255,0.8); }
+        .s15-cface svg { position: absolute; left: 25px; top: 25px; width: 100px; height: 100px; }
+        .s15-chl { position: absolute; left: -40px; top: -60px; width: 140px; height: 120px; border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(255,255,255,0.65), rgba(255,255,255,0) 70%); }
+        .s15-ring { position: absolute; width: 0; height: 0; }
+        .s15-chk { position: absolute; right: -14px; top: -14px; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+          background: linear-gradient(160deg, #bfe9da, #9fd8c4); border: 3px solid #ffffff; box-shadow: 0 8px 14px -5px rgba(28,51,84,0.45); }
+        /* fx */
+        .s15-fx { position: absolute; inset: 0; pointer-events: none; }
+        .s15-glow { width: 760px; height: 760px; margin-left: -380px; margin-top: -380px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,1), rgba(255,247,226,0.6) 28%, rgba(172,198,231,0.22) 52%, rgba(172,198,231,0) 70%); }
+        .s15-flash { width: 600px; height: 600px; margin-left: -300px; margin-top: -300px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(232,240,251,0.6) 40%, rgba(232,240,251,0) 70%); }
+        .s15-shock { width: 400px; height: 400px; margin-left: -200px; margin-top: -200px; border-radius: 50%;
           border: 5px solid rgba(255,255,255,0.95); box-shadow: 0 0 30px rgba(172,198,231,0.9), inset 0 0 24px rgba(172,198,231,0.7); }
-        .s15-spark { width: 56px; height: 56px; }
-        .s15-check { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-          background: linear-gradient(160deg, #bfe9da, #9fd8c4); border: 3px solid #ffffff; box-shadow: 0 10px 18px -6px rgba(28,51,84,0.4); }
+        .s15-spk { width: 0; height: 0; }
+        .s15-spk svg { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; overflow: visible; }
+        .s15-fg { border-radius: 50%; filter: blur(12px);
+          background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(203,219,244,0.7) 50%, rgba(172,198,231,0)); }
+        .s15-fgSheet { border-radius: 10px; filter: blur(9px); opacity: 0.75; background: linear-gradient(175deg, #fffefb, #efeadf); box-shadow: 0 30px 40px -20px rgba(28,51,84,0.35); }
+        .s15-mote { width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle, #ffffff, rgba(203,219,244,0.6) 60%, rgba(203,219,244,0)); }
       </style>
       <div id="root" data-composition-id="s15" data-width="1080" data-height="1920">
+        <div class="s15-abs s15-beam" id="s15-beam"></div>
         <div class="s15-abs s15-key"></div>
-        <div class="s15-abs s15-far" style="left:70px;top:780px;width:110px;height:110px"></div>
-        <div class="s15-abs s15-far" style="left:905px;top:860px;width:84px;height:84px"></div>
-        <div class="s15-abs s15-far" style="left:920px;top:1230px;width:120px;height:120px"></div>
-        <div class="s15-abs s15-cone"></div>
-        <div class="s15-abs s15-world" style="inset:0">
-          <div class="s15-abs s15-shadow"></div>
-          <div class="s15-abs s15-glow"></div>
-          <div class="s15-abs s15-hero"><div class="s15-hero-inner"></div></div>
-          <div class="s15-abs s15-shock"></div>
-          <div class="s15-abs s15-check" style="left:792px;top:612px">
-            <svg width="34" height="34" viewBox="0 0 34 34"><path d="M7 18 L14 25 L27 10" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="s15-abs" id="s15-farp" style="inset:0">
+          <div class="s15-abs s15-far" style="left:60px;top:440px;width:120px;height:120px"></div>
+          <div class="s15-abs s15-far" style="left:930px;top:560px;width:90px;height:90px"></div>
+          <div class="s15-abs s15-farSheet" style="left:-40px;top:900px;width:150px;height:200px;transform:rotate(-12deg)"></div>
+          <div class="s15-abs s15-farSheet" style="left:960px;top:1080px;width:140px;height:190px;transform:rotate(10deg)"></div>
+          <div class="s15-abs s15-far" style="left:900px;top:1300px;width:120px;height:120px"></div>
+        </div>
+        <div class="s15-abs s15-floor" id="s15-floor"></div>
+
+        <div class="s15-cam">
+          <div class="s15-world" id="s15-world">
+            <div class="s15-plane" id="s15-plane">
+              <div class="s15-thick" style="transform:translateZ(-22px)"></div>
+              <div class="s15-thick" style="transform:translateZ(-11px)"></div>
+              <div class="s15-board">
+                <div class="s15-emb"></div>
+                <div class="s15-groove"></div>
+                <div class="s15-corner" style="right:0;top:0;border-radius:0 34px 0 0;clip-path:polygon(0 0,100% 0,100% 100%)"></div>
+                <div class="s15-corner" style="right:0;bottom:0;border-radius:0 0 34px 0;clip-path:polygon(100% 0,100% 100%,0 100%)"></div>
+              </div>
+              <div class="s15-spine" id="s15-spine"></div>
+              <div class="s15-mech" style="transform:translateZ(3px)">
+                <div class="s15-rivet" style="top:40px"></div><div class="s15-rivet" style="top:726px"></div>
+              </div>
+              <!-- wells where the keeper chips land -->
+              <div class="s15-well" style="left:192px;top:487px"></div>
+              <div class="s15-well" style="left:372px;top:487px"></div>
+              <div class="s15-well" style="left:552px;top:487px"></div>
+              <div class="s15-abs" style="left:200px;top:680px;width:510px;height:8px;border-radius:4px;background:rgba(41,75,119,0.12)"></div>
+              <!-- outdated list sheets (abstract lines only) -->
+              <div id="s15-sheets" style="position:absolute;inset:0;transform-style:preserve-3d"></div>
+              <!-- ring lever -->
+              <div class="s15-abs" id="s15-lever" style="left:96px;top:60px;width:38px;height:70px;border-radius:19px;background:linear-gradient(90deg,#8d9ab0,#ffffff 45%,#9aa7ba);box-shadow:0 6px 8px -2px rgba(28,51,84,0.45);transform-origin:50% 100%"></div>
+              <div id="s15-rings" style="position:absolute;inset:0;transform-style:preserve-3d"></div>
+              <!-- keeper chips -->
+              <div class="s15-chip" id="s15-c1" style="left:200px;top:495px">
+                <div class="s15-csh"></div>
+                <div class="s15-cl" style="transform:translateZ(3px);background:#1c3354"></div>
+                <div class="s15-cl" style="transform:translateZ(7px);background:#22406a"></div>
+                <div class="s15-cl" style="transform:translateZ(11px);background:#294b77"></div>
+                <div class="s15-cface s15-navy" style="transform:translateZ(15px)">
+                  <div class="s15-chl"></div>
+                  <svg viewBox="0 0 100 100"><path d="M50 10 C52 38 62 48 90 50 C62 52 52 62 50 90 C48 62 38 52 10 50 C38 48 48 38 50 10Z" fill="#ffffff" /><circle cx="78" cy="24" r="6" fill="#cbdbf4" /></svg>
+                </div>
+                <div class="s15-chk" style="transform:translateZ(22px)"><svg width="26" height="26" viewBox="0 0 34 34"><path d="M8 18 L14 24 L27 10" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              </div>
+              <div class="s15-chip" id="s15-c2" style="left:380px;top:495px">
+                <div class="s15-csh"></div>
+                <div class="s15-cl" style="transform:translateZ(3px);background:#8eabd4"></div>
+                <div class="s15-cl" style="transform:translateZ(7px);background:#a3bce0"></div>
+                <div class="s15-cl" style="transform:translateZ(11px);background:#b8cdea"></div>
+                <div class="s15-cface s15-ice" style="transform:translateZ(15px)">
+                  <div class="s15-chl"></div>
+                  <svg viewBox="0 0 100 100"><path d="M24 78 L74 22" stroke="#294b77" stroke-width="8" stroke-linecap="round" /><circle cx="76" cy="20" r="7" fill="none" stroke="#294b77" stroke-width="4" /><path d="M16 60 Q30 46 44 60 T72 60" fill="none" stroke="#3a6299" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round" /></svg>
+                </div>
+                <div class="s15-chk" style="transform:translateZ(22px)"><svg width="26" height="26" viewBox="0 0 34 34"><path d="M8 18 L14 24 L27 10" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              </div>
+              <div class="s15-chip" id="s15-c3" style="left:560px;top:495px">
+                <div class="s15-csh"></div>
+                <div class="s15-cl" style="transform:translateZ(3px);background:#1c3354"></div>
+                <div class="s15-cl" style="transform:translateZ(7px);background:#22406a"></div>
+                <div class="s15-cl" style="transform:translateZ(11px);background:#294b77"></div>
+                <div class="s15-cface s15-navy" style="transform:translateZ(15px)">
+                  <div class="s15-chl"></div>
+                  <svg viewBox="0 0 100 100"><ellipse cx="50" cy="52" rx="38" ry="15" fill="none" stroke="#cbdbf4" stroke-width="5" transform="rotate(-24 50 52)" /><circle cx="50" cy="52" r="14" fill="#ffffff" /><circle cx="82" cy="36" r="6" fill="#ffffff" /></svg>
+                </div>
+                <div class="s15-chk" style="transform:translateZ(22px)"><svg width="26" height="26" viewBox="0 0 34 34"><path d="M8 18 L14 24 L27 10" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div class="s15-fx">
+          <div class="s15-abs s15-flash" id="s15-flash" style="left:300px;top:900px"></div>
+          <div class="s15-abs s15-shock" id="s15-shockA" style="left:300px;top:900px"></div>
+          <div class="s15-abs s15-glow" id="s15-glow" style="left:560px;top:1040px"></div>
+          <div class="s15-abs s15-shock" id="s15-shockB" style="left:560px;top:1040px"></div>
+          <div id="s15-spks"></div>
+          <div id="s15-motes"></div>
+          <div class="s15-abs s15-fgSheet" id="s15-fgS" style="left:-70px;top:1500px;width:260px;height:330px;transform:rotate(-16deg)"></div>
+          <div class="s15-abs s15-fg" id="s15-fg2" style="left:930px;top:420px;width:160px;height:160px"></div>
         </div>
       </div>
       <script>
@@ -64,47 +189,171 @@
           const R = document.querySelector('[data-composition-id="' + ID + '"]');
           const q = (s) => R.querySelector(s), qa = (s) => R.querySelectorAll(s);
           const tl = gsap.timeline({ paused: true });
-          const DUR = 3.2667;                 // = host slot data-duration
-          const T = { apex: 1.2 };         // scene-local word times (key action lands on the word)
-
-          // seeded PRNG for sparkle placement (never Math.random)
-          let seed = 7;
+          const DUR = 3.2667;
+          // verified local word starts
+          const T = { jadi: 0.11, jangan: 0.62, asal: 0.9, simpan: 1.17, daftar: 1.59, ai: 1.88, yang: 2.17, sudah: 2.41, lama: 2.67 };
+          const mk = (tag, cls, parent, css) => { const e = document.createElement(tag); if (cls) e.className = cls; if (css) e.style.cssText = css; parent.appendChild(e); return e; };
+          let seed = 1515;
           const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-          const STAR = '<svg viewBox="0 0 40 40" width="100%" height="100%"><path d="M20 2 C21 14 26 19 38 20 C26 21 21 26 20 38 C19 26 14 21 2 20 C14 19 19 14 20 2Z" fill="#ffffff" stroke="#acc6e7" stroke-width="1.5"/></svg>';
-          const sparks = [];
-          for (let i = 0; i < 10; i++) {
-            const sp = document.createElement("div");
-            sp.className = "s15-abs s15-spark"; sp.innerHTML = STAR;
-            sp.style.left = 515 + "px"; sp.style.top = 875 + "px";
-            q(".s15-world").appendChild(sp);
-            const a = (i / 10) * Math.PI * 2 + rnd() * 0.4, r = 220 + rnd() * 160;
-            sparks.push([sp, Math.cos(a) * r, Math.sin(a) * r]);
+
+          // spine ribs
+          for (let i = 0; i < 9; i++) mk("i", "", q("#s15-spine"), "top:" + (90 + i * 102) + "px");
+
+          // ---------- sheets ----------
+          const RINGY = [210, 500, 790];
+          const TABC = ["linear-gradient(180deg,#cbdbf4,#acc6e7)", "linear-gradient(180deg,#3a6299,#294b77)", "linear-gradient(180deg,#e8f0fb,#cbdbf4)", "linear-gradient(180deg,#bfe0d4,#9fd8c4)"];
+          const sheets = [];
+          for (let s = 0; s < 4; s++) {
+            const sh = mk("div", "s15-sheet", q("#s15-sheets"));
+            const rot = [-1.6, 1.2, -0.6, 0.4][s], dx = [10, -6, 4, 0][s], dy = [8, -4, 4, 0][s];
+            tl.set(sh, { x: dx, y: dy, rotation: rot, z: 2 + s * 2 }, 0);
+            RINGY.forEach((y) => mk("div", "s15-hole", sh, "top:" + (y - 52 - 15) + "px"));
+            mk("div", "s15-tab", sh, "top:" + (120 + s * 150) + "px;background:" + TABC[s]).appendChild(document.createElement("i"));
+            if (s < 3) {
+              mk("div", "s15-hdr", sh, "opacity:0.6;width:" + (180 + s * 30) + "px");
+              for (let r = 0; r < 12; r++) {
+                const row = mk("div", "s15-row", sh, "top:" + (160 + r * 56) + "px;width:440px;opacity:0.7");
+                mk("div", "s15-box", row);
+                mk("div", "s15-ln", row, "width:" + (160 + rnd() * 240).toFixed(0) + "px");
+              }
+            }
+            if (s === 3) {
+              mk("div", "s15-hdr", sh); mk("div", "s15-hdr2", sh);
+              const rows = [];
+              for (let r = 0; r < 14; r++) {
+                const row = mk("div", "s15-row", sh, "top:" + (150 + r * 50) + "px;width:440px");
+                mk("div", "s15-box", row);
+                const w = 180 + rnd() * 240;
+                mk("div", "s15-ln", row, "width:" + w.toFixed(0) + "px");
+                if (r % 4 === 1) mk("div", "s15-strike", row, "width:" + (w + 12).toFixed(0) + "px");
+                rows.push(row);
+              }
+              mk("div", "s15-stain", sh, "left:400px;top:700px;width:120px;height:120px");
+              mk("div", "s15-dog", sh);
+              const scan = mk("div", "s15-scan", sh, "top:140px");
+              sh._rows = rows; sh._scan = scan;
+            }
+            sheets.push(sh);
           }
+          const top = sheets[3];
 
-          // initial hidden states (set FIRST; later fromTo tweens use immediateRender:false)
-          tl.set([q(".s15-shock"), q(".s15-glow"), q(".s15-cone")], { opacity: 0 }, 0);
-          tl.set(q(".s15-check"), { scale: 0 }, 0);
-          tl.set(sparks.map((s) => s[0]), { opacity: 0 }, 0);
-
-          // frame 0 is never empty: hero already rising, slow push-in all scene
-          tl.fromTo(q(".s15-world"), { scale: 1 }, { scale: 1.07, duration: DUR, ease: "none" }, 0);
-          tl.fromTo(q(".s15-hero"), { y: 60, rotation: -2 }, { y: 0, rotation: 0, duration: 0.5, ease: "power3.out" }, 0);
-          tl.fromTo(q(".s15-shadow"), { scaleX: 0.8, opacity: 0.5 }, { scaleX: 1, opacity: 1, duration: 0.5, ease: "power3.out" }, 0);
-          tl.fromTo(qa(".s15-far"), { y: 0 }, { y: -40, duration: DUR, ease: "none" }, 0);   // far plane parallax (slower)
-          tl.fromTo(q(".s15-cone"), { opacity: 0 }, { opacity: 0.9, duration: 0.4, ease: "power2.out", immediateRender: false }, T.apex - 0.3);
-
-          // APEX on the spoken word: glow + shockwave + sparkles + scale punch + mint check
-          tl.fromTo(q(".s15-glow"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1.1, duration: 0.25, ease: "power2.out", immediateRender: false }, T.apex - 0.03);
-          tl.to(q(".s15-glow"), { opacity: 0.35, duration: 0.8, ease: "power2.out" }, T.apex + 0.25);
-          tl.fromTo(q(".s15-shock"), { opacity: 0.95, scale: 0.4 }, { opacity: 0, scale: 1.8, duration: 0.6, ease: "power2.out", immediateRender: false }, T.apex);
-          tl.fromTo(q(".s15-hero"), { scale: 1 }, { scale: 1.045, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, T.apex);
-          tl.fromTo(q(".s15-check"), { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.4, ease: "back.out(1.8)", immediateRender: false }, T.apex + 0.05);
-          sparks.forEach(([sp, dx, dy], i) => {
-            tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 },
-              { x: dx, y: dy, scale: 0.6 + (i % 3) * 0.25, opacity: 0, rotation: 90, duration: 0.7, ease: "power3.out", immediateRender: false }, T.apex + i * 0.012);
+          // ---------- rings (two chrome half-loops each) ----------
+          const ringSVG = (half) => {
+            const d = half === 0 ? "M0 0 C 0 -62, 12 -92, 31 -92" : "M0 0 C 0 -62, -12 -92, -31 -92";
+            return '<svg width="160" height="120" viewBox="-80 -100 160 120" style="position:absolute;left:-80px;top:-100px;overflow:visible">' +
+              '<path d="' + d + '" fill="none" stroke="rgba(28,51,84,0.35)" stroke-width="16" stroke-linecap="round" transform="translate(4 6)"/>' +
+              '<path d="' + d + '" fill="none" stroke="#8592a6" stroke-width="15" stroke-linecap="round"/>' +
+              '<path d="' + d + '" fill="none" stroke="#e8edf3" stroke-width="9" stroke-linecap="round"/>' +
+              '<path d="' + d + '" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" transform="translate(-2 -2)"/></svg>';
+          };
+          const rings = [];
+          RINGY.forEach((y) => {
+            // each half stands up out of the board (rotationX -90); the inner element opens/closes in the ring's own plane
+            const oa = mk("div", "s15-ring", q("#s15-rings"), "left:99px;top:" + y + "px");
+            const ob = mk("div", "s15-ring", q("#s15-rings"), "left:161px;top:" + y + "px");
+            const a = mk("div", "s15-ring", oa), b = mk("div", "s15-ring", ob);
+            a.innerHTML = ringSVG(0); b.innerHTML = ringSVG(1);
+            tl.set([oa, ob], { z: 4, rotationX: -48 }, 0);
+            tl.set([a, b], { rotation: 0, x: 0 }, 0);
+            rings.push([a, b]);
           });
 
-          window.__timelines[ID] = tl; // register LAST
+          // ---------- sparks / motes ----------
+          const STAR = '<svg viewBox="0 0 40 40"><path d="M20 2 C21 14 26 19 38 20 C26 21 21 26 20 38 C19 26 14 21 2 20 C14 19 19 14 20 2Z" fill="#ffffff" stroke="#acc6e7" stroke-width="1.5"/></svg>';
+          const STARA = '<svg viewBox="0 0 40 40"><path d="M20 2 C21 14 26 19 38 20 C26 21 21 26 20 38 C19 26 14 21 2 20 C14 19 19 14 20 2Z" fill="#fff7e2" stroke="#f2c46d" stroke-width="1.5"/></svg>';
+          const mkSparks = (n, cx, cy, r0, r1, amber) => {
+            const arr = [];
+            for (let i = 0; i < n; i++) {
+              const sp = mk("div", "s15-abs s15-spk", q("#s15-spks"), "left:" + cx + "px;top:" + cy + "px");
+              sp.innerHTML = amber && i % 5 === 2 ? STARA : STAR;
+              const a = (i / n) * Math.PI * 2 + rnd() * 0.5, r = r0 + rnd() * (r1 - r0);
+              arr.push([sp, Math.cos(a) * r, Math.sin(a) * r * 0.85, 0.45 + rnd() * 0.65]);
+            }
+            return arr;
+          };
+          const spA = mkSparks(10, 300, 900, 140, 260, false), spB = mkSparks(16, 560, 1040, 220, 380, true);
+          for (let i = 0; i < 14; i++) {
+            const m = mk("div", "s15-abs s15-mote", q("#s15-motes"), "left:" + (80 + rnd() * 920).toFixed(0) + "px;top:" + (420 + rnd() * 1160).toFixed(0) + "px;opacity:" + (0.4 + rnd() * 0.5).toFixed(2));
+            tl.set(m, { scale: 0.6 + rnd() * 1.4 }, 0);
+            tl.fromTo(m, { x: 0, y: 0 }, { x: (rnd() - 0.5) * 50, y: -30 - rnd() * 60, duration: DUR, ease: "none" }, 0);
+          }
+
+          // ---------- initial states ----------
+          const world = q("#s15-world"), plane = q("#s15-plane"), chips = [q("#s15-c1"), q("#s15-c2"), q("#s15-c3")];
+          tl.set([q("#s15-flash"), q("#s15-shockA"), q("#s15-glow"), q("#s15-shockB")], { opacity: 0 }, 0);
+          tl.set(spA.concat(spB).map((s) => s[0]), { opacity: 0 }, 0);
+          tl.set(world, { transformOrigin: "540px 1000px" }, 0);
+          tl.set(plane, { transformOrigin: "50% 50%" }, 0);
+          chips.forEach((c, i) => tl.set(c, { z: 14, rotation: [-4, 2, 5][i], transformOrigin: "50% 50%" }, 0));
+          tl.set(top._scan, { opacity: 0, y: 0 }, 0);
+          tl.set(q("#s15-lever"), { rotation: 0, z: 6 }, 0);
+          tl.set(top.querySelector(".s15-dog"), { transformOrigin: "100% 100%", scale: 1 }, 0);
+
+          // ---------- entry (frame 0 populated) ----------
+          tl.fromTo(world, { scale: 1 }, { scale: 1.06, duration: DUR, ease: "none" }, 0);
+          tl.fromTo(plane, { y: 150, rotationX: 44, rotationY: -4, rotationZ: -6 }, { y: 0, rotationX: 26, rotationY: -10, rotationZ: 2, duration: 0.6, ease: "power3.out" }, 0);
+          tl.fromTo(q("#s15-floor"), { scaleX: 0.8, opacity: 0.5 }, { scaleX: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, 0);
+          tl.fromTo(q("#s15-farp"), { y: 0 }, { y: -36, duration: DUR, ease: "none" }, 0);
+          tl.fromTo(q("#s15-beam"), { rotation: -4 }, { rotation: 3, duration: DUR, ease: "sine.inOut" }, 0);
+          tl.fromTo([q("#s15-fgS"), q("#s15-fg2")], { y: 0 }, { y: -120, duration: DUR, ease: "none" }, 0);
+          chips.forEach((c, i) => tl.fromTo(c, { z: 70, y: -30 }, { z: 14, y: 0, duration: 0.45, ease: "back.out(1.5)", immediateRender: false }, 0.04 + i * 0.06));
+
+          // "jangan": PUNCH — lever flips, rings snap open, flash + shock + sparks
+          const J = T.jangan;
+          tl.to(q("#s15-lever"), { rotation: -38, duration: 0.1, ease: "power3.in" }, J - 0.08);
+          rings.forEach(([a, b], i) => {
+            tl.to(a, { rotation: -34, x: -8, duration: 0.12, ease: "back.out(2.2)" }, J + i * 0.015);
+            tl.to(b, { rotation: 34, x: 10, duration: 0.12, ease: "back.out(2.2)" }, J + i * 0.015);
+          });
+          tl.fromTo(q("#s15-flash"), { opacity: 0, scale: 0.6 }, { opacity: 0.9, scale: 1.05, duration: 0.15, ease: "power2.out", immediateRender: false }, J - 0.03);
+          tl.to(q("#s15-flash"), { opacity: 0, duration: 0.5, ease: "power2.out" }, J + 0.15);
+          tl.fromTo(q("#s15-shockA"), { opacity: 0.95, scale: 0.4 }, { opacity: 0, scale: 1.8, duration: 0.6, ease: "power2.out", immediateRender: false }, J);
+          tl.fromTo(plane, { scale: 1 }, { scale: 1.05, duration: 0.11, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, J);
+          sheets.forEach((sh, s) => tl.to(sh, { z: 4 + s * 3, duration: 0.18, ease: "power2.out" }, J + 0.02));
+          spA.forEach(([sp, dx, dy, s], i) => tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 }, { x: dx, y: dy, scale: s, opacity: 0, rotation: 90, duration: 0.6, ease: "power3.out", immediateRender: false }, J + i * 0.012));
+
+          // "asal" / "simpan": the stack riffles and gets a first tug
+          tl.to(top.querySelector(".s15-dog"), { scale: 1.25, duration: 0.18, ease: "sine.inOut", yoyo: true, repeat: 1 }, T.asal);
+          sheets.forEach((sh, s) => tl.to(sh, { x: "+=14", duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1 }, T.simpan + s * 0.02));
+          // "daftar": stale-list scan — rows fade as the scanner passes
+          tl.to(top._scan, { opacity: 1, duration: 0.08, ease: "none" }, T.daftar - 0.08);
+          tl.to(top._scan, { y: 690, duration: 0.55, ease: "power1.inOut" }, T.daftar - 0.08);
+          tl.to(top._scan, { opacity: 0, duration: 0.1, ease: "none" }, T.daftar + 0.47);
+          top._rows.forEach((r, i) => tl.to(r, { opacity: 0.45, duration: 0.12, ease: "none" }, T.daftar - 0.05 + i * 0.038));
+          // "AI": keeper chips glint
+          chips.forEach((c, i) => tl.fromTo(c.querySelector(".s15-chl"), { x: 0, y: 0 }, { x: 260, y: 230, duration: 0.5, ease: "power2.inOut", immediateRender: false }, T.ai + i * 0.06));
+          chips.forEach((c, i) => tl.to(c, { z: 30, duration: 0.2, ease: "power2.out", yoyo: true, repeat: 1 }, T.ai + i * 0.05));
+          // "yang": wind-up
+          sheets.forEach((sh) => tl.to(sh, { x: "-=16", duration: 0.2, ease: "power2.out" }, T.yang));
+          // "sudah lama": the old list is yanked out from under the chips
+          chips.forEach((c) => tl.to(c, { z: 44, duration: 0.14, ease: "power2.out" }, T.sudah - 0.14));
+          [3, 2, 1, 0].forEach((s, k) => {
+            tl.to(sheets[s], { x: 980, y: 30 + k * 16, z: 30, rotation: 7 + k * 2, duration: 0.3, ease: "power3.in" }, T.sudah - 0.04 + k * 0.05);
+          });
+          chips.forEach((c, i) => {
+            tl.to(c, { z: 0, rotation: 0, duration: 0.14, ease: "power2.in" }, T.lama - 0.14 + i * 0.012);
+            tl.to(c, { z: 10, duration: 0.1, ease: "power2.out" }, T.lama + 0.0 + i * 0.012);
+            tl.to(c, { z: 4, duration: 0.2, ease: "bounce.out" }, T.lama + 0.1 + i * 0.012);
+          });
+          // APEX on "lama": keeper chips settle — glow + shock + sparkle + punch
+          tl.fromTo(q("#s15-glow"), { opacity: 0, scale: 0.6 }, { opacity: 0.95, scale: 1.1, duration: 0.25, ease: "power2.out", immediateRender: false }, T.lama - 0.03);
+          tl.to(q("#s15-glow"), { opacity: 0.3, duration: 0.5, ease: "power2.out" }, T.lama + 0.25);
+          tl.fromTo(q("#s15-shockB"), { opacity: 0.95, scale: 0.4 }, { opacity: 0, scale: 1.9, duration: 0.55, ease: "power2.out", immediateRender: false }, T.lama);
+          spB.forEach(([sp, dx, dy, s], i) => tl.fromTo(sp, { x: 0, y: 0, scale: 0, opacity: 1, rotation: 0 }, { x: dx, y: dy, scale: s, opacity: 0, rotation: 90, duration: 0.55, ease: "power3.out", immediateRender: false }, T.lama + i * 0.01));
+          // mint "keeper" checks pop on the three chips
+          chips.forEach((c, i) => {
+            const k = c.querySelector(".s15-chk");
+            tl.set(k, { scale: 0, rotation: -40 }, 0);
+            tl.to(k, { scale: 1, rotation: 0, duration: 0.32, ease: "back.out(1.8)" }, T.lama + 0.1 + i * 0.07);
+          });
+          // rings close again around nothing (clean binder) just before the cut
+          rings.forEach(([a, b], i) => {
+            tl.to(a, { rotation: 0, x: 0, duration: 0.16, ease: "back.out(2)" }, T.lama + 0.2 + i * 0.02);
+            tl.to(b, { rotation: 0, x: 0, duration: 0.16, ease: "back.out(2)" }, T.lama + 0.2 + i * 0.02);
+          });
+          tl.to(q("#s15-lever"), { rotation: 0, duration: 0.14, ease: "back.out(2)" }, T.lama + 0.2);
+
+          window.__timelines[ID] = tl;
         })();
       </script>
     </template>

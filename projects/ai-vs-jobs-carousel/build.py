@@ -1,33 +1,33 @@
 # Builds carousel.html: draws the AI vs Jobs chart from real monthly data (data/*.csv).
-# Job openings: BLS JOLTS (FRED series JTSJOL), thousands. S&P 500: monthly average (datasets/s-and-p-500).
+# Job openings: BLS JOLTS (FRED series JTSJOL, latest vintage), thousands. S&P 500: monthly average (datasets/s-and-p-500).
 import csv
 from pathlib import Path
 
 d = Path(__file__).parent
-START, END = "2003-01-01", "2025-02-01"
+START, END = "2003-01-01", "2026-09-01"
 CHATGPT = 2022 + 10 / 12 + 29 / 365  # 30 Nov 2022
 
 def series(path, key, val):
     rows = [r for r in csv.DictReader(open(d / path)) if START <= r[key] <= END]
     return [(int(r[key][:4]) + (int(r[key][5:7]) - 1) / 12, float(r[val])) for r in rows]
 
-jobs = series("data/jolts.csv", "observation_date", "JTSJOL")   # thousands
+jobs = series("data/jolts.csv", "date", "value")   # thousands
 spx = series("data/spx.csv", "Date", "SP500")
 
 # plot box inside the chart svg
-W, H, L, R, T, B = 860, 560, 70, 70, 70, 60
-x0, x1 = 2003, 2025 + 1 / 12
+W, H, L, R, T, B = 860, 520, 70, 70, 70, 60
+x0, x1 = 2003, 2026 + 8 / 12
 def X(t): return L + (t - x0) / (x1 - x0) * (W - L - R)
-def YJ(v): return T + (1 - v / 13000) * (H - T - B)      # jobs: 0–13M
-def YS(v): return T + (1 - v / 6500) * (H - T - B)       # S&P: 0–6,500
+def YJ(v): return T + (1 - v / 16000) * (H - T - B)      # jobs: 0–16M
+def YS(v): return T + (1 - v / 8000) * (H - T - B)       # S&P: 0–8,000
 
 def path(pts, fy):
     return "M" + " L".join(f"{X(t):.1f},{fy(v):.1f}" for t, v in pts)
 
-grid = "".join(f'<line x1="{L}" x2="{W-R}" y1="{YJ(v):.1f}" y2="{YJ(v):.1f}" class="gr"/>' for v in (0, 4000, 8000, 12000))
-ylab = "".join(f'<text x="{L-14}" y="{YJ(v)+7:.1f}" text-anchor="end" class="ax">{v//1000}M</text>' for v in (0, 4000, 8000, 12000))
-ylab += "".join(f'<text x="{W-R+14}" y="{YS(v)+7:.1f}" class="ax">{v:,}</text>' for v in (0, 2000, 4000, 6000))
-xlab = "".join(f'<text x="{X(y):.1f}" y="{H-B+38}" text-anchor="middle" class="ax">{y}</text>' for y in range(2003, 2026, 4))
+grid = "".join(f'<line x1="{L}" x2="{W-R}" y1="{YJ(v):.1f}" y2="{YJ(v):.1f}" class="gr"/>' for v in (0, 4000, 8000, 12000, 16000))
+ylab = "".join(f'<text x="{L-14}" y="{YJ(v)+7:.1f}" text-anchor="end" class="ax">{v//1000}M</text>' for v in (0, 4000, 8000, 12000, 16000))
+ylab += "".join(f'<text x="{W-R+14}" y="{YS(v)+7:.1f}" class="ax">{v:,}</text>' for v in (0, 2000, 4000, 6000, 8000))
+xlab = "".join(f'<text x="{X(y):.1f}" y="{H-B+38}" text-anchor="middle" class="ax">{y}</text>' for y in (2003, 2007, 2011, 2015, 2019, 2023, 2026))
 cx = X(CHATGPT)
 jx, jy = X(jobs[-1][0]), YJ(jobs[-1][1])
 sx, sy = X(spx[-1][0]), YS(spx[-1][1])

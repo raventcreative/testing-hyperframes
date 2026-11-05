@@ -1,12 +1,183 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s10" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s10-abs { position: absolute; }
+    .s10-far { left: -40px; top: 440px; width: 1160px; color: rgba(227,237,250,.07); font: 700 62px/1.28 Poppins, sans-serif; filter: blur(5px); }
+    .s10-world { position: absolute; inset: 0; transform-origin: 540px 900px; }
+    .s10-pool { left: 40px; top: 520px; width: 1000px; height: 900px; border-radius: 50%; background: radial-gradient(ellipse, rgba(1,204,247,.13), rgba(1,204,247,0) 64%); }
+    /* slot plate: a glass slab seen from above-front, with a precise slit */
+    .s10-plate { left: 90px; top: 1118px; width: 900px; height: 214px; clip-path: polygon(7% 0, 93% 0, 100% 100%, 0 100%);
+      background: linear-gradient(180deg, rgba(34,56,104,.96) 0%, rgba(18,30,66,.97) 45%, rgba(10,17,44,.98) 100%); }
+    .s10-platesvg { left: 90px; top: 1118px; width: 900px; height: 252px; overflow: visible; }
+    .s10-edge { left: 90px; top: 1332px; width: 900px; height: 38px; border-radius: 0 0 18px 18px; background: linear-gradient(180deg, rgba(14,24,56,.98), rgba(5,9,28,.98)); box-shadow: 0 50px 80px -20px rgba(0,0,0,.75); }
+    .s10-slit { left: 150px; top: 1194px; width: 780px; height: 22px; border-radius: 11px; background: linear-gradient(180deg, #02040f, #070c26); box-shadow: inset 0 3px 6px rgba(0,0,0,.9), 0 -1px 0 rgba(255,255,255,.22); transform-origin: 50% 50%; }
+    .s10-line { left: 150px; top: 1206px; width: 780px; height: 5px; border-radius: 3px; background: linear-gradient(90deg, rgba(1,204,247,.2), #01ccf7 18%, #6adfff 50%, #01ccf7 82%, rgba(1,204,247,.2)); box-shadow: 0 0 16px #01ccf7, 0 0 34px rgba(1,204,247,.6); transform-origin: 50% 50%; }
+    .s10-lglint { left: 150px; top: 1199px; width: 160px; height: 18px; border-radius: 9px; background: radial-gradient(ellipse, rgba(255,255,255,.95), rgba(160,240,255,0) 70%); mix-blend-mode: screen; }
+    .s10-brk { top: 1172px; width: 48px; height: 70px; }
+    .s10-brk span { position: absolute; width: 26px; height: 26px; border: 5px solid #01ccf7; filter: drop-shadow(0 0 8px rgba(1,204,247,.9)); }
+    /* the mask ends exactly at the slit: the tile disappears INTO it */
+    .s10-mask { left: 0; top: 0; width: 1080px; height: 1208px; overflow: hidden; perspective: 1500px; perspective-origin: 540px 640px; }
+    .s10-tile { left: 230px; top: 580px; width: 620px; height: 440px; border-radius: 30px; transform-origin: 50% 100%;
+      background: linear-gradient(165deg, rgba(23,38,78,.97), rgba(10,17,44,.98));
+      box-shadow: 0 0 0 2.5px rgba(242,196,109,.92) inset, 0 0 0 1px rgba(255,255,255,.08), 0 0 46px rgba(242,196,109,.22), 0 50px 90px -30px rgba(0,0,0,.85); overflow: hidden; }
+    .s10-tsheen { left: -260px; top: -120px; width: 200px; height: 760px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.12), rgba(255,255,255,0)); transform: rotate(18deg); }
+    .s10-q { left: 44px; top: 44px; width: 104px; height: 104px; border-radius: 50%; background: radial-gradient(circle at 38% 32%, #ffe3a6, #f2c46d 55%, #c99a45); box-shadow: 0 0 26px rgba(242,196,109,.55); color: #0a1130; font: 700 72px/104px Poppins, sans-serif; text-align: center; }
+    .s10-lab { left: 176px; top: 58px; font: 700 40px/1 "DejaVu Sans Mono", monospace; color: #f2c46d; letter-spacing: .5px; }
+    .s10-lab2 { left: 178px; top: 110px; font: 400 25px/1 "DejaVu Sans Mono", monospace; color: rgba(227,237,250,.5); }
+    .s10-bar { left: 44px; height: 16px; border-radius: 8px; background: rgba(227,237,250,.2); }
+    .s10-bar i { position: absolute; right: 0; top: 0; height: 16px; border-radius: 8px; background: rgba(242,196,109,.75); }
+    .s10-imp { left: 360px; top: 168px; width: 236px; height: 236px; overflow: visible; }
+    /* the question-mark stamp */
+    .s10-stamp { left: 563px; top: 548px; width: 250px; height: 350px; transform-origin: 50% 100%; }
+    .s10-knob { left: 56px; top: 0; width: 138px; height: 100px; border-radius: 50%; background: radial-gradient(circle at 40% 32%, #8fb0e4, #2a4a86 46%, #0e1a40 80%); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.28), 0 14px 24px rgba(0,0,0,.55); }
+    .s10-stem { left: 92px; top: 72px; width: 66px; height: 170px; background: linear-gradient(90deg, #0b1534, #4c6fae 38%, #1b2f62 70%, #0b1534); }
+    .s10-collar { left: 38px; top: 228px; width: 174px; height: 34px; border-radius: 10px; background: linear-gradient(180deg, #34558f, #101c40); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.2); }
+    .s10-base { left: 0; top: 256px; width: 250px; height: 82px; border-radius: 16px; background: linear-gradient(180deg, rgba(40,64,118,.99), rgba(12,20,48,.99)); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.22), 0 30px 50px -10px rgba(0,0,0,.75);
+      color: #6adfff; font: 700 54px/82px Poppins, sans-serif; text-align: center; text-shadow: 0 0 14px rgba(1,204,247,.9); }
+    .s10-face { left: 8px; top: 334px; width: 234px; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #01ccf7, #6adfff, #01ccf7); box-shadow: 0 0 20px #01ccf7; }
+    .s10-ring { left: 545px; top: 820px; width: 320px; height: 130px; border-radius: 50%; border: 5px solid #6adfff; box-shadow: 0 0 24px #01ccf7, inset 0 0 18px rgba(1,204,247,.6); }
+    .s10-flash { left: 230px; top: 520px; width: 920px; height: 700px; background: radial-gradient(ellipse, rgba(170,240,255,.5), rgba(1,204,247,0) 58%); mix-blend-mode: screen; }
+    .s10-spark { width: 34px; height: 34px; }
+    .s10-mote { border-radius: 50%; background: radial-gradient(circle, rgba(200,245,255,.95), rgba(1,204,247,0) 70%); }
+  </style>
+  <div id="root" data-composition-id="s10" data-width="1080" data-height="1920">
+    <div class="s10-abs s10-far" id="s10-far">give every unique candidate<br>to a fresh verifier that<br>tries to disprove it.</div>
+    <div class="s10-world" id="s10-world">
+      <div class="s10-abs s10-pool"></div>
+      <div id="s10-slot">
+        <div class="s10-abs s10-edge"></div>
+        <div class="s10-abs s10-plate"></div>
+        <svg class="s10-abs s10-platesvg" viewBox="0 0 900 252">
+          <polygon points="63,0 837,0 900,214 0,214" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
+          <line x1="63" y1="1" x2="837" y2="1" stroke="rgba(255,255,255,.35)" stroke-width="1.5"/>
+          <line x1="0" y1="214" x2="900" y2="214" stroke="rgba(106,223,255,.35)" stroke-width="2"/>
+        </svg>
+        <div class="s10-abs s10-slit" id="s10-slit"></div>
+      </div>
+      <div class="s10-abs s10-mask">
+        <div class="s10-abs s10-tile" id="s10-tile">
+          <div class="s10-abs s10-q">?</div>
+          <div class="s10-abs s10-lab">candidate</div>
+          <div class="s10-abs s10-lab2">candidate validation</div>
+          <div class="s10-abs s10-bar" style="top:196px;width:300px"><i style="width:70px"></i></div>
+          <div class="s10-abs s10-bar" style="top:240px;width:250px"></div>
+          <div class="s10-abs s10-bar" style="top:284px;width:290px"><i style="width:110px"></i></div>
+          <div class="s10-abs s10-bar" style="top:328px;width:190px"></div>
+          <div class="s10-abs s10-bar" style="top:372px;width:240px"></div>
+          <svg class="s10-abs s10-imp" id="s10-imp" viewBox="0 0 236 236">
+            <defs>
+              <filter id="s10-ink" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/>
+                <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.75" result="a"/>
+                <feComposite in="SourceGraphic" in2="a" operator="in" result="ink"/>
+                <feGaussianBlur in="ink" stdDeviation="3" result="g"/>
+                <feMerge><feMergeNode in="g"/><feMergeNode in="ink"/></feMerge>
+              </filter>
+            </defs>
+            <g filter="url(#s10-ink)" transform="rotate(-11 118 118)">
+              <circle cx="118" cy="118" r="106" fill="none" stroke="#6adfff" stroke-width="9"/>
+              <circle cx="118" cy="118" r="88" fill="none" stroke="#6adfff" stroke-width="3" stroke-dasharray="7 7"/>
+              <text x="118" y="168" text-anchor="middle" font-family="Poppins, sans-serif" font-weight="700" font-size="150" fill="#6adfff">?</text>
+            </g>
+          </svg>
+          <div class="s10-abs s10-tsheen" id="s10-tsheen"></div>
+        </div>
+      </div>
+      <div class="s10-abs s10-line" id="s10-line"></div>
+      <div class="s10-abs s10-lglint" id="s10-lglint"></div>
+      <div class="s10-abs s10-brk" id="s10-brkL" style="left:120px"><span style="left:0;top:0;border-right:0;border-bottom:0"></span><span style="left:0;bottom:0;border-right:0;border-top:0"></span></div>
+      <div class="s10-abs s10-brk" id="s10-brkR" style="left:912px"><span style="right:0;top:0;border-left:0;border-bottom:0"></span><span style="right:0;bottom:0;border-left:0;border-top:0"></span></div>
+      <div class="s10-abs s10-ring" id="s10-ring"></div>
+      <div class="s10-abs s10-flash" id="s10-flash"></div>
+      <div class="s10-abs s10-stamp" id="s10-stamp">
+        <div class="s10-abs s10-stem"></div>
+        <div class="s10-abs s10-knob"></div>
+        <div class="s10-abs s10-collar"></div>
+        <div class="s10-abs s10-base">?</div>
+        <div class="s10-abs s10-face"></div>
+      </div>
+      <div id="s10-sparks"></div>
+    </div>
+    <div id="s10-near"></div>
+  </div>
   <script>
     (function () {
+      const ID = "s10";
+      const R = document.querySelector('[data-composition-id="' + ID + '"]');
+      const q = (s) => R.querySelector(s);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 1.757);
+      const DUR = 1.7666;
+      const T = { bukan: 0.16, asal: 0.47, kasih: 0.73, peringatan: 1.01 };
+      const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+      let seed = 1010;
+      const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      const STAR = '<svg viewBox="0 0 40 40" width="100%" height="100%"><path d="M20 2 C21 14 26 19 38 20 C26 21 21 26 20 38 C19 26 14 21 2 20 C14 19 19 14 20 2Z" fill="#ffffff"/></svg>';
+
+      // near-plane motes (depth)
+      const near = q("#s10-near");
+      for (let i = 0; i < 8; i++) { const m = document.createElement("div"); m.className = "s10-abs s10-mote"; const sz = 10 + rnd() * 26;
+        m.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080}px;top:${420 + rnd() * 1250}px;filter:blur(${2 + rnd() * 4}px)`; near.appendChild(m);
+        tl.set(m, { opacity: 0.25 + rnd() * 0.35 }, 0); ft(m, { y: 0 }, { y: -170 - rnd() * 120, duration: DUR, ease: "none" }, 0); }
+      // impact sparkles
+      const sparks = [], CX = 688, CY = 884;
+      for (let i = 0; i < 9; i++) { const s = document.createElement("div"); s.className = "s10-abs s10-spark"; s.innerHTML = STAR; s.style.left = (CX - 17) + "px"; s.style.top = (CY - 17) + "px"; q("#s10-sparks").appendChild(s);
+        const a = (i / 9) * Math.PI * 2 + rnd() * 0.4, d = 170 + rnd() * 120; sparks.push({ el: s, x: Math.cos(a) * d, y: Math.sin(a) * d * 0.55, sc: 0.5 + rnd() * 0.6 }); }
+
+      const tile = q("#s10-tile"), stamp = q("#s10-stamp"), world = q("#s10-world"), line = q("#s10-line");
+
+      // ---- initial states
+      tl.set([q("#s10-imp"), q("#s10-ring"), q("#s10-flash"), q("#s10-lglint"), q("#s10-brkL"), q("#s10-brkR")], { opacity: 0 }, 0);
+      tl.set(stamp, { y: -980 }, 0);
+      tl.set(sparks.map((s) => s.el), { opacity: 0, scale: 0 }, 0);
+      tl.set(tile, { filter: "blur(0px)" }, 0);
+
+      // entry: s09's pressure flip lands — the tile settles face-up over the filter slot
+      ft(tile, { rotationX: -42, rotationY: 18, y: -50 }, { rotationX: 8, rotationY: 0, y: 0, duration: 0.24, ease: "power3.out" }, 0);
+      ft(q("#s10-tsheen"), { x: 0 }, { x: 1100, duration: 0.5, ease: "power2.inOut" }, 0);
+      ft(q("#s10-far"), { x: 0 }, { x: -150, duration: DUR, ease: "none" }, 0);
+      ft(world, { scale: 1.17 }, { scale: 1.1, duration: 0.3, ease: "power2.out" }, 0);
+
+      // "Bukan": the ?-stamp slams down (motion blur), squashes, leaves a ? imprint — no check mark
+      ft(stamp, { y: -980, scaleY: 1.18, filter: "blur(10px)" }, { y: 0, scaleY: 1, filter: "blur(0px)", duration: 0.15, ease: "power4.in" }, T.bukan - 0.15);
+      ft(stamp, { scaleY: 1 }, { scaleY: 0.88, duration: 0.05, yoyo: true, repeat: 1, ease: "power2.out" }, T.bukan);
+      ft(stamp, { y: 0 }, { y: -1050, duration: 0.3, ease: "power3.in" }, T.bukan + 0.16);
+      ft(q("#s10-imp"), { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: 0.07, ease: "power2.out" }, T.bukan);
+      ft(tile, { scaleY: 1 }, { scaleY: 0.965, duration: 0.05, yoyo: true, repeat: 1, ease: "power2.out" }, T.bukan);
+      ft(q("#s10-ring"), { opacity: 1, scale: 0.35 }, { opacity: 0, scale: 1.7, duration: 0.42, ease: "power2.out" }, T.bukan);
+      ft(q("#s10-flash"), { opacity: 0 }, { opacity: 1, duration: 0.05 }, T.bukan);
+      ft(q("#s10-flash"), { opacity: 1 }, { opacity: 0, duration: 0.32, ease: "power2.out" }, T.bukan + 0.05);
+      ft(world, { y: 0 }, { y: 14, duration: 0.05, ease: "power2.out" }, T.bukan);
+      ft(world, { y: 14 }, { y: 0, duration: 0.3, ease: "elastic.out(1, 0.35)" }, T.bukan + 0.05);
+      sparks.forEach((s, i) => {
+        ft(s.el, { opacity: 0, scale: 0, x: 0, y: 0, rotation: 0 }, { opacity: 1, scale: s.sc, x: s.x, y: s.y, rotation: 120, duration: 0.3, ease: "power3.out" }, T.bukan + 0.01 + i * 0.008);
+        ft(s.el, { opacity: 1 }, { opacity: 0, duration: 0.2 }, T.bukan + 0.25 + i * 0.008);
+      });
+
+      // "kasih": hold, then the slit opens, brackets align, the tile leans toward the slot
+      ft(q("#s10-slit"), { scaleY: 0.55 }, { scaleY: 1.5, duration: 0.24, ease: "power3.out" }, T.kasih - 0.04);
+      ft(line, { scaleX: 0.86 }, { scaleX: 1, duration: 0.24, ease: "power3.out" }, T.kasih - 0.04);
+      ft(q("#s10-brkL"), { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.2, ease: "power4.out" }, T.kasih - 0.02);
+      ft(q("#s10-brkR"), { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.2, ease: "power4.out" }, T.kasih - 0.02);
+      ft(tile, { rotationX: 8, y: 0 }, { rotationX: 26, y: 118, duration: 0.28, ease: "power3.inOut" }, T.kasih - 0.06);
+
+      // "peringatan": the tile drops cleanly through the slit; the lip flashes
+      ft(tile, { rotationX: 26, y: 118 }, { rotationX: 44, y: 780, duration: 0.26, ease: "power3.in" }, T.peringatan - 0.07);
+      ft(tile, { filter: "blur(0px)" }, { filter: "blur(5px)", duration: 0.2, ease: "power2.in" }, T.peringatan);
+      ft(q("#s10-lglint"), { opacity: 0, x: 0 }, { opacity: 1, x: 620, duration: 0.36, ease: "power2.inOut" }, T.peringatan + 0.02);
+      ft(q("#s10-lglint"), { opacity: 1 }, { opacity: 0, duration: 0.12 }, T.peringatan + 0.38);
+      ft(line, { scaleY: 1 }, { scaleY: 2.2, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, T.peringatan + 0.12);
+      ft(q("#s10-slot"), { y: 0 }, { y: 8, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, T.peringatan + 0.14);
+      ft([q("#s10-brkL"), q("#s10-brkR")], { opacity: 1 }, { opacity: 0, duration: 0.16 }, T.peringatan + 0.3);
+
+      // exit: the slit's cyan lip stretches into a full-width rail; camera tilts down past it (vertical whip) → s11 intake line at y≈560 (world scale 1.1 about 540,900: 900+306*1.1-589 ≈ 650; s11 settles it up to 560)
+      ft(line, { scaleX: 1 }, { scaleX: 1.42, duration: 0.42, ease: "power3.inOut" }, 1.26);
+      ft(q("#s10-slot"), { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, 1.36);
+      ft(world, { y: 0, filter: "blur(0px)" }, { y: -589, filter: "blur(7px)", duration: 0.42, ease: "power3.in" }, DUR - 0.42);
+
+      // seek-order safety: a backward seek first rewinds to 0, then plays forward
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
-      window.__timelines["s10"] = tl;
+      window.__timelines[ID] = tl;
     })();
   </script>
 </template>

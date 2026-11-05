@@ -1,0 +1,84 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s03-abs { position: absolute; }
+    .s03-world { position: absolute; inset: 0; }
+    .s03-far { left: -60px; top: 420px; width: 1200px; color: rgba(227,237,250,.08); font: 400 40px/1.6 Poppins, sans-serif; filter: blur(4px); }
+    .s03-label { left: 0; width: 1080px; top: 650px; text-align: center; font: 400 26px/1 "DejaVu Sans Mono", monospace; color: rgba(227,237,250,.55); letter-spacing: .5px; }
+    .s03-title { left: 0; top: 730px; width: 1080px; text-align: center; font: 700 168px/1 Poppins, sans-serif; color: #fff; letter-spacing: -6px; }
+    .s03-title .h { color: #e3edfa; }
+    .s03-lens { width: 330px; height: 330px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 6px rgba(1,204,247,.95), 0 0 34px rgba(1,204,247,.7), 0 30px 60px -10px rgba(0,0,0,.7), inset 0 0 40px rgba(255,255,255,.25); background: rgba(10,20,50,.35); }
+    .s03-lens .s03-mag { position: absolute; transform-origin: 0 0; }
+    .s03-lensrim { width: 330px; height: 330px; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); }
+    .s03-lensglare { left: 40px; top: 30px; width: 140px; height: 70px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.45), rgba(255,255,255,0) 70%); transform: rotate(-28deg); }
+    .s03-cmd { left: 90px; top: 1150px; width: 900px; height: 190px; border-radius: 24px; background: linear-gradient(165deg, rgba(14,24,56,.96), rgba(8,13,36,.98)); box-shadow: 0 0 0 2.5px rgba(1,204,247,.9), 0 0 30px rgba(1,204,247,.35), 0 40px 70px -20px rgba(0,0,0,.7); }
+    .s03-cmd pre { position: absolute; left: 40px; top: 36px; font: 500 27px/1.55 "DejaVu Sans Mono", monospace; color: #e3edfa; }
+    .s03-cmd pre b { color: #01ccf7; font-weight: 700; }
+    .s03-flash { left: 0; top: 500px; width: 1080px; height: 900px; background: radial-gradient(ellipse, rgba(170,240,255,.45), rgba(1,204,247,0) 60%); mix-blend-mode: screen; }
+    .s03-mote { border-radius: 50%; background: radial-gradient(circle, rgba(200,245,255,.95), rgba(1,204,247,0) 70%); }
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div class="s03-abs s03-far" id="s03-far">The skill runs a structured audit in six phases: reconnaissance, coverage-led hunting, candidate validation, structured output, independent record verification, reporting.</div>
+    <div class="s03-world" id="s03-world">
+      <div class="s03-abs s03-label" id="s03-label">README.md · cloudflare/security-audit-skill</div>
+      <div class="s03-abs s03-title" id="s03-title">security-<br>audit</div>
+      <div class="s03-abs s03-cmd" id="s03-cmd"><pre><b>npx</b> skills add https://github.com/
+  cloudflare/security-audit-skill \
+  --skill security-audit</pre></div>
+      <div class="s03-abs s03-lens" id="s03-lens"><div class="s03-mag" id="s03-mag"></div><div class="s03-abs s03-lensglare"></div></div>
+      <div class="s03-abs s03-flash" id="s03-flash"></div>
+    </div>
+    <div id="s03-near"></div>
+  </div>
+  <script>
+    (function () {
+      const ID = "s03";
+      const R = document.querySelector('[data-composition-id="' + ID + '"]');
+      const q = (s) => R.querySelector(s);
+      const tl = gsap.timeline({ paused: true });
+      const DUR = 2.2333;
+      const T = { namanya: 0.17, security: 0.78, audit: 1.38, skill: 1.75 };
+      const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+      let seed = 303;
+      const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      const near = q("#s03-near");
+      for (let i = 0; i < 8; i++) { const m = document.createElement("div"); m.className = "s03-abs s03-mote"; const sz = 10 + rnd() * 26;
+        m.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080}px;top:${400 + rnd() * 1300}px;filter:blur(${2 + rnd() * 4}px)`; near.appendChild(m);
+        tl.set(m, { opacity: 0.25 + rnd() * 0.35 }, 0); ft(m, { y: 0 }, { y: -200 - rnd() * 120, duration: DUR, ease: "none" }, 0); }
+
+      // magnifier: a copy of the real title inside the lens, scaled k around the lens centre
+      const title = q("#s03-title"), lens = q("#s03-lens"), mag = q("#s03-mag");
+      const k = 1.0, r = 165, TX = 0, TY = 730;   // focus lens: sharp copy inside, blurred title outside
+      const copy = title.cloneNode(true); copy.removeAttribute("id"); copy.className = "s03-title"; copy.style.cssText = "position:absolute;left:0;top:0;filter:none"; mag.appendChild(copy);
+      const L = { x: -260, y: 760 };
+      function place() {
+        lens.style.left = (L.x - r) + "px"; lens.style.top = (L.y - r) + "px";
+        mag.style.transform = `translate(${(TX - L.x) * k + r}px, ${(TY - L.y) * k + r}px) scale(${k})`;
+      }
+      tl.set(L, { x: -260, y: 760, onUpdate: place }, 0); place();
+      tl.set([q("#s03-cmd"), q("#s03-flash")], { opacity: 0 }, 0);
+
+      // arrive from s02's dive: the title settles from a soft push, blurred until "Skill"
+      ft(q("#s03-world"), { scale: 1.28, y: 60 }, { scale: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0);
+      ft(title, { filter: "blur(9px)", opacity: 0.75 }, { filter: "blur(4px)", opacity: 0.85, duration: 0.5, ease: "power2.out" }, 0);
+      ft(q("#s03-far"), { x: 0 }, { x: -180, duration: DUR, ease: "none" }, 0);
+      // lens travels the real title word by word
+      ft(L, { x: -260, y: 810 }, { x: 420, y: 815, duration: T.security - 0.05, ease: "power3.out", onUpdate: place }, 0.02);
+      ft(L, { x: 420, y: 815 }, { x: 460, y: 980, duration: T.audit - T.security, ease: "power3.inOut", onUpdate: place }, T.security - 0.03);
+      ft(L, { x: 460, y: 980 }, { x: 540, y: 900, duration: 0.3, ease: "power4.out", onUpdate: place }, T.skill - 0.12);
+      // "Skill": focus pull — the title snaps sharp, flash, lens lifts away and the outline becomes the install command
+      ft(title, { filter: "blur(4px)", opacity: 0.85 }, { filter: "blur(0px)", opacity: 1, duration: 0.14, ease: "power2.out" }, T.skill);
+      ft(q("#s03-flash"), { opacity: 0 }, { opacity: 1, duration: 0.07 }, T.skill);
+      ft(q("#s03-flash"), { opacity: 1 }, { opacity: 0, duration: 0.36 }, T.skill + 0.07);
+      ft(lens, { scale: 1, opacity: 1 }, { scale: 1.25, opacity: 0, duration: 0.24, ease: "power2.in" }, T.skill + 0.08);
+      ft(q("#s03-cmd"), { opacity: 0, scaleX: 0.3, scaleY: 0.5 }, { opacity: 1, scaleX: 1, scaleY: 1, duration: 0.3, ease: "power4.out" }, T.skill + 0.12);
+      ft(q("#s03-world"), { scale: 1 }, { scale: 1.035, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, T.skill);
+      // exit: tilt down toward the command box (leads into s04's caret)
+      ft(q("#s03-world"), { y: 0 }, { y: -260, duration: 0.26, ease: "power3.in" }, DUR - 0.26);
+
+      (function (t) { const rr = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) rr.call(this, 0, true, true); return rr.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines[ID] = tl;
+    })();
+  </script>
+</template>

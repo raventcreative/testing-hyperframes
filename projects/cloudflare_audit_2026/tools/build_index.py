@@ -10,7 +10,7 @@ T = json.loads((P / "production/timing.json").read_text())
 total = T["total_sec"]
 W = ",\n          ".join(json.dumps([w["w"], w["s"], w["st"]], ensure_ascii=False) for w in T["words"])
 C = ",\n          ".join(json.dumps(c) for c in T["caps"])
-slots = "".join(f'      <div id="{s["id"]}" data-composition-id="{s["id"]}" data-composition-src="compositions/{s["id"]}.html" data-start="{s["start"]}" '
+slots = "".join(f'      <div id="{s["id"]}" class="safe-scene" data-composition-id="{s["id"]}" data-composition-src="compositions/{s["id"]}.html" data-start="{s["start"]}" '
                 f'data-duration="{s["dur"]}" data-track-index="{2 + k % 3}" data-width="1080" data-height="1920"></div>\n' for k, s in enumerate(T["scenes"]))
 html = f"""<!doctype html>
 <html lang="id" data-resolution="portrait">
@@ -38,7 +38,7 @@ html = f"""<!doctype html>
       #vig {{ position: absolute; inset: 0; background: radial-gradient(ellipse 85% 70% at 50% 52%, rgba(0,0,0,0) 55%, rgba(4,6,24,.55) 100%); }}
       .dust {{ position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(160,230,255,.9), rgba(1,204,247,0) 70%); }}
       /* captions */
-      .cap {{ position: absolute; left: 70px; right: 70px; top: 214px; text-align: center; font-size: 46px; line-height: 1.24; letter-spacing: -0.005em; }}
+      .cap {{ position: absolute; left: 90px; right: 90px; top: 292px; text-align: center; font-size: 46px; line-height: 1.24; letter-spacing: -0.005em; }}
       .cap .m {{ display: inline-block; overflow: hidden; vertical-align: top; padding: 0.04em 0.1em 0.16em; margin: -0.04em -0.1em -0.16em; }}
       .cap .w {{ display: inline-block; }}
       .cap .b {{ font-weight: 700; color: var(--white); }}
@@ -47,6 +47,11 @@ html = f"""<!doctype html>
       .cap .k {{ font-weight: 700; color: var(--cy); background: #ffffff; padding: 0 9px; border-radius: 2px; }}
       .cap {{ text-shadow: 0 2px 14px rgba(4,8,30,.55); }}
       .cap .k {{ text-shadow: none; }}
+      /* SAFE ZONE (IG Reels): top ~250 px header, bottom ~420 px caption/username/buttons, right-side action icons.
+         Every scene is scaled into the safe area (content x 110-970, y 460-1480); clipping is disabled so nothing gets
+         cut at the scaled box edge — the main root still clips at the frame. */
+      .safe-scene {{ transform-origin: 540px 955px; transform: scale(0.86); }}
+      .safe-scene, .safe-scene > div, .safe-scene [data-composition-id] {{ overflow: visible !important; }}
     </style>
   </head>
   <body>

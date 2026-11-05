@@ -28,16 +28,20 @@
       // windows: [t0, t1, framing {fx, fy, h}, enter dir]
       const s01 = S("s01"), s07 = S("s07"), s15 = S("s15");
       const WIN = [
-        { t0: 0.25, t1: s01.start + s01.dur - 0.05, v: { fx: 860, fy: 2160, h: 900 } },            // bottom-right reaction, website stays the hero
-        { t0: s07.start - 0.05, t1: s07.start + s07.dur - 0.05, v: { fx: 540, fy: 2330, h: 1500 } }, // big, centred: the freeze beat
-        { t0: s15.start + 0.05, t1: s15.start + 1.55, v: { fx: 250, fy: 2230, h: 980 } },          // left, pointing at the comment card
+        // each cameo: pops in full-body on the floor (far), then steps FORWARD into the half-body framing (near)
+        { t0: 0.25, t1: s01.start + s01.dur - 0.05, far: { fx: 830, fy: 1480, h: 540 }, v: { fx: 860, fy: 2160, h: 900 } },             // bottom-right reaction
+        { t0: s07.start - 0.05, t1: s07.start + s07.dur - 0.05, far: { fx: 540, fy: 1490, h: 600 }, v: { fx: 540, fy: 2330, h: 1500 } },  // big, centred: the freeze beat
+        { t0: s15.start + 0.05, t1: s15.start + 1.55, far: { fx: 245, fy: 1480, h: 460 }, v: { fx: 250, fy: 2230, h: 980 } },           // left, pointing at the comment card
       ];
       function view(t) {
         for (const w of WIN) {
           if (t < w.t0 || t > w.t1) continue;
-          const inn = e3((t - w.t0) / 0.38), out = sm((t - (w.t1 - 0.3)) / 0.3);
-          const drop = (1 - inn) * 520 + out * 620;
-          return { visible: true, fx: w.v.fx, fy: w.v.fy + drop, h: w.v.h, yaw: 0, pitch: 4 };
+          const u = one((t - w.t0) / 0.24), c1 = 1.70158, c3 = c1 + 1;
+          const pop = u >= 1 ? 1 : 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2);   // back.out pop on the floor
+          const fwd = e3((t - w.t0 - 0.16) / 0.5);                                            // then step forward to half body
+          const out = sm((t - (w.t1 - 0.3)) / 0.3);
+          const L = (a, b) => a + (b - a) * fwd;
+          return { visible: pop > 0.02, sc: Math.max(0.001, pop), fx: L(w.far.fx, w.v.fx), fy: L(w.far.fy, w.v.fy) + out * 620, h: L(w.far.h, w.v.h), yaw: 0, pitch: 4 };
         }
         return { visible: false };
       }
@@ -61,7 +65,7 @@
         const Pf = PERF(t), acc = accents(t);
         const id = M3.micro(t, 17, vnoise);
         const bones = add(Pf.bones, id, { head: [0.03 * acc, 0, 0], neck: [0.012 * acc, 0, 0] });
-        const root = { x: Pf.root.x, y: Pf.root.y, ry: Pf.root.ry + 0.012 * vnoise(t, 26, 0.18), rz: Pf.root.rz, rx: 0, s: Pf.root.s };
+        const root = { x: Pf.root.x, y: Pf.root.y, ry: Pf.root.ry + 0.012 * vnoise(t, 26, 0.18), rz: Pf.root.rz, rx: 0, s: Pf.root.s * v.sc };
         mascot.setView(v);
         const bl = M3.blink(t, 0, D, 3, DIR.blinks);
         mascot.setState({ root, bones, face: { blink: [bl, bl], gaze: DIR.gaze(t), mouthMix: 1, mouth: mouthAt(t) } });

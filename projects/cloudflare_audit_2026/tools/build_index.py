@@ -12,6 +12,7 @@ W = ",\n          ".join(json.dumps([w["w"], w["s"], w["st"]], ensure_ascii=Fals
 C = ",\n          ".join(json.dumps(c) for c in T["caps"])
 slots = "".join(f'      <div id="{s["id"]}" class="safe-scene" data-composition-id="{s["id"]}" data-composition-src="compositions/{s["id"]}.html" data-start="{s["start"]}" '
                 f'data-duration="{s["dur"]}" data-track-index="{2 + k % 3}" data-width="1080" data-height="1920"></div>\n' for k, s in enumerate(T["scenes"]))
+s15_start = [x for x in T["scenes"] if x["id"] == "s15"][0]["start"]
 html = f"""<!doctype html>
 <html lang="id" data-resolution="portrait">
   <head>
@@ -51,6 +52,9 @@ html = f"""<!doctype html>
          Every scene is scaled into the safe area (content x 110-970, y 460-1480); clipping is disabled so nothing gets
          cut at the scaled box edge — the main root still clips at the frame. */
       .safe-scene {{ transform-origin: 540px 955px; transform: scale(0.86); }}
+      /* persistent brand mark (client logo, white) — top-left inside the safe zone, above the caption */
+      #brandlogo {{ position: absolute; left: 90px; top: 196px; width: 210px; height: auto; opacity: .92; filter: drop-shadow(0 2px 10px rgba(4,8,30,.5)); }}
+      #brandrule {{ position: absolute; left: 90px; top: 230px; width: 38px; height: 3px; border-radius: 2px; background: var(--cy); box-shadow: 0 0 10px rgba(1,204,247,.7); }}
       .safe-scene, .safe-scene > div, .safe-scene [data-composition-id] {{ overflow: visible !important; }}
     </style>
   </head>
@@ -60,7 +64,7 @@ html = f"""<!doctype html>
         <div class="plate"></div><div id="glow-a" class="glow"></div><div id="glow-b" class="glow"></div><div id="dust"></div>
       </div>
 {slots}      <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
-      <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="7"><div id="vig"></div><div id="grain"></div></div>
+      <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="7"><div id="vig"></div><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_user_white.png" alt="AI PRENEUR"><div id="brandrule"></div></div>
       <div id="caps" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"></div>
       <audio id="vo" src="assets/audio/vo.mp3" data-start="0" data-duration="{T['vo_sec']}" data-track-index="9" data-volume="1"></audio>
     </div>
@@ -104,6 +108,8 @@ html = f"""<!doctype html>
         tl.fromTo("#glow-a", {{ x: 0, y: 0 }}, {{ x: 90, y: 70, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#glow-b", {{ x: 0, y: 0 }}, {{ x: -110, y: -60, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
+        const s15 = {s15_start};
+        tl.fromTo(["#brandlogo", "#brandrule"], {{ opacity: 0.92 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, s15 + 0.95);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;
       }})();

@@ -1,12 +1,144 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s06-abs { position: absolute; }
+    .s06-stage { position: absolute; inset: 0; perspective: 1700px; perspective-origin: 50% 46%; }
+    .s06-far { left: -80px; top: 420px; width: 1400px; color: rgba(227,237,250,.07); font: 700 54px/1.6 "DejaVu Sans Mono", monospace; white-space: pre; filter: blur(5px); }
+    /* four lanes (frame 0 == s05's last frame) */
+    .s06-lanes { left: 40px; top: 470px; width: 1000px; height: 1000px; transform-origin: 50% 50%; transform-style: preserve-3d; }
+    .s06-lane { position: absolute; left: 0; width: 1000px; height: 210px; transform-origin: 50% 50%; }
+    .s06-lbody { left: 0; top: 0; width: 1000px; height: 210px; border-radius: 22px; background: linear-gradient(180deg, rgba(23,38,78,.9), rgba(10,17,44,.92)); box-shadow: 0 0 0 1.5px rgba(255,255,255,.12) inset, 0 30px 60px -30px rgba(0,0,0,.7); overflow: hidden; }
+    .s06-ledge { left: 0; top: -2px; width: 1000px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, rgba(1,204,247,.2), #6adfff 50%, rgba(1,204,247,.2)); box-shadow: 0 0 16px #01ccf7; }
+    .s06-lc { left: 0; top: 0; width: 1000px; height: 210px; }
+    .s06-lf { left: 30px; top: 16px; font: 500 20px/1 "DejaVu Sans Mono", monospace; color: rgba(227,237,250,.55); }
+    .s06-lf b { color: #fff; font-weight: 700; }
+    .s06-cl { position: absolute; left: 0; width: 1000px; height: 44px; font: 500 24px/44px "DejaVu Sans Mono", monospace; white-space: pre; color: #c9d6ec; }
+    .s06-cl i { font-style: normal; display: inline-block; width: 50px; text-align: right; margin-right: 28px; color: rgba(201,214,236,.35); }
+    .s06-k { color: #7fd3ff; } .s06-s { color: #9fe3b8; } .s06-p { color: #f2c46d; }
+    /* schematic magnifier "hunters" (conceptual) */
+    .s06-hun { left: 0; top: 30px; width: 150px; height: 150px; }
+    .s06-scan { top: 4px; width: 260px; height: 142px; }
+    .s06-ring { left: 12px; top: 12px; width: 104px; height: 104px; border-radius: 50%; border: 6px solid #01ccf7; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.22), rgba(106,223,255,.08) 55%, rgba(1,204,247,.04));
+      box-shadow: 0 0 18px rgba(1,204,247,.85), inset 0 0 18px rgba(1,204,247,.4); }
+    .s06-handle { left: 100px; top: 104px; width: 52px; height: 13px; border-radius: 7px; background: linear-gradient(90deg, #6adfff, #01ccf7); box-shadow: 0 0 12px rgba(1,204,247,.8); transform: rotate(45deg); transform-origin: 0 50%; }
+    /* amber CANDIDATE glints (question glyph only — never a confirmed finding) */
+    .s06-cand { top: -46px; width: 78px; height: 78px; border-radius: 20px; border: 3.5px solid #f2c46d; background: rgba(36,30,24,.82); color: #f2c46d; font: 700 50px/71px Poppins, sans-serif; text-align: center;
+      box-shadow: 0 0 26px rgba(242,196,109,.6), 0 14px 26px -10px rgba(0,0,0,.6); }
+    .s06-ctag { left: 92px; top: 22px; font: 500 21px/1 "DejaVu Sans Mono", monospace; color: #f2c46d; white-space: nowrap; text-shadow: 0 0 10px rgba(242,196,109,.5); }
+    .s06-burst { top: -84px; width: 154px; height: 154px; border-radius: 50%; border: 3px solid rgba(242,196,109,.9); }
+    /* the converged amber tile (s07 starts from it) */
+    .s06-tile { left: 390px; top: 610px; width: 300px; height: 300px; border-radius: 40px; background: linear-gradient(165deg, rgba(40,40,52,.96), rgba(18,20,40,.98));
+      box-shadow: 0 0 0 4px #f2c46d, 0 0 44px rgba(242,196,109,.55), 0 50px 80px -30px rgba(0,0,0,.8); }
+    .s06-tq { left: 0; top: 30px; width: 300px; text-align: center; font: 700 190px/1 Poppins, sans-serif; color: #f2c46d; text-shadow: 0 0 30px rgba(242,196,109,.55); }
+    .s06-tflash { left: 140px; top: 360px; width: 800px; height: 800px; border-radius: 50%; background: radial-gradient(circle, rgba(255,232,180,.5), rgba(242,196,109,0) 60%); mix-blend-mode: screen; }
+    .s06-mote { border-radius: 50%; background: radial-gradient(circle, rgba(200,245,255,.95), rgba(1,204,247,0) 70%); }
+  </style>
+  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920">
+    <div class="s06-abs s06-far" id="s06-far">HUNTING.md   ATTACK-CLASSES.md
+CLIENT-SIDE.md   AI-AND-LLM.md
+WEB-PROTOCOL-AND-AUTH.md
+SUPPLY-CHAIN-AND-RELEASE.md
+CLOUD-AND-DEPLOYMENT.md
+DATA-ISOLATION-AND-LIFECYCLE.md</div>
+    <div class="s06-stage"><div class="s06-abs s06-lanes" id="s06-lanes"></div></div>
+    <div class="s06-abs s06-tflash" id="s06-tflash"></div>
+    <div class="s06-abs s06-tile" id="s06-tile"><div class="s06-abs s06-tq">?</div></div>
+    <div id="s06-near"></div>
+  </div>
   <script>
     (function () {
+      const ID = "s06";
+      const R = document.querySelector('[data-composition-id="' + ID + '"]');
+      const q = (s) => R.querySelector(s);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.123);
+      const DUR = 4.1333;
+      const T = { setelah: 0.19, itu: 0.61, beberapa: 0.95, agent: 1.59, berburu: 1.87, potensi: 2.30, celah: 2.70, dari: 3.00, sisi: 3.23, berbeda: 3.50 };
+      const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+      let seed = 606;
+      const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      const K = (c, s) => `<span class="s06-${c}">${s}</span>`;
+
+      // four REAL code crops from this project (each lane a different file)
+      const LANES = [
+        { f: "package.json", n: 5, l: [K("s", '"scripts"') + ": {", "  " + K("s", '"dev"') + ": " + K("s", '"npx --yes hyperframes@0.8.186 preview"') + ",", "  " + K("s", '"check"') + ": " + K("s", '"npx --yes hyperframes@0.8.186 check"') + ","] },
+        { f: "tools/build_index.py", n: 9, l: ["T = json.loads((P / " + K("s", '"production/timing.json"') + ").read_text())", "total = T[" + K("s", '"total_sec"') + "]"] },
+        { f: "hyperframes.json", n: 4, l: [K("s", '"paths"') + ": {", "  " + K("s", '"blocks"') + ": " + K("s", '"compositions"') + ",", "  " + K("s", '"components"') + ": " + K("s", '"compositions/components"') + ","] },
+        { f: "compositions/s01.html", n: 72, l: [K("k", "const") + " tl = gsap.timeline({ " + K("p", "paused") + ": " + K("s", "true") + " });", K("k", "const") + " DUR = " + K("s", "3.7667") + ";"] },
+      ];
+      // hunter keyframes (lane-local x): different directions = different sides
+      const HUNT = [
+        { x0: 30, k: [[1.55, 2.27, 430], [2.62, 3.42, 840]], cand: 430, at: T.potensi, tag: true },
+        { x0: 830, k: [[1.6, 3.42, 110]] },
+        { x0: 120, k: [[1.62, 2.27, 640], [2.6, 3.42, 860]], cand: 640, at: T.potensi + 0.06 },
+        { x0: 850, k: [[1.66, 2.66, 360], [2.98, 3.44, 60]], cand: 360, at: T.celah },
+      ];
+      const lanesEl = q("#s06-lanes"), lanes = [], lcs = [], huns = [], scans = [], cands = [], bursts = [];
+      LANES.forEach((L, i) => {
+        const lane = document.createElement("div"); lane.className = "s06-lane"; lane.style.top = (20 + i * 250) + "px";
+        let h = `<div class="s06-abs s06-lbody"><div class="s06-abs s06-lc"><div class="s06-abs s06-lf"><b>${L.f}</b></div>`;
+        L.l.forEach((t, j) => { h += `<div class="s06-cl" style="top:${(L.l.length === 2 ? 70 : 52) + j * 46}px;left:30px"><i>${L.n + j}</i>${t}</div>`; });
+        h += `</div></div><div class="s06-abs s06-ledge"></div>`;
+        const H = HUNT[i], ltr = H.k[0][2] > H.x0;
+        h += `<div class="s06-abs s06-hun"><div class="s06-abs s06-scan" style="${ltr ? "left:-196px;background:linear-gradient(90deg, rgba(1,204,247,0), rgba(1,204,247,.16))" : "left:66px;background:linear-gradient(270deg, rgba(1,204,247,0), rgba(1,204,247,.16))"};border-radius:20px"></div>
+          <div class="s06-abs s06-ring"></div><div class="s06-abs s06-handle"></div></div>`;
+        if (H.cand != null) h += `<div class="s06-abs s06-burst" style="left:${H.cand - 24}px"></div><div class="s06-abs s06-cand" style="left:${H.cand + 14}px">?${H.tag ? '<div class="s06-abs s06-ctag">candidate</div>' : ""}</div>`;
+        lane.innerHTML = h; lanesEl.appendChild(lane); lanes.push(lane);
+        lcs.push(lane.querySelector(".s06-lc")); huns.push(lane.querySelector(".s06-hun")); scans.push(lane.querySelector(".s06-scan"));
+        cands.push(lane.querySelector(".s06-cand")); bursts.push(lane.querySelector(".s06-burst"));
+      });
+
+      const near = q("#s06-near");
+      for (let i = 0; i < 10; i++) { const m = document.createElement("div"); m.className = "s06-abs s06-mote"; const sz = 10 + rnd() * 28;
+        m.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080}px;top:${420 + rnd() * 1300}px;filter:blur(${2 + rnd() * 4}px)`; near.appendChild(m);
+        tl.set(m, { opacity: 0.22 + rnd() * 0.33 }, 0); ft(m, { x: 0 }, { x: 260 + rnd() * 160, duration: DUR, ease: "none" }, 0); }
+
+      // ---- initial states
+      tl.set(lanesEl, { rotationX: 34, rotationY: 0, x: 0, y: 0, scale: 1 }, 0);
+      tl.set(lcs, { opacity: 0 }, 0);
+      huns.forEach((hn, i) => tl.set(hn, { x: HUNT[i].x0, opacity: 0, scale: 0 }, 0));
+      tl.set(scans, { opacity: 0 }, 0);
+      tl.set(cands.filter(Boolean), { opacity: 0, scale: 0 }, 0);
+      tl.set(bursts.filter(Boolean), { opacity: 0, scale: 0.3 }, 0);
+      tl.set([q("#s06-tile"), q("#s06-tflash")], { opacity: 0 }, 0);
+
+      // ---- the real code arrives on each lane (lanes were opened by s05)
+      lcs.forEach((c, i) => ft(c, { opacity: 0, x: i % 2 ? 40 : -40 }, { opacity: 1, x: 0, duration: 0.34, ease: "power2.out" }, 0.02 + i * 0.05));
+
+      // ---- camera: lateral multi-plane track along the lanes (lanes at different depths), then rise to overhead
+      ft(lanesEl, { rotationY: 0, x: 0, scale: 1 }, { rotationY: -9, x: -6, scale: 0.88, duration: 2.4, ease: "sine.inOut" }, 0);
+      const ZS = [-110, -40, 30, 90], XS = [-36, -12, 12, 36];
+      lanes.forEach((l, i) => {
+        ft(l, { z: 0, x: 0 }, { z: ZS[i], x: XS[i], duration: 1.2, ease: "sine.inOut" }, 0.1);
+        ft(l, { z: ZS[i], x: XS[i] }, { z: 0, x: -XS[i] * 0.3, duration: 1.2, ease: "sine.inOut" }, 1.3);
+        ft(l, { x: -XS[i] * 0.3 }, { x: 0, duration: 0.9, ease: "power2.inOut" }, 2.5);
+      });
+      ft(lanesEl, { rotationX: 34, rotationY: -9, x: -6, y: 0, scale: 0.88 }, { rotationX: 0, rotationY: 0, x: 0, y: -40, scale: 0.96, duration: 0.95, ease: "power2.inOut" }, 2.42);
+      ft(q("#s06-far"), { x: 0, y: 0 }, { x: -300, y: -120, duration: DUR, ease: "none" }, 0);
+
+      // ---- "beberapa agent": four schematic hunters drop onto the lanes; "berburu": they sweep from different sides
+      huns.forEach((hn, i) => {
+        ft(hn, { opacity: 0, scale: 0, rotation: -30 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.26, ease: "back.out(2.2)" }, T.beberapa + i * 0.12);
+        let x = HUNT[i].x0;
+        HUNT[i].k.forEach(([a, b, to]) => { ft(hn, { x: x }, { x: to, duration: b - a, ease: "power1.inOut" }, a); x = to; });
+        ft(scans[i], { opacity: 0 }, { opacity: 1, duration: 0.3 }, HUNT[i].k[0][0]);
+      });
+      // amber CANDIDATE glints on "potensi" / "celah" (question glyph: needs validation, not a finding)
+      HUNT.forEach((H, i) => { if (H.cand == null) return;
+        ft(cands[i], { opacity: 0, scale: 0, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.26, ease: "back.out(2.6)" }, H.at - 0.05);
+        ft(bursts[i], { opacity: 0.9, scale: 0.3 }, { opacity: 0, scale: 1.5, duration: 0.42, ease: "power2.out" }, H.at - 0.02);
+        ft(huns[i], { scale: 1 }, { scale: 1.12, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, H.at - 0.04);
+      });
+
+      // ---- exit: the four lanes converge into one centred amber tile (s07 starts from it)
+      const TY = 500 + (760 - 970) / 0.96;
+      lanes.forEach((l, i) => ft(l, { y: 0, scale: 1, opacity: 1 }, { y: TY - (125 + 250 * i), scale: 0.3, opacity: 0, duration: 0.42, ease: "power3.in" }, 3.5 + (i % 2) * 0.03));
+      ft(q("#s06-tile"), { opacity: 0, scale: 0.35, rotation: -8 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.34, ease: "back.out(1.8)" }, 3.78);
+      ft(q("#s06-tflash"), { opacity: 0 }, { opacity: 1, duration: 0.07 }, 3.84);
+      ft(q("#s06-tflash"), { opacity: 1 }, { opacity: 0, duration: 0.2 }, 3.91);
+
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
-      window.__timelines["s06"] = tl;
+      window.__timelines[ID] = tl;
     })();
   </script>
 </template>

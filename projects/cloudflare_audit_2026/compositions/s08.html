@@ -1,12 +1,205 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s08" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s08-abs { position: absolute; }
+    .s08-far { left: -60px; top: 400px; width: 1300px; color: rgba(227,237,250,.075); font: 700 60px/1.3 Poppins, sans-serif; white-space: nowrap; filter: blur(5px); }
+    .s08-stage { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 680px 1000px; }
+    .s08-rig { left: 680px; top: 1000px; width: 0; height: 0; transform-style: preserve-3d; }
+    .s08-g3 { transform-style: preserve-3d; }
+    .s08-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    /* floor orbit ring (sells the camera move) */
+    .s08-floor { left: -400px; top: -130px; width: 800px; height: 800px; }
+    .s08-fshadow { left: -300px; top: -130px; width: 600px; height: 800px; border-radius: 50%; background: radial-gradient(circle, rgba(2,4,20,.55), rgba(2,4,20,0) 60%); }
+    /* real code crop = the back of s07's pause pane */
+    .s08-card { left: -650px; top: -330px; width: 640px; height: 480px; }
+    .s08-cf, .s08-cb { left: 0; top: 0; width: 640px; height: 480px; border-radius: 26px; overflow: hidden; }
+    .s08-cf { background: linear-gradient(165deg, rgba(23,38,78,.97), rgba(10,17,44,.98)); box-shadow: 0 50px 90px -30px rgba(0,0,0,.75), 0 0 0 1.5px rgba(255,255,255,.14) inset, 0 1px 0 rgba(255,255,255,.25) inset; }
+    .s08-cb { transform: rotateY(180deg); background: linear-gradient(165deg, rgba(23,38,78,.9), rgba(10,17,44,.94)); box-shadow: 0 0 0 1.5px rgba(255,255,255,.14) inset; }
+    .s08-chead { left: 0; top: 0; width: 640px; height: 58px; background: linear-gradient(180deg, rgba(20,32,66,.96), rgba(14,24,52,.96)); border-bottom: 1px solid rgba(255,255,255,.08); }
+    .s08-dot { top: 22px; width: 13px; height: 13px; border-radius: 50%; background: rgba(255,255,255,.22); }
+    .s08-fname { left: 104px; top: 0; font: 400 20px/58px "DejaVu Sans Mono", monospace; color: rgba(227,237,250,.62); }
+    .s08-ln { position: absolute; left: 0; width: 1200px; height: 44px; font: 500 21px/44px "DejaVu Sans Mono", monospace; white-space: pre; color: #c9d6ec; }
+    .s08-ln i { font-style: normal; display: inline-block; width: 44px; text-align: right; margin-right: 22px; color: rgba(201,214,236,.35); }
+    .s08-k { color: #7fd3ff; } .s08-s { color: #9fe3b8; } .s08-p { color: #f2c46d; }
+    .s08-scan { left: 0; top: 0; width: 640px; height: 44px; background: linear-gradient(90deg, rgba(1,204,247,.3), rgba(1,204,247,0)); border-left: 3px solid #01ccf7; }
+    .s08-csvg { left: -6px; top: -6px; width: 652px; height: 492px; overflow: visible; }
+    /* hypothesis tile */
+    .s08-tile { left: -190px; top: -220px; width: 380px; height: 440px; }
+    .s08-tface { left: 0; top: 0; width: 380px; height: 440px; border-radius: 30px; overflow: hidden;
+      background: linear-gradient(165deg, rgba(23,38,78,.97), rgba(10,17,44,.98));
+      box-shadow: 0 0 0 3px #f2c46d, 0 0 34px rgba(242,196,109,.45), 0 0 0 5px rgba(255,255,255,.08) inset; }
+    .s08-side { background: linear-gradient(180deg, #f6d48e, #a77b2e); }
+    .s08-tpill { left: 30px; top: 28px; height: 40px; padding: 0 16px; border-radius: 20px; border: 2px solid #f2c46d; color: #f2c46d; font: 700 21px/36px "DejaVu Sans Mono", monospace; }
+    .s08-tq { left: 105px; top: 92px; width: 170px; height: 170px; border-radius: 50%; border: 7px solid #f2c46d; box-shadow: 0 0 26px rgba(242,196,109,.55), inset 0 0 22px rgba(242,196,109,.25);
+      color: #f2c46d; font: 700 118px/150px Poppins, sans-serif; text-align: center; }
+    .s08-bar { left: 40px; height: 13px; border-radius: 7px; background: rgba(227,237,250,.32); }
+    .s08-bar::before { content: ""; position: absolute; left: -2px; top: -1px; width: 15px; height: 15px; border-radius: 50%; background: #f2c46d; }
+    .s08-tglint { left: -200px; top: -40px; width: 140px; height: 540px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.4), rgba(255,255,255,0)); transform: rotate(16deg); }
+    .s08-aura { left: -330px; top: -350px; width: 660px; height: 700px; border-radius: 50%; background: radial-gradient(ellipse, rgba(242,196,109,.36), rgba(242,196,109,0) 62%); }
+    /* inspector #1 (hunter): a round cyan lens */
+    .s08-lens { left: 0; top: 0; width: 0; height: 0; }
+    .s08-lsvg { left: -125px; top: -125px; width: 300px; height: 300px; overflow: visible; }
+    .s08-lpill { left: -80px; top: 128px; width: 160px; height: 46px; border-radius: 23px; border: 2.5px solid #01ccf7; color: #01ccf7; font: 700 23px/41px "DejaVu Sans Mono", monospace; text-align: center; background: rgba(8,14,40,.75); box-shadow: 0 0 18px rgba(1,204,247,.35); }
+    .s08-lpb { transform: rotateY(180deg); }
+    .s08-pulse { left: -110px; top: -110px; width: 220px; height: 220px; border-radius: 50%; border: 4px solid #6adfff; box-shadow: 0 0 20px rgba(1,204,247,.8); }
+    .s08-brk { left: -222px; top: -252px; width: 444px; height: 504px; }
+    .s08-brk span { position: absolute; width: 48px; height: 48px; border: 5px solid #01ccf7; filter: drop-shadow(0 0 10px rgba(1,204,247,.9)); }
+    .s08-trace { left: -700px; top: -400px; width: 900px; height: 800px; overflow: visible; }
+    .s08-flash { left: 140px; top: 520px; width: 1080px; height: 960px; background: radial-gradient(ellipse, rgba(255,226,160,.42), rgba(242,196,109,0) 58%); mix-blend-mode: screen; }
+    .s08-mote { border-radius: 50%; background: radial-gradient(circle, rgba(200,245,255,.95), rgba(1,204,247,0) 70%); }
+  </style>
+  <div id="root" data-composition-id="s08" data-width="1080" data-height="1920">
+    <div class="s08-abs s08-far" id="s08-far">Adversarial validation. &nbsp; coverage-led hunting<br>candidate validation &nbsp; independent record verification</div>
+    <div class="s08-stage" id="s08-stage"><div class="s08-abs s08-rig" id="s08-rig">
+      <div class="s08-abs s08-fshadow" id="s08-fshadow"></div>
+      <svg class="s08-abs s08-floor" id="s08-floor" viewBox="0 0 800 800">
+        <circle cx="400" cy="400" r="380" fill="none" stroke="rgba(1,204,247,.28)" stroke-width="3"/>
+        <circle cx="400" cy="400" r="330" fill="none" stroke="rgba(227,237,250,.12)" stroke-width="2" stroke-dasharray="6 18"/>
+        <circle cx="400" cy="400" r="380" fill="none" stroke="#6adfff" stroke-width="6" stroke-dasharray="180 420 60 540 120 1068" stroke-linecap="round"/>
+      </svg>
+      <div class="s08-abs s08-aura" id="s08-aura"></div>
+      <div class="s08-abs s08-card s08-g3" id="s08-card">
+        <div class="s08-abs s08-cf s08-face" id="s08-cf">
+          <div class="s08-abs s08-chead"><div class="s08-abs s08-dot" style="left:24px"></div><div class="s08-abs s08-dot" style="left:46px"></div><div class="s08-abs s08-dot" style="left:68px"></div>
+            <div class="s08-abs s08-fname">tools/build_index.py</div></div>
+          <div class="s08-abs s08-scan" id="s08-scan"></div>
+          <div id="s08-code"></div>
+        </div>
+        <div class="s08-abs s08-cb s08-face" id="s08-cb"></div>
+        <svg class="s08-abs s08-csvg" viewBox="-6 -6 652 492">
+          <defs><filter id="s08-bloom" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <rect id="s08-thread" x="0" y="0" width="640" height="480" rx="26" fill="none" stroke="#01ccf7" stroke-width="4" filter="url(#s08-bloom)" pathLength="1000"/>
+        </svg>
+      </div>
+      <svg class="s08-abs s08-trace" id="s08-tracesvg" viewBox="-700 -400 900 800">
+        <path id="s08-trace" d="M -330 30 C -250 140, -120 120, -60 40" fill="none" stroke="#f2c46d" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 14" pathLength="1000"/>
+      </svg>
+      <div class="s08-abs s08-tile s08-g3" id="s08-tile"></div>
+      <div class="s08-abs s08-brk" id="s08-brk">
+        <span style="left:0;top:0;border-right:0;border-bottom:0"></span><span style="right:0;top:0;border-left:0;border-bottom:0"></span>
+        <span style="left:0;bottom:0;border-right:0;border-top:0"></span><span style="right:0;bottom:0;border-left:0;border-top:0"></span>
+      </div>
+      <div class="s08-abs s08-lens s08-g3" id="s08-lens">
+        <div class="s08-abs s08-pulse" id="s08-pulse"></div>
+        <svg class="s08-abs s08-lsvg" id="s08-lsvg" viewBox="-125 -125 300 300">
+          <defs><filter id="s08-lb" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <radialGradient id="s08-lg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="rgba(190,240,255,.30)"/><stop offset="1" stop-color="rgba(1,204,247,.06)"/></radialGradient></defs>
+          <line x1="72" y1="72" x2="150" y2="150" stroke="#6adfff" stroke-width="22" stroke-linecap="round" filter="url(#s08-lb)"/>
+          <line x1="72" y1="72" x2="150" y2="150" stroke="#e9fbff" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="0" cy="0" r="98" fill="url(#s08-lg)" stroke="#01ccf7" stroke-width="12" filter="url(#s08-lb)"/>
+          <circle cx="0" cy="0" r="86" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2"/>
+          <ellipse cx="-36" cy="-44" rx="34" ry="16" fill="rgba(255,255,255,.45)" transform="rotate(-30 -36 -44)"/>
+        </svg>
+        <div class="s08-abs s08-lpill s08-face" id="s08-lpf">hunter</div>
+        <div class="s08-abs s08-lpill s08-face s08-lpb" id="s08-lpb">hunter</div>
+      </div>
+    </div></div>
+    <div class="s08-abs s08-flash" id="s08-flash"></div>
+    <div id="s08-near"></div>
+  </div>
   <script>
     (function () {
+      const ID = "s08";
+      const R = document.querySelector('[data-composition-id="' + ID + '"]');
+      const q = (s) => R.querySelector(s);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 2.323);
+      const DUR = 2.3333;
+      const T = { kalau: 0.17, satu: 0.45, agent: 0.76, merasa: 0.97, menemukan: 1.30, masalah: 1.81 };
+      const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+      let seed = 808;
+      const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+
+      // REAL code crop: tools/build_index.py of this very project (lines 5–12)
+      const CODE = [
+        [5, '<span class="s08-k">import</span> json, sys'],
+        [6, '<span class="s08-k">from</span> pathlib <span class="s08-k">import</span> Path'],
+        [7, ''],
+        [8, 'P = Path(sys.argv[<span class="s08-p">1</span>] <span class="s08-k">if</span> len(sys.argv) &gt; <span class="s08-p">1</span> <span class="s08-k">else</span> <span class="s08-s">"."</span>).resolve()'],
+        [9, 'T = json.loads((P / <span class="s08-s">"production/timing.json"</span>).read_text())'],
+        [10, 'total = T[<span class="s08-s">"total_sec"</span>]'],
+        [11, 'W = <span class="s08-s">",\\n          "</span>.join(json.dumps([w[<span class="s08-s">"w"</span>], w[<span class="s08-s">"s"</span>], w[<span class="s08-s">"st"</span>]], ensure_ascii=<span class="s08-k">False</span>) <span class="s08-k">for</span> w <span class="s08-k">in</span> T[<span class="s08-s">"words"</span>])'],
+        [12, 'C = <span class="s08-s">",\\n          "</span>.join(json.dumps(c) <span class="s08-k">for</span> c <span class="s08-k">in</span> T[<span class="s08-s">"caps"</span>])'],
+      ];
+      const code = q("#s08-code");
+      CODE.forEach(([n, h], i) => { const d = document.createElement("div"); d.className = "s08-ln"; d.style.top = (78 + i * 48) + "px"; d.innerHTML = "<i>" + n + "</i>" + h; code.appendChild(d); });
+
+      // hypothesis tile: a thin amber-edged slab (front, back, four edges) — the SAME object s09 pressure-tests
+      const FACE = '<div class="s08-abs s08-tpill">candidate</div><div class="s08-abs s08-tq">?</div>' +
+        '<div class="s08-abs s08-bar" style="top:300px;width:300px"></div><div class="s08-abs s08-bar" style="top:331px;width:232px;left:58px"></div>' +
+        '<div class="s08-abs s08-bar" style="top:362px;width:276px;left:30px"></div><div class="s08-abs s08-bar" style="top:393px;width:180px;left:66px"></div><div class="s08-abs s08-tglint"></div>';
+      const tile = q("#s08-tile");
+      const mk = (cls, css, html) => { const d = document.createElement("div"); d.className = cls; d.style.cssText = css; if (html) d.innerHTML = html; tile.appendChild(d); return d; };
+      const tf = mk("s08-abs s08-tface s08-face", "transform: translateZ(12px)", FACE);
+      const tb = mk("s08-abs s08-tface s08-face", "transform: rotateY(180deg) translateZ(12px)", FACE);
+      mk("s08-abs s08-side s08-face", "left:-12px;top:22px;width:24px;height:396px;transform: rotateY(-90deg)");
+      mk("s08-abs s08-side s08-face", "left:368px;top:22px;width:24px;height:396px;transform: rotateY(90deg)");
+      mk("s08-abs s08-side s08-face", "left:22px;top:-12px;width:336px;height:24px;transform: rotateX(90deg)");
+      mk("s08-abs s08-side s08-face", "left:22px;top:428px;width:336px;height:24px;transform: rotateX(-90deg)");
+      const tglint = tf.querySelector(".s08-tglint");
+
+      // near motes
+      const near = q("#s08-near");
+      for (let i = 0; i < 9; i++) { const m = document.createElement("div"); m.className = "s08-abs s08-mote"; const sz = 10 + rnd() * 26;
+        m.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080}px;top:${400 + rnd() * 1300}px;filter:blur(${2 + rnd() * 4}px)`; near.appendChild(m);
+        tl.set(m, { opacity: 0.25 + rnd() * 0.35 }, 0); ft(m, { x: 0, y: 0 }, { x: 120 + rnd() * 80, y: -60 - rnd() * 60, duration: DUR, ease: "power1.in" }, 0); }
+
+      // ---- initial states (frame 0 = s07's last frame: pane edge-on, tile at its mark)
+      const rig = q("#s08-rig"), card = q("#s08-card"), lens = q("#s08-lens");
+      tl.set(q("#s08-floor"), { rotationX: 90, opacity: 0 }, 0);
+      tl.set(q("#s08-fshadow"), { rotationX: 90, opacity: 0 }, 0);
+      tl.set(rig, { rotationY: 0 }, 0);
+      tl.set(card, { z: -140, rotationY: -85 }, 0);
+      tl.set(q("#s08-thread"), { attr: { "stroke-dasharray": "0 1000" } }, 0);
+      tl.set(q("#s08-scan"), { opacity: 0, y: 78 }, 0);
+      tl.set(tile, { y: 0, scale: 1.12 }, 0);
+      tl.set(q("#s08-aura"), { z: -40, opacity: 0.55, scale: 1 }, 0);
+      tl.set(lens, { x: -408, y: 300, z: 140, scale: 0 }, 0);
+      tl.set([q("#s08-lpf"), q("#s08-lpb")], { opacity: 0 }, 0);
+      tl.set(q("#s08-pulse"), { opacity: 0 }, 0);
+      tl.set(q("#s08-brk"), { z: 40, opacity: 0, scale: 1.45 }, 0);
+      tl.set(q("#s08-tracesvg"), { z: -50 }, 0);
+      tl.set(q("#s08-trace"), { attr: { "stroke-dashoffset": 0 }, opacity: 0 }, 0);
+      tl.set(q("#s08-flash"), { opacity: 0 }, 0);
+
+      // 0 → 0.4: the pane finishes its 180° — its code side (a REAL file of this project) faces us; the light thread draws its border
+      ft(card, { rotationY: -85 }, { rotationY: 0, duration: 0.42, ease: "power3.out" }, 0);
+      ft(q("#s08-thread"), { attr: { "stroke-dasharray": "0 1000" } }, { attr: { "stroke-dasharray": "1000 0" }, duration: 0.7, ease: "power2.inOut" }, 0.04);
+      ft(q("#s08-floor"), { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.1);
+      ft(q("#s08-fshadow"), { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.1);
+      ft(tile, { y: 0 }, { y: -12, duration: DUR, ease: "sine.inOut" }, 0);
+      ft(q("#s08-far"), { x: 0 }, { x: -110, duration: 1.95, ease: "none" }, 0);
+
+      // "satu": ONE agent — a single cyan lens pops in with a ring pulse
+      ft(lens, { scale: 0 }, { scale: 1, duration: 0.26, ease: "back.out(2)" }, T.satu - 0.06);
+      ft(q("#s08-pulse"), { opacity: 1, scale: 0.9 }, { opacity: 0, scale: 1.7, duration: 0.45, ease: "power2.out" }, T.satu);
+      ft([q("#s08-lpf"), q("#s08-lpb")], { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, T.satu + 0.06);
+      // "agent merasa menemukan": the lens sweeps the code, a scan band follows line by line
+      ft(lens, { x: -408, y: 300 }, { x: -470, y: -160, duration: 0.3, ease: "power2.inOut" }, T.agent - 0.02);
+      ft(lens, { x: -470, y: -160 }, { x: -210, y: -100, duration: 0.3, ease: "power2.inOut" }, T.agent + 0.28);
+      ft(lens, { x: -210, y: -100 }, { x: -330, y: 40, duration: 0.3, ease: "power2.inOut" }, T.agent + 0.58);
+      ft(q("#s08-scan"), { opacity: 0 }, { opacity: 1, duration: 0.12 }, T.agent);
+      ft(q("#s08-scan"), { y: 78 }, { y: 366, duration: 0.86, ease: "steps(6)" }, T.agent);
+      ft(q("#s08-scan"), { opacity: 1 }, { opacity: 0, duration: 0.2 }, T.masalah - 0.2);
+      // lens flies to the tile and LANDS on "masalah"
+      ft(lens, { x: -330, y: 40, scale: 1 }, { x: 0, y: -48, scale: 1.08, duration: 0.24, ease: "power3.inOut" }, T.masalah - 0.24);
+      ft(lens, { scale: 1.08 }, { scale: 1, duration: 0.18, ease: "power2.out" }, T.masalah);
+      ft(q("#s08-trace"), { opacity: 0 }, { opacity: 1, duration: 0.05 }, T.masalah - 0.2);
+      ft(q("#s08-trace"), { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -160 }, duration: 0.5, ease: "none" }, T.masalah - 0.2);
+      ft(q("#s08-brk"), { opacity: 0, scale: 1.45 }, { opacity: 1, scale: 1.12, duration: 0.2, ease: "power4.out" }, T.masalah - 0.04);
+      ft(q("#s08-flash"), { opacity: 0 }, { opacity: 1, duration: 0.06 }, T.masalah);
+      ft(q("#s08-flash"), { opacity: 1 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, T.masalah + 0.06);
+      ft(q("#s08-aura"), { opacity: 0.55, scale: 1 }, { opacity: 1, scale: 1.12, duration: 0.3, ease: "power2.out" }, T.masalah);
+      ft(tile, { scale: 1.12 }, { scale: 1.18, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, T.masalah);
+      ft(tglint, { x: 0 }, { x: 760, duration: 0.45, ease: "power2.inOut" }, T.masalah - 0.05);
+
+      // exit: the camera starts to ORBIT around the tile (accelerating; s09 completes the 180°)
+      const O0 = DUR - 0.4;
+      ft(rig, { rotationY: 0 }, { rotationY: -40, duration: DUR - O0, ease: "power2.in" }, O0);
+      ft(q("#s08-far"), { x: -110 }, { x: -20, duration: DUR - 1.95, ease: "power2.in" }, 1.95);
+
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
-      window.__timelines["s08"] = tl;
+      window.__timelines[ID] = tl;
     })();
   </script>
 </template>

@@ -1,12 +1,185 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s14" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s14-abs { position: absolute; }
+    .s14-far { left: -40px; top: 400px; width: 1200px; color: rgba(227,237,250,.07); font: 400 42px/1.5 "DejaVu Sans Mono", monospace; filter: blur(5px); white-space: nowrap; }
+    .s14-stage { position: absolute; inset: 0; perspective: 1600px; perspective-origin: 50% 50%; }
+    .s14-world { position: absolute; inset: 0; }
+    .s14-pool { left: 40px; top: 560px; width: 1000px; height: 860px; border-radius: 50%; background: radial-gradient(ellipse, rgba(1,204,247,.13), rgba(1,204,247,0) 62%); }
+    /* orbiting panels: 860 x 330, front slot centred at (540, 650) */
+    .s14-panel { left: 80px; top: 490px; width: 920px; height: 380px; }
+    .s14-in { position: absolute; inset: 0; }
+    .s14-card { position: absolute; inset: 0; border-radius: 30px; background: linear-gradient(165deg, rgba(23,38,78,.97), rgba(10,17,44,.98));
+      box-shadow: 0 50px 90px -30px rgba(0,0,0,.85), 0 0 0 1.5px rgba(255,255,255,.15) inset, 0 1px 0 rgba(255,255,255,.25) inset; overflow: hidden; }
+    .s14-sheen { left: -300px; top: -150px; width: 220px; height: 700px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.16), rgba(255,255,255,0)); transform: rotate(18deg); }
+    .s14-tag { height: 52px; padding: 0 22px; border-radius: 26px; border: 2.5px solid #01ccf7; color: #01ccf7; font: 700 28px/47px Poppins, sans-serif; box-shadow: 0 0 18px rgba(1,204,247,.3); white-space: nowrap; }
+    .s14-logo { left: 48px; top: 48px; width: 150px; height: 150px; border-radius: 30px; background: #fff; box-shadow: 0 16px 30px -10px rgba(0,0,0,.6); overflow: hidden; }
+    .s14-logo img { position: absolute; left: -9px; top: -9px; width: 168px; height: 168px; }
+    .s14-host { left: 228px; top: 124px; font: 400 44px/1.2 Poppins, sans-serif; color: #e3edfa; white-space: nowrap; }
+    .s14-repo { left: 46px; top: 232px; font: 700 70px/1.1 Poppins, sans-serif; color: #fff; letter-spacing: -1.5px; white-space: nowrap; }
+    .s14-uline { left: 48px; top: 330px; width: 780px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #01ccf7, #6adfff); box-shadow: 0 0 14px #01ccf7; transform-origin: 0 50%; }
+    .s14-term { left: 44px; top: 112px; width: 832px; height: 230px; border-radius: 20px; background: rgba(4,8,26,.72); box-shadow: 0 0 0 1.5px rgba(1,204,247,.55) inset; }
+    .s14-term pre { position: absolute; left: 34px; top: 30px; font: 500 35px/1.5 "DejaVu Sans Mono", monospace; color: #e3edfa; }
+    .s14-term pre b { color: #01ccf7; font-weight: 700; }
+    .s14-dots { left: 760px; top: 48px; }
+    .s14-dots i { display: inline-block; width: 13px; height: 13px; margin-left: 9px; border-radius: 50%; background: rgba(255,255,255,.22); }
+    .s14-note { position: absolute; inset: 0; border-radius: 30px; background: linear-gradient(165deg, rgba(36,58,108,.97), rgba(14,24,58,.98));
+      box-shadow: 0 50px 90px -30px rgba(0,0,0,.85), 0 0 0 1.5px rgba(255,255,255,.18) inset; clip-path: polygon(0 0, 820px 0, 920px 100px, 920px 380px, 0 380px); }
+    .s14-fold { left: 820px; top: 0; width: 100px; height: 100px; background: linear-gradient(225deg, rgba(227,237,250,0) 50%, rgba(227,237,250,.55) 51%, rgba(170,200,240,.35) 100%); border-bottom-left-radius: 14px; transform-origin: 100% 0%; }
+    .s14-bar { position: absolute; left: 48px; height: 22px; border-radius: 11px; background: rgba(227,237,250,.28); transform-origin: 0 50%; }
+    .s14-bar.c { background: linear-gradient(90deg, #01ccf7, #6adfff); box-shadow: 0 0 12px rgba(1,204,247,.6); }
+    .s14-qmark { left: 44px; top: 36px; }
+    /* central comment input (identical to s13's hand-off) */
+    .s14-inp { left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 1060px; }
+    .s14-input { left: 160px; top: 985px; width: 760px; height: 150px; border-radius: 75px; background: linear-gradient(165deg, rgba(23,38,78,.97), rgba(10,17,44,.98)); box-shadow: 0 40px 70px -26px rgba(0,0,0,.8); }
+    .s14-ava { left: 27px; top: 27px; width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(160deg, #305d8f, #182c53); box-shadow: 0 0 0 1.5px rgba(255,255,255,.18) inset; overflow: hidden; }
+    .s14-send { left: 637px; top: 27px; width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(160deg, #6adfff, #01ccf7); box-shadow: 0 0 24px rgba(1,204,247,.55); }
+    .s14-caret { left: 150px; top: 44px; width: 5px; height: 62px; border-radius: 3px; background: #01ccf7; box-shadow: 0 0 10px #01ccf7; }
+    .s14-svg { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    .s14-ripple { left: 272px; top: 1022px; width: 76px; height: 76px; border-radius: 50%; border: 4px solid #6adfff; box-shadow: 0 0 18px #01ccf7; }
+    .s14-cursor { left: 304px; top: 1040px; width: 88px; height: 89px; }
+    .s14-cursor img { width: 88px; height: 89px; filter: drop-shadow(0 10px 14px rgba(0,0,0,.55)); }
+    .s14-rim { position: absolute; inset: 0; border-radius: 30px; box-shadow: inset 0 0 0 2.5px rgba(1,204,247,.9), inset 0 0 26px rgba(1,204,247,.25); }
+    .s14-mote { border-radius: 50%; background: radial-gradient(circle, rgba(200,245,255,.95), rgba(1,204,247,0) 70%); }
+  </style>
+  <div id="root" data-composition-id="s14" data-width="1080" data-height="1920">
+    <div class="s14-abs s14-far" id="s14-far">Install the skill with the Skills CLI<br>Use --global for a user-level installation<br>Run npx skills --help for agent-selection<br>and non-interactive options.</div>
+    <div class="s14-abs s14-pool"></div>
+    <div class="s14-stage"><div class="s14-world" id="s14-world">
+      <div class="s14-abs s14-panel" id="s14-pA"><div class="s14-in" id="s14-iA">
+        <div class="s14-card">
+          <div class="s14-abs s14-logo"><img src="assets/src/cloudflare_avatar.png" alt="Cloudflare"></div>
+          <div class="s14-abs s14-tag" style="left:228px;top:52px">link resmi</div>
+          <div class="s14-abs s14-host">github.com/cloudflare/</div>
+          <div class="s14-abs s14-repo">security-audit-skill</div>
+          <div class="s14-abs s14-uline" id="s14-ulA"></div>
+          <div class="s14-abs s14-sheen" id="s14-shA"></div><div class="s14-rim"></div>
+        </div>
+      </div></div>
+      <div class="s14-abs s14-panel" id="s14-pB"><div class="s14-in" id="s14-iB">
+        <div class="s14-card">
+          <div class="s14-abs s14-tag" style="left:44px;top:32px">cara pasang</div>
+          <div class="s14-abs s14-dots"><i></i><i></i><i></i></div>
+          <div class="s14-abs s14-term" id="s14-term"><pre><b>npx</b> skills add https://github.com/
+  cloudflare/security-audit-skill \
+  --skill security-audit</pre></div>
+          <div class="s14-abs s14-sheen" id="s14-shB"></div><div class="s14-rim"></div>
+        </div>
+      </div></div>
+      <div class="s14-abs s14-panel" id="s14-pC"><div class="s14-in" id="s14-iC">
+        <div class="s14-note">
+          <div class="s14-abs s14-tag" style="left:44px;top:32px">contoh prompt-nya</div>
+          <div id="s14-bars"></div>
+          <div class="s14-abs s14-sheen" id="s14-shC"></div><div class="s14-rim"></div>
+        </div>
+        <div class="s14-abs s14-fold" id="s14-fold"></div>
+      </div></div>
+      <div class="s14-abs s14-inp" id="s14-inp">
+        <div class="s14-abs s14-input">
+          <div class="s14-abs s14-ava"><svg viewBox="0 0 96 96" width="96" height="96"><circle cx="48" cy="38" r="17" fill="rgba(227,237,250,.7)"/><path d="M16 92 C18 66 32 58 48 58 C64 58 78 66 80 92Z" fill="rgba(227,237,250,.7)"/></svg></div>
+          <div class="s14-abs s14-caret" id="s14-caret"></div>
+          <div class="s14-abs s14-send"><svg viewBox="0 0 96 96" width="96" height="96"><path d="M28 47 L70 30 L56 70 L49 52 Z" fill="#fff"/><path d="M49 52 L70 30" stroke="#01ccf7" stroke-width="3"/></svg></div>
+        </div>
+        <svg class="s14-abs s14-svg" viewBox="0 0 1080 1920">
+          <defs><filter id="s14-bloom" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <path id="s14-line" d="M 235 985 L 845 985 A 75 75 0 0 1 845 1135 L 280 1135 L 210 1175 L 230 1135 L 235 1135 A 75 75 0 0 1 235 985 Z" fill="none" stroke="#01ccf7" stroke-width="4" stroke-linejoin="round" filter="url(#s14-bloom)" pathLength="1000"/>
+          <path id="s14-spoke" d="" fill="none" stroke="#01ccf7" stroke-width="3" stroke-linecap="round" opacity="0.8" filter="url(#s14-bloom)"/>
+        </svg>
+        <div class="s14-abs s14-ripple" id="s14-ripple"></div>
+        <div class="s14-abs s14-cursor" id="s14-cursor"><img src="assets/brand/cursor_trim.png" alt=""></div>
+      </div>
+    </div></div>
+    <div id="s14-near"></div>
+  </div>
   <script>
     (function () {
+      const ID = "s14";
+      const R = document.querySelector('[data-composition-id="' + ID + '"]');
+      const q = (s) => R.querySelector(s);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 2.79);
+      const DUR = 2.8;
+      const T = { mau: 0.16, link: 0.42, resmi: 0.61, cara: 1.06, pasang: 1.32, dan: 1.72, contoh: 1.93, prompt: 2.22 };
+      const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+      let seed = 1414;
+      const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+
+      // abstract prompt lines (no invented prompt text)
+      const bars = q("#s14-bars"), barEls = [];
+      [[130, 700, ""], [176, 610, ""], [222, 760, "c"], [268, 660, ""], [314, 420, ""]].forEach(([y, w, c]) => { const b = document.createElement("div"); b.className = "s14-bar " + c; b.style.top = y + "px"; b.style.width = w + "px"; bars.appendChild(b); barEls.push(b); });
+      // near-plane motes
+      const near = q("#s14-near");
+      for (let i = 0; i < 8; i++) { const m = document.createElement("div"); m.className = "s14-abs s14-mote"; const s = 10 + rnd() * 24;
+        m.style.cssText += `width:${s}px;height:${s}px;left:${rnd() * 1080}px;top:${420 + rnd() * 1300}px;filter:blur(${2 + rnd() * 4}px)`; near.appendChild(m);
+        tl.set(m, { opacity: 0.22 + rnd() * 0.3 }, 0); ft(m, { x: 0 }, { x: -140 - rnd() * 120, duration: DUR, ease: "none" }, 0); }
+
+      // ---------- orbit: three panels on an ellipse around the comment input (centre 540,1000) ----------
+      const P = [q("#s14-pA"), q("#s14-pB"), q("#s14-pC")], TH = [0, 120, 240];
+      const RIM = P.map((p) => p.querySelector(".s14-rim"));
+      const O = { phi: 60, k: 0 };
+      const RX = 380, RY = 380, rad = Math.PI / 180, spoke = q("#s14-spoke");
+      function place() {
+        let front = null, fc = -2;
+        P.forEach((el, i) => {
+          const a = (TH[i] + O.phi) * rad, c = Math.cos(a), s = Math.sin(a), f = (1 + c) / 2;
+          const k = O.k;
+          const x = RX * s * k, y = (RY * (1 - c)) * k + (1 - k) * 380;           // collapsed panels sit at the input centre
+          const sc = (0.3 + 0.7 * Math.pow(f, 1.2)) * (0.35 + 0.65 * k);
+          el.style.transform = `perspective(1600px) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0px) rotateY(${(-24 * s).toFixed(2)}deg) scale(${sc.toFixed(4)})`;
+          el.style.filter = `blur(${(7 * (1 - f)).toFixed(2)}px)`;
+          el.style.opacity = ((0.35 + 0.65 * f) * Math.min(1, k * 1.6) * O.vis).toFixed(3);
+          el.style.zIndex = (c >= 0 && k > 0.75) ? String(60 + Math.round(c * 30)) : String(20 + Math.round((c + 1) * 30));
+          RIM[i].style.opacity = Math.max(0, Math.min(1, (c - 0.92) * 12.5)).toFixed(3);
+          if (c > fc) { fc = c; front = { x: 540 + x, y: 680 + y + 190 * sc }; }
+        });
+        // a thin light spoke ties the front panel to the comment input
+        if (front && fc > 0.9 && O.k > 0.95) spoke.setAttribute("d", `M ${front.x.toFixed(1)} ${(front.y + 4).toFixed(1)} L 540 985`);
+        else spoke.setAttribute("d", "M 540 985 L 540 985");
+        spoke.style.opacity = (Math.max(0, (fc - 0.9) * 10) * O.vis * 0.85).toFixed(3);
+      }
+      O.vis = 1;
+
+      // ---------- initial states ----------
+      tl.set(O, { phi: 60, k: 0, vis: 1, onUpdate: place }, 0); place();
+      q("#s14-inp").style.zIndex = "55";
+      tl.set([q("#s14-ulA")], { scaleX: 0 }, 0);
+      tl.set(barEls, { scaleX: 0 }, 0);
+      tl.set([q("#s14-ripple"), q("#s14-cursor")], { opacity: 0 }, 0);
+      tl.set(q("#s14-fold"), { rotationY: 0, rotationX: 0 }, 0);
+
+      // ---------- "Mau ... link resmi": the panels swing out of the bubble into orbit; link panel lands front ----------
+      ft(O, { k: 0 }, { k: 1, duration: 0.42, ease: "power2.out", onUpdate: place }, 0.0);
+      ft(O, { phi: 60 }, { phi: 0, duration: 0.46, ease: "power3.out", onUpdate: place }, 0.0);
+      ft(O, { phi: 0 }, { phi: -5, duration: 1.0 - 0.46, ease: "sine.inOut", onUpdate: place }, 0.46);
+      ft(q("#s14-iA"), { scale: 1 }, { scale: 1.045, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, T.link);
+      ft(q("#s14-shA"), { x: 0 }, { x: 1300, duration: 0.55, ease: "power2.inOut" }, T.link - 0.08);
+      ft(q("#s14-ulA"), { scaleX: 0 }, { scaleX: 1, duration: 0.36, ease: "power3.out" }, T.resmi - 0.05);
+      // "cara pasang": snap to the install command
+      ft(O, { phi: -5 }, { phi: -120, duration: 0.34, ease: "back.out(1.15)", onUpdate: place }, T.cara - 0.07);
+      ft(O, { phi: -120 }, { phi: -125, duration: 1.86 - (T.cara + 0.27), ease: "sine.inOut", onUpdate: place }, T.cara + 0.27);
+      ft(q("#s14-iB"), { scale: 1 }, { scale: 1.045, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, T.cara + 0.02);
+      ft(q("#s14-shB"), { x: 0 }, { x: 1300, duration: 0.55, ease: "power2.inOut" }, T.pasang - 0.1);
+      // "contoh prompt-nya": snap to the folded prompt note, abstract lines write in
+      ft(O, { phi: -125 }, { phi: -240, duration: 0.34, ease: "back.out(1.15)", onUpdate: place }, T.contoh - 0.07);
+      ft(O, { phi: -240 }, { phi: -244, duration: 2.46 - (T.contoh + 0.27), ease: "sine.inOut", onUpdate: place }, T.contoh + 0.27);
+      ft(q("#s14-iC"), { scale: 1 }, { scale: 1.045, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, T.contoh + 0.02);
+      barEls.forEach((b, i) => ft(b, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power2.out" }, T.contoh + 0.04 + i * 0.05));
+      ft(q("#s14-fold"), { rotationX: 0, rotationY: 0 }, { rotationX: 30, rotationY: -40, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, T.prompt - 0.02);
+      ft(q("#s14-shC"), { x: 0 }, { x: 1300, duration: 0.5, ease: "power2.inOut" }, T.prompt - 0.06);
+
+      // ---------- exit: panels release, the cursor drops into the comment field, the field pushes toward s15's card ----------
+      ft(O, { vis: 1 }, { vis: 0, duration: 0.24, ease: "power2.in", onUpdate: place }, 2.48);
+      ft(q("#s14-cursor"), { opacity: 0, y: -720, rotation: -8 }, { opacity: 1, y: 0, rotation: 0, duration: 0.22, ease: "power3.in" }, 2.36);
+      ft(q("#s14-cursor"), { scale: 1 }, { scale: 0.86, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "8% 6%" }, 2.58);
+      ft(q("#s14-ripple"), { opacity: 1, scale: 0.4 }, { opacity: 0, scale: 1.8, duration: 0.32, ease: "power2.out" }, 2.58);
+      ft(q("#s14-caret"), { scaleY: 1 }, { scaleY: 1.25, duration: 0.08, yoyo: true, repeat: 1 }, 2.58);
+      ft(q("#s14-line"), { attr: { "stroke-width": 4 } }, { attr: { "stroke-width": 6 }, duration: 0.18, ease: "power2.out" }, 2.58);
+      ft(q("#s14-inp"), { y: 0, scale: 1 }, { y: -210, scale: 1.13, duration: 0.22, ease: "power3.in" }, DUR - 0.22);
+      ft(q("#s14-far"), { x: 0 }, { x: -200, duration: DUR, ease: "none" }, 0);
+
+      // seek-order safety: a backward seek first rewinds to 0, then plays forward
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
-      window.__timelines["s14"] = tl;
+      window.__timelines[ID] = tl;
     })();
   </script>
 </template>

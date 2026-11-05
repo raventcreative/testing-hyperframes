@@ -1,12 +1,270 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s04-abs { position: absolute; }
+    .s04-stage { position: absolute; inset: 0; perspective: 2000px; perspective-origin: 50% 45%; }
+    .s04-world { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1700px; perspective-origin: 50% 900px; }
+    .s04-far { left: -40px; top: 520px; width: 1300px; color: rgba(227,237,250,.07); font: 400 58px/1.5 "DejaVu Sans Mono", monospace; white-space: pre; filter: blur(5px); }
+    /* abstract coding-agent console (no product UI, no output text) */
+    .s04-con { left: 50px; top: 820px; width: 980px; height: 640px; border-radius: 34px; background: linear-gradient(165deg, rgba(23,38,78,.97), rgba(10,17,44,.98));
+      box-shadow: 0 60px 100px -34px rgba(0,0,0,.8), 0 0 0 1.5px rgba(255,255,255,.14) inset, 0 1px 0 rgba(255,255,255,.25) inset; transform-origin: 50% 0%; }
+    .s04-dot { top: 34px; width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,.2); }
+    .s04-chip { left: 120px; top: 18px; height: 50px; padding: 0 24px 0 46px; border-radius: 25px; border: 2.5px solid #01ccf7; color: #01ccf7; font: 700 27px/45px Poppins, sans-serif; box-shadow: 0 0 22px rgba(1,204,247,.35); white-space: nowrap; }
+    .s04-chip i { position: absolute; left: 18px; top: 15px; width: 14px; height: 14px; border-radius: 50%; background: #01ccf7; box-shadow: 0 0 10px #01ccf7; }
+    .s04-slot { left: 26px; top: 96px; width: 928px; height: 282px; border-radius: 30px; background: rgba(3,7,24,.55); box-shadow: inset 0 6px 22px rgba(0,0,0,.6), inset 0 0 0 1.5px rgba(255,255,255,.07); }
+    .s04-clamp { width: 54px; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #01ccf7, #6adfff); box-shadow: 0 0 14px #01ccf7; }
+    .s04-core { left: 56px; top: 404px; width: 200px; height: 200px; }
+    .s04-bar { height: 22px; border-radius: 11px; background: rgba(227,237,250,.13); overflow: hidden; }
+    .s04-bar i { position: absolute; left: 0; top: 0; width: 160px; height: 22px; background: linear-gradient(90deg, rgba(1,204,247,0), rgba(106,223,255,.75), rgba(1,204,247,0)); }
+    .s04-conrim { left: -4px; top: -4px; width: 988px; height: 648px; overflow: visible; }
+    /* the REAL install command plate (continues s03's box) */
+    .s04-plate { left: 90px; top: 890px; width: 900px; height: 260px; }
+    .s04-plsvg { left: -40px; top: -40px; width: 980px; height: 340px; overflow: visible; filter: drop-shadow(0 30px 34px rgba(0,0,0,.55)); }
+    .s04-tw { left: 40px; top: 36px; width: 900px; height: 200px; transform-origin: 0 0; }
+    .s04-ln { position: absolute; left: 0; width: 900px; height: 59px; font: 500 38px/59px "DejaVu Sans Mono", monospace; white-space: pre; color: #e3edfa; }
+    .s04-ln b { color: #01ccf7; font-weight: 700; }
+    .s04-lb { color: #ffffff; text-shadow: 0 0 14px rgba(1,204,247,.85); }
+    .s04-ul { height: 3px; border-radius: 2px; background: linear-gradient(90deg, rgba(1,204,247,.25), #01ccf7); box-shadow: 0 0 10px #01ccf7; transform-origin: 0 50%; }
+    .s04-caret { left: 0; top: 0; width: 5px; height: 48px; border-radius: 2px; background: #6adfff; box-shadow: 0 0 12px #01ccf7, 0 0 26px rgba(1,204,247,.8); }
+    .s04-svg { left: 0; top: 0; width: 1080px; height: 2400px; overflow: visible; }
+    /* REAL project file tree (this very project) */
+    .s04-tree { left: 80px; top: 1560px; width: 920px; height: 600px; border-radius: 30px; background: linear-gradient(165deg, rgba(23,38,78,.97), rgba(10,17,44,.98));
+      box-shadow: 0 60px 100px -34px rgba(0,0,0,.8), 0 0 0 1.5px rgba(255,255,255,.14) inset, 0 1px 0 rgba(255,255,255,.25) inset; transform-origin: 50% 0%; }
+    .s04-th { left: 92px; top: 34px; font: 700 34px/48px "DejaVu Sans Mono", monospace; color: #fff; white-space: nowrap; }
+    .s04-th span { color: rgba(227,237,250,.55); font-weight: 500; }
+    .s04-fold { width: 30px; height: 23px; border-radius: 4px; border: 2.5px solid rgba(106,223,255,.9); }
+    .s04-fold:before { content: ""; position: absolute; left: -2.5px; top: -8px; width: 13px; height: 7px; border-radius: 3px 3px 0 0; border: 2.5px solid rgba(106,223,255,.9); border-bottom: 0; }
+    .s04-file { width: 22px; height: 28px; border-radius: 3px; border: 2.5px solid rgba(227,237,250,.7); }
+    .s04-row { position: absolute; left: 0; width: 920px; height: 50px; }
+    .s04-nm { position: absolute; left: 124px; top: 0; font: 500 30px/50px "DejaVu Sans Mono", monospace; color: #e3edfa; white-space: nowrap; }
+    .s04-dt { position: absolute; left: 384px; top: 0; font: 500 22px/50px "DejaVu Sans Mono", monospace; color: rgba(227,237,250,.45); white-space: nowrap; }
+    .s04-rail { left: 53px; top: 84px; width: 2px; height: 450px; background: rgba(227,237,250,.16); }
+    .s04-tick { width: 18px; height: 2px; background: rgba(227,237,250,.16); }
+    .s04-tsvg { left: 0; top: 0; width: 920px; height: 600px; overflow: visible; }
+    .s04-brk { left: 20px; top: 22px; width: 690px; height: 72px; }
+    .s04-brk span { position: absolute; width: 30px; height: 30px; border: 4.5px solid #01ccf7; filter: drop-shadow(0 0 9px rgba(1,204,247,.9)); }
+    .s04-hglint { left: 88px; top: 30px; width: 150px; height: 56px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.6), rgba(255,255,255,0)); mix-blend-mode: overlay; }
+    .s04-flash { border-radius: 50%; background: radial-gradient(ellipse, rgba(170,240,255,.55), rgba(1,204,247,0) 62%); mix-blend-mode: screen; }
+    .s04-spark { width: 30px; height: 30px; }
+    .s04-mote { border-radius: 50%; background: radial-gradient(circle, rgba(200,245,255,.95), rgba(1,204,247,0) 70%); }
+  </style>
+  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div class="s04-abs s04-far" id="s04-far">assets/   compositions/   production/
+tools/   vendor/   index.html   package.json
+hyperframes.json   s01.html … s15.html</div>
+    <div class="s04-stage"><div class="s04-world" id="s04-world">
+      <!-- abstract agent console -->
+      <div class="s04-abs s04-con" id="s04-con">
+        <div class="s04-abs s04-dot" style="left:34px"></div><div class="s04-abs s04-dot" style="left:60px"></div><div class="s04-abs s04-dot" style="left:86px"></div>
+        <div class="s04-abs s04-chip" id="s04-chip"><i></i>coding agent</div>
+        <div class="s04-abs s04-slot"></div>
+        <svg class="s04-abs s04-core" id="s04-core" viewBox="-100 -100 200 200">
+          <defs><filter id="s04-cbloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <radialGradient id="s04-orb"><stop offset="0" stop-color="#e9fbff"/><stop offset=".45" stop-color="#6adfff"/><stop offset="1" stop-color="#01ccf7" stop-opacity="0"/></radialGradient></defs>
+          <circle r="90" fill="none" stroke="rgba(227,237,250,.12)" stroke-width="2"/>
+          <g id="s04-ringA"><circle r="78" fill="none" stroke="#01ccf7" stroke-width="4" stroke-dasharray="46 22" filter="url(#s04-cbloom)"/></g>
+          <g id="s04-ringB"><circle r="56" fill="none" stroke="rgba(106,223,255,.6)" stroke-width="2.5" stroke-dasharray="8 10"/></g>
+          <circle id="s04-orbc" r="34" fill="url(#s04-orb)"/>
+        </svg>
+        <div class="s04-abs s04-bar" style="left:300px;top:438px;width:560px"><i class="s04-sh"></i></div>
+        <div class="s04-abs s04-bar" style="left:300px;top:494px;width:430px"><i class="s04-sh"></i></div>
+        <div class="s04-abs s04-bar" style="left:300px;top:550px;width:300px"><i class="s04-sh"></i></div>
+        <svg class="s04-abs s04-conrim" viewBox="-4 -4 988 648">
+          <defs><filter id="s04-rbloom" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <rect id="s04-rim" x="0" y="0" width="980" height="640" rx="34" fill="none" stroke="#01ccf7" stroke-width="3.5" filter="url(#s04-rbloom)" pathLength="1000"/>
+        </svg>
+      </div>
+      <!-- the REAL install command -->
+      <div class="s04-abs s04-plate" id="s04-plate">
+        <svg class="s04-abs s04-plsvg" viewBox="-40 -40 980 340">
+          <defs><linearGradient id="s04-pg" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="rgb(14,24,56)" stop-opacity=".96"/><stop offset="1" stop-color="rgb(8,13,36)" stop-opacity=".98"/></linearGradient>
+            <filter id="s04-pglowf" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="11"/></filter></defs>
+          <rect id="s04-pglow" x="0" y="0" width="900" height="190" rx="24" fill="none" stroke="#01ccf7" stroke-width="7" opacity=".55" filter="url(#s04-pglowf)"/>
+          <rect id="s04-prect" x="0" y="0" width="900" height="190" rx="24" fill="url(#s04-pg)" stroke="#01ccf7" stroke-opacity=".9" stroke-width="2.6"/>
+        </svg>
+        <div class="s04-abs s04-tw" id="s04-tw"></div>
+        <div class="s04-abs s04-clamp" id="s04-cl0" style="left:60px;top:-22px"></div><div class="s04-abs s04-clamp" id="s04-cl1" style="left:786px;top:-22px"></div>
+        <div class="s04-abs s04-clamp" id="s04-cl2" style="left:60px;top:266px"></div><div class="s04-abs s04-clamp" id="s04-cl3" style="left:786px;top:266px"></div>
+        <div class="s04-abs s04-flash" id="s04-pflash" style="left:-80px;top:-120px;width:1060px;height:500px"></div>
+      </div>
+      <!-- REAL project file tree -->
+      <div class="s04-abs s04-tree" id="s04-tree">
+        <div class="s04-abs s04-fold" style="left:38px;top:47px"></div>
+        <div class="s04-abs s04-th" id="s04-th">projects/<span></span>cloudflare_audit_2026/</div>
+        <div class="s04-abs s04-rail"></div>
+        <div id="s04-rows"></div>
+        <svg class="s04-abs s04-tsvg" viewBox="0 0 920 600">
+          <defs><filter id="s04-tbloom" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <path id="s04-cabB" d="M53 0 L53 40" fill="none" stroke="#01ccf7" stroke-width="5" stroke-linecap="round" filter="url(#s04-tbloom)" pathLength="100"/>
+          <g id="s04-routes"></g>
+        </svg>
+        <div class="s04-abs s04-hglint" id="s04-hglint"></div>
+        <div class="s04-abs s04-brk" id="s04-brk">
+          <span style="left:0;top:0;border-right:0;border-bottom:0"></span><span style="right:0;top:0;border-left:0;border-bottom:0"></span>
+          <span style="left:0;bottom:0;border-right:0;border-top:0"></span><span style="right:0;bottom:0;border-left:0;border-top:0"></span>
+        </div>
+        <div class="s04-abs s04-flash" id="s04-tflash" style="left:-160px;top:-180px;width:1000px;height:440px"></div>
+        <div id="s04-sparks"></div>
+      </div>
+      <!-- the caret becomes a curving cyan cable -->
+      <svg class="s04-abs s04-svg" viewBox="0 0 1080 2400">
+        <defs><filter id="s04-bloom" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <radialGradient id="s04-head"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#6adfff"/><stop offset="1" stop-color="#01ccf7" stop-opacity="0"/></radialGradient></defs>
+        <path id="s04-cabAw" d="M681 1113 L930 1113 C1062 1113 1066 1270 930 1360 C790 1452 133 1420 133 1560" fill="none" stroke="rgba(1,204,247,.22)" stroke-width="16" stroke-linecap="round" pathLength="1000"/>
+        <path id="s04-cabA" d="M681 1113 L930 1113 C1062 1113 1066 1270 930 1360 C790 1452 133 1420 133 1560" fill="none" stroke="#01ccf7" stroke-width="5.5" stroke-linecap="round" filter="url(#s04-bloom)" pathLength="1000"/>
+        <circle id="s04-headA" cx="0" cy="0" r="26" fill="url(#s04-head)"/>
+      </svg>
+    </div></div>
+    <div id="s04-near"></div>
+  </div>
   <script>
     (function () {
+      const ID = "s04";
+      const R = document.querySelector('[data-composition-id="' + ID + '"]');
+      const q = (s) => R.querySelector(s);
+      const qa = (s) => Array.from(R.querySelectorAll(s));
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.49);
+      const DUR = 3.5;
+      const T = { kamu: 0.15, pasang: 0.37, di: 0.78, coding: 1.02, agent: 1.22, lalu: 1.70, arahkan: 1.98, ke: 2.32, project: 2.60, milikmu: 2.85 };
+      const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+      let seed = 404;
+      const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      const STAR = '<svg viewBox="0 0 40 40" width="100%" height="100%"><path d="M20 2 C21 14 26 19 38 20 C26 21 21 26 20 38 C19 26 14 21 2 20 C14 19 19 14 20 2Z" fill="#ffffff"/></svg>';
+
+      // ---- the REAL install command (README "Installation"), same 3-line layout as s03, laid out at 38px
+      const CW = 38 * 0.60205, LH = 59;
+      const LINES = ['<b>npx</b> skills add https://github.com/', '  cloudflare/security-audit-skill \\', '  --skill security-audit'];
+      const LEN = [34, 35, 24], OFF = [0, 34, 69], TOT = 93;
+      const tw = q("#s04-tw"), bright = [], ul = [];
+      LINES.forEach((h, i) => {
+        const a = document.createElement("div"); a.className = "s04-ln"; a.style.top = (i * LH) + "px"; a.innerHTML = h; tw.appendChild(a);
+        const u = document.createElement("div"); u.className = "s04-abs s04-ul"; u.style.cssText += `left:${i ? 2 * CW : 0}px;top:${i * LH + 52}px;width:${(LEN[i] - (i ? 2 : 0)) * CW}px`; tw.appendChild(u); ul.push(u);
+        const b = document.createElement("div"); b.className = "s04-ln s04-lb"; b.style.top = (i * LH) + "px"; b.innerHTML = h; tw.appendChild(b); bright.push(b);
+      });
+      const caret = document.createElement("div"); caret.className = "s04-abs s04-caret"; tw.appendChild(caret);
+      const C = { p: 0 };
+      function drawCaret() {
+        let line = 0, col = 0;
+        for (let i = 0; i < 3; i++) {
+          const c = Math.max(0, Math.min(LEN[i], C.p - OFF[i]));
+          bright[i].style.clipPath = `inset(-14px ${(900 - c * CW).toFixed(1)}px -14px -14px)`;
+          const st = i ? 2 : 0; ul[i].style.transform = `scaleX(${Math.max(0, (c - st) / (LEN[i] - st)).toFixed(4)})`;
+          if (C.p >= OFF[i]) { line = i; col = c; }
+        }
+        caret.style.transform = `translate(${(col * CW + 1).toFixed(1)}px, ${(line * LH + 6).toFixed(1)}px)`;
+      }
+
+      // ---- REAL project tree rows
+      const ROWS = [["d", "assets/", "audio · brand · fonts · mascot3d · src"], ["d", "compositions/", "s01.html … s15.html · mascot.html"], ["d", "production/", ""],
+        ["d", "tools/", "align.py · build_index.py"], ["d", "vendor/", ""], ["f", "index.html", ""], ["f", "hyperframes.json", ""], ["f", "package.json", ""]];
+      const RY = (i) => 108 + i * 58;
+      const rowEls = [];
+      ROWS.forEach(([k, n, d], i) => {
+        const r = document.createElement("div"); r.className = "s04-row"; r.style.top = RY(i) + "px";
+        r.innerHTML = `<div class="s04-abs s04-tick" style="left:55px;top:24px"></div>` + (k === "d" ? `<div class="s04-abs s04-fold" style="left:78px;top:16px"></div>` : `<div class="s04-abs s04-file" style="left:82px;top:11px"></div>`) +
+          `<div class="s04-nm">${n}</div>` + (d ? `<div class="s04-dt">${d}</div>` : "");
+        q("#s04-rows").appendChild(r); rowEls.push(r);
+      });
+      // exit route lines: the cable splits down the rail into four real entries
+      const NS = "http://www.w3.org/2000/svg", routes = [];
+      [0, 1, 4, 5].forEach((ri) => { const y = RY(ri) + 25; const p = document.createElementNS(NS, "path");
+        p.setAttribute("d", `M53 76 L53 ${y - 14} Q53 ${y} 67 ${y} L108 ${y}`); p.setAttribute("fill", "none"); p.setAttribute("stroke", "#01ccf7"); p.setAttribute("stroke-width", "4.5");
+        p.setAttribute("stroke-linecap", "round"); p.setAttribute("filter", "url(#s04-tbloom)"); p.setAttribute("pathLength", "100"); q("#s04-routes").appendChild(p); routes.push(p);
+        const n = document.createElementNS(NS, "circle"); n.setAttribute("cx", 112); n.setAttribute("cy", y); n.setAttribute("r", 7); n.setAttribute("fill", "#e9fbff"); n.setAttribute("filter", "url(#s04-tbloom)"); q("#s04-routes").appendChild(n); routes.push(n); });
+
+      // sparkles + near motes
+      const sparks = [];
+      for (let i = 0; i < 8; i++) { const s = document.createElement("div"); s.className = "s04-abs s04-spark"; s.innerHTML = STAR; s.style.left = (90 + rnd() * 640) + "px"; s.style.top = (6 + rnd() * 90) + "px"; q("#s04-sparks").appendChild(s); sparks.push(s); }
+      const near = q("#s04-near");
+      for (let i = 0; i < 9; i++) { const m = document.createElement("div"); m.className = "s04-abs s04-mote"; const sz = 10 + rnd() * 26;
+        m.style.cssText += `width:${sz}px;height:${sz}px;left:${rnd() * 1080}px;top:${420 + rnd() * 1300}px;filter:blur(${2 + rnd() * 4}px)`; near.appendChild(m);
+        tl.set(m, { opacity: 0.22 + rnd() * 0.33 }, 0); ft(m, { y: 0 }, { y: -260 - rnd() * 160, duration: DUR, ease: "none" }, 0); }
+
+      // cable head follows the drawn end of the path
+      const cabA = q("#s04-cabA"), headA = q("#s04-headA"), LA = cabA.getTotalLength();
+      const CA = { d: 0 };
+      function drawCable() {
+        const d = CA.d; const s = `${(d * 1000).toFixed(2)} 1000`;
+        cabA.setAttribute("stroke-dasharray", s); q("#s04-cabAw").setAttribute("stroke-dasharray", s);
+        const pt = cabA.getPointAtLength(LA * d); headA.setAttribute("cx", pt.x.toFixed(1)); headA.setAttribute("cy", pt.y.toFixed(1));
+        headA.setAttribute("opacity", d <= 0.001 || d >= 0.999 ? 0 : 1);
+      }
+
+      // ---- initial states (frame 0 = s03's last frame: the cyan-outlined command box at y 890)
+      tl.set(C, { p: 0, onUpdate: drawCaret }, 0); drawCaret();
+      tl.set(CA, { d: 0, onUpdate: drawCable }, 0); drawCable();
+      tl.set(q("#s04-tw"), { scale: 27 / 38 }, 0);
+      tl.set([q("#s04-prect"), q("#s04-pglow")], { attr: { height: 190 } }, 0);
+      tl.set(q("#s04-con"), { opacity: 0 }, 0);
+      tl.set(q("#s04-rim"), { attr: { "stroke-dasharray": "0 1000" } }, 0);
+      tl.set([q("#s04-chip"), q("#s04-brk"), q("#s04-hglint"), q("#s04-pflash"), q("#s04-tflash"), caret], { opacity: 0 }, 0);
+      tl.set(qa(".s04-clamp"), { opacity: 0 }, 0);
+      tl.set(q("#s04-cabB"), { attr: { "stroke-dasharray": "0 100" } }, 0);
+      tl.set(routes, { opacity: 0 }, 0);
+      tl.set(sparks, { opacity: 0, scale: 0 }, 0);
+      tl.set(q("#s04-tree"), { rotationX: 16, opacity: 0 }, 0);
+
+      // ---- camera A: carry s03's downward tilt momentum, settle on the command, track the caret
+      ft(q("#s04-world"), { y: 0 }, { y: -250, duration: 0.42, ease: "power3.out" }, 0);
+      ft(q("#s04-world"), { rotationY: 0, x: 0 }, { rotationY: -5, x: -22, duration: 1.1, ease: "sine.inOut" }, 0);
+      ft(q("#s04-far"), { x: 0, y: 0 }, { x: -200, y: -420, duration: DUR, ease: "none" }, 0);
+      // command grows to a large, readable size
+      ft(q("#s04-tw"), { scale: 27 / 38 }, { scale: 1, duration: 0.45, ease: "power3.inOut" }, 0.04);
+      ft([q("#s04-prect"), q("#s04-pglow")], { attr: { height: 190 } }, { attr: { height: 254 }, duration: 0.45, ease: "power3.inOut" }, 0.04);
+      // caret runs along the real command ("Kamu pasang di")
+      ft(caret, { opacity: 0 }, { opacity: 1, duration: 0.06 }, 0.1);
+      ft(C, { p: 0 }, { p: TOT, duration: 0.86, ease: "power1.inOut", onUpdate: drawCaret }, 0.12);
+
+      ft(q("#s04-tree"), { opacity: 0, y: 140 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.62);
+      // ---- "coding agent": the plate docks into the abstract agent console
+      ft(q("#s04-con"), { opacity: 0, y: 280, rotationX: -38, scale: 0.94 }, { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: 0.42, ease: "power3.out" }, 0.74);
+      ft(q("#s04-chip"), { opacity: 0, x: -30, scale: 0.8 }, { opacity: 1, x: 0, scale: 1, duration: 0.24, ease: "back.out(2)" }, T.coding - 0.04);
+      ft(q("#s04-plate"), { y: 0 }, { y: 40, duration: 0.2, ease: "power3.in" }, T.agent - 0.2);
+      ft(q("#s04-rim"), { attr: { "stroke-dasharray": "0 1000" } }, { attr: { "stroke-dasharray": "1000 0" }, duration: 0.3, ease: "power2.inOut" }, T.agent - 0.28);
+      qa(".s04-clamp").forEach((c, i) => ft(c, { opacity: 0, scaleX: 2.2, x: i % 2 ? 50 : -50 }, { opacity: 1, scaleX: 1, x: 0, duration: 0.16, ease: "power4.out" }, T.agent - 0.04));
+      ft(q("#s04-pflash"), { opacity: 0 }, { opacity: 1, duration: 0.07 }, T.agent);
+      ft(q("#s04-pflash"), { opacity: 1 }, { opacity: 0, duration: 0.36 }, T.agent + 0.07);
+      ft(q("#s04-con"), { scale: 1 }, { scale: 1.02, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, T.agent);
+      ft(q("#s04-world"), { y: -250 }, { y: -330, duration: 0.7, ease: "sine.inOut" }, 0.9);
+      // agent core idles (abstract)
+      ft(q("#s04-ringA"), { rotation: 0, svgOrigin: "0 0" }, { rotation: 160, svgOrigin: "0 0", duration: DUR - 0.8, ease: "none" }, 0.8);
+      ft(q("#s04-ringB"), { rotation: 0, svgOrigin: "0 0" }, { rotation: -120, svgOrigin: "0 0", duration: DUR - 0.8, ease: "none" }, 0.8);
+      ft(q("#s04-orbc"), { scale: 0.8, svgOrigin: "0 0" }, { scale: 1.15, svgOrigin: "0 0", duration: 0.3, yoyo: true, repeat: 3, ease: "sine.inOut" }, T.agent);
+      qa(".s04-sh").forEach((s, i) => ft(s, { x: -180 }, { x: 640, duration: 0.9, ease: "power1.inOut" }, 1.0 + i * 0.12));
+      ft(caret, { opacity: 1 }, { opacity: 0.25, duration: 0.12, yoyo: true, repeat: 1, ease: "steps(1)" }, 1.32);
+
+      // ---- "lalu arahkan ke project": the caret stretches into a curving cable that dives into the REAL file tree
+      ft(caret, { scaleY: 1, opacity: 1 }, { scaleY: 0.25, opacity: 0, duration: 0.18, ease: "power2.in" }, T.lalu);
+      ft(CA, { d: 0 }, { d: 1, duration: 0.74, ease: "power2.inOut", onUpdate: drawCable }, T.lalu + 0.02);
+      ft(q("#s04-world"), { y: -330 }, { y: -840, duration: 0.86, ease: "power2.inOut" }, T.lalu + 0.06);
+      ft(q("#s04-world"), { rotationY: -5, x: -22 }, { rotationY: 0, x: 0, duration: 0.9, ease: "sine.inOut" }, 1.1 + 0.6);
+      ft(q("#s04-con"), { opacity: 1, filter: "blur(0px)" }, { opacity: 0.5, filter: "blur(5px)", duration: 0.6, ease: "power1.in" }, 1.95);
+      ft(q("#s04-plate"), { opacity: 1, filter: "blur(0px)" }, { opacity: 0.5, filter: "blur(4px)", duration: 0.6, ease: "power1.in" }, 1.95);
+      rowEls.forEach((r, i) => ft(r, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, 1.95 + i * 0.045));
+      ft(q("#s04-cabB"), { attr: { "stroke-dasharray": "0 100" } }, { attr: { "stroke-dasharray": "100 0" }, duration: 0.1, ease: "power2.in" }, T.lalu + 0.76);
+      // apex "project": the cable plugs into the project root — brackets lock, glint, flash
+      ft(q("#s04-brk"), { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: 0.2, ease: "power4.out" }, T.project - 0.08);
+      ft(q("#s04-tflash"), { opacity: 0 }, { opacity: 1, duration: 0.07 }, T.project);
+      ft(q("#s04-tflash"), { opacity: 1 }, { opacity: 0, duration: 0.4 }, T.project + 0.07);
+      ft(q("#s04-hglint"), { opacity: 0, x: 0 }, { opacity: 1, x: 520, duration: 0.42, ease: "power2.inOut" }, T.project - 0.02);
+      ft(q("#s04-hglint"), { opacity: 1 }, { opacity: 0, duration: 0.1 }, T.project + 0.4);
+      ft(q("#s04-tree"), { scale: 1 }, { scale: 1.025, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, T.project);
+      // "milikmu": a few sparkles on the root
+      sparks.forEach((s, i) => { ft(s, { opacity: 0, scale: 0, rotation: 0 }, { opacity: 1, scale: 0.5 + (i % 3) * 0.25, rotation: 90, duration: 0.22, ease: "power2.out" }, T.milikmu - 0.05 + i * 0.03);
+        ft(s, { opacity: 1 }, { opacity: 0, duration: 0.28 }, T.milikmu + 0.22 + i * 0.03); });
+      ft(q("#s04-brk"), { opacity: 1 }, { opacity: 0, duration: 0.2 }, 3.05);
+
+      // ---- exit: the cable splits into route lines; camera rises over the flattened tree (hands off to s05's board)
+      routes.forEach((p, i) => { const k = Math.floor(i / 2);
+        if (p.tagName === "path") ft(p, { opacity: 1, attr: { "stroke-dasharray": "0 100" } }, { opacity: 1, attr: { "stroke-dasharray": "100 0" }, duration: 0.3, ease: "power2.out" }, 2.98 + k * 0.06);
+        else ft(p, { opacity: 0, scale: 0, svgOrigin: p.getAttribute("cx") + " " + p.getAttribute("cy") }, { opacity: 1, scale: 1, svgOrigin: p.getAttribute("cx") + " " + p.getAttribute("cy"), duration: 0.16, ease: "back.out(3)" }, 3.24 + k * 0.06); });
+      ft([q("#s04-con"), q("#s04-plate")], { opacity: 0.5 }, { opacity: 0, duration: 0.5, ease: "power1.in" }, DUR - 0.52);
+      ft(q("#s04-world"), { y: -840 }, { y: -1040, duration: 0.55, ease: "power2.inOut" }, DUR - 0.55);
+      ft(q("#s04-tree"), { rotationX: 16 }, { rotationX: 0, duration: 0.55, ease: "power2.inOut" }, DUR - 0.55);
+
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
-      window.__timelines["s04"] = tl;
+      window.__timelines[ID] = tl;
     })();
   </script>
 </template>

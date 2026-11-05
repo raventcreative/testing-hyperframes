@@ -2,10 +2,10 @@
 const { chromium } = require("playwright");
 (async () => {
   const [out] = process.argv.slice(2);
-  const b = await chromium.launch();
+  const b = await chromium.launch({ args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
   p.on("pageerror", (e) => console.error("pageerror", e.message));
-  await p.goto("http://127.0.0.1:8768/thumbnail/cover.html");
+  await p.goto("http://127.0.0.1:8768/thumbnail/cover.html" + (process.argv[3] ? "?t=" + process.argv[3] : ""));
   await p.evaluate(() => window.COVER_READY);
   await p.waitForTimeout(300);
   await p.screenshot({ path: out });

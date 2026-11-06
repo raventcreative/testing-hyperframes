@@ -9,7 +9,7 @@
   <script>
     (function () {
       // AI PRENEUR chibi businessman (mascot_biz_rigged.glb), live WebGL.
-      // OPENING (0 – 4.33 s): lands SITTING in the white world ->
+      // OPENING (0 – 1.0 s): back to camera -> turns to the front ->
       // stands up -> turns to look back at the 4 paid tools -> turns forward as they come forward -> steps in to half body.
       // Then he presents every round (half body, bottom of frame, below the caption band).
       const M3 = window.Mascot3D;
@@ -42,54 +42,31 @@
       const LOOK = { head: [-0.14, 0.35, 0], neck: [-0.05, 0.15, 0], spine: [0, 0.08, 0] };
       const SCRATCH = { upperarm_R: [-0.2, 0.9, 0.1], forearm_R: [-1.6, 0, 0], hand_R: [0, 0, 0.3] };
       const FAR = { fx: 540, fy: 1520, h: 640, pitch: 6 }, HALF = { fx: 540, fy: 2185, h: 1060, pitch: 4 };
-      const LAND = 0.18, T_HAND = 4.3333;
+      const LAND = -1, T_HAND = 1.02;
 
       function opening(t) {
+        // frame 0: standing, back to camera -> turns to the front -> steps straight in to half body -> explains
         const o = { yaw: 0, shadow: true, visible: true, brow: [0, 0] };
         const R = { x: 0, y: 0, rx: 0, ry: 0, rz: 0, s: 1, sx: 1, sy: 1 };
-        let B, view = FAR;
-        if (t < LAND) {                                        // ---- frame 0: last few cm of a drop, already folded into a sit
-          const u = t / LAND;
-          R.y = L(0.6, -0.14, u * u);
-          B = SITFALL;
-          o.mouth = [0.036, 0.032, 0.005, 0.9]; o.brow = [0.6, 0.6];
-        } else if (t < 0.58) {                                 // ---- impact (squash + tiny rebound) then a dazed beat
-          const k = t - LAND, sq = Math.exp(-k * 9) * Math.cos(k * 26);
-          R.y = -0.14 + (k < 0.24 ? 0.045 * Math.sin(Math.PI * k / 0.24) : 0);
-          R.sy = 1 - 0.15 * sq; R.sx = 1 + 0.09 * sq;
-          B = mixP(SITFALL, SIT, e3(k / 0.14));
-          const dz = Math.exp(-Math.max(0, t - 0.28) * 3);
-          B = add(B, { head: [0.04, 0.2 * Math.sin((t - 0.24) * 13) * dz, 0.1 * dz] });
-        } else if (t < 0.80) {                                 // ---- leans forward, hands down: getting up
-          const u = io3((t - 0.58) / 0.22);
-          R.y = L(-0.14, -0.075, u); B = mixP(SIT, CROUCH, u);
-        } else if (t < 1.20) {                                 // ---- pushes up to standing (small hop at the top)
-          const u = (t - 0.80) / 0.40, e = e3(u * 1.15);
-          R.y = L(-0.075, 0, e) + 0.022 * Math.sin(Math.PI * one((u - 0.55) / 0.45));
-          B = mixP(CROUCH, STAND, e);
-        } else if (t < 3.35) {                                 // ---- turns to look back at the 4 logos rising behind him
-          const u = io3((t - 1.20) / 0.46);
-          R.ry = L(0, 2.3, u);
-          const sc = sm((t - 2.35) / 0.26) * (1 - sm((t - 3.13) / 0.22));
-          const shake = 0.12 * Math.sin((t - 2.68) * 16) * bump(t, 2.93, 0.3);
-          B = add(scl(LOOK, u), scl(SCRATCH, sc), { head: [0, shake, 0] });
-        } else {                                               // ---- snaps forward on "sebulan?", logos come forward, he steps in
-          const u = e3((t - 3.35) / 0.3);
-          R.ry = L(2.3, 0, u);
-          B = scl(LOOK, 1 - u);
-          const w = M3.walk(t, 3.59, 4.29, 2, 0.4);
-          B = add(B, w.bones); R.y = w.bob;
-          const v = io3((t - 3.57) / 0.74);
-          view = { fx: 540, fy: L(FAR.fy, HALF.fy, v), h: L(FAR.h, HALF.h, v), pitch: L(FAR.pitch, HALF.pitch, v) };
-        }
-        o.root = R; o.bones = B; o.view = view;
+        const u = e3((t - 0.04) / 0.36);
+        R.ry = L(2.6, 0, u);
+        let B = scl(LOOK, 1 - u);
+        const w = M3.walk(t, 0.3, 1.0, 2, 0.4);
+        B = add(B, w.bones); R.y = w.bob;
+        const v = io3((t - 0.28) / 0.74);
+        o.view = { fx: 540, fy: L(FAR.fy, HALF.fy, v), h: L(FAR.h, HALF.h, v), pitch: L(FAR.pitch, HALF.pitch, v) };
+        o.shadow = v < 0.6;
+        o.root = R; o.bones = B;
         return o;
       }
 
       // ---------------------------------------------------------------- presenter (after the opening)
       const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
       const intents = [
-        { t: 4.33, action: "idle" },
+        { t: 1.0, action: "idle" },
+        { t: wt("tools") - 0.15, action: "present", side: "left" },
+        { t: wt("sampai") - 0.1, action: "question", side: "right" },
+        { t: wt("sebulan?") - 0.15, action: "emphasize", side: "left" },
         { t: wt("Padahal") - 0.05, action: "explain", side: "left" },
         { t: wt("GitHub.") - 0.25, action: "present", side: "right" },
         { t: wt("Open") - 0.1, action: "emphasize", side: "left" },

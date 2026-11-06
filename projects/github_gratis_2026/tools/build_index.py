@@ -71,7 +71,6 @@ html = f"""<!doctype html>
         <div class="plate"></div><div id="glow-a" class="glow"></div><div id="glow-b" class="glow"></div>
       </div>
 {slots}      <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
-      <div id="s01top" data-composition-id="s01top" data-composition-src="compositions/s01top.html" data-start="0" data-duration="1.4" data-track-index="7" data-width="1080" data-height="1920"></div>
       <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_trim.png" alt="AI PRENEUR">
         <div id="hdr"><div id="hdr-title"><span class="pa">Berbayar</span><span class="vs">vs</span><span class="fr">Gratis</span></div></div></div>
       <div id="caps" class="clip layer" data-start="0" data-duration="{total}" data-track-index="9"></div>
@@ -131,9 +130,8 @@ html = f"""<!doctype html>
         tl.fromTo("#glow-a", {{ x: 0, y: 0 }}, {{ x: 120, y: 90, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#glow-b", {{ x: 0, y: 0 }}, {{ x: -140, y: -80, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
-        // the logo waits for the white world (the opening starts in the sky)
         tl.set("#brandlogo", {{ opacity: 0 }}, 0);
-        tl.fromTo("#brandlogo", {{ opacity: 0 }}, {{ opacity: 0.95, duration: 0.5, ease: "power2.out", immediateRender: false }}, 1.25);
+        tl.fromTo("#brandlogo", {{ opacity: 0 }}, {{ opacity: 0.95, duration: 0.4, ease: "power2.out", immediateRender: false }}, 0.02);
         // the end lockup (s18) shows the big logo: the small corner mark steps away
         tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s18"]["start"] + 2.0, 3)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);

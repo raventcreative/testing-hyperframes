@@ -1,13 +1,15 @@
 """Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
 - display fixes (Higgsfield, Wan 2.2, ElevenLabs, GPT-SoVITS, Midjourney, ComfyUI, FLUX, ChatGPT, Ollama, ...)
 - word starts that whisper put inside a silence are snapped to the real voice onset (energy > -40 dB)
-- VO starts at OFFSET s (room for the cloud-fall opening).   Run: python3 -I tools/timing.py ."""
+- VO starts at OFFSET s (exactly 7 frames: room for the landing beat).   Run: python3 -I tools/timing.py ."""
 import json, re, subprocess, sys
 from pathlib import Path
 import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-OFFSET, FPS, TAIL = 0.8, 30, 0.6
+OFFSET, FPS, TAIL = 7 / 30, 30, 0.6
+# scene cuts are LOCKED to preview v1 (VO at 0.8 s = 24 frames) and moved 17 frames earlier with the VO, so every scene keeps its exact length
+CUTS_V1 = [0, 147, 232, 344, 399, 488, 620, 680, 789, 963, 1016, 1121, 1291, 1338, 1429, 1583, 1708, 1777]
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 
@@ -110,7 +112,7 @@ for q, (sid, first, cuts, cyan, marker) in enumerate(SC):
                    "speech": [words[w0]["s"], words[w1]["e"]], "cuts": [w0 + c for c in cuts]})
 TOTAL = round(int(np.ceil((DUR + OFFSET + TAIL - 0.3) * FPS)) / FPS, 4)
 for q, sc in enumerate(scenes):
-    sc["start"] = 0.0 if q == 0 else round(round(((scenes[q - 1]["speech"][1] + sc["speech"][0]) / 2) * FPS) / FPS, 4)
+    sc["start"] = 0.0 if q == 0 else round((CUTS_V1[q] - 17) / FPS, 4)
 for q, sc in enumerate(scenes):
     en = scenes[q + 1]["start"] if q + 1 < len(scenes) else TOTAL
     sc["dur"] = round(en - sc["start"], 4)
@@ -122,7 +124,7 @@ for sc in scenes:
         cs = (round(words[a0]["s"] - 0.25, 3) if sc["id"] == "s01" else sc["start"]) if c == 0 else round(words[a0]["s"] - 0.1, 3)
         ce = sc["start"] + sc["dur"] if c == len(bounds) - 2 else round(words[bounds[c + 1]]["s"] - 0.1, 3)
         caps.append([round(cs, 3), round(ce, 3), a0, a1])
-out = {"vo_offset": OFFSET, "vo_sec": round(DUR, 5), "total_sec": TOTAL, "frames": int(round(TOTAL * FPS)),
+out = {"vo_offset": round(OFFSET, 4), "vo_sec": round(DUR, 5), "total_sec": TOTAL, "frames": int(round(TOTAL * FPS)),
        "segments": [[round(x + OFFSET, 2), round(y + OFFSET, 2)] for x, y in segs], "words": words, "scenes": scenes, "caps": caps}
 (P / "production/timing.json").write_text(json.dumps(out, indent=1, ensure_ascii=False))
 VW = [[w["w"], w["s"], w["e"], 1 if w["st"] in "cm" else 0, w["sp"]] for w in words]

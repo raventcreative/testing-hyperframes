@@ -36,9 +36,9 @@
       #brandlogo { opacity: 0; position: absolute; left: 84px; top: 262px; width: 236px; height: auto; }
       /* round header */
       #hdr { position: absolute; left: 0; right: 0; top: 0; height: 0; }
-      .chip { opacity: 0; position: absolute; left: 540px; top: 256px; white-space: nowrap; font-weight: 700; font-size: 21px; letter-spacing: .14em; color: #fff;
+      .chip { opacity: 0; position: absolute; left: 540px; top: 306px; white-space: nowrap; font-weight: 700; font-size: 21px; letter-spacing: .14em; color: #fff;
                background: var(--grad); padding: 7px 18px 6px; border-radius: 30px; box-shadow: 0 8px 20px rgba(10,13,44,.18); }
-      #hdr-title { opacity: 0; position: absolute; left: 0; right: 0; top: 300px; text-align: center; font-size: 46px; line-height: 1.1; letter-spacing: -0.015em; white-space: nowrap; }
+      #hdr-title { opacity: 0; position: absolute; left: 0; right: 0; top: 350px; text-align: center; font-size: 44px; line-height: 1.1; letter-spacing: -0.015em; white-space: nowrap; }
       #hdr-title span { display: inline-block; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
       #hdr-title .vs { font-weight: 400; font-size: 34px; margin: 0 14px; vertical-align: 4px; }
       #hdr-title .pa { font-weight: 700; }
@@ -78,6 +78,9 @@
     <script>
       (function () {
         const tl = gsap.timeline({ paused: true });
+        // expand the "scale" shorthand (seek-order-safe scaleY in the HF runtime)
+        const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+        { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
         const mk = (tag, cls, parent, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; };
         // VERIFIED word timings (VO offset included): [text, start, style]
         const W = [
@@ -217,32 +220,32 @@
           [2.552, 4.9, 6, 9, "top"],
           [4.9, 6.221, 10, 12, "mid"],
           [6.221, 7.733, 13, 16, "mid"],
-          [7.81, 8.75, 17, 18, "mid"],
+          [7.733, 8.75, 17, 18, "mid"],
           [8.75, 9.617, 19, 20, "mid"],
           [9.617, 11.467, 21, 26, "mid"],
-          [11.55, 13.3, 27, 29, "mid"],
-          [13.37, 16.267, 30, 35, "mid"],
+          [11.467, 13.3, 27, 29, "mid"],
+          [13.3, 16.267, 30, 35, "mid"],
           [16.267, 18.44, 36, 37, "mid"],
           [18.44, 20.667, 38, 41, "mid"],
-          [20.83, 22.667, 42, 44, "mid"],
-          [22.69, 24.78, 45, 48, "mid"],
+          [20.667, 22.667, 42, 44, "mid"],
+          [22.667, 24.78, 45, 48, "mid"],
           [24.78, 26.3, 49, 50, "mid"],
           [26.3, 28.125, 51, 52, "mid"],
           [28.125, 29.88, 53, 57, "mid"],
           [29.88, 32.1, 58, 62, "mid"],
           [32.1, 33.867, 63, 65, "mid"],
-          [33.99, 35.926, 66, 69, "mid"],
+          [33.867, 35.926, 66, 69, "mid"],
           [35.926, 37.367, 70, 72, "mid"],
           [37.367, 41.025, 73, 78, "mid"],
           [41.025, 43.033, 79, 83, "mid"],
-          [43.07, 44.6, 84, 85, "mid"],
-          [44.64, 47.633, 86, 90, "mid"],
+          [43.033, 44.6, 84, 85, "mid"],
+          [44.6, 47.633, 86, 90, "mid"],
           [47.633, 49.36, 91, 92, "mid"],
           [49.36, 50.72, 93, 96, "mid"],
           [50.72, 52.767, 97, 102, "mid"],
-          [52.82, 55.036, 103, 107, "mid"],
+          [52.767, 55.036, 103, 107, "mid"],
           [55.036, 56.933, 108, 114, "mid"],
-          [56.96, 59.233, 115, 120, "mid"],
+          [56.933, 59.233, 115, 120, "mid"],
           [59.233, 60.347, 121, 122, "mid"],
           [60.347, 62.433, 123, 128, "mid"]
         ];
@@ -288,6 +291,8 @@
         // the logo waits for the white world (the opening starts in the sky)
         tl.set("#brandlogo", { opacity: 0 }, 0);
         tl.fromTo("#brandlogo", { opacity: 0 }, { opacity: 0.95, duration: 0.5, ease: "power2.out", immediateRender: false }, 1.25);
+        // the end lockup (s18) shows the big logo: the small corner mark steps away
+        tl.fromTo("#brandlogo", { opacity: 0.95 }, { opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }, 61.233);
         (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
         window.__timelines = window.__timelines || {};
         window.__timelines["main"] = tl;

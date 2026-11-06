@@ -1,10 +1,323 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s09" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s09-abs { position: absolute; }
+    .s09-rig { position: absolute; inset: 0; transform-origin: 540px 606px; }
+    .s09-stage { position: absolute; inset: 0; perspective: 1600px; perspective-origin: 50% 36%; }
+    .s09-blob { left: 300px; top: 330px; width: 900px; height: 700px; border-radius: 50%; background: radial-gradient(ellipse, rgba(31,136,61,.16), rgba(31,136,61,0) 64%); }
+    /* carried over from the end of s08 (same pixels), then cleared during the push */
+    .s09-bblob { left: 120px; top: 360px; width: 840px; height: 640px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,160,225,.30), rgba(120,160,225,0) 66%); }
+    .s09-ghost { left: 0; right: 0; top: 560px; text-align: center; font: 700 210px/1 Poppins, sans-serif; letter-spacing: -0.04em; color: rgba(41,75,119,.05); white-space: nowrap; }
+    .s09-far { background: #294b77; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s09-floor { left: 260px; top: 892px; width: 560px; height: 40px; border-radius: 50%; background: radial-gradient(ellipse, rgba(20,40,90,.22), rgba(20,40,90,0) 70%); }
+    .s09-ico { width: 24px; height: 24px; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    /* PAID CARD — identical to the end state of s08 */
+    .s09-card { left: 220px; top: 440px; width: 640px; height: 440px; border-radius: 36px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 54px 90px -40px rgba(20,40,90,.48), 0 0 0 1.5px rgba(10,13,44,.06); }
+    .s09-logo { left: 40px; top: 38px; width: 88px; height: 88px; border-radius: 24px; background: #fff url(assets/logos/elevenlabs.png) center / 100% 100% no-repeat;
+      box-shadow: 0 10px 22px -8px rgba(20,40,90,.35), 0 0 0 1.5px rgba(10,13,44,.08); }
+    .s09-name { left: 150px; top: 42px; font: 700 42px/1.1 Poppins, sans-serif; letter-spacing: -0.02em; color: #0a0d2c; white-space: nowrap; }
+    .s09-sub { left: 151px; top: 94px; font: 400 21px/1.2 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s09-tag { right: 36px; top: 46px; padding: 7px 14px 6px; border-radius: 20px; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .12em; color: #294b77; background: rgba(41,75,119,.08); }
+    .s09-rule { left: 40px; right: 40px; top: 156px; height: 1.5px; background: rgba(10,13,44,.08); }
+    .s09-from { left: 42px; top: 178px; height: 36px; display: flex; align-items: center; gap: 9px; font: 400 24px/1 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s09-plan { font: 700 19px/1 Poppins, sans-serif; letter-spacing: .02em; color: #fff; padding: 7px 12px 6px; border-radius: 11px; background: linear-gradient(172deg, #0a0d2c, #294b77); box-shadow: 0 6px 14px -6px rgba(10,13,44,.5); }
+    .s09-price { left: 36px; top: 214px; height: 130px; display: flex; align-items: baseline; white-space: nowrap; }
+    .s09-price .rp { font: 700 44px/1 Poppins, sans-serif; color: #294b77; margin-right: 6px; }
+    .s09-price .num { font: 700 124px/1 Poppins, sans-serif; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; background: linear-gradient(172deg, #0a0d2c, #294b77); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s09-price .rb { font: 700 62px/1 Poppins, sans-serif; color: #0a0d2c; margin-left: 6px; }
+    .s09-price .per { font: 400 30px/1 Poppins, sans-serif; color: #294b77; margin-left: 10px; }
+    .s09-btn { left: 40px; right: 40px; top: 358px; height: 50px; border-radius: 16px; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff; display: flex; align-items: center; justify-content: center; gap: 12px; font: 700 20px/1 Poppins, sans-serif; letter-spacing: .02em; }
+    .s09-btn .s09-ico { color: #fff; }
+    .s09-strike { left: 26px; top: 286px; width: 520px; height: 8px; border-radius: 4px; background: #e5484d; box-shadow: 0 4px 12px rgba(229,72,77,.35); transform-origin: 0 50%; }
+    .s09-dim { inset: 0; border-radius: 36px; background: rgba(238,242,250,.55); }
+    /* FREE CARD — open-source repo (real data: production/repos.json → RVC-Boss/GPT-SoVITS) */
+    .s09-free { left: 452px; top: 430px; width: 590px; height: 432px; }
+    .s09-fsh { left: 0; top: 0; width: 590px; height: 128px; border-radius: 36px; background: #fff; box-shadow: 0 40px 70px -34px rgba(20,60,40,.42), 0 0 0 2px rgba(31,136,61,.28); }
+    .s09-fbot { left: 0; top: 0; width: 590px; height: 432px; border-radius: 36px; background: linear-gradient(180deg, #ffffff, #f7fbf8);
+      box-shadow: 0 60px 100px -40px rgba(20,60,40,.42), 0 0 0 2px rgba(31,136,61,.28); overflow: hidden; }
+    .s09-fstrip { left: 0; top: 0; width: 590px; height: 128px; border-radius: 36px; background: linear-gradient(180deg, #ffffff, #f7fbf8) 0 0 / 590px 432px no-repeat; }
+    .s09-gh { left: 36px; top: 28px; width: 72px; height: 72px; border-radius: 50%; background: #0a0d2c; }
+    .s09-gh i { position: absolute; inset: 14px; background: #fff; -webkit-mask: url(assets/icons/si-github.svg) center / contain no-repeat; mask: url(assets/icons/si-github.svg) center / contain no-repeat; }
+    .s09-wf { left: 80px; top: 70px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(172deg, #1f883d, #116329); box-shadow: 0 0 0 3px #fff, 0 6px 12px -4px rgba(17,99,41,.5); color: #fff; }
+    .s09-wf .s09-ico { position: absolute; left: 8px; top: 8px; width: 20px; height: 20px; }
+    .s09-own { left: 128px; top: 30px; font: 400 22px/1.2 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s09-repo { left: 126px; top: 56px; font: 700 44px/1.1 Poppins, sans-serif; letter-spacing: -0.02em; color: #0a0d2c; white-space: nowrap; }
+    .s09-pub { right: 34px; top: 40px; padding: 6px 13px 5px; border-radius: 20px; border: 1.5px solid rgba(10,13,44,.18); font: 700 15px/1 Poppins, sans-serif; color: #294b77; }
+    .s09-desc { left: 38px; right: 38px; top: 132px; font: 400 21px/1.42 Poppins, sans-serif; color: #294b77; }
+    .s09-meta { left: 38px; top: 210px; display: flex; gap: 26px; font: 700 20px/1 Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s09-meta span { display: flex; align-items: center; gap: 8px; }
+    .s09-meta .s09-ico { width: 22px; height: 22px; color: #294b77; }
+    .s09-meta .star { color: #d4a72c; }
+    .s09-rule2 { left: 38px; right: 38px; top: 252px; height: 1.5px; background: rgba(10,13,44,.08); }
+    .s09-fshade { inset: 0; background: linear-gradient(180deg, rgba(20,60,40,.05), rgba(20,60,40,.4)); }
+    .s09-fprice { left: 34px; top: 262px; height: 140px; display: flex; align-items: baseline; white-space: nowrap; }
+    .s09-fprice .rp { font: 700 48px/1 Poppins, sans-serif; color: #1a7f37; margin-right: 6px; }
+    .s09-fprice .num { font: 700 140px/1 Poppins, sans-serif; letter-spacing: -0.04em; background: linear-gradient(172deg, #116329, #1f883d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s09-fprice .rb { display: inline-block; font: 700 66px/1 Poppins, sans-serif; color: #1a7f37; margin-left: 4px; }
+    .s09-fprice .per { display: inline-block; font: 400 28px/1 Poppins, sans-serif; color: #1a7f37; margin-left: 12px; }
+    .s09-glint { left: -220px; top: 0; width: 180px; height: 432px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    .s09-flash { left: 0; top: 0; width: 590px; height: 432px; border-radius: 36px; background: #ffffff; }
+    .s09-vs { left: 410px; top: 600px; width: 92px; height: 92px; border-radius: 50%; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff; font: 700 30px/92px Poppins, sans-serif; text-align: center; letter-spacing: -0.02em;
+      box-shadow: 0 16px 30px -10px rgba(10,13,44,.5), 0 0 0 6px rgba(255,255,255,.9); }
+    .s09-ring { left: 497px; top: 396px; width: 500px; height: 500px; border-radius: 50%; border: 4px solid rgba(31,136,61,.5); }
+    /* VOICE BEAT — timer + two tracks (the waveform = the real VO loudness of this very sentence) */
+    .s09-timer { left: 670px; top: 424px; width: 350px; height: 128px; border-radius: 36px; background: linear-gradient(172deg, #0a0d2c, #294b77); box-shadow: 0 34px 60px -30px rgba(10,13,44,.6); }
+    .s09-mic { left: 24px; top: 34px; width: 60px; height: 60px; border-radius: 50%; background: #fff; color: #0a0d2c; }
+    .s09-mic .s09-ico { position: absolute; left: 15px; top: 15px; width: 30px; height: 30px; }
+    .s09-time { left: 102px; top: 16px; font: 700 72px/1 Poppins, sans-serif; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: #fff; white-space: nowrap; }
+    .s09-tlab { left: 105px; top: 92px; font: 400 18px/1 Poppins, sans-serif; color: rgba(255,255,255,.78); white-space: nowrap; }
+    .s09-tring { left: 670px; top: 424px; width: 350px; height: 128px; border-radius: 40px; border: 3px solid rgba(41,75,119,.45); }
+    .s09-panel { left: 60px; top: 572px; width: 960px; height: 368px; border-radius: 34px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 54px 90px -40px rgba(20,40,90,.48), 0 0 0 1.5px rgba(10,13,44,.06); overflow: hidden; }
+    .s09-ti { left: 28px; width: 52px; height: 52px; border-radius: 50%; color: #fff; }
+    .s09-ti .s09-ico { position: absolute; left: 13px; top: 13px; width: 26px; height: 26px; }
+    .s09-t1i { top: 78px; background: linear-gradient(172deg, #0a0d2c, #294b77); }
+    .s09-t2i { top: 214px; background: linear-gradient(172deg, #1f883d, #116329); }
+    .s09-tl { left: 94px; font: 700 22px/1 Poppins, sans-serif; letter-spacing: -0.01em; white-space: nowrap; }
+    .s09-t1l { top: 93px; color: #0a0d2c; }
+    .s09-t2l { top: 229px; color: #116329; }
+    .s09-base { left: 250px; width: 680px; height: 1.5px; background: rgba(10,13,44,.09); transform-origin: 0 50%; }
+    .s09-bars { left: 250px; width: 680px; height: 100px; }
+    .s09-bar { position: absolute; width: 6px; border-radius: 3px; }
+    .s09-b1 { background: linear-gradient(180deg, #294b77, #0a0d2c 50%, #294b77); }
+    .s09-bg { background: #294b77; opacity: .26; }
+    .s09-bc { background: linear-gradient(180deg, #2ea043, #116329 50%, #2ea043); }
+    .s09-ph { left: 249px; top: 40px; width: 2px; height: 128px; border-radius: 1px; background: #294b77; }
+    .s09-ph i { position: absolute; left: -4px; top: -5px; width: 10px; height: 10px; border-radius: 50%; background: #0a0d2c; }
+    .s09-note { left: 30px; top: 318px; display: flex; align-items: center; gap: 9px; font: 400 17px/1 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s09-note b { font-weight: 700; color: #0a0d2c; }
+    .s09-note .s09-ico { width: 18px; height: 18px; color: #0a0d2c; }
+    .s09-cring { left: 28px; top: 214px; width: 52px; height: 52px; border-radius: 50%; border: 3px solid rgba(31,136,61,.55); }
+    .s09-pglint { left: 150px; top: 180px; width: 200px; height: 120px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.7), rgba(255,255,255,0)); }
+    .s09-iris { left: -120px; top: -54px; width: 1320px; height: 1320px; border-radius: 50%; border: 8px solid rgba(41,75,119,.5); }
+  </style>
+  <div id="root" data-composition-id="s09" data-width="1080" data-height="1920">
+    <div class="s09-rig" id="s09-rig">
+      <div class="s09-abs s09-bblob" id="s09-bblob"></div>
+      <div class="s09-abs s09-blob" id="s09-blob"></div>
+      <div class="s09-abs s09-ghost" id="s09-ghost">Rp350rb</div>
+      <div class="s09-abs s09-far" id="s09-far1" style="left:86px;top:470px;width:84px;height:84px;--i:url(assets/icons/lucide-mic.svg)"></div>
+      <div class="s09-abs s09-far" id="s09-far2" style="left:920px;top:560px;width:96px;height:96px;--i:url(assets/icons/lucide-audio-waveform.svg)"></div>
+      <div class="s09-abs s09-far" id="s09-far3" style="left:120px;top:800px;width:60px;height:60px;--i:url(assets/icons/lucide-audio-waveform.svg)"></div>
+      <div class="s09-abs s09-floor" id="s09-floor"></div>
+      <div class="s09-stage">
+        <div class="s09-abs s09-card" id="s09-card">
+          <div class="s09-abs s09-logo"></div>
+          <div class="s09-abs s09-name">ElevenLabs</div>
+          <div class="s09-abs s09-sub">AI voice</div>
+          <div class="s09-abs s09-tag">BERBAYAR</div>
+          <div class="s09-abs s09-rule"></div>
+          <div class="s09-abs s09-from"><span>paket</span><span class="s09-plan">Creator</span><span>sekitar</span></div>
+          <div class="s09-abs s09-price"><span class="rp">Rp</span><span class="num">350</span><span class="rb">rb</span><span class="per">/bulan</span></div>
+          <div class="s09-abs s09-btn"><span class="s09-ico" style="--i:url(assets/icons/lucide-repeat.svg)"></span>Langganan tiap bulan</div>
+          <div class="s09-abs s09-dim" id="s09-dim"></div>
+          <div class="s09-abs s09-strike" id="s09-strike"></div>
+        </div>
+        <div class="s09-abs s09-tring" id="s09-tring"></div>
+        <div class="s09-abs s09-timer" id="s09-timer">
+          <div class="s09-abs s09-mic" id="s09-mic"><i class="s09-ico" style="--i:url(assets/icons/lucide-mic.svg)"></i></div>
+          <div class="s09-abs s09-time" id="s09-time">0:00</div>
+          <div class="s09-abs s09-tlab" id="s09-tlab">sampel suara</div>
+        </div>
+        <div class="s09-abs s09-panel" id="s09-panel">
+          <div class="s09-abs s09-ti s09-t1i" id="s09-t1i"><i class="s09-ico" style="--i:url(assets/icons/lucide-mic.svg)"></i></div>
+          <div class="s09-abs s09-tl s09-t1l" id="s09-t1l">suara kamu</div>
+          <div class="s09-abs s09-base" id="s09-base1" style="top:103px"></div>
+          <div class="s09-abs s09-bars" id="s09-bars1" style="top:54px"></div>
+          <div class="s09-abs s09-ph" id="s09-ph"><i></i></div>
+          <div class="s09-abs s09-cring" id="s09-cring"></div>
+          <div class="s09-abs s09-ti s09-t2i" id="s09-t2i"><i class="s09-ico" style="--i:url(assets/icons/lucide-badge-check.svg)"></i></div>
+          <div class="s09-abs s09-tl s09-t2l" id="s09-t2l">dikloning</div>
+          <div class="s09-abs s09-base" id="s09-base2" style="top:239px"></div>
+          <div class="s09-abs s09-bars" id="s09-clone" style="top:190px"></div>
+          <div class="s09-abs s09-note" id="s09-note"><i class="s09-ico" style="--i:url(assets/icons/si-github.svg)"></i><b>README</b>“Few-shot TTS: Fine-tune the model with just 1 minute of training data…”</div>
+          <div class="s09-abs s09-pglint" id="s09-pglint"></div>
+        </div>
+        <div class="s09-abs s09-ring" id="s09-ring"></div>
+        <div class="s09-abs s09-free" id="s09-free">
+          <div class="s09-abs s09-fsh" id="s09-fsh"></div>
+          <div class="s09-abs s09-fbot" id="s09-fbot">
+            <div class="s09-abs s09-desc">1 min voice data can also be used to train a good TTS model! (few shot voice cloning)</div>
+            <div class="s09-abs s09-meta"><span><i class="s09-ico star" style="--i:url(assets/icons/lucide-star.svg)"></i>65k</span><span><i class="s09-ico" style="--i:url(assets/icons/lucide-git-fork.svg)"></i>6,8k</span><span id="s09-lic"><i class="s09-ico" style="--i:url(assets/icons/lucide-scale.svg)"></i>MIT</span></div>
+            <div class="s09-abs s09-rule2"></div>
+            <div class="s09-abs s09-glint" id="s09-glint"></div>
+            <div class="s09-abs s09-fshade" id="s09-fshade"></div>
+          </div>
+          <div class="s09-abs s09-fstrip" id="s09-fstrip">
+            <div class="s09-abs s09-gh"><i></i></div>
+            <div class="s09-abs s09-wf"><i class="s09-ico" style="--i:url(assets/icons/lucide-audio-waveform.svg)"></i></div>
+            <div class="s09-abs s09-own">RVC-Boss /</div>
+            <div class="s09-abs s09-repo">GPT-SoVITS</div>
+            <div class="s09-abs s09-pub" id="s09-pub">Public</div>
+          </div>
+          <div class="s09-abs s09-fprice" id="s09-fprice"><span class="rp">Rp</span><span class="num" id="s09-fnum">350</span><span class="rb" id="s09-frb">rb</span><span class="per" id="s09-fper">/bulan</span></div>
+          <div class="s09-abs s09-flash" id="s09-flash"></div>
+        </div>
+        <div class="s09-abs s09-vs" id="s09-vs">VS</div>
+      </div>
+    </div>
+    <div class="s09-abs s09-iris" id="s09-iris"></div>
+  </div>
   <script>
     (function () {
+      const D = 5.8;
+      const root = document.querySelector('[data-composition-id="s09"]');
+      const $ = (id) => root.querySelector("#" + id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.79);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      // words (local s): Gantinya 0.17 · GPT-SoVITS 0.89 · Cukup 1.93 · 1 2.60 · menit 2.73 · sampel 3.00 · suara 3.24 ·
+      //                  suara 3.68 · kamu 4.04 · langsung 4.36 · bisa 4.98 · dikloning 5.12
+      const card = $("s09-card"), free = $("s09-free");
+
+      // ---------- 0. s08's end-state decor (identical pixels at the cut), cleared as the push starts ----------
+      tl.set($("s09-bblob"), { scale: 1.05, opacity: 1 }, 0);
+      ft($("s09-bblob"), { scale: 1.05 }, { scale: 1.14, duration: D, ease: "sine.inOut" }, 0);
+      tl.set($("s09-ghost"), { x: -50, opacity: 1 }, 0);
+      ft($("s09-ghost"), { x: -50, opacity: 1 }, { x: -240, opacity: 0, duration: 0.6, ease: "power2.in" }, 0.08);
+      [["s09-far1", 22, 0.1, -120], ["s09-far2", -26, 0.09, 140], ["s09-far3", 22, 0.07, -100]].forEach(([id, x0, o, dx]) => {
+        tl.set($(id), { x: x0, opacity: o }, 0);
+        ft($(id), { x: x0, opacity: o }, { x: x0 + dx, opacity: 0, duration: 0.55, ease: "power2.in" }, 0.1);
+      });
+      tl.set($("s09-floor"), { opacity: 1 }, 0);
+      ft($("s09-floor"), { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power2.out" }, 0.08);
+
+      // ---------- 1. "Gantinya": paid card (= s08 end state) pushed back, dimmed, struck ----------
+      tl.set(card, { x: 0, rotationY: 0, rotationZ: -1.6, scale: 1.04, opacity: 1 }, 0);
+      ft(card, { x: 0, rotationY: 0, rotationZ: -1.6, scale: 1.04 }, { x: -275, rotationY: 24, rotationZ: -4, scale: 0.6, duration: 0.6, ease: "power4.inOut" }, 0.08);
+      tl.set($("s09-dim"), { opacity: 0 }, 0);
+      ft($("s09-dim"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.4);
+      tl.set($("s09-strike"), { scaleX: 0 }, 0);
+      ft($("s09-strike"), { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power3.inOut" }, 0.52);
+
+      // ---------- 2. "GPT-SoVITS": the open-source card slams in ----------
+      tl.set(free, { x: 520, rotationY: -40, scale: 1.35, opacity: 0, filter: "blur(12px)" }, 0);
+      ft(free, { x: 520, rotationY: -40, scale: 1.35, opacity: 0, filter: "blur(12px)" }, { x: 0, rotationY: 0, scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 0.44);
+      tl.set(free, { filter: "none" }, 0.94);
+      ft(free, { scale: 1 }, { scale: 1.03, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 0.95);
+      tl.set($("s09-flash"), { opacity: 0 }, 0);
+      ft($("s09-flash"), { opacity: 0.95 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 0.86);
+      tl.set($("s09-ring"), { opacity: 0, scale: 0.5 }, 0);
+      ft($("s09-ring"), { opacity: 1, scale: 0.5 }, { opacity: 0, scale: 1.5, duration: 0.7, ease: "power3.out" }, 0.89);
+      tl.set($("s09-blob"), { opacity: 0, x: 0 }, 0);
+      ft($("s09-blob"), { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.86);
+      tl.set($("s09-vs"), { scale: 0, rotation: -30 }, 0);
+      ft($("s09-vs"), { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.45, ease: "back.out(3)" }, 1.0);
+      ft($("s09-lic"), { color: "#0a0d2c" }, { color: "#1a7f37", duration: 0.3, ease: "power2.out" }, 1.0);
+
+      // ---------- 3. the price rolls to Rp0 in the "GPT-SoVITS." tail ----------
+      const fnum = $("s09-fnum"), frb = $("s09-frb"), fprice = $("s09-fprice"), cd = { v: 350 };
+      tl.set(fprice, { opacity: 0, y: 24, x: 0, scale: 1 }, 0);
+      ft(fprice, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 0.94);
+      tl.call(() => { fnum.textContent = "350"; }, null, 0.97);
+      ft(cd, { v: 350 }, { v: 0, duration: 0.42, ease: "power2.in", onUpdate: () => { fnum.textContent = String(Math.round(cd.v)); } }, 0.98);
+      tl.set(frb, { opacity: 1, scale: 1 }, 0);
+      ft(frb, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4, duration: 0.16, ease: "power2.in" }, 1.24);
+      tl.set($("s09-fper"), { x: 0 }, 0);
+      ft($("s09-fper"), { x: 0 }, { x: -76, duration: 0.2, ease: "power3.inOut" }, 1.27);
+      ft(fprice, { scale: 1 }, { scale: 1.12, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "15% 60%" }, 1.4);
+      ft(free, { y: 0 }, { y: 9, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, 1.45);
+      tl.set($("s09-glint"), { x: 0 }, 0);
+      ft($("s09-glint"), { x: 0 }, { x: 1000, duration: 0.5, ease: "power2.inOut" }, 1.12);
+
+      // ---------- 4. MORPH (before "Cukup"): paid card leaves, the repo card folds up into a header strip ----------
+      ft(card, { x: -275, opacity: 1 }, { x: -760, opacity: 0, duration: 0.36, ease: "power3.in" }, 1.56);
+      ft($("s09-vs"), { scale: 1 }, { scale: 0, duration: 0.2, ease: "power3.in" }, 1.54);
+      const fbot = $("s09-fbot");
+      tl.set(fbot, { rotationX: 0, opacity: 1, transformOrigin: "50% 0%", transformPerspective: 1100 }, 0);
+      ft(fbot, { rotationX: 0 }, { rotationX: -90, duration: 0.42, ease: "power2.inOut" }, 1.6);
+      ft(fbot, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, 1.8);
+      tl.set($("s09-fshade"), { opacity: 0 }, 0);
+      ft($("s09-fshade"), { opacity: 0 }, { opacity: 1, duration: 0.34, ease: "power2.in" }, 1.6);
+      tl.set($("s09-fsh"), { opacity: 0 }, 0);
+      ft($("s09-fsh"), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 1.72);
+      tl.set($("s09-pub"), { opacity: 1 }, 0);
+      ft($("s09-pub"), { opacity: 1 }, { opacity: 0, duration: 0.14, ease: "power1.in" }, 1.58);
+      ft(free, { x: 0, y: 0 }, { x: -392, y: -6, duration: 0.46, ease: "power3.inOut" }, 1.6);
+      // the big green 0 rides up into the strip (x leads, y follows → it arcs under the repo name)
+      tl.set(fprice, { transformOrigin: "0% 0%" }, 1.62);
+      ft(fprice, { x: 0 }, { x: 386, duration: 0.44, ease: "power3.out" }, 1.62);
+      ft(fprice, { y: 0, scale: 1 }, { y: -232, scale: 0.5, duration: 0.44, ease: "power3.inOut" }, 1.62);
+      ft($("s09-blob"), { x: 0 }, { x: -170, duration: 0.6, ease: "power3.inOut" }, 1.6);
+
+      // ---------- 5. "Cukup 1 menit": timer card + the voice panel unfolds ----------
+      const timer = $("s09-timer"), panel = $("s09-panel");
+      tl.set(timer, { x: 380, rotationY: -35, opacity: 0 }, 0);
+      ft(timer, { x: 380, rotationY: -35, opacity: 0 }, { x: 0, rotationY: 0, opacity: 1, duration: 0.5, ease: "expo.out" }, 1.78);
+      tl.set(panel, { rotationX: -82, y: -10, opacity: 0, transformOrigin: "50% 0%", transformPerspective: 1500 }, 0);
+      ft(panel, { rotationX: -82, y: -10, opacity: 0 }, { rotationX: 0, y: 0, opacity: 1, duration: 0.55, ease: "expo.out" }, 1.74);
+      // timer: time-lapse 0:00 → 1:00, locks on "1"
+      const tm = $("s09-time"), tc = { v: 0 };
+      tl.call(() => { tm.textContent = "0:00"; }, null, 1.97);
+      ft(tc, { v: 0 }, { v: 60, duration: 0.62, ease: "power2.in", onUpdate: () => { const s = Math.round(tc.v); tm.textContent = s >= 60 ? "1:00" : "0:" + String(s).padStart(2, "0"); } }, 1.98);
+      ft(timer, { scale: 1 }, { scale: 1.07, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out" }, 2.6);
+      tl.set($("s09-tring"), { opacity: 0, scale: 1 }, 0);
+      ft($("s09-tring"), { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.28, duration: 0.6, ease: "power3.out" }, 2.6);
+      tl.set($("s09-mic"), { scale: 1 }, 0);
+      ft($("s09-mic"), { scale: 1 }, { scale: 1.18, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 2.62);
+      tl.set($("s09-tlab"), { opacity: 0, y: 8 }, 0);
+      ft($("s09-tlab"), { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, 2.96);
+
+      // ---------- 6. track 1 = the REAL VO envelope of "Cukup 1 menit sampel suara," (global 28.20–29.92 s, 56 bars,
+      //            assets/data/s09_peaks.json) — each bar appears exactly when that slice of the voice is heard ----------
+      const PK = [0.07,0.34,0.35,0.35,0.25,0.09,0.06,0.09,0.07,0.08,0.08,0.09,0.08,0.07,0.07,0.11,0.6,1.0,0.43,0.13,0.67,0.69,0.25,0.45,0.66,0.7,0.34,0.12,0.87,0.65,0.36,0.5,0.52,0.5,0.58,0.16,0.4,0.38,0.59,0.63,0.45,0.21,0.53,0.52,0.29,0.28,0.28,0.52,0.56,0.59,0.46,0.41,0.4,0.35,0.45,0.63];
+      const T0 = 1.90, T1 = 3.62, N = PK.length, pitch = 680 / N, dt = (T1 - T0) / N;
+      const mkBars = (host, cls) => PK.map((v, i) => {
+        const h = Math.max(6, Math.round(v * 100));
+        const e = document.createElement("div"); e.className = "s09-bar " + cls;
+        e.style.cssText += `left:${Math.round(i * pitch + (pitch - 6) / 2)}px;top:${Math.round((100 - h) / 2)}px;height:${h}px;`;
+        host.appendChild(e); return e;
+      });
+      const b1 = mkBars($("s09-bars1"), "s09-b1");
+      const cg = mkBars($("s09-clone"), "s09-bg");
+      const cc = mkBars($("s09-clone"), "s09-bc");
+      tl.set(b1, { scaleY: 0 }, 0);
+      b1.forEach((e, i) => ft(e, { scaleY: 0 }, { scaleY: 1, duration: 0.16, ease: "back.out(2.2)" }, T0 + i * dt));
+      tl.set($("s09-ph"), { x: 0, opacity: 0 }, 0);
+      ft($("s09-ph"), { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, T0 - 0.04);
+      ft($("s09-ph"), { x: 0 }, { x: 680, duration: T1 - T0, ease: "none" }, T0);
+      ft($("s09-ph"), { opacity: 1 }, { opacity: 0, duration: 0.18, ease: "power1.out" }, T1);
+      tl.set([$("s09-base1"), $("s09-base2")], { scaleX: 0 }, 0);
+      ft($("s09-base1"), { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 1.86);
+      tl.set($("s09-t1i"), { scale: 0, rotation: -20 }, 0);
+      ft($("s09-t1i"), { scale: 0, rotation: -20 }, { scale: 1, rotation: 0, duration: 0.4, ease: "back.out(2.4)" }, 1.92);
+      tl.set($("s09-note"), { opacity: 0, y: 10 }, 0);
+      ft($("s09-note"), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 2.74);
+      // "suara kamu"
+      tl.set($("s09-t1l"), { opacity: 0, x: -12 }, 0);
+      ft($("s09-t1l"), { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.34, ease: "power3.out" }, 3.64);
+      ft($("s09-t1i"), { scale: 1 }, { scale: 1.14, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out" }, 3.68);
+
+      // ---------- 7. "langsung": a copy peels off track 1 and slides down; "dikloning": it turns green ----------
+      const clone = $("s09-clone");
+      tl.set(clone, { y: -136, opacity: 0 }, 0);
+      ft(clone, { y: -136, opacity: 0 }, { y: 0, opacity: 1, duration: 0.46, ease: "expo.out" }, 4.32);
+      ft($("s09-base2"), { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 4.36);
+      tl.set($("s09-t2i"), { scale: 0, rotation: -20 }, 0);
+      ft($("s09-t2i"), { scale: 0, rotation: -20 }, { scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2.4)" }, 4.4);
+      tl.set(cc, { scaleY: 0 }, 0);
+      cc.forEach((e, i) => ft(e, { scaleY: 0 }, { scaleY: 1, duration: 0.2, ease: "back.out(2)" }, 4.8 + i * 0.0062));
+      tl.set($("s09-t2l"), { opacity: 0, scale: 0.6 }, 0);
+      ft($("s09-t2l"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.36, ease: "back.out(2.6)", transformOrigin: "0% 50%" }, 5.07);
+      ft($("s09-t2i"), { scale: 1 }, { scale: 1.2, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 5.12);
+      tl.set($("s09-cring"), { opacity: 0, scale: 1 }, 0);
+      ft($("s09-cring"), { opacity: 1, scale: 1 }, { opacity: 0, scale: 2.6, duration: 0.6, ease: "power3.out" }, 5.12);
+      tl.set($("s09-pglint"), { x: 0 }, 0);
+      ft($("s09-pglint"), { x: 0 }, { x: 860, duration: 0.5, ease: "power2.inOut" }, 5.1);
+
+      // ---------- 8. EXIT: iris-close onto screen (540, 606), landing on a 50 px dot = exactly where s10's iris-open
+      //            starts (circle(50px at 540px 606px)). While it closes, the rig slides up 206 px so the dot ends on the
+      //            green clone waveform; the clip centre is counter-animated with the same ease so it stays put on screen ----------
+      const rig = $("s09-rig"), R0 = 660, R1 = 50, PUSH = 206, IE = "power3.inOut";
+      ft(rig, { clipPath: `circle(${R0}px at 540px 606px)` }, { clipPath: `circle(${R1}px at 540px ${606 + PUSH}px)`, duration: 0.3, ease: IE }, D - 0.3);
+      ft(rig, { y: 0 }, { y: -PUSH, duration: 0.3, ease: IE }, D - 0.3);
+      tl.set($("s09-iris"), { opacity: 0, scale: 1 }, 0);
+      ft($("s09-iris"), { opacity: 0 }, { opacity: 1, duration: 0.05, ease: "none" }, D - 0.3);
+      ft($("s09-iris"), { scale: 1 }, { scale: R1 / R0, duration: 0.3, ease: IE }, D - 0.3);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s09"] = tl;
     })();

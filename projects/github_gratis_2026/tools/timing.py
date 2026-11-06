@@ -119,7 +119,7 @@ for sc in scenes:
     bounds = [sc["w0"]] + sc["cuts"] + [sc["w1"] + 1]
     for c in range(len(bounds) - 1):
         a0, a1 = bounds[c], bounds[c + 1] - 1
-        cs = max(sc["start"], round(words[a0]["s"] - 0.25, 3)) if c == 0 else round(words[a0]["s"] - 0.1, 3)
+        cs = (round(words[a0]["s"] - 0.25, 3) if sc["id"] == "s01" else sc["start"]) if c == 0 else round(words[a0]["s"] - 0.1, 3)
         ce = sc["start"] + sc["dur"] if c == len(bounds) - 2 else round(words[bounds[c + 1]]["s"] - 0.1, 3)
         caps.append([round(cs, 3), round(ce, 3), a0, a1])
 out = {"vo_offset": OFFSET, "vo_sec": round(DUR, 5), "total_sec": TOTAL, "frames": int(round(TOTAL * FPS)),

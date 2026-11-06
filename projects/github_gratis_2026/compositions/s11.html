@@ -1,10 +1,142 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s11" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s11-abs { position: absolute; }
+    .s11-stage { position: absolute; inset: 0; perspective: 1600px; perspective-origin: 50% 36%; }
+    .s11-blob { left: 120px; top: 360px; width: 840px; height: 640px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,160,225,.30), rgba(120,160,225,0) 66%); }
+    .s11-ghost { left: 0; right: 0; top: 560px; text-align: center; font: 700 210px/1 Poppins, sans-serif; letter-spacing: -0.04em; color: rgba(41,75,119,.05); white-space: nowrap; }
+    .s11-far { background: #294b77; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s11-streak { width: 4px; border-radius: 2px; background: linear-gradient(0deg, rgba(41,75,119,0), rgba(41,75,119,.45)); }
+    /* PAID CARD (same component as s05) */
+    .s11-card { left: 220px; top: 440px; width: 640px; height: 440px; border-radius: 36px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 54px 90px -40px rgba(20,40,90,.48), 0 0 0 1.5px rgba(10,13,44,.06); }
+    .s11-logo { left: 40px; top: 38px; width: 88px; height: 88px; border-radius: 24px; background: #fff url(assets/logos/midjourney.png) center / 100% 100% no-repeat;
+      box-shadow: 0 10px 22px -8px rgba(20,40,90,.35), 0 0 0 1.5px rgba(10,13,44,.08); }
+    .s11-name { left: 150px; top: 42px; font: 700 42px/1.1 Poppins, sans-serif; letter-spacing: -0.02em; color: #0a0d2c; white-space: nowrap; }
+    .s11-sub { left: 151px; top: 94px; font: 400 21px/1.2 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s11-tag { right: 36px; top: 46px; padding: 7px 14px 6px; border-radius: 20px; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .12em; color: #294b77; background: rgba(41,75,119,.08); }
+    .s11-rule { left: 40px; right: 40px; top: 156px; height: 1.5px; background: rgba(10,13,44,.08); }
+    .s11-from { left: 42px; top: 178px; height: 36px; display: flex; align-items: center; gap: 9px; font: 400 24px/1 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s11-from span { display: inline-block; }
+    .s11-from .s11-plan { font: 700 19px/1 Poppins, sans-serif; letter-spacing: .02em; color: #fff; padding: 7px 12px 6px; border-radius: 11px; background: linear-gradient(172deg, #0a0d2c, #294b77); box-shadow: 0 6px 14px -6px rgba(10,13,44,.5); }
+    .s11-price { left: 36px; top: 214px; height: 130px; display: flex; align-items: baseline; white-space: nowrap; }
+    .s11-price .rp { font: 700 44px/1 Poppins, sans-serif; color: #294b77; margin-right: 6px; }
+    .s11-price .num { font: 700 124px/1 Poppins, sans-serif; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+    .s11-price .rb { display: inline-block; font: 700 62px/1 Poppins, sans-serif; color: #0a0d2c; margin-left: 6px; }
+    .s11-price .per { display: inline-block; font: 400 30px/1 Poppins, sans-serif; color: #294b77; margin-left: 10px; }
+    /* odometer digits: a hidden placeholder keeps the exact text metrics/baseline, the rolling column sits on top */
+    .s11-dg { position: relative; display: inline-block; padding: 0 14px; margin: 0 -14px;
+      -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0px, #000 15px, #000 111px, rgba(0,0,0,0) 124px); mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0px, #000 15px, #000 111px, rgba(0,0,0,0) 124px); }
+    .s11-ph { visibility: hidden; }
+    .s11-col { position: absolute; left: 14px; top: 0; }
+    .s11-col b { display: block; font: inherit; background: linear-gradient(172deg, #0a0d2c, #294b77); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s11-btn { left: 40px; right: 40px; top: 358px; height: 50px; border-radius: 16px; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff; display: flex; align-items: center; justify-content: center; gap: 12px;
+      font: 700 20px/1 Poppins, sans-serif; letter-spacing: .02em; }
+    .s11-ico { width: 24px; height: 24px; background: #fff; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s11-gclip { inset: 0; border-radius: 36px; overflow: hidden; }
+    .s11-glint { left: -200px; top: 0; width: 160px; height: 440px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0)); }
+    .s11-ring { left: 120px; top: 200px; width: 400px; height: 160px; border-radius: 50%; border: 3px solid rgba(41,75,119,.35); }
+  </style>
+  <div id="root" data-composition-id="s11" data-width="1080" data-height="1920">
+    <div class="s11-abs s11-blob" id="s11-blob"></div>
+    <div class="s11-abs s11-ghost" id="s11-ghost">Rp500rb</div>
+    <div class="s11-abs s11-far" id="s11-far1" style="left:80px;top:480px;width:90px;height:90px;--i:url(assets/icons/lucide-image.svg)"></div>
+    <div class="s11-abs s11-far" id="s11-far2" style="left:912px;top:600px;width:104px;height:104px;--i:url(assets/icons/lucide-image.svg)"></div>
+    <div class="s11-abs s11-far" id="s11-far3" style="left:118px;top:806px;width:62px;height:62px;--i:url(assets/icons/lucide-image.svg)"></div>
+    <div id="s11-streaks"></div>
+    <div class="s11-stage">
+      <div class="s11-abs s11-card" id="s11-card">
+        <div class="s11-abs s11-logo" id="s11-logo"></div>
+        <div class="s11-abs s11-name" id="s11-name">Midjourney</div>
+        <div class="s11-abs s11-sub" id="s11-sub">AI image</div>
+        <div class="s11-abs s11-tag" id="s11-tag">BERBAYAR</div>
+        <div class="s11-abs s11-rule"></div>
+        <div class="s11-abs s11-from" id="s11-from"><span id="s11-f1">paket</span><span class="s11-plan" id="s11-f2">Standard</span><span id="s11-f3">hampir</span></div>
+        <div class="s11-abs s11-ring" id="s11-ring"></div>
+        <div class="s11-abs s11-price" id="s11-price"><span class="rp">Rp</span><span class="num" id="s11-num"></span><span class="rb" id="s11-rb">rb</span><span class="per" id="s11-per">/bulan</span></div>
+        <div class="s11-abs s11-btn" id="s11-btn"><span class="s11-ico" style="--i:url(assets/icons/lucide-repeat.svg)"></span>Langganan tiap bulan</div>
+        <div class="s11-abs s11-gclip"><div class="s11-abs s11-glint" id="s11-glint"></div></div>
+      </div>
+    </div>
+  </div>
   <script>
     (function () {
+      const D = 3.5;
+      const root = document.querySelector('[data-composition-id="s11"]');
+      const $ = (id) => root.querySelector("#" + id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.49);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      // words (local s): Midjourney 0.37 · paket 1.06 · Standard 1.33 · hampir 1.74 · 500 2.16 · ribu 2.45 · sebulan 2.94
+      const card = $("s11-card");
+      // ENTRY: rises from below out of s10's whip-up (y +1300 → 0, tilted back, motion blur + vertical streaks)
+      tl.set(card, { y: 1300, rotationX: -28, scale: 0.92, filter: "blur(14px)" }, 0);   // same tilt sense as s10's exit (rotX -32)
+      ft(card, { y: 1300, rotationX: -28, scale: 0.92 }, { y: 0, rotationX: 0, scale: 1, duration: 0.62, ease: "expo.out" }, 0);
+      ft(card, { filter: "blur(14px)" }, { filter: "blur(0px)", duration: 0.34, ease: "power2.out" }, 0);
+      tl.set(card, { filter: "none" }, 0.34);
+      const sk = $("s11-streaks");
+      [[250, 0.0, 420], [372, 0.04, 520], [560, 0.0, 600], [742, 0.05, 480], [862, 0.02, 380], [470, 0.08, 300]].forEach(([x, d, h]) => {
+        const e = document.createElement("div"); e.className = "s11-abs s11-streak"; sk.appendChild(e);
+        e.style.cssText += `left:${x}px;top:0;height:${h}px;`;
+        tl.set(e, { y: 1500, opacity: 0 }, 0);
+        ft(e, { y: 1500, opacity: 0.9 }, { y: -700, opacity: 0, duration: 0.44, ease: "power2.out" }, d);
+      });
+      // far plane rises slower (parallax depth)
+      [["s11-far1", 0.0, 0.09, 520], ["s11-far2", 0.04, 0.08, 640], ["s11-far3", 0.08, 0.06, 460]].forEach(([id, t, o, dy]) => {
+        tl.set($(id), { opacity: 0, y: dy }, 0);
+        ft($(id), { opacity: 0, y: dy }, { opacity: o, y: 0, duration: 1.0, ease: "power3.out" }, t);
+        ft($(id), { rotation: 0 }, { rotation: id === "s11-far2" ? -8 : 7, duration: D - t, ease: "sine.inOut" }, t);
+      });
+      ft($("s11-blob"), { scale: 0.9, opacity: 0.6 }, { scale: 1.05, opacity: 1, duration: D, ease: "sine.inOut" }, 0);
+      // "Midjourney": the brand lands
+      tl.set($("s11-logo"), { scale: 0, rotation: -14 }, 0);
+      ft($("s11-logo"), { scale: 0, rotation: -14 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.4)" }, 0.3);
+      tl.set([$("s11-name"), $("s11-sub"), $("s11-tag")], { opacity: 0, y: 18 }, 0);
+      ft($("s11-name"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.35);
+      ft($("s11-sub"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.47);
+      ft($("s11-tag"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(2)" }, 0.55);
+      // "paket" · "Standard" (plan pill stamps) · "hampir"
+      tl.set([$("s11-f1"), $("s11-f3")], { opacity: 0, x: -14 }, 0);
+      ft($("s11-f1"), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, 1.02);
+      tl.set($("s11-f2"), { opacity: 0, scale: 0.5, rotation: -8 }, 0);
+      ft($("s11-f2"), { opacity: 0, scale: 0.5, rotation: -8 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.42, ease: "back.out(3)" }, 1.28);
+      ft($("s11-f3"), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, 1.7);
+      // price: odometer roll — the three digits spin and lock on "500"
+      const numEl = $("s11-num"), L = 124;
+      const COLS = [[0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0]];
+      const cols = COLS.map((seq) => {
+        const dg = document.createElement("span"); dg.className = "s11-dg";
+        const ph = document.createElement("span"); ph.className = "s11-ph"; ph.textContent = String(seq[seq.length - 1]); dg.appendChild(ph);
+        const col = document.createElement("span"); col.className = "s11-col";
+        col.innerHTML = seq.map((d) => "<b>" + d + "</b>").join(""); dg.appendChild(col);
+        numEl.appendChild(dg); return [col, seq.length];
+      });
+      tl.set($("s11-price"), { opacity: 0 }, 0);
+      ft($("s11-price"), { opacity: 0 }, { opacity: 1, duration: 0.18, ease: "none" }, 1.62);
+      cols.forEach(([col, n], k) => {
+        tl.set(col, { y: 0 }, 0);
+        ft(col, { y: 0 }, { y: -(n - 1) * L, duration: 0.5 + k * 0.04, ease: "power3.out" }, 1.64);
+      });
+      ft($("s11-price"), { scale: 1 }, { scale: 1.07, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "20% 70%" }, 2.16);
+      tl.set($("s11-ring"), { opacity: 0, scale: 0.4 }, 0);
+      ft($("s11-ring"), { opacity: 1, scale: 0.4 }, { opacity: 0, scale: 1.6, duration: 0.55, ease: "power3.out" }, 2.16);
+      ft(card, { rotationZ: 0 }, { rotationZ: -1.6, duration: 0.5, ease: "power3.out" }, 2.16);
+      tl.set($("s11-ghost"), { opacity: 0, scale: 0.9 }, 0);
+      ft($("s11-ghost"), { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.9, ease: "power2.out" }, 1.9);
+      ft($("s11-ghost"), { x: 0 }, { x: 56, duration: D - 1.9, ease: "none" }, 1.9);
+      // "ribu" → rb ; "sebulan" → /bulan + subscription bar + glint
+      tl.set([$("s11-rb"), $("s11-per")], { opacity: 0, y: 20 }, 0);
+      ft($("s11-rb"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.32, ease: "back.out(2.6)" }, 2.41);
+      ft($("s11-per"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.32, ease: "back.out(2)" }, 2.88);
+      tl.set($("s11-btn"), { opacity: 0, y: 16 }, 0);
+      ft($("s11-btn"), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 2.9);
+      tl.set($("s11-glint"), { x: 0 }, 0);
+      ft($("s11-glint"), { x: 0 }, { x: 1040, duration: 0.6, ease: "power2.inOut" }, 2.86);
+      // slow push-in; END STATE for s12 = card left 220 / top 440 (640x440), x0 y0 rotX0 rotY0, rotZ -1.6, scale 1.04
+      ft(card, { scale: 1 }, { scale: 1.04, duration: D - 0.62, ease: "sine.inOut" }, 0.62);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s11"] = tl;
     })();

@@ -139,8 +139,9 @@ final report; the lead will adjust his framing.
 - Keep CSS `filter` (blur) animations short (≤0.5 s) and set `filter:"none"` after them (render cost + raster glitches).
 - No Math.random/Date/rAF/timers/repeat:-1/play(); seeded PRNG only. No <video>/<audio> in scenes. Static images allowed (assets/ only).
 - Check your work from the project root: `npx --yes hyperframes@0.8.186 snapshot . -o /tmp/claude-0/-workspace/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/agents/<your scene ids>/ --at <global seconds> --no-end --timeout 20000`
-  (entry +0.05, each apex, the calm holds, exit −0.1) and LOOK at the PNGs; iterate at least twice. NOTE: the snapshot tool sometimes draws
-  elements that carry a CSS filter squashed vertically — that is a capture artefact (the real render is fine); avoid filters on resting elements.
+  (entry +0.05, each apex, the calm holds, exit −0.1) and LOOK at the PNGs; iterate at least twice. NOTE: GSAP's `scale` shorthand in
+  fromTo/set can leave scaleY stale (seek-order dependent) in the HF runtime → every scene expands it: right after creating `tl`, add the
+  `_sc` wrapper used in s05/s06 (tl.set / tl.fromTo / tl.to rewrite `scale` into `scaleX`+`scaleY`).
   `npx --yes hyperframes@0.8.186 lint` must show 0 errors (host warnings are expected).
 - Do not edit index.html, tools, timing, the mascot, other scenes or assets (you MAY add new derived data files under `assets/data/` named
   `sNN_*.json`/`.png`); do not render, commit or push. Final report: what you built per scene, apex times, anything the lead must adjust.

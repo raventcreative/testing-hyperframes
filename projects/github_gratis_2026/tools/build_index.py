@@ -80,6 +80,9 @@ html = f"""<!doctype html>
     <script>
       (function () {{
         const tl = gsap.timeline({{ paused: true }});
+        // expand the "scale" shorthand (seek-order-safe scaleY in the HF runtime)
+        const _sc = (v) => {{ if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({{}}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; }};
+        {{ const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }}
         const mk = (tag, cls, parent, html) => {{ const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }};
         // VERIFIED word timings (VO offset included): [text, start, style]
         const W = [
@@ -131,6 +134,8 @@ html = f"""<!doctype html>
         // the logo waits for the white world (the opening starts in the sky)
         tl.set("#brandlogo", {{ opacity: 0 }}, 0);
         tl.fromTo("#brandlogo", {{ opacity: 0 }}, {{ opacity: 0.95, duration: 0.5, ease: "power2.out", immediateRender: false }}, 1.25);
+        // the end lockup (s18) shows the big logo: the small corner mark steps away
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s18"]["start"] + 2.0, 3)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;

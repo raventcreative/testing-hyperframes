@@ -56,9 +56,9 @@ html = f"""<!doctype html>
       #brandlogo {{ opacity: 0; position: absolute; left: 84px; top: 262px; width: 236px; height: auto; }}
       /* round header */
       #hdr {{ position: absolute; left: 0; right: 0; top: 0; height: 0; }}
-      .chip {{ opacity: 0; position: absolute; left: 540px; top: 256px; white-space: nowrap; font-weight: 700; font-size: 21px; letter-spacing: .14em; color: #fff;
+      .chip {{ opacity: 0; position: absolute; left: 540px; top: 306px; white-space: nowrap; font-weight: 700; font-size: 21px; letter-spacing: .14em; color: #fff;
                background: var(--grad); padding: 7px 18px 6px; border-radius: 30px; box-shadow: 0 8px 20px rgba(10,13,44,.18); }}
-      #hdr-title {{ opacity: 0; position: absolute; left: 0; right: 0; top: 300px; text-align: center; font-size: 46px; line-height: 1.1; letter-spacing: -0.015em; white-space: nowrap; }}
+      #hdr-title {{ opacity: 0; position: absolute; left: 0; right: 0; top: 350px; text-align: center; font-size: 44px; line-height: 1.1; letter-spacing: -0.015em; white-space: nowrap; }}
       #hdr-title span {{ display: inline-block; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }}
       #hdr-title .vs {{ font-weight: 400; font-size: 34px; margin: 0 14px; vertical-align: 4px; }}
       #hdr-title .pa {{ font-weight: 700; }}

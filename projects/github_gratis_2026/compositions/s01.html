@@ -25,7 +25,7 @@
   </div>
   <script>
     (function () {
-      const D = 4.3333;
+      const D = 6.0667;
       const root = document.querySelector('[data-composition-id="s01"]');
       const $ = (id) => root.querySelector("#" + id);
       const tl = gsap.timeline({ paused: true });
@@ -37,44 +37,54 @@
 
       // ---------------- WHITE WORLD: soft floor light under his feet, gone as he steps forward ----------------
       tl.set($("s01-pool"), { opacity: 1, scaleX: 1 }, 0);
-      ft($("s01-pool"), { opacity: 1, scaleX: 1 }, { opacity: 0, scaleX: 1.3, duration: 0.6, ease: "power2.inOut" }, 0.35);
+      ft($("s01-pool"), { opacity: 1, scaleX: 1 }, { opacity: 0, scaleX: 1.3, duration: 0.6, ease: "power2.inOut" }, 1.38);
 
       // ---------------- the 4 paid tools rise into a row above him ----------------
       // end layout (shared with s02): centres x 195/425/655/885, y 640
+      // INTRO (no VO, SFX only): he stands with his back to us; the 4 logos pop up behind/above him one by one,
+      // then they come forward into the row while he turns and steps in. VO starts at 1.97 s.
       const TOOLS = [
-        ["higgsfield", "Higgsfield", "300", 1.18], ["elevenlabs", "ElevenLabs", "350", 1.31],
-        ["midjourney", "Midjourney", "500", 1.59], ["openai", "ChatGPT Plus", "330", 1.81],
+        ["higgsfield", "Higgsfield", "300"], ["elevenlabs", "ElevenLabs", "350"],
+        ["midjourney", "Midjourney", "500"], ["openai", "ChatGPT Plus", "330"],
       ];
+      const POP = [0.15, 0.4, 0.65, 0.9];           // = assets/audio/sfx_intro.wav pop onsets
+      const SAY = [2.91, 3.05, 3.33, 3.54];         // "4 · tools · AI · ini"
       const X = [195, 425, 655, 885], Y = 640;
+      const ARC = [[250, 722, -10], [430, 636, -4], [650, 636, 4], [830, 722, 10]];
       const tiles = $("s01-tiles");
-      TOOLS.forEach(([f, nm, pr, t0], i) => {
+      TOOLS.forEach(([f, nm, pr], i) => {
         const w = document.createElement("div"); w.className = "s01-abs s01-t"; w.style.left = X[i] + "px"; w.style.top = Y + "px";
         w.innerHTML = `<div class="s01-abs s01-ic" style="background-image:url(assets/logos/${f}.png)"></div><div class="s01-abs s01-nm">${nm}</div><div class="s01-abs s01-pr"><b>Rp${pr}rb</b><i>/bln</i></div>`;
         tiles.appendChild(w);
-        const nmE = w.children[1], prE = w.children[2];
-        tl.set(w, { x: 0, y: 240, scale: 0.55, rotation: (i - 1.5) * 8, opacity: 0, filter: "blur(10px)" }, 0);
-        // rise into the row on "4 / tools / AI / ini"
-        ft(w, { x: 0, y: 240, scale: 0.55, rotation: (i - 1.5) * 8, opacity: 0, filter: "blur(10px)" },
-              { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, filter: "blur(0px)", duration: 0.6, ease: "back.out(1.6)" }, t0 - 0.12);
-        tl.set(w, { filter: "none" }, t0 + 0.5);
-        // "sebulan?": a quick synchronised hop
-        ft(w, { y: 0 }, { y: -16, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1 }, 3.5 + i * 0.05);
+        const ic = w.children[0], nmE = w.children[1], prE = w.children[2];
+        const ax = ARC[i][0] - X[i], ay = ARC[i][1] - Y, ar = ARC[i][2];
+        tl.set(w, { x: ax, y: ay + 60, scale: 0.2, rotation: ar * 2.5, opacity: 0 }, 0);
+        // pop (one per SFX note)
+        ft(w, { x: ax, y: ay + 60, scale: 0.2, rotation: ar * 2.5, opacity: 0 }, { x: ax, y: ay, scale: 0.86, rotation: ar, opacity: 1, duration: 0.42, ease: "back.out(2.6)" }, POP[i]);
+        // hover while he looks at them
+        ft(w, { x: ax, y: ay, scale: 0.86, rotation: ar }, { x: ax, y: ay - 10, scale: 0.86, rotation: ar * 0.7, duration: 1.32 - (POP[i] + 0.42), ease: "sine.inOut" }, POP[i] + 0.42);
+        // he turns + steps in: the logos come forward into the row (whoosh)
+        ft(w, { x: ax, y: ay - 10, scale: 0.86, rotation: ar * 0.7 }, { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.66, ease: "power4.inOut" }, 1.32 + i * 0.04);
+        // "4 · tools · AI · ini": a ripple across the row (icon only, so the tile transform stays free)
+        ft(ic, { y: 0 }, { y: -14, duration: 0.13, ease: "power2.out", yoyo: true, repeat: 1 }, SAY[i] - 0.03);
         // price tags on "sampai"
         tl.set([nmE, prE], { opacity: 0, y: 14 }, 0);
-        ft(nmE, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 2.05 + i * 0.07);
-        ft(prE, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.34, ease: "back.out(2.2)" }, 2.11 + i * 0.07);
+        ft(nmE, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 3.78 + i * 0.07);
+        ft(prE, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.34, ease: "back.out(2.2)" }, 3.84 + i * 0.07);
+        // "sebulan?": a quick synchronised hop
+        ft(w, { y: 0 }, { y: -16, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1 }, 5.24 + i * 0.05);
       });
 
       // ---------------- total counter on "1,5 juta" (300 + 350 + 500 + 330 = Rp1.480.000) ----------------
       const tot = $("s01-tot"), totv = $("s01-totv");
       tl.set(tot, { xPercent: -50, opacity: 0, y: -16, scale: 0.9 }, 0);
-      tl.call(() => { totv.textContent = "Rp0"; }, null, 2.30);
-      ft(tot, { opacity: 0, y: -16, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(2)" }, 2.29);
+      tl.call(() => { totv.textContent = "Rp0"; }, null, 4.04);
+      ft(tot, { opacity: 0, y: -16, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(2)" }, 4.03);
       const fmt = (v) => "Rp" + Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       const cnt = { v: 0 };
       tl.set(cnt, { v: 0 }, 0);
-      ft(cnt, { v: 0 }, { v: 1480000, duration: 0.85, ease: "power3.out", onUpdate: () => { totv.textContent = fmt(Math.round(cnt.v / 10000) * 10000); } }, 2.35);
-      ft(tot, { scale: 1 }, { scale: 1.06, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 3.09);
+      ft(cnt, { v: 0 }, { v: 1480000, duration: 0.85, ease: "power3.out", onUpdate: () => { totv.textContent = fmt(Math.round(cnt.v / 10000) * 10000); } }, 4.09);
+      ft(tot, { scale: 1 }, { scale: 1.06, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 4.82);
 
       tl.set({}, {}, D - 0.01);
       (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);

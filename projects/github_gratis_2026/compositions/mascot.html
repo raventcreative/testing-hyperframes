@@ -9,12 +9,12 @@
   <script>
     (function () {
       // AI PRENEUR chibi businessman (mascot_biz_rigged.glb), live WebGL.
-      // OPENING (0 – 1.0 s): back to camera -> turns to the front ->
+      // OPENING (0 – 2.0 s, no VO): back to camera while the 4 logos pop -> turns to the front ->
       // stands up -> turns to look back at the 4 paid tools -> turns forward as they come forward -> steps in to half body.
       // Then he presents every round (half body, bottom of frame, below the caption band).
       const M3 = window.Mascot3D;
       const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump, REST } = M3;
-      const VW = window.VO_WORDS, SC = window.VO_SCENES, D = 61.8667;
+      const VW = window.VO_WORDS, SC = window.VO_SCENES, D = 63.6;
       const canvas = document.getElementById("m-canvas");
       const mouthAt = buildLipTrack(window.VO_PHONES, window.VO_ENV, D, { smooth: 1 });
       const ACC = syllableAccents(window.VO_ENV, VW, window.VO_PHONES, D);
@@ -42,18 +42,22 @@
       const LOOK = { head: [-0.14, 0.35, 0], neck: [-0.05, 0.15, 0], spine: [0, 0.08, 0] };
       const SCRATCH = { upperarm_R: [-0.2, 0.9, 0.1], forearm_R: [-1.6, 0, 0], hand_R: [0, 0, 0.3] };
       const FAR = { fx: 540, fy: 1520, h: 640, pitch: 6 }, HALF = { fx: 540, fy: 2185, h: 1060, pitch: 4 };
-      const LAND = -1, T_HAND = 1.02;
+      const LAND = -1, T_HAND = 2.02;
 
       function opening(t) {
-        // frame 0: standing, back to camera -> turns to the front -> steps straight in to half body -> explains
+        // INTRO (no VO): back to camera, looking up at the logos as they pop (head follows each one) ->
+        // turns to the front (1.05) -> steps straight in to half body with the logos (1.3-2.0) -> VO starts at 1.97
         const o = { yaw: 0, shadow: true, visible: true, brow: [0, 0] };
         const R = { x: 0, y: 0, rx: 0, ry: 0, rz: 0, s: 1, sx: 1, sy: 1 };
-        const u = e3((t - 0.04) / 0.36);
-        R.ry = L(2.6, 0, u);
-        let B = scl(LOOK, 1 - u);
-        const w = M3.walk(t, 0.3, 1.0, 2, 0.4);
+        const POP = [0.15, 0.4, 0.65, 0.9], HY = [0.42, 0.14, -0.14, -0.42];
+        let hy = HY[0] * sm(t / 0.2);
+        for (let i = 1; i < 4; i++) hy = L(hy, HY[i], e3((t - POP[i] + 0.02) / 0.22));
+        const u = e3((t - 1.05) / 0.34);
+        R.ry = L(2.75, 0, u);
+        let B = add(scl(LOOK, 1 - u), { head: [-0.08 * (1 - u), hy * (1 - u), 0], neck: [0, 0.35 * hy * (1 - u), 0] });
+        const w = M3.walk(t, 1.3, 2.0, 2, 0.4);
         B = add(B, w.bones); R.y = w.bob;
-        const v = io3((t - 0.28) / 0.74);
+        const v = io3((t - 1.28) / 0.74);
         o.view = { fx: 540, fy: L(FAR.fy, HALF.fy, v), h: L(FAR.h, HALF.h, v), pitch: L(FAR.pitch, HALF.pitch, v) };
         o.shadow = v < 0.6;
         o.root = R; o.bones = B;
@@ -63,7 +67,7 @@
       // ---------------------------------------------------------------- presenter (after the opening)
       const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
       const intents = [
-        { t: 1.0, action: "idle" },
+        { t: 2.0, action: "idle" },
         { t: wt("tools") - 0.15, action: "present", side: "left" },
         { t: wt("sampai") - 0.1, action: "question", side: "right" },
         { t: wt("sebulan?") - 0.15, action: "emphasize", side: "left" },

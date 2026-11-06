@@ -75,6 +75,7 @@ html = f"""<!doctype html>
         <div id="hdr"><div id="hdr-title"><span class="pa">Berbayar</span><span class="vs">vs</span><span class="fr">Gratis</span></div></div></div>
       <div id="caps" class="clip layer" data-start="0" data-duration="{total}" data-track-index="9"></div>
       <audio id="vo" src="assets/audio/vo.mp3" data-start="{off}" data-duration="{T['vo_sec']}" data-track-index="10" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx_intro.wav" data-start="0" data-duration="3.2" data-track-index="11" data-volume="0.85"></audio>
     </div>
     <script>
       (function () {{

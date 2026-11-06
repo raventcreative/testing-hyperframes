@@ -1,14 +1,14 @@
 """Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
 - display fixes (Higgsfield, Wan 2.2, ElevenLabs, GPT-SoVITS, Midjourney, ComfyUI, FLUX, ChatGPT, Ollama, ...)
 - word starts that whisper put inside a silence are snapped to the real voice onset (energy > -40 dB)
-- VO starts at OFFSET s (exactly 7 frames: room for the landing beat).   Run: python3 -I tools/timing.py ."""
+- VO starts at OFFSET s (59 frames: the silent SFX intro plays first).   Run: python3 -I tools/timing.py ."""
 import json, re, subprocess, sys
 from pathlib import Path
 import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-OFFSET, FPS, TAIL = 7 / 30, 30, 0.6
-# scene cuts are LOCKED to preview v1 (VO at 0.8 s = 24 frames) and moved 17 frames earlier with the VO, so every scene keeps its exact length
+OFFSET, FPS, TAIL = 59 / 30, 30, 0.6
+# scene cuts are LOCKED to preview v1 (VO at 0.8 s = 24 frames) and moved 35 frames later with the VO (silent SFX intro: logos appear, he turns and steps in), so every scene keeps its exact length
 CUTS_V1 = [0, 147, 232, 344, 399, 488, 620, 680, 789, 963, 1016, 1121, 1291, 1338, 1429, 1583, 1708, 1777]
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
@@ -112,7 +112,7 @@ for q, (sid, first, cuts, cyan, marker) in enumerate(SC):
                    "speech": [words[w0]["s"], words[w1]["e"]], "cuts": [w0 + c for c in cuts]})
 TOTAL = round(int(np.ceil((DUR + OFFSET + TAIL - 0.3) * FPS)) / FPS, 4)
 for q, sc in enumerate(scenes):
-    sc["start"] = 0.0 if q == 0 else round((CUTS_V1[q] - 17) / FPS, 4)
+    sc["start"] = 0.0 if q == 0 else round((CUTS_V1[q] + 35) / FPS, 4)
 for q, sc in enumerate(scenes):
     en = scenes[q + 1]["start"] if q + 1 < len(scenes) else TOTAL
     sc["dur"] = round(en - sc["start"], 4)

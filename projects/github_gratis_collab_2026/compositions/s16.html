@@ -1,0 +1,255 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s16-abs { position: absolute; }
+    .s16-rig { position: absolute; inset: 0; transform-origin: 540px 642px; }
+    .s16-blob { left: 40px; top: 250px; width: 1000px; height: 800px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,160,225,.30), rgba(120,160,225,0) 66%); }
+    .s16-bokeh { border-radius: 50%; background: radial-gradient(circle, rgba(150,186,236,.42), rgba(150,186,236,.16) 42%, rgba(150,186,236,0) 68%); }
+    /* NOTE CARD (same box as the s17 recap table: the zoom-out hands this card over) */
+    .s16-card { left: 60px; top: 352px; width: 960px; height: 580px; border-radius: 36px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 54px 90px -40px rgba(20,40,90,.48), 0 0 0 1.5px rgba(10,13,44,.06); }
+    .s16-in { position: absolute; inset: 0; }
+    .s16-tab { left: 44px; top: -26px; height: 52px; padding: 0 26px 0 22px; border-radius: 26px; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff;
+      display: flex; align-items: center; gap: 12px; font: 700 21px/1 Poppins, sans-serif; letter-spacing: .2em; white-space: nowrap; box-shadow: 0 14px 26px -12px rgba(10,13,44,.55); }
+    .s16-tab i { width: 9px; height: 9px; border-radius: 50%; background: #fff; }
+    .s16-tring { left: 26px; top: -48px; width: 230px; height: 96px; border-radius: 50%; border: 3px solid rgba(41,75,119,.35); }
+    .s16-ico { background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    /* inputs: video / gambar */
+    .s16-tile { width: 104px; height: 104px; border-radius: 30px; background: rgba(41,75,119,.07); box-shadow: inset 0 0 0 1.5px rgba(41,75,119,.08); }
+    .s16-tile i { position: absolute; left: 25px; top: 25px; width: 54px; height: 54px; background: linear-gradient(172deg, #0a0d2c, #294b77);
+      -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s16-lab { font: 700 31px/1 Poppins, sans-serif; letter-spacing: -0.01em; color: #0a0d2c; white-space: nowrap; }
+    .s16-wires { left: 0; top: 0; width: 960px; height: 340px; overflow: visible; }
+    /* GPU */
+    .s16-glow { left: 300px; top: 0; width: 360px; height: 340px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,160,225,.38), rgba(120,160,225,0) 66%); }
+    .s16-chip { left: 392px; top: 84px; width: 176px; height: 176px; border-radius: 40px; background: linear-gradient(172deg, #0a0d2c, #294b77); overflow: hidden;
+      box-shadow: 0 26px 44px -18px rgba(10,13,44,.6); }
+    .s16-chip .s16-ico { position: absolute; left: 45px; top: 22px; width: 86px; height: 86px; color: #fff; }
+    .s16-chip b { position: absolute; left: 0; right: 0; bottom: 20px; text-align: center; font: 700 34px/1 Poppins, sans-serif; letter-spacing: .06em; color: #fff; }
+    .s16-cglint { left: -160px; top: -20px; width: 110px; height: 220px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.38), rgba(255,255,255,0)); }
+    .s16-cring { left: 370px; top: 62px; width: 220px; height: 220px; border-radius: 50%; border: 3px solid rgba(41,75,119,.4); }
+    /* gauge (a diagram, drawn here) */
+    .s16-gauge { position: absolute; inset: 0; }
+    .s16-gsvg { left: 616px; top: 72px; width: 308px; height: 190px; overflow: visible; }
+    .s16-needle { left: 766px; top: 134px; width: 8px; height: 106px; border-radius: 4px; background: linear-gradient(0deg, #294b77, #0a0d2c); box-shadow: 0 4px 10px rgba(10,13,44,.25); }
+    .s16-hub { left: 752px; top: 222px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(172deg, #0a0d2c, #294b77); box-shadow: 0 6px 14px -4px rgba(10,13,44,.5); }
+    .s16-hub i { position: absolute; left: 13px; top: 13px; width: 10px; height: 10px; border-radius: 50%; background: #fff; }
+    .s16-tipring { left: 832px; top: 161px; width: 60px; height: 60px; border-radius: 50%; border: 3px solid rgba(41,75,119,.45); }
+    .s16-kuat { left: 770px; top: 274px; height: 46px; padding: 0 22px 0 18px; border-radius: 23px; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff;
+      display: flex; align-items: center; gap: 10px; font: 700 22px/1 Poppins, sans-serif; white-space: nowrap; box-shadow: 0 12px 22px -10px rgba(10,13,44,.5); }
+    .s16-kuat .s16-ico { width: 24px; height: 24px; color: #fff; }
+    /* real quote, Wan2.2 README */
+    .s16-quote { left: 36px; top: 362px; width: 888px; height: 186px; border-radius: 26px; background: rgba(41,75,119,.05); box-shadow: inset 0 0 0 1.5px rgba(41,75,119,.06); }
+    .s16-gh { left: 24px; top: 22px; width: 44px; height: 44px; border-radius: 50%; background: #0a0d2c; }
+    .s16-gh i { position: absolute; inset: 9px; background: #fff; -webkit-mask: url(assets/icons/si-github.svg) center / contain no-repeat; mask: url(assets/icons/si-github.svg) center / contain no-repeat; }
+    .s16-src { left: 80px; top: 33px; font: 700 21px/1 Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s16-src span { font-weight: 400; color: #294b77; }
+    .s16-readme { right: 24px; top: 28px; padding: 6px 13px 5px; border-radius: 20px; border: 1.5px solid rgba(10,13,44,.18); font: 700 15px/1 Poppins, sans-serif; letter-spacing: .08em; color: #294b77; }
+    .s16-qhead { position: absolute; inset: 0; }
+    .s16-qt { left: 26px; right: 26px; top: 80px; font: 400 31px/1.36 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s16-slot { border: 2.5px dashed rgba(41,75,119,.2); }
+    .s16-sk { height: 16px; border-radius: 8px; background: rgba(41,75,119,.08); }
+    .s16-hl { position: relative; display: inline-block; font-weight: 700; color: #0a0d2c; }
+    .s16-mk { left: -5px; right: -5px; bottom: 5px; height: 15px; border-radius: 4px; background: rgba(41,75,119,.16); transform-origin: 0 50%; }
+    .s16-hl b { position: relative; font-weight: 700; }
+    /* entry light leak (out of s15's soft dissolve) */
+    .s16-leak { left: -300px; top: 80px; width: 1680px; height: 1360px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(255,255,255,.96), rgba(240,246,254,.82) 30%, rgba(214,228,250,.4) 52%, rgba(214,228,250,0) 70%); }
+    .s16-streak { left: -200px; top: 200px; width: 420px; height: 1500px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.75), rgba(255,255,255,0)); }
+  </style>
+  <div id="root" data-composition-id="s16" data-width="1080" data-height="1920">
+    <div class="s16-rig" id="s16-rig">
+      <div class="s16-abs s16-blob" id="s16-blob"></div>
+      <div class="s16-abs s16-card" id="s16-card">
+        <div class="s16-in" id="s16-in">
+          <div class="s16-abs s16-glow" id="s16-glow"></div>
+          <!-- placeholder slots (drawn on "Catatan", filled word by word) -->
+          <div class="s16-abs s16-slot" id="s16-sl1" style="left:44px;top:66px;width:104px;height:104px;border-radius:30px"></div>
+          <div class="s16-abs s16-slot" id="s16-sl2" style="left:44px;top:196px;width:104px;height:104px;border-radius:30px"></div>
+          <div class="s16-abs s16-slot" id="s16-sl3" style="left:392px;top:84px;width:176px;height:176px;border-radius:40px"></div>
+          <div class="s16-abs s16-sk" id="s16-sk1" style="left:168px;top:110px;width:92px"></div>
+          <div class="s16-abs s16-sk" id="s16-sk2" style="left:168px;top:240px;width:124px"></div>
+          <div class="s16-abs s16-sk" id="s16-sk3" style="left:700px;top:290px;width:140px"></div>
+          <div class="s16-abs s16-tile" id="s16-tv" style="left:44px;top:66px"><i style="--i:url(assets/icons/lucide-video.svg)"></i></div>
+          <div class="s16-abs s16-lab" id="s16-lv" style="left:168px;top:102px">Video</div>
+          <div class="s16-abs s16-tile" id="s16-ti" style="left:44px;top:196px"><i style="--i:url(assets/icons/lucide-image.svg)"></i></div>
+          <div class="s16-abs s16-lab" id="s16-li" style="left:168px;top:232px">Gambar</div>
+          <svg class="s16-abs s16-wires" viewBox="0 0 960 340" xmlns="http://www.w3.org/2000/svg">
+            <path id="s16-w1" d="M 290 118 C 342 118, 340 150, 392 150" pathLength="100" fill="none" stroke="rgba(41,75,119,.30)" stroke-width="3" stroke-linecap="round" stroke-dasharray="100" />
+            <path id="s16-w2" d="M 318 248 C 360 248, 350 212, 392 212" pathLength="100" fill="none" stroke="rgba(41,75,119,.30)" stroke-width="3" stroke-linecap="round" stroke-dasharray="100" />
+            <path id="s16-f1" d="M 290 118 C 342 118, 340 150, 392 150" pathLength="100" fill="none" stroke="#294b77" stroke-width="7" stroke-linecap="round" stroke-dasharray="0.01 14" />
+            <path id="s16-f2" d="M 318 248 C 360 248, 350 212, 392 212" pathLength="100" fill="none" stroke="#294b77" stroke-width="7" stroke-linecap="round" stroke-dasharray="0.01 14" />
+          </svg>
+          <div class="s16-abs s16-cring" id="s16-cring"></div>
+          <div class="s16-abs s16-chip" id="s16-chip"><i class="s16-ico" style="--i:url(assets/icons/lucide-cpu.svg)"></i><b>GPU</b><div class="s16-abs s16-cglint" id="s16-cglint"></div></div>
+          <div class="s16-gauge" id="s16-gauge">
+            <svg class="s16-abs s16-gsvg" viewBox="0 0 308 190" xmlns="http://www.w3.org/2000/svg">
+              <defs><linearGradient id="s16-gg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7d97bd" /><stop offset="1" stop-color="#0a0d2c" /></linearGradient></defs>
+              <path d="M 28 168 A 126 126 0 0 1 280 168" fill="none" stroke="rgba(41,75,119,.10)" stroke-width="22" stroke-linecap="round" />
+              <path id="s16-gfill" d="M 28 168 A 126 126 0 0 1 280 168" pathLength="100" fill="none" stroke="url(#s16-gg)" stroke-width="22" stroke-linecap="round" stroke-dasharray="100 200" />
+              <g id="s16-ticks"></g>
+            </svg>
+            <div class="s16-abs s16-tipring" id="s16-tipring"></div>
+            <div class="s16-abs s16-needle" id="s16-needle"></div>
+            <div class="s16-abs s16-hub"><i></i></div>
+          </div>
+          <div class="s16-abs s16-kuat" id="s16-kuat"><i class="s16-ico" style="--i:url(assets/icons/lucide-gauge.svg)"></i>cukup kuat</div>
+          <div class="s16-abs s16-quote" id="s16-quote">
+            <div class="s16-abs s16-sk" id="s16-sk4" style="left:26px;top:34px;width:300px"></div>
+            <div class="s16-abs s16-sk" id="s16-sk5" style="left:26px;top:100px;width:620px"></div>
+            <div class="s16-abs s16-sk" id="s16-sk6" style="left:26px;top:144px;width:380px"></div>
+            <div class="s16-qhead" id="s16-qhead">
+              <div class="s16-abs s16-gh"><i></i></div>
+              <div class="s16-abs s16-src">Wan-Video / Wan2.2</div>
+              <div class="s16-abs s16-readme">SUMBER: README</div>
+            </div>
+            <div class="s16-abs s16-qt" id="s16-qt">“…can also run on consumer-grade<br>graphics cards like <span class="s16-hl"><i class="s16-abs s16-mk" id="s16-mk"></i><b>4090</b></span>.”</div>
+          </div>
+          <div class="s16-abs s16-tring" id="s16-tring"></div>
+          <div class="s16-abs s16-tab" id="s16-tab"><i></i>CATATAN</div>
+        </div>
+      </div>
+      <div class="s16-abs s16-bokeh" id="s16-bk1" style="left:850px;top:236px;width:300px;height:300px"></div>
+      <div class="s16-abs s16-bokeh" id="s16-bk2" style="left:-70px;top:600px;width:170px;height:170px"></div>
+    </div>
+    <div class="s16-abs s16-leak" id="s16-leak"></div>
+    <div class="s16-abs s16-streak" id="s16-streak"></div>
+  </div>
+  <script>
+    (function () {
+      const D = 4.1666;
+      const root = document.querySelector('[data-composition-id="s16"]');
+      const $ = (id) => root.querySelector("#" + id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      // words (local s): Catatan 0.30 · buat 1.02 · video 1.38 · dan 1.69 · gambar 1.88 · kamu 2.37 · butuh 2.58 · GPU 2.90 · yang 3.07 · cukup 3.37 · kuat 3.66 · ya 3.94
+      const card = $("s16-card"), rig = $("s16-rig");
+
+      // ---------------- ENTRY: out of s15's soft light-leak / blur dissolve ----------------
+      tl.set($("s16-leak"), { opacity: 1, x: -120, scale: 1.1 }, 0);
+      ft($("s16-leak"), { opacity: 1, x: -120, scale: 1.1 }, { opacity: 0, x: 160, scale: 1.25, duration: 0.5, ease: "power2.out" }, 0);
+      tl.set($("s16-streak"), { rotation: 16, x: -420, opacity: 0.9 }, 0);
+      ft($("s16-streak"), { x: -420, opacity: 0.9 }, { x: 1180, opacity: 0, duration: 0.6, ease: "power2.out" }, 0);
+      tl.set(card, { scale: 1.08, rotation: -3, opacity: 0.4, y: 0, filter: "blur(14px)" }, 0);
+      ft(card, { scale: 1.08, rotation: -3, opacity: 0.4, filter: "blur(14px)" }, { scale: 1, rotation: -1.2, opacity: 1, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 0);
+      tl.set(card, { filter: "none" }, 0.5);
+      ft(card, { scale: 1, rotation: -1.2 }, { scale: 1.025, rotation: -0.6, duration: 3.33, ease: "sine.inOut" }, 0.5);
+      ft($("s16-blob"), { scale: 0.9, opacity: 0.55 }, { scale: 1.05, opacity: 1, duration: 3.83, ease: "sine.inOut" }, 0);
+      ft($("s16-bk1"), { x: 40, y: -20 }, { x: -30, y: 24, duration: 3.83, ease: "sine.inOut" }, 0);
+      ft($("s16-bk2"), { x: -20, y: 30 }, { x: 24, y: -26, duration: 3.83, ease: "sine.inOut" }, 0);
+
+      // "Catatan": the navy tab stamps onto the card
+      const tab = $("s16-tab");
+      tl.set(tab, { scale: 2.2, opacity: 0, rotation: -12 }, 0);
+      ft(tab, { scale: 2.2, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: -3, duration: 0.17, ease: "power3.in" }, 0.13);
+      tl.set($("s16-tring"), { opacity: 0, scale: 0.5 }, 0);
+      ft($("s16-tring"), { opacity: 0.9, scale: 0.55 }, { opacity: 0, scale: 1.6, duration: 0.5, ease: "power3.out" }, 0.3);
+      ft(card, { y: 0 }, { y: 7, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, 0.3);
+      // ...and the note's empty slots draw in right after (a blueprint that fills word by word)
+      const slots = ["s16-sl1", "s16-sl2", "s16-sl3"], sks = ["s16-sk1", "s16-sk2", "s16-sk3", "s16-sk4", "s16-sk5", "s16-sk6"];
+      slots.forEach((s, k) => {
+        tl.set($(s), { opacity: 0, scale: 0.86 }, 0);
+        ft($(s), { opacity: 0, scale: 0.86 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.8)" }, 0.38 + k * 0.07);
+      });
+      sks.forEach((s, k) => {
+        tl.set($(s), { opacity: 0, scaleX: 0, transformOrigin: "0% 50%" }, 0);
+        ft($(s), { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.42, ease: "power3.out" }, 0.46 + k * 0.05);
+      });
+      const quote = $("s16-quote");
+      tl.set(quote, { opacity: 0, y: 28 }, 0);
+      ft(quote, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.5);
+      const slotOut = (id, t0) => ft($(id), { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.out" }, t0);
+
+      // "buat video dan gambar": the two inputs pop into their slots on their words
+      [["s16-tv", "s16-lv", 1.28, "s16-sl1", "s16-sk1"], ["s16-ti", "s16-li", 1.78, "s16-sl2", "s16-sk2"]].forEach(([t, l, t0, sl, sk]) => {
+        tl.set($(t), { scale: 0, rotation: -14, opacity: 0 }, 0);
+        ft($(t), { scale: 0, rotation: -14, opacity: 0 }, { scale: 1, rotation: 0, opacity: 1, duration: 0.45, ease: "back.out(2.4)" }, t0);
+        slotOut(sl, t0 + 0.04);
+        tl.set($(l), { opacity: 0, x: -16 }, 0);
+        ft($(l), { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, t0 + 0.08);
+        slotOut(sk, t0 + 0.08);
+      });
+
+      // the honest source: the real Wan2.2 README line writes itself into the quote slot
+      tl.set($("s16-qhead"), { opacity: 0, x: -14 }, 0);
+      ft($("s16-qhead"), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 2.06);
+      ["s16-sk4", "s16-sk5", "s16-sk6"].forEach((s, k) => slotOut(s, 2.06 + k * 0.08));
+      tl.set($("s16-qt"), { clipPath: "inset(0% 100% 0% 0%)" }, 0);
+      ft($("s16-qt"), { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.62, ease: "power2.out" }, 2.14);
+
+      // "butuh": wires run from both inputs to where the GPU will land
+      [["s16-w1", 2.46], ["s16-w2", 2.52]].forEach(([w, t0]) => {
+        tl.set($(w), { strokeDashoffset: 100 }, 0);
+        ft($(w), { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 0.38, ease: "power2.inOut" }, t0);
+      });
+      // "GPU": the chip slams in where the wires meet
+      const chip = $("s16-chip");
+      tl.set(chip, { scale: 1.7, opacity: 0 }, 0);
+      ft(chip, { scale: 1.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "power3.in" }, 2.71);
+      ft(chip, { scale: 1 }, { scale: 1.07, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, 2.91);
+      slotOut("s16-sl3", 2.86);
+      tl.set($("s16-cring"), { opacity: 0, scale: 0.6 }, 0);
+      ft($("s16-cring"), { opacity: 1, scale: 0.6 }, { opacity: 0, scale: 1.5, duration: 0.6, ease: "power3.out" }, 2.91);
+      tl.set($("s16-cglint"), { x: 0, rotation: 14 }, 0);
+      ft($("s16-cglint"), { x: 0 }, { x: 440, duration: 0.5, ease: "power2.inOut" }, 2.96);
+      tl.set($("s16-glow"), { opacity: 0, scale: 0.7 }, 0);
+      ft($("s16-glow"), { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 2.91);
+      ft(card, { y: 0 }, { y: 5, duration: 0.05, yoyo: true, repeat: 1, ease: "power2.out" }, 2.91);
+      // data keeps flowing into the GPU
+      ["s16-f1", "s16-f2"].forEach((f) => {
+        tl.set($(f), { opacity: 0, strokeDashoffset: 0 }, 0);
+        ft($(f), { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "none" }, 2.92);
+        ft($(f), { strokeDashoffset: 0 }, { strokeDashoffset: -42, duration: 0.91, ease: "none" }, 2.92);
+      });
+      // "4090" gets a soft marker
+      tl.set($("s16-mk"), { scaleX: 0 }, 0);
+      ft($("s16-mk"), { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power3.inOut" }, 3.0);
+
+      // "cukup kuat": the gauge needle sweeps to high and lands on "kuat"
+      const gauge = $("s16-gauge"), needle = $("s16-needle"), gfill = $("s16-gfill");
+      tl.set(gauge, { opacity: 0, y: 20, scale: 0.92, transformOrigin: "770px 200px" }, 0);
+      ft(gauge, { opacity: 0, y: 20, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }, 0.56);
+      const ticks = $("s16-ticks"), NS = "http://www.w3.org/2000/svg", tickEls = [];
+      for (let k = 0; k <= 12; k++) {
+        const a = Math.PI * (1 - k / 12), major = k % 3 === 0, r1 = major ? 88 : 94, r2 = 104;
+        const ln = document.createElementNS(NS, "line");
+        ln.setAttribute("x1", (154 + Math.cos(a) * r1).toFixed(2)); ln.setAttribute("y1", (168 - Math.sin(a) * r1).toFixed(2));
+        ln.setAttribute("x2", (154 + Math.cos(a) * r2).toFixed(2)); ln.setAttribute("y2", (168 - Math.sin(a) * r2).toFixed(2));
+        ln.setAttribute("stroke", "#294b77"); ln.setAttribute("stroke-width", major ? "4" : "2.5"); ln.setAttribute("stroke-linecap", "round");
+        ticks.appendChild(ln); tickEls.push(ln);
+      }
+      const pct = (deg) => 100 - ((deg + 90) / 180) * 100;
+      tl.set(needle, { rotation: -84, transformOrigin: "50% 100%" }, 0);
+      tl.set(gfill, { opacity: 0, strokeDashoffset: pct(-78) }, 0);
+      ft(needle, { rotation: -84 }, { rotation: -78, duration: 2.3, ease: "sine.inOut" }, 0.9);   // idles low while it waits
+      tl.set(gfill, { opacity: 1 }, 3.28);
+      ft(needle, { rotation: -78 }, { rotation: 62, duration: 0.36, ease: "power3.inOut" }, 3.28);
+      ft(gfill, { strokeDashoffset: pct(-78) }, { strokeDashoffset: pct(62), duration: 0.36, ease: "power3.inOut" }, 3.28);
+      ft(needle, { rotation: 62 }, { rotation: 52, duration: 0.2, ease: "power2.out" }, 3.64);
+      ft(gfill, { strokeDashoffset: pct(62) }, { strokeDashoffset: pct(52), duration: 0.2, ease: "power2.out" }, 3.64);
+      tickEls.forEach((ln, k) => {
+        tl.set(ln, { opacity: 0.28 }, 0);
+        if (k <= 10) ft(ln, { opacity: 0.28 }, { opacity: 0.85, duration: 0.12, ease: "power2.out" }, 3.3 + k * 0.03);
+      });
+      tl.set($("s16-tipring"), { opacity: 0, scale: 0.4 }, 0);
+      ft($("s16-tipring"), { opacity: 1, scale: 0.4 }, { opacity: 0, scale: 1.7, duration: 0.5, ease: "power3.out" }, 3.64);
+      const kuat = $("s16-kuat");
+      tl.set(kuat, { xPercent: -50, opacity: 0, y: 14, scale: 0.8 }, 0);
+      ft(kuat, { opacity: 0, y: 14, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "back.out(2.2)" }, 3.32);
+      slotOut("s16-sk3", 3.34);
+      ft(kuat, { scale: 1 }, { scale: 1.12, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 3.64);
+
+      // ---------------- EXIT: snap zoom-out — the card shrinks to 0.4 and flies up to the recap's spot (s17 grows it back as the table) ----------------
+      ft(rig, { scale: 1, y: 0, rotation: 0, filter: "blur(0px)" }, { scale: 0.4, y: -40, rotation: -5, filter: "blur(5px)", duration: 0.29, ease: "power3.in" }, 3.83);
+      ft($("s16-in"), { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, 3.92);
+      ft([$("s16-blob"), $("s16-bk1"), $("s16-bk2")], { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power2.in" }, 3.83);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s16"] = tl;
+    })();
+  </script>
+</template>

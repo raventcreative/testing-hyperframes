@@ -1,0 +1,195 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s10-abs { position: absolute; }
+    .s10-stage { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 540px 606px; }
+    .s10-rig, .s10-plane { position: absolute; inset: 0; transform-origin: 540px 606px; }
+    /* far plane */
+    .s10-blob { left: 90px; top: 236px; width: 900px; height: 740px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,160,225,.30), rgba(120,160,225,0) 66%); }
+    .s10-dial { left: 260px; top: 326px; width: 560px; height: 560px; }
+    .s10-dial svg { position: absolute; left: 0; top: 0; width: 560px; height: 560px; overflow: visible; }
+    /* progress ring: one quarter per round (12 -> 3 -> 6 -> 9 -> 12 o'clock) */
+    .s10-ring { left: 310px; top: 376px; width: 460px; height: 460px; }
+    .s10-ring svg { position: absolute; left: 0; top: 0; width: 460px; height: 460px; overflow: visible; }
+    .s10-hr { left: 310px; top: 376px; width: 460px; height: 460px; }
+    .s10-head { left: 216px; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 0 6px #294b77, 0 0 26px 8px rgba(120,160,225,.7); }
+    /* kicker */
+    .s10-kick { left: 0; width: 1080px; top: 310px; height: 40px; display: flex; justify-content: center; align-items: center; gap: 20px; }
+    .s10-ln { display: block; width: 64px; height: 2px; border-radius: 1px; background: rgba(41,75,119,.42); }
+    .s10-kt { font: 700 24px/1 Poppins, sans-serif; letter-spacing: .24em; margin-right: -.24em; color: #294b77; white-space: nowrap; }
+    .s10-kt b { color: #0a0d2c; }
+    /* numeral (+ soft depth duplicate) */
+    .s10-nw { left: 0; width: 1080px; top: 449px; height: 345px; transform-origin: 540px 157px; }
+    .s10-num, .s10-dup { position: absolute; left: 0; top: 0; width: 1080px; height: 345px; display: flex; justify-content: center; align-items: flex-start; white-space: nowrap; }
+    .s10-hash { font: 700 158px/1 Poppins, sans-serif; margin: 23px 12px 0 0; }
+    .s10-dig { font: 700 345px/1 Poppins, sans-serif; letter-spacing: -0.02em; }
+    .s10-num .s10-hash { color: #294b77; }
+    .s10-num .s10-dig { --gx: -320px; background: linear-gradient(104deg, rgba(255,255,255,0) 15%, rgba(255,255,255,.8) 50%, rgba(255,255,255,0) 85%) var(--gx) 0 / 150px 100% no-repeat, linear-gradient(172deg, #0a0d2c, #294b77);
+      -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s10-dup { color: transparent; text-shadow: 0 0 30px rgba(41,75,119,.42); }
+    /* category pill */
+    .s10-prow { left: 0; width: 1080px; top: 850px; height: 84px; display: flex; justify-content: center; }
+    .s10-pill { position: relative; height: 84px; display: flex; align-items: center; gap: 18px; padding: 0 38px 0 11px; border-radius: 42px; background: linear-gradient(172deg, #0a0d2c, #294b77);
+      box-shadow: 0 26px 46px -20px rgba(10,13,44,.6), 0 0 0 6px rgba(255,255,255,.8); }
+    .s10-icb { position: relative; flex: none; width: 62px; height: 62px; border-radius: 50%; background: #ffffff; }
+    .s10-ico { position: absolute; inset: 15px; background: #0a0d2c; -webkit-mask: url(assets/icons/lucide-image.svg) center / contain no-repeat; mask: url(assets/icons/lucide-image.svg) center / contain no-repeat; }
+    .s10-rip { position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgba(120,160,225,.95); }
+    .s10-lab { display: flex; gap: 14px; font: 700 36px/1 Poppins, sans-serif; letter-spacing: .05em; color: #ffffff; white-space: nowrap; }
+    .s10-m { display: inline-block; overflow: hidden; padding: 6px 0 8px; margin: -6px 0 -8px; }
+    .s10-w { display: inline-block; }
+    .s10-gl { position: absolute; inset: 0; border-radius: 42px; overflow: hidden; }
+    .s10-gls { position: absolute; left: -150px; top: 0; width: 110px; height: 84px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.34), rgba(255,255,255,0)); }
+    /* near plane: out-of-focus discs (soft gradients, no filter) */
+    .s10-bok { border-radius: 50%; background: radial-gradient(circle, rgba(120,160,225,.42) 0%, rgba(120,160,225,.2) 42%, rgba(120,160,225,0) 70%); }
+    .s10-vstreak { width: 4px; border-radius: 2px; background: linear-gradient(180deg, rgba(41,75,119,.45), rgba(41,75,119,0)); }
+    .s10-flash { left: -460px; top: -394px; width: 2000px; height: 2000px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,255,255,.8) 45%, rgba(255,255,255,0) 70%); }
+    .s10-irisv { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+  </style>
+  <div id="root" data-composition-id="s10" data-width="1080" data-height="1920">
+    <div class="s10-stage">
+      <div class="s10-rig" id="s10-rig">
+        <div class="s10-abs s10-flash" id="s10-flash"></div>
+        <div class="s10-plane" id="s10-far">
+          <div class="s10-abs s10-blob" id="s10-blob"></div>
+          <div class="s10-abs s10-dial" id="s10-dial"><svg viewBox="0 0 560 560">
+            <circle cx="280" cy="280" r="242" fill="none" stroke="rgba(41,75,119,.16)" stroke-width="10" stroke-dasharray="2 19.12"/>
+            <circle cx="280" cy="280" r="242" fill="none" stroke="rgba(41,75,119,.28)" stroke-width="18" stroke-dasharray="3 123.71" stroke-dashoffset="1.5"/>
+          </svg></div>
+        </div>
+        <div class="s10-plane" id="s10-mid">
+          <div class="s10-abs s10-ring"><svg viewBox="0 0 460 460">
+            <defs><linearGradient id="s10-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a0d2c"/><stop offset="1" stop-color="#294b77"/></linearGradient></defs>
+            <circle cx="230" cy="230" r="218" fill="none" stroke="rgba(41,75,119,.13)" stroke-width="3"/>
+            <circle id="s10-arc" cx="230" cy="230" r="218" fill="none" stroke="url(#s10-g)" stroke-width="9" stroke-linecap="round" stroke-dasharray="1369.73 1369.73" stroke-dashoffset="684.87" transform="rotate(-90 230 230)"/>
+            <circle cx="230.0" cy="12.0" r="8" fill="#294b77" stroke="rgba(41,75,119,.4)" stroke-width="3"/><circle cx="448.0" cy="230.0" r="8" fill="#294b77" stroke="rgba(41,75,119,.4)" stroke-width="3"/><circle cx="230.0" cy="448.0" r="8" fill="#294b77" stroke="rgba(41,75,119,.4)" stroke-width="3"/><circle cx="12.0" cy="230.0" r="8" fill="#ffffff" stroke="rgba(41,75,119,.4)" stroke-width="3"/>
+            <circle id="s10-pop" cx="12.0" cy="230.0" r="10" fill="none" stroke="#294b77" stroke-width="3" opacity="0"/>
+            <circle id="s10-shock" cx="230" cy="230" r="120" fill="none" stroke="rgba(41,75,119,.42)" stroke-width="4" opacity="0"/>
+          </svg></div>
+          <div class="s10-abs s10-hr" id="s10-hr"><div class="s10-abs s10-head"></div></div>
+          <div class="s10-abs s10-kick" id="s10-kick"><i class="s10-ln" id="s10-l1"></i><span class="s10-kt">ROUND <b>3</b> / 4</span><i class="s10-ln" id="s10-l2"></i></div>
+          <div class="s10-abs s10-nw" id="s10-nw">
+            <div class="s10-dup" id="s10-dup"><span class="s10-hash">#</span><span class="s10-dig">3</span></div>
+            <div class="s10-num" id="s10-num"><span class="s10-hash">#</span><span class="s10-dig" id="s10-dig">3</span></div>
+          </div>
+          <div class="s10-abs s10-prow"><div class="s10-pill" id="s10-pill">
+            <div class="s10-icb" id="s10-icb"><i class="s10-ico"></i><i class="s10-rip" id="s10-rip"></i></div>
+            <div class="s10-lab"><span class="s10-m"><span class="s10-w">GAMBAR</span></span><span class="s10-m"><span class="s10-w">AI</span></span></div>
+            <div class="s10-gl"><i class="s10-gls" id="s10-gls"></i></div>
+          </div></div>
+        </div>
+        <div class="s10-plane" id="s10-near">
+          <div class="s10-abs s10-bok" id="s10-b1" style="left:-40px;top:690px;width:230px;height:230px"></div>
+          <div class="s10-abs s10-bok" id="s10-b2" style="left:890px;top:330px;width:170px;height:170px"></div>
+          <div class="s10-abs s10-bok" id="s10-b3" style="left:850px;top:780px;width:96px;height:96px"></div>
+        </div>
+      </div>
+    </div>
+    <div id="s10-fx"></div>
+    <svg class="s10-abs s10-irisv" id="s10-irisv" viewBox="0 0 1080 1920"><circle id="s10-iris" cx="540" cy="606" r="50" fill="none" stroke="rgba(41,75,119,.5)" stroke-width="6"/></svg>
+  </div>
+  <script>
+    (function () {
+      const D = 1.7667;
+      const root = document.querySelector('[data-composition-id="s10"]');
+      const $ = (id) => root.querySelector("#" + id);
+      const tl = gsap.timeline({ paused: true });
+      // runtime guard (lead): never let the `scale` shorthand reach GSAP — it can leave scaleY stale depending on seek order
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const mk = (cls, css) => { const e = document.createElement("div"); e.className = "s10-abs " + cls; e.style.cssText = css; $("s10-fx").appendChild(e); return e; };
+      // words (local s): Ketiga, 0.25 · gambar 0.82 · AI. 1.27
+      const APEX = 0.25, W1 = 0.82, W2 = 1.27;
+      const rig = $("s10-rig"), far = $("s10-far"), mid = $("s10-mid"), near = $("s10-near"), nw = $("s10-nw"), pill = $("s10-pill");
+      const C = 1369.73, F0 = 0.5, F1 = 0.75;   // progress ring: this round's quarter
+      const XS = D - 0.41;                       // exit wind-up starts here
+
+      // ---------------- ENTRY: iris-OPEN out of s09's iris-close (circle grows from the hero centre)
+      const IR = "circle(50px at 540px 606px)", IR1 = "circle(1000px at 540px 606px)";
+      tl.set(rig, { clipPath: IR }, 0);
+      ft(rig, { clipPath: IR }, { clipPath: IR1, duration: 0.52, ease: "power2.out" }, 0);
+      tl.set(rig, { clipPath: "none" }, 0.52);
+      const iris = $("s10-iris");
+      tl.set(iris, { attr: { r: 50 }, opacity: 1 }, 0);
+      ft(iris, { attr: { r: 50 } }, { attr: { r: 1000 }, duration: 0.52, ease: "power2.out" }, 0);
+      ft(iris, { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, 0.08);
+      tl.set($("s10-flash"), { opacity: 1, display: "block" }, 0);
+      ft($("s10-flash"), { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power2.out" }, 0);
+      // the oversized iris helpers leave the render tree once they are spent
+      tl.set($("s10-flash"), { display: "none" }, 0.31);
+      tl.set($("s10-irisv"), { display: "block" }, 0);
+      tl.set($("s10-irisv"), { display: "none" }, 0.35);
+      // inside the iris the hero settles from a little closer (depth)
+      ft(mid, { scaleX: 1.3, scaleY: 1.3 }, { scaleX: 1, scaleY: 1, duration: 0.42, ease: "power3.out" }, 0);
+      ft(near, { scaleX: 1.8, scaleY: 1.8 }, { scaleX: 1, scaleY: 1, duration: 0.5, ease: "power3.out" }, 0);
+
+      // ---------------- ROUND-TITLE SYSTEM (identical in s04 / s07 / s10 / s13) ----------------
+      // far plane: the light breathes, the near discs drift
+      ft($("s10-blob"), { scaleX: 0.92, scaleY: 0.92, opacity: 0.7 }, { scaleX: 1.06, scaleY: 1.06, opacity: 1, duration: D, ease: "sine.inOut" }, 0);
+      // the dial spins in and settles (a stopwatch for the round), then keeps creeping
+      tl.set($("s10-dial"), { rotation: -50 }, 0);
+      ft($("s10-dial"), { rotation: -50 }, { rotation: 0, duration: 0.9, ease: "expo.out" }, 0);
+      ft($("s10-dial"), { rotation: 0 }, { rotation: 5, duration: D - 0.9, ease: "none" }, 0.9);
+      ft($("s10-b1"), { x: 0, y: 0 }, { x: 26, y: -34, duration: D, ease: "sine.inOut" }, 0);
+      ft($("s10-b2"), { x: 0, y: 0 }, { x: -22, y: 30, duration: D, ease: "sine.inOut" }, 0);
+      ft($("s10-b3"), { x: 0, y: 0 }, { x: -30, y: -40, duration: D, ease: "sine.inOut" }, 0);
+      // APEX (ordinal word): the numeral lifts off the page — its soft duplicate separates — pulse, shock ring, glint
+      const dup = $("s10-dup"), num = $("s10-num"), dig = $("s10-dig");
+      tl.set(dup, { x: 0, y: 6, opacity: 0.5 }, 0);
+      ft(dup, { x: 0, y: 6, opacity: 0.5 }, { x: 12, y: 30, opacity: 1, duration: 0.5, ease: "power3.out" }, APEX - 0.03);
+      ft(num, { y: 0 }, { y: -8, duration: 0.5, ease: "power3.out" }, APEX - 0.03);
+      ft(nw, { scaleX: 1, scaleY: 1 }, { scaleX: 1.075, scaleY: 1.075, duration: 0.09, ease: "power2.out" }, APEX - 0.04);
+      ft(nw, { scaleX: 1.075, scaleY: 1.075 }, { scaleX: 1, scaleY: 1, duration: 0.32, ease: "power2.inOut" }, APEX + 0.05);
+      tl.set($("s10-shock"), { opacity: 0, attr: { r: 120 } }, 0);
+      ft($("s10-shock"), { opacity: 1, attr: { r: 120 } }, { opacity: 0, attr: { r: 320 }, duration: 0.62, ease: "power3.out" }, APEX);
+      tl.set(dig, { "--gx": "-320px" }, 0);
+      ft(dig, { "--gx": "-320px" }, { "--gx": "480px", duration: 0.55, ease: "power2.inOut" }, APEX - 0.02);
+      // the kicker's hairlines extend
+      tl.set([$("s10-l1"), $("s10-l2")], { scaleX: 0 }, 0);
+      ft($("s10-l1"), { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out", transformOrigin: "100% 50%" }, APEX);
+      ft($("s10-l2"), { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out", transformOrigin: "0% 50%" }, APEX);
+      // progress ring: this round's quarter draws, the marker travels with it
+      tl.set($("s10-arc"), { strokeDashoffset: C * (1 - F0) }, 0);
+      ft($("s10-arc"), { strokeDashoffset: C * (1 - F0) }, { strokeDashoffset: C * (1 - F1), duration: 0.62, ease: "power3.inOut" }, APEX + 0.02);
+      tl.set($("s10-hr"), { rotation: F0 * 360 }, 0);
+      ft($("s10-hr"), { rotation: F0 * 360 }, { rotation: F1 * 360, duration: 0.62, ease: "power3.inOut" }, APEX + 0.02);
+      // the marker clicks into this round's checkpoint
+      tl.set($("s10-pop"), { opacity: 0, attr: { r: 10 } }, 0);
+      ft($("s10-pop"), { opacity: 1, attr: { r: 10 } }, { opacity: 0, attr: { r: 38 }, duration: 0.42, ease: "power2.out" }, APEX + 0.6);
+
+      // category pill lands on its word; the icon pops exactly on it
+      tl.set(pill, { opacity: 0, scaleX: 0.5, scaleY: 0.5, y: 26 }, 0);
+      ft(pill, { opacity: 0, scaleX: 0.5, scaleY: 0.5, y: 26 }, { opacity: 1, scaleX: 1, scaleY: 1, y: 0, duration: 0.42, ease: "back.out(2)" }, W1 - 0.14);
+      tl.set($("s10-icb"), { scaleX: 0, scaleY: 0, rotation: -40 }, 0);
+      ft($("s10-icb"), { scaleX: 0, scaleY: 0, rotation: -40 }, { scaleX: 1, scaleY: 1, rotation: 0, duration: 0.4, ease: "back.out(3)" }, W1 - 0.07);
+      root.querySelectorAll(".s10-w").forEach((w, i) => {
+        tl.set(w, { yPercent: 115 }, 0);
+        ft(w, { yPercent: 115 }, { yPercent: 0, duration: 0.36, ease: "power4.out" }, W1 - 0.09 + i * 0.07);
+      });
+      // second beat: icon ripple + a glint across the pill
+      tl.set($("s10-rip"), { opacity: 0, scaleX: 1, scaleY: 1 }, 0);
+      ft($("s10-rip"), { opacity: 1, scaleX: 1, scaleY: 1 }, { opacity: 0, scaleX: 1.9, scaleY: 1.9, duration: Math.min(0.5, D - (W2 - 0.02)), ease: "power2.out" }, W2 - 0.02);
+      tl.set($("s10-gls"), { x: 0 }, 0);
+      ft($("s10-gls"), { x: 0 }, { x: 720, duration: Math.min(0.5, D - (W2 - 0.08)), ease: "power2.inOut" }, W2 - 0.08);
+      // calm hold, kept alive by a slow push-in until the exit wind-up
+      ft(mid, { scaleX: 1, scaleY: 1 }, { scaleX: 1.035, scaleY: 1.035, duration: XS - (APEX + 0.45), ease: "sine.inOut" }, APEX + 0.45);
+
+      // ---------------- EXIT: whip UP (wind-up, then y -1300 with a tilt + vertical streaks) -> s11 rises from below
+      const XU = D - 0.25;
+      ft(rig, { y: 0 }, { y: 22, duration: 0.16, ease: "power2.out" }, XU - 0.16);
+      ft(rig, { y: 22, rotationX: 0, filter: "blur(0px)" }, { y: -1300, rotationX: -32, filter: "blur(10px)", duration: 0.25, ease: "power2.in" }, XU);
+      // streaks at a constant 10000 px/s, still crossing the frame at the cut so they bridge into s11's rising streaks
+      [[330, 0.0], [450, 0.04], [600, 0.07], [720, 0.02], [540, 0.10], [840, 0.13]].forEach(([x, d], k) => {
+        const e = mk("s10-vstreak", "top:0;left:" + x + "px;height:" + (360 + k * 60) + "px;");
+        const t0 = XU + 0.03 + d;
+        tl.set(e, { y: 1500, opacity: 0 }, 0);
+        ft(e, { y: 1500, opacity: 0.85 }, { y: 1500 - 10000 * (D - t0), opacity: 0.85, duration: D - t0, ease: "none" }, t0);
+      });
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s10"] = tl;
+    })();
+  </script>
+</template>

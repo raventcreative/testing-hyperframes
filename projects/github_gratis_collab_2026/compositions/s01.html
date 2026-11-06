@@ -1,0 +1,95 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s01-abs { position: absolute; }
+    /* ---------- WHITE WORLD ---------- */
+    .s01-pool { left: 140px; top: 1370px; width: 800px; height: 300px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.95), rgba(255,255,255,0) 68%); }
+    .s01-t { width: 170px; height: 240px; margin-left: -85px; margin-top: -85px; }
+    .s01-ic { left: 0; top: 0; width: 170px; height: 170px; border-radius: 40px; background-size: 100% 100%; background-repeat: no-repeat; background-color: #fff;
+      box-shadow: 0 22px 44px -14px rgba(20,40,90,.38), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s01-ic::after { content: ""; position: absolute; inset: 0; border-radius: 40px; background: linear-gradient(160deg, rgba(255,255,255,.35), rgba(255,255,255,0) 42%); }
+    .s01-nm { left: -40px; top: 184px; width: 250px; text-align: center; font: 700 21px/1 Poppins, sans-serif; color: #294b77; letter-spacing: -0.01em; white-space: nowrap; }
+    .s01-pr { left: -40px; top: 212px; width: 250px; text-align: center; font: 700 31px/1 Poppins, sans-serif; white-space: nowrap; }
+    .s01-pr b { background: linear-gradient(172deg, #0a0d2c, #294b77); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s01-pr i { font-style: normal; font-weight: 400; font-size: 19px; color: #294b77; }
+    .s01-tot { left: 540px; top: 446px; height: 78px; white-space: nowrap; padding: 0 30px 0 26px; border-radius: 40px; background: rgba(255,255,255,.9);
+      box-shadow: 0 18px 40px -16px rgba(20,40,90,.35), 0 0 0 1.5px rgba(41,75,119,.12); display: flex; align-items: center; gap: 14px; }
+    .s01-tot .l { font: 700 17px/1 Poppins, sans-serif; letter-spacing: .18em; color: #294b77; }
+    .s01-tot .v { font: 700 44px/1 Poppins, sans-serif; background: linear-gradient(172deg, #0a0d2c, #294b77); -webkit-background-clip: text; background-clip: text; color: transparent; font-variant-numeric: tabular-nums; }
+    .s01-tot .u { font: 400 22px/1 Poppins, sans-serif; color: #294b77; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div class="s01-abs s01-pool" id="s01-pool"></div>
+    <div class="s01-abs s01-tot" id="s01-tot"><span class="l">TOTAL</span><span class="v" id="s01-totv">Rp0</span><span class="u">/bulan</span></div>
+    <div id="s01-tiles"></div>
+  </div>
+  <script>
+    (function () {
+      const D = 6.0667;
+      const root = document.querySelector('[data-composition-id="s01"]');
+      const $ = (id) => root.querySelector("#" + id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      let seed = 4101;
+      const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+
+      // ---------------- WHITE WORLD: soft floor light under his feet, gone as he steps forward ----------------
+      tl.set($("s01-pool"), { opacity: 1, scaleX: 1 }, 0);
+      ft($("s01-pool"), { opacity: 1, scaleX: 1 }, { opacity: 0, scaleX: 1.3, duration: 0.6, ease: "power2.inOut" }, 1.38);
+
+      // ---------------- the 4 paid tools rise into a row above him ----------------
+      // end layout (shared with s02): centres x 195/425/655/885, y 640
+      // INTRO (no VO, SFX only): he stands with his back to us; the 4 logos pop up behind/above him one by one,
+      // then they come forward into the row while he turns and steps in. VO starts at 1.97 s.
+      const TOOLS = [
+        ["higgsfield", "Higgsfield", "300"], ["elevenlabs", "ElevenLabs", "350"],
+        ["midjourney", "Midjourney", "500"], ["openai", "ChatGPT Plus", "330"],
+      ];
+      const POP = [0.15, 0.4, 0.65, 0.9];           // = assets/audio/sfx_intro.wav pop onsets
+      const SAY = [2.91, 3.05, 3.33, 3.54];         // "4 · tools · AI · ini"
+      const X = [195, 425, 655, 885], Y = 640;
+      const ARC = [[250, 722, -10], [430, 636, -4], [650, 636, 4], [830, 722, 10]];
+      const tiles = $("s01-tiles");
+      TOOLS.forEach(([f, nm, pr], i) => {
+        const w = document.createElement("div"); w.className = "s01-abs s01-t"; w.style.left = X[i] + "px"; w.style.top = Y + "px";
+        w.innerHTML = `<div class="s01-abs s01-ic" style="background-image:url(assets/logos/${f}.png)"></div><div class="s01-abs s01-nm">${nm}</div><div class="s01-abs s01-pr"><b>Rp${pr}rb</b><i>/bln</i></div>`;
+        tiles.appendChild(w);
+        const ic = w.children[0], nmE = w.children[1], prE = w.children[2];
+        const ax = ARC[i][0] - X[i], ay = ARC[i][1] - Y, ar = ARC[i][2];
+        tl.set(w, { x: ax, y: ay + 60, scale: 0.2, rotation: ar * 2.5, opacity: 0 }, 0);
+        // pop (one per SFX note)
+        ft(w, { x: ax, y: ay + 60, scale: 0.2, rotation: ar * 2.5, opacity: 0 }, { x: ax, y: ay, scale: 0.86, rotation: ar, opacity: 1, duration: 0.42, ease: "back.out(2.6)" }, POP[i]);
+        // hover while he looks at them
+        ft(w, { x: ax, y: ay, scale: 0.86, rotation: ar }, { x: ax, y: ay - 10, scale: 0.86, rotation: ar * 0.7, duration: 1.32 - (POP[i] + 0.42), ease: "sine.inOut" }, POP[i] + 0.42);
+        // he turns + steps in: the logos come forward into the row (whoosh)
+        ft(w, { x: ax, y: ay - 10, scale: 0.86, rotation: ar * 0.7 }, { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.66, ease: "power4.inOut" }, 1.32 + i * 0.04);
+        // "4 · tools · AI · ini": a ripple across the row (icon only, so the tile transform stays free)
+        ft(ic, { y: 0 }, { y: -14, duration: 0.13, ease: "power2.out", yoyo: true, repeat: 1 }, SAY[i] - 0.03);
+        // price tags on "sampai"
+        tl.set([nmE, prE], { opacity: 0, y: 14 }, 0);
+        ft(nmE, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 3.78 + i * 0.07);
+        ft(prE, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.34, ease: "back.out(2.2)" }, 3.84 + i * 0.07);
+        // "sebulan?": a quick synchronised hop
+        ft(w, { y: 0 }, { y: -16, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1 }, 5.24 + i * 0.05);
+      });
+
+      // ---------------- total counter on "1,5 juta" (300 + 350 + 500 + 330 = Rp1.480.000) ----------------
+      const tot = $("s01-tot"), totv = $("s01-totv");
+      tl.set(tot, { xPercent: -50, opacity: 0, y: -16, scale: 0.9 }, 0);
+      tl.call(() => { totv.textContent = "Rp0"; }, null, 4.04);
+      ft(tot, { opacity: 0, y: -16, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(2)" }, 4.03);
+      const fmt = (v) => "Rp" + Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const cnt = { v: 0 };
+      tl.set(cnt, { v: 0 }, 0);
+      ft(cnt, { v: 0 }, { v: 1480000, duration: 0.85, ease: "power3.out", onUpdate: () => { totv.textContent = fmt(Math.round(cnt.v / 10000) * 10000); } }, 4.09);
+      ft(tot, { scale: 1 }, { scale: 1.06, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 4.82);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s01"] = tl;
+    })();
+  </script>
+</template>

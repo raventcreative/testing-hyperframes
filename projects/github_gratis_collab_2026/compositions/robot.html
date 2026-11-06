@@ -1,0 +1,145 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #r-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  </style>
+  <div id="root" data-composition-id="robot" data-width="1080" data-height="1920">
+    <canvas id="r-canvas" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas>
+  </div>
+  <script>
+    (function () {
+      // AI PRENEUR ROBOT (client's robot, rigged: body / head / floating hands, AI PRENEUR print baked into the collar),
+      // the mascot's sidekick. Flies in when the mascot turns (intro), hovers at his side, reacts to every beat and SPEAKS the
+      // "Gantinya…" lines (s06 / s09 / s12 / s15): screen-face talk bars follow the real voice envelope, blue lights pulse.
+      const M3 = window.Mascot3D, VW = window.VO_WORDS, SC = window.VO_SCENES, ENV = window.VO_ENV, D = 63.6;
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
+      const e3 = (u) => { u = one(u); return 1 - Math.pow(1 - u, 3); };
+      const io3 = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const L = (a, b, u) => a + (b - a) * u;
+      const vn = M3.vnoise;
+      const S = (id) => SC.find((s) => s.id === id);
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : -99; };
+      const env = (t) => { const f = t * 100, i = Math.max(0, Math.min(ENV.length - 2, Math.floor(f))), u = f - i; return (ENV[i] + (ENV[i + 1] - ENV[i]) * u) / 99; };
+      // ---------------------------------------------------------------- who speaks
+      const LINES = ["s06", "s09", "s12", "s15"].map((id) => { const s = S(id), w0 = VW[s.w0], w1 = VW[s.w1]; return [w0[1] - 0.12, w1[2] + 0.18, s.start, s.start + s.dur]; });
+      const speakAmt = (t) => { let a = 0; for (const [a0, a1] of LINES) a = Math.max(a, sm((t - a0 + 0.2) / 0.2) * (1 - sm((t - a1) / 0.25))); return a; };
+      const inLine = (t) => { let a = 0; for (const [, , s0, s1] of LINES) a = Math.max(a, sm((t - s0) / 0.35) * (1 - sm((t - (s1 - 0.3)) / 0.35))); return a; };
+      // ---------------------------------------------------------------- gesture library (envelope-weighted, additive)
+      // each: {t, d (hold), k: kind, side}
+      const G = [];
+      const add = (t, k, d = 0.9, side) => { if (t > 0) G.push({ t, k, d, side }); };
+      const s = (id) => S(id).start;
+      // s01 (intro + hook)
+      add(2.25, "lookup", 1.6); add(wt("1,5"), "shock", 0.95); add(wt("sebulan?"), "no", 0.75);
+      // s02 / s03
+      add(wt("gratisnya"), "happy", 1.0); add(wt("gratisnya") + 0.05, "clap", 0.55); add(wt("GitHub.") - 0.05, "present", 0.8, "R");
+      add(wt("Open"), "happy", 0.7); add(wt("langganan,") - 0.05, "nod", 0.5); add(wt("komputer"), "lookmascot", 0.9);
+      // round titles: celebratory spin on the ordinal
+      for (const w of ["Pertama,", "Kedua,", "Ketiga,", "Keempat,"]) add(wt(w) - 0.1, "spin", 0.7);
+      // paid prices: shocked / no
+      add(wt("300") + 0.05, "no", 0.8); add(wt("350") + 0.05, "shock", 0.9); add(wt("500") + 0.05, "no", 0.8); add(wt("330") + 0.05, "shock", 0.9);
+      // robot lines
+      add(wt("Wan 2.2.") - 0.15, "present", 1.2, "R"); add(wt("Gratis,") - 0.05, "happy", 1.4); add(wt("unlimited.") - 0.05, "nod", 0.5);
+      add(wt("GPT-SoVITS.") - 0.15, "present", 1.1, "R"); add(wt("Cukup"), "think", 1.2); add(wt("dikloning.") - 0.1, "happy", 0.9); add(wt("dikloning.") - 0.05, "clap", 0.55);
+      add(wt("ComfyUI") - 0.15, "present", 1.2, "R"); add(wt("Gratis", s("s12")) - 0.05, "happy", 0.9); add(wt("detail.") - 0.1, "nod", 0.5);
+      add(wt("Ollama.") - 0.15, "present", 1.1, "R"); add(wt("offline,") - 0.05, "nod", 0.5); add(wt("laptop.") - 0.1, "happy", 0.9);
+      // note / recap / CTA
+      add(wt("Catatan,"), "think", 2.2); add(wt("GPU") - 0.05, "nod", 0.5);
+      add(wt("keempatnya") - 0.05, "happy", 1.0);
+      add(wt("Komen") - 0.1, "wave", 1.6); add(wt("DM") - 0.05, "happy", 1.4); add(D - 1.0, "wave", 0.9);
+      const envG = (t, g) => { const a = sm((t - g.t + 0.18) / 0.22), b = 1 - sm((t - (g.t + g.d)) / 0.3); return a * b; };
+      // ---------------------------------------------------------------- blinks (deterministic schedule) + gaze saccades
+      const BL = []; { let x = 2.4, h = 7; while (x < D) { BL.push(x); h = (h * 9301 + 49297) % 233280; x += 2.3 + (h / 233280) * 2.2; } }
+      const blinkAt = (t) => { let v = 0; for (const b of BL) { const d = t - b; if (d > -0.06 && d < 0.18) v = Math.max(v, d < 0 ? 1 + d / 0.06 : 1 - sm((d - 0.04) / 0.14)); } return Math.max(0, v); };
+      // ---------------------------------------------------------------- framing
+      const PRES = { fx: 776, fy: 1740, h: 430, pitch: 4 }, SPEAK = { fx: 760, fy: 1748, h: 470, pitch: 4 };
+      function frame(t) {
+        if (t < 1.02) return null;
+        const u = io3((t - 1.02) / 0.95);                       // flies in from the right (intro, with the whoosh)
+        const arc = Math.sin(Math.PI * u) * 170;
+        const base = { fx: L(1380, PRES.fx, u), fy: L(1520, PRES.fy, u) - arc, h: L(380, PRES.h, u), pitch: 4 };
+        const sp = inLine(t);
+        return { fx: L(base.fx, SPEAK.fx, sp), fy: L(base.fy, SPEAK.fy, sp), h: L(base.h, SPEAK.h, sp), pitch: 4, fly: u };
+      }
+      // ---------------------------------------------------------------- performance
+      function perf(t) {
+        const fr = frame(t); if (!fr) return null;
+        const fly = fr.fly;
+        const root = { x: 0, y: 0, z: 0, rx: 0, ry: -0.3, rz: 0, s: 1 };
+        const bones = { body: [0, 0, 0], head: [0, 0, 0], hand_L: [0, 0, 0], hand_R: [0, 0, 0] };
+        const offs = { hand_L: [0, 0, 0], hand_R: [0, 0, 0], head: [0, 0, 0] };
+        const face = { blink: blinkAt(t), gaze: [-0.08, 0.04], happy: 0, squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 };
+        // hover + idle life
+        root.y = 0.014 * Math.sin(2 * Math.PI * 0.55 * t) + 0.006 * Math.sin(2 * Math.PI * 1.27 * t + 1.1);
+        root.rz = 0.035 * Math.sin(2 * Math.PI * 0.41 * t + 0.4) + 0.01 * vn(t, 3, 0.3);
+        root.rx = 0.018 * Math.sin(2 * Math.PI * 0.5 * t + 1.7);
+        bones.head = [0.02 * vn(t, 5, 0.25), 0.05 * vn(t, 6, 0.18), 0.03 * vn(t, 7, 0.2)];
+        offs.hand_L = [-0.07 + 0.006 * vn(t, 11, 0.4), 0.018 * Math.sin(2 * Math.PI * 0.55 * t + 1.3), 0.008 * vn(t, 12, 0.35)];
+        offs.hand_R = [0.07 + 0.006 * vn(t, 13, 0.4), 0.018 * Math.sin(2 * Math.PI * 0.55 * t + 2.4), 0.008 * vn(t, 14, 0.35)];
+        bones.hand_L = [0.08 * Math.sin(2 * Math.PI * 0.5 * t), 0, 0.06 * vn(t, 15, 0.3)];
+        bones.hand_R = [0.08 * Math.sin(2 * Math.PI * 0.5 * t + 1), 0, 0.06 * vn(t, 16, 0.3)];
+        face.gaze = [-0.08 + 0.06 * vn(t, 21, 0.22), 0.04 + 0.04 * vn(t, 22, 0.2)];
+        // intro flight: banks into the curve, hands trail, eyes forward
+        if (fly < 1) { const k = 1 - fly; root.rz += 0.35 * Math.sin(Math.PI * fly) * k; root.ry += -0.5 * k; root.rx += 0.15 * k;
+          offs.hand_L[0] += 0.08 * k; offs.hand_R[0] += 0.08 * k; offs.hand_L[1] += 0.06 * k; offs.hand_R[1] += 0.06 * k; }
+        // speaking: faces camera, voice bars, nods on the accents, lights pulse
+        const sp = speakAmt(t), il = inLine(t);
+        root.ry = L(root.ry, -0.2, il);
+        face.gaze = [L(face.gaze[0], 0.0, il), L(face.gaze[1], 0.02, il)];
+        if (sp > 0.001) {
+          const e = env(t);
+          face.talk = sp;
+          for (let k = 0; k < 5; k++) face.bars[k] = one(Math.pow(e, 0.9) * (0.55 + 0.45 * (0.5 + 0.5 * vn(t, 40 + k, 3.5))) * (k === 2 ? 1 : k === 1 || k === 3 ? 0.85 : 0.6) * 1.25);
+          bones.head[0] += 0.05 * Math.max(0, e - 0.35) * sp;
+          root.y += 0.008 * e * sp;
+        }
+        let ring = 1 + 0.9 * sp * env(t);
+        // gestures
+        for (const g of G) {
+          const w = envG(t, g); if (w < 1e-3) continue;
+          const lt = t - g.t;
+          switch (g.k) {
+            case "lookup": face.gaze = [L(face.gaze[0], -0.05, w), L(face.gaze[1], 0.28, w)]; bones.head[0] -= 0.12 * w; break;
+            case "lookmascot": root.ry -= 0.3 * w; bones.head[1] -= 0.14 * w; face.gaze = [L(face.gaze[0], -0.3, w), face.gaze[1]]; break;
+            case "shock": face.blink = Math.min(face.blink, L(0, -0.28, w)); root.rx -= 0.08 * w; root.y += 0.03 * w * sm(lt / 0.15);
+              offs.hand_L[1] += 0.07 * w; offs.hand_R[1] += 0.07 * w; offs.hand_L[0] += 0.03 * w; offs.hand_R[0] -= 0.03 * w; break;
+            case "no": bones.head[1] += 0.2 * w * Math.sin(lt * 2 * Math.PI * 2.6); face.squint = Math.max(face.squint, 0.6 * w); break;
+            case "nod": bones.head[0] += 0.12 * w * Math.max(0, Math.sin(lt * 2 * Math.PI * 1.6)); break;
+            case "happy": face.happy = Math.max(face.happy, w); ring += 0.5 * w; break;
+            case "think": face.squint = Math.max(face.squint, 0.5 * w); face.gaze = [L(face.gaze[0], 0.18, w), L(face.gaze[1], 0.22, w)]; bones.head[2] += 0.14 * w;
+              offs.hand_R = [L(offs.hand_R[0], 0.16, w), L(offs.hand_R[1], 0.17, w), L(offs.hand_R[2], 0.14, w)]; bones.hand_R[0] -= 0.4 * w; break;
+            case "clap": { const c = 0.5 + 0.5 * Math.cos(lt * 2 * Math.PI * 4.5); const k = w * (0.65 + 0.35 * c);
+              offs.hand_L = [L(offs.hand_L[0], -0.24, k), L(offs.hand_L[1], 0.09, w), L(offs.hand_L[2], 0.16, w)];
+              offs.hand_R = [L(offs.hand_R[0], 0.24, k), L(offs.hand_R[1], 0.05, w), L(offs.hand_R[2], 0.1, w)]; face.happy = Math.max(face.happy, w); break; }
+            case "present": { const up = w * (1 + 0.06 * Math.sin(lt * 9) * Math.exp(-lt * 3));
+              offs.hand_R = [L(offs.hand_R[0], 0.05, up), L(offs.hand_R[1], 0.30, up), L(offs.hand_R[2], 0.12, up)]; bones.hand_R = [L(bones.hand_R[0], -0.5, w), 0, L(bones.hand_R[2], 0.45, w)];
+              face.gaze = [L(face.gaze[0], -0.12, w), L(face.gaze[1], 0.2, w)]; bones.head[0] -= 0.06 * w; break; }
+            case "spin": { const u = io3(lt / 0.62); root.ry += 2 * Math.PI * u * (lt > 0 ? 1 : 0); root.y += 0.05 * Math.sin(Math.PI * one(lt / 0.62));
+              offs.hand_L[0] += 0.06 * w; offs.hand_R[0] -= 0.06 * w; offs.hand_L[1] += 0.05 * w; offs.hand_R[1] += 0.05 * w; face.happy = Math.max(face.happy, w); break; }
+            case "wave": { const k = w;
+              offs.hand_L = [L(offs.hand_L[0], 0.04, k), L(offs.hand_L[1], 0.30, k), L(offs.hand_L[2], 0.1, k)];
+              bones.hand_L = [L(bones.hand_L[0], -0.3, k), 0, L(bones.hand_L[2], -0.35, k) + 0.45 * k * Math.sin(lt * 2 * Math.PI * 2.2)]; root.ry -= 0.12 * k; break; }
+          }
+        }
+        // blink suppressed while the eyes are "happy" (closed arcs)
+        face.blink *= 1 - face.happy;
+        return { view: fr, state: { root, bones, offs, face, ring, shadow: false } };
+      }
+      let robot = null;
+      function apply(t) {
+        const p = perf(t);
+        if (!p) { robot.setState({ visible: false }); robot.render(); return; }
+        robot.setView(p.view); robot.setState(p.state); robot.render();
+      }
+      window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+      const ready = window.Robot3D.Robot.create(document.getElementById("r-canvas"), { url: "assets/robot3d/robot_aipreneur.glb", width: 1080, height: 1920, envIntensity: 0.55 })
+        .then((r) => { robot = r; apply(0); });
+      window.__hf.buildReady["robot"] = ready;
+      window.addEventListener("hf-seek", (e) => { const t = e.detail.time; if (robot) apply(t); else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t))); });
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02);
+      window.__timelines["robot"] = tl;
+    })();
+  </script>
+</template>

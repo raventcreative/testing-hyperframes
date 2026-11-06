@@ -1,0 +1,368 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s12-abs { position: absolute; }
+    .s12-rig { position: absolute; inset: 0; }
+    .s12-cards { position: absolute; inset: 0; transform-origin: 700px 680px; }
+    .s12-stage { position: absolute; inset: 0; perspective: 1600px; perspective-origin: 50% 36%; }
+    .s12-ghost { left: 0; right: 0; top: 560px; text-align: center; font: 700 210px/1 Poppins, sans-serif; letter-spacing: -0.04em; color: rgba(41,75,119,.05); white-space: nowrap; }
+    .s12-far { background: #294b77; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s12-bblob { left: 120px; top: 360px; width: 840px; height: 640px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,160,225,.30), rgba(120,160,225,0) 66%); }
+    .s12-blob { left: 300px; top: 330px; width: 900px; height: 700px; border-radius: 50%; background: radial-gradient(ellipse, rgba(31,136,61,.16), rgba(31,136,61,0) 64%); }
+    /* PAID CARD — identical to the end state of s11 (Midjourney) */
+    .s12-card { left: 220px; top: 440px; width: 640px; height: 440px; border-radius: 36px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 54px 90px -40px rgba(20,40,90,.48), 0 0 0 1.5px rgba(10,13,44,.06); }
+    .s12-logo { left: 40px; top: 38px; width: 88px; height: 88px; border-radius: 24px; background: #fff url(assets/logos/midjourney.png) center / 100% 100% no-repeat;
+      box-shadow: 0 10px 22px -8px rgba(20,40,90,.35), 0 0 0 1.5px rgba(10,13,44,.08); }
+    .s12-name { left: 150px; top: 42px; font: 700 42px/1.1 Poppins, sans-serif; letter-spacing: -0.02em; color: #0a0d2c; white-space: nowrap; }
+    .s12-sub { left: 151px; top: 94px; font: 400 21px/1.2 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s12-tag { right: 36px; top: 46px; padding: 7px 14px 6px; border-radius: 20px; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .12em; color: #294b77; background: rgba(41,75,119,.08); }
+    .s12-rule { left: 40px; right: 40px; top: 156px; height: 1.5px; background: rgba(10,13,44,.08); }
+    .s12-from { left: 42px; top: 178px; height: 36px; display: flex; align-items: center; gap: 9px; font: 400 24px/1 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s12-from span { display: inline-block; }
+    .s12-from .s12-plan { font: 700 19px/1 Poppins, sans-serif; letter-spacing: .02em; color: #fff; padding: 7px 12px 6px; border-radius: 11px; background: linear-gradient(172deg, #0a0d2c, #294b77); box-shadow: 0 6px 14px -6px rgba(10,13,44,.5); }
+    .s12-price { left: 36px; top: 214px; height: 130px; display: flex; align-items: baseline; white-space: nowrap; }
+    .s12-price .rp { font: 700 44px/1 Poppins, sans-serif; color: #294b77; margin-right: 6px; }
+    .s12-price .num { font: 700 124px/1 Poppins, sans-serif; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+    .s12-dg { position: relative; display: inline-block; padding: 0 14px; margin: 0 -14px;
+      -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0px, #000 15px, #000 111px, rgba(0,0,0,0) 124px); mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0px, #000 15px, #000 111px, rgba(0,0,0,0) 124px); }
+    .s12-ph { visibility: hidden; }
+    .s12-col { position: absolute; left: 14px; top: 0; }
+    .s12-col b { display: block; font: inherit; background: linear-gradient(172deg, #0a0d2c, #294b77); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s12-price .rb { display: inline-block; font: 700 62px/1 Poppins, sans-serif; color: #0a0d2c; margin-left: 6px; }
+    .s12-price .per { display: inline-block; font: 400 30px/1 Poppins, sans-serif; color: #294b77; margin-left: 10px; }
+    .s12-btn { left: 40px; right: 40px; top: 358px; height: 50px; border-radius: 16px; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff; display: flex; align-items: center; justify-content: center; gap: 12px;
+      font: 700 20px/1 Poppins, sans-serif; letter-spacing: .02em; }
+    .s12-ico { display: inline-block; width: 24px; height: 24px; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s12-strike { left: 26px; top: 286px; width: 520px; height: 8px; border-radius: 4px; background: #e5484d; box-shadow: 0 4px 12px rgba(229,72,77,.35); transform-origin: 0 50%; }
+    .s12-dim { inset: 0; border-radius: 36px; background: rgba(238,242,250,.55); }
+    /* FREE CARD — Comfy-Org/ComfyUI (real data: production/repos.json) */
+    .s12-free { left: 452px; top: 420px; width: 588px; height: 372px; border-radius: 34px; background: linear-gradient(180deg, #ffffff, #f7fbf8);
+      box-shadow: 0 60px 100px -40px rgba(20,60,40,.42), 0 0 0 2px rgba(31,136,61,.28); overflow: hidden; }
+    .s12-flogo { left: 34px; top: 32px; width: 76px; height: 76px; border-radius: 20px; background: url(assets/logos/comfy.png) center / 100% 100% no-repeat; box-shadow: 0 10px 22px -8px rgba(20,40,90,.35); }
+    .s12-own { left: 128px; top: 34px; font: 400 22px/1.2 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s12-repo { left: 126px; top: 60px; font: 700 44px/1.1 Poppins, sans-serif; letter-spacing: -0.02em; color: #0a0d2c; white-space: nowrap; }
+    .s12-pub { right: 32px; top: 42px; padding: 6px 13px 5px; border-radius: 20px; border: 1.5px solid rgba(10,13,44,.18); font: 700 15px/1 Poppins, sans-serif; color: #294b77; }
+    .s12-desc { left: 36px; right: 36px; top: 122px; font: 400 19px/1.42 Poppins, sans-serif; color: #294b77; }
+    .s12-meta { left: 36px; top: 190px; display: flex; gap: 26px; font: 700 20px/1 Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s12-meta span { display: flex; align-items: center; gap: 8px; }
+    .s12-meta .s12-ico { width: 22px; height: 22px; color: #294b77; }
+    .s12-meta .star { color: #d4a72c; }
+    .s12-rule2 { left: 36px; right: 36px; top: 228px; height: 1.5px; background: rgba(10,13,44,.08); }
+    .s12-fprice { left: 32px; top: 230px; height: 116px; display: flex; align-items: baseline; white-space: nowrap; }
+    .s12-fprice .rp { font: 700 44px/1 Poppins, sans-serif; color: #1a7f37; margin-right: 6px; }
+    .s12-fprice .num { font: 700 116px/1 Poppins, sans-serif; letter-spacing: -0.04em; background: linear-gradient(172deg, #116329, #1f883d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s12-fprice .rb { display: inline-block; font: 700 58px/1 Poppins, sans-serif; color: #1a7f37; margin-left: 4px; }
+    .s12-fprice .per { display: inline-block; font: 400 26px/1 Poppins, sans-serif; color: #1a7f37; margin-left: 12px; }
+    .s12-chip { display: flex; align-items: center; gap: 7px; padding: 9px 14px 8px 11px; border-radius: 15px; background: rgba(31,136,61,.1); color: #116329; font: 700 18px/1 Poppins, sans-serif; white-space: nowrap; }
+    .s12-chip .s12-ico { width: 20px; height: 20px; color: #1a7f37; }
+    .s12-c1 { left: 334px; top: 298px; }
+    .s12-glint { left: -220px; top: 0; width: 180px; height: 372px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    /* LINKED CARD — black-forest-labs/flux */
+    .s12-flux { left: 452px; top: 808px; width: 588px; height: 132px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #f7fbf8);
+      box-shadow: 0 40px 70px -34px rgba(20,60,40,.40), 0 0 0 2px rgba(31,136,61,.28); overflow: hidden; transform-origin: 50% 0; }
+    .s12-xlogo { left: 28px; top: 28px; width: 76px; height: 76px; border-radius: 20px; background: #ffffff url(assets/logos/bfl.png) center / 86% 86% no-repeat; box-shadow: 0 10px 22px -8px rgba(20,40,90,.30), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s12-xown { left: 124px; top: 30px; font: 400 20px/1.2 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s12-xrepo { left: 122px; top: 54px; font: 700 38px/1.1 Poppins, sans-serif; letter-spacing: -0.02em; color: #0a0d2c; white-space: nowrap; }
+    .s12-xtag { left: 212px; top: 67px; padding: 6px 11px 5px; border-radius: 14px; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff; font: 700 14px/1 Poppins, sans-serif; letter-spacing: .12em; }
+    .s12-xmeta { right: 30px; top: 30px; display: flex; flex-direction: column; align-items: flex-end; gap: 16px; font: 700 20px/1 Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s12-xmeta span { display: flex; align-items: center; gap: 8px; }
+    .s12-xmeta .s12-ico { width: 22px; height: 22px; color: #294b77; }
+    .s12-xmeta .star { color: #d4a72c; }
+    .s12-plus { left: 717px; top: 772px; width: 58px; height: 58px; border-radius: 50%; background: linear-gradient(172deg, #1f883d, #116329); color: #fff; font: 700 40px/56px Poppins, sans-serif; text-align: center;
+      box-shadow: 0 12px 24px -8px rgba(17,99,41,.55), 0 0 0 6px rgba(255,255,255,.92); }
+    .s12-vs { left: 398px; top: 614px; width: 92px; height: 92px; border-radius: 50%; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff; font: 700 30px/92px Poppins, sans-serif; text-align: center; letter-spacing: -0.02em;
+      box-shadow: 0 16px 30px -10px rgba(10,13,44,.5), 0 0 0 6px rgba(255,255,255,.9); }
+    .s12-ring { left: 511px; top: 371px; width: 470px; height: 470px; border-radius: 50%; border: 4px solid rgba(31,136,61,.5); }
+    .s12-flash { left: 452px; top: 420px; width: 588px; height: 372px; border-radius: 34px; background: #ffffff; }
+    .s12-xflash { left: 452px; top: 808px; width: 588px; height: 132px; border-radius: 28px; background: #ffffff; }
+    /* NODE DIAGRAM — the 5 real default node names of ComfyUI's default workflow */
+    .s12-diag { position: absolute; inset: 0; transform-origin: 565px 678px; }
+    .s12-grid { left: 40px; top: 440px; width: 1000px; height: 500px; background: radial-gradient(circle, rgba(41,75,119,.22) 0 1.7px, rgba(41,75,119,0) 2.4px) 0 0 / 26px 26px;
+      -webkit-mask: radial-gradient(ellipse 50% 50% at 50% 50%, #000 35%, rgba(0,0,0,0) 100%); mask: radial-gradient(ellipse 50% 50% at 50% 50%, #000 35%, rgba(0,0,0,0) 100%); }
+    .s12-lock { left: 40px; top: 432px; height: 56px; padding: 0 22px 0 10px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 20px 36px -20px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.07); display: flex; align-items: center; gap: 10px; font: 700 22px/1 Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s12-lock .lg { width: 38px; height: 38px; border-radius: 11px; background: url(assets/logos/comfy.png) center / 100% 100% no-repeat; }
+    .s12-lock .lg2 { width: 38px; height: 38px; border-radius: 11px; background: #ffffff url(assets/logos/bfl.png) center / 86% 86% no-repeat; box-shadow: 0 0 0 1.5px rgba(10,13,44,.08); }
+    .s12-lock .pl { color: #1a7f37; font-size: 26px; margin: 0 2px; }
+    .s12-node { height: 84px; border-radius: 17px; background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 22px 34px -20px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.08);
+      display: flex; align-items: center; padding-left: 18px; font: 700 20px/1.18 Poppins, sans-serif; color: #0a0d2c; }
+    .s12-nbfl { right: 10px; top: 10px; width: 24px; height: 24px; border-radius: 7px; background: #ffffff url(assets/logos/bfl.png) center / 88% 88% no-repeat; box-shadow: 0 0 0 1.2px rgba(10,13,44,.1); }
+    .s12-n3 { left: 458px; top: 528px; width: 214px; height: 296px; }
+    .s12-kshadow { left: 0; top: 0; width: 214px; height: 296px; border-radius: 17px; box-shadow: 0 26px 40px -22px rgba(20,40,90,.5), 0 0 0 1.5px rgba(10,13,44,.08); transform-origin: 50% 0; }
+    .s12-ks { left: 0; top: 0; width: 214px; height: 296px; border-radius: 17px; background: linear-gradient(180deg, #ffffff, #f6f8fd); overflow: hidden; }
+    .s12-kshead { left: 18px; top: 0; height: 84px; display: flex; align-items: center; gap: 10px; font: 700 22px/1 Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s12-kshead .s12-ico { width: 24px; height: 24px; color: #1a7f37; }
+    .s12-ksrule { left: 16px; right: 16px; top: 84px; height: 1.5px; background: rgba(10,13,44,.08); }
+    .s12-kp { left: 18px; right: 18px; height: 56px; }
+    .s12-kp .lab { position: absolute; left: 0; top: 0; font: 400 19px/1 Poppins, sans-serif; color: #294b77; }
+    .s12-kp .val { position: absolute; right: 0; top: 0; font: 700 19px/1 Poppins, sans-serif; color: #0a0d2c; font-variant-numeric: tabular-nums; }
+    .s12-kp .trk { position: absolute; left: 0; right: 0; top: 32px; height: 8px; border-radius: 4px; background: rgba(41,75,119,.12); overflow: hidden; }
+    .s12-kp .fil { position: absolute; left: 0; top: 0; width: 178px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #1f883d, #116329); transform-origin: 0 50%; }
+    .s12-kp .knob { position: absolute; left: -11px; top: 25px; width: 22px; height: 22px; border-radius: 50%; background: #ffffff; box-shadow: 0 3px 8px rgba(10,13,44,.28), 0 0 0 2.5px #1f883d; }
+    .s12-kglint { left: -160px; top: 0; width: 120px; height: 296px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    .s12-kring { left: 375px; top: 488px; width: 380px; height: 380px; border-radius: 50%; border: 4px solid rgba(31,136,61,.5); }
+    .s12-wires { left: 0; top: 0; width: 1080px; height: 1000px; overflow: visible; }
+    .s12-streak { height: 4px; border-radius: 2px; background: linear-gradient(90deg, rgba(41,75,119,.45), rgba(41,75,119,0)); }
+  </style>
+  <div id="root" data-composition-id="s12" data-width="1080" data-height="1920">
+    <div class="s12-rig" id="s12-rig">
+      <div class="s12-abs s12-bblob" id="s12-bblob"></div>
+      <div class="s12-abs s12-ghost" id="s12-ghost">Rp500rb</div>
+      <div class="s12-abs s12-far" id="s12-far1" style="left:80px;top:480px;width:90px;height:90px;--i:url(assets/icons/lucide-image.svg)"></div>
+      <div class="s12-abs s12-far" id="s12-far2" style="left:912px;top:600px;width:104px;height:104px;--i:url(assets/icons/lucide-image.svg)"></div>
+      <div class="s12-abs s12-far" id="s12-far3" style="left:118px;top:806px;width:62px;height:62px;--i:url(assets/icons/lucide-image.svg)"></div>
+      <div class="s12-abs s12-blob" id="s12-blob"></div>
+      <div class="s12-cards" id="s12-cards">
+        <div class="s12-stage">
+          <div class="s12-abs s12-card" id="s12-card">
+            <div class="s12-abs s12-logo"></div>
+            <div class="s12-abs s12-name">Midjourney</div>
+            <div class="s12-abs s12-sub">AI image</div>
+            <div class="s12-abs s12-tag">BERBAYAR</div>
+            <div class="s12-abs s12-rule"></div>
+            <div class="s12-abs s12-from"><span>paket</span><span class="s12-plan">Standard</span><span>hampir</span></div>
+            <div class="s12-abs s12-price"><span class="rp">Rp</span><span class="num"><span class="s12-dg"><span class="s12-ph">5</span><span class="s12-col"><b>5</b></span></span><span class="s12-dg"><span class="s12-ph">0</span><span class="s12-col"><b>0</b></span></span><span class="s12-dg"><span class="s12-ph">0</span><span class="s12-col"><b>0</b></span></span></span><span class="rb">rb</span><span class="per">/bulan</span></div>
+            <div class="s12-abs s12-btn"><span class="s12-ico" style="--i:url(assets/icons/lucide-repeat.svg)"></span>Langganan tiap bulan</div>
+            <div class="s12-abs s12-dim" id="s12-dim"></div>
+            <div class="s12-abs s12-strike" id="s12-strike"></div>
+          </div>
+          <div class="s12-abs s12-ring" id="s12-ring"></div>
+          <div class="s12-abs s12-flux" id="s12-flux">
+            <div class="s12-abs s12-xlogo" id="s12-xlogo"></div>
+            <div class="s12-abs s12-xown">black-forest-labs /</div>
+            <div class="s12-abs s12-xrepo">flux</div>
+            <div class="s12-abs s12-xtag" id="s12-xtag">MODEL</div>
+            <div class="s12-abs s12-xmeta"><span><i class="s12-ico star" style="--i:url(assets/icons/lucide-star.svg)"></i>26k</span><span id="s12-xlic"><i class="s12-ico" style="--i:url(assets/icons/lucide-scale.svg)"></i>Apache-2.0</span></div>
+          </div>
+          <div class="s12-abs s12-xflash" id="s12-xflash"></div>
+          <div class="s12-abs s12-free" id="s12-free">
+            <div class="s12-abs s12-flogo"></div>
+            <div class="s12-abs s12-own">Comfy-Org /</div>
+            <div class="s12-abs s12-repo">ComfyUI</div>
+            <div class="s12-abs s12-pub">Public</div>
+            <div class="s12-abs s12-desc">The most powerful and modular diffusion model GUI, api and backend with a graph/nodes interface.</div>
+            <div class="s12-abs s12-meta"><span><i class="s12-ico star" style="--i:url(assets/icons/lucide-star.svg)"></i>145k</span><span><i class="s12-ico" style="--i:url(assets/icons/lucide-git-fork.svg)"></i>17,3k</span><span id="s12-lic"><i class="s12-ico" style="--i:url(assets/icons/lucide-scale.svg)"></i>GPL-3.0</span></div>
+            <div class="s12-abs s12-rule2"></div>
+            <div class="s12-abs s12-fprice" id="s12-fprice"><span class="rp">Rp</span><span class="num" id="s12-fnum">500</span><span class="rb" id="s12-frb">rb</span><span class="per" id="s12-fper">/bulan</span></div>
+            <div class="s12-abs s12-chip s12-c1" id="s12-c1"><i class="s12-ico" style="--i:url(assets/icons/lucide-circle-check.svg)"></i>Gratis</div>
+            <div class="s12-abs s12-glint" id="s12-glint"></div>
+          </div>
+          <div class="s12-abs s12-flash" id="s12-flash"></div>
+          <div class="s12-abs s12-plus" id="s12-plus">+</div>
+          <div class="s12-abs s12-vs" id="s12-vs">VS</div>
+        </div>
+      </div>
+      <div class="s12-diag" id="s12-diag">
+        <div class="s12-abs s12-grid" id="s12-grid"></div>
+        <div class="s12-abs s12-lock" id="s12-lock"><span class="lg"></span>ComfyUI<span class="pl">+</span><span class="lg2"></span>FLUX</div>
+        <div class="s12-abs s12-node" id="s12-n1" style="left:52px;top:528px;width:158px;">Load<br>Checkpoint<span class="s12-abs s12-nbfl"></span></div>
+        <div class="s12-abs s12-node" id="s12-n2" style="left:259px;top:716px;width:150px;">CLIP Text<br>Encode</div>
+        <div class="s12-abs s12-kring" id="s12-kring"></div>
+        <div class="s12-abs s12-n3" id="s12-n3">
+          <div class="s12-abs s12-kshadow" id="s12-kshadow"></div>
+          <div class="s12-abs s12-ks" id="s12-ks">
+            <div class="s12-abs s12-kshead"><i class="s12-ico" style="--i:url(assets/icons/lucide-sliders-horizontal.svg)"></i>KSampler</div>
+            <div class="s12-abs s12-ksrule"></div>
+            <div class="s12-abs s12-kp" id="s12-kp1" style="top:102px;"><span class="lab">steps</span><span class="val" id="s12-v1">0</span><div class="trk"><div class="fil" id="s12-f1"></div></div><div class="knob" id="s12-k1"></div></div>
+            <div class="s12-abs s12-kp" id="s12-kp2" style="top:164px;"><span class="lab">cfg</span><span class="val" id="s12-v2">0.0</span><div class="trk"><div class="fil" id="s12-f2"></div></div><div class="knob" id="s12-k2"></div></div>
+            <div class="s12-abs s12-kp" id="s12-kp3" style="top:226px;"><span class="lab">seed</span><div class="trk"><div class="fil" id="s12-f3"></div></div><div class="knob" id="s12-k3"></div></div>
+            <div class="s12-abs s12-kglint" id="s12-kglint"></div>
+          </div>
+        </div>
+        <div class="s12-abs s12-node" id="s12-n4" style="left:721px;top:716px;width:132px;">VAE<br>Decode</div>
+        <div class="s12-abs s12-node" id="s12-n5" style="left:902px;top:528px;width:126px;">Save<br>Image</div>
+        <svg class="s12-abs s12-wires" id="s12-wires" viewBox="0 0 1080 1000" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+    <div id="s12-streaks"></div>
+  </div>
+  <script>
+    (function () {
+      const D = 5.6666;
+      const root = document.querySelector('[data-composition-id="s12"]');
+      const $ = (id) => root.querySelector("#" + id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const st = (el, v, t) => tl.set(el, v, t);
+      // words (local s): Gantinya 0.21 · ComfyUI 1.06 · plus 1.72 · model 2.05 · FLUX 2.33 · Gratis 3.16 · dan 3.76 · kontrolnya 3.87 · jauh 4.46 · lebih 4.98 · detail 5.10
+      const card = $("s12-card"), free = $("s12-free"), flux = $("s12-flux");
+
+      // start = s11 end state (paid Midjourney card, rotZ -1.6, scale 1.04)
+      st(card, { x: 0, y: 0, rotationX: 0, rotationY: 0, rotationZ: -1.6, scale: 1.04 }, 0);
+      st($("s12-bblob"), { scale: 1.05 }, 0);
+      ft($("s12-bblob"), { opacity: 1 }, { opacity: 0, duration: 0.7, ease: "power2.out" }, 0.3);
+      // s11 end decor (ghost price + far image icons) is cleared by the push
+      st($("s12-ghost"), { x: 56, opacity: 1 }, 0);
+      ft($("s12-ghost"), { x: 56, opacity: 1 }, { x: -200, opacity: 0, duration: 0.6, ease: "power2.in" }, 0.08);
+      [["s12-far1", 0.09, 7, -110], ["s12-far2", 0.08, -8, 130], ["s12-far3", 0.06, 7, -90]].forEach(([id, o, r, dx], k) => {
+        st($(id), { opacity: o, rotation: r, x: 0, y: 0 }, 0);
+        ft($(id), { opacity: o, x: 0 }, { opacity: 0, x: dx, duration: 0.55, ease: "power2.in" }, 0.1 + k * 0.04);
+      });
+
+      // "Gantinya": knocked back to the left (tilts away), dimmed, struck through in coral
+      ft(card, { x: 0, y: 0, rotationX: 0, rotationY: 0, rotationZ: -1.6, scale: 1.04 }, { x: -282, y: 8, rotationX: 7, rotationY: 26, rotationZ: -4.5, scale: 0.58, duration: 0.62, ease: "power4.inOut" }, 0.1);
+      tl.set($("s12-dim"), { opacity: 0 }, 0);
+      ft($("s12-dim"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.42);
+      tl.set($("s12-strike"), { scaleX: 0 }, 0);
+      ft($("s12-strike"), { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power3.inOut" }, 0.56);
+
+      // "ComfyUI": the repo card STAMPS down from the camera (accelerates, hits the wall at 1.02)
+      st(free, { y: -50, rotationX: -26, rotationZ: 5, scale: 1.62, opacity: 0, filter: "blur(12px)" }, 0);
+      ft(free, { opacity: 0 }, { opacity: 1, duration: 0.14, ease: "none" }, 0.7);
+      ft(free, { y: -50, rotationX: -26, rotationZ: 5, scale: 1.62, filter: "blur(12px)" }, { y: 0, rotationX: 0, rotationZ: 0, scale: 1, filter: "blur(0px)", duration: 0.32, ease: "power3.in" }, 0.7);
+      tl.set(free, { filter: "none" }, 1.03);
+      ft(free, { scale: 1 }, { scale: 0.982, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, 1.02);
+      ft($("s12-rig"), { y: 0 }, { y: 9, duration: 0.05, yoyo: true, repeat: 3, ease: "sine.inOut" }, 1.02);
+      tl.set($("s12-flash"), { opacity: 0 }, 0);
+      ft($("s12-flash"), { opacity: 0.95 }, { opacity: 0, duration: 0.42, ease: "power2.out" }, 1.02);
+      st($("s12-ring"), { opacity: 0, scale: 0.5 }, 0);
+      ft($("s12-ring"), { opacity: 1, scale: 0.5 }, { opacity: 0, scale: 1.5, duration: 0.7, ease: "power3.out" }, 1.03);
+      tl.set($("s12-blob"), { opacity: 0 }, 0);
+      ft($("s12-blob"), { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 1.0);
+      st($("s12-vs"), { scale: 0, rotation: -30 }, 0);
+      ft($("s12-vs"), { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.45, ease: "back.out(3)" }, 1.14);
+
+      // "plus": a green + snaps onto the seam
+      st($("s12-plus"), { scale: 0, rotation: -120 }, 0);
+      ft($("s12-plus"), { scale: 0, rotation: -120 }, { scale: 1, rotation: 0, duration: 0.42, ease: "back.out(3)" }, 1.66);
+      // "model FLUX": the linked card unfolds down from behind the ComfyUI card (hinge on its top edge)
+      tl.set(flux, { rotationX: -92, opacity: 0 }, 0);
+      ft(flux, { rotationX: -92, opacity: 0 }, { rotationX: 0, opacity: 1, duration: 0.4, ease: "back.out(1.25)" }, 1.94);
+      st($("s12-xlogo"), { scale: 0, rotation: -14 }, 0);
+      ft($("s12-xlogo"), { scale: 0, rotation: -14 }, { scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2.6)" }, 2.14);
+      tl.set($("s12-xtag"), { opacity: 0, x: -12 }, 0);
+      ft($("s12-xtag"), { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, 2.1);
+      ft(flux, { scale: 1 }, { scale: 1.03, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 2.33);
+      tl.set($("s12-xflash"), { opacity: 0 }, 0);
+      ft($("s12-xflash"), { opacity: 0.85 }, { opacity: 0, duration: 0.36, ease: "power2.out" }, 2.32);
+      ft($("s12-plus"), { scale: 1 }, { scale: 1.18, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 2.33);
+
+      // "Gratis": the price counts DOWN to Rp0 + chip
+      const fnum = $("s12-fnum"), frb = $("s12-frb"), cd = { v: 500 };
+      tl.set($("s12-fprice"), { opacity: 0, y: 22 }, 0);
+      ft($("s12-fprice"), { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, 1.22);
+      tl.call(() => { fnum.textContent = "500"; }, null, 1.21);
+      ft(cd, { v: 500 }, { v: 0, duration: 1.82, ease: "power3.in", onUpdate: () => { fnum.textContent = String(Math.round(cd.v)); } }, 1.3);
+      ft(frb, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4, duration: 0.16, ease: "power2.in" }, 2.98);
+      ft($("s12-fper"), { x: 0 }, { x: -64, duration: 0.2, ease: "power3.inOut" }, 3.0);
+      ft($("s12-fprice"), { scale: 1 }, { scale: 1.12, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "15% 60%" }, 3.14);
+      ft(free, { y: 0 }, { y: 9, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, 3.2);
+      st($("s12-c1"), { opacity: 0, y: 20, scale: 0.7 }, 0);
+      ft($("s12-c1"), { opacity: 0, y: 20, scale: 0.7 }, { opacity: 1, y: 0, scale: 1, duration: 0.38, ease: "back.out(2.6)" }, 3.18);
+      ft($("s12-lic"), { color: "#0a0d2c" }, { color: "#1a7f37", duration: 0.3, ease: "power2.out" }, 3.2);
+      ft($("s12-xlic"), { color: "#0a0d2c" }, { color: "#1a7f37", duration: 0.3, ease: "power2.out" }, 3.26);
+      tl.set($("s12-glint"), { x: 0 }, 0);
+      ft($("s12-glint"), { x: 0 }, { x: 1000, duration: 0.6, ease: "power2.inOut" }, 3.2);
+
+      // "dan kontrolnya": the cards fall back into depth, the node graph takes the stage
+      ft($("s12-cards"), { scale: 1, y: 0, filter: "blur(0px)" }, { scale: 0.82, y: -14, filter: "blur(10px)", duration: 0.36, ease: "power2.in" }, 3.5);
+      ft($("s12-cards"), { opacity: 1 }, { opacity: 0, duration: 0.32, ease: "power1.inOut" }, 3.52);
+      tl.set($("s12-cards"), { filter: "none" }, 3.87);
+      ft($("s12-blob"), { opacity: 1 }, { opacity: 0.45, duration: 0.5, ease: "power2.out" }, 3.7);
+      st($("s12-grid"), { opacity: 0, scale: 1.08 }, 0);
+      ft($("s12-grid"), { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }, 3.72);
+      tl.set($("s12-lock"), { opacity: 0, x: -30 }, 0);
+      ft($("s12-lock"), { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.42, ease: "power3.out" }, 3.74);
+      const nodes = [[$("s12-n1"), 3.82], [$("s12-n2"), 3.88], [$("s12-n3"), 3.94], [$("s12-n4"), 4.0], [$("s12-n5"), 4.06]];
+      nodes.forEach(([n, t], k) => {
+        const o = k === 2 ? "107px 42px" : "50% 50%";
+        st(n, { opacity: 0, y: 34, scale: 0.6, transformOrigin: o }, 0);
+        ft(n, { opacity: 0, y: 34, scale: 0.6 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(2.2)" }, t);
+      });
+      // wires: bezier from output (right edge) to input (left edge), drawing on in flow order
+      const svg = $("s12-wires"), NS = "http://www.w3.org/2000/svg";
+      const W = [[210, 570, 259, 758, 3.98, 1], [210, 570, 458, 558, 4.06, 0.5], [409, 758, 458, 586, 4.1, 1], [672, 570, 721, 758, 4.18, 1], [853, 758, 902, 570, 4.26, 1]];
+      const bez = (w, t) => {
+        const [x1, y1, x2, y2] = w, dx = Math.max(42, (x2 - x1) * 0.5), u = 1 - t;
+        const p = [x1, x1 + dx, x2 - dx, x2], q = [y1, y1, y2, y2];
+        const f = (a) => u * u * u * a[0] + 3 * u * u * t * a[1] + 3 * u * t * t * a[2] + t * t * t * a[3];
+        return [f(p), f(q)];
+      };
+      W.forEach((w) => {
+        const [x1, y1, x2, y2, t0, a] = w, dx = Math.max(42, (x2 - x1) * 0.5);
+        const p = document.createElementNS(NS, "path");
+        p.setAttribute("d", `M${x1} ${y1} C${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`);
+        p.setAttribute("pathLength", "1");
+        p.setAttribute("fill", "none");
+        p.setAttribute("stroke", `rgba(41,75,119,${0.62 * a})`);
+        p.setAttribute("stroke-width", "3.2");
+        p.setAttribute("stroke-linecap", "round");
+        p.style.strokeDasharray = "1";
+        svg.appendChild(p);
+        tl.set(p, { strokeDashoffset: 1 }, 0);
+        ft(p, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.3, ease: "power2.inOut" }, t0);
+        [[x1, y1, "#294b77", "#294b77", t0 - 0.02], [x2, y2, "#ffffff", "#294b77", t0 + 0.24]].forEach(([cx, cy, fill, st, ts]) => {
+          const c = document.createElementNS(NS, "circle");
+          c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", "6.5");
+          c.setAttribute("fill", fill); c.setAttribute("stroke", st); c.setAttribute("stroke-width", "2.6");
+          svg.appendChild(c);
+          tl.set(c, { opacity: 0 }, 0);
+          ft(c, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "none" }, ts);
+        });
+      });
+      // data pulses run through the graph on "lebih detail"
+      W.forEach((w, k) => {
+        if (k === 1) return;
+        const c = document.createElementNS(NS, "circle");
+        c.setAttribute("r", "6"); c.setAttribute("fill", "#1f883d");
+        c.setAttribute("cx", w[0]); c.setAttribute("cy", w[1]);
+        svg.appendChild(c);
+        const o = { t: 0 }, t0 = 4.9 + k * 0.1;
+        tl.set(c, { opacity: 0 }, 0);
+        tl.call(() => { c.setAttribute("cx", w[0]); c.setAttribute("cy", w[1]); }, null, t0 - 0.01);
+        ft(c, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, t0);
+        ft(o, { t: 0 }, { t: 1, duration: 0.36, ease: "power1.inOut", onUpdate: () => { const [x, y] = bez(w, o.t); c.setAttribute("cx", x.toFixed(1)); c.setAttribute("cy", y.toFixed(1)); } }, t0);
+        ft(c, { opacity: 1 }, { opacity: 0, duration: 0.1, ease: "none" }, t0 + 0.3);
+      });
+
+      // "jauh lebih detail": KSampler opens up (steps / cfg / seed = its real parameters), the rest steps back
+      const ks = $("s12-ks");
+      tl.set(ks, { clipPath: "inset(0px 0px 212px 0px round 17px)" }, 0);
+      ft(ks, { clipPath: "inset(0px 0px 212px 0px round 17px)" }, { clipPath: "inset(0px 0px 0px 0px round 17px)", duration: 0.42, ease: "expo.out" }, 4.42);
+      tl.set($("s12-kshadow"), { scaleY: 84 / 296 }, 0);
+      ft($("s12-kshadow"), { scaleY: 84 / 296 }, { scaleY: 1, duration: 0.42, ease: "expo.out" }, 4.42);
+      [$("s12-n1"), $("s12-n2"), $("s12-n4"), $("s12-n5")].forEach((n) => {
+        ft(n, { opacity: 1 }, { opacity: 0.58, duration: 0.35, ease: "power2.out" }, 4.46);
+      });
+      ft($("s12-diag"), { scale: 1 }, { scale: 1.035, duration: D - 0.3 - 4.4, ease: "sine.inOut" }, 4.4);
+      const PR = [[1, 0.4, 4.56, 20, 0], [2, 0.55, 4.7, 8, 1], [3, 0.72, 4.84, -1, 0]];
+      PR.forEach(([i, frac, t, target, dec]) => {
+        const f = $("s12-f" + i), kn = $("s12-k" + i), v = $("s12-v" + i);
+        tl.set($("s12-kp" + i), { opacity: 0, y: 10 }, 0);
+        ft($("s12-kp" + i), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.25, ease: "power3.out" }, t - 0.1);
+        tl.set(f, { scaleX: 0 }, 0);
+        ft(f, { scaleX: 0 }, { scaleX: frac, duration: 0.42, ease: "power3.out" }, t);
+        tl.set(kn, { x: 0 }, 0);
+        ft(kn, { x: 0 }, { x: 178 * frac, duration: 0.42, ease: "power3.out" }, t);
+        if (v) {
+          const o = { v: 0 };
+          tl.call(() => { v.textContent = dec ? "0.0" : "0"; }, null, t - 0.01);
+          ft(o, { v: 0 }, { v: target, duration: 0.42, ease: "power3.out", onUpdate: () => { v.textContent = dec ? o.v.toFixed(1) : String(Math.round(o.v)); } }, t);
+        }
+      });
+      // apex "detail": ring + glint + pulse on the KSampler
+      st($("s12-kring"), { opacity: 0, scale: 0.5 }, 0);
+      ft($("s12-kring"), { opacity: 1, scale: 0.5 }, { opacity: 0, scale: 1.35, duration: 0.6, ease: "power3.out" }, 5.08);
+      tl.set($("s12-kglint"), { x: 0 }, 0);
+      ft($("s12-kglint"), { x: 0 }, { x: 420, duration: 0.45, ease: "power2.inOut" }, 5.0);
+      ft($("s12-n3"), { scale: 1 }, { scale: 1.045, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out" }, 5.1);
+
+      // EXIT: push LEFT (s13 pushes in from the right)
+      const sk = $("s12-streaks");
+      [[560, 0.0], [700, 0.04], [820, 0.02], [640, 0.07]].forEach(([y, d], k) => {
+        const e = document.createElement("div"); e.className = "s12-abs s12-streak"; sk.appendChild(e);
+        e.style.cssText += `left:0;top:${y}px;width:${380 + k * 110}px;`;
+        tl.set(e, { x: 1100, opacity: 0 }, 0);
+        ft(e, { x: 1100, opacity: 0.85 }, { x: -700, opacity: 0, duration: 0.3, ease: "power2.in" }, D - 0.3 + d * 0.5);
+      });
+      ft($("s12-rig"), { x: 0 }, { x: -1100, duration: 0.3, ease: "power3.in" }, D - 0.3);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s12"] = tl;
+    })();
+  </script>
+</template>

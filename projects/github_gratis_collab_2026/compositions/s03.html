@@ -1,0 +1,203 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s03-abs { position: absolute; }
+    .s03-rig { position: absolute; inset: 0; }
+    .s03-stage { position: absolute; inset: 0; perspective: 1600px; perspective-origin: 50% 36%; }
+    .s03-blob { left: 90px; top: 300px; width: 900px; height: 720px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,160,225,.30), rgba(120,160,225,0) 66%); }
+    .s03-bokeh { border-radius: 50%; background: radial-gradient(circle, rgba(120,160,225,.34), rgba(120,160,225,0) 70%); }
+    /* GitHub mark (same component as s02: navy circle, white octocat) */
+    .s03-gm { border-radius: 50%; background: #fff; }
+    .s03-gm i { position: absolute; inset: -1px; background: linear-gradient(172deg, #0a0d2c, #294b77); -webkit-mask: url(assets/icons/si-github.svg) center / contain no-repeat; mask: url(assets/icons/si-github.svg) center / contain no-repeat; }
+    .s03-mark { left: 370px; top: 520px; width: 340px; height: 340px; box-shadow: 0 54px 90px -34px rgba(10,13,44,.55); }
+    .s03-thread { left: 539px; top: 410px; width: 2px; height: 52px; border-radius: 1px; background: linear-gradient(180deg, rgba(41,75,119,.4), rgba(41,75,119,.12)); transform-origin: 50% 0%; }
+    .s03-bring { left: 500px; top: 320px; width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(31,136,61,.55); }
+    /* ---------- benefit cards ---------- */
+    .s03-card { left: 90px; width: 900px; height: 170px; border-radius: 34px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 54px 90px -40px rgba(20,40,90,.48), 0 0 0 1.5px rgba(10,13,44,.06); }
+    .s03-tile { left: 32px; top: 33px; width: 104px; height: 104px; border-radius: 30px; background: linear-gradient(172deg, #0a0d2c, #294b77); box-shadow: 0 16px 28px -12px rgba(10,13,44,.55); }
+    .s03-ico { background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s03-tile .s03-ico { position: absolute; left: 25px; top: 25px; width: 54px; height: 54px; color: #fff; }
+    .s03-ttl { left: 166px; top: 28px; font: 700 54px/1.12 Poppins, sans-serif; letter-spacing: -0.025em; white-space: nowrap; background: linear-gradient(172deg, #0a0d2c, #294b77); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s03-chips { left: 166px; top: 101px; display: flex; gap: 10px; }
+    .s03-chip { display: flex; align-items: center; gap: 7px; padding: 8px 15px 7px 11px; border-radius: 15px; background: rgba(31,136,61,.1); color: #116329; font: 700 21px/1 Poppins, sans-serif; white-space: nowrap; }
+    .s03-chip .s03-ico { width: 20px; height: 20px; color: #1a7f37; }
+    .s03-price { left: 164px; top: 92px; display: flex; align-items: baseline; white-space: nowrap; }
+    .s03-price b { font: 700 50px/1 Poppins, sans-serif; letter-spacing: -0.03em; background: linear-gradient(172deg, #116329, #1f883d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s03-price i { font-style: normal; font: 400 24px/1 Poppins, sans-serif; color: #1a7f37; margin-left: 6px; }
+    .s03-check { right: 36px; top: 55px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(172deg, #1f883d, #116329); box-shadow: 0 12px 22px -8px rgba(17,99,41,.55); }
+    .s03-check .s03-ico { position: absolute; left: 14px; top: 14px; width: 32px; height: 32px; color: #fff; }
+    .s03-slash { left: 52px; top: 52px; width: 0; height: 0; transform: rotate(45deg); }
+    .s03-slash i { position: absolute; left: -66px; top: -4px; width: 132px; height: 8px; border-radius: 4px; background: #e5484d; box-shadow: 0 0 0 3px #1b3156; transform-origin: 0 50%; }
+    .s03-pring { left: 140px; top: 70px; width: 220px; height: 90px; border-radius: 45px; border: 3px solid rgba(31,136,61,.55); }
+    /* ---------- laptop (drawn after the lucide "laptop" proportions: lid + base) ---------- */
+    .s03-lglow { left: 140px; top: 392px; width: 800px; height: 560px; border-radius: 50%; background: radial-gradient(ellipse, rgba(150,186,236,.55), rgba(150,186,236,0) 66%); }
+    .s03-shadow { left: 170px; top: 858px; width: 740px; height: 60px; border-radius: 50%; background: radial-gradient(ellipse, rgba(20,40,90,.30), rgba(20,40,90,0) 70%); }
+    .s03-base { left: 150px; top: 838px; width: 780px; height: 34px; border-radius: 6px 6px 30px 30px / 6px 6px 22px 22px; background: linear-gradient(180deg, #f4f7fc 0%, #dfe6f2 45%, #c3cfe2 100%);
+      box-shadow: 0 0 0 1.5px rgba(10,13,44,.10), 0 18px 30px -14px rgba(20,40,90,.45); }
+    .s03-notch { left: 330px; top: 0; width: 120px; height: 9px; border-radius: 0 0 9px 9px; background: linear-gradient(180deg, #c9d3e4, #e3e9f3); }
+    .s03-lid { left: 230px; top: 432px; width: 620px; height: 410px; border-radius: 30px 30px 10px 10px; background: linear-gradient(172deg, #0a0d2c, #294b77);
+      box-shadow: 0 0 0 1.5px rgba(10,13,44,.2); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .s03-disp { left: 18px; top: 18px; width: 584px; height: 374px; border-radius: 14px; background: linear-gradient(180deg, #ffffff, #eef3fb); box-shadow: inset 0 0 0 1px rgba(10,13,44,.06); overflow: hidden; }
+    .s03-disp::after { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 120px; background: linear-gradient(180deg, rgba(150,186,236,.18), rgba(150,186,236,0)); }
+    .s03-cam { left: 304px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: #3a5a88; }
+    .s03-glint { left: 248px; top: 450px; width: 584px; height: 374px; border-radius: 14px; overflow: hidden; }
+    .s03-glint i { position: absolute; left: -260px; top: -40px; width: 220px; height: 460px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.75), rgba(255,255,255,0)); }
+    /* card 3: the phrase as a navy pill + a check on "sendiri" */
+    .s03-pill { left: 540px; top: 326px; height: 76px; display: flex; align-items: center; gap: 14px; padding: 0 34px 0 28px; border-radius: 38px; background: linear-gradient(172deg, #0a0d2c, #294b77);
+      box-shadow: 0 22px 40px -16px rgba(10,13,44,.55); color: #fff; font: 700 33px/1 Poppins, sans-serif; letter-spacing: -0.015em; white-space: nowrap; }
+    .s03-pill .s03-ico { width: 38px; height: 38px; color: #fff; }
+    .s03-pchk { right: -18px; top: -14px; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(172deg, #1f883d, #116329); box-shadow: 0 0 0 4px #fff, 0 10px 20px -6px rgba(17,99,41,.5); }
+    .s03-pchk .s03-ico { position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; color: #fff; }
+    .s03-pburst { left: 816px; top: 302px; width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(31,136,61,.6); }
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div class="s03-rig" id="s03-rig">
+      <div class="s03-abs s03-blob" id="s03-blob"></div>
+      <div class="s03-abs s03-lglow" id="s03-lglow"></div>
+      <div class="s03-abs s03-shadow" id="s03-shadow"></div>
+      <div class="s03-stage">
+        <div class="s03-abs s03-base" id="s03-base"><div class="s03-abs s03-notch"></div></div>
+        <div class="s03-abs s03-lid" id="s03-lid"><div class="s03-abs s03-cam"></div><div class="s03-abs s03-disp"></div></div>
+        <div class="s03-abs s03-thread" id="s03-thread"></div>
+        <!-- card 1: Open source (real licences of the five repos: MIT, Apache-2.0, GPL-3.0) -->
+        <div class="s03-abs s03-card" id="s03-c1" style="top:462px">
+          <div class="s03-abs s03-tile" id="s03-t1"><i class="s03-ico" style="--i:url(assets/icons/lucide-code.svg)"></i></div>
+          <div class="s03-abs s03-ttl" id="s03-h1">Open source</div>
+          <div class="s03-abs s03-chips">
+            <div class="s03-chip" id="s03-l1"><i class="s03-ico" style="--i:url(assets/icons/lucide-scale.svg)"></i>MIT</div>
+            <div class="s03-chip" id="s03-l2"><i class="s03-ico" style="--i:url(assets/icons/lucide-scale.svg)"></i>Apache-2.0</div>
+            <div class="s03-chip" id="s03-l3"><i class="s03-ico" style="--i:url(assets/icons/lucide-scale.svg)"></i>GPL-3.0</div>
+          </div>
+          <div class="s03-abs s03-check" id="s03-k1"><i class="s03-ico" style="--i:url(assets/icons/lucide-check.svg)"></i></div>
+        </div>
+        <!-- card 2: tanpa langganan -> Rp0/bulan -->
+        <div class="s03-abs s03-card" id="s03-c2" style="top:652px">
+          <div class="s03-abs s03-tile" id="s03-t2"><i class="s03-ico" style="--i:url(assets/icons/lucide-credit-card.svg)"></i><div class="s03-abs s03-slash"><i id="s03-sl"></i></div></div>
+          <div class="s03-abs s03-ttl" id="s03-h2">Tanpa langganan</div>
+          <div class="s03-abs s03-pring" id="s03-pr"></div>
+          <div class="s03-abs s03-price" id="s03-p2"><b>Rp0</b><i>/bulan</i></div>
+          <div class="s03-abs s03-check" id="s03-k2"><i class="s03-ico" style="--i:url(assets/icons/lucide-check.svg)"></i></div>
+        </div>
+        <div class="s03-abs s03-gm s03-mark" id="s03-mark"><i></i></div>
+        <div class="s03-abs s03-glint" id="s03-glint"><i id="s03-gl"></i></div>
+      </div>
+      <div class="s03-abs s03-bring" id="s03-bring"></div>
+      <div class="s03-abs s03-pburst" id="s03-pburst"></div>
+      <div class="s03-abs s03-pill" id="s03-pill"><i class="s03-ico" style="--i:url(assets/icons/lucide-laptop.svg)"></i>Jalan di komputer kamu sendiri<div class="s03-abs s03-pchk" id="s03-pchk"><i class="s03-ico" style="--i:url(assets/icons/lucide-check.svg)"></i></div></div>
+      <div class="s03-abs s03-bokeh" id="s03-bk1" style="left:-130px;top:560px;width:300px;height:300px"></div>
+      <div class="s03-abs s03-bokeh" id="s03-bk2" style="left:940px;top:330px;width:250px;height:250px"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 3.7334;
+      const root = document.querySelector('[data-composition-id="s03"]');
+      const $ = (id) => root.querySelector("#" + id);
+      const tl = gsap.timeline({ paused: true });
+      // NOTE: the "scale" shorthand inside fromTo(immediateRender:false) leaves scaleY at a stale value in the HF runtime
+      // (seek-order dependent) -> always expand it to scaleX/scaleY.
+      const sc = (v) => { if (!v || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      const ft = (el, a, b, t) => tl.fromTo(el, sc(a), Object.assign({ immediateRender: false }, sc(b)), t);
+      const set = (el, v, t) => tl.set(el, sc(v), t);
+      // words (local s): Open 0.33 · source 0.55 · tanpa 1.12 · langganan 1.45 · dan 1.98 · jalan 2.15 · di 2.59 · komputer 2.72 · kamu 3.00 · sendiri 3.18
+      const rig = $("s03-rig");
+      const SX = 540, SY = 637;                         // centre of the laptop screen (zoom-through target)
+      set(rig, { scale: 1, opacity: 1, filter: "none", transformOrigin: SX + "px " + SY + "px" }, 0);
+
+      // ---------------- ENTRY: the GitHub mark arrives from s02's dolly (scale 2, blur 5) and recoils into a badge ----------------
+      const mark = $("s03-mark");
+      set(mark, { x: 0, y: 0, scale: 2.0, filter: "blur(5px)" }, 0);
+      ft(mark, { y: 0, scale: 2.0 }, { y: -330, scale: 0.28, duration: 0.55, ease: "expo.out" }, 0);
+      ft(mark, { filter: "blur(5px)" }, { filter: "blur(0px)", duration: 0.22, ease: "power2.out" }, 0);
+      set(mark, { filter: "none" }, 0.23);
+      set($("s03-bring"), { opacity: 0, scale: 1 }, 0);
+      ft($("s03-bring"), { opacity: 1, scale: 1 }, { opacity: 0, scale: 2.2, duration: 0.5, ease: "power3.out" }, 0.36);
+      // depth
+      set([$("s03-blob"), $("s03-bk1"), $("s03-bk2")], { opacity: 0 }, 0);
+      ft($("s03-blob"), { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }, 0.05);
+      ft($("s03-bk1"), { opacity: 0, x: 0, y: 0 }, { opacity: 1, x: 50, y: -120, duration: 3.2, ease: "sine.out" }, 0.15);
+      ft($("s03-bk2"), { opacity: 0, x: 0, y: 0 }, { opacity: 1, x: -40, y: 110, duration: 3.2, ease: "sine.out" }, 0.2);
+
+      // ---------------- cards unfold one per phrase (accordion from the badge) ----------------
+      const c1 = $("s03-c1"), c2 = $("s03-c2");
+      const unfold = (c, t) => {
+        set(c, { opacity: 0, rotationX: -95, y: -20, scale: 1, transformOrigin: "50% 0%" }, 0);
+        ft(c, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "none" }, t);
+        ft(c, { rotationX: -95, y: -20 }, { rotationX: 0, y: 0, duration: 0.55, ease: "expo.out" }, t);
+      };
+      const pop = (el, t, from) => { set(el, from, 0); ft(el, from, { opacity: 1, x: 0, y: 0, scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2.4)" }, t); };
+      // "Open source"
+      set($("s03-thread"), { scaleY: 0, opacity: 1 }, 0);
+      ft($("s03-thread"), { scaleY: 0 }, { scaleY: 1, duration: 0.2, ease: "power2.out" }, 0.2);
+      ft($("s03-thread"), { opacity: 1 }, { opacity: 0, duration: 0.15, ease: "power2.in" }, 1.92);
+      unfold(c1, 0.26);
+      pop($("s03-t1"), 0.34, { opacity: 0, scale: 0.3, rotation: -20 });
+      set($("s03-h1"), { opacity: 0, y: 18 }, 0);
+      ft($("s03-h1"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.38);
+      [["s03-l1", 0.55], ["s03-l2", 0.62], ["s03-l3", 0.69]].forEach(([id, t]) => pop($(id), t, { opacity: 0, y: 20, scale: 0.7 }));
+      pop($("s03-k1"), 0.8, { opacity: 0, scale: 0, rotation: -60 });
+      // "tanpa langganan"
+      unfold(c2, 1.04);
+      pop($("s03-t2"), 1.12, { opacity: 0, scale: 0.3, rotation: 20 });
+      set($("s03-h2"), { opacity: 0, y: 18 }, 0);
+      ft($("s03-h2"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 1.16);
+      // "langganan": the card gets slashed in coral, then Rp0/bulan stamps in green
+      set($("s03-sl"), { scaleX: 0 }, 0);
+      ft($("s03-sl"), { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power3.inOut" }, 1.42);
+      ft($("s03-t2"), { rotation: 0 }, { rotation: -8, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, 1.6);
+      set($("s03-p2"), { opacity: 0, scale: 1.7, transformOrigin: "20% 60%" }, 0);
+      ft($("s03-p2"), { opacity: 0, scale: 1.7 }, { opacity: 1, scale: 1, duration: 0.34, ease: "back.out(2)" }, 1.55);
+      set($("s03-pr"), { opacity: 0, scale: 0.7 }, 0);
+      ft($("s03-pr"), { opacity: 1, scale: 0.7 }, { opacity: 0, scale: 1.35, duration: 0.5, ease: "power3.out" }, 1.66);
+      pop($("s03-k2"), 1.74, { opacity: 0, scale: 0, rotation: -60 });
+
+      // ---------------- "dan jalan di komputer kamu sendiri": the laptop opens and the cards fold into its screen ----------------
+      set([c1, c2], { transformOrigin: "50% 50%" }, 1.9);           // at rest: no visual change
+      ft(c1, { y: 0, scale: 1 }, { y: 70.6, scale: 0.56, duration: 0.5, ease: "power3.inOut" }, 1.96);
+      ft(c2, { y: 0, scale: 1 }, { y: -10.4, scale: 0.56, duration: 0.5, ease: "power3.inOut" }, 1.99);
+      ft(c1, { rotationX: 0 }, { rotationX: 16, duration: 0.24, ease: "power2.in" }, 1.96);
+      ft(c1, { rotationX: 16 }, { rotationX: 0, duration: 0.3, ease: "power2.out" }, 2.2);
+      ft(c2, { rotationX: 0 }, { rotationX: -16, duration: 0.24, ease: "power2.in" }, 1.99);
+      ft(c2, { rotationX: -16 }, { rotationX: 0, duration: 0.3, ease: "power2.out" }, 2.23);
+      ft(mark, { y: -330, scale: 0.28 }, { y: -162, scale: 0.1647, duration: 0.46, ease: "power3.inOut" }, 1.96);
+      const lid = $("s03-lid"), base = $("s03-base");
+      set(lid, { opacity: 0, rotationX: -90, transformOrigin: "50% 100%" }, 0);
+      ft(lid, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, 1.98);
+      ft(lid, { rotationX: -90 }, { rotationX: 0, duration: 0.62, ease: "back.out(1.25)" }, 1.98);
+      set(base, { opacity: 0, y: 46, scaleX: 0.9 }, 0);
+      ft(base, { opacity: 0, y: 46, scaleX: 0.9 }, { opacity: 1, y: 0, scaleX: 1, duration: 0.42, ease: "power3.out" }, 1.95);
+      set($("s03-shadow"), { opacity: 0, scaleX: 0.5 }, 0);
+      ft($("s03-shadow"), { opacity: 0, scaleX: 0.5 }, { opacity: 1, scaleX: 1, duration: 0.45, ease: "power2.out" }, 2.0);
+      set($("s03-lglow"), { opacity: 0, scale: 0.8 }, 0);
+      ft($("s03-lglow"), { opacity: 0, scale: 0.8 }, { opacity: 0.6, scale: 1, duration: 0.5, ease: "power2.out" }, 2.1);
+      // card 3 = the phrase itself, landing on "jalan"
+      const pill = $("s03-pill");
+      set(pill, { xPercent: -50, opacity: 0, y: -18, scale: 0.85 }, 0);
+      ft(pill, { opacity: 0, y: -18, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(2)" }, 2.16);
+      // "komputer": the screen powers up (glow + glint) and the set kicks
+      ft($("s03-lglow"), { opacity: 0.6 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 2.7);
+      set($("s03-glint"), { opacity: 0 }, 0);
+      set($("s03-glint"), { opacity: 1 }, 2.6);
+      set($("s03-gl"), { x: 0 }, 0);
+      ft($("s03-gl"), { x: 0 }, { x: 1120, duration: 0.55, ease: "power2.inOut" }, 2.64);
+      ft(rig, { scale: 1 }, { scale: 1.035, duration: 0.12, ease: "power2.out" }, 2.72);
+      ft(rig, { scale: 1.035 }, { scale: 1.02, duration: 0.3, ease: "power2.inOut" }, 2.84);
+      // "sendiri": the third check
+      set($("s03-pchk"), { opacity: 0, scale: 0, rotation: -60 }, 0);
+      ft($("s03-pchk"), { opacity: 0, scale: 0, rotation: -60 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.4, ease: "back.out(3)" }, 3.14);
+      set($("s03-pburst"), { opacity: 0, scale: 0.6 }, 0);
+      ft($("s03-pburst"), { opacity: 1, scale: 0.6 }, { opacity: 0, scale: 1.8, duration: 0.45, ease: "power3.out" }, 3.18);
+      // anticipation, then EXIT: snap zoom-through INTO the laptop screen (s04 arrives out of it)
+      ft(rig, { scale: 1.02 }, { scale: 1.045, duration: 3.43 - 3.14, ease: "sine.in" }, 3.14);
+      const X0 = D - 0.3;
+      ft(rig, { scale: 1.045 }, { scale: 3.4, duration: 0.3, ease: "power3.in" }, X0);
+      ft(rig, { filter: "blur(0px)", opacity: 1 }, { filter: "blur(14px)", opacity: 0, duration: 0.3, ease: "power3.in" }, X0);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s03"] = tl;
+    })();
+  </script>
+</template>

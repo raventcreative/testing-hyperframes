@@ -1,0 +1,298 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s15-abs { position: absolute; }
+    .s15-rig { position: absolute; inset: 0; transform-origin: 540px 660px; }
+    .s15-stage { position: absolute; inset: 0; perspective: 1600px; perspective-origin: 50% 36%; }
+    .s15-ghost { left: 0; right: 0; top: 560px; text-align: center; font: 700 210px/1 Poppins, sans-serif; letter-spacing: -0.04em; color: rgba(41,75,119,.05); white-space: nowrap; }
+    .s15-far { background: #294b77; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s15-bblob { left: 120px; top: 360px; width: 840px; height: 640px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,160,225,.30), rgba(120,160,225,0) 66%); }
+    .s15-blob { left: 300px; top: 330px; width: 900px; height: 700px; border-radius: 50%; background: radial-gradient(ellipse, rgba(31,136,61,.16), rgba(31,136,61,0) 64%); }
+    /* PAID CARD — identical to the end state of s14 (ChatGPT Plus) */
+    .s15-card { left: 220px; top: 440px; width: 640px; height: 440px; border-radius: 36px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 54px 90px -40px rgba(20,40,90,.48), 0 0 0 1.5px rgba(10,13,44,.06); }
+    .s15-logo { left: 40px; top: 38px; width: 88px; height: 88px; border-radius: 24px; background: url(assets/logos/openai.png) center / 100% 100% no-repeat; box-shadow: 0 10px 22px -8px rgba(20,40,90,.35), 0 0 0 1.5px rgba(10,13,44,.05); }
+    .s15-name { left: 150px; top: 42px; font: 700 42px/1.1 Poppins, sans-serif; letter-spacing: -0.02em; color: #0a0d2c; white-space: nowrap; }
+    .s15-sub { left: 151px; top: 94px; font: 400 21px/1.2 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s15-tag { right: 36px; top: 46px; padding: 7px 14px 6px; border-radius: 20px; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .12em; color: #294b77; background: rgba(41,75,119,.08); }
+    .s15-rule { left: 40px; right: 40px; top: 156px; height: 1.5px; background: rgba(10,13,44,.08); }
+    .s15-from { left: 42px; top: 184px; font: 400 24px/1 Poppins, sans-serif; color: #294b77; }
+    .s15-price { left: 36px; top: 214px; height: 130px; display: flex; align-items: baseline; white-space: nowrap; }
+    .s15-price .rp { font: 700 44px/1 Poppins, sans-serif; color: #294b77; margin-right: 6px; }
+    .s15-price .num { font: 700 124px/1 Poppins, sans-serif; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; background: linear-gradient(172deg, #0a0d2c, #294b77); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s15-price .rb { display: inline-block; font: 700 62px/1 Poppins, sans-serif; color: #0a0d2c; margin-left: 6px; }
+    .s15-price .per { display: inline-block; font: 400 30px/1 Poppins, sans-serif; color: #294b77; margin-left: 10px; }
+    .s15-btn { left: 40px; right: 40px; top: 358px; height: 50px; border-radius: 16px; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff; display: flex; align-items: center; justify-content: center; gap: 12px; font: 700 20px/1 Poppins, sans-serif; letter-spacing: .02em; }
+    .s15-ico { display: inline-block; width: 24px; height: 24px; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s15-strike { left: 26px; top: 286px; width: 520px; height: 8px; border-radius: 4px; background: #e5484d; box-shadow: 0 4px 12px rgba(229,72,77,.35); transform-origin: 0 50%; }
+    .s15-dim { inset: 0; border-radius: 36px; background: rgba(238,242,250,.55); }
+    /* FREE CARD — ollama/ollama (real data: production/repos.json) */
+    .s15-free { left: 452px; top: 412px; width: 590px; height: 480px; border-radius: 36px; background: linear-gradient(180deg, #ffffff, #f7fbf8);
+      box-shadow: 0 60px 100px -40px rgba(20,60,40,.42), 0 0 0 2px rgba(31,136,61,.28); overflow: hidden; }
+    .s15-flogo { left: 34px; top: 32px; width: 76px; height: 76px; border-radius: 20px; background: url(assets/logos/ollama.png) center / 100% 100% no-repeat; box-shadow: 0 10px 22px -8px rgba(20,40,90,.35), 0 0 0 1.5px rgba(10,13,44,.06); }
+    .s15-own { left: 128px; top: 34px; font: 400 22px/1.2 Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .s15-repo { left: 126px; top: 60px; font: 700 44px/1.1 Poppins, sans-serif; letter-spacing: -0.02em; color: #0a0d2c; white-space: nowrap; }
+    .s15-pub { right: 34px; top: 42px; padding: 6px 13px 5px; border-radius: 20px; border: 1.5px solid rgba(10,13,44,.18); font: 700 15px/1 Poppins, sans-serif; color: #294b77; }
+    .s15-desc { left: 36px; right: 36px; top: 124px; font: 400 19px/1.42 Poppins, sans-serif; color: #294b77; }
+    .s15-meta { left: 36px; top: 194px; display: flex; gap: 24px; font: 700 20px/1 Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s15-meta span { display: flex; align-items: center; gap: 8px; }
+    .s15-meta .s15-ico { width: 22px; height: 22px; color: #294b77; }
+    .s15-meta .star { color: #d4a72c; }
+    .s15-rule2 { left: 36px; right: 36px; top: 234px; height: 1.5px; background: rgba(10,13,44,.08); }
+    .s15-fprice { left: 32px; top: 244px; height: 124px; display: flex; align-items: baseline; white-space: nowrap; }
+    .s15-fprice .rp { font: 700 46px/1 Poppins, sans-serif; color: #1a7f37; margin-right: 6px; }
+    .s15-fprice .num { font: 700 124px/1 Poppins, sans-serif; letter-spacing: -0.04em; background: linear-gradient(172deg, #116329, #1f883d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s15-fprice .rb { display: inline-block; font: 700 62px/1 Poppins, sans-serif; color: #1a7f37; margin-left: 4px; }
+    .s15-fprice .per { display: inline-block; font: 400 28px/1 Poppins, sans-serif; color: #1a7f37; margin-left: 12px; }
+    .s15-glint { left: -220px; top: 0; width: 180px; height: 480px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    .s15-vs { left: 398px; top: 614px; width: 92px; height: 92px; border-radius: 50%; background: linear-gradient(172deg, #0a0d2c, #294b77); color: #fff; font: 700 30px/92px Poppins, sans-serif; text-align: center; letter-spacing: -0.02em;
+      box-shadow: 0 16px 30px -10px rgba(10,13,44,.5), 0 0 0 6px rgba(255,255,255,.9); }
+    .s15-ring { left: 497px; top: 402px; width: 500px; height: 500px; border-radius: 50%; border: 4px solid rgba(31,136,61,.5); }
+    .s15-flash { left: 452px; top: 412px; width: 590px; height: 480px; border-radius: 36px; background: #ffffff; }
+    /* the REAL command (README_ollama.md) in a small dark code pill + the offline chip */
+    .s15-code { left: 486px; top: 802px; height: 54px; padding: 0 20px 0 16px; border-radius: 16px; background: linear-gradient(172deg, #0a0d2c, #1d3558); display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 16px 28px -14px rgba(10,13,44,.6); white-space: nowrap; }
+    .s15-code .s15-ico { width: 24px; height: 24px; color: #3fb950; }
+    .s15-cmd { font: 400 23px/1 Poppins, sans-serif; color: #ffffff; letter-spacing: .01em; }
+    .s15-cur { width: 11px; height: 25px; border-radius: 2px; background: #3fb950; margin-left: 1px; }
+    .s15-off { left: 858px; top: 806px; height: 46px; padding: 0 16px 0 12px; border-radius: 15px; background: rgba(31,136,61,.12); color: #116329; display: flex; align-items: center; gap: 8px; font: 700 19px/1 Poppins, sans-serif; white-space: nowrap; }
+    .s15-off svg { width: 26px; height: 26px; overflow: visible; }
+    /* LAPTOP BEAT — lucide-laptop geometry drawn large, data dots bouncing INSIDE a boundary */
+    .s15-lap { position: absolute; inset: 0; }
+    .s15-lshadow { left: 250px; top: 840px; width: 580px; height: 70px; border-radius: 50%; background: radial-gradient(ellipse, rgba(20,40,90,.22), rgba(20,40,90,0) 70%); }
+    .s15-lsvg { left: 270px; top: 446px; width: 540px; height: 432px; overflow: visible; }
+    .s15-bound { left: 346px; top: 482px; width: 388px; height: 252px; border-radius: 30px; border: 3px dashed rgba(31,136,61,.55); }
+    .s15-bsolid { left: 346px; top: 482px; width: 388px; height: 252px; border-radius: 30px; border: 3px solid #1f883d; box-shadow: 0 0 0 7px rgba(31,136,61,.12), inset 0 0 28px rgba(31,136,61,.12); }
+    .s15-dotw { left: 0; top: 0; width: 0; height: 0; }
+    .s15-dot { left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; }
+    .s15-dot.n { background: linear-gradient(172deg, #0a0d2c, #294b77); box-shadow: 0 4px 10px rgba(10,13,44,.3); }
+    .s15-dot.g { background: linear-gradient(172deg, #1f883d, #116329); box-shadow: 0 4px 10px rgba(17,99,41,.35); }
+    .s15-rip { width: 56px; height: 56px; border-radius: 50%; border: 3px solid rgba(31,136,61,.7); }
+    .s15-tile { left: 492px; top: 560px; width: 96px; height: 96px; border-radius: 26px; background: url(assets/logos/ollama.png) center / 100% 100% no-repeat; box-shadow: 0 16px 30px -12px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s15-lock { left: 494px; top: 710px; width: 92px; height: 92px; border-radius: 50%; background: linear-gradient(172deg, #1f883d, #116329); box-shadow: 0 16px 30px -10px rgba(17,99,41,.55), 0 0 0 7px rgba(255,255,255,.95); }
+    .s15-lock i { position: absolute; inset: 22px; background: #fff; -webkit-mask: url(assets/icons/lucide-lock.svg) center / contain no-repeat; mask: url(assets/icons/lucide-lock.svg) center / contain no-repeat; }
+    .s15-lring { left: 400px; top: 616px; width: 280px; height: 280px; border-radius: 50%; border: 4px solid rgba(31,136,61,.5); }
+    /* exit: soft light leak */
+    .s15-leak { left: -360px; top: 140px; width: 1500px; height: 1300px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.97) 0%, rgba(244,248,255,.9) 32%, rgba(196,218,248,.3) 54%, rgba(196,218,248,0) 72%); }
+    .s15-leak2 { left: -500px; top: 520px; width: 2080px; height: 300px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.9) 0%, rgba(196,218,250,.55) 40%, rgba(196,218,250,0) 70%); }
+  </style>
+  <div id="root" data-composition-id="s15" data-width="1080" data-height="1920">
+    <div class="s15-rig" id="s15-rig">
+      <div class="s15-abs s15-bblob" id="s15-bblob"></div>
+      <div class="s15-abs s15-ghost" id="s15-ghost">Rp330rb</div>
+      <div class="s15-abs s15-far" id="s15-far1" style="left:80px;top:480px;width:90px;height:90px;--i:url(assets/icons/lucide-message-circle.svg)"></div>
+      <div class="s15-abs s15-far" id="s15-far2" style="left:912px;top:600px;width:104px;height:104px;--i:url(assets/icons/lucide-message-circle.svg)"></div>
+      <div class="s15-abs s15-far" id="s15-far3" style="left:118px;top:806px;width:62px;height:62px;--i:url(assets/icons/lucide-message-circle.svg)"></div>
+      <div class="s15-abs s15-blob" id="s15-blob"></div>
+      <div class="s15-lap" id="s15-lap">
+        <div class="s15-abs s15-lshadow" id="s15-lshadow"></div>
+        <svg class="s15-abs s15-lsvg" id="s15-lsvg" viewBox="2 4.5 20 16" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="s15-lg" x1="0" y1="0" x2="0.25" y2="1"><stop offset="0" stop-color="#0a0d2c"/><stop offset="1" stop-color="#294b77"/></linearGradient>
+            <linearGradient id="s15-sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#f3f6fc"/></linearGradient>
+          </defs>
+          <path id="s15-lfill" d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9z" fill="url(#s15-sg)"/>
+          <path id="s15-bfill" d="M20 16l1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16z" fill="#e9eef8"/>
+          <path id="s15-lline" d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16" fill="none" stroke="url(#s15-lg)" stroke-width="0.24" stroke-linecap="round" stroke-linejoin="round" pathLength="1" style="stroke-dasharray:1"/>
+        </svg>
+        <div class="s15-abs s15-bound" id="s15-bound"></div>
+        <div class="s15-abs s15-bsolid" id="s15-bsolid"></div>
+        <div id="s15-dots"></div>
+        <div class="s15-abs s15-rip" id="s15-rip"></div>
+        <div class="s15-abs s15-tile" id="s15-tile"></div>
+        <div class="s15-abs s15-lring" id="s15-lring"></div>
+        <div class="s15-abs s15-lock" id="s15-lock"><i></i></div>
+      </div>
+      <div class="s15-stage">
+        <div class="s15-abs s15-card" id="s15-card">
+          <div class="s15-abs s15-logo"></div>
+          <div class="s15-abs s15-name">ChatGPT Plus</div>
+          <div class="s15-abs s15-sub">AI chatbot</div>
+          <div class="s15-abs s15-tag">BERBAYAR</div>
+          <div class="s15-abs s15-rule"></div>
+          <div class="s15-abs s15-from">sekitar</div>
+          <div class="s15-abs s15-price"><span class="rp">Rp</span><span class="num">330</span><span class="rb">rb</span><span class="per">/bulan</span></div>
+          <div class="s15-abs s15-btn"><span class="s15-ico" style="--i:url(assets/icons/lucide-repeat.svg)"></span>Langganan tiap bulan</div>
+          <div class="s15-abs s15-dim" id="s15-dim"></div>
+          <div class="s15-abs s15-strike" id="s15-strike"></div>
+        </div>
+        <div class="s15-abs s15-ring" id="s15-ring"></div>
+        <div class="s15-abs s15-free" id="s15-free">
+          <div class="s15-abs s15-flogo"></div>
+          <div class="s15-abs s15-own">ollama /</div>
+          <div class="s15-abs s15-repo">ollama</div>
+          <div class="s15-abs s15-pub">Public</div>
+          <div class="s15-abs s15-desc">Get up and running with Kimi, GLM, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models.</div>
+          <div class="s15-abs s15-meta"><span><i class="s15-ico star" style="--i:url(assets/icons/lucide-star.svg)"></i>186k</span><span><i class="s15-ico" style="--i:url(assets/icons/lucide-git-fork.svg)"></i>18,9k</span><span id="s15-lic"><i class="s15-ico" style="--i:url(assets/icons/lucide-scale.svg)"></i>MIT</span><span><i class="s15-ico" style="--i:url(assets/icons/lucide-code.svg)"></i>Go</span></div>
+          <div class="s15-abs s15-rule2"></div>
+          <div class="s15-abs s15-fprice" id="s15-fprice"><span class="rp">Rp</span><span class="num" id="s15-fnum">330</span><span class="rb" id="s15-frb">rb</span><span class="per" id="s15-fper">/bulan</span></div>
+          <div class="s15-abs s15-glint" id="s15-glint"></div>
+        </div>
+        <div class="s15-abs s15-flash" id="s15-flash"></div>
+        <div class="s15-abs s15-vs" id="s15-vs">VS</div>
+      </div>
+      <div class="s15-abs s15-code" id="s15-code"><i class="s15-ico" style="--i:url(assets/icons/lucide-terminal.svg)"></i><span class="s15-cmd" id="s15-cmd"></span><span class="s15-cur" id="s15-cur"></span></div>
+      <div class="s15-abs s15-off" id="s15-off">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <g id="s15-arcs"><path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 5.17-2.69"/><path d="M19 12.859a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/></g>
+          <path id="s15-slash" d="m2 2 20 20" pathLength="1" style="stroke-dasharray:1"/>
+        </svg>offline</div>
+    </div>
+    <div class="s15-abs s15-leak" id="s15-leak"></div>
+    <div class="s15-abs s15-leak2" id="s15-leak2"></div>
+  </div>
+  <script>
+    (function () {
+      const D = 5.1334;
+      const root = document.querySelector('[data-composition-id="s15"]');
+      const $ = (id) => root.querySelector("#" + id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const st = (el, v, t) => tl.set(el, v, t);
+      // words (local s): Gantinya 0.20 · Ollama 0.99 · Model 1.83 · AI 2.17 · jalan 2.40 · offline 2.68 · data 3.19 · kamu 3.43 · nggak 3.77 · keluar 3.95 · dari 4.31 · laptop 4.55
+      const card = $("s15-card"), free = $("s15-free");
+
+      // start = s14 end state (paid ChatGPT Plus card, rotZ -1.6, scale 1.04)
+      st(card, { x: 0, y: 0, rotationX: 0, rotationY: 0, rotationZ: -1.6, scale: 1.04, opacity: 1 }, 0);
+      st($("s15-bblob"), { scale: 1.05 }, 0);
+      ft($("s15-bblob"), { opacity: 1 }, { opacity: 0, duration: 0.7, ease: "power2.out" }, 0.3);
+      // the faint ghost price of s14 drifts on and fades
+      st($("s15-ghost"), { x: -60, opacity: 1 }, 0);
+      ft($("s15-ghost"), { x: -60, opacity: 1 }, { x: -240, opacity: 0, duration: 0.6, ease: "power2.in" }, 0.08);
+      [["s15-far1", 0.09, 7, -110], ["s15-far2", 0.08, -8, 130], ["s15-far3", 0.06, 7, -90]].forEach(([id, o, r, dx], k) => {
+        st($(id), { opacity: o, rotation: r, x: 0, y: 0 }, 0);
+        ft($(id), { opacity: o, x: 0 }, { opacity: 0, x: dx, duration: 0.55, ease: "power2.in" }, 0.1 + k * 0.04);
+      });
+      // "Gantinya": spun back to the left, dimmed, struck through
+      ft(card, { x: 0, y: 0, rotationX: 0, rotationY: 0, rotationZ: -1.6, scale: 1.04 }, { x: -286, y: 16, rotationX: -6, rotationY: 32, rotationZ: 2.5, scale: 0.57, duration: 0.6, ease: "power4.inOut" }, 0.1);
+      tl.set($("s15-dim"), { opacity: 0 }, 0);
+      ft($("s15-dim"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.42);
+      tl.set($("s15-strike"), { scaleX: 0 }, 0);
+      ft($("s15-strike"), { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power3.inOut" }, 0.56);
+
+      // "Ollama": the repo card swings in like a door (hinge on its right edge), settles on the word
+      tl.set(free, { rotationY: -96, x: 60, opacity: 0, transformOrigin: "100% 50%" }, 0);
+      ft(free, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "none" }, 0.6);
+      ft(free, { rotationY: -96, x: 60 }, { rotationY: 0, x: 0, duration: 0.42, ease: "back.out(1.3)" }, 0.6);
+      tl.set($("s15-flash"), { opacity: 0 }, 0);
+      ft($("s15-flash"), { opacity: 0.9 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 0.96);
+      st($("s15-ring"), { opacity: 0, scale: 0.5 }, 0);
+      ft($("s15-ring"), { opacity: 1, scale: 0.5 }, { opacity: 0, scale: 1.5, duration: 0.7, ease: "power3.out" }, 0.98);
+      tl.set($("s15-blob"), { opacity: 0 }, 0);
+      ft($("s15-blob"), { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.9);
+      st($("s15-vs"), { scale: 0, rotation: -30 }, 0);
+      ft($("s15-vs"), { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.45, ease: "back.out(3)" }, 1.06);
+
+      // the price melts to Rp0 in the pause after "Ollama."
+      const fnum = $("s15-fnum"), frb = $("s15-frb"), cd = { v: 330 };
+      tl.set($("s15-fprice"), { opacity: 0, y: 22 }, 0);
+      ft($("s15-fprice"), { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 1.08);
+      tl.call(() => { fnum.textContent = "330"; }, null, 1.07);
+      ft(cd, { v: 330 }, { v: 0, duration: 0.52, ease: "power2.in", onUpdate: () => { fnum.textContent = String(Math.round(cd.v)); } }, 1.16);
+      ft(frb, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4, duration: 0.16, ease: "power2.in" }, 1.54);
+      ft($("s15-fper"), { x: 0 }, { x: -66, duration: 0.2, ease: "power3.inOut" }, 1.56);
+      ft($("s15-fprice"), { scale: 1 }, { scale: 1.12, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "15% 60%" }, 1.7);
+      ft(free, { y: 0 }, { y: 9, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, 1.76);
+      ft($("s15-lic"), { color: "#0a0d2c" }, { color: "#1a7f37", duration: 0.3, ease: "power2.out" }, 1.72);
+
+      // "Model AI jalan": the real command types into the dark code pill
+      const code = $("s15-code"), cmd = $("s15-cmd"), cur = $("s15-cur"), TXT = "ollama run gemma4";
+      st(code, { opacity: 0, y: 18, scale: 0.92, transformOrigin: "0% 50%" }, 0);
+      ft(code, { opacity: 0, y: 18, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(2)" }, 1.78);
+      const ty = { n: 0 };
+      tl.call(() => { cmd.textContent = ""; }, null, 0);
+      tl.call(() => { cmd.textContent = ""; }, null, 1.87);
+      ft(ty, { n: 0 }, { n: TXT.length, duration: 0.66, ease: "none", onUpdate: () => { cmd.textContent = TXT.slice(0, Math.round(ty.n)); } }, 1.88);
+      tl.set(cur, { opacity: 1 }, 0);
+      [2.62, 2.88, 3.14].forEach((t) => { tl.set(cur, { opacity: 0 }, t); tl.set(cur, { opacity: 1 }, t + 0.13); });
+      // "offline": the chip stamps, the slash crosses the wifi signal out
+      const off = $("s15-off");
+      st(off, { opacity: 0, scale: 1.5, transformOrigin: "50% 50%" }, 0);
+      ft(off, { opacity: 0, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, 2.58);
+      tl.set($("s15-slash"), { strokeDashoffset: 1 }, 0);
+      ft($("s15-slash"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.2, ease: "power2.inOut" }, 2.68);
+      ft(off, { y: 0 }, { y: 5, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, 2.86);
+      tl.set($("s15-glint"), { x: 0 }, 0);
+      ft($("s15-glint"), { x: 0 }, { x: 1000, duration: 0.6, ease: "power2.inOut" }, 2.66);
+
+      // "data kamu…": the repo goes INTO the laptop — card shrinks into the screen, the outline draws around it
+      ft(card, { x: -286, opacity: 1 }, { x: -760, opacity: 0, duration: 0.42, ease: "power2.in" }, 2.96);
+      ft($("s15-vs"), { scale: 1 }, { scale: 0, duration: 0.25, ease: "power2.in" }, 2.96);
+      ft(free, { x: 0, scale: 1, opacity: 1 }, { x: -207, scale: 0.3, opacity: 0, duration: 0.4, ease: "power3.in" }, 3.0);
+      tl.set(free, { transformOrigin: "50% 50%", y: 0 }, 2.99);
+      ft(free, { y: 0 }, { y: -50, duration: 0.4, ease: "power3.in" }, 3.0);
+      ft($("s15-blob"), { opacity: 1 }, { opacity: 0.5, duration: 0.5, ease: "power2.out" }, 3.0);
+      // code pill drops below the laptop, offline chip docks top-right of it
+      ft(code, { x: 0, y: 0 }, { x: -86, y: 84, duration: 0.5, ease: "power3.inOut" }, 3.0);
+      ft(off, { x: 0, y: 0, scale: 1 }, { x: -38, y: -330, scale: 1.2, duration: 0.5, ease: "power3.inOut" }, 3.04);
+      const ll = $("s15-lline");
+      tl.set(ll, { strokeDashoffset: 1 }, 0);
+      ft(ll, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, 3.04);
+      tl.set([$("s15-lfill"), $("s15-bfill"), $("s15-lshadow")], { opacity: 0 }, 0);
+      ft([$("s15-lfill"), $("s15-bfill"), $("s15-lshadow")], { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.16);
+      st($("s15-lap"), { scale: 0.94, transformOrigin: "540px 660px" }, 0);
+      ft($("s15-lap"), { scale: 0.94 }, { scale: 1, duration: 0.6, ease: "power3.out" }, 3.04);
+      ft($("s15-lap"), { scale: 1 }, { scale: 1.03, duration: 4.78 - 3.64, ease: "sine.inOut" }, 3.64);
+      st($("s15-tile"), { scale: 0, rotation: -12 }, 0);
+      ft($("s15-tile"), { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2.4)" }, 3.24);
+      st($("s15-bound"), { opacity: 0, scale: 1.06 }, 0);
+      ft($("s15-bound"), { opacity: 0, scale: 1.06 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, 3.2);
+
+      // data dots — deterministic bounces inside the boundary (they never get out)
+      const BX0 = 346 + 3 + 9, BX1 = 346 + 388 - 3 - 9, BY0 = 482 + 3 + 9, BY1 = 482 + 252 - 3 - 9, T0 = 3.18;
+      const refl = (v, a, b) => { const L = b - a; let m = (v - a) % (2 * L); if (m < 0) m += 2 * L; return a + (m <= L ? m : 2 * L - m); };
+      const HIT = 3.95, V0 = 330;
+      const DOTS = [
+        [BX1 - V0 * (HIT - T0), 600, V0, 46, "g"],
+        [420, 520, -170, 120, "n"], [690, 700, 140, -150, "n"], [470, 690, 210, 90, "g"], [620, 520, -120, -190, "n"],
+        [380, 610, 150, -110, "n"], [700, 560, -200, 70, "g"], [560, 700, 90, 170, "n"], [520, 530, -230, -60, "n"]
+      ];
+      const dw = $("s15-dots"), els = [];
+      DOTS.forEach(([x0, y0, vx, vy, c], k) => {
+        const w = document.createElement("div"); w.className = "s15-abs s15-dotw";
+        const d = document.createElement("div"); d.className = "s15-abs s15-dot " + c;
+        w.appendChild(d); dw.appendChild(w); els.push(w);
+        st(d, { scale: 0, opacity: 0 }, 0);
+        ft(d, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(3)" }, T0 + 0.02 + k * 0.03);
+      });
+      const place = (t) => DOTS.forEach(([x0, y0, vx, vy], k) => {
+        const x = refl(x0 + vx * (t - T0), BX0, BX1), y = refl(y0 + vy * (t - T0), BY0, BY1);
+        els[k].style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+      });
+      const sim = { t: T0 };
+      tl.call(() => place(T0), null, T0 - 0.005);
+      ft(sim, { t: T0 }, { t: D, duration: D - T0, ease: "none", onUpdate: () => place(sim.t) }, T0);
+      // "nggak keluar": the green dot hits the wall and is bounced back — ripple on the boundary
+      const hy = refl(DOTS[0][1] + DOTS[0][3] * (HIT - T0), BY0, BY1);
+      const rip = $("s15-rip");
+      rip.style.left = (BX1 + 12 - 28) + "px"; rip.style.top = (hy - 28) + "px";
+      st(rip, { opacity: 0, scale: 0.3 }, 0);
+      ft(rip, { opacity: 1, scale: 0.3 }, { opacity: 0, scale: 1.8, duration: 0.5, ease: "power3.out" }, HIT);
+      ft($("s15-bound"), { borderColor: "rgba(31,136,61,0.55)" }, { borderColor: "rgba(31,136,61,1)", duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, HIT);
+      // "laptop": locked — boundary turns solid, lock badge stamps on the hinge
+      tl.set($("s15-bsolid"), { opacity: 0 }, 0);
+      ft($("s15-bsolid"), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 4.5);
+      st($("s15-lock"), { scale: 0, rotation: -25 }, 0);
+      ft($("s15-lock"), { scale: 0, rotation: -25 }, { scale: 1, rotation: 0, duration: 0.4, ease: "back.out(3)" }, 4.44);
+      st($("s15-lring"), { opacity: 0, scale: 0.4 }, 0);
+      ft($("s15-lring"), { opacity: 1, scale: 0.4 }, { opacity: 0, scale: 1.4, duration: 0.55, ease: "power3.out" }, 4.55);
+      ft($("s15-tile"), { scale: 1 }, { scale: 1.08, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 4.55);
+
+      // EXIT: soft light-leak + blur dissolve (hands over to s16)
+      ft($("s15-rig"), { opacity: 1, scale: 1, filter: "blur(0px)" }, { opacity: 0, scale: 1.05, filter: "blur(14px)", duration: 0.35, ease: "power2.in" }, D - 0.35);
+      st($("s15-leak"), { opacity: 0, x: -260, scale: 0.8 }, 0);
+      ft($("s15-leak"), { opacity: 0, x: -260, scale: 0.8 }, { opacity: 0.92, x: 40, scale: 1, duration: 0.2, ease: "power2.out" }, D - 0.35);
+      ft($("s15-leak"), { opacity: 0.92, x: 40, scale: 1 }, { opacity: 0.12, x: 260, scale: 1.1, duration: 0.15, ease: "power1.in" }, D - 0.15);
+      // a thin anamorphic streak crosses the frame with the leak
+      st($("s15-leak2"), { opacity: 0, x: -700, rotation: -9, scaleY: 0.6 }, 0);
+      ft($("s15-leak2"), { opacity: 0, x: -700, scaleY: 0.6 }, { opacity: 1, x: 0, scaleY: 1, duration: 0.2, ease: "power2.out" }, D - 0.35);
+      ft($("s15-leak2"), { opacity: 1, x: 0, scaleY: 1 }, { opacity: 0, x: 700, scaleY: 0.5, duration: 0.15, ease: "power1.in" }, D - 0.15);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s15"] = tl;
+    })();
+  </script>
+</template>

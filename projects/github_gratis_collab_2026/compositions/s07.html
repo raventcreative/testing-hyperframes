@@ -1,0 +1,184 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s07-abs { position: absolute; }
+    .s07-stage { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 540px 606px; }
+    .s07-rig, .s07-plane { position: absolute; inset: 0; transform-origin: 540px 606px; }
+    /* far plane */
+    .s07-blob { left: 90px; top: 236px; width: 900px; height: 740px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,160,225,.30), rgba(120,160,225,0) 66%); }
+    .s07-dial { left: 260px; top: 326px; width: 560px; height: 560px; }
+    .s07-dial svg { position: absolute; left: 0; top: 0; width: 560px; height: 560px; overflow: visible; }
+    /* progress ring: one quarter per round (12 -> 3 -> 6 -> 9 -> 12 o'clock) */
+    .s07-ring { left: 310px; top: 376px; width: 460px; height: 460px; }
+    .s07-ring svg { position: absolute; left: 0; top: 0; width: 460px; height: 460px; overflow: visible; }
+    .s07-hr { left: 310px; top: 376px; width: 460px; height: 460px; }
+    .s07-head { left: 216px; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 0 6px #294b77, 0 0 26px 8px rgba(120,160,225,.7); }
+    /* kicker */
+    .s07-kick { left: 0; width: 1080px; top: 310px; height: 40px; display: flex; justify-content: center; align-items: center; gap: 20px; }
+    .s07-ln { display: block; width: 64px; height: 2px; border-radius: 1px; background: rgba(41,75,119,.42); }
+    .s07-kt { font: 700 24px/1 Poppins, sans-serif; letter-spacing: .24em; margin-right: -.24em; color: #294b77; white-space: nowrap; }
+    .s07-kt b { color: #0a0d2c; }
+    /* numeral (+ soft depth duplicate) */
+    .s07-nw { left: 0; width: 1080px; top: 449px; height: 345px; transform-origin: 540px 157px; }
+    .s07-num, .s07-dup { position: absolute; left: 0; top: 0; width: 1080px; height: 345px; display: flex; justify-content: center; align-items: flex-start; white-space: nowrap; }
+    .s07-hash { font: 700 158px/1 Poppins, sans-serif; margin: 23px 12px 0 0; }
+    .s07-dig { font: 700 345px/1 Poppins, sans-serif; letter-spacing: -0.02em; }
+    .s07-num .s07-hash { color: #294b77; }
+    .s07-num .s07-dig { --gx: -320px; background: linear-gradient(104deg, rgba(255,255,255,0) 15%, rgba(255,255,255,.8) 50%, rgba(255,255,255,0) 85%) var(--gx) 0 / 150px 100% no-repeat, linear-gradient(172deg, #0a0d2c, #294b77);
+      -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s07-dup { color: transparent; text-shadow: 0 0 30px rgba(41,75,119,.42); }
+    /* category pill */
+    .s07-prow { left: 0; width: 1080px; top: 850px; height: 84px; display: flex; justify-content: center; }
+    .s07-pill { position: relative; height: 84px; display: flex; align-items: center; gap: 18px; padding: 0 38px 0 11px; border-radius: 42px; background: linear-gradient(172deg, #0a0d2c, #294b77);
+      box-shadow: 0 26px 46px -20px rgba(10,13,44,.6), 0 0 0 6px rgba(255,255,255,.8); }
+    .s07-icb { position: relative; flex: none; width: 62px; height: 62px; border-radius: 50%; background: #ffffff; }
+    .s07-ico { position: absolute; inset: 15px; background: #0a0d2c; -webkit-mask: url(assets/icons/lucide-mic.svg) center / contain no-repeat; mask: url(assets/icons/lucide-mic.svg) center / contain no-repeat; }
+    .s07-rip { position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgba(120,160,225,.95); }
+    .s07-lab { display: flex; gap: 14px; font: 700 36px/1 Poppins, sans-serif; letter-spacing: .05em; color: #ffffff; white-space: nowrap; }
+    .s07-m { display: inline-block; overflow: hidden; padding: 6px 0 8px; margin: -6px 0 -8px; }
+    .s07-w { display: inline-block; }
+    .s07-gl { position: absolute; inset: 0; border-radius: 42px; overflow: hidden; }
+    .s07-gls { position: absolute; left: -150px; top: 0; width: 110px; height: 84px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.34), rgba(255,255,255,0)); }
+    /* near plane: out-of-focus discs (soft gradients, no filter) */
+    .s07-bok { border-radius: 50%; background: radial-gradient(circle, rgba(120,160,225,.42) 0%, rgba(120,160,225,.2) 42%, rgba(120,160,225,0) 70%); }
+    .s07-spk { left: 540px; top: 606px; width: 0; height: 0; }
+    .s07-spl { position: absolute; left: 0; top: -1.5px; width: 240px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, rgba(41,75,119,.34), rgba(41,75,119,0)); }
+  </style>
+  <div id="root" data-composition-id="s07" data-width="1080" data-height="1920">
+    <div class="s07-stage">
+      <div class="s07-rig" id="s07-rig">
+        <div class="s07-plane" id="s07-far">
+          <div class="s07-abs s07-blob" id="s07-blob"></div>
+          <div class="s07-abs s07-dial" id="s07-dial"><svg viewBox="0 0 560 560">
+            <circle cx="280" cy="280" r="242" fill="none" stroke="rgba(41,75,119,.16)" stroke-width="10" stroke-dasharray="2 19.12"/>
+            <circle cx="280" cy="280" r="242" fill="none" stroke="rgba(41,75,119,.28)" stroke-width="18" stroke-dasharray="3 123.71" stroke-dashoffset="1.5"/>
+          </svg></div>
+        </div>
+        <div class="s07-plane" id="s07-mid">
+          <div class="s07-abs s07-ring"><svg viewBox="0 0 460 460">
+            <defs><linearGradient id="s07-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a0d2c"/><stop offset="1" stop-color="#294b77"/></linearGradient></defs>
+            <circle cx="230" cy="230" r="218" fill="none" stroke="rgba(41,75,119,.13)" stroke-width="3"/>
+            <circle id="s07-arc" cx="230" cy="230" r="218" fill="none" stroke="url(#s07-g)" stroke-width="9" stroke-linecap="round" stroke-dasharray="1369.73 1369.73" stroke-dashoffset="1027.30" transform="rotate(-90 230 230)"/>
+            <circle cx="230.0" cy="12.0" r="8" fill="#294b77" stroke="rgba(41,75,119,.4)" stroke-width="3"/><circle cx="448.0" cy="230.0" r="8" fill="#294b77" stroke="rgba(41,75,119,.4)" stroke-width="3"/><circle cx="230.0" cy="448.0" r="8" fill="#ffffff" stroke="rgba(41,75,119,.4)" stroke-width="3"/><circle cx="12.0" cy="230.0" r="8" fill="#ffffff" stroke="rgba(41,75,119,.4)" stroke-width="3"/>
+            <circle id="s07-pop" cx="230.0" cy="448.0" r="10" fill="none" stroke="#294b77" stroke-width="3" opacity="0"/>
+            <circle id="s07-shock" cx="230" cy="230" r="120" fill="none" stroke="rgba(41,75,119,.42)" stroke-width="4" opacity="0"/>
+          </svg></div>
+          <div class="s07-abs s07-hr" id="s07-hr"><div class="s07-abs s07-head"></div></div>
+          <div class="s07-abs s07-kick" id="s07-kick"><i class="s07-ln" id="s07-l1"></i><span class="s07-kt">ROUND <b>2</b> / 4</span><i class="s07-ln" id="s07-l2"></i></div>
+          <div class="s07-abs s07-nw" id="s07-nw">
+            <div class="s07-dup" id="s07-dup"><span class="s07-hash">#</span><span class="s07-dig">2</span></div>
+            <div class="s07-num" id="s07-num"><span class="s07-hash">#</span><span class="s07-dig" id="s07-dig">2</span></div>
+          </div>
+          <div class="s07-abs s07-prow"><div class="s07-pill" id="s07-pill">
+            <div class="s07-icb" id="s07-icb"><i class="s07-ico"></i><i class="s07-rip" id="s07-rip"></i></div>
+            <div class="s07-lab"><span class="s07-m"><span class="s07-w">KLONING</span></span><span class="s07-m"><span class="s07-w">SUARA</span></span></div>
+            <div class="s07-gl"><i class="s07-gls" id="s07-gls"></i></div>
+          </div></div>
+        </div>
+        <div class="s07-plane" id="s07-near">
+          <div class="s07-abs s07-bok" id="s07-b1" style="left:-40px;top:690px;width:230px;height:230px"></div>
+          <div class="s07-abs s07-bok" id="s07-b2" style="left:890px;top:330px;width:170px;height:170px"></div>
+          <div class="s07-abs s07-bok" id="s07-b3" style="left:850px;top:780px;width:96px;height:96px"></div>
+        </div>
+      </div>
+    </div>
+    <div id="s07-fx"></div>
+  </div>
+  <script>
+    (function () {
+      const D = 2.0;
+      const root = document.querySelector('[data-composition-id="s07"]');
+      const $ = (id) => root.querySelector("#" + id);
+      const tl = gsap.timeline({ paused: true });
+      // runtime guard (lead): never let the `scale` shorthand reach GSAP — it can leave scaleY stale depending on seek order
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const mk = (cls, css) => { const e = document.createElement("div"); e.className = "s07-abs " + cls; e.style.cssText = css; $("s07-fx").appendChild(e); return e; };
+      // words (local s): Kedua, 0.41 · kloning 1.03 · suara. 1.34
+      const APEX = 0.41, W1 = 1.03, W2 = 1.34;
+      const rig = $("s07-rig"), far = $("s07-far"), mid = $("s07-mid"), near = $("s07-near"), nw = $("s07-nw"), pill = $("s07-pill");
+      const C = 1369.73, F0 = 0.25, F1 = 0.5;   // progress ring: this round's quarter
+      const XS = D - 0.46;                       // exit wind-up starts here
+
+      // ---------------- ENTRY: out of s06's zoom-through (its rig ended at scale 3.2 + blur) — zoom-out + 90deg roll, lands on "Kedua"
+      tl.set(rig, { scaleX: 2.6, scaleY: 2.6, rotation: -90, opacity: 0.35, filter: "blur(16px)" }, 0);
+      ft(rig, { scaleX: 2.6, scaleY: 2.6, rotation: -90 }, { scaleX: 1, scaleY: 1, rotation: 0, duration: 0.5, ease: "expo.out" }, 0);
+      ft(rig, { opacity: 0.35 }, { opacity: 1, duration: 0.16, ease: "power1.out" }, 0);
+      ft(rig, { filter: "blur(16px)" }, { filter: "blur(0px)", duration: 0.34, ease: "power2.out" }, 0);
+      tl.set(rig, { filter: "none" }, 0.35);
+      ft(near, { scaleX: 2.2, scaleY: 2.2 }, { scaleX: 1, scaleY: 1, duration: 0.55, ease: "expo.out" }, 0);
+
+      // converging speed lines sell the zoom-out (wrappers carry the static angle; GSAP only moves the inner line)
+      for (let k = 0; k < 18; k++) {
+        const a = k * 20 + (k % 3) * 6 - 6;
+        const w = mk("s07-spk", "transform: rotate(" + a + "deg);");
+        const l = document.createElement("div"); l.className = "s07-spl"; w.appendChild(l);
+        const r0 = 760 + (k % 4) * 70, r1 = 230 + (k % 3) * 30, d0 = (k % 5) * 0.012;
+        tl.set(l, { x: r0, opacity: 0 }, 0);
+        ft(l, { x: r0, opacity: 0.9 }, { x: r1, opacity: 0, duration: 0.34, ease: "power2.out" }, d0);
+      }
+
+      // ---------------- ROUND-TITLE SYSTEM (identical in s04 / s07 / s10 / s13) ----------------
+      // far plane: the light breathes, the near discs drift
+      ft($("s07-blob"), { scaleX: 0.92, scaleY: 0.92, opacity: 0.7 }, { scaleX: 1.06, scaleY: 1.06, opacity: 1, duration: D, ease: "sine.inOut" }, 0);
+      // the dial spins in and settles (a stopwatch for the round), then keeps creeping
+      tl.set($("s07-dial"), { rotation: -50 }, 0);
+      ft($("s07-dial"), { rotation: -50 }, { rotation: 0, duration: 0.9, ease: "expo.out" }, 0);
+      ft($("s07-dial"), { rotation: 0 }, { rotation: 5, duration: D - 0.9, ease: "none" }, 0.9);
+      ft($("s07-b1"), { x: 0, y: 0 }, { x: 26, y: -34, duration: D, ease: "sine.inOut" }, 0);
+      ft($("s07-b2"), { x: 0, y: 0 }, { x: -22, y: 30, duration: D, ease: "sine.inOut" }, 0);
+      ft($("s07-b3"), { x: 0, y: 0 }, { x: -30, y: -40, duration: D, ease: "sine.inOut" }, 0);
+      // APEX (ordinal word): the numeral lifts off the page — its soft duplicate separates — pulse, shock ring, glint
+      const dup = $("s07-dup"), num = $("s07-num"), dig = $("s07-dig");
+      tl.set(dup, { x: 0, y: 6, opacity: 0.5 }, 0);
+      ft(dup, { x: 0, y: 6, opacity: 0.5 }, { x: 12, y: 30, opacity: 1, duration: 0.5, ease: "power3.out" }, APEX - 0.03);
+      ft(num, { y: 0 }, { y: -8, duration: 0.5, ease: "power3.out" }, APEX - 0.03);
+      ft(nw, { scaleX: 1, scaleY: 1 }, { scaleX: 1.075, scaleY: 1.075, duration: 0.09, ease: "power2.out" }, APEX - 0.04);
+      ft(nw, { scaleX: 1.075, scaleY: 1.075 }, { scaleX: 1, scaleY: 1, duration: 0.32, ease: "power2.inOut" }, APEX + 0.05);
+      tl.set($("s07-shock"), { opacity: 0, attr: { r: 120 } }, 0);
+      ft($("s07-shock"), { opacity: 1, attr: { r: 120 } }, { opacity: 0, attr: { r: 320 }, duration: 0.62, ease: "power3.out" }, APEX);
+      tl.set(dig, { "--gx": "-320px" }, 0);
+      ft(dig, { "--gx": "-320px" }, { "--gx": "480px", duration: 0.55, ease: "power2.inOut" }, APEX - 0.02);
+      // the kicker's hairlines extend
+      tl.set([$("s07-l1"), $("s07-l2")], { scaleX: 0 }, 0);
+      ft($("s07-l1"), { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out", transformOrigin: "100% 50%" }, APEX);
+      ft($("s07-l2"), { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out", transformOrigin: "0% 50%" }, APEX);
+      // progress ring: this round's quarter draws, the marker travels with it
+      tl.set($("s07-arc"), { strokeDashoffset: C * (1 - F0) }, 0);
+      ft($("s07-arc"), { strokeDashoffset: C * (1 - F0) }, { strokeDashoffset: C * (1 - F1), duration: 0.62, ease: "power3.inOut" }, APEX + 0.02);
+      tl.set($("s07-hr"), { rotation: F0 * 360 }, 0);
+      ft($("s07-hr"), { rotation: F0 * 360 }, { rotation: F1 * 360, duration: 0.62, ease: "power3.inOut" }, APEX + 0.02);
+      // the marker clicks into this round's checkpoint
+      tl.set($("s07-pop"), { opacity: 0, attr: { r: 10 } }, 0);
+      ft($("s07-pop"), { opacity: 1, attr: { r: 10 } }, { opacity: 0, attr: { r: 38 }, duration: 0.42, ease: "power2.out" }, APEX + 0.6);
+
+      // category pill lands on its word; the icon pops exactly on it
+      tl.set(pill, { opacity: 0, scaleX: 0.5, scaleY: 0.5, y: 26 }, 0);
+      ft(pill, { opacity: 0, scaleX: 0.5, scaleY: 0.5, y: 26 }, { opacity: 1, scaleX: 1, scaleY: 1, y: 0, duration: 0.42, ease: "back.out(2)" }, W1 - 0.14);
+      tl.set($("s07-icb"), { scaleX: 0, scaleY: 0, rotation: -40 }, 0);
+      ft($("s07-icb"), { scaleX: 0, scaleY: 0, rotation: -40 }, { scaleX: 1, scaleY: 1, rotation: 0, duration: 0.4, ease: "back.out(3)" }, W1 - 0.07);
+      root.querySelectorAll(".s07-w").forEach((w, i) => {
+        tl.set(w, { yPercent: 115 }, 0);
+        ft(w, { yPercent: 115 }, { yPercent: 0, duration: 0.36, ease: "power4.out" }, W1 - 0.09 + i * 0.07);
+      });
+      // second beat: icon ripple + a glint across the pill
+      tl.set($("s07-rip"), { opacity: 0, scaleX: 1, scaleY: 1 }, 0);
+      ft($("s07-rip"), { opacity: 1, scaleX: 1, scaleY: 1 }, { opacity: 0, scaleX: 1.9, scaleY: 1.9, duration: Math.min(0.5, D - (W2 - 0.02)), ease: "power2.out" }, W2 - 0.02);
+      tl.set($("s07-gls"), { x: 0 }, 0);
+      ft($("s07-gls"), { x: 0 }, { x: 720, duration: Math.min(0.5, D - (W2 - 0.08)), ease: "power2.inOut" }, W2 - 0.08);
+      // calm hold, kept alive by a slow push-in until the exit wind-up
+      ft(mid, { scaleX: 1, scaleY: 1 }, { scaleX: 1.035, scaleY: 1.035, duration: XS - (APEX + 0.45), ease: "sine.inOut" }, APEX + 0.45);
+
+      // ---------------- EXIT: 3D flip DOWN (tiny lift, then rotateX 0 -> 90, last 0.3 s) -> s08 flips up from rotateX -90
+      const XF = D - 0.3;
+      ft(rig, { rotationX: 0 }, { rotationX: -7, duration: 0.16, ease: "power2.out" }, XF - 0.16);
+      ft(rig, { rotationX: -7, y: 0 }, { rotationX: 90, y: 40, duration: 0.3, ease: "power3.in" }, XF);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s07"] = tl;
+    })();
+  </script>
+</template>

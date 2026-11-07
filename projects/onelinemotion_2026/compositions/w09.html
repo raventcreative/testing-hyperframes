@@ -16,6 +16,9 @@
     .w09-h { fill: none; stroke: #3a3a3a; stroke-width: 2.2; stroke-opacity: .4; stroke-linecap: round; stroke-linejoin: round; }
     .w09-l { fill: none; stroke: #5b5b5b; stroke-width: 3; stroke-opacity: .6; stroke-linecap: round; stroke-linejoin: round; }
     .w09-ink { fill: #222222; stroke: none; }
+    .w09-bk .w09-p, .w09-bk .w09-pf { stroke: #8d8d8d; stroke-width: 3.6px; }
+    .w09-bk .w09-q { stroke-opacity: .25; }
+    #w09-run .w09-p, #w09-run .w09-pf { stroke-width: 5.6px; }
     .w09-t { font: 700 34px Poppins, sans-serif; fill: #1f1f1f; }
     /* 12 fps line boil: three drawings of everything, cycled through #w09-all[data-b] (set on the GSAP timeline) */
     #w09-all[data-b="0"] .w09-v1, #w09-all[data-b="0"] .w09-v2,
@@ -104,7 +107,7 @@
           d += `C${P(p1[0] + (p2[0] - p0[0]) / 6)},${P(p1[1] + (p2[1] - p0[1]) / 6)} ${P(p2[0] - (p3[0] - p1[0]) / 6)},${P(p2[1] - (p3[1] - p1[1]) / 6)} ${P(p2[0])},${P(p2[1])}`; }
         return d + (closed ? "Z" : "");
       };
-      const S = (pts, o) => Object.assign({ pts, key: KEY++, cls: "w09-p", amp: 1.7 }, o || {});
+      const S = (pts, o) => Object.assign({ pts, key: KEY++, cls: "w09-p", amp: 2.1 }, o || {});
       const seg = (x0, y0, x1, y1, n = 3, bow = 0) => { const p = []; for (let i = 0; i <= n; i++) { const u = i / n; p.push([x0 + (x1 - x0) * u - (y1 - y0) * bow * Math.sin(Math.PI * u), y0 + (y1 - y0) * u + (x1 - x0) * bow * Math.sin(Math.PI * u)]); } return p; };
       const ring = (cx, cy, rx, ry, n = 14, over = 0.35, a0 = -2.2) => { const p = []; for (let i = 0; i <= n; i++) { const a = a0 + (i / n) * (Math.PI * 2 + over), k = 1 + 0.05 * (i / n); p.push([cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]); } return p; };
       // render strokes as 3 boil drawings; o.vs = number of drawings (1 = static), o.cls extra class on each drawing, o.draw = class for draw-on paths
@@ -135,7 +138,7 @@
         run1: { lean: 14, ll: [8, -8], rl: [78, -12], la: [-15, 40], ra: [20, 100] },
         run2: { lean: 16, rl: [55, 10], ll: [-32, -95], ra: [-55, -20], la: [60, 150] },
         run3: { lean: 14, rl: [8, -8], ll: [78, -12], ra: [-15, 40], la: [20, 100] },
-        tuck: { lean: 10, ll: [125, 15], rl: [115, 5], la: [70, 160], ra: [80, 150] },
+        star: { lean: 0, ll: [38, 34], rl: [-38, -34], la: [-128, -132], ra: [128, 132] },
         tada: { lean: -12, ll: [48, 22], rl: [-22, -8], la: [-148, -168], ra: [148, 168] },
         cheerA: { lean: 0, ll: [14, 6], rl: [-14, -6], la: [-140, -165], ra: [140, 165] },
         cheerB: { lean: 0, ll: [18, 8], rl: [-18, -8], la: [-118, -160], ra: [168, 185], hop: 10 },
@@ -171,7 +174,7 @@
       {
         const hy = (x) => 1218 - 46 * Math.abs(Math.sin((x / 560) * Math.PI + 0.6));
         const p = []; for (let x = -20; x <= 2500; x += 46) p.push([x, hy(x)]);
-        let m = draw([S(p, { amp: 1.8, ghost: true })]);
+        let m = `<g class="w09-bk">` + draw([S(p, { amp: 1.8, ghost: true })]);
         const house = (x, w, h) => { const b = hy(x + w / 2) + 10, top = b - h, st = [
             S([[x, b], [x + 1, top], [x + w, top + 2], [x + w - 1, b]], { cls: "w09-pf", closed: true, ghost: true }),
             S([[x - 12, top + 4], [x + w / 2, top - h * 0.62], [x + w + 12, top + 3]], { cls: "w09-pf", closed: true, ghost: true }),
@@ -189,6 +192,15 @@
         ITEMS.forEach((it, i) => { const st = it[0] === "h" ? house(it[1], it[2], it[3]) : it[0] === "t" ? tree(it[1], it[2]) : fence(it[1], it[2]);
           const t0 = (it[1] - 1050) / VMID;   // starts being sketched just before it scrolls into frame
           if (t0 > 0.3 && t0 < D - 0.44) { DRAWN.push(["w09-dm" + i, t0]); m += draw(st, { draw: "w09-dm" + i }); } else m += draw(st); });
+        m += `</g>`;
+        // spectators cheering on the hills (pass under the rocket at ~0.6 s, on "kena" and at the end)
+        const FANS = [[560, "c"], [612, "c2"], [1470, "c"], [1522, "f"], [1580, "c2"], [1990, "c2"], [2040, "c"]];
+        FANS.forEach(([x, k]) => { const b = hy(x) + 4, sc = 0.74;
+          const A = k === "f" ? stick(POSE.flagA, sc, x, b) : stick(k === "c" ? POSE.cheerA : POSE.cheerB, sc, x, b);
+          const B = k === "f" ? stick(POSE.flagB, sc, x, b) : stick(k === "c" ? POSE.cheerB : POSE.cheerA, sc, x, b);
+          if (k === "f") for (const [Q, wv] of [[A, 0], [B, 1]]) { const h = Q.hand; Q.push(S([h, [h[0] + 1, h[1] - 56]], { amp: 1 }));
+            Q.push(S(wv ? [[h[0] + 1, h[1] - 56], [h[0] + 22, h[1] - 48], [h[0] + 40, h[1] - 53], [h[0] + 2, h[1] - 34]] : [[h[0] + 1, h[1] - 56], [h[0] + 21, h[1] - 55], [h[0] + 40, h[1] - 45], [h[0] + 2, h[1] - 34]], { cls: "w09-pf", closed: true, amp: 1.2 })); }
+          m += `<g class="w09-wA">${draw(A)}</g><g class="w09-wB">${draw(B)}</g>`; });
         $("w09-mid").innerHTML = m;
       }
       // ---------------------------------------------------------------- ground line (900 px/s) with tufts, pebbles, flowers and the cheering crowd
@@ -204,14 +216,14 @@
             for (let j = 0; j < 5; j++) { const a = (j / 5) * Math.PI * 2; st.push(S(ring(x + 1 + Math.cos(a) * 11, b - 46 + Math.sin(a) * 11, 5, 5, 7, 0.2), { amp: 0.5, w: 2.6 })); } }
           else { for (let j = 0; j < 4; j++) st.push(S(seg(x + j * 9, GY + 14, x + j * 9 - 10, GY + 30, 1), { cls: "w09-h", amp: 1 })); } }
         let m = draw(st);
-        // crowd (strip x; passes under the rocket at ~0.75 s, on "kena" and at the end)
-        const CROWD = [[1250, "c"], [1320, "c2"], [2120, "c"], [2190, "f"], [2265, "c2"], [3080, "c2"], [3150, "c"]];
-        CROWD.forEach(([x, k], i) => { const b = gy(x);
-          const A = k === "f" ? stick(POSE.flagA, 0.95, x, b) : stick(k === "c" ? POSE.cheerA : POSE.cheerB, 0.95, x, b);
-          const B = k === "f" ? stick(POSE.flagB, 0.95, x, b) : stick(k === "c" ? POSE.cheerB : POSE.cheerA, 0.95, x, b);
-          if (k === "f") for (const [Q, wv] of [[A, 0], [B, 1]]) { const h = Q.hand; Q.push(S([h, [h[0] + 1, h[1] - 74]], { amp: 1 }));
-            Q.push(S(wv ? [[h[0] + 1, h[1] - 74], [h[0] + 30, h[1] - 64], [h[0] + 52, h[1] - 70], [h[0] + 2, h[1] - 44]] : [[h[0] + 1, h[1] - 74], [h[0] + 28, h[1] - 72], [h[0] + 52, h[1] - 60], [h[0] + 2, h[1] - 44]], { cls: "w09-pf", closed: true, amp: 1.2 })); }
-          m += `<g class="w09-wA">${draw(A)}</g><g class="w09-wB">${draw(B)}</g>`; });
+        // a few bigger ground props: bushes and a signpost
+        const props = [];
+        for (const x of [760, 1900, 3050]) { const b = gy(x); props.push(S([[x - 46, b], [x - 52, b - 22], [x - 30, b - 44], [x - 4, b - 50], [x + 22, b - 46], [x + 46, b - 26], [x + 44, b]], { cls: "w09-pf", ghost: true, amp: 2.4 }));
+          props.push(S([[x - 22, b - 18], [x - 10, b - 30], [x + 4, b - 22]], { cls: "w09-h", amp: 1.2 })); }
+        for (const x of [1380, 2620]) { const b = gy(x); props.push(S([[x, b], [x + 1, b - 92]], { amp: 1.2, w: 5 }));
+          props.push(S([[x - 40, b - 96], [x + 52, b - 92], [x + 70, b - 74], [x + 50, b - 58], [x - 40, b - 60]], { cls: "w09-pf", closed: true, ghost: true, amp: 1.6 }));
+          props.push(S([[x - 22, b - 78], [x + 40, b - 76]], { cls: "w09-h", amp: 1.2 })); }
+        m += draw(props);
         // dust puffs kicked up by the skidding landing (live in ground space so they stay behind)
         [[1.8, 430], [1.9, 395], [2.0, 350], [2.1, 300]].forEach(([t, sx], i) => { const x = sx - 30 + VGND * t; PUFFS.push(["w09-pu" + i, t]);
           m += `<g id="w09-pu${i}">${draw([S(ring(x, GY - 14, 16 + i * 2, 12, 10, 0.4), { amp: 1.4, w: 3 }), S(ring(x - 22, GY - 8, 10, 8, 8, 0.4), { amp: 1.2, w: 3 })])}</g>`; });
@@ -235,8 +247,8 @@
             [tx, ty], [x + w * 0.26, y + h], [x + r, y + h], [x, y + h - r], [x - 1, y + r]];
           return `<g id="${id}">${draw([S(p, { cls: "w09-pf", closed: true, ghost: true, amp: 1.6 })])}<text class="w09-t" x="${x + w / 2}" y="${y + h / 2 + 12}" text-anchor="middle">${txt}</text></g>`; };
         let m = "";
-        ["run0", "run1", "run2", "run3"].forEach((k, i) => { m += `<g class="w09-r${i}">${draw(stick(POSE[k], 1.05))}</g>`; });
-        m = `<g id="w09-rc">${m}</g><g id="w09-rt">${draw(stick(POSE.tuck, 1.05))}</g><g id="w09-rd">${draw(stick(POSE.tada, 1.05))}</g>`;
+        ["run0", "run1", "run2", "run3"].forEach((k, i) => { m += `<g class="w09-r${i}">${draw(stick(POSE[k], 1.12))}</g>`; });
+        m = `<g id="w09-rc">${m}</g><g id="w09-rt">${draw(stick(POSE.star, 1.12))}</g><g id="w09-rd">${draw(stick(POSE.tada, 1.12))}</g>`;
         const burst = []; for (let i = 0; i < 7; i++) { const a = Math.PI * (1.05 + (i / 6) * 0.9); burst.push(S(seg(Math.cos(a) * 70, -70 + Math.sin(a) * 92, Math.cos(a) * 104, -70 + Math.sin(a) * 128, 1), { amp: 1.2, w: 3.6 })); }
         m += `<g id="w09-burst">${draw(burst)}</g>`;
         m += bubble(-176, -290, 120, 66, -30, -206, "gas!", "w09-bg") + bubble(-246, -292, 196, 66, -26, -208, "mantap!", "w09-bm");
@@ -271,10 +283,13 @@
         for (let k = 0; k < LEN.length; k++) { const [ax, ay] = ZZ[k], [bx, by] = ZZ[k + 1], ang = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI, tr = `translate(${P(ax)} ${P(ay)}) rotate(${P(ang)})`;
           clip += `<rect id="w09-cd${k}" x="${-H0 / 2}" y="${-H0 / 2}" width="0" height="${H0}" rx="${H0 / 2}" transform="${tr}"/>`;
           clip += `<rect id="w09-cs${k}" x="0" y="0" width="${P(LEN[k])}" height="0" rx="0" transform="${tr}"/>`;
-          const ux = (bx - ax) / LEN[k], uy = (by - ay) / LEN[k];
-          for (let j = -1; j <= 1; j++) { const o = j * H0 * 0.3, pts = []; for (let i = 0; i <= 5; i++) { const u = 0.02 + (i / 5) * 0.96;
-              pts.push([ax + ux * LEN[k] * u - uy * o + (hash(k * 9 + j * 3 + i) - 0.5) * 14, ay + uy * LEN[k] * u + ux * o + (hash(k * 7 + j * 5 + i + 40) - 0.5) * 14]); }
-            hatch += `<path class="w09-hz w09-hz${k}" pathLength="1" d="${curve(pts)}" fill="none" stroke="#262626" stroke-width="${j ? 3 : 5}" stroke-opacity="${j ? 0.42 : 0.72}" stroke-linecap="round"/>`; } }
+          // the pencil's actual scribble: a tight zig-zag across the band as it travels along it
+          const ux = (bx - ax) / LEN[k], uy = (by - ay) / LEN[k], n = Math.round(LEN[k] / 46), pts = [];
+          for (let i = 0; i <= n; i++) { const u = i / n, o = (i % 2 ? 1 : -1) * H0 * (0.36 + 0.08 * hash(k * 13 + i));
+            pts.push([ax + ux * LEN[k] * u - uy * o + (hash(k * 9 + i) - 0.5) * 16, ay + uy * LEN[k] * u + ux * o + (hash(k * 7 + i + 40) - 0.5) * 16]); }
+          let d = `M${P(pts[0][0])},${P(pts[0][1])}`; for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; d += `Q${P((x0 + x1) / 2 + ux * 18)},${P((y0 + y1) / 2 + uy * 18)} ${P(x1)},${P(y1)}`; }
+          hatch += `<path class="w09-hz w09-hz${k}" pathLength="1" d="${d}" fill="none" stroke="#2a2a2a" stroke-width="3.2" stroke-opacity=".5" stroke-linecap="round" stroke-linejoin="round"/>`;
+          hatch += `<path class="w09-hz w09-hz${k}" pathLength="1" d="${curve([[ax, ay], [(ax + bx) / 2 + uy * 9, (ay + by) / 2 - ux * 9], [bx, by]])}" fill="none" stroke="#1f1f1f" stroke-width="5" stroke-opacity=".7" stroke-linecap="round"/>`; }
         $("w09-wipe").innerHTML = `<defs><clipPath id="w09-reveal" clipPathUnits="userSpaceOnUse">${clip}</clipPath></defs><g id="w09-hatch">${hatch}</g>`;
       }
       const world = $("w09-world");
@@ -289,7 +304,7 @@
         I(hz, { strokeDasharray: "1 1.02", strokeDashoffset: 1.01 });
         ft(hz, { strokeDashoffset: 1.01 }, { strokeDashoffset: 0, duration: b - a, ease: "none" }, a);
       }
-      const hatchG = $("w09-hatch"); I(hatchG, { opacity: 1 }); ft(hatchG, { opacity: 1 }, { opacity: 0, duration: 0.35, ease: "power1.in" }, 0.48);
+      const hatchG = $("w09-hatch"); I(hatchG, { opacity: 1 }); ft(hatchG, { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power1.in" }, 0.42);
       // the pencil: follows the scribble head, swoops to the title, underlines it, leaves
       const pencil = $("w09-pencil"), PX = (x) => x - 40, PY = (y) => y - 280;
       I(pencil, { x: PX(NX), y: PY(NY), rotation: 0, scale: 1, opacity: 1, transformOrigin: "40px 280px" });

@@ -12,10 +12,18 @@ def dec(path, filt=None):
     return np.frombuffer(subprocess.run(cmd, capture_output=True, check=True).stdout, np.float32).astype(np.float64)
 vo = P / "assets/audio/vo.mp3"
 dry = dec(vo)
-CHAIN = ("rubberband=pitch=1.189:formant=preserved:transients=crisp,"
-         "asplit[a][b];[b]afreqshift=shift=42[bs];[a][bs]amix=inputs=2:weights='0.68 0.32':normalize=0,"
-         "aecho=0.85:0.55:6|11:0.28|0.18,acrusher=bits=12:mode=log:aa=1:mix=0.1,"
-         "highpass=f=190,lowpass=f=7600,equalizer=f=2600:t=q:w=1.2:g=3,volume=10dB,alimiter=limit=0.8:attack=4:release=60:level=false")
+# v2 "premium AI assistant": clean & full (wider band), soft digital sheen (thin octave-up layer + chorus), only a hint of metal,
+# gentle compression and a small room. Pitch +2.7 st with natural formants.
+CHAIN = ("rubberband=pitch=1.17:formant=preserved:transients=crisp,asplit=3[a][b][c];"
+         "[b]rubberband=pitch=2.0:formant=preserved,highpass=f=900,volume=0.13[oct];"
+         "[c]afreqshift=shift=24,volume=0.10[fs];"
+         "[a][oct][fs]amix=inputs=3:normalize=0,"
+         "chorus=0.75:0.9:13|19:0.28|0.22:0.33|0.27:1.3|1.7,"
+         "aecho=0.9:0.5:4:0.14,"
+         "highpass=f=110,lowpass=f=12500,equalizer=f=260:t=q:w=1.0:g=-2.5,equalizer=f=3300:t=q:w=1.0:g=2.5,equalizer=f=7200:t=q:w=1.4:g=-2,"
+         "acompressor=threshold=-22dB:ratio=3:attack=6:release=90:makeup=2,"
+         "aecho=0.85:0.22:38|64:0.10|0.07,"
+         "volume=8dB,alimiter=limit=0.8:attack=4:release=60:level=false")
 wet = dec(vo, CHAIN)
 n = min(len(dry), len(wet)); dry, wet = dry[:n], wet[:n]
 mask = np.zeros(n)

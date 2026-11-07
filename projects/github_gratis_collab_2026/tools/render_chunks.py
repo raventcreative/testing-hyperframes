@@ -22,9 +22,28 @@ def chunk_index(t0, t1):
     h = re.sub(r'(      <div id="s\d\d" class="scene"[^>]*data-start=")([0-9.]+)("[^\n]*\n)', slot, h)
     h = re.sub(r'\s*<audio [^>]*></audio>', '', h)
     h = h.replace('<script src="vendor/gsap/dist/gsap.min.js"></script>', f'<script>window.__T0 = {t0};</script>\n    <script src="vendor/gsap/dist/gsap.min.js"></script>', 1)
-    seek = '(function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);'
-    assert seek in h
-    h = h.replace(seek, seek + f'\n        (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ return r.call(this, tt + {t0}, se, f); }}; }})(tl);', 1)
+    # host timeline: shift its own data by -t0 (a render-patch offset is not honoured by the producer's render path)
+    if t0 > 0:
+        def shift_block(h, start_marker, fn):
+            i = h.index(start_marker) + len(start_marker); j = h.index("\n        ];", i)
+            rows = [r.strip().rstrip(",") for r in h[i:j].strip().split("\n")]
+            out = [json.dumps(fn(json.loads(r)), ensure_ascii=False) for r in rows if r]
+            out = [o for o in out if o != "null"]
+            return h[:i] + "\n          " + ",\n          ".join(out) + h[j:]
+        h = shift_block(h, "const W = [", lambda r: [r[0], round(r[1] - t0, 3), r[2]])
+        h = shift_block(h, "const CAPS = [", lambda r: None if r[1] <= t0 + 0.02 else [round(max(0.0, r[0] - t0), 3), round(r[1] - t0, 3), r[2], r[3], r[4]])
+        m = re.search(r"const HW = (\[.*?\]);\n", h); HW = json.loads(m.group(1))
+        HW = [[round(a - t0, 4), round(b - t0, 4), lab] for a, b, lab in HW if b > t0 + 1e-6]
+        h = h[:m.start(1)] + json.dumps(HW, ensure_ascii=False) + h[m.end(1):]
+        # a round header already on screen at the chunk start is shown instantly (no negative-time tweens)
+        h = h.replace("tl.fromTo(chip, { opacity: 0, y: -14, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: \"back.out(2)\", immediateRender: false }, a + 0.04);",
+                      "if (a < 0) tl.set(chip, { opacity: 1, y: 0, scale: 1 }, 0); else tl.fromTo(chip, { opacity: 0, y: -14, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: \"back.out(2)\", immediateRender: false }, a + 0.04);")
+        h = h.replace("tl.fromTo(ttl, { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.45, ease: \"power3.out\", immediateRender: false }, a + 0.1);",
+                      "if (a < 0) tl.set(ttl, { opacity: 1, y: 0 }, 0); else tl.fromTo(ttl, { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.45, ease: \"power3.out\", immediateRender: false }, a + 0.1);")
+        # small corner logo: already visible; its end fade shifts
+        h = h.replace('tl.set("#brandlogo", { opacity: 0 }, 0);', 'tl.set("#brandlogo", { opacity: 0.95 }, 0);')
+        h = re.sub(r'\n        tl\.fromTo\("#brandlogo", \{ opacity: 0 \}, \{ opacity: 0\.95[^\n]*\n', '\n', h)
+        h = re.sub(r'(tl\.fromTo\("#brandlogo", \{ opacity: 0\.95 \}, [^\n]*\}, )([0-9.]+)\);', lambda m: m.group(1) + f"{round(float(m.group(2)) - t0, 4)});", h)
     return h
 parts = []
 for k in range(len(CUTS) - 1):

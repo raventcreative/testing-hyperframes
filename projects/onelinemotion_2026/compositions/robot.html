@@ -1,0 +1,159 @@
+<template>
+  <style>
+    #rb-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #rb-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  </style>
+  <div data-hf-id="hf-qqwu" id="rb-root" data-composition-id="robot" data-width="1080" data-height="1920">
+    <canvas data-hf-id="hf-su0m" id="rb-canvas" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas>
+  </div>
+  <script>
+    (function () {
+      // AI PRENEUR ROBOT: flies in during s02, hovers beside the Claude skill card, hops onto the rocket on "dan satu garis",
+      // RIDES it through the ten worlds (tilts with it, reacts to every world), hops off beside the mascot in s13
+      // and co-hosts s14–s16 (points at the prompt, cheers the CTA, waves at the end). Pure function of global time.
+      const F = window.FLIGHT, VW = window.VO_WORDS, SC = window.VO_SCENES, D = 45.6667, M3 = window.Mascot3D;
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
+      const ssm = (u) => { u = one(u); return u * u * u * (u * (u * 6 - 15) + 10); };
+      const e3 = (u) => { u = one(u); return 1 - Math.pow(1 - u, 3); };
+      const io3 = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const L = (a, b, u) => a + (b - a) * u;
+      const vn = M3.vnoise;
+      const S = (id) => SC.find((s) => s.id === id);
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : -99; };
+      const HEAD_FIX = [-0.0775, -0.227, -0.1287];   // straightens the modelled head (visor centred, eyes level)
+      // ---------------------------------------------------------------- staging
+      const s02 = S("s02"), s13 = S("s13"), s16 = S("s16");
+      const T_IN = s02.start + 0.12;                      // flies in from the right
+      const T_B0 = F.T.arrive + 0.22, T_B1 = F.T.arrive + 0.72;   // boards the rocket
+      const T_H0 = F.T.hop, T_H1 = F.T.hop + 0.55;        // hops off beside the mascot
+      const CARD = { fx: 868, fy: 845, h: 250, ry: -0.62 };        // beside the Claude skill card (faces it)
+      const STAND = { fx: 828, fy: 1668, h: 330, ry: -0.38 };      // co-host, right of the mascot (outside the IG icon column)
+      const RIDE_H = 205, RIDE_RY = 0.95;                 // riding: 3/4 view facing the flight direction
+      const SEAT = { x: -34, y: -33 };                     // seat on the rocket (rocket-local px, before scale)
+      function seat(t) {
+        const o = F.state(t), r = (o.rot * Math.PI) / 180, c = Math.cos(r), s = Math.sin(r);
+        const sx = SEAT.x * o.s, sy = SEAT.y * o.s;
+        return { fx: o.x + c * sx - s * sy, fy: o.y + s * sx + c * sy, h: RIDE_H * o.s, ry: RIDE_RY, rot: o.rot, vis: o.vis, o };
+      }
+      function frame(t) {
+        if (t < T_IN) return null;
+        if (t < T_B0) {                                   // fly-in + hover beside the card
+          const u = io3((t - T_IN) / 0.7), arc = Math.sin(Math.PI * u) * 120;
+          return { fx: L(1330, CARD.fx, u), fy: L(1020, CARD.fy, u) - arc, h: L(270, CARD.h, u), ry: L(-1.2, CARD.ry, u), rot: L(-14, 0, u), fly: u, ride: 0 };
+        }
+        if (t < T_B1) {                                   // jump onto the seat (the seat is moving)
+          const u = ssm((t - T_B0) / (T_B1 - T_B0)), q = seat(t), hop = Math.sin(Math.PI * u) * 150;
+          return { fx: L(CARD.fx, q.fx, u), fy: L(CARD.fy, q.fy, u) - hop, h: L(CARD.h, q.h, u), ry: L(CARD.ry, q.ry, u), rot: L(0, q.rot, u), fly: 1, ride: u };
+        }
+        if (t < T_H0) { const q = seat(t); return { fx: q.fx, fy: q.fy, h: q.h, ry: q.ry, rot: q.rot, fly: 1, ride: 1 }; }
+        if (t < T_H1) {                                   // hop off: arc down to the co-host spot
+          const u = ssm((t - T_H0) / (T_H1 - T_H0)), q = seat(Math.min(t, T_H0 + 0.08)), hop = Math.sin(Math.PI * u) * 260;
+          return { fx: L(q.fx, STAND.fx, u), fy: L(q.fy, STAND.fy, u) - hop, h: L(q.h, STAND.h, u), ry: L(q.ry, STAND.ry, u), rot: L(q.rot, 0, sm(u * 1.4)), fly: 1, ride: 1 - u, land: u };
+        }
+        return { fx: STAND.fx, fy: STAND.fy, h: STAND.h, ry: STAND.ry, rot: 0, fly: 1, ride: 0, land: 1 };
+      }
+      // ---------------------------------------------------------------- gestures (envelope-weighted, additive)
+      const G = [];
+      const add = (t, k, d = 0.9, x) => { if (t > 0) G.push(Object.assign({ t, k, d }, x || {})); };
+      add(wt("Claude") - 0.1, "point", 0.75); add(wt("gratis,") - 0.05, "happy", 0.8); add(wt("gratis,"), "clap", 0.5);
+      add(F.T.arrive + 0.02, "lookdown", 0.35);
+      add(wt("terbang", s02.start) - 0.1, "cheer", 0.75);
+      for (const id of F.WIDS) { const s = S(id).start; add(s + 0.08, "whoa", 0.45); }
+      add(wt("cerah"), "wavecam", 1.0); add(wt("8-bit,") + 0.1, "happy", 0.8); add(wt("neon,") - 0.05, "lookup", 0.9);
+      add(wt("BOOM!") - 0.05, "shock", 0.75); add(wt("dimensi.") - 0.05, "happy", 0.6); add(wt("lilin."), "wavecam", 0.9);
+      add(wt("megah") - 0.05, "lookup", 1.1); add(wt("kena.") - 0.05, "happy", 0.7); add(wt("lembut.") - 0.1, "happy", 0.8);
+      add(wt("nggak") + 0.4, "happy", 0.6);
+      add(wt("animasi.", s13.start) - 0.1, "no", 0.7);
+      add(wt("ketik") - 0.1, "point", 1.5, { up: 1 }); add(wt("Claude", s13.start) - 0.05, "happy", 1.0); add(wt("videonya.") - 0.1, "clap", 0.55);
+      add(wt("MOTION,") - 0.1, "cheer", 0.9); add(wt("DM.") - 0.1, "point", 0.6, { up: 1 });
+      add(wt("dunia", s16.start) - 0.1, "lookup", 1.6); add(wt("angkanya") - 0.15, "wave", 1.6);
+      const envG = (t, g) => sm((t - g.t + 0.16) / 0.2) * (1 - sm((t - (g.t + g.d)) / 0.28));
+      const BL = []; { let x = 4.9, h = 11; while (x < D) { BL.push(x); h = (h * 9301 + 49297) % 233280; x += 2.2 + (h / 233280) * 2.3; } }
+      const blinkAt = (t) => { let v = 0; for (const b of BL) { const d = t - b; if (d > -0.06 && d < 0.18) v = Math.max(v, d < 0 ? 1 + d / 0.06 : 1 - sm((d - 0.04) / 0.14)); } return Math.max(0, v); };
+      // ---------------------------------------------------------------- performance
+      function perf(t) {
+        const fr = frame(t); if (!fr) return null;
+        const root = { x: 0, y: 0, z: 0, rx: 0, ry: fr.ry, rz: 0, s: 1 };
+        const bones = { body: [0, 0, 0], head: [0, 0, 0], hand_L: [0, 0, 0], hand_R: [0, 0, 0] };
+        const offs = { hand_L: [0, 0, 0], hand_R: [0, 0, 0], head: [0, 0, 0] };
+        const face = { blink: blinkAt(t), gaze: [0, 0.03], happy: 0, squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 };
+        const ride = fr.ride, idle = 1 - ride;
+        // hover life (damped while seated)
+        root.y = (0.014 * Math.sin(2 * Math.PI * 0.55 * t) + 0.006 * Math.sin(2 * Math.PI * 1.27 * t + 1.1)) * (1 - 0.75 * ride);
+        root.rz = 0.03 * Math.sin(2 * Math.PI * 0.41 * t + 0.4) * idle;
+        root.rx = 0.018 * Math.sin(2 * Math.PI * 0.5 * t + 1.7) + 0.1 * ride;           // leans into the ride
+        bones.head = [HEAD_FIX[0] + 0.02 * vn(t, 5, 0.25), HEAD_FIX[1] + 0.05 * vn(t, 6, 0.18), HEAD_FIX[2] + 0.03 * vn(t, 7, 0.2)];
+        offs.hand_L = [-0.07 + 0.006 * vn(t, 11, 0.4), 0.018 * Math.sin(2 * Math.PI * 0.55 * t + 1.3), 0.008 * vn(t, 12, 0.35)];
+        offs.hand_R = [0.07 + 0.006 * vn(t, 13, 0.4), 0.018 * Math.sin(2 * Math.PI * 0.55 * t + 2.4), 0.008 * vn(t, 14, 0.35)];
+        bones.hand_L = [0.08 * Math.sin(2 * Math.PI * 0.5 * t), 0, 0.06 * vn(t, 15, 0.3)];
+        bones.hand_R = [0.08 * Math.sin(2 * Math.PI * 0.5 * t + 1), 0, 0.06 * vn(t, 16, 0.3)];
+        face.gaze = [0.05 * vn(t, 21, 0.22), 0.03 + 0.04 * vn(t, 22, 0.2)];
+        // riding: both hands forward-down on the hull, head turned a little to camera so the visor reads
+        if (ride > 0) {
+          offs.hand_L = [L(offs.hand_L[0], -0.085, ride), L(offs.hand_L[1], -0.035 + 0.008 * Math.sin(t * 9), ride), L(offs.hand_L[2], 0.17, ride)];
+          offs.hand_R = [L(offs.hand_R[0], 0.085, ride), L(offs.hand_R[1], -0.035 + 0.008 * Math.sin(t * 9 + 1), ride), L(offs.hand_R[2], 0.17, ride)];
+          bones.hand_L[0] += 0.5 * ride; bones.hand_R[0] += 0.5 * ride;
+          bones.head[1] -= 0.42 * ride; bones.head[0] -= 0.04 * ride;
+          face.gaze = [L(face.gaze[0], -0.12, ride), face.gaze[1]];
+        }
+        // fly-in: banks, hands trail
+        if (fr.fly < 1) { const k = 1 - fr.fly; root.rx += 0.15 * k; offs.hand_L[0] += 0.08 * k; offs.hand_R[0] += 0.08 * k; offs.hand_L[1] += 0.06 * k; offs.hand_R[1] += 0.06 * k; }
+        // landing squash after the hop
+        if (fr.land !== undefined && fr.land > 0.85) { const lt = t - (T_H1 - 0.08); if (lt > 0 && lt < 0.5) root.y -= 0.03 * Math.sin(Math.PI * one(lt / 0.3)) * Math.exp(-lt * 4); }
+        let ring = 1;
+        for (const g of G) {
+          const w = envG(t, g); if (w < 1e-3) continue;
+          const lt = t - g.t;
+          switch (g.k) {
+            case "lookdown": face.gaze = [L(face.gaze[0], -0.15, w), L(face.gaze[1], -0.25, w)]; bones.head[0] += 0.12 * w; break;
+            case "lookup": face.gaze = [L(face.gaze[0], 0.05, w), L(face.gaze[1], 0.3, w)]; bones.head[0] -= 0.14 * w; break;
+            case "whoa": face.blink = Math.min(face.blink, 0); face.squint = 0; ring += 0.8 * w; root.rx -= 0.06 * w; bones.head[0] -= 0.06 * w;
+              face.gaze = [L(face.gaze[0], -0.25, w), L(face.gaze[1], 0.1, w)]; break;
+            case "shock": root.rx -= 0.1 * w; root.y += 0.03 * w * sm(lt / 0.15); offs.hand_L[1] += 0.08 * w; offs.hand_R[1] += 0.08 * w; offs.hand_L[2] -= 0.08 * w; offs.hand_R[2] -= 0.08 * w; ring += 1.2 * w; break;
+            case "no": bones.head[1] += 0.22 * w * Math.sin(lt * 2 * Math.PI * 2.6); face.squint = Math.max(face.squint, 0.6 * w); break;
+            case "happy": face.happy = Math.max(face.happy, w); ring += 0.5 * w; break;
+            case "cheer": face.happy = Math.max(face.happy, w); ring += 0.7 * w; { const b = 0.5 + 0.5 * Math.sin(lt * 2 * Math.PI * 3);
+              offs.hand_L = [L(offs.hand_L[0], -0.13, w), L(offs.hand_L[1], 0.24 + 0.04 * b, w), L(offs.hand_L[2], 0.06, w)];
+              offs.hand_R = [L(offs.hand_R[0], 0.13, w), L(offs.hand_R[1], 0.24 + 0.04 * (1 - b), w), L(offs.hand_R[2], 0.06, w)]; root.y += 0.02 * w * b; } break;
+            case "clap": { const c = 0.5 + 0.5 * Math.cos(lt * 2 * Math.PI * 4.5); const k = w * (0.65 + 0.35 * c);
+              offs.hand_L = [L(offs.hand_L[0], -0.24, k), L(offs.hand_L[1], 0.09, w), L(offs.hand_L[2], 0.16, w)];
+              offs.hand_R = [L(offs.hand_R[0], 0.24, k), L(offs.hand_R[1], 0.05, w), L(offs.hand_R[2], 0.1, w)]; face.happy = Math.max(face.happy, w); break; }
+            case "point": { const up = g.up ? 0.12 : 0;   // points toward screen-left (the card / the prompt)
+              offs.hand_R = [L(offs.hand_R[0], 0.02, w), L(offs.hand_R[1], 0.12 + up, w), L(offs.hand_R[2], 0.25, w)];
+              bones.hand_R = [L(bones.hand_R[0], -0.35 - up, w), 0, L(bones.hand_R[2], 0.3, w)]; face.gaze = [L(face.gaze[0], -0.2, w), L(face.gaze[1], 0.04 + up * 0.6, w)]; break; }
+            case "wavecam": case "wave": { const k = w;
+              offs.hand_L = [L(offs.hand_L[0], 0.04, k), L(offs.hand_L[1], 0.30, k), L(offs.hand_L[2], 0.1, k)];
+              bones.hand_L = [L(bones.hand_L[0], -0.3, k), 0, L(bones.hand_L[2], -0.35, k) + 0.45 * k * Math.sin(lt * 2 * Math.PI * 2.2)];
+              if (g.k === "wavecam") { bones.head[1] -= 0.25 * k * ride; face.gaze = [L(face.gaze[0], -0.3, k), face.gaze[1]]; face.happy = Math.max(face.happy, 0.6 * k); }
+              else root.ry -= 0.12 * k; break; }
+          }
+        }
+        face.blink *= 1 - face.happy;
+        return { fr, state: { root, bones, offs, face, ring, shadow: false } };
+      }
+      const cv = document.getElementById("rb-canvas");
+      let robot = null, lastT = "";
+      function apply(t) {
+        const p = perf(t);
+        const vis = p && (p.fr.ride < 0.5 || F.state(t).vis || t >= T_H0);
+        if (!vis) { robot.setState({ visible: false }); robot.render(); return; }
+        const fr = p.fr;
+        robot.setView({ fx: fr.fx, fy: fr.fy, h: fr.h, pitch: 5 });
+        robot.setState(p.state); robot.render();
+        // screen-space roll with the rocket, about the robot's base
+        const tf = Math.abs(fr.rot) > 0.01 ? `rotate(${fr.rot.toFixed(2)}deg)` : "none", to = `${fr.fx.toFixed(1)}px ${fr.fy.toFixed(1)}px`;
+        if (cv.style.transform !== tf) cv.style.transform = tf;
+        if (cv.style.transformOrigin !== to) cv.style.transformOrigin = to;
+      }
+      window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+      const ready = window.Robot3D.Robot.create(cv, { url: "assets/robot3d/robot_aipreneur.glb", width: 1080, height: 1920, envIntensity: 0.55 })
+        .then((r) => { robot = r; apply(0); });
+      window.__hf.buildReady["robot"] = ready;
+      window.addEventListener("hf-seek", (e) => { const t = e.detail.time + (window.__T0 || 0); if (robot) apply(t); else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t))); });
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02);
+      window.__timelines["robot"] = tl;
+    })();
+  </script>
+</template>

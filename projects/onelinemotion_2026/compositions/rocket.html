@@ -1,0 +1,279 @@
+<template>
+  <style>
+    #rk-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #rk-svg { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+  </style>
+  <div data-hf-id="hf-v0v3" id="rk-root" data-composition-id="rocket" data-width="1080" data-height="1920">
+    <svg data-hf-id="hf-qyrr" id="rk-svg" viewBox="0 0 1080 1920" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></svg>
+  </div>
+  <script>
+    (function () {
+      // THE ONE LINE: the rocket (ridden by the robot) and the line it draws. It changes style in every world
+      // (brand / flat / chalk / pixel / neon / comic / low-poly / clay / cinematic / stickman / watercolor) with a pop + ring.
+      // Pure function of global time (vendor/flight.js), redrawn on every hf-seek.
+      const F = window.FLIGHT, D = 45.6667, NS = "http://www.w3.org/2000/svg";
+      const svg = document.getElementById("rk-svg");
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
+      const L = (a, b, u) => a + (b - a) * u;
+      const hash = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+      const noise = (t, k) => { const i = Math.floor(t), f = t - i, u = f * f * (3 - 2 * f); return L(hash(i * 7.13 + k * 19.7), hash((i + 1) * 7.13 + k * 19.7), u) * 2 - 1; };
+      const STY = ["brand", "flat", "chalk", "pixel", "neon", "comic", "poly", "clay", "cine", "stick", "water"];
+      const ACCENT = { brand: "#01ccf7", flat: "#ffd23f", chalk: "#ffffff", pixel: "#ffe14d", neon: "#ff4fd8", comic: "#ffd21f",
+                       poly: "#ff9a3d", clay: "#ff8e6e", cine: "#ffd27a", stick: "#111111", water: "#ef6f6c" };
+
+      // ---------------------------------------------------------------- geometry (local: centre 0,0, nose to the right)
+      const G = {
+        BODY: "M -128,-40 L 52,-40 C 104,-40 146,-18 162,0 C 146,18 104,40 52,40 L -128,40 Q -138,40 -138,30 L -138,-30 Q -138,-40 -128,-40 Z",
+        NOSE: "M 80,-36.5 C 116,-32 148,-15 162,0 C 148,15 116,32 80,36.5 C 89,20 89,-20 80,-36.5 Z",
+        BAND: "M -100,-40 L -84,-40 L -84,40 L -100,40 Z",
+        FIN_T: "M -88,-38 L -122,-80 Q -128,-88 -138,-86 L -146,-84 L -128,-38 Z",
+        FIN_B: "M -88,38 L -122,80 Q -128,88 -138,86 L -146,84 L -128,38 Z",
+        NOZ: "M -136,-25 L -156,-31 L -156,31 L -136,25 Z",
+        SHADE: "M -128,14 L 70,14 C 96,14 130,8 150,3 C 140,14 104,40 52,40 L -128,40 Q -138,40 -138,30 L -138,14 Z",
+        HI: "M -118,-30 L 46,-30 C 76,-30 104,-24 124,-14",
+      };
+      const WIN = { x: 26, y: -2, r: 22, ri: 14.5 };
+      const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+      const html = (parent, s) => { parent.insertAdjacentHTML("beforeend", s); return parent.lastElementChild; };
+
+      // ---------------------------------------------------------------- defs
+      html(svg, `<defs>
+        <linearGradient id="rk-g-body" x1="0" y1="-40" x2="0" y2="40" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#eef4fc"/><stop offset="1" stop-color="#c9d8ec"/></linearGradient>
+        <linearGradient id="rk-g-fin" x1="0" y1="-86" x2="0" y2="86" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#01ccf7"/><stop offset=".5" stop-color="#0a8fc4"/><stop offset="1" stop-color="#01ccf7"/></linearGradient>
+        <radialGradient id="rk-g-glass" cx="20" cy="-10" r="26" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#b8f1ff"/><stop offset=".55" stop-color="#3fd6ff"/><stop offset="1" stop-color="#0b7fb3"/></radialGradient>
+        <radialGradient id="rk-g-glow" cx="0" cy="0" r="1"><stop offset="0" stop-color="#01ccf7" stop-opacity=".38"/><stop offset="1" stop-color="#01ccf7" stop-opacity="0"/></radialGradient>
+        <linearGradient id="rk-g-metal" x1="0" y1="-40" x2="0" y2="40" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f4f6f8"/><stop offset=".3" stop-color="#c3cad2"/><stop offset=".62" stop-color="#7d8792"/><stop offset="1" stop-color="#2c333b"/></linearGradient>
+        <linearGradient id="rk-g-gun" x1="0" y1="-40" x2="0" y2="40" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6b7480"/><stop offset=".5" stop-color="#363d46"/><stop offset="1" stop-color="#16191e"/></linearGradient>
+        <radialGradient id="rk-g-amber" cx="26" cy="-2" r="22" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#ffc14d"/><stop offset="1" stop-color="#b85a00"/></radialGradient>
+        <radialGradient id="rk-g-engine" cx="0" cy="0" r="1"><stop offset="0" stop-color="#fffaf0"/><stop offset=".25" stop-color="#ffe2a0" stop-opacity=".9"/><stop offset=".6" stop-color="#ff9a3c" stop-opacity=".35"/><stop offset="1" stop-color="#ff6a00" stop-opacity="0"/></radialGradient>
+        <radialGradient id="rk-g-clay" cx="-10" cy="-26" r="90" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fffdf8"/><stop offset=".6" stop-color="#f1e6d6"/><stop offset="1" stop-color="#d9c4aa"/></radialGradient>
+        <radialGradient id="rk-g-clayred" cx="110" cy="-20" r="70" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffb199"/><stop offset=".6" stop-color="#ff7b54"/><stop offset="1" stop-color="#d4542f"/></radialGradient>
+        <radialGradient id="rk-g-clayfin" cx="-120" cy="-60" r="60" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffa184"/><stop offset="1" stop-color="#d4542f"/></radialGradient>
+        <radialGradient id="rk-g-clayblue" cx="20" cy="-10" r="24" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c9ecff"/><stop offset="1" stop-color="#4aa8e8"/></radialGradient>
+        <pattern id="rk-p-dots" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle cx="4.5" cy="4.5" r="2.1" fill="#111"/></pattern>
+        <clipPath id="rk-c-body"><path d="${G.BODY}"/></clipPath>
+        <filter id="rk-f-chalk" x="-20%" y="-30%" width="140%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="3.2"/></filter>
+        <filter id="rk-f-soft" x="-20%" y="-30%" width="140%" height="160%"><feGaussianBlur stdDeviation="1.1"/></filter>
+        <filter id="rk-f-wtr" x="-10%" y="-60%" width="120%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>
+        <linearGradient id="rk-g-trail" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".35" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient>
+        <mask id="rk-m-trail" maskUnits="userSpaceOnUse" x="-400" y="-400" width="1880" height="2720"><rect id="rk-m-rect" x="-400" y="-400" width="1880" height="2720" fill="url(#rk-g-trail)"/></mask>
+      </defs>`);
+
+      // ---------------------------------------------------------------- trails (one group per style, masked to fade at the far end)
+      const trailRoot = el("g", { mask: "url(#rk-m-trail)" }, svg);
+      const TR = {};
+      const tpaths = (st, specs) => { const g = el("g", { style: "display:none" }, trailRoot); TR[st] = { g, p: specs.map((a) => el("path", Object.assign({ fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, a), g)) }; };
+      tpaths("brand", [{ stroke: "#01ccf7", "stroke-width": 34, "stroke-opacity": 0.16 }, { stroke: "#01ccf7", "stroke-width": 13 }, { stroke: "#e9fbff", "stroke-width": 4 }]);
+      tpaths("flat", [{ stroke: "#1b2350", "stroke-width": 24 }, { stroke: "#ff5d4d", "stroke-width": 14 }, { stroke: "#ffffff", "stroke-width": 3.5, "stroke-opacity": 0.55, transform: "translate(0,-3)" }]);
+      tpaths("chalk", [{ stroke: "#ffffff", "stroke-width": 11, "stroke-opacity": 0.85, "stroke-dasharray": "26 4 9 3 40 5 14 2", filter: "url(#rk-f-chalk)" }, { stroke: "#ffffff", "stroke-width": 3, "stroke-opacity": 0.5, transform: "translate(0,7)", "stroke-dasharray": "10 6 22 4" }]);
+      tpaths("pixel", [{ fill: "#c8321e", stroke: "none" }, { fill: "#ff6a2b", stroke: "none" }, { fill: "#ffb238", stroke: "none" }, { fill: "#fff27a", stroke: "none" }]);
+      tpaths("neon", [{ stroke: "#ff4fd8", "stroke-width": 40, "stroke-opacity": 0.12 }, { stroke: "#ff4fd8", "stroke-width": 18, "stroke-opacity": 0.32 }, { stroke: "#ff4fd8", "stroke-width": 7 }, { stroke: "#ffe6fb", "stroke-width": 2.5 }]);
+      tpaths("comic", [{ stroke: "#111111", "stroke-width": 28 }, { stroke: "#ff3b30", "stroke-width": 16 }, { stroke: "#ffd21f", "stroke-width": 5 }]);
+      tpaths("poly", [{ fill: "#ff8a3d", stroke: "none" }, { fill: "#d9601f", stroke: "none" }, { fill: "#ffc06b", stroke: "none" }]);
+      tpaths("clay", [{ stroke: "#7a2e1d", "stroke-width": 26, "stroke-opacity": 0.28, transform: "translate(0,9)" }, { stroke: "#ff7b54", "stroke-width": 24 }, { stroke: "#ffd1bf", "stroke-width": 6, "stroke-opacity": 0.85, transform: "translate(0,-6)" }]);
+      tpaths("cine", [{ stroke: "#ffb547", "stroke-width": 46, "stroke-opacity": 0.1 }, { stroke: "#ffd27a", "stroke-width": 16, "stroke-opacity": 0.38 }, { stroke: "#fff6e0", "stroke-width": 5 }, { fill: "#fff3cf", stroke: "none" }]);
+      tpaths("stick", [{ stroke: "#111111", "stroke-width": 5 }, { stroke: "#111111", "stroke-width": 2, "stroke-opacity": 0.45, transform: "translate(1.5,-2)" }]);
+      tpaths("water", [{ stroke: "#ef6f6c", "stroke-width": 34, "stroke-opacity": 0.22, filter: "url(#rk-f-wtr)" }, { stroke: "#f59a6e", "stroke-width": 20, "stroke-opacity": 0.35, filter: "url(#rk-f-wtr)" }, { stroke: "#e2505b", "stroke-width": 8, "stroke-opacity": 0.55 }]);
+
+      // ---------------------------------------------------------------- the ship: halo, one variant group per style, ring fx
+      const fx = el("g", {}, svg);
+      const ring = el("circle", { r: 0, fill: "none", "stroke-width": 8, opacity: 0 }, fx);
+      const ship = el("g", {}, svg);
+      const halo = el("ellipse", { cx: -10, cy: 0, rx: 230, ry: 130, fill: "url(#rk-g-glow)" }, ship);
+      const V = {}, FL = {};
+      const variant = (st, markup) => { const g = el("g", { style: "display:none" }, ship); g.innerHTML = markup; V[st] = g; FL[st] = { o: g.querySelector(".flo"), i: g.querySelector(".fli"), x: g.querySelector(".flx") }; };
+      const parts = (p) => `
+        <path d="${G.FIN_T}" ${p.fin}/><path d="${G.FIN_B}" ${p.fin}/><path d="${G.NOZ}" ${p.noz}/>
+        <path d="${G.BODY}" ${p.body}/>${p.shade ? `<path d="${G.SHADE}" ${p.shade}/>` : ""}
+        <path d="${G.BAND}" ${p.band}/><path d="${G.NOSE}" ${p.nose}/>
+        <circle cx="${WIN.x}" cy="${WIN.y}" r="${WIN.r}" ${p.win}/><circle cx="${WIN.x}" cy="${WIN.y}" r="${WIN.ri}" ${p.glass}/>
+        ${p.hi ? `<path d="${G.HI}" ${p.hi}/>` : ""}${p.extra || ""}`;
+      const flame = (p) => `<g class="flg"><path class="flo" ${p.o}/><path class="fli" ${p.i}/>${p.x ? `<path class="flx" ${p.x}/>` : ""}</g>`;
+      // brand (navy scenes): clean white + cyan
+      variant("brand", flame({ o: 'fill="#01ccf7" fill-opacity=".85"', i: 'fill="#f2fdff"' }) + parts({
+        fin: 'fill="url(#rk-g-fin)"', noz: 'fill="#33415f"', body: 'fill="url(#rk-g-body)"', shade: 'fill="#9fb6d6" fill-opacity=".22"', band: 'fill="#01ccf7"',
+        nose: 'fill="#01ccf7"', win: 'fill="#0b1440"', glass: 'fill="url(#rk-g-glass)"', hi: 'fill="none" stroke="#fff" stroke-width="3" stroke-opacity=".9" stroke-linecap="round"',
+        extra: `<circle cx="20" cy="-8" r="4.5" fill="#fff" fill-opacity=".9"/>` }));
+      // flat cartoon: thick navy outline, coral + white
+      const O = 'stroke="#1b2350" stroke-width="5" stroke-linejoin="round"';
+      variant("flat", flame({ o: `fill="#ff8a1f" ${O}`, i: 'fill="#ffd23f"' }) + parts({
+        fin: `fill="#ff5d4d" ${O}`, noz: `fill="#3b4566" ${O}`, body: `fill="#ffffff" ${O}`, shade: 'fill="#d9e2f2" fill-opacity=".8"', band: `fill="#ff5d4d" ${O}`,
+        nose: `fill="#ff5d4d" ${O}`, win: `fill="#ffffff" ${O}`, glass: `fill="#6fd3ff" ${O}`, extra: `<circle cx="20" cy="-8" r="4" fill="#fff"/>` }));
+      // chalk: outlines only, rough
+      const C = 'fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linejoin="round" stroke-opacity=".92"';
+      variant("chalk", `<g filter="url(#rk-f-chalk)">` + flame({ o: 'fill="none" stroke="#ffffff" stroke-width="4" stroke-opacity=".9" stroke-dasharray="12 4"', i: 'fill="none" stroke="#ffffff" stroke-width="3" stroke-opacity=".6"' }) + parts({
+        fin: `fill="#ffffff" fill-opacity=".1" ${C}`, noz: C, body: `fill="#ffffff" fill-opacity=".06" ${C}`, band: C, nose: `fill="#ffffff" fill-opacity=".22" ${C}`, win: C, glass: 'fill="#ffffff" fill-opacity=".18" stroke="#fff" stroke-width="2.5"',
+        extra: `<path d="M -70,40 L -50,-40 M -50,40 L -30,-40 M -30,40 L -10,-40 M 60,30 L 70,24" fill="none" stroke="#fff" stroke-width="2" stroke-opacity=".35"/>` }) + `</g>`);
+      // neon: dark hull, glowing tubes
+      const N1 = (c, w) => `fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round"`;
+      variant("neon", flame({ o: 'fill="none" stroke="#ff4fd8" stroke-width="5"', i: 'fill="none" stroke="#3ff0ff" stroke-width="3"', x: 'fill="#ff4fd8" fill-opacity=".18"' }) +
+        [["#3ff0ff", 16, 0.18], ["#3ff0ff", 4.5, 1]].map(([c, w, a]) => `<g opacity="${a}">` + parts({
+          fin: `fill="${a < 1 ? "none" : "#1a0b33"}" ${N1("#ff4fd8", w)}`, noz: N1(c, w), body: `fill="${a < 1 ? "none" : "#140a2b"}" ${N1(c, w)}`, band: N1("#ff4fd8", w), nose: N1("#ff4fd8", w),
+          win: N1(c, w), glass: `fill="${a < 1 ? "none" : "#ff4fd8"}" fill-opacity=".35" ${N1("#ff4fd8", w * 0.7)}` }) + `</g>`).join(""));
+      // comic: heavy ink, halftone, red / yellow
+      const K = 'stroke="#111" stroke-width="7" stroke-linejoin="round"';
+      variant("comic", flame({ o: `fill="#ff3b30" ${K}`, i: 'fill="#ffd21f"' }) + parts({
+        fin: `fill="#ff3b30" ${K}`, noz: `fill="#444" ${K}`, body: `fill="#ffffff" ${K}`, shade: 'fill="url(#rk-p-dots)" fill-opacity=".35" clip-path="url(#rk-c-body)"', band: `fill="#ff3b30" ${K}`,
+        nose: `fill="#ff3b30" ${K}`, win: `fill="#ffffff" ${K}`, glass: `fill="#ffd21f" ${K}`,
+        extra: `<path d="M -110,-26 L 30,-26" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M 12,-10 L 22,-16" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="${G.BODY}" fill="none" ${K}/>` }));
+      // low-poly: flat-shaded facets
+      const tri = (pts, c) => `<polygon points="${pts}" fill="${c}" stroke="${c}" stroke-width="0.8" stroke-linejoin="round"/>`;
+      variant("poly", flame({ o: 'fill="#ff8a3d"', i: 'fill="#ffd36b"' }) +
+        tri("-88,-38 -128,-38 -146,-84 -122,-80", "#d9601f") + tri("-88,-38 -122,-80 -100,-60", "#ff8a3d") +
+        tri("-88,38 -128,38 -146,84 -122,80", "#b84d16") + tri("-88,38 -122,80 -100,60", "#e8722a") +
+        tri("-136,-25 -156,-31 -156,31 -136,25", "#4a4f5c") +
+        tri("-138,-36 -40,-40 -70,0", "#f4f6fa") + tri("-40,-40 52,-40 10,0", "#e7ebf2") + tri("-40,-40 10,0 -70,0", "#dfe4ec") + tri("-138,-36 -70,0 -138,0", "#e9edf3") +
+        tri("52,-40 80,-36 10,0", "#d7dde7") + tri("-138,0 -70,0 -138,36", "#c3cbd7") + tri("-70,0 -40,40 -138,36", "#b6bfcd") + tri("-70,0 10,0 -40,40", "#c9d0db") +
+        tri("10,0 52,40 -40,40", "#aeb7c5") + tri("10,0 80,36 52,40", "#a3adbc") + tri("10,0 80,-36 80,36", "#cdd3dd") +
+        tri("80,-36.5 162,0 108,-6", "#ff9a3d") + tri("80,-36.5 108,-6 84,0", "#ff8a2d") + tri("84,0 108,-6 162,0", "#f07a22") + tri("84,0 162,0 80,36.5", "#d9601f") +
+        tri("-100,-40 -84,-40 -84,0 -100,0", "#ff8a3d") + tri("-100,0 -84,0 -84,40 -100,40", "#d9601f") +
+        `<polygon points="26,-24 45,-13 45,9 26,20 7,9 7,-13" fill="#2a3446"/><polygon points="26,-16 38,-9 38,5 26,12" fill="#56c8f0"/><polygon points="26,-16 26,12 14,5 14,-9" fill="#3aa2d6"/>`);
+      // clay: soft gradients, chunky
+      variant("clay", flame({ o: 'fill="#ff9a5c"', i: 'fill="#ffe08a"' }) + `<ellipse cx="0" cy="62" rx="150" ry="14" fill="#7a2e1d" fill-opacity=".14"/>` + parts({
+        fin: 'fill="url(#rk-g-clayfin)" stroke="#d4542f" stroke-width="4" stroke-linejoin="round"', noz: 'fill="#8d7f72"', body: 'fill="url(#rk-g-clay)" stroke="#f1e6d6" stroke-width="5" stroke-linejoin="round"',
+        shade: 'fill="#b8946e" fill-opacity=".18"', band: 'fill="url(#rk-g-clayred)"', nose: 'fill="url(#rk-g-clayred)" stroke="#e86a44" stroke-width="3" stroke-linejoin="round"', win: 'fill="#f6efe6" stroke="#cdb79d" stroke-width="3"', glass: 'fill="url(#rk-g-clayblue)"',
+        hi: 'fill="none" stroke="#fff" stroke-width="7" stroke-opacity=".55" stroke-linecap="round"', extra: `<circle cx="19" cy="-9" r="5" fill="#fff" fill-opacity=".85"/><path d="M -60,30 Q -40,33 -20,30" stroke="#b8946e" stroke-opacity=".35" stroke-width="2" fill="none"/>` }));
+      // cinematic: brushed metal, amber porthole, engine bloom
+      variant("cine", `<ellipse class="flx" cx="-170" cy="0" rx="120" ry="64" fill="url(#rk-g-engine)"/>` + flame({ o: 'fill="#ffb547" fill-opacity=".55"', i: 'fill="#fffaf0"' }) + parts({
+        fin: 'fill="url(#rk-g-gun)"', noz: 'fill="#22262c"', body: 'fill="url(#rk-g-metal)"', band: 'fill="url(#rk-g-gun)"', nose: 'fill="url(#rk-g-gun)"', win: 'fill="#1b1f25"', glass: 'fill="url(#rk-g-amber)"',
+        hi: 'fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity=".85" stroke-linecap="round"', extra: `<path d="M -128,40 L 52,40 C 104,40 146,18 162,0" fill="none" stroke="#ffcf8a" stroke-width="2" stroke-opacity=".55"/><circle cx="26" cy="-2" r="30" fill="#ffc14d" fill-opacity=".12"/>` }));
+      // stickman / pencil
+      const P = 'fill="none" stroke="#111" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"';
+      variant("stick", flame({ o: 'fill="none" stroke="#111" stroke-width="3.5" stroke-linecap="round"', i: 'fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"' }) +
+        `<g class="boil">` + parts({ fin: `fill="#fff" ${P}`, noz: P, body: `fill="#ffffff" ${P}`, band: P, nose: `fill="#fff" ${P}`, win: P, glass: P }) +
+        `<g transform="translate(2,-1.6)" opacity=".45">` + parts({ fin: P.replace('stroke-width="4"', 'stroke-width="1.6"'), noz: 'fill="none"', body: P.replace('stroke-width="4"', 'stroke-width="1.6"'), band: 'fill="none"', nose: P.replace('stroke-width="4"', 'stroke-width="1.6"'), win: 'fill="none"', glass: 'fill="none"' }) + `</g>` +
+        `<path d="M 96,-20 L 116,-6 M 98,-6 L 118,8 M 100,8 L 116,20" stroke="#111" stroke-width="2" stroke-opacity=".55" fill="none"/></g>`);
+      // watercolour: soft washes, bleeding edges
+      variant("water", `<g filter="url(#rk-f-soft)">` + flame({ o: 'fill="#f59a6e" fill-opacity=".55"', i: 'fill="#ffd27a" fill-opacity=".7"' }) +
+        `<g transform="translate(3,3)" opacity=".5">` + parts({ fin: 'fill="#ef6f6c"', noz: 'fill="#8b8fa3"', body: 'fill="#e9d6c4"', band: 'fill="#ef6f6c"', nose: 'fill="#ef6f6c"', win: 'fill="none"', glass: 'fill="none"' }) + `</g>` +
+        parts({ fin: 'fill="#ef6f6c" fill-opacity=".75"', noz: 'fill="#7f86a0" fill-opacity=".8"', body: 'fill="#fbf4ea" fill-opacity=".95"', shade: 'fill="#d9b7a4" fill-opacity=".35"', band: 'fill="#ef6f6c" fill-opacity=".7"',
+          nose: 'fill="#e2505b" fill-opacity=".75"', win: 'fill="#f3e6d8"', glass: 'fill="#7fb6e8" fill-opacity=".85"', extra: `<path d="${G.BODY}" fill="none" stroke="#c98d7c" stroke-width="1.6" stroke-opacity=".5"/>` }) + `</g>`);
+      // pixel: rasterise the vector rocket onto a 12 px grid (generated once, deterministic)
+      {
+        const probe = el("g", {}, svg), pp = (d) => el("path", { d }, probe), pc = (r) => el("circle", { cx: WIN.x, cy: WIN.y, r }, probe);
+        const body = pp(G.BODY), nose = pp(G.NOSE), band = pp(G.BAND), finT = pp(G.FIN_T), finB = pp(G.FIN_B), noz = pp(G.NOZ), w0 = pc(WIN.r), w1 = pc(WIN.ri);
+        const P0 = svg.createSVGPoint(), Z = 12, cells = {};
+        const inn = (e, x, y) => { P0.x = x; P0.y = y; return e.isPointInFill(P0); };
+        for (let gy = -8; gy <= 8; gy++) for (let gx = -14; gx <= 14; gx++) {
+          const x = gx * Z, y = gy * Z; let c = null;
+          if (inn(w1, x, y)) c = gy < 0 ? "#9ff3ff" : "#2bc4ff"; else if (inn(w0, x, y)) c = "#1e2a55";
+          else if (inn(nose, x, y)) c = gy < 0 ? "#ff5a5a" : "#d8343a"; else if (inn(band, x, y)) c = "#ff5a5a";
+          else if (inn(body, x, y)) c = gy < -1 ? "#ffffff" : gy < 2 ? "#e3e9f3" : "#b9c4d6";
+          else if (inn(finT, x, y) || inn(finB, x, y)) c = "#d8343a"; else if (inn(noz, x, y)) c = "#5b6478";
+          if (c) cells[gx + "," + gy] = c;
+        }
+        svg.removeChild(probe);
+        let m = "";
+        for (const k in cells) { const [gx, gy] = k.split(",").map(Number); const edge = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => !cells[(gx + a) + "," + (gy + b)]);
+          m += `<rect x="${gx * Z - Z / 2}" y="${gy * Z - Z / 2}" width="${Z}" height="${Z}" fill="${edge && cells[k] !== "#1e2a55" ? "#1a1030" : cells[k]}"/>`; }
+        variant("pixel", `<g class="pxfl"></g>` + m);
+        FL.pixel.px = V.pixel.querySelector(".pxfl");
+      }
+
+      // ---------------------------------------------------------------- per-frame
+      const fmt = (v) => v.toFixed(1);
+      const smoothD = (p) => {
+        if (p.length < 2) return "";
+        let d = `M${fmt(p[0].x)},${fmt(p[0].y)}`;
+        for (let i = 0; i < p.length - 1; i++) {
+          const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
+          d += `C${fmt(p1.x + (p2.x - p0.x) / 6)},${fmt(p1.y + (p2.y - p0.y) / 6)} ${fmt(p2.x - (p3.x - p1.x) / 6)},${fmt(p2.y - (p3.y - p1.y) / 6)} ${fmt(p2.x)},${fmt(p2.y)}`;
+        }
+        return d;
+      };
+      // resample a polyline every `step` px: [{x,y,age}]
+      const resample = (p, step) => {
+        const out = []; if (p.length < 2) return out;
+        let total = 0; for (let i = 1; i < p.length; i++) total += Math.hypot(p[i].x - p[i - 1].x, p[i].y - p[i - 1].y);
+        if (total < 1e-3) return out;
+        let dist = 0, next = 0;
+        for (let i = 1; i < p.length; i++) {
+          const ax = p[i - 1].x, ay = p[i - 1].y, bx = p[i].x, by = p[i].y, seg = Math.hypot(bx - ax, by - ay); if (seg < 1e-6) continue;
+          while (next <= dist + seg) { const u = (next - dist) / seg; out.push({ x: L(ax, bx, u), y: L(ay, by, u), age: next / total, nx: -(by - ay) / seg, ny: (bx - ax) / seg }); next += step; }
+          dist += seg;
+        }
+        return out;
+      };
+      let curStyle = null;
+      function draw(t) {
+        const o = F.state(t);
+        if (!o.vis) { ship.setAttribute("style", "display:none"); trailRoot.setAttribute("style", "display:none"); ring.setAttribute("opacity", 0); return; }
+        ship.removeAttribute("style"); trailRoot.removeAttribute("style");
+        const wi = F.worldAt(t), st = wi >= 0 && t < F.T.wEnd ? STY[wi + 1] : "brand";
+        if (st !== curStyle) { for (const k of STY) { V[k].setAttribute("style", k === st ? "" : "display:none"); TR[k].g.setAttribute("style", k === st ? "" : "display:none"); } curStyle = st; }
+        halo.setAttribute("style", st === "brand" ? "" : "display:none");
+        // pop + ring when the style switches (world cuts)
+        let pop = 0, rt = -1;
+        if (wi >= 0) { const s0 = window.VO_SCENES.find((s) => s.id === F.WIDS[wi]).start; rt = t - s0; }
+        else if (t >= F.T.wEnd && t < F.T.wEnd + 0.6) rt = t - F.T.wEnd;
+        if (rt >= 0 && rt < 0.5) { pop = Math.sin(Math.PI * one(rt / 0.32)) * (rt < 0.32 ? 1 : 0);
+          const u = one(rt / 0.45); ring.setAttribute("cx", fmt(o.x)); ring.setAttribute("cy", fmt(o.y)); ring.setAttribute("r", fmt(L(70, 300, 1 - Math.pow(1 - u, 3)) * o.s));
+          ring.setAttribute("stroke", ACCENT[st]); ring.setAttribute("stroke-width", fmt(L(14, 2, u))); ring.setAttribute("opacity", fmt(0.9 * (1 - u))); }
+        else ring.setAttribute("opacity", 0);
+        // stickman boil (12 fps), pixel snapping
+        let jx = 0, jy = 0, rot = o.rot, x = o.x, y = o.y;
+        if (st === "stick") { const f = Math.floor(t * 12); jx = (hash(f) - 0.5) * 2.4; jy = (hash(f + 33) - 0.5) * 2.4; rot += (hash(f + 77) - 0.5) * 1.6; }
+        if (st === "pixel") { x = Math.round(x / 6) * 6; y = Math.round(y / 6) * 6; rot = Math.round(rot / 7.5) * 7.5; }
+        const sc = o.s * (1 + 0.16 * pop);
+        ship.setAttribute("transform", `translate(${fmt(x + jx)} ${fmt(y + jy)}) rotate(${rot.toFixed(2)}) scale(${sc.toFixed(4)})`);
+        // flame
+        const fl = Math.max(0.2, o.flame) * (1 + 0.12 * noise(t * 14, 3) + 0.06 * Math.sin(t * 61));
+        const len = 46 + 52 * fl, h = 21 + 3 * Math.sin(t * 47);
+        const fpath = (l, hh, x0 = -154) => `M ${x0},${-hh} C ${x0 - l * 0.38},${-hh * 1.12} ${x0 - l * 0.82},${-hh * 0.34} ${x0 - l},0 C ${x0 - l * 0.82},${hh * 0.34} ${x0 - l * 0.38},${hh * 1.12} ${x0},${hh} Z`;
+        const f = FL[st];
+        if (st === "comic" || st === "poly") {
+          const n = 7, pts = []; for (let i = 0; i <= n; i++) { const a = i / n, r = i % 2 ? 0.55 : 1; pts.push([-154 - len * Math.sin(Math.PI * a) * r * (0.75 + 0.25 * Math.sin(t * 40 + i)), (a - 0.5) * 2 * h * 1.15]); }
+          const d = "M -154," + (-h) + " " + pts.map((p) => `L ${fmt(p[0])},${fmt(p[1])}`).join(" ") + " Z";
+          f.o.setAttribute("d", d); f.i.setAttribute("d", fpath(len * 0.5, h * 0.5));
+        } else if (st === "pixel") {
+          let m = ""; const Z = 12, cols = ["#fff27a", "#ffb238", "#ff6a2b", "#c8321e"]; const n = Math.round(len / Z);
+          for (let i = 0; i < n; i++) { const span = Math.max(0, Math.round((1 - i / n) * 2.2 + (hash(Math.floor(t * 15) * 13 + i) > 0.6 ? 1 : 0))); for (let j = -span; j <= span; j++) m += `<rect x="${-162 - i * Z - Z / 2}" y="${j * Z - Z / 2}" width="${Z}" height="${Z}" fill="${cols[Math.min(3, Math.floor((i / n) * 4 + Math.abs(j) * 0.6))]}"/>`; }
+          f.px.innerHTML = m;
+        } else if (st === "stick") {
+          const w = (k) => `M -156,${k * 8} q ${-len * 0.3},${-6 + 4 * Math.sin(t * 30 + k)} ${-len * 0.55},0 t ${-len * 0.45},0`;
+          f.o.setAttribute("d", w(-1) + " " + w(1)); f.i.setAttribute("d", w(0));
+        } else {
+          f.o.setAttribute("d", fpath(len, h)); f.i.setAttribute("d", fpath(len * 0.55, h * 0.55));
+          if (st === "neon" && f.x) f.x.setAttribute("d", fpath(len * 1.15, h * 1.3));
+          if (st === "cine" && f.x) { f.x.setAttribute("rx", fmt(90 + 50 * fl)); f.x.setAttribute("ry", fmt(48 + 16 * fl)); f.x.setAttribute("cx", fmt(-160 - 30 * fl)); }
+        }
+        // trail
+        const pts = F.trail(t, 64, st === "brand" ? 1.6 : 1.3);
+        const tr = TR[st];
+        if (pts.length < 2) { for (const p of tr.p) p.setAttribute("d", ""); return; }
+        if (pts.length > 1) {
+          const a = pts[pts.length - 1], b = pts[0];
+          const g = document.getElementById("rk-g-trail"); g.setAttribute("x1", fmt(a.x)); g.setAttribute("y1", fmt(a.y)); g.setAttribute("x2", fmt(b.x)); g.setAttribute("y2", fmt(b.y));
+        }
+        let P = pts;
+        if (st === "stick") { const f2 = Math.floor(t * 12); P = pts.map((p, k) => ({ x: p.x + (hash(f2 * 3.1 + k) - 0.5) * 3, y: p.y + (hash(f2 * 5.7 + k + 50) - 0.5) * 3 })); }
+        if (st === "pixel") {
+          const Z = 16, seen = {}, d = ["", "", "", ""]; const R = resample(pts, 9);
+          for (const q of R) { const gx = Math.round(q.x / Z), gy = Math.round(q.y / Z), k = gx + "," + gy; if (seen[k]) continue; seen[k] = 1;
+            const band = Math.min(3, Math.floor(q.age * 5)); if (q.age > 0.35 && hash(gx * 3.3 + gy * 7.7 + Math.floor(t * 10)) < q.age * 0.75) continue;
+            d[3 - band] += `M${gx * Z - Z / 2},${gy * Z - Z / 2}h${Z}v${Z}h-${Z}z`; }
+          tr.p.forEach((p, i) => p.setAttribute("d", d[i]));
+          return;
+        }
+        if (st === "poly") {
+          const R = resample(pts, 30); const d = ["", "", ""];
+          for (let i = 0; i < R.length - 1; i++) { const a = R[i], b = R[i + 1], wa = 15 * (1 - 0.55 * a.age), wb = 15 * (1 - 0.55 * b.age);
+            const al = [a.x + a.nx * wa, a.y + a.ny * wa], ar = [a.x - a.nx * wa, a.y - a.ny * wa], bl = [b.x + b.nx * wb, b.y + b.ny * wb], br = [b.x - b.nx * wb, b.y - b.ny * wb];
+            const T3 = (p, q, r) => `M${fmt(p[0])},${fmt(p[1])}L${fmt(q[0])},${fmt(q[1])}L${fmt(r[0])},${fmt(r[1])}Z`;
+            d[i % 2 ? 0 : 2] += T3(al, bl, ar); d[1] += T3(ar, bl, br); }
+          tr.p.forEach((p, i) => p.setAttribute("d", d[i]));
+          return;
+        }
+        const dd = smoothD(P);
+        tr.p.forEach((p, i) => { if (st === "cine" && i === 3) return; p.setAttribute("d", dd); });
+        if (st === "cine") { const R = resample(pts, 34); let m = ""; R.forEach((q, i) => { if (i < 1) return; const tw = hash(i * 9.1 + Math.floor(t * 20)); if (tw < 0.45) return; const r = (1 - q.age) * 3.4 * tw; const ox = (hash(i * 2.7) - 0.5) * 26, oy = (hash(i * 5.3) - 0.5) * 26; m += `M${fmt(q.x + ox - r)},${fmt(q.y + oy)}a${fmt(r)},${fmt(r)} 0 1,0 ${fmt(2 * r)},0a${fmt(r)},${fmt(r)} 0 1,0 ${fmt(-2 * r)},0`; }); tr.p[3].setAttribute("d", m); }
+      }
+      draw(0);
+      window.addEventListener("hf-seek", (e) => draw(e.detail.time + (window.__T0 || 0)));
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02);
+      window.__timelines["rocket"] = tl;
+    })();
+  </script>
+</template>

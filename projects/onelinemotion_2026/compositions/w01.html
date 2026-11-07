@@ -1,0 +1,131 @@
+<template>
+  <style>
+    #w01-root { position: absolute; inset: 0; overflow: hidden; }
+    #w01-world { position: absolute; inset: 0; overflow: hidden; }
+    .w01-a { position: absolute; }
+    #w01-sky { left: 0; top: 0; width: 1080px; height: 1920px; background: linear-gradient(180deg, #45b2ff 0%, #7dcfff 46%, #bfeaff 78%, #d9f4ff 100%); }
+    #w01-sun { left: 742px; top: 470px; width: 220px; height: 220px; }
+    #w01-title { left: 0; width: 1080px; top: 300px; text-align: center; font: 700 92px/1 Poppins, sans-serif; letter-spacing: -0.02em; color: #ffffff;
+      -webkit-text-stroke: 13px #1b2350; paint-order: stroke fill; text-shadow: 0 10px 0 #1b2350; white-space: nowrap; }
+    #w01-title span { display: inline-block; }
+    .w01-chip { left: 50%; top: 420px; height: 46px; padding: 0 20px; border-radius: 23px; background: rgba(8, 14, 46, 0.86); display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 8px 20px rgba(4, 8, 30, 0.3), inset 0 0 0 1.5px rgba(255, 255, 255, 0.1); transform: translateX(-50%); white-space: nowrap; }
+    .w01-chip b { font: 700 24px/1 Poppins, sans-serif; color: #ffffff; letter-spacing: 0.02em; }
+    .w01-chip b em { font-style: normal; color: #01ccf7; }
+    .w01-chip i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, 0.26); margin-left: 6px; }
+    .w01-chip i.on { background: #01ccf7; box-shadow: 0 0 10px rgba(1, 204, 247, 0.8); }
+    #w01-ring { left: 0; top: 0; width: 0; height: 0; border-radius: 50%; border: 24px solid #ffd23f; box-shadow: 0 0 0 7px #1b2350, inset 0 0 0 7px #1b2350; transform: translate(-50%, -50%); }
+  </style>
+  <div data-hf-id="hf-3l1s" id="w01-root" data-composition-id="w01" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-mfk2" id="w01-world">
+      <div data-hf-id="hf-0qzg" class="w01-a" id="w01-sky"></div>
+      <svg data-hf-id="hf-0l08" class="w01-a" id="w01-speed" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0"></svg>
+      <svg data-hf-id="hf-iphn" class="w01-a" id="w01-sun" viewBox="-110 -110 220 220">
+        <g data-hf-id="hf-xrh7" id="w01-rays"></g>
+        <circle data-hf-id="hf-cqnb" r="64" fill="#ffd23f" stroke="#1b2350" stroke-width="7"/>
+        <circle data-hf-id="hf-exul" cx="-18" cy="-18" r="16" fill="#fff6c2"/>
+      </svg>
+      <svg data-hf-id="hf-v76y" class="w01-a" id="w01-clouds" width="1600" height="900" viewBox="0 0 1600 900" style="left:0;top:500px"></svg>
+      <svg data-hf-id="hf-ioxq" class="w01-a" id="w01-birds" width="300" height="120" viewBox="0 0 300 120" style="left:640px;top:690px"></svg>
+      <svg data-hf-id="hf-f6aq" class="w01-a" id="w01-far" width="1700" height="700" viewBox="0 0 1700 700" style="left:0;top:1120px"></svg>
+      <svg data-hf-id="hf-zww6" class="w01-a" id="w01-near" width="2400" height="700" viewBox="0 0 2400 700" style="left:0;top:1260px"></svg>
+      <svg data-hf-id="hf-ug4h" class="w01-a" id="w01-town" width="4000" height="560" viewBox="0 0 4000 560" style="left:0;top:1360px"></svg>
+      <div data-hf-id="hf-xyn1" class="w01-a" id="w01-title"><span data-hf-id="hf-eg21" id="w01-t1">Kartun</span> <span data-hf-id="hf-sp5c" id="w01-t2">Flat</span></div>
+      <div data-hf-id="hf-bny6" class="w01-a w01-chip" id="w01-chip"><b data-hf-id="hf-t4n0">1<em data-hf-id="hf-d3ch">/10</em></b><span data-hf-id="hf-wwwd" id="w01-dots"></span></div>
+      <svg data-hf-id="hf-iqvk" class="w01-a" id="w01-spark" width="1080" height="600" viewBox="0 0 1080 600" style="left:0;top:220px"></svg>
+    </div>
+    <div data-hf-id="hf-81t7" class="w01-a" id="w01-ring"></div>
+  </div>
+  <script>
+    (function () {
+      // WORLD 1/10 — KARTUN FLAT: bright flat-vector town under a cartoon sun; thick navy outlines like the flat rocket.
+      // Entry: cartoon IRIS from the rocket's nose (yellow ring with navy outline) over the navy s02 stage.
+      // Parallax scroll (the rocket flies right): clouds 70, far hills 170, near hills 380, town 900 px/s.
+      const ID = "w01", D = 3.0833, TR = 0.55;
+      const root = document;   // the runtime strips the id of the template root: look elements up document-wide (ids are prefixed)
+      const $ = (id) => root.querySelector("#" + id);
+      const NS = "http://www.w3.org/2000/svg";
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };   // initial state: applied now (frame 0) AND on every re-seek
+      let seed = 7; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+      const O = 'stroke="#1b2350" stroke-width="6" stroke-linejoin="round"';
+      // words (local s): Kartun 0.31 · flat 0.66 · cerah 1.26 · dan 1.73 · bersih 1.84
+
+      // ---------------------------------------------------------------- art
+      { let m = ""; for (let i = 0; i < 12; i++) { const a = (i / 12) * 360; m += `<rect x="78" y="-9" width="${i % 2 ? 22 : 30}" height="18" rx="9" fill="#ffd23f" stroke="#1b2350" stroke-width="6" transform="rotate(${a})"/>`; } $("w01-rays").innerHTML = m; }
+      const cloud = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M -110,30 Q -130,30 -128,8 Q -126,-18 -96,-16 Q -92,-58 -48,-58 Q -18,-86 22,-66 Q 52,-82 74,-52 Q 112,-56 118,-18 Q 136,-14 134,10 Q 132,30 110,30 Z" fill="#ffffff" ${O}/><path d="M -100,18 L 104,18" stroke="#cfeeff" stroke-width="10" stroke-linecap="round"/></g>`;
+      $("w01-clouds").innerHTML = cloud(150, 130, 1.0) + cloud(640, 60, 0.7) + cloud(1020, 210, 0.85) + cloud(1420, 90, 0.75) + cloud(420, 330, 0.55);
+      $("w01-birds").innerHTML = `<path id="w01-b1" d="M 20,60 Q 40,40 60,60 Q 80,40 100,60" fill="none" stroke="#1b2350" stroke-width="6" stroke-linecap="round"/><path id="w01-b2" d="M 150,30 Q 166,14 182,30 Q 198,14 214,30" fill="none" stroke="#1b2350" stroke-width="5" stroke-linecap="round"/>`;
+      const hills = (w, base, amp, per, col, ph) => { let d = `M 0,700 L 0,${base}`; for (let x = 0; x <= w; x += 20) d += ` L ${x},${(base - amp * Math.abs(Math.sin((x / per) * Math.PI + ph))).toFixed(1)}`; return `<path d="${d} L ${w},700 Z" fill="${col}" ${O}/>`; };
+      $("w01-far").innerHTML = hills(1700, 210, 120, 520, "#8bdc86", 0.4);
+      $("w01-near").innerHTML = hills(2400, 220, 90, 380, "#5ec463", 1.3) +
+        Array.from({ length: 9 }, (_, i) => { const x = 120 + i * 260 + rnd() * 80, y = 200 - 60 * Math.abs(Math.sin(((x) / 380) * Math.PI + 1.3)) + 16; return `<g transform="translate(${x.toFixed(0)} ${y.toFixed(0)})"><rect x="-5" y="-6" width="10" height="34" fill="#8a5a3c" ${O}/><circle cy="-30" r="30" fill="#2f9e44" ${O}/></g>`; }).join("");
+      {
+        // the town (scrolls with the line): grass band, houses, trees, fences
+        let m = `<rect x="-10" y="150" width="4020" height="420" fill="#4cb85a" ${O}/><rect x="-10" y="250" width="4020" height="320" fill="#3fa24f"/>
+                 <path d="M -10,330 L 4010,330" stroke="#ffd23f" stroke-width="10" stroke-dasharray="60 50" stroke-linecap="round" opacity=".55"/>`;
+        const walls = ["#ffffff", "#ffd23f", "#9be7ff", "#ffb4a8", "#ffffff"], roofs = ["#ff5d4d", "#1b2350", "#ff5d4d", "#3b6fd1", "#ff8a1f"];
+        let x = 40, k = 0;
+        while (x < 3960) {
+          if (k % 3 === 2) { // tree pair
+            m += `<g transform="translate(${x + 40} 150)"><rect x="-7" y="-50" width="14" height="52" fill="#8a5a3c" ${O}/><circle cy="-78" r="44" fill="#2f9e44" ${O}/><circle cx="-14" cy="-92" r="12" fill="#5ccf6c"/></g>`;
+            x += 120;
+          } else {
+            const w = 150 + Math.round(rnd() * 60), h = 120 + Math.round(rnd() * 70), c = k % walls.length;
+            m += `<g transform="translate(${x} 150)"><rect x="0" y="${-h}" width="${w}" height="${h}" fill="${walls[c]}" ${O}/>
+              <path d="M -16,${-h + 4} L ${w / 2},${-h - 76} L ${w + 16},${-h + 4} Z" fill="${roofs[c]}" ${O}/>
+              <rect x="${w / 2 - 20}" y="-62" width="40" height="62" rx="4" fill="#1b2350"/>
+              <rect x="18" y="${-h + 26}" width="34" height="34" rx="4" fill="#bdeaff" ${O}/><rect x="${w - 52}" y="${-h + 26}" width="34" height="34" rx="4" fill="#bdeaff" ${O}/></g>`;
+            x += w + 36 + Math.round(rnd() * 40);
+          }
+          k++;
+        }
+        $("w01-town").innerHTML = m;
+      }
+      { let m = ""; for (let i = 0; i < 9; i++) { const y = 560 + rnd() * 560, x = rnd() * 1200, l = 80 + rnd() * 120; m += `<path class="w01-sl" d="M ${x.toFixed(0)},${y.toFixed(0)} l ${l.toFixed(0)},0" stroke="#ffffff" stroke-width="${(4 + rnd() * 4).toFixed(1)}" stroke-linecap="round" opacity=".7"/>`; } $("w01-speed").innerHTML = m; }
+      { let m = ""; for (let i = 0; i < 10; i++) m += `<i class="${i < 1 ? "on" : ""}" id="w01-d${i}"></i>`; $("w01-dots").innerHTML = m; }
+      $("w01-spark").innerHTML = [[250, 70], [830, 100], [210, 210], [880, 230]].map(([x, y], i) => `<path id="w01-sp${i}" d="M ${x},${y - 22} L ${x + 6},${y - 6} L ${x + 22},${y} L ${x + 6},${y + 6} L ${x},${y + 22} L ${x - 6},${y + 6} L ${x - 22},${y} L ${x - 6},${y - 6} Z" fill="#ffffff" stroke="#1b2350" stroke-width="4" stroke-linejoin="round"/>`).join("");
+
+      // ---------------------------------------------------------------- ENTRY: cartoon iris from the rocket's nose
+      const CX = 500, CY = 905, RMAX = 1500;
+      const world = $("w01-world"), ring = $("w01-ring");
+      I(world, { clipPath: `circle(0px at ${CX}px ${CY}px)` });
+      ft(world, { clipPath: `circle(0px at ${CX}px ${CY}px)` }, { clipPath: `circle(${RMAX}px at ${CX}px ${CY}px)`, duration: TR, ease: "power1.in" }, 0);
+      tl.set(world, { clipPath: "none" }, TR + 0.01);
+      I(ring, { left: CX, top: CY, width: 0, height: 0, opacity: 1 });
+      ft(ring, { width: 0, height: 0 }, { width: RMAX * 2 + 40, height: RMAX * 2 + 40, duration: TR, ease: "power1.in" }, 0);
+      tl.set(ring, { opacity: 0 }, TR + 0.01);
+
+      // ---------------------------------------------------------------- parallax scroll (linear, whole scene)
+      const scroll = (el, v, y0 = 0) => ft(el, { x: 0 }, { x: -v * D, duration: D, ease: "none" }, 0);
+      scroll($("w01-clouds"), 70); scroll($("w01-far"), 170); scroll($("w01-near"), 380); scroll($("w01-town"), 900); scroll($("w01-speed"), 1500);
+      ft($("w01-birds"), { x: 0, y: 0 }, { x: -260, y: -40, duration: D, ease: "none" }, 0);
+      for (const [id, d] of [["w01-b1", 0.32], ["w01-b2", 0.27]]) { const b = $(id); for (let k = 0; (k + 1) * d <= D; k++) ft(b, { scaleY: 1 }, { scaleY: -0.4, duration: d / 2, yoyo: true, repeat: 1, ease: "sine.inOut", transformOrigin: "50% 60%" }, k * d); }
+      // sun: rays turn, glows on "cerah"
+      const sun = $("w01-sun"), rays = $("w01-rays");
+      I(sun, { scale: 0.6, rotation: -30, transformOrigin: "50% 50%" });
+      ft(sun, { scale: 0.6, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.7, ease: "back.out(2.2)" }, 0.12);
+      ft(rays, { rotation: 0 }, { rotation: 75, duration: D, ease: "none", transformOrigin: "0px 0px" }, 0);
+      ft(sun, { scale: 1 }, { scale: 1.18, duration: 0.18, yoyo: true, repeat: 1, ease: "power2.out" }, 1.22);
+      // town / hills settle up from below (the camera arrives)
+      for (const [id, d] of [["w01-far", 0.05], ["w01-near", 0.1], ["w01-town", 0.15]]) { I($(id), { y: 160 }); ft($(id), { y: 160 }, { y: 0, duration: 0.7, ease: "back.out(1.4)" }, d); }
+      // title: each word pops on its spoken word
+      for (const [id, t] of [["w01-t1", 0.24], ["w01-t2", 0.6]]) { const e = $(id); I(e, { scale: 0, rotation: -12, opacity: 0, transformOrigin: "50% 80%" });
+        tl.set(e, { opacity: 1 }, t); ft(e, { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.6)" }, t); }
+      ft($("w01-title"), { y: 0 }, { y: -8, duration: 0.6, yoyo: true, repeat: 3, ease: "sine.inOut" }, 0.9);
+      const chip = $("w01-chip"); I(chip, { opacity: 0, y: 14 }); ft(chip, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.5);
+      const d0 = $("w01-d0"); I(d0, { scale: 1 }); ft(d0, { scale: 1 }, { scale: 1.7, duration: 0.2, yoyo: true, repeat: 1, ease: "power2.out" }, 0.7);
+      // "bersih": sparkles twinkle around the title
+      for (let i = 0; i < 4; i++) { const e = $("w01-sp" + i); I(e, { scale: 0, rotation: 0, transformOrigin: "50% 50%" });
+        ft(e, { scale: 0, rotation: 0 }, { scale: 1, rotation: 90, duration: 0.3, ease: "back.out(3)" }, 1.8 + i * 0.07);
+        ft(e, { scale: 1 }, { scale: 0, duration: 0.3, ease: "power2.in" }, 2.45 + i * 0.05); }
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["w01"] = tl;
+    })();
+  </script>
+</template>

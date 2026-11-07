@@ -44,12 +44,13 @@
     .w08-chip i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, 0.26); margin-left: 6px; }
     .w08-chip i.on { background: #01ccf7; box-shadow: 0 0 10px rgba(1, 204, 247, 0.8); }
     #w08-fx { left: 0; top: 0; width: 1080px; height: 1920px; }
-    #w08-flash { left: 245px; top: 311px; width: 1100px; height: 1100px; border-radius: 50%; mix-blend-mode: screen;
+    #w08-dim { left: 0; top: 0; width: 1080px; height: 1920px; background: radial-gradient(ellipse 90% 55% at 66% 45%, rgba(6, 6, 16, .5), rgba(4, 4, 12, .88) 100%); }
+    #w08-flash { left: 245px; top: 311px; width: 1100px; height: 1100px; border-radius: 50%;
       background: radial-gradient(circle, rgba(255, 252, 240, 1), rgba(255, 220, 150, .75) 12%, rgba(255, 180, 90, .3) 32%, rgba(255, 150, 70, 0) 60%); }
     #w08-streak { left: -505px; top: 857px; width: 2600px; height: 8px; transform-origin: 1300px 4px;
       background: linear-gradient(90deg, rgba(255, 200, 110, 0) 4%, rgba(255, 206, 130, .75) 30%, #fffaf0 47%, #ffffff 50%, #fffaf0 53%, rgba(255, 206, 130, .75) 70%, rgba(255, 200, 110, 0) 96%);
       box-shadow: 0 0 16px rgba(255, 230, 170, 1), 0 0 4px #ffffff; }
-    #w08-streak2 { left: -505px; top: 761px; width: 2600px; height: 200px; transform-origin: 1300px 100px; mix-blend-mode: screen;
+    #w08-streak2 { left: -505px; top: 761px; width: 2600px; height: 200px; transform-origin: 1300px 100px;
       background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255, 226, 170, .95), rgba(255, 190, 100, .42) 30%, rgba(255, 160, 80, .1) 55%, rgba(255, 160, 80, 0) 72%); }
     #w08-streak3 { left: -505px; top: 884px; width: 2600px; height: 2px; transform-origin: 1300px 1px;
       background: linear-gradient(90deg, rgba(140, 200, 255, 0) 12%, rgba(160, 214, 255, .7) 40%, rgba(200, 232, 255, .9) 50%, rgba(160, 214, 255, .7) 60%, rgba(140, 200, 255, 0) 88%); }
@@ -59,6 +60,7 @@
     #w08-barB { top: 1820px; }
   </style>
   <div id="w08-root" data-composition-id="w08" data-width="1080" data-height="1920">
+    <div class="w08-a" id="w08-dim"></div>
     <div id="w08-world">
       <div class="w08-cam" id="w08-c0">
         <div class="w08-a" id="w08-sky"></div>
@@ -122,7 +124,7 @@
       const tl = gsap.timeline({ paused: true });
       const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
       { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
-      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false, lazy: false }, b), t);   // lazy:false: chained string tweens must not read their start before startAt is written
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
       const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };   // initial state: applied now (frame 0) AND on every re-seek
       let seed = 8; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
       const gauss = () => (rnd() + rnd() + rnd() + rnd() - 2) / 2;
@@ -266,6 +268,10 @@
       I(flash, { scale: 0.2, opacity: 0, transformOrigin: "50% 50%" });
       ft(flash, { scale: 0.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.1, ease: "power2.out" }, 0);
       ft(flash, { scale: 1, opacity: 1 }, { scale: 1.3, opacity: 0, duration: 0.36, ease: "power2.in" }, 0.1);
+      // house lights down: the previous world dims (under this world, over the old one) so the light streak pops
+      const dim = $("w08-dim"); I(dim, { opacity: 0 });
+      ft(dim, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.02);
+      tl.set(dim, { opacity: 0 }, TR + 0.01);
       // letterbox bars slide in and stay (inside the IG-covered zones)
       I($("w08-barT"), { y: -100 }); ft($("w08-barT"), { y: -100 }, { y: 0, duration: 0.42, ease: "power3.out" }, 0.1);
       I($("w08-barB"), { y: 100 }); ft($("w08-barB"), { y: 100 }, { y: 0, duration: 0.42, ease: "power3.out" }, 0.1);

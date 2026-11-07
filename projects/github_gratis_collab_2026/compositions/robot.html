@@ -46,6 +46,8 @@
       // s02 / s03
       add(wt("gratisnya"), "happy", 1.0); add(wt("gratisnya") + 0.05, "clap", 0.55); add(wt("GitHub.") - 0.05, "present", 0.8, "R");
       add(wt("Open"), "happy", 0.7); add(wt("langganan,") - 0.05, "nod", 0.5); add(wt("komputer"), "lookmascot", 0.9);
+      // paid-card scenes: point at the price card the whole scene, jab exactly on the price
+      for (const [id, num] of [["s05", "300"], ["s08", "350"], ["s11", "500"], ["s14", "330"]]) { const sc = VO_SC(id); const g0 = sc.start + 0.4; G.push({ t: g0, k: "point", d: sc.dur - 0.85, jab: wt(num) - g0 }); }
       // round titles: celebratory spin on the ordinal
       for (const w of ["Pertama,", "Kedua,", "Ketiga,", "Keempat,"]) add(wt(w) - 0.1, "spin", 0.7);
       // paid prices: shocked / no
@@ -67,27 +69,48 @@
       const BACK = { fx: 826, fy: 1588, h: 300 }, FRONT = { fx: 642, fy: 1800, h: 580 }, SIDE = { fx: 790, fy: 1745, h: 430 };
       const HEAD_FIX = [-0.0775, -0.227, -0.1287];   // the Tripo head is modelled turned 13° and tilted 7°: straighten it (visor centred, eyes level)
       const mixV = (a, b, u) => ({ fx: L(a.fx, b.fx, u), fy: L(a.fy, b.fy, u), h: L(a.h, b.h, u) });
+      // A + B staging: behind the mascot (blurred) / NEAR the explainer visuals (sharp, pointing) / FRONT when the robot speaks / SIDE at the end
+      const T = (o) => Object.assign({ depth: 0, ry: -0.3, z: 7 }, o);
+      const BACKT = T({ ...BACK, depth: 1, ry: -0.3, z: 5 }), FRONTT = T({ ...FRONT, ry: -0.04 }), SIDET = T({ ...SIDE, ry: -0.16 });
+      const NEAR_CARD = T({ fx: 948, fy: 930, h: 235, ry: -0.78 });      // right of the price card, faces it and points at the price
+      const NEAR_ROUND = T({ fx: 905, fy: 880, h: 220, ry: -0.2 });      // beside the big round numeral
+      const NEAR_GH = T({ fx: 905, fy: 948, h: 225, ry: -0.55 });        // beside the GitHub mark
+      const st = (id) => VO_SC(id).start;
+      const PLAN = [
+        [wt("GitHub.") - 0.35, NEAR_GH], [st("s03"), BACKT],
+        [st("s04"), NEAR_ROUND], [st("s05"), NEAR_CARD], [st("s06"), FRONTT],
+        [st("s07"), NEAR_ROUND], [st("s08"), NEAR_CARD], [st("s09"), FRONTT],
+        [st("s10"), NEAR_ROUND], [st("s11"), NEAR_CARD], [st("s12"), FRONTT],
+        [st("s13"), NEAR_ROUND], [st("s14"), NEAR_CARD], [st("s15"), FRONTT],
+        [st("s16"), BACKT], [st("s18") + 2.0, SIDET],
+      ];
       function frame(t) {
         if (t < 1.02) return null;
-        const u = io3((t - 1.02) / 0.95);                       // flies in from the right (intro whoosh) and settles behind him
-        const arc = Math.sin(Math.PI * u) * 150;
-        let v = { fx: L(1360, BACK.fx, u), fy: L(1420, BACK.fy, u) - arc, h: L(330, BACK.h, u) };
-        const rf = robotFront(t), fb = finalBeat(t);
-        v = mixV(v, FRONT, rf); v = mixV(v, SIDE, fb);
-        const depth = (1 - rf) * (1 - fb);                     // 1 = fully in the background
-        return { fx: v.fx, fy: v.fy, h: v.h, pitch: 4, fly: u, depth, rf, fb };
+        const fu = io3((t - 1.02) / 0.95);                      // intro: flies in from the right and settles behind him
+        const farc = Math.sin(Math.PI * fu) * 150;
+        let cur = T({ fx: L(1360, BACK.fx, fu), fy: L(1420, BACK.fy, fu) - farc, h: L(330, BACK.h, fu), depth: 1, ry: -0.3, z: 5 });
+        let bank = 0, lift = 0;
+        for (const [tk, tgt] of PLAN) {
+          if (t < tk - 0.28) break;
+          const u = ssm((t - (tk - 0.28)) / 0.56);
+          const dist = Math.hypot(tgt.fx - cur.fx, tgt.fy - cur.fy);
+          const k = Math.min(1, dist / 300) * Math.sin(Math.PI * u);
+          bank = 0.28 * k * Math.sign(tgt.fx - cur.fx || 1); lift = 120 * k;
+          cur = T({ fx: L(cur.fx, tgt.fx, u), fy: L(cur.fy, tgt.fy, u), h: L(cur.h, tgt.h, u), depth: L(cur.depth, tgt.depth, u), ry: L(cur.ry, tgt.ry, u), z: u > 0.5 ? tgt.z : cur.z });
+        }
+        return { fx: cur.fx, fy: cur.fy - lift, h: cur.h, pitch: 4, fly: fu, depth: cur.depth, ry: cur.ry, z: cur.z, bank };
       }
       // ---------------------------------------------------------------- performance
       function perf(t) {
         const fr = frame(t); if (!fr) return null;
         const fly = fr.fly;
-        const root = { x: 0, y: 0, z: 0, rx: 0, ry: L(L(-0.3, -0.04, fr.rf), -0.16, fr.fb), rz: 0, s: 1 };
+        const root = { x: 0, y: 0, z: 0, rx: 0, ry: fr.ry, rz: fr.bank, s: 1 };
         const bones = { body: [0, 0, 0], head: [0, 0, 0], hand_L: [0, 0, 0], hand_R: [0, 0, 0] };
         const offs = { hand_L: [0, 0, 0], hand_R: [0, 0, 0], head: [0, 0, 0] };
         const face = { blink: blinkAt(t), gaze: [-0.08, 0.04], happy: 0, squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 };
         // hover + idle life
         root.y = 0.014 * Math.sin(2 * Math.PI * 0.55 * t) + 0.006 * Math.sin(2 * Math.PI * 1.27 * t + 1.1);
-        root.rz = 0.035 * Math.sin(2 * Math.PI * 0.41 * t + 0.4) + 0.01 * vn(t, 3, 0.3);
+        root.rz += 0.035 * Math.sin(2 * Math.PI * 0.41 * t + 0.4) + 0.01 * vn(t, 3, 0.3);
         root.rx = 0.018 * Math.sin(2 * Math.PI * 0.5 * t + 1.7);
         bones.head = [HEAD_FIX[0] + 0.02 * vn(t, 5, 0.25), HEAD_FIX[1] + 0.05 * vn(t, 6, 0.18), HEAD_FIX[2] + 0.03 * vn(t, 7, 0.2)];
         offs.hand_L = [-0.07 + 0.006 * vn(t, 11, 0.4), 0.018 * Math.sin(2 * Math.PI * 0.55 * t + 1.3), 0.008 * vn(t, 12, 0.35)];
@@ -126,6 +149,9 @@
             case "clap": { const c = 0.5 + 0.5 * Math.cos(lt * 2 * Math.PI * 4.5); const k = w * (0.65 + 0.35 * c);
               offs.hand_L = [L(offs.hand_L[0], -0.24, k), L(offs.hand_L[1], 0.09, w), L(offs.hand_L[2], 0.16, w)];
               offs.hand_R = [L(offs.hand_R[0], 0.24, k), L(offs.hand_R[1], 0.05, w), L(offs.hand_R[2], 0.1, w)]; face.happy = Math.max(face.happy, w); break; }
+            case "point": { const lj = lt - g.jab, jab = lj > 0 ? Math.sin(Math.min(Math.PI, lj * 12)) * Math.exp(-lj * 2.5) : 0;
+              offs.hand_R = [L(offs.hand_R[0], 0.03, w), L(offs.hand_R[1], 0.12 + 0.03 * jab, w), L(offs.hand_R[2], 0.24 + 0.1 * jab, w)];
+              bones.hand_R = [L(bones.hand_R[0], -0.35, w), 0, L(bones.hand_R[2], 0.3, w)]; bones.head[0] += 0.05 * w; face.gaze = [L(face.gaze[0], 0, w), L(face.gaze[1], -0.04, w)]; break; }
             case "present": { const up = w * (1 + 0.06 * Math.sin(lt * 9) * Math.exp(-lt * 3));
               offs.hand_R = [L(offs.hand_R[0], 0.05, up), L(offs.hand_R[1], 0.30, up), L(offs.hand_R[2], 0.12, up)]; bones.hand_R = [L(bones.hand_R[0], -0.5, w), 0, L(bones.hand_R[2], 0.45, w)];
               face.gaze = [L(face.gaze[0], -0.12, w), L(face.gaze[1], 0.2, w)]; bones.head[0] -= 0.06 * w; break; }
@@ -149,7 +175,7 @@
         const d = p.view.depth, cv = document.getElementById("r-canvas");
         const f = d > 0.01 ? `blur(${(3.2 * d).toFixed(2)}px)` : "none"; if (cv.style.filter !== f) cv.style.filter = f;
         const o = String(1 - 0.08 * d); if (cv.style.opacity !== o) cv.style.opacity = o;
-        setZ("robot", p.view.rf > 0.5 ? 7 : 5);
+        setZ("robot", p.view.z);
       }
       window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
       const ready = window.Robot3D.Robot.create(document.getElementById("r-canvas"), { url: "assets/robot3d/robot_aipreneur.glb", width: 1080, height: 1920, envIntensity: 0.55 })

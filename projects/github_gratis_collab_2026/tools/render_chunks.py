@@ -64,7 +64,7 @@ video = WORK / "video.mp4"
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-an", "-c", "copy", str(video)], check=True)
 # audio: VO at its offset + intro SFX (same volumes as the composition), -14 LUFS
 off = int(round(T["vo_offset"] * 1000))
-subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(video), "-i", str(P / "assets/audio/vo.mp3"), "-i", str(P / "assets/audio/sfx_intro.wav"),
+subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(video), "-i", str(P / "assets/audio/vo_collab.wav"), "-i", str(P / "assets/audio/sfx_intro.wav"),
                 "-filter_complex", f"[1:a]adelay={off}|{off},aresample=48000[v];[2:a]volume=0.85,aresample=48000[s];[v][s]amix=inputs=2:normalize=0:duration=longest,apad,atrim=0:{TOTAL},loudnorm=I=-14:TP=-1:LRA=11[a]",
                 "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", str(OUT)], check=True)
 print("done", OUT, flush=True)

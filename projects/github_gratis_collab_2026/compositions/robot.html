@@ -19,6 +19,17 @@
       const L = (a, b, u) => a + (b - a) * u;
       const vn = M3.vnoise;
       const S = (id) => SC.find((s) => s.id === id);
+
+      const ssm = (u) => { u = Math.max(0, Math.min(1, u)); return u * u * u * (u * (u * 6 - 15) + 10); };
+      const VO_SC = (id) => window.VO_SCENES.find((s) => s.id === id);
+      const VO_NEXT = (id) => { const i = window.VO_SCENES.findIndex((s) => s.id === id); return window.VO_SCENES[i + 1]; };
+
+      // ---- TAG-TEAM STAGING: the speaker is in front (half body, sharp); the partner stays behind (smaller, depth-of-field blur)
+      // and keeps reacting. The robot comes to the front for the "Gantinya…" scenes (s06/s09/s12/s15); final beat = both side by side.
+      const ROBOT_TURNS = ["s06", "s09", "s12", "s15"].map((id) => { const a = VO_SC(id); const b = VO_NEXT(id); return [a.start, b ? b.start : a.start + a.dur]; });
+      const robotFront = (t) => { let a = 0; for (const [s0, s1] of ROBOT_TURNS) a = Math.max(a, ssm((t - (s0 - 0.28)) / 0.56) * (1 - ssm((t - (s1 - 0.28)) / 0.56))); return a; };
+      const finalBeat = (t) => { const s = VO_SC("s18"); return ssm((t - (s.start + 2.0)) / 0.55); };
+      const setZ = (id, z) => { const el = document.getElementById(id); if (el && el.style.zIndex !== String(z)) el.style.zIndex = String(z); };
       const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : -99; };
       const env = (t) => { const f = t * 100, i = Math.max(0, Math.min(ENV.length - 2, Math.floor(f))), u = f - i; return (ENV[i] + (ENV[i + 1] - ENV[i]) * u) / 99; };
       // ---------------------------------------------------------------- who speaks
@@ -52,21 +63,25 @@
       // ---------------------------------------------------------------- blinks (deterministic schedule) + gaze saccades
       const BL = []; { let x = 2.4, h = 7; while (x < D) { BL.push(x); h = (h * 9301 + 49297) % 233280; x += 2.3 + (h / 233280) * 2.2; } }
       const blinkAt = (t) => { let v = 0; for (const b of BL) { const d = t - b; if (d > -0.06 && d < 0.18) v = Math.max(v, d < 0 ? 1 + d / 0.06 : 1 - sm((d - 0.04) / 0.14)); } return Math.max(0, v); };
-      // ---------------------------------------------------------------- framing
-      const PRES = { fx: 776, fy: 1740, h: 430, pitch: 4 }, SPEAK = { fx: 760, fy: 1748, h: 470, pitch: 4 };
+      // ---------------------------------------------------------------- framing (behind the mascot / front speaker / final side by side)
+      const BACK = { fx: 826, fy: 1588, h: 300 }, FRONT = { fx: 642, fy: 1800, h: 580 }, SIDE = { fx: 790, fy: 1745, h: 430 };
+      const HEAD_FIX = [-0.0775, -0.227, -0.1287];   // the Tripo head is modelled turned 13° and tilted 7°: straighten it (visor centred, eyes level)
+      const mixV = (a, b, u) => ({ fx: L(a.fx, b.fx, u), fy: L(a.fy, b.fy, u), h: L(a.h, b.h, u) });
       function frame(t) {
         if (t < 1.02) return null;
-        const u = io3((t - 1.02) / 0.95);                       // flies in from the right (intro, with the whoosh)
-        const arc = Math.sin(Math.PI * u) * 170;
-        const base = { fx: L(1380, PRES.fx, u), fy: L(1520, PRES.fy, u) - arc, h: L(380, PRES.h, u), pitch: 4 };
-        const sp = inLine(t);
-        return { fx: L(base.fx, SPEAK.fx, sp), fy: L(base.fy, SPEAK.fy, sp), h: L(base.h, SPEAK.h, sp), pitch: 4, fly: u };
+        const u = io3((t - 1.02) / 0.95);                       // flies in from the right (intro whoosh) and settles behind him
+        const arc = Math.sin(Math.PI * u) * 150;
+        let v = { fx: L(1360, BACK.fx, u), fy: L(1420, BACK.fy, u) - arc, h: L(330, BACK.h, u) };
+        const rf = robotFront(t), fb = finalBeat(t);
+        v = mixV(v, FRONT, rf); v = mixV(v, SIDE, fb);
+        const depth = (1 - rf) * (1 - fb);                     // 1 = fully in the background
+        return { fx: v.fx, fy: v.fy, h: v.h, pitch: 4, fly: u, depth, rf, fb };
       }
       // ---------------------------------------------------------------- performance
       function perf(t) {
         const fr = frame(t); if (!fr) return null;
         const fly = fr.fly;
-        const root = { x: 0, y: 0, z: 0, rx: 0, ry: -0.3, rz: 0, s: 1 };
+        const root = { x: 0, y: 0, z: 0, rx: 0, ry: L(L(-0.3, -0.04, fr.rf), -0.16, fr.fb), rz: 0, s: 1 };
         const bones = { body: [0, 0, 0], head: [0, 0, 0], hand_L: [0, 0, 0], hand_R: [0, 0, 0] };
         const offs = { hand_L: [0, 0, 0], hand_R: [0, 0, 0], head: [0, 0, 0] };
         const face = { blink: blinkAt(t), gaze: [-0.08, 0.04], happy: 0, squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 };
@@ -74,7 +89,7 @@
         root.y = 0.014 * Math.sin(2 * Math.PI * 0.55 * t) + 0.006 * Math.sin(2 * Math.PI * 1.27 * t + 1.1);
         root.rz = 0.035 * Math.sin(2 * Math.PI * 0.41 * t + 0.4) + 0.01 * vn(t, 3, 0.3);
         root.rx = 0.018 * Math.sin(2 * Math.PI * 0.5 * t + 1.7);
-        bones.head = [0.02 * vn(t, 5, 0.25), 0.05 * vn(t, 6, 0.18), 0.03 * vn(t, 7, 0.2)];
+        bones.head = [HEAD_FIX[0] + 0.02 * vn(t, 5, 0.25), HEAD_FIX[1] + 0.05 * vn(t, 6, 0.18), HEAD_FIX[2] + 0.03 * vn(t, 7, 0.2)];
         offs.hand_L = [-0.07 + 0.006 * vn(t, 11, 0.4), 0.018 * Math.sin(2 * Math.PI * 0.55 * t + 1.3), 0.008 * vn(t, 12, 0.35)];
         offs.hand_R = [0.07 + 0.006 * vn(t, 13, 0.4), 0.018 * Math.sin(2 * Math.PI * 0.55 * t + 2.4), 0.008 * vn(t, 14, 0.35)];
         bones.hand_L = [0.08 * Math.sin(2 * Math.PI * 0.5 * t), 0, 0.06 * vn(t, 15, 0.3)];
@@ -85,7 +100,6 @@
           offs.hand_L[0] += 0.08 * k; offs.hand_R[0] += 0.08 * k; offs.hand_L[1] += 0.06 * k; offs.hand_R[1] += 0.06 * k; }
         // speaking: faces camera, voice bars, nods on the accents, lights pulse
         const sp = speakAmt(t), il = inLine(t);
-        root.ry = L(root.ry, -0.2, il);
         face.gaze = [L(face.gaze[0], 0.0, il), L(face.gaze[1], 0.02, il)];
         if (sp > 0.001) {
           const e = env(t);
@@ -131,6 +145,11 @@
         const p = perf(t);
         if (!p) { robot.setState({ visible: false }); robot.render(); return; }
         robot.setView(p.view); robot.setState(p.state); robot.render();
+        // depth of field + layer order (front speaker above the partner)
+        const d = p.view.depth, cv = document.getElementById("r-canvas");
+        const f = d > 0.01 ? `blur(${(3.2 * d).toFixed(2)}px)` : "none"; if (cv.style.filter !== f) cv.style.filter = f;
+        const o = String(1 - 0.08 * d); if (cv.style.opacity !== o) cv.style.opacity = o;
+        setZ("robot", p.view.rf > 0.5 ? 7 : 5);
       }
       window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
       const ready = window.Robot3D.Robot.create(document.getElementById("r-canvas"), { url: "assets/robot3d/robot_aipreneur.glb", width: 1080, height: 1920, envIntensity: 0.55 })

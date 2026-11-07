@@ -1,0 +1,13 @@
+import { NodeIO } from '@gltf-transform/core';
+import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
+import sharp from 'sharp';
+const [src, base, mr, nrm, out] = process.argv.slice(2);
+const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
+const doc = await io.read(src);
+const mat = doc.getRoot().listMaterials()[0];
+const webp = async (f, q) => new Uint8Array(await sharp(f).webp({ quality: q, effort: 5 }).toBuffer());
+mat.getBaseColorTexture().setImage(await webp(base, 94)).setMimeType('image/webp');
+mat.getMetallicRoughnessTexture().setImage(await webp(mr, 92)).setMimeType('image/webp');
+mat.getNormalTexture().setImage(await webp(nrm, 92)).setMimeType('image/webp');
+await io.write(out, doc);
+console.log('ok');

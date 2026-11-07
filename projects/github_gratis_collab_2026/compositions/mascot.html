@@ -27,6 +27,17 @@
       const mixP = (a, b, u) => { const o = {}; const ks = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]); for (const k of ks) { const x = (a && a[k]) || [0, 0, 0], y = (b && b[k]) || [0, 0, 0]; o[k] = [L(x[0], y[0], u), L(x[1], y[1], u), L(x[2], y[2], u)]; } return o; };
       const scl = (a, k) => { const o = {}; for (const [n, v] of Object.entries(a)) o[n] = [v[0] * k, v[1] * k, v[2] * k]; return o; };
       const S = (id) => SC.find((s) => s.id === id);
+
+      const ssm = (u) => { u = Math.max(0, Math.min(1, u)); return u * u * u * (u * (u * 6 - 15) + 10); };
+      const VO_SC = (id) => window.VO_SCENES.find((s) => s.id === id);
+      const VO_NEXT = (id) => { const i = window.VO_SCENES.findIndex((s) => s.id === id); return window.VO_SCENES[i + 1]; };
+
+      // ---- TAG-TEAM STAGING: the speaker is in front (half body, sharp); the partner stays behind (smaller, depth-of-field blur)
+      // and keeps reacting. The robot comes to the front for the "Gantinya…" scenes (s06/s09/s12/s15); final beat = both side by side.
+      const ROBOT_TURNS = ["s06", "s09", "s12", "s15"].map((id) => { const a = VO_SC(id); const b = VO_NEXT(id); return [a.start, b ? b.start : a.start + a.dur]; });
+      const robotFront = (t) => { let a = 0; for (const [s0, s1] of ROBOT_TURNS) a = Math.max(a, ssm((t - (s0 - 0.28)) / 0.56) * (1 - ssm((t - (s1 - 0.28)) / 0.56))); return a; };
+      const finalBeat = (t) => { const s = VO_SC("s18"); return ssm((t - (s.start + 2.0)) / 0.55); };
+      const setZ = (id, z) => { const el = document.getElementById(id); if (el && el.style.zIndex !== String(z)) el.style.zIndex = String(z); };
       function accents(t) { let n = 0; for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; } return Math.min(1.3, n); }
 
       // ---------------------------------------------------------------- opening poses (offsets on top of REST)
@@ -41,7 +52,7 @@
       const STAND = {};
       const LOOK = { head: [-0.14, 0.35, 0], neck: [-0.05, 0.15, 0], spine: [0, 0.08, 0] };
       const SCRATCH = { upperarm_R: [-0.2, 0.9, 0.1], forearm_R: [-1.6, 0, 0], hand_R: [0, 0, 0.3] };
-      const FAR = { fx: 540, fy: 1520, h: 640, pitch: 6 }, HALF = { fx: 300, fy: 2185, h: 1000, pitch: 4 };   // collab: the robot hovers on the right
+      const FAR = { fx: 540, fy: 1520, h: 640, pitch: 6 }, HALF = { fx: 420, fy: 2185, h: 1040, pitch: 4 };   // collab: the robot hovers behind his right shoulder
       const LAND = -1, T_HAND = 2.02;
 
       function opening(t) {
@@ -111,11 +122,11 @@
       // presenter framing per scene (smoothly eased between); round-title scenes punch in
       const FR = {
         s02: HALF, s03: HALF,
-        s04: { fx: 312, fy: 2235, h: 1090, pitch: 4 }, s05: HALF, s06: HALF,
-        s07: { fx: 312, fy: 2235, h: 1090, pitch: 4 }, s08: HALF, s09: HALF,
-        s10: { fx: 312, fy: 2235, h: 1090, pitch: 4 }, s11: HALF, s12: HALF,
-        s13: { fx: 312, fy: 2235, h: 1090, pitch: 4 }, s14: HALF, s15: HALF,
-        s16: { fx: 306, fy: 2215, h: 1050, pitch: 4 }, s17: HALF, s18: HALF,
+        s04: { fx: 430, fy: 2235, h: 1120, pitch: 4 }, s05: HALF, s06: HALF,
+        s07: { fx: 430, fy: 2235, h: 1120, pitch: 4 }, s08: HALF, s09: HALF,
+        s10: { fx: 430, fy: 2235, h: 1120, pitch: 4 }, s11: HALF, s12: HALF,
+        s13: { fx: 430, fy: 2235, h: 1120, pitch: 4 }, s14: HALF, s15: HALF,
+        s16: { fx: 425, fy: 2215, h: 1080, pitch: 4 }, s17: HALF, s18: HALF,
       };
       function presView(t) {
         let cur = HALF, prev = HALF, t0 = 0;
@@ -149,6 +160,14 @@
           root = { x: Pf.root.x, y: Pf.root.y, ry: Pf.root.ry + 0.012 * vnoise(t, 26, 0.18) + 0.42 * la, rz: Pf.root.rz, rx: 0, s: Pf.root.s };
           if (la > 0) { bones = add(bones, { head: [0.03 * la, 0.18 * la, 0.04 * la] }); mouth = mouthAt(-5).map((v, i) => v + (mouth[i] - v) * (1 - la)); }
           view = presView(t);
+          const rf = robotFront(t), fb = finalBeat(t);
+          const BACKM = { fx: 215, fy: 1990, h: 700, pitch: 4 }, FINAL = { fx: 318, fy: 2185, h: 1000, pitch: 4 };
+          const mv = (a, b, u) => ({ fx: L(a.fx, b.fx, u), fy: L(a.fy, b.fy, u), h: L(a.h, b.h, u), pitch: 4, yaw: 0 });
+          view = mv(mv(view, BACKM, rf), FINAL, fb);
+          const d = rf, f = d > 0.01 ? `blur(${(3.2 * d).toFixed(2)}px)` : "none";
+          if (canvas.style.filter !== f) canvas.style.filter = f;
+          const o = String(1 - 0.08 * d); if (canvas.style.opacity !== o) canvas.style.opacity = o;
+          setZ("mascot", rf > 0.5 ? 5 : 7);
         }
         if (mascot.shadow) mascot.shadow.visible = shadow;
         mascot.setView(view);

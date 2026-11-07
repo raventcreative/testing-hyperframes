@@ -31,15 +31,15 @@ def chunk_index(t0, t1):
             out = [o for o in out if o != "null"]
             return h[:i] + "\n          " + ",\n          ".join(out) + h[j:]
         h = shift_block(h, "const W = [", lambda r: [r[0], round(r[1] - t0, 3), r[2]])
-        h = shift_block(h, "const CAPS = [", lambda r: None if r[1] <= t0 + 0.02 else [round(max(0.0, r[0] - t0), 3), round(r[1] - t0, 3), r[2], r[3], r[4]])
+        h = shift_block(h, "const CAPS = [", lambda r: None if r[1] <= t0 + 0.02 else [round(max(0.001, r[0] - t0), 3), round(r[1] - t0, 3), r[2], r[3], r[4]])
         m = re.search(r"const HW = (\[.*?\]);\n", h); HW = json.loads(m.group(1))
         HW = [[round(a - t0, 4), round(b - t0, 4), lab] for a, b, lab in HW if b > t0 + 1e-6]
         h = h[:m.start(1)] + json.dumps(HW, ensure_ascii=False) + h[m.end(1):]
         # a round header already on screen at the chunk start is shown instantly (no negative-time tweens)
         h = h.replace("tl.fromTo(chip, { opacity: 0, y: -14, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: \"back.out(2)\", immediateRender: false }, a + 0.04);",
-                      "if (a < 0) tl.set(chip, { opacity: 1, y: 0, scale: 1 }, 0); else tl.fromTo(chip, { opacity: 0, y: -14, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: \"back.out(2)\", immediateRender: false }, a + 0.04);")
+                      "if (a < 0) tl.set(chip, { opacity: 1, y: 0, scale: 1 }, 0.001); else tl.fromTo(chip, { opacity: 0, y: -14, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: \"back.out(2)\", immediateRender: false }, a + 0.04);")
         h = h.replace("tl.fromTo(ttl, { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.45, ease: \"power3.out\", immediateRender: false }, a + 0.1);",
-                      "if (a < 0) tl.set(ttl, { opacity: 1, y: 0 }, 0); else tl.fromTo(ttl, { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.45, ease: \"power3.out\", immediateRender: false }, a + 0.1);")
+                      "if (a < 0) tl.set(ttl, { opacity: 1, y: 0 }, 0.001); else tl.fromTo(ttl, { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.45, ease: \"power3.out\", immediateRender: false }, a + 0.1);")
         # small corner logo: already visible; its end fade shifts
         h = h.replace('tl.set("#brandlogo", { opacity: 0 }, 0);', 'tl.set("#brandlogo", { opacity: 0.95 }, 0);')
         h = re.sub(r'\n        tl\.fromTo\("#brandlogo", \{ opacity: 0 \}, \{ opacity: 0\.95[^\n]*\n', '\n', h)

@@ -1,10 +1,371 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-gklt" id="root" data-composition-id="w10" data-width="1080" data-height="1920"></div>
+  <style>
+    #w10-root { position: absolute; inset: 0; overflow: hidden; }
+    .w10-world { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden; background: #f3ead9; transform-origin: 1160px 740px; }
+    .w10-a { position: absolute; }
+    canvas.w10-a { display: block; }
+    #w10-defs { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+    #w10-title, #w10-bleed { left: 0; width: 1080px; top: 298px; text-align: center; font: 700 106px/1.08 Poppins, sans-serif; letter-spacing: -0.01em; white-space: nowrap; }
+    #w10-title span { display: inline-block; padding: 0 8px; color: transparent; -webkit-background-clip: text; background-clip: text; background-size: 640px 130px; background-repeat: no-repeat;
+      -webkit-text-stroke: 1.6px rgba(150, 44, 74, 0.32); }
+    #w10-bleed span { display: inline-block; padding: 0 8px; color: rgba(214, 86, 112, 0.34); filter: blur(5px); }
+    .w10-chip { left: 50%; top: 422px; height: 46px; padding: 0 20px; border-radius: 23px; background: rgba(8, 14, 46, 0.86); display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 8px 20px rgba(60, 40, 30, 0.22), inset 0 0 0 1.5px rgba(255, 255, 255, 0.1); white-space: nowrap; }
+    .w10-chip b { font: 700 24px/1 Poppins, sans-serif; color: #ffffff; letter-spacing: 0.02em; }
+    .w10-chip b em { font-style: normal; color: #01ccf7; }
+    .w10-chip i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: #01ccf7; box-shadow: 0 0 10px rgba(1, 204, 247, 0.8); margin-left: 6px; }
+  </style>
+  <div id="w10-root" data-composition-id="w10" data-width="1080" data-height="1920">
+    <svg id="w10-defs" width="0" height="0" viewBox="0 0 1 1"><defs>
+      <clipPath id="w10-bloom" clipPathUnits="userSpaceOnUse"></clipPath>
+      <radialGradient id="w10-gpet" cx="0.42" cy="0.35" r="0.75"><stop offset="0" stop-color="#ffe3df"/><stop offset="0.5" stop-color="#f5a7a6"/><stop offset="1" stop-color="#e06878"/></radialGradient>
+      <radialGradient id="w10-gleaf" cx="0.4" cy="0.35" r="0.8"><stop offset="0" stop-color="#cfe6b0"/><stop offset="0.55" stop-color="#8dbb7a"/><stop offset="1" stop-color="#5a8f5e"/></radialGradient>
+    </defs></svg>
+    <div class="w10-world" id="w10-world">
+      <canvas class="w10-a" id="w10-paper" width="1080" height="1920" style="left:0;top:0"></canvas>
+      <canvas class="w10-a" id="w10-sky" width="1200" height="1130" style="left:0;top:0"></canvas>
+      <canvas class="w10-a" id="w10-sun" width="380" height="380" style="left:690px;top:372px"></canvas>
+      <svg class="w10-a" id="w10-drops" width="1200" height="1130" viewBox="0 0 1200 1130" style="left:0;top:0"></svg>
+      <canvas class="w10-a" id="w10-clouds" width="1420" height="560" style="left:0;top:430px"></canvas>
+      <svg class="w10-a" id="w10-birds" width="1080" height="1100" viewBox="0 0 1080 1100" style="left:0;top:0"></svg>
+      <canvas class="w10-a" id="w10-far" width="1500" height="560" style="left:0;top:905px"></canvas>
+      <canvas class="w10-a" id="w10-mid" width="2000" height="600" style="left:0;top:1075px"></canvas>
+      <canvas class="w10-a" id="w10-near" width="3220" height="720" style="left:0;top:1200px"></canvas>
+      <svg class="w10-a" id="w10-petals" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0"></svg>
+      <canvas class="w10-a" id="w10-lift" width="880" height="230" style="left:100px;top:250px"></canvas>
+      <div class="w10-a" id="w10-bleed"><span id="w10-tb1">Cat</span> <span id="w10-tb2">Air</span></div>
+      <div class="w10-a" id="w10-title"><span id="w10-t1">Cat</span> <span id="w10-t2">Air</span></div>
+      <div class="w10-a w10-chip" id="w10-chip"><b>10<em>/10</em></b><span id="w10-dots"></span></div>
+      <svg class="w10-a" id="w10-spk" width="1080" height="600" viewBox="0 0 1080 600" style="left:0;top:200px"></svg>
+    </div>
+    <svg class="w10-a" id="w10-fx" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0"></svg>
+  </div>
   <script>
     (function () {
+      // WORLD 10/10 — CAT AIR: a hand-painted watercolour landscape on cream paper (sky wash, sun blot, cloud washes, three ranges of
+      // blue-green hills, blot trees, granulation, paper grain). Every wash is painted ONCE into a canvas with a seeded layered-deformation
+      // technique (dozens of translucent, randomly deformed polygons per shape = soft bleeding edges + pigment pooling), so it reads as paint.
+      // ENTRY = INK BLOOM: pigment drops bloom out of the rocket's nose (lobed blobs with darker wet-edge rings + water halos) over w09.
+      // Beats: "cat" the title blooms in wet + the sun is painted · "air" clear-water drops land on the sky and make cauliflower blooms ·
+      // "lembut" petals and leaves drift, the far layers slow down, the title floats. Chip 10/10 fills up (last world).
+      // EXIT (last 0.55 s, coordinated with s13): the painting is RIPPED IN TWO along a torn line — two copies of the world are clipped to the
+      // two pieces and fly apart (hinge, then off) while s13 draws the navy stage, white paper-fibre rims and shadows in the gap.
+      const ID = "w10", D = 2.2834, TR = 0.55, TS = D - TR;
+      const root = document;   // the runtime strips the id of the template root: look elements up document-wide (ids are prefixed)
+      const q = (n) => root.querySelector("#w10-" + n);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 2.273);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };   // initial state: applied now (frame 0) AND on every re-seek
+      let S0 = 2027; const rnd = () => { S0 = (S0 * 16807) % 2147483647; return (S0 - 1) / 2147483646; };
+      const gau = () => (rnd() + rnd() + rnd() + rnd() - 2) * 1.732;
+      const f1 = (v) => v.toFixed(1), f2 = (v) => v.toFixed(2);
+      // words (local s): dan 0.18 · cat 0.42 · air 0.88 · yang 1.12 · lembut 1.28 · rocket exits right 1.53 · tear 1.733
+
+      // ---- TORN PAPER (shared verbatim by w10.html and s13.html: the tear line + how the two pieces move) ----
+      const TEAR = (function () {
+        let s = 4242; const r = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+        const PIV = [1160, 740], pts = [];
+        let w = 0, v = 0;
+        for (let i = 0; i <= 135; i++) {
+          const x = i * 8;
+          v = 0.6 * v + (r() - 0.5) * 9; w = 0.82 * w + v;
+          const y = 918 - 0.13 * x + 16 * Math.sin(x / 150 + 0.7) + 7 * Math.sin(x / 47 + 2.0) + w + (r() - 0.5) * 3.5;
+          pts.push([x, +y.toFixed(1)]);
+        }
+        const one = (u) => Math.max(0, Math.min(1, u));
+        function state(t) {                       // t = seconds since the tear started (0 … 0.55)
+          const a = one((t - 0.05) / 0.3), o = 1 - (1 - a) * (1 - a);      // hinge: the rip opens like a wedge from the left
+          const b = one((t - 0.04) / 0.44), f = b * b;                      // then both pieces are thrown off (accelerating)
+          return { ax: -60 * f, ay: -1500 * f, ar: 10 * o + 9 * f, as: 1 + 0.08 * one(t / 0.4),
+                   bx: 50 * f, by: 1560 * f, br: -8 * o - 7 * f, bs: 1 + 0.06 * one(t / 0.4), lift: one(t / 0.3) };
+        }
+        return { pts, PIV, state };
+      })();
+
+      // ---------------------------------------------------------------- watercolour painting toolkit (canvas, generated once)
+      const ell = (cx, cy, rx, ry, n = 14) => Array.from({ length: n }, (_, i) => { const a = (i / n) * Math.PI * 2; return [cx + Math.cos(a) * rx * (0.9 + rnd() * 0.2), cy + Math.sin(a) * ry * (0.9 + rnd() * 0.2), 1]; });
+      const deform = (P, depth, amt) => {
+        for (let d = 0; d < depth; d++) {
+          const Q = [];
+          for (let i = 0; i < P.length; i++) {
+            const a = P[i], b = P[(i + 1) % P.length], l = Math.hypot(b[0] - a[0], b[1] - a[1]), v = (a[2] + b[2]) / 2;
+            Q.push(a, [(a[0] + b[0]) / 2 + gau() * l * amt * v, (a[1] + b[1]) / 2 + gau() * l * amt * v, v * (0.7 + rnd() * 0.6)]);
+          }
+          P = Q;
+        }
+        return P;
+      };
+      const poly = (g, P) => { g.beginPath(); g.moveTo(P[0][0], P[0][1]); for (let i = 1; i < P.length; i++) g.lineTo(P[i][0], P[i][1]); g.closePath(); };
+      // layered translucent glazes of a randomly deformed shape = soft bleeding edge, darker overlaps, pooled wet edge
+      const wash = (g, base, fill, o = {}) => {
+        const core = deform(base, o.d0 ?? 2, o.a0 ?? 0.22), n = o.n ?? 20, al = o.alpha ?? 0.045;
+        g.save(); g.fillStyle = fill;
+        for (let i = 0; i < n; i++) {
+          const P = deform(core, o.d1 ?? 2, o.a1 ?? 0.16); poly(g, P);
+          g.globalAlpha = al; g.fill();
+          if (o.edge && i % 3 === 0) { g.globalAlpha = o.edge; g.strokeStyle = o.edgeCol || fill; g.lineWidth = o.edgeW || 1.6; g.stroke(); }
+        }
+        g.restore();
+      };
+      const mk = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
+      // granulation: pigment lifted in specks (destination-out) + dark pigment settling in the paper tooth (source-atop)
+      const grainA = mk(256, 256), grainB = mk(256, 256);
+      { const g = grainA.getContext("2d"), im = g.createImageData(256, 256);
+        for (let i = 0; i < 65536; i++) { const v = rnd(); im.data[i * 4 + 3] = v < 0.55 ? 0 : Math.round(255 * Math.pow((v - 0.55) / 0.45, 1.6)); }
+        g.putImageData(im, 0, 0);
+        for (let i = 0; i < 260; i++) { g.globalAlpha = 0.25 + rnd() * 0.5; g.beginPath(); g.arc(rnd() * 256, rnd() * 256, 0.6 + rnd() * 1.8, 0, 6.283); g.fill(); }
+        const h = grainB.getContext("2d");
+        for (let i = 0; i < 900; i++) { h.globalAlpha = 0.15 + rnd() * 0.55; h.fillStyle = "#26304a"; h.beginPath(); h.arc(rnd() * 256, rnd() * 256, 0.4 + rnd() * 1.3, 0, 6.283); h.fill(); } }
+      const granulate = (c, lift, dark) => {
+        const g = c.getContext("2d"); g.save();
+        g.globalCompositeOperation = "destination-out"; g.globalAlpha = lift; g.fillStyle = g.createPattern(grainA, "repeat"); g.fillRect(0, 0, c.width, c.height);
+        g.globalCompositeOperation = "source-atop"; g.globalAlpha = dark; g.fillStyle = g.createPattern(grainB, "repeat"); g.fillRect(0, 0, c.width, c.height);
+        g.restore();
+      };
+      // ridge polygon (top edge deformable, sides/bottom fixed)
+      const ridge = (w, h, yf, step) => { const P = [[-40, h + 10, 0]]; for (let x = -40; x <= w + 40; x += step) P.push([x, yf(x), 1]); P.push([w + 40, h + 10, 0]); return P; };
+      const body = (g, P, dy, c0, c1, y0, y1, a) => { g.save(); const lg = g.createLinearGradient(0, y0, 0, y1); lg.addColorStop(0, c0); lg.addColorStop(1, c1); g.fillStyle = lg; g.globalAlpha = a;
+        poly(g, P.map((p) => [p[0], p[2] ? p[1] + dy : p[1]])); g.fill(); g.restore(); };
+
+      // ---------------------------------------------------------------- paper
+      { const c = q("paper"), g = c.getContext("2d");
+        g.fillStyle = "#f4ecdd"; g.fillRect(0, 0, 1080, 1920);
+        for (let i = 0; i < 150; i++) { const x = rnd() * 1080, y = rnd() * 1920, r = 60 + rnd() * 240, dk = rnd() < 0.5, col = dk ? "196,168,128" : "255,252,244";
+          const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, `rgba(${col},${dk ? 0.06 : 0.12})`); gr.addColorStop(1, `rgba(${col},0)`); g.fillStyle = gr; g.fillRect(x - r, y - r, 2 * r, 2 * r); }
+        const im = g.getImageData(0, 0, 1080, 1920), d = im.data;
+        for (let i = 0; i < d.length; i += 4) { const n = (rnd() - 0.5) * 10; d[i] += n; d[i + 1] += n; d[i + 2] += n * 1.15; }
+        g.putImageData(im, 0, 0);
+        g.strokeStyle = "rgba(170,150,120,0.10)"; g.lineWidth = 0.8;
+        for (let i = 0; i < 260; i++) { const x = rnd() * 1080, y = rnd() * 1920, a = rnd() * 6.28, l = 6 + rnd() * 16; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a) * l * 0.5 + 3, y + Math.sin(a) * l * 0.5 - 3, x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); } }
+
+      // ---------------------------------------------------------------- sky wash (wet-in-wet cerulean → peach horizon)
+      { const c = q("sky"), g = c.getContext("2d"), w = 1200, h = 1130;
+        const lg = g.createLinearGradient(0, 0, 0, h);
+        lg.addColorStop(0, "rgba(78,134,196,0.66)"); lg.addColorStop(0.4, "rgba(132,178,220,0.44)"); lg.addColorStop(0.7, "rgba(238,196,170,0.36)"); lg.addColorStop(1, "rgba(246,212,178,0)");
+        g.fillStyle = lg; g.fillRect(0, 0, w, h);
+        for (let k = 0; k < 8; k++) wash(g, ell((k / 7) * w + (rnd() - 0.5) * 140, 40 + rnd() * 300, 200 + rnd() * 170, 130 + rnd() * 120), "#3f78bd", { n: 16, alpha: 0.034, edge: 0.03, edgeCol: "#2f5f9e" });
+        for (let k = 0; k < 4; k++) wash(g, ell(rnd() * w, 380 + rnd() * 260, 160 + rnd() * 120, 70 + rnd() * 60), "#8a8fd0", { n: 12, alpha: 0.028 });
+        for (let k = 0; k < 5; k++) wash(g, ell((k / 4) * w + (rnd() - 0.5) * 100, 860 + rnd() * 140, 260 + rnd() * 120, 80 + rnd() * 50), "#f0a688", { n: 14, alpha: 0.034 });
+        // backruns (cauliflower blooms) already dried into the sky
+        for (let k = 0; k < 5; k++) { const x = rnd() * w, y = 80 + rnd() * 520, r = 40 + rnd() * 70; const P = deform(ell(x, y, r, r * (0.8 + rnd() * 0.3), 16), 2, 0.12);
+          g.save(); poly(g, P); g.globalCompositeOperation = "destination-out"; g.globalAlpha = 0.22; g.fill(); g.globalCompositeOperation = "source-over"; g.globalAlpha = 0.16; g.strokeStyle = "#2f5f9e"; g.lineWidth = 2; g.stroke(); g.restore(); }
+        granulate(c, 0.2, 0.08); }
+
+      // ---------------------------------------------------------------- sun blot
+      { const c = q("sun"), g = c.getContext("2d");
+        wash(g, ell(190, 190, 160, 160, 18), "#fbd27e", { n: 18, alpha: 0.03, a0: 0.12, a1: 0.12 });
+        wash(g, ell(190, 190, 86, 86, 16), "#f39a52", { n: 24, alpha: 0.06, a0: 0.08, a1: 0.1, edge: 0.07, edgeCol: "#cf5a2a" });
+        wash(g, ell(176, 174, 42, 40, 12), "#ffe7a6", { n: 10, alpha: 0.09, a0: 0.1 });
+        granulate(c, 0.16, 0.06); }
+
+      // ---------------------------------------------------------------- clouds (cream body + lavender shadow)
+      { const c = q("clouds"), g = c.getContext("2d");
+        const cloud = (cx, cy, s) => {
+          for (const [dx, dy, rx, ry] of [[-70, 10, 80, 42], [0, -14, 96, 58], [72, 6, 82, 44], [20, 26, 130, 34]]) wash(g, ell(cx + dx * s, cy + dy * s, rx * s, ry * s, 12), "#fcf8f0", { n: 12, alpha: 0.085, a0: 0.12 });
+          wash(g, ell(cx + 10 * s, cy + 30 * s, 130 * s, 22 * s, 12), "#9a9cc8", { n: 12, alpha: 0.04, a0: 0.15 });
+        };
+        cloud(170, 150, 1.0); cloud(620, 70, 0.72); cloud(1010, 240, 0.95); cloud(1300, 120, 0.8); granulate(c, 0.12, 0.04); }
+
+      // ---------------------------------------------------------------- far range (blue-violet, misty)
+      { const c = q("far"), g = c.getContext("2d"), w = 1500, h = 560;
+        const ph = rnd() * 6;
+        const yf = (x) => 150 - 100 * Math.pow(Math.abs(Math.sin(x / 230 + ph)), 1.6) - 30 * Math.sin(x / 97 + 1) + gau() * 4;
+        const P = ridge(w, h, yf, 40);
+        wash(g, P, "#8ea2c9", { n: 20, alpha: 0.05, a0: 0.05, a1: 0.05, edge: 0.05, edgeCol: "#6e82ae" });
+        body(g, P, 50, "rgba(150,166,204,1)", "rgba(176,190,214,1)", 80, 400, 0.55);
+        g.save(); g.globalCompositeOperation = "destination-out"; const mg = g.createLinearGradient(0, 220, 0, 470); mg.addColorStop(0, "rgba(0,0,0,0)"); mg.addColorStop(1, "rgba(0,0,0,0.75)"); g.fillStyle = mg; g.fillRect(0, 0, w, h); g.restore();
+        granulate(c, 0.14, 0.1); }
+
+      // ---------------------------------------------------------------- mid range (teal-green) + distant conifers
+      { const c = q("mid"), g = c.getContext("2d"), w = 2000, h = 600;
+        const yf = (x) => 110 - 34 * Math.sin(x / 210 + 0.4) - 22 * Math.sin(x / 83 + 2) + gau() * 3;
+        const P = ridge(w, h, yf, 40);
+        wash(g, P, "#6c9e8e", { n: 20, alpha: 0.06, a0: 0.05, a1: 0.05, edge: 0.06, edgeCol: "#45786b" });
+        body(g, P, 40, "rgba(110,156,140,1)", "rgba(84,130,118,1)", 60, 520, 0.72);
+        for (let x = 30; x < w; x += 60 + rnd() * 90) { const y = yf(x) + 14, hh = 34 + rnd() * 34, ww = 14 + rnd() * 8;
+          wash(g, [[x, y - hh, 1], [x + ww, y, 1], [x + ww * 0.3, y + 6, 1], [x - ww * 0.3, y + 6, 1], [x - ww, y, 1]], "#2f6b60", { n: 8, alpha: 0.11, a0: 0.1, a1: 0.08 }); }
+        granulate(c, 0.16, 0.1); }
+
+      // ---------------------------------------------------------------- near hills (sap green) + blot trees + flower dots
+      { const c = q("near"), g = c.getContext("2d"), w = 3220, h = 720;
+        const yf = (x) => 120 - 36 * Math.sin(x / 300 + 1.1) - 18 * Math.sin(x / 120 + 0.3) + gau() * 3;
+        const P = ridge(w, h, yf, 40);
+        wash(g, P, "#5f9b63", { n: 20, alpha: 0.065, a0: 0.05, a1: 0.05, edge: 0.07, edgeCol: "#3b7247" });
+        body(g, P, 34, "rgba(98,156,100,1)", "rgba(52,96,74,1)", 80, 700, 0.84);
+        wash(g, ridge(w, h, (x) => 520 + 26 * Math.sin(x / 170) + gau() * 4, 60), "#2c5747", { n: 14, alpha: 0.07, a0: 0.04, a1: 0.06 });
+        // blot trees on the ridge
+        for (let x = 60; x < w - 40; x += 150 + rnd() * 130) {
+          const y = yf(x) + 10, r = 34 + rnd() * 30, cy = y - r * 0.95;
+          g.save(); g.strokeStyle = "#5e4634"; g.globalAlpha = 0.7; g.lineWidth = 4 + r * 0.06; g.lineCap = "round"; g.beginPath(); g.moveTo(x, cy + r * 0.4); g.quadraticCurveTo(x + 3, y - 6, x - 1, y + 12); g.stroke(); g.restore();
+          wash(g, ell(x, cy, r, r * 0.92, 12), rnd() < 0.5 ? "#4f8e55" : "#5b9a52", { n: 14, alpha: 0.085, a0: 0.12, a1: 0.1, edge: 0.06, edgeCol: "#2d5e3c" });
+          wash(g, ell(x + r * 0.28, cy + r * 0.3, r * 0.62, r * 0.5, 10), "#2f6342", { n: 8, alpha: 0.07, a0: 0.12 });
+          wash(g, ell(x - r * 0.3, cy - r * 0.32, r * 0.34, r * 0.28, 8), "#a8cf86", { n: 6, alpha: 0.08, a0: 0.12 });
+        }
+        for (let i = 0; i < 70; i++) { const x = rnd() * w, y = 230 + rnd() * 300; wash(g, ell(x, y, 5 + rnd() * 5, 4 + rnd() * 4, 7), ["#f08a7e", "#f7c35f", "#fbe9e0", "#e9707f"][i % 4], { n: 5, alpha: 0.2, a0: 0.15, a1: 0.1 }); }
+        g.save(); g.strokeStyle = "#2e5e40"; g.globalAlpha = 0.25; g.lineWidth = 2; g.lineCap = "round";
+        for (let i = 0; i < 160; i++) { const x = rnd() * w, y = 200 + rnd() * 440, l = 14 + rnd() * 26; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 2, y - l * 0.6, x + 6 * (rnd() - 0.3), y - l); g.stroke(); }
+        g.restore();
+        granulate(c, 0.12, 0.1); }
+
+      // ---------------------------------------------------------------- lifted paper behind the title + painted title fill
+      { const c = q("lift"), g = c.getContext("2d"); wash(g, ell(440, 112, 400, 72, 18), "#fbf6ea", { n: 18, alpha: 0.05, a0: 0.18, a1: 0.14 }); }
+      { const c = mk(640, 130), g = c.getContext("2d");
+        g.fillStyle = "#e46a5c"; g.fillRect(0, 0, 640, 130);
+        wash(g, ell(110, 26, 230, 70, 12), "#f4a256", { n: 12, alpha: 0.08 });
+        wash(g, ell(520, 70, 220, 90, 12), "#cf4570", { n: 14, alpha: 0.08 });
+        wash(g, ell(240, 128, 300, 52, 12), "#6658ad", { n: 14, alpha: 0.07 });
+        wash(g, ell(420, 10, 180, 40, 10), "#f2876a", { n: 10, alpha: 0.08 });
+        granulate(c, 0.16, 0.18);
+        const url = `url(${c.toDataURL("image/png")})`;
+        q("t1").style.backgroundImage = url; q("t1").style.backgroundPosition = "0px -6px";
+        q("t2").style.backgroundImage = url; q("t2").style.backgroundPosition = "-300px -6px"; }
+
+      // ---------------------------------------------------------------- vector bits: chip dots, drops, birds, petals, sparkles
+      q("dots").innerHTML = Array.from({ length: 10 }, (_, i) => `<i id="w10-d${i}"></i>`).join("");
+      const blobD = (amp = 1) => { const ph = [rnd() * 6.28, rnd() * 6.28, rnd() * 6.28, rnd() * 6.28]; let d = "";
+        for (let i = 0; i <= 120; i++) { const a = (i / 120) * Math.PI * 2, r = 100 * (1 + amp * (0.05 * Math.sin(3 * a + ph[0]) + 0.035 * Math.sin(7 * a + ph[1]) + 0.022 * Math.sin(13 * a + ph[2]) + 0.012 * Math.sin(29 * a + ph[3])));
+          d += (i ? "L" : "M") + f2(r * Math.cos(a)) + "," + f2(r * Math.sin(a)); } return d + "Z"; };
+      const DROPS = [[120, 560, 0.86, 0.6], [975, 690, 0.92, 0.7], [330, 740, 0.99, 0.5], [930, 985, 1.05, 0.55]];
+      q("drops").innerHTML = DROPS.map(([x, y], i) => `<g id="w10-db${i}" transform="translate(${x} ${y}) scale(0.01)"><path d="${blobD(1.4)}" fill="#ffffff" fill-opacity=".26"/>
+          <path d="${blobD(1.6)}" fill="none" stroke="#4d7fb6" stroke-opacity=".5" stroke-width="3.2"/><path d="${blobD(1.2)}" transform="scale(0.78)" fill="none" stroke="#4d7fb6" stroke-opacity=".18" stroke-width="7"/></g>
+        <path id="w10-dd${i}" d="M0,-16 C 5,-6 9,0 9,6 C 9,12 4,16 0,16 C -4,16 -9,12 -9,6 C -9,0 -5,-6 0,-16 Z" fill="#4d7fb6" fill-opacity=".85" transform="translate(${x} ${y - 160}) scale(0)"/>`).join("");
+      q("birds").innerHTML = [[150, 640, 1], [236, 600, 0.8], [212, 690, 0.7]].map(([x, y, s], i) => `<g transform="translate(${x} ${y}) scale(${s})"><path id="w10-bw${i}" d="M -26,0 Q -13,-14 0,0 Q 13,-14 26,0" fill="none" stroke="#3a4d7a" stroke-opacity=".8" stroke-width="4" stroke-linecap="round" transform="scale(1 1)"/></g>`).join("");
+      // petals + leaves: drift in on "lembut"
+      const PET = [];
+      for (let i = 0; i < 16; i++) {
+        const leaf = i % 4 === 3, s = 1.1 + rnd() * 0.8, fromR = i % 3 === 0;
+        const x0 = fromR ? 1110 + rnd() * 160 : 140 + rnd() * 900, y0 = fromR ? 260 + rnd() * 900 : 520 + rnd() * 760;
+        PET.push({ i, leaf, s, x0, y0, t0: 1.0 + i * 0.03, r0: rnd() * 360, vx: 380 + rnd() * 200, vy: 70 + rnd() * 90, spin: (rnd() < 0.5 ? -1 : 1) * (150 + rnd() * 200), fp: 0.32 + rnd() * 0.2, fade: !fromR });
+      }
+      q("petals").innerHTML = PET.map((p) => `<g id="w10-pg${p.i}" transform="translate(${f1(p.x0)} ${f1(p.y0)}) rotate(${f1(p.r0)}) scale(${f2(p.s)})" opacity="0"><path id="w10-pp${p.i}" transform="scale(1 1)" ` +
+        (p.leaf ? `d="M0,-15 C 9,-7 8,8 0,15 C -8,8 -9,-7 0,-15 Z" fill="url(#w10-gleaf)" stroke="#3f7349" stroke-opacity=".35" stroke-width="1"/>` : `d="M0,-12 C 7,-12 11,-2 6,7 C 3,12 -3,12 -6,7 C -11,-2 -7,-12 0,-12 Z M 0,-12 L 0,-6" fill="url(#w10-gpet)" stroke="#c9566a" stroke-opacity=".35" stroke-width="1"/>`) + `</g>`).join("");
+      const STAR = (x, y, r) => `M ${x},${y - r} Q ${x + r * 0.16},${y - r * 0.16} ${x + r},${y} Q ${x + r * 0.16},${y + r * 0.16} ${x},${y + r} Q ${x - r * 0.16},${y + r * 0.16} ${x - r},${y} Q ${x - r * 0.16},${y - r * 0.16} ${x},${y - r} Z`;
+      const SPK = [[712, 214, 15], [742, 262, 9], [352, 220, 11], [318, 262, 7]];
+      q("spk").innerHTML = SPK.map(([x, y, r], i) => `<path id="w10-sk${i}" d="${STAR(0, 0, r)}" fill="#fffaf0" stroke="#e46a5c" stroke-width="2" stroke-opacity=".6" transform="translate(${x} ${y}) scale(0)"/>`).join("");
+
+      // ---------------------------------------------------------------- ENTRY: INK BLOOM (clip blobs + wet-edge rings over w09)
+      const NX = 818, NY = 895;
+      const BL = [  // cx, cy, final radius, t0, dur, pigment, ease
+        [NX, NY, 1560, 0.0, 0.55, "#3e64a3", "sine.inOut"], [560, 1160, 560, 0.02, 0.4, "#2f8a8f", "power2.out"], [930, 1560, 760, 0.05, 0.46, "#c98a2c", "power2.out"],
+        [330, 470, 820, 0.07, 0.46, "#d95a55", "power2.out"], [190, 1440, 900, 0.1, 0.44, "#4c8c5f", "power2.out"], [880, 320, 640, 0.12, 0.42, "#7d5fb0", "power2.out"]];
+      let cm = "", fm = "";
+      BL.forEach(([x, y, R, t0, du, col], i) => { const d = blobD(1); const tr = `translate(${x} ${y}) rotate(0) scale(0.001)`;
+        cm += `<path id="w10-bc${i}" d="${d}" transform="${tr}"/>`;
+        fm += `<g id="w10-br${i}" opacity="1"><path class="w10-brp" d="${d}" transform="${tr}" fill="none" stroke="${col}" stroke-opacity=".10" stroke-width="44" vector-effect="non-scaling-stroke"/>
+          <path class="w10-brp" d="${d}" transform="${tr}" fill="none" stroke="${col}" stroke-opacity=".22" stroke-width="16" vector-effect="non-scaling-stroke"/>
+          <path class="w10-brp" d="${d}" transform="${tr}" fill="none" stroke="${col}" stroke-opacity=".75" stroke-width="4.5" vector-effect="non-scaling-stroke"/></g>`; });
+      // pigment splatter flicked off the nose
+      const SPL = Array.from({ length: 10 }, (_, i) => { const a = -1.4 + (i / 9) * 2.8 + (rnd() - 0.5) * 0.3, d = 60 + rnd() * 150; return [NX + 40 + Math.cos(a) * d, NY + Math.sin(a) * d, 3 + rnd() * 9, BL[i % BL.length][5]]; });
+      fm += SPL.map(([x, y, r, col], i) => `<path id="w10-sp${i}" d="${blobD(2)}" fill="${col}" fill-opacity=".7" transform="translate(${f1(x)} ${f1(y)}) scale(0)"/>`).join("");
+      q("bloom").innerHTML = cm; q("fx").innerHTML = fm;
+
+      // ---------------------------------------------------------------- the second copy of the world (bottom piece of the tear)
+      const A = q("world"), B = A.cloneNode(true);
+      B.id = "w10b-world"; B.querySelectorAll("[id]").forEach((e) => { e.id = e.id.replace(/^w10-/, "w10b-"); });
+      A.parentNode.insertBefore(B, A.nextSibling);
+      { const ca = A.querySelectorAll("canvas"), cb = B.querySelectorAll("canvas"); ca.forEach((c, i) => cb[i].getContext("2d").drawImage(c, 0, 0)); }
+      const $ = (n) => [root.querySelector("#w10-" + n), root.querySelector("#w10b-" + n)];
+      const $$ = (...ns) => ns.flatMap($);
+
+      // ---------------------------------------------------------------- bloom timeline
+      I(A, { clipPath: "url(#w10-bloom)" });
+      BL.forEach(([x, y, R, t0, du, col, ea], i) => {
+        const a0 = `translate(${x} ${y}) rotate(0) scale(0.001)`, a1 = `translate(${x} ${y}) rotate(${i % 2 ? -24 : 24}) scale(${f2(R / 100)})`;
+        const els = [q("bc" + i), ...root.querySelectorAll(`#w10-br${i} .w10-brp`)];
+        I(els, { attr: { transform: a0 } });
+        ft(els, { attr: { transform: a0 } }, { attr: { transform: a1 }, duration: du, ease: ea }, t0);
+        I(q("br" + i), { opacity: 1 });
+        ft(q("br" + i), { opacity: 1 }, { opacity: 0, duration: du * 0.4, ease: "power1.in" }, t0 + du * 0.6);
+      });
+      SPL.forEach(([x, y], i) => { const e = q("sp" + i), t = 0.02 + i * 0.012;
+        I(e, { attr: { transform: `translate(${f1(x)} ${f1(y)}) scale(0)` }, opacity: 1 });
+        ft(e, { attr: { transform: `translate(${f1(x)} ${f1(y)}) scale(0)` } }, { attr: { transform: `translate(${f1(x)} ${f1(y)}) scale(${f2(SPL[i][2] / 100)})` }, duration: 0.14, ease: "back.out(2)" }, t);
+        ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, 0.33); });
+      tl.set(A, { clipPath: "none" }, TR + 0.01);
+      tl.set(q("fx"), { display: "none" }, TR + 0.01);
+
+      // ---------------------------------------------------------------- parallax (the far layers ease down on "lembut")
+      const SL = 1.15, K = 0.55;
+      const scroll = (els, v, slow) => {
+        if (!slow) { ft(els, { x: 0 }, { x: -v * D, duration: D, ease: "none" }, 0); return; }
+        ft(els, { x: 0 }, { x: -v * SL, duration: SL, ease: "none" }, 0);
+        const dt = D - SL - 0.001;
+        ft(els, { x: -v * SL }, { x: -v * SL - v * dt * (1 - K / 2), duration: dt, ease: (p) => (p - (K / 2) * p * p) / (1 - K / 2) }, SL);
+      };
+      scroll($$("sky", "drops"), 40, true); scroll($("sun"), 52, true); scroll($("clouds"), 100, true); scroll($("far"), 160, true); scroll($("mid"), 380, true); scroll($("near"), 900, false);
+      for (const [n, d, a] of [["far", 0.03, 70], ["mid", 0.07, 110], ["near", 0.11, 150]]) { I($(n), { y: a }); ft($(n), { y: a }, { y: 0, duration: 0.85, ease: "power3.out" }, d); }
+      // birds drift + flap
+      I($("birds"), { x: 0, y: 0 }); ft($("birds"), { x: 0, y: 0 }, { x: -170, y: -46, duration: D, ease: "none" }, 0);
+      for (let i = 0; i < 3; i++) { const e = $("bw" + i), d = 0.3 + i * 0.04; I(e, { attr: { transform: "scale(1 1)" } });
+        for (let k = 0; (k + 1) * d <= D; k++) ft(e, { attr: { transform: "scale(1 1)" } }, { attr: { transform: "scale(1 -0.35)" }, duration: d / 2, yoyo: true, repeat: 1, ease: "sine.inOut" }, k * d); }
+      // "cat": the sun is painted in
+      I($("sun"), { scale: 0.45, opacity: 0, transformOrigin: "50% 50%" });
+      ft($("sun"), { scale: 0.45, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.75, ease: "power2.out" }, 0.34);
+      // title: the lifted-paper swipe, then each word blooms in wet (blur → sharp) on its word
+      I($("lift"), { scaleX: 0, opacity: 0, transformOrigin: "0% 50%" });
+      ft($("lift"), { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.55, ease: "power3.out" }, 0.26);
+      for (const [k, t] of [["1", 0.37], ["2", 0.83]]) {
+        const e = $("t" + k), b = $("tb" + k);
+        I(e, { opacity: 0, scale: 1.2, y: 8, filter: "blur(14px)", transformOrigin: "50% 70%" });
+        ft(e, { opacity: 0, scale: 1.2, y: 8, filter: "blur(14px)" }, { opacity: 1, scale: 1, y: 0, filter: "blur(0px)", duration: 0.5, ease: "power2.out" }, t);
+        I(b, { opacity: 0, scale: 1.45, transformOrigin: "50% 70%" });
+        ft(b, { opacity: 0, scale: 1.45 }, { opacity: 1, scale: 1.04, duration: 0.7, ease: "power2.out" }, t);
+      }
+      // "lembut": the words float like paper on water
+      for (const [k, ph] of [["1", 0], ["2", 0.22]]) { const e = $$("t" + k, "tb" + k);
+        ft(e, { y: 0, rotation: 0 }, { y: -7, rotation: k === "1" ? -1.6 : 1.4, duration: 0.38, yoyo: true, repeat: 1, ease: "sine.inOut" }, 1.24 + ph); }
+      // chip: 10/10 fills up in a wave, the tenth dot pops with sparkles
+      I($("chip"), { xPercent: -50, opacity: 0, y: 14 }); ft($("chip"), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.48);
+      for (let i = 0; i < 10; i++) { const e = $("d" + i), t = 0.52 + i * 0.034;
+        I(e, { scale: 0.4, opacity: 0.3 }); ft(e, { scale: 0.4, opacity: 0.3 }, { scale: 1, opacity: 1, duration: 0.22, ease: "back.out(3)" }, t); }
+      ft($("d9"), { scale: 1 }, { scale: 1.9, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, 1.05);
+      SPK.forEach(([x, y, r], i) => { const e = $("sk" + i), t = 0.9 + i * 0.05;
+        const a = `translate(${x} ${y}) rotate(0) scale(0)`, b = `translate(${x} ${y}) rotate(90) scale(1)`, c = `translate(${x} ${y}) rotate(150) scale(0)`;
+        I(e, { attr: { transform: a } }); ft(e, { attr: { transform: a } }, { attr: { transform: b }, duration: 0.25, ease: "back.out(3)" }, t);
+        ft(e, { attr: { transform: b } }, { attr: { transform: c }, duration: 0.3, ease: "power2.in" }, t + 0.42); });
+      // "air": clear-water drops land on the sky wash and bloom (cauliflower backruns)
+      DROPS.forEach(([x, y, t, s], i) => {
+        const dd = $("dd" + i), db = $("db" + i);
+        const d0 = `translate(${x} ${y - 170}) scale(0.9)`, d1 = `translate(${x} ${y}) scale(1)`, d2 = `translate(${x} ${y}) scale(0)`;
+        I(dd, { attr: { transform: `translate(${x} ${y - 170}) scale(0)` } });
+        tl.set(dd, { attr: { transform: d0 } }, t - 0.16);
+        ft(dd, { attr: { transform: d0 } }, { attr: { transform: d1 }, duration: 0.15, ease: "power2.in" }, t - 0.16);
+        ft(dd, { attr: { transform: d1 } }, { attr: { transform: d2 }, duration: 0.06, ease: "power1.in" }, t - 0.01);
+        const b0 = `translate(${x} ${y}) rotate(0) scale(0.02)`, b1 = `translate(${x} ${y}) rotate(${i % 2 ? 18 : -18}) scale(${s})`;
+        I(db, { attr: { transform: b0 } }); ft(db, { attr: { transform: b0 } }, { attr: { transform: b1 }, duration: 0.6, ease: "power3.out" }, t);
+      });
+      // petals + leaves drift (to the very end — they ride the torn pieces away)
+      PET.forEach((p) => {
+        const g = $("pg" + p.i), pp = $("pp" + p.i), du = D - p.t0 - 0.002;
+        const a = `translate(${f1(p.x0)} ${f1(p.y0)}) rotate(${f1(p.r0)}) scale(${f2(p.s)})`, b = `translate(${f1(p.x0 - p.vx * du)} ${f1(p.y0 + p.vy * du)}) rotate(${f1(p.r0 + p.spin * du)}) scale(${f2(p.s)})`;
+        I(g, { attr: { transform: a }, opacity: 0 });
+        ft(g, { attr: { transform: a } }, { attr: { transform: b }, duration: du, ease: "none" }, p.t0);
+        ft(g, { opacity: 0 }, { opacity: 0.95, duration: p.fade ? 0.3 : 0.05, ease: "power1.out" }, p.t0);
+        I(pp, { attr: { transform: "scale(1 1)" } });
+        for (let k = 0; p.t0 + (k + 1) * p.fp <= D; k++) ft(pp, { attr: { transform: "scale(1 1)" } }, { attr: { transform: "scale(0.25 1)" }, duration: p.fp / 2, yoyo: true, repeat: 1, ease: "sine.inOut" }, p.t0 + k * p.fp);
+      });
+
+      // ---------------------------------------------------------------- EXIT: the painting is ripped in two (s13 draws the stage + rims)
+      const yAt = (dy) => TEAR.pts.map(([x, y]) => `${x}px ${f1(y + dy)}px`);
+      const polyA = `polygon(0px 0px, 1080px 0px, ${yAt(2).reverse().join(", ")})`;
+      const polyB = `polygon(${yAt(-2).join(", ")}, 1080px 1920px, 0px 1920px)`;
+      I(B, { display: "none" });
+      tl.set(A, { clipPath: polyA }, TS);
+      tl.set(B, { display: "block", clipPath: polyB }, TS);
+      const tearApply = (t) => {
+        if (t <= 0) { A.style.transform = ""; B.style.transform = ""; return; }
+        const s = TEAR.state(t);
+        A.style.transform = `translate(${f2(s.ax)}px, ${f2(s.ay)}px) rotate(${s.ar.toFixed(3)}deg) scale(${s.as.toFixed(4)})`;
+        B.style.transform = `translate(${f2(s.bx)}px, ${f2(s.by)}px) rotate(${s.br.toFixed(3)}deg) scale(${s.bs.toFixed(4)})`;
+      };
+      const TP = { _t: 0 }; Object.defineProperty(TP, "t", { get() { return this._t; }, set(v) { this._t = v; tearApply(v); } });
+      I(TP, { t: 0 });
+      ft(TP, { t: 0 }, { t: TR - 0.002, duration: TR - 0.002, ease: "none" }, TS);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["w10"] = tl;
     })();

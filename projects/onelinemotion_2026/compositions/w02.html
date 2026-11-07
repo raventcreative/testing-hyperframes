@@ -1,10 +1,353 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-j2be" id="root" data-composition-id="w02" data-width="1080" data-height="1920"></div>
+  <style>
+    #w02-root { position: absolute; inset: 0; overflow: hidden; }
+    #w02-world { position: absolute; inset: 0; overflow: hidden; background: #2b5641; }
+    .w02-a { position: absolute; }
+    #w02-board { left: 0; top: 0; width: 1080px; height: 1920px;
+      background: radial-gradient(ellipse 780px 920px at 46% 38%, rgba(220, 255, 235, 0.06), rgba(220, 255, 235, 0) 72%),
+                  linear-gradient(180deg, #2f5d46 0%, #2c5843 50%, #264d3a 100%); }
+    #w02-grain { left: 0; top: 0; width: 1080px; height: 1920px; background: url(assets/brand/grain_256.png); opacity: 0.85; }
+    #w02-vig { left: 0; top: 0; width: 1080px; height: 1920px; background: radial-gradient(ellipse 780px 1200px at 50% 46%, rgba(6, 22, 14, 0) 58%, rgba(6, 22, 14, 0.42) 100%); }
+    #w02-title { left: 0; width: 1080px; top: 292px; text-align: center; font: 700 88px/1.12 Poppins, sans-serif; letter-spacing: -0.01em; white-space: nowrap; }
+    .w02-w { display: inline-block; position: relative; }
+    .w02-t { display: inline-block; padding: 0 6px 6px; color: transparent; -webkit-background-clip: text; background-clip: text; background-size: 256px 256px; }
+    #w02-ring { position: absolute; left: -30px; top: -4px; width: calc(100% + 60px); height: calc(100% + 14px); overflow: visible; }
+    .w02-chip { left: 50%; top: 420px; height: 46px; padding: 0 20px; border-radius: 23px; background: rgba(8, 14, 46, 0.86); display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 8px 20px rgba(4, 12, 8, 0.32), inset 0 0 0 1.5px rgba(255, 255, 255, 0.16); transform: translateX(-50%); white-space: nowrap; }
+    .w02-chip b { font: 700 24px/1 Poppins, sans-serif; color: #ffffff; letter-spacing: 0.02em; }
+    .w02-chip b em { font-style: normal; color: #01ccf7; }
+    .w02-chip i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, 0.26); margin-left: 6px; }
+    .w02-chip i.on { background: #01ccf7; box-shadow: 0 0 10px rgba(1, 204, 247, 0.8); }
+    .w02-er { left: 0; top: 0; width: 0; height: 0; }
+    .w02-er svg { position: absolute; left: -580px; top: -240px; overflow: visible; }
+  </style>
+  <div data-hf-id="hf-j2be" id="w02-root" data-composition-id="w02" data-width="1080" data-height="1920">
+    <svg class="w02-a" width="0" height="0" style="left:0;top:0">
+      <defs><clipPath id="w02-reveal" clipPathUnits="userSpaceOnUse"></clipPath></defs>
+    </svg>
+    <div id="w02-world">
+      <div class="w02-a" id="w02-board"></div>
+      <div class="w02-a" id="w02-grain"></div>
+      <svg class="w02-a" id="w02-smudge" width="1400" height="1920" viewBox="0 0 1400 1920" style="left:0;top:0"></svg>
+      <svg class="w02-a" id="w02-ghost" width="1700" height="1920" viewBox="0 0 1700 1920" style="left:0;top:0"></svg>
+      <div class="w02-a" id="w02-vig"></div>
+      <svg class="w02-a" id="w02-mid" width="2300" height="1920" viewBox="0 0 2300 1920" style="left:0;top:0"></svg>
+      <svg class="w02-a" id="w02-tray" width="4100" height="200" viewBox="0 0 4100 200" style="left:0;top:1740px"></svg>
+      <svg class="w02-a" id="w02-motes" width="4400" height="1920" viewBox="0 0 4400 1920" style="left:0;top:0"></svg>
+      <div class="w02-a" id="w02-title"><span class="w02-w"><span class="w02-t" id="w02-t1">Papan</span></span> <span class="w02-w"><span class="w02-t" id="w02-t2">Tulis</span></span> <span class="w02-w"><span class="w02-t" id="w02-t3">Sains</span><svg id="w02-ring" viewBox="0 0 100 100" preserveAspectRatio="none"><path id="w02-ringp" d="" fill="none" stroke="#f4f7f1" stroke-opacity=".9" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></span></div>
+      <div class="w02-a w02-chip" id="w02-chip"><b>2<em>/10</em></b><span id="w02-dots"></span></div>
+    </div>
+    <svg class="w02-a" id="w02-dust" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0;overflow:visible"></svg>
+    <div class="w02-a w02-er" id="w02-g2"></div>
+    <div class="w02-a w02-er" id="w02-g1"></div>
+    <div class="w02-a w02-er" id="w02-er"></div>
+  </div>
   <script>
     (function () {
+      // WORLD 2/10 — PAPAN TULIS SAINS: a green chalkboard; science doodles draw themselves in textured chalk while the board scrolls by.
+      // Entry: ERASER WIPE — a giant felt board-eraser pops out of the rocket's nose and wipes the previous world off in a big
+      // Z (up-right, sweep left, sweep right), the board appearing along its path (union of footprint stamps), chalk dust puffing.
+      // Parallax: smudges 50 · ghost formulas 120 · doodles 300 · chalk tray 900 · dust motes 1000 px/s.
+      const ID = "w02", D = 3.1167, TR = 0.55;
+      const root = document;   // the runtime strips the id of the template root: look elements up document-wide (ids are prefixed)
+      const $ = (id) => root.querySelector("#" + id);
+      const NS = "http://www.w3.org/2000/svg";
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.107);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };   // initial state: applied now (frame 0) AND on every re-seek
+      let seed = 23; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+      const R = (a, b) => a + (b - a) * rnd();
+      const f1 = (v) => v.toFixed(1);
+      const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+      // words (local s): Papan 0.20 · tulis 0.52 · sains 0.79 · digambar 1.03 · pakai 1.82 · kapur 2.00
+      const V_SM = 50, V_GH = 120, V_MID = 300, V_TRAY = 900, V_MOTE = 1000;
+
+      // ---------------------------------------------------------------- chalk texture (seeded canvas, generated once, tiles 256 px)
+      const TEX = (() => {
+        const N = 256, c = document.createElement("canvas"); c.width = c.height = N;
+        const g = c.getContext("2d"), im = g.createImageData(N, N), d = im.data;
+        const lat = (n) => { const a = []; for (let i = 0; i < n * n; i++) a.push(rnd()); return a; };
+        const vn = (a, n, x, y) => { const s = N / n, gx = x / s, gy = y / s, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy;
+          const v = (i, j) => a[(((j % n) + n) % n) * n + (((i % n) + n) % n)]; const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+          return (v(ix, iy) * (1 - sx) + v(ix + 1, iy) * sx) * (1 - sy) + (v(ix, iy + 1) * (1 - sx) + v(ix + 1, iy + 1) * sx) * sy; };
+        const A = lat(32), B = lat(128);
+        for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+          const n = 0.5 * vn(A, 32, x, y) + 0.5 * vn(B, 128, x, y);
+          let a = Math.min(1, Math.max(0, (n - 0.24) / 0.22));
+          a *= 0.7 + 0.3 * rnd(); if (rnd() < 0.07) a *= 0.15;
+          const i = (y * N + x) * 4; d[i] = 247; d[i + 1] = 250; d[i + 2] = 243; d[i + 3] = Math.round(255 * a);
+        }
+        g.putImageData(im, 0, 0); return c.toDataURL("image/png");
+      })();
+
+      // ---------------------------------------------------------------- hand-drawn path helpers
+      const cr = (P, closed) => {   // Catmull-Rom through points -> cubic path
+        let d = `M${f1(P[0][0])},${f1(P[0][1])}`; const n = P.length;
+        for (let i = 0; i < n - 1; i++) {
+          const p0 = P[i - 1] || (closed ? P[n - 2] : P[i]), p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || (closed ? P[1] : p2);
+          d += `C${f1(p1[0] + (p2[0] - p0[0]) / 6)},${f1(p1[1] + (p2[1] - p0[1]) / 6)} ${f1(p2[0] - (p3[0] - p1[0]) / 6)},${f1(p2[1] - (p3[1] - p1[1]) / 6)} ${f1(p2[0])},${f1(p2[1])}`;
+        }
+        return d;
+      };
+      // ellipse loop drawn by hand: starts at a0, sweeps a bit more than a full turn (chalk overshoot), radius wobble
+      const loop = (cx, cy, rx, ry, rot, a0 = -2.2, sweep = 6.75, jit = 0.04, n = 22) => {
+        const P = [], c = Math.cos(rot), s = Math.sin(rot), ph = R(0, 6);
+        for (let i = 0; i <= n; i++) { const a = a0 + (sweep * i) / n, k = 1 + jit * Math.sin(a * 2 + ph) + (i / n) * jit * 0.8;
+          const x = rx * k * Math.cos(a), y = ry * k * Math.sin(a); P.push([cx + x * c - y * s, cy + x * s + y * c]); }
+        return cr(P);
+      };
+      const wline = (x1, y1, x2, y2, bow = 4) => { const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, L = Math.hypot(x2 - x1, y2 - y1), nx = -(y2 - y1) / L, ny = (x2 - x1) / L, b = R(-bow, bow);
+        return `M${f1(x1)},${f1(y1)} Q${f1(mx + nx * b)},${f1(my + ny * b)} ${f1(x2)},${f1(y2)}`; };
+
+      // ---------------------------------------------------------------- the board: smudges (far) + ghost formulas (half-erased)
+      {
+        let m = "";
+        for (let i = 0; i < 9; i++) { const x = R(-100, 1300), y = R(380, 1800), w = R(90, 170), P = [];
+          for (let k = 0; k < 6; k++) P.push([x + k * R(70, 120), y + (k % 2 ? 1 : -1) * R(30, 90)]);
+          m += `<path d="${cr(P)}" fill="none" stroke="#e8f4ec" stroke-opacity="${R(0.025, 0.05).toFixed(3)}" stroke-width="${w.toFixed(0)}" stroke-linecap="round" stroke-linejoin="round"/>`; }
+        // fresh eraser streaks along the two wipe bands (left on the board by the entry eraser)
+        for (const [ya, yb, oa, ob, off] of [[415, 545, -400, 380, 0.22 * V_SM], [1433, 1554, -440, 400, 0.45 * V_SM]]) for (let k = 0; k < 9; k++) {
+          const o = R(oa, ob);
+          m += `<path d="${wline(-60 + off, ya + o, 1460 + off, yb + o, 10)}" fill="none" stroke="#eaf6ee" stroke-opacity="${R(0.025, 0.06).toFixed(3)}" stroke-width="${R(2, 7).toFixed(1)}" stroke-linecap="round"/>`; }
+        $("w02-smudge").innerHTML = m;
+      }
+      {
+        const T = (x, y, s, r, o, txt) => `<text x="${x}" y="${y}" transform="rotate(${r} ${x} ${y})" font-family="Poppins" font-weight="400" font-size="${s}" fill="#f2f8f2" fill-opacity="${o}">${txt}</text>`;
+        const S = (d, o, w = 4) => `<path d="${d}" fill="none" stroke="#f2f8f2" stroke-opacity="${o}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+        let m = "";
+        m += T(70, 690, 62, -4, 0.1, "v = s / t") + T(560, 640, 50, 3, 0.08, "x² + 4x = 0") + T(1130, 760, 58, -2, 0.09, "sin 30° = 0,5");
+        m += T(150, 1060, 54, 2, 0.08, "g = 9,8 m/s²") + T(980, 1450, 66, -3, 0.09, "PV = nRT") + T(60, 1700, 56, -2, 0.08, "W = F · s") + T(1240, 1180, 52, 4, 0.08, "1 + 1 = 2");
+        m += S("M 640,1030 L 640,1250 L 900,1250 Z", 0.08) + S(wline(640, 1220, 670, 1220, 1) + " L 670,1250", 0.08, 3);
+        m += S(`M 420,1560 Q 560,1300 700,1560`, 0.07) + S(wline(380, 1560, 740, 1560, 2), 0.07, 3) + S(wline(560, 1580, 560, 1300, 2), 0.07, 3);
+        m += S(loop(1360, 1560, 90, 90, 0, 0, 6.3, 0.02), 0.07) + S(wline(1360, 1560, 1445, 1530, 1), 0.07, 3);
+        $("w02-ghost").innerHTML = m;
+      }
+
+      // ---------------------------------------------------------------- the doodles (mid layer, chalk texture, draw themselves)
+      const mid = $("w02-mid");
+      mid.innerHTML = `<defs><pattern id="w02-chalk" patternUnits="userSpaceOnUse" width="256" height="256"><image href="${TEX}" width="256" height="256"/></pattern></defs>`;
+      const CH = 'fill="none" stroke="url(#w02-chalk)" stroke-linecap="round" stroke-linejoin="round"';
+      const draws = [];   // [el, t, dur, ease]
+      const P = (parent, d, t, dur, w = 6, ease = "power1.inOut") => { const p = el("path", { d, fill: "none", stroke: "url(#w02-chalk)", "stroke-width": w, "stroke-linecap": "round", "stroke-linejoin": "round" }, parent); draws.push([p, t, dur, ease]); return p; };
+      const G = (tx, ty, parent = mid) => el("g", { transform: `translate(${tx} ${ty})` }, parent);
+      // chalk text written letter by letter (tspans pop in)
+      const letters = [];
+      const TXT = (parent, x, y, size, parts, t, dt = 0.055) => {   // parts: [str, dy, scale]
+        const tx = el("text", { x, y, "font-family": "Poppins", "font-weight": "700", "font-size": size, fill: "url(#w02-chalk)", style: "white-space:pre" }, parent);
+        let k = 0;
+        for (const [s, dy = 0, sc = 1] of parts) { let first = true; for (const ch of s) { const a = {}; if (sc !== 1) a["font-size"] = size * sc; if (first && dy) a.dy = dy; first = false;
+          const sp = el("tspan", a, tx); sp.textContent = ch; if (ch !== " ") letters.push([sp, t + k * dt]); k++; } }
+        return tx;
+      };
+
+      // DNA helix (band A, above the robot) — drawn on "digambar"
+      { const g = G(900, 552), n = 64, a = [], b = []; let rungs = "";
+        for (let i = 0; i <= n; i++) { const x = (i / n) * 320, ph = (x / 160) * Math.PI * 2; a.push([x, -36 * Math.sin(ph)]); b.push([x, 36 * Math.sin(ph)]);
+          if (i % 4 === 2 && i < n) rungs += `M${f1(x)},${f1(-30 * Math.sin(ph))} L${f1(x)},${f1(30 * Math.sin(ph))} `; }
+        P(g, cr(a), 1.0, 0.34, 6); P(g, cr(b), 1.06, 0.34, 6); P(g, rungs, 1.18, 0.3, 3.5, "none"); }
+      // atom: three hand-drawn orbits, nucleus, electrons (orbit via nested rotations: exact ellipses, no squashed dots)
+      const AT = { x: 769, y: 1112, rx: 118, ry: 38 };
+      const electrons = [];
+      { const g = G(AT.x, AT.y);
+        [[0, 1.03], [60, 1.1], [-60, 1.17]].forEach(([deg, t], i) => {
+          const og = el("g", { transform: `rotate(${deg})` }, g);
+          P(og, loop(0, 0, AT.rx, AT.ry, 0, -2.4 + i, 6.7, 0.03, 24), t, 0.28, 5.5);
+          const sq = el("g", { transform: `scale(1 ${AT.ry / AT.rx})` }, og), spin = el("g", { transform: "rotate(0)" }, sq);
+          const eg = el("g", { transform: `translate(${AT.rx} 0) rotate(0)` }, spin);
+          el("ellipse", { cx: 0, cy: 0, rx: 9, ry: 9 * AT.rx / AT.ry, fill: "url(#w02-chalk)" }, eg);
+          electrons.push([spin, eg, t + 0.27, 0.8 + i * 0.07, i * 120]); });
+        const nuc = el("g", { id: "w02-nuc" }, g);
+        for (const [x, y] of [[-8, -6], [8, -5], [0, 8]]) el("circle", { cx: x, cy: y, r: 11, fill: "url(#w02-chalk)" }, nuc); }
+      // Erlenmeyer flask with bubbling liquid + "H2O"
+      const FL = { x: 1136, y: 1000 };
+      const bubbles = [];
+      { const g = G(FL.x, FL.y);
+        P(g, cr([[-22, 6], [-21, 70], [-24, 92], [-74, 200], [-70, 214], [0, 216], [70, 214], [74, 200], [24, 92], [21, 70], [22, 6]]), 1.1, 0.42, 6);
+        P(g, wline(-32, 6, 32, 6, 2), 1.48, 0.1, 6);
+        P(g, `M-50,150 Q-30,140 -12,150 T 26,150 T 52,150`, 1.42, 0.2, 4.5);
+        for (const [bx, r, d, t0] of [[-20, 7, 0.52, 1.5], [14, 5, 0.46, 1.62], [-2, 9, 0.6, 1.74]]) {
+          const c = el("circle", { cx: bx, cy: 204, r, fill: "none", stroke: "url(#w02-chalk)", "stroke-width": 3.5 }, g); bubbles.push([c, t0, d]); }
+        TXT(g, 96, 128, 60, [["H"], ["2", 14, 0.62], ["O", -14]], 1.46, 0.07); }
+      // E = mc² with a wavy double underline
+      { const g = G(444, 1495); TXT(g, 0, 0, 116, [["E = mc²"]], 1.18, 0.05);
+        P(g, `M -4,34 Q 90,24 190,32 T 386,30`, 1.5, 0.22, 6); P(g, `M 30,52 Q 120,44 210,50 T 360,48`, 1.62, 0.18, 4.5); }
+      // F = m·a (band A, enters later)
+      { const g = G(1290, 578); TXT(g, 0, 0, 66, [["F = m·a"]], 1.86, 0.05); P(g, wline(-6, 22, 236, 18, 3), 2.2, 0.16, 4.5); }
+      // graph axes; the chalk stick writes the wave packet on "kapur"
+      const GR = { x: 975, y: 1530 };
+      let wave = null;
+      { const g = G(GR.x, GR.y);
+        P(g, wline(-12, 0, 430, 0, 3) + " M 412,-12 L 432,0 L 412,12", 1.3, 0.3, 5);
+        P(g, wline(0, 104, 0, -134, 3) + " M -12,-116 L 0,-136 L 12,-116", 1.36, 0.26, 5);
+        const W = []; for (let i = 0; i <= 120; i++) { const x = 6 + (i / 120) * 392, env = Math.pow(Math.sin((Math.PI * (x - 6)) / 392), 1.3); W.push([x, -(12 + 78 * env) * Math.sin((x / 49) * Math.PI)]); }
+        wave = P(g, cr(W), 2.0, 0.46, 6.5, "none"); }
+      // solar orbit (band B, enters on "pakai")
+      const OR = { x: 1560, y: 1108, rx: 150, ry: 48 };
+      let planet = null;
+      { const g = G(OR.x, OR.y);
+        P(g, loop(0, 0, 24, 24, 0, -1.6, 6.6, 0.05, 14), 1.84, 0.16, 6);
+        let rays = ""; for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + 0.2; rays += `M${f1(Math.cos(a) * 36)},${f1(Math.sin(a) * 36)} L${f1(Math.cos(a) * 52)},${f1(Math.sin(a) * 52)} `; }
+        P(g, rays, 1.98, 0.18, 4.5, "none");
+        const og = el("g", { transform: "rotate(-8)" }, g);
+        P(og, loop(0, 0, OR.rx, OR.ry, 0, 0.6, 6.6, 0.025, 26), 1.9, 0.3, 4.5);
+        const sq = el("g", { transform: `scale(1 ${OR.ry / OR.rx})` }, og), spin = el("g", { transform: "rotate(0)" }, sq);
+        const pg = el("g", { transform: `translate(${OR.rx} 0) rotate(0)` }, spin);
+        el("ellipse", { cx: 0, cy: 0, rx: 13, ry: (13 * OR.rx) / OR.ry, fill: "url(#w02-chalk)" }, pg);
+        planet = [spin, pg, 2.16, 1.25, 200]; }
+      // right triangle + a² + b² = c² (band C, last second)
+      { const g = G(1500, 1640);
+        P(g, "M 0,0 L 0,-150 L 200,0 Z", 2.3, 0.36, 5.5, "none"); P(g, "M 0,-24 L 24,-24 L 24,0", 2.62, 0.1, 4);
+        TXT(g, 240, -40, 54, [["a² + b² = c²"]], 2.42, 0.045); }
+
+      // the chalk stick ("pakai kapur"): flies in, writes the wave, flicks away — lives in the doodle layer (scrolls with the board)
+      const stick = el("g", {}, mid), stickArt = el("g", { transform: "rotate(-58)" }, stick);
+      stickArt.innerHTML = `<g transform="translate(9 13)" opacity=".28"><rect x="6" y="-13" width="190" height="26" rx="12" fill="#0b2015"/></g>
+        <rect x="6" y="-13" width="190" height="26" rx="12" fill="#f6f6ef"/><rect x="6" y="3" width="190" height="10" rx="5" fill="#d7dacf"/>
+        <rect x="150" y="-13" width="46" height="26" rx="12" fill="#e9e6d8"/><ellipse cx="9" cy="0" rx="9" ry="12.5" fill="#ffffff"/>
+        <path d="M 40,-6 L 140,-6" stroke="#ffffff" stroke-width="3" stroke-opacity=".8" stroke-linecap="round"/>`;
+      const crumbs = el("g", {}, mid);
+
+      // ---------------------------------------------------------------- chalk tray (near, 900 px/s): wooden ledge with chalk pieces
+      {
+        let m = `<defs><linearGradient id="w02-wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a6334"/><stop offset=".5" stop-color="#7d4c25"/><stop offset="1" stop-color="#5e3718"/></linearGradient>
+          <linearGradient id="w02-tsh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1c12" stop-opacity="0"/><stop offset="1" stop-color="#0a1c12" stop-opacity=".5"/></linearGradient></defs>
+          <rect x="-10" y="0" width="4120" height="46" fill="url(#w02-tsh)"/><rect x="-10" y="46" width="4120" height="154" fill="url(#w02-wood)"/>
+          <rect x="-10" y="46" width="4120" height="10" fill="#c48a52"/><rect x="-10" y="56" width="4120" height="5" fill="#4a2a10" opacity=".45"/>`;
+        for (let k = 0; k < 14; k++) { const y = 74 + k * 9 + R(-3, 3), Q = []; for (let x = -20; x <= 4120; x += 260) Q.push([x, y + R(-4, 4)]); m += `<path d="${cr(Q)}" fill="none" stroke="#5a3415" stroke-opacity="${R(0.2, 0.45).toFixed(2)}" stroke-width="${R(1.5, 3).toFixed(1)}"/>`; }
+        for (let x = 700; x < 4100; x += 1000) m += `<rect x="${x}" y="46" width="4" height="154" fill="#3e220b" opacity=".6"/>`;
+        let x = 120; const cols = ["#f6f6ef", "#f6f6ef", "#ffe48a", "#ffb3c6", "#9fe0ff"];
+        while (x < 4000) { const w = R(46, 96), c = cols[Math.floor(R(0, 5))];
+          m += `<g transform="translate(${f1(x)} 33) rotate(${R(-6, 6).toFixed(1)})"><rect x="0" y="0" width="${f1(w)}" height="15" rx="7" fill="${c}"/><rect x="0" y="9" width="${f1(w)}" height="6" rx="3" fill="#000" opacity=".12"/></g>`;
+          if (rnd() < 0.55) m += `<ellipse cx="${f1(x + R(-40, 120))}" cy="47" rx="${f1(R(30, 80))}" ry="4" fill="#ffffff" opacity="${R(0.18, 0.35).toFixed(2)}"/>`;
+          x += R(180, 420); }
+        // a spare eraser lying in the tray
+        m += `<g transform="translate(1900 8)"><rect x="0" y="0" width="190" height="40" rx="9" fill="#c9c6bd"/><rect x="4" y="0" width="182" height="28" rx="8" fill="#b97d43"/><rect x="40" y="8" width="110" height="10" rx="5" fill="#8e5d31"/></g>`;
+        $("w02-tray").innerHTML = m;
+      }
+      // dust motes in front (near)
+      { let m = ""; for (let i = 0; i < 46; i++) { const y = rnd() < 0.5 ? R(470, 600) : R(990, 1760); m += `<circle cx="${f1(R(0, 4400))}" cy="${f1(y)}" r="${R(1.5, 4.2).toFixed(1)}" fill="#ffffff" opacity="${R(0.12, 0.4).toFixed(2)}"/>`; } $("w02-motes").innerHTML = m; }
+      { let m = ""; for (let i = 0; i < 10; i++) m += `<i class="${i < 2 ? "on" : ""}" id="w02-d${i}"></i>`; $("w02-dots").innerHTML = m; }
+
+      // ---------------------------------------------------------------- ENTRY: ERASER WIPE from the rocket's nose
+      // keyframes: t, x, y, scale; rotation per segment (art: long side along local x, it moves along its short axis)
+      const EL = 1060, EW = 380;
+      const KF = [[0, 840, 880, 0.22], [0.12, 1430, 540, 0.95], [0.29, -480, 380, 1], [0.36, -480, 1400, 1], [0.55, 1540, 1560, 1]];
+      const KR = [57, 95, 95, 96], RT = 0.03;
+      const E1 = gsap.parseEase("power1.inOut");
+      const at = (t) => { for (let i = 0; i < KF.length - 1; i++) { const a = KF[i], b = KF[i + 1]; if (t <= b[0]) { const u = E1(Math.max(0, (t - a[0]) / (b[0] - a[0])));
+        return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u, a[3] + (b[3] - a[3]) * u]; } } const z = KF[KF.length - 1]; return [z[1], z[2], z[3]]; };
+      const rotAt = (t) => { let r = KR[0]; for (let i = 1; i < KF.length - 1; i++) { const ti = KF[i][0]; if (t >= ti + RT) r = KR[i]; else if (t > ti - RT) r = KR[i - 1] + (KR[i] - KR[i - 1]) * E1((t - (ti - RT)) / (2 * RT)); } return r; };
+      // footprint = felt pad + streaky ends (felt streaks leave lines along the band edges)
+      let FP = `M${-EL / 2 + 40},${-EW / 2} H${EL / 2 - 40} Q${EL / 2},${-EW / 2} ${EL / 2},${-EW / 2 + 40} V${EW / 2 - 40} Q${EL / 2},${EW / 2} ${EL / 2 - 40},${EW / 2} H${-EL / 2 + 40} Q${-EL / 2},${EW / 2} ${-EL / 2},${EW / 2 - 40} V${-EW / 2 + 40} Q${-EL / 2},${-EW / 2} ${-EL / 2 + 40},${-EW / 2} Z`;
+      for (const sgn of [-1, 1]) { let x = EL / 2 - 6; for (let k = 0; k < 5; k++) { const w = R(3, 9), o = R(4, 34); const x0 = x + o; FP += ` M${f1(sgn * x0)},${-EW / 2 + 30} h${f1(sgn * w)} v${EW - 60} h${f1(-sgn * w)} Z`; x = x0 + w; } }
+      const stamps = $("w02-reveal");
+      for (let j = 0; j <= 66; j++) { const t = j / 120, [x, y, s] = at(t), r = rotAt(t);
+        const p = el("path", { d: FP, transform: "scale(0)" }, stamps);
+        tl.set(p, { attr: { transform: `translate(${f1(x)} ${f1(y)}) rotate(${r.toFixed(2)}) scale(${s.toFixed(3)})` } }, Math.max(0, t - 0.0004)); }
+      const world = $("w02-world");
+      I(world, { clipPath: "url(#w02-reveal)" });
+      tl.set(world, { clipPath: "none" }, TR + 0.01);
+      // the eraser (+ two smear ghosts trailing by 1/90 s)
+      const eraserArt = (full) => {
+        let g = "";
+        if (full) g += `<rect x="${-EL / 2 + 22}" y="${-EW / 2 + 30}" width="${EL}" height="${EW}" rx="46" fill="#081a10" opacity=".34"/>`;
+        g += `<rect x="${-EL / 2}" y="${-EW / 2}" width="${EL}" height="${EW}" rx="46" fill="#cfd2ca"/>`;
+        g += `<rect x="${-EL / 2 + 20}" y="${-EW / 2 + 18}" width="${EL - 40}" height="${EW - 44}" rx="36" fill="url(#w02-ewood)"/>`;
+        if (full) {
+          for (let k = 0; k < 11; k++) { const y = -EW / 2 + 40 + k * 26 + R(-4, 4), Q = []; for (let x = -EL / 2 + 40; x <= EL / 2 - 40; x += 120) Q.push([x, y + R(-5, 5)]); g += `<path d="${cr(Q)}" fill="none" stroke="#9b6534" stroke-opacity="${R(0.3, 0.55).toFixed(2)}" stroke-width="${R(2, 4).toFixed(1)}"/>`; }
+          g += `<rect x="-330" y="-40" width="660" height="80" rx="40" fill="#8e5a2c"/><rect x="-318" y="-32" width="636" height="30" rx="15" fill="#6b4019" opacity=".55"/>`;
+          g += `<path d="M ${-EL / 2 + 60},${-EW / 2 + 32} H ${EL / 2 - 60}" stroke="#f6d3a2" stroke-width="7" stroke-opacity=".55" stroke-linecap="round"/>`;
+          for (let k = 0; k < 26; k++) g += `<circle cx="${f1(R(-EL / 2 + 10, EL / 2 - 10))}" cy="${f1(EW / 2 - R(4, 16))}" r="${R(2, 6).toFixed(1)}" fill="#ffffff" opacity="${R(0.4, 0.85).toFixed(2)}"/>`;
+        }
+        return `<svg width="1160" height="480" viewBox="-580 -240 1160 480">${g}</svg>`;
+      };
+      $("w02-er").innerHTML = eraserArt(true); $("w02-g1").innerHTML = eraserArt(false); $("w02-g2").innerHTML = eraserArt(false);
+      const animEraser = (e, lag, op) => {
+        I(e, { x: KF[0][1], y: KF[0][2], scale: KF[0][3], rotation: KR[0], opacity: lag ? 0 : op });
+        if (lag) tl.set(e, { opacity: op }, lag);
+        for (let i = 0; i < KF.length - 1; i++) { const a = KF[i], b = KF[i + 1];
+          ft(e, { x: a[1], y: a[2], scale: a[3] }, { x: b[1], y: b[2], scale: b[3], duration: b[0] - a[0], ease: "power1.inOut" }, a[0] + lag);
+          if (i > 0) ft(e, { rotation: KR[i - 1] }, { rotation: KR[i], duration: 2 * RT, ease: "power1.inOut" }, a[0] - RT + lag); }
+        tl.set(e, { opacity: 0 }, TR + lag + 0.005);
+      };
+      animEraser($("w02-er"), 0, 1); animEraser($("w02-g1"), 1 / 90, 0.32); animEraser($("w02-g2"), 2 / 90, 0.14);
+      // chalk dust puffs (soft radial blobs) along the eraser's ends + a burst at the nose
+      const dust = $("w02-dust");
+      dust.innerHTML = `<defs><linearGradient id="w02-ewood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2ab6c"/><stop offset=".55" stop-color="#c88a4c"/><stop offset="1" stop-color="#a5693a"/></linearGradient><radialGradient id="w02-pg"><stop offset="0" stop-color="#ffffff" stop-opacity=".62"/><stop offset=".55" stop-color="#f2f6f0" stop-opacity=".26"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient></defs>`;
+      const puff = (t, x, y, r0, r1, dur, dx, dy, op = 1) => { const c = el("circle", { cx: x, cy: y, r: r0, fill: "url(#w02-pg)", opacity: 0 }, dust);
+        I(c, { attr: { r: r0, cx: x, cy: y }, opacity: 0 }); tl.set(c, { opacity: op }, t);
+        ft(c, { attr: { r: r0, cx: x, cy: y } }, { attr: { r: r1, cx: x + dx, cy: y + dy }, duration: dur, ease: "power2.out" }, t);
+        ft(c, { opacity: op }, { opacity: 0, duration: dur, ease: "power1.in" }, t); };
+      puff(0, 820, 880, 20, 120, 0.4, 30, -30, 0.9);
+      for (let j = 1; j <= 15; j++) { const t = (j / 15) * 0.53, [x, y, s] = at(t), r = (rotAt(t) * Math.PI) / 180, ux = Math.cos(r), uy = Math.sin(r);
+        for (const e of [-1, 1]) { const k = (EL / 2) * s * e * R(0.82, 1.02); puff(t, x + ux * k, y + uy * k, R(24, 46) * s, R(90, 170) * s, R(0.32, 0.5), R(-40, 40), R(-70, -10), R(0.6, 0.95)); }
+        if (j % 2) { const k = R(-0.4, 0.4) * EL * s; puff(t, x + ux * k, y + uy * k, 30 * s, R(110, 190) * s, 0.45, R(-30, 30), R(-40, 20), 0.5); } }
+      // falling chalk crumbs from the felt
+      for (let j = 0; j < 18; j++) { const t = R(0.05, 0.52), [x, y, s] = at(t), r = (rotAt(t) * Math.PI) / 180, k = R(-0.5, 0.5) * EL * s;
+        const cx = x + Math.cos(r) * k, cy = y + Math.sin(r) * k, c = el("circle", { cx: 0, cy: 0, r: R(2.5, 5.5), fill: "#f4f6f0", opacity: 0 }, dust);
+        I(c, { x: cx, y: cy, opacity: 0 }); tl.set(c, { opacity: R(0.6, 0.95) }, t);
+        ft(c, { x: cx, y: cy }, { x: cx + R(-30, 30), y: cy + R(120, 260), duration: 0.5, ease: "power2.in" }, t); ft(c, { opacity: 0.9 }, { opacity: 0, duration: 0.2, ease: "none" }, t + 0.3); }
+
+      // ---------------------------------------------------------------- parallax scroll (linear, whole scene)
+      const scroll = (e, v) => ft(e, { x: 0 }, { x: -v * D, duration: D, ease: "none" }, 0);
+      scroll($("w02-smudge"), V_SM); scroll($("w02-ghost"), V_GH); scroll(mid, V_MID); scroll($("w02-tray"), V_TRAY); scroll($("w02-motes"), V_MOTE);
+
+      // ---------------------------------------------------------------- title: chalk write-on per spoken word, teacher's circle on "sains"
+      for (const id of ["w02-t1", "w02-t2", "w02-t3"]) $(id).style.backgroundImage = `url(${TEX})`;
+      for (const [id, t, dur] of [["w02-t1", 0.15, 0.22], ["w02-t2", 0.47, 0.2], ["w02-t3", 0.74, 0.22]]) { const e = $(id);
+        I(e, { clipPath: "inset(0% 100% 0% 0%)", y: 6, rotation: -2, transformOrigin: "0% 80%" });
+        ft(e, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: dur, ease: "power1.inOut" }, t);
+        ft(e, { y: 6, rotation: -2 }, { y: 0, rotation: 0, duration: 0.45, ease: "back.out(2.2)" }, t); }
+      { const rp = $("w02-ringp"), Q = []; for (let i = 0; i <= 26; i++) { const a = -2.6 + (i / 26) * 6.9, k = 1 + 0.05 * Math.sin(a * 3) + (i / 26) * 0.06; Q.push([50 + 48 * k * Math.cos(a), 50 + 46 * k * Math.sin(a) - 4 * Math.cos(a)]); }
+        rp.setAttribute("d", cr(Q)); rp.setAttribute("pathLength", "1");
+        I(rp, { strokeDasharray: "1 1.2", strokeDashoffset: 1.05 }); ft(rp, { strokeDashoffset: 1.05 }, { strokeDashoffset: 0, duration: 0.34, ease: "power1.inOut" }, 0.86); }
+      ft($("w02-title"), { y: 0 }, { y: -6, duration: 0.55, yoyo: true, repeat: 2, ease: "sine.inOut" }, 1.0);
+      const chip = $("w02-chip"); I(chip, { opacity: 0, y: 14 }); ft(chip, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.5);
+      const d1 = $("w02-d1"); I(d1, { scale: 1 }); ft(d1, { scale: 1 }, { scale: 1.7, duration: 0.2, yoyo: true, repeat: 1, ease: "power2.out" }, 0.72);
+
+      // ---------------------------------------------------------------- doodles draw themselves ("digambar" and after)
+      for (const [p, t, dur, ease] of draws) { const L = p.getTotalLength() + 2;
+        I(p, { strokeDasharray: `${f1(L)} ${f1(L + 12)}`, strokeDashoffset: L + 6 });
+        ft(p, { strokeDashoffset: L + 6 }, { strokeDashoffset: 0, duration: dur, ease }, t); }
+      for (const [sp, t] of letters) { I(sp, { fillOpacity: 0 }); ft(sp, { fillOpacity: 0 }, { fillOpacity: 1, duration: 0.06, ease: "none" }, t); }
+      // nucleus pops, electrons + planet orbit (two counter-rotating groups → exact ellipse orbits)
+      { const nuc = $("w02-nuc"); I(nuc, { scale: 0, transformOrigin: "50% 50%" }); ft(nuc, { scale: 0 }, { scale: 1, duration: 0.35, ease: "back.out(3)" }, 1.08); }
+      for (const [spin, eg, t0, per, a0] of electrons.concat([planet])) {
+        const turns = (360 * (D - t0)) / per, rx = eg === planet[1] ? OR.rx : AT.rx;
+        I(eg, { opacity: 0 }); tl.set(eg, { opacity: 1 }, t0);
+        ft(spin, { attr: { transform: `rotate(${a0})` } }, { attr: { transform: `rotate(${f1(a0 + turns)})` }, duration: D - t0, ease: "none" }, t0);
+        ft(eg, { attr: { transform: `translate(${rx} 0) rotate(${-a0})` } }, { attr: { transform: `translate(${rx} 0) rotate(${f1(-a0 - turns)})` }, duration: D - t0, ease: "none" }, t0); }
+      // bubbles rise in the flask (loops)
+      for (const [c, t0, d] of bubbles) { I(c, { opacity: 0, attr: { cy: 204 } });
+        for (let k = 0; t0 + (k + 1) * d <= D; k++) { const t = t0 + k * d;
+          ft(c, { attr: { cy: 204 } }, { attr: { cy: 150 }, duration: d, ease: "power1.in" }, t);
+          ft(c, { opacity: 0 }, { opacity: 1, duration: d * 0.25, ease: "none" }, t); ft(c, { opacity: 1 }, { opacity: 0, duration: d * 0.2, ease: "none" }, t + d * 0.8); } }
+
+      // ---------------------------------------------------------------- "pakai kapur": the chalk stick writes the wave
+      {
+        const L = wave.getTotalLength(), N = 28, W0 = [GR.x, GR.y], tw0 = 2.0, tw = 0.46;
+        const pt = (u) => { const p = wave.getPointAtLength(u * L); return [W0[0] + p.x, W0[1] + p.y]; };
+        const s0 = pt(0), xin = [1220 + V_MID * 1.74, 1840], xout = [GR.x + 1300, 1120];
+        I(stick, { x: xin[0], y: xin[1], rotation: 18, opacity: 0, svgOrigin: "0 0" });
+        tl.set(stick, { opacity: 1 }, 1.74);
+        ft(stick, { x: xin[0], y: xin[1], rotation: 18 }, { x: s0[0], y: s0[1], rotation: 0, duration: 0.26, ease: "power3.out" }, 1.74);
+        let prev = s0;
+        for (let k = 1; k <= N; k++) { const p = pt(k / N); ft(stick, { x: prev[0], y: prev[1] }, { x: p[0], y: p[1], duration: tw / N, ease: "none" }, tw0 + ((k - 1) * tw) / N); prev = p; }
+        ft(stick, { rotation: 0 }, { rotation: -7, duration: tw / 4, yoyo: true, repeat: 3, ease: "sine.inOut" }, tw0);
+        ft(stick, { x: prev[0], y: prev[1], rotation: 0 }, { x: xout[0], y: xout[1], rotation: 34, duration: 0.42, ease: "power2.in" }, tw0 + tw + 0.04);
+        // chalk crumbs falling from the tip while it writes
+        for (let k = 0; k < 12; k++) { const u = (k + 0.5) / 12, p = pt(u), t = tw0 + u * tw, c = el("circle", { cx: 0, cy: 0, r: R(2, 4.2), fill: "#f6f7f2" }, crumbs);
+          I(c, { x: p[0], y: p[1], opacity: 0 }); tl.set(c, { opacity: R(0.55, 0.9) }, t);
+          ft(c, { x: p[0], y: p[1] }, { x: p[0] + R(-14, 14), y: p[1] + R(70, 140), duration: 0.55, ease: "power2.in" }, t); ft(c, { opacity: 0.9 }, { opacity: 0, duration: 0.2, ease: "none" }, t + 0.35); }
+        // tap-dust at the start
+        for (let k = 0; k < 3; k++) { const c = el("circle", { cx: s0[0], cy: s0[1], r: 8, fill: "#ffffff", opacity: 0 }, crumbs);
+          I(c, { attr: { r: 6 }, opacity: 0 }); tl.set(c, { opacity: 0.35 }, tw0 + k * 0.03); ft(c, { attr: { r: 6 } }, { attr: { r: 30 + k * 12 }, duration: 0.35, ease: "power2.out" }, tw0 + k * 0.03); ft(c, { opacity: 0.35 }, { opacity: 0, duration: 0.35, ease: "power1.in" }, tw0 + k * 0.03); }
+      }
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["w02"] = tl;
     })();

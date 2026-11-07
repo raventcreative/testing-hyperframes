@@ -1,10 +1,291 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-o2e1" id="root" data-composition-id="s14" data-width="1080" data-height="1920"></div>
+  <style>
+    #s14-root { position: absolute; inset: 0; overflow: hidden; }
+    .s14-a { position: absolute; }
+    #s14-blob { left: -60px; top: 160px; width: 1200px; height: 940px; border-radius: 50%; background: radial-gradient(ellipse, rgba(1,204,247,.15), rgba(1,204,247,0) 64%); }
+    #s14-line { left: 70px; top: 456px; width: 940px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, rgba(1,204,247,0), #01ccf7 16%, #e9fbff 50%, #01ccf7 84%, rgba(1,204,247,0)); box-shadow: 0 0 22px rgba(1,204,247,.75); }
+    .s14-card { border-radius: 36px; overflow: hidden; background: linear-gradient(160deg, rgba(27,44,112,.96), rgba(10,17,54,.97) 70%);
+      box-shadow: 0 50px 90px -36px rgba(0,0,0,.65), 0 0 0 1.5px rgba(106,223,255,.32), 0 0 70px rgba(1,204,247,.14); }
+    /* ---------------- prompt box ---------------- */
+    #s14-box { left: 70px; top: 322px; width: 940px; height: 272px; }
+    #s14-focus { left: 0; top: 0; width: 940px; height: 272px; border-radius: 36px; box-shadow: inset 0 0 0 2.5px rgba(1,204,247,.9), inset 0 0 40px rgba(1,204,247,.16); }
+    #s14-tile { left: 28px; top: 22px; width: 66px; height: 66px; border-radius: 19px; background: #f5f3ec; box-shadow: 0 10px 24px -8px rgba(0,0,0,.45); overflow: hidden; }
+    #s14-mark { left: 12px; top: 12px; width: 42px; height: 42px; background: #d97757; -webkit-mask: url(assets/icons/si-claude.svg) center / contain no-repeat; mask: url(assets/icons/si-claude.svg) center / contain no-repeat; }
+    #s14-glint { left: -50px; top: -14px; width: 30px; height: 96px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    #s14-name { left: 112px; top: 32px; font: 700 36px/1.2 Poppins, sans-serif; letter-spacing: -0.02em; color: #fff; white-space: nowrap; }
+    #s14-dots { left: 262px; top: 52px; width: 60px; height: 12px; }
+    #s14-dots i { position: absolute; top: 0; width: 11px; height: 11px; border-radius: 50%; background: #6adfff; box-shadow: 0 0 10px rgba(1,204,247,.8); }
+    #s14-chip { right: 28px; top: 34px; height: 42px; padding: 0 18px 0 14px; border-radius: 21px; display: flex; align-items: center; gap: 8px; background: rgba(1,204,247,.14);
+      box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.55); font: 700 21px/1 Poppins, sans-serif; letter-spacing: .02em; color: #6adfff; white-space: nowrap; overflow: hidden; }
+    #s14-chip .ic { width: 22px; height: 22px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-type.svg) center / contain no-repeat; mask: url(assets/icons/lucide-type.svg) center / contain no-repeat; }
+    #s14-cglint { left: -60px; top: 0; width: 46px; height: 42px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.7), rgba(255,255,255,0)); }
+    #s14-rule { left: 28px; top: 108px; width: 884px; height: 1.5px; background: rgba(255,255,255,.1); }
+    #s14-ph { left: 30px; top: 128px; font: 400 46px/1.25 Poppins, sans-serif; letter-spacing: -0.01em; color: #7c8eb9; white-space: pre; }
+    #s14-txt { left: 30px; top: 128px; font: 700 46px/1.25 Poppins, sans-serif; letter-spacing: -0.015em; color: #fff; white-space: pre; }
+    .s14-ln { position: relative; height: 1.25em; }
+    .s14-ch { visibility: hidden; }
+    .s14-k { color: #6adfff; }
+    .s14-cr { display: inline-block; position: relative; width: 0; height: 1em; vertical-align: -0.1em; }
+    .s14-cr::after { content: ""; position: absolute; left: 2px; top: 0; width: 4px; height: 1.06em; border-radius: 2px; background: #01ccf7; box-shadow: 0 0 10px rgba(1,204,247,.85); }
+    #s14-sglow { left: 806px; top: 142px; width: 136px; height: 136px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,.55), rgba(1,204,247,0) 68%); }
+    #s14-send { left: 836px; top: 172px; width: 76px; height: 76px; border-radius: 50%; background-color: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.4); }
+    #s14-send i { position: absolute; left: 19px; top: 19px; width: 38px; height: 38px; background-color: #6adfff; transform: rotate(-90deg);
+      -webkit-mask: url(assets/icons/lucide-arrow-right.svg) center / contain no-repeat; mask: url(assets/icons/lucide-arrow-right.svg) center / contain no-repeat; }
+    #s14-shim { left: 0; top: -60px; width: 170px; height: 400px; background: linear-gradient(90deg, rgba(160,235,255,0), rgba(160,235,255,.16), rgba(160,235,255,0)); }
+    /* ---------------- video card ---------------- */
+    #s14-vid { left: 70px; top: 628px; width: 940px; height: 300px; }
+    #s14-strip { left: 24px; top: 22px; width: 892px; height: 170px; overflow: hidden; border-radius: 12px; }
+    .s14-perf { left: 0; width: 892px; height: 6px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.17) 0 10px, rgba(255,255,255,0) 10px 18px); }
+    .s14-fr { top: 12px; width: 82px; height: 146px; border-radius: 9px; overflow: hidden; background: #16235a; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+    .s14-fc { left: 0; top: 0; width: 82px; height: 146px; }
+    .s14-fc svg { position: absolute; left: 0; top: 0; }
+    .s14-sk { left: 0; top: 0; width: 82px; height: 146px; background: linear-gradient(180deg, #1c2a6a, #121c4c); }
+    .s14-sk::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 14px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); }
+    .s14-fl { left: 0; top: 0; width: 82px; height: 146px; background: #eafcff; }
+    .s14-fn { left: 5px; top: 5px; min-width: 20px; height: 18px; padding: 0 5px; border-radius: 9px; background: rgba(8,14,46,.82); font: 700 12px/18px Poppins, sans-serif; color: #fff; text-align: center; }
+    #s14-sline { left: 0; top: 12px; }
+    #s14-roc { left: 0; top: 0; width: 28px; height: 28px; background: #fff; -webkit-mask: url(assets/icons/lucide-rocket.svg) center / contain no-repeat; mask: url(assets/icons/lucide-rocket.svg) center / contain no-repeat; }
+    #s14-rocw { left: 852px; top: 0; width: 28px; height: 28px; filter: drop-shadow(0 0 2px #0b1440) drop-shadow(0 0 6px rgba(1,204,247,.9)); }
+    #s14-sshim { left: 0; top: 0; width: 150px; height: 170px; background: linear-gradient(90deg, rgba(160,235,255,0), rgba(160,235,255,.22), rgba(160,235,255,0)); }
+    #s14-play { left: 424px; top: 61px; width: 92px; height: 92px; border-radius: 50%; background: rgba(255,255,255,.96); box-shadow: 0 0 0 9px rgba(255,255,255,.2), 0 16px 32px rgba(0,0,0,.45); }
+    #s14-play i { position: absolute; left: 27px; top: 25px; width: 42px; height: 42px; background: #0b1440; -webkit-mask: url(assets/icons/lucide-play.svg) center / contain no-repeat; mask: url(assets/icons/lucide-play.svg) center / contain no-repeat; }
+    #s14-film { left: 26px; top: 226px; width: 32px; height: 32px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-film.svg) center / contain no-repeat; mask: url(assets/icons/lucide-film.svg) center / contain no-repeat; }
+    #s14-vlab { left: 70px; top: 222px; font: 700 28px/40px Poppins, sans-serif; color: #fff; white-space: nowrap; }
+    #s14-track { left: 200px; top: 238px; width: 600px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.14); }
+    #s14-fill { left: 0; top: 0; width: 600px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #01ccf7, #6adfff); box-shadow: 0 0 12px rgba(1,204,247,.7); }
+    #s14-knob { left: -10px; top: -6px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(1,204,247,.35), 0 2px 6px rgba(0,0,0,.4); }
+    #s14-time { left: 826px; top: 224px; font: 400 25px/36px Poppins, sans-serif; color: #cfe0f7; white-space: nowrap; }
+    #s14-vshade { left: 0; top: 0; width: 940px; height: 300px; background: #040822; }
+    /* ---------------- fx (outside the cards) ---------------- */
+    #s14-ring { left: 98px; top: 344px; width: 66px; height: 66px; border-radius: 22px; border: 3px solid #6adfff; box-shadow: 0 0 18px rgba(1,204,247,.6); }
+    #s14-rip { left: 906px; top: 494px; width: 76px; height: 76px; border-radius: 50%; border: 3px solid #6adfff; }
+    .s14-sp { left: 0; top: 0; width: 36px; height: 36px; filter: drop-shadow(0 0 4px rgba(1,204,247,1)) drop-shadow(0 0 12px rgba(1,204,247,.7)); }
+    .s14-sp i { position: absolute; left: 0; top: 0; width: 36px; height: 36px; -webkit-mask: url(assets/icons/lucide-sparkle.svg) center / 100% 100% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 90% 90% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 80% 80% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 70% 70% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 60% 60% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 50% 50% no-repeat, radial-gradient(circle 7px at 50% 50%, #000 0 96%, rgba(0,0,0,0) 100%); mask: url(assets/icons/lucide-sparkle.svg) center / 100% 100% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 90% 90% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 80% 80% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 70% 70% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 60% 60% no-repeat, url(assets/icons/lucide-sparkle.svg) center / 50% 50% no-repeat, radial-gradient(circle 7px at 50% 50%, #000 0 96%, rgba(0,0,0,0) 100%); }
+  </style>
+  <div data-hf-id="hf-o2e1" id="s14-root" data-composition-id="s14" data-width="1080" data-height="1920">
+    <div class="s14-a" id="s14-blob"></div>
+    <div class="s14-a" id="s14-line"></div>
+    <div class="s14-a s14-card" id="s14-box">
+      <div class="s14-a" id="s14-focus"></div>
+      <div class="s14-a" id="s14-tile"><div class="s14-a" id="s14-mark"></div><div class="s14-a" id="s14-glint"></div></div>
+      <div class="s14-a" id="s14-name">Claude</div>
+      <div class="s14-a" id="s14-dots"><i id="s14-d0" style="left:0"></i><i id="s14-d1" style="left:20px"></i><i id="s14-d2" style="left:40px"></i></div>
+      <div class="s14-a" id="s14-chip"><span class="ic"></span>1 kalimat<span class="s14-a" id="s14-cglint"></span></div>
+      <div class="s14-a" id="s14-rule"></div>
+      <div class="s14-a" id="s14-ph">Ketik satu kalimat…</div>
+      <div class="s14-a" id="s14-txt"></div>
+      <div class="s14-a" id="s14-sglow"></div>
+      <div class="s14-a" id="s14-send"><i id="s14-sico"></i></div>
+      <div class="s14-a" id="s14-shim"></div>
+    </div>
+    <div class="s14-a s14-card" id="s14-vid">
+      <div class="s14-a" id="s14-strip">
+        <div class="s14-a s14-perf" style="top:0"></div>
+        <div class="s14-a s14-perf" style="top:164px"></div>
+        <div id="s14-frames"></div>
+        <svg class="s14-a" id="s14-sline" width="892" height="146" viewBox="0 0 892 146" style="overflow:visible">
+          <path id="s14-slu" d="" fill="none" stroke="#0b1440" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path id="s14-slp" d="" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="s14-a" id="s14-rocw"><div class="s14-a" id="s14-roc"></div></div>
+        <div class="s14-a" id="s14-sshim"></div>
+        <div class="s14-a" id="s14-play"><i></i></div>
+      </div>
+      <div class="s14-a" id="s14-film"></div>
+      <div class="s14-a" id="s14-vlab">1 video</div>
+      <div class="s14-a" id="s14-track"><div class="s14-a" id="s14-fill"></div><div class="s14-a" id="s14-knob"></div></div>
+      <div class="s14-a" id="s14-time">0:45</div>
+      <div class="s14-a" id="s14-vshade"></div>
+    </div>
+    <div class="s14-a" id="s14-ring"></div>
+    <div class="s14-a" id="s14-rip"></div>
+    <div id="s14-sparks"></div>
+  </div>
   <script>
     (function () {
+      // s14 "Cukup ketik satu kalimat, Claude yang bikinin videonya."
+      // A cyan line (the one line of the film) opens into a prompt box · "ketik": the sentence types itself · "kalimat": "1 kalimat" tag ·
+      // send · "Claude": the mark whips round + shimmer · "yang bikinin": a video card unfolds from the box, ten sparks fly from the
+      // Claude tile and develop the ten world frames of a film strip (one line runs through all ten) · "videonya": play button + progress.
+      // HAND-OVER: the prompt box lifts away, the video card glides up to the top slot and flips edge-on — s15's comment row is its back
+      // face (s15 flips in from -90° at the same centre, same perspective).
+      const D = 2.8667;
+      const root = document;   // the runtime strips the id of the template root: look elements up document-wide (ids are prefixed)
+      const $ = (id) => root.querySelector("#" + id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 2.857);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };   // initial state: applied now (frame 0) AND on every re-seek
+      const blink = (el, a, b, half) => { let on = true; for (let t = a + half; t < b - 1e-4; t += half) { on = !on; tl.set(el, { opacity: on ? 1 : 0 }, t); } };
+      // words (local s): Cukup 0.20 · ketik 0.57 · satu 0.75 · kalimat 0.85 · Claude 1.58 · yang 1.83 · bikinin 2.00 · videonya 2.26
+
+      // ---------------------------------------------------------------- build: typed sentence (chars + one caret per position)
+      const LINES = ["Bikinin video: roket lewat", "10 dunia, 10 gaya animasi"], KEY = 14;
+      { let h = "", n = 0;
+        LINES.forEach((ln, li) => {
+          h += `<div class="s14-ln"><i class="s14-cr" id="s14-crl${li}"></i>`;
+          for (const c of ln) { h += `<span class="s14-ch${li === 0 && n < KEY ? " s14-k" : ""}" id="s14-c${n}">${c}</span><i class="s14-cr" id="s14-cr${n}"></i>`; n++; }
+          h += "</div>";
+        });
+        $("s14-txt").innerHTML = h; }
+      // ---------------------------------------------------------------- build: ten tiny world frames (palettes + one motif each)
+      const WB = ["linear-gradient(180deg,#8fd8ff,#45b2ff)", "linear-gradient(180deg,#356a50,#264d3a)", "linear-gradient(180deg,#1a1a40,#2b1e5a)",
+        "linear-gradient(180deg,#1d0838,#3a0f63 62%,#22073d)", "radial-gradient(circle,#f0a500 1.5px,rgba(0,0,0,0) 1.9px) 0 0/7px 7px, #ffd21f",
+        "linear-gradient(180deg,#1f6f78,#f2a55e)", "linear-gradient(180deg,#ffd6dc,#ffe7d4)", "linear-gradient(180deg,#05070d,#0b0d12 60%,#151b30)",
+        "repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 17px,rgba(80,130,220,.18) 17px 18px), #ffffff", "#f6efe2"];
+      const star = (cx, cy, n, r1, r2) => { let p = ""; for (let i = 0; i < n * 2; i++) { const a = (Math.PI * i) / n - Math.PI / 2, r = i % 2 ? r2 : r1; p += `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)} `; } return p; };
+      const WS = [
+        `<circle cx="60" cy="30" r="11" fill="#ffd84a"/><ellipse cx="24" cy="42" rx="13" ry="5.5" fill="#fff"/><ellipse cx="31" cy="38" rx="7" ry="5" fill="#fff"/><path d="M0 110 Q30 88 82 104 V146 H0Z" fill="#5ec463"/><path d="M0 126 Q46 106 82 120 V146 H0Z" fill="#3c9c4c"/>`,
+        `<g fill="none" stroke="#eef3ee" stroke-width="1.6" opacity=".92"><ellipse cx="41" cy="42" rx="17" ry="6.5" transform="rotate(30 41 42)"/><ellipse cx="41" cy="42" rx="17" ry="6.5" transform="rotate(-30 41 42)"/><path d="M8 116 q8 -12 16 0 t16 0 t16 0 t16 0"/></g><circle cx="41" cy="42" r="3.2" fill="#eef3ee"/><rect y="138" width="82" height="8" fill="#8a5a33"/>`,
+        `<g shape-rendering="crispEdges"><rect x="9" y="14" width="3" height="3" fill="#fff"/><rect x="30" y="30" width="3" height="3" fill="#fff"/><rect x="18" y="52" width="3" height="3" fill="#fff"/><rect x="70" y="50" width="3" height="3" fill="#fff"/><rect x="54" y="14" width="15" height="15" fill="#ffe28a"/><rect x="62" y="12" width="10" height="10" fill="#1d1b46"/><rect x="5" y="98" width="20" height="48" fill="#3b2f7a"/><rect x="29" y="84" width="22" height="62" fill="#4a3b96"/><rect x="55" y="104" width="23" height="42" fill="#3b2f7a"/><rect x="10" y="106" width="4" height="4" fill="#ffd34d"/><rect x="17" y="118" width="4" height="4" fill="#ffd34d"/><rect x="34" y="92" width="4" height="4" fill="#ff5a5a"/><rect x="42" y="104" width="4" height="4" fill="#ffd34d"/><rect x="34" y="118" width="4" height="4" fill="#ffd34d"/><rect x="61" y="112" width="4" height="4" fill="#ffd34d"/><rect x="69" y="124" width="4" height="4" fill="#ff5a5a"/></g>`,
+        `<circle cx="41" cy="72" r="19" fill="#ff8a3d"/><circle cx="41" cy="72" r="19" fill="#ff4fd8" opacity=".45"/><rect x="18" y="74" width="46" height="2" fill="#3a0f63"/><rect x="18" y="79" width="46" height="3" fill="#3a0f63"/><rect x="18" y="85" width="46" height="4" fill="#3a0f63"/><rect y="90" width="82" height="56" fill="#1a0630"/><g stroke="#ff4fd8" stroke-width="1.2" opacity=".9"><path d="M0 90 H82"/><path d="M41 90 L-30 146 M41 90 L5 146 M41 90 L41 146 M41 90 L77 146 M41 90 L112 146"/><path d="M0 100 H82 M0 113 H82 M0 131 H82"/></g><path d="M0 90 H82" stroke="#6adfff" stroke-width="1.6"/>`,
+        `<polygon points="${star(41, 54, 11, 27, 14)}" fill="#ff3b30" stroke="#111" stroke-width="2.4" stroke-linejoin="round"/><polygon points="${star(41, 54, 11, 15, 8)}" fill="#fff36b"/><rect x="1.5" y="1.5" width="79" height="143" fill="none" stroke="#111" stroke-width="3"/>`,
+        `<polygon points="58,20 72,30 62,42" fill="#ffd36b"/><polygon points="0,112 22,76 42,112" fill="#1e5d66"/><polygon points="22,76 42,112 50,94" fill="#2b8a8f"/><polygon points="38,112 60,66 82,106" fill="#ff9a3d"/><polygon points="60,66 82,106 82,82" fill="#e07b2a"/><polygon points="0,112 82,104 82,146 0,146" fill="#16474e"/><polygon points="0,112 40,108 18,146 0,146" fill="#123b41"/>`,
+        `<circle cx="60" cy="30" r="10" fill="#ffe08a"/><circle cx="57" cy="27" r="3.5" fill="#fff6d6"/><circle cx="21" cy="46" r="7" fill="#fff"/><circle cx="31" cy="42" r="9" fill="#fff"/><circle cx="41" cy="47" r="6" fill="#fff"/><ellipse cx="18" cy="132" rx="42" ry="28" fill="#ff9b7a"/><ellipse cx="70" cy="138" rx="36" ry="24" fill="#ff7b54"/><ellipse cx="12" cy="118" rx="12" ry="5" fill="#ffc2ad" opacity=".8"/>`,
+        `<circle cx="12" cy="18" r="1" fill="#fff"/><circle cx="66" cy="12" r="1.2" fill="#fff"/><circle cx="30" cy="34" r=".9" fill="#fff"/><circle cx="72" cy="40" r="1" fill="#fff"/><circle cx="50" cy="26" r=".8" fill="#fff"/><circle cx="41" cy="210" r="88" fill="none" stroke="#6adfff" stroke-width="6" opacity=".25"/><circle cx="41" cy="210" r="86" fill="#10204a" stroke="#9fe9ff" stroke-width="1.4"/><rect x="4" y="56" width="74" height="1.6" fill="#ffc14d" opacity=".9"/><circle cx="41" cy="57" r="2.6" fill="#fff3d0"/>`,
+        `<g fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="64" cy="24" r="6"/><path d="M64 13 v-3 M73 24 h3 M55 24 h-3 M70 17 l2 -2 M58 17 l-2 -2"/><circle cx="41" cy="62" r="7"/><path d="M41 69 V94 M41 76 L28 64 M41 76 L54 64 M41 94 L32 113 M41 94 L50 113 M6 116 H76"/></g>`,
+        `<circle cx="58" cy="30" r="12" fill="#f4a582" opacity=".75"/><ellipse cx="40" cy="60" rx="26" ry="9" fill="#b8d6f2" opacity=".5"/><ellipse cx="20" cy="120" rx="36" ry="24" fill="#7fb6e8" opacity=".55"/><ellipse cx="66" cy="128" rx="34" ry="20" fill="#9fd0c0" opacity=".65"/><circle cx="16" cy="102" r="7" fill="#3e8f6a" opacity=".55"/>`,
+      ];
+      { let h = "";
+        for (let i = 0; i < 10; i++) {
+          h += `<div class="s14-a s14-fr" id="s14-fr${i}" style="left:${i * 90}px">` +
+               `<div class="s14-a s14-fc" id="s14-fc${i}" style="background:${WB[i]}"><svg width="82" height="146" viewBox="0 0 82 146">${WS[i]}</svg></div>` +
+               `<div class="s14-a s14-fn">${i + 1}</div><div class="s14-a s14-sk" id="s14-sk${i}"></div><div class="s14-a s14-fl" id="s14-fl${i}"></div></div>`;
+        }
+        $("s14-frames").innerHTML = h; }
+      // the one line running through all ten frames (gentle wave, ends at a tiny rocket)
+      const LY = (x) => 80 + 9 * Math.sin(x / 64) - 6 * Math.sin(x / 151 + 1.2);
+      { let d = "M 6 " + LY(6).toFixed(1); for (let x = 16; x <= 852; x += 10) d += " L " + x + " " + LY(x).toFixed(1);
+        $("s14-slu").setAttribute("d", d); $("s14-slp").setAttribute("d", d); }
+      // sparks (one per frame)
+      { let h = ""; for (let i = 0; i < 10; i++) h += `<div class="s14-a s14-sp" id="s14-sp${i}"><i style="background:${i % 2 ? "#ffffff" : "#6adfff"}"></i></div>`; $("s14-sparks").innerHTML = h; }
+
+      // ---------------------------------------------------------------- ENTRY: one line opens into the prompt box
+      const blob = $("s14-blob"), line = $("s14-line"), box = $("s14-box");
+      I(blob, { opacity: 0, scale: 0.75 }); ft(blob, { opacity: 0, scale: 0.75 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power2.out" }, 0.04);
+      I(line, { scaleX: 0.06, opacity: 1, transformOrigin: "50% 50%" });
+      ft(line, { scaleX: 0.06 }, { scaleX: 1, duration: 0.24, ease: "expo.out" }, 0);
+      ft(line, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, 0.17);
+      I(box, { scaleY: 0.016, opacity: 0, transformOrigin: "50% 50%" });
+      tl.set(box, { opacity: 1 }, 0.08);
+      ft(box, { scaleY: 0.016 }, { scaleY: 1, duration: 0.5, ease: "expo.out" }, 0.08);
+      ["s14-tile", "s14-name", "s14-rule", "s14-ph", "s14-send"].forEach((id, i) => {
+        I($(id), { opacity: 0, y: 16 }); ft($(id), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 0.2 + i * 0.045); });
+      // caret waits at the start of the empty field
+      const crl0 = $("s14-crl0"), crl1 = $("s14-crl1");
+      root.querySelectorAll("#s14-txt .s14-cr").forEach((e) => I(e, { opacity: 0 }));
+      root.querySelectorAll("#s14-txt .s14-ch").forEach((e) => I(e, { visibility: "hidden" }));
+      tl.set(crl0, { opacity: 1 }, 0.3); blink(crl0, 0.3, 0.58, 0.14);
+
+      // ---------------------------------------------------------------- "ketik": the sentence types itself
+      const focus = $("s14-focus");
+      I(focus, { opacity: 0 }); ft(focus, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 0.53);
+      ft(focus, { opacity: 1 }, { opacity: 0.45, duration: 0.5, ease: "power2.inOut" }, 1.55);
+      const T0 = 0.59, T1 = 1.42, TXT = LINES[0] + LINES[1];
+      const gaps = []; { let s = 11; const r = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+        for (let k = 1; k < TXT.length; k++) { const p = TXT[k - 1]; let g = 0.75 + 0.5 * r(); if (p === ":") g += 2.4; if (p === ",") g += 1.8; if (p === " ") g += 0.35; if (k === LINES[0].length) g += 2.8; gaps.push(g); } }
+      const gsum = gaps.reduce((a, b) => a + b, 0);
+      let cur = crl0, tk = T0;
+      const ph = $("s14-ph");
+      tl.set(ph, { opacity: 0 }, T0 - 0.005);
+      for (let k = 0; k < TXT.length; k++) {
+        if (k > 0) {
+          const g = (gaps[k - 1] / gsum) * (T1 - T0);
+          if (k === LINES[0].length) { tl.set(cur, { opacity: 0 }, tk + g * 0.5); tl.set(crl1, { opacity: 1 }, tk + g * 0.5); cur = crl1; }   // line break
+          tk += g;
+        }
+        const ch = $("s14-c" + k), cr = $("s14-cr" + k);
+        tl.set(ch, { visibility: "visible" }, tk);
+        tl.set(cur, { opacity: 0 }, tk); tl.set(cr, { opacity: 1 }, tk); cur = cr;
+      }
+      blink(cur, T1, 1.5, 0.08); tl.set(cur, { opacity: 0 }, 1.5);
+      // "satu kalimat": tag pops in the header
+      const chip = $("s14-chip");
+      I(chip, { opacity: 0, scale: 0, transformOrigin: "100% 50%" }); tl.set(chip, { opacity: 1 }, 0.83);
+      ft(chip, { scale: 0 }, { scale: 1, duration: 0.42, ease: "back.out(2.6)" }, 0.83);
+      I($("s14-cglint"), { x: 0 }); ft($("s14-cglint"), { x: 0 }, { x: 220, duration: 0.42, ease: "power2.inOut" }, 0.98);
+      // sentence complete: send activates, is pressed
+      const send = $("s14-send"), sico = $("s14-sico"), sglow = $("s14-sglow");
+      I(send, { backgroundColor: "rgba(255,255,255,0.06)", scale: 1 }); I(sico, { backgroundColor: "#6adfff" }); I(sglow, { opacity: 0, scale: 0.6 });
+      ft(send, { backgroundColor: "rgba(255,255,255,0.06)" }, { backgroundColor: "#01ccf7", duration: 0.14, ease: "power2.out" }, 1.4);
+      ft(sico, { backgroundColor: "#6adfff" }, { backgroundColor: "#07113a", duration: 0.14, ease: "power2.out" }, 1.4);
+      ft(sglow, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.25, ease: "power2.out" }, 1.4);
+      ft(send, { scale: 1 }, { scale: 0.82, duration: 0.07, ease: "power2.in" }, 1.47);
+      ft(send, { scale: 0.82 }, { scale: 1, duration: 0.34, ease: "back.out(3)" }, 1.54);
+      ft(sglow, { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 1.7);
+      const rip = $("s14-rip");
+      I(rip, { opacity: 0, scale: 1 }); tl.set(rip, { opacity: 1 }, 1.53);
+      ft(rip, { scale: 1, opacity: 0.95 }, { scale: 2.5, opacity: 0, duration: 0.5, ease: "power2.out" }, 1.53);
+
+      // ---------------------------------------------------------------- "Claude": the mark whips round + shimmer
+      const tile = $("s14-tile"), mark = $("s14-mark"), glint = $("s14-glint"), ring = $("s14-ring"), shim = $("s14-shim");
+      I(mark, { rotation: 0 }); ft(mark, { rotation: 0 }, { rotation: 360, duration: 0.95, ease: "power3.out" }, 1.52);
+      ft(tile, { scale: 1 }, { scale: 1.16, duration: 0.15, yoyo: true, repeat: 1, ease: "power2.out" }, 1.53);
+      I(glint, { x: 0, rotation: 22 }); ft(glint, { x: 0 }, { x: 150, duration: 0.42, ease: "power2.inOut" }, 1.58);
+      I(ring, { opacity: 0, scale: 1 }); tl.set(ring, { opacity: 1 }, 1.57);
+      ft(ring, { scale: 1, opacity: 1 }, { scale: 2.1, opacity: 0, duration: 0.55, ease: "power2.out" }, 1.57);
+      I(shim, { x: -240, rotation: 16 }); ft(shim, { x: -240 }, { x: 1120, duration: 0.62, ease: "power2.inOut" }, 1.56);
+      ft($("s14-name"), { scale: 1 }, { scale: 1.07, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "0% 50%" }, 1.58);
+      // thinking dots next to "Claude"
+      const dots = [0, 1, 2].map((i) => $("s14-d" + i)), DT = $("s14-dots");
+      I(DT, { opacity: 0 }); ft(DT, { opacity: 0 }, { opacity: 1, duration: 0.15 }, 1.64); ft(DT, { opacity: 1 }, { opacity: 0, duration: 0.18 }, 2.24);
+      dots.forEach((d, i) => { I(d, { y: 0 }); for (let c = 0; c < 2; c++) { const t = 1.66 + i * 0.08 + c * 0.28;
+        ft(d, { y: 0 }, { y: -10, duration: 0.12, ease: "sine.out" }, t); ft(d, { y: -10 }, { y: 0, duration: 0.12, ease: "sine.in" }, t + 0.12); } });
+
+      // ---------------------------------------------------------------- "yang bikinin": video card unfolds, ten sparks develop ten worlds
+      const vid = $("s14-vid"), vshade = $("s14-vshade");
+      I(vid, { opacity: 0, rotationX: -90, y: 0, scale: 1, transformPerspective: 1400, transformOrigin: "50% 0%" });
+      tl.set(vid, { opacity: 1 }, 1.74);
+      ft(vid, { rotationX: -90 }, { rotationX: 0, duration: 0.52, ease: "expo.out" }, 1.74);
+      I(vshade, { opacity: 0.6 }); ft(vshade, { opacity: 0.6 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 1.74);
+      const sshim = $("s14-sshim");
+      I(sshim, { x: -170 }); ft(sshim, { x: -170 }, { x: 900, duration: 0.5, ease: "power1.inOut" }, 1.84);
+      for (let i = 0; i < 10; i++) {
+        const sp = $("s14-sp" + i), t0 = 1.84 + i * 0.026, dur = 0.27, land = t0 + dur;
+        const sx = 131 - 18, sy = 377 - 18, ex = 135 + 90 * i - 18, ey = 735 - 18;
+        I(sp, { x: sx, y: sy, opacity: 0, scale: 0.4, rotation: 0 });
+        tl.set(sp, { opacity: 1 }, t0);
+        ft(sp, { x: sx }, { x: ex, duration: dur, ease: "power1.inOut" }, t0);
+        ft(sp, { y: sy }, { y: ey, duration: dur, ease: "power2.in" }, t0);
+        ft(sp, { scale: 0.4, rotation: 0 }, { scale: 1.15, rotation: 200, duration: dur, ease: "power1.out" }, t0);
+        ft(sp, { opacity: 1, scale: 1.15 }, { opacity: 0, scale: 0.3, duration: 0.1, ease: "power2.in" }, land - 0.02);
+        const fc = $("s14-fc" + i), sk = $("s14-sk" + i), fl = $("s14-fl" + i);
+        I(fc, { scale: 1.2 }); I(sk, { opacity: 1 }); I(fl, { opacity: 0 });
+        tl.set(fl, { opacity: 0.9 }, land); ft(fl, { opacity: 0.9 }, { opacity: 0, duration: 0.24, ease: "power2.out" }, land);
+        tl.set(sk, { opacity: 0 }, land);
+        ft(fc, { scale: 1.2 }, { scale: 1, duration: 0.34, ease: "power3.out" }, land);
+      }
+      // the one line draws through all ten worlds, the rocket pops at its head
+      const SL = 870;
+      [$("s14-slu"), $("s14-slp")].forEach((p) => { I(p, { attr: { "stroke-dasharray": SL + " " + (SL + 20), "stroke-dashoffset": SL } });
+        ft(p, { attr: { "stroke-dashoffset": SL } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.32, ease: "power1.inOut" }, 2.12); });
+      const rocw = $("s14-rocw");
+      I(rocw, { y: LY(852) - 14 + 12, rotation: 45, scale: 0, opacity: 0 });
+      tl.set(rocw, { opacity: 1 }, 2.4);
+      ft(rocw, { scale: 0 }, { scale: 1, duration: 0.32, ease: "back.out(3)" }, 2.4);
+
+      // ---------------------------------------------------------------- "videonya": play + progress
+      const play = $("s14-play");
+      I(play, { opacity: 0, scale: 0 }); tl.set(play, { opacity: 1 }, 2.28);
+      ft(play, { scale: 0 }, { scale: 1, duration: 0.42, ease: "back.out(2.4)" }, 2.28);
+      tl.set(vid, { transformOrigin: "50% 50%" }, 2.265);
+      ft(vid, { scale: 1 }, { scale: 1.025, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 2.27);
+      const fill = $("s14-fill"), knob = $("s14-knob");
+      I(fill, { scaleX: 0, transformOrigin: "0% 50%" }); I(knob, { x: 0 });
+      ft(fill, { scaleX: 0 }, { scaleX: 1, duration: D - 2.34, ease: "none" }, 2.34);
+      ft(knob, { x: 0 }, { x: 600, duration: D - 2.34, ease: "none" }, 2.34);
+
+      // ---------------------------------------------------------------- HAND-OVER: box lifts away, the card glides up and flips edge-on
+      ft(box, { y: 0, opacity: 1, scale: 1 }, { y: -120, opacity: 0, scale: 0.92, duration: 0.3, ease: "power2.in" }, 2.5);
+      ft(blob, { opacity: 1 }, { opacity: 0.5, duration: 0.3, ease: "power1.inOut" }, D - 0.32);
+      ft(vid, { y: 0 }, { y: -300, duration: 0.34, ease: "power3.inOut" }, D - 0.34);
+      tl.set(vid, { transformOrigin: "50% 50%" }, D - 0.28);
+      ft(vid, { rotationX: 0 }, { rotationX: 90, duration: 0.27, ease: "power2.in" }, D - 0.27);
+      ft(vshade, { opacity: 0 }, { opacity: 0.55, duration: 0.27, ease: "power2.in" }, D - 0.27);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s14"] = tl;
     })();

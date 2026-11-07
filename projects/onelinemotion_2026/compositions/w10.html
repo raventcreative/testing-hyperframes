@@ -25,6 +25,7 @@
       <canvas class="w10-a" id="w10-paper" width="1080" height="1920" style="left:0;top:0"></canvas>
       <canvas class="w10-a" id="w10-sky" width="1200" height="1130" style="left:0;top:0"></canvas>
       <canvas class="w10-a" id="w10-sun" width="380" height="380" style="left:690px;top:372px"></canvas>
+      <div class="w10-a" id="w10-blooms" style="left:0;top:0;width:1200px;height:1130px"></div>
       <svg class="w10-a" id="w10-drops" width="1200" height="1130" viewBox="0 0 1200 1130" style="left:0;top:0"></svg>
       <canvas class="w10-a" id="w10-clouds" width="1420" height="560" style="left:0;top:430px"></canvas>
       <svg class="w10-a" id="w10-birds" width="1080" height="1100" viewBox="0 0 1080 1100" style="left:0;top:0"></svg>
@@ -145,12 +146,12 @@
         const lg = g.createLinearGradient(0, 0, 0, h);
         lg.addColorStop(0, "rgba(78,134,196,0.66)"); lg.addColorStop(0.4, "rgba(132,178,220,0.44)"); lg.addColorStop(0.7, "rgba(238,196,170,0.36)"); lg.addColorStop(1, "rgba(246,212,178,0)");
         g.fillStyle = lg; g.fillRect(0, 0, w, h);
-        for (let k = 0; k < 8; k++) wash(g, ell((k / 7) * w + (rnd() - 0.5) * 140, 40 + rnd() * 300, 200 + rnd() * 170, 130 + rnd() * 120), "#3f78bd", { n: 16, alpha: 0.034, edge: 0.03, edgeCol: "#2f5f9e" });
+        for (let k = 0; k < 8; k++) wash(g, ell((k / 7) * w + (rnd() - 0.5) * 140, 40 + rnd() * 300, 200 + rnd() * 170, 130 + rnd() * 120), "#3f78bd", { n: 16, alpha: 0.034 });
         for (let k = 0; k < 4; k++) wash(g, ell(rnd() * w, 380 + rnd() * 260, 160 + rnd() * 120, 70 + rnd() * 60), "#8a8fd0", { n: 12, alpha: 0.028 });
         for (let k = 0; k < 5; k++) wash(g, ell((k / 4) * w + (rnd() - 0.5) * 100, 860 + rnd() * 140, 260 + rnd() * 120, 80 + rnd() * 50), "#f0a688", { n: 14, alpha: 0.034 });
         // backruns (cauliflower blooms) already dried into the sky
-        for (let k = 0; k < 5; k++) { const x = rnd() * w, y = 80 + rnd() * 520, r = 40 + rnd() * 70; const P = deform(ell(x, y, r, r * (0.8 + rnd() * 0.3), 16), 2, 0.12);
-          g.save(); poly(g, P); g.globalCompositeOperation = "destination-out"; g.globalAlpha = 0.22; g.fill(); g.globalCompositeOperation = "source-over"; g.globalAlpha = 0.16; g.strokeStyle = "#2f5f9e"; g.lineWidth = 2; g.stroke(); g.restore(); }
+        for (let k = 0; k < 3; k++) { const x = rnd() * w, y = 80 + rnd() * 520, r = 40 + rnd() * 70; const P = deform(ell(x, y, r, r * (0.8 + rnd() * 0.3), 16), 2, 0.12);
+          g.save(); poly(g, P); g.globalCompositeOperation = "destination-out"; g.globalAlpha = 0.22; g.fill(); g.globalCompositeOperation = "source-over"; g.globalAlpha = 0.08; g.strokeStyle = "#2f5f9e"; g.lineWidth = 2; g.stroke(); g.restore(); }
         granulate(c, 0.2, 0.08); }
 
       // ---------------------------------------------------------------- sun blot
@@ -227,20 +228,26 @@
       const blobD = (amp = 1) => { const ph = [rnd() * 6.28, rnd() * 6.28, rnd() * 6.28, rnd() * 6.28]; let d = "";
         for (let i = 0; i <= 120; i++) { const a = (i / 120) * Math.PI * 2, r = 100 * (1 + amp * (0.05 * Math.sin(3 * a + ph[0]) + 0.035 * Math.sin(7 * a + ph[1]) + 0.022 * Math.sin(13 * a + ph[2]) + 0.012 * Math.sin(29 * a + ph[3])));
           d += (i ? "L" : "M") + f2(r * Math.cos(a)) + "," + f2(r * Math.sin(a)); } return d + "Z"; };
-      const DROPS = [[120, 560, 0.86, 0.6], [975, 690, 0.92, 0.7], [330, 740, 0.99, 0.5], [930, 985, 1.05, 0.55]];
-      q("drops").innerHTML = DROPS.map(([x, y], i) => `<g id="w10-db${i}" transform="translate(${x} ${y}) scale(0.01)"><path d="${blobD(1.4)}" fill="#ffffff" fill-opacity=".26"/>
-          <path d="${blobD(1.6)}" fill="none" stroke="#4d7fb6" stroke-opacity=".5" stroke-width="3.2"/><path d="${blobD(1.2)}" transform="scale(0.78)" fill="none" stroke="#4d7fb6" stroke-opacity=".18" stroke-width="7"/></g>
-        <path id="w10-dd${i}" d="M0,-16 C 5,-6 9,0 9,6 C 9,12 4,16 0,16 C -4,16 -9,12 -9,6 C -9,0 -5,-6 0,-16 Z" fill="#4d7fb6" fill-opacity=".85" transform="translate(${x} ${y - 160}) scale(0)"/>`).join("");
+      const DROPS = [[120, 560, 0.86, 0.85], [975, 690, 0.92, 1.0], [330, 740, 0.99, 0.72], [930, 985, 1.05, 0.8]];
+      DROPS.forEach(([x, y], i) => {
+        const c = mk(240, 240), g = c.getContext("2d"); c.className = "w10-a"; c.id = "w10-wb" + i; c.style.left = (x - 120) + "px"; c.style.top = (y - 120) + "px";
+        const bs = deform(ell(120, 120, 80, 72, 9), 2, 0.2); wash(g, bs, "#fffaf0", { n: 14, alpha: 0.055, d0: 1, a0: 0.1, a1: 0.12 });
+        g.save(); g.strokeStyle = "#3d6eae";
+        for (let k = 0; k < 10; k++) { poly(g, deform(bs.map((p) => [120 + (p[0] - 120) * 1.04, 120 + (p[1] - 120) * 1.04, 1]), 2, 0.12)); g.globalAlpha = 0.08; g.lineWidth = 1.6 + rnd() * 3.2; g.stroke(); }
+        for (let k = 0; k < 6; k++) { const a = rnd() * 6.283, r = 12 + rnd() * 16; poly(g, deform(ell(120 + Math.cos(a) * 78, 120 + Math.sin(a) * 72, r, r, 10), 2, 0.14)); g.globalAlpha = 0.07; g.lineWidth = 1.5; g.stroke(); }
+        g.restore(); granulate(c, 0.1, 0.05); q("blooms").appendChild(c);
+      });
+      q("drops").innerHTML = DROPS.map(([x, y], i) => `<path id="w10-dd${i}" d="M0,-16 C 5,-6 9,0 9,6 C 9,12 4,16 0,16 C -4,16 -9,12 -9,6 C -9,0 -5,-6 0,-16 Z" fill="#4d7fb6" fill-opacity=".85" transform="translate(${x} ${y - 160}) scale(0)"/>`).join("");
       q("birds").innerHTML = [[150, 640, 1], [236, 600, 0.8], [212, 690, 0.7]].map(([x, y, s], i) => `<g transform="translate(${x} ${y}) scale(${s})"><path id="w10-bw${i}" d="M -26,0 Q -13,-14 0,0 Q 13,-14 26,0" fill="none" stroke="#3a4d7a" stroke-opacity=".8" stroke-width="4" stroke-linecap="round" transform="scale(1 1)"/></g>`).join("");
       // petals + leaves: drift in on "lembut"
       const PET = [];
-      for (let i = 0; i < 16; i++) {
-        const leaf = i % 4 === 3, s = 1.1 + rnd() * 0.8, fromR = i % 3 === 0;
+      for (let i = 0; i < 22; i++) {
+        const leaf = i % 5 === 4, s = 1.5 + rnd() * 0.9, fromR = i % 3 === 0;
         const x0 = fromR ? 1110 + rnd() * 160 : 140 + rnd() * 900, y0 = fromR ? 260 + rnd() * 900 : 520 + rnd() * 760;
-        PET.push({ i, leaf, s, x0, y0, t0: 1.0 + i * 0.03, r0: rnd() * 360, vx: 380 + rnd() * 200, vy: 70 + rnd() * 90, spin: (rnd() < 0.5 ? -1 : 1) * (150 + rnd() * 200), fp: 0.32 + rnd() * 0.2, fade: !fromR });
+        PET.push({ i, leaf, s, x0, y0, t0: 1.0 + i * 0.022, r0: rnd() * 360, vx: 380 + rnd() * 200, vy: 70 + rnd() * 90, spin: (rnd() < 0.5 ? -1 : 1) * (150 + rnd() * 200), fp: 0.32 + rnd() * 0.2, fade: !fromR });
       }
       q("petals").innerHTML = PET.map((p) => `<g id="w10-pg${p.i}" transform="translate(${f1(p.x0)} ${f1(p.y0)}) rotate(${f1(p.r0)}) scale(${f2(p.s)})" opacity="0"><path id="w10-pp${p.i}" transform="scale(1 1)" ` +
-        (p.leaf ? `d="M0,-15 C 9,-7 8,8 0,15 C -8,8 -9,-7 0,-15 Z" fill="url(#w10-gleaf)" stroke="#3f7349" stroke-opacity=".35" stroke-width="1"/>` : `d="M0,-12 C 7,-12 11,-2 6,7 C 3,12 -3,12 -6,7 C -11,-2 -7,-12 0,-12 Z M 0,-12 L 0,-6" fill="url(#w10-gpet)" stroke="#c9566a" stroke-opacity=".35" stroke-width="1"/>`) + `</g>`).join("");
+        (p.leaf ? `d="M0,-15 C 9,-7 8,8 0,15 C -8,8 -9,-7 0,-15 Z" fill="url(#w10-gleaf)" stroke="#3f7349" stroke-opacity=".35" stroke-width="1"/>` : `d="M-3,-13 C -9,-12 -12,-3 -7,7 C -4,12 4,12 7,7 C 12,-3 9,-12 3,-13 L 0,-9 Z" fill="url(#w10-gpet)" stroke="#c9566a" stroke-opacity=".4" stroke-width="0.9"/>`) + `</g>`).join("");
       const STAR = (x, y, r) => `M ${x},${y - r} Q ${x + r * 0.16},${y - r * 0.16} ${x + r},${y} Q ${x + r * 0.16},${y + r * 0.16} ${x},${y + r} Q ${x - r * 0.16},${y + r * 0.16} ${x - r},${y} Q ${x - r * 0.16},${y - r * 0.16} ${x},${y - r} Z`;
       const SPK = [[712, 214, 15], [742, 262, 9], [352, 220, 11], [318, 262, 7]];
       q("spk").innerHTML = SPK.map(([x, y, r], i) => `<path id="w10-sk${i}" d="${STAR(0, 0, r)}" fill="#fffaf0" stroke="#e46a5c" stroke-width="2" stroke-opacity=".6" transform="translate(${x} ${y}) scale(0)"/>`).join("");
@@ -248,14 +255,17 @@
       // ---------------------------------------------------------------- ENTRY: INK BLOOM (clip blobs + wet-edge rings over w09)
       const NX = 818, NY = 895;
       const BL = [  // cx, cy, final radius, t0, dur, pigment, ease
-        [NX, NY, 1560, 0.0, 0.55, "#3e64a3", "sine.inOut"], [560, 1160, 560, 0.02, 0.4, "#2f8a8f", "power2.out"], [930, 1560, 760, 0.05, 0.46, "#c98a2c", "power2.out"],
-        [330, 470, 820, 0.07, 0.46, "#d95a55", "power2.out"], [190, 1440, 900, 0.1, 0.44, "#4c8c5f", "power2.out"], [880, 320, 640, 0.12, 0.42, "#7d5fb0", "power2.out"]];
-      let cm = "", fm = "";
+        [NX, NY, 1560, 0.0, 0.55, "#3e64a3", "sine.out"], [960, 1640, 720, 0.08, 0.45, "#c98a2c", "sine.out"],
+        [290, 420, 780, 0.1, 0.43, "#d95a55", "sine.out"], [160, 1520, 840, 0.14, 0.4, "#4c8c5f", "sine.out"], [920, 250, 600, 0.16, 0.37, "#7d5fb0", "sine.out"]];
+      let cm = "", fm = "", mm = "";
       BL.forEach(([x, y, R, t0, du, col], i) => { const d = blobD(1); const tr = `translate(${x} ${y}) rotate(0) scale(0.001)`;
         cm += `<path id="w10-bc${i}" d="${d}" transform="${tr}"/>`;
-        fm += `<g id="w10-br${i}" opacity="1"><path class="w10-brp" d="${d}" transform="${tr}" fill="none" stroke="${col}" stroke-opacity=".10" stroke-width="44" vector-effect="non-scaling-stroke"/>
-          <path class="w10-brp" d="${d}" transform="${tr}" fill="none" stroke="${col}" stroke-opacity=".22" stroke-width="16" vector-effect="non-scaling-stroke"/>
-          <path class="w10-brp" d="${d}" transform="${tr}" fill="none" stroke="${col}" stroke-opacity=".75" stroke-width="4.5" vector-effect="non-scaling-stroke"/></g>`; });
+        mm += `<path id="w10-bm${i}" d="${d}" transform="${tr}" fill="#000"/>`;
+        fm += `<g id="w10-br${i}" opacity="1"><path class="w10-brp" d="${d}" transform="${tr}" fill="none" stroke="${col}" stroke-opacity=".08" stroke-width="56" vector-effect="non-scaling-stroke"/>
+          <path class="w10-brp" d="${d}" transform="${tr}" fill="none" stroke="${col}" stroke-opacity=".18" stroke-width="18" vector-effect="non-scaling-stroke"/>
+          <path class="w10-brp" d="${d}" transform="${tr}" fill="none" stroke="${col}" stroke-opacity=".5" stroke-width="3.2" vector-effect="non-scaling-stroke"/></g>`; });
+      // the wet-edge rings only show at the advancing front: masked out of the bloom interiors (blobs at 96 %)
+      fm = `<defs><mask id="w10-fxm" maskUnits="userSpaceOnUse" x="0" y="0" width="1080" height="1920"><rect x="0" y="0" width="1080" height="1920" fill="#fff"/>${mm}</mask></defs><g mask="url(#w10-fxm)">${fm}</g>`;
       // pigment splatter flicked off the nose
       const SPL = Array.from({ length: 10 }, (_, i) => { const a = -1.4 + (i / 9) * 2.8 + (rnd() - 0.5) * 0.3, d = 60 + rnd() * 150; return [NX + 40 + Math.cos(a) * d, NY + Math.sin(a) * d, 3 + rnd() * 9, BL[i % BL.length][5]]; });
       fm += SPL.map(([x, y, r, col], i) => `<path id="w10-sp${i}" d="${blobD(2)}" fill="${col}" fill-opacity=".7" transform="translate(${f1(x)} ${f1(y)}) scale(0)"/>`).join("");
@@ -273,11 +283,12 @@
       I(A, { clipPath: "url(#w10-bloom)" });
       BL.forEach(([x, y, R, t0, du, col, ea], i) => {
         const a0 = `translate(${x} ${y}) rotate(0) scale(0.001)`, a1 = `translate(${x} ${y}) rotate(${i % 2 ? -24 : 24}) scale(${f2(R / 100)})`;
-        const els = [q("bc" + i), ...q("br" + i).querySelectorAll(".w10-brp")];
-        I(els, { attr: { transform: a0 } });
+        const els = [q("bc" + i), ...q("br" + i).querySelectorAll(".w10-brp")], m1 = `translate(${x} ${y}) rotate(${i % 2 ? -24 : 24}) scale(${f2((R / 100) * 0.96)})`;
+        I(els, { attr: { transform: a0 } }); I(q("bm" + i), { attr: { transform: a0 } });
         ft(els, { attr: { transform: a0 } }, { attr: { transform: a1 }, duration: du, ease: ea }, t0);
-        I(q("br" + i), { opacity: 1 });
-        ft(q("br" + i), { opacity: 1 }, { opacity: 0, duration: du * 0.4, ease: "power1.in" }, t0 + du * 0.6);
+        ft(q("bm" + i), { attr: { transform: a0 } }, { attr: { transform: m1 }, duration: du, ease: ea }, t0);
+        I(q("br" + i), { opacity: 0 }); tl.set(q("br" + i), { opacity: 1 }, t0 + 0.01);
+        ft(q("br" + i), { opacity: 1 }, { opacity: 0, duration: du * 0.45, ease: "power1.in" }, t0 + du * 0.55);
       });
       SPL.forEach(([x, y], i) => { const e = q("sp" + i), t = 0.02 + i * 0.012;
         I(e, { attr: { transform: `translate(${f1(x)} ${f1(y)}) scale(0)` }, opacity: 1 });
@@ -294,7 +305,7 @@
         const dt = D - SL - 0.001;
         ft(els, { x: -v * SL }, { x: -v * SL - v * dt * (1 - K / 2), duration: dt, ease: (p) => (p - (K / 2) * p * p) / (1 - K / 2) }, SL);
       };
-      scroll($$("sky", "drops"), 40, true); scroll($("sun"), 52, true); scroll($("clouds"), 100, true); scroll($("far"), 160, true); scroll($("mid"), 380, true); scroll($("near"), 900, false);
+      scroll($$("sky", "blooms", "drops"), 40, true); scroll($("sun"), 52, true); scroll($("clouds"), 100, true); scroll($("far"), 160, true); scroll($("mid"), 380, true); scroll($("near"), 900, false);
       for (const [n, d, a] of [["far", 0.03, 70], ["mid", 0.07, 110], ["near", 0.11, 150]]) { I($(n), { y: a }); ft($(n), { y: a }, { y: 0, duration: 0.85, ease: "power3.out" }, d); }
       // birds drift + flap
       I($("birds"), { x: 0, y: 0 }); ft($("birds"), { x: 0, y: 0 }, { x: -170, y: -46, duration: D, ease: "none" }, 0);
@@ -327,14 +338,16 @@
         ft(e, { attr: { transform: b } }, { attr: { transform: c }, duration: 0.3, ease: "power2.in" }, t + 0.42); });
       // "air": clear-water drops land on the sky wash and bloom (cauliflower backruns)
       DROPS.forEach(([x, y, t, s], i) => {
-        const dd = $("dd" + i), db = $("db" + i);
+        const dd = $("dd" + i);
         const d0 = `translate(${x} ${y - 170}) scale(0.9)`, d1 = `translate(${x} ${y}) scale(1)`, d2 = `translate(${x} ${y}) scale(0)`;
         I(dd, { attr: { transform: `translate(${x} ${y - 170}) scale(0)` } });
         tl.set(dd, { attr: { transform: d0 } }, t - 0.16);
         ft(dd, { attr: { transform: d0 } }, { attr: { transform: d1 }, duration: 0.15, ease: "power2.in" }, t - 0.16);
         ft(dd, { attr: { transform: d1 } }, { attr: { transform: d2 }, duration: 0.06, ease: "power1.in" }, t - 0.01);
-        const b0 = `translate(${x} ${y}) rotate(0) scale(0.02)`, b1 = `translate(${x} ${y}) rotate(${i % 2 ? 18 : -18}) scale(${s})`;
-        I(db, { attr: { transform: b0 } }); ft(db, { attr: { transform: b0 } }, { attr: { transform: b1 }, duration: 0.6, ease: "power3.out" }, t);
+        const wb = $("wb" + i);
+        I(wb, { scale: 0.06, rotation: 0, opacity: 0, transformOrigin: "50% 50%" });
+        ft(wb, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, t);
+        ft(wb, { scale: 0.06, rotation: 0 }, { scale: s, rotation: i % 2 ? 14 : -14, duration: 0.65, ease: "power3.out" }, t);
       });
       // petals + leaves drift (to the very end — they ride the torn pieces away)
       PET.forEach((p) => {

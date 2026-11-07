@@ -1,6 +1,6 @@
 <template>
   <style>
-    #w04-root, .w04-rootc { position: absolute; inset: 0; overflow: hidden; }
+    #w04-root { position: absolute; inset: 0; overflow: hidden; }
     #w04-world { position: absolute; inset: 0; overflow: hidden; background: #07021a; }
     .w04-a { position: absolute; }
     #w04-sky { left: 0; top: 0; width: 1080px; height: 1200px;
@@ -45,7 +45,7 @@
     .w04-edge { left: 0; width: 1080px; height: 4px; background: #ffffff;
       box-shadow: 0 0 10px 3px rgba(160, 250, 255, 0.9), 0 0 30px 8px rgba(63, 240, 255, 0.45); }
   </style>
-  <div data-hf-id="hf-tjic" id="w04-root" class="w04-rootc" data-composition-id="w04" data-width="1080" data-height="1920">
+  <div data-hf-id="hf-tjic" id="w04-root" data-composition-id="w04" data-width="1080" data-height="1920">
     <div id="w04-world">
       <div class="w04-a" id="w04-sky"></div>
       <svg class="w04-a" id="w04-stars" width="1400" height="1180" viewBox="0 0 1400 1180" style="left:0;top:0"></svg>
@@ -90,7 +90,8 @@
       const tl = gsap.timeline({ paused: true });
       const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
       { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
-      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false, lazy: false }, b), t);   // lazy:false = from-values apply before the start is read (attr tweens)
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      // NOTE: the runtime primes every tween at the initial state, so an attr: tween must start FROM its I() value (CSS props are fine)
       const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };   // initial state: applied now (frame 0) AND on every re-seek
       let seed = 404; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
       const f1 = (v) => v.toFixed(1);
@@ -335,10 +336,10 @@
       { // a bright pulse line rolls across the floor toward the viewer
         const p = $("w04-pulse"), z0 = 22, z1 = 1.15, ez = (u) => (1 / (z0 - (z0 - z1) * u) - 1 / z0) / (1 / z1 - 1 / z0);
         const a = { y: zy(z0) - 6, height: 12 }, b = { y: zy(z1) - 40, height: 80 };
-        I(p, { attr: { y: a.y, height: 0 } });
-        tl.set(p, { attr: a }, 1.13);
+        I(p, { attr: a, opacity: 0 });
+        tl.set(p, { opacity: 1 }, 1.13);
         ft(p, { attr: a }, { attr: b, duration: 0.62, ease: ez }, 1.13);
-        tl.set(p, { attr: { height: 0 } }, 1.76);
+        tl.set(p, { opacity: 0 }, 1.76);
       }
 
       // ---------------------------------------------------------------- "malam hari": night falls

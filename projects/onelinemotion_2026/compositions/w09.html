@@ -1,10 +1,363 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-4a1f" id="root" data-composition-id="w09" data-width="1080" data-height="1920"></div>
+  <style>
+    #w09-root { position: absolute; inset: 0; overflow: hidden; }
+    #w09-all { position: absolute; inset: 0; }
+    #w09-world { position: absolute; inset: 0; overflow: hidden; background: #fbfaf3; }
+    .w09-a { position: absolute; }
+    #w09-paper { left: 0; top: 0; width: 1080px; height: 1920px;
+      background-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 110px, rgba(226, 98, 98, .34) 110px, rgba(226, 98, 98, .34) 112px, rgba(0, 0, 0, 0) 112px),
+        repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 62px, rgba(92, 142, 214, .2) 62px, rgba(92, 142, 214, .2) 64px);
+      background-position: 0 0, 0 498px; background-size: 1080px 1920px, 1080px 64px; background-repeat: no-repeat, repeat-y; }
+    #w09-paper2 { left: 0; top: 0; width: 1080px; height: 1920px; background: url(assets/brand/grain_256.png); opacity: .9; }
+    #w09-shade { left: 0; top: 0; width: 1080px; height: 1920px; background: radial-gradient(ellipse 80% 70% at 50% 45%, rgba(0, 0, 0, 0) 60%, rgba(120, 104, 70, .1) 100%); }
+    .w09-p { fill: none; stroke: #222222; stroke-width: 4.4; stroke-linecap: round; stroke-linejoin: round; }
+    .w09-pf { fill: #fbfaf3; stroke: #222222; stroke-width: 4.4; stroke-linecap: round; stroke-linejoin: round; }
+    .w09-q { fill: none; stroke: #4a4a4a; stroke-width: 1.6; stroke-opacity: .45; stroke-linecap: round; stroke-linejoin: round; }
+    .w09-h { fill: none; stroke: #3a3a3a; stroke-width: 2.2; stroke-opacity: .4; stroke-linecap: round; stroke-linejoin: round; }
+    .w09-l { fill: none; stroke: #5b5b5b; stroke-width: 3; stroke-opacity: .6; stroke-linecap: round; stroke-linejoin: round; }
+    .w09-ink { fill: #222222; stroke: none; }
+    .w09-t { font: 700 34px Poppins, sans-serif; fill: #1f1f1f; }
+    /* 12 fps line boil: three drawings of everything, cycled through #w09-all[data-b] (set on the GSAP timeline) */
+    #w09-all[data-b="0"] .w09-v1, #w09-all[data-b="0"] .w09-v2,
+    #w09-all[data-b="1"] .w09-v0, #w09-all[data-b="1"] .w09-v2,
+    #w09-all[data-b="2"] .w09-v0, #w09-all[data-b="2"] .w09-v1 { display: none; }
+    /* run cycle (4 drawings) and cheering (2 drawings, on twos) through #w09-all[data-r] */
+    #w09-all[data-r="0"] .w09-r1, #w09-all[data-r="0"] .w09-r2, #w09-all[data-r="0"] .w09-r3,
+    #w09-all[data-r="1"] .w09-r0, #w09-all[data-r="1"] .w09-r2, #w09-all[data-r="1"] .w09-r3,
+    #w09-all[data-r="2"] .w09-r0, #w09-all[data-r="2"] .w09-r1, #w09-all[data-r="2"] .w09-r3,
+    #w09-all[data-r="3"] .w09-r0, #w09-all[data-r="3"] .w09-r1, #w09-all[data-r="3"] .w09-r2,
+    #w09-all[data-r="0"] .w09-wB, #w09-all[data-r="1"] .w09-wB, #w09-all[data-r="2"] .w09-wA, #w09-all[data-r="3"] .w09-wA { display: none; }
+    #w09-all[data-b="1"] #w09-tj { transform: translate(1.4px, -1px) rotate(-0.3deg); }
+    #w09-all[data-b="2"] #w09-tj { transform: translate(-1.2px, 1px) rotate(0.25deg); }
+    #w09-tj { left: 0; top: 0; width: 1080px; height: 520px; }
+    #w09-title { left: 0; width: 1080px; top: 300px; text-align: center; font: 400 96px/1 Poppins, sans-serif; letter-spacing: -0.01em; color: #1d1d1d; white-space: nowrap; }
+    #w09-title span { display: inline-block; }
+    .w09-chip { left: 50%; top: 420px; height: 46px; padding: 0 20px; border-radius: 23px; background: rgba(8, 14, 46, 0.86); display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 6px 0 rgba(30, 30, 30, 0.12), inset 0 0 0 1.5px rgba(255, 255, 255, 0.1); transform: translateX(-50%); white-space: nowrap; }
+    .w09-chip b { font: 700 24px/1 Poppins, sans-serif; color: #ffffff; letter-spacing: 0.02em; }
+    .w09-chip b em { font-style: normal; color: #01ccf7; }
+    .w09-chip i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, 0.26); margin-left: 6px; }
+    .w09-chip i.on { background: #01ccf7; box-shadow: 0 0 10px rgba(1, 204, 247, 0.8); }
+    #w09-fx { left: 0; top: 0; width: 1080px; height: 1920px; }
+  </style>
+  <div id="w09-root" data-composition-id="w09" data-width="1080" data-height="1920">
+    <div id="w09-all" data-b="0" data-r="0">
+      <div id="w09-world">
+        <div class="w09-a" id="w09-paper"></div>
+        <div class="w09-a" id="w09-paper2"></div>
+        <svg class="w09-a" id="w09-sun" width="240" height="240" viewBox="-120 -120 240 240" style="left:50px;top:490px"></svg>
+        <svg class="w09-a" id="w09-clouds" width="1400" height="420" viewBox="0 460 1400 420" style="left:0;top:460px"></svg>
+        <svg class="w09-a" id="w09-birds" width="260" height="120" viewBox="0 0 260 120" style="left:720px;top:470px"></svg>
+        <svg class="w09-a" id="w09-hills" width="1700" height="200" viewBox="0 1060 1700 200" style="left:0;top:1060px"></svg>
+        <svg class="w09-a" id="w09-mid" width="2500" height="280" viewBox="0 990 2500 280" style="left:0;top:990px"></svg>
+        <svg class="w09-a" id="w09-ground" width="3960" height="480" viewBox="0 900 3960 480" style="left:0;top:900px"></svg>
+        <svg class="w09-a" id="w09-run" width="520" height="340" viewBox="-260 -300 520 340" style="left:0;top:0"></svg>
+        <svg class="w09-a" id="w09-crowd" width="4700" height="480" viewBox="0 1440 4700 480" style="left:0;top:1440px"></svg>
+        <div class="w09-a" id="w09-shade"></div>
+        <div class="w09-a" id="w09-tj">
+          <div class="w09-a" id="w09-title"></div>
+          <svg class="w09-a" id="w09-ul" width="1080" height="120" viewBox="0 340 1080 120" style="left:0;top:340px"></svg>
+          <svg class="w09-a" id="w09-spk" width="1080" height="200" viewBox="0 240 1080 200" style="left:0;top:240px"></svg>
+        </div>
+        <div class="w09-a w09-chip" id="w09-chip"><b>9<em>/10</em></b><span id="w09-dots"></span></div>
+      </div>
+      <div class="w09-a" id="w09-fx">
+        <svg class="w09-a" id="w09-wipe" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0"></svg>
+        <svg class="w09-a" id="w09-pencil" width="340" height="320" viewBox="-40 -280 340 320" style="left:0;top:0"></svg>
+      </div>
+    </div>
+  </div>
   <script>
     (function () {
+      // WORLD 9/10 — STICKMAN: a notebook page, everything drawn in black pencil and BOILING at 12 fps (three drawings of every
+      // line cycled on the timeline). Doodle sun with a face, clouds, birds, rolling hills with houses that get SKETCHED IN as they
+      // enter, a cheering stickman crowd on the ground line, a foreground audience waving, and a hero stickman RUNNING after the
+      // rocket ("gas!") who FLIPS on "tapi" and lands a skidding ta-da on "kena" ("mantap!").
+      // Entry: SCRIBBLE WIPE — a yellow pencil scribbles a huge zig-zag from the rocket's nose; the paper fills in along the
+      // strokes (SVG clipPath of capsules that draw on, then swell), then the same pencil underlines the title and leaves.
+      const ID = "w09", D = 2.9166, TR = 0.55;
+      const root = document;   // the runtime strips the id of the template root: look elements up document-wide (ids are prefixed)
+      const $ = (id) => root.querySelector("#" + id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 2.907);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };   // initial state: applied now (frame 0) AND on every re-seek
+      // NOTE: each SVG attribute is tweened by ONE tween only, starting from its markup value (chained attr tweens were seen to
+      // restart from a stale value in the runtime). CSS props (transforms, opacity) may chain freely.
+      let seed = 9; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+      const hash = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+      const P = (v) => v.toFixed(1);
+      // words (local s): Stickman 0.29 · simpel 1.00 · tapi 1.38 · kena 1.78
+      const T_TITLE = 0.27, T_SIMPEL = 1.0, T_TAPI = 1.38, T_KENA = 1.78;
+      const NX = 801, NY = 884;     // rocket nose at the cut
+      const GY = 1240;              // ground line
+
+      // ---------------------------------------------------------------- pencil-line toolkit (jittered Catmull-Rom curves, 3 boil drawings)
+      let KEY = 1;
+      const jit = (pts, v, a, key) => pts.map(([x, y], i) => [x + (hash(key * 31.7 + i * 7.13 + v * 113.9) - 0.5) * 2 * a, y + (hash(key * 17.9 + i * 3.71 + v * 57.3 + 9.1) - 0.5) * 2 * a]);
+      const curve = (p, closed) => {
+        const n = p.length; if (n < 2) return "";
+        const g = (i) => (closed ? p[(i + n) % n] : p[Math.max(0, Math.min(n - 1, i))]);
+        let d = `M${P(p[0][0])},${P(p[0][1])}`;
+        for (let i = 0; i < (closed ? n : n - 1); i++) { const p0 = g(i - 1), p1 = g(i), p2 = g(i + 1), p3 = g(i + 2);
+          d += `C${P(p1[0] + (p2[0] - p0[0]) / 6)},${P(p1[1] + (p2[1] - p0[1]) / 6)} ${P(p2[0] - (p3[0] - p1[0]) / 6)},${P(p2[1] - (p3[1] - p1[1]) / 6)} ${P(p2[0])},${P(p2[1])}`; }
+        return d + (closed ? "Z" : "");
+      };
+      const S = (pts, o) => Object.assign({ pts, key: KEY++, cls: "w09-p", amp: 1.7 }, o || {});
+      const seg = (x0, y0, x1, y1, n = 3, bow = 0) => { const p = []; for (let i = 0; i <= n; i++) { const u = i / n; p.push([x0 + (x1 - x0) * u - (y1 - y0) * bow * Math.sin(Math.PI * u), y0 + (y1 - y0) * u + (x1 - x0) * bow * Math.sin(Math.PI * u)]); } return p; };
+      const ring = (cx, cy, rx, ry, n = 14, over = 0.35, a0 = -2.2) => { const p = []; for (let i = 0; i <= n; i++) { const a = a0 + (i / n) * (Math.PI * 2 + over), k = 1 + 0.05 * (i / n); p.push([cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]); } return p; };
+      // render strokes as 3 boil drawings; o.vs = number of drawings (1 = static), o.cls extra class on each drawing, o.draw = class for draw-on paths
+      const draw = (strokes, o = {}) => { const vs = o.vs || 3; let m = "";
+        for (let v = 0; v < vs; v++) {
+          m += `<g class="${vs > 1 ? "w09-v" + v : ""} ${o.cls || ""}">`;
+          for (const s of strokes) { const pl = o.draw ? ` pathLength="1"` : "", dc = o.draw ? " " + o.draw : "";
+            const q = jit(s.pts, v, s.amp, s.key), d = curve(q, s.closed);
+            m += `<path class="${s.cls}${dc}"${pl} d="${d}"${s.w ? ` style="stroke-width:${s.w}px"` : ""}/>`;
+            if (s.ghost) m += `<path class="w09-q${dc}"${pl} d="${curve(jit(s.pts, v + 5, s.amp * 1.4, s.key), s.closed)}" transform="translate(1.6 -1.4)"/>`; }
+          m += `</g>`; }
+        return m; };
+
+      // ---------------------------------------------------------------- stickman builder (feet at 0,0; angles from straight down, + = forward/right)
+      const pt = (o, len, ang) => [o[0] + Math.sin((ang * Math.PI) / 180) * len, o[1] + Math.cos((ang * Math.PI) / 180) * len];
+      const stick = (pose, s = 1, x = 0, y = 0) => {
+        const lean = pose.lean || 0, TH = 34 * s, SH = 34 * s, UA = 30 * s, LA = 28 * s, BODY = 62 * s, HR = 16.5 * s;
+        const drop = (l) => Math.cos((l[0] * Math.PI) / 180) * TH + Math.cos((l[1] * Math.PI) / 180) * SH;
+        const hip = [x, y - Math.max(drop(pose.ll), drop(pose.rl)) - (pose.hop || 0)];
+        const neck = pt(hip, BODY, 180 - lean), head = pt(neck, HR + 4 * s, 180 - lean), sh = pt(neck, 7 * s, -lean);
+        const limb = (o, a, l1, l2) => { const m = pt(o, l1, a[0]); return [o, m, pt(m, l2, a[1])]; };
+        const st = [S(ring(head[0], head[1], HR, HR * 1.05, 12, 0.4), { cls: "w09-pf", amp: 1.2 }), S([neck, pt(neck, BODY / 2, -lean + 3), hip], { amp: 1.4 }),
+          S(limb(sh, pose.la, UA, LA), { amp: 1.4 }), S(limb(sh, pose.ra, UA, LA), { amp: 1.4 }), S(limb(hip, pose.ll, TH, SH), { amp: 1.4 }), S(limb(hip, pose.rl, TH, SH), { amp: 1.4 })];
+        st.hand = limb(sh, pose.ra, UA, LA)[2]; st.head = head;
+        return st; };
+      const POSE = {
+        run0: { lean: 16, ll: [55, 10], rl: [-32, -95], la: [-55, -20], ra: [60, 150] },
+        run1: { lean: 14, ll: [8, -8], rl: [78, -12], la: [-15, 40], ra: [20, 100] },
+        run2: { lean: 16, rl: [55, 10], ll: [-32, -95], ra: [-55, -20], la: [60, 150] },
+        run3: { lean: 14, rl: [8, -8], ll: [78, -12], ra: [-15, 40], la: [20, 100] },
+        tuck: { lean: 10, ll: [125, 15], rl: [115, 5], la: [70, 160], ra: [80, 150] },
+        tada: { lean: -12, ll: [48, 22], rl: [-22, -8], la: [-148, -168], ra: [148, 168] },
+        cheerA: { lean: 0, ll: [14, 6], rl: [-14, -6], la: [-140, -165], ra: [140, 165] },
+        cheerB: { lean: 0, ll: [18, 8], rl: [-18, -8], la: [-118, -160], ra: [168, 185], hop: 10 },
+        flagA: { lean: 0, ll: [14, 6], rl: [-14, -6], la: [-40, -10], ra: [172, 180] },
+        flagB: { lean: 0, ll: [16, 8], rl: [-16, -8], la: [-60, -20], ra: [168, 178], hop: 8 },
+      };
+
+      // ---------------------------------------------------------------- sky: sun with a face (winks on "kena"), clouds, birds
+      {
+        const sun = [S(ring(0, 0, 50, 50, 16, 0.5), { cls: "w09-pf", ghost: true }), S(seg(-22, 14, 22, 14, 3, 0.22), { amp: 1.2 }),
+          S([[-15, -8], [-13, -12], [-11, -8]], { cls: "w09-p", amp: 0.6 })];
+        for (let i = 0; i < 6; i++) { const y = -6 + i * 9, hw = Math.sqrt(Math.max(0, 50 * 50 - y * y)) * 0.85; sun.push(S(seg(6 - hw * 0.2, y + 28, hw, y + 6, 2), { cls: "w09-h", amp: 1.5 })); }
+        const rays = []; for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2 + 0.13, r0 = 64, r1 = 84 + (i % 2) * 12; rays.push(S(seg(Math.cos(a) * r0, Math.sin(a) * r0, Math.cos(a) * r1, Math.sin(a) * r1, 1), { amp: 1.5 })); }
+        const eyeR = [S(ring(13, -10, 4.2, 4.6, 8, 0.2), { cls: "w09-pf", amp: 0.5, w: 5 })], wink = [S([[7, -9], [13, -14], [19, -9]], { amp: 0.6 })];
+        $("w09-sun").innerHTML = `<g id="w09-rays">${draw(rays)}</g>` + draw(sun) + draw([S(ring(-13, -10, 4.2, 4.6, 8, 0.2), { cls: "w09-pf", amp: 0.5, w: 5 })]) +
+          `<g id="w09-eyeR">${draw(eyeR)}</g><g id="w09-wink">${draw(wink)}</g>`;
+        const cloud = (cx, cy, w, h) => { const B = 4, p = [[cx - w / 2, cy], [cx, cy + 3], [cx + w / 2, cy]];
+          for (let j = 0; j < B; j++) { const rb = (w / (2 * B)) * 1.18, bx = cx + w / 2 - (j + 0.5) * (w / B), by = cy - h * 0.32 - h * 0.28 * Math.sin((Math.PI * (j + 0.5)) / B);
+            for (let k = 0; k <= 5; k++) { const a = (k / 5) * Math.PI; p.push([bx + rb * Math.cos(a), by - rb * Math.sin(a)]); } }
+          return S(p, { cls: "w09-pf", closed: true, ghost: true, amp: 1.6 }); };
+        $("w09-clouds").innerHTML = draw([cloud(380, 560, 170, 70), cloud(915, 590, 140, 58), cloud(1250, 690, 160, 64), cloud(1180, 520, 90, 40)]);
+        const bird = (x, y, s, up) => S(up ? [[x - 14 * s, y - 4 * s], [x - 7 * s, y - 12 * s], [x, y], [x + 7 * s, y - 12 * s], [x + 14 * s, y - 4 * s]] : [[x - 14 * s, y - 9 * s], [x - 7 * s, y - 6 * s], [x, y], [x + 7 * s, y - 6 * s], [x + 14 * s, y - 9 * s]], { amp: 0.8 });
+        const B3 = [[40, 60, 1.2], [120, 34, 0.9], [190, 72, 1]];
+        $("w09-birds").innerHTML = `<g class="w09-wA">${draw(B3.map(([x, y, s]) => bird(x, y, s, 1)), { vs: 1 })}</g><g class="w09-wB">${draw(B3.map(([x, y, s]) => bird(x, y, s, 0)), { vs: 1 })}</g>`;
+      }
+      // ---------------------------------------------------------------- far hills (light pencil), mid hills with houses/trees sketched in on entry
+      const VFAR = 160, VMID = 420, VGND = 900, VAUD = 1150;
+      {
+        const p = []; for (let x = -20; x <= 1720; x += 50) p.push([x, 1170 - 34 * Math.abs(Math.sin((x / 520) * Math.PI + 1.1)) - 10 * Math.sin(x / 90)]);
+        $("w09-hills").innerHTML = draw([S(p, { cls: "w09-l", amp: 2 })]);
+      }
+      const DRAWN = [];   // [selectorClass, start time] for the sketch-in items
+      {
+        const hy = (x) => 1218 - 46 * Math.abs(Math.sin((x / 560) * Math.PI + 0.6));
+        const p = []; for (let x = -20; x <= 2500; x += 46) p.push([x, hy(x)]);
+        let m = draw([S(p, { amp: 1.8, ghost: true })]);
+        const house = (x, w, h) => { const b = hy(x + w / 2) + 10, top = b - h, st = [
+            S([[x, b], [x + 1, top], [x + w, top + 2], [x + w - 1, b]], { cls: "w09-pf", closed: true, ghost: true }),
+            S([[x - 12, top + 4], [x + w / 2, top - h * 0.62], [x + w + 12, top + 3]], { cls: "w09-pf", closed: true, ghost: true }),
+            S([[x + w * 0.55, b], [x + w * 0.55, b - h * 0.5], [x + w * 0.78, b - h * 0.5], [x + w * 0.78, b]], { amp: 1.2 }),
+            S([[x + w * 0.14, top + 14], [x + w * 0.4, top + 14], [x + w * 0.4, top + 36], [x + w * 0.14, top + 36]], { closed: true, amp: 1.1 }),
+            S([[x + w * 0.27, top + 14], [x + w * 0.27, top + 36]], { amp: 0.8 }), S([[x + w * 0.14, top + 25], [x + w * 0.4, top + 25]], { amp: 0.8 })];
+          for (let i = 0; i < 4; i++) st.push(S(seg(x + w / 2 - 22 + i * 13, top - 6 - i * 4, x + w / 2 - 34 + i * 13, top - h * 0.3 + 6, 1), { cls: "w09-h", amp: 1.2 }));
+          return st; };
+        const tree = (x, h) => { const b = hy(x) + 8; return [S([[x - 5, b], [x - 3, b - h * 0.5], [x - 6, b - h]], { amp: 1.2 }), S([[x + 5, b], [x + 4, b - h * 0.5], [x + 6, b - h]], { amp: 1.2 }),
+          S(ring(x, b - h - 26, 32, 28, 16, 0.6), { cls: "w09-pf", ghost: true, amp: 2.4 }), S([[x - 14, b - h - 30], [x - 2, b - h - 40], [x + 10, b - h - 24]], { cls: "w09-h", amp: 1.4 })]; };
+        const fence = (x, n) => { const st = [], b = (xx) => hy(xx) + 12; for (let i = 0; i < n; i++) st.push(S([[x + i * 24, b(x + i * 24)], [x + i * 24 + 1, b(x + i * 24) - 34]], { amp: 1 }));
+          st.push(S(seg(x - 6, b(x) - 24, x + (n - 1) * 24 + 8, b(x + (n - 1) * 24) - 24, 4), { amp: 1.2 })); st.push(S(seg(x - 6, b(x) - 12, x + (n - 1) * 24 + 8, b(x + (n - 1) * 24) - 12, 4), { amp: 1.2 })); return st; };
+        const ITEMS = [["h", 120, 100, 78], ["t", 330, 54], ["f", 420, 5], ["h", 640, 120, 86], ["t", 860, 46], ["t", 930, 60], ["h", 1120, 96, 74], ["f", 1300, 6], ["t", 1520, 56],
+          ["h", 1700, 112, 84], ["t", 1900, 50], ["h", 2080, 100, 80], ["t", 2300, 58], ["f", 2380, 4]];
+        ITEMS.forEach((it, i) => { const st = it[0] === "h" ? house(it[1], it[2], it[3]) : it[0] === "t" ? tree(it[1], it[2]) : fence(it[1], it[2]);
+          const t0 = (it[1] - 1050) / VMID;   // starts being sketched just before it scrolls into frame
+          if (t0 > 0.3 && t0 < D - 0.44) { DRAWN.push(["w09-dm" + i, t0]); m += draw(st, { draw: "w09-dm" + i }); } else m += draw(st); });
+        $("w09-mid").innerHTML = m;
+      }
+      // ---------------------------------------------------------------- ground line (900 px/s) with tufts, pebbles, flowers and the cheering crowd
+      const PUFFS = [];
+      {
+        const W = 3960, gy = (x) => GY + 3 * Math.sin(x / 70) + 2 * Math.sin(x / 23);
+        const p = []; for (let x = -20; x <= W; x += 60) p.push([x, gy(x)]);
+        const st = [S(p, { amp: 1.5, ghost: true, w: 5 })];
+        for (let x = 30; x < W; x += 90 + rnd() * 120) { const k = rnd();
+          if (k < 0.45) { const b = gy(x); st.push(S([[x - 10, b - 2], [x - 6, b - 16], [x - 2, b - 2], [x + 3, b - 20], [x + 7, b - 2], [x + 11, b - 13], [x + 14, b - 2]], { amp: 1, w: 3 })); }
+          else if (k < 0.7) st.push(S(ring(x, gy(x) + 26 + rnd() * 30, 7 + rnd() * 6, 4 + rnd() * 3, 9, 0.3), { amp: 0.8, w: 3 }));
+          else if (k < 0.82) { const b = gy(x); st.push(S([[x, b], [x + 2, b - 22], [x + 1, b - 40]], { amp: 1, w: 3 })); st.push(S(ring(x + 1, b - 46, 6, 6, 8, 0.3), { amp: 0.6, w: 3 }));
+            for (let j = 0; j < 5; j++) { const a = (j / 5) * Math.PI * 2; st.push(S(ring(x + 1 + Math.cos(a) * 11, b - 46 + Math.sin(a) * 11, 5, 5, 7, 0.2), { amp: 0.5, w: 2.6 })); } }
+          else { for (let j = 0; j < 4; j++) st.push(S(seg(x + j * 9, GY + 14, x + j * 9 - 10, GY + 30, 1), { cls: "w09-h", amp: 1 })); } }
+        let m = draw(st);
+        // crowd (strip x; passes under the rocket at ~0.75 s, on "kena" and at the end)
+        const CROWD = [[1250, "c"], [1320, "c2"], [2120, "c"], [2190, "f"], [2265, "c2"], [3080, "c2"], [3150, "c"]];
+        CROWD.forEach(([x, k], i) => { const b = gy(x);
+          const A = k === "f" ? stick(POSE.flagA, 0.95, x, b) : stick(k === "c" ? POSE.cheerA : POSE.cheerB, 0.95, x, b);
+          const B = k === "f" ? stick(POSE.flagB, 0.95, x, b) : stick(k === "c" ? POSE.cheerB : POSE.cheerA, 0.95, x, b);
+          if (k === "f") for (const [Q, wv] of [[A, 0], [B, 1]]) { const h = Q.hand; Q.push(S([h, [h[0] + 1, h[1] - 74]], { amp: 1 }));
+            Q.push(S(wv ? [[h[0] + 1, h[1] - 74], [h[0] + 30, h[1] - 64], [h[0] + 52, h[1] - 70], [h[0] + 2, h[1] - 44]] : [[h[0] + 1, h[1] - 74], [h[0] + 28, h[1] - 72], [h[0] + 52, h[1] - 60], [h[0] + 2, h[1] - 44]], { cls: "w09-pf", closed: true, amp: 1.2 })); }
+          m += `<g class="w09-wA">${draw(A)}</g><g class="w09-wB">${draw(B)}</g>`; });
+        // dust puffs kicked up by the skidding landing (live in ground space so they stay behind)
+        [[1.8, 430], [1.9, 395], [2.0, 350], [2.1, 300]].forEach(([t, sx], i) => { const x = sx - 30 + VGND * t; PUFFS.push(["w09-pu" + i, t]);
+          m += `<g id="w09-pu${i}">${draw([S(ring(x, GY - 14, 16 + i * 2, 12, 10, 0.4), { amp: 1.4, w: 3 }), S(ring(x - 22, GY - 8, 10, 8, 8, 0.4), { amp: 1.2, w: 3 })])}</g>`; });
+        $("w09-ground").innerHTML = m;
+      }
+      // ---------------------------------------------------------------- foreground audience (backs of heads, arms waving) at the bottom
+      {
+        let m = "";
+        for (let i = 0; i < 24; i++) { const x = 60 + i * 190 + (rnd() - 0.5) * 50, y = 1700 + (rnd() - 0.5) * 50, s = 0.9 + rnd() * 0.25, up = rnd();
+          const body = S([[x - 70 * s, y + 220], [x - 64 * s, y + 92 * s], [x - 40 * s, y + 58 * s], [x, y + 52 * s], [x + 40 * s, y + 58 * s], [x + 64 * s, y + 92 * s], [x + 70 * s, y + 220]], { cls: "w09-pf", w: 5.5, amp: 1.6 });
+          const head = S(ring(x, y, 42 * s, 44 * s, 14, 0.4), { cls: "w09-pf", w: 5.5, amp: 1.6 });
+          const arm = (sg, pose) => { const sx = x + sg * 44 * s, sy = y + 62 * s; const e = pose ? [sx + sg * 26 * s, sy - 70 * s] : [sx + sg * 6 * s, sy - 74 * s], h = pose ? [sx + sg * 18 * s, sy - 146 * s] : [sx - sg * 14 * s, sy - 150 * s];
+            return [S([[sx, sy], e, h], { w: 5.5, amp: 1.4 }), S(ring(h[0], h[1] - 6, 9 * s, 9 * s, 8, 0.3), { cls: "w09-pf", w: 4.5, amp: 0.8 })]; };
+          const arms = (ph) => (up < 0.3 ? arm(1, ph) : up < 0.55 ? arm(-1, ph) : arm(-1, ph).concat(arm(1, 1 - ph)));
+          m += `<g class="w09-wA">${draw([body, head].concat(arms(0)), { vs: 1 })}</g><g class="w09-wB">${draw([body, head].concat(arms(1)), { vs: 1 })}</g>`; }
+        $("w09-crowd").innerHTML = m;
+      }
+      // ---------------------------------------------------------------- the hero runner (screen space), his bubbles and landing burst
+      {
+        const bubble = (x, y, w, h, tx, ty, txt, id) => { const r = 16, p = [[x + r, y], [x + w * 0.5, y - 2], [x + w - r, y], [x + w, y + r], [x + w + 1, y + h - r], [x + w - r, y + h], [x + w * 0.42, y + h + 1],
+            [tx, ty], [x + w * 0.26, y + h], [x + r, y + h], [x, y + h - r], [x - 1, y + r]];
+          return `<g id="${id}">${draw([S(p, { cls: "w09-pf", closed: true, ghost: true, amp: 1.6 })])}<text class="w09-t" x="${x + w / 2}" y="${y + h / 2 + 12}" text-anchor="middle">${txt}</text></g>`; };
+        let m = "";
+        ["run0", "run1", "run2", "run3"].forEach((k, i) => { m += `<g class="w09-r${i}">${draw(stick(POSE[k], 1.05))}</g>`; });
+        m = `<g id="w09-rc">${m}</g><g id="w09-rt">${draw(stick(POSE.tuck, 1.05))}</g><g id="w09-rd">${draw(stick(POSE.tada, 1.05))}</g>`;
+        const burst = []; for (let i = 0; i < 7; i++) { const a = Math.PI * (1.05 + (i / 6) * 0.9); burst.push(S(seg(Math.cos(a) * 70, -70 + Math.sin(a) * 92, Math.cos(a) * 104, -70 + Math.sin(a) * 128, 1), { amp: 1.2, w: 3.6 })); }
+        m += `<g id="w09-burst">${draw(burst)}</g>`;
+        m += bubble(-176, -290, 120, 66, -30, -206, "gas!", "w09-bg") + bubble(-246, -292, 196, 66, -26, -208, "mantap!", "w09-bm");
+        $("w09-run").innerHTML = m;
+      }
+      // ---------------------------------------------------------------- title, underline, sparkles, chip dots
+      const LET = "Stickman".split("");
+      $("w09-title").innerHTML = LET.map((c, i) => `<span id="w09-t${i}">${c}</span>`).join("");
+      $("w09-ul").innerHTML = draw([S([[300, 400], [420, 396], [560, 398], [700, 393], [772, 386], [786, 378]], { w: 5.5, amp: 1.2, ghost: true })], { draw: "w09-ulp" });
+      { const star = (x, y, r) => S([[x, y - r], [x + r * 0.22, y - r * 0.22], [x + r, y], [x + r * 0.22, y + r * 0.22], [x, y + r], [x - r * 0.22, y + r * 0.22], [x - r, y], [x - r * 0.22, y - r * 0.22]], { closed: true, cls: "w09-pf", amp: 1, w: 3.6 });
+        $("w09-spk").innerHTML = `<g id="w09-s0">${draw([star(258, 322, 22)])}</g><g id="w09-s1">${draw([star(842, 300, 17)])}</g><g id="w09-s2">${draw([star(870, 372, 11)])}</g>`; }
+      { let m = ""; for (let i = 0; i < 10; i++) m += `<i class="${i < 9 ? "on" : ""}" id="w09-d${i}"></i>`; $("w09-dots").innerHTML = m; }
+      // pencil prop (tip at 0,0, held from the upper right)
+      $("w09-pencil").innerHTML = `<g transform="rotate(-50)" stroke="#1f1f1f" stroke-width="3" stroke-linejoin="round">
+          <path d="M 14,-5 L 52,-17 L 52,17 L 14,5 Z" fill="#f1d2a0"/><path d="M 0,0 L 15,-5.4 L 15,5.4 Z" fill="#2b2b2b" stroke-width="2"/>
+          <rect x="52" y="-17" width="200" height="34" fill="#f6c844"/><path d="M 52,-17 Q 46,-11.5 52,-6 Q 46,0 52,6 Q 46,11.5 52,17" fill="#f6c844" stroke-width="2.4"/>
+          <path d="M 58,-5.5 L 252,-5.5 M 58,5.5 L 252,5.5" stroke="#d6a020" stroke-width="2.4"/><path d="M 70,-12 L 240,-12" stroke="#fff3c0" stroke-width="2.4" stroke-linecap="round"/>
+          <rect x="252" y="-18" width="24" height="36" fill="#c4c9d0"/><path d="M 260,-18 L 260,18 M 268,-18 L 268,18" stroke="#8a9099" stroke-width="2"/>
+          <path d="M 276,-17 L 292,-17 Q 304,-17 304,-6 L 304,6 Q 304,17 292,17 L 276,17 Z" fill="#f29aa6"/></g>`;
+
+      // ---------------------------------------------------------------- 12 fps boil + run cycle (attribute flips on #w09-all)
+      const all = $("w09-all");
+      for (let f = 0; f / 12 <= D - 0.012; f++) tl.set(all, { attr: { "data-b": f % 3, "data-r": f % 4 } }, f / 12);
+
+      // ---------------------------------------------------------------- ENTRY: scribble wipe from the rocket's nose
+      const ZZ = [[NX, NY], [-170, 1930], [1250, 1590], [-170, 1180], [1250, 760], [-170, 360], [1250, -40]];
+      const H0 = 250, H1 = 840, T0 = 0.02, T1 = 0.42;
+      const LEN = [], CUM = [0]; for (let k = 0; k < ZZ.length - 1; k++) { const l = Math.hypot(ZZ[k + 1][0] - ZZ[k][0], ZZ[k + 1][1] - ZZ[k][1]); LEN.push(l); CUM.push(CUM[k] + l); }
+      const TK = CUM.map((c) => T0 + (T1 - T0) * Math.pow(c / CUM[CUM.length - 1], 1 / 1.6));   // accelerating scribble
+      {
+        let clip = "", hatch = "";
+        for (let k = 0; k < LEN.length; k++) { const [ax, ay] = ZZ[k], [bx, by] = ZZ[k + 1], ang = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI, tr = `translate(${P(ax)} ${P(ay)}) rotate(${P(ang)})`;
+          clip += `<rect id="w09-cd${k}" x="${-H0 / 2}" y="${-H0 / 2}" width="0" height="${H0}" rx="${H0 / 2}" transform="${tr}"/>`;
+          clip += `<rect id="w09-cs${k}" x="0" y="0" width="${P(LEN[k])}" height="0" rx="0" transform="${tr}"/>`;
+          const ux = (bx - ax) / LEN[k], uy = (by - ay) / LEN[k];
+          for (let j = -1; j <= 1; j++) { const o = j * H0 * 0.3, pts = []; for (let i = 0; i <= 5; i++) { const u = 0.02 + (i / 5) * 0.96;
+              pts.push([ax + ux * LEN[k] * u - uy * o + (hash(k * 9 + j * 3 + i) - 0.5) * 14, ay + uy * LEN[k] * u + ux * o + (hash(k * 7 + j * 5 + i + 40) - 0.5) * 14]); }
+            hatch += `<path class="w09-hz w09-hz${k}" pathLength="1" d="${curve(pts)}" fill="none" stroke="#262626" stroke-width="${j ? 3 : 5}" stroke-opacity="${j ? 0.42 : 0.72}" stroke-linecap="round"/>`; } }
+        $("w09-wipe").innerHTML = `<defs><clipPath id="w09-reveal" clipPathUnits="userSpaceOnUse">${clip}</clipPath></defs><g id="w09-hatch">${hatch}</g>`;
+      }
+      const world = $("w09-world");
+      I(world, { clipPath: "url(#w09-reveal)" });
+      tl.set(world, { clipPath: "none" }, TR + 0.01);
+      for (let k = 0; k < LEN.length; k++) {
+        const a = TK[k], b = TK[k + 1];
+        ft($("w09-cd" + k), { attr: { width: 0 } }, { attr: { width: LEN[k] + H0 }, duration: b - a, ease: "none" }, a);
+        const s0 = Math.min(b + 0.02, 0.4), sd = Math.min(0.17, TR - 0.005 - s0);
+        ft($("w09-cs" + k), { attr: { x: 0, y: 0, width: LEN[k], height: 0, rx: 0 } }, { attr: { x: -H1 / 2, y: -H1 / 2, width: LEN[k] + H1, height: H1, rx: H1 / 2 }, duration: sd, ease: "power2.out" }, s0);
+        const hz = root.querySelectorAll(".w09-hz" + k);
+        I(hz, { strokeDasharray: "1 1.02", strokeDashoffset: 1.01 });
+        ft(hz, { strokeDashoffset: 1.01 }, { strokeDashoffset: 0, duration: b - a, ease: "none" }, a);
+      }
+      const hatchG = $("w09-hatch"); I(hatchG, { opacity: 1 }); ft(hatchG, { opacity: 1 }, { opacity: 0, duration: 0.35, ease: "power1.in" }, 0.48);
+      // the pencil: follows the scribble head, swoops to the title, underlines it, leaves
+      const pencil = $("w09-pencil"), PX = (x) => x - 40, PY = (y) => y - 280;
+      I(pencil, { x: PX(NX), y: PY(NY), rotation: 0, scale: 1, opacity: 1, transformOrigin: "40px 280px" });
+      for (let k = 0; k < LEN.length; k++) ft(pencil, { x: PX(ZZ[k][0]), y: PY(ZZ[k][1]), rotation: k % 2 ? 6 : -6 }, { x: PX(ZZ[k + 1][0]), y: PY(ZZ[k + 1][1]), rotation: k % 2 ? -6 : 6, duration: TK[k + 1] - TK[k], ease: "none" }, TK[k]);
+      const UL = [[300, 400], [420, 396], [560, 398], [700, 393], [772, 386], [786, 378]], TU0 = 0.58, TU1 = 0.86;
+      ft(pencil, { x: PX(ZZ[6][0]), y: PY(ZZ[6][1]), scale: 1, rotation: 6 }, { x: PX(UL[0][0]), y: PY(UL[0][1]), scale: 0.72, rotation: -4, duration: TU0 - T1, ease: "power2.inOut" }, T1);
+      { let ulen = 0; const L2 = []; for (let i = 1; i < UL.length; i++) { const l = Math.hypot(UL[i][0] - UL[i - 1][0], UL[i][1] - UL[i - 1][1]); L2.push(l); ulen += l; }
+        let t = TU0; for (let i = 1; i < UL.length; i++) { const dt = ((TU1 - TU0) * L2[i - 1]) / ulen;
+          ft(pencil, { x: PX(UL[i - 1][0]), y: PY(UL[i - 1][1]) }, { x: PX(UL[i][0]), y: PY(UL[i][1]), duration: dt, ease: "none" }, t); t += dt; } }
+      ft(pencil, { x: PX(UL[5][0]), y: PY(UL[5][1]), rotation: -4 }, { x: PX(1260), y: PY(120), rotation: 14, duration: 0.3, ease: "power2.in" }, TU1);
+      tl.set(pencil, { opacity: 0 }, TU1 + 0.31);
+      const ulp = root.querySelectorAll(".w09-ulp");
+      I(ulp, { strokeDasharray: "1 1.02", strokeDashoffset: 1.01 });
+      ft(ulp, { strokeDashoffset: 1.01 }, { strokeDashoffset: 0, duration: TU1 - TU0, ease: "none" }, TU0);
+
+      // ---------------------------------------------------------------- parallax (linear, whole scene)
+      const scroll = (el, v) => ft(el, { x: 0 }, { x: -v * D, duration: D, ease: "none" }, 0);
+      scroll($("w09-sun"), 22); scroll($("w09-clouds"), 70); scroll($("w09-hills"), VFAR); scroll($("w09-mid"), VMID); scroll($("w09-ground"), VGND); scroll($("w09-crowd"), VAUD);
+      ft($("w09-birds"), { x: 0, y: 0 }, { x: -150 * D, y: -24, duration: D, ease: "none" }, 0);
+      ft($("w09-rays"), { rotation: 0 }, { rotation: 36, duration: D, ease: "steps(35)", transformOrigin: "50% 50%" }, 0);
+      // houses / trees get sketched in just before they scroll into frame
+      DRAWN.forEach(([cls, t0]) => { const ps = root.querySelectorAll("." + cls); I(ps, { strokeDasharray: "1 1.02", strokeDashoffset: 1.01 });
+        ft(ps, { strokeDashoffset: 1.01 }, { strokeDashoffset: 0, duration: 0.42, ease: "power1.inOut" }, t0); });
+
+      // ---------------------------------------------------------------- title: letters written in (stepped), underline by the pencil, sparkles on "simpel"
+      LET.forEach((_, i) => { const e = $("w09-t" + i), t = T_TITLE + Math.round(i * 0.9) / 24;
+        I(e, { opacity: 0, scale: 1.35, rotation: (i % 2 ? 7 : -6), transformOrigin: "50% 80%" });
+        tl.set(e, { opacity: 1 }, t); ft(e, { scale: 1.35, rotation: (i % 2 ? 7 : -6) }, { scale: 1, rotation: 0, duration: 0.25, ease: "back.out(2.5)" }, t); });
+      ["w09-s0", "w09-s1", "w09-s2"].forEach((id, i) => { const e = $(id);
+        I(e, { scale: 0, rotation: 0, transformOrigin: "50% 50%" });
+        ft(e, { scale: 0, rotation: 0 }, { scale: 1, rotation: 45, duration: 0.3, ease: "back.out(3)" }, T_SIMPEL - 0.04 + i * 0.07);
+        ft(e, { scale: 1 }, { scale: 0, duration: 0.25, ease: "power2.in" }, T_SIMPEL + 0.75 + i * 0.05); });
+      const chip = $("w09-chip"); I(chip, { opacity: 0, y: 14 }); ft(chip, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.62);
+      const d8 = $("w09-d8"); I(d8, { scale: 1 }); ft(d8, { scale: 1 }, { scale: 1.7, duration: 0.2, yoyo: true, repeat: 1, ease: "power2.out" }, 0.82);
+
+      // ---------------------------------------------------------------- the runner: runs ("gas!"), flips on "tapi", skids a ta-da on "kena" ("mantap!")
+      const run = $("w09-run"), RX = (x) => x - 260, RY = GY + 14 - 300;
+      const rc = $("w09-rc"), rt = $("w09-rt"), rd = $("w09-rd"), burst = $("w09-burst"), bg = $("w09-bg"), bm = $("w09-bm");
+      I(run, { x: RX(150), y: RY, rotation: 0, transformOrigin: "260px 222px" });
+      ft(run, { x: RX(150) }, { x: RX(300), duration: T_TAPI - 0.02, ease: "sine.inOut" }, 0);
+      ft(run, { x: RX(300) }, { x: RX(440), duration: T_KENA - T_TAPI, ease: "none" }, T_TAPI);
+      ft(run, { y: RY }, { y: RY - 132, duration: (T_KENA - T_TAPI) / 2, ease: "power2.out" }, T_TAPI);
+      ft(run, { y: RY - 132 }, { y: RY, duration: (T_KENA - T_TAPI) / 2, ease: "power2.in" }, T_TAPI + (T_KENA - T_TAPI) / 2);
+      ft(run, { rotation: 0 }, { rotation: 360, duration: T_KENA - T_TAPI - 0.02, ease: "power1.inOut" }, T_TAPI);
+      ft(run, { x: RX(440) }, { x: RX(250), duration: 0.44, ease: "power2.in" }, T_KENA);           // skids: planted feet catch the ground's speed
+      ft(run, { x: RX(250) }, { x: RX(330), duration: D - T_KENA - 0.44 - 0.01, ease: "sine.inOut" }, T_KENA + 0.44);
+      I(rc, { opacity: 1 }); I(rt, { opacity: 0 }); I(rd, { opacity: 0 });
+      tl.set(rc, { opacity: 0 }, T_TAPI); tl.set(rt, { opacity: 1 }, T_TAPI);
+      tl.set(rt, { opacity: 0 }, T_KENA - 0.02); tl.set(rd, { opacity: 1 }, T_KENA - 0.02);
+      tl.set(rd, { opacity: 0 }, T_KENA + 0.46); tl.set(rc, { opacity: 1 }, T_KENA + 0.46);
+      I(burst, { opacity: 0, scale: 0.6, transformOrigin: "50% 100%" });
+      tl.set(burst, { opacity: 1 }, T_KENA); ft(burst, { scale: 0.6 }, { scale: 1.15, duration: 0.3, ease: "power2.out" }, T_KENA);
+      tl.set(burst, { opacity: 0 }, T_KENA + 0.34);
+      for (const [b, t0, t1] of [[bg, 0.78, T_TAPI - 0.06], [bm, T_KENA + 0.05, D - 0.25]]) {
+        I(b, { scale: 0, opacity: 1, transformOrigin: "50% 100%" });
+        ft(b, { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2.6)" }, t0);
+        ft(b, { scale: 1, opacity: 1 }, { scale: 0.6, opacity: 0, duration: 0.16, ease: "power2.in" }, t1); }
+      PUFFS.forEach(([id, t]) => { const e = $(id); I(e, { opacity: 0, scale: 0.4, transformOrigin: "50% 50%" });
+        ft(e, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.12, ease: "power2.out" }, t);
+        ft(e, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.4, duration: 0.3, ease: "power1.in" }, t + 0.14); });
+      // the sun winks on "kena"
+      const eyeR = $("w09-eyeR"), wink = $("w09-wink");
+      I(eyeR, { opacity: 1 }); I(wink, { opacity: 0 });
+      tl.set(eyeR, { opacity: 0 }, T_KENA); tl.set(wink, { opacity: 1 }, T_KENA); tl.set(eyeR, { opacity: 1 }, T_KENA + 0.42); tl.set(wink, { opacity: 0 }, T_KENA + 0.42);
+      const sunE = $("w09-sun"); ft(sunE, { scale: 1 }, { scale: 1.12, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "50% 50%" }, T_KENA);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["w09"] = tl;
     })();

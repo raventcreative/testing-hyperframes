@@ -202,7 +202,7 @@
         TXT(g, 240, -40, 54, [["a² + b² = c²"]], 2.42, 0.045); }
 
       // the chalk stick ("pakai kapur"): flies in, writes the wave, flicks away — lives in the doodle layer (scrolls with the board)
-      const stick = el("g", {}, mid), stickArt = el("g", { transform: "rotate(-58)" }, stick);
+      const stick = el("g", {}, mid), stRA = el("g", { transform: "rotate(18)" }, stick), stRB = el("g", { transform: "rotate(0)" }, stRA), stW = el("g", { transform: "rotate(0)" }, stRB), stickArt = el("g", { transform: "rotate(-58)" }, stW);
       stickArt.innerHTML = `<g transform="translate(9 13)" opacity=".28"><rect x="6" y="-15" width="224" height="30" rx="14" fill="#0b2015"/></g>
         <rect x="6" y="-15" width="224" height="30" rx="14" fill="#f6f6ef"/><rect x="6" y="4" width="224" height="11" rx="5" fill="#d7dacf"/>
         <rect x="178" y="-15" width="52" height="30" rx="14" fill="#e9e6d8"/><ellipse cx="9" cy="0" rx="10" ry="14.5" fill="#ffffff"/>
@@ -322,9 +322,9 @@
         ft(spin, { attr: { transform: `rotate(${a0})` } }, { attr: { transform: `rotate(${f1(a0 + turns)})` }, duration: D - t0, ease: "none" }, t0);
         ft(eg, { attr: { transform: `translate(${rx} 0) rotate(${-a0})` } }, { attr: { transform: `translate(${rx} 0) rotate(${f1(-a0 - turns)})` }, duration: D - t0, ease: "none" }, t0); }
       // bubbles rise in the flask (loops)
-      for (const [c, t0, d] of bubbles) { I(c, { opacity: 0, attr: { cy: 204 } });
+      for (const [c, t0, d] of bubbles) { I(c, { opacity: 0, y: 0 });
         for (let k = 0; t0 + (k + 1) * d <= D; k++) { const t = t0 + k * d;
-          ft(c, { attr: { cy: 204 } }, { attr: { cy: 150 }, duration: d, ease: "power1.in" }, t);
+          ft(c, { y: 0 }, { y: -54, duration: d, ease: "power1.in" }, t);
           ft(c, { opacity: 0 }, { opacity: 1, duration: d * 0.25, ease: "none" }, t); ft(c, { opacity: 1 }, { opacity: 0, duration: d * 0.2, ease: "none" }, t + d * 0.8); } }
 
       // ---------------------------------------------------------------- "pakai kapur": the chalk stick writes the wave
@@ -332,14 +332,16 @@
         const L = wave.getTotalLength(), N = 28, W0 = [GR.x, GR.y], tw0 = 2.0, tw = 0.46;
         const pt = (u) => { const p = wave.getPointAtLength(u * L); return [W0[0] + p.x, W0[1] + p.y]; };
         const s0 = pt(0), xin = [1220 + V_MID * 1.74, 1840], xout = [GR.x + 1300, 1120];
-        const TF = (p, r) => ({ attr: { transform: `translate(${f1(p[0])} ${f1(p[1])}) rotate(${r.toFixed(2)})` } });
-        I(stick, Object.assign(TF(xin, 18), { opacity: 0 }));
+        // position: GSAP x/y (pure translation); rotations: one attr tween per nested group (entry / exit / writing wobble)
+        I(stick, { x: xin[0], y: xin[1], opacity: 0 });
         tl.set(stick, { opacity: 1 }, 1.74);
-        ft(stick, TF(xin, 18), Object.assign(TF(s0, 0), { duration: 0.26, ease: "power3.out" }), 1.74);
-        let prev = s0, pr = 0;
-        for (let k = 1; k <= N; k++) { const p = pt(k / N), r = -7 * Math.sin((k / N) * Math.PI * 4);
-          ft(stick, TF(prev, pr), Object.assign(TF(p, r), { duration: tw / N, ease: "none" }), tw0 + ((k - 1) * tw) / N); prev = p; pr = r; }
-        ft(stick, TF(prev, pr), Object.assign(TF(xout, 34), { duration: 0.42, ease: "power2.in" }), tw0 + tw + 0.04);
+        ft(stick, { x: xin[0], y: xin[1] }, { x: s0[0], y: s0[1], duration: 0.26, ease: "power3.out" }, 1.74);
+        ft(stRA, { attr: { transform: "rotate(18)" } }, { attr: { transform: "rotate(0)" }, duration: 0.26, ease: "power3.out" }, 1.74);
+        let prev = s0;
+        for (let k = 1; k <= N; k++) { const p = pt(k / N); ft(stick, { x: prev[0], y: prev[1] }, { x: p[0], y: p[1], duration: tw / N, ease: "none" }, tw0 + ((k - 1) * tw) / N); prev = p; }
+        ft(stW, { attr: { transform: "rotate(0)" } }, { attr: { transform: "rotate(-7)" }, duration: tw / 4, yoyo: true, repeat: 3, ease: "sine.inOut" }, tw0);
+        ft(stick, { x: prev[0], y: prev[1] }, { x: xout[0], y: xout[1], duration: 0.42, ease: "power2.in" }, tw0 + tw + 0.04);
+        ft(stRB, { attr: { transform: "rotate(0)" } }, { attr: { transform: "rotate(34)" }, duration: 0.42, ease: "power2.in" }, tw0 + tw + 0.04);
         // chalk crumbs falling from the tip while it writes
         for (let k = 0; k < 12; k++) { const u = (k + 0.5) / 12, p = pt(u), t = tw0 + u * tw, c = el("circle", { cx: 0, cy: 0, r: R(2, 4.2), fill: "#f6f7f2" }, crumbs);
           I(c, { x: p[0], y: p[1], opacity: 0 }); tl.set(c, { opacity: R(0.55, 0.9) }, t);

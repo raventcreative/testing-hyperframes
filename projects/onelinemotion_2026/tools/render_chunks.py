@@ -56,9 +56,12 @@ def chunk_index(t0, t1):
         h = re.sub(r'(tl\.fromTo\("#brandlogo", \{ opacity: 0\.95 \}, [^\n]*\}, )([0-9.]+)\);', lambda m: m.group(1) + f"{round(float(m.group(2)) - t0, 4)});", h)
     return h
 
+import os
+ONLY = [int(x) for x in os.environ.get("CHUNKS", "").split(",") if x.strip()]   # e.g. CHUNKS=0,2 renders only those (no concat)
 parts = []
 for k, (t0, keep, t1) in enumerate(CH):
     part = WORK / f"part{k}.mp4"; parts.append((part, round(keep - t0, 4), round(t1 - keep, 4)))
+    if ONLY and k not in ONLY: continue
     if part.exists() and part.stat().st_size > 100000: print("skip", part.name, flush=True); continue
     cp = WORK / f"proj{k}"
     if cp.exists(): shutil.rmtree(cp)
@@ -69,6 +72,7 @@ for k, (t0, keep, t1) in enumerate(CH):
     subprocess.run(["npx", "--yes", "hyperframes@0.8.186", "render", str(cp), "-o", str(tmp), "-q", Q, "-f", str(FPS), "-w", "3"], check=True,
                    stdout=open(WORK / f"part{k}.log", "w"), stderr=subprocess.STDOUT)
     tmp.rename(part); shutil.rmtree(cp)
+if ONLY: print("rendered chunks", ONLY, flush=True); sys.exit(0)
 # trim pre-rolls (frame-exact) and concat in one x264 pass
 ins, fc = [], []
 for i, (p, ss, dur) in enumerate(parts):

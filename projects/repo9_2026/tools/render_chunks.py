@@ -9,10 +9,10 @@ P = Path(sys.argv[1]).resolve(); OUT = Path(sys.argv[2]).resolve(); Q = sys.argv
 T = json.loads((P / "production/timing.json").read_text()); TOTAL = T["total_sec"]; FPS = 30
 S = {s["id"]: s for s in T["scenes"]}
 # (render start, keep from, end): scenes do not overlap in this reel, so no pre-roll is needed
-CH = [(0.0, 0.0, S["s05"]["start"]),
-      (S["s05"]["start"], S["s05"]["start"], S["s08"]["start"]),
-      (S["s08"]["start"], S["s08"]["start"], S["s11"]["start"]),
-      (S["s11"]["start"], S["s11"]["start"], TOTAL)]
+CH = [(0.0, 0.0, S["r3"]["start"]),
+      (S["r3"]["start"], S["r3"]["start"], S["r6"]["start"]),
+      (S["r6"]["start"], S["r6"]["start"], S["r9"]["start"]),
+      (S["r9"]["start"], S["r9"]["start"], TOTAL)]
 WORK = OUT.parent / (OUT.stem + "_chunks"); WORK.mkdir(parents=True, exist_ok=True)
 src = (P / "index.html").read_text()
 ease_sine = lambda u: -(__import__("math").cos(__import__("math").pi * u) - 1) / 2
@@ -20,7 +20,7 @@ ease_sine = lambda u: -(__import__("math").cos(__import__("math").pi * u) - 1) /
 def chunk_index(t0, t1):
     d = round(t1 - t0, 4); h = src
     h = re.sub(r'(<div[^>]*\bid="main-root"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)   # tolerant of injected data-hf-id attributes
-    for lid in ("bg", "fx", "caps", "stepper", "robot", "mascot"):
+    for lid in ("bg", "fx", "caps", "tracker", "robot", "mascot"):
         h = re.sub(rf'(<div[^>]*\bid="{lid}"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)
     def slot(m):
         st = float(m.group(2))
@@ -34,8 +34,13 @@ def chunk_index(t0, t1):
         e0, e1 = ease_sine(t0 / TOTAL), ease_sine(t1 / TOTAL)
         return (f'tl.fromTo("{sel}", {{ x: {round(x1 * e0, 2)}, y: {round(y1 * e0, 2)} }}, {{ x: {round(x1 * e1, 2)}, y: {round(y1 * e1, 2)}, '
                 f'duration: {d}, ease: "none", immediateRender: false }}, 0);')
-    h = re.sub(r'tl\.fromTo\("#glow-a"[^\n]*', amb("#glow-a", 90, 70), h)
-    h = re.sub(r'tl\.fromTo\("#glow-b"[^\n]*', amb("#glow-b", -110, -60), h)
+    # the animated grid + its wandering light are linear over the whole reel: give each chunk its exact slice
+    def lin(sel, x0, y0, x1, y1):
+        f0, f1 = t0 / TOTAL, t1 / TOTAL
+        return (f'tl.fromTo("{sel}", {{ x: {round(x0 + (x1 - x0) * f0, 3)}, y: {round(y0 + (y1 - y0) * f0, 3)} }}, {{ x: {round(x0 + (x1 - x0) * f1, 3)}, '
+                f'y: {round(y0 + (y1 - y0) * f1, 3)}, duration: {d}, ease: "none", immediateRender: false }}, 0);')
+    h = re.sub(r'tl\.fromTo\("#grid",[^\n]*', lin("#grid", 0, 0, 430, 430), h)
+    h = re.sub(r'tl\.fromTo\("#gridhl",[^\n]*', lin("#gridhl", 600, 180, 180, 640), h)
     h = re.sub(r'tl\.fromTo\("#grain"[^\n]*', f'tl.fromTo("#grain", {{ x: {round(64 * t0 / TOTAL, 2)}, y: {round(40 * t0 / TOTAL, 2)} }}, '
                f'{{ x: {round(64 * t1 / TOTAL, 2)}, y: {round(40 * t1 / TOTAL, 2)}, duration: {d}, ease: "steps({max(1, int(d * 15))})", immediateRender: false }}, 0);', h)
     if t0 > 0:

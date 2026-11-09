@@ -41,7 +41,7 @@ html = f"""<!doctype html>
       /* the client's grid, re-created and ANIMATED: 43 px cells, thin blue-grey lines, top-right, radial fade (drifts + breathes) */
       #gridwrap {{ position: absolute; left: 330px; top: 160px; width: 900px; height: 820px;
                    -webkit-mask-image: radial-gradient(ellipse 430px 360px at 450px 405px, #000 35%, transparent 100%); mask-image: radial-gradient(ellipse 430px 360px at 450px 405px, #000 35%, transparent 100%); }}
-      #grid {{ position: absolute; left: -86px; top: -86px; width: 1072px; height: 992px;
+      #grid {{ position: absolute; left: -473px; top: -473px; width: 1846px; height: 1766px;
                background-image: linear-gradient(90deg, rgba(104,132,186,.30) 2px, transparent 2px), linear-gradient(0deg, rgba(104,132,186,.30) 2px, transparent 2px);
                background-size: 43px 43px; }}
       #gridhl {{ position: absolute; left: 0; top: 0; width: 520px; height: 520px; margin: -260px 0 0 -260px; border-radius: 50%;
@@ -109,9 +109,8 @@ html = f"""<!doctype html>
           }}
         }});
         // ambient (slow, seekable): the client's grid drifts diagonally by whole cells, a soft light wanders over it, the tint breathes
-        tl.fromTo("#grid", {{ x: 0, y: 0 }}, {{ x: -86, y: 86, duration: {total}, ease: "none", immediateRender: false }}, 0);
+        tl.fromTo("#grid", {{ x: 0, y: 0 }}, {{ x: 430, y: 430, duration: {total}, ease: "none", immediateRender: false }}, 0);
         tl.fromTo("#gridhl", {{ x: 600, y: 180 }}, {{ x: 180, y: 640, duration: {total}, ease: "none", immediateRender: false }}, 0);
-        tl.fromTo("#gridtint", {{ scale: 1, opacity: 1 }}, {{ scale: 1.08, opacity: 0.8, duration: {round(total / 8, 3)}, ease: "sine.inOut", yoyo: true, repeat: 7, immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
         tl.set("#brandlogo", {{ opacity: 0 }}, 0);
         tl.fromTo("#brandlogo", {{ opacity: 0 }}, {{ opacity: 0.95, duration: 0.4, ease: "power2.out", immediateRender: false }}, 0.02);

@@ -19,14 +19,14 @@ ease_sine = lambda u: -(__import__("math").cos(__import__("math").pi * u) - 1) /
 
 def chunk_index(t0, t1):
     d = round(t1 - t0, 4); h = src
-    h = re.sub(r'(<div id="main-root"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)
+    h = re.sub(r'(<div[^>]*\bid="main-root"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)   # tolerant of injected data-hf-id attributes
     for lid in ("bg", "fx", "caps", "stepper", "robot", "mascot"):
-        h = re.sub(rf'(<div id="{lid}"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)
+        h = re.sub(rf'(<div[^>]*\bid="{lid}"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)
     def slot(m):
         st = float(m.group(2))
         if st < t0 - 1e-6 or st >= t1 - 1e-6: return ""
         return m.group(1) + f'{round(st - t0, 4)}' + m.group(3)
-    h = re.sub(r'(      <div id="[sw]\d\d" class="scene"[^>]*data-start=")([0-9.]+)("[^\n]*\n)', slot, h)
+    h = re.sub(r'(      <div[^>]*\bid="[sw]\d\d" class="scene"[^>]*data-start=")([0-9.]+)("[^\n]*\n)', slot, h)
     h = re.sub(r'\s*<audio [^>]*></audio>', '', h)
     h = h.replace('<script src="vendor/gsap/dist/gsap.min.js"></script>', f'<script>window.__T0 = {t0};</script>\n    <script src="vendor/gsap/dist/gsap.min.js"></script>', 1)
     # ambient drift: piecewise-linear per chunk (continuous across chunk seams)
@@ -63,7 +63,9 @@ for k, (t0, keep, t1) in enumerate(CH):
     cp = WORK / f"proj{k}"
     if cp.exists(): shutil.rmtree(cp)
     shutil.copytree(P, cp, ignore=shutil.ignore_patterns("out", ".hyperframes", "thumbnail", "renders", "reference.mp4"))
-    (cp / "index.html").write_text(chunk_index(t0, t1))
+    hx = chunk_index(t0, t1)
+    assert f'data-duration="{round(t1 - t0, 4)}"' in hx and hx.count('class="scene"') < len(T["scenes"]) or (t0 == 0 and t1 == TOTAL), "chunk index not rewritten"
+    (cp / "index.html").write_text(hx)
     print(f"render chunk {k}: {t0} -> {t1} (keep from {keep})", flush=True)
     tmp = WORK / f"part{k}.tmp.mp4"
     subprocess.run(["npx", "--yes", "hyperframes@0.8.186", "render", str(cp), "-o", str(tmp), "-q", Q, "-f", str(FPS), "-w", "3"], check=True,

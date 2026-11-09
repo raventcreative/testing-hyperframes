@@ -2,16 +2,16 @@
   <style>
     #rb-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
     #rb-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
-    #rb-kb { position: absolute; left: 0; top: 0; width: 250px; height: 92px; margin: -46px 0 0 -125px; opacity: 0; transform-origin: 50% 50%; }
-    #rb-kb .pl { position: absolute; inset: 0; border-radius: 16px; background: linear-gradient(180deg, rgba(1,204,247,.26), rgba(1,204,247,.08));
+    #rb-kb { position: absolute; left: 0; top: 0; width: 300px; height: 100px; margin: -50px 0 0 -150px; opacity: 0; transform-origin: 50% 50%; }
+    #rb-kb .pl { position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(180deg, rgba(1,204,247,.30), rgba(1,204,247,.10));
       box-shadow: 0 0 0 1.5px rgba(106,223,255,.7), 0 0 26px rgba(1,204,247,.55), inset 0 0 18px rgba(1,204,247,.25); }
-    #rb-kb .ks { position: absolute; left: 14px; top: 12px; width: 222px; height: 68px; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(3, 1fr); gap: 4px; }
+    #rb-kb .ks { position: absolute; left: 16px; top: 13px; width: 268px; height: 74px; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(3, 1fr); gap: 4px; }
     #rb-kb .ks i { display: block; border-radius: 4px; background: rgba(160,235,255,.22); box-shadow: inset 0 0 0 1px rgba(160,235,255,.35); }
     #rb-kb .ks i.on { background: rgba(220,250,255,.95); box-shadow: 0 0 10px rgba(1,204,247,.95); }
   </style>
   <div data-hf-id="hf-qqwu" id="rb-root" data-composition-id="robot" data-width="1080" data-height="1920">
-    <div data-hf-id="hf-sjel" id="rb-kb"><div data-hf-id="hf-3f18" class="pl"></div><div data-hf-id="hf-gedt" class="ks" id="rb-keys"></div></div>
     <canvas data-hf-id="hf-su0m" id="rb-canvas" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas>
+    <div data-hf-id="hf-sjel" id="rb-kb"><div data-hf-id="hf-3f18" class="pl"></div><div data-hf-id="hf-gedt" class="ks" id="rb-keys"></div></div>
   </div>
   <script>
     (function () {
@@ -82,7 +82,8 @@
               const a = Math.sin(lt * 2 * Math.PI * 5.2), b = Math.sin(lt * 2 * Math.PI * 4.6 + 1.7);
               offs.hand_L = [L(offs.hand_L[0], -0.09, w), L(offs.hand_L[1], -0.07 + 0.016 * Math.max(0, a), w), L(offs.hand_L[2], 0.15, w)];
               offs.hand_R = [L(offs.hand_R[0], 0.09, w), L(offs.hand_R[1], -0.07 + 0.016 * Math.max(0, b), w), L(offs.hand_R[2], 0.15, w)];
-              bones.hand_L[0] += 0.55 * w; bones.hand_R[0] += 0.55 * w; bones.head[0] += 0.1 * w;
+              bones.hand_L[0] += 0.55 * w; bones.hand_R[0] += 0.55 * w; bones.head[0] += 0.14 * w;
+              root.ry = L(root.ry, -0.04, w); root.rx += 0.05 * w;            // faces the viewer, leans over the keyboard in front of it
               face.gaze = [L(face.gaze[0], -0.05, w), L(face.gaze[1], -0.2, w)]; ring += 0.4 * w; break; }
             case "scan": { const sw = Math.sin(lt * 2 * Math.PI * 1.1);
               bones.head[1] += 0.26 * w * sw; face.gaze = [L(face.gaze[0], 0.28 * sw, w), L(face.gaze[1], 0.12, w)]; face.squint = Math.max(face.squint, 0.45 * w); ring += 0.3 * w; break; }
@@ -126,10 +127,11 @@
         robot.setView({ fx: p.fr.fx, fy: p.fr.fy, h: p.fr.h, pitch: 5 });
         robot.setState(p.state); robot.render();
         // holo keyboard in front of the hands while typing (keys light up at 14 Hz, deterministic)
-        const o = p.kb.toFixed(3); if (kbEl.style.opacity !== o) kbEl.style.opacity = o;
+        const o = (0.9 * p.kb).toFixed(3); if (kbEl.style.opacity !== o) kbEl.style.opacity = o;
         if (p.kb > 0.001) {
-          const x = p.fr.fx - 0.05 * p.fr.h, y = p.fr.fy - 0.2 * p.fr.h;
-          kbEl.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) perspective(500px) rotateX(58deg) scale(${(0.7 + 0.3 * p.kb).toFixed(3)})`;
+          // in FRONT of the robot, just under its hands (the robot faces the viewer while typing)
+          const x = p.fr.fx - 0.06 * p.fr.h, y = p.fr.fy - 0.1 * p.fr.h;
+          kbEl.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) perspective(600px) rotateX(52deg) scale(${(0.75 + 0.25 * p.kb).toFixed(3)})`;
           const f = Math.floor(t * 14);
           for (let i = 0; i < 30; i++) KEYS[i].classList.toggle("on", hash(f * 31 + i) > 0.82);
         }

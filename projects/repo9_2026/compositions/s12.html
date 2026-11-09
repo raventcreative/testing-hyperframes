@@ -1,10 +1,284 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-uiwj" id="root" data-composition-id="s12" data-width="1080" data-height="1920"></div>
+  <style>
+    .s12-a { position: absolute; }
+    .s12-grad { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .s12-m { -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+    #s12-blob { left: 40px; top: 250px; width: 1000px; height: 740px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.95), rgba(255,255,255,0) 66%); }
+    #s12-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1700px; perspective-origin: 50% 32%; }
+    .s12-card { background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 34px 70px -34px rgba(20,40,90,.5), 0 0 0 1.5px rgba(10,13,44,.06); }
+    /* logo tiles (the tracker's 76 px tile) */
+    .s12-tile { left: 0; top: 0; width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 20px; overflow: hidden; background: #fff;
+      box-shadow: 0 10px 22px -10px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s12-lg { position: absolute; left: 0; top: 0; width: 76px; height: 76px; }
+    .s12-lg.png { background-size: 100% 100%; }
+    .s12-lg i { position: absolute; left: 18px; top: 18px; width: 40px; height: 40px; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+    .s12-mini { width: 40px; height: 40px; border-radius: 11px; overflow: hidden; background: #fff; box-shadow: 0 6px 14px -8px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s12-mini .s12-lg { transform: scale(.5263); transform-origin: 0 0; }
+    /* LIST card: "9 link repo gratis" */
+    #s12-list { left: 120px; top: 340px; width: 840px; height: 556px; border-radius: 34px; }
+    #s12-hic { left: 28px; top: 22px; width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(160deg, #294b77, #0a0d2c); box-shadow: 0 10px 20px -10px rgba(10,13,44,.6); }
+    #s12-hic i { position: absolute; left: 12px; top: 12px; width: 32px; height: 32px; background: #fff; --m: url(assets/icons/si-github.svg); }
+    #s12-ht { left: 100px; top: 22px; height: 56px; display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+    #s12-n9 { width: 50px; height: 50px; border-radius: 15px; background: linear-gradient(160deg, #2da44e, #116329); color: #fff; font: 700 32px/50px Poppins, sans-serif; text-align: center;
+      box-shadow: 0 10px 20px -10px rgba(17,99,41,.7); }
+    #s12-ht b { font: 700 34px/1 Poppins, sans-serif; letter-spacing: -0.02em; }
+    #s12-ht b.g { color: #1a7f37; }
+    #s12-os { right: 28px; top: 27px; height: 46px; padding: 0 16px; border-radius: 23px; display: flex; align-items: center; font: 700 19px/1 Poppins, sans-serif; letter-spacing: .04em;
+      background: #e9f7ee; color: #1a7f37; box-shadow: inset 0 0 0 1.5px rgba(45,164,78,.5); white-space: nowrap; }
+    #s12-hl { left: 28px; right: 28px; top: 94px; height: 1.5px; background: rgba(10,13,44,.08); }
+    .s12-row { left: 0; width: 840px; height: 48px; }
+    .s12-row::after { content: ""; position: absolute; left: 78px; right: 28px; bottom: 0; height: 1px; background: rgba(10,13,44,.06); }
+    .s12-row:last-child::after { display: none; }
+    .s12-no { left: 28px; top: 7px; width: 34px; height: 34px; border-radius: 50%; background: #eef2fb; color: #294b77; font: 700 20px/34px Poppins, sans-serif; text-align: center; }
+    .s12-slot { left: 78px; top: 4px; width: 40px; height: 40px; border-radius: 11px; border: 2px dashed rgba(41,75,119,.24); }
+    .s12-rl { left: 78px; top: 4px; }
+    .s12-sk { left: 134px; top: 17px; height: 14px; border-radius: 7px; background: linear-gradient(90deg, #e3e9f4, #eef2f9); }
+    .s12-path { left: 134px; top: 0; font: 400 24px/48px Poppins, sans-serif; color: #294b77; white-space: nowrap; letter-spacing: -0.01em; }
+    .s12-path b { font-weight: 700; color: #0a0d2c; }
+    .s12-lk { left: 776px; top: 6px; width: 36px; height: 36px; border-radius: 50%; background: #eef2fb; }
+    .s12-lk i { position: absolute; left: 8px; top: 8px; width: 20px; height: 20px; background: #9aa8c4; -webkit-mask: url(assets/icons/lucide-link-2.svg) center / contain no-repeat; mask: url(assets/icons/lucide-link-2.svg) center / contain no-repeat; }
+    .s12-lk.on { background: linear-gradient(160deg, #2da44e, #116329); box-shadow: 0 6px 12px -6px rgba(17,99,41,.7); }
+    .s12-lk.on i { background: #fff; }
+    /* COMMENT card: "Komen OPEN" */
+    #s12-cmt { left: 120px; top: 800px; width: 840px; height: 124px; border-radius: 32px; }
+    #s12-av { left: 24px; top: 28px; width: 68px; height: 68px; border-radius: 50%; background: #eef2fb; box-shadow: inset 0 0 0 1.5px rgba(41,75,119,.18); }
+    #s12-av i { position: absolute; left: 16px; top: 16px; width: 36px; height: 36px; background: #294b77; --m: url(assets/icons/lucide-user-round.svg); }
+    #s12-field { left: 108px; top: 20px; width: 620px; height: 84px; border-radius: 24px; background: #f2f5fb; box-shadow: inset 0 0 0 1.5px rgba(41,75,119,.12); }
+    #s12-ph { left: 38px; top: 0; font: 400 26px/84px Poppins, sans-serif; color: #8b9bbb; white-space: nowrap; }
+    #s12-typed { left: 22px; top: 0; height: 84px; display: flex; align-items: center; }
+    .s12-k { display: inline-block; font: 700 68px/1 Poppins, sans-serif; letter-spacing: -0.01em; padding-top: 6px; }
+    #s12-caret { width: 4px; height: 54px; margin-left: 6px; border-radius: 2px; background: #294b77; }
+    #s12-hb { left: 756px; top: 34px; width: 56px; height: 56px; }
+    #s12-ho { left: 0; top: 0; width: 56px; height: 56px; background: #9aa8c4; --m: url(assets/icons/lucide-heart.svg); }
+    #s12-hf { left: 0; top: 0; width: 56px; height: 56px; }
+    #s12-hr { left: -14px; top: -14px; width: 84px; height: 84px; border-radius: 50%; border: 3px solid rgba(229,72,77,.7); }
+    .s12-hp { left: 23px; top: 23px; width: 10px; height: 10px; border-radius: 50%; }
+    /* DM card */
+    #s12-dm { left: 330px; top: 350px; width: 620px; height: 300px; border-radius: 32px; }
+    #s12-dav { left: 24px; top: 18px; width: 58px; height: 58px; border-radius: 50%; background: linear-gradient(160deg, #294b77, #0a0d2c); box-shadow: 0 10px 20px -10px rgba(10,13,44,.6); }
+    #s12-dav i { position: absolute; left: 15px; top: 16px; width: 28px; height: 28px; background: #fff; --m: url(assets/icons/lucide-send.svg); }
+    #s12-dt { left: 98px; top: 14px; font: 700 34px/1.2 Poppins, sans-serif; letter-spacing: -0.01em; }
+    #s12-ds { left: 99px; top: 56px; font: 400 20px/1 Poppins, sans-serif; color: #294b77; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    #s12-ds s { width: 10px; height: 10px; border-radius: 50%; background: #2da44e; box-shadow: 0 0 0 3px rgba(45,164,78,.2); }
+    #s12-dline { left: 24px; right: 24px; top: 92px; height: 1.5px; background: rgba(10,13,44,.07); }
+    #s12-bub { left: 76px; top: 108px; width: 520px; height: 124px; border-radius: 26px 26px 8px 26px; background: linear-gradient(160deg, #294b77 0%, #0a0d2c 100%);
+      box-shadow: 0 18px 30px -16px rgba(10,13,44,.6); }
+    #s12-bt { left: 24px; top: 16px; display: flex; align-items: center; gap: 10px; font: 700 24px/32px Poppins, sans-serif; color: #fff; white-space: nowrap; }
+    #s12-bt i { width: 24px; height: 24px; background: #6ee7a0; --m: url(assets/icons/lucide-link-2.svg); }
+    .s12-bm { top: 64px; }
+    #s12-sent { right: 24px; top: 244px; display: flex; align-items: center; gap: 2px; font: 700 20px/26px Poppins, sans-serif; color: #1a7f37; white-space: nowrap; }
+    #s12-sent span { margin-right: 8px; }
+    #s12-sent i { width: 20px; height: 20px; background: #1a7f37; --m: url(assets/icons/lucide-check.svg); }
+    #s12-sent i + i { margin-left: -12px; }
+    /* paper plane + trail */
+    #s12-plane { left: 0; top: 0; width: 100px; height: 100px; margin: -50px 0 0 -50px; filter: drop-shadow(0 12px 14px rgba(10,13,44,.28)); }
+    .s12-dot { left: 0; top: 0; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #294b77; }
+    #s12-poof { left: 250px; top: 560px; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 3px solid rgba(41,75,119,.45); }
+    /* end lockup */
+    #s12-lockw { left: 540px; top: 612px; width: 0; height: 0; }
+    #s12-halo { left: -290px; top: -64px; width: 580px; height: 128px; border-radius: 64px; border: 2.5px solid rgba(41,75,119,.28); }
+    #s12-lock { left: -230px; top: -21px; width: 460px; height: 42px; }
+    #s12-lock img { position: absolute; left: 0; top: 0; width: 460px; height: 42px; }
+    #s12-glint { position: absolute; left: 0; top: 0; width: 460px; height: 42px; overflow: hidden;
+      -webkit-mask: url(assets/brand/logo_dark_trim.png) 0 0 / 100% 100% no-repeat; mask: url(assets/brand/logo_dark_trim.png) 0 0 / 100% 100% no-repeat; }
+    #s12-gband { position: absolute; left: 0; top: -20px; width: 120px; height: 82px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.95) 50%, rgba(255,255,255,0)); }
+    #s12-rule { left: -70px; top: 48px; width: 140px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #0a0d2c, #294b77); }
+  </style>
+  <div id="s12-root" data-composition-id="s12" data-width="1080" data-height="1920">
+    <div class="s12-a" id="s12-blob"></div>
+    <div id="s12-stage">
+      <div class="s12-a s12-card" id="s12-list">
+        <div class="s12-a" id="s12-hic"><i class="s12-m"></i></div>
+        <div class="s12-a" id="s12-ht"><span id="s12-n9">9</span><b class="s12-grad">link repo</b><b class="g">gratis</b></div>
+        <div class="s12-a" id="s12-os">OPEN SOURCE</div>
+        <div class="s12-a" id="s12-hl"></div>
+        <div id="s12-rows"></div>
+      </div>
+      <div class="s12-a s12-card" id="s12-dm">
+        <div class="s12-a" id="s12-dav"><i class="s12-m"></i></div>
+        <div class="s12-a s12-grad" id="s12-dt">DM</div>
+        <div class="s12-a" id="s12-ds"><s></s>Pesan baru</div>
+        <div class="s12-a" id="s12-dline"></div>
+        <div class="s12-a" id="s12-bub"><div class="s12-a" id="s12-bt"><i class="s12-m"></i>9 link repo gratis</div><div id="s12-bl"></div></div>
+        <div class="s12-a" id="s12-sent"><span>Terkirim</span><i class="s12-m"></i><i class="s12-m"></i></div>
+      </div>
+    </div>
+    <div class="s12-a s12-card" id="s12-cmt">
+      <div class="s12-a" id="s12-av"><i class="s12-a s12-m"></i></div>
+      <div class="s12-a" id="s12-field">
+        <div class="s12-a" id="s12-ph">Tulis komentar…</div>
+        <div class="s12-a" id="s12-typed"><span class="s12-k s12-grad" id="s12-k0">O</span><span class="s12-k s12-grad" id="s12-k1">P</span><span class="s12-k s12-grad" id="s12-k2">E</span><span class="s12-k s12-grad" id="s12-k3">N</span><span id="s12-caret"></span></div>
+      </div>
+      <div class="s12-a" id="s12-hb">
+        <div class="s12-a" id="s12-hr"></div>
+        <div id="s12-hps"></div>
+        <i class="s12-a s12-m" id="s12-ho"></i>
+        <svg class="s12-a" id="s12-hf" viewBox="0 0 24 24"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" fill="#e5484d" stroke="#e5484d" stroke-width="2" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div id="s12-fly"></div>
+    <div class="s12-a" id="s12-poof"></div>
+    <div id="s12-trail"></div>
+    <svg class="s12-a" id="s12-plane" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" fill="#ffffff" stroke="#0a0d2c" stroke-width="1.5" stroke-linejoin="round"/><path d="m21.854 2.147-10.94 10.939" fill="none" stroke="#294b77" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <div class="s12-a" id="s12-lockw">
+      <div class="s12-a" id="s12-halo"></div>
+      <div class="s12-a" id="s12-lock"><img src="assets/brand/logo_dark_trim.png" alt="AI PRENEUR"><div id="s12-glint"><div id="s12-gband"></div></div></div>
+      <div class="s12-a" id="s12-rule"></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // s12 CTA — "Kalian mau 9 link-nya? Komen OPEN, aku kirim lewat DM."
+      // The tracker lifts away; its nine FREE logos drop out of their tiles into a "9 link repo gratis" list card (numbered rows, real repo
+      // paths from window.APPS, link icons turn green on "link-nya") · "Komen": a comment composer slides up, "OPEN" types itself big in the
+      // navy gradient, a heart pops · "aku kirim": the list folds into a paper plane that flies (dotted trail) into a DM card and unfolds as
+      // the message bubble (nine logos) · "DM": Terkirim ✓✓ · last 1.6 s: centred dark AI PRENEUR lockup with a glint.
+      const ID = "s12", D = 4.9, A = window.APPS;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.89);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a2, v, p) => s0(a2, _sc(v), p); tl.fromTo = (a2, x, y, p) => f0(a2, _sc(x), _sc(y), p); tl.to = (a2, v, p) => t0(a2, _sc(v), p); }
+      const ft = (el, x, y, t) => tl.fromTo(el, x, Object.assign({ immediateRender: false }, y), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      // words (local s): Kalian 0.20 · mau 0.59 · 9 0.73 · link-nya? 1.06 · Komen 1.78 · OPEN, 2.01 · aku 2.54 · kirim 2.77 · lewat 3.08 · DM. 3.24
+      const logo = (l) => l.type === "png" ? `<div class="s12-lg png" style="background-image:url(${l.src});${l.bg ? `background-color:${l.bg};` : ""}"></div>`
+        : `<div class="s12-lg" style="background:${l.bg || "#fff"}"><i style="--m:url(${l.src});background:${l.color}"></i></div>`;
+      const LX = 120, LY = 340, RY = 104, RH = 48;
+      $("s12-rows").innerHTML = A.map((a, i) => { const p = a.free.repo.split("/");
+        return `<div class="s12-a s12-row" style="top:${RY + RH * i}px"><div class="s12-a s12-no">${i + 1}</div><div class="s12-a s12-slot"></div>
+          <div class="s12-a s12-sk" id="s12-sk${i}" style="width:${Math.round(12.5 * a.free.repo.length)}px"></div>
+          <div class="s12-a s12-path" id="s12-p${i}"><span>${p[0]}/</span><b>${p.slice(1).join("/")}</b></div>
+          <div class="s12-a s12-mini s12-rl" id="s12-rl${i}">${logo(a.free.logo)}</div>
+          <div class="s12-a s12-lk"><i></i></div><div class="s12-a s12-lk on" id="s12-lk${i}"><i></i></div></div>`; }).join("");
+      $("s12-fly").innerHTML = A.map((a, i) => `<div class="s12-a s12-tile" id="s12-t${i}">${logo(a.free.logo)}</div>`).join("");
+      $("s12-bl").innerHTML = A.map((a, i) => `<div class="s12-a s12-mini s12-bm" id="s12-bm${i}" style="left:${24 + i * 49}px">${logo(a.free.logo)}</div>`).join("");
+      const HP = ["#e5484d", "#d4a72c", "#e5484d", "#294b77", "#e5484d", "#d4a72c"];
+      $("s12-hps").innerHTML = HP.map((c, i) => `<div class="s12-a s12-hp" id="s12-hp${i}" style="background:${c}"></div>`).join("");
+      const NDOT = 13;
+      $("s12-trail").innerHTML = Array.from({ length: NDOT }, (_, j) => `<div class="s12-a s12-dot" id="s12-d${j}"></div>`).join("");
+
+      I($("s12-blob"), { opacity: 0, scale: 0.8 }); ft($("s12-blob"), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 0);
+
+      // ---- 1 · "Kalian mau 9 link-nya?" — list card + the nine free logos drop out of the tracker into its rows
+      const list = $("s12-list");
+      I(list, { opacity: 0, y: 60, scale: 0.94, rotationX: -14, transformOrigin: "50% 0%" });
+      ft(list, { opacity: 0, y: 60, scale: 0.94, rotationX: -14 }, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 0.5, ease: "expo.out" }, 0.04);
+      const hic = $("s12-hic"); I(hic, { scale: 0, rotation: -60 }); ft(hic, { scale: 0, rotation: -60 }, { scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2.4)" }, 0.6);
+      const ht = $("s12-ht"); I(ht, { opacity: 0, x: -24 }); ft(ht, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 0.62);
+      const os = $("s12-os"); I(os, { opacity: 0, scale: 0.4 }); ft(os, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.34, ease: "back.out(2.6)" }, 0.8);
+      const n9 = $("s12-n9"); I(n9, { scale: 1, rotation: 0 });
+      ft(n9, { scale: 1, rotation: 0 }, { scale: 1.32, rotation: -8, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out" }, 0.76);
+      A.forEach((a, i) => {
+        const t = $("s12-t" + i), rl = $("s12-rl" + i), sk = $("s12-sk" + i), pth = $("s12-p" + i), lk = $("s12-lk" + i);
+        const x0 = 134 + 38 + 92 * i, y0 = i === 8 ? 330 : 338, s0 = i === 8 ? 1.12 : 1;      // the tracker's tile (r9's tile is still lifted)
+        const x1 = LX + 98, y1 = LY + RY + RH * i + 24, s1 = 40 / 76;
+        const d0 = 0.04 + i * 0.03, DY = 0.32, XS = d0 + 0.16, DX = 0.2 + 0.25 * Math.abs(x0 - x1) / 690, L = Math.max(d0 + DY, XS + DX), rr = i % 2 ? 8 : -8;
+        I(t, { x: x0, y: y0, scale: s0, rotation: 0, opacity: 1 });
+        ft(t, { y: y0 }, { y: y1, duration: DY, ease: "power2.in" }, d0);
+        ft(t, { x: x0 }, { x: x1, duration: DX, ease: "power2.inOut" }, XS);
+        ft(t, { scale: s0 }, { scale: s1, duration: DY + 0.06, ease: "power1.inOut" }, d0);
+        ft(t, { rotation: 0 }, { rotation: rr, duration: 0.2, ease: "power1.out" }, d0);
+        ft(t, { rotation: rr }, { rotation: 0, duration: L - d0 - 0.2, ease: "power1.inOut" }, d0 + 0.2);
+        tl.set(t, { opacity: 0 }, L);
+        // lands in its slot: squash, the skeleton bar becomes the real repo path
+        I(rl, { opacity: 0, scaleX: 1, scaleY: 1, transformOrigin: "0% 50%" }); tl.set(rl, { opacity: 1 }, L);
+        ft(rl, { scaleX: 0.8, scaleY: 1.16 }, { scaleX: 1, scaleY: 1, duration: 0.34, ease: "elastic.out(1, 0.45)" }, L);
+        I(sk, { opacity: 1 }); ft(sk, { opacity: 1 }, { opacity: 0, duration: 0.14, ease: "power1.out" }, L + 0.02);
+        I(pth, { clipPath: "inset(0% 100% 0% 0%)", x: -10 });
+        ft(pth, { clipPath: "inset(0% 100% 0% 0%)", x: -10 }, { clipPath: "inset(0% 0% 0% 0%)", x: 0, duration: 0.34, ease: "power2.out" }, L + 0.02);
+        // "link-nya?": the link icons switch on, top to bottom
+        I(lk, { opacity: 0, scale: 0.3 }); tl.set(lk, { opacity: 1 }, 1.04 + i * 0.035);
+        ft(lk, { scale: 0.3 }, { scale: 1, duration: 0.3, ease: "back.out(3)" }, 1.04 + i * 0.035);
+      });
+
+      // ---- 2 · "Komen OPEN," — the list makes room, the comment composer slides up, OPEN types itself, heart pops
+      ft(list, { y: 0, scale: 1 }, { y: -40, scale: 0.86, duration: 0.4, ease: "power3.inOut" }, 1.6);
+      const cmt = $("s12-cmt");
+      I(cmt, { opacity: 0, y: 60, scale: 0.94 });
+      ft(cmt, { opacity: 0, y: 60, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.5)" }, 1.72);
+      const av = $("s12-av"); I(av, { scale: 0 }); ft(av, { scale: 0 }, { scale: 1, duration: 0.36, ease: "back.out(2.6)" }, 1.8);
+      const ph = $("s12-ph"); I(ph, { opacity: 1 }); tl.set(ph, { opacity: 0 }, 2.0);
+      const caret = $("s12-caret");
+      I(caret, { opacity: 0 });
+      [[1.86, 1], [1.95, 0], [2.0, 1], [2.42, 0], [2.52, 1], [2.62, 0]].forEach(([t, o]) => tl.set(caret, { opacity: o }, t));
+      [2.01, 2.07, 2.13, 2.19].forEach((t, k) => { const e = $("s12-k" + k);
+        I(e, { display: "none", y: 0, scale: 1 }); tl.set(e, { display: "inline-block" }, t);
+        ft(e, { y: 18, scale: 1.45 }, { y: 0, scale: 1, duration: 0.22, ease: "back.out(3)" }, t); });
+      const fld = $("s12-field");
+      ft(fld, { scale: 1 }, { scale: 1.025, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, 2.27);
+      // heart
+      const HT = 2.3, ho = $("s12-ho"), hf = $("s12-hf"), hr = $("s12-hr");
+      I(ho, { opacity: 1 }); tl.set(ho, { opacity: 0 }, HT);
+      I(hf, { opacity: 0, scale: 0, transformOrigin: "50% 55%" }); tl.set(hf, { opacity: 1 }, HT);
+      ft(hf, { scale: 0 }, { scale: 1, duration: 0.36, ease: "back.out(3.6)" }, HT);
+      I(hr, { opacity: 0, scale: 0.5 }); tl.set(hr, { opacity: 1 }, HT + 0.04);
+      ft(hr, { scale: 0.5, opacity: 1 }, { scale: 1.35, opacity: 0, duration: 0.42, ease: "power2.out" }, HT + 0.04);
+      HP.forEach((_, i) => { const e = $("s12-hp" + i), ang = -Math.PI / 2 + (i - 2.5) * 0.62, r = 58 + (i % 2) * 14;
+        I(e, { opacity: 0, x: 0, y: 0, scale: 1 }); tl.set(e, { opacity: 1 }, HT + 0.05);
+        ft(e, { x: 0, y: 0, scale: 1 }, { x: Math.cos(ang) * r, y: Math.sin(ang) * r, scale: 0, duration: 0.46, ease: "power3.out" }, HT + 0.05); });
+      ft(cmt, { y: 0 }, { y: 6, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, HT + 0.02);
+
+      // ---- 3 · "aku kirim lewat DM." — the list folds into a paper plane, flies into the DM card, unfolds as the message
+      const P0 = [250, 560], CP = [[250, 560], [250, 250], [600, 170], [666, 520]];   // plane path (cubic) → bubble centre
+      const TC = 2.4;                                                               // fold starts
+      ft(list, { x: 0, y: -40, scale: 0.86, rotation: 0, rotationY: 0 },
+        { x: P0[0] - 540 - 5, y: P0[1] - LY - 16, scale: 0.06, rotation: -16, rotationY: 50, duration: 0.26, ease: "power2.in" }, TC);
+      ft(list, { opacity: 1 }, { opacity: 0, duration: 0.08, ease: "power1.in" }, TC + 0.18);
+      const poof = $("s12-poof"); I(poof, { opacity: 0, scale: 0.3 }); tl.set(poof, { opacity: 1 }, TC + 0.24);
+      ft(poof, { scale: 0.3, opacity: 1 }, { scale: 1.3, opacity: 0, duration: 0.38, ease: "power2.out" }, TC + 0.24);
+      const dm = $("s12-dm");
+      I(dm, { opacity: 0, x: 140, scale: 0.94, rotationY: -24, transformOrigin: "100% 50%" });
+      ft(dm, { opacity: 0, x: 140, scale: 0.94, rotationY: -24 }, { opacity: 1, x: 0, scale: 1, rotationY: 0, duration: 0.5, ease: "expo.out" }, 2.62);
+      const dav = $("s12-dav"); I(dav, { scale: 0 }); ft(dav, { scale: 0 }, { scale: 1, duration: 0.34, ease: "back.out(2.6)" }, 2.72);
+      // arc-length sampled cubic, so the dotted trail and the plane agree
+      const bz = (u) => { const v = 1 - u, a = v * v * v, b = 3 * v * v * u, c = 3 * v * u * u, d = u * u * u;
+        return [a * CP[0][0] + b * CP[1][0] + c * CP[2][0] + d * CP[3][0], a * CP[0][1] + b * CP[1][1] + c * CP[2][1] + d * CP[3][1]]; };
+      const NS = 240, PT = [], CL = [0];
+      for (let k = 0; k <= NS; k++) { PT.push(bz(k / NS)); if (k) CL.push(CL[k - 1] + Math.hypot(PT[k][0] - PT[k - 1][0], PT[k][1] - PT[k - 1][1])); }
+      const LEN = CL[NS];
+      const at = (s) => { const L = s * LEN; let k = 1; while (k < NS && CL[k] < L) k++;
+        const f = (L - CL[k - 1]) / Math.max(1e-6, CL[k] - CL[k - 1]), x = PT[k - 1][0] + (PT[k][0] - PT[k - 1][0]) * f, y = PT[k - 1][1] + (PT[k][1] - PT[k - 1][1]) * f;
+        const ang = Math.atan2(PT[k][1] - PT[k - 1][1], PT[k][0] - PT[k - 1][0]) * 180 / Math.PI + 45;     // lucide-send points up-right (−45°)
+        return [x, y, ang]; };
+      const ez = (u) => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+      const plane = $("s12-plane"), F0 = 2.66, F1 = 3.0, NK = 22;
+      const st0 = at(0);
+      I(plane, { opacity: 0, x: st0[0], y: st0[1], rotation: st0[2], scale: 0 }); tl.set(plane, { opacity: 1 }, TC + 0.18);
+      ft(plane, { scale: 0 }, { scale: 1, duration: 0.2, ease: "back.out(2.4)" }, TC + 0.18);
+      let prev = st0;
+      for (let k = 0; k < NK; k++) { const nx = at(ez((k + 1) / NK)); if (nx[2] - prev[2] > 180) nx[2] -= 360; if (nx[2] - prev[2] < -180) nx[2] += 360;
+        ft(plane, { x: prev[0], y: prev[1], rotation: prev[2] }, { x: nx[0], y: nx[1], rotation: nx[2], duration: (F1 - F0) / NK, ease: "none" }, F0 + k * (F1 - F0) / NK); prev = nx; }
+      ft(plane, { scale: 1 }, { scale: 0.25, duration: 0.1, ease: "power2.in" }, F1 - 0.04);
+      tl.set(plane, { opacity: 0 }, F1 + 0.06);
+      for (let j = 0; j < NDOT; j++) { const s = 0.05 + 0.85 * j / (NDOT - 1), p = at(s), e = $("s12-d" + j);
+        let lo = 0, hi = 1; for (let it = 0; it < 30; it++) { const m = (lo + hi) / 2; if (ez(m) < s) lo = m; else hi = m; }
+        const td = F0 + lo * (F1 - F0);
+        I(e, { x: p[0], y: p[1], opacity: 0, scale: 0 }); tl.set(e, { opacity: 0.55 }, td);
+        ft(e, { scale: 0 }, { scale: 1, duration: 0.12, ease: "back.out(3)" }, td);
+        ft(e, { opacity: 0.55 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, 3.04 + j * 0.014); }
+      // lands: the bubble unfolds from the plane, the nine logos pop in, "Terkirim ✓✓" on "DM"
+      const bub = $("s12-bub");
+      I(bub, { opacity: 0, scale: 0.15, transformOrigin: "50% 50%" }); tl.set(bub, { opacity: 1 }, F1 - 0.02);
+      ft(bub, { scale: 0.15 }, { scale: 1, duration: 0.32, ease: "back.out(1.7)" }, F1 - 0.02);
+      A.forEach((_, i) => { const e = $("s12-bm" + i); I(e, { scale: 0 }); ft(e, { scale: 0 }, { scale: 1, duration: 0.2, ease: "back.out(2.8)" }, F1 + 0.04 + i * 0.018); });
+      const sent = $("s12-sent"); I(sent, { opacity: 0, x: 16 }); ft(sent, { opacity: 0, x: 16 }, { opacity: 1, x: 0, duration: 0.24, ease: "power3.out" }, 3.14);
+      const dt = $("s12-dt"); I(dt, { scale: 1, transformOrigin: "0% 50%" });
+      ft(dt, { scale: 1 }, { scale: 1.18, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 3.24);
+
+      // ---- 4 · end lockup (last 1.6 s; the host's corner logo fades out at 3.3)
+      ft(dm, { opacity: 1, y: 0, scale: 1 }, { opacity: 0, y: -80, scale: 0.9, duration: 0.2, ease: "power2.in" }, 3.4);
+      ft(cmt, { opacity: 1, y: 0 }, { opacity: 0, y: 40, duration: 0.2, ease: "power2.in" }, 3.4);
+      const lw = $("s12-lockw"), lk = $("s12-lock"), halo = $("s12-halo"), rule = $("s12-rule"), gb = $("s12-gband");
+      I(lw, { scale: 1 }); ft(lw, { scale: 1 }, { scale: 1.04, duration: D - 0.01 - 3.6, ease: "none" }, 3.6);
+      I(lk, { opacity: 0, scale: 0.86, clipPath: "inset(0% 50% 0% 50%)" }); tl.set(lk, { opacity: 1 }, 3.6);
+      ft(lk, { scale: 0.86, clipPath: "inset(0% 50% 0% 50%)" }, { scale: 1, clipPath: "inset(0% 0% 0% 0%)", duration: 0.6, ease: "expo.out" }, 3.6);
+      I(halo, { opacity: 0, scale: 0.7 }); tl.set(halo, { opacity: 1 }, 3.62);
+      ft(halo, { scale: 0.7, opacity: 1 }, { scale: 1.25, opacity: 0, duration: 0.7, ease: "power2.out" }, 3.62);
+      I(rule, { scaleX: 0 }); ft(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, 3.8);
+      I(gb, { x: -160, skewX: -20 }); ft(gb, { x: -160 }, { x: 520, duration: 0.6, ease: "power2.inOut" }, 4.08);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s12"] = tl;
     })();

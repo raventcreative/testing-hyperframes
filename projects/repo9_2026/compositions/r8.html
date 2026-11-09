@@ -1,10 +1,249 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-nyrt" id="root" data-composition-id="r8" data-width="1080" data-height="1920"></div>
+  <style>
+    /* ===== ROUND KIT (copied from r1, prefix r8-) ===== */
+    .r8-a { position: absolute; }
+    .r8-grad { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #r8-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1700px; perspective-origin: 50% 40%; }
+    #r8-blob { left: 100px; top: 380px; width: 880px; height: 640px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.95), rgba(255,255,255,0) 66%); }
+    /* use-case pill */
+    #r8-uc { left: 540px; top: 440px; height: 54px; padding: 0 24px 0 14px; border-radius: 27px; display: flex; align-items: center; gap: 12px; transform: translateX(-50%);
+      background: #ffffff; box-shadow: 0 12px 26px -12px rgba(20,40,90,.4), 0 0 0 1.5px rgba(10,13,44,.07); white-space: nowrap; }
+    #r8-uc .ic { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(160deg, #294b77, #0a0d2c); position: relative; }
+    #r8-uc .ic i { position: absolute; left: 7px; top: 7px; width: 20px; height: 20px; background: #fff; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+    #r8-uc b { font: 700 24px/1 Poppins, sans-serif; }
+    /* PAID card */
+    #r8-paid { left: 140px; top: 520px; width: 800px; height: 128px; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 34px 60px -30px rgba(20,40,90,.5), 0 0 0 1.5px rgba(10,13,44,.06); transform-style: preserve-3d; backface-visibility: hidden; }
+    .r8-tile { position: absolute; width: 76px; height: 76px; border-radius: 20px; overflow: hidden; background: #fff; box-shadow: 0 10px 22px -10px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .r8-lg { position: absolute; left: 0; top: 0; width: 76px; height: 76px; }
+    .r8-lg.png { background-size: 100% 100%; }
+    .r8-lg i { position: absolute; left: 18px; top: 18px; width: 40px; height: 40px; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+    #r8-ptile { left: 26px; top: 26px; }
+    #r8-pname { left: 124px; top: 28px; font: 700 40px/1.1 Poppins, sans-serif; letter-spacing: -0.02em; white-space: nowrap; }
+    #r8-psub { left: 126px; top: 80px; font: 400 20px/1 Poppins, sans-serif; color: #294b77; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    #r8-psub i { width: 20px; height: 20px; background: #e5484d; -webkit-mask: url(assets/icons/lucide-credit-card.svg) center / contain no-repeat; mask: url(assets/icons/lucide-credit-card.svg) center / contain no-repeat; }
+    #r8-ptag { right: 26px; top: 44px; height: 38px; padding: 0 14px; border-radius: 19px; background: #e5484d; color: #fff; font: 700 16px/38px Poppins, sans-serif; letter-spacing: .14em; }
+    #r8-pstrike { left: 110px; top: 60px; width: 470px; height: 7px; border-radius: 4px; background: #e5484d; transform-origin: 0 50%; box-shadow: 0 3px 10px rgba(229,72,77,.4); }
+    /* FREE repo card */
+    #r8-free { left: 80px; top: 560px; width: 920px; height: 360px; border-radius: 36px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 54px 90px -40px rgba(20,40,90,.5), 0 0 0 1.5px rgba(10,13,44,.06), 0 0 0 10px rgba(45,164,78,.0); transform-style: preserve-3d; backface-visibility: hidden; }
+    #r8-ring { left: -10px; top: -10px; width: 940px; height: 380px; border-radius: 44px; border: 4px solid rgba(45,164,78,.55); }
+    #r8-ftile { left: 34px; top: 34px; transform: scale(1.42); transform-origin: 0 0; }
+    #r8-fname { left: 170px; top: 34px; font: 700 50px/1.05 Poppins, sans-serif; letter-spacing: -0.025em; white-space: nowrap; }
+    #r8-frepo { left: 172px; top: 98px; font: 400 22px/1 Poppins, sans-serif; color: #294b77; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    #r8-frepo i { width: 22px; height: 22px; background: #294b77; -webkit-mask: url(assets/icons/si-github.svg) center / contain no-repeat; mask: url(assets/icons/si-github.svg) center / contain no-repeat; }
+    .r8-chip { position: absolute; top: 160px; height: 46px; padding: 0 16px; border-radius: 23px; display: flex; align-items: center; gap: 8px; font: 700 21px/1 Poppins, sans-serif; white-space: nowrap; }
+    .r8-chip.st { background: #fff8e1; color: #9a6700; box-shadow: inset 0 0 0 1.5px rgba(212,167,44,.5); }
+    .r8-chip.st i { width: 22px; height: 22px; background: #d4a72c; -webkit-mask: url(assets/icons/lucide-star.svg) center / contain no-repeat; mask: url(assets/icons/lucide-star.svg) center / contain no-repeat; }
+    .r8-chip.li { background: #eef2fb; color: #294b77; box-shadow: inset 0 0 0 1.5px rgba(41,75,119,.25); }
+    .r8-chip.os { background: #e9f7ee; color: #1a7f37; box-shadow: inset 0 0 0 1.5px rgba(45,164,78,.5); }
+    .r8-feat { position: absolute; top: 240px; height: 58px; padding: 0 22px 0 14px; border-radius: 29px; display: flex; align-items: center; gap: 10px;
+      background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); color: #fff; font: 700 25px/1 Poppins, sans-serif; white-space: nowrap; box-shadow: 0 12px 24px -10px rgba(10,13,44,.5); }
+    .r8-feat i { width: 28px; height: 28px; background: #6ee7a0; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+    #r8-stamp { right: 30px; top: 246px; height: 64px; padding: 0 22px; border-radius: 16px; border: 4px solid #1a7f37; color: #1a7f37; background: rgba(233,247,238,.92);
+      font: 700 34px/56px Poppins, sans-serif; letter-spacing: .1em; }
+    /* ===== r8 signature transition: CHANNEL FUNNEL =====
+       chat bubbles from every channel spiral in from the screen edges through an elliptical funnel into ONE hub (the Chatwoot tile);
+       the funnel throat opens into the free card (= the inbox) and the hub lands as its logo tile. */
+    #r8-fun { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #r8-piv { left: 540px; top: 740px; width: 0; height: 0; }
+    #r8-cone { left: -440px; top: -440px; width: 880px; height: 880px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(41,75,119,.20) 0%, rgba(41,75,119,.08) 34%, rgba(41,75,119,0) 68%); }
+    .r8-fr { left: -150px; top: -150px; width: 300px; height: 300px; border-radius: 50%; border: 3px dashed rgba(41,75,119,.5); }
+    .r8-arm { left: 0; top: 0; width: 0; height: 0; }
+    .r8-bb { left: -84px; top: -34px; width: 168px; height: 68px; }
+    .r8-bf { position: absolute; left: 0; top: 0; width: 168px; height: 68px; border-radius: 24px 24px 24px 8px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 14px 26px -12px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .r8-bi { position: absolute; left: 12px; top: 12px; width: 44px; height: 44px; border-radius: 50%; }
+    .r8-bi i, .r8-chi i { position: absolute; left: 10px; top: 10px; width: 24px; height: 24px; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+    .r8-bl { position: absolute; left: 68px; height: 10px; border-radius: 5px; }
+    #r8-glow { left: 410px; top: 610px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(45,164,78,.34), rgba(45,164,78,0) 66%); }
+    #r8-hub { left: 540px; top: 740px; width: 0; height: 0; }
+    #r8-hubi { left: -38px; top: -38px; width: 76px; height: 76px; }
+    #r8-hubi .r8-tile { left: 0; top: 0; }
+    .r8-ping { left: 494px; top: 694px; width: 92px; height: 92px; border-radius: 28px; border: 3px solid rgba(45,164,78,.7); }
+    /* in-card: channel row ("semua channel") that flies into the tile ("masuk satu inbox") */
+    .r8-ch { top: 50px; width: 56px; height: 56px; }
+    .r8-chi { position: absolute; left: 0; top: 0; width: 56px; height: 56px; border-radius: 50%; box-shadow: 0 10px 20px -10px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.08); }
+    .r8-chi i { left: 14px; top: 14px; width: 28px; height: 28px; }
+    #r8-tring { left: 26px; top: 26px; width: 124px; height: 124px; border-radius: 36px; border: 4px solid rgba(45,164,78,.75); }
+    #r8-f1 { isolation: isolate; }
+    .r8-hl { position: relative; }
+    .r8-hl b { position: absolute; left: -9px; right: -9px; top: -7px; bottom: -7px; border-radius: 12px; background: linear-gradient(160deg, #2da44e, #116329); z-index: -1; transform-origin: 0 50%; }
+  </style>
+  <div id="r8-root" data-composition-id="r8" data-width="1080" data-height="1920">
+    <div class="r8-a" id="r8-blob"></div>
+    <div class="r8-a" id="r8-uc"><span class="ic"><i style="--m:url(assets/icons/lucide-message-circle.svg)"></i></span><b class="r8-grad">Live chat pelanggan</b></div>
+    <div id="r8-stage">
+      <div class="r8-a" id="r8-paid">
+        <div class="r8-tile" id="r8-ptile"></div>
+        <div class="r8-a r8-grad" id="r8-pname"></div>
+        <div class="r8-a" id="r8-psub"><i></i>langganan tiap bulan</div>
+        <div class="r8-a" id="r8-ptag">BERBAYAR</div>
+        <div class="r8-a" id="r8-pstrike"></div>
+      </div>
+      <div class="r8-a" id="r8-free">
+        <div class="r8-a" id="r8-ring"></div>
+        <div class="r8-a" id="r8-tring"></div>
+        <div class="r8-tile" id="r8-ftile"></div>
+        <div class="r8-a r8-grad" id="r8-fname"></div>
+        <div class="r8-a" id="r8-frepo"><i></i><span id="r8-frepot"></span></div>
+        <div id="r8-chips"></div>
+        <div id="r8-feats"></div>
+        <div id="r8-chan"></div>
+        <div class="r8-a" id="r8-stamp">GRATIS</div>
+      </div>
+    </div>
+    <div id="r8-fun">
+      <div class="r8-a" id="r8-piv"><div class="r8-a" id="r8-cone"></div><div id="r8-rings"></div><div id="r8-arms"></div></div>
+      <div class="r8-a" id="r8-glow"></div>
+      <div id="r8-pings"></div>
+      <div class="r8-a" id="r8-hub"><div class="r8-a" id="r8-hubi"><div class="r8-tile" id="r8-htile"></div></div></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // ROUND 8 — "Live chat pelanggan ala Intercom. Chatwoot, semua channel masuk satu inbox."
+      // Use-case pill on "Live chat" · PAID card (Intercom, BERBAYAR) swings in · "ala Intercom": red strike + shake ·
+      // SIGNATURE TRANSITION = CHANNEL FUNNEL: chat bubbles from mail / live chat / web / Instagram / Facebook spiral in from both screen
+      // edges through an elliptical funnel (dashed rings contracting) into ONE hub = the Chatwoot tile, which swallows the Intercom card
+      // first; on "Chatwoot" the funnel throat opens into the free repo card (the inbox) and the hub flies into its logo slot ·
+      // stats chips · "Live chat" chip · "semua channel": the five channels line up on the card · "masuk satu inbox": they hop into the
+      // Chatwoot tile and "1 inbox" lights up green · GRATIS stamp · shared EXIT into the tracker tile.
+      const ID = "r8", K = 7, D = 4.5, a = window.APPS[K];
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.49);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a2, v, p) => s0(a2, _sc(v), p); tl.fromTo = (a2, x, y, p) => f0(a2, _sc(x), _sc(y), p); tl.to = (a2, v, p) => t0(a2, _sc(v), p); }
+      const ft = (el, x, y, t) => tl.fromTo(el, x, Object.assign({ immediateRender: false }, y), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      // words (local s): Live 0.22 · chat 0.54 · pelanggan 0.69 · ala 1.09 · Intercom 1.27 · Chatwoot 2.09 · semua 2.69 · channel 2.96 · masuk 3.31 · satu 3.69 · inbox 3.93
+      const TF = a.tFree - a.start;                                  // free name spoken (local) = 2.087
+      const logo = (l) => l.type === "png" ? `<div class="r8-lg png" style="background-image:url(${l.src});${l.bg ? `background-color:${l.bg};` : ""}"></div>`
+        : `<div class="r8-lg" style="background:${l.bg || "#fff"}"><i style="--m:url(${l.src});background:${l.color}"></i></div>`;
+      $("r8-ptile").innerHTML = logo(a.paid.logo); $("r8-pname").textContent = a.paid.name;
+      $("r8-ftile").innerHTML = logo(a.free.logo); $("r8-fname").textContent = a.free.name; $("r8-frepot").textContent = a.free.repo;
+      $("r8-htile").innerHTML = logo(a.free.logo);
+      const CH = [["st", `<i></i>${a.free.starsTxt}`], a.free.license ? ["li", a.free.license] : null, ["os", "OPEN SOURCE"]].filter(Boolean);
+      let x = 172; $("r8-chips").innerHTML = CH.map(([c, h], i) => { const w = c === "st" ? 150 : c === "os" ? 196 : 34 + 13 * h.length; const s = `<div class="r8-chip ${c}" id="r8-c${i}" style="left:${x}px">${h}</div>`; x += w + 12; return s; }).join("");
+      const FI = ["lucide-message-circle.svg", "lucide-message-square-text.svg"];
+      // "Semua channel, 1 inbox": the part after the comma gets a green highlight on "satu inbox"
+      const fhtml = (f) => { const k = f.indexOf(", "); return k < 0 ? f : `<span>${f.slice(0, k + 1)} <span class="r8-hl"><b id="r8-hlb"></b>${f.slice(k + 2)}</span></span>`; };
+      x = 34; $("r8-feats").innerHTML = a.features.map((f, i) => { const s = `<div class="r8-feat" id="r8-f${i}" style="left:${x}px"><i style="--m:url(assets/icons/${FI[i]})"></i>${fhtml(f)}</div>`; x += 88 + 14 * f.length; return s; }).join("");
+      // the five channels (UI: lucide mail / message-circle / globe · brands: Simple Icons Instagram / Facebook in their own colours)
+      const CHN = [
+        { m: "assets/icons/lucide-mail.svg", c: "#294b77", bg: "#eef2fb" },
+        { m: "assets/icons/si-instagram.svg", c: "#FF0069", bg: "#fff0f6" },
+        { m: "assets/icons/lucide-message-circle.svg", c: "#294b77", bg: "#eef2fb" },
+        { m: "assets/icons/si-facebook.svg", c: "#0866FF", bg: "#edf3ff" },
+        { m: "assets/icons/lucide-globe.svg", c: "#294b77", bg: "#eef2fb" }];
+      const NB = 10, SQ = 0.55;                                      // bubbles; funnel squash (pivot scaleY) = perspective of the funnel
+      $("r8-arms").innerHTML = Array.from({ length: NB }, (_, i) => { const c = CHN[i % 5];
+        return `<div class="r8-a r8-arm" id="r8-arm${i}"><div class="r8-a r8-bb" id="r8-bb${i}"><div class="r8-bf" id="r8-bf${i}">
+          <div class="r8-bi" style="background:${c.bg}"><i style="--m:url(${c.m});background:${c.c}"></i></div>
+          <div class="r8-bl" style="top:20px;width:${70 + (i % 3) * 8}px;background:rgba(41,75,119,.22)"></div>
+          <div class="r8-bl" style="top:38px;width:${44 + (i % 2) * 14}px;background:rgba(41,75,119,.13)"></div></div></div></div>`; }).join("");
+      $("r8-rings").innerHTML = Array.from({ length: 4 }, (_, i) => `<div class="r8-a r8-fr" id="r8-fr${i}"></div>`).join("");
+      $("r8-pings").innerHTML = Array.from({ length: 5 }, (_, i) => `<div class="r8-a r8-ping" id="r8-pg${i}"></div>`).join("");
+      $("r8-chan").innerHTML = CHN.map((c, i) => `<div class="r8-a r8-ch" id="r8-ch${i}" style="left:${556 + i * 66}px"><div class="r8-chi" id="r8-chi${i}" style="background:#fff"><i style="--m:url(${c.m});background:${c.c}"></i></div></div>`).join("");
+
+      // use-case pill on the question
+      const uc = $("r8-uc"); I(uc, { opacity: 0, y: -20, scale: 0.8 }); ft(uc, { opacity: 0, y: -20, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(2.2)" }, 0.14);
+      ft(uc.firstElementChild, { rotation: -90, scale: 0.5 }, { rotation: 0, scale: 1, duration: 0.5, ease: "back.out(2.6)" }, 0.22);
+      I($("r8-blob"), { opacity: 0, scale: 0.7 }); ft($("r8-blob"), { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power2.out" }, 0.04);
+      // PAID card swings in from the right (3D)
+      const paid = $("r8-paid");
+      I(paid, { x: 700, rotationY: -55, opacity: 0, transformOrigin: "50% 50%" }); tl.set(paid, { opacity: 1 }, 0.42);
+      ft(paid, { x: 700, rotationY: -55 }, { x: 0, rotationY: 0, duration: 0.6, ease: "expo.out" }, 0.42);
+      // "ala Intercom": strike + shake
+      const sk = $("r8-pstrike"); I(sk, { scaleX: 0, rotation: -3 }); ft(sk, { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power3.out" }, 1.1);
+      ft(paid, { x: 0 }, { x: 14, duration: 0.05, yoyo: true, repeat: 3, ease: "sine.inOut" }, 1.27);
+      ft($("r8-ptag"), { scale: 1 }, { scale: 1.18, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 1.29);
+
+      // ---------------- SIGNATURE: CHANNEL FUNNEL ----------------
+      const piv = $("r8-piv"); I(piv, { scaleY: SQ, scaleX: 1 });
+      const cone = $("r8-cone"); I(cone, { opacity: 0, scale: 0.6 });
+      ft(cone, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }, 1.12);
+      ft(cone, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, TF - 0.06);
+      // funnel rings: dashed ellipses contracting + spinning into the throat
+      [1.16, 1.3, 1.44, 1.58].forEach((t0, i) => { const r = $("r8-fr" + i), d = 0.6;
+        I(r, { opacity: 0, scale: 2.5, rotation: 0 });
+        ft(r, { scale: 2.5 }, { scale: 0.2, duration: d, ease: "power2.in" }, t0);
+        ft(r, { rotation: 0 }, { rotation: 150, duration: d, ease: "none" }, t0);
+        ft(r, { opacity: 0 }, { opacity: 0.75, duration: 0.15, ease: "power1.out" }, t0);
+        ft(r, { opacity: 0.75 }, { opacity: 0, duration: 0.16, ease: "power1.in" }, t0 + d - 0.16); });
+      // the hub (Chatwoot tile) appears in the throat; green glow behind it
+      const hub = $("r8-hub"), hubi = $("r8-hubi"), glow = $("r8-glow");
+      I(hub, { scale: 0, opacity: 1 }); ft(hub, { scale: 0 }, { scale: 1.1, duration: 0.34, ease: "back.out(2.4)" }, 1.4);
+      I(glow, { opacity: 0, scale: 0.5 }); ft(glow, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1.15, duration: 0.5, ease: "power2.out" }, 1.42);
+      ft(glow, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, TF);
+      // the Intercom card is swallowed by the funnel (spins down into the hub)
+      ft(paid, { y: 0, scale: 1, rotation: 0 }, { y: 156, scale: 0.05, rotation: 32, duration: 0.24, ease: "power3.in" }, 1.47);
+      tl.set(paid, { opacity: 0 }, 1.71);
+      // the bubbles: arm rotates (angle, power2.in = swirl accelerates), bubble moves along the arm (radius -> 0) and counter-rotates;
+      // its scaleY compensates the pivot squash, so the bubble stays undistorted while its path is an elliptical spiral
+      const LA = [168, 186, 176, 194, 172], RA = [-8, 10, 2, -14, 12];
+      const ARR = [];
+      for (let i = 0; i < NB; i++) {
+        const left = i % 2 === 0, th0 = left ? LA[i >> 1] : RA[(i - 1) >> 1], R0 = 700 + (i % 3) * 30, De = 100 + (i % 4) * 8;
+        const s = 1.2 + i * 0.036, d = 0.56, arm = $("r8-arm" + i), bb = $("r8-bb" + i), bf = $("r8-bf" + i);
+        I(arm, { rotation: th0 }); I(bb, { x: R0, rotation: -th0, scaleX: 1, scaleY: 1 / SQ, opacity: 0 }); I(bf, { rotation: left ? -10 : 10 });
+        tl.set(bb, { opacity: 1 }, s);
+        ft(arm, { rotation: th0 }, { rotation: th0 + De, duration: d, ease: "power2.in" }, s);
+        ft(bb, { rotation: -th0 }, { rotation: -(th0 + De), duration: d, ease: "power2.in" }, s);
+        ft(bb, { x: R0 }, { x: 0, duration: d, ease: "none" }, s);
+        ft(bb, { scaleX: 1, scaleY: 1 / SQ }, { scaleX: 0.3, scaleY: 0.3 / SQ, duration: d * 0.4, ease: "power1.in" }, s + d * 0.6);
+        ft(bf, { rotation: left ? -10 : 10 }, { rotation: 0, duration: d * 0.7, ease: "power2.out" }, s);
+        ft(bb, { opacity: 1 }, { opacity: 0, duration: 0.07, ease: "none" }, s + d - 0.07);
+        if (!left) ARR.push(s + d);
+      }
+      // each wave that lands: the hub pulses and a green ping leaves it
+      ARR.forEach((t, i) => {
+        ft(hubi, { scale: 1 }, { scale: 1.14, duration: 0.03, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+        const pg = $("r8-pg" + i); I(pg, { opacity: 0, scale: 0.9 }); tl.set(pg, { opacity: 1 }, t);
+        ft(pg, { opacity: 0.9, scale: 0.9 }, { opacity: 0, scale: 2.1, duration: 0.34, ease: "power2.out" }, t); });
+      // on "Chatwoot": the throat opens into the FREE card (scale from the hub + tilt up) while the hub flies into its logo slot
+      const free = $("r8-free"), OPEN = TF - 0.03;
+      I(free, { opacity: 0, scale: 0.1, rotationX: 45, transformOrigin: "50% 50%" }); tl.set(free, { opacity: 1 }, OPEN);
+      ft(free, { scale: 0.1 }, { scale: 1, duration: 0.46, ease: "back.out(1.35)" }, OPEN);
+      ft(free, { rotationX: 45 }, { rotationX: 0, duration: 0.5, ease: "power3.out" }, OPEN);
+      const LAND = OPEN + 0.48;
+      ft(hub, { x: 0, y: 0, scale: 1.1 }, { x: 168 - 540, y: 648 - 740, scale: 1.42, duration: 0.48, ease: "power3.inOut" }, OPEN);
+      tl.set(hub, { opacity: 0 }, LAND);
+      const ftile = $("r8-ftile"); I(ftile, { opacity: 0 }); tl.set(ftile, { opacity: 1 }, LAND);
+      const ring = $("r8-ring"); I(ring, { opacity: 0, scale: 0.96 }); tl.set(ring, { opacity: 1 }, LAND - 0.04);
+      ft(ring, { scale: 0.96, opacity: 1 }, { scale: 1.06, opacity: 0, duration: 0.6, ease: "power2.out" }, LAND - 0.04);
+      // card content builds on the free name
+      [["r8-fname", 0.36], ["r8-frepo", 0.42]].forEach(([id, d]) => { const e = $(id); I(e, { opacity: 0, x: -20 }); ft(e, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.36, ease: "power3.out" }, TF + d); });
+      CH.forEach((_, i) => { const e = $("r8-c" + i); I(e, { opacity: 0, scale: 0.4 }); ft(e, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(2.6)" }, TF + 0.34 + i * 0.1); });
+      const FT = [TF + 0.5, 2.68];                                   // "Live chat" (asked in the question) · "semua channel"
+      a.features.forEach((_, i) => { const e = $("r8-f" + i); I(e, { opacity: 0, y: 24, scale: 0.85 }); ft(e, { opacity: 0, y: 24, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(2.2)" }, FT[i]); });
+      // "semua channel": the five channels line up on the card
+      CHN.forEach((_, i) => { const e = $("r8-ch" + i), t = 2.7 + i * 0.055; I(e, { opacity: 0, scale: 0, x: 0, y: 0 }); tl.set(e, { opacity: 1 }, t);
+        ft(e, { scale: 0 }, { scale: 1, duration: 0.32, ease: "back.out(2.6)" }, t); });
+      // "masuk satu inbox": each channel hops into the Chatwoot tile (outer = x/scale, inner = arc)
+      CHN.forEach((_, i) => { const e = $("r8-ch" + i), ei = $("r8-chi" + i), t = 3.3 + i * 0.05, d = 0.34, dx = 88 - (584 + i * 66);
+        ft(e, { x: 0, y: 0 }, { x: dx, y: 10, duration: d, ease: "power2.inOut" }, t);
+        ft(e, { scale: 1 }, { scale: 0.4, duration: d, ease: "power2.in" }, t);
+        I(ei, { y: 0 }); ft(ei, { y: 0 }, { y: -58 - i * 6, duration: d / 2, yoyo: true, repeat: 1, ease: "sine.out" }, t);
+        ft(e, { opacity: 1 }, { opacity: 0, duration: 0.06, ease: "none" }, t + d - 0.06); });
+      const PO = -(1.6 - 1.42) * 38;                                 // keep the pulse centred (tile origin is 0 0)
+      ft(ftile, { scaleX: 1.42, scaleY: 1.42, x: 0, y: 0 }, { scaleX: 1.6, scaleY: 1.6, x: PO, y: PO, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, 3.66);
+      const tr = $("r8-tring"); I(tr, { opacity: 0, scale: 0.9 }); tl.set(tr, { opacity: 1 }, 3.68);
+      ft(tr, { opacity: 1, scale: 0.9 }, { opacity: 0, scale: 1.45, duration: 0.45, ease: "power2.out" }, 3.68);
+      const hlb = $("r8-hlb"); if (hlb) { I(hlb, { scaleX: 0 }); ft(hlb, { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power3.out" }, 3.69); }
+      // GRATIS stamp
+      const st = $("r8-stamp"); I(st, { opacity: 0, scale: 2.2, rotation: -24 }); tl.set(st, { opacity: 1 }, TF + 1.0);
+      ft(st, { scale: 2.2, rotation: -24 }, { scale: 1, rotation: -8, duration: 0.22, ease: "power4.in" }, TF + 1.0);
+      ft(free, { y: 0 }, { y: 8, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, TF + 1.22);
+      // EXIT (all rounds): the free card shrinks into its tracker tile; the pill lifts away
+      const TX = 134 + 38 + K * 92, TY = 338, EX = D - 0.36;
+      ft(free, { x: 0, y: 0, scale: 1, rotationY: 0 }, { x: TX - 540, y: TY - 740, scale: 0.09, duration: 0.34, ease: "power3.in" }, EX);
+      ft(free, { opacity: 1 }, { opacity: 0, duration: 0.1, ease: "power1.in" }, D - 0.1);
+      ft(uc, { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.25, ease: "power2.in" }, EX);
+      ft($("r8-blob"), { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, EX);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["r8"] = tl;
     })();

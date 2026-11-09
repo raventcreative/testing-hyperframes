@@ -1,0 +1,82 @@
+<template>
+  <style>
+    #tk-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #tk-wrap { position: absolute; left: 0; top: 300px; width: 1080px; height: 110px; }
+    .tk-t { position: absolute; top: 0; width: 76px; height: 76px; perspective: 400px; }
+    .tk-f { position: absolute; inset: 0; border-radius: 20px; overflow: hidden; backface-visibility: hidden;
+      box-shadow: 0 10px 22px -10px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.07); background: #ffffff; }
+    .tk-f.bk { transform: rotateY(180deg); }
+    .tk-lg { position: absolute; left: 0; top: 0; width: 76px; height: 76px; }
+    .tk-lg.png { background-size: 100% 100%; }
+    .tk-lg.svg i, .tk-lg.icon i { position: absolute; left: 18px; top: 18px; width: 40px; height: 40px; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+    .tk-x { position: absolute; left: 6px; right: 6px; top: 36px; height: 5px; border-radius: 3px; background: #e5484d; transform-origin: 0 50%; transform: rotate(-24deg) scaleX(0); box-shadow: 0 2px 6px rgba(229,72,77,.35); }
+    .tk-ok { position: absolute; right: -8px; bottom: -8px; width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(160deg, #2da44e, #116329);
+      box-shadow: 0 0 0 3px #ffffff, 0 4px 10px rgba(17,99,41,.4); transform: scale(0); }
+    .tk-ok i { position: absolute; left: 6px; top: 6px; width: 18px; height: 18px; background: #fff; -webkit-mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; }
+    .tk-ring { position: absolute; left: -8px; top: -8px; width: 92px; height: 92px; border-radius: 26px; border: 3px solid #294b77; opacity: 0; }
+    #tk-count { position: absolute; left: 0; width: 1080px; top: 86px; text-align: center; font: 700 20px/1 Poppins, sans-serif; letter-spacing: .14em; }
+    #tk-count span { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #tk-count b { color: #1a7f37; -webkit-text-fill-color: #1a7f37; }
+  </style>
+  <div data-hf-id="hf-zwlb" id="tk-root" data-composition-id="tracker" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-g64r" id="tk-wrap"><div data-hf-id="hf-agx2" id="tk-tiles"></div><div data-hf-id="hf-r56w" id="tk-count"><span data-hf-id="hf-oz9z" id="tk-ct"></span></div></div>
+  </div>
+  <script>
+    (function () {
+      // Persistent 9-APP TRACKER (r1–r9): the nine paid apps in a row under the logo. Each round: its tile lifts with a ring, gets struck
+      // on the paid name, then FLIPS to the free twin (GitHub logo) with a green check on the free name. Counter "n/9 DIGANTI GRATIS".
+      // It lands at 5.73 s from s02 (which hands the 9 tiles over in exactly these positions) and leaves into the CTA (s12).
+      // Pure function of global time (hf-seek, __T0 for chunked renders).
+      const A = window.APPS, SC = window.VO_SCENES, D = 56.0667;
+      const S = (id) => SC.find((s) => s.id === id);
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const e3 = (u) => { u = one(u); return 1 - Math.pow(1 - u, 3); };
+      const io = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const back = (u) => { u = one(u); const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };
+      const W = 76, G = 16, X0 = (1080 - (9 * W + 8 * G)) / 2;
+      const T_IN = S("r1").start, T_OUT = S("s12").start;
+      const logo = (l) => l.type === "png" ? `<div class="tk-lg png" style="background-image:url(${l.src});${l.bg ? `background-color:${l.bg};` : ""}"></div>`
+        : `<div class="tk-lg ${l.type}" style="background:${l.bg || "#fff"}"><i style="--m:url(${l.src});background:${l.color}"></i></div>`;
+      document.getElementById("tk-tiles").innerHTML = A.map((a, i) => `<div class="tk-t" id="tk-t${i}" style="left:${(X0 + i * (W + G)).toFixed(1)}px">
+          <div class="tk-ring" id="tk-r${i}"></div>
+          <div class="tk-f" id="tk-p${i}">${logo(a.paid.logo)}<div class="tk-x" id="tk-x${i}"></div></div>
+          <div class="tk-f bk" id="tk-g${i}">${logo(a.free.logo)}</div>
+          <div class="tk-ok" id="tk-ok${i}"><i></i></div></div>`).join("");
+      const $ = (id) => document.getElementById(id);
+      const set = (el, k, v) => { if (el.style[k] !== v) el.style[k] = v; };
+      const wrap = $("tk-wrap"), ct = $("tk-ct");
+      // the paid name is spoken ~0.4–1.2 s into the round; strike right before the free name
+      function draw(t) {
+        if (t < T_IN - 0.02 || t >= T_OUT + 0.6) { set(wrap, "opacity", "0"); return; }
+        const outU = io((t - T_OUT) / 0.5);
+        set(wrap, "opacity", String(1 - outU)); set(wrap, "transform", `translateY(${(-60 * outU).toFixed(1)}px)`);
+        let done = 0;
+        A.forEach((a, i) => {
+          const t0 = a.start, tf = a.tFree, end = a.start + a.dur;
+          const act = one((t - t0 + 0.1) / 0.3) * (1 - one((t - end + 0.15) / 0.3));       // active round: lift + ring
+          const lift = -10 * e3(act), sc = 1 + 0.16 * e3(act);
+          const flip = io((t - (tf - 0.12)) / 0.42);                                         // 0 = paid face, 1 = free face
+          const tile = $("tk-t" + i);
+          set(tile, "transform", `translateY(${lift.toFixed(2)}px) scale(${sc.toFixed(4)})`);
+          set($("tk-r" + i), "opacity", act.toFixed(3));
+          set($("tk-p" + i), "transform", `rotateY(${(180 * flip).toFixed(2)}deg)`);
+          set($("tk-g" + i), "transform", `rotateY(${(180 * flip - 180).toFixed(2)}deg)`);
+          const strike = one((t - (tf - 0.55)) / 0.2);
+          set($("tk-x" + i), "transform", `rotate(-24deg) scaleX(${strike.toFixed(3)})`);
+          const okU = back((t - (tf + 0.25)) / 0.32);
+          set($("tk-ok" + i), "transform", `scale(${(t < tf + 0.25 ? 0 : okU).toFixed(3)})`);
+          // waiting tiles are a little faded; finished ones are full
+          set(tile, "opacity", (t < t0 - 0.1 && flip === 0 ? 1 - 0.45 * one((t - T_IN - 0.05) / 0.5) : 1).toFixed(3));   // waiting tiles dim gently after the hand-over
+          if (t >= tf + 0.3) done++;
+        });
+        const txt = `${done}/9 DIGANTI <b>GRATIS</b>`;
+        if (ct.innerHTML !== txt) ct.innerHTML = txt;
+      }
+      draw(0);
+      window.addEventListener("hf-seek", (e) => draw(e.detail.time + (window.__T0 || 0)));
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02);
+      window.__timelines["tracker"] = tl;
+    })();
+  </script>
+</template>

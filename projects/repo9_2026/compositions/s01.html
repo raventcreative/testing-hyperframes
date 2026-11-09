@@ -1,0 +1,79 @@
+<template>
+  <style>
+    .s01-a { position: absolute; }
+    #s01-ghost { left: 0; width: 1080px; top: 236px; text-align: center; font: 700 760px/1 Poppins, sans-serif; letter-spacing: -0.06em;
+      background: linear-gradient(172deg, rgba(10,13,44,.09), rgba(41,75,119,.04)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #s01-blob { left: 120px; top: 300px; width: 840px; height: 680px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.95), rgba(255,255,255,0) 66%); }
+    /* tiles = the tracker's 76 px tile, scaled up (so the hand-over to the tracker is a pure transform) */
+    .s01-t { left: 0; top: 0; width: 76px; height: 76px; margin: -38px 0 0 -38px; }
+    .s01-f { position: absolute; inset: 0; border-radius: 20px; overflow: hidden; background: #ffffff; box-shadow: 0 10px 22px -10px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s01-lg { position: absolute; left: 0; top: 0; width: 76px; height: 76px; }
+    .s01-lg.png { background-size: 100% 100%; }
+    .s01-lg i { position: absolute; left: 18px; top: 18px; width: 40px; height: 40px; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+    .s01-nm { left: 0; top: 0; width: 220px; margin-left: -110px; text-align: center; font: 700 21px/1 Poppins, sans-serif; letter-spacing: -0.01em;
+      background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
+    .s01-tag { left: 0; top: 0; height: 30px; padding: 0 11px; border-radius: 15px; background: #e5484d; color: #fff; font: 700 14px/30px Poppins, sans-serif; letter-spacing: .12em;
+      box-shadow: 0 6px 14px -4px rgba(229,72,77,.6); white-space: nowrap; }
+    #s01-ring { left: 540px; top: 632px; width: 0; height: 0; }
+    #s01-ring svg { position: absolute; left: -380px; top: -380px; }
+    #s01-pill { left: 540px; top: 890px; height: 56px; padding: 0 24px 0 16px; border-radius: 28px; display: flex; align-items: center; gap: 10px; transform: translateX(-50%);
+      background: #fff1f1; box-shadow: 0 0 0 2px rgba(229,72,77,.55), 0 14px 30px -14px rgba(229,72,77,.6); font: 700 24px/1 Poppins, sans-serif; color: #c4343a; white-space: nowrap; }
+    #s01-pill i { width: 28px; height: 28px; background: #e5484d; -webkit-mask: url(assets/icons/lucide-repeat.svg) center / contain no-repeat; mask: url(assets/icons/lucide-repeat.svg) center / contain no-repeat; }
+  </style>
+  <div id="s01-root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div class="s01-a" id="s01-blob"></div>
+    <div class="s01-a" id="s01-ghost">9</div>
+    <div class="s01-a" id="s01-ring"><svg width="760" height="760" viewBox="-380 -380 760 760"><g id="s01-rg">
+      <circle r="352" fill="none" stroke="#e5484d" stroke-width="5" stroke-dasharray="26 18" stroke-linecap="round" opacity=".75"/>
+      <path d="M 340,-92 l 26,-14 l 6,30 z" fill="#e5484d"/><path d="M -340,92 l -26,14 l -6,-30 z" fill="#e5484d"/></g></svg></div>
+    <div id="s01-grid"></div>
+    <div class="s01-a" id="s01-pill"><i></i>ditagih tiap bulan</div>
+  </div>
+  <script>
+    (function () {
+      // s01 HOOK "9 aplikasi ini kamu bayar tiap bulan."
+      // The nine paid apps slam into a 3×3 grid (a ghost "9" behind) · "bayar": a red BAYAR tag stamps on every tile in a ripple ·
+      // "tiap bulan": a red auto-renew ring circles the grid and a "ditagih tiap bulan" pill drops in. s02 starts from this exact state.
+      const D = 3.1, A = window.APPS;
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      // words (local s): 9 0.37 · aplikasi 0.74 · ini 1.25 · kamu 1.48 · bayar 1.79 · tiap 2.38 · bulan 2.53
+      const SC = 2.21, CX = (i) => 540 + ((i % 3) - 1) * 196, CY = (i) => 622 + (Math.floor(i / 3) - 1) * 196;
+      const logo = (l) => l.type === "png" ? `<div class="s01-lg png" style="background-image:url(${l.src});${l.bg ? `background-color:${l.bg};` : ""}"></div>`
+        : `<div class="s01-lg" style="background:${l.bg || "#fff"}"><i style="--m:url(${l.src});background:${l.color}"></i></div>`;
+      $("s01-grid").innerHTML = A.map((a, i) => `<div class="s01-a s01-t" id="s01-t${i}"><div class="s01-f">${logo(a.paid.logo)}</div></div>
+          <div class="s01-a s01-nm" id="s01-n${i}">${a.paid.name}</div><div class="s01-a s01-tag" id="s01-g${i}">BAYAR</div>`).join("");
+      I($("s01-blob"), { opacity: 0, scale: 0.7 }); ft($("s01-blob"), { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }, 0);
+      const gh = $("s01-ghost"); I(gh, { opacity: 0, scale: 1.4 }); ft(gh, { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.6, ease: "expo.out" }, 0.3);
+      // the nine tiles slam in from the camera, centre-out order
+      const ORDER = [4, 1, 3, 5, 7, 0, 2, 6, 8];
+      ORDER.forEach((i, k) => {
+        const t = $("s01-t" + i), n = $("s01-n" + i), g = $("s01-g" + i), t0 = 0.12 + k * 0.075;
+        I(t, { x: CX(i), y: CY(i), scale: SC * 2.2, rotation: (k % 2 ? 1 : -1) * 14, opacity: 0 });
+        tl.set(t, { opacity: 1 }, t0);
+        ft(t, { scale: SC * 2.2, rotation: (k % 2 ? 1 : -1) * 14 }, { scale: SC, rotation: 0, duration: 0.34, ease: "power4.in" }, t0);
+        ft(t, { y: CY(i) }, { y: CY(i) + 6, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, t0 + 0.34);
+        I(n, { x: CX(i), y: CY(i) + 92, opacity: 0 }); ft(n, { opacity: 0, y: CY(i) + 104 }, { opacity: 1, y: CY(i) + 92, duration: 0.3, ease: "power3.out" }, t0 + 0.3);
+        // "bayar": red BAYAR tag stamps on the tile's top-right corner, ripple from the centre
+        I(g, { x: CX(i) + 30, y: CY(i) - 100, scale: 2.2, rotation: 14, opacity: 0, transformOrigin: "50% 50%" });
+        const ts = 1.72 + k * 0.045; tl.set(g, { opacity: 1 }, ts);
+        ft(g, { scale: 2.2, rotation: 14 }, { scale: 1, rotation: 8, duration: 0.2, ease: "power4.in" }, ts);
+        ft(t, { scale: SC }, { scale: SC * 0.94, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, ts + 0.2);
+      });
+      // "tiap bulan": auto-renew ring circles the grid, pill drops in
+      const ring = $("s01-ring"), rg = $("s01-rg");
+      I(ring, { opacity: 0, scale: 0.6 }); ft(ring, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.6)" }, 2.3);
+      I(rg, { rotation: 0, transformOrigin: "50% 50%" }); ft(rg, { rotation: 0 }, { rotation: 140, duration: D - 2.3, ease: "power1.out", transformOrigin: "50% 50%" }, 2.3);
+      const pill = $("s01-pill"); I(pill, { opacity: 0, y: 30, scale: 0.8 }); ft(pill, { opacity: 0, y: 30, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(2.4)" }, 2.42);
+      ft(pill.firstElementChild, { rotation: 0 }, { rotation: 360, duration: 0.6, ease: "power3.out" }, 2.5);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s01"] = tl;
+    })();
+  </script>
+</template>

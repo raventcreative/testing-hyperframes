@@ -1,10 +1,339 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-gr41" id="root" data-composition-id="s03" data-width="1080" data-height="1920"></div>
+  <style>
+    .s03-a { position: absolute; }
+    #s03-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1800px; perspective-origin: 50% 34%; }
+    #s03-whip { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    /* the Manus window = s02's Manus card, opened (same rect, same header) */
+    #s03-win { left: 60px; top: 300px; width: 960px; height: 630px; border-radius: 28px; overflow: hidden;
+      background: linear-gradient(160deg, rgba(23,36,94,.97), rgba(9,15,48,.98) 72%);
+      box-shadow: 0 50px 90px -40px rgba(0,0,0,.7), 0 0 0 1.5px rgba(106,223,255,.3), 0 0 60px rgba(1,204,247,.12); }
+    #s03-glow { left: 0; top: 0; width: 960px; height: 630px; border-radius: 28px; box-shadow: inset 0 0 0 2px rgba(106,223,255,.9), inset 0 0 60px rgba(1,204,247,.28); }
+    .s03-tile { left: 26px; top: 26px; width: 96px; height: 96px; border-radius: 24px; background: linear-gradient(160deg, #233a86, #0f1a4c);
+      box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.5), 0 0 26px rgba(1,204,247,.28); }
+    .s03-tile i { position: absolute; left: 18px; top: 18px; width: 60px; height: 60px; background: #ffffff;
+      -webkit-mask: url(assets/icons/lobe-manus.svg) center / contain no-repeat; mask: url(assets/icons/lobe-manus.svg) center / contain no-repeat; }
+    #s03-tr { left: 26px; top: 26px; width: 96px; height: 96px; border-radius: 24px; box-shadow: 0 0 0 3px #6adfff, 0 0 18px rgba(1,204,247,.8); }
+    .s03-ak { left: 140px; top: 32px; font: 700 16px/1 Poppins, sans-serif; letter-spacing: .18em; color: #6adfff; white-space: nowrap; }
+    .s03-nm { left: 138px; top: 52px; font: 700 46px/1 Poppins, sans-serif; letter-spacing: -0.02em; color: #ffffff; white-space: nowrap; }
+    .s03-pl { left: 140px; top: 104px; height: 30px; padding: 0 12px; border-radius: 15px; background: #01ccf7; color: #071033; overflow: hidden;
+      font: 700 15px/30px Poppins, sans-serif; letter-spacing: .14em; white-space: nowrap; box-shadow: 0 6px 16px -6px rgba(1,204,247,.8); }
+    #s03-shine { left: 0; top: -10px; width: 34px; height: 50px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.85), rgba(255,255,255,0)); transform: rotate(20deg); }
+    .s03-dv { left: 26px; top: 150px; width: 398px; height: 2px; border-radius: 1px; background: rgba(255,255,255,.08); }
+    .s03-ll { left: 26px; top: 164px; height: 18px; display: flex; align-items: center; gap: 8px; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .16em; color: #6adfff; white-space: nowrap; }
+    .s03-ll i { width: 18px; height: 18px; background: #6adfff; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    /* plan tickets (same paper tickets as s02's lane) */
+    .s03-row { left: 26px; width: 398px; height: 52px; border-radius: 13px; background: #f4f1e8; box-shadow: 0 14px 26px -12px rgba(0,0,0,.55);
+      display: flex; align-items: center; gap: 12px; padding: 0 14px; font: 700 22px/1 Poppins, sans-serif; color: #12183a; white-space: nowrap; }
+    .s03-row .ck { position: relative; width: 24px; height: 24px; border-radius: 7px; box-shadow: inset 0 0 0 2px rgba(18,24,58,.32); flex: none; }
+    .s03-row .ic { width: 24px; height: 24px; background: #12183a; flex: none; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s03-row .sp { position: absolute; left: -4px; top: -4px; width: 32px; height: 32px; border-radius: 50%; border: 3px solid rgba(1,169,216,.25); border-top-color: #01a9d8; }
+    .s03-row .ok { position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 7px; background: #01ccf7; box-shadow: 0 0 12px rgba(1,204,247,.8); }
+    .s03-row .ok i { position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; background: #071033; -webkit-mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; }
+    .s03-row .hl { position: absolute; left: -3px; top: -3px; right: -3px; bottom: -3px; border-radius: 16px; box-shadow: 0 0 0 2.5px #01ccf7, 0 0 22px rgba(1,204,247,.6); }
+    #s03-sep { left: 332px; top: 22px; width: 2px; height: 586px; background: rgba(255,255,255,.07); }
+    .s03-src { left: 26px; width: 280px; height: 42px; border-radius: 12px; background: rgba(255,255,255,.05); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.08); }
+    .s03-src b { position: absolute; left: 13px; top: 0; font: 700 16px/42px Poppins, sans-serif; color: #6adfff; }
+    .s03-src s { position: absolute; left: 36px; top: 17px; width: 92px; height: 8px; border-radius: 4px; background: rgba(227,237,250,.25); }
+    .s03-src em { position: absolute; right: 8px; top: 7px; height: 28px; padding: 0 10px; border-radius: 14px; display: flex; align-items: center; gap: 6px; font: 700 15px/1 Poppins, sans-serif; font-style: normal;
+      color: #6adfff; background: rgba(1,204,247,.14); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.5); }
+    .s03-src em i { width: 14px; height: 14px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-external-link.svg) center / contain no-repeat; mask: url(assets/icons/lucide-external-link.svg) center / contain no-repeat; }
+    /* work viewport */
+    #s03-vp { left: 352px; top: 22px; width: 586px; height: 586px; border-radius: 18px; overflow: hidden; background: rgba(0,0,0,.2); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.08); perspective: 1200px; }
+    .s03-tab { top: 14px; width: 128px; height: 36px; border-radius: 10px; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.09); }
+    .s03-tab.on { background: rgba(1,204,247,.13); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.6); }
+    .s03-tab i { position: absolute; left: 12px; top: 10px; width: 16px; height: 16px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-globe.svg) center / contain no-repeat; mask: url(assets/icons/lucide-globe.svg) center / contain no-repeat; }
+    .s03-tab s { position: absolute; left: 36px; top: 14px; width: 72px; height: 8px; border-radius: 4px; background: rgba(227,237,250,.28); }
+    #s03-globe { left: 293px; top: 282px; width: 0; height: 0; }
+    #s03-gc { position: absolute; left: -85px; top: -85px; width: 170px; height: 170px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,.28), rgba(1,204,247,.04) 70%);
+      box-shadow: inset 0 0 0 2px rgba(106,223,255,.5), 0 0 50px rgba(1,204,247,.25); }
+    #s03-gi { position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-globe.svg) center / contain no-repeat; mask: url(assets/icons/lucide-globe.svg) center / contain no-repeat; }
+    .s03-go { position: absolute; left: -140px; top: -42px; width: 280px; height: 84px; border-radius: 50%; border: 2px solid rgba(106,223,255,.35); }
+    .s03-go i { position: absolute; left: 132px; top: -7px; width: 12px; height: 12px; border-radius: 50%; background: #e9fbff; box-shadow: 0 0 10px #01ccf7; }
+    #s03-status { left: 18px; top: 542px; width: 400px; height: 30px; }
+    #s03-ssp { position: absolute; left: 0; top: 5px; width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid rgba(106,223,255,.25); border-top-color: #6adfff; }
+    .s03-st { position: absolute; left: 32px; top: 0; font: 400 20px/30px Poppins, sans-serif; color: #c9d6ee; white-space: nowrap; }
+    #s03-brs { left: 0; top: 0; width: 586px; height: 586px; }
+    .s03-br { left: 163px; top: 192px; width: 260px; height: 196px; border-radius: 14px; overflow: hidden; background: linear-gradient(170deg, #22367f, #111b55);
+      box-shadow: 0 30px 50px -24px rgba(0,0,0,.75), 0 0 0 1.5px rgba(106,223,255,.32); }
+    .s03-br .d { position: absolute; top: 11px; width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.22); }
+    .s03-br .ad { position: absolute; left: 52px; top: 7px; width: 192px; height: 16px; border-radius: 8px; background: rgba(255,255,255,.08); }
+    .s03-br .ad i { position: absolute; left: 5px; top: 3px; width: 10px; height: 10px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-globe.svg) center / contain no-repeat; mask: url(assets/icons/lucide-globe.svg) center / contain no-repeat; }
+    .s03-br .ad s { position: absolute; left: 20px; top: 5px; width: 90px; height: 6px; border-radius: 3px; background: rgba(227,237,250,.3); }
+    .s03-br .hero { position: absolute; left: 14px; top: 40px; width: 232px; height: 62px; border-radius: 9px; transform-origin: 0 50%; }
+    .s03-br .ln { position: absolute; left: 14px; height: 9px; border-radius: 5px; background: rgba(227,237,250,.3); transform-origin: 0 50%; }
+    .s03-br .cp { position: absolute; top: 168px; width: 56px; height: 16px; border-radius: 8px; background: rgba(1,204,247,.3); transform-origin: 0 50%; }
+    /* trend panel */
+    #s03-trend { left: 40px; top: 196px; width: 506px; height: 300px; border-radius: 18px; background: linear-gradient(170deg, rgba(33,52,124,.98), rgba(14,23,72,.98));
+      box-shadow: 0 40px 70px -30px rgba(0,0,0,.8), 0 0 0 1.5px rgba(106,223,255,.38), 0 0 40px rgba(1,204,247,.15); }
+    #s03-q { left: 16px; top: 16px; width: 474px; height: 48px; border-radius: 24px; background: rgba(0,0,0,.28); box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.32); }
+    #s03-q i { position: absolute; left: 16px; top: 13px; width: 22px; height: 22px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-search.svg) center / contain no-repeat; mask: url(assets/icons/lucide-search.svg) center / contain no-repeat; }
+    #s03-qt { position: absolute; left: 50px; top: 0; font: 700 22px/48px Poppins, sans-serif; color: #ffffff; white-space: nowrap; }
+    .s03-car { display: inline-block; width: 3px; height: 24px; background: #01ccf7; box-shadow: 0 0 8px rgba(1,204,247,.9); margin-left: 3px; vertical-align: -5px; }
+    #s03-chips { left: 16px; top: 76px; display: flex; gap: 8px; }
+    .s03-chip { height: 32px; padding: 0 14px; border-radius: 16px; background: rgba(1,204,247,.14); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.5);
+      font: 700 16px/32px Poppins, sans-serif; color: #e3edfa; white-space: nowrap; }
+    #s03-chart { left: 16px; top: 122px; width: 474px; height: 162px; overflow: visible; }
+    #s03-dot { left: 466px; top: 140px; width: 16px; height: 16px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 0 4px rgba(1,204,247,.5), 0 0 18px #01ccf7; }
+    #s03-dring { left: 462px; top: 136px; width: 24px; height: 24px; border-radius: 50%; border: 2.5px solid #6adfff; }
+    #s03-badge { left: 262px; top: 118px; height: 32px; padding: 0 12px; border-radius: 16px; display: flex; align-items: center; gap: 7px; background: #01ccf7; color: #071033;
+      font: 700 16px/1 Poppins, sans-serif; white-space: nowrap; box-shadow: 0 8px 20px -8px rgba(1,204,247,.9); }
+    #s03-badge i { width: 18px; height: 18px; background: #071033; -webkit-mask: url(assets/icons/lucide-trending-up.svg) center / contain no-repeat; mask: url(assets/icons/lucide-trending-up.svg) center / contain no-repeat; }
+    /* draft document (paper) */
+    #s03-doc { left: 150px; top: 150px; width: 400px; height: 340px; border-radius: 16px; background: #f4f1e8; box-shadow: 0 40px 70px -26px rgba(0,0,0,.85), 0 0 0 1.5px rgba(255,255,255,.5); }
+    #s03-dh { left: 20px; top: 18px; height: 28px; display: flex; align-items: center; gap: 9px; font: 700 22px/1 Poppins, sans-serif; color: #12183a; white-space: nowrap; }
+    #s03-dh i { width: 24px; height: 24px; background: #12183a; -webkit-mask: url(assets/icons/lucide-file-text.svg) center / contain no-repeat; mask: url(assets/icons/lucide-file-text.svg) center / contain no-repeat; }
+    #s03-dpill { right: 18px; top: 18px; height: 28px; padding: 0 12px; border-radius: 14px; background: #01ccf7; color: #071033; font: 700 15px/28px Poppins, sans-serif; letter-spacing: .14em; }
+    #s03-ddv { left: 20px; top: 58px; width: 360px; height: 2px; background: rgba(18,24,58,.12); }
+    .s03-dl { position: absolute; left: 20px; font: 700 18px/1 Poppins, sans-serif; color: #12183a; white-space: nowrap; }
+    .s03-bar { position: absolute; height: 10px; border-radius: 5px; background: rgba(18,24,58,.22); transform-origin: 0 50%; }
+    .s03-bul { position: absolute; left: 22px; width: 7px; height: 7px; border-radius: 50%; background: #01a9d8; }
+    .s03-tag { position: absolute; top: 302px; width: 56px; height: 24px; border-radius: 12px; background: rgba(1,169,216,.2); }
+    .s03-tag i { position: absolute; left: 8px; top: 5px; width: 14px; height: 14px; background: #01799c; -webkit-mask: url(assets/icons/lucide-hash.svg) center / contain no-repeat; mask: url(assets/icons/lucide-hash.svg) center / contain no-repeat; }
+    .s03-tag s { position: absolute; left: 26px; top: 9px; width: 20px; height: 6px; border-radius: 3px; background: rgba(1,121,156,.45); }
+    #s03-dcar { left: 0; top: 0; width: 3px; height: 20px; background: #01a9d8; box-shadow: 0 0 6px rgba(1,169,216,.8); }
+    #s03-cur { left: 0; top: 0; width: 38px; height: 38px; }
+    #s03-cur i { position: absolute; left: 0; top: 0; width: 38px; height: 38px; background: #ffffff; filter: drop-shadow(0 3px 6px rgba(0,0,0,.6));
+      -webkit-mask: url(assets/icons/lucide-mouse-pointer-click.svg) center / contain no-repeat; mask: url(assets/icons/lucide-mouse-pointer-click.svg) center / contain no-repeat; }
+    #s03-ring { left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 3px solid #6adfff; }
+    .s03-stk { height: 3px; border-radius: 2px; background: linear-gradient(90deg, rgba(240,253,255,1), rgba(106,223,255,.75) 30%, rgba(106,223,255,0)); }
+  </style>
+  <div id="s03-root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div id="s03-stage">
+      <div id="s03-whip">
+        <div class="s03-a" id="s03-win">
+          <div class="s03-a s03-tile" id="s03-tile"><i id="s03-mark"></i></div>
+          <div class="s03-a" id="s03-tr"></div>
+          <div class="s03-a s03-ak">AGEN 1</div>
+          <div class="s03-a s03-nm">Manus</div>
+          <div class="s03-a s03-pl" id="s03-pill">PERISET<div class="s03-a" id="s03-shine"></div></div>
+          <div class="s03-a s03-dv" id="s03-dv"></div>
+          <div class="s03-a s03-ll"><i style="--i:url(assets/icons/lucide-list-checks.svg)"></i>TUGAS</div>
+          <div id="s03-rows"></div>
+          <div class="s03-a" id="s03-sep"></div>
+          <div class="s03-a s03-ll" id="s03-srcl" style="top:398px"><i style="--i:url(assets/icons/lucide-link-2.svg)"></i>SUMBER</div>
+          <div id="s03-srcs"></div>
+          <div class="s03-a" id="s03-vp">
+            <div id="s03-tabs"></div>
+            <div class="s03-a" id="s03-globe">
+              <div id="s03-gc"></div>
+              <div class="s03-go" id="s03-go1"><i></i></div>
+              <div class="s03-go" id="s03-go2"><i></i></div>
+              <div id="s03-gi"></div>
+            </div>
+            <div class="s03-a" id="s03-brs"></div>
+            <div class="s03-a" id="s03-trend">
+              <div class="s03-a" id="s03-q"><i></i><div id="s03-qt"></div></div>
+              <div class="s03-a" id="s03-chips"><div class="s03-chip" id="s03-ch0">AI &amp; produktivitas</div><div class="s03-chip" id="s03-ch1">kreator pemula</div></div>
+              <svg class="s03-a" id="s03-chart" viewBox="0 0 474 162" width="474" height="162">
+                <defs>
+                  <linearGradient id="s03-ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#01ccf7" stop-opacity=".38"/><stop offset="1" stop-color="#01ccf7" stop-opacity="0"/></linearGradient>
+                  <clipPath id="s03-clip"><rect id="s03-clipr" x="0" y="0" width="0" height="162"/></clipPath>
+                </defs>
+                <g stroke="rgba(255,255,255,.08)" stroke-width="2" stroke-dasharray="6 8"><line x1="0" y1="40" x2="474" y2="40"/><line x1="0" y1="82" x2="474" y2="82"/><line x1="0" y1="124" x2="474" y2="124"/></g>
+                <line x1="0" y1="160" x2="474" y2="160" stroke="rgba(106,223,255,.25)" stroke-width="2"/>
+                <path id="s03-area" fill="url(#s03-ag)" clip-path="url(#s03-clip)"/>
+                <path id="s03-lglow" fill="none" stroke="rgba(1,204,247,.25)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <path id="s03-line" fill="none" stroke="#01ccf7" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="s03-a" id="s03-dring"></div>
+              <div class="s03-a" id="s03-dot"></div>
+              <div class="s03-a" id="s03-badge"><i></i>lagi ramai</div>
+            </div>
+            <div class="s03-a" id="s03-doc">
+              <div class="s03-a" id="s03-dh"><i></i>Draf konten</div>
+              <div class="s03-a" id="s03-dpill">DRAF</div>
+              <div class="s03-a" id="s03-ddv"></div>
+              <div id="s03-dbody"></div>
+              <div class="s03-a" id="s03-dcar"></div>
+            </div>
+            <div class="s03-a" id="s03-status"><div id="s03-ssp"></div>
+              <div class="s03-st" id="s03-st0">Siap riset</div><div class="s03-st" id="s03-st1">Membuka web</div>
+              <div class="s03-st" id="s03-st2">Mencari tren</div><div class="s03-st" id="s03-st3">Menulis draf</div></div>
+          </div>
+          <div class="s03-a" id="s03-glow"></div>
+        </div>
+        <div class="s03-a" id="s03-ring"></div>
+        <div class="s03-a" id="s03-cur"><i></i></div>
+      </div>
+      <div id="s03-stks"></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // s03 "Manus jadi periset, buka web, cari tren, bikin draf."
+      // Frame 0 = s02's last frame: the Manus card opened into a window (same rect, header and lane tickets). The lane compacts
+      // into a plan sidebar and a work viewport opens · "Manus": logo kick + window glow · "periset": the role pill stamps ·
+      // "buka web": the idle globe bursts into a fan of browser windows + tabs, the cursor clicks the address bar ·
+      // "cari tren": a search panel rises, the query types, a trend line draws to its peak ("lagi ramai"), sources stack in the
+      // sidebar · "bikin draf": a paper draft slides in front and writes itself line by line; each plan ticket spins then checks ·
+      // exit: the fixed whip LEFT into s04 (last 0.25 s, motion streaks).
+      const D = 3.6;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.59);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      let seed = 7331; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+      // words (local s): Manus 0.22 · jadi 0.60 · periset 0.69 · buka 1.49 · web 1.75 · cari 2.13 · tren 2.41 · bikin 2.79 · draf 3.19
+      const ROWS = [["Buka web", "lucide-globe.svg"], ["Cari tren", "lucide-trending-up.svg"], ["Bikin draf", "lucide-file-text.svg"]];
+      const BEAT = [[1.45, 2.06], [2.1, 2.7], [2.76, 3.2]];        // [active, done] per plan ticket
+      $("s03-rows").innerHTML = ROWS.map((r, i) => `<div class="s03-a s03-row" id="s03-r${i}" style="top:${190 + 62 * i}px"><span class="ck"><span class="s03-a sp" id="s03-sp${i}"></span>
+          <span class="s03-a ok" id="s03-ok${i}"><i></i></span></span><span class="ic" style="--i:url(assets/icons/${r[1]})"></span>${r[0]}<span class="hl" id="s03-hl${i}"></span></div>`).join("");
+      $("s03-srcs").innerHTML = [0, 1, 2].map((i) => `<div class="s03-a s03-src" id="s03-src${i}" style="top:${428 + 50 * i}px"><b>${i + 1}</b><s style="width:${[92, 74, 84][i]}px"></s><em>sumber<i></i></em></div>`).join("");
+      $("s03-tabs").innerHTML = [0, 1, 2, 3].map((i) => `<div class="s03-a s03-tab${i === 1 ? " on" : ""}" id="s03-tab${i}" style="left:${14 + 136 * i}px"><i></i><s style="width:${[72, 60, 66, 54][i]}px"></s></div>`).join("");
+      const HERO = [["#2a7bff", "#6adfff"], ["#0aa7d6", "#b8f1ff"], ["#01ccf7", "#45b2ff"]];
+      $("s03-brs").innerHTML = [0, 1, 2].map((i) => `<div class="s03-a s03-br" id="s03-br${i}"><span class="d" style="left:12px"></span><span class="d" style="left:24px"></span><span class="d" style="left:36px"></span>
+          <span class="ad" id="s03-ad${i}"><i></i><s></s></span>
+          <span class="hero" id="s03-h${i}" style="background:linear-gradient(130deg, ${HERO[i][0]}, ${HERO[i][1]}aa)"></span>
+          <span class="ln" id="s03-l${i}_0" style="top:116px;width:200px"></span><span class="ln" id="s03-l${i}_1" style="top:132px;width:172px"></span><span class="ln" id="s03-l${i}_2" style="top:148px;width:120px;opacity:.7"></span>
+          <span class="cp" id="s03-c${i}_0" style="left:14px"></span><span class="cp" id="s03-c${i}_1" style="left:78px;opacity:.6"></span></div>`).join("");
+      // the draft: labels typed, skeleton bars written line by line
+      const DOC = [["L", "Hook", 74], ["B", 20, 100, 330, 12], ["L", "Poin", 128], ["P", 34, 156, 300], ["P", 34, 176, 318], ["P", 34, 196, 250], ["L", "Caption", 222], ["B", 20, 250, 350, 10], ["B", 20, 268, 268, 10]];
+      $("s03-dbody").innerHTML = DOC.map((d, i) => d[0] === "L" ? `<div class="s03-dl" id="s03-d${i}" style="top:${d[2]}px">${[...d[1]].map((c, k) => `<span id="s03-d${i}_${k}">${c}</span>`).join("")}</div>`
+        : d[0] === "B" ? `<div class="s03-bar" id="s03-d${i}" style="left:${d[1]}px;top:${d[2]}px;width:${d[3]}px;height:${d[4]}px"></div>`
+        : `<div class="s03-bul" id="s03-db${i}" style="top:${d[2] - 1}px"></div><div class="s03-bar" id="s03-d${i}" style="left:${d[1]}px;top:${d[2] - 2}px;width:${d[3]}px"></div>`).join("")
+        + [0, 1, 2, 3, 4].map((k) => `<div class="s03-tag" id="s03-tg${k}" style="left:${20 + 64 * k}px"><i></i><s></s></div>`).join("");
+      // trend line (Catmull-Rom → cubic) — rises to a peak at the right
+      const P = [[0, 128], [40, 120], [80, 126], [120, 112], [160, 118], [200, 104], [240, 110], [280, 94], [320, 98], [360, 78], [400, 62], [436, 42], [458, 26]];
+      let dp = `M${P[0][0]} ${P[0][1]}`, PL = 0;
+      for (let i = 0; i < P.length - 1; i++) {
+        const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
+        const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+        dp += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0]} ${p2[1]}`; PL += Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+      }
+      PL = Math.ceil(PL * 1.06 + 6);
+      $("s03-line").setAttribute("d", dp); $("s03-lglow").setAttribute("d", dp); $("s03-area").setAttribute("d", dp + " L458 162 L0 162 Z");
+      ["s03-line", "s03-lglow"].forEach((id) => $(id).setAttribute("stroke-dasharray", PL));
+      // motion streaks for the whip (seeded)
+      const NST = 10;
+      $("s03-stks").innerHTML = Array.from({ length: NST }, (_, i) => { const w = 240 + rnd() * 340, y = 330 + (i / NST) * 560 + rnd() * 40, x = 380 + rnd() * 560, h = 2 + Math.round(rnd() * 3);
+        return `<div class="s03-a s03-stk" id="s03-k${i}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;width:${w.toFixed(0)}px;height:${h}px"></div>`; }).join("");
+
+      // HAND-OVER (0 – 0.5): the lane compacts into a plan sidebar, the work viewport opens beside it
+      ROWS.forEach((r, i) => ft($("s03-r" + i), { width: 398 }, { width: 280, duration: 0.42, ease: "power3.inOut" }, 0.06 + i * 0.03));
+      ft($("s03-dv"), { width: 398 }, { width: 280, duration: 0.42, ease: "power3.inOut" }, 0.06);
+      I($("s03-sep"), { scaleY: 0, transformOrigin: "50% 0%" }); ft($("s03-sep"), { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0.14);
+      const vp = $("s03-vp");
+      I(vp, { opacity: 0, scale: 0.94, x: 40 }); ft(vp, { opacity: 0, scale: 0.94, x: 40 }, { opacity: 1, scale: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.14);
+      // "Manus": logo kick + window glow
+      const tile = $("s03-tile"), mark = $("s03-mark"), tr = $("s03-tr"), glow = $("s03-glow");
+      ft(tile, { scale: 1 }, { scale: 1.14, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 0.19);
+      I(mark, { rotation: 0 }); ft(mark, { rotation: 0 }, { rotation: -22, duration: 0.08, ease: "power2.out" }, 0.17); ft(mark, { rotation: -22 }, { rotation: 0, duration: 0.45, ease: "back.out(3)" }, 0.25);
+      I(tr, { opacity: 0, scale: 1 }); ft(tr, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.5, duration: 0.45, ease: "power2.out" }, 0.19);
+      I(glow, { opacity: 0 }); ft(glow, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "power2.out" }, 0.19); ft(glow, { opacity: 1 }, { opacity: 0, duration: 0.55, ease: "power2.out" }, 0.31);
+      // "periset": the role pill stamps + shine
+      const pill = $("s03-pill");
+      I(pill, { scale: 1, transformOrigin: "0% 50%" }); ft(pill, { scale: 1 }, { scale: 1.3, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, 0.66);
+      I($("s03-shine"), { x: -50 }); ft($("s03-shine"), { x: -50 }, { x: 130, duration: 0.42, ease: "power2.inOut" }, 0.68);
+      // idle: globe with orbit rings, status line
+      const globe = $("s03-globe");
+      I(globe, { opacity: 0, scale: 0.5 }); ft(globe, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }, 0.36);
+      I($("s03-go1"), { rotation: -22 }); ft($("s03-go1"), { rotation: -22 }, { rotation: 170, duration: 1.3, ease: "none" }, 0.3);
+      I($("s03-go2"), { rotation: 22 }); ft($("s03-go2"), { rotation: 22 }, { rotation: -170, duration: 1.3, ease: "none" }, 0.3);
+      ft($("s03-gc"), { scale: 1 }, { scale: 1.08, duration: 0.36, yoyo: true, repeat: 1, ease: "sine.inOut" }, 0.7);
+      ft(globe, { scale: 1, opacity: 1 }, { scale: 2, opacity: 0, duration: 0.24, ease: "power2.in" }, 1.42);
+      const st = $("s03-status");
+      I(st, { opacity: 0, y: 10 }); ft(st, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 0.45);
+      I($("s03-ssp"), { rotation: 0 }); ft($("s03-ssp"), { rotation: 0 }, { rotation: 1440, duration: 3.0, ease: "none" }, 0.45);
+      [[0, 0], [1, 1.45], [2, 2.1], [3, 2.76]].forEach(([i, t]) => {
+        const e = $("s03-st" + i); I(e, { opacity: i === 0 ? 1 : 0, y: 0 });
+        if (i > 0) { ft(e, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, t); ft($("s03-st" + (i - 1)), { opacity: 1, y: 0 }, { opacity: 0, y: -14, duration: 0.16, ease: "power2.in" }, t - 0.02); }
+      });
+      // plan tickets: active (glow + spinner) → done (check)
+      BEAT.forEach(([a, d], i) => {
+        const hl = $("s03-hl" + i), sp = $("s03-sp" + i), ok = $("s03-ok" + i);
+        I(hl, { opacity: 0 }); ft(hl, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "power2.out" }, a); ft(hl, { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "power2.out" }, d + 0.02);
+        I(sp, { opacity: 0, rotation: 0 }); tl.set(sp, { opacity: 1 }, a); ft(sp, { rotation: 0 }, { rotation: 600, duration: d - a, ease: "none" }, a); tl.set(sp, { opacity: 0 }, d);
+        I(ok, { scale: 0, rotation: -90 }); ft(ok, { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.3, ease: "back.out(3)" }, d);
+        ft($("s03-r" + i), { x: 0 }, { x: 8, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, a);
+      });
+
+      // "buka web": tabs pop, browser windows fan out of the globe, the cursor clicks the address bar
+      [0, 1, 2, 3].forEach((i) => { const e = $("s03-tab" + i); I(e, { opacity: 0, y: -12, scale: 0.8 }); ft(e, { opacity: 0, y: -12, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.24, ease: "back.out(2)" }, 1.47 + i * 0.06); });
+      const FAN = [{ x: -150, y: 24, r: -9, ry: 16, t: 1.52 }, { x: 150, y: 24, r: 9, ry: -16, t: 1.56 }, { x: 0, y: -6, r: 0, ry: 0, t: 1.48 }];
+      FAN.forEach((f, i) => {
+        const b = $("s03-br" + i);
+        I(b, { opacity: 0, scale: 0.25, x: 0, y: -8, rotation: 0, rotationY: 0 });
+        ft(b, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "none" }, f.t);
+        ft(b, { scale: 0.25, x: 0, y: -8, rotation: 0, rotationY: 0 }, { scale: 1, x: f.x, y: f.y, rotation: f.r, rotationY: f.ry, duration: 0.42, ease: "back.out(1.4)" }, f.t);
+        const tl0 = i === 2 ? 1.8 : f.t + 0.16;      // the middle page loads after the click
+        I($("s03-h" + i), { scaleX: 0 }); ft($("s03-h" + i), { scaleX: 0 }, { scaleX: 1, duration: 0.22, ease: "power3.out" }, tl0);
+        for (let k = 0; k < 3; k++) { const l = $(`s03-l${i}_${k}`); I(l, { scaleX: 0 }); ft(l, { scaleX: 0 }, { scaleX: 1, duration: 0.18, ease: "power2.out" }, tl0 + 0.06 + k * 0.04); }
+        for (let k = 0; k < 2; k++) { const c = $(`s03-c${i}_${k}`); I(c, { scaleX: 0 }); ft(c, { scaleX: 0 }, { scaleX: 1, duration: 0.16, ease: "power2.out" }, tl0 + 0.16 + k * 0.04); }
+      });
+      const brs = $("s03-brs");
+      I(brs, { rotationY: 0, x: 0, scale: 1, y: 0, opacity: 1 });
+      ft(brs, { rotationY: 0, x: 0 }, { rotationY: -7, x: -12, duration: 0.7, ease: "sine.inOut" }, 1.6);      // parallax drift
+      const cur = $("s03-cur"), ring = $("s03-ring"), CX = 723, CY = 523;      // middle browser's address bar (page coords)
+      I(cur, { x: 1000, y: 900, opacity: 0, scale: 1 }); tl.set(cur, { opacity: 1 }, 1.5);
+      ft(cur, { x: 1000, y: 900 }, { x: CX - 14, y: CY - 15, duration: 0.24, ease: "power3.out" }, 1.5);
+      ft(cur, { scale: 1 }, { scale: 0.82, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, 1.73);
+      I(ring, { x: CX, y: CY, opacity: 0, scale: 0.4 }); tl.set(ring, { opacity: 1 }, 1.75);
+      ft(ring, { scale: 0.4, opacity: 1 }, { scale: 2.4, opacity: 0, duration: 0.4, ease: "power2.out" }, 1.75);
+      ft($("s03-ad2"), { backgroundColor: "rgba(255,255,255,0.08)" }, { backgroundColor: "rgba(1,204,247,0.55)", duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 1.75);
+      ft(cur, { x: CX - 14, y: CY - 15, opacity: 1 }, { x: 930, y: 760, opacity: 0, duration: 0.3, ease: "power2.in" }, 1.95);
+
+      // "cari tren": browsers recede, the search panel rises, query types, the trend line draws to its peak
+      ft(brs, { scale: 1, y: 0, opacity: 1 }, { scale: 0.84, y: -56, opacity: 0.32, duration: 0.3, ease: "power2.inOut" }, 2.08);
+      const trend = $("s03-trend");
+      I(trend, { opacity: 0, y: 120, rotationX: -24, transformOrigin: "50% 100%", x: 0, scale: 1 });
+      ft(trend, { opacity: 0, y: 120, rotationX: -24 }, { opacity: 1, y: 0, rotationX: 0, duration: 0.38, ease: "power3.out" }, 2.08);
+      const Q = "tren minggu ini", qt = $("s03-qt");
+      qt.innerHTML = [...Q].map((c, k) => `<span id="s03-q${k}">${c === " " ? "&nbsp;" : c}</span>`).join("") + `<span class="s03-car" id="s03-qc"></span>`;
+      for (let k = 0; k < Q.length; k++) { const c = $("s03-q" + k); I(c, { opacity: 0 }); tl.set(c, { opacity: 1 }, 2.15 + k * 0.017); }
+      I($("s03-qc"), { opacity: 0 }); tl.set($("s03-qc"), { opacity: 1 }, 2.14); tl.set($("s03-qc"), { opacity: 0 }, 2.6);
+      [0, 1].forEach((k) => { const c = $("s03-ch" + k); I(c, { opacity: 0, scale: 0.6 }); ft(c, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2.5)" }, 2.42 + k * 0.08); });
+      ["s03-line", "s03-lglow"].forEach((id) => { I($(id), { attr: { "stroke-dashoffset": PL } }); ft($(id), { attr: { "stroke-dashoffset": PL } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.36, ease: "power2.inOut" }, 2.36); });
+      I($("s03-clipr"), { attr: { width: 0 } }); ft($("s03-clipr"), { attr: { width: 0 } }, { attr: { width: 474 }, duration: 0.36, ease: "power2.inOut" }, 2.36);
+      const dot = $("s03-dot"), dring = $("s03-dring"), badge = $("s03-badge");
+      I(dot, { scale: 0 }); ft(dot, { scale: 0 }, { scale: 1, duration: 0.24, ease: "back.out(3)" }, 2.68);
+      I(dring, { scale: 0.6, opacity: 0 }); tl.set(dring, { opacity: 1 }, 2.7); ft(dring, { scale: 0.6, opacity: 1 }, { scale: 2.6, opacity: 0, duration: 0.5, ease: "power2.out" }, 2.7);
+      I(badge, { opacity: 0, scale: 0.5, transformOrigin: "100% 50%" }); ft(badge, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, 2.66);
+      I($("s03-srcl"), { opacity: 0, x: -14 }); ft($("s03-srcl"), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.25, ease: "power2.out" }, 2.3);
+      [0, 1, 2].forEach((i) => { const e = $("s03-src" + i); I(e, { opacity: 0, x: -24 }); ft(e, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.26, ease: "power3.out" }, 2.46 + i * 0.1); });
+
+      // "bikin draf": the search panel steps back, a paper draft slides in and writes itself line by line
+      ft(trend, { x: 0, y: 0, scale: 1, opacity: 1 }, { x: -46, y: -40, scale: 0.88, opacity: 0.42, duration: 0.3, ease: "power2.inOut" }, 2.76);
+      const doc = $("s03-doc");
+      I(doc, { opacity: 0, y: 170, x: 30, rotation: 7, scale: 1 });
+      ft(doc, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "none" }, 2.76);
+      ft(doc, { y: 170, x: 30, rotation: 7 }, { y: 0, x: 0, rotation: -1.5, duration: 0.34, ease: "power3.out" }, 2.76);
+      const car = $("s03-dcar"); I(car, { opacity: 0, x: 20, y: 74 }); tl.set(car, { opacity: 1 }, 2.86);
+      let t = 2.86;
+      DOC.forEach((d, i) => {
+        if (d[0] === "L") {
+          const n = d[1].length;
+          for (let k = 0; k < n; k++) { const c = $(`s03-d${i}_${k}`); I(c, { opacity: 0 }); tl.set(c, { opacity: 1 }, t + k * 0.014); }
+          tl.set(car, { x: 22 + n * 10.5, y: d[2] - 1 }, t); t += 0.05;
+        } else {
+          const b = $("s03-d" + i), bl = d[0] === "P" ? $("s03-db" + i) : null, dur = 0.07;
+          I(b, { scaleX: 0 }); ft(b, { scaleX: 0 }, { scaleX: 1, duration: dur, ease: "power1.out" }, t);
+          if (bl) { I(bl, { scale: 0 }); ft(bl, { scale: 0 }, { scale: 1, duration: 0.12, ease: "back.out(3)" }, t); }
+          tl.set(car, { x: d[1] + d[3] + 4, y: d[2] - 6 }, t + dur); t += 0.045;
+        }
+      });
+      [0, 1, 2, 3, 4].forEach((k) => { const g = $("s03-tg" + k); I(g, { opacity: 0, scale: 0.5 }); ft(g, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.18, ease: "back.out(3)" }, 3.22 + k * 0.025); });
+      tl.set(car, { opacity: 0 }, 3.24);
+      // "draf": apex — the DRAF stamp, the page punches
+      const dpill = $("s03-dpill");
+      I(dpill, { scale: 0, rotation: -14 }); ft(dpill, { scale: 0, rotation: -14 }, { scale: 1, rotation: 0, duration: 0.3, ease: "back.out(3)" }, 3.16);
+      ft(doc, { scale: 1 }, { scale: 1.04, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, 3.17);
+
+      // EXIT (fixed): whip LEFT in the last 0.25 s, with motion streaks
+      const whip = $("s03-whip");
+      I(whip, { x: 0, skewX: 0, opacity: 1, transformOrigin: "540px 615px" });
+      ft(whip, { x: 0, skewX: 0 }, { x: -1100, skewX: 9, duration: 0.25, ease: "power2.in" }, D - 0.25);
+      ft(whip, { opacity: 1 }, { opacity: 0.55, duration: 0.1, ease: "power1.in" }, D - 0.1);
+      for (let i = 0; i < NST; i++) {
+        const k = $("s03-k" + i), t0 = D - 0.25 + rnd() * 0.07, dur = D - 0.01 - t0, a = 0.55 + rnd() * 0.45;
+        I(k, { x: 300, opacity: 0 });
+        ft(k, { x: 300 }, { x: -1300, duration: dur, ease: "power1.in" }, t0);
+        ft(k, { opacity: 0 }, { opacity: a, duration: 0.04, ease: "none" }, t0);
+        ft(k, { opacity: a }, { opacity: 0, duration: 0.03, ease: "none" }, t0 + dur - 0.03);
+      }
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s03"] = tl;
     })();

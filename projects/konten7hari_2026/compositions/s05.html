@@ -1,10 +1,231 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-58hn" id="root" data-composition-id="s05" data-width="1080" data-height="1920"></div>
+  <style>
+    .s05-a { position: absolute; }
+    #s05-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s05-halo { left: 280px; top: 416px; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,.2), rgba(1,204,247,0) 64%); }
+    #s05-orbit { left: 368px; top: 504px; width: 344px; height: 344px; }
+    #s05-icw { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    /* the file: icon (handed over by s04) → document → 300×52 chip (handed over to s06) */
+    #s05-paper { left: 430px; top: 540px; width: 220px; height: 272px; border-radius: 18px; overflow: hidden; --dog: 38.2px;
+      background: linear-gradient(225deg, rgba(244,241,232,0) var(--dog), #f4f1e8 var(--dog));
+      box-shadow: 0 40px 70px -30px rgba(0,0,0,.75); }
+    #s05-flap { right: 0; top: 0; width: 54px; height: 54px; border-radius: 0 0 0 9px; transform-origin: 100% 0%;
+      background: linear-gradient(225deg, rgba(0,0,0,0) 50%, #d4ccb6 50%, #e6dfcd 100%); box-shadow: -3px 4px 8px -4px rgba(9,15,48,.35); }
+    #s05-emb { left: 486px; top: 598px; width: 108px; height: 108px; border-radius: 28px; background: linear-gradient(160deg, #1b2c70, #0b1440);
+      box-shadow: inset 0 0 0 2px rgba(106,223,255,.45), 0 12px 24px -10px rgba(9,15,48,.7); }
+    #s05-emb i { position: absolute; left: 24px; top: 24px; width: 60px; height: 60px; background: #01ccf7; -webkit-mask: url(assets/icons/lucide-audio-waveform.svg) center / contain no-repeat; mask: url(assets/icons/lucide-audio-waveform.svg) center / contain no-repeat; }
+    .s05-sk { height: 12px; border-radius: 6px; background: rgba(18,24,58,.16); }
+    .s05-rip { left: 540px; top: 652px; width: 108px; height: 108px; margin: -54px 0 0 -54px; border-radius: 30px; border: 3px solid #6adfff; }
+    #s05-one { left: 396px; top: 512px; width: 72px; height: 72px; border-radius: 50%; background: #01ccf7; box-shadow: 0 10px 24px -8px rgba(1,160,210,.8), 0 0 0 4px rgba(9,15,48,.9);
+      font: 700 42px/72px Poppins, sans-serif; text-align: center; color: #071033; }
+    #s05-onering { left: 432px; top: 548px; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; border: 3px solid #6adfff; }
+    #s05-lab { left: 540px; top: 858px; font: 700 38px/1 Poppins, sans-serif; letter-spacing: -0.01em; color: #fff; white-space: nowrap; }
+    #s05-lab span { display: inline-block; }
+    /* document content (doc coords: the paper opens to 920×472 at page 80,458) */
+    #s05-dc { position: absolute; left: 0; top: 0; width: 920px; height: 472px; }
+    .s05-hd { top: 26px; width: 13px; height: 13px; border-radius: 50%; background: rgba(18,24,58,.18); }
+    #s05-hdl { left: 24px; top: 64px; width: 872px; height: 1.5px; background: rgba(18,24,58,.1); }
+    .s05-row { left: 0; width: 920px; height: 58px; }
+    .s05-sep { left: 24px; width: 872px; height: 1px; background: rgba(18,24,58,.07); }
+    .s05-fl { left: 12px; top: 3px; width: 896px; height: 52px; border-radius: 14px; background: rgba(1,204,247,.18); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.4); }
+    .s05-ict { left: 28px; top: 9px; width: 40px; height: 40px; border-radius: 11px; background: rgba(18,24,58,.07); }
+    .s05-ict i, .s05-on i { position: absolute; left: 9px; top: 9px; width: 22px; height: 22px; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s05-ict i { background: #7a819a; }
+    .s05-on { position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 11px; background: #01ccf7; box-shadow: 0 6px 14px -6px rgba(1,160,210,.9); }
+    .s05-on i { background: #071033; }
+    .s05-key { left: 84px; top: 0; height: 58px; display: flex; align-items: center; font: 700 21px/1 Poppins, sans-serif; color: #2a3156; white-space: nowrap; }
+    .s05-ph { left: 332px; top: 23px; height: 12px; border-radius: 6px; background: rgba(18,24,58,.1); transform-origin: 0% 50%; }
+    .s05-val { left: 332px; top: 0; height: 58px; display: flex; align-items: center; font: 700 29px/1 Poppins, sans-serif; letter-spacing: -0.01em; color: #12183a; white-space: pre; }
+    .s05-kamu { position: relative; display: inline-block; }
+    .s05-kamu .mk { position: absolute; left: -2px; right: -5px; top: 6%; bottom: -2%; border-radius: 8px; background: rgba(1,204,247,.55); transform-origin: 0% 50%; }
+    .s05-kamu b { position: relative; font-weight: 700; }
+    #s05-chips { left: 332px; top: 9px; height: 40px; display: flex; gap: 12px; }
+    .s05-chip { position: relative; height: 40px; padding: 0 16px; border-radius: 20px; display: flex; align-items: center; background: #12183a;
+      font: 400 22px/1 Poppins, sans-serif; color: #e3edfa; white-space: nowrap; }
+    .s05-chip .tx { position: relative; }
+    .s05-chip .sl { position: absolute; left: 10px; right: 10px; top: 50%; height: 3px; margin-top: -1px; border-radius: 2px; background: #01ccf7; box-shadow: 0 0 8px rgba(1,204,247,.9); transform-origin: 0% 50%; }
+    .s05-card { top: 316px; width: 174px; height: 134px; border-radius: 16px; background: #ffffff; box-shadow: 0 10px 20px -10px rgba(18,24,58,.45), 0 0 0 1px rgba(18,24,58,.08); }
+    .s05-th { position: absolute; left: 8px; top: 8px; width: 158px; height: 80px; border-radius: 11px; overflow: hidden; }
+    .s05-ig { position: absolute; left: 8px; top: 8px; width: 18px; height: 18px; background: #fff; -webkit-mask: url(assets/icons/si-instagram.svg) center / contain no-repeat; mask: url(assets/icons/si-instagram.svg) center / contain no-repeat; }
+    .s05-cl { position: absolute; left: 12px; height: 8px; border-radius: 4px; background: rgba(18,24,58,.16); }
+    .s05-ht { position: absolute; right: 12px; top: 100px; width: 20px; height: 20px; background: #8a90a6; -webkit-mask: url(assets/icons/lucide-heart.svg) center / contain no-repeat; mask: url(assets/icons/lucide-heart.svg) center / contain no-repeat; }
+    .s05-star { position: absolute; right: -10px; top: -12px; width: 40px; height: 40px; border-radius: 50%; background: #01ccf7; box-shadow: 0 6px 14px -4px rgba(1,160,210,.9), 0 0 0 3px #f4f1e8; }
+    .s05-star i { position: absolute; left: 9px; top: 9px; width: 22px; height: 22px; background: #071033; -webkit-mask: url(assets/icons/lucide-star.svg) center / contain no-repeat; mask: url(assets/icons/lucide-star.svg) center / contain no-repeat; }
+    .s05-slot { top: 316px; width: 174px; height: 134px; border-radius: 16px; border: 2px dashed rgba(18,24,58,.16); }
+    /* chip face inside the paper while it folds + the exact s06 chip (#s06-file) for the hand-over */
+    #s05-cf { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 10px; padding: 0 14px; font: 700 20px/1 Poppins, sans-serif; color: #12183a; white-space: nowrap; }
+    #s05-cf .ic, #s05-file .ic { width: 24px; height: 24px; background: #12183a; -webkit-mask: url(assets/icons/lucide-file-text.svg) center / contain no-repeat; mask: url(assets/icons/lucide-file-text.svg) center / contain no-repeat; flex: none; }
+    #s05-file { left: 0; top: 0; width: 300px; height: 52px; border-radius: 13px; background: #f4f1e8; box-shadow: 0 16px 30px -12px rgba(0,0,0,.6);
+      display: flex; align-items: center; gap: 10px; padding: 0 14px; font: 700 20px/1 Poppins, sans-serif; color: #12183a; white-space: nowrap; }
+  </style>
+  <div id="s05-root" data-composition-id="s05" data-width="1080" data-height="1920">
+    <div id="s05-stage">
+      <div class="s05-a" id="s05-halo"></div>
+      <svg class="s05-a" id="s05-orbit" viewBox="-172 -172 344 344" width="344" height="344">
+        <circle r="168" fill="none" stroke="rgba(106,223,255,.28)" stroke-width="2.5" stroke-dasharray="3 14" stroke-linecap="round"/>
+        <circle r="5" cx="0" cy="-168" fill="#6adfff"/><circle r="3.5" cx="145" cy="84" fill="#01ccf7"/><circle r="3" cx="-150" cy="76" fill="#6adfff"/>
+      </svg>
+      <div id="s05-icw">
+        <div class="s05-a" id="s05-paper">
+          <div id="s05-dc">
+            <div class="s05-a s05-hd" style="left:26px"></div><div class="s05-a s05-hd" style="left:46px"></div><div class="s05-a s05-hd" style="left:66px"></div>
+            <div class="s05-a" id="s05-hdl"></div>
+            <div id="s05-rows"></div>
+          </div>
+          <div class="s05-a" id="s05-flap"></div>
+          <div id="s05-cf"><span class="ic"></span>brand_voice.md</div>
+        </div>
+        <div class="s05-a s05-rip" id="s05-rp0"></div><div class="s05-a s05-rip" id="s05-rp1"></div>
+        <div class="s05-a" id="s05-emb"><i></i></div>
+        <div class="s05-a s05-sk" id="s05-sk0" style="left:476px;top:726px;width:128px"></div>
+        <div class="s05-a s05-sk" id="s05-sk1" style="left:494px;top:748px;width:92px"></div>
+        <div class="s05-a" id="s05-onering"></div>
+        <div class="s05-a" id="s05-one">1</div>
+      </div>
+      <div class="s05-a" id="s05-lab"></div>
+      <div class="s05-a" id="s05-file"><span class="ic"></span>brand_voice.md</div>
+    </div>
+  </div>
   <script>
     (function () {
+      // s05 PERSIAPAN "Persiapan, 1 file brand voice. Isinya: niche, audiens, nada bicara, kata yang dihindari, dan 3 postingan terbaikmu."
+      // Starts on s04's folded page = a file icon with the voice emblem (header flips to "0 PERSIAPAN") · "1": a count badge pops ·
+      // "file brand voice": the name writes itself under the icon · "Isinya": the file opens into the brand_voice.md document
+      // (the name flies up into its title bar) · each row fills exactly on its word (niche, audiens, nada bicara — "kamu"
+      // marked, kata yang dihindari — clichés struck, 3 postingan terbaik — three post cards + stars) · exit: the document
+      // folds back into the 300×52 brand_voice.md chip and parks at the hand-over spot (120, 330, −8°, 0.9) for s06.
+      const D = 8.0667;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 8.057);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      // words (local s): Persiapan 0.26 · 1 0.99 · file 1.31 · brand 1.64 · voice 1.80 · Isinya 2.45 · niche 3.03 · audiens 3.79 ·
+      // nada 4.49 · bicara 4.67 · kata 5.40 · yang 5.72 · dihindari 5.83 · dan 6.36 · 3 6.51 · postingan 6.77 · terbaikmu 7.39 (ends 7.83)
+      const ROWS = [
+        ["Niche", "lucide-hash.svg", "AI & produktivitas", 230, 2.98],
+        ["Audiens", "lucide-user-round.svg", "kreator pemula", 190, 3.74],
+        ["Nada bicara", "lucide-message-circle.svg", "santai, pakai ‘kamu’", 260, 4.42],
+        ["Kata yang dihindari", "lucide-ban.svg", null, 300, 5.36],
+        ["3 postingan terbaik", "lucide-star.svg", null, 0, 6.44],
+      ];
+      const TH = [["#45b2ff", "#ffd23f"], ["#7c5cff", "#ffd6f5"], ["#ff4fa3", "#ffe5f2"]];
+      const art = (i) => i === 0 ? `<circle cx="120" cy="24" r="12" fill="${TH[i][1]}" opacity=".9"/><path d="M0 80 L46 38 L76 62 L104 44 L158 80Z" fill="rgba(255,255,255,.55)"/>`
+        : i === 1 ? `<rect x="40" y="22" width="88" height="10" rx="5" fill="rgba(255,255,255,.85)"/><rect x="40" y="40" width="62" height="10" rx="5" fill="rgba(255,255,255,.6)"/><rect x="40" y="58" width="34" height="12" rx="6" fill="${TH[i][1]}"/>`
+        : `<circle cx="79" cy="40" r="22" fill="rgba(255,255,255,.85)"/><path d="M73 29 L92 40 L73 51Z" fill="${TH[i][0]}"/>`;
+      const chars = (pre, s) => [...s].map((c, k) => `<span id="${pre}${k}">${c === " " ? "&nbsp;" : c.replace("&", "&amp;")}</span>`).join("");
+      $("s05-rows").innerHTML = ROWS.map(([key, ic, val, ph], i) => {
+        const top = 70 + i * 58;
+        let inner = `<div class="s05-a s05-fl" id="s05-fl${i}"${i === 4 ? ' style="height:146px"' : ""}></div>` +
+          `<div class="s05-a s05-ict"${i === 4 ? ' style="top:57px"' : ""}><i style="--i:url(assets/icons/${ic})"></i><span class="s05-on" id="s05-on${i}"><i style="--i:url(assets/icons/${ic})"></i></span></div>` +
+          `<div class="s05-a s05-key" id="s05-k${i}"${i === 4 ? ' style="top:48px"' : ""}>${key}</div>`;
+        if (i < 3) {
+          const k0 = val.indexOf("‘");
+          const v = k0 < 0 ? chars(`s05-c${i}_`, val)
+            : chars(`s05-c${i}_`, val.slice(0, k0)) + `<span class="s05-kamu"><i class="mk" id="s05-mk"></i><b>` + [...val.slice(k0)].map((c, k) => `<span id="s05-c${i}_${k0 + k}">${c}</span>`).join("") + `</b></span>`;
+          inner += `<div class="s05-a s05-ph" id="s05-ph${i}" style="width:${ph}px"></div><div class="s05-a s05-val" id="s05-v${i}">${v}</div>`;
+        } else if (i === 3) {
+          inner += `<div class="s05-a s05-ph" id="s05-ph${i}" style="width:${ph}px"></div><div class="s05-a" id="s05-chips">` +
+            ["di era digital…", "mari kita simak…"].map((c, k) => `<span class="s05-chip" id="s05-ch${k}"><span class="tx" id="s05-cht${k}">${c}</span><i class="sl" id="s05-chs${k}"></i></span>`).join("") + `</div>`;
+        } else {
+          inner += [0, 1, 2].map((k) => `<div class="s05-a s05-slot" id="s05-sl${k}" style="left:${332 + k * 194}px;top:10px"></div>`).join("") +
+            [0, 1, 2].map((k) => `<div class="s05-a s05-card" id="s05-cd${k}" style="left:${332 + k * 194}px;top:10px">
+              <div class="s05-th" style="background:linear-gradient(150deg, ${TH[k][0]}, ${TH[k][0]}cc 60%, ${TH[k][1]}66)"><svg viewBox="0 0 158 80" width="158" height="80">${art(k)}</svg><i class="s05-ig"></i></div>
+              <i class="s05-cl" style="top:100px;width:${[104, 92, 116][k]}px"></i><i class="s05-cl" style="top:116px;width:${[70, 84, 62][k]}px;opacity:.7"></i><i class="s05-ht"></i>
+              <span class="s05-star" id="s05-st${k}"><i></i></span></div>`).join("");
+        }
+        const sep = i > 0 ? `<div class="s05-a s05-sep" style="top:${top}px"></div>` : "";
+        return sep + `<div class="s05-a s05-row" id="s05-r${i}" style="top:${top}px">${inner}</div>`;
+      }).join("");
+      // label "brand_voice.md" as single characters (written on "file brand voice")
+      const LAB = "brand_voice.md";
+      $("s05-lab").innerHTML = [...LAB].map((c, k) => `<span id="s05-l${k}"${k >= 11 ? ' style="color:#6adfff"' : ""}>${c}</span>`).join("");
+
+      // OPENING — s04's folded page is this file icon (same rect); the header flips to 0 PERSIAPAN above it
+      const icw = $("s05-icw"), paper = $("s05-paper"), emb = $("s05-emb"), lab = $("s05-lab");
+      I(icw, { y: 0, rotation: 0, transformOrigin: "540px 676px" });
+      ft(icw, { y: 0, rotation: 0 }, { y: -12, rotation: -2.5, duration: 1.0, yoyo: true, repeat: 1, ease: "sine.inOut" }, 0.3);
+      I($("s05-halo"), { opacity: 0, scale: 0.6 }); ft($("s05-halo"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 0.2);
+      const orb = $("s05-orbit");
+      I(orb, { opacity: 0, rotation: 0, scale: 0.85 });
+      ft(orb, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 0.26);
+      ft(orb, { rotation: 0 }, { rotation: 75, duration: 2.6, ease: "none" }, 0);
+      // "1": count badge
+      const one = $("s05-one"), oring = $("s05-onering");
+      I(one, { scale: 0, rotation: -40 }); ft(one, { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.36, ease: "back.out(2.6)" }, 0.93);
+      I(oring, { opacity: 0, scale: 0.6 }); tl.set(oring, { opacity: 1 }, 0.98);
+      ft(oring, { scale: 0.6, opacity: 1 }, { scale: 2.4, opacity: 0, duration: 0.45, ease: "power2.out" }, 0.98);
+      // "file brand voice": the name writes itself; the voice emblem pulses with two ripples
+      I(lab, { xPercent: -50, y: 0, scale: 1, color: "#ffffff" });
+      [...LAB].forEach((c, k) => { const e = $("s05-l" + k), t = k < 11 ? 1.32 + k * 0.048 : 1.86 + (k - 11) * 0.04;
+        I(e, { opacity: 0, y: 16 }); ft(e, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, t); });
+      ft(emb, { scale: 1 }, { scale: 1.12, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 1.64);
+      ["s05-rp0", "s05-rp1"].forEach((id, k) => { const r = $(id); I(r, { opacity: 0, scale: 1 }); tl.set(r, { opacity: 1 }, 1.64 + k * 0.16);
+        ft(r, { scale: 1, opacity: 1 }, { scale: 2.1, opacity: 0, duration: 0.5, ease: "power2.out" }, 1.64 + k * 0.16); });
+      // "Isinya": the file opens into the document; the name flies up into its title bar, the emblem docks top-right
+      ft(icw, { scaleX: 1, scaleY: 1 }, { scaleX: 1.04, scaleY: 0.95, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, 2.3);
+      ft(one, { scale: 1 }, { scale: 0, duration: 0.16, ease: "back.in(2)" }, 2.36);
+      ["s05-sk0", "s05-sk1"].forEach((id) => ft($(id), { opacity: 1 }, { opacity: 0, duration: 0.1, ease: "power1.in" }, 2.4));
+      ft($("s05-halo"), { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, 2.4);
+      ft(orb, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.4, duration: 0.3, ease: "power2.in" }, 2.38);
+      ft($("s05-flap"), { scale: 1 }, { scale: 0, duration: 0.14, ease: "power2.in" }, 2.42);
+      I(paper, { left: 430, top: 540, width: 220, height: 272, borderRadius: 18, "--dog": "38.2px", rotation: 0, scale: 1, boxShadow: "0 40px 70px -30px rgba(0,0,0,0.75)" });
+      ft(paper, { left: 430, top: 540, width: 220, height: 272, borderRadius: 18, "--dog": "38.2px" },
+        { left: 80, top: 458, width: 920, height: 472, borderRadius: 24, "--dog": "0px", duration: 0.55, ease: "expo.out" }, 2.44);
+      I(emb, { x: 0, y: 0, scale: 1, opacity: 1 });
+      ft(emb, { x: 0, y: 0, scale: 1 }, { x: 952 - 540, y: 490 - 652, scale: 44 / 108, duration: 0.5, ease: "power3.inOut" }, 2.44);
+      ft(lab, { y: 0, scale: 1, color: "#ffffff" }, { y: 490 - 877, scale: 0.74, color: "#12183a", duration: 0.5, ease: "power3.inOut" }, 2.44);
+      [11, 12, 13].forEach((k) => ft($("s05-l" + k), { color: "#6adfff" }, { color: "#12183a", duration: 0.4, ease: "power1.inOut" }, 2.5));
+      const dc = $("s05-dc"); I(dc, { opacity: 1, scale: 1, transformOrigin: "0% 0%" });
+      [...dc.querySelectorAll(".s05-hd"), $("s05-hdl")].forEach((e, k) => { I(e, { opacity: 0 }); ft(e, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" }, 2.66 + k * 0.03); });
+      for (let i = 0; i < 5; i++) { const r = $("s05-r" + i); I(r, { opacity: 0, y: 16 }); ft(r, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, 2.66 + i * 0.05); }
+      dc.querySelectorAll(".s05-sep").forEach((e, k) => { I(e, { opacity: 0 }); ft(e, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, 2.72 + k * 0.05); });
+      // rows fill on their words
+      const fill = (i, T) => {
+        const fl = $("s05-fl" + i), on = $("s05-on" + i), k = $("s05-k" + i);
+        I(fl, { opacity: 0 }); ft(fl, { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "power1.out" }, T);
+        ft(fl, { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power1.in" }, T + 0.45);
+        I(on, { opacity: 0, scale: 0.4, rotation: -30 }); ft(on, { opacity: 0, scale: 0.4, rotation: -30 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.32, ease: "back.out(2.6)" }, T);
+        I(k, { opacity: 0.5 }); ft(k, { opacity: 0.5 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, T);
+        const ph = $("s05-ph" + i); if (ph) { I(ph, { scaleX: 1, opacity: 1 }); ft(ph, { scaleX: 1, opacity: 1 }, { scaleX: 0.2, opacity: 0, duration: 0.16, ease: "power2.in" }, T); }
+      };
+      ROWS.forEach((r, i) => fill(i, r[4]));
+      for (let i = 0; i < 3; i++) {
+        const v = ROWS[i][2], n = [...v].length, T = ROWS[i][4] + 0.04, dur = 0.3;
+        for (let k = 0; k < n; k++) { const e = $(`s05-c${i}_${k}`); I(e, { opacity: 0 }); tl.set(e, { opacity: 1 }, T + (k / n) * dur); }
+      }
+      const mk = $("s05-mk"); I(mk, { scaleX: 0 }); ft(mk, { scaleX: 0 }, { scaleX: 1, duration: 0.22, ease: "power2.out" }, 4.84);
+      // kata yang dihindari: two clichés pop in, struck through on "dihindari"
+      for (let k = 0; k < 2; k++) {
+        const ch = $("s05-ch" + k), sl = $("s05-chs" + k), tx = $("s05-cht" + k);
+        I(ch, { opacity: 0, scale: 0.6, y: 10 }); ft(ch, { opacity: 0, scale: 0.6, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "back.out(2.4)" }, 5.38 + k * 0.14);
+        I(sl, { scaleX: 0 }); ft(sl, { scaleX: 0 }, { scaleX: 1, duration: 0.18, ease: "power2.out" }, 5.8 + k * 0.13);
+        I(tx, { opacity: 1 }); ft(tx, { opacity: 1 }, { opacity: 0.5, duration: 0.2, ease: "power1.out" }, 5.86 + k * 0.13);
+        ft(ch, { x: 0 }, { x: 5, duration: 0.05, yoyo: true, repeat: 3, ease: "sine.inOut" }, 5.82 + k * 0.13);
+      }
+      // 3 postingan terbaik: three post cards drop into their slots, stars on "terbaikmu"
+      for (let k = 0; k < 3; k++) {
+        const cd = $("s05-cd" + k), st = $("s05-st" + k), sl = $("s05-sl" + k);
+        I(cd, { opacity: 0, y: 40, scale: 0.7, rotation: (k - 1) * 8 });
+        ft(cd, { opacity: 0, y: 40, scale: 0.7, rotation: (k - 1) * 8 }, { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.36, ease: "back.out(1.8)" }, 6.46 + k * 0.11);
+        I(sl, { opacity: 1 }); ft(sl, { opacity: 1 }, { opacity: 0, duration: 0.15, ease: "power1.out" }, 6.5 + k * 0.11);
+        I(st, { scale: 0, rotation: -60 }); ft(st, { scale: 0, rotation: -60 }, { scale: 1, rotation: 0, duration: 0.3, ease: "back.out(3)" }, 7.3 + k * 0.06);
+        ft(cd, { y: 0 }, { y: -10, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 7.3 + k * 0.06);
+      }
+      // EXIT — the document folds back into the brand_voice.md chip and parks at the s06 hand-over spot
+      ft(dc, { scale: 1 }, { scale: 300 / 920, duration: 0.42, ease: "power3.inOut" }, 7.54);
+      ft(dc, { opacity: 1 }, { opacity: 0, duration: 0.16, ease: "power1.in" }, 7.6);
+      ft(emb, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.in" }, 7.54);
+      ft(lab, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.in" }, 7.54);
+      ft(paper, { left: 80, top: 458, width: 920, height: 472, borderRadius: 24, rotation: 0, scale: 1, boxShadow: "0 40px 70px -30px rgba(0,0,0,0.75)" },
+        { left: 120, top: 330, width: 300, height: 52, borderRadius: 13, rotation: -8, scale: 0.9, boxShadow: "0 16px 30px -12px rgba(0,0,0,0.6)", duration: 0.42, ease: "power3.inOut" }, 7.54);
+      const cf = $("s05-cf"); I(cf, { opacity: 0 }); ft(cf, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "power1.out" }, 7.8);
+      const file = $("s05-file");
+      I(file, { x: 120, y: 330, rotation: -8, scale: 0.9, opacity: 0 });
+      tl.set(file, { opacity: 1 }, 7.97); tl.set(paper, { opacity: 0 }, 7.97);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s05"] = tl;
     })();

@@ -1,10 +1,218 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-8xwg" id="root" data-composition-id="s04" data-width="1080" data-height="1920"></div>
+  <style>
+    .s04-a { position: absolute; }
+    #s04-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s04-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    .s04-streak { left: 0; height: 4px; border-radius: 3px; background: linear-gradient(90deg, rgba(214,248,255,.95), rgba(106,223,255,.55) 30%, rgba(106,223,255,0)); }
+    /* Claude window (same family as the Manus window of s06) */
+    #s04-win { left: 60px; top: 318px; width: 960px; height: 600px; border-radius: 30px; overflow: hidden;
+      background: linear-gradient(160deg, rgba(23,36,94,.97), rgba(9,15,48,.98) 72%);
+      box-shadow: 0 50px 90px -40px rgba(0,0,0,.7), 0 0 0 1.5px rgba(106,223,255,.3), 0 0 60px rgba(1,204,247,.12); }
+    #s04-bar { left: 0; top: 0; width: 960px; height: 62px; background: rgba(255,255,255,.04); box-shadow: inset 0 -1.5px 0 rgba(255,255,255,.07); }
+    .s04-dot { top: 24px; width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,.18); }
+    #s04-brand { left: 148px; top: 13px; height: 36px; display: flex; align-items: center; font: 700 26px/1 Poppins, sans-serif; color: #fff; }
+    #s04-tag { right: 22px; top: 15px; height: 32px; padding: 0 14px; border-radius: 16px; display: flex; align-items: center; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .14em;
+      color: #071033; background: #01ccf7; white-space: nowrap; }
+    /* the Claude mark on its light tile (real logo, brand colour) */
+    #s04-ct { left: 468px; top: 628px; width: 144px; height: 144px; border-radius: 34px; background: #f5f3ec;
+      box-shadow: 0 24px 44px -16px rgba(0,0,0,.65), 0 0 50px rgba(217,119,87,.25); }
+    #s04-ct img { position: absolute; left: 26px; top: 26px; width: 92px; height: 92px; }
+    #s04-disc { left: 410px; top: 570px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #22378a, #0b1440 72%);
+      box-shadow: 0 0 0 2px rgba(106,223,255,.55), 0 0 70px rgba(1,204,247,.35), 0 34px 60px -24px rgba(0,0,0,.7); }
+    #s04-ring { left: 540px; top: 700px; width: 260px; height: 260px; margin: -130px 0 0 -130px; border-radius: 50%; border: 3px solid #6adfff; }
+    /* the draft page (paper) — it folds into the file icon at the end */
+    #s04-page { left: 88px; top: 402px; width: 904px; height: 488px; border-radius: 22px; overflow: hidden; --dog: 0px;
+      background: linear-gradient(225deg, rgba(244,241,232,0) var(--dog), #f4f1e8 var(--dog));
+      box-shadow: 0 40px 70px -30px rgba(0,0,0,.75); }
+    #s04-pc { position: absolute; left: 0; top: 0; width: 904px; height: 488px; }
+    #s04-fn { left: 36px; top: 26px; height: 32px; display: flex; align-items: center; gap: 10px; font: 700 20px/1 Poppins, sans-serif; color: #5a6386; white-space: nowrap; }
+    #s04-fn i { width: 24px; height: 24px; background: #5a6386; -webkit-mask: url(assets/icons/lucide-file-text.svg) center / contain no-repeat; mask: url(assets/icons/lucide-file-text.svg) center / contain no-repeat; }
+    .s04-st { right: 32px; top: 22px; height: 38px; padding: 0 16px; border-radius: 19px; display: flex; align-items: center; gap: 8px; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .14em; white-space: nowrap; }
+    #s04-st0 { color: #737a92; background: rgba(18,24,58,.07); box-shadow: inset 0 0 0 1.5px rgba(18,24,58,.1); }
+    #s04-st1 { color: #071033; background: #01ccf7; box-shadow: 0 8px 18px -8px rgba(1,160,210,.8); }
+    #s04-st1 i { width: 18px; height: 18px; background: #071033; -webkit-mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; }
+    #s04-div { left: 36px; top: 80px; width: 832px; height: 1.5px; background: rgba(18,24,58,.1); }
+    .s04-raw { left: 44px; font: 400 34px/1.2 Poppins, sans-serif; color: #3a4266; white-space: nowrap; }
+    .s04-rl { position: relative; display: inline-block; }
+    .s04-sq { position: absolute; left: 0; right: 0; bottom: -9px; height: 10px;
+      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='10'><path d='M0 5 Q5 0.5 10 5 T20 5' fill='none' stroke='%23d97757' stroke-width='2.4'/></svg>") repeat-x 0 0 / 20px 10px; }
+    .s04-st-l { position: absolute; left: -8px; right: -8px; top: 52%; height: 4px; margin-top: -2px; border-radius: 2px; background: #d97757; transform-origin: 0% 50%; }
+    #s04-ins { left: 44px; top: 266px; width: 5px; height: 116px; border-radius: 3px; background: #01ccf7; box-shadow: 0 0 10px rgba(1,204,247,.6); transform-origin: 50% 0%; }
+    .s04-pl { left: 68px; font: 700 38px/1.25 Poppins, sans-serif; letter-spacing: -0.01em; color: #12183a; white-space: nowrap; }
+    .s04-w { display: inline-block; }
+    .s04-kamu { position: relative; }
+    .s04-kamu .mk { position: absolute; left: -7px; right: -7px; top: 9%; bottom: 3%; border-radius: 9px; background: rgba(1,204,247,.55); transform-origin: 0% 50%; }
+    .s04-kamu b { position: relative; font-weight: 700; }
+    #s04-sw { left: -330px; top: -170px; width: 230px; height: 860px; transform: rotate(18deg);
+      background: linear-gradient(90deg, rgba(106,223,255,0), rgba(106,223,255,.5) 38%, rgba(255,255,255,.6) 50%, rgba(217,119,87,.4) 64%, rgba(217,119,87,0)); }
+    .s04-spk { width: 34px; height: 34px; margin: -17px 0 0 -17px; -webkit-mask: url(assets/icons/lucide-sparkle.svg) center / contain no-repeat; mask: url(assets/icons/lucide-sparkle.svg) center / contain no-repeat; }
+    /* voice badge: "suara kamu" */
+    #s04-vb { left: 536px; top: 398px; height: 66px; padding: 0 24px 0 9px; border-radius: 33px; display: flex; align-items: center; gap: 14px;
+      background: linear-gradient(160deg, #1b2c70, #0b1440); box-shadow: 0 16px 30px -12px rgba(9,15,48,.8), 0 0 0 2px rgba(1,204,247,.7);
+      font: 700 23px/1 Poppins, sans-serif; color: #fff; white-space: nowrap; }
+    #s04-av { position: relative; width: 48px; height: 48px; border-radius: 50%; background: #01ccf7; flex: none; box-shadow: 0 0 14px rgba(1,204,247,.7); }
+    #s04-av i { position: absolute; left: 10px; top: 10px; width: 28px; height: 28px; background: #071033; -webkit-mask: url(assets/icons/lucide-user-round.svg) center / contain no-repeat; mask: url(assets/icons/lucide-user-round.svg) center / contain no-repeat; }
+    #s04-avr { left: 9px; top: 9px; width: 48px; height: 48px; border-radius: 50%; border: 3px solid #6adfff; }
+    #s04-wave { display: flex; align-items: center; gap: 4px; height: 36px; }
+    #s04-wave i { display: block; width: 5px; border-radius: 3px; background: #6adfff; }
+    /* file icon (the hand-over to s05: same rect, same look there) */
+    #s04-flap { right: 0; top: 0; width: 54px; height: 54px; border-radius: 0 0 0 9px; transform-origin: 100% 0%;
+      background: linear-gradient(225deg, rgba(0,0,0,0) 50%, #d4ccb6 50%, #e6dfcd 100%); box-shadow: -3px 4px 8px -4px rgba(9,15,48,.35); }
+    #s04-emb { left: 486px; top: 598px; width: 108px; height: 108px; border-radius: 28px; background: linear-gradient(160deg, #1b2c70, #0b1440);
+      box-shadow: inset 0 0 0 2px rgba(106,223,255,.45), 0 12px 24px -10px rgba(9,15,48,.7); }
+    #s04-emb i { position: absolute; left: 24px; top: 24px; width: 60px; height: 60px; background: #01ccf7; -webkit-mask: url(assets/icons/lucide-audio-waveform.svg) center / contain no-repeat; mask: url(assets/icons/lucide-audio-waveform.svg) center / contain no-repeat; }
+    .s04-sk { height: 12px; border-radius: 6px; background: rgba(18,24,58,.16); }
+  </style>
+  <div id="s04-root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div id="s04-stage">
+      <div id="s04-streaks"></div>
+      <div id="s04-cam">
+        <div class="s04-a" id="s04-win">
+          <div class="s04-a" id="s04-bar">
+            <div class="s04-a s04-dot" style="left:24px"></div><div class="s04-a s04-dot" style="left:46px"></div><div class="s04-a s04-dot" style="left:68px"></div>
+            <div class="s04-a" id="s04-brand">Claude</div>
+            <div class="s04-a" id="s04-tag">AGEN 2 · EDITOR</div>
+          </div>
+        </div>
+        <div class="s04-a" id="s04-page">
+          <div id="s04-pc">
+            <div class="s04-a" id="s04-fn"><i></i>draf_senin.md</div>
+            <div class="s04-a s04-st" id="s04-st0">DRAF MENTAH</div>
+            <div class="s04-a s04-st" id="s04-st1"><i></i>DIPOLES</div>
+            <div class="s04-a" id="s04-div"></div>
+            <div id="s04-raws"></div>
+            <div class="s04-a" id="s04-ins"></div>
+            <div id="s04-pls"></div>
+            <div class="s04-a" id="s04-sw"></div>
+            <div id="s04-spks"></div>
+            <div class="s04-a" id="s04-vb"><span id="s04-av"><i></i></span><span id="s04-wave"></span>suara kamu<div class="s04-a" id="s04-avr"></div></div>
+          </div>
+          <div class="s04-a" id="s04-flap"></div>
+        </div>
+        <div class="s04-a" id="s04-disc"></div>
+        <div class="s04-a" id="s04-ring"></div>
+        <div class="s04-a" id="s04-ct"><img src="assets/icons/lobe-claude-color.svg" alt=""></div>
+      </div>
+      <div class="s04-a" id="s04-emb"><i></i></div>
+      <div class="s04-a s04-sk" id="s04-sk0" style="left:476px;top:726px;width:128px"></div>
+      <div class="s04-a s04-sk" id="s04-sk1" style="left:494px;top:748px;width:92px"></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // s04 "Claude jadi editor, poles drafnya biar kedengeran kayak kamu."
+      // Arrives with s03's camera whip (from the right, streaks) carrying Manus' raw draft on a page inside a Claude window ·
+      // "Claude": the Claude mark pops big on its light tile, then docks into the window bar · "editor": AGEN 2 · EDITOR tag, the
+      // editor underlines the AI clichés · "poles": a cyan/orange polish sweep with sparkles strikes them through, the human
+      // rewrite rises in below · "kedengeran kayak kamu": a "suara kamu" voice badge, apex on "kamu" (marker on "Kamu", ring,
+      // status flips to DIPOLES) · exit: the page folds into a file icon carrying the voice emblem (s05 starts from it).
+      const D = 3.8;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.79);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      let seed = 4041; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      // words (local s): Claude 0.31 · jadi 0.58 · editor 0.75 · poles 1.61 · drafnya 1.93 · biar 2.41 · kedengeran 2.69 · kayak 3.19 · kamu 3.28 (ends 3.53)
+      const RAW = ["Di era digital yang semakin maju,", "konten adalah kunci kesuksesan.", "Mari kita simak bersama!"];
+      const PL = [["Capek", "mikirin", "konten", "tiap", "hari?"], ["Kamu", "cukup", "20", "menit", "seminggu."]];
+      $("s04-raws").innerHTML = RAW.map((s, i) => `<div class="s04-a s04-raw" id="s04-r${i}" style="top:${100 + i * 50}px"><span class="s04-rl"><span id="s04-rt${i}">${s}</span>` +
+        `<i class="s04-sq" id="s04-sq${i}"></i><i class="s04-st-l" id="s04-sl${i}"></i></span></div>`).join("");
+      $("s04-pls").innerHTML = PL.map((ws, li) => `<div class="s04-a s04-pl" style="top:${262 + li * 58}px">` + ws.map((w, k) => (li === 1 && k === 0)
+        ? `<span class="s04-w s04-kamu" id="s04-w${li}_${k}"><i class="mk" id="s04-mk"></i><b>${w}</b></span>`
+        : `<span class="s04-w" id="s04-w${li}_${k}">${w}</span>`).join(" ") + `</div>`).join("");
+      const WH = [12, 22, 30, 18, 34, 24, 14, 28, 16];
+      $("s04-wave").innerHTML = WH.map((h, i) => `<i id="s04-b${i}" style="height:${h}px"></i>`).join("");
+      const SPK = [[150, 112, "#01ccf7", 48], [470, 170, "#d97757", 42], [700, 104, "#01ccf7", 56], [330, 228, "#01ccf7", 38], [610, 236, "#d97757", 46], [830, 150, "#01ccf7", 42],
+        [30, 296, "#01ccf7", 46], [160, 392, "#d97757", 38], [212, 296, "#01ccf7", 34]];
+      $("s04-spks").innerHTML = SPK.map(([x, y, c, s], i) => `<div class="s04-a s04-spk" id="s04-k${i}" style="left:${x}px;top:${y}px;background:${c};width:${s}px;height:${s}px;margin:${-s / 2}px 0 0 ${-s / 2}px"></div>`).join("");
+      { let h = ""; for (let i = 0; i < 14; i++) { const y = 300 + rnd() * 640, w = 260 + rnd() * 480, th = 2 + Math.round(rnd() * 4); h += `<div class="s04-a s04-streak" id="s04-s${i}" style="top:${y.toFixed(0)}px;width:${w.toFixed(0)}px;height:${th}px"></div>`; } $("s04-streaks").innerHTML = h; }
+
+      // ENTRY — the camera whip lands (continues s03's whip to the left): everything arrives from the right and brakes hard
+      const cam = $("s04-cam");
+      I(cam, { x: 880, skewX: -9 });
+      ft(cam, { x: 880, skewX: -9 }, { x: 0, skewX: 0, duration: 0.44, ease: "expo.out" }, 0);
+      for (let i = 0; i < 14; i++) {
+        const s = $("s04-s" + i), x0 = -150 + rnd() * 1150, d = 0.26 + rnd() * 0.14;
+        I(s, { x: x0, opacity: 0.95 });
+        ft(s, { x: x0 }, { x: x0 - 1500 - rnd() * 500, duration: d, ease: "power2.out" }, 0);
+        ft(s, { opacity: 0.95 }, { opacity: 0, duration: 0.16, ease: "power1.in" }, d - 0.16);
+      }
+      // "Claude": the mark pops big on its light tile, ring shock, then docks into the window bar
+      const ct = $("s04-ct"), ring = $("s04-ring"), disc = $("s04-disc");
+      I(disc, { opacity: 0, scale: 0.3 }); ft(disc, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.34, ease: "back.out(1.8)" }, 0.24);
+      ft(disc, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4, duration: 0.24, ease: "power2.in" }, 0.64);
+      I(ct, { opacity: 0, scale: 0.2, rotation: -30, x: 0, y: 0 }); tl.set(ct, { opacity: 1 }, 0.26);
+      ft(ct, { scale: 0.2, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.36, ease: "back.out(2.2)" }, 0.26);
+      ft(ct.firstElementChild, { rotation: -90 }, { rotation: 0, duration: 0.5, ease: "power3.out" }, 0.26);
+      I(ring, { opacity: 0, scale: 0.5 }); tl.set(ring, { opacity: 1 }, 0.32);
+      ft(ring, { scale: 0.5, opacity: 1 }, { scale: 1.9, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.32);
+      ft(ct, { x: 0, y: 0, scale: 1 }, { x: 176 - 540, y: 349 - 700, scale: 40 / 144, duration: 0.3, ease: "power3.inOut" }, 0.64);
+      I($("s04-brand"), { opacity: 0, x: -14 }); ft($("s04-brand"), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, 0.84);
+      // "editor": the role tag pops; the editor underlines the clichés
+      I($("s04-tag"), { opacity: 0, scale: 0.6 }); ft($("s04-tag"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.4)" }, 0.72);
+      for (let i = 0; i < 3; i++) {
+        const sq = $("s04-sq" + i);
+        I(sq, { clipPath: "inset(0% 100% 0% 0%)", opacity: 1 });
+        ft(sq, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.3, ease: "power2.out" }, 0.95 + i * 0.13);
+        ft(sq, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.out" }, 1.66 + i * 0.12);
+      }
+      // "poles": polish sweep with sparkles, clichés struck through, the rewrite rises in
+      I($("s04-sw"), { x: 0, rotation: 18 }); ft($("s04-sw"), { x: 0, rotation: 18 }, { x: 1560, rotation: 18, duration: 0.62, ease: "power1.inOut" }, 1.5);
+      for (let i = 0; i < 3; i++) {
+        const sl = $("s04-sl" + i), rt = $("s04-rt" + i);
+        I(sl, { scaleX: 0 }); ft(sl, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power2.out" }, 1.64 + i * 0.12);
+        I(rt, { opacity: 1 }); ft(rt, { opacity: 1 }, { opacity: 0.42, duration: 0.25, ease: "power1.out" }, 1.68 + i * 0.12);
+      }
+      for (let i = 0; i < 6; i++) {
+        const k = $("s04-k" + i), t = 1.58 + i * 0.075;
+        I(k, { scale: 0, rotation: -45, opacity: 1 });
+        ft(k, { scale: 0, rotation: -45 }, { scale: 1, rotation: 20, duration: 0.2, ease: "back.out(3)" }, t);
+        ft(k, { scale: 1, rotation: 20 }, { scale: 0, rotation: 60, duration: 0.28, ease: "power2.in" }, t + 0.24);
+      }
+      I($("s04-ins"), { scaleY: 0 }); ft($("s04-ins"), { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 1.9);
+      PL.forEach((ws, li) => ws.forEach((w, k) => {
+        const el = $(`s04-w${li}_${k}`), t = (li === 0 ? 1.95 : 2.3) + k * 0.055;
+        I(el, { opacity: 0, y: 26 }); ft(el, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, t);
+      }));
+      // "kedengeran kayak kamu": the voice badge, live waveform; apex on "kamu"
+      const vb = $("s04-vb");
+      I(vb, { opacity: 0, scale: 0.4, rotation: -14, transformOrigin: "20% 50%" });
+      ft(vb, { opacity: 0, scale: 0.4, rotation: -14 }, { opacity: 1, scale: 1, rotation: -3, duration: 0.42, ease: "back.out(2)" }, 2.64);
+      WH.forEach((h, i) => {
+        const b = $("s04-b" + i), d = 0.11 + (i % 4) * 0.018;
+        I(b, { scaleY: 0.3 });
+        ft(b, { scaleY: 0.3 }, { scaleY: 1, duration: d, yoyo: true, repeat: Math.floor(0.82 / d), ease: "sine.inOut" }, 2.7 + (i % 3) * 0.03);
+      });
+      const mk = $("s04-mk"), kamu = $("s04-w1_0");
+      I(mk, { scaleX: 0 }); ft(mk, { scaleX: 0 }, { scaleX: 1, duration: 0.22, ease: "power2.out" }, 3.16);
+      ft(kamu, { y: 0 }, { y: -9, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 3.24);
+      ft(vb, { scale: 1 }, { scale: 1.08, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out" }, 3.26);
+      const avr = $("s04-avr"); I(avr, { opacity: 0, scale: 1 }); tl.set(avr, { opacity: 1 }, 3.26);
+      ft(avr, { scale: 1, opacity: 1 }, { scale: 2.3, opacity: 0, duration: 0.4, ease: "power2.out" }, 3.26);
+      for (let i = 6; i < 9; i++) {
+        const k = $("s04-k" + i), t = 3.24 + (i - 6) * 0.05;
+        I(k, { scale: 0, rotation: -45, opacity: 1 });
+        ft(k, { scale: 0, rotation: -45 }, { scale: 1, rotation: 15, duration: 0.18, ease: "back.out(3)" }, t);
+        ft(k, { scale: 1, rotation: 15 }, { scale: 0, rotation: 50, duration: 0.2, ease: "power2.in" }, t + 0.2);
+      }
+      I($("s04-st0"), { y: 0, opacity: 1 }); ft($("s04-st0"), { y: 0, opacity: 1 }, { y: -26, opacity: 0, duration: 0.18, ease: "power2.in" }, 3.2);
+      I($("s04-st1"), { y: 26, opacity: 0 }); ft($("s04-st1"), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.26, ease: "back.out(2.2)" }, 3.3);
+      // EXIT — hand-over: the window falls away, the page folds into the brand-voice file icon (voice emblem), s05 starts from it
+      const win = $("s04-win"), page = $("s04-page");
+      ft(win, { y: 0, opacity: 1, scale: 1 }, { y: 70, opacity: 0, scale: 0.96, duration: 0.26, ease: "power2.in" }, 3.44);
+      ft(ct, { opacity: 1 }, { opacity: 0, duration: 0.16, ease: "power1.in" }, 3.44);
+      ft($("s04-pc"), { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.in" }, 3.47);
+      I(page, { left: 88, top: 402, width: 904, height: 488, borderRadius: 22, "--dog": "0px" });
+      ft(page, { left: 88, top: 402, width: 904, height: 488, borderRadius: 22, "--dog": "0px" },
+        { left: 430, top: 540, width: 220, height: 272, borderRadius: 18, "--dog": "38.2px", duration: 0.3, ease: "power3.inOut" }, 3.45);
+      I($("s04-flap"), { scale: 0 }); ft($("s04-flap"), { scale: 0 }, { scale: 1, duration: 0.14, ease: "power2.out" }, 3.6);
+      const emb = $("s04-emb");
+      I(emb, { opacity: 0, scale: 0.4, rotation: -20 }); ft(emb, { opacity: 0, scale: 0.4, rotation: -20 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.2, ease: "back.out(2)" }, 3.55);
+      ["s04-sk0", "s04-sk1"].forEach((id, i) => { I($(id), { opacity: 0, scaleX: 0.3 }); ft($(id), { opacity: 0, scaleX: 0.3 }, { opacity: 1, scaleX: 1, duration: 0.14, ease: "power2.out" }, 3.58 + i * 0.03); });
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s04"] = tl;
     })();

@@ -1,10 +1,261 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-mdki" id="root" data-composition-id="s11" data-width="1080" data-height="1920"></div>
+  <style>
+    .s11-a { position: absolute; }
+    .s11-m { -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    #s11-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1800px; perspective-origin: 50% 40%; }
+    /* Claude composer window (same glass family as s06) */
+    #s11-wrap { left: 60px; top: 462px; width: 960px; height: 316px; }
+    #s11-wsh { left: 0; top: 0; width: 960px; height: 316px; border-radius: 30px; box-shadow: 0 50px 90px -40px rgba(0,0,0,.7), 0 0 0 1.5px rgba(106,223,255,.3), 0 0 60px rgba(1,204,247,.12); }
+    #s11-win { left: 0; top: 0; width: 960px; height: 316px; border-radius: 30px; overflow: hidden;
+      background: linear-gradient(160deg, rgba(23,36,94,.97), rgba(9,15,48,.98) 72%); box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.22); }
+    #s11-bar { left: 0; top: 0; width: 960px; height: 58px; background: rgba(255,255,255,.04); box-shadow: inset 0 -1.5px 0 rgba(255,255,255,.07); }
+    .s11-dot { top: 22px; width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,.18); }
+    #s11-brand { left: 96px; top: 11px; height: 36px; display: flex; align-items: center; gap: 12px; font: 700 26px/1 Poppins, sans-serif; color: #fff; }
+    .s11-cl { width: 36px; height: 36px; border-radius: 10px; flex: none; background: #f5f3ec url(assets/icons/lobe-claude-color.svg) center / 24px 24px no-repeat; }
+    #s11-tag { right: 22px; top: 13px; height: 32px; padding: 0 14px; border-radius: 16px; display: flex; align-items: center; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .14em; color: #071033; background: #01ccf7; }
+    /* attachment: the Manus table, pasted */
+    #s11-att { left: 24px; top: 72px; width: 392px; height: 52px; border-radius: 13px; background: #f4f1e8; box-shadow: 0 14px 26px -12px rgba(0,0,0,.55);
+      display: flex; align-items: center; gap: 10px; padding: 0 12px 0 9px; font: 700 20px/1 Poppins, sans-serif; color: #12183a; white-space: nowrap; }
+    #s11-att .mk { position: relative; width: 34px; height: 34px; border-radius: 9px; background: #12183a; flex: none; }
+    #s11-att .mk i { position: absolute; left: 6px; top: 6px; width: 22px; height: 22px; background: #fff; }
+    #s11-att .n { font-weight: 400; color: #4a5578; }
+    #s11-att .tb { margin-left: auto; width: 24px; height: 24px; background: #4a5578; flex: none; }
+    #s11-atr { left: 24px; top: 72px; width: 392px; height: 52px; border-radius: 13px; box-shadow: 0 0 0 3px #6adfff, 0 0 22px rgba(1,204,247,.6); }
+    #s11-paste { left: 436px; top: 79px; width: 38px; height: 38px; background: #6adfff; }
+    /* lock chips: fakta / angka / sumber */
+    .s11-lk { top: 75px; width: 150px; height: 46px; border-radius: 23px; display: flex; align-items: center; justify-content: center; gap: 9px; overflow: hidden;
+      font: 700 21px/1 Poppins, sans-serif; color: #fff; background: rgba(1,204,247,.16); box-shadow: inset 0 0 0 2px #01ccf7, 0 0 18px rgba(1,204,247,.35); }
+    .s11-lk .ic { width: 21px; height: 21px; background: #6adfff; flex: none; }
+    .s11-lk .fl { position: absolute; inset: 0; background: #6adfff; }
+    /* prompt */
+    #s11-pr { left: 28px; top: 136px; width: 904px; height: 92px; }
+    .s11-ln { position: absolute; left: 0; white-space: nowrap; font: 400 30px/44px Poppins, sans-serif; color: #e3edfa; }
+    .s11-lw { position: relative; font-weight: 700; color: #fff; }
+    .s11-ul { position: absolute; left: 0; right: 0; bottom: 2px; height: 3px; border-radius: 2px; background: #01ccf7; box-shadow: 0 0 8px rgba(1,204,247,.8); }
+    #s11-ph { left: 0; top: 0; font: 400 30px/44px Poppins, sans-serif; color: #6f83aa; white-space: nowrap; }
+    #s11-car0 { left: 0; top: 7px; width: 3px; height: 30px; background: #01ccf7; box-shadow: 0 0 8px rgba(1,204,247,.9); }
+    /* toolbar */
+    #s11-clip { left: 24px; top: 240px; width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    #s11-clip i { position: absolute; left: 12px; top: 12px; width: 24px; height: 24px; background: #8fa3c8; }
+    #s11-slot { left: 86px; top: 237px; width: 304px; height: 53px; border-radius: 27px; border: 2px dashed rgba(106,223,255,.55); }
+    #s11-send { left: 880px; top: 236px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(160deg, #0fd3ff, #01a9d8); box-shadow: 0 10px 24px -8px rgba(1,204,247,.8); }
+    #s11-send i { position: absolute; left: 14px; top: 15px; width: 26px; height: 26px; background: #071033; }
+    #s11-sring { left: 880px; top: 236px; width: 56px; height: 56px; border-radius: 50%; border: 3px solid #6adfff; }
+    /* the style chip handed over by s10 (pill 380x66, cyan border, Claude mark left, centred at 540,520) */
+    #s11-chip { left: 350px; top: 487px; width: 380px; height: 66px; border-radius: 33px; display: flex; align-items: center; gap: 14px; padding-left: 10px;
+      background: linear-gradient(160deg, rgba(23,36,94,.98), rgba(9,15,48,.98)); box-shadow: inset 0 0 0 2.5px #01ccf7, 0 0 30px rgba(1,204,247,.4), 0 18px 34px -16px rgba(0,0,0,.6);
+      font: 700 27px/1 Poppins, sans-serif; color: #fff; white-space: nowrap; }
+    #s11-chip .s11-cl { width: 46px; height: 46px; border-radius: 50%; background-size: 29px 29px; }
+    #s11-chip .g { font-weight: 400; color: #6adfff; }
+    #s11-sw { right: 14px; top: 16px; width: 60px; height: 34px; border-radius: 17px; background: rgba(255,255,255,.16); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    #s11-swon { left: 0; top: 0; width: 60px; height: 34px; border-radius: 17px; background: #01ccf7; box-shadow: 0 0 14px rgba(1,204,247,.8); }
+    #s11-knob { left: 4px; top: 4px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.45); }
+    #s11-ring { left: 146px; top: 699px; width: 304px; height: 53px; border-radius: 27px; border: 3px solid #6adfff; }
+    /* the 7 drafts from the Manus table: raw (grey) -> polished (cyan) */
+    .s11-cw { top: 796px; width: 122px; height: 132px; perspective: 700px; }
+    .s11-card { position: absolute; left: 0; top: 0; width: 122px; height: 132px; transform-style: preserve-3d; }
+    .s11-f { position: absolute; left: 0; top: 0; width: 122px; height: 132px; border-radius: 16px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .s11-raw { background: linear-gradient(160deg, rgba(78,90,124,.62), rgba(40,48,78,.7)); box-shadow: inset 0 0 0 1.5px rgba(200,210,230,.2); }
+    .s11-pol { background: linear-gradient(160deg, rgba(27,44,112,.98), rgba(10,17,54,.98)); box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.62), inset 0 0 22px rgba(1,204,247,.16); transform: rotateY(180deg); }
+    .s11-lab { position: absolute; left: 12px; top: 11px; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .1em; }
+    .s11-raw .s11-lab { color: #9aa5bd; }
+    .s11-pol .s11-lab { color: #6adfff; }
+    .s11-fi { position: absolute; right: 10px; top: 8px; width: 18px; height: 18px; }
+    .s11-raw .s11-fi { background: #9aa5bd; }
+    .s11-pol .s11-fi { background: #6adfff; }
+    .s11-b { position: absolute; left: 12px; height: 7px; border-radius: 4px; }
+    .s11-raw .s11-b { background: rgba(196,206,228,.32); }
+    .s11-pol .s11-b { background: rgba(227,237,250,.72); }
+    .s11-pol .s11-b.h { height: 9px; background: #01ccf7; box-shadow: 0 0 8px rgba(1,204,247,.6); }
+    .s11-src { position: absolute; left: 12px; top: 99px; height: 23px; padding: 0 7px 0 8px; border-radius: 12px; display: flex; align-items: center; gap: 4px;
+      font: 700 15px/1 Poppins, sans-serif; color: #d3def2; background: rgba(255,255,255,.11); white-space: nowrap; }
+    .s11-src i { width: 13px; height: 13px; background: #d3def2; flex: none; }
+    .s11-sh { position: absolute; left: -60px; top: -34px; width: 46px; height: 200px; background: linear-gradient(90deg, rgba(200,245,255,0), rgba(225,250,255,.6), rgba(200,245,255,0)); }
+  </style>
+  <div id="s11-root" data-composition-id="s11" data-width="1080" data-height="1920">
+    <div id="s11-stage">
+      <div class="s11-a" id="s11-wrap">
+        <div class="s11-a" id="s11-wsh"></div>
+        <div class="s11-a" id="s11-win">
+          <div class="s11-a" id="s11-bar">
+            <div class="s11-a s11-dot" style="left:24px"></div><div class="s11-a s11-dot" style="left:46px"></div><div class="s11-a s11-dot" style="left:68px"></div>
+            <div class="s11-a" id="s11-brand"><span class="s11-cl" id="s11-bmk"></span>Claude</div>
+            <div class="s11-a" id="s11-tag">AGEN 2 · EDITOR</div>
+          </div>
+          <div class="s11-a" id="s11-att"><span class="mk" id="s11-amk"><i class="s11-m" style="--i:url(assets/icons/lobe-manus.svg)"></i></span>tabel dari Manus<span class="n">· 7 baris</span><span class="tb s11-m" style="--i:url(assets/icons/lucide-table-2.svg)"></span></div>
+          <div class="s11-a" id="s11-atr"></div>
+          <div class="s11-a s11-m" id="s11-paste" style="--i:url(assets/icons/lucide-clipboard-paste.svg)"></div>
+          <div class="s11-a s11-lk" id="s11-lk0" style="left:436px"><span class="fl" id="s11-lf0"></span><span class="ic s11-m" id="s11-li0" style="--i:url(assets/icons/lucide-lock.svg)"></span>fakta</div>
+          <div class="s11-a s11-lk" id="s11-lk1" style="left:600px"><span class="fl" id="s11-lf1"></span><span class="ic s11-m" id="s11-li1" style="--i:url(assets/icons/lucide-lock.svg)"></span>angka</div>
+          <div class="s11-a s11-lk" id="s11-lk2" style="left:764px"><span class="fl" id="s11-lf2"></span><span class="ic s11-m" id="s11-li2" style="--i:url(assets/icons/lucide-lock.svg)"></span>sumber</div>
+          <div class="s11-a" id="s11-pr">
+            <div class="s11-a" id="s11-ph">Tulis pesan untuk Claude…</div>
+            <div class="s11-ln" id="s11-l0" style="top:0"></div>
+            <div class="s11-ln" id="s11-l1" style="top:44px"></div>
+            <div class="s11-a" id="s11-car0"></div>
+          </div>
+          <div class="s11-a" id="s11-clip"><i class="s11-m" style="--i:url(assets/icons/lucide-paperclip.svg)"></i></div>
+          <div class="s11-a" id="s11-slot"></div>
+          <div class="s11-a" id="s11-send"><i class="s11-m" style="--i:url(assets/icons/lucide-send.svg)"></i></div>
+          <div class="s11-a" id="s11-sring"></div>
+        </div>
+      </div>
+      <div class="s11-a" id="s11-ring"></div>
+      <div class="s11-a" id="s11-chip"><span class="s11-cl" id="s11-cmk"></span><span><span class="g">Gaya:</span> Suaramu</span>
+        <div class="s11-a" id="s11-sw"><div class="s11-a" id="s11-swon"></div><div class="s11-a" id="s11-knob"></div></div></div>
+      <div id="s11-strip"></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // s11 LANGKAH 5 "Lima. Tempel tabel dari Manus, lalu ketik: Poles 7 draf ini sesuai gaya saya. Jangan ubah fakta, angka, atau sumber."
+      // Hand-over IN (fixed): s10 leaves the style chip "Gaya: Suaramu" alone at (540,520) -> a Claude composer unfolds out of it and the chip
+      // docks into the toolbar as the active style toggle (switch ON) · "Tempel tabel dari Manus": the Manus table is pasted as an attachment
+      // and spills its 7 raw drafts (grey) into a strip · "ketik": the prompt types itself as spoken (caret follows) · "fakta / angka / sumber":
+      // a lock chip clamps on per word · send: the 7 drafts flip raw -> polished (cyan) in a quick cascade under a glint.
+      // Hand-over OUT: s12 frame 0 is this exact final frame (composer + polished strip); s12 folds the composer away.
+      const D = 7.8;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 7.79);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      // words (local s): Lima 0.22 · Tempel 0.82 · tabel 1.25 · dari 1.48 · Manus 1.59 · lalu 2.20 · ketik 2.43 · Poles 3.09 · 7 3.60 · draf 3.77 ·
+      // ini 4.03 · sesuai 4.22 · gaya 4.80 · saya 5.01 · Jangan 5.18 · ubah 5.74 · fakta 6.03 · angka 6.58 · atau 7.07 · sumber 7.31
+
+      // ---------------------------------------------------------------- build: the 7 drafts (same x grid as s01's week tiles)
+      const DAYS = ["SEN", "SEL", "RAB", "KAM", "JUM", "SAB", "MIN"];
+      const X0 = 78, CW = 122, G = 12.7, CT = 796;
+      const POL = [[86, 98, 64, 86], [72, 90, 98, 58], [92, 76, 94, 70], [80, 98, 72, 90], [68, 84, 98, 62], [90, 96, 60, 88], [76, 70, 98, 80]];
+      const src = `<div class="s11-src">sumber<i class="s11-m" style="--i:url(assets/icons/lucide-external-link.svg)"></i></div>`;
+      $("s11-strip").innerHTML = DAYS.map((d, i) => `<div class="s11-a s11-cw" id="s11-w${i}" style="left:${(X0 + i * (CW + G)).toFixed(1)}px"><div class="s11-card" id="s11-c${i}">
+          <div class="s11-f s11-raw"><div class="s11-lab">${d}</div><i class="s11-fi s11-m" style="--i:url(assets/icons/lucide-bot.svg)"></i>
+            <div class="s11-b" style="top:37px;width:98px"></div><div class="s11-b" style="top:51px;width:98px"></div><div class="s11-b" style="top:65px;width:98px"></div><div class="s11-b" style="top:79px;width:66px"></div>${src}</div>
+          <div class="s11-f s11-pol"><div class="s11-lab">${d}</div><i class="s11-fi s11-m" style="--i:url(assets/icons/lucide-sparkles.svg)"></i>
+            <div class="s11-b h" style="top:36px;width:${POL[i][0]}px"></div><div class="s11-b" style="top:53px;width:${POL[i][1]}px"></div><div class="s11-b" style="top:67px;width:${POL[i][2]}px"></div><div class="s11-b" style="top:81px;width:${POL[i][3]}px"></div>${src}<i class="s11-sh" id="s11-sh${i}"></i></div>
+        </div></div>`).join("");
+
+      // ---------------------------------------------------------------- build: the prompt, one span per character (typed with tl.set windows)
+      // [word, spoken time, lock index]; the locked words are bold from the start (no reflow when they light up)
+      const LINES = [
+        [["Poles", 3.09], ["7", 3.60], ["draf", 3.77], ["ini", 4.03], ["sesuai", 4.22], ["gaya", 4.80], ["saya.", 5.01]],
+        [["Jangan", 5.18], ["ubah", 5.74], ["fakta,", 6.03, 0], ["angka,", 6.58, 1], ["atau", 7.07], ["sumber.", 7.31, 2]],
+      ];
+      const CH = [];   // [id, time]
+      LINES.forEach((words, li) => {
+        let h = "";
+        words.forEach(([w, tw, lk], wi) => {
+          const last = li === 1 && wi === words.length - 1;
+          const lead = last ? 0.19 : 0.1, ci = last ? 0.026 : 0.032;
+          const txt = w + (wi < words.length - 1 ? " " : "");
+          const core = lk === undefined ? 0 : w.replace(/[.,]$/, "").length;
+          let open = false;
+          [...txt].forEach((c, k) => {
+            const id = `s11-ch${CH.length}`;
+            CH.push([id, tw - lead + k * ci]);
+            if (core && k === 0) { h += `<span class="s11-lw" id="s11-lw${lk}">`; open = true; }
+            h += `<span id="${id}">${c === " " ? "&nbsp;" : c}</span>`;
+            if (open && k === core - 1) { h += `<i class="s11-ul" id="s11-ul${lk}"></i></span>`; open = false; }
+          });
+        });
+        $("s11-l" + li).innerHTML = h;
+      });
+
+      // ---------------------------------------------------------------- 0.0 - 1.0: the chip opens the composer, then docks as the style toggle (ON)
+      const wrap = $("s11-wrap"), win = $("s11-win"), chip = $("s11-chip");
+      I(win, { opacity: 0, clipPath: "inset(25px 290px 225px 290px round 33px)" });
+      tl.set(win, { opacity: 1 }, 0.08);
+      ft(win, { clipPath: "inset(25px 290px 225px 290px round 33px)" }, { clipPath: "inset(0px 0px 0px 0px round 30px)", duration: 0.56, ease: "expo.out" }, 0.08);
+      I($("s11-wsh"), { opacity: 0 }); ft($("s11-wsh"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.3);
+      ft(chip, { scale: 1 }, { scale: 1.06, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, 0.04);
+      // dock: an arc (x leads, y follows) into the dashed slot of the toolbar, scale 0.8
+      ft(chip, { x: 0 }, { x: -242, duration: 0.46, ease: "power2.inOut" }, 0.26);
+      ft(chip, { y: 0 }, { y: 205.5, duration: 0.46, ease: "power3.in" }, 0.26);
+      ft(chip, { scaleX: 1, scaleY: 1 }, { scaleX: 0.8, scaleY: 0.8, duration: 0.46, ease: "power2.inOut" }, 0.26);
+      ft(chip, { rotation: 0 }, { rotation: -5, duration: 0.23, yoyo: true, repeat: 1, ease: "sine.inOut" }, 0.26);
+      ft(chip, { scaleX: 0.8, scaleY: 0.8 }, { scaleX: 0.86, scaleY: 0.72, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, 0.72);
+      const slot = $("s11-slot");
+      I(slot, { opacity: 0 }); ft(slot, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, 0.34);
+      ft(slot, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.out" }, 0.74);
+      // switch slides ON
+      const sw = $("s11-sw"), knob = $("s11-knob"), swon = $("s11-swon");
+      I(sw, { opacity: 0, scale: 0.3 }); ft(sw, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.6)" }, 0.76);
+      I(swon, { opacity: 0 }); ft(swon, { opacity: 0 }, { opacity: 1, duration: 0.18, ease: "power2.out" }, 0.94);
+      I(knob, { x: 0 }); ft(knob, { x: 0 }, { x: 26, duration: 0.2, ease: "power3.inOut" }, 0.92);
+      const ring = $("s11-ring");
+      I(ring, { opacity: 0, scale: 1 });
+      ft(ring, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.3, duration: 0.45, ease: "power2.out" }, 1.0);
+      // composer furniture settles in
+      [["s11-brand", 0.3], ["s11-tag", 0.42], ["s11-ph", 0.48], ["s11-clip", 0.52], ["s11-send", 0.58]].forEach(([id, t]) => {
+        const e = $(id); I(e, { opacity: 0, y: 12 }); ft(e, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, t);
+      });
+      ft($("s11-bmk"), { rotation: -40, scale: 0.6 }, { rotation: 0, scale: 1, duration: 0.5, ease: "back.out(3)" }, 0.32);
+
+      // ---------------------------------------------------------------- "Tempel tabel dari Manus": paste the table, it spills its 7 raw drafts
+      const att = $("s11-att"), atr = $("s11-atr"), paste = $("s11-paste");
+      I(paste, { opacity: 0, scale: 0.4, y: 0 });
+      ft(paste, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(3)" }, 0.78);
+      ft(paste, { opacity: 1, y: 0 }, { opacity: 0, y: -22, duration: 0.3, ease: "power2.in" }, 1.08);
+      I(att, { opacity: 0, y: -26, scale: 1.14 });
+      ft(att, { opacity: 0, y: -26, scale: 1.14 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(2)" }, 0.86);
+      I(atr, { opacity: 0, scale: 1 });
+      ft(atr, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.12, duration: 0.45, ease: "power2.out" }, 1.08);
+      ft(atr, { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.12, duration: 0.5, ease: "power2.out" }, 5.2);     // "Jangan": guard the table
+      ft($("s11-amk"), { rotation: -28, scale: 0.7 }, { rotation: 0, scale: 1, duration: 0.45, ease: "back.out(3)" }, 1.57);
+      const AX = 60 + 24 + 196, AY = 462 + 72 + 26;   // attachment centre (page)
+      for (let i = 0; i < 7; i++) {
+        const w = $("s11-w" + i), t = 1.24 + i * 0.055;
+        const dx = AX - (X0 + i * (CW + G) + CW / 2), dy = AY - (CT + 66);
+        I(w, { x: dx, y: dy, scale: 0.25, rotation: (i - 3) * 6, opacity: 0 });
+        ft(w, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "power1.out" }, t);
+        ft(w, { x: dx, y: dy, scale: 0.25, rotation: (i - 3) * 6 }, { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.52, ease: "power3.out" }, t);
+        // "7 draf": a counting wave over the strip
+        ft(w, { y: 0 }, { y: -16, duration: 0.13, yoyo: true, repeat: 1, ease: "power2.out" }, 3.55 + i * 0.045);
+      }
+
+      // ---------------------------------------------------------------- "lalu ketik": caret, then the prompt types itself as spoken
+      const ph = $("s11-ph"), car0 = $("s11-car0");
+      ft(ph, { opacity: 1 }, { opacity: 0, duration: 0.18, ease: "power1.in" }, 2.3);
+      I(car0, { opacity: 0 });
+      [[2.42, 1], [2.64, 0], [2.8, 1], [2.99, 0]].forEach(([t, o]) => tl.set(car0, { opacity: o }, t));
+      const CAR = "3px 0 0 0 #01ccf7", NOC = "0px 0 0 0 rgba(1,204,247,0)";
+      CH.forEach(([id, t], k) => {
+        const e = $(id); I(e, { opacity: 0, boxShadow: NOC });
+        tl.set(e, { opacity: 1, boxShadow: CAR }, t);
+        if (k > 0) tl.set($(CH[k - 1][0]), { boxShadow: NOC }, t);
+      });
+      const TSEND = 7.34;
+      tl.set($(CH[CH.length - 1][0]), { boxShadow: NOC }, TSEND);
+      // "gaya": the style toggle answers
+      ft(chip, { scaleX: 0.8, scaleY: 0.8 }, { scaleX: 0.86, scaleY: 0.86, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, 4.78);
+      ft(ring, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.3, duration: 0.45, ease: "power2.out" }, 4.8);
+
+      // ---------------------------------------------------------------- "fakta / angka / sumber": a lock chip clamps on per word
+      [6.07, 6.62, 7.31].forEach((T, k) => {
+        const lk = $("s11-lk" + k), li = $("s11-li" + k), fl = $("s11-lf" + k), lw = $("s11-lw" + k), ul = $("s11-ul" + k);
+        I(lk, { opacity: 0, y: -40, scaleX: 0.9, scaleY: 1.35 });
+        tl.set(lk, { opacity: 1 }, T - 0.12);
+        ft(lk, { y: -40, scaleX: 0.9, scaleY: 1.35 }, { y: 0, scaleX: 1, scaleY: 1, duration: 0.12, ease: "power3.in" }, T - 0.12);
+        ft(lk, { scaleX: 1, scaleY: 1 }, { scaleX: 1.1, scaleY: 0.84, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, T);
+        ft(li, { rotation: -40, scale: 1.6 }, { rotation: 0, scale: 1, duration: 0.32, ease: "back.out(3)" }, T);
+        I(fl, { opacity: 0 }); ft(fl, { opacity: 0.85 }, { opacity: 0, duration: 0.34, ease: "power2.out" }, T);
+        ft(lw, { color: "#ffffff" }, { color: "#01ccf7", duration: 0.16, ease: "power1.out" }, T);
+        I(ul, { scaleX: 0, transformOrigin: "0% 50%" }); ft(ul, { scaleX: 0 }, { scaleX: 1, duration: 0.22, ease: "power3.out" }, T);
+      });
+
+      // ---------------------------------------------------------------- send -> the 7 drafts flip raw -> polished (cascade under a glint)
+      const send = $("s11-send"), sring = $("s11-sring");
+      ft(send, { scale: 1 }, { scale: 0.84, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, TSEND);
+      I(sring, { opacity: 0, scale: 1 }); ft(sring, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.9, duration: 0.36, ease: "power2.out" }, TSEND + 0.02);
+      for (let i = 0; i < 7; i++) {
+        const fs = 7.37 + i * 0.035, sh = $("s11-sh" + i);
+        ft($("s11-c" + i), { rotationY: 0 }, { rotationY: 180, duration: 0.17, ease: "power2.inOut" }, fs);
+        I(sh, { x: 0, rotation: 18 }); ft(sh, { x: 0, rotation: 18 }, { x: 240, rotation: 18, duration: 0.14, ease: "none" }, fs + 0.07);   // shine, clipped by the card
+      }
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s11"] = tl;
     })();

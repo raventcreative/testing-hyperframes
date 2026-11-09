@@ -1,10 +1,232 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-me1o" id="root" data-composition-id="s08" data-width="1080" data-height="1920"></div>
+  <style>
+    .s08-a { position: absolute; }
+    .s08-m { -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    #s08-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s08-cam { left: 0; top: 0; width: 1080px; height: 1920px; }
+    /* window: identical to s07's last frame (chrome + 7 lit rows) */
+    #s08-win { left: 60px; top: 458px; width: 960px; height: 472px; border-radius: 30px; overflow: hidden;
+      background: linear-gradient(160deg, rgba(23,36,94,.97), rgba(9,15,48,.98) 72%);
+      box-shadow: 0 50px 90px -40px rgba(0,0,0,.7), 0 0 0 1.5px rgba(106,223,255,.3), 0 0 60px rgba(1,204,247,.12); }
+    #s08-bar { left: 0; top: 0; width: 960px; height: 62px; background: rgba(255,255,255,.04); box-shadow: inset 0 -1.5px 0 rgba(255,255,255,.07); }
+    .s08-dot { top: 24px; width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,.18); }
+    #s08-brand { left: 96px; top: 13px; height: 36px; display: flex; align-items: center; gap: 10px; font: 700 26px/1 Poppins, sans-serif; color: #fff; }
+    #s08-brand i { width: 34px; height: 34px; background: #fff; -webkit-mask: url(assets/icons/lobe-manus.svg) center / contain no-repeat; mask: url(assets/icons/lobe-manus.svg) center / contain no-repeat; }
+    #s08-tag { right: 22px; top: 15px; height: 32px; padding: 0 14px; border-radius: 16px; display: flex; align-items: center; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .14em;
+      color: #071033; background: #01ccf7; }
+    /* new task line */
+    #s08-pr { left: 20px; top: 72px; width: 920px; height: 46px; border-radius: 14px; background: rgba(0,0,0,.22); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.09); }
+    #s08-pri { left: 14px; top: 12px; width: 22px; height: 22px; background: #6adfff; }
+    #s08-ptx { left: 48px; top: 0; height: 46px; font: 400 22px/46px Poppins, sans-serif; color: #e3edfa; white-space: nowrap; }
+    #s08-ptx .bd { font-weight: 700; color: #fff; }
+    .s08-cr { display: inline-block; width: 3px; height: 26px; background: #01ccf7; box-shadow: 0 0 8px rgba(1,204,247,.9); margin-left: 1px; vertical-align: -6px; }
+    #s08-snd { left: 879px; top: 5px; width: 36px; height: 36px; border-radius: 50%; background: #01ccf7; box-shadow: 0 6px 16px -6px rgba(1,204,247,.8); }
+    #s08-snd i { position: absolute; left: 8px; top: 9px; width: 18px; height: 18px; background: #071033; }
+    #s08-ring { left: 917px; top: 95px; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 3px solid #6adfff; }
+    /* column header + spec chips */
+    #s08-hd { left: 20px; top: 124px; width: 920px; height: 34px; }
+    .s08-hl { top: 0; height: 34px; display: flex; align-items: center; gap: 8px; font: 700 16px/1 Poppins, sans-serif; letter-spacing: .12em; color: #6adfff; white-space: nowrap; }
+    .s08-chip { height: 26px; padding: 0 10px; border-radius: 13px; background: #01ccf7; color: #071033; font: 700 17px/26px Poppins, sans-serif; letter-spacing: 0; display: flex; align-items: center; white-space: nowrap;
+      box-shadow: 0 6px 16px -6px rgba(1,204,247,.8); }
+    .s08-chip i { width: 18px; height: 18px; background: #071033; }
+    .s08-band { top: 158px; height: 308px; border-radius: 12px; background: linear-gradient(180deg, rgba(1,204,247,.17), rgba(1,204,247,.04)); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.35); }
+    /* rows: front face = s07's lit result row (keep in sync with .s07-row.on), back face = the day row */
+    .s08-row { left: 0; top: 0; width: 920px; height: 39px; transform-style: preserve-3d; }
+    .s08-face { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 10px; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+    .s08-fr { background: rgba(1,204,247,.16); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.75), 0 0 18px rgba(1,204,247,.22); }
+    .s08-fr .n { position: absolute; left: 7px; top: 50%; margin-top: -13px; width: 30px; height: 26px; border-radius: 8px; background: #01ccf7;
+      font: 700 18px/26px Poppins, sans-serif; color: #071033; text-align: center; }
+    .s08-fr .tp { position: absolute; left: 50px; top: 50%; margin-top: -6px; height: 12px; border-radius: 6px; background: rgba(225,249,255,.92); }
+    .s08-fr .wy { position: absolute; left: 370px; top: 50%; margin-top: -11px; height: 22px; display: flex; align-items: center; gap: 8px; }
+    .s08-fr .wy i { display: block; width: 20px; height: 20px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-trending-up.svg) center / contain no-repeat; mask: url(assets/icons/lucide-trending-up.svg) center / contain no-repeat; }
+    .s08-fr .wy b { display: block; height: 10px; border-radius: 5px; background: rgba(106,223,255,.6); }
+    .s08-fr .sr { position: absolute; right: 10px; top: 50%; margin-top: -13px; height: 26px; padding: 0 9px 0 12px; border-radius: 13px; display: flex; align-items: center; gap: 5px;
+      font: 700 18px/1 Poppins, sans-serif; color: #071033; background: #6adfff; white-space: nowrap; }
+    .s08-fr .sr i { display: block; width: 16px; height: 16px; background: currentColor; transform: rotate(-45deg);
+      -webkit-mask: url(assets/icons/lucide-arrow-right.svg) center / contain no-repeat; mask: url(assets/icons/lucide-arrow-right.svg) center / contain no-repeat; }
+    .s08-fr .fl { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 10px; background: rgba(190,242,255,.6); }
+    .s08-bk { transform: rotateX(180deg); background: rgba(255,255,255,.035); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.08); }
+    .s08-bk .dy { position: absolute; left: 0; top: 0; width: 84px; height: 39px; padding-left: 18px; font: 700 19px/39px Poppins, sans-serif; letter-spacing: .04em; color: #fff; }
+    .s08-bk .dy i { position: absolute; left: 0; top: 9px; width: 4px; height: 21px; border-radius: 2px; background: #01ccf7; }
+    .s08-cl { position: absolute; top: 4px; height: 31px; border-radius: 8px; background: rgba(255,255,255,.045); overflow: hidden; }
+    .s08-cc { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+    .s08-hw { position: absolute; top: 10px; height: 11px; border-radius: 6px; background: rgba(240,248,255,.88); }
+    .s08-bd { position: absolute; top: 12px; width: 7px; height: 7px; border-radius: 50%; background: #01ccf7; }
+    .s08-bb { position: absolute; top: 12px; height: 7px; border-radius: 4px; background: rgba(227,237,250,.5); }
+    .s08-cb { position: absolute; left: 10px; height: 7px; border-radius: 4px; background: rgba(227,237,250,.42); }
+    .s08-tg { position: absolute; top: 4px; width: 23px; height: 23px; border-radius: 6px; background: rgba(1,204,247,.14); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.5); }
+    .s08-tg i { position: absolute; left: 5px; top: 5px; width: 13px; height: 13px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-hash.svg) center / contain no-repeat; mask: url(assets/icons/lucide-hash.svg) center / contain no-repeat; }
+    /* the draft card the camera pushes into (s09 frame 0 continues from it) */
+    #s08-card { left: 0; top: 0; overflow: hidden; background: linear-gradient(160deg, rgba(23,36,94,.99), rgba(9,15,48,.99) 72%);
+      box-shadow: 0 0 0 1.5px rgba(106,223,255,.45), 0 0 60px rgba(1,204,247,.2), 0 40px 80px -30px rgba(0,0,0,.7); }
+    #s08-cin { left: 0; top: 0; width: 900px; height: 424px; }
+    #s08-kd { left: 30px; top: 26px; height: 36px; padding: 0 16px; border-radius: 18px; background: #01ccf7; color: #071033; font: 700 19px/36px Poppins, sans-serif; letter-spacing: .08em; }
+    #s08-kt { left: 128px; top: 26px; font: 700 26px/36px Poppins, sans-serif; color: #fff; white-space: nowrap; }
+    #s08-km { right: 30px; top: 26px; height: 36px; display: flex; align-items: center; gap: 10px; font: 700 22px/1 Poppins, sans-serif; color: #fff; }
+    #s08-km i { width: 28px; height: 28px; background: #fff; -webkit-mask: url(assets/icons/lobe-manus.svg) center / contain no-repeat; mask: url(assets/icons/lobe-manus.svg) center / contain no-repeat; }
+    #s08-kl { left: 30px; top: 82px; width: 840px; height: 1.5px; background: rgba(255,255,255,.1); }
+    .s08-kh { left: 30px; font: 700 16px/1 Poppins, sans-serif; letter-spacing: .14em; color: #6adfff; }
+    .s08-kw { top: 104px; height: 20px; border-radius: 10px; background: rgba(240,248,255,.9); }
+    .s08-kdt { left: 172px; width: 12px; height: 12px; border-radius: 50%; background: #01ccf7; }
+    .s08-kb { left: 198px; height: 12px; border-radius: 6px; background: rgba(227,237,250,.55); }
+    .s08-ktg { top: 362px; width: 44px; height: 34px; border-radius: 9px; background: rgba(1,204,247,.14); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.55); }
+    .s08-ktg i { position: absolute; left: 13px; top: 8px; width: 18px; height: 18px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-hash.svg) center / contain no-repeat; mask: url(assets/icons/lucide-hash.svg) center / contain no-repeat; }
+  </style>
+  <div id="s08-root" data-composition-id="s08" data-width="1080" data-height="1920">
+    <div id="s08-stage">
+      <div class="s08-a" id="s08-cam">
+        <div class="s08-a" id="s08-win">
+          <div class="s08-a" id="s08-bar">
+            <div class="s08-a s08-dot" style="left:24px"></div><div class="s08-a s08-dot" style="left:46px"></div><div class="s08-a s08-dot" style="left:68px"></div>
+            <div class="s08-a" id="s08-brand"><i></i>Manus</div>
+            <div class="s08-a" id="s08-tag">AGEN 1 · PERISET</div>
+          </div>
+          <div class="s08-a" id="s08-pr">
+            <div class="s08-a s08-m" id="s08-pri" style="--i:url(assets/icons/lucide-square-pen.svg)"></div>
+            <div class="s08-a" id="s08-ptx"></div>
+            <div class="s08-a" id="s08-snd"><i class="s08-m" style="--i:url(assets/icons/lucide-send.svg)"></i></div>
+          </div>
+          <div class="s08-a" id="s08-ring"></div>
+          <div id="s08-bands"></div>
+          <div class="s08-a" id="s08-hd">
+            <div class="s08-a s08-hl" id="s08-L0" style="left:16px">HARI</div>
+            <div class="s08-a s08-hl" id="s08-L1" style="left:98px">HOOK<span class="s08-chip" id="s08-k1">maks. 12 kata</span></div>
+            <div class="s08-a s08-hl" id="s08-L2" style="left:406px">ISI<span class="s08-chip" id="s08-k2">3–5 poin</span></div>
+            <div class="s08-a s08-hl" id="s08-L3" style="left:608px">CAPTION<span class="s08-chip" id="s08-k3" style="padding:0 4px"><i class="s08-m" style="--i:url(assets/icons/lucide-check.svg)"></i></span></div>
+            <div class="s08-a s08-hl" id="s08-L4" style="left:790px">HASHTAG<span class="s08-chip" id="s08-k4">5</span></div>
+          </div>
+          <div id="s08-rows"></div>
+        </div>
+      </div>
+      <div class="s08-a" id="s08-card">
+        <div class="s08-a" id="s08-cin">
+          <div class="s08-a" id="s08-kd">KAM</div>
+          <div class="s08-a" id="s08-kt">Draf konten</div>
+          <div class="s08-a" id="s08-km"><i></i>Manus</div>
+          <div class="s08-a" id="s08-kl"></div>
+          <div id="s08-kc"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     (function () {
+      // s08 LANGKAH 3 "Tiga. Minta 7 konten, Senin sampai Minggu. Hook maksimal 12 kata, 3–5 poin, caption, dan 5 hashtag."
+      // Frame 0 = s07's last frame: the same Manus window holding the 7 chosen topic rows (lit cyan) · a new task line drops in and
+      // types "7 konten, Senin sampai Minggu." (robot types) · send · on "Senin sampai Minggu" the 7 topic rows flip one by one into
+      // the day rows SEN…MIN · the weekly table's columns light up on the spoken specs, each with its spec chip, and their cells fill
+      // with skeleton text: HOOK (word blocks, max 12) · ISI (3–5 bullets) · CAPTION (2 lines) · HASHTAG (5 tags) ·
+      // EXIT: camera push INTO the KAM · ISI cell; it opens into a large draft card (s09 frame 0 continues from that card).
+      const D = 7.7667;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 7.757);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      // words (local s): Tiga 0.20 · Minta 0.78 · 7 1.24 · konten 1.38 · Senin 1.88 · sampai 2.15 · Minggu 2.48 · Hook 3.34 · maksimal 3.72 ·
+      // 12 4.06 · kata 4.17 · 3–5 5.00 · poin 5.72 · caption 6.30 · dan 6.68 · 5 6.90 · hashtag 7.14
+      // robot (host): types 0.73–2.33 · points up 3.29–6.69
+      // SHARED WITH s07: skeleton widths of the kept rows + row geometry (window-local x 20, y 164 + k*43, 920 x 39)
+      const TW = [262, 210, 238, 184, 276, 226, 198, 250, 172, 232];
+      const AW = [176, 150, 196, 132, 168, 188, 140, 160, 120, 182];
+      const KEEP = [0, 1, 2, 4, 5, 7, 9];
+      const HX = 20, HY = 164, HP = 43;
+      const DAYS = ["SEN", "SEL", "RAB", "KAM", "JUM", "SAB", "MIN"];
+      const HOOK = [[22, 30, 16, 26, 20, 28, 18, 24], [26, 18, 28, 22, 16, 30, 20, 24, 18, 22], [30, 22, 18, 26, 24, 16, 28], [20, 28, 24, 16, 30, 22, 18, 26, 20],
+        [24, 18, 30, 20, 26, 22, 16, 28], [16, 22, 20, 26, 14, 22, 18, 24, 20, 16, 20], [28, 20, 24, 18, 30, 22, 26]];     // word blocks (≤ 12 words)
+      const PTS = [4, 3, 5, 4, 3, 5, 4];                                                                                // 3–5 bullets
+      const CAP = [[140, 96], [128, 110], [150, 84], [136, 102], [118, 90], [146, 108], [132, 94]];
+      const COL = [[88, 300], [396, 194], [598, 174], [780, 132]];                                                      // HOOK, ISI, CAPTION, HASHTAG (row-local x, w)
+      const ZK = 3;                                                                                                     // zoom target: KAM · ISI
+
+      // ---------------------------------------------------------------- build
+      $("s08-bands").innerHTML = COL.map(([x, w], j) => `<div class="s08-a s08-band" id="s08-bd${j}" style="left:${HX + x - 4}px;width:${w + 8}px"></div>`).join("");
+      $("s08-rows").innerHTML = KEEP.map((i, k) => {
+        let hook = "", x = 10; HOOK[k].forEach((w) => { hook += `<i class="s08-hw" style="left:${x}px;width:${w}px"></i>`; x += w + 5; });
+        let isi = ""; const slot = 174 / PTS[k];
+        for (let p = 0; p < PTS[k]; p++) { const x0 = 10 + p * slot; isi += `<i class="s08-bd" style="left:${x0.toFixed(1)}px"></i><i class="s08-bb" style="left:${(x0 + 11).toFixed(1)}px;width:${(slot - 17).toFixed(1)}px"></i>`; }
+        const cap = `<i class="s08-cb" style="top:7px;width:${CAP[k][0]}px"></i><i class="s08-cb" style="top:18px;width:${CAP[k][1]}px"></i>`;
+        let tags = ""; for (let j = 0; j < 5; j++) tags += `<span class="s08-tg" style="left:${2 + j * 26}px"><i></i></span>`;
+        const cells = [hook, isi, cap, tags].map((h, c) => `<div class="s08-cl" style="left:${COL[c][0]}px;width:${COL[c][1]}px${c === 3 ? ";background:none" : ""}"><div class="s08-cc" id="s08-c${c}_${k}">${h}</div></div>`).join("");
+        return `<div class="s08-a s08-row" id="s08-r${k}">
+          <div class="s08-face s08-fr"><span class="n">${i + 1}</span><b class="tp" style="width:${TW[i]}px"></b><span class="wy"><i></i><b style="width:${AW[i]}px"></b></span><span class="sr">sumber<i></i></span><span class="fl" id="s08-fl${k}"></span></div>
+          <div class="s08-face s08-bk"><div class="dy"><i></i>${DAYS[k]}</div>${cells}</div></div>`;
+      }).join("");
+      {
+        // the draft card (KAM): big hook, 4 bullets, caption, 5 hashtags
+        let h = `<div class="s08-a s08-kh" style="top:108px">HOOK</div><div class="s08-a s08-kh" style="top:160px">ISI</div><div class="s08-a s08-kh" style="top:314px">CAPTION</div><div class="s08-a s08-kh" style="top:372px">HASHTAG</div>`;
+        let x = 172; HOOK[ZK].forEach((w) => { h += `<div class="s08-a s08-kw" style="left:${x}px;width:${w * 2}px"></div>`; x += w * 2 + 9; });
+        [540, 470, 590, 420].forEach((w, r) => { h += `<div class="s08-a s08-kdt" style="top:${158 + r * 38}px"></div><div class="s08-a s08-kb" style="top:${158 + r * 38}px;width:${w}px"></div>`; });
+        h += `<div class="s08-a s08-kb" style="left:172px;top:312px;width:620px;height:11px;background:rgba(227,237,250,.42)"></div><div class="s08-a s08-kb" style="left:172px;top:332px;width:450px;height:11px;background:rgba(227,237,250,.42)"></div>`;
+        for (let j = 0; j < 5; j++) h += `<div class="s08-a s08-ktg" style="left:${172 + j * 54}px"><i></i></div>`;
+        $("s08-kc").innerHTML = h;
+      }
+      const SEG = [["7 konten", 1], [", ", 0], ["Senin sampai Minggu", 1], [".", 0]];
+      let n = 0;
+      $("s08-ptx").innerHTML = SEG.map(([s, b]) => [...s].map((ch) => `<span id="s08-c${n++}"${b ? ' class="bd"' : ""}>${ch}</span>`).join("")).join("") + `<span class="s08-cr" id="s08-cr"></span>`;
+
+      // ---------------------------------------------------------------- frame 0 = s07's last frame
+      const rows = KEEP.map((_, k) => $("s08-r" + k));
+      rows.forEach((r, k) => { I(r, { x: HX, y: HY + k * HP, rotationX: 0, scale: 1, transformPerspective: 900, transformOrigin: "50% 50%" }); I($("s08-fl" + k), { opacity: 0 }); });
+      // "Minta 7 konten": a new task line drops in and types itself
+      const pr = $("s08-pr");
+      I(pr, { opacity: 0, y: -14 }); ft(pr, { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.34, ease: "power3.out" }, 0.08);
+      ft($("s08-brand").firstElementChild, { rotation: 0 }, { rotation: 360, duration: 0.6, ease: "power3.out" }, 0.1);
+      const cr = $("s08-cr"); I(cr, { opacity: 0 });
+      tl.set(cr, { opacity: 1 }, 0.36); tl.set(cr, { opacity: 0 }, 0.6); tl.set(cr, { opacity: 1 }, 0.78);
+      for (let k = 0; k < n; k++) { const c = $("s08-c" + k); I(c, { display: "none" }); tl.set(c, { display: "inline" }, 0.8 + (k / (n - 1)) * 0.86); }
+      tl.set(cr, { opacity: 0 }, 1.78);
+      // "7": the seven topics pulse
+      rows.forEach((r, k) => ft($("s08-fl" + k), { opacity: 0 }, { opacity: 0.55, duration: 0.1, yoyo: true, repeat: 1, ease: "power1.out" }, 1.2 + k * 0.03));
+      // send
+      const snd = $("s08-snd"), ring = $("s08-ring");
+      ft(snd, { scale: 1 }, { scale: 0.8, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, 1.72);
+      I(ring, { opacity: 0, scale: 0.4 }); ft(ring, { scale: 0.4, opacity: 1 }, { scale: 2.4, opacity: 0, duration: 0.42, ease: "power2.out" }, 1.76);
+      // "Senin sampai Minggu": each topic row flips into its day (SEN at "Senin" … MIN at "Minggu")
+      rows.forEach((r, k) => {
+        const t = 1.86 + k * 0.1;
+        ft(r, { rotationX: 0 }, { rotationX: -180, duration: 0.46, ease: "power2.inOut" }, t);
+        ft(r, { scale: 1 }, { scale: 1.035, duration: 0.23, yoyo: true, repeat: 1, ease: "power1.inOut" }, t);
+      });
+      // the weekly table's header appears (dim) once the days are in
+      const L = [0, 1, 2, 3, 4].map((j) => $("s08-L" + j));
+      L.forEach((e, j) => { I(e, { opacity: 0, y: 8 }); ft(e, { opacity: 0, y: 8 }, { opacity: j ? 0.42 : 1, y: 0, duration: 0.24, ease: "power2.out" }, 2.42 + j * 0.05); });
+      for (let j = 1; j <= 4; j++) I($("s08-k" + j), { opacity: 0, scale: 0.4, transformOrigin: "0% 50%" });
+      for (let j = 0; j < 4; j++) { I($("s08-bd" + j), { opacity: 0 }); for (let k = 0; k < 7; k++) I($(`s08-c${j}_${k}`), { clipPath: "inset(0% 100% 0% 0%)" }); }
+      // ---------------------------------------------------------------- the specs, each on its word
+      const SPEC = [
+        // [column, label lights, chip pops, band out, cells start, step, fill duration, ease]
+        [0, 3.3, 3.7, 4.55, 3.38, 0.075, 0.38, "steps(7)"],      // "Hook maksimal 12 kata"
+        [1, 4.97, 5.0, 5.95, 5.04, 0.085, 0.34, "power1.inOut"], // "3–5 poin"
+        [2, 6.27, 6.3, 6.95, 6.32, 0.05, 0.3, "power1.inOut"],   // "caption"
+        [3, 6.87, 6.9, 7.3, 6.92, 0.035, 0.22, "power1.inOut"],  // "5 hashtag"
+      ];
+      SPEC.forEach(([c, tL, tC, tOut, t0, st, du, ez]) => {
+        const lab = L[c + 1], chip = $("s08-k" + (c + 1)), band = $("s08-bd" + c);
+        ft(lab, { opacity: 0.42 }, { opacity: 1, duration: 0.16, ease: "power1.out" }, tL);
+        ft(chip, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.6)" }, tC);
+        ft(band, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, tL);
+        ft(band, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tOut);
+        for (let k = 0; k < 7; k++) ft($(`s08-c${c}_${k}`), { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: du, ease: ez }, t0 + k * st);
+      });
+      ft($("s08-k1"), { scale: 1 }, { scale: 1.16, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 4.04);   // "12"
+      ft($("s08-k4"), { scale: 1 }, { scale: 1.25, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 7.12);   // "hashtag"
+
+      // ---------------------------------------------------------------- EXIT: camera push into KAM · ISI → the draft card
+      const TX = 60 + HX + COL[1][0], TY = 458 + HY + ZK * HP + 4, TWc = COL[1][1], THc = 31;   // target cell (page)
+      const CX = TX + TWc / 2, CY = TY + THc / 2;
+      const cam = $("s08-cam"), win = $("s08-win"), card = $("s08-card"), cin = $("s08-cin");
+      I(cam, { scale: 1, x: 0, y: 0, transformOrigin: `${CX}px ${CY}px` });
+      ft(cam, { scale: 1, x: 0, y: 0 }, { scale: 2.4, x: 540 - CX, y: 696 - CY, duration: 0.48, ease: "power2.in" }, 7.24);
+      ft(win, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, 7.36);
+      I(card, { opacity: 0, left: TX, top: TY, width: TWc, height: THc, borderRadius: 8 });
+      ft(card, { opacity: 0 }, { opacity: 1, duration: 0.14, ease: "power1.out" }, 7.24);
+      ft(card, { left: TX, top: TY, width: TWc, height: THc, borderRadius: 8 }, { left: 90, top: 484, width: 900, height: 424, borderRadius: 26, duration: 0.46, ease: "power3.inOut" }, 7.24);
+      I(cin, { opacity: 0, scale: 0.94, transformOrigin: "50% 50%" });
+      ft(cin, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out" }, 7.42);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s08"] = tl;
     })();

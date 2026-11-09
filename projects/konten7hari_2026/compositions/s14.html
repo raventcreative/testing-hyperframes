@@ -1,10 +1,235 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-o2e1" id="root" data-composition-id="s14" data-width="1080" data-height="1920"></div>
+  <style>
+    .s14-a { position: absolute; }
+    #s14-stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1600px; perspective-origin: 50% 28%; }
+    #s14-lab { left: 84px; top: 380px; height: 30px; display: flex; align-items: center; gap: 10px; font: 700 20px/1 Poppins, sans-serif; letter-spacing: .16em; color: #6adfff; white-space: nowrap; }
+    #s14-lab i { width: 26px; height: 26px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-message-circle.svg) center / contain no-repeat; mask: url(assets/icons/lucide-message-circle.svg) center / contain no-repeat; }
+    /* file chips (paper) */
+    .s14-chip { top: 700px; width: 448px; height: 66px; border-radius: 16px; background: #f4f1e8; box-shadow: 0 18px 32px -14px rgba(0,0,0,.65);
+      display: flex; align-items: center; gap: 12px; padding: 0 18px; font: 700 23px/1 Poppins, sans-serif; color: #12183a; white-space: nowrap; }
+    .s14-chip .ic { width: 28px; height: 28px; background: #12183a; flex: none; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    .s14-hl { background-image: linear-gradient(rgba(1,204,247,.5), rgba(1,204,247,.5)); background-repeat: no-repeat; background-position: 0 92%; background-size: 0% 46%; }
+    /* the panel: front = comment, back = DM */
+    #s14-card { left: 80px; top: 430px; width: 920px; height: 230px; transform-style: preserve-3d; }
+    .s14-face { position: absolute; left: 0; top: 0; width: 920px; height: 230px; border-radius: 40px; -webkit-backface-visibility: hidden; backface-visibility: hidden;
+      background: linear-gradient(160deg, rgba(23,36,94,.97), rgba(9,15,48,.98) 72%); box-shadow: 0 50px 90px -40px rgba(0,0,0,.7), 0 0 0 1.5px rgba(106,223,255,.3), 0 0 60px rgba(1,204,247,.12); }
+    #s14-back { transform: rotateY(180deg); }
+    #s14-hr { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 40px; box-shadow: 0 0 0 2px rgba(1,204,247,.95), 0 0 34px rgba(1,204,247,.55); }
+    .s14-av { border-radius: 50%; background: linear-gradient(150deg, #8be8ff, #01ccf7 55%, #01a9d8); box-shadow: 0 0 0 3px rgba(106,223,255,.25); }
+    .s14-av i { position: absolute; background: #071033; -webkit-mask: url(assets/icons/lucide-user-round.svg) center / contain no-repeat; mask: url(assets/icons/lucide-user-round.svg) center / contain no-repeat; }
+    #s14-av { left: 34px; top: 46px; width: 92px; height: 92px; }
+    #s14-av i { left: 20px; top: 18px; width: 52px; height: 52px; }
+    #s14-nm { left: 150px; top: 44px; white-space: nowrap; font: 400 22px/1 Poppins, sans-serif; color: #8fa3c8; }
+    #s14-nm b { font: 700 26px/1 Poppins, sans-serif; color: #ffffff; }
+    #s14-ph { left: 150px; top: 108px; display: flex; align-items: center; gap: 10px; white-space: nowrap; font: 400 34px/1 Poppins, sans-serif; color: #6f83aa; }
+    #s14-pc { width: 3px; height: 38px; background: #01ccf7; box-shadow: 0 0 8px rgba(1,204,247,.9); }
+    #s14-kw { left: 142px; top: 66px; white-space: nowrap; font: 700 140px/1 Poppins, sans-serif; letter-spacing: -0.01em; color: #01ccf7; }
+    .s14-l { display: inline-block; text-shadow: 0 0 30px rgba(1,204,247,.45); }
+    #s14-kc { display: inline-block; width: 7px; height: 100px; margin-left: 8px; background: #01ccf7; box-shadow: 0 0 12px rgba(1,204,247,.9); }
+    #s14-hw { left: 820px; top: 86px; width: 64px; height: 64px; }
+    #s14-hw svg { position: absolute; left: 0; top: 0; width: 64px; height: 64px; overflow: visible; }
+    .s14-hd { left: 27px; top: 27px; width: 10px; height: 10px; border-radius: 50%; background: #6adfff; box-shadow: 0 0 8px rgba(1,204,247,.9); }
+    /* DM face */
+    #s14-dav { left: 30px; top: 22px; width: 58px; height: 58px; }
+    #s14-dav i { left: 12px; top: 11px; width: 34px; height: 34px; }
+    #s14-dt { left: 104px; top: 24px; font: 700 26px/1 Poppins, sans-serif; color: #ffffff; white-space: nowrap; }
+    #s14-dsb { left: 104px; top: 58px; font: 400 19px/1 Poppins, sans-serif; color: #8fa3c8; white-space: nowrap; }
+    #s14-dtag { right: 28px; top: 28px; height: 40px; padding: 0 18px 0 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px; background: #01ccf7;
+      font: 700 18px/1 Poppins, sans-serif; letter-spacing: .14em; color: #071033; }
+    #s14-dtag i { width: 20px; height: 20px; background: #071033; -webkit-mask: url(assets/icons/lucide-send.svg) center / contain no-repeat; mask: url(assets/icons/lucide-send.svg) center / contain no-repeat; }
+    #s14-ddv { left: 0; top: 98px; width: 920px; height: 1.5px; background: rgba(255,255,255,.07); }
+    #s14-bub { left: 476px; top: 108px; width: 412px; height: 98px; border-radius: 24px 24px 8px 24px; background: linear-gradient(160deg, #46e2ff, #01ccf7 50%, #01a9d8);
+      box-shadow: 0 14px 30px -12px rgba(1,204,247,.7); }
+    .s14-mc { left: 10px; width: 392px; height: 36px; border-radius: 10px; background: #f4f1e8; display: flex; align-items: center; gap: 8px; padding: 0 12px;
+      font: 700 17px/1 Poppins, sans-serif; color: #12183a; white-space: nowrap; }
+    .s14-mc .ic { width: 20px; height: 20px; background: #12183a; flex: none; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+    #s14-sent { left: 221px; top: 184px; width: 240px; display: flex; justify-content: flex-end; align-items: center; gap: 6px; font: 400 18px/1 Poppins, sans-serif; color: #8fa3c8; white-space: nowrap; }
+    #s14-sent i { width: 20px; height: 20px; background: #01ccf7; -webkit-mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; }
+    /* paper plane */
+    .s14-pl { left: 0; top: 0; width: 96px; height: 96px; margin: -48px 0 0 -48px; }
+    .s14-pl i { position: absolute; left: 0; top: 0; width: 96px; height: 96px; background: #b4f2ff;
+      -webkit-mask: url(assets/icons/lucide-send.svg) center / contain no-repeat; mask: url(assets/icons/lucide-send.svg) center / contain no-repeat; }
+    #s14-plane i { background: #e9fbff; filter: drop-shadow(0 0 12px rgba(1,204,247,.95)); }
+    #s14-arr { left: 762px; top: 588px; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; border: 3px solid rgba(160,240,255,.9); box-shadow: 0 0 20px rgba(1,204,247,.6); }
+    /* end card */
+    #s14-end { left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s14-glow { left: 140px; top: 400px; width: 800px; height: 400px; border-radius: 50%; background: radial-gradient(ellipse, rgba(1,204,247,.2), rgba(1,204,247,0) 66%); }
+    #s14-streak { left: 140px; top: 588px; width: 800px; height: 4px; border-radius: 2px;
+      background: linear-gradient(90deg, rgba(160,240,255,0), #e9fbff 50%, rgba(160,240,255,0)); box-shadow: 0 0 22px rgba(1,204,247,.9); }
+    #s14-logo { left: 320px; top: 570px; width: 440px; height: 40px; }
+    #s14-logo img { position: absolute; left: 0; top: 0; width: 440px; height: 39.3px; filter: drop-shadow(0 0 18px rgba(1,204,247,.35)); }
+    #s14-gl { position: absolute; left: 0; top: 0; width: 440px; height: 39.3px; overflow: hidden;
+      -webkit-mask: url(assets/brand/logo_white_trim.png) 0 0 / 100% 100% no-repeat; mask: url(assets/brand/logo_white_trim.png) 0 0 / 100% 100% no-repeat; }
+    #s14-glb { position: absolute; left: 0; top: 0; width: 130px; height: 40px; background: linear-gradient(105deg, rgba(1,204,247,0) 18%, rgba(120,228,255,.95) 50%, rgba(1,204,247,0) 82%); }
+    #s14-rule { left: 514px; top: 636px; width: 52px; height: 4px; border-radius: 2px; background: #01ccf7; box-shadow: 0 0 12px rgba(1,204,247,.8); }
+    #s14-ctaw { left: 0; top: 670px; width: 1080px; display: flex; justify-content: center; }
+    #s14-cta { height: 70px; padding: 0 32px 0 24px; border-radius: 35px; display: flex; align-items: center; gap: 12px; white-space: nowrap;
+      background: linear-gradient(160deg, rgba(23,36,94,.97), rgba(9,15,48,.98) 72%); box-shadow: 0 0 0 1.5px rgba(106,223,255,.35), 0 0 40px rgba(1,204,247,.18);
+      font: 400 29px/1 Poppins, sans-serif; color: #e3edfa; }
+    #s14-cta i { width: 32px; height: 32px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-message-circle.svg) center / contain no-repeat; mask: url(assets/icons/lucide-message-circle.svg) center / contain no-repeat; }
+    #s14-cta b { font-weight: 700; color: #01ccf7; letter-spacing: .04em; }
+  </style>
+  <div id="s14-root" data-composition-id="s14" data-width="1080" data-height="1920">
+    <div class="s14-a" id="s14-lab"><i></i>KOMENTAR</div>
+    <div class="s14-a s14-chip" id="s14-c1" style="left:80px"><span class="ic" style="--i:url(assets/icons/lucide-file-text.svg)"></span><span>template_<span class="s14-hl" id="s14-h1">brand_voice</span>.md</span></div>
+    <div class="s14-a s14-chip" id="s14-c2" style="left:552px"><span class="ic" style="--i:url(assets/icons/lucide-message-square-text.svg)"></span><span><span class="s14-hl" id="s14-h2">prompt</span>_manus_claude.txt</span></div>
+    <div id="s14-stage">
+      <div class="s14-a" id="s14-card">
+        <div class="s14-face" id="s14-front">
+          <div id="s14-hr"></div>
+          <div class="s14-a s14-av" id="s14-av"><i></i></div>
+          <div class="s14-a" id="s14-nm"><b>kamu</b> · baru saja</div>
+          <div class="s14-a" id="s14-ph"><span id="s14-pc"></span>Tulis komentar...</div>
+          <div class="s14-a" id="s14-kw"><span class="s14-l" id="s14-l0">K</span><span class="s14-l" id="s14-l1">O</span><span class="s14-l" id="s14-l2">N</span><span class="s14-l" id="s14-l3">T</span><span class="s14-l" id="s14-l4">E</span><span class="s14-l" id="s14-l5">N</span><span id="s14-kc"></span></div>
+          <div class="s14-a" id="s14-hw">
+            <div id="s14-dots"></div>
+            <svg id="s14-ho" viewBox="0 0 24 24" fill="none" stroke="#8fa3c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg>
+            <svg id="s14-hf" viewBox="0 0 24 24" fill="#01ccf7" stroke="#01ccf7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 10px rgba(1,204,247,.8))"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg>
+          </div>
+        </div>
+        <div class="s14-face" id="s14-back">
+          <div class="s14-a s14-av" id="s14-dav"><i></i></div>
+          <div class="s14-a" id="s14-dt">kamu</div>
+          <div class="s14-a" id="s14-dsb">Pesan langsung</div>
+          <div class="s14-a" id="s14-dtag"><i></i>DM</div>
+          <div class="s14-a" id="s14-ddv"></div>
+          <div class="s14-a" id="s14-sent">Terkirim<i></i></div>
+          <div class="s14-a" id="s14-bub">
+            <div class="s14-a s14-mc" id="s14-m1" style="top:9px"><span class="ic" style="--i:url(assets/icons/lucide-file-text.svg)"></span>template_brand_voice.md</div>
+            <div class="s14-a s14-mc" id="s14-m2" style="top:53px"><span class="ic" style="--i:url(assets/icons/lucide-message-square-text.svg)"></span>prompt_manus_claude.txt</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="s14-a s14-pl" id="s14-g4"><i></i></div>
+    <div class="s14-a s14-pl" id="s14-g3"><i></i></div>
+    <div class="s14-a s14-pl" id="s14-g2"><i></i></div>
+    <div class="s14-a s14-pl" id="s14-g1"><i></i></div>
+    <div class="s14-a s14-pl" id="s14-plane"><i></i></div>
+    <div class="s14-a" id="s14-arr"></div>
+    <div class="s14-a" id="s14-end">
+      <div class="s14-a" id="s14-glow"></div>
+      <div class="s14-a" id="s14-streak"></div>
+      <div class="s14-a" id="s14-logo"><img src="assets/brand/logo_white_trim.png" alt="AI PRENEUR"><div id="s14-gl"><div id="s14-glb"></div></div></div>
+      <div class="s14-a" id="s14-rule"></div>
+      <div class="s14-a" id="s14-ctaw"><div id="s14-cta"><i></i>Komen <b>KONTEN</b></div></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // s14 CTA "Komen KONTEN, template brand voice sama prompt-nya aku kirim lewat DM."
+      // Frame 0 = s13's hand-over: the empty glass panel (page 80,430 · 920×230) with a cyan ring glow. It becomes a comment row:
+      // avatar + "kamu · baru saja", a placeholder, then "KONTEN" types itself big in cyan on "KONTEN," and the heart pops ·
+      // "template brand voice" / "sama prompt-nya": two paper file chips drop out from under the panel · "aku": the panel flips
+      // (3D) to its DM side · "kirim": a paper plane swallows both chips and swoops into the DM, where they land as attachments
+      // ("Terkirim" on "DM.") · END CARD: the DM folds into a line of light that opens into the centred AI PRENEUR lockup
+      // (glint sweep, slow push-in) with a small "Komen KONTEN" reminder pill.
+      const D = 5.0334;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.023);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      // words (local s): Komen 0.16 · KONTEN 0.56 · template 1.07 · brand 1.38 · voice 1.64 · sama 1.92 · prompt-nya 2.08 ·
+      // aku 2.56 · kirim 2.80 · lewat 3.20 · DM 3.40
+      $("s14-dots").innerHTML = Array.from({ length: 7 }, (_, i) => `<div class="s14-a s14-hd" id="s14-hd${i}"></div>`).join("");
+
+      // FRAME 0: the panel handed over by s13 (ring glow settles)
+      const card = $("s14-card");
+      I(card, { rotationY: 0, scale: 1, y: 0, visibility: "visible", transformOrigin: "50% 50%" });
+      I($("s14-hr"), { opacity: 1 }); ft($("s14-hr"), { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power2.out" }, 0.1);
+      // the comment row builds: avatar, name, placeholder with caret ("Komen")
+      I($("s14-lab"), { opacity: 0, y: 14 }); ft($("s14-lab"), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, 0.1);
+      I($("s14-av"), { scale: 0 }); ft($("s14-av"), { scale: 0 }, { scale: 1, duration: 0.36, ease: "back.out(2.4)" }, 0.04);
+      I($("s14-nm"), { opacity: 0, x: -14 }); ft($("s14-nm"), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, 0.12);
+      const ph = $("s14-ph"), pc = $("s14-pc");
+      I(ph, { opacity: 0 }); ft(ph, { opacity: 0 }, { opacity: 1, duration: 0.18, ease: "power1.out" }, 0.16); tl.set(ph, { opacity: 0 }, 0.52);
+      I(pc, { opacity: 1 }); tl.set(pc, { opacity: 0 }, 0.36); tl.set(pc, { opacity: 1 }, 0.45);
+      // "KONTEN,": the keyword types itself, letter by letter (display toggles keep the caret at the typing point)
+      const kw = $("s14-kw"), kc = $("s14-kc");
+      I(kc, { display: "none" }); tl.set(kc, { display: "inline-block" }, 0.52); tl.set(kc, { opacity: 0 }, 1.0); I(kc, { opacity: 1 });
+      for (let i = 0; i < 6; i++) {
+        const l = $("s14-l" + i), t = 0.56 + i * 0.06;
+        I(l, { display: "none", opacity: 0, scale: 1.5, y: -10, transformOrigin: "50% 80%" });
+        tl.set(l, { display: "inline-block" }, t);
+        ft(l, { opacity: 0, scale: 1.5, y: -10 }, { opacity: 1, scale: 1, y: 0, duration: 0.18, ease: "back.out(2)" }, t);
+      }
+      I(kw, { scale: 1, transformOrigin: "0% 60%" }); ft(kw, { scale: 1 }, { scale: 1.05, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 0.94);
+      // heart pops (filled cyan) with a small burst
+      const hf = $("s14-hf");
+      I(hf, { scale: 0, opacity: 0, transformOrigin: "50% 50%" }); tl.set(hf, { opacity: 1 }, 1.0);
+      ft(hf, { scale: 0 }, { scale: 1, duration: 0.36, ease: "back.out(3.2)" }, 1.0);
+      I($("s14-ho"), { opacity: 0 }); ft($("s14-ho"), { opacity: 0 }, { opacity: 1, duration: 0.24, ease: "power1.out" }, 0.2); tl.set($("s14-ho"), { opacity: 0 }, 1.06);
+      for (let i = 0; i < 7; i++) {
+        const d = $("s14-hd" + i), a = (i / 7) * Math.PI * 2 - Math.PI / 2;
+        I(d, { x: 0, y: 0, opacity: 0, scale: 1 }); tl.set(d, { opacity: 1 }, 1.03);
+        ft(d, { x: 0, y: 0, scale: 1 }, { x: Math.cos(a) * 50, y: Math.sin(a) * 50, scale: 0.3, duration: 0.4, ease: "power2.out" }, 1.03);
+        ft(d, { opacity: 1 }, { opacity: 0, duration: 0.18, ease: "power1.in" }, 1.25);
+      }
+      // "template brand voice": chip 1 drops out from under the panel (centred), marker on "brand voice"
+      const c1 = $("s14-c1"), c2 = $("s14-c2");
+      I(c1, { x: 236, y: -80, opacity: 0, rotation: -6, scale: 0.85 });
+      ft(c1, { x: 236, y: -80, opacity: 0, rotation: -6, scale: 0.85 }, { x: 236, y: 0, opacity: 1, rotation: 0, scale: 1, duration: 0.44, ease: "back.out(1.7)" }, 1.02);
+      I($("s14-h1"), { backgroundSize: "0% 46%" }); ft($("s14-h1"), { backgroundSize: "0% 46%" }, { backgroundSize: "100% 46%", duration: 0.32, ease: "power2.inOut" }, 1.38);
+      // "sama prompt-nya": chip 1 makes room, chip 2 drops in, marker on "prompt"
+      ft(c1, { x: 236 }, { x: 0, duration: 0.3, ease: "power3.inOut" }, 1.94);
+      I(c2, { y: -80, opacity: 0, rotation: 6, scale: 0.85 });
+      ft(c2, { y: -80, opacity: 0, rotation: 6, scale: 0.85 }, { y: 0, opacity: 1, rotation: 0, scale: 1, duration: 0.44, ease: "back.out(1.7)" }, 2.0);
+      I($("s14-h2"), { backgroundSize: "0% 46%" }); ft($("s14-h2"), { backgroundSize: "0% 46%" }, { backgroundSize: "100% 46%", duration: 0.26, ease: "power2.inOut" }, 2.1);
+      // "aku": the panel flips to its DM side
+      ft($("s14-lab"), { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, 2.4);
+      ft(card, { rotationY: 0 }, { rotationY: 180, duration: 0.42, ease: "power3.inOut" }, 2.42);
+      ft(card, { scale: 1 }, { scale: 0.93, duration: 0.21, yoyo: true, repeat: 1, ease: "sine.inOut" }, 2.42);
+      I($("s14-dtag"), { scale: 0.5, opacity: 0 }); ft($("s14-dtag"), { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.6)" }, 2.78);
+      // "kirim": a paper plane swallows both chips, then swoops into the DM
+      const pl = $("s14-plane"), PX0 = 540, PY0 = 733, PX1 = 762, PY1 = 588;
+      I(pl, { x: PX0, y: PY0, scale: 0, rotation: -30, opacity: 0 }); tl.set(pl, { opacity: 1 }, 2.64);
+      ft(pl, { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.22, ease: "back.out(2.4)" }, 2.64);
+      ft(c1, { x: 0, scale: 1, opacity: 1 }, { x: 236, scale: 0.2, opacity: 0, duration: 0.2, ease: "power2.in" }, 2.72);
+      ft(c2, { x: 0, scale: 1, opacity: 1 }, { x: -236, scale: 0.2, opacity: 0, duration: 0.2, ease: "power2.in" }, 2.74);
+      ft(pl, { scale: 1 }, { scale: 1.18, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, 2.9);
+      const fly = (el, d0) => {
+        ft(el, { y: PY0, rotation: 0 }, { y: PY0 + 16, rotation: 40, duration: 0.1, ease: "power2.out" }, 2.86 + d0);
+        ft(el, { x: PX0 }, { x: PX1, duration: 0.3, ease: "back.out(1.6)" }, 2.96 + d0);
+        ft(el, { y: PY0 + 16 }, { y: PY1, duration: 0.3, ease: "power2.in" }, 2.96 + d0);
+        ft(el, { rotation: 40 }, { rotation: -50, duration: 0.3, ease: "sine.inOut" }, 2.96 + d0);
+      };
+      fly(pl, 0);
+      ft(pl, { scale: 1, opacity: 1 }, { scale: 0.3, opacity: 0, duration: 0.1, ease: "power2.in" }, 3.18);
+      [0.42, 0.28, 0.18, 0.1].forEach((o, k) => {
+        const g = $("s14-g" + (k + 1)), d0 = (k + 1) * 0.028;
+        I(g, { x: PX0, y: PY0, rotation: 0, opacity: 0, scale: 0.94 - k * 0.08 }); tl.set(g, { opacity: o }, 2.96 + d0);
+        fly(g, d0);
+        ft(g, { opacity: o }, { opacity: 0, duration: 0.08, ease: "power1.in" }, 3.18 + d0);
+      });
+      // arrival: ring, the bubble with both attachments, "Terkirim" on "DM."
+      I($("s14-arr"), { scale: 0.2, opacity: 0 }); tl.set($("s14-arr"), { opacity: 1 }, 3.22);
+      ft($("s14-arr"), { scale: 0.2, opacity: 1 }, { scale: 2.2, opacity: 0, duration: 0.4, ease: "power2.out" }, 3.22);
+      const bub = $("s14-bub");
+      I(bub, { scale: 0.3, opacity: 0, transformOrigin: "100% 100%" }); ft(bub, { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.32, ease: "back.out(1.8)" }, 3.2);
+      ["s14-m1", "s14-m2"].forEach((id, i) => { I($(id), { opacity: 0, x: 26 }); ft($(id), { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.22, ease: "power3.out" }, 3.27 + i * 0.06); });
+      I($("s14-sent"), { opacity: 0, y: 8 }); ft($("s14-sent"), { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, 3.38);
+
+      // END CARD: the DM folds into a line of light that opens into the AI PRENEUR lockup
+      ft(card, { scaleY: 1, y: 0 }, { scaleY: 0.02, y: 45, duration: 0.2, ease: "power3.in" }, 3.6);
+      tl.set(card, { visibility: "hidden" }, 3.8);
+      const streak = $("s14-streak");
+      I(streak, { scaleX: 0.15, opacity: 0 });
+      ft(streak, { scaleX: 0.15, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.2, ease: "power2.out" }, 3.7);
+      ft(streak, { scaleX: 1, opacity: 1 }, { scaleX: 1.15, opacity: 0, duration: 0.45, ease: "power2.out" }, 3.92);
+      const logo = $("s14-logo");
+      I(logo, { clipPath: "inset(0% 50% 0% 50%)", scale: 1.08 });
+      ft(logo, { clipPath: "inset(0% 50% 0% 50%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.42, ease: "power3.out" }, 3.78);
+      ft(logo, { scale: 1.08 }, { scale: 1, duration: 0.7, ease: "expo.out" }, 3.78);
+      I($("s14-glow"), { opacity: 0, scale: 0.7 }); ft($("s14-glow"), { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 3.72);
+      I($("s14-rule"), { scaleX: 0 }); ft($("s14-rule"), { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power3.out" }, 4.0);
+      I($("s14-ctaw"), { opacity: 0, y: 22 }); ft($("s14-ctaw"), { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 4.05);
+      I($("s14-glb"), { x: -160 }); ft($("s14-glb"), { x: -160 }, { x: 600, duration: 0.62, ease: "power2.inOut" }, 4.24);
+      const end = $("s14-end");
+      I(end, { scale: 1, transformOrigin: "540px 620px" }); ft(end, { scale: 1 }, { scale: 1.04, duration: D - 3.81, ease: "none" }, 3.8);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s14"] = tl;
     })();

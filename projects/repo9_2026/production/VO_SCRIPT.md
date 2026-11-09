@@ -1,23 +1,23 @@
-# VO — Stop bayar 9 aplikasi ini (remake, ±55 detik)
+# VO — 9 aplikasi berbayar vs kembaran gratisnya di GitHub (remake versi baru, ±55 detik)
 
-Stop bayar 9 aplikasi ini. Semuanya ada versi gratisnya di GitHub.
+9 aplikasi ini kamu bayar tiap bulan. Padahal kembaran gratisnya ada di GitHub.
 
-Higgsfield? Ganti Open Generative AI. Bikin gambar dan video AI sinematik, pakai ratusan model.
+Gambar dan video AI, lupakan Higgsfield. Open Generative AI punya 600 lebih model.
 
-ElevenLabs? VoiceStudio. Kloning suara, 100% jalan di laptop kamu sendiri.
+Kloning suara tanpa ElevenLabs? VoiceStudio. Semuanya jalan di laptop kamu sendiri.
 
-Semrush? OpenSEO. Riset keyword, backlink, sampai audit website, semua di satu tempat.
+Riset SEO bukan cuma Semrush. OpenSEO: keyword, backlink, sampai audit website.
 
-Notion? AppFlowy. Catatan dan dokumen pakai AI, datanya tetap di tangan kamu.
+Workspace ala Notion? AppFlowy. Ada AI-nya, datanya tetap punya kamu.
 
-Wispr Flow? OpenWhispr. Dikte suara ke aplikasi apa pun, bahkan tanpa internet.
+Ngetik pakai suara kayak Wispr Flow? OpenWhispr, bisa jalan offline.
 
-Asana? OpenProject. Kelola tugas dan proyek di server kamu sendiri.
+Kelola proyek tim tanpa Asana. OpenProject, pasang di server sendiri.
 
-Calendly? Cal.diy. Link booking yang sinkron ke Google Calendar dan Outlook.
+Jadwal meeting tanpa Calendly. Cal.diy, langsung sinkron ke Google Calendar dan Outlook.
 
-Intercom? Chatwoot. Semua chat pelanggan masuk ke satu inbox.
+Live chat pelanggan ala Intercom? Chatwoot, semua channel masuk satu inbox.
 
-Loom? Cap. Rekam layar, langsung share sekali klik.
+Rekam layar kayak Loom? Cap, sekali klik langsung bisa dibagikan.
 
-Komen REPO, 9 link-nya aku kirim lewat DM.
+Mau 9 link-nya? Komen OPEN, aku kirim lewat DM.

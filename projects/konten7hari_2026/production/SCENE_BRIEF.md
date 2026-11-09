@@ -52,7 +52,7 @@ Your two scenes share a hand-over you design yourself. Cross-agent cuts are fixe
 - **s03 → s04 (whip)**: s03's last 0.25 s whips everything LEFT (x −700…−1100, motion streaks). s04's first 0.3 s arrives FROM THE RIGHT with
   matching speed (streaks), so it reads as one camera whip.
 - **s05 → s06 (hand-over, fixed)**: at s05's last frame the file chip `brand_voice.md` (300×52, `#f4f1e8`, lucide-file-text icon + label, see
-  `#s06-file` in s06.html) sits at page position left 120, top 330, rotated −8°, scale 0.9, everything else of s05 already gone. s06 picks it up
+  `#s06-file` in s06.html) sits at page position left 120, top 470 (below the step header), rotated −8°, scale 0.9, everything else of s05 already gone. s06 picks it up
   from exactly there.
 - **s06 → s07**: s06's window tilts away and slides LEFT in its last 0.34 s. s07 enters from the RIGHT (same project continues: a "Tugas baru"
   panel of the same Manus window design).

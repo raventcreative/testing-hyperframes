@@ -1,0 +1,103 @@
+<template>
+  <style>
+    #st-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #st-wrap { position: absolute; left: 84px; top: 304px; width: 912px; height: 116px; }
+    .st-tile { position: absolute; left: 0; top: 0; width: 96px; height: 112px; perspective: 520px; }
+    .st-half { position: absolute; left: 0; width: 96px; height: 56px; overflow: hidden; background: linear-gradient(180deg, #1b2c70, #0f1a4c);
+      box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.38); backface-visibility: hidden; }
+    .st-half.top { top: 0; border-radius: 16px 16px 0 0; transform-origin: 50% 100%; }
+    .st-half.bot { top: 56px; border-radius: 0 0 16px 16px; transform-origin: 50% 0%; background: linear-gradient(180deg, #13205a, #0b1440); }
+    .st-half b { position: absolute; left: 0; width: 96px; height: 112px; text-align: center; font: 700 80px/112px Poppins, sans-serif; color: #fff; letter-spacing: -0.03em; }
+    .st-half.top b { top: 0; } .st-half.bot b { top: -56px; }
+    .st-half.warn b { color: #ffb020; }
+    #st-seam { position: absolute; left: 0; top: 55px; width: 96px; height: 2px; background: rgba(4,8,30,.85); }
+    #st-glow { position: absolute; left: -26px; top: -26px; width: 148px; height: 164px; border-radius: 40px; background: radial-gradient(ellipse, rgba(1,204,247,.32), rgba(1,204,247,0) 68%); }
+    #st-txt { position: absolute; left: 122px; top: 0; width: 790px; height: 116px; overflow: hidden; }
+    .st-line { position: absolute; left: 0; top: 0; width: 790px; }
+    .st-eb { display: flex; align-items: center; gap: 12px; height: 34px; margin-top: 6px; font: 700 19px/1 Poppins, sans-serif; letter-spacing: .2em; color: #01ccf7; }
+    .st-eb.warn { color: #ffb020; }
+    .st-ti { font: 700 46px/1.15 Poppins, sans-serif; letter-spacing: -0.02em; color: #fff; white-space: nowrap; margin-top: 6px; }
+    #st-dots { position: absolute; left: 122px; top: 126px; display: flex; gap: 8px; }
+    #st-dots i { display: block; width: 26px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.18); }
+    #st-dots i.on { background: #01ccf7; box-shadow: 0 0 10px rgba(1,204,247,.7); }
+  </style>
+  <div data-hf-id="hf-k9eu" id="st-root" data-composition-id="stepper" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-x18t" id="st-wrap">
+      <div data-hf-id="hf-dw5y" id="st-glow"></div>
+      <div data-hf-id="hf-e33i" class="st-tile">
+        <div data-hf-id="hf-kp9u" class="st-half top" id="st-tn"><b data-hf-id="hf-xujp"></b></div>
+        <div data-hf-id="hf-4tsn" class="st-half bot" id="st-bo"><b data-hf-id="hf-ey49"></b></div>
+        <div data-hf-id="hf-quzn" class="st-half top" id="st-to"><b data-hf-id="hf-g51c"></b></div>
+        <div data-hf-id="hf-0vom" class="st-half bot" id="st-bn"><b data-hf-id="hf-fqqb"></b></div>
+        <div data-hf-id="hf-8ax7" id="st-seam"></div>
+      </div>
+      <div data-hf-id="hf-ozgv" id="st-txt"><div data-hf-id="hf-qdww" class="st-line" id="st-l0"></div><div data-hf-id="hf-r5kp" class="st-line" id="st-l1"></div></div>
+      <div data-hf-id="hf-r2jl" id="st-dots"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      // Persistent STEP HEADER (s05–s12): a split-flap tile flips to the step digit while the title rolls; 7 progress pips (0–6).
+      // s09 is the warning beat ("!" / HATI-HATI, amber). Pure function of global time (hf-seek), works in chunked renders (__T0).
+      const SC = window.VO_SCENES, D = 73.3667;
+      const S = (id) => SC.find((s) => s.id === id);
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const ei = (u) => { u = one(u); return u * u; };
+      const eo = (u) => { u = one(u); return 1 - (1 - u) * (1 - u); };
+      const e3 = (u) => { u = one(u); return 1 - Math.pow(1 - u, 3); };
+      const STEPS = [
+        ["s05", "0", "PERSIAPAN", "File brand voice", 0],
+        ["s06", "1", "LANGKAH 1", "Bikin project di Manus", 1],
+        ["s07", "2", "LANGKAH 2", "Riset tren", 2],
+        ["s08", "3", "LANGKAH 3", "7 konten sekaligus", 3],
+        ["s09", "!", "HATI-HATI", "Draf AI mentah", -1],
+        ["s10", "4", "LANGKAH 4", "Gaya tulisanmu di Claude", 4],
+        ["s11", "5", "LANGKAH 5", "Poles 7 draf", 5],
+        ["s12", "6", "LANGKAH 6", "Review manual", 6],
+      ].map(([id, d, eb, ti, pip]) => ({ t: S(id).start + 0.04, d, eb, ti, pip, warn: d === "!" }));
+      const T_IN = STEPS[0].t - 0.02, T_OUT = S("s13").start;
+      const $ = (id) => document.getElementById(id);
+      const wrap = $("st-wrap"), tn = $("st-tn"), bo = $("st-bo"), to = $("st-to"), bn = $("st-bn"), l0 = $("st-l0"), l1 = $("st-l1");
+      $("st-dots").innerHTML = Array.from({ length: 7 }, (_, i) => `<i id="st-p${i}"></i>`).join("");
+      const set = (el, k, v) => { if (el.style[k] !== v) el.style[k] = v; };
+      const face = (el, d, warn) => { const b = el.firstElementChild; if (b.textContent !== d) b.textContent = d; el.classList.toggle("warn", !!warn); };
+      const lineHTML = (s) => `<div class="st-eb${s.warn ? " warn" : ""}">${s.eb}</div><div class="st-ti">${s.ti}</div>`;
+      let lastKey = "";
+      const FLIP = 0.36;
+      function draw(t) {
+        if (t < T_IN || t >= T_OUT + 0.45) { set(wrap, "opacity", "0"); return; }
+        // whole header: drops in at s05, lifts away at s13
+        const inU = e3((t - T_IN) / 0.45), outU = ei((t - T_OUT) / 0.4);
+        set(wrap, "opacity", String(Math.min(inU, 1 - outU)));
+        set(wrap, "transform", `translateY(${(-40 * (1 - inU) - 50 * outU).toFixed(1)}px)`);
+        let k = 0; for (let i = 0; i < STEPS.length; i++) if (t >= STEPS[i].t) k = i;
+        const cur = STEPS[k], prev = k > 0 ? STEPS[k - 1] : { d: "", eb: "", ti: "", warn: false, pip: -1 };
+        const u = (t - cur.t) / FLIP;                     // 0..1 flip progress
+        // split-flap: old top folds down (0..0.5), new bottom falls into place (0.5..1)
+        face(tn, cur.d, cur.warn); face(bn, cur.d, cur.warn); face(to, prev.d, prev.warn); face(bo, prev.d, prev.warn);
+        if (u >= 1 || (k === 0 && t < cur.t)) { set(to, "display", "none"); set(bn, "transform", "none"); set(bn, "display", "block"); set(bo, "display", "none"); }
+        else {
+          set(bo, "display", "block"); set(to, "display", "block"); set(bn, "display", "block");
+          const a = ei(u / 0.5), b2 = eo((u - 0.5) / 0.5);
+          set(to, "transform", `rotateX(${(-90 * a).toFixed(2)}deg)`); set(to, "display", u < 0.5 ? "block" : "none");
+          set(bn, "transform", `rotateX(${(90 * (1 - b2)).toFixed(2)}deg)`); set(bn, "display", u >= 0.5 ? "block" : "none");
+          // tiny bounce of the whole tile when the flap lands
+        }
+        const land = t - (cur.t + FLIP);
+        set($("st-glow"), "opacity", String(0.55 + 0.45 * Math.exp(-Math.max(0, land) * 4) * (land > 0 ? 1 : 0)));
+        // title roll: old line rises out, new line rises in
+        const key = k + "";
+        if (key !== lastKey) { l0.innerHTML = lineHTML(prev); l1.innerHTML = lineHTML(cur); lastKey = key; }
+        const v = e3((t - cur.t - 0.06) / 0.42);
+        set(l0, "transform", `translateY(${(-60 * v).toFixed(1)}px)`); set(l0, "opacity", String(k === 0 ? 0 : 1 - v));
+        set(l1, "transform", `translateY(${(60 * (1 - v)).toFixed(1)}px)`); set(l1, "opacity", String(v));
+        for (let i = 0; i < 7; i++) { const on = cur.pip >= 0 ? i <= cur.pip : i <= 3; $("st-p" + i).classList.toggle("on", on); }
+      }
+      draw(0);
+      window.addEventListener("hf-seek", (e) => draw(e.detail.time + (window.__T0 || 0)));
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02);
+      window.__timelines["stepper"] = tl;
+    })();
+  </script>
+</template>

@@ -69,27 +69,6 @@ cover = frame("cover p2", f'''<div class="label">Part 2 <em>· save this list</e
     <div class="row more"><em>+</em><b>The full list of 64</b>{I["arrow"]}</div>
   </div>''', swipe=True)
 
-# ---------- 2. ANIME (26) ----------
-sheet = f'''<div class="sheet">
-  <div class="sh-h"><b>Aria</b><span>Novel heroine · v3</span></div>
-  <p><em>Hair</em>Silver, side braid, red ribbon</p>
-  <p><em>Outfit</em>Knight armor, red cape</p>
-  <p><em>Mood</em>Calm, sunset light</p>
-  <div class="locks">{I["lock"]}Face · hair · outfit locked</div>
-</div>'''
-uc26 = usecase(26, "AI Anime Generator.",
-               "Turn a text idea or a photo into anime art and characters.",
-               two(("Custom characters", "For stories, games and side projects. You set hair, outfit and expression."),
-                   ("Photo-to-anime portraits", "For avatars, profile pictures and gifts.")),
-               steps([("Describe the scene, or upload a photo.", ""),
-                      ("Refine it.", "Style, details, expression."),
-                      ("Generate your anime art.", "The more detail you give, the closer the result.")]),
-               "An amateur writer turns her novel’s heroine into an anime portrait, prints it, and keeps it by her desk for the whole first draft.",
-               sheet,
-               extra=f'''<div class="prompt">{I["quote"]}<p>A young female anime knight with silver hair, standing in a field of glowing flowers at sunset.</p></div>
-  {chips(["Ghibli-inspired", "Cyberpunk", "Shonen", "Shojo", "Retro 90s"], "Styles")}''')
-
-# ---------- 3. AVATAR (27) ----------
 avs = f'''<div class="avs">
   <small>Before: random</small>
   <div class="row r0"><i class="a1"></i><i class="a2">~</i><i class="a3">☆</i><i class="a4">?</i></div>
@@ -97,50 +76,69 @@ avs = f'''<div class="avs">
   <small>After: one team look</small>
   <div class="row r1"><i>AL</i><i>JT</i><i>MR</i><i>DK</i></div>
 </div>'''
-uc27 = usecase(27, "AI Avatar Generator.",
-               "Turn a photo or a text prompt into avatars and profile pictures.",
-               two(("Team headshots", "Matching professional headshots for a remote team. No photo shoot."),
-                   ("Game &amp; stream avatars", "Anime, cyberpunk or fantasy looks for Twitch, Discord and Steam.")),
-               steps([("Upload a reference photo, or describe the style.", ""),
-                      ("It makes several versions.", "Light, composition and style matched."),
-                      ("Download in high resolution.", "PNG or JPEG, sized for LinkedIn, Instagram, X or Discord."),
-                      ("Refine by chat.", "Colors, expression, background. Same person across the set.")]),
-               "A fully remote team of 12 drops the random cartoon profile pics. Everyone gets the same clean headshot style, from one selfie each.",
-               avs,
-               extra=chips(["Realistic", "Anime", "Cyberpunk", "Fantasy", "Watercolor", "Minimal"], "Styles"))
+
+# ---------- 2. ANIME (26) ----------
+STY = [("style_ghibli", "Ghibli-inspired"), ("style_cyber", "Cyberpunk"), ("style_shonen", "Shonen"),
+       ("style_shojo", "Shojo"), ("style_retro", "Retro 90s")]
+uc26 = frame("uc anime", f'''<div class="label">Use case 26 <em>of 64</em></div>
+  <h1 class="g">AI Anime Generator.</h1>
+  <p class="lede">Turn a text idea or a photo into anime art and characters.</p>
+  <div class="hero">
+    <div class="hl">
+      <div class="sec"><h3>Use it for</h3>
+        <div class="stack"><div><b>Custom characters</b><span>Stories, games, side projects. You set hair, outfit, expression.</span></div>
+        <div><b>Photo-to-anime portraits</b><span>Avatars, profile pictures and gifts.</span></div></div></div>
+      <div class="sec"><h3>How it works</h3>{steps([("Describe the scene, or upload a photo.", ""), ("Refine style, details, expression.", ""), ("Generate. Keep face, hair and outfit locked.", "")])}</div>
+    </div>
+    <figure class="shot"><img src="assets/examples/anime_main.jpg" alt="Anime detective example">
+      <figcaption>{I["quote"]}<p>A young male detective in a trench coat and fedora, on a rain-soaked Tokyo street at night.</p></figcaption></figure>
+  </div>
+  <div class="sec"><h3>Styles include</h3><div class="thumbs">{"".join(f'<figure><img src="assets/examples/{f}.jpg" alt="{t}"><figcaption>{t}</figcaption></figure>' for f, t in STY)}</div></div>
+  <div class="ex slim"><div class="ex-t"><h3>Real example</h3><p>An indie game dev turns his detective hero into anime key art for the Steam page, then reuses the same look in every promo post.</p></div></div>''')
+
+# ---------- 3. AVATAR (27) ----------
+AVS = [("av_real", "Realistic"), ("av_anime", "Anime"), ("av_cyber", "Cyberpunk"), ("av_fantasy", "Fantasy")]
+uc27 = frame("uc avatar", f'''<div class="label">Use case 27 <em>of 64</em></div>
+  <h1 class="g">AI Avatar Generator.</h1>
+  <p class="lede">Turn one photo or a text prompt into avatars and profile pictures.</p>
+  <div class="avrow">
+    <figure class="src"><img src="assets/examples/av_selfie.jpg" alt="Selfie"><figcaption>One selfie</figcaption></figure>
+    <span class="ar">{I["arrow"]}</span>
+    {"".join(f'<figure><img src="assets/examples/{f}.jpg" alt="{t}"><figcaption>{t}</figcaption></figure>' for f, t in AVS)}
+  </div>
+  <div class="sec"><h3>Use it for</h3>{two(("Team headshots", "Matching professional headshots for the whole team. No photo shoot."), ("Game &amp; stream avatars", "Anime, cyberpunk or fantasy looks for Twitch, Discord and Steam."))}</div>
+  <div class="sec"><h3>How it works</h3>{steps([("Upload a reference photo, or describe the style.", ""), ("Pick from several versions.", "Light, composition and style matched. Same person across the set."), ("Download in high resolution.", "PNG or JPEG, sized for LinkedIn, Instagram, X or Discord.")])}</div>
+  <div class="ex slim"><div class="ex-t"><h3>Real example</h3><p>A small agency of 8 swaps mismatched profile pics on its website and LinkedIn for one consistent headshot style, made from one selfie each.</p></div></div>''')
 
 # ---------- 4. INTERIOR (29) ----------
 brief = '''<div class="brief">
-  <div class="sh-h"><b>Carpenter brief</b><span>Living room</span></div>
-  <p><em>Style</em>Calm Muji</p>
-  <p><em>Build</em>Full-height storage, one wall</p>
-  <div class="sw"><i style="--c:#c9a77c"></i><i style="--c:#efe9df"></i><i style="--c:#9a9a92"></i><i style="--c:#3f4a3c"></i><span>Oak · linen · stone · olive</span></div>
+  <div class="sh-h"><b>Carpenter brief</b><span>Spare room</span></div>
+  <p><em>Style</em>Scandinavian office</p>
+  <p><em>Build</em>Full-height shelving, one wall</p>
+  <div class="sw"><i style="--c:#e3cfa9"></i><i style="--c:#f6f4ef"></i><i style="--c:#d9cbb4"></i><i style="--c:#4f7a4a"></i><span>Birch · white · wool · green</span></div>
 </div>'''
-uc29 = usecase(29, "AI Interior Design.",
-               "Redesign a room from a photo, stage an empty space, or turn a sketch into a realistic interior.",
-               two(("Japanese Muji redesign", "Natural wood, calm, clean lines."),
-                   ("Mid-century modern", "Rich woods and retro shapes.")),
-               steps([("Upload a clear room photo.", ""),
-                      ("Pick a style.", ""),
-                      ("Add specific asks.", "More storage, warmer colors, a reading corner.")]),
-               "A couple about to buy a flat uploads their bare living room, sees it as a calm Muji space with storage along one wall, then uses the image to brief their carpenter.",
-               brief,
-               extra=f'''<div class="tips t3"><p><b>Swap anything.</b> Furniture, layout, colors, materials.</p><p><b>Try real pieces.</b> Including the full IKEA range, before you buy.</p><p><b>Get a shopping list.</b> Cheaper swaps and the first 3 changes.</p></div>
-  {chips(["Art Deco", "Scandinavian", "Mid-century", "Minimal", "Bohemian", "Mediterranean", "Feng Shui"], "Styles")}''')
+ROOMS = [("room_before", "Before: bare spare room"), ("room_scandi", "After: Scandinavian"), ("room_industrial", "After: Industrial")]
+uc29 = frame("uc interior", f'''<div class="label">Use case 29 <em>of 64</em></div>
+  <h1 class="g">AI Interior Design.</h1>
+  <p class="lede">Redesign a room from a photo, stage an empty space, or turn a sketch into a real interior.</p>
+  <div class="rooms">{"".join(f'<figure class="{"b" if i == 0 else "a"}"><img src="assets/examples/{f}.jpg" alt="{t}"><figcaption>{t}</figcaption></figure>' for i, (f, t) in enumerate(ROOMS))}</div>
+  <div class="sec"><h3>Use it for</h3>{two(("Scandinavian refresh", "Light wood, white shelving, soft textiles."), ("Industrial office", "Dark steel, walnut, warm leather."))}</div>
+  <div class="sec"><h3>How it works</h3>{steps([("Upload a clear room photo, then pick a style.", ""), ("Add specific asks.", "More storage, warmer colors, swap the layout or materials."), ("Get a shopping list.", "Real furniture, cheaper swaps, and the first 3 changes to make.")])}</div>
+  <div class="ex"><div class="ex-t"><h3>Real example</h3><p>A freelancer turns a bare spare room into a home office with shelving along one wall, then uses the image to brief his carpenter.</p></div><div class="ex-v">{brief}</div></div>''')
 
 # ---------- 5. MATH (46) ----------
 types = '''<div class="types">
-  <div><em>Typed</em><b>2x + 3 = 11</b></div>
-  <div><em>Photo</em><b>5(2x − 1) = 15</b></div>
-  <div><em>Handwritten</em><b class="hw">∫ x² dx</b></div>
-  <div><em>PDF</em><b>Worksheet p.4</b></div>
+  <div><em>Typed</em><b>3x − 7 = 14</b></div>
+  <div><em>Photo</em><b>4(x + 2) = 20</b></div>
+  <div><em>Handwritten</em><b class="hw">∫ 2x dx</b></div>
+  <div><em>PDF</em><b>Exam p.12</b></div>
 </div>'''
-dose = '''<div class="mx">
-  <div class="q">Dosage problem</div>
-  <p class="sm">Order 500 mg · Available 250 mg per tablet</p>
-  <p><i>1</i>Order ÷ available</p>
-  <p><i>2</i>= 500 mg ÷ 250 mg</p>
-  <p class="ok"><i>3</i>= <b>2 tablets</b></p>
+price = '''<div class="mx">
+  <div class="q">Pricing problem</div>
+  <p class="sm">Rp250,000 · 20% off · then 11% tax</p>
+  <p><i>1</i>250,000 × 0.8 = 200,000</p>
+  <p><i>2</i>200,000 × 1.11</p>
+  <p class="ok"><i>3</i>= <b>Rp222,000</b></p>
 </div>'''
 uc46 = usecase(46, "AI Math Solver.",
                "Solves math step by step, with the reason behind each step.",
@@ -150,26 +148,26 @@ uc46 = usecase(46, "AI Math Solver.",
                       ("It shows clear steps.", "Right formulas, matched to your level."),
                       ("It explains and checks.", "States each rule, verifies with a second method."),
                       ("Practice and more.", "3 practice problems, easy to hard, answers hidden.")]),
-               "A nursing student photographs a dosage problem, follows the worked steps, and finally understands the formula instead of memorizing answers.",
-               dose)
+               "A shop owner snaps a pricing question, follows the worked steps, and finally gets how a discount and tax stack, instead of guessing at the till.",
+               price)
 
 # ---------- 6. LEAD MANAGEMENT (64) ----------
 tbl = f'''<table class="tbl">
   <thead><tr><th>Lead</th><th>Score</th><th>Priority</th><th>Next action</th></tr></thead>
   <tbody>
-  <tr><td>John T.</td><td><b>92</b></td><td><span class="p hot">Hot</span></td><td>{I["phone"]}Call today</td></tr>
-  <tr><td>Maria L.</td><td><b>78</b></td><td><span class="p warm">Warm</span></td><td>{I["cal"]}Follow up in 2 days</td></tr>
-  <tr><td>Daniel K.</td><td><b>54</b></td><td><span class="p cold">Cold</span></td><td>{I["mail"]}Nurture by email</td></tr>
+  <tr><td>Budi S.</td><td><b>88</b></td><td><span class="p hot">Hot</span></td><td>{I["phone"]}Test drive today</td></tr>
+  <tr><td>Rina A.</td><td><b>71</b></td><td><span class="p warm">Warm</span></td><td>{I["cal"]}Follow up in 2 days</td></tr>
+  <tr><td>Kevin T.</td><td><b>49</b></td><td><span class="p cold">Cold</span></td><td>{I["mail"]}Monthly promo email</td></tr>
   </tbody></table>'''
 uc64 = usecase(64, "AI Lead Management Tool.",
                "Turn scattered leads into a scored, organized pipeline.",
                two(("SaaS teams", "BANT scoring, routing rules, email templates and dashboards."),
-                   ("Real estate agents", "Priority rules, follow-up timing, call scripts and KPIs.")),
+                   ("Real estate &amp; dealers", "Priority rules, follow-up timing, call scripts and KPIs.")),
                steps([("Describe your business.", "Lead sources, sales steps, team size, customers, current problems."),
                       ("It researches proven systems.", ""),
                       ("It builds your playbook.", "Scoring points, routing, nurture emails, follow-up timing."),
                       ("It maps fields to your CRM.", "Salesforce, HubSpot or Pipedrive.")]),
-               "A real estate team swaps a messy shared sheet for a scoring system. Agents call the hottest enquiries first instead of working the list top to bottom.",
+               "A car dealership swaps a messy WhatsApp list for lead scoring. Salespeople call the hottest test-drive requests first.",
                tbl, cls="wide lead")
 
 # ---------- 7. FULL LIST + CTA ----------

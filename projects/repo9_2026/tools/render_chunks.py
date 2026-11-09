@@ -26,7 +26,7 @@ def chunk_index(t0, t1):
         st = float(m.group(2))
         if st < t0 - 1e-6 or st >= t1 - 1e-6: return ""
         return m.group(1) + f'{round(st - t0, 4)}' + m.group(3)
-    h = re.sub(r'(      <div[^>]*\bid="[sw]\d\d" class="scene"[^>]*data-start=")([0-9.]+)("[^\n]*\n)', slot, h)
+    h = re.sub(r'(      <div[^>]*\bid="[swr]\d+" class="scene"[^>]*data-start=")([0-9.]+)("[^\n]*\n)', slot, h)   # s01.., w01.., r1..
     h = re.sub(r'\s*<audio [^>]*></audio>', '', h)
     h = h.replace('<script src="vendor/gsap/dist/gsap.min.js"></script>', f'<script>window.__T0 = {t0};</script>\n    <script src="vendor/gsap/dist/gsap.min.js"></script>', 1)
     # ambient drift: piecewise-linear per chunk (continuous across chunk seams)
@@ -69,7 +69,8 @@ for k, (t0, keep, t1) in enumerate(CH):
     if cp.exists(): shutil.rmtree(cp)
     shutil.copytree(P, cp, ignore=shutil.ignore_patterns("out", ".hyperframes", "thumbnail", "renders", "reference.mp4"))
     hx = chunk_index(t0, t1)
-    assert f'data-duration="{round(t1 - t0, 4)}"' in hx and hx.count('class="scene"') < len(T["scenes"]) or (t0 == 0 and t1 == TOTAL), "chunk index not rewritten"
+    nsc = hx.count('class="scene"'); want = sum(1 for s in T["scenes"] if t0 - 1e-6 <= s["start"] < t1 - 1e-6)
+    assert f'data-duration="{round(t1 - t0, 4)}"' in hx and nsc == want, f"chunk index not rewritten ({nsc} slots, want {want})"
     (cp / "index.html").write_text(hx)
     print(f"render chunk {k}: {t0} -> {t1} (keep from {keep})", flush=True)
     tmp = WORK / f"part{k}.tmp.mp4"

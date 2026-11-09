@@ -37,10 +37,10 @@ I = {
 }
 
 
-def frame(n, cls, body, swipe=True):
+def frame(n, cls, body, swipe=False):
     foot = '<div class="bot">Swipe →</div>' if swipe else ''
     return f'''<section class="slide {cls}">
-  <div class="top"><img class="logo-a" src="assets/logo.png" alt="AIpreneur"><span class="count">{n:02d} / {TOTAL:02d}</span></div>
+  <div class="top"><img class="logo-a" src="assets/logo.png" alt="AIpreneur"></div>
   {body}
   {foot}
 </section>'''
@@ -53,7 +53,7 @@ def head(label, title, sub=""):
 
 # ---------- 1. COVER ----------
 DIVS = [("09", "Social Media"), ("06", "Business Growth"), ("02", "Sales &amp; Comms"), ("04", "Finance &amp; Ops")]
-cover = frame(1, "cover", f'''{head("Claude for Business", 'Your Complete<br><span class="c">AI Team.</span>', "21 roles. 4 divisions. One goal: grow your business.")}
+cover = frame(1, "cover", swipe=True, body=f'''{head("Claude for Business", 'Your Complete<br><span class="c">AI Team.</span>', "21 roles. 4 divisions. One goal: grow your business.")}
   <div class="org">
     <div class="root">Claude</div>
     <svg class="wires" viewBox="0 0 860 70"><path d="M430 0V35M100 70V47a12 12 0 0 1 12-12h636a12 12 0 0 1 12 12v23M320 35v35M540 35v35"/></svg>
@@ -131,7 +131,7 @@ cta = frame(6, "cta", f'''{head("One team. One goal.", 'Every role is one<br><sp
     <span class="cm">Comment</span>
     <div class="kw">“AI TEAM”</div>
     <span class="cm2">and I’ll send you the full team.</span>
-  </div>''', swipe=False)
+  </div>''')
 
 CSS = (D / "style.css").read_text()
 (D / "carousel.html").write_text(f'''<!doctype html>

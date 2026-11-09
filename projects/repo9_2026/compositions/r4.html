@@ -48,7 +48,10 @@
     #r4-cast { left: 66px; top: 506px; width: 948px; height: 428px; border-radius: 34px; background: var(--cs); }
     #r4-pg { left: 0; top: 0; width: 1080px; height: 1920px; clip-path: var(--pc); }
     #r4-sheet { left: 66px; top: 506px; width: 948px; height: 428px; border-radius: 34px; background: linear-gradient(180deg, #ffffff, #f7f9fd);
-      box-shadow: 0 30px 56px -30px rgba(20,40,90,.45), 0 0 0 1.5px rgba(10,13,44,.06); }
+      box-shadow: 0 0 0 1.5px rgba(10,13,44,.06); }
+    /* the page's drop shadow lives on its own layer, masked softly along the fold (no hard cut where the fold line leaves the page) */
+    #r4-psh { left: -4px; top: 436px; width: 1088px; height: 568px; -webkit-mask-image: var(--sm); mask-image: var(--sm); }
+    #r4-psh b { position: absolute; left: 70px; top: 70px; width: 948px; height: 428px; border-radius: 34px; box-shadow: 0 30px 56px -30px rgba(20,40,90,.45); }
     .r4-bar { position: absolute; height: 14px; border-radius: 7px; background: #e3e8f1; transform-origin: 0 50%; }
     .r4-bar.h { height: 22px; border-radius: 11px; background: #d9e0ec; }
     .r4-cb { position: absolute; width: 26px; height: 26px; border-radius: 8px; box-shadow: inset 0 0 0 2.5px #c6cfe0; }
@@ -72,6 +75,7 @@
         <div class="r4-a" id="r4-ao"></div>
       </div>
       <div class="r4-a" id="r4-cast"></div>
+      <div class="r4-a" id="r4-psh"><b></b></div>
       <div class="r4-a" id="r4-pg">
         <div class="r4-a" id="r4-sheet"></div>
         <div class="r4-a" id="r4-paid">
@@ -110,7 +114,7 @@
       let x = 172; $("r4-chips").innerHTML = CH.map(([c, h], i) => { const w = c === "st" ? 150 : c === "os" ? 196 : 34 + 13 * h.length; const s = `<div class="r4-chip ${c}" id="r4-c${i}" style="left:${x}px">${h}</div>`; x += w + 12; return s; }).join("");
       const FI = ["lucide-sparkles.svg", "lucide-lock.svg"];
       const FT = [2.98, 3.5];                                        // feature chip times: "AI-nya", "datanya" (lock snaps on "punya kamu")
-      x = 34; $("r4-feats").innerHTML = a.features.map((f, i) => { const s = `<div class="r4-feat" id="r4-f${i}" style="left:${x}px"><i style="--m:url(assets/icons/${FI[i]})"></i>${f}</div>`; x += 60 + 15 * f.length; return s; }).join("");
+      x = 34; $("r4-feats").innerHTML = a.features.map((f, i) => { const s = `<div class="r4-feat" id="r4-f${i}" style="left:${x}px"><i style="--m:url(assets/icons/${FI[i]})"></i>${f}</div>`; x += 72 + 15 * f.length; return s; }).join("");   // (+12 gap vs r1: chips no longer touch)
       // the workspace page: generic to-do lines under the paid card (page-local coords)
       const ROWS = [[178, 300, 0, 1], [226, 560, 1, 0], [268, 430, 1, 0], [310, 500, 2, 0], [352, 360, 1, 0]];
       $("r4-sheet").innerHTML = ROWS.map(([y, w, cb, h], i) => (cb ? `<div class="r4-cb${cb === 2 ? " on" : ""}" id="r4-cb${i}" style="left:74px;top:${y - 6}px">${cb === 2 ? "<i></i>" : ""}</div>` : "")
@@ -121,8 +125,9 @@
       ft(uc.firstElementChild, { rotation: -90, scale: 0.5 }, { rotation: 0, scale: 1, duration: 0.5, ease: "back.out(2.6)" }, 0.24);
       I($("r4-blob"), { opacity: 0, scale: 0.7 }); ft($("r4-blob"), { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power2.out" }, 0.06);
       // the workspace PAGE rises on "Workspace", its lines write themselves
-      const sheet = $("r4-sheet");
-      I(sheet, { opacity: 0, y: 50, scale: 0.95, transformOrigin: "50% 70%" }); ft(sheet, { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }, 0.26);
+      const sheet = $("r4-sheet"), psh = $("r4-psh");
+      [[sheet, "50% 70%"], [psh, `${70 + 0.5 * 948}px ${70 + 0.7 * 428}px`]].forEach(([e, o]) => {
+        I(e, { opacity: 0, y: 50, scale: 0.95, transformOrigin: o }); ft(e, { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }, 0.26); });
       ROWS.forEach(([, , cb], i) => { const b = $("r4-bar" + i), t = 0.46 + i * 0.07;
         I(b, { scaleX: 0 }); ft(b, { scaleX: 0 }, { scaleX: 1, duration: 0.36, ease: "power3.out" }, t);
         if (cb) { const c = $("r4-cb" + i); I(c, { scale: 0 }); ft(c, { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2.6)" }, t - 0.03); } });
@@ -159,7 +164,9 @@
         const A = (Math.atan2(nx, -ny) * 180 / Math.PI).toFixed(2), w = Math.min(84, d * 0.9);   // gradient runs from C along n (px = distance from C)
         const fb = `linear-gradient(${A}deg, #dce3ee 0px, #e9eef6 ${f1(Math.max(0, d - w))}px, #ffffff ${f1(d - 0.45 * w)}px, #e2e8f2 ${f1(d - 0.1 * w)}px, #bfc9dc ${f1(d)}px)`;
         const cs = `linear-gradient(${A}deg, rgba(10,13,44,0) 0px, rgba(10,13,44,0) ${f1(Math.max(0, d - 58))}px, rgba(10,13,44,.22) ${f1(d)}px, rgba(10,13,44,0) ${f1(d + 0.5)}px)`;
-        return { pc, fc, fm, fb, cs };
+        const rw = d - EXP * (nx + ny);                                          // same distance, measured in the shadow layer's (expanded) box
+        const sm = `linear-gradient(${A}deg, transparent 0px, transparent ${f1(Math.max(0, rw - 12))}px, #000 ${f1(rw + 46)}px)`;
+        return { pc, fc, fm, fb, cs, sm };
       }
       const one = (u) => Math.max(0, Math.min(1, u));
       const backO = (u) => { u = one(u); const c1 = 1.7, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };
@@ -167,16 +174,16 @@
       const TA = 0.8, TAE = 1.06, XD = 96, TB = 1.3, TC = 1.96, XE = 2000;      // dog-ear 0.80–1.06 · peel 1.30–1.96 (free name at 1.79)
       const peelX = (t) => t < TAE ? XD * backO((t - TA) / (TAE - TA)) : t < TB ? XD : XD + (XE - XD) * io2((t - TB) / (TC - TB));
       const pg = $("r4-pg"), flapw = $("r4-flapw"), flap = $("r4-flap"), cast = $("r4-cast");
-      I(pg, { "--pc": "none" }); I(flap, { "--fc": "none", "--fm": "none", "--fb": "none" }); I(cast, { "--cs": "none" });
+      I(pg, { "--pc": "none" }); I(psh, { "--sm": "none" }); I(flap, { "--fc": "none", "--fm": "none", "--fb": "none" }); I(cast, { "--cs": "none" });
       I(flapw, { opacity: 0 }); I(cast, { opacity: 0 });
       tl.set([flapw, cast], { opacity: 1 }, TA - 0.5 / FR);
       for (let k = Math.round(TA * FR); k <= Math.round(TC * FR); k++) {
         const t = k / FR; if (t > TAE + 0.04 && t < TB) continue;               // static dog-ear in between
         const g = peelAt(peelX(t)), ts = t - 0.5 / FR;
-        tl.set(pg, { "--pc": g.pc }, ts); tl.set(flap, { "--fc": g.fc, "--fm": g.fm, "--fb": g.fb }, ts); tl.set(cast, { "--cs": g.cs }, ts);
+        tl.set(pg, { "--pc": g.pc }, ts); tl.set(flap, { "--fc": g.fc, "--fm": g.fm, "--fb": g.fb }, ts); tl.set(cast, { "--cs": g.cs }, ts); tl.set(psh, { "--sm": g.sm }, ts);
       }
       ft(cast, { opacity: 1 }, { opacity: 0, duration: 0.14, ease: "power1.in" }, TC - 0.14);
-      tl.set([flapw, pg], { opacity: 0 }, TC + 0.5 / FR);
+      tl.set([flapw, pg, psh], { opacity: 0 }, TC + 0.5 / FR);
       // the FREE card lies under the page (slightly sunk + shaded), springs up as the page leaves — lands with the tracker flip
       const free = $("r4-free"), ao = $("r4-ao");
       I(free, { opacity: 0, scale: 0.975, transformOrigin: "50% 50%" }); ft(free, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none" }, 1.24);

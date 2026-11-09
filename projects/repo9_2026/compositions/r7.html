@@ -91,11 +91,13 @@
           <div id="r7-chips"></div>
           <div id="r7-feats"></div>
           <svg class="r7-a" id="r7-arw" width="920" height="200" viewBox="0 0 920 200">
-            <path id="r7-ap0" fill="none" stroke="#2da44e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path id="r7-ap1" fill="none" stroke="#2da44e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path id="r7-ap0" fill="none" stroke="#2da44e" stroke-width="4.5" stroke-linecap="round"></path>
+            <path id="r7-ap1" fill="none" stroke="#2da44e" stroke-width="4.5" stroke-linecap="round"></path>
+            <path id="r7-ah0" fill="none" stroke="#2da44e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path id="r7-ah1" fill="none" stroke="#2da44e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
           </svg>
-          <div class="r7-ts" id="r7-ts0" style="top:38px"></div>
-          <div class="r7-ts" id="r7-ts1" style="top:102px"></div>
+          <div class="r7-ts" id="r7-ts0" style="top:38px;width:266px"></div>
+          <div class="r7-ts" id="r7-ts1" style="top:102px;width:162px"></div>
           <div class="r7-tg" id="r7-tg0" style="top:38px"><i style="--m:url(assets/icons/si-googlecalendar.svg);background:#4285F4"></i><span class="r7-grad" id="r7-tgt0"></span></div>
           <div class="r7-tg" id="r7-tg1" style="top:102px"><i style="--m:url(assets/icons/lucide-calendar.svg);background:#294b77"></i><span class="r7-grad" id="r7-tgt1"></span></div>
           <div class="r7-a r7-pk" id="r7-pk0"></div>
@@ -168,9 +170,10 @@
       // sync arrows: cubic curves hub → target chip (+ arrow head); length + sample points computed here (deterministic)
       const CV = [[[508, 88], [552, 88], [566, 63], [608, 63]], [[508, 100], [552, 100], [566, 127], [608, 127]]];
       const bz = (c, t) => { const u = 1 - t; return [0, 1].map((k) => u * u * u * c[0][k] + 3 * u * u * t * c[1][k] + 3 * u * t * t * c[2][k] + t * t * t * c[3][k]); };
-      const ARW = CV.map((c, j) => { const e = c[3], d = `M${c[0]} C${c[1]} ${c[2]} ${e} M${e[0] - 11},${e[1] - 9} L${e[0]},${e[1]} L${e[0] - 11},${e[1] + 9}`;
+      const ARW = CV.map((c, j) => { const e = c[3];
         let L = 0, p0 = bz(c, 0); const pts = [p0]; for (let k = 1; k <= 40; k++) { const p = bz(c, k / 40); L += Math.hypot(p[0] - p0[0], p[1] - p0[1]); p0 = p; if (k % 5 === 0) pts.push(p); }
-        L += 2 * Math.hypot(11, 9); const el = $("r7-ap" + j); el.setAttribute("d", d); el.style.strokeDasharray = (L + 2).toFixed(1); return { el, L: L + 2, pts }; });
+        const el = $("r7-ap" + j), hd = $("r7-ah" + j); el.setAttribute("d", `M${c[0]} C${c[1]} ${c[2]} ${e}`); el.style.strokeDasharray = `${(L + 4).toFixed(1)} ${(L + 40).toFixed(1)}`;
+        hd.setAttribute("d", `M${e[0] - 11},${e[1] - 9} L${e[0]},${e[1]} L${e[0] - 11},${e[1] + 9}`); return { el, hd, L: L + 4, pts }; });
 
       // use-case pill on the question
       const uc = $("r7-uc"); I(uc, { opacity: 0, y: -20, scale: 0.8 }); ft(uc, { opacity: 0, y: -20, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(2.2)" }, 0.22);
@@ -193,27 +196,27 @@
       // ===== SIGNATURE: TEAR-OFF CALENDAR =====
       const T0 = TF - 0.52, TR = T0 + 0.16, TT = TR + 0.12;          // pull · rip · toss
       const body = $("r7-pbody"), blift = $("r7-blift"), free = $("r7-free");
-      I(body, { x: 0, y: 0, rotation: 0, rotationX: 0, rotationY: 0, scale: 1, opacity: 1, transformOrigin: "88% 0%" });
+      I(body, { x: 0, y: 0, rotation: 0, rotationX: 0, rotationY: 0, scale: 1, opacity: 1, transformOrigin: "12% 0%" });
       I(blift, { opacity: 0 });
       // pull: the sheet bows toward the viewer
-      ft(body, { rotationX: 0, y: 0 }, { rotationX: 14, y: 10, duration: TR - T0, ease: "power2.out" }, T0);
+      ft(body, { rotationX: 0, y: 0 }, { rotationX: 12, y: 6, duration: TR - T0, ease: "power2.out" }, T0);
       ft(blift, { opacity: 0 }, { opacity: 1, duration: TR - T0, ease: "power2.out" }, T0);
-      // rip along the perforation: left side gives first (pivot top-right), zigzag edges + paper flecks
-      ft(body, { rotation: 0, y: 10 }, { rotation: -7, y: 24, duration: TT - TR, ease: "power2.in" }, TR);
+      // rip along the perforation: the right side is pulled up and gives first (pivot top-left), zigzag edges + paper flecks
+      ft(body, { rotation: 0, y: 6 }, { rotation: -5, y: 10, duration: TT - TR, ease: "power2.out" }, TR);
       const perf = $("r7-perf"), szig = $("r7-szig"), bzig = $("r7-bzig");
       I(szig, { opacity: 0 }); I(bzig, { opacity: 0 });
       tl.set(szig, { opacity: 1 }, TR); tl.set(bzig, { opacity: 1 }, TR); tl.set(perf, { opacity: 0 }, TR);
       for (let i = 0; i < FK; i++) { const e = $("r7-fk" + i), fx = 40 + i * (840 / (FK - 1)), h = (i * 37 + 11) % 53, dx = -40 + ((i * 29) % 46) - 23, up = 34 + h, t = TR + i * 0.008;
         I(e, { x: fx, y: 26, opacity: 0, rotation: 0, scale: 1 }); tl.set(e, { opacity: 1 }, t);
-        ft(e, { x: fx }, { x: fx + dx * 2.2 - 30, duration: 0.62, ease: "power1.out" }, t);
+        ft(e, { x: fx }, { x: fx + (dx + 40) * 2.2 + 30, duration: 0.62, ease: "power1.out" }, t);
         ft(e, { y: 26 }, { y: 26 - up, duration: 0.24, ease: "power2.out" }, t);
         ft(e, { y: 26 - up }, { y: 26 - up + 120, duration: 0.38, ease: "power2.in" }, t + 0.24);
         ft(e, { rotation: 0 }, { rotation: ((i * 67) % 300) - 150, duration: 0.62, ease: "none" }, t);
         ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, t + 0.42); }
-      // toss: the torn sheet flies off to the left, tumbling
-      ft(body, { x: 0, y: 24, rotation: -7, rotationX: 14, rotationY: 0, scale: 1 },
-        { x: -1200, y: -10, rotation: 8, rotationX: 20, rotationY: -26, scale: 0.86, duration: 0.5, ease: "power2.in" }, TT);
-      tl.set(body, { opacity: 0 }, TT + 0.5);
+      // toss: the torn sheet is flung off to the right, tumbling (uncovers the free logo + name first)
+      ft(body, { x: 0, y: 10, rotation: -5, rotationX: 12, rotationY: 0, scale: 1 },
+        { x: 1200, y: -20, rotation: -16, rotationX: 18, rotationY: 26, scale: 0.86, duration: 0.44, ease: "power1.in" }, TT);
+      tl.set(body, { opacity: 0 }, TT + 0.44);
       // the NEXT sheet = FREE repo card springs up as the weight leaves it, green ring on the free name
       I(free, { scale: 0.985, y: 6, transformOrigin: "50% 50%" });
       ft(free, { scale: 0.985, y: 6 }, { scale: 1, y: 0, duration: 0.5, ease: "back.out(2.4)" }, TT + 0.06);
@@ -232,7 +235,9 @@
       I(hubi, { rotation: -180 }); ft(hubi, { rotation: -180 }, { rotation: 0, duration: 0.5, ease: "power3.out" }, 3.56);
       ft(hubi, { rotation: 0 }, { rotation: 360, duration: 0.62, ease: "power2.inOut" }, 4.12);
       ft(hub, { scale: 1 }, { scale: 1.14, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, 4.17);
-      ARW.forEach((r, j) => { I(r.el, { strokeDashoffset: r.L }); ft(r.el, { strokeDashoffset: r.L }, { strokeDashoffset: 0, duration: 0.34, ease: "power2.out" }, 4.18 + j * 0.05);
+      ARW.forEach((r, j) => { const ta = 4.18 + j * 0.05; I(r.el, { strokeDashoffset: r.L + 8, opacity: 0 }); tl.set(r.el, { opacity: 1 }, ta);
+        ft(r.el, { strokeDashoffset: r.L + 8 }, { strokeDashoffset: 0, duration: 0.34, ease: "power2.out" }, ta);
+        I(r.hd, { opacity: 0 }); ft(r.hd, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, ta + 0.24);
         const ts = $("r7-ts" + j); I(ts, { opacity: 0, scale: 0.8, transformOrigin: "0% 50%" });
         ft(ts, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2)" }, 4.3 + j * 0.06); });
       // each target fills on its word, a sync packet runs along its arrow first

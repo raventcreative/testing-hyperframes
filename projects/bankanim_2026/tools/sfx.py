@@ -135,44 +135,63 @@ def bell(dur=0.9):
 put(0.02, pop(500, 760, 0.08), 0.08)
 for k in range(9): put(0.05 + k * 0.1, tick(0.015, 5200), 0.035)               # playhead scrub
 put(wt("nggak") - 0.02, buzz(0.18), 0.03)
-for k in range(13): put(wt("After Effects,") + 0.05 + (k % 5) * 0.05 + (k // 5) * 0.03 + 0.4, pop(260 - 8 * k, 110, 0.1), 0.09)   # clips hit the floor
+for k in range(13): put(wt("After Effects,") + 0.05 + (k % 5) * 0.05 + (k // 5) * 0.03 + 0.4, pop(260 - 8 * k, 110, 0.1), 0.09)
 put(wt("After Effects,") + 0.02, whoosh(0.5, 2200, 500, 1.4, 0.3), W * 0.6)
-put(wt("semuanya") - 0.3, whoosh(0.42, 600, 1800, 1.2, 0.5), W * 0.5)          # the app folds away
-put(wt("semuanya") - 0.06, whoosh(0.5, 300, 2600, 1.1, 0.55), W * 0.8)         # the code window flies in
-typing(wt("semuanya") + 0.2, wt("Claude.") - 0.1, 0.09, 18)
-put(wt("Claude.") - 0.02, boom(0.5, 140, 60), 0.22); put(wt("Claude.") + 0.06, chime((1318.5, 1975.5, 2637), 0.9), 0.07)
-# --- s02: compile → flash → 12 cards
+put(wt("semuanya") - 0.3, whoosh(0.42, 600, 1800, 1.2, 0.5), W * 0.5)
+put(wt("semuanya") - 0.06, whoosh(0.5, 300, 2600, 1.1, 0.55), W * 0.8)
+typing(wt("semuanya") + 0.2, wt("Claude,") - 0.1, 0.09, 18)
+put(wt("Claude,") - 0.02, boom(0.5, 140, 60), 0.22); put(wt("Claude,") + 0.06, chime((1318.5, 1975.5, 2637), 0.9), 0.07)
+# --- s02: compile → flash → 12 cards → filed into the strip
 put(wt("Termasuk") - 0.1, rise(0.45, 400, 1600), 0.05)
-put(wt("bank") - 0.3, whoosh(0.3, 2600, 400, 1.6, 0.8), W * 0.7)
-put(wt("bank") - 0.02, boom(0.35, 220, 90), 0.16)
-for k in range(12): put(wt("bank") + 0.04 + k * 0.03, pop(700 + 40 * k, 1100 + 40 * k, 0.05), 0.06)
+put(wt("dua belas") - 0.3, whoosh(0.3, 2600, 400, 1.6, 0.8), W * 0.7)
+put(wt("dua belas") - 0.02, boom(0.35, 220, 90), 0.16)
+for k in range(12): put(wt("dua belas") + 0.04 + k * 0.03, pop(700 + 40 * k, 1100 + 40 * k, 0.05), 0.06)
 put(wt("ini.") - 0.05, whoosh(0.3, 900, 2200, 1.5, 0.4), W * 0.3)
-# --- s03: spotlight per named animation
-for w in ("Centang,", "loading,", "angka", "notifikasi,", "grafik."):
-    put(wt(w) - 0.12, whoosh(0.28, 700, 2400, 1.4, 0.5), W * 0.55)
-put(wt("Centang,") + 0.1, chime((1760, 2637), 0.6), 0.06)
-for k in range(6): put(wt("loading,") + 0.05 + k * 0.08, tick(0.02, 3800), 0.05)
-put(wt("angka") + 0.02, rise(0.5, 500, 1500), 0.04)
-put(wt("notifikasi,") + 0.05, bell(0.8), 0.06)
-for k in range(4): put(wt("grafik.") + 0.05 + k * 0.07, pop(500 + 120 * k, 800 + 120 * k, 0.06), 0.08)
-# --- s04: silky wave + the easing editor
-put(wt("gerak") - 0.05, whoosh(0.9, 400, 1800, 0.9, 0.5), W * 0.6)
-put(wt("motion") - 0.15, whoosh(0.4, 1200, 3200, 1.6, 0.4), W * 0.5); put(wt("designer.") + 0.05, pop(1100, 1500, 0.05), 0.07)
+put(wt("Aku") - 0.05, whoosh(0.8, 500, 2600, 1.2, 0.4), W * 0.6)
+for k in range(12): put(wt("Aku") + 0.45 + k * 0.045, tick(0.02, 3000 + 80 * k), 0.06)
+# --- the 12 rounds
+ROUNDS = json.loads((P / "vendor/rounds.js").read_text().split("window.ROUNDS = ", 1)[1].split(";\n", 1)[0])
+def bellsnd(dur=0.8):
+    n = int(dur * SR); t = np.arange(n) / SR; x = np.zeros(n)
+    for k, f in enumerate((1568, 2349, 3136)): x += np.sin(2 * np.pi * f * t) * np.exp(-t * (4 + 2 * k)) * (0.8 ** k)
+    x *= 0.75 + 0.25 * np.sin(2 * np.pi * 11 * t); return x / np.abs(x).max()
+for i, r in enumerate(ROUNDS):
+    st, end, ty = r["start"], r["start"] + r["dur"], r["type"]
+    put(st + 0.02, whoosh(0.45, 600, 2400, 1.3, 0.5), W * 0.55)                  # the card lifts out of its chip
+    put(r["tNum"] - 0.06, boom(0.22, 220, 110), 0.12)                             # number badge
+    put(r["tName"] - 0.02, pop(900, 1400, 0.06), 0.09)                            # lands on the name
+    if ty == "check": put(r["tName"] + 0.3, chime((1760, 2637), 0.6), 0.05)
+    if ty == "loading":
+        for k in range(8): put(r["tUse"] + k * 0.12, tick(0.018, 3800), 0.04)
+    if ty == "counter": put(r["tUse"] - 0.1, rise(0.8, 400, 1500), 0.04)
+    if ty == "bell": put(r["tName"] + 0.1, bellsnd(0.8), 0.05); put(r["tUse"] + 0.3, bellsnd(0.6), 0.04)
+    if ty == "chart":
+        for k in range(4): put(r["tUse"] + 0.5 + k * 0.07, pop(500 + 120 * k, 800 + 120 * k, 0.06), 0.07)
+    if ty == "toggle": put(r["tUse"] + 0.9, tick(0.03, 1800), 0.14); put(r["tUse"] + 1.4, tick(0.03, 1500), 0.12)
+    if ty == "heart": put(r["tUse"] + 0.1, pop(400, 900, 0.1), 0.14); put(r["tUse"] + 0.15, chime((2093, 2637), 0.5), 0.04)
+    if ty == "ring": put(r["tUse"] - 0.1, rise(0.9, 350, 1300), 0.04)
+    if ty == "typing": typing(r["tUse"] + 0.2, r["tUse"] + 0.75, 0.06, 14); put(r["speechEnd"] - 0.25, pop(800, 1300, 0.06), 0.08)
+    if ty == "upload": put(r["tUse"] - 0.05, whoosh(0.4, 400, 2800, 1.3, 0.5), W * 0.5); put(r["speechEnd"] - 0.1, chime((1568, 2093), 0.5), 0.05)
+    if ty == "search": typing(r["tUse"] - 0.3, r["tUse"] + 0.4, 0.06, 18); put(r["speechEnd"] - 0.1, pop(1200, 1800, 0.05), 0.08)
+    if ty == "stars":
+        for k in range(5): put(r["tUse"] - 0.2 + k * 0.09, pop(900 + 150 * k, 1300 + 150 * k, 0.05), 0.06)
+    put(end - 0.42, whoosh(0.35, 2200, 700, 1.4, 0.3), W * 0.45)                  # exit back into the chip
+    put(end - 0.08, tick(0.025, 3200), 0.08)                                       # chip comes back with a ✓
+# strip grows back into the GRID
+G0 = ROUNDS[-1]["start"] + ROUNDS[-1]["dur"] - 0.5
+put(G0, whoosh(0.5, 400, 2000, 1.1, 0.5), W * 0.6)
+for k in range(12): put(G0 + 0.1 + k * 0.03, pop(700 + 30 * k, 1000 + 30 * k, 0.04), 0.045)
 # --- s05: copy → paste → type → Enter → a new card is born
 put(wt("Caranya") - 0.05, whoosh(0.4, 2000, 600, 1.3, 0.4), W * 0.5)
 put(wt("Copy") - 0.02, tick(0.025, 2600), 0.16); put(wt("Copy") + 0.12, pop(900, 1500, 0.06), 0.08)
 put(wt("tempel") - 0.05, whoosh(0.35, 500, 2400, 1.3, 0.4), W * 0.6)
 typing(wt("tempel") + 0.1, wt("animasinya") - 0.05, 0.1, 20)
-put(wt("animasinya") - 0.02, pop(180, 90, 0.1), 0.18)                          # Enter
+put(wt("animasinya") - 0.02, pop(180, 90, 0.1), 0.18)
 put(wt("animasinya") + 0.05, rise(0.5, 300, 1400), 0.05)
 put(wt("jadi.") - 0.05, chime((1318.5, 1760, 2637), 0.9), 0.08); put(wt("jadi.") - 0.02, pop(900, 1600, 0.08), 0.1)
 # --- s06: live edit
 for k in range(5): put(wt("ganti") + 0.05 + k * 0.07, tick(0.02, 3600 + 300 * (k % 2)), 0.08)
-for k in range(4): put(wt("datanya,") + k * 0.06, pop(600 + 90 * k, 900 + 90 * k, 0.05), 0.07)
-put(wt("cocok") - 0.08, whoosh(0.45, 2400, 500, 1.2, 0.6), W * 0.6); put(wt("konten") - 0.05, pop(300, 160, 0.09), 0.12)
-# --- s07: two "nope" stamps
-put(wt("install") - 0.02, boom(0.3, 200, 80), 0.2); put(wt("aplikasi,") + 0.05, whoosh(0.35, 800, 3000, 1.4, 0.3), W * 0.7)
-put(wt("jago") - 0.02, boom(0.3, 180, 75), 0.2); put(wt("editing.") + 0.05, whoosh(0.4, 2800, 600, 1.3, 0.5), W * 0.6)
+for k in range(4): put(wt("datanya.") + k * 0.06, pop(600 + 90 * k, 900 + 90 * k, 0.05), 0.07)
 # --- s08 CTA
 put(wt("panduan") - 0.05, whoosh(0.6, 400, 2600, 1.1, 0.6), W * 0.7)
 for k in range(12): put(wt("panduan") + 0.15 + k * 0.035, pop(900 + 30 * k, 1300 + 30 * k, 0.04), 0.045)

@@ -118,7 +118,7 @@ Playwright + static server (`python3 -m http.server`). Render 3D live (robot/Sty
 - SFX di setiap beat.
 - CTA divisualkan: keyword ngetik sendiri di kolom komen → hati → pesawat kertas → kartu DM "terkirim".
 
-**Bank transisi yang udah dipakai** (jangan ulang persis di video berikutnya): coin flip, sound-wave morph, magnifier scan, page peel, mic ripple, kanban drag, sobekan kalender + sync, channel funnel, REC + clapper (REPO9) · scan "re-render" genre, panel komik, tulisan kapur, koin pixel, satu garis, callout explainer, character select, brand kit, letterbox + slate (ANIM10) · roket lewat 10 dunia (ONELINEMOTION) · stepper split-flap "LANGKAH n" (KONTEN7HARI).
+**Bank transisi yang udah dipakai** (jangan ulang persis di video berikutnya): coin flip, sound-wave morph, magnifier scan, page peel, mic ripple, kanban drag, sobekan kalender + sync, channel funnel, REC + clapper (REPO9) · scan "re-render" genre, panel komik, tulisan kapur, koin pixel, satu garis, callout explainer, character select, brand kit, letterbox + slate (ANIM10) · roket lewat 10 dunia (ONELINEMOTION) · stepper split-flap "LANGKAH n" (KONTEN7HARI) · timeline klip jatuh → kode → compile jadi grid, meja 3D spotlight, kurva easing, copy → terminal → kartu lahir, inspector live → postingan, stempel "GAK PERLU", folder paket → komen → DM (BANKANIM).
 
 ---
 

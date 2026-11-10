@@ -22,6 +22,7 @@ void main() {
   float bl = smoothstep(0.2, 0.8, texture2D(tI, vUv + vec2(0.0, 1.5) * uTexel).b) * robot;
   lc = mix(lc, vec3(0.4, 0.86, 1.0), bl);
   vec3 col = lc * e;
+  col += vec3(0.25, 0.75, 1.0) * 0.42 * smoothstep(0.35, 0.9, inf.b) * robot;      // the light strip: a thin cyan glow
   col += vec3(0.97) * smoothstep(0.35, 0.75, inf.g) * robot;
   col += vec3(0.9) * smoothstep(0.4, 0.75, inf.a) * robot * 0.85;
   float floorM = step(0.5, g.w) * step(g.w, 1.5);

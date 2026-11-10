@@ -59,7 +59,7 @@ void main() {
   col = mix(col, chalkW, 0.3 * shell * smoothstep(0.35, 0.8, rub));
   col = mix(col, vec3(0.55, 0.85, 1.0), smoothstep(0.3, 0.7, inf.b) * robot * grain(px + 9.0, 0.85));
   col = mix(col, vec3(0.88, 0.97, 1.0), smoothstep(0.3, 0.7, inf.g) * robot * grain(px + 1.0, 0.92));
-  col = mix(col, chalkW, smoothstep(0.35, 0.7, inf.a) * robot * grain(px + 4.0, 0.85));
+  col = mix(col, chalkW, smoothstep(0.3, 0.75, inf.a) * robot * grain(px * 1.4 + 4.0, 0.62) * 0.95);
   // hatching in shadow (diagonal strokes, broken)
   float shade = (1.0 - inf.r) * has;
   vec2 hp = px + w1 / uTexel;

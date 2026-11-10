@@ -167,7 +167,8 @@ export function litRobotMaterial(rig, opts = {}) {
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u, P);
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute vec3 _face;\nattribute vec3 aCls;\nvarying vec3 vFace;\nvarying vec3 vCls;\nvarying vec3 vRestP;\nvarying vec3 vRestN;')
+      .replace('#include <beginnormal_vertex>', opts.smoothN ? 'vec3 objectNormal = aSmoothN;\n#ifdef USE_TANGENT\nvec3 objectTangent = vec3( tangent.xyz );\n#endif' : '#include <beginnormal_vertex>')
+      .replace('#include <common>', '#include <common>\nattribute vec3 aSmoothN;\nattribute vec3 _face;\nattribute vec3 aCls;\nvarying vec3 vFace;\nvarying vec3 vCls;\nvarying vec3 vRestP;\nvarying vec3 vRestN;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvFace = _face; vCls = aCls; vRestP = position; vRestN = normal;');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vFace; varying vec3 vCls; varying vec3 vRestP; varying vec3 vRestN;\nuniform vec3 uTint; uniform vec3 uDarkTint; uniform vec3 uEmiCol; uniform vec3 uEyeCol; uniform vec3 uEyeAlb; uniform vec2 uRough; uniform float uEyeK; uniform float uEmiK; uniform float uVisorRough;\n' + FACE
@@ -195,6 +196,6 @@ export function litRobotMaterial(rig, opts = {}) {
         totalEmissiveRadiance *= uEmiCol * uEmiK * uRing;
         totalEmissiveRadiance += uEyeCol * faceA * uEyeK * uEyeGlow;`);
   };
-  mat.customProgramCacheKey = () => 'sb-litrobot-' + (opts.key || 'x') + (opts.physical ? 'p' : 's');
+  mat.customProgramCacheKey = () => 'sb-litrobot-' + (opts.key || 'x') + (opts.physical ? 'p' : 's') + (opts.smoothN ? 'n' : '');
   return mat;
 }

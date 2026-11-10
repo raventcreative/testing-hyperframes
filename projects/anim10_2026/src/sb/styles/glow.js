@@ -35,9 +35,10 @@ void main() {
   // hatch strokes on the floor around the light pool (shadow side)
   float floorM = step(0.5, g.w) * step(g.w, 1.5);
   vec2 hp = gl_FragCoord.xy + w1 / uTexel;
-  float hatch = smoothstep(0.55, 0.9, abs(fract((hp.x * 0.7 - hp.y) / 9.0) * 2.0 - 1.0));
-  float hz = smoothstep(0.05, 0.35, inf.a) * (1.0 - smoothstep(0.55, 0.9, inf.a)) * floorM;
-  col += gold * 0.16 * hatch * hz * step(0.45, vnoise(hp * 0.05));
+  float hatch = 1.0 - smoothstep(0.0, 0.22, abs(fract((hp.x * 0.55 - hp.y) / 8.0) - 0.5) * 2.0);
+  float hz = smoothstep(0.02, 0.2, inf.a) * (1.0 - smoothstep(0.35, 0.6, inf.a)) * floorM;
+  float brk = step(0.35, vnoise(vec2((hp.x * 0.55 - hp.y) / 8.0, hp.x * 0.04)));
+  col += gold * 0.2 * hatch * hz * brk;
   gl_FragColor = vec4(col, 1.0);
 }`;
 
@@ -61,7 +62,7 @@ void main() {
   float cx = mix(uLamp.x, uPoolC.x, t);
   float inC = (1.0 - smoothstep(hw * 0.78, hw, abs(p.x - cx))) * step(0.0, t) * (1.0 - smoothstep(0.92, 1.02, t));
   float coreC = 1.0 - smoothstep(0.0, hw * 0.75, abs(p.x - cx));
-  col += gold * inC * (0.055 + 0.05 * coreC) * (0.6 + 0.4 * t);
+  col += gold * inC * (0.07 + 0.07 * coreC) * (0.55 + 0.45 * t);
   // cone edge strokes (sketched)
   float edgeL = exp(-abs(abs(p.x - cx) - hw) / 1.1) * step(0.0, t) * step(t, 0.97);
   col += gold * edgeL * 0.35 * (0.6 + 0.4 * vnoise(vec2(p.y * 0.05, 3.0)));

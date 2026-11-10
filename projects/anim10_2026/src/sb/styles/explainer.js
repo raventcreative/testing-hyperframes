@@ -45,7 +45,7 @@ export default function createExplainer(ctx) {
     { pos: [3.0, 1.8, 2.0], size: [2.0, 2.0], look: [0, 0.6, 0], color: 0xe6efff, intensity: 1.0 },
   ] });
   scene.environmentIntensity = 0.45;
-  const robotMat = litRobotMaterial(ctx.rig, { key: 'explainer', noNormal: true, rough: [0.5, 0.0], visorRough: 0.12, emiK: 0.9, eyeK: 1.4,
+  const robotMat = litRobotMaterial(ctx.rig, { key: 'explainer', noNormal: true, smoothN: true, rough: [0.5, 0.0], visorRough: 0.18, emiK: 0.9, eyeK: 1.4,
     emi: [0.5, 0.8, 1.0], eye: [0.85, 0.95, 1.0], eyeAlb: [0.95, 0.98, 1.0],
     classes: { white: [0.86, 0.82, 0.77], dark: [0.055, 0.066, 0.13], blue: [0.22, 0.58, 1.0], visor: [0.02, 0.025, 0.06], logo: [0.06, 0.07, 0.15] } });
   const robot = ctx.robotMesh(robotMat); robot.castShadow = true; robot.receiveShadow = true; scene.add(robot);

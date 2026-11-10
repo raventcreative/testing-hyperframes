@@ -18,7 +18,8 @@ export function gInfoScene(ctx, { keyDir = [-0.6, 0.7, 0.45], smooth = true, poo
       float ell = pow((vRest.x - 0.078) / 0.27, 2.0) + pow((vRest.y - 0.647) / 0.18, 2.0);
       float fr = step(0.1, vRest.z) * step(0.0, vRestN.z);
       float vis = step(ell, 1.18) * fr, bez = step(ell, 1.6) * fr;
-      writeG(s.eye > 0.5 ? 34.0 : (vis > 0.5 ? 33.0 : (s.blue > 0.5 ? 32.0 : (s.white > 0.5 || bez > 0.5 ? 30.0 : 31.0))));` : 'writeG(robotId(s));'}
+      float helmet = step(0.5, vRest.y) * step(abs(vRest.x - 0.03), 0.36);    // helmet: one shell (no side-panel specks)
+      writeG(s.eye > 0.5 ? 34.0 : (vis > 0.5 ? 33.0 : (s.white > 0.5 || bez > 0.5 || helmet > 0.5 ? 30.0 : 31.0)));` : 'writeG(robotId(s));'}
     }` });
   const setMat = styleMat({ robot: false, defines: { MRT: '' }, uniforms: { uKey, uPool }, extra: 'uniform vec3 uKey; uniform vec3 uPool;\n', frag: /* glsl */ `
     void main() {

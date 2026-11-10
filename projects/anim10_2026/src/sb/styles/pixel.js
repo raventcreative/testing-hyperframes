@@ -105,8 +105,8 @@ export default function createPixel(ctx) {
       else if (p == ${PAL.bar4}) c = ${v3(C.b2)};
       else if (p == ${PAL.board} || p == ${PAL.clock} || p == ${PAL.keyboard}) c = ${RAMP('w1', 'w2', 'w3')};
       else if (p == ${PAL.winFrame}) c = ${RAMP('w1', 'w2', 'w3')};
-      else if (p == ${PAL.sky}) { c = ${v3(C.sky)}; vec2 g = floor(vW.xy * 14.0); if (h12(g) > 0.95) c = ${v3(C.w3)}; if (length(vW.xy - vec2(-0.55, 1.58)) < 0.08) c = ${v3(C.y3)}; }
-      else if (p == ${PAL.city}) { c = ${v3(C.p1)}; vec2 g = floor(vec2(vW.x * 30.0, vW.y * 22.0)); if (h12(g) > 0.6 && fract(vW.x * 30.0) > 0.4) c = ${v3(C.y2)}; }
+      else if (p == ${PAL.sky}) { c = ${v3(C.sky)}; if (h12(floor(gl_FragCoord.xy)) > 0.97) c = ${v3(C.w2)}; if (length(vW.xy - vec2(-0.62, 1.55)) < 0.075) c = ${v3(C.y3)}; }
+      else if (p == ${PAL.city}) { c = ${v3(C.p1)}; vec2 f = floor(gl_FragCoord.xy); if (mod(f.x, 2.0) < 1.0 && mod(f.y, 3.0) < 1.0 && h12(floor(f / vec2(2.0, 3.0))) > 0.45) c = ${v3(C.y2)}; }
       else if (p == ${PAL.axis} || p == ${PAL.clockHand}) c = ${v3(C.ink)};
       else if (p == ${PAL.soil}) c = ${v3(C.o1)};
       gl_FragColor = vec4(c, 1.0);

@@ -99,15 +99,15 @@ export default function createPs2(ctx) {
     uAmbUp: { value: new THREE.Vector3(0.36, 0.36, 0.44) }, uAmbDn: { value: new THREE.Vector3(0.16, 0.13, 0.12) },
     uSnap: { value: new THREE.Vector2(Wl / 2, Hl / 2) }, uFogCol: { value: new THREE.Vector3(0.12, 0.1, 0.14) }, uFog: { value: new THREE.Vector2(4.4, 11.0) } };
   const robotMat = styleMat({ robot: true, rawNormals: true, shared: ctx.rig.shared, defines: { VLIGHT: '', SNAP: '' }, uniforms: { ...L }, side: THREE.DoubleSide,
-    extra: 'varying vec3 vGouraud;\n' + PS2V, frag: /* glsl */ `
+    extra: 'varying vec3 vGouraud;\nuniform vec3 uKeyDir;\n' + PS2V, frag: /* glsl */ `
     void main() {
       RobotSurf s = robotSurf();
-      vec3 white = vec3(0.86, 0.87, 0.9), dark = vec3(0.09, 0.095, 0.115), blue = vec3(0.25, 0.65, 1.0);
+      vec3 white = vec3(0.8, 0.81, 0.84), dark = vec3(0.09, 0.095, 0.115), blue = vec3(0.25, 0.65, 1.0);
       vec3 base = white * s.white + dark * s.dark;
-      vec3 c = base * vGouraud * 1.15;
+      vec3 c = base * vGouraud;
       // per-vertex-ish specular (shiny console plastic)
       vec3 V = normalize(cameraPosition - vW); vec3 Hh = normalize(normalize(uKeyDir) + V);
-      c += vec3(0.5) * pow(max(dot(normalize(vN), Hh), 0.0), 18.0) * s.white;
+      c += vec3(0.32) * pow(max(dot(normalize(vN), Hh), 0.0), 16.0) * s.white;
       // chrome sphere-map visor (fake reflection from the view normal)
       vec3 n = normalize(vNV);
       float band = smoothstep(0.25, 0.5, n.y) * (1.0 - smoothstep(0.55, 0.85, n.y)) + 0.35 * smoothstep(0.6, 0.95, -n.x);

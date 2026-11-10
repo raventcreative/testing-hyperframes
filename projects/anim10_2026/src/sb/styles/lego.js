@@ -68,8 +68,24 @@ function voxelize(geo) {
         const k = cid(X, Y, Z); if (ext[k] || occ[k]) continue; ext[k] = 1; q.push(X, Y, Z);
       }
     }
-    // interior (enclosed) cells are solid black; dark cells mostly read dark bluish grey only where the scan said grey
+    // interior (enclosed) cells are solid black
     for (let i = 0; i < NC; i++) if (!occ[i] && !ext[i]) { occ[i] = 1; col[i] = 1; }
+    // cleanup: drop lone bricks sticking out (<= 1 solid face neighbour), fill pits (>= 4 solid face neighbours)
+    const N6 = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+    const nb = (x, y, z, f) => { let c = 0; for (const [dx, dy, dz] of N6) { const X = x + dx, Y = y + dy, Z = z + dz; if (X < 0 || Y < 0 || Z < 0 || X >= NX || Y >= NY || Z >= NZ) continue; if (f(cid(X, Y, Z))) c++; } return c; };
+    for (let pass = 0; pass < 2; pass++) {
+      const rem = [], add = [];
+      for (let y = 0; y < NY; y++) for (let z = 0; z < NZ; z++) for (let x = 0; x < NX; x++) {
+        const k = cid(x, y, z);
+        if (occ[k] && nb(x, y, z, (j) => ext[j]) > 0 && nb(x, y, z, (j) => occ[j]) <= 1) rem.push(k);
+        else if (ext[k] && nb(x, y, z, (j) => occ[j]) >= 4) {
+          const cc = [0, 0, 0, 0]; for (const [dx, dy, dz] of N6) { const X = x + dx, Y = y + dy, Z = z + dz; if (X < 0 || Y < 0 || Z < 0 || X >= NX || Y >= NY || Z >= NZ) continue; const j = cid(X, Y, Z); if (occ[j] && col[j] >= 0) cc[col[j]]++; }
+          add.push([k, cc.indexOf(Math.max(...cc))]);
+        }
+      }
+      for (const k of rem) { occ[k] = 0; ext[k] = 1; col[k] = -1; }
+      for (const [k, c] of add) { occ[k] = 1; ext[k] = 0; col[k] = c; }
+    }
     groups.push({ occ, col, ext });
   }
   return { groups, NX, NY, NZ, X0, Z0, cid };
@@ -197,9 +213,9 @@ function makeStuds(list, geo, mat, cols) {
 
 // LEGO palette for the set (sRGB)
 const SETCOL = {
-  floor: 0xa0a5a9, wall: 0xf4f4f0, trim: 0x0a3463, deskTop: 0x582a12, deskBody: 0xe4cd9e, monitor: 0x1b2a34, screen: 0x0d69ab,
+  floor: 0xa0a5a9, wall: 0xe4cd9e, trim: 0x958a73, deskTop: 0x582a12, deskBody: 0xa0a5a9, monitor: 0x1b2a34, screen: 0x0d69ab,
   bar1: 0x4b9f4a, bar2: 0xf2cd37, bar3: 0xc91a09, bar4: 0x0055bf, board: 0xf4f4f0, boardFrame: 0x0a3463, leaf: 0x4b9f4a, pot: 0xa0522d,
-  winFrame: 0xf4f4f0, sky: 0x9fd6f5, city: 0x6c6e68, clock: 0xf4f4f0, clockHand: 0x1b2a34, keyboard: 0x6c6e68, mug: 0xc91a09, axis: 0x1b2a34, soil: 0x352100,
+  winFrame: 0xf4f4f0, sky: 0x9fd6f5, city: 0x9fd6f5, clock: 0xf4f4f0, clockHand: 0x1b2a34, keyboard: 0x6c6e68, mug: 0xc91a09, axis: 0x1b2a34, soil: 0x352100,
 };
 
 const COMP = /* glsl */ `
@@ -210,7 +226,7 @@ vec3 filmic(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.
 void main() {
   vec3 c = texture2D(tC, vUv).rgb;
   float z = -viewZ(texture2D(tD, vUv).r);
-  float coc = smoothstep(0.1, 0.7, clamp(abs(1.0 / uFocus - 1.0 / z) * uFocus * 1.6, 0.0, 1.0));
+  float coc = 0.85 * smoothstep(0.1, 0.8, clamp(abs(1.0 / uFocus - 1.0 / z) * uFocus * 1.5, 0.0, 1.0));
   c = mix(c, texture2D(tDof, vUv).rgb, coc);
   c = filmic(c * 1.05);
   c = pow(c, vec3(1.0 / 2.2));
@@ -222,7 +238,7 @@ void main() {
 export default function createLego(ctx) {
   const { W, H, renderer, rig } = ctx;
   const scene = new THREE.Scene();
-  scene.background = lc(0xf4f4f0);
+  scene.background = lc(0xe4cd9e);
   scene.environment = makeEnv(renderer, { bg: 0x9aa0a8, bgK: 0.5, panels: [
     { pos: [-2.0, 3.8, 2.6], size: [3.0, 2.2], look: [0, 0.5, 0], color: 0xfff6ec, intensity: 3.2 },
     { pos: [2.8, 2.2, 2.2], size: [1.6, 2.4], look: [0, 0.5, 0], color: 0xeaf2ff, intensity: 1.6 },
@@ -282,13 +298,13 @@ export default function createLego(ctx) {
   // ---- brick-built set: palette colours, brick seams + bevels from world position, studs on top faces
   const cols = [], rm = [];
   for (let i = 0; i < NPAL; i++) { const name = Object.keys(PAL).find((k) => PAL[k] === i); cols.push(lc(SETCOL[name] ?? 0xa0a5a9)); rm.push([name === 'sky' ? 1 : 0.3, 0]); }
-  const em = cols.map(() => new THREE.Color(0, 0, 0)); em[PAL.sky] = lc(0x9fd6f5).multiplyScalar(0.9); em[PAL.screen] = lc(0x0d69ab).multiplyScalar(0.5);
+  const em = cols.map(() => new THREE.Color(0, 0, 0)); em[PAL.sky] = lc(0x9fd6f5).multiplyScalar(0.9); em[PAL.city] = em[PAL.sky].clone(); em[PAL.screen] = lc(0x0d69ab).multiplyScalar(0.5);
   const setMat = litSetMaterial({ cols, rm, em, physical: true, key: 'lego', phys: { clearcoat: 0.3, clearcoatRoughness: 0.2 }, hooks: {
     pars: `const float BS = ${S.toFixed(4)}, BH = ${HH.toFixed(4)};\nfloat gSeam = 0.0;\n`,
     normal: /* glsl */ `
       {
         vec3 wn = normalize((vec4(normal, 0.0) * viewMatrix).xyz);
-        bool side = abs(wn.y) < 0.5 && vPal != ${PAL.sky} && vPal != ${PAL.leaf} && vPal != ${PAL.screen};
+        bool side = abs(wn.y) < 0.5 && vPal != ${PAL.sky} && vPal != ${PAL.city} && vPal != ${PAL.leaf} && vPal != ${PAL.screen};
         if (side) {
           float u = abs(wn.z) > 0.5 ? vWPos.x : vWPos.z;
           float row = floor(vWPos.y / BH);
@@ -304,7 +320,7 @@ export default function createLego(ctx) {
       }`,
     albedo: /* glsl */ `
       if (vPal == ${PAL.wall}) { float row = floor(vWPos.y / BH); float bi = floor((vWPos.x + mod(row, 2.0) * 2.0 * BS) / (4.0 * BS));
-        float hb = h12(vec2(bi, row)); diffuseColor.rgb *= 0.97 + 0.05 * hb; if (hb > 0.93 && vWPos.y > 0.1) diffuseColor.rgb = vec3(0.32, 0.6, 0.85); }`,
+        float hb = h12(vec2(bi, row)); diffuseColor.rgb *= 0.97 + 0.05 * hb; if (hb > 0.9 && vWPos.y > 0.1) diffuseColor.rgb = vec3(0.29, 0.24, 0.16); }`,
     emissive: `diffuseColor.rgb *= 1.0 - 0.7 * gSeam; totalEmissiveRadiance *= 1.0 - 0.6 * gSeam;`,
   } });
   const setMesh = new THREE.Mesh(ctx.setGeo.sharp, setMat); setMesh.receiveShadow = true; setMesh.castShadow = true; scene.add(setMesh);
@@ -336,7 +352,7 @@ export default function createLego(ctx) {
   const rtH = makeRT(hw, hh, { depth: false, type: THREE.HalfFloatType });
   const down = new Pass(`uniform sampler2D tSrc; uniform vec2 uTexel; varying vec2 vUv; void main() { gl_FragColor = (texture2D(tSrc, vUv + uTexel * vec2(-1.0)) + texture2D(tSrc, vUv + uTexel) + texture2D(tSrc, vUv + uTexel * vec2(1.0, -1.0)) + texture2D(tSrc, vUv + uTexel * vec2(-1.0, 1.0))) * 0.25; }`,
     { tSrc: { value: rt.texture }, uTexel: { value: new THREE.Vector2(0.5 / W, 0.5 / H) } });
-  const blur = new Blur(Math.ceil(W / 4), Math.ceil(H / 4), THREE.HalfFloatType);
+  const blur = new Blur(hw, hh, THREE.HalfFloatType);
   const comp = new Pass(COMP, { tC: { value: rt.texture }, tD: { value: rt.depthTexture }, tDof: { value: null }, uNF: { value: new THREE.Vector2() }, uFocus: { value: 4.5 }, uRes: { value: new THREE.Vector2(W, H) } });
   const tmp = new THREE.Vector3();
   return {
@@ -348,7 +364,7 @@ export default function createLego(ctx) {
       r.shadowMap.needsUpdate = true;
       r.setRenderTarget(rt); r.clear(); r.render(scene, ctx.camera);
       down.render(r, rtH);
-      comp.u.tDof.value = blur.run(r, rtH.texture, 1.3, 2);
+      comp.u.tDof.value = blur.run(r, rtH.texture, 1.5, 2);
       comp.u.uNF.value.set(ctx.camera.near, ctx.camera.far);
       comp.u.uFocus.value = ctx.camera.position.distanceTo(tmp.set(rr.position.x, 0.5 + rr.position.y, rr.position.z));
       comp.render(r, target);

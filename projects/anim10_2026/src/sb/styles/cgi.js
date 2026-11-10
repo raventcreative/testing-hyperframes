@@ -19,7 +19,7 @@ function palette(o) {
   return { cols, rm, em };
 }
 const PALETTE = palette({
-  floor: { c: 0x07090c, r: 0.22 }, wall: { c: 0x1b2330, r: 0.85 }, trim: { c: 0x0a0c10, e: 0x2fd6ff, k: 1.4 },
+  floor: { c: 0x07090c, r: 0.22 }, wall: { c: 0x1b2330, r: 0.85 }, trim: { c: 0x0a0c10, e: 0x2fd6ff, k: 0.55 },
   deskTop: { c: 0x3a2618, r: 0.32 }, deskBody: { c: 0x101216, r: 0.45 }, monitor: { c: 0x0b0c0f, r: 0.25, m: 0.3 },
   screen: { c: 0x02040a, r: 0.2, e: 0x0b2c5a, k: 1.4 }, bar1: { c: 0x02040a, e: 0x23e0c5, k: 3.2 }, bar2: { c: 0x02040a, e: 0xffb43c, k: 3.0 },
   bar3: { c: 0x02040a, e: 0xff4f7a, k: 3.0 }, bar4: { c: 0x02040a, e: 0x3cc8ff, k: 3.6 }, board: { c: 0x0b1118, r: 0.12, m: 0.2, e: 0x07182a, k: 0.6 },
@@ -74,7 +74,7 @@ export default function createCgi(ctx) {
     { pos: [2.6, 1.2, 3.0], size: [2.0, 1.4], look: [0, 1, 0], color: 0xffd2a8, intensity: 1.0 },
   ] });
   scene.environmentIntensity = 0.9;
-  const robotMat = litRobotMaterial(ctx.rig, { physical: true, key: 'cgi', clearcoat: 0.8, clearcoatRoughness: 0.08, emiK: 4.0, eyeK: 4.5, emi: [0.25, 0.65, 1.0], eye: [0.75, 0.92, 1.0], visorRough: 0.06 });
+  const robotMat = litRobotMaterial(ctx.rig, { physical: true, key: 'cgi', clearcoat: 0.8, clearcoatRoughness: 0.08, emiK: 3.6, eyeK: 2.4, emi: [0.25, 0.65, 1.0], eye: [0.75, 0.92, 1.0], visorRough: 0.06 });
   const robot = ctx.robotMesh(robotMat); robot.castShadow = true; scene.add(robot);
   const mirror = new FloorMirror();
   const rtRefl = makeRT(Math.ceil(W / 2), Math.ceil(H / 2), { type: THREE.HalfFloatType });
@@ -127,7 +127,7 @@ export default function createCgi(ctx) {
   const hw = Math.ceil(W / 2), hh = Math.ceil(H / 2), qw = Math.ceil(W / 4), qh = Math.ceil(H / 4);
   const rtHalf = makeRT(hw, hh, { depth: false, type: THREE.HalfFloatType });
   const rtQ = makeRT(qw, qh, { depth: false, type: THREE.HalfFloatType });
-  const bright = new Pass(BRIGHT, { tSrc: { value: rt.texture }, uTexel: { value: new THREE.Vector2(1 / W, 1 / H) }, uTh: { value: 1.1 } });
+  const bright = new Pass(BRIGHT, { tSrc: { value: rt.texture }, uTexel: { value: new THREE.Vector2(1 / W, 1 / H) }, uTh: { value: 1.3 } });
   const down = new Pass(DOWN, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2(1 / hw, 1 / hh) } });
   const bl1 = new Blur(hw, hh, THREE.HalfFloatType), bl2 = new Blur(qw, qh, THREE.HalfFloatType), bl3 = new Blur(Math.ceil(qw / 2), Math.ceil(qh / 2), THREE.HalfFloatType);
   const dofDown = new Pass(DOWN, { tSrc: { value: rt.texture }, uTexel: { value: new THREE.Vector2(1 / W, 1 / H) } });

@@ -50,7 +50,6 @@ export class StyleBot {
         return m;
       },
       get robotVisible() { return self.rig.visible !== false; },
-      cache: {},
     };
     this.styles = {};
     for (const id of styles) this.styles[id] = FACTORIES[id](this.ctx);
@@ -72,6 +71,7 @@ export class StyleBot {
   }
 
   setStyle(id) { if (!this.styles[id]) throw new Error('StyleBot: unknown style ' + id); this.style = id; }
+  // reel time in seconds: drives line boil (glow 8 fps, chalk 6 fps) and film grain; same t -> same frame
   setTime(t) { this.t = t || 0; }
   setState(s) { applyState(this.rig, s || {}); if (s && s.t != null) this.t = s.t; }
 

@@ -13,6 +13,7 @@ const OUT = path.resolve(ROOT, process.env.OUT || 'production/lookdev');
 const ALL = ['lego', 'glow', 'comic', 'chalk', 'pixel', 'line', 'explainer', 'ps2', 'flat', 'cgi'];
 const NAMES = { lego: 'Lego', glow: 'Glow Sketch', comic: 'Comic', chalk: 'Chalkboard', pixel: 'Pixel Art', line: 'Minimal Line', explainer: 'Explainer 3D', ps2: 'PS2 Style', flat: 'Flat Vector', cgi: 'CGI Motion' };
 const args = process.argv.slice(2);
+const POSE2 = args.includes('--pose2');
 const ids = args.filter((a) => ALL.includes(a));
 const only = ids.length > 0;
 const list = only ? ids : ALL;
@@ -42,9 +43,13 @@ const waitPort = async () => { for (let i = 0; i < 50; i++) { try { const r = aw
       console.log(`${id.padEnd(10)} ${r.ms.toFixed(0).padStart(5)} ms   (${r.all.map((x) => x.toFixed(0)).join(' / ')})`);
       shots.push({ label: `${ALL.indexOf(id) + 1}. ${NAMES[id]}`, sub: `${r.ms.toFixed(0)} ms`, png: r.png });
     }
+    if (POSE2) for (const id of list) { save(`pose2_${id}.png`, await page.evaluate((id) => window.shootPose2(id), id)); console.log('pose2', id); }
     if (!only) {
       const sheet = await page.evaluate((items) => window.makeSheet(items, 5), shots);
       save('styles_sheet.png', sheet);
+      const ck = await page.evaluate((ids) => window.checks(ids), ALL);
+      console.log('determinism (same state rendered twice, other styles in between):', JSON.stringify(ck.det));
+      console.log('hook flash (one frame per style, switching every frame), ms:', ck.flash.map(([i, ms]) => `${i}:${ms}`).join(' '));
       const [a, b] = (process.env.SWEEP || 'pixel,line').split(',');
       for (const u of [0.3, 0.5, 0.7]) {
         const r = await page.evaluate(([a, b, u]) => window.shootSweep(a, b, u, 18), [a, b, u]);

@@ -154,7 +154,20 @@ b2 = prompt_slide(8, "Choose where", "to sell it.",
      ("Traffic", "Does it bring buyers to you?"), ("Payouts", "Paid to your local bank?")])),
   "", label="Bonus 02")
 
+MATH = ('<div class="mth">'
+  '<div class="mr"><b>Rp150k <i>×</i> 20 sales</b><span>= Rp3 juta</span></div>'
+  '<div class="mr on"><b>Rp300k <i>×</i> 10 sales</b><span>= Rp3 juta</span></div>'
+  '<div class="mr"><b>Rp600k <i>×</i> 5 sales</b><span>= Rp3 juta</span></div>'
+  '<div class="fn"><div><small>Visitors</small><b>500</b></div><i>→</i><div><small>Conversion</small><b>2%</b></div><i>→</i><div class="hi"><small>Sales</small><b>10</b></div></div>'
+  '</div>')
+b3 = prompt_slide(9, "Work back from your", "sales target.",
+  "Pick a price, then work out the sales you need for Rp3 juta a day.",
+  [("Daily target", "Rp3 juta, before fees and refunds."), ("Your price", "For example, Rp300k."),
+   ("Conversion rate", "Your real rate, or a test estimate."), ("Traffic source", "Where will the right buyers find you?")],
+  "My daily sales target is Rp3 juta before fees. My price is [price], my store conversion rate is [rate], and my traffic comes from [sources].\n\nWork out how many sales and visitors I need per day. Show the math and compare a few price points. If I don't have conversion data, label every assumption.\n\nSuggest one simple test to check whether people will buy.",
+  ("See the math behind the target", MATH), "", extra_first=True, label="Bonus 03")
+
 CSS = (D / "style.css").read_text()
 (D / "carousel.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Claude Side Hustle</title><style>{CSS}</style></head><body>
-{cover}{overview}{p1}{p2}{p3}{p4}{p5}{p6}{b1}{b2}</body></html>''')
+{cover}{overview}{p1}{p2}{p3}{p4}{p5}{p6}{b1}{b2}{b3}</body></html>''')
 print("ok")

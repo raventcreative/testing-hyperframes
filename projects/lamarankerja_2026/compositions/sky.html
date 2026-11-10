@@ -1,0 +1,51 @@
+<template>
+  <style>
+    #sk-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #sk-warm { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; opacity: 0;
+      background: radial-gradient(ellipse 900px 520px at 540px 980px, rgba(255,176,102,.55), rgba(255,140,90,.18) 45%, rgba(255,140,90,0) 70%),
+                  linear-gradient(180deg, rgba(70,110,190,.0) 0%, rgba(255,190,140,.16) 60%, rgba(255,190,140,0) 100%); }
+    #sk-sun { position: absolute; left: 430px; top: 0; width: 220px; height: 220px; border-radius: 50%; opacity: 0;
+      background: radial-gradient(circle at 45% 40%, #fff6dc, #ffd27a 55%, #ffb05c); box-shadow: 0 0 80px 30px rgba(255,190,110,.35), 0 0 180px 60px rgba(255,160,90,.18); }
+    #sk-glow { position: absolute; left: 700px; top: 240px; width: 270px; height: 270px; border-radius: 50%; background: radial-gradient(circle, rgba(255,231,166,.18), rgba(255,231,166,0) 65%); }
+    #sk-moon { position: absolute; left: 760px; top: 300px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 38% 35%, #fff9e8, #ffe7a6 60%, #f4cf72);
+      -webkit-mask: radial-gradient(circle at 92% 22%, transparent 47%, #000 48.5%); mask: radial-gradient(circle at 92% 22%, transparent 47%, #000 48.5%);
+      filter: drop-shadow(0 0 26px rgba(255,231,166,.45)); }
+    .sk-star { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #e3edfa; box-shadow: 0 0 10px rgba(227,237,250,.9); }
+  </style>
+  <div id="sk-root" data-composition-id="sky" data-width="1080" data-height="1920">
+    <div id="sk-stars"></div><div id="sk-warm"></div><div id="sk-sun"></div><div id="sk-glow"></div><div id="sk-moon"></div>
+  </div>
+  <script>
+    (function () {
+      // THE SKY (persistent, hf-seek) behind every scene: the NIGHT (twinkling stars, a crescent moon drifting) from frame 0 through
+      // s05; on s06 ("Tapi ingat, wawancaranya…") the morning comes: the moon sinks and fades, the stars go out, a warm dawn glow rises
+      // from the horizon and a soft sun climbs to the hero zone's top (you wake up, your applications already went out). Pure f(t).
+      const SC = window.VO_SCENES, D = window.VO_SCENES.reduce((a, s) => Math.max(a, s.start + s.dur), 0);
+      const S = (id) => SC.find((s) => s.id === id);
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const io = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const $ = (id) => document.getElementById(id);
+      const set = (el, k, v) => { if (el.style[k] !== v) el.style[k] = v; };
+      let seed = 7; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+      const ST = [];
+      for (let i = 0; i < 30; i++) ST.push({ x: Math.round(40 + rnd() * 1000), y: Math.round(270 + rnd() * 480), s: 0.5 + rnd() * 1.1, b: 0.3 + rnd() * 0.5, ph: rnd() * 6.28 });
+      $("sk-stars").innerHTML = ST.map((s, i) => `<i class="sk-star" id="sk-s${i}" style="left:${s.x}px;top:${s.y}px"></i>`).join("");
+      const T0 = S("s06").start - 0.1, T1 = T0 + 1.2;   // dawn
+      function draw(t) {
+        const d = io((t - T0) / (T1 - T0));
+        ST.forEach((s, i) => { const tw = 0.55 + 0.45 * Math.sin(t * 2.1 + s.ph); set($("sk-s" + i), "opacity", (s.b * tw * (1 - d)).toFixed(3)); set($("sk-s" + i), "transform", `scale(${s.s.toFixed(2)})`); });
+        const my = -10 * Math.sin(t * 0.4) + 300 * d;
+        set($("sk-moon"), "transform", `translateY(${my.toFixed(1)}px) rotate(${(-6 + 6 * Math.sin(t * 0.3)).toFixed(2)}deg)`);
+        set($("sk-moon"), "opacity", (1 - d).toFixed(3)); set($("sk-glow"), "opacity", (1 - d).toFixed(3));
+        set($("sk-glow"), "transform", `translateY(${my.toFixed(1)}px)`);
+        set($("sk-warm"), "opacity", (0.95 * d).toFixed(3));
+        const sy = 940 - 640 * d; set($("sk-sun"), "opacity", (one(d * 1.4)).toFixed(3)); set($("sk-sun"), "transform", `translateY(${sy.toFixed(1)}px)`);
+      }
+      draw(0);
+      window.addEventListener("hf-seek", (e) => draw(e.detail.time + (window.__T0 || 0)));
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02);
+      window.__timelines["sky"] = tl;
+    })();
+  </script>
+</template>

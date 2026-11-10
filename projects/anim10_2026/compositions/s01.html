@@ -1,10 +1,222 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-4z0v" id="root" data-composition-id="s01" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; font-family: Poppins, sans-serif; }
+    .s01-a { position: absolute; }
+    /* ---------- HUD tab inside the stage (top centre): flicks through the 10 style names in sync with the stage flicker */
+    #s01-hud { left: 324px; top: 476px; width: 432px; height: 58px; border-radius: 29px; overflow: hidden;
+      background: rgba(8,14,46,.86); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.42), 0 12px 26px -12px rgba(0,0,0,.75); }
+    #s01-hdot { left: 22px; top: 23px; width: 12px; height: 12px; border-radius: 50%; background: #01ccf7; box-shadow: 0 0 10px rgba(1,204,247,.9); }
+    #s01-rows { left: 46px; right: 14px; top: 0; bottom: 0; overflow: hidden; }
+    .s01-row { position: absolute; left: 0; right: 0; top: 0; height: 58px; display: flex; align-items: center; white-space: nowrap; }
+    .s01-row b { width: 33px; font: 700 25px/1 Poppins, sans-serif; color: #01ccf7; letter-spacing: -0.01em; }
+    .s01-row i { font: 700 18px/1 Poppins, sans-serif; color: rgba(227,237,250,.5); font-style: normal; margin-top: 3px; }
+    .s01-row s { width: 1.5px; height: 26px; margin: 0 15px; background: rgba(255,255,255,.2); }
+    .s01-row em { font: 700 30px/1 Poppins, sans-serif; color: #ffffff; font-style: normal; letter-spacing: -0.01em; }
+    #s01-hbar { left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, #6adfff, #01ccf7); transform-origin: 0 50%; box-shadow: 0 0 8px rgba(1,204,247,.9); }
+    #s01-hring { left: 324px; top: 476px; width: 432px; height: 58px; border-radius: 29px; box-shadow: 0 0 0 2px #01ccf7, 0 0 22px rgba(1,204,247,.75); }
+    /* ---------- headline lockup above the stage: big cyan "10" + stacked GAYA / ANIMASI (zone y 300–440) */
+    #s01-hl { left: 318px; top: 296px; width: 450px; height: 150px; }
+    #s01-tenw { left: 0; top: 0; width: 150px; height: 160px; }
+    .s01-ten { position: absolute; left: 0; top: 0; font: 700 160px/1 Poppins, sans-serif; letter-spacing: -0.05em; white-space: nowrap; }
+    #s01-ten { background: linear-gradient(100deg, #01ccf7 0%, #6adfff 38%, #ffffff 50%, #6adfff 62%, #01ccf7 100%) 100% 0 / 300% 100% no-repeat;
+      -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 22px rgba(1,204,247,.45)); }
+    .s01-gh { color: rgba(1,204,247,.55); }
+    #s01-tenf { color: #ffffff; }
+    .s01-wd { left: 170px; height: 64px; overflow: hidden; white-space: nowrap; font: 700 64px/1 Poppins, sans-serif; letter-spacing: -0.01em; color: #ffffff; }
+    .s01-wd span { display: inline-block; }
+    #s01-w1 { top: 7px; }
+    #s01-w2 { top: 82px; }
+    #s01-shock { left: 72px; top: 76px; width: 0; height: 0; }
+    #s01-shock i { position: absolute; left: -100px; top: -100px; width: 200px; height: 200px; border-radius: 50%; border: 3px solid #6adfff; box-shadow: 0 0 18px rgba(1,204,247,.6); }
+    .s01-ln { position: absolute; left: 72px; top: 76px; width: 0; height: 0; }
+    .s01-ln i { position: absolute; left: 0; top: -1.5px; width: 52px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, rgba(106,223,255,0), #6adfff); transform-origin: 0 50%; }
+    /* ---------- divider + "SEMUANYA PAKAI [Claude]" block (right side) */
+    #s01-div { left: 611px; top: 316px; width: 2px; height: 116px; border-radius: 1px; background: linear-gradient(180deg, rgba(227,237,250,0), rgba(227,237,250,.42) 30%, rgba(106,223,255,.55) 70%, rgba(227,237,250,0)); transform-origin: 50% 50%; }
+    #s01-cl { left: 644px; top: 309px; width: 320px; height: 130px; }
+    #s01-cll { left: 4px; top: 0; white-space: nowrap; font: 700 20px/1 Poppins, sans-serif; letter-spacing: .2em; color: #6adfff; }
+    #s01-cll span { display: inline-block; white-space: pre; }
+    #s01-clc { left: 0; top: 31px; height: 92px; padding: 0 30px 0 17px; border-radius: 46px; display: flex; align-items: center; gap: 14px; white-space: nowrap;
+      background: linear-gradient(160deg, rgba(26,44,96,.95), rgba(8,14,46,.95)); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.15), 0 16px 30px -12px rgba(0,0,0,.75), 0 0 26px -8px rgba(1,204,247,.4); }
+    #s01-clm { width: 58px; height: 58px; display: block; }
+    #s01-clx { overflow: hidden; height: 66px; display: flex; align-items: center; }
+    #s01-clt { display: inline-block; font: 700 50px/1 Poppins, sans-serif; letter-spacing: -0.01em; color: #ffffff; }
+    #s01-clr { left: -6px; top: 25px; width: 314px; height: 104px; border-radius: 52px; box-shadow: 0 0 0 2px #6adfff, 0 0 24px rgba(1,204,247,.6); }
+    .s01-sp { position: absolute; width: 0; height: 0; }
+    .s01-sp svg { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; overflow: visible; }
+    /* ---------- "nomor 10." pointer above strip chip 10 (centre x 909, chip top y 316) */
+    #s01-arr { left: 877.5px; top: 233px; width: 63px; height: 72px; }
+    #s01-arr svg { display: block; width: 63px; height: 72px; overflow: visible; filter: drop-shadow(0 0 10px rgba(1,204,247,.7)); }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div class="s01-a" id="s01-hring"></div>
+    <div class="s01-a" id="s01-hud"><div class="s01-a" id="s01-hdot"></div><div class="s01-a" id="s01-rows"></div><div class="s01-a" id="s01-hbar"></div></div>
+    <div class="s01-a" id="s01-hl">
+      <div class="s01-a" id="s01-shock"><i id="s01-shi"></i></div>
+      <div id="s01-lines"></div>
+      <div class="s01-a" id="s01-tenw">
+        <div class="s01-ten s01-gh" id="s01-g2">10</div><div class="s01-ten s01-gh" id="s01-g1">10</div>
+        <div class="s01-ten" id="s01-ten">10</div><div class="s01-ten" id="s01-tenf">10</div>
+      </div>
+      <div class="s01-a s01-wd" id="s01-w1"></div>
+      <div class="s01-a s01-wd" id="s01-w2"></div>
+    </div>
+    <div class="s01-a" id="s01-div"></div>
+    <div class="s01-a" id="s01-cl">
+      <div class="s01-a" id="s01-clr"></div>
+      <div class="s01-a" id="s01-cll"></div>
+      <div class="s01-a" id="s01-clc"><img id="s01-clm" src="assets/icons/lobe-claude-color.svg" alt="Claude"><span id="s01-clx"><span id="s01-clt">Claude</span></span></div>
+      <div id="s01-sps"></div>
+    </div>
+    <div class="s01-a" id="s01-arr"><svg viewBox="0 0 56 64"><defs><linearGradient id="s01-ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6adfff"/><stop offset="1" stop-color="#01ccf7"/></linearGradient></defs>
+      <path d="M20 4 h16 a4 4 0 0 1 4 4 v20 h9.5 a3 3 0 0 1 2.2 5 l-21.5 26 a3 3 0 0 1 -4.4 0 l-21.5 -26 a3 3 0 0 1 2.2 -5 h9.5 v-20 a4 4 0 0 1 4 -4 z" fill="url(#s01-ag)" stroke="#ffffff" stroke-opacity=".55" stroke-width="2" stroke-linejoin="round"/></svg></div>
+  </div>
   <script>
     (function () {
+      // s01 HOOK "Robot ini aku ubah jadi 10 gaya animasi, semuanya pakai Claude. Tahan sampai nomor 10."
+      // · while the stage flickers through the 10 styles, a HUD tab inside the stage rolls the style names (01/10 … 10/10) in sync
+      // · "10": a big cyan 10 SLAMS above the stage (zoom ghosts, white flash, shock ring, speed lines); GAYA / ANIMASI rise letter by letter
+      // · "Semuanya": the lockup glides left, a divider draws, "SEMUANYA PAKAI" tracks in · "Claude.": the Claude chip pops (mark spins in, sparkles)
+      // · just before "Tahan": everything lifts away (the strip drops in at 4.82) · "nomor 10.": a cyan pointer bounces above strip chip 10.
+      const D = 5.9667, R = window.ROUNDS, H = window.HOOK;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.957);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+
+      // ---------------------------------------------------------------- HUD: style names in sync with the stage flicker
+      // stage.html: flicker step k starts at FL0 + k*FLD with a 0.11 s re-render sweep; order = ROUNDS[k]
+      const FL0 = H.tRobot + 0.15, FLD = (H.tAnimasi - FL0) / 10;
+      $("s01-rows").innerHTML = R.map((r, k) => `<div class="s01-row" id="s01-r${k}"><b>${String(r.k).padStart(2, "0")}</b><i>/10</i><s></s><em>${r.name}</em></div>`).join("");
+      const hud = $("s01-hud"), hdot = $("s01-hdot"), hbar = $("s01-hbar"), hring = $("s01-hring");
+      I(hud, { opacity: 0, scale: 0.72, y: 10, transformOrigin: "50% 50%" });
+      ft(hud, { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, FL0 - 0.08);
+      ft(hud, { scale: 0.72, y: 10 }, { scale: 1, y: 0, duration: 0.3, ease: "back.out(2.2)" }, FL0 - 0.08);
+      I(hbar, { scaleX: 0 });
+      I(hring, { opacity: 0, scale: 1, transformOrigin: "50% 50%" });
+      R.forEach((r, k) => {
+        const row = $("s01-r" + k), tk = FL0 + k * FLD + 0.035;                    // name changes mid re-render sweep
+        I(row, { yPercent: k === 0 ? 0 : 105 });
+        if (k > 0) {
+          ft(row, { yPercent: 105 }, { yPercent: 0, duration: 0.12, ease: "power3.out" }, tk);
+          ft($("s01-r" + (k - 1)), { yPercent: 0 }, { yPercent: -105, duration: 0.1, ease: "power2.in" }, tk - 0.02);
+        }
+        ft(hbar, { scaleX: k / 10 }, { scaleX: (k + 1) / 10, duration: 0.12, ease: "power2.out" }, tk);
+        ft(hdot, { scale: 1.9 }, { scale: 1, duration: 0.16, ease: "power2.out" }, tk);
+      });
+      I(hdot, { scale: 1 });
+      // flicker lands on "animasi.": ring flash, then the tab tucks away
+      ft(hring, { opacity: 0, scale: 1 }, { opacity: 1, scale: 1.04, duration: 0.08, ease: "power2.out" }, H.tAnimasi - 0.03);
+      ft(hring, { opacity: 1, scale: 1.04 }, { opacity: 0, scale: 1.12, duration: 0.3, ease: "power2.out" }, H.tAnimasi + 0.05);
+      ft(hud, { opacity: 1 }, { opacity: 0, duration: 0.18, ease: "power2.in" }, 2.66);
+      ft(hud, { scale: 1, y: 0 }, { scale: 0.9, y: -8, duration: 0.18, ease: "power2.in" }, 2.66);
+
+      // ---------------------------------------------------------------- "10" SLAM
+      const T10 = H.t10, hl = $("s01-hl"), ten = $("s01-ten"), tenf = $("s01-tenf"), g1 = $("s01-g1"), g2 = $("s01-g2"), tenw = $("s01-tenw");
+      const TI = T10 + 0.02;                                                      // impact frame
+      [ten, tenf, g1, g2].forEach((e) => I(e, { opacity: 0, scale: 1, transformOrigin: "46% 56%" }));
+      I(tenw, { x: 0, y: 0 });
+      tl.set(ten, { opacity: 1 }, TI - 0.13);
+      ft(ten, { scale: 2.3 }, { scale: 1, duration: 0.13, ease: "power3.in" }, TI - 0.13);
+      ft(ten, { scale: 1 }, { scale: 1.07, duration: 0.07, ease: "power2.out", yoyo: true, repeat: 1 }, TI + 0.01);
+      // zoom ghosts trail behind the slam
+      tl.set(g1, { opacity: 0.5 }, TI - 0.1); ft(g1, { scale: 2.9 }, { scale: 1, duration: 0.13, ease: "power3.in" }, TI - 0.1);
+      ft(g1, { opacity: 0.5 }, { opacity: 0, duration: 0.12, ease: "power1.out" }, TI + 0.03);
+      tl.set(g2, { opacity: 0.28 }, TI - 0.08); ft(g2, { scale: 3.5 }, { scale: 1, duration: 0.13, ease: "power3.in" }, TI - 0.08);
+      ft(g2, { opacity: 0.28 }, { opacity: 0, duration: 0.12, ease: "power1.out" }, TI + 0.05);
+      // white impact flash
+      tl.set(tenf, { opacity: 0.95 }, TI); ft(tenf, { opacity: 0.95 }, { opacity: 0, duration: 0.26, ease: "power2.out" }, TI + 0.02);
+      ft(tenf, { scale: 1 }, { scale: 1.07, duration: 0.07, ease: "power2.out", yoyo: true, repeat: 1 }, TI + 0.01);
+      // tiny camera-shake on the lockup
+      [[0, 0, -6, 3], [-6, 3, 5, -2], [5, -2, -3, 1], [-3, 1, 0, 0]].forEach(([x0, y0, x1, y1], i) =>
+        ft(tenw, { x: x0, y: y0 }, { x: x1, y: y1, duration: 0.033, ease: "none" }, TI + i * 0.033));
+      // shock ring + speed lines
+      const shi = $("s01-shi");
+      I(shi, { opacity: 0, scale: 0.35 });
+      tl.set(shi, { opacity: 0.95 }, TI);
+      ft(shi, { scale: 0.35 }, { scale: 1.6, duration: 0.36, ease: "power3.out" }, TI);
+      ft(shi, { opacity: 0.95 }, { opacity: 0, duration: 0.36, ease: "power1.out" }, TI);
+      const LN = [-168, -140, -108, -72, -36, 0, 24, 156, 180, 204];
+      $("s01-lines").innerHTML = LN.map((a, i) => `<div class="s01-ln" style="transform:rotate(${a}deg)"><i id="s01-l${i}"></i></div>`).join("");
+      LN.forEach((a, i) => {
+        const l = $("s01-l" + i), r0 = 78 + (i % 3) * 10;
+        I(l, { x: r0, opacity: 0, scaleX: 1 });
+        tl.set(l, { opacity: 1 }, TI);
+        ft(l, { x: r0, scaleX: 1.2 }, { x: r0 + 92, scaleX: 0.2, duration: 0.36, ease: "power2.out" }, TI);
+        ft(l, { opacity: 1 }, { opacity: 0, duration: 0.36, ease: "power1.in" }, TI);
+      });
+      // sheen across the 10 once the line is complete
+      I(ten, { backgroundPosition: "100% 0" });
+      ft(ten, { backgroundPosition: "100% 0" }, { backgroundPosition: "0% 0", duration: 0.7, ease: "power2.inOut" }, 2.78);
+
+      // ---------------------------------------------------------------- GAYA / ANIMASI rise letter by letter
+      const word = (el, txt, t0, pre) => {
+        el.innerHTML = [...txt].map((c, i) => `<span id="${pre}${i}">${c}</span>`).join("");
+        [...txt].forEach((c, i) => {
+          const s = $(pre + i), t = t0 + i * 0.026;
+          I(s, { yPercent: 112, rotation: 7, transformOrigin: "0% 100%" });
+          ft(s, { yPercent: 112, rotation: 7 }, { yPercent: 0, rotation: 0, duration: 0.38, ease: "power4.out" }, t);
+        });
+      };
+      word($("s01-w1"), "GAYA", 2.088 - 0.07, "s01-a");
+      word($("s01-w2"), "ANIMASI", H.tAnimasi - 0.07, "s01-b");
+
+      // ---------------------------------------------------------------- "Semuanya pakai Claude."
+      const TS = 3.3, TC = H.tClaude;
+      I(hl, { x: 0, y: 0, opacity: 1 });
+      ft(hl, { x: 0 }, { x: -183, duration: 0.5, ease: "power3.inOut" }, TS - 0.14);
+      const dv = $("s01-div");
+      I(dv, { scaleY: 0, opacity: 1 });
+      ft(dv, { scaleY: 0 }, { scaleY: 1, duration: 0.42, ease: "power3.out" }, TS + 0.12);
+      const cll = $("s01-cll"), LBL = "SEMUANYA PAKAI";
+      cll.innerHTML = [...LBL].map((c, i) => `<span id="s01-c${i}">${c}</span>`).join("");
+      [...LBL].forEach((c, i) => {
+        const s = $("s01-c" + i), t = TS + 0.1 + i * 0.022;
+        I(s, { opacity: 0, y: 12 });
+        ft(s, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, t);
+      });
+      const cl = $("s01-cl"), clc = $("s01-clc"), clm = $("s01-clm"), clt = $("s01-clt"), clr = $("s01-clr");
+      I(cl, { y: 0, opacity: 1 });
+      I(clc, { opacity: 0, scale: 0.45, transformOrigin: "46px 50%" });
+      tl.set(clc, { opacity: 1 }, TC - 0.07);
+      ft(clc, { scale: 0.45 }, { scale: 1, duration: 0.44, ease: "back.out(2.1)" }, TC - 0.07);
+      I(clm, { rotation: -160, scale: 0.2, transformOrigin: "50% 50%" });
+      ft(clm, { rotation: -160, scale: 0.2 }, { rotation: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" }, TC - 0.06);
+      ft(clm, { rotation: 0 }, { rotation: 45, duration: 0.3, ease: "sine.inOut" }, TC + 0.56);
+      I(clt, { x: -60, opacity: 0 });
+      ft(clt, { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.38, ease: "power4.out" }, TC + 0.02);
+      I(clr, { opacity: 0, scale: 1, transformOrigin: "50% 50%" });
+      tl.set(clr, { opacity: 0.9 }, TC + 0.08);
+      ft(clr, { scale: 1 }, { scale: 1.14, duration: 0.45, ease: "power2.out" }, TC + 0.08);
+      ft(clr, { opacity: 0.9 }, { opacity: 0, duration: 0.45, ease: "power2.in" }, TC + 0.08);
+      // sparkles around the chip (4-point stars)
+      const SP = [[-14, 40, -30, -16, 1], [84, 10, 10, -24, 0], [282, 24, 26, -20, 1], [312, 104, 30, 10, 0], [150, 140, 6, 22, 1], [-22, 124, -26, 16, 0]];
+      $("s01-sps").innerHTML = SP.map((p, i) => `<div class="s01-sp" id="s01-s${i}" style="left:${p[0]}px;top:${p[1]}px"><svg viewBox="-11 -11 22 22"><path d="M0 -11 C1.2 -2.4 2.4 -1.2 11 0 C2.4 1.2 1.2 2.4 0 11 C-1.2 2.4 -2.4 1.2 -11 0 C-2.4 -1.2 -1.2 -2.4 0 -11 Z" fill="${p[4] ? "#ffffff" : "#6adfff"}"/></svg></div>`).join("");
+      SP.forEach((p, i) => {
+        const s = $("s01-s" + i), t = TC + 0.06 + (i % 3) * 0.04;
+        I(s, { scale: 0, x: 0, y: 0, rotation: 0 });
+        ft(s, { scale: 0 }, { scale: i % 2 ? 0.8 : 1.15, duration: 0.18, ease: "back.out(3)" }, t);
+        ft(s, { scale: i % 2 ? 0.8 : 1.15 }, { scale: 0, duration: 0.3, ease: "power2.in" }, t + 0.24);
+        ft(s, { x: 0, y: 0, rotation: 0 }, { x: p[2], y: p[3], rotation: 90, duration: 0.54, ease: "power2.out" }, t);
+      });
+
+      // ---------------------------------------------------------------- lift away before "Tahan" (strip drops in at 4.82)
+      const TX = H.tTahan - 0.27;
+      ft(cl, { y: 0, opacity: 1 }, { y: -40, opacity: 0, duration: 0.2, ease: "power2.in" }, TX);
+      ft(dv, { scaleY: 1 }, { scaleY: 0, duration: 0.18, ease: "power2.in" }, TX + 0.01);
+      ft(hl, { y: 0, opacity: 1 }, { y: -40, opacity: 0, duration: 0.2, ease: "power2.in" }, TX + 0.03);
+
+      // ---------------------------------------------------------------- "nomor 10.": pointer above strip chip 10
+      const arr = $("s01-arr"), TA = H.t10b - 0.08;
+      I(arr, { opacity: 0, y: -34, scale: 0.4, transformOrigin: "50% 100%" });
+      ft(arr, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, TA);
+      ft(arr, { y: -34, scale: 0.4 }, { y: 0, scale: 1, duration: 0.18, ease: "back.out(2.4)" }, TA);
+      ft(arr, { y: 0 }, { y: 9, duration: 0.068, ease: "sine.inOut", yoyo: true, repeat: 3 }, TA + 0.18);
+      ft(arr, { opacity: 1 }, { opacity: 0, duration: 0.07, ease: "power1.in" }, D - 0.085);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s01"] = tl;
     })();

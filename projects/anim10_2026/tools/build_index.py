@@ -109,9 +109,8 @@ html = f"""<!doctype html>
         tl.fromTo("#glow-a", {{ x: 0, y: 0 }}, {{ x: 90, y: 70, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#glow-b", {{ x: 0, y: 0 }}, {{ x: -110, y: -60, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
-        tl.set("#brandlogo", {{ opacity: 0 }}, 0);
-        tl.fromTo("#brandlogo", {{ opacity: 0 }}, {{ opacity: 0.95, duration: 0.4, ease: "power2.out", immediateRender: false }}, 0.02);
-        (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
+        tl.set("#brandlogo", {{ opacity: 0.95 }}, 0);
+                (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;
       }})();

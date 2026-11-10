@@ -1,10 +1,125 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-wwpg" id="root" data-composition-id="r3" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    /* everything lives inside the stage screen (x 130–950, y 450–1430) */
+    #r3-clip { position: absolute; left: 130px; top: 450px; width: 820px; height: 980px; overflow: hidden; border-radius: 34px; }
+    .r3-a { position: absolute; left: 0; top: 0; opacity: 0; }
+    .r3-a svg { position: absolute; left: 0; top: 0; overflow: visible; }
+    #r3-pow { left: -34px; top: 322px; width: 300px; height: 260px; transform-origin: 62% 62%; }
+    #r3-pow text, #r3-bub text, #r3-cap { font-family: Poppins, sans-serif; font-weight: 700; }
+    /* gutters: white band with black ink on both edges */
+    .r3-gut { position: absolute; background: #f8f4ea; opacity: 0; box-shadow: 0 0 0 1px rgba(16,16,16,.25); }
+    #r3-g1 { left: -40px; top: 299px; width: 920px; height: 36px; border-top: 7px solid #101010; border-bottom: 7px solid #101010; transform-origin: 0 50%; }
+    #r3-g2 { left: 450px; top: -30px; width: 36px; height: 340px; border-left: 7px solid #101010; border-right: 7px solid #101010; transform-origin: 50% 0; }
+    #r3-cap { left: 22px; top: 66px; padding: 7px 14px 8px; background: #ffe03a; border: 4px solid #101010; color: #101010; font-size: 24px; line-height: 1.1;
+      letter-spacing: 0.01em; box-shadow: 5px 5px 0 #101010; transform-origin: 0 0; white-space: nowrap; }
+    #r3-bub { left: 396px; top: 70px; width: 410px; height: 280px; transform-origin: 82px 264px; }
+  </style>
+  <div id="root" data-composition-id="r3" data-width="1080" data-height="1920">
+    <div id="r3-clip">
+      <div class="r3-a" id="r3-pow"></div>
+      <div class="r3-a" id="r3-tl"></div>
+      <div class="r3-a" id="r3-tr"></div>
+      <div class="r3-gut" id="r3-g2"></div>
+      <div class="r3-gut" id="r3-g1"></div>
+      <div class="r3-a" id="r3-cap">SEMENTARA ITU,<br>DI KANTOR...</div>
+      <div class="r3-a" id="r3-bub"></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // r3 COMIC — "Tiga, Comic, lengkap sama panel dan balon kata."
+      // Limited animation on 12 fps steps (like the stage's comic pose), hand-inked shapes, a touch of line boil.
+      // POW stinger (sweep end, the robot's punch) -> a POW! burst with action lines erupts beside the punching fist ·
+      // "panel" -> two white gutters slice the stage into a 3-panel page, a yellow narration box drops in ·
+      // gutters slide out on "dan" · "balon kata" -> a speech balloon pops, tail to the robot's head: "HALO! AKU ROBOT AI PRENEUR!".
+      const R = window.ROUNDS[2], ST = R.start, DUR = R.dur;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.19);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const word = (txt) => { const w = window.VO_WORDS.find((x) => x[0] === txt && x[1] >= ST); return w ? w[1] : null; };
+      let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+
+      // ---------------------------------------------------------------- POW! burst (hand-inked starburst, halftone, action lines)
+      const burst = (cx, cy, rx, ry, n, inner, jit) => { const p = [];
+        for (let i = 0; i < n * 2; i++) { const a = (i / (n * 2)) * Math.PI * 2 - Math.PI / 2, out = i % 2 === 0, k = out ? 1 - jit * rnd() : inner + jit * 0.5 * (rnd() - 0.5);
+          p.push(`${(cx + Math.cos(a) * rx * k).toFixed(1)},${(cy + Math.sin(a) * ry * k).toFixed(1)}`); }
+        return p.join(" "); };
+      const lines = []; for (let i = 0; i < 11; i++) { const a = (-200 + i * 22 + (rnd() - 0.5) * 8) * Math.PI / 180, r0 = 1.12 + rnd() * 0.08, r1 = 1.38 + rnd() * 0.16, w = 0.035 + rnd() * 0.02;
+        const P = (r, da) => `${(150 + Math.cos(a + da) * 128 * r).toFixed(1)},${(130 + Math.sin(a + da) * 104 * r).toFixed(1)}`;
+        lines.push(`<polygon points="${P(r0, -w)} ${P(r1, 0)} ${P(r0, w)}" fill="#101010"/>`); }
+      $("r3-pow").innerHTML = `<svg width="300" height="260"><defs><pattern id="r3-dots" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
+          <circle cx="4.5" cy="4.5" r="2.1" fill="#e08a00" opacity=".55"/></pattern></defs>
+        ${lines.join("")}
+        <polygon points="${burst(150, 130, 128, 104, 13, 0.7, 0.16)}" fill="#ffd21f" stroke="#101010" stroke-width="5.5" stroke-linejoin="round"/>
+        <polygon points="${burst(150, 132, 92, 72, 11, 0.74, 0.12)}" fill="#f2381f" stroke="#101010" stroke-width="3" stroke-linejoin="round"/>
+        <polygon points="${burst(150, 132, 92, 72, 11, 0.74, 0.0)}" fill="url(#r3-dots)" opacity=".7"/>
+        <g transform="translate(150 132) rotate(-9) skewX(-10)">
+          <text x="5" y="27" text-anchor="middle" font-size="64" fill="#101010" letter-spacing="-1">POW!</text>
+          <text x="0" y="22" text-anchor="middle" font-size="64" fill="#ffe94a" stroke="#101010" stroke-width="7" stroke-linejoin="round" paint-order="stroke" letter-spacing="-1">POW!</text>
+          <text x="-2" y="20" text-anchor="middle" font-size="64" fill="none" stroke="#ffffff" stroke-width="1.6" opacity=".55" letter-spacing="-1">POW!</text>
+        </g></svg>`;
+
+      // ---------------------------------------------------------------- speech balloon (one inked outline: tail drawn under, its fill patched over the seam)
+      const bx = 206, by = 106, brx = 192, bry = 88;   // balloon centre / radii (in #r3-bub px)
+      const ell = []; for (let i = 0; i <= 64; i++) { const a = (i / 64) * Math.PI * 2, k = 1 + 0.018 * Math.sin(a * 3 + 0.7) + 0.012 * Math.sin(a * 5 + 2);
+        ell.push(`${(bx + Math.cos(a) * brx * k).toFixed(1)},${(by + Math.sin(a) * bry * k).toFixed(1)}`); }
+      const tip = [82, 264], tb1 = [150, 168], tb2 = [196, 184];   // tail tip -> the robot's head (stage-local ≈ 478, 334)
+      const tail = `M${tb1[0]},${tb1[1]} Q${118},${214} ${tip[0]},${tip[1]} Q${146},${226} ${tb2[0]},${tb2[1]} Z`;
+      $("r3-bub").innerHTML = `<svg width="410" height="280">
+        <path d="${tail}" fill="#ffffff" stroke="#101010" stroke-width="5" stroke-linejoin="round"/>
+        <polygon points="${ell.join(" ")}" fill="#ffffff" stroke="#101010" stroke-width="5" stroke-linejoin="round"/>
+        <path d="${tail}" fill="#ffffff"/>
+        <text x="${bx}" y="${by - 8}" text-anchor="middle" font-size="33" fill="#101010" letter-spacing="0.2">HALO! AKU ROBOT</text>
+        <text x="${bx}" y="${by + 32}" text-anchor="middle" font-size="38" fill="#101010" letter-spacing="0.2">AI PRENEUR!</text></svg>`;
+
+      // ---------------------------------------------------------------- the page: each top panel gets its own colourist's screentone
+      const tint = (pts, dot, flat, id) => `<svg width="820" height="980"><defs><pattern id="${id}" width="11" height="11" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <circle cx="5.5" cy="5.5" r="2.7" fill="${dot}"/></pattern></defs><polygon points="${pts}" fill="${flat}"/><polygon points="${pts}" fill="url(#${id})"/></svg>`;
+      $("r3-tl").innerHTML = tint("0,0 452,0 471,268 0,297", "rgba(255,170,0,.5)", "rgba(255,224,64,.36)", "r3-ty");
+      $("r3-tr").innerHTML = tint("488,0 820,0 820,246 507,266", "rgba(255,50,110,.42)", "rgba(255,110,150,.2)", "r3-tp");
+
+      // ---------------------------------------------------------------- timing on global 12 fps steps
+      const kOf = (g) => Math.ceil(g * 12 - 1e-6), tk = (k) => k / 12 - ST - 0.004;
+      const kPow = kOf(R.sweep[1] - 0.04);               // the comic POW stinger (13.333)
+      const kPanel = kOf(word("panel") - 0.02);           // 14.5
+      const kBal = kOf(word("balon") - 0.12);             // 14.917: a beat before "balon" so the balloon is read while it is said
+      const kEnd = kOf(ST + DUR) - 1;                     // last step inside the round (15.75)
+      const pow = $("r3-pow"), g1 = $("r3-g1"), g2 = $("r3-g2"), cap = $("r3-cap"), bub = $("r3-bub"), ttl = $("r3-tl"), ttr = $("r3-tr");
+      I(ttl, { opacity: 0 }); I(ttr, { opacity: 0 });
+      I(pow, { opacity: 0, scale: 0.3, rotation: -18, x: 0, y: 0 });
+      I(g1, { opacity: 0, rotation: -3.5, scaleX: 0, x: 0 }); I(g2, { opacity: 0, rotation: -4, scaleY: 0, y: 0 });
+      I(cap, { opacity: 0, scale: 0.6, rotation: -2, y: -10 }); I(bub, { opacity: 0, scale: 0.2, rotation: -4 });
+      // POW: erupts on the punch, settles, boils (hand-drawn jitter), pops off before "lengkap" ends
+      const kPowOut = kOf(word("sama") - 0.1);
+      tl.set(pow, { opacity: 1, scale: 0.42, rotation: -18 }, tk(kPow));
+      tl.set(pow, { scale: 1.2, rotation: -5 }, tk(kPow + 1));
+      tl.set(pow, { scale: 0.95, rotation: -9 }, tk(kPow + 2));
+      for (let k = kPow + 3; k < kPowOut; k++) tl.set(pow, { scale: 1, rotation: -8 + (k % 2 ? 0.9 : -0.6), x: (k % 3) - 1, y: ((k + 1) % 3) - 1 }, tk(k));
+      tl.set(pow, { scale: 1.12, rotation: -4 }, tk(kPowOut)); tl.set(pow, { scale: 0.5, rotation: 6, opacity: 0.0 }, tk(kPowOut + 1));
+      // "panel": the gutters slice in (two steps each), the narration box drops into the top-left panel
+      tl.set(g1, { opacity: 1, scaleX: 0.46 }, tk(kPanel)); tl.set(g1, { scaleX: 1 }, tk(kPanel + 1));
+      tl.set(ttl, { opacity: 1 }, tk(kPanel + 1)); tl.set(ttr, { opacity: 1 }, tk(kPanel + 2));
+      tl.set([ttl, ttr], { opacity: 0 }, tk(kBal - 1));
+      tl.set(g2, { opacity: 1, scaleY: 0.5 }, tk(kPanel + 1)); tl.set(g2, { scaleY: 1 }, tk(kPanel + 2));
+      tl.set(cap, { opacity: 1, scale: 1.08, rotation: -3.2, y: 4 }, tk(kPanel + 2)); tl.set(cap, { scale: 1, rotation: -2, y: 0 }, tk(kPanel + 3));
+      // "dan": the gutters slide out (the page opens back up for the balloon)
+      tl.set(g1, { x: -220 }, tk(kBal - 1)); tl.set(g1, { x: -960 }, tk(kBal));
+      tl.set(g2, { y: -120 }, tk(kBal - 1)); tl.set(g2, { y: -420, opacity: 0 }, tk(kBal)); tl.set(g1, { opacity: 0 }, tk(kBal + 1));
+      // "balon kata": the balloon pops from its tail
+      tl.set(bub, { opacity: 1, scale: 0.3, rotation: -8 }, tk(kBal));
+      tl.set(bub, { scale: 1.12, rotation: 2 }, tk(kBal + 1));
+      tl.set(bub, { scale: 0.96, rotation: -1 }, tk(kBal + 2));
+      tl.set(bub, { scale: 1, rotation: 0 }, tk(kBal + 3));
+      // out: the balloon and the box pop away on the last steps of the round
+      tl.set(bub, { scale: 1.07 }, tk(kEnd - 1)); tl.set(cap, { scale: 1.05 }, tk(kEnd - 1));
+      tl.set([bub, cap], { opacity: 0 }, tk(kEnd));
+
+      tl.set({}, {}, DUR - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["r3"] = tl;
     })();

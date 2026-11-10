@@ -1,10 +1,109 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-fbxs" id="root" data-composition-id="r7" data-width="1080" data-height="1920"></div>
+  <style>
+    #r7-clip { position: absolute; left: 130px; top: 450px; width: 820px; height: 980px; overflow: hidden; border-radius: 34px; pointer-events: none; }
+    .r7-g { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+    .r7-g svg { position: absolute; left: 0; top: 0; overflow: visible; }
+    .r7-g path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    /* soft explainer chips: soft navy pill, white Poppins 700, pastel key dot */
+    .r7-chip { position: absolute; height: 52px; padding: 0 20px 0 15px; border-radius: 26px; display: flex; align-items: center; gap: 11px; white-space: nowrap;
+      background: rgba(18,28,76,.94); color: #ffffff; font: 700 26px/1 Poppins, sans-serif; letter-spacing: -0.005em;
+      box-shadow: 0 14px 28px -12px rgba(18,26,70,.6), inset 0 1.5px 0 rgba(255,255,255,.12); }
+    .r7-chip i { width: 13px; height: 13px; border-radius: 50%; flex: none; box-shadow: 0 0 0 3px rgba(255,255,255,.14); }
+    .r7-dot { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; background: #16215a;
+      box-shadow: 0 0 0 4px #ffffff, 0 4px 10px rgba(18,26,70,.45); }
+    .r7-ring { position: absolute; left: -16px; top: -16px; width: 32px; height: 32px; border-radius: 50%; border: 2.5px solid #ffffff; }
+  </style>
+  <div data-hf-id="hf-fbxs" id="r7-root" data-composition-id="r7" data-width="1080" data-height="1920">
+    <div id="r7-clip">
+      <!-- A: face screen -> chip upper-right -->
+      <div class="r7-g" id="r7-gA">
+        <svg width="10" height="10"><path id="r7-hA" d="M0,0 L44,-104 L64,-104" stroke="#ffffff" stroke-width="7" opacity=".9"></path>
+          <path id="r7-lA" d="M0,0 L44,-104 L64,-104" stroke="#16215a" stroke-width="2.6"></path></svg>
+        <div class="r7-ring" id="r7-rA"></div><div class="r7-dot" id="r7-dA"></div>
+        <div class="r7-chip" id="r7-cA" style="left:66px;top:-104px;"><i style="background:#8fd8f7"></i>Layar wajah</div>
+      </div>
+      <!-- C: floating hand -> chip lower-left -->
+      <div class="r7-g" id="r7-gC">
+        <svg width="10" height="10"><path id="r7-hC" d="M0,0 L-40,72" stroke="#ffffff" stroke-width="7" opacity=".9"></path>
+          <path id="r7-lC" d="M0,0 L-40,72" stroke="#16215a" stroke-width="2.6"></path></svg>
+        <div class="r7-ring" id="r7-rC"></div><div class="r7-dot" id="r7-dC"></div>
+        <div class="r7-chip" id="r7-cC" style="left:-44px;top:76px;"><i style="background:#a9ecc8"></i>Tangan melayang</div>
+      </div>
+      <!-- B: chest logo -> chip right -->
+      <div class="r7-g" id="r7-gB">
+        <svg width="10" height="10"><path id="r7-hB" d="M0,0 L34,-34 L54,-34" stroke="#ffffff" stroke-width="7" opacity=".9"></path>
+          <path id="r7-lB" d="M0,0 L34,-34 L54,-34" stroke="#16215a" stroke-width="2.6"></path></svg>
+        <div class="r7-ring" id="r7-rB"></div><div class="r7-dot" id="r7-dB"></div>
+        <div class="r7-chip" id="r7-cB" style="left:56px;top:-34px;"><i style="background:#ffc4a3"></i>Logo AI PRENEUR</div>
+      </div>
+    </div>
+  </div>
   <script>
     (function () {
+      // r7 EXPLAINER 3D "Tujuh, Explainer 3D, lembut, cocok buat jelasin produk."
+      // Product-explainer callouts, soft and springy, each pinned to a robot part and tracking it as the camera drifts
+      // (part positions measured from the rendered stage, interpolated): "3D," -> "Layar wajah" (face screen, chip upper-right) ·
+      // "lembut," (pop SFX) -> "Tangan melayang" (floating hand, lower-left) · "cocok" -> "Logo AI PRENEUR" (chest logo, right).
+      // "jelasin produk." -> the three pins ping in turn and the chips bump together; everything folds away before the next round.
+      const R = window.ROUNDS[6], DUR = R.dur, T = (g) => g - R.start;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.923);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const wt = (w) => T(window.VO_WORDS.find((x) => x[0] === w && x[1] > R.start)[1]);
+
+      // measured stage-local part positions [global t, x, y] (face screen centre, chest logo centre, left floating hand)
+      const VIS = [[27.1, 381, 546], [28.3, 392, 544], [28.7, 391, 547], [29.0, 383, 537], [29.3, 372, 526], [29.6, 361, 539], [29.9, 360, 530], [30.15, 362, 544], [30.4, 363, 546]];
+      const LOGO = [[27.1, 371, 676], [28.3, 380, 674], [28.7, 376, 680], [29.0, 370, 672], [29.3, 360, 662], [29.6, 356, 666], [29.9, 354, 668], [30.15, 350, 676], [30.4, 349, 677]];
+      const HAND = [[27.1, 233, 719], [28.3, 234, 717], [28.7, 228, 716], [29.0, 221, 711], [29.3, 215, 711], [29.6, 211, 722], [29.9, 209, 723], [30.15, 207, 724], [30.4, 206, 724]];
+      const at = (S, g) => { let i = 0; while (i + 2 < S.length && g >= S[i + 1][0]) i++; const [t0, x0, y0] = S[i], [t1, x1, y1] = S[i + 1], u = Math.max(0, Math.min(1, (g - t0) / (t1 - t0))); return [x0 + (x1 - x0) * u, y0 + (y1 - y0) * u]; };
+      // the group follows its part from tIn (local) to the end of the scene
+      function track(g, S, off, tIn) {
+        const p0 = at(S, tIn + R.start); I(g, { x: p0[0] + off[0], y: p0[1] + off[1] });
+        let tp = tIn, pp = p0;
+        S.forEach(([gt]) => {
+          const tk = Math.min(T(gt), DUR - 0.005); if (tk <= tp + 1e-3) return;
+          const p = at(S, tk + R.start);
+          ft(g, { x: pp[0] + off[0], y: pp[1] + off[1] }, { x: p[0] + off[0], y: p[1] + off[1], duration: tk - tp, ease: "none" }, tp);
+          tp = tk; pp = p;
+        });
+      }
+      const CALL = [
+        { k: "A", S: VIS, off: [86, -50], t: wt("3D,") + 0.02, o: "0% 50%", xp: 0, yp: -50 },
+        { k: "C", S: HAND, off: [4, -2], t: wt("lembut,") - 0.02, o: "50% 0%", xp: -50, yp: 0 },
+        { k: "B", S: LOGO, off: [80, 2], t: wt("cocok"), o: "0% 50%", xp: 0, yp: -50 },
+      ];
+      const tJ = wt("jelasin"), tP = wt("produk."), tX = tP + 0.175;
+      CALL.forEach((c, i) => {
+        const g = $("r7-g" + c.k), dot = $("r7-d" + c.k), ring = $("r7-r" + c.k), chip = $("r7-c" + c.k);
+        const lines = [$("r7-h" + c.k), $("r7-l" + c.k)], len = lines[1].getTotalLength() || 120;
+        track(g, c.S, c.off, c.t - 0.05);
+        // pin pops, ring ripples, leader draws out, chip springs from the leader's end
+        I(dot, { scale: 0, opacity: 1 }); I(ring, { scale: 0.4, opacity: 0 });
+        lines.forEach((l) => { l.setAttribute("stroke-dasharray", `${len + 1} ${len + 40}`); I(l, { attr: { "stroke-dashoffset": len + 1 } }); });
+        I(chip, { scale: 0.55, opacity: 0, transformOrigin: c.o, xPercent: c.xp, yPercent: c.yp });
+        ft(dot, { scale: 0 }, { scale: 1, duration: 0.42, ease: "back.out(3.2)" }, c.t);
+        ft(ring, { scale: 0.4, opacity: 0.95 }, { scale: 2.3, opacity: 0, duration: 0.55, ease: "power2.out" }, c.t);
+        lines.forEach((l) => ft(l, { attr: { "stroke-dashoffset": len + 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.3, ease: "power2.inOut" }, c.t + 0.08));
+        ft(chip, { opacity: 0 }, { opacity: 1, duration: 0.16, ease: "power1.out" }, c.t + 0.3);
+        ft(chip, { scale: 0.55 }, { scale: 1, duration: 0.5, ease: "elastic.out(1, 0.6)" }, c.t + 0.3);
+        // "jelasin produk.": pins ping in turn, chips bump together
+        ft(ring, { scale: 0.4, opacity: 0.95 }, { scale: 2.3, opacity: 0, duration: 0.4, ease: "power2.out" }, tJ + i * 0.1);
+        ft(dot, { scale: 1 }, { scale: 1.35, duration: 0.1, ease: "power2.out" }, tJ + i * 0.1);
+        ft(dot, { scale: 1.35 }, { scale: 1, duration: 0.22, ease: "back.out(2)" }, tJ + i * 0.1 + 0.1);
+        ft(chip, { scale: 1 }, { scale: 1.07, duration: 0.08, ease: "power2.out" }, tP);
+        ft(chip, { scale: 1.07 }, { scale: 1, duration: 0.09, ease: "power2.in" }, tP + 0.08);
+        // fold away: chip shrinks into the leader, leader retracts into the pin, pin pops out
+        const tx = tX + i * 0.015;
+        ft(chip, { scale: 1, opacity: 1 }, { scale: 0.7, opacity: 0, duration: 0.11, ease: "power2.in" }, tx);
+        lines.forEach((l) => ft(l, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -(len + 1) }, duration: 0.11, ease: "power2.in" }, tx + 0.02));
+        ft(dot, { scale: 1 }, { scale: 0, duration: 0.09, ease: "power2.in" }, tx + 0.06);
+      });
+
+      tl.set({}, {}, DUR - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["r7"] = tl;
     })();

@@ -1,10 +1,138 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-4tfu" id="root" data-composition-id="r5" data-width="1080" data-height="1920"></div>
+  <style>
+    #r5-clip { position: absolute; left: 130px; top: 450px; width: 820px; height: 980px; overflow: hidden; border-radius: 34px; pointer-events: none; }
+    .r5-a { position: absolute; left: 0; top: 0; }
+    .r5-a svg { position: absolute; left: 0; top: 0; overflow: visible; shape-rendering: crispEdges; }
+    /* 8-bit dialog box: hard double border, no radius, no blur */
+    #r5-box { left: 560px; top: 94px; width: 242px; height: 88px; transform-origin: 50% 50%; background: #120c2a;
+      box-shadow: 0 0 0 4px #ffffff, 0 0 0 8px #120c2a, 8px 8px 0 4px rgba(10,6,28,.55); }
+  </style>
+  <div data-hf-id="hf-4tfu" id="r5-root" data-composition-id="r5" data-width="1080" data-height="1920">
+    <div id="r5-clip">
+      <div id="r5-sprites"></div>
+      <div class="r5-a" id="r5-box"><div class="r5-a" id="r5-txt"></div><div class="r5-a" id="r5-cur"></div></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // r5 PIXEL ART "Lima, Pixel Art, retro, kayak game jadul."
+      // Everything moves on a 10 fps grid (the stage steps the robot at 10 fps): a gold bonus block pops in above the robot on the
+      // 8-bit arpeggio (sweep end); the robot's two jumps (sweep end, "game") bonk it -> a spinning coin + "+100", then a heart + "1UP".
+      // On "retro" an 8-bit dialog box opens top-right and types "LEVEL 5" with a blinking cursor. Block poofs, box folds shut by the end.
+      const R = window.ROUNDS[4], DUR = R.dur, T = (g) => g - R.start;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.123);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const FPS = 10, q = (t) => Math.round(t * FPS) / FPS, S = 1 / FPS;
+      const wt = (w) => T(window.VO_WORDS.find((x) => x[0] === w && x[1] > R.start)[1]);
+
+      // ---------------------------------------------------------------- sprite sheet (rows of chars -> one crisp <path> per colour)
+      const PAL = { O: "#2a1400", h: "#fff1a6", y: "#f7b733", d: "#c0660e", r: "#6e3606", W: "#ffffff", Y: "#ffe14d",
+        R: "#ff3b5c", D: "#a8103a", G: "#3ee06a", K: "#120c2a", s: "#1a0f2e" };
+      function sprite(rows, P, shadow) {
+        const by = {}; rows.forEach((row, j) => [...row].forEach((c, i) => { if (c !== ".") (by[c] = by[c] || []).push(`M${i * P},${j * P}h${P}v${P}h-${P}z`); }));
+        let svg = "";
+        if (shadow) svg += `<path transform="translate(${shadow} ${shadow})" fill="${PAL.s}" opacity=".85" d="${Object.values(by).flat().join("")}"/>`;
+        for (const c in by) svg += `<path fill="${PAL[c]}" d="${by[c].join("")}"/>`;
+        return `<svg width="${rows[0].length * P}" height="${rows.length * P}" data-w="${rows[0].length * P}" data-h="${rows.length * P}">${svg}</svg>`;
+      }
+      const FONT = {   // 5x7
+        "L": ["1....", "1....", "1....", "1....", "1....", "1....", "11111"], "E": ["11111", "1....", "1....", "1111.", "1....", "1....", "11111"],
+        "V": ["1...1", "1...1", "1...1", "1...1", ".1.1.", ".1.1.", "..1.."], "5": ["11111", "1....", "1111.", "....1", "....1", "1...1", ".111."],
+        "1": ["..1..", ".11..", "..1..", "..1..", "..1..", "..1..", ".111."], "U": ["1...1", "1...1", "1...1", "1...1", "1...1", "1...1", ".111."],
+        "P": ["1111.", "1...1", "1...1", "1111.", "1....", "1....", "1...."], "+": [".....", "..1..", "..1..", "11111", "..1..", "..1..", "....."],
+        "0": [".111.", "1...1", "1..11", "1.1.1", "11..1", "1...1", ".111."], " ": [".....", ".....", ".....", ".....", ".....", ".....", "....."],
+      };
+      const textRows = (txt, col) => { const rows = Array.from({ length: 7 }, () => ""); [...txt].forEach((ch, k) => FONT[ch].forEach((r, j) => { rows[j] += (k ? "." : "") + r.replace(/1/g, col); })); return rows; };
+      const BLOCK = [".OOOOOOOO.", "OhhhhhhhhO", "OhryyyyrdO", "OhyyWWyydO", "OhyWWWWydO", "OhyWWWWydO", "OhyyWWyydO", "OhryyyyrdO", "OddddddddO", ".OOOOOOOO."];
+      const COIN = [
+        [".OOOO.", "OhyyyO", "OhydyO", "OhydyO", "OhydyO", "OhydyO", "OyyyyO", ".OOOO."],
+        [".OO.", "OhyO", "OhdO", "OhdO", "OhdO", "OhdO", "OyyO", ".OO."],
+        ["OO", "hd", "hd", "hd", "hd", "hd", "hd", "OO"],
+      ];
+      const HEART = [".RR.RR.", "RWRRRRR", "RRRRRRR", ".RRRRR.", "..RRD..", "...D..."];
+      const SPK = [["..W..", "..W..", "WWYWW", "..W..", "..W.."], [".W.", "WYW", ".W."]];
+      const PUFF = [[".WW.WW.", "WWWWWWW", ".WWWWW.", "WWWWWWW", ".WW.WW."], ["W.....W", "...W...", ".W...W.", "...W...", "W.....W"]];
+
+      const host = $("r5-sprites");
+      const mk = (id, html) => { const d = document.createElement("div"); d.className = "r5-a"; d.id = id; d.innerHTML = html; host.appendChild(d);
+        const sv = d.firstElementChild; d.style.width = sv.getAttribute("data-w") + "px"; d.style.height = sv.getAttribute("data-h") + "px"; return d; };
+      const P = 8;
+      // block: bottom edge sits just above the robot's head at the top of each jump (measured: head top ~ y 310 local at the peaks)
+      const BX = 375, BY = 220;
+      const coinF = COIN.map((c, i) => mk("r5-c" + i, sprite(c, P, 4)));
+      const heart = mk("r5-hrt", sprite(HEART, P, 4));
+      const block = mk("r5-blk", sprite(BLOCK, P, 4));          // after the coin/heart: they slide out from behind it
+      const plus = mk("r5-p100", sprite(textRows("+100", "W"), 6, 5));
+      const oneup = mk("r5-1up", sprite(textRows("1UP", "G"), 7, 5));
+      const spk = SPK.map((s, i) => mk("r5-s" + i, sprite(s, 8, 4)));
+      const puff = PUFF.map((s, i) => mk("r5-f" + i, sprite(s, 10, 0)));
+      [block, heart, plus, oneup, ...coinF, ...spk, ...puff].forEach((e) => I(e, { opacity: 0, x: 0, y: 0 }));
+
+      // ---------------------------------------------------------------- the block pops in on the arpeggio (sweep end)
+      const t0 = q(T(R.sweep[1]));
+      const bset = (t, v) => tl.set(block, Object.assign({ x: BX, y: BY }, v), t);
+      I(block, { opacity: 0, x: BX, y: BY, scale: 1, transformOrigin: "50% 100%" });
+      bset(t0, { opacity: 1, scale: 0.5 }); bset(t0 + S, { scale: 1.15 }); bset(t0 + 2 * S, { scale: 1 });
+      // a jump peak bonks the block: it kicks up one pixel-row pair and settles
+      const bonk = (t) => { bset(t, { y: BY - 2 * P }); bset(t + S, { y: BY - P }); bset(t + 2 * S, { y: BY }); };
+      // a sprite flies out of the block top, rises with gravity, pops into a sparkle and leaves a score label floating up
+      function popOut(t, kind) {
+        const cx = BX + 40;
+        const ys = kind === "coin" ? [190, 142, 114, 106] : [192, 150, 124, 114];   // centre y per step (decelerating, then tips over)
+        ys.forEach((yc, k) => {
+          const tk = t + k * S;
+          if (kind === "coin") {
+            const f = [0, 1, 2, 1][k];
+            coinF.forEach((e, i) => { const w = COIN[i][0].length * P; tl.set(e, { opacity: i === f ? 1 : 0, x: cx - w / 2, y: yc - 32 }, tk); });
+          } else tl.set(heart, { opacity: 1, x: cx - 28, y: yc - 24 - (k % 2) * 3 }, tk);
+        });
+        const tv = t + ys.length * S;
+        if (kind === "coin") coinF.forEach((e) => tl.set(e, { opacity: 0 }, tv)); else tl.set(heart, { opacity: 0 }, tv);
+        // sparkle: big then small
+        const sy = ys[ys.length - 1];
+        tl.set(spk[0], { opacity: 1, x: cx - 20, y: sy - 20 }, tv); tl.set(spk[0], { opacity: 0 }, tv + S);
+        tl.set(spk[1], { opacity: 1, x: cx - 12, y: sy - 12 }, tv + S); tl.set(spk[1], { opacity: 0 }, tv + 2 * S);
+        // score label floats up 4 steps, blinks once, gone
+        const lab = kind === "coin" ? plus : oneup, lw = kind === "coin" ? 138 : 119, lx = cx - 52;
+        const nl = kind === "coin" ? 5 : 3;
+        for (let k = 0; k < nl; k++) tl.set(lab, { opacity: k === nl - 2 && nl > 3 ? 0 : 1, x: lx - lw / 2, y: 98 - k * 5 }, tv + (2 + k) * S);
+        tl.set(lab, { opacity: 0 }, tv + (2 + nl) * S);
+      }
+      // jump 1 peaks ~0.25 s after it starts at sweep[1]-0.02 (stage ACT), jump 2 ~0.25 s after "game"-0.2; robot pose is stepped at 10 fps
+      const j1 = q(T(R.sweep[1]) + 0.2), j2 = q(wt("game"));
+      bonk(j1); popOut(j1, "coin");
+      bonk(j2); popOut(j2, "heart");
+      // exit: the block poofs into a pixel cloud
+      const tx = q(DUR - 0.25);
+      tl.set(block, { opacity: 0 }, tx);
+      tl.set(puff[0], { opacity: 1, x: BX + 40 - 35, y: BY + 40 - 25 }, tx); tl.set(puff[0], { opacity: 0 }, tx + S);
+      tl.set(puff[1], { opacity: 1, x: BX + 40 - 35, y: BY + 40 - 25 }, tx + S); tl.set(puff[1], { opacity: 0 }, tx + 2 * S);
+
+      // ---------------------------------------------------------------- "retro": dialog box opens and types LEVEL 5
+      const box = $("r5-box"), txt = $("r5-txt"), cur = $("r5-cur");
+      const MSG = "LEVEL 5", TP = 5;
+      txt.innerHTML = sprite(textRows(MSG, "Y"), TP, 0);
+      cur.innerHTML = sprite(["WWWWW", ".WWW.", "..W.."], 4, 0);
+      I(box, { opacity: 0, scaleY: 0.1 });
+      txt.style.width = (MSG.length * 6 - 1) * TP + "px"; txt.style.height = 7 * TP + "px";
+      I(txt, { x: 121 - (MSG.length * 6 - 1) * TP / 2, y: 18, clipPath: "inset(0px 100% 0px 0px)" });
+      I(cur, { x: 216, y: 66, opacity: 0 });
+      const tb = q(wt("retro,"));
+      tl.set(box, { opacity: 1, scaleY: 0.12 }, tb); tl.set(box, { scaleY: 0.55 }, tb + S); tl.set(box, { scaleY: 1 }, tb + 2 * S);
+      // typing: two glyphs per step (6-col glyph cell * 5 px = 30 px per glyph)
+      const gw = 6 * TP, full = MSG.length * gw;
+      [2, 4, 6, 7].forEach((n, k) => tl.set(txt, { clipPath: `inset(0px ${Math.max(0, full - n * gw)}px 0px 0px)` }, tb + (3 + k) * S));
+      const tc = q(DUR - 0.36);
+      for (let t = tb + 7 * S, k = 0; t < tc - 1e-6; t += 2 * S, k++) tl.set(cur, { opacity: k % 2 ? 0 : 1 }, t);
+      tl.set(cur, { opacity: 0 }, tc);
+      tl.set(box, { scaleY: 0.5 }, tc); tl.set(txt, { opacity: 0 }, tc); tl.set(box, { scaleY: 0.12 }, tc + S); tl.set(box, { opacity: 0 }, tc + 2 * S);
+
+      tl.set({}, {}, DUR - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["r5"] = tl;
     })();

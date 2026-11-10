@@ -1,10 +1,130 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-1vhy" id="root" data-composition-id="r9" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    #r9-clip { position: absolute; left: 130px; top: 450px; width: 820px; height: 980px; overflow: hidden; border-radius: 34px; }
+    .r9-a { position: absolute; left: 0; top: 0; }
+    /* flat confetti: one crisp shape per 64 px SVG, centred on its x/y */
+    .r9-c { width: 84px; height: 84px; margin: -42px 0 0 -42px; }
+    .r9-c svg { position: absolute; left: 0; top: 0; overflow: visible; }
+    /* vector-editor selection box (the robot is "selected": neat, on the grid) */
+    #r9-sel { border: 2.5px solid #01ccf7; }
+    .r9-h { width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; background: #ffffff; border: 2.5px solid #01ccf7; border-radius: 2px; }
+    #r9-tag { left: -2px; top: -36px; height: 30px; padding: 0 11px; border-radius: 6px; background: #01ccf7; color: #0b1440; font: 700 18px/30px Poppins, sans-serif; white-space: nowrap; }
+    .r9-g { width: 0; height: 420px; border-left: 2px dashed rgba(1,204,247,.85); }
+    /* brand kit card: flat, cream, hard offset shadow */
+    #r9-kit { width: 214px; height: 106px; border-radius: 20px; background: #fbf7ef; box-shadow: 0 8px 0 rgba(10,16,52,.38); }
+    #r9-kit .hd { position: absolute; left: 17px; top: 17px; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .2em; color: #0b1440; }
+    .r9-sw { top: 47px; width: 39px; height: 39px; border-radius: 50%; }
+    #r9-ok { left: 176px; top: 10px; width: 26px; height: 26px; border-radius: 50%; background: #0b1440; }
+    #r9-ok i { position: absolute; left: 5px; top: 5px; width: 16px; height: 16px; background: #01ccf7;
+      -webkit-mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; }
+    #r9-ring { width: 300px; height: 300px; margin: -150px 0 0 -150px; border-radius: 50%; border: 10px solid #fff6e6; }
+  </style>
+  <div id="root" data-composition-id="r9" data-width="1080" data-height="1920">
+    <div id="r9-clip">
+      <div class="r9-a" id="r9-ring"></div>
+      <div class="r9-a r9-g" id="r9-g0"></div><div class="r9-a r9-g" id="r9-g1"></div>
+      <div class="r9-a" id="r9-sel"><div class="r9-a" id="r9-tag">robot.svg</div></div>
+      <div id="r9-conf"></div>
+      <div class="r9-a" id="r9-kit"><div class="hd">BRAND KIT</div>
+        <div class="r9-a r9-sw" id="r9-sw0" style="left:17px;background:#0b1440"></div>
+        <div class="r9-a r9-sw" id="r9-sw1" style="left:65px;background:#01ccf7"></div>
+        <div class="r9-a r9-sw" id="r9-sw2" style="left:113px;background:#ffffff;box-shadow:inset 0 0 0 2.5px #d6dcea"></div>
+        <div class="r9-a r9-sw" id="r9-sw3" style="left:161px;background:#f26b5b"></div>
+        <div class="r9-a" id="r9-ok"><i></i></div></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // r9 FLAT VECTOR — "Sembilan, Flat Vector, rapi, aman buat brand."
+      // Sweep lands (UI pops): flat geometric confetti bursts out of the gliding robot · "rapi": the robot gets SELECTED like a vector object
+      // (cyan box, handles, "robot.svg" tag) and the confetti snaps into two tidy aligned columns along dashed smart guides ·
+      // "aman buat brand": a flat brand-kit card pops top-right, swatches (navy, cyan, white, coral) land one by one, a check on "brand".
+      const R = window.ROUNDS[8], DUR = R.dur, S = R.start;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.357);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const VW = window.VO_WORDS, wt = (txt) => { const w = VW.find((x) => x[0] === txt && x[1] >= S - 0.05); return (w ? w[1] : S) - S; };
+      // local beats: sweep lands 0.74 · rapi 1.81 · aman 2.52 · buat 2.80 · brand 2.99 · out by 3.37
+      const LAND = R.sweep[1] - S, RAPI = wt("rapi,"), AMAN = wt("aman"), BRAND = wt("brand."), OUT = DUR - 0.27;
+      // layout (stage-local px): robot glides in from the left and settles at ≈ x 230–660, y 400–830 on "rapi"
+      const ORG = { x: 300, y: 600 }, BOX = { l: 206, t: 380, r: 684, b: 846 }, KIT = { x: 588, y: 22 };
+
+      // ---- confetti (flat palette lifted from the set: coral rug, mustard pot, teal + cyan chart bars, cream board)
+      const CO = "#f26b5b", YE = "#ffc845", TE = "#35c9a5", CY = "#01ccf7", CR = "#fff6e6";
+      const SH = {
+        dot: (c) => `<circle cx="32" cy="32" r="15" fill="${c}"/>`,
+        ring: (c) => `<circle cx="32" cy="32" r="13" fill="none" stroke="${c}" stroke-width="7"/>`,
+        plus: (c) => `<rect x="27" y="15" width="10" height="34" rx="4" fill="${c}"/><rect x="15" y="27" width="34" height="10" rx="4" fill="${c}"/>`,
+        wave: (c) => `<path d="M10 34 q5.5 -12 11 0 t11 0 t11 0 t11 0" fill="none" stroke="${c}" stroke-width="6.5" stroke-linecap="round"/>`,
+        half: (c) => `<path d="M13 40 a19 19 0 0 1 38 0 z" fill="${c}"/>`,
+        tri: (c) => `<path d="M32 15 L48 43 L16 43 Z" fill="${c}" stroke="${c}" stroke-width="5" stroke-linejoin="round"/>`,
+        zig: (c) => `<path d="M11 38 l7 -10 l7 10 l7 -10 l7 10 l7 -10" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`,
+      };
+      // [shape, colour, burst x, y, burst rotation, tidy column (0 L / 1 R), tidy row]
+      const C = [
+        ["dot", CO, 104, 196, 0, 0, 0], ["plus", YE, 262, 292, 28, 0, 1], ["wave", TE, 556, 268, -22, 1, 0], ["half", CY, 708, 372, 38, 1, 2],
+        ["ring", YE, 762, 560, 0, 1, 3], ["tri", CO, 690, 792, -30, 1, 4], ["plus", CR, 52, 652, -18, 0, 3], ["zig", TE, 72, 420, 24, 0, 2],
+        ["dot", CY, 436, 318, 0, 1, 1], ["half", CO, 44, 806, -40, 0, 4],
+      ];
+      const COLX = [66, 752], ROWY = (k) => 540 + k * 76;
+      $("r9-conf").innerHTML = C.map((c, i) => `<div class="r9-a r9-c" id="r9-c${i}"><svg width="84" height="84" viewBox="0 0 64 64">${SH[c[0]](c[1])}</svg></div>`).join("");
+      C.forEach((c, i) => {
+        const el = $("r9-c" + i), d = Math.hypot(c[2] - ORG.x, c[3] - ORG.y), t0 = LAND - 0.02 + d * 0.00022;
+        I(el, { x: ORG.x + (c[2] - ORG.x) * 0.45, y: ORG.y + (c[3] - ORG.y) * 0.45, rotation: c[4] - 90, scale: 0 });
+        // burst: out of the robot, overshoot, settle
+        ft(el, { x: ORG.x + (c[2] - ORG.x) * 0.45, y: ORG.y + (c[3] - ORG.y) * 0.45 }, { x: c[2], y: c[3], duration: 0.5, ease: "expo.out" }, t0);
+        ft(el, { scale: 0 }, { scale: 1, duration: 0.42, ease: "back.out(3)" }, t0);
+        // drift a little while waiting (never frozen)
+        ft(el, { rotation: c[4] - 90 }, { rotation: c[4] + 14 * (i % 2 ? 1 : -1), duration: RAPI - 0.06 - t0, ease: "power2.out" }, t0);
+        // "rapi": snap square + into the aligned columns
+        const ts = RAPI - 0.04 + c[6] * 0.03 + c[5] * 0.015;
+        ft(el, { x: c[2], y: c[3] }, { x: COLX[c[5]], y: ROWY(c[6]), duration: 0.34, ease: "power4.inOut" }, ts);
+        ft(el, { rotation: c[4] + 14 * (i % 2 ? 1 : -1) }, { rotation: 0, duration: 0.34, ease: "back.out(2.2)" }, ts);
+        // a little pop on "brand", then out
+        ft(el, { scale: 1 }, { scale: 1.18, duration: 0.09, ease: "power2.out", yoyo: true, repeat: 1 }, BRAND - 0.02 + c[6] * 0.02);
+        ft(el, { scale: 1 }, { scale: 0, duration: 0.14, ease: "back.in(2)" }, OUT + c[6] * 0.012);
+      });
+      // a flat pop ring at the burst origin
+      const ring = $("r9-ring");
+      I(ring, { x: ORG.x, y: ORG.y, scale: 0.2, opacity: 0 });
+      ft(ring, { scale: 0.2, opacity: 1 }, { scale: 1.25, opacity: 0, duration: 0.5, ease: "power2.out" }, LAND - 0.02);
+
+      // ---- "rapi": selection box + handles, dashed smart guides through the two columns
+      const sel = $("r9-sel"), tag = $("r9-tag"), W = BOX.r - BOX.l, H = BOX.b - BOX.t;
+      sel.style.width = W + "px"; sel.style.height = H + "px";
+      const HP = [[0, 0], [0.5, 0], [1, 0], [1, 0.5], [1, 1], [0.5, 1], [0, 1], [0, 0.5]];
+      HP.forEach((p, k) => { const h = document.createElement("div"); h.className = "r9-a r9-h"; h.id = "r9-h" + k; h.style.left = (p[0] * W - 1.25) + "px"; h.style.top = (p[1] * H - 1.25) + "px"; sel.appendChild(h); });
+      I(sel, { x: BOX.l, y: BOX.t, opacity: 0, scale: 1.1, transformOrigin: "50% 50%" });
+      tl.set(sel, { opacity: 1 }, RAPI - 0.06);
+      ft(sel, { scale: 1.1 }, { scale: 1, duration: 0.2, ease: "power3.out" }, RAPI - 0.06);
+      HP.forEach((p, k) => { const h = $("r9-h" + k); I(h, { scale: 0 }); ft(h, { scale: 0 }, { scale: 1, duration: 0.18, ease: "back.out(3)" }, RAPI + 0.02 + k * 0.022); });
+      I(tag, { opacity: 0, y: 8 }); ft(tag, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, RAPI + 0.08);
+      ft(sel, { opacity: 1 }, { opacity: 0, duration: 0.14, ease: "power1.in" }, AMAN - 0.1);
+      [0, 1].forEach((k) => {
+        const g = $("r9-g" + k);
+        I(g, { x: COLX[k] - 1, y: ROWY(0) - 44, scaleY: 0, opacity: 1, transformOrigin: "50% 0%" });
+        g.style.height = (ROWY(4) - ROWY(0) + 84) + "px";
+        ft(g, { scaleY: 0 }, { scaleY: 1, duration: 0.26, ease: "power3.out" }, RAPI + 0.04);
+        ft(g, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, RAPI + 0.5);
+      });
+
+      // ---- "aman buat brand": brand kit card, swatches land one by one, check on "brand"
+      const kit = $("r9-kit"), ok = $("r9-ok");
+      I(kit, { x: KIT.x, y: KIT.y - 26, opacity: 0, scale: 0.7, transformOrigin: "80% 20%" });
+      ft(kit, { y: KIT.y - 26, opacity: 0, scale: 0.7 }, { y: KIT.y, opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.2)" }, AMAN - 0.08);
+      [0, 1, 2, 3].forEach((k) => {
+        const sw = $("r9-sw" + k), t = AMAN + 0.1 + k * ((BRAND - 0.04 - AMAN - 0.1) / 3);
+        I(sw, { scale: 0 }); ft(sw, { scale: 0 }, { scale: 1, duration: 0.22, ease: "back.out(3.2)" }, t);
+      });
+      I(ok, { scale: 0, rotation: -90 }); ft(ok, { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.24, ease: "back.out(3)" }, BRAND + 0.02);
+      ft(kit, { y: KIT.y, opacity: 1, scale: 1 }, { y: KIT.y - 16, opacity: 0, scale: 0.85, duration: 0.15, ease: "power2.in" }, OUT + 0.03);
+
+      tl.set({}, {}, DUR - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["r9"] = tl;
     })();

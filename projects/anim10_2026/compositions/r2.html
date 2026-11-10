@@ -1,10 +1,175 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-u8nz" id="root" data-composition-id="r2" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    /* everything lives inside the stage screen (x 130–950, y 450–1430) */
+    #r2-clip { position: absolute; left: 130px; top: 450px; width: 820px; height: 980px; overflow: hidden; border-radius: 34px; }
+    #r2-dark { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse 64% 50% at 50% 60%, rgba(0,0,0,0) 38%, rgba(0,0,0,.5) 100%); }
+    /* the orbit rides the robot: origin = the robot's waist projected through the stage camera */
+    #r2-orb { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
+    #r2-svg { position: absolute; left: -440px; top: -300px; overflow: visible; }
+    #r2-tip { position: absolute; left: -40px; top: -40px; width: 80px; height: 80px; border-radius: 50%; opacity: 0;
+      background: radial-gradient(circle, #ffffff 0 7%, rgba(255,240,200,.95) 12%, rgba(255,200,100,.5) 26%, rgba(255,170,60,.16) 46%, rgba(255,170,60,0) 70%); }
+    .r2-sp { position: absolute; left: 0; top: 0; width: 100px; height: 100px; margin: -50px 0 0 -50px; transform-origin: 50% 50%; opacity: 0; }
+    .r2-sp svg { position: absolute; left: 0; top: 0; overflow: visible; }
+  </style>
+  <div id="root" data-composition-id="r2" data-width="1080" data-height="1920">
+    <div id="r2-clip">
+      <div id="r2-dark"></div>
+      <div id="r2-orb"></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // r2 GLOW SKETCH — "Dua, Glow Sketch, garis neon nyala di ruang gelap."
+      // A light-painting orbit around the robot (it rides the robot: its waist is projected through the stage camera each frame).
+      // shimmer stinger (sweep end) -> sparkles twinkle around the head · "garis" -> a light pen draws a sketchy gold orbit
+      // (front arc in front of the body, back arc slipping behind it) with a cyan second pass · "nyala" -> the neon flares and a
+      // white-hot surge runs once around it · "di ruang gelap" -> the room darkens around the glow · the line erases from its tail.
+      const R = window.ROUNDS[1], NX = window.ROUNDS[2], ST = R.start, DUR = R.dur;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.49);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const word = (txt) => { const w = window.VO_WORDS.find((x) => x[0] === txt && x[1] >= ST); return w ? w[1] - ST : null; };
+      const tGaris = word("garis"), tNyala = word("nyala"), tDi = word("di"), tSweep = R.sweep[1] - ST;
+
+      // ---------------------------------------------------------------- stage camera + robot root (same models as stage.html; live ones when registered)
+      const one = (x) => Math.max(0, Math.min(1, x)), Lr = (a, b, u) => a + (b - a) * u, sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
+      const hsh = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+      const vn = (t, seed, f) => { const x = t * f + seed * 17.13, i = Math.floor(x), u = x - i, w = u * u * (3 - 2 * u); return Lr(hsh(i + seed * 31), hsh(i + 1 + seed * 31), w) * 2 - 1; };
+      const CA = { yaw: -18, pitch: 4, dist: 3.8, ty: 0.74 }, CB = { yaw: -6, pitch: 6, dist: 3.45, ty: 0.72 };
+      const camLocal = (t) => { const u = 0.5 - 0.5 * Math.cos(Math.PI * one((t - R.sweep[1]) / (NX.sweep[0] - R.sweep[1])));
+        return { yaw: Lr(CA.yaw, CB.yaw, u) + 0.6 * vn(t, 3, 0.35), pitch: Lr(CA.pitch, CB.pitch, u) + 0.35 * vn(t, 4, 0.3), dist: Lr(CA.dist, CB.dist, u), ty: Lr(CA.ty, CB.ty, u), tx: 0, roll: 0 }; };
+      const camAt = (t) => (window.__STAGE && window.__STAGE.camAt ? window.__STAGE.camAt(t) : camLocal(t));
+      const rootLocal = (t) => { const g = R.sweep[1] - 0.05, env = sm((t - g + 0.16) / 0.2) * (1 - sm((t - (g + 2.2)) / 0.26));
+        return { x: 0, y: 0.075 + 0.016 * Math.sin(2 * Math.PI * 0.55 * t) + 0.006 * Math.sin(2 * Math.PI * 1.27 * t + 1.1) + 0.07 * sm((t - g) / 1.2) * env, z: 0 }; };
+      const rootAt = (t) => (window.__STAGE && window.__STAGE.perf ? window.__STAGE.perf(t).root : rootLocal(t));
+      function proj(c, p) {
+        const r = Math.PI / 180, a = c.yaw * r, pi = c.pitch * r, T = [c.tx || 0, c.ty == null ? 0.8 : c.ty, 0];
+        const cp = [T[0] + Math.sin(a) * Math.cos(pi) * c.dist, T[1] + Math.sin(pi) * c.dist, T[2] + Math.cos(a) * Math.cos(pi) * c.dist];
+        const nz = (v) => { const l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l]; };
+        const cr = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+        const dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+        const Z = nz([cp[0] - T[0], cp[1] - T[1], cp[2] - T[2]]), X = nz(cr([0, 1, 0], Z)), Y = cr(Z, X);
+        const ro = (c.roll || 0) * r, X2 = X.map((x, i) => Math.cos(ro) * x + Math.sin(ro) * Y[i]), Y2 = Y.map((y, i) => -Math.sin(ro) * X[i] + Math.cos(ro) * y);
+        const d = [p[0] - cp[0], p[1] - cp[1], p[2] - cp[2]], xc = dot(d, X2), yc = dot(d, Y2), zc = -dot(d, Z);
+        const f = 1 / Math.tan(13.5 * r);
+        return [((f * 980 / 820) * xc / zc + 1) * 410, (1 - f * yc / zc) * 490, zc];
+      }
+      const waist = (g) => { const ro = rootAt(g); return proj(camAt(g), [ro.x || 0, (ro.y || 0) + 0.28, ro.z || 0]); };
+      const dRef = waist(R.sweep[1] + 1.5)[2];
+
+      // ---------------------------------------------------------------- the orbit (ring-local px; seeded wobble so it reads hand-drawn)
+      let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+      const TILT = -10 * Math.PI / 180, ct = Math.cos(TILT), st = Math.sin(TILT);
+      function orbit(rx, ry, th0, th1, grow, wob, n) {
+        const P = []; const ph = rnd() * 6;
+        for (let i = 0; i <= n; i++) {
+          const u = i / n, th = th0 + (th1 - th0) * u, k = 1 + grow * u + wob * Math.sin(th * 3 + ph) + wob * 0.5 * Math.sin(th * 7 + ph * 2);
+          const x = rx * k * Math.cos(th), y = ry * k * Math.sin(th);
+          P.push([x * ct - y * st, x * st + y * ct]);
+        }
+        return P;
+      }
+      const D2R = Math.PI / 180;
+      const MAIN = orbit(332, 90, 150 * D2R, -238 * D2R, 0.07, 0.012, 160);    // front-left -> front -> right -> behind -> left, overshoots its start
+      const CYAN = orbit(318, 104, -14 * D2R, -330 * D2R, -0.04, 0.016, 140);
+      const dOf = (P) => "M" + P.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" L");
+      const cum = (P) => { const c = [0]; for (let i = 1; i < P.length; i++) c.push(c[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1])); return c; };
+      const CM = cum(MAIN), LM = CM[CM.length - 1];
+      const at = (P, C, u) => { const s = u * C[C.length - 1]; let i = 1; while (i < C.length - 1 && C[i] < s) i++; const w = (s - C[i - 1]) / Math.max(1e-6, C[i] - C[i - 1]); return [Lr(P[i - 1][0], P[i][0], w), Lr(P[i - 1][1], P[i][1], w)]; };
+      // the back arc slips behind the body: masked where it is above the ring's long axis and inside the body's width
+      const BODY = 196;
+      const hidden = (p) => { const yl = -p[0] * st + p[1] * ct; if (yl > -6) return 0; return 1 - sm((Math.abs(p[0]) - (BODY - 40)) / 80); };
+      const dm = dOf(MAIN), dc = dOf(CYAN);
+      const lay = (d, w, c, o, extra) => `<path d="${d}" pathLength="1" fill="none" stroke="${c}" stroke-width="${w}" stroke-opacity="${o}" stroke-linecap="round" stroke-linejoin="round"${extra || ""}/>`;
+      const SPK = "M0,-1 C.1,-.1 .1,-.1 1,0 C.1,.1 .1,.1 0,1 C-.1,.1 -.1,.1 -1,0 C-.1,-.1 -.1,-.1 0,-1Z";
+      $("r2-orb").innerHTML = `<svg id="r2-svg" width="880" height="600" viewBox="-440 -300 880 600">
+        <defs>
+          <linearGradient id="r2-mg" x1="${-BODY - 60}" y1="0" x2="${BODY + 60}" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#fff"/><stop offset=".2" stop-color="#000"/><stop offset=".8" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient>
+          <mask id="r2-mask" maskUnits="userSpaceOnUse" x="-440" y="-300" width="880" height="600">
+            <rect x="-440" y="-300" width="880" height="600" fill="#fff"/>
+            <g transform="rotate(-10)"><rect x="${-BODY - 60}" y="-300" width="${2 * BODY + 120}" height="294" fill="url(#r2-mg)"/></g>
+          </mask>
+        </defs>
+        <g mask="url(#r2-mask)">
+          <g id="r2-flare" opacity="0">${lay(dm, 64, "#ffb44e", 0.07)}${lay(dm, 46, "#ffbe5a", 0.09)}${lay(dm, 30, "#ffd27a", 0.14)}${lay(dc, 34, "#01ccf7", 0.08)}${lay(dc, 18, "#4fdcff", 0.14)}</g>
+          <g id="r2-cy" stroke-dasharray="1 1" stroke-dashoffset="1" opacity="0">${lay(dc, 20, "#01ccf7", 0.07)}${lay(dc, 11, "#01ccf7", 0.14)}${lay(dc, 4.2, "#4fdcff", 0.85)}${lay(dc, 1.4, "#e8fcff", 0.95)}</g>
+          <g id="r2-gd" stroke-dasharray="1 1" stroke-dashoffset="1" opacity="0">${lay(dm, 34, "#ffaa3c", 0.06)}${lay(dm, 22, "#ffb24a", 0.1)}${lay(dm, 12, "#ffc062", 0.22)}${lay(dm, 5.5, "#ffd27a", 0.95)}${lay(dm, 2, "#fff7e2", 1)}</g>
+          <g id="r2-surge" stroke-dasharray=".07 1.3" stroke-dashoffset=".07" opacity="0">${lay(dm, 20, "#ffe9b8", 0.45)}${lay(dm, 6, "#ffffff", 1)}</g>
+        </g>
+      </svg><div id="r2-tip"></div>`;
+      const orb = $("r2-orb"), gd = $("r2-gd"), cy = $("r2-cy"), flare = $("r2-flare"), surge = $("r2-surge"), tip = $("r2-tip"), dark = $("r2-dark");
+      // sparkles: [x, y (ring-local), size, colour, t]
+      const SP = [
+        [-236, -300, 40, "#ffe3a0", tSweep + 0.03], [214, -356, 50, "#ffffff", tSweep + 0.11], [282, -182, 32, "#7fe9ff", tSweep + 0.2], [-290, -150, 30, "#ffd27a", tSweep + 0.28],
+        [-312, 34, 40, "#ffffff", tNyala + 0.0], [326, -78, 46, "#ffe3a0", tNyala + 0.05], [122, 98, 32, "#7fe9ff", tNyala + 0.1], [-156, 94, 34, "#ffd27a", tNyala + 0.14], [196, -156, 28, "#ffffff", tNyala + 0.2],
+        [-128, -336, 26, "#ffe3a0", tDi + 0.1], [306, -252, 28, "#7fe9ff", tDi + 0.3],
+      ];
+      SP.forEach(([x, y, s, c], i) => {
+        const e = document.createElement("div"); e.className = "r2-sp"; e.id = "r2-sp" + i; e.style.left = x + "px"; e.style.top = y + "px";
+        e.innerHTML = `<svg width="100" height="100" viewBox="-50 -50 100 100"><circle r="${(s * 0.7).toFixed(1)}" fill="${c}" opacity=".12"/><circle r="${(s * 0.36).toFixed(1)}" fill="${c}" opacity=".22"/>
+          <path d="${SPK}" transform="scale(${(s * 0.5).toFixed(1)})" fill="${c}"/><path d="${SPK}" transform="scale(${(s * 0.22).toFixed(1)}) rotate(45)" fill="#ffffff" opacity=".9"/></svg>`;
+        orb.appendChild(e);
+      });
+
+      // ---------------------------------------------------------------- timeline
+      const FR = 30, fr = (t) => Math.round((t + ST) * FR), lt = (f) => f / FR - ST - 0.004;   // global 30 fps frames <-> local set times
+      const ioS = (u) => 0.5 - 0.5 * Math.cos(Math.PI * one(u));
+      const tIn = tSweep - 0.02, tOut = DUR - 0.36;
+      // ride the robot (only while anything is visible)
+      I(orb, { x: 410, y: 650, scale: 1 });
+      for (let f = fr(tIn); f < fr(DUR); f++) { const g = f / FR, w = waist(g); tl.set(orb, { x: +w[0].toFixed(2), y: +w[1].toFixed(2), scale: +(dRef / w[2]).toFixed(4) }, Math.max(0, lt(f))); }
+      // beat 1 — shimmer: sparkles twinkle around the head (and later ones along the ring)
+      SP.forEach(([x, y, s, c, t0], i) => {
+        const e = $("r2-sp" + i), dd = i < 4 ? 0.5 : 0.42;
+        I(e, { opacity: 0, scale: 0, rotation: -40 });
+        ft(e, { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 10, duration: dd * 0.4, ease: "power2.out" }, t0);
+        ft(e, { opacity: 1, scale: 1, rotation: 10 }, { opacity: 0, scale: 0.1, rotation: 70, duration: dd * 0.6, ease: "power2.in" }, t0 + dd * 0.4);
+      });
+      // beat 2 — "garis": the light pen draws the orbit (pen tip leads; hidden while it passes behind the body)
+      const g0 = tGaris - 0.1, g1 = tNyala - 0.06;
+      I(gd, { opacity: 0, attr: { "stroke-dashoffset": 1 } }); I(tip, { opacity: 0, x: MAIN[0][0], y: MAIN[0][1], scale: 1 });
+      tl.set(gd, { opacity: 1 }, g0);
+      for (let f = fr(g0); f <= fr(g1); f++) {
+        const u = ioS((f / FR - ST - g0) / (g1 - g0)), p = at(MAIN, CM, u);
+        tl.set(gd, { attr: { "stroke-dashoffset": +(1 - u).toFixed(4) } }, Math.max(0, lt(f)));
+        tl.set(tip, { x: +p[0].toFixed(1), y: +p[1].toFixed(1), opacity: +(1 - hidden(p)).toFixed(3), scale: 1 + 0.25 * Math.sin(f * 1.7) }, Math.max(0, lt(f)));
+      }
+      tl.set(tip, { opacity: 0 }, g1 + 0.03);
+      // the cyan second pass, a beat behind
+      const c0 = g0 + 0.12, c1 = g1 + 0.06;
+      I(cy, { opacity: 0, attr: { "stroke-dashoffset": 1 } });
+      tl.set(cy, { opacity: 1 }, c0);
+      for (let f = fr(c0); f <= fr(c1); f++) tl.set(cy, { attr: { "stroke-dashoffset": +(1 - ioS((f / FR - ST - c0) / (c1 - c0))).toFixed(4) } }, Math.max(0, lt(f)));
+      // beat 3 — "nyala": the neon flares, a white-hot surge runs once around
+      I(flare, { opacity: 0 });
+      ft(flare, { opacity: 0 }, { opacity: 1, duration: 0.09, ease: "power2.out" }, tNyala - 0.02);
+      ft(flare, { opacity: 1 }, { opacity: 0.38, duration: 0.6, ease: "power2.out" }, tNyala + 0.07);
+      ft(gd, { opacity: 1 }, { opacity: 0.84, duration: 0.16, ease: "sine.inOut", yoyo: true, repeat: 1 }, tNyala + 0.7);
+      I(surge, { opacity: 0, attr: { "stroke-dashoffset": 0.07 } });
+      const s0 = tNyala, s1 = tNyala + 0.42;
+      tl.set(surge, { opacity: 1 }, s0);
+      for (let f = fr(s0); f <= fr(s1); f++) tl.set(surge, { attr: { "stroke-dashoffset": +(0.07 - 1.07 * ((f / FR - ST - s0) / (s1 - s0))).toFixed(4) } }, Math.max(0, lt(f)));
+      tl.set(surge, { opacity: 0 }, s1 + 0.02);
+      // beat 4 — "di ruang gelap": the room closes in around the glow
+      I(dark, { opacity: 0 });
+      ft(dark, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.inOut" }, tDi - 0.05);
+      // exit — the line erases from its tail, the dark lifts; gone by the round end
+      const e0 = tOut, e1 = DUR - 0.08;
+      for (let f = fr(e0); f <= fr(e1); f++) {
+        const u = ioS((f / FR - ST - e0) / (e1 - e0));
+        tl.set(gd, { attr: { "stroke-dashoffset": +(-u).toFixed(4) } }, lt(f)); tl.set(cy, { attr: { "stroke-dashoffset": +(-u).toFixed(4) } }, lt(f));
+      }
+      ft(flare, { opacity: 0.38 }, { opacity: 0, duration: e1 - e0, ease: "power1.in" }, e0);
+      tl.set([gd, cy, flare], { opacity: 0 }, e1 + 0.01);
+      ft(dark, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.inOut" }, DUR - 0.36);
+
+      tl.set({}, {}, DUR - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["r2"] = tl;
     })();

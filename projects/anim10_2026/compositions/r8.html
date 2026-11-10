@@ -1,10 +1,164 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-nyrt" id="root" data-composition-id="r8" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    /* everything lives inside the stage box (x 130–950, y 450–1430) */
+    #r8-clip { position: absolute; left: 130px; top: 450px; width: 820px; height: 980px; overflow: hidden; border-radius: 34px; }
+    .r8-a { position: absolute; left: 0; top: 0; }
+    /* CRT scanlines + a faint edge darkening: the 2000s TV the console was plugged into */
+    #r8-scan { left: 0; top: 0; width: 820px; height: 980px;
+      background: repeating-linear-gradient(180deg, rgba(4,8,30,.34) 0 2px, rgba(4,8,30,0) 2px 5px),
+                  radial-gradient(ellipse 78% 70% at 50% 48%, rgba(4,8,30,0) 62%, rgba(4,8,30,.42) 100%); }
+    /* chrome text: Poppins 700, sheared to the era's italic, horizon-line chrome fill */
+    .r8-chr { font: 700 30px/1 Poppins, sans-serif; letter-spacing: .02em; white-space: nowrap; color: transparent;
+      background: linear-gradient(180deg, #ffffff 0%, #e4f3ff 44%, #7fb6ff 50%, #2f6fd8 64%, #d6ecff 100%); -webkit-background-clip: text; background-clip: text;
+      filter: drop-shadow(0 2px 0 #050a26) drop-shadow(0 0 1px #050a26); }
+    /* ◄ ► select arrows */
+    .r8-arw { width: 90px; height: 116px; margin: -58px 0 0 -45px; }
+    .r8-arw svg { position: absolute; left: 0; top: 0; overflow: visible; filter: drop-shadow(0 0 10px rgba(80,170,255,.75)); }
+    /* 1P cursor above the selected character */
+    #r8-p1 { width: 92px; height: 70px; margin-left: -46px; }
+    #r8-p1 svg { position: absolute; left: 0; top: 0; overflow: visible; filter: drop-shadow(0 4px 0 rgba(5,10,38,.6)); }
+    #r8-p1 b { position: absolute; left: 0; top: 9px; width: 92px; text-align: center; font: 700 30px/1 Poppins, sans-serif; color: #fff; letter-spacing: .02em;
+      transform: skewX(-10deg); text-shadow: 0 2px 0 #6b0a10; }
+    /* top-right select panel: tab (PILIH KARAKTER + countdown) over a chrome-rimmed body (name + boxy stat bars) */
+    #r8-pan { width: 284px; height: 280px; }
+    #r8-tab { left: 22px; top: 0; height: 44px; padding: 0 10px 0 18px; display: flex; align-items: center; gap: 12px; }
+    #r8-body { left: 0; top: 52px; width: 284px; height: 226px; }
+    .r8-bg { position: absolute; inset: 0; transform: skewX(-12deg); border-radius: 6px;
+      background: linear-gradient(180deg, rgba(36,74,170,.94) 0%, rgba(14,30,92,.95) 50%, rgba(6,12,46,.95) 100%);
+      box-shadow: inset 0 2px 0 rgba(200,230,255,.8), inset 0 -2px 0 rgba(0,0,0,.45), inset 0 0 0 2px rgba(120,180,255,.5), 0 6px 0 rgba(3,6,24,.45), 0 0 18px rgba(60,140,255,.35); }
+    #r8-tab .chr { position: relative; transform: skewX(-10deg); font-size: 22px; }
+    #r8-tm { position: relative; width: 44px; height: 30px; border-radius: 5px; background: #050a26; box-shadow: inset 0 0 0 2px rgba(120,180,255,.55);
+      font: 700 21px/30px Poppins, sans-serif; color: #ffd84a; text-align: center; letter-spacing: .04em; text-shadow: 0 0 8px rgba(255,200,40,.6); }
+    #r8-body .in { position: absolute; left: 22px; top: 14px; width: 246px; }
+    #r8-body .sub { font: 700 14px/1 Poppins, sans-serif; letter-spacing: .3em; color: #8fc4ff; transform: skewX(-10deg); }
+    #r8-body .nm { margin-top: 5px; transform: skewX(-10deg); font-size: 32px; }
+    #r8-body .row { position: relative; height: 42px; margin-top: 6px; }
+    #r8-body .row:first-of-type { margin-top: 12px; }
+    #r8-body .lb { position: absolute; left: 0; top: 0; font: 700 15px/1 Poppins, sans-serif; letter-spacing: .16em; color: #e3edfa; transform: skewX(-10deg); }
+    #r8-body .seg { position: absolute; top: 21px; width: 19px; height: 16px; transform: skewX(-12deg); border-radius: 2px;
+      background: rgba(150,190,255,.10); box-shadow: inset 0 0 0 1.5px rgba(150,190,255,.28); }
+    #r8-body .seg i { position: absolute; inset: 0; border-radius: 2px; background: linear-gradient(180deg, #e6fbff 0%, #6adfff 40%, #01ccf7 62%, #0273b4 100%);
+      box-shadow: 0 0 8px rgba(1,204,247,.7); }
+    #r8-body .seg.g i { background: linear-gradient(180deg, #fffbe0 0%, #ffe066 40%, #ffbf1f 62%, #c77700 100%); box-shadow: 0 0 9px rgba(255,190,40,.8); }
+    #r8-max { left: 178px; top: -6px; height: 24px; padding: 0 9px; border-radius: 4px; transform: skewX(-12deg);
+      background: linear-gradient(180deg, #fff3a8, #ffbf1f 60%, #d98400); box-shadow: 0 0 14px rgba(255,190,40,.85), inset 0 1px 0 #fffbe0;
+      font: 700 16px/24px Poppins, sans-serif; letter-spacing: .08em; color: #3a1d00; }
+    #r8-flash { left: 0; top: 0; width: 820px; height: 980px; background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(170,220,255,.55), rgba(170,220,255,0) 70%); }
+  </style>
+  <div id="root" data-composition-id="r8" data-width="1080" data-height="1920">
+    <div id="r8-clip">
+      <div class="r8-a" id="r8-scan"></div>
+      <div class="r8-a" id="r8-flash"></div>
+      <div class="r8-a r8-arw" id="r8-al"><svg width="90" height="116" viewBox="0 0 74 96">
+        <defs><linearGradient id="r8-ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".46" stop-color="#bfe2ff"/>
+          <stop offset=".52" stop-color="#3f86ee"/><stop offset="1" stop-color="#9fd2ff"/></linearGradient></defs>
+        <path d="M62 8 L10 48 L62 88 Z" fill="url(#r8-ga)" stroke="#050a26" stroke-width="7" stroke-linejoin="round"/><path d="M55 72 L23 48" stroke="#123a8a" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+        <path d="M54 22 L22 46" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity=".85"/></svg></div>
+      <div class="r8-a r8-arw" id="r8-ar"><svg width="90" height="116" viewBox="0 0 74 96">
+        <path d="M12 8 L64 48 L12 88 Z" fill="url(#r8-ga)" stroke="#050a26" stroke-width="7" stroke-linejoin="round"/><path d="M19 72 L51 48" stroke="#123a8a" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+        <path d="M20 22 L52 46" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity=".85"/></svg></div>
+      <div class="r8-a" id="r8-p1"><svg width="92" height="70" viewBox="0 0 92 70">
+        <defs><linearGradient id="r8-gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a7a"/><stop offset=".5" stop-color="#ff2f3c"/><stop offset="1" stop-color="#b3000f"/></linearGradient></defs>
+        <path d="M8 4 H84 Q88 4 88 8 V40 Q88 44 84 44 H58 L46 64 L34 44 H8 Q4 44 4 40 V8 Q4 4 8 4 Z" fill="url(#r8-gp)" stroke="#ffffff" stroke-width="4" stroke-linejoin="round"/></svg><b>1P</b></div>
+      <div class="r8-a" id="r8-pan">
+        <div class="r8-a" id="r8-tab"><div class="r8-bg"></div><span class="r8-chr chr">PILIH KARAKTER</span><span id="r8-tm">30</span></div>
+        <div class="r8-a" id="r8-body"><div class="r8-bg"></div><div class="in">
+          <div class="sub">ROBOT</div><div class="r8-chr nm">AI PRENEUR</div>
+          <div class="row" id="r8-row0"><span class="lb">KECEPATAN</span></div>
+          <div class="row" id="r8-row1"><span class="lb">KEKUATAN</span></div>
+          <div class="row" id="r8-row2"><span class="lb">GAYA</span><div class="r8-a" id="r8-max">MAX</div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
   <script>
     (function () {
+      // r8 PS2 STYLE — "Delapan, gaya PS2, kotak-kotak khas game tahun 2000-an."
+      // A 2000s console CHARACTER-SELECT screen boots over the stage when the sweep lands (synth pad): CRT scanlines, chrome ◄ ► arrows
+      // bobbing at the sides, a red 1P cursor bobbing over the (turntabling) robot, a "PILIH KARAKTER" tab with a countdown (top-right).
+      // "kotak-kotak": the stat panel slides in and three stat bars fill BOX BY BOX · "2000-an": GAYA tops out — MAX — the cursor confirms.
+      const R = window.ROUNDS[7], DUR = R.dur, S = R.start;
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.19);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const VW = window.VO_WORDS, wt = (txt) => { const w = VW.find((x) => x[0] === txt && x[1] >= S - 0.05); return (w ? w[1] : S) - S; };
+      // local beats: sweep lands 1.38 · kotak-kotak 2.15 · game 3.131 · 2000-an 3.452 · out by 4.2
+      const LAND = R.sweep[1] - S, KK = wt("kotak-kotak"), GAME = wt("game"), Y2K = wt("2000-an."), OUT = DUR - 0.3;
+      // layout (stage-local px; robot ≈ x 180–645, y 370–840, head top ≈ (410, 370) — it turntables in place)
+      const ARW_Y = 560, ARW_LX = 56, ARW_RX = 764, HEAD = { x: 412, y: 350 }, PAN = { x: 500, y: 68 };
+
+      // ---- boot: scanlines + a soft CRT flash on the synth pad
+      const scan = $("r8-scan"), flash = $("r8-flash");
+      I(scan, { opacity: 0 }); ft(scan, { opacity: 0 }, { opacity: 0.55, duration: 0.12, ease: "none" }, LAND - 0.04);
+      ft(scan, { opacity: 0.55 }, { opacity: 0, duration: 0.2, ease: "none" }, OUT + 0.06);
+      I(flash, { opacity: 0 }); ft(flash, { opacity: 0.9 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, LAND);
+      ft(flash, { opacity: 0.55 }, { opacity: 0, duration: 0.35, ease: "power2.out" }, Y2K);
+
+      // ---- ◄ ► arrows: slide in from the edges, bob outward in stepped beats, the right one "pressed" on the beats
+      const al = $("r8-al"), ar = $("r8-ar");
+      I(al, { x: ARW_LX - 120, y: ARW_Y, opacity: 0 }); I(ar, { x: ARW_RX + 120, y: ARW_Y, opacity: 0 });
+      tl.set([al, ar], { opacity: 1 }, LAND + 0.02);
+      ft(al, { x: ARW_LX - 120 }, { x: ARW_LX, duration: 0.26, ease: "back.out(2)" }, LAND + 0.02);
+      ft(ar, { x: ARW_RX + 120 }, { x: ARW_RX, duration: 0.26, ease: "back.out(2)" }, LAND + 0.06);
+      const BOB0 = LAND + 0.32, BOBP = 0.36, nB = Math.floor((OUT - BOB0) / BOBP);
+      for (let k = 0; k < nB; k++) {
+        const t = BOB0 + k * BOBP;
+        ft(al, { x: ARW_LX }, { x: ARW_LX - 12, duration: BOBP / 2, ease: "steps(3)", yoyo: true, repeat: 1 }, t);
+        ft(ar, { x: ARW_RX }, { x: ARW_RX + 12, duration: BOBP / 2, ease: "steps(3)", yoyo: true, repeat: 1 }, t);
+      }
+      const arS = ar.firstElementChild; I(arS, { scale: 1, transformOrigin: "50% 50%" });
+      [KK - 0.04, GAME - 0.04].forEach((t) => ft(arS, { scale: 0.74 }, { scale: 1, duration: 0.22, ease: "back.out(3)" }, t));
+      ft(al, { opacity: 1, x: ARW_LX }, { opacity: 0, x: ARW_LX - 120, duration: 0.2, ease: "power2.in" }, OUT);
+      ft(ar, { opacity: 1, x: ARW_RX }, { opacity: 0, x: ARW_RX + 120, duration: 0.2, ease: "power2.in" }, OUT);
+
+      // ---- 1P cursor drops onto the robot's head and bobs
+      const p1 = $("r8-p1");
+      I(p1, { x: HEAD.x, y: HEAD.y - 64 - 90, opacity: 0 });
+      tl.set(p1, { opacity: 1 }, LAND + 0.16);
+      ft(p1, { y: HEAD.y - 64 - 90 }, { y: HEAD.y - 64, duration: 0.3, ease: "bounce.out" }, LAND + 0.16);
+      const PB0 = LAND + 0.5, PBP = 0.4, nP = Math.floor((Y2K - 0.05 - PB0) / PBP);
+      for (let k = 0; k < nP; k++) ft(p1, { y: HEAD.y - 64 }, { y: HEAD.y - 64 - 10, duration: PBP / 2, ease: "steps(3)", yoyo: true, repeat: 1 }, PB0 + k * PBP);
+      // "2000-an": confirm — the cursor pumps and blinks (selected!)
+      I(p1, { scale: 1, transformOrigin: "50% 100%" });
+      ft(p1, { scale: 1.3 }, { scale: 1, duration: 0.3, ease: "back.out(3)" }, Y2K);
+      [0.22, 0.32].forEach((d) => { tl.set(p1, { opacity: 0.3 }, Y2K + d); tl.set(p1, { opacity: 1 }, Y2K + d + 0.05); });
+      ft(p1, { opacity: 1, y: HEAD.y - 64 }, { opacity: 0, y: HEAD.y - 64 - 60, duration: 0.2, ease: "power2.in" }, OUT);
+
+      // ---- select panel: tab (with countdown) slides in after the boot, body right before "kotak-kotak"
+      const pan = $("r8-pan"), tab = $("r8-tab"), body = $("r8-body"), tm = $("r8-tm");
+      I(pan, { x: PAN.x, y: PAN.y });
+      I(tab, { x: 360 }); ft(tab, { x: 360 }, { x: 0, duration: 0.3, ease: "power4.out" }, LAND + 0.12);
+      I(body, { x: 380 }); ft(body, { x: 380 }, { x: 0, duration: 0.3, ease: "power4.out" }, KK - 0.22);
+      I(tm, { textContent: "30" });
+      [29, 28].forEach((n, k) => tl.set(tm, { textContent: String(n) }, LAND + 0.62 + k * 1.0));
+      // "kotak-kotak": the stat bars fill BOX BY BOX (stepped sets, a little overshoot on each box)
+      const VAL = [8, 7, 10], NSEG = 10, SEGW = 24;
+      VAL.forEach((v, r) => {
+        const row = $("r8-row" + r);
+        for (let s = 0; s < NSEG; s++) {
+          const seg = document.createElement("div"); seg.className = "seg" + (r === 2 ? " g" : ""); seg.style.left = (s * SEGW + 3) + "px";
+          const fill = document.createElement("i"); seg.appendChild(fill); row.appendChild(seg);
+          I(fill, { opacity: 0, scale: 1 });
+          if (s < v) {
+            const t = KK + 0.04 + r * 0.17 + s * (r === 2 ? 0.07 : 0.045);
+            tl.set(fill, { opacity: 1, scale: 1.3 }, t); tl.set(fill, { scale: 1 }, t + 0.034);
+          }
+        }
+      });
+      // GAYA tops out: MAX stamps in on "2000-an" and blinks
+      const mx = $("r8-max");
+      I(mx, { opacity: 0, scale: 2.2, transformOrigin: "30% 50%" });
+      ft(mx, { opacity: 0, scale: 2.2 }, { opacity: 1, scale: 1, duration: 0.16, ease: "power4.in" }, Y2K - 0.14);
+      [0.16, 0.26, 0.34, 0.42].forEach((d, k) => tl.set(mx, { opacity: k % 2 ? 1 : 0.35 }, Y2K + d));
+      ft(tab, { x: 0 }, { x: 360, duration: 0.22, ease: "power3.in" }, OUT + 0.04);
+      ft(body, { x: 0 }, { x: 380, duration: 0.22, ease: "power3.in" }, OUT);
+
+      tl.set({}, {}, DUR - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["r8"] = tl;
     })();

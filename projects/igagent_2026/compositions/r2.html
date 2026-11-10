@@ -1,7 +1,374 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-u8nz" id="root" data-composition-id="r2" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .r2-a { position: absolute; left: 0; top: 0; }
+    /* ======================================================================================================================
+       BADGE COMPONENT — copy exactly
+       (owner: s02). Copy this CSS block + the JS block marked the same way below, then replace the prefix "r2-" with your
+       scene prefix (e.g. "r2-") in the CSS, and call bdgHTML("r2", k). Change nothing else (sizes, colours, fonts, layout).
+       Badge = 150×204, radius 20. Its x/y (GSAP) = its CENTRE in a full-frame parent (left/top 0, margin -102/-75).
+       Parts (ids, k = 1..13, + optional suffix o.id):  #P-bdgK (root: move/scale/rotate it) · #P-bdgK-card (the white front)
+       · #P-bdgK-back (navy back with the number "01".."13", opacity 0 by default: for flips set it to 1 at 90°)
+       · #P-bdgK-strap (the 6 px lanyard going up off-card; length = o.strap px; tween scaleY with transformOrigin "50% 100%")
+       · #P-bdgK-ic (the 56 px icon circle). For a lanyard swing rotate the root with transformOrigin "50% -<strap>px".
+       TEAM WALL slot of badge k = BDG_WALL(k) (scale .92) · ROUND HEADER spot = BDG_HEAD (x 135, y 402, scale 1; keep the strap
+       ≤ 14 px there: the white logo sits at x 84–320, y 262–300) with .P-rh (role 52 px white + command 30 px cyan) beside it.
+       ====================================================================================================================== */
+    .r2-bdg { position: absolute; left: 0; top: 0; width: 150px; height: 204px; margin: -102px 0 0 -75px; transform-origin: 50% 50%; }
+    .r2-bdg-strap { position: absolute; left: 72px; bottom: 188px; width: 6px; height: var(--strap, 120px); border-radius: 3px 3px 0 0; transform-origin: 50% 100%;
+      background: linear-gradient(90deg, rgba(0,0,0,.24), rgba(255,255,255,.22) 45%, rgba(0,0,0,.24)), var(--c);
+      -webkit-mask-image: linear-gradient(0deg, #000 0, #000 calc(100% - 36px), transparent 100%); mask-image: linear-gradient(0deg, #000 0, #000 calc(100% - 36px), transparent 100%); }
+    .r2-bdg-card, .r2-bdg-back { position: absolute; left: 0; top: 0; width: 150px; height: 204px; border-radius: 20px; overflow: hidden; }
+    .r2-bdg-card { background: linear-gradient(180deg, #ffffff, #eef3fb); box-shadow: 0 18px 34px -16px rgba(2,6,28,.78), inset 0 0 0 1px rgba(255,255,255,.7); }
+    .r2-bdg-band { position: absolute; left: 0; top: 0; width: 150px; height: 54px; background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 75%), var(--c); }
+    .r2-bdg-slot { position: absolute; left: 58px; top: 12px; width: 34px; height: 8px; border-radius: 4px; background: #0b1440;
+      box-shadow: inset 0 2px 2px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.35); }
+    .r2-bdg-ic { position: absolute; left: 47px; top: 26px; width: 56px; height: 56px; border-radius: 50%; background: var(--c); color: #ffffff;
+      box-shadow: 0 0 0 4px #ffffff, 0 7px 12px -5px rgba(10,13,44,.5); }
+    .r2-bdg-ic svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; stroke-width: 2.25; }
+    .r2-bdg-role { position: absolute; left: 6px; top: 90px; width: 138px; height: 48px; display: flex; align-items: center; justify-content: center; text-align: center;
+      font: 700 19px/23px Poppins, sans-serif; color: #0a0d2c; letter-spacing: -.01em; }
+    .r2-bdg-cmd { position: absolute; left: 0; top: 144px; width: 150px; text-align: center; font: 400 17px/22px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .r2-bdg-bar { position: absolute; left: 40px; top: 178px; width: 70px; height: 10px; opacity: .26;
+      background: repeating-linear-gradient(90deg, #294b77 0 2px, transparent 2px 4px, #294b77 4px 7px, transparent 7px 9px, #294b77 9px 10px, transparent 10px 13px); }
+    .r2-bdg-back { opacity: 0; background: linear-gradient(180deg, #1c2b6a, #0f1a4c); box-shadow: 0 18px 34px -16px rgba(2,6,28,.78), inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    .r2-bdg-back .r2-bdg-slot { background: #060a24; box-shadow: inset 0 2px 2px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.12); }
+    .r2-bdg-no { position: absolute; left: 0; top: 60px; width: 150px; text-align: center; font: 700 66px/76px Poppins, sans-serif; color: #ffffff; letter-spacing: -.02em; }
+    .r2-bdg-cbar { position: absolute; left: 51px; top: 148px; width: 48px; height: 6px; border-radius: 3px; background: var(--c); box-shadow: 0 0 12px var(--c); }
+    .r2-bdg-clip { position: absolute; left: 68px; top: -7px; width: 14px; height: 24px; border-radius: 4px;
+      background: linear-gradient(90deg, #8a9ab6, #f4f7fc 45%, #7d8daa); box-shadow: 0 2px 3px rgba(0,0,0,.4); }
+    /* ROUND HEADER text (r1–r4, s07): beside the badge at BDG_HEAD, box x 236–1020, y 320–470 */
+    .r2-rh { position: absolute; left: 236px; top: 320px; width: 784px; height: 150px; display: flex; flex-direction: column; justify-content: center; }
+    .r2-rh-role { font: 700 52px/62px Poppins, sans-serif; color: #ffffff; letter-spacing: -.015em; white-space: nowrap; }
+    .r2-rh-cmd { font: 700 30px/40px Poppins, sans-serif; color: #01ccf7; white-space: nowrap; margin-top: 4px; }
+    /* ============================================== END BADGE COMPONENT ============================================== */
+    #r2-hx { left: 236px; top: 320px; width: 784px; height: 150px; overflow: hidden; }   /* clip box for the header-text roll */
+    .r2-hw { position: absolute; left: -236px; top: -320px; width: 1px; height: 1px; }
+    /* ---- the idea note ---- */
+    #r2-note { left: 360px; top: 568px; width: 360px; height: 320px; border-radius: 18px; background: linear-gradient(160deg, #fff1b8, #ffd66b);
+      box-shadow: 0 30px 50px -24px rgba(0,0,0,.75), inset 0 -3px 0 rgba(160,110,0,.12); }
+    #r2-ntp { left: 125px; top: -16px; width: 110px; height: 34px; border-radius: 4px; background: rgba(255,255,255,.55); transform: rotate(-3deg); }
+    #r2-nlb { left: 32px; top: 34px; height: 30px; display: flex; align-items: center; gap: 8px; font: 700 22px/30px Poppins, sans-serif; letter-spacing: .18em; color: #8a6400; }
+    #r2-nlb svg { width: 24px; height: 24px; color: #8a6400; }
+    #r2-nmk { left: 24px; top: 168px; width: 252px; height: 28px; border-radius: 6px; background: rgba(1,204,247,.5); transform-origin: 0 50%; }
+    #r2-ntx { left: 32px; top: 82px; width: 310px; font: 700 46px/56px Poppins, sans-serif; color: #0a0d2c; letter-spacing: -.01em; }
+    #r2-nby { left: 32px; top: 252px; font: 400 24px/32px Poppins, sans-serif; color: #7a5a00; }
+    #r2-nby b { font-weight: 700; }
+    /* ---- the script page ---- */
+    #r2-page { left: 100px; top: 536px; width: 880px; height: 392px; border-radius: 26px; overflow: hidden; background: linear-gradient(180deg, #ffffff, #eef3fb);
+      box-shadow: 0 30px 60px -28px rgba(0,0,0,.8); }
+    #r2-pgy { left: 0; top: 0; width: 880px; height: 392px; background: linear-gradient(160deg, #fff1b8, #ffd66b); }
+    #r2-clap { left: 36px; top: 30px; width: 64px; height: 58px; transform-origin: 50% 50%; }
+    #r2-clap .bd { position: absolute; left: 0; top: 18px; width: 64px; height: 40px; border-radius: 4px 4px 8px 8px; background: #0a0d2c; }
+    #r2-clap .bs { position: absolute; left: 0; top: 18px; width: 64px; height: 11px; background: repeating-linear-gradient(60deg, #ffffff 0 7px, #0a0d2c 7px 14px); }
+    #r2-clap .dt { position: absolute; left: 10px; top: 38px; width: 44px; height: 5px; border-radius: 3px; background: #01ccf7; box-shadow: 0 0 8px rgba(1,204,247,.9); }
+    #r2-clst { left: 0; top: 4px; width: 64px; height: 12px; border-radius: 3px; transform-origin: 4px 12px;
+      background: repeating-linear-gradient(-60deg, #ffffff 0 7px, #0a0d2c 7px 14px); box-shadow: inset 0 0 0 2px #0a0d2c; }
+    #r2-plb { left: 124px; top: 26px; font: 700 22px/28px Poppins, sans-serif; letter-spacing: .16em; color: #0294b4; }
+    #r2-ptt { left: 124px; top: 54px; font: 700 40px/48px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; letter-spacing: -.01em; }
+    #r2-pch { left: 708px; top: 38px; width: 136px; height: 42px; border-radius: 21px; background: #0b1440; text-align: center; font: 700 22px/42px Poppins, sans-serif; color: #01ccf7; }
+    #r2-pdv { left: 36px; top: 120px; width: 808px; height: 2px; background: #d9e3f3; transform-origin: 0 50%; }
+    .r2-lab { position: absolute; left: 36px; width: 100px; height: 38px; border-radius: 11px; text-align: center; font: 700 22px/38px Poppins, sans-serif; letter-spacing: .08em; }
+    .r2-ln { position: absolute; left: 158px; width: 690px; font: 400 26px/36px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    #r2-hk { left: 156px; top: 136px; width: 688px; height: 80px; border-radius: 14px; border: 2.5px dashed #01ccf7; background: rgba(1,204,247,.08); }
+    #r2-hkt { left: 22px; top: 19px; font: 400 26px/36px Poppins, sans-serif; color: #5a7aa8; white-space: nowrap; }
+    #r2-car { left: 300px; top: 22px; width: 3px; height: 32px; background: #01ccf7; }
+    /* ---- the hook slot machine ---- */
+    #r2-mac { left: 60px; top: 532px; width: 960px; height: 398px; border-radius: 30px;
+      background: linear-gradient(180deg, rgba(18,31,84,.97), rgba(10,18,58,.97)); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), 0 30px 60px -30px rgba(0,0,0,.7); }
+    #r2-cnt { left: 30px; top: 16px; height: 52px; display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+    #r2-cn { font: 700 44px/52px Poppins, sans-serif; color: #01ccf7; min-width: 54px; }
+    #r2-cl { font: 700 22px/30px Poppins, sans-serif; color: #e3edfa; letter-spacing: .02em; }
+    .r2-pip { position: absolute; top: 37px; width: 11px; height: 11px; margin-left: -5.5px; border-radius: 50%; background: rgba(255,255,255,.16); }
+    .r2-win { position: absolute; top: 84px; width: 292px; height: 236px; border-radius: 20px; overflow: hidden;
+      background: linear-gradient(180deg, #081034, #13205a 50%, #081034); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    .r2-mv { position: absolute; left: 0; top: 0; width: 292px; }
+    .r2-cell { position: absolute; left: 0; width: 292px; height: 118px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .r2-cell b { font: 700 20px/24px Poppins, sans-serif; color: #6adfff; letter-spacing: .06em; }
+    .r2-cell span { padding: 0 20px; font: 700 27px/32px Poppins, sans-serif; color: #ffffff; }
+    .r2-blur .r2-cell b { color: rgba(106,223,255,.5); text-shadow: 0 -10px 0 rgba(106,223,255,.22), 0 10px 0 rgba(106,223,255,.22); }
+    .r2-blur .r2-cell span { color: rgba(255,255,255,.5); text-shadow: 0 -14px 0 rgba(255,255,255,.2), 0 14px 0 rgba(255,255,255,.2), 0 -28px 0 rgba(255,255,255,.08), 0 28px 0 rgba(255,255,255,.08); }
+    .r2-pay { position: absolute; left: 8px; top: 59px; width: 276px; height: 118px; border-radius: 16px; box-shadow: inset 0 0 0 2.5px #01ccf7, 0 0 20px rgba(1,204,247,.3); background: rgba(1,204,247,.06); }
+    .r2-pay.g { box-shadow: inset 0 0 0 3px #3ddc97, 0 0 26px rgba(61,220,151,.55); background: rgba(61,220,151,.10); }
+    .r2-fade { position: absolute; left: 0; top: 0; width: 292px; height: 236px; background: linear-gradient(180deg, #081034 0%, rgba(8,16,52,0) 30%, rgba(8,16,52,0) 70%, #081034 100%); }
+    .r2-arw { position: absolute; top: 190px; width: 0; height: 0; border-top: 13px solid transparent; border-bottom: 13px solid transparent; }
+    #r2-sweep { left: 0; top: 84px; width: 26px; height: 236px; border-radius: 13px; background: linear-gradient(90deg, rgba(1,204,247,0), rgba(160,240,255,.95), rgba(1,204,247,0));
+      box-shadow: 0 0 26px rgba(1,204,247,.8); }
+    .r2-stp { position: absolute; left: 0; top: 0; width: 124px; height: 124px; margin: -62px 0 0 -62px; border-radius: 50%; text-align: center;
+      background: radial-gradient(circle, rgba(10,18,58,.94) 0 62%, rgba(10,18,58,.82)); }
+    .r2-stp b { display: block; margin-top: 24px; font: 700 44px/48px Poppins, sans-serif; letter-spacing: -.01em; }
+    .r2-stp span { display: block; font: 700 20px/22px Poppins, sans-serif; letter-spacing: .16em; }
+    .r2-bst { position: absolute; left: 0; top: 0; width: 124px; height: 124px; margin: -62px 0 0 -62px; border-radius: 50%; }
+    /* ---- violet shutters (exit into r3) ---- */
+    .r2-sh { position: absolute; top: 524px; width: 312px; height: 408px; border-radius: 24px; overflow: hidden;
+      background: repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 2px, rgba(255,255,255,0) 2px 34px), linear-gradient(180deg, #2c2b7c, #1b1d58);
+      box-shadow: inset 0 0 0 1.5px rgba(157,140,255,.45); }
+    .r2-sh .ed { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: #c9beff; box-shadow: 0 0 14px rgba(157,140,255,.95), 0 0 3px #ffffff; }
+    .r2-sh svg { position: absolute; left: 124px; top: 172px; width: 64px; height: 64px; color: #9d8cff; }
+  </style>
+  <div data-hf-id="hf-u8nz" id="root" data-composition-id="r2" data-width="1080" data-height="1920">
+    <div class="r2-a" id="r2-r1"></div>
+    <div class="r2-a" id="r2-page">
+      <div class="r2-a" id="r2-pgy"></div>
+      <div class="r2-a" id="r2-clap"><div class="bd"></div><div class="bs"></div><div class="dt"></div><div class="r2-a" id="r2-clst"></div></div>
+      <div class="r2-a" id="r2-plb">NASKAH REEL</div>
+      <div class="r2-a" id="r2-ptt">Kopi susu gula aren</div>
+      <div class="r2-a" id="r2-pch">30 detik</div>
+      <div class="r2-a" id="r2-pdv"></div>
+      <div class="r2-lab" id="r2-l0" style="top:157px;background:#01ccf7;color:#0a0d2c">HOOK</div>
+      <div class="r2-a" id="r2-hk"><div class="r2-a" id="r2-hkt">pilih 3 hook terbaik…</div><div class="r2-a" id="r2-car"></div></div>
+      <div class="r2-lab" id="r2-l1" style="top:242px;background:#e3ecfb;color:#294b77">ISI</div>
+      <div class="r2-ln" id="r2-i0" style="top:236px"><b style="color:#0a0d2c">Siram espresso</b> ke susu dingin,</div>
+      <div class="r2-ln" id="r2-i1" style="top:272px">lalu aduk gula aren pelan-pelan.</div>
+      <div class="r2-lab" id="r2-l2" style="top:326px;background:#e3ecfb;color:#294b77">CTA</div>
+      <div class="r2-ln" id="r2-c0" style="top:327px">Simpan buat bikin besok pagi.</div>
+    </div>
+    <div class="r2-a" id="r2-note">
+      <div class="r2-a" id="r2-ntp"></div>
+      <div class="r2-a" id="r2-nlb"></div>
+      <div class="r2-a" id="r2-nmk"></div>
+      <div class="r2-a" id="r2-ntx"></div>
+      <div class="r2-a" id="r2-nby">dari: <b>kamu</b></div>
+    </div>
+    <div class="r2-a" id="r2-mac">
+      <div class="r2-a" id="r2-cnt"><span id="r2-cn">00</span><span id="r2-cl">rumus hook</span></div>
+      <div class="r2-a" id="r2-pips"></div>
+      <div class="r2-a" id="r2-wins"></div>
+      <div class="r2-arw" style="left:-2px;border-left:16px solid #01ccf7"></div>
+      <div class="r2-arw" style="left:946px;border-right:16px solid #01ccf7"></div>
+      <div class="r2-a" id="r2-sweep"></div>
+      <div class="r2-a" id="r2-stps"></div>
+    </div>
+    <div class="r2-a" id="r2-shs"></div>
+    <div class="r2-a" id="r2-hdr"></div>
+    <div class="r2-a" id="r2-hx"></div>
+  </div>
   <script>
-    (function () { window.__timelines = window.__timelines || {}; const tl = gsap.timeline({ paused: true }); window.__timelines["r2"] = tl; })();
+    (function () {
+      // r2 /ig-reel "Lalu, satu ide kamu dijadiin naskah reel. Tiga hook dari 26 rumus, langsung dikasih skor."
+      // FRAME 0 = r1's end state (badge 1 Pemburu Tren · /ig-viral in the ROUND HEADER + its leaderboard; see section 1).
+      // IN ("Lalu,"): LANYARD RELAY — badge 1 is yanked up out of the header on its strap while badge 2 (Penulis Naskah · /ig-reel) drops in on
+      // a long lanyard, swings, and its badge reel winds the strap up; header text rolls.
+      // "satu ide": a yellow sticky note pops in (tape, "IDE") · "kamu": "kopi susu gula aren" writes itself, a cyan marker swipes, "dari: kamu" ·
+      // "dijadiin": the note squares up and its rectangle OPENS into a white script page · "naskah": HOOK / ISI / CTA rows write in ·
+      // "reel.": the clapperboard claps, chip "30 detik" · the HOOK slot waits (dashed box, blinking caret) · "Tiga": push into the HOOK box —
+      // it becomes a 3-reel SLOT MACHINE (payline arrows) that spins · "hook": reel 1 lands "Pertanyaan nyelekit" · "26": the counter rolls
+      // 00→26 and 26 pips light up, the chosen ones glow · reel 2 lands "Angka mengejutkan" · "rumus,": reel 3 lands "Mitos vs fakta" ·
+      // "langsung": an evaluation sweep passes the three windows · "dikasih … skor.": score stamps slam (8,4 · 9,1 · 7,8), the machine
+      // jolts, the 9,1 window turns green · OUT: three violet shutters (badge 3's colour) drop over the workspace.
+      // END STATE (t = D): header = badge 2 (bdgHTML strap 14) at BDG_HEAD (centre x135 y402, scale 1, rotation 0) + .r2-rh "Penulis Naskah" /
+      //   "/ig-reel"; workspace fully covered by 3 closed violet shutters (.r2-sh x 60/384/708, w 312, y 524–932, r 24, scan-face icon in the
+      //   middle one, glowing edge bar at their bottom). r3 rebuilds this exactly and lifts the shutters.
+      const SC = window.VO_SCENES.find((s) => s.id === "r2");
+      const D = SC.dur, ST = SC.start, VW = window.VO_WORDS;
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const L = (txt) => wt(txt, ST - 0.05) - ST;   // local time of a word in this scene
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const WJ = "⁠";   // word joiner: keeps GSAP from parsing numeric textContent
+      const tLal = L("Lalu,"), tSat = L("satu"), tIde = L("ide"), tKam = L("kamu"), tDij = L("dijadiin"), tNas = L("naskah"), tRee = L("reel.");
+      const tTig = L("Tiga"), tHoo = L("hook"), t26 = L("26"), tRum = L("rumus,"), tLan = L("langsung"), tDik = L("dikasih"), tSko = L("skor.");
+
+      // ====================================================================================================================
+      // BADGE COMPONENT — copy exactly (JS half; see the CSS block for the rules). P = your scene prefix without the dash.
+      // ====================================================================================================================
+      const BDG = [null,
+        ["/ig-viral", "Pemburu Tren", "trending-up", "#ff5c8a"], ["/ig-reel", "Penulis Naskah", "clapperboard", "#01ccf7"],
+        ["/ig-profile", "Auditor Profil", "scan-face", "#9d8cff"], ["/ig-plan", "Perencana Jadwal", "calendar-days", "#ffb35c"],
+        ["/ig-caption", "Caption", "type", "#3ddc97"], ["/ig-carousel", "Carousel", "gallery-horizontal", "#6adfff"],
+        ["/ig-story", "Story", "circle-dashed", "#ff8f6b"], ["/ig-human", "Penghalus Tulisan", "eraser", "#c7a6ff"],
+        ["/ig-comment", "Komentar", "message-circle", "#5ec8ff"], ["/ig-reply", "Balas Komentar", "reply", "#7ee2b8"],
+        ["/ig-dm", "DM", "send", "#ffd66b"], ["/ig-repurpose", "Daur Ulang", "repeat", "#ff9ec0"], ["/ig-audit", "Audit Postingan", "chart-column", "#8fb6ff"]];
+      const BDG_IC = {   // lucide-static 1.70 (ISC), assets/icons/lucide-*.svg
+        "trending-up": '<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
+        "clapperboard": '<path d="m12.296 3.464 3.02 3.956"/><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m6.18 5.276 3.1 3.899"/>',
+        "scan-face": '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
+        "calendar-days": '<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/>',
+        "type": '<path d="M12 4v16"/><path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2"/><path d="M9 20h6"/>',
+        "gallery-horizontal": '<path d="M2 3v18"/><rect width="12" height="18" x="6" y="3" rx="2"/><path d="M22 3v18"/>',
+        "circle-dashed": '<path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/>',
+        "eraser": '<path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/><path d="m5.082 11.09 8.828 8.828"/>',
+        "message-circle": '<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>',
+        "reply": '<path d="M20 18v-2a4 4 0 0 0-4-4H4"/><path d="m9 17-5-5 5-5"/>',
+        "send": '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+        "repeat": '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+        "chart-column": '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>' };
+      const bdgSVG = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${BDG_IC[name]}</svg>`;
+      // badge k (1..13) → markup string. o.id = id suffix (a 2nd copy of the same badge), o.strap = lanyard length in px (default 120, 0 = none)
+      const bdgHTML = (P, k, o = {}) => {
+        const [cmd, role, ic, c] = BDG[k], id = `${P}-bdg${k}${o.id || ""}`, st = o.strap == null ? 120 : o.strap;
+        return `<div class="${P}-bdg" id="${id}" style="--c:${c};--strap:${st}px">` + (st ? `<div class="${P}-bdg-strap" id="${id}-strap"></div>` : "") +
+          `<div class="${P}-bdg-card" id="${id}-card"><div class="${P}-bdg-band"><i class="${P}-bdg-slot"></i></div>` +
+          `<div class="${P}-bdg-ic" id="${id}-ic">${bdgSVG(ic)}</div><div class="${P}-bdg-role">${role}</div><div class="${P}-bdg-cmd">${cmd}</div><i class="${P}-bdg-bar"></i></div>` +
+          `<div class="${P}-bdg-back" id="${id}-back"><i class="${P}-bdg-slot"></i><div class="${P}-bdg-no">${String(k).padStart(2, "0")}</div><i class="${P}-bdg-cbar"></i></div>` +
+          `<i class="${P}-bdg-clip"></i></div>`;
+      };
+      // ROUND HEADER text markup (place it next to the badge at BDG_HEAD)
+      const rhHTML = (P, k) => `<div class="${P}-rh" id="${P}-rh"><div class="${P}-rh-role" id="${P}-rh-role">${BDG[k][1]}</div><div class="${P}-rh-cmd" id="${P}-rh-cmd">${BDG[k][0]}</div></div>`;
+      // geometry (centres, full-frame coordinates): TEAM WALL rows 5/4/4 at y 400/625/850, pitch 164 (150×.92 + 26 gap), centred in x
+      const BDG_WALL = (k) => { const r = k <= 5 ? 0 : k <= 9 ? 1 : 2, i = k - [1, 6, 10][r], n = r ? 4 : 5; return { x: 540 + (i - (n - 1) / 2) * 164, y: [400, 625, 850][r], scale: 0.92 }; };
+      const BDG_HEAD = { x: 135, y: 402, scale: 1 };
+      const BDG_WALL_STRAP = 28;   // the lanyard stub every badge shows on the wall
+      // ============================================== END BADGE COMPONENT ==============================================
+
+      // ================================================================ UI icons (lucide, ISC)
+      const ICON = {
+        "sparkles": '<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>',
+        "scan-face": '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>'
+      };
+      const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[n]}</svg>`;
+      const rhCopy = (k, id) => { const w = document.createElement("div"); w.className = "r2-hw"; w.id = id; w.innerHTML = rhHTML("r2", k);
+        w.querySelectorAll("[id]").forEach((e) => { e.id = e.id + "-" + id; }); $("r2-hx").appendChild(w); return w; };
+      const HX = BDG_HEAD.x, HY = BDG_HEAD.y;
+
+      // ================================================================ 1) r1's end state + the LANYARD RELAY
+      // (r1's end state: badge 1 in the header; the workspace hand-off lives in r1Out() below)
+      const hdr = $("r2-hdr"), SL = 420;
+      hdr.innerHTML = bdgHTML("r2", 1, { strap: 14 }) + bdgHTML("r2", 2, { strap: SL });
+      const t1 = rhCopy(1, "r2-t1"), t2 = rhCopy(2, "r2-t2");
+      const b1 = $("r2-bdg1"), b2 = $("r2-bdg2"), s2 = $("r2-bdg2-strap");
+      I(b1, { x: HX, y: HY, rotation: 0, scale: 1, opacity: 1 });
+      ft(b1, { y: HY }, { y: HY + 12, duration: 0.08, ease: "power2.out" }, 0.02);
+      ft(b1, { y: HY + 12, rotation: 0 }, { y: HY - 560, rotation: 5, duration: 0.28, ease: "power3.in" }, 0.1);
+      tl.set(b1, { opacity: 0 }, 0.4);
+      // badge 2 falls on its lanyard, swings about the strap top, then its badge reel winds the strap up to 14 px
+      I(b2, { x: HX, y: HY - 600, rotation: 0, scale: 1, opacity: 1, transformOrigin: `50% ${-SL + 16}px` });
+      ft(b2, { y: HY - 600 }, { y: HY, duration: 0.4, ease: "back.out(1.25)" }, 0.16);
+      const SW = [[0.22, 0, 4.4, 0.2], [0.42, 4.4, -2.8, 0.22], [0.64, -2.8, 1.5, 0.22], [0.86, 1.5, -0.6, 0.2], [1.06, -0.6, 0, 0.2]];
+      I(b2, { rotation: 0 });
+      SW.forEach(([t, a, b, d]) => ft(b2, { rotation: a }, { rotation: b, duration: d, ease: "sine.inOut" }, t));
+      I(s2, { scaleY: 1 });
+      ft(s2, { scaleY: 1 }, { scaleY: 14 / SL, duration: 0.34, ease: "power2.inOut" }, 1.0);
+      I(t1, { y: 0, opacity: 1 }); I(t2, { y: 150, opacity: 0 });
+      ft(t1, { y: 0, opacity: 1 }, { y: -150, opacity: 0, duration: 0.3, ease: "power3.in" }, 0.05);
+      ft(t2, { y: 150, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, 0.26);
+      const r1Out = () => { /* r1's workspace end state + its exit (filled in once r1 is final) */ };
+      r1Out();
+
+      // ================================================================ 2) "satu ide kamu": the sticky note
+      const note = $("r2-note"), ntx = $("r2-ntx"), nlb = $("r2-nlb"), nmk = $("r2-nmk"), nby = $("r2-nby");
+      nlb.innerHTML = svg("sparkles") + "IDE";
+      const IDEA = ["kopi susu", "gula aren"]; let ih = "", nc = 0;
+      IDEA.forEach((w, li) => { for (const ch of w) { ih += ch === " " ? " " : `<span id="r2-ic${nc++}">${ch}</span>`; } if (li === 0) ih += "<br>"; });
+      ntx.innerHTML = ih;
+      I(note, { scale: 0.3, rotation: -16, opacity: 0, y: 30 });
+      ft(note, { scale: 0.3, rotation: -16, opacity: 0, y: 30 }, { scale: 1, rotation: -3, opacity: 1, y: 0, duration: 0.42, ease: "back.out(1.7)" }, tSat - 0.04);
+      I(nlb, { opacity: 0, x: -10 }); ft(nlb, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.26, ease: "power3.out" }, tSat + 0.12);
+      for (let i = 0; i < nc; i++) { const c = $("r2-ic" + i); tl.set(c, { opacity: 0 }, 0); tl.set(c, { opacity: 1 }, tIde - 0.04 + i * 0.022); }
+      I(nmk, { scaleX: 0 }); ft(nmk, { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power2.out" }, tKam + 0.02);
+      I(nby, { opacity: 0, y: 8 }); ft(nby, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.24, ease: "power2.out" }, tKam + 0.06);
+
+      // ================================================================ 3) "dijadiin naskah reel.": the note opens into the script page
+      const page = $("r2-page"), pgy = $("r2-pgy"), tM = tDij + 0.08;
+      ft(note, { rotation: -3 }, { rotation: 0, duration: 0.1, ease: "power2.inOut" }, tM - 0.1);
+      [ntx, nlb, nmk, nby, $("r2-ntp")].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.08 }, tM - 0.08));
+      tl.set(note, { opacity: 0 }, tM);
+      I(page, { opacity: 0, clipPath: "inset(32px 260px 40px 260px round 18px)", scale: 1 });
+      tl.set(page, { opacity: 1 }, tM);
+      ft(page, { clipPath: "inset(32px 260px 40px 260px round 18px)" }, { clipPath: "inset(0px 0px 0px 0px round 26px)", duration: 0.38, ease: "power3.inOut" }, tM);
+      I(pgy, { opacity: 1 }); ft(pgy, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.inOut" }, tM + 0.06);
+      const clap = $("r2-clap"), clst = $("r2-clst"), plb = $("r2-plb"), ptt = $("r2-ptt"), pch = $("r2-pch"), pdv = $("r2-pdv");
+      I(clap, { scale: 0.4, opacity: 0, rotation: -10 }); ft(clap, { scale: 0.4, opacity: 0, rotation: -10 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.3, ease: "back.out(2.4)" }, tM + 0.24);
+      I(plb, { opacity: 0, x: -12 }); ft(plb, { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.26, ease: "power3.out" }, tM + 0.26);
+      I(ptt, { opacity: 0, y: 14 }); ft(ptt, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tM + 0.3);
+      I(pdv, { scaleX: 0 }); ft(pdv, { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.out" }, tM + 0.36);
+      // rows write in on "naskah"
+      const ROWS = [["r2-l0", "r2-hk", 0], ["r2-l1", "r2-i0", 0.1], [null, "r2-i1", 0.18], ["r2-l2", "r2-c0", 0.26]];
+      ROWS.forEach(([lb, ln, d]) => { const t = tNas - 0.06 + d;
+        if (lb) { const e = $(lb); I(e, { scale: 0.5, opacity: 0 }); ft(e, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, t); }
+        const e = $(ln); I(e, { clipPath: "inset(0px 100% 0px 0px)" });
+        ft(e, { clipPath: "inset(0px 100% 0px 0px)" }, { clipPath: "inset(0px 0% 0px 0px)", duration: 0.32, ease: "power2.out" }, t + 0.04); });
+      // "reel.": clap!
+      I(clst, { rotation: -32 });
+      ft(clst, { rotation: -32 }, { rotation: 0, duration: 0.09, ease: "power3.in" }, tRee - 0.07);
+      ft(clap, { scale: 1, y: 0 }, { scale: 1.12, y: 2, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tRee + 0.02);
+      I(pch, { scale: 0.4, opacity: 0 }); ft(pch, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.6)" }, tRee + 0.04);
+      // the HOOK slot waits: caret blinks
+      const car = $("r2-car"); I(car, { opacity: 0 });
+      for (let k = 0; k < 4; k++) { tl.set(car, { opacity: 1 }, tRee + 0.2 + k * 0.32); tl.set(car, { opacity: 0 }, tRee + 0.36 + k * 0.32); }
+
+      // ================================================================ 4) "Tiga": push into the HOOK box -> the slot machine
+      const mac = $("r2-mac"), tP = tTig - 0.06;
+      I(page, { transformOrigin: "500px 176px" });
+      ft(page, { scale: 1, opacity: 1 }, { scale: 1.7, opacity: 0, duration: 0.3, ease: "power2.in" }, tP);
+      I(mac, { opacity: 0, clipPath: "inset(140px 76px 178px 196px round 14px)", x: 0 });
+      tl.set(mac, { opacity: 1 }, tP + 0.04);
+      ft(mac, { clipPath: "inset(140px 76px 178px 196px round 14px)" }, { clipPath: "inset(0px 0px 0px 0px round 30px)", duration: 0.34, ease: "power3.inOut" }, tP + 0.04);
+      // pips (26 formulas) + counter
+      const pips = $("r2-pips"), PX = (i) => 470 + i * 18.4, CH = [3, 10, 18];
+      pips.innerHTML = Array.from({ length: 26 }, (_, i) => `<i class="r2-pip" id="r2-pp${i}" style="left:${PX(i).toFixed(1)}px"></i>`).join("");
+      const cn = $("r2-cn"); tl.set(cn, { textContent: "00" + WJ }, 0);
+      for (let i = 0; i < 26; i++) { const p = $("r2-pp" + i), t = t26 - 0.06 + i * 0.013;
+        I(p, { backgroundColor: "rgba(255,255,255,0.16)", scale: 1 });
+        ft(p, { backgroundColor: "rgba(255,255,255,0.16)", scale: 1 }, { backgroundColor: "#01ccf7", scale: 1.25, duration: 0.12, ease: "power2.out" }, t);
+        tl.set(cn, { textContent: String(i + 1).padStart(2, "0") + WJ }, t); }
+      ft(cn, { scale: 1 }, { scale: 1.2, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "0% 70%" }, t26 - 0.06 + 25 * 0.013);
+      // the three reels
+      const F = ["Pertanyaan nyelekit", "Angka mengejutkan", "Mitos vs fakta", "Kesalahan umum", "Sebelum vs sesudah", "Rahasia kecil", "Tantangan 3 detik",
+        "Cerita singkat", "Kontra opini", "Daftar cepat", "Janji hasil", "Larangan keras", "Tebak harga", "Pengakuan jujur"];
+      const NUM = (f) => String(((f * 11) % 26) + 1).padStart(2, "0");
+      const LAND = [tHoo + 0.04, t26 + 0.1, tRum + 0.02], TRAVEL = [6, 12, 18], WIN = [0, 1, 2];   // reel r lands formula WIN[r]
+      const CELL = 118, tS = tTig + 0.13, wins = $("r2-wins");
+      let wh = "";
+      WIN.forEach((fw, r) => {
+        const n = TRAVEL[r] + 3, cells = [];
+        for (let i = 0; i < n; i++) cells.push(i === 1 ? fw : (i * 5 + r * 3 + 3) % 14 === fw ? (fw + 4) % 14 : (i * 5 + r * 3 + 3) % 14);
+        const strip = (cls) => `<div class="r2-a ${cls}">` + cells.map((f, i) => `<div class="r2-cell" style="top:${i * CELL}px"><b>#${NUM(f)}</b><span>${F[f]}</span></div>`).join("") + `</div>`;
+        wh += `<div class="r2-win" id="r2-w${r}" style="left:${24 + r * 310}px"><div class="r2-pay" id="r2-py${r}"></div><div class="r2-pay g" id="r2-pg${r}"></div>` +
+          `<div class="r2-mv" id="r2-mv${r}">${strip("r2-sharp")}${strip("r2-blur")}</div><div class="r2-fade"></div></div>`;
+      });
+      wins.innerHTML = wh;
+      // PRNG-free: strip y = 59 - i*CELL centres cell i; spin DOWN from cell TRAVEL+1 to cell 1
+      WIN.forEach((fw, r) => {
+        const mv = $("r2-mv" + r), sh = mv.children[0], bl = mv.children[1], y0 = 59 - (TRAVEL[r] + 1) * CELL, y1 = 59 - CELL, tl0 = LAND[r];
+        I(mv, { y: y0 }); I(sh, { opacity: 1 }); I(bl, { opacity: 0 }); I($("r2-pg" + r), { opacity: 0 });
+        ft(mv, { y: y0 }, { y: y0 - 26, duration: 0.1, ease: "power2.out" }, tS - 0.1);                      // lever kick (anticipation)
+        ft(mv, { y: y0 - 26 }, { y: y1, duration: tl0 - tS, ease: "back.out(1.15)" }, tS);
+        tl.set(sh, { opacity: 0 }, tS + 0.03); tl.set(bl, { opacity: 1 }, tS + 0.03);
+        ft(bl, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tl0 - 0.2); ft(sh, { opacity: 0 }, { opacity: 1, duration: 0.12 }, tl0 - 0.2);
+        const py = $("r2-py" + r);
+        ft(py, { opacity: 1 }, { opacity: 0.35, duration: 0.07, yoyo: true, repeat: 3, ease: "none" }, tl0 - 0.02);
+        const lit = $("r2-pp" + CH[r]), tp = Math.max(tl0, t26 + 0.3);
+        ft(lit, { backgroundColor: "#01ccf7", scale: 1.25 }, { backgroundColor: "#ffffff", scale: 1.9, duration: 0.2, ease: "back.out(3)" }, tp);
+      });
+      // "langsung": the evaluation sweep
+      const sw = $("r2-sweep"); I(sw, { x: 0, opacity: 0 });
+      tl.set(sw, { opacity: 1 }, tLan - 0.04);
+      ft(sw, { x: 0 }, { x: 934, duration: 0.46, ease: "sine.inOut" }, tLan - 0.04);
+      tl.set(sw, { opacity: 0 }, tLan + 0.43);
+      // "dikasih … skor.": the stamps
+      const STP = [["8,4", "#01ccf7", "rgba(1,204,247,.55)"], ["9,1", "#3ddc97", "rgba(61,220,151,.6)"], ["7,8", "#ffb35c", "rgba(255,179,92,.55)"]];
+      const TST = [tDik - 0.02, (tDik + tSko) / 2 - 0.01, tSko];
+      const stps = $("r2-stps");
+      stps.innerHTML = STP.map(([v, c, g], r) => `<div class="r2-bst" id="r2-bs${r}" style="box-shadow:0 0 0 4px ${c}"></div>` +
+        `<div class="r2-stp" id="r2-st${r}" style="color:${c};box-shadow:0 0 0 4px ${c},inset 0 0 0 7px rgba(10,18,58,.9),inset 0 0 0 9px ${c},0 0 26px ${g}"><b>${v}</b><span>SKOR</span></div>`).join("");
+      STP.forEach((_, r) => { const s = $("r2-st" + r), b = $("r2-bs" + r), x = 24 + r * 310 + 246, y = 300, t = TST[r], rot = [-12, 8, -6][r];
+        I(s, { x, y, scale: 2.3, opacity: 0, rotation: rot - 24 });
+        ft(s, { scale: 2.3, opacity: 0, rotation: rot - 24 }, { scale: 0.9, opacity: 1, rotation: rot, duration: 0.13, ease: "power3.in" }, t - 0.13);
+        ft(s, { scale: 0.9 }, { scale: 1, duration: 0.14, ease: "back.out(3)" }, t);
+        I(b, { x, y, scale: 1, opacity: 0 });
+        ft(b, { scale: 1, opacity: 0.9 }, { scale: 1.75, opacity: 0, duration: 0.34, ease: "power2.out" }, t);
+        ft(mac, { x: r % 2 ? -7 : 7 }, { x: 0, duration: 0.15, ease: "power2.out" }, t);
+        ft($("r2-w" + r), { scale: 1 }, { scale: 0.975, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, t); });
+      ft($("r2-pg1"), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, TST[1] + 0.04);
+
+      // ================================================================ 5) OUT: violet shutters drop (r3 lifts them)
+      const shs = $("r2-shs");
+      shs.innerHTML = [60, 384, 708].map((x, i) => `<div class="r2-sh" id="r2-sh${i}" style="left:${x}px">${i === 1 ? svg("scan-face") : ""}<div class="ed"></div></div>`).join("");
+      [0, 1, 2].forEach((i) => { const s = $("r2-sh" + i), ed = s.querySelector(".ed"), t = D - 0.27 + i * 0.025;
+        I(s, { clipPath: "inset(0px 0px 408px 0px round 24px)", opacity: 0 });
+        tl.set(s, { opacity: 1 }, t);
+        ft(s, { clipPath: "inset(0px 0px 408px 0px round 24px)" }, { clipPath: "inset(0px 0px 0px 0px round 24px)", duration: 0.2, ease: "power3.in" }, t);
+        I(ed, { y: -404 }); ft(ed, { y: -404 }, { y: 0, duration: 0.2, ease: "power3.in" }, t); });
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["r2"] = tl;
+    })();
   </script>
 </template>

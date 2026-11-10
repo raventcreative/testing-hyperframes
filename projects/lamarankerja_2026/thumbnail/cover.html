@@ -56,7 +56,7 @@
   .ant i { position: absolute; left: -4px; top: -10px; width: 12px; height: 12px; border-radius: 50%; background: #e5484d; box-shadow: 0 0 14px rgba(229,72,77,.9); }
   /* trails + planes + the CV */
   #fly { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; z-index: 14; overflow: visible; }
-  #cv { position: absolute; left: 432px; top: 948px; width: 216px; height: 284px; border-radius: 22px; background: linear-gradient(180deg, #ffffff, #eef3fb);
+  #cv { position: absolute; left: 432px; top: 932px; width: 216px; height: 284px; border-radius: 22px; background: linear-gradient(180deg, #ffffff, #eef3fb);
     box-shadow: 0 30px 60px -20px rgba(0,0,0,.7), 0 0 0 6px rgba(1,204,247,.14), 0 0 46px rgba(1,204,247,.35); transform: rotate(-5deg); z-index: 15; }
   #cv .av { position: absolute; left: 20px; top: 20px; width: 60px; height: 60px; border-radius: 50%; background: #e3ecfb; }
   #cv .av i { position: absolute; left: 13px; top: 12px; width: 34px; height: 34px; background: #294b77; -webkit-mask: url(../assets/icons/lucide-user-round.svg) center / contain no-repeat; mask: url(../assets/icons/lucide-user-round.svg) center / contain no-repeat; }
@@ -110,10 +110,12 @@
       if ((x > 100 && x < 990 && y > 440 && y < 880) || (x > 280 && x < 800 && y > 300 && y < 440)) continue;   // never inside the hook / logo / chip
       h += `<i class="st" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;opacity:${o.toFixed(2)};transform:scale(${s.toFixed(2)})"></i>`;
     }
-    const SP = [[770, 455, 30], [990, 640, 22], [120, 520, 26], [215, 760, 18], [70, 880, 16]];
+    const SP = [[770, 455, 30], [990, 640, 22], [120, 520, 26], [48, 700, 18], [70, 880, 16]];
     for (const [x, y, s] of SP) h += `<svg class="sp" style="left:${x - s / 2}px;top:${y - s / 2}px" width="${s}" height="${s}" viewBox="0 0 20 20"><path d="M10 0 C11 7 13 9 20 10 C13 11 11 13 10 20 C9 13 7 11 0 10 C7 9 9 7 10 0Z" fill="#f2f7ff"/></svg>`;
     document.getElementById("stars").innerHTML = h;
   }
+  const ZS = [[372, 1150, 46, -8, 0.8], [306, 1078, 62, 6, 0.92], [218, 990, 84, -6, 1]];    // Zzz: left, top, size, rot, opacity
+  const ZC = ZS.map(([x, y, s]) => [x + s * 0.3, y + s * 0.55, s * 0.95]);
   // ---- the office skyline (windows lit warm, a few cyan = "applications landing")
   {
     const B = [[-10, 112, 250], [92, 120, 330], [205, 92, 212], [290, 130, 292], [414, 104, 204], [506, 118, 262], [616, 112, 344], [722, 128, 240], [842, 104, 302], [940, 150, 224]];
@@ -122,21 +124,22 @@
       h += `<div class="bd" style="left:${x}px;width:${w}px;height:${ht}px">`;
       const cols = Math.floor((w - 16) / 26), rows = Math.floor((ht - 26) / 30), ox = (w - (cols * 26 - 12)) / 2;
       for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-        const v = rnd(); const cls = v < 0.56 ? "win" : v < 0.95 ? "win on" : "win cy";
+        const v = rnd(), wx = x + ox + c * 26 + 7, wy = 900 + 420 - ht + 16 + r * 30 + 9;
+        const nearZ = ZC.some(([zx, zy, zr]) => Math.hypot(wx - zx, wy - zy) < zr);                      // dark offices behind the Zzz
+        const cls = nearZ || v < 0.56 ? "win" : v < 0.95 ? "win on" : "win cy";
         h += `<i class="${cls}" style="left:${(ox + c * 26).toFixed(0)}px;top:${16 + r * 30}px"></i>`;
       }
       h += `</div>`;
-      if (i === 6) h += `<div class="ant" style="left:${x + w / 2 - 2}px;bottom:${ht}px;height:46px"><i></i></div>`;
     });
     document.getElementById("city").innerHTML = h;
   }
   // ---- paper planes on dotted arcs from the CV to the offices
   {
     const PL = [ // start, control, end, size
-      [[452, 1030], [300, 860], [128, 968], 58],
-      [[470, 968], [400, 870], [300, 930], 44],
-      [[628, 1010], [800, 850], [968, 960], 60],
-      [[612, 960], [690, 880], [790, 900], 42],
+      [[452, 1014], [300, 846], [128, 962], 58],
+      [[470, 952], [400, 856], [300, 922], 44],
+      [[628, 994], [800, 838], [968, 954], 60],
+      [[612, 944], [690, 868], [790, 892], 42],
     ];
     const plane = (s) => `<g><path d="M2 30 L62 6 L22 37 Z" fill="#ffffff"/><path d="M22 37 L62 6 L38 56 Z" fill="#cfe6ff"/><path d="M22 37 L27 52 L34 45 Z" fill="#8fb6e6"/></g>`;
     let h = "";
@@ -150,8 +153,7 @@
   }
   // ---- Zzz rising from the sleeping host
   {
-    const Z = [[372, 1150, 46, -8, 0.8], [306, 1078, 62, 6, 0.92], [218, 990, 84, -6, 1]];
-    document.getElementById("zz").innerHTML = Z.map(([x, y, s, r, o]) => `<div class="zz" style="left:${x}px;top:${y}px;font-size:${s}px;opacity:${o};transform:rotate(${r}deg)">z</div>`).join("");
+    document.getElementById("zz").innerHTML = ZS.map(([x, y, s, r, o]) => `<div class="zz" style="left:${x}px;top:${y}px;font-size:${s}px;opacity:${o};transform:rotate(${r}deg)">z</div>`).join("");
   }
   document.getElementById("keys").innerHTML = Array.from({ length: 30 }, (_, i) => `<i class="${[3, 7, 12, 16, 21, 25, 28].includes(i) ? "on" : ""}"></i>`).join("");
   async function buildRobot() {
@@ -162,9 +164,9 @@
     rb.setView({ fx, fy, h, pitch: 5 });
     // typing on the holo keyboard (robot.html "type" gesture at full weight)
     rb.setState({ root: { x: 0, y: 0, z: 0, rx: 0.05, ry: P("bry", "-0.12"), rz: 0, s: 1 },
-      bones: { body: [0, 0, 0], head: [HF[0] + P("rhx", "0.1"), HF[1] + P("rhy", "0.04"), HF[2]], hand_L: [0.55, 0, 0], hand_R: [0.6, 0, 0] },
+      bones: { body: [0, 0, 0], head: [HF[0] + P("rhx", "0.1"), HF[1] + P("rhy", "-0.16"), HF[2]], hand_L: [0.55, 0, 0], hand_R: [0.6, 0, 0] },
       offs: { hand_L: [-0.09, -0.06, 0.15], hand_R: [0.09, -0.07, 0.15], head: [0, 0, 0] },
-      face: { blink: 0, gaze: [P("gx", "-0.1"), P("gy", "-0.1")], happy: P("hap", "0.5"), squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 }, ring: 1.4, shadow: false });
+      face: { blink: 0, gaze: [P("gx", "-0.24"), P("gy", "0.12")], happy: P("hap", "0.8"), squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 }, ring: 1.4, shadow: false });
     rb.render();
     const kb = document.getElementById("kb"), x = fx - 0.06 * h + P("kx", "0"), y = fy - 0.1 * h + P("ky", "0");
     kb.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) perspective(600px) rotateX(52deg) scale(${P("ks", "1")})`;
@@ -172,6 +174,7 @@
   async function buildMascot() {
     const FACE = {"eyeA": {"c": [-0.1017, 0.6033], "r": [0.037, 0.034], "n": 344, "J": [-0.8070804081852212, -0.28336927447264443, -0.2689292148517819, 0.767464652853189], "uv0": [0.41428961906002, 0.6508527738073399], "maxErr": 0.0075728971647898765}, "eyeB": {"c": [0.1, 0.602], "r": [0.037, 0.034], "n": 344, "J": [0.7239884387099991, -0.06125307155111093, -0.04553605872381199, -0.7027396856405153], "uv0": [0.10665626011522979, 0.44039104240012367], "maxErr": 0.005958813097786782}, "browA": {"c": [-0.101, 0.689], "n": 99, "J": [-0.2397367555212638, 0.8539817292816768, 0.7021133260473107, 0.3275224085304049], "uv0": [0.6104683461950666, 0.4751860845807758], "maxErr": 0.0034168031311564056}, "browB": {"c": [0.1, 0.689], "n": 183, "J": [0.7452202855149699, -0.1768453408899853, -0.1387417639801932, -0.7149624190012184], "uv0": [0.09597917118934614, 0.3768964421328661], "maxErr": 0.004863166031021183}, "mouth": {"c": [0, 0.547], "r": [0.03, 0.016]}, "skin": [253, 200, 156], "skinEye": [243, 186, 141], "coverNormal": 0, "lidLit": [1, 1, 1], "mouthDy": 0, "faceSmooth": 1, "lidRing": 1.5, "browNy": 0.98, "headC": [0, 0.72, 0]};
     if (q.get("se")) FACE.skinEye = q.get("se").split(",").map(Number);
+    FACE.lidRing = P("lr", "1.5");
     const src = await (await fetch("../compositions/mascot.html")).text();
     const DECALS = JSON.parse(src.match(/const DECALS = (\[.*?\]);\n/s)[1].replace(/"assets\//g, '"../assets/'));
     const cv = document.getElementById("m"); cv.width = 1080; cv.height = 1920;
@@ -180,11 +183,11 @@
     if (m.shadow) m.shadow.visible = false;
     const DIR = M3.direct(VW, 60, { intents: [{ t: 0.4, action: "idle" }], seed: 9, quiet: 0, look: 0 });
     const PERF = M3.buildPerformance(DIR.tracks, 60.05, { smooth: 1 });
-    m.setView({ fx: P("mx", "330"), fy: P("my", "1960"), h: P("mh", "760"), yaw: 0, pitch: 4 });
+    m.setView({ fx: P("mx", "330"), fy: P("my", "1990"), h: P("mh", "800"), yaw: 0, pitch: 4 });
     const B = Object.assign({}, PERF(0).bones);
     // asleep (mascot.html's sleep pose): head drooping + tilted, eyes shut
     const hd = B.head || [0, 0, 0], nk = B.neck || [0, 0, 0];
-    B.head = [hd[0] + P("hx", "0.22"), hd[1] + P("hy", "-0.1"), hd[2] + P("hz", "0.14")];
+    B.head = [hd[0] + P("hx", "0.12"), hd[1] + P("hy", "-0.1"), hd[2] + P("hz", "0.22")];
     B.neck = [nk[0] + 0.08, nk[1], nk[2]];
     m.setState({ root: { x: 0, y: 0, ry: P("mry", "0.22"), rz: P("mrz", "0"), rx: 0, s: 1 }, bones: B,
       face: { blink: [1, 1], gaze: [0, 0], mouthMix: 1, mouth: [0.02, 0.006, 0, 0.1] } });

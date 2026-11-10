@@ -70,18 +70,18 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Robot", [8, 11], ["10", "Claude.", "10."], []),
+    ("s01", "Robot", [4, 8, 11], ["10", "Claude.", "10."], []),
     ("r1", "Satu,", [3], ["Lego,"], ["Satu,"]),
     ("r2", "Dua,", [3], ["Glow", "Sketch,"], ["Dua,"]),
-    ("r3", "Tiga,", [2], ["Comic,"], ["Tiga,"]),
-    ("r4", "Empat,", [2], ["Chalkboard,"], ["Empat,"]),
+    ("r3", "Tiga,", [2, 5], ["Comic,"], ["Tiga,"]),
+    ("r4", "Empat,", [2, 4], ["Chalkboard,"], ["Empat,"]),
     ("r5", "Lima,", [3], ["Pixel", "Art,"], ["Lima,"]),
     ("r6", "Enam,", [3], ["Minimal", "Line,"], ["Enam,"]),
     ("r7", "Tujuh,", [3], ["Explainer", "3D,"], ["Tujuh,"]),
-    ("r8", "Delapan,", [3], ["PS2,"], ["Delapan,"]),
+    ("r8", "Delapan,", [3, 5], ["PS2,"], ["Delapan,"]),
     ("r9", "Sembilan,", [3], ["Flat", "Vector,"], ["Sembilan,"]),
     ("r10", "Sepuluh,", [3], ["CGI", "Motion,"], ["Sepuluh,"]),
-    ("s12", "Mau", [5], ["DM."], ["PROMPT,"]),
+    ("s12", "Mau", [5, 7], ["DM."], ["PROMPT,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",
          "punya", "tetap", "bisa", "langsung", "satu", "semua", "masuk", "tiap", "pakai", "kalian", "mau"}

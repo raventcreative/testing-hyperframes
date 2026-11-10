@@ -148,3 +148,13 @@ Playwright + static server (`python3 -m http.server`). Render 3D live (robot/Sty
 - [ ] Cover jadi (crop 4:5 aman).
 - [ ] Commit + push (merge `origin/main` dulu).
 - [ ] Ingatkan klien siapkan isi yang dijanjikan CTA (link/prompt).
+
+---
+
+## 6. Batch semalam (5 reel otomatis) — cara kerja yang terbukti
+- VO otomatis: `VO_SCRIPT.md` (bagian "## Naskah") → `tools/vo_from_script.py` → ElevenLabs Eleven v4 (voice klien, stability 41 %, similarity 75 %, tag [playful]/[excited]) → faster-whisper large-v3 → `tools/timing.py`.
+- Background selang-seling (navy → terang → navy …), host disalin dari proyek terakhir dengan background sama.
+- Per video: 1 brief super detail (fakta terverifikasi, sistem visual + kontrak serah-terima pakai angka pasti, ide tiap scene, timing) → 3 agen paralel; komponen bersama ditulis 1 agen DULUAN.
+- Render antre di proses terpisah (`setsid nohup`), karena job background harness mati setelah 2 jam; `render_chunks.py` lanjut dari chunk yang sudah jadi.
+- Cover tiap video dikerjakan agen terpisah dari template cover terakhir dengan background sama.
+- Jangan nyalain > ~8 agen sekaligus di 4 core: snapshot jadi lambat (load 50).

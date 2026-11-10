@@ -39,6 +39,11 @@ Paint order: light background (white → soft blue) with an ANIMATED grid top-ri
 - **s04** (15.87–19.40) "Jadi, kita suruh Claude bikinin alatnya. Cuma 5 langkah." — the Claude chip (mark + "Claude") arrives and the
   pile turns into the tool; on "5 langkah" a 5-step rail appears (5 numbered dots) at the top of the hero zone — **the step rail stays
   visible in r1–r5** (each r-scene draws it in the same place: x 140–940, y 300–360, the current step active, done steps checked).
+- **RAIL SPEC (exact, shared by s04 and r1–r5 so the cut is invisible)**: 4 px line from x 166 to 914 at y 330 (colour #d5e0f0; the
+  part up to the active step navy gradient). 5 dots, 52 px circles, centres x = 166 + i·187 (166, 353, 540, 727, 914), y 330.
+  Upcoming: white fill, 2 px border #c9d6ea, number Poppins 700 22 px #294b77. Active: fill linear-gradient(135deg,#0a0d2c,#294b77),
+  white number, a soft 8 px ring rgba(41,75,119,.18). Done: fill #2da44e with a white lucide check (24 px). In s04 the rail ends with
+  all 5 upcoming; each r-scene k starts with steps < k done, step k becomes active on its number word (tNum), and ends with step k done.
 - **r1** (19.40–21.10) "Satu, buka Claude." — the chat window opens (scale/clip reveal) under the rail.
 - **r2** (21.10–24.13) "Dua, tempel prompt pembuat alat yang aku kasih." — a clipboard chip "Prompt pembuat alat" flies in and pastes
   into the input as a long message bubble (fast scrolling text lines), sent.

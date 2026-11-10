@@ -1,10 +1,135 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-gr41" id="root" data-composition-id="s03" data-width="1080" data-height="1920"></div>
+  <style>
+    .s03-a { position: absolute; }
+    /* one perspective space for the whole bank: the grid can lie back like a table while a card stands up toward the viewer */
+    #s03-stage { left: 0; top: 0; width: 1080px; height: 1920px; perspective: 1500px; perspective-origin: 540px 607px; }
+    /* soft spotlight pool behind the hero card (veils the receded table around it) */
+    #s03-glow { left: 150px; top: 217px; width: 780px; height: 780px; border-radius: 50%; z-index: 5;
+      background: radial-gradient(circle, rgba(255,255,255,.97) 0%, rgba(246,249,255,.9) 30%, rgba(226,236,252,.55) 50%, rgba(226,236,252,0) 70%); }
+    /* landing pulse: a rounded-square outline that breathes out of the hero card on each word */
+    #s03-ring { left: 349px; top: 416px; width: 382px; height: 382px; border-radius: 62px; z-index: 19;
+      box-shadow: 0 0 0 3px rgba(58,111,224,.55), 0 0 26px rgba(58,111,224,.25); }
+    /* carousel indicator: 5 dots + a sliding blue pill (which word of the run we are on) */
+    #s03-dots { left: 455px; top: 876px; width: 170px; height: 36px; border-radius: 18px; z-index: 25;
+      background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 12px 26px -14px rgba(10,13,44,.5), 0 0 0 1.5px rgba(10,13,44,.06); }
+    .s03-dot { position: absolute; top: 13px; width: 10px; height: 10px; border-radius: 5px; background: #c9d4e8; }
+    #s03-pill { left: 18px; top: 13px; width: 30px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #3a6fe0, #294b77); }
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div class="s03-a" id="s03-stage">
+      <div class="s03-a" id="s03-glow"></div>
+      <div class="s03-a" id="s03-ring"></div>
+      <div class="s03-a" id="s03-dots"><i class="s03-dot" style="left:28px"></i><i class="s03-dot" style="left:54px"></i><i class="s03-dot" style="left:80px"></i><i class="s03-dot" style="left:106px"></i><i class="s03-dot" style="left:132px"></i><i class="s03-a" id="s03-pill"></i></div>
+    </div>
+  </div>
   <script>
     (function () {
+      // s03 "Centang, loading, angka naik, notifikasi, grafik." — a SPOTLIGHT RUN through the named cards.
+      // Starts on the GRID. Just before "Centang," the whole bank lies back into depth (one rigid table, tilted 26°, pushed back) and
+      // dims, while the Centang card flips up out of it and lands big (1.9×) in the hero centre on a soft light pool. On each next word
+      // the next card flips up and lands as the previous one glides back into its slot on the table (they cross, the incoming one on
+      // top); a pulse breathes out of the card on every landing and a pill slides along a 5-dot indicator. "naik,": the counter card
+      // rises a little as its number climbs. After "grafik." the table swings upright and every card settles exactly on the GRID.
+      // All micro-animations are drawn from GLOBAL time (hf-seek), so the cut to s02 / s04 is invisible.
+      const D = 3.8, ST = 5.9667, VW = window.VO_WORDS, MA = window.MicroAnim;
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const L = (txt) => wt(txt, ST - 0.05) - ST;   // local time of a word
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.79);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+
+      const stage = $("s03-stage");
+      const H = MA.grid(stage, "s03-c");                    // the 12 cards, on the GRID
+      const HX = 540, HY = 607, HS = 1.9;                    // hero centre + hero scale
+      const TH = 26, TR = TH * Math.PI / 180, ZB = 230, DIM = 0.46;
+      // the "table": every card keeps its column, rows fold toward the pivot line y = 607 and the plane is pushed back
+      const P = H.map((h) => { const cx = h.home.x + 95, cy = h.home.y + 95, d = cy - HY;
+        return { cx, cy, dy: d * (Math.cos(TR) - 1), dz: d * Math.sin(TR) - ZB }; });
+      const HOME = { x: 0, y: 0, z: 0, rotationX: 0, rotation: 0, scale: 1, opacity: 1 };
+      const plane = (i) => ({ x: 0, y: P[i].dy, z: P[i].dz, rotationX: TH, rotation: 0, scale: 1, opacity: DIM });
+      H.forEach((h) => I(h.el, Object.assign({ zIndex: 0 }, HOME)));
+
+      // the run: the 5 named cards (= GRID indices 0..4) and their words
+      const WORDS = ["Centang,", "loading,", "angka", "notifikasi,", "grafik."].map(L);
+      const tNaik = L("naik,");
+      const LEAD = 0.2;                                       // a card starts its flight 0.2 s before its word (≈ 85 % there on the word)
+      const tIn = WORDS.map((w) => w - LEAD);
+      const tEnd = 3.32;                                      // after "grafik.": the table swings upright
+      const SET = 0.4;                                        // settle duration (ends ≤ 3.73; last frame is 3.767)
+
+      // 1) the bank lies back into depth (all but the first hero), dimming
+      const t0 = 0.03;
+      H.forEach((h, i) => { if (i === 0) return; ft(h.el, HOME, Object.assign({ duration: 0.55, ease: "power3.inOut" }, plane(i)), t0); });
+
+      // 2) hero flights
+      const hero = (i, lift = 0) => ({ x: HX - P[i].cx, y: HY - P[i].cy + lift, z: 0, rotationX: 0, rotation: 0, scale: HS, opacity: 1 });
+      for (let k = 0; k < 5; k++) {
+        const el = H[k].el, from = k === 0 ? HOME : plane(k), to = hero(k), a = tIn[k];
+        const tilt = Math.max(-6, Math.min(6, (HX - P[k].cx) / 55));
+        const q = k === 4 ? 0.64 : 1;                         // the last card arrives a bit snappier (its settle starts at tEnd)
+        tl.set(el, { zIndex: 20 }, a);
+        // position / size / depth: a fast lift that lands softly on the word
+        ft(el, { x: from.x, y: from.y, z: from.z, scale: from.scale, opacity: from.opacity },
+               { x: to.x, y: to.y, z: 0, scale: HS, opacity: 1, duration: 0.62 * q, ease: "power4.out" }, a);
+        // flip-up: the card stands up out of the table and slightly past upright, then settles
+        ft(el, { rotationX: from.rotationX }, { rotationX: -8, duration: 0.2 * q, ease: "power2.out" }, a);
+        ft(el, { rotationX: -8 }, { rotationX: 0, duration: 0.44 * q, ease: "power2.inOut" }, a + 0.2 * q);
+        // lean into the travel, then straighten
+        ft(el, { rotation: 0 }, { rotation: tilt, duration: 0.16 * q, ease: "power2.out" }, a);
+        ft(el, { rotation: tilt }, { rotation: 0, duration: 0.46 * q, ease: "power3.out" }, a + 0.16 * q);
+        if (k < 4) {
+          // swapped out: glides back into its slot on the table while the next card lands (the next one passes on top)
+          const b = tIn[k + 1] - 0.03, lift = k === 2 ? -20 : 0, pl = plane(k);
+          tl.set(el, { zIndex: 15 }, b);
+          ft(el, Object.assign({}, hero(k, lift)), Object.assign({ duration: 0.44, ease: "power3.inOut" }, pl), b);
+          tl.set(el, { zIndex: 0 }, b + 0.44);
+        }
+      }
+      // "naik,": the counter card rises with its number
+      ft(H[2].el, { y: HY - P[2].cy }, { y: HY - P[2].cy - 20, duration: 0.28, ease: "power3.out" }, tNaik - 0.04);
+
+      // 3) after "grafik.": the table swings upright, the grafik card drops back into its slot, everything settles on the GRID
+      ft(H[4].el, hero(4), Object.assign({ duration: SET, ease: "power3.inOut" }, HOME), tEnd);
+      const order = [5, 6, 7, 8, 9, 10, 11, 0, 1, 2, 3];
+      order.forEach((i, n) => { const t = tEnd - 0.02 + (P[i].cy > 700 ? 0 : P[i].cy > 500 ? 0.012 : 0.024);
+        ft(H[i].el, plane(i), Object.assign({ duration: SET, ease: "power3.inOut" }, HOME), t); });
+      H.forEach((h) => tl.set(h.el, { zIndex: 0 }, tEnd + SET + 0.01));
+
+      // spotlight pool
+      const glow = $("s03-glow"); I(glow, { opacity: 0, scale: 0.7 });
+      ft(glow, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 0.06);
+      ft(glow, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.85, duration: 0.36, ease: "power2.in" }, tEnd - 0.02);
+      // landing pulse on each word
+      const ring = $("s03-ring"); I(ring, { opacity: 0, scale: 0.96 });
+      WORDS.forEach((w) => ft(ring, { opacity: 0.85, scale: 0.97 }, { opacity: 0, scale: 1.17, duration: 0.55, ease: "power2.out" }, w - 0.02));
+      // 5-dot indicator: pops in with the first card, the pill slides (and stretches) on every swap, leaves with the settle
+      const dots = $("s03-dots"), pill = $("s03-pill");
+      I(dots, { opacity: 0, y: 26, scale: 0.85 }); I(pill, { x: 0, scaleX: 1 });
+      ft(dots, { opacity: 0, y: 26, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.8)" }, tIn[0] + 0.1);
+      for (let k = 1; k < 5; k++) {
+        ft(pill, { x: (k - 1) * 26 }, { x: k * 26, duration: 0.36, ease: "power3.inOut" }, tIn[k] + 0.02);
+        ft(pill, { scaleX: 1 }, { scaleX: 1.55, duration: 0.18, ease: "power2.out" }, tIn[k] + 0.02);
+        ft(pill, { scaleX: 1.55 }, { scaleX: 1, duration: 0.2, ease: "power2.inOut" }, tIn[k] + 0.2);
+      }
+      ft(dots, { opacity: 1, y: 0, scale: 1 }, { opacity: 0, y: 18, scale: 0.9, duration: 0.26, ease: "power2.in" }, tEnd - 0.04);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      // per-card TIME WARP (global seconds, 0 outside 6.05–9.7 → identical to every other scene at the cuts): each spotlighted card
+      // shows its best moment while it is big — the check ticks + fills, the counter resets during take-off and climbs on "naik",
+      // the bell's badge pops on landing. Ramps are gentle where the card is visible, fast only inside the flip-up flight.
+      const one = (x) => Math.max(0, Math.min(1, x)), win = (t, a, b) => one((t - a) / (b - a)), ss = (u) => u * u * (3 - 2 * u);
+      const WARP = {
+        0: (t) => 0.45 * ss(win(t, 6.05, 6.45)) - 0.45 * ss(win(t, 7.25, 9.25)),
+        2: (t) => 0.3 * win(t, 7.38, 7.52) - 0.3 * win(t, 7.55, 7.93),
+        3: (t) => -0.2 * win(t, 8.21, 8.41) + 0.2 * ss(win(t, 9.05, 9.7)),
+      };
+      const drawAll = (t) => H.forEach((h, i) => h.draw(WARP[i] ? t + WARP[i](t) : t));
+      drawAll(ST);
+      window.addEventListener("hf-seek", (e) => drawAll(e.detail.time + (window.__T0 || 0)));
       window.__timelines = window.__timelines || {};
       window.__timelines["s03"] = tl;
     })();

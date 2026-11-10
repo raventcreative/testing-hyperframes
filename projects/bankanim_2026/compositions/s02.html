@@ -1,0 +1,90 @@
+<template>
+  <style>
+    .s02-a { position: absolute; }
+    #s02-code { left: 110px; top: 330px; width: 860px; height: 560px; border-radius: 28px; background: linear-gradient(180deg, #0f1638, #0a0d2c);
+      box-shadow: 0 36px 70px -30px rgba(10,13,44,.65), 0 0 0 1.5px rgba(255,255,255,.06); overflow: hidden; transform-origin: 50% 50%; }
+    .s02-bar { position: absolute; left: 0; right: 0; top: 0; height: 54px; border-bottom: 1.5px solid rgba(255,255,255,.08); }
+    .s02-bar i { position: absolute; top: 21px; width: 13px; height: 13px; border-radius: 50%; background: rgba(255,255,255,.18); }
+    .s02-bar b { position: absolute; left: 0; right: 0; top: 0; text-align: center; font: 700 19px/54px Poppins, sans-serif; color: #9fb2d6; letter-spacing: .01em; }
+    .s02-ln { position: absolute; left: 44px; height: 48px; white-space: nowrap; font: 400 25px/48px Poppins, sans-serif; color: #dbe6ff; letter-spacing: .005em; overflow: hidden; }
+    .s02-ln .n { display: inline-block; width: 44px; color: #4f5f86; }
+    .s02-ln .k { color: #7fb4ff; } .s02-ln .s { color: #8ee0a8; } .s02-ln .f { color: #ffd479; } .s02-ln .c { color: #6a7aa3; }
+    #s02-scan { left: 0; width: 860px; height: 60px; top: 0; background: linear-gradient(180deg, rgba(127,180,255,0), rgba(127,180,255,.22) 50%, rgba(127,180,255,0)); }
+    #s02-glow { inset: 0; border-radius: 28px; box-shadow: inset 0 0 0 3px rgba(127,180,255,.9), 0 0 50px rgba(58,111,224,.55); opacity: 0; }
+    #s02-cl { left: 700px; top: 344px; height: 52px; padding: 0 20px 0 12px; border-radius: 26px; display: flex; align-items: center; gap: 10px;
+      background: #ffffff; box-shadow: 0 12px 26px -10px rgba(0,0,0,.5); font: 700 23px/1 Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s02-cl img { width: 32px; height: 32px; }
+    #s02-cl em { font-style: normal; font-weight: 400; color: #5d6f8f; font-size: 19px; }
+    #s02-flash { left: 540px; top: 612px; width: 0; height: 0; }
+    #s02-flash i { position: absolute; left: -160px; top: -160px; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,1), rgba(196,216,255,.6) 40%, rgba(196,216,255,0) 70%); }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div class="s02-a" id="s02-code">
+      <div class="s02-bar"><i style="left:22px"></i><i style="left:44px"></i><i style="left:66px"></i><b>bank-animasi.js</b></div>
+      <div id="s02-lines"></div><div class="s02-a" id="s02-scan"></div><div class="s02-a" id="s02-glow"></div>
+    </div>
+    <div class="s02-a" id="s02-cl"><img src="assets/icons/lobe-claude-color.svg" alt=""><span>Claude</span><em>yang bikin</em></div>
+    <div class="s02-a" id="s02-flash"><i></i></div>
+    <div id="s02-grid"></div>
+  </div>
+  <script>
+    (function () {
+      // s02 "Termasuk bank animasi ini." — starts on s01's exact code window (6 typed lines + Claude chip) · "Termasuk": a light scan runs
+      // down the code and the window glows (it compiles) · "bank animasi": the window collapses into a white flash at the grid centre and
+      // the 12 micro-animation cards burst out centre-first onto the BANK GRID (MicroAnim.GRID) · "ini.": the grid ripples once.
+      // Ends exactly on the GRID (s03 starts from it). Cards are drawn from GLOBAL time (hf-seek) so they never jump between scenes.
+      const D = 1.7, ST = 4.2667, VW = window.VO_WORDS, MA = window.MicroAnim;
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const L = (txt) => wt(txt) - ST;   // local time of a word
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const LINES = [
+        '<span class="c">// bank animasi — 12 gerakan siap pakai</span>',
+        '<span class="k">const</span> kartu = MicroAnim.<span class="f">grid</span>(layar, <span class="s">"bank-"</span>);',
+        'kartu.<span class="f">forEach</span>((k) =&gt; k.<span class="f">draw</span>(waktu));',
+        'tl.<span class="f">fromTo</span>(kartu, { y: <span class="s">40</span> }, { y: <span class="s">0</span> });',
+        '<span class="f">centang</span>() · <span class="f">loading</span>() · <span class="f">angka</span>(<span class="s">98</span>)',
+        '<span class="f">render</span>(<span class="s">"1080x1920"</span>, <span class="s">30</span>);',
+      ];
+      $("s02-lines").innerHTML = LINES.map((l, i) => `<div class="s02-ln" id="s02-l${i}" style="top:${86 + i * 66}px"><span class="n">${i + 1}</span>${l}</div>`).join("");
+      const code = $("s02-code"), cl = $("s02-cl"), scan = $("s02-scan"), glow = $("s02-glow");
+      I(code, { opacity: 1, scale: 1, y: 0, rotation: 0 }); I(cl, { opacity: 1, scale: 1, x: 0, y: 0 });
+      // "Termasuk": scan + glow (compiling)
+      const tT = L("Termasuk");
+      I(scan, { y: 40, opacity: 0 }); tl.set(scan, { opacity: 1 }, tT - 0.1);
+      ft(scan, { y: 40 }, { y: 500, duration: 0.42, ease: "power1.inOut" }, tT - 0.1);
+      LINES.forEach((_, i) => { const ln = $("s02-l" + i); I(ln, { color: "#dbe6ff" }); tl.set(ln, { textShadow: "0 0 14px rgba(127,180,255,.9)" }, tT - 0.1 + 0.07 * i); tl.set(ln, { textShadow: "none" }, tT + 0.06 + 0.07 * i); });
+      I(glow, { opacity: 0 }); ft(glow, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, tT + 0.12);
+      // "bank animasi": the window collapses into a flash at the grid centre
+      const tB = L("bank");
+      ft(cl, { opacity: 1, scale: 1, x: 0, y: 0 }, { opacity: 0, scale: 0.4, x: -160, y: 260, duration: 0.24, ease: "power3.in" }, tB - 0.3);
+      ft(code, { opacity: 1, scale: 1, y: 0, rotation: 0 }, { opacity: 0, scale: 0.08, y: -3, rotation: 6, duration: 0.3, ease: "expo.in" }, tB - 0.3);
+      const fl = $("s02-flash"); I(fl, { opacity: 0, scale: 0.2 });
+      ft(fl, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.1, ease: "power2.out" }, tB - 0.02);
+      ft(fl, { opacity: 1, scale: 1 }, { opacity: 0, scale: 2.4, duration: 0.42, ease: "power2.out" }, tB + 0.08);
+      // the 12 cards burst out of the flash onto the GRID, centre-first
+      const H = MA.grid($("s02-grid"), "s02-c");
+      const CX = 540 - MA.GRID_SIZE / 2, CY = 612 - MA.GRID_SIZE / 2;
+      const order = H.map((h, i) => [i, Math.hypot(h.home.x - CX, h.home.y - CY)]).sort((a, b) => a[1] - b[1]).map((a) => a[0]);
+      order.forEach((i, k) => {
+        const h = H[i], dx = CX - h.home.x, dy = CY - h.home.y, t0 = tB + 0.02 + k * 0.03;
+        I(h.el, { x: dx, y: dy, scale: 0.2, rotation: (i % 2 ? 1 : -1) * 20, opacity: 0 });
+        tl.set(h.el, { opacity: 1 }, t0);
+        ft(h.el, { x: dx, y: dy, scale: 0.2, rotation: (i % 2 ? 1 : -1) * 20 }, { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.5, ease: "back.out(1.5)" }, t0);
+        // "ini.": one ripple across the grid
+        ft(h.el, { scale: 1 }, { scale: 1.05, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, L("ini.") - 0.05 + k * 0.02);
+      });
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      const drawAll = (t) => H.forEach((h) => h.draw(t));
+      drawAll(ST);
+      window.addEventListener("hf-seek", (e) => drawAll(e.detail.time + (window.__T0 || 0)));
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s02"] = tl;
+    })();
+  </script>
+</template>

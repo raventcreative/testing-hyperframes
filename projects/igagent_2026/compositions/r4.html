@@ -1,24 +1,49 @@
 <template>
   <style>
     #root { position: absolute; inset: 0; overflow: hidden; }
-    .r4-a { position: absolute; }
-    /* ---- member ID badge (THE SYSTEM, 150x204) ---- */
-    .r4-bdg { position: absolute; width: 150px; height: 204px; }
-    .r4-bdg .strap { position: absolute; left: 72px; top: -150px; width: 6px; height: 166px; border-radius: 3px; }
-    .r4-bdg .card { position: absolute; inset: 0; border-radius: 20px; overflow: hidden; background: linear-gradient(180deg, #ffffff, #eef3fb);
-      box-shadow: 0 22px 40px -18px rgba(0,0,0,.7), inset 0 -2px 0 rgba(41,75,119,.08); }
-    .r4-bdg .band { position: absolute; left: 0; top: 0; right: 0; height: 54px; }
-    .r4-bdg .slot { position: absolute; left: 58px; top: 10px; width: 34px; height: 8px; border-radius: 4px; background: #0a1033; box-shadow: inset 0 1px 2px rgba(0,0,0,.6); }
-    .r4-bdg .ic { position: absolute; left: 47px; top: 27px; width: 56px; height: 56px; border-radius: 50%; box-shadow: 0 0 0 4px #ffffff, 0 8px 14px -6px rgba(0,0,0,.4); }
-    .r4-bdg .ic svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; color: #ffffff; }
-    .r4-bdg .rl { position: absolute; left: 8px; right: 8px; top: 90px; height: 50px; display: flex; align-items: center; justify-content: center; text-align: center;
-      font: 700 19px/23px Poppins, sans-serif; color: #0a0d2c; }
-    .r4-bdg .cm { position: absolute; left: 0; right: 0; top: 150px; text-align: center; font: 400 17px/22px Poppins, sans-serif; color: #294b77; }
-    /* ---- ROUND HEADER text ---- */
-    #r4-hx { left: 236px; top: 320px; width: 784px; height: 150px; overflow: hidden; }
-    .r4-ht { position: absolute; left: 0; top: 0; width: 784px; height: 150px; }
-    .r4-ht .ro { position: absolute; left: 0; top: 26px; font: 700 52px/60px Poppins, sans-serif; color: #ffffff; white-space: nowrap; letter-spacing: -.01em; }
-    .r4-ht .co { position: absolute; left: 2px; top: 92px; font: 700 30px/38px Poppins, sans-serif; color: #01ccf7; white-space: nowrap; }
+    .r4-a { position: absolute; left: 0; top: 0; }
+    /* ======================================================================================================================
+       BADGE COMPONENT — copy exactly
+       (owner: s02). Copy this CSS block + the JS block marked the same way below, then replace the prefix "r4-" with your
+       scene prefix (e.g. "r2-") in the CSS, and call bdgHTML("r2", k). Change nothing else (sizes, colours, fonts, layout).
+       Badge = 150×204, radius 20. Its x/y (GSAP) = its CENTRE in a full-frame parent (left/top 0, margin -102/-75).
+       Parts (ids, k = 1..13, + optional suffix o.id):  #P-bdgK (root: move/scale/rotate it) · #P-bdgK-card (the white front)
+       · #P-bdgK-back (navy back with the number "01".."13", opacity 0 by default: for flips set it to 1 at 90°)
+       · #P-bdgK-strap (the 6 px lanyard going up off-card; length = o.strap px; tween scaleY with transformOrigin "50% 100%")
+       · #P-bdgK-ic (the 56 px icon circle). For a lanyard swing rotate the root with transformOrigin "50% -<strap>px".
+       TEAM WALL slot of badge k = BDG_WALL(k) (scale .92) · ROUND HEADER spot = BDG_HEAD (x 135, y 402, scale 1; keep the strap
+       ≤ 14 px there: the white logo sits at x 84–320, y 262–300) with .P-rh (role 52 px white + command 30 px cyan) beside it.
+       ====================================================================================================================== */
+    .r4-bdg { position: absolute; left: 0; top: 0; width: 150px; height: 204px; margin: -102px 0 0 -75px; transform-origin: 50% 50%; }
+    .r4-bdg-strap { position: absolute; left: 72px; bottom: 188px; width: 6px; height: var(--strap, 120px); border-radius: 3px 3px 0 0; transform-origin: 50% 100%;
+      background: linear-gradient(90deg, rgba(0,0,0,.24), rgba(255,255,255,.22) 45%, rgba(0,0,0,.24)), var(--c);
+      -webkit-mask-image: linear-gradient(0deg, #000 0, #000 calc(100% - 36px), transparent 100%); mask-image: linear-gradient(0deg, #000 0, #000 calc(100% - 36px), transparent 100%); }
+    .r4-bdg-card, .r4-bdg-back { position: absolute; left: 0; top: 0; width: 150px; height: 204px; border-radius: 20px; overflow: hidden; }
+    .r4-bdg-card { background: linear-gradient(180deg, #ffffff, #eef3fb); box-shadow: 0 18px 34px -16px rgba(2,6,28,.78), inset 0 0 0 1px rgba(255,255,255,.7); }
+    .r4-bdg-band { position: absolute; left: 0; top: 0; width: 150px; height: 54px; background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 75%), var(--c); }
+    .r4-bdg-slot { position: absolute; left: 58px; top: 12px; width: 34px; height: 8px; border-radius: 4px; background: #0b1440;
+      box-shadow: inset 0 2px 2px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.35); }
+    .r4-bdg-ic { position: absolute; left: 47px; top: 26px; width: 56px; height: 56px; border-radius: 50%; background: var(--c); color: #ffffff;
+      box-shadow: 0 0 0 4px #ffffff, 0 7px 12px -5px rgba(10,13,44,.5); }
+    .r4-bdg-ic svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; stroke-width: 2.25; }
+    .r4-bdg-role { position: absolute; left: 6px; top: 90px; width: 138px; height: 48px; display: flex; align-items: center; justify-content: center; text-align: center;
+      font: 700 19px/23px Poppins, sans-serif; color: #0a0d2c; letter-spacing: -.01em; }
+    .r4-bdg-cmd { position: absolute; left: 0; top: 144px; width: 150px; text-align: center; font: 400 17px/22px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .r4-bdg-bar { position: absolute; left: 40px; top: 178px; width: 70px; height: 10px; opacity: .26;
+      background: repeating-linear-gradient(90deg, #294b77 0 2px, transparent 2px 4px, #294b77 4px 7px, transparent 7px 9px, #294b77 9px 10px, transparent 10px 13px); }
+    .r4-bdg-back { opacity: 0; background: linear-gradient(180deg, #1c2b6a, #0f1a4c); box-shadow: 0 18px 34px -16px rgba(2,6,28,.78), inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    .r4-bdg-back .r4-bdg-slot { background: #060a24; box-shadow: inset 0 2px 2px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.12); }
+    .r4-bdg-no { position: absolute; left: 0; top: 60px; width: 150px; text-align: center; font: 700 66px/76px Poppins, sans-serif; color: #ffffff; letter-spacing: -.02em; }
+    .r4-bdg-cbar { position: absolute; left: 51px; top: 148px; width: 48px; height: 6px; border-radius: 3px; background: var(--c); box-shadow: 0 0 12px var(--c); }
+    .r4-bdg-clip { position: absolute; left: 68px; top: -7px; width: 14px; height: 24px; border-radius: 4px;
+      background: linear-gradient(90deg, #8a9ab6, #f4f7fc 45%, #7d8daa); box-shadow: 0 2px 3px rgba(0,0,0,.4); }
+    /* ROUND HEADER text (r1–r4, s07): beside the badge at BDG_HEAD, box x 236–1020, y 320–470 */
+    .r4-rh { position: absolute; left: 236px; top: 320px; width: 784px; height: 150px; display: flex; flex-direction: column; justify-content: center; }
+    .r4-rh-role { font: 700 52px/62px Poppins, sans-serif; color: #ffffff; letter-spacing: -.015em; white-space: nowrap; }
+    .r4-rh-cmd { font: 700 30px/40px Poppins, sans-serif; color: #01ccf7; white-space: nowrap; margin-top: 4px; }
+    /* ============================================== END BADGE COMPONENT ============================================== */
+    #r4-hx { left: 236px; top: 320px; width: 784px; height: 150px; overflow: hidden; }   /* clip box for the header-text roll */
+    .r4-hw { position: absolute; left: -236px; top: -320px; width: 1px; height: 1px; }
     /* ---- r3's end state (profile card + ring), rebuilt 1:1 ---- */
     #r4-card { left: 60px; top: 532px; width: 460px; height: 396px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #eef3fb);
       box-shadow: 0 30px 60px -26px rgba(0,0,0,.75); overflow: hidden; }
@@ -119,7 +144,7 @@
       // topic cards drop in · "formatnya apa,": format icons (Reel / Carousel / Story) pop · "jam berapa,": time chips flip in ·
       // "plus 10 akun": the engage lane rises, 10 initial-only avatar circles line up while the counter counts 1→10 · "ajak interaksi.": a dotted
       // thread runs through them, a heart / comment badge pops on each, a few hearts float up.
-      // END STATE (t = D): header = badge 4 at x60 y300 (scale 1, no strap) + "Perencana Jadwal" (52px white) / "/ig-plan" (30px cyan) at x236.
+      // END STATE (t = D): header = badge 4 (bdgHTML strap 14) at BDG_HEAD (centre x135 y402, scale 1, rotation 0) + .r4-rh "Perencana Jadwal" / "/ig-plan".
       //   Week board #r4-board: navy glass x60-1020 y528-812 (r 28): 7 columns (x = 76 + 134k, w 124): day label, amber underline, white topic card
       //   (y586-674), format icon + label (y682-756), amber time chip (y766-800). Engage lane #r4-lane: navy glass x60-1020 y824-932: counter "10 / akun"
       //   at left, dotted amber thread y878, 10 avatar circles (64px, cx = 210 + 84i, cy 878) each with a heart / comment badge.
@@ -137,7 +162,49 @@
       const tJad = L("Jadwal"), tSem = L("seminggu"), tDis = L("disusun."), tPos = L("Posting"), tApa = L("apa,"), tFor = L("formatnya"), tApa2 = L("apa,", ST + tFor);
       const tJam = L("jam"), tBer = L("berapa,"), tPlu = L("plus"), t10 = L("10"), tAku = L("akun"), tAja = L("ajak"), tInt = L("interaksi.");
 
-      // ================================================================ icons (lucide, ISC) + the member badge
+      // ====================================================================================================================
+      // BADGE COMPONENT — copy exactly (JS half; see the CSS block for the rules). P = your scene prefix without the dash.
+      // ====================================================================================================================
+      const BDG = [null,
+        ["/ig-viral", "Pemburu Tren", "trending-up", "#ff5c8a"], ["/ig-reel", "Penulis Naskah", "clapperboard", "#01ccf7"],
+        ["/ig-profile", "Auditor Profil", "scan-face", "#9d8cff"], ["/ig-plan", "Perencana Jadwal", "calendar-days", "#ffb35c"],
+        ["/ig-caption", "Caption", "type", "#3ddc97"], ["/ig-carousel", "Carousel", "gallery-horizontal", "#6adfff"],
+        ["/ig-story", "Story", "circle-dashed", "#ff8f6b"], ["/ig-human", "Penghalus Tulisan", "eraser", "#c7a6ff"],
+        ["/ig-comment", "Komentar", "message-circle", "#5ec8ff"], ["/ig-reply", "Balas Komentar", "reply", "#7ee2b8"],
+        ["/ig-dm", "DM", "send", "#ffd66b"], ["/ig-repurpose", "Daur Ulang", "repeat", "#ff9ec0"], ["/ig-audit", "Audit Postingan", "chart-column", "#8fb6ff"]];
+      const BDG_IC = {   // lucide-static 1.70 (ISC), assets/icons/lucide-*.svg
+        "trending-up": '<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
+        "clapperboard": '<path d="m12.296 3.464 3.02 3.956"/><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m6.18 5.276 3.1 3.899"/>',
+        "scan-face": '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
+        "calendar-days": '<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/>',
+        "type": '<path d="M12 4v16"/><path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2"/><path d="M9 20h6"/>',
+        "gallery-horizontal": '<path d="M2 3v18"/><rect width="12" height="18" x="6" y="3" rx="2"/><path d="M22 3v18"/>',
+        "circle-dashed": '<path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/>',
+        "eraser": '<path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/><path d="m5.082 11.09 8.828 8.828"/>',
+        "message-circle": '<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>',
+        "reply": '<path d="M20 18v-2a4 4 0 0 0-4-4H4"/><path d="m9 17-5-5 5-5"/>',
+        "send": '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+        "repeat": '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+        "chart-column": '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>' };
+      const bdgSVG = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${BDG_IC[name]}</svg>`;
+      // badge k (1..13) → markup string. o.id = id suffix (a 2nd copy of the same badge), o.strap = lanyard length in px (default 120, 0 = none)
+      const bdgHTML = (P, k, o = {}) => {
+        const [cmd, role, ic, c] = BDG[k], id = `${P}-bdg${k}${o.id || ""}`, st = o.strap == null ? 120 : o.strap;
+        return `<div class="${P}-bdg" id="${id}" style="--c:${c};--strap:${st}px">` + (st ? `<div class="${P}-bdg-strap" id="${id}-strap"></div>` : "") +
+          `<div class="${P}-bdg-card" id="${id}-card"><div class="${P}-bdg-band"><i class="${P}-bdg-slot"></i></div>` +
+          `<div class="${P}-bdg-ic" id="${id}-ic">${bdgSVG(ic)}</div><div class="${P}-bdg-role">${role}</div><div class="${P}-bdg-cmd">${cmd}</div><i class="${P}-bdg-bar"></i></div>` +
+          `<div class="${P}-bdg-back" id="${id}-back"><i class="${P}-bdg-slot"></i><div class="${P}-bdg-no">${String(k).padStart(2, "0")}</div><i class="${P}-bdg-cbar"></i></div>` +
+          `<i class="${P}-bdg-clip"></i></div>`;
+      };
+      // ROUND HEADER text markup (place it next to the badge at BDG_HEAD)
+      const rhHTML = (P, k) => `<div class="${P}-rh" id="${P}-rh"><div class="${P}-rh-role" id="${P}-rh-role">${BDG[k][1]}</div><div class="${P}-rh-cmd" id="${P}-rh-cmd">${BDG[k][0]}</div></div>`;
+      // geometry (centres, full-frame coordinates): TEAM WALL rows 5/4/4 at y 400/625/850, pitch 164 (150×.92 + 26 gap), centred in x
+      const BDG_WALL = (k) => { const r = k <= 5 ? 0 : k <= 9 ? 1 : 2, i = k - [1, 6, 10][r], n = r ? 4 : 5; return { x: 540 + (i - (n - 1) / 2) * 164, y: [400, 625, 850][r], scale: 0.92 }; };
+      const BDG_HEAD = { x: 135, y: 402, scale: 1 };
+      const BDG_WALL_STRAP = 28;   // the lanyard stub every badge shows on the wall
+      // ============================================== END BADGE COMPONENT ==============================================
+
+      // ================================================================ UI icons (lucide, ISC)
       const ICON = {
         "scan-face": '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
         "calendar-days": '<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/>',
@@ -150,12 +217,9 @@
         "message-circle": '<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>'
       };
       const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[n]}</svg>`;
-      const MEM = { 3: ["/ig-profile", "Auditor Profil", "scan-face", "#9d8cff"], 4: ["/ig-plan", "Perencana Jadwal", "calendar-days", "#ffb35c"] };
-      const badge = (k, id) => { const [cmd, role, ic, c] = MEM[k];
-        return `<div class="r4-bdg" id="${id}"><div class="strap" id="${id}s" style="background:linear-gradient(180deg,rgba(0,0,0,0),${c} 45%)"></div><div class="card">` +
-          `<div class="band" style="background:${c}"></div><div class="slot"></div><div class="ic" style="background:${c}">${svg(ic)}</div>` +
-          `<div class="rl">${role}</div><div class="cm">${cmd}</div></div></div>`; };
-      const htext = (k, id) => `<div class="r4-ht" id="${id}"><div class="ro">${MEM[k][1]}</div><div class="co">${MEM[k][0]}</div></div>`;
+      // header text copies: rhHTML() always uses the ids r4-rh*, so each copy gets its own wrapper and renamed ids
+      const rhCopy = (k, id) => { const w = document.createElement("div"); w.className = "r4-hw"; w.id = id; w.innerHTML = rhHTML("r4", k);
+        w.querySelectorAll("[id]").forEach((e) => { e.id = e.id + "-" + id; }); $("r4-hx").appendChild(w); return w; };
 
       // ================================================================ 1) r3's end state, rebuilt exactly
       $("r4-av").innerHTML = svg("user-round");
@@ -173,15 +237,13 @@
       $("r4-nums").innerHTML = Array.from({ length: 12 }, (_, k) => { const [x, y] = pt(k * 30 + 15, 186); return `<div class="r4-num" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px${WEAK.includes(k) ? ";color:" + GRN : ""}">${k + 1}</div>`; }).join("");
 
       // ================================================================ 2) header: badge 3 tips back, badge 4 is dealt in
-      $("r4-hdr").innerHTML = badge(3, "r4-b3") + badge(4, "r4-b4");
-      $("r4-hx").innerHTML = htext(3, "r4-t3") + htext(4, "r4-t4");
-      const b3 = $("r4-b3"), b4 = $("r4-b4");
-      I($("r4-b3s"), { opacity: 0 }); I($("r4-b4s"), { opacity: 0 });
-      I(b3, { x: 60, y: 300, rotation: 0, scale: 1, opacity: 1, transformOrigin: "50% 100%" });
-      ft(b3, { y: 300, rotation: 0, scale: 1, opacity: 1 }, { y: 336, rotation: -9, scale: 0.86, opacity: 0, duration: 0.3, ease: "power2.in" }, 0.02);
-      I(b4, { x: -250, y: 318, rotation: -18, scale: 1, opacity: 1, transformOrigin: "50% 100%" });
-      ft(b4, { x: -250, y: 318, rotation: -18 }, { x: 60, y: 300, rotation: 0, duration: 0.5, ease: "back.out(1.5)" }, 0.06);
-      const t3 = $("r4-t3"), t4 = $("r4-t4");
+      $("r4-hdr").innerHTML = bdgHTML("r4", 3, { strap: 14 }) + bdgHTML("r4", 4, { strap: 14 });
+      const t3 = rhCopy(3, "r4-t3"), t4 = rhCopy(4, "r4-t4");
+      const b3 = $("r4-bdg3"), b4 = $("r4-bdg4"), HX = BDG_HEAD.x, HY = BDG_HEAD.y;
+      I(b3, { x: HX, y: HY, rotation: 0, scale: 1, opacity: 1, transformOrigin: "50% 100%" });
+      ft(b3, { y: HY, rotation: 0, scale: 1, opacity: 1 }, { y: HY + 36, rotation: -9, scale: 0.86, opacity: 0, duration: 0.3, ease: "power2.in" }, 0.02);
+      I(b4, { x: HX - 310, y: HY + 18, rotation: -18, scale: 1, opacity: 1, transformOrigin: "50% 100%" });
+      ft(b4, { x: HX - 310, y: HY + 18, rotation: -18 }, { x: HX, y: HY, rotation: 0, duration: 0.5, ease: "back.out(1.5)" }, 0.06);
       I(t3, { y: 0, opacity: 1 }); I(t4, { y: 150, opacity: 0 });
       ft(t3, { y: 0, opacity: 1 }, { y: -150, opacity: 0, duration: 0.3, ease: "power3.in" }, 0.03);
       ft(t4, { y: 150, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, 0.2);

@@ -28,3 +28,11 @@ project: projects/bankanim_2026
 - Render chunk yang udah final bisa jalan duluan sambil nunggu scene lain (CHUNKS=0,2).
 
 Output: `projects/bankanim_2026/out/BANKANIM_Remake_PREVIEW.mp4` (lokal, di-ignore git) · cover `thumbnail/COVER_BANKANIM_1080x1920.png`.
+
+## v2 (revisi klien: "jelasin semua, kasih contoh tiap animasi")
+- VO baru dari klien (58,3 s) → reel 59,6 s. 12 **ronde**: tiap animasi diangkat dari strip, dikasih nama, nomor "animasi k dari 12", lalu **CONTOH PEMAKAIAN** (UI generik) yang jalan pas katanya, terus terbang balik ke chip-nya (✓).
+- **Strip persisten** (`compositions/strip.html`): 12 chip di bawah logo, counter "k / 12"; setelah ronde 12 strip mekar balik jadi GRID → s05.
+- **Round kit** (`r1.html`) disalin persis ke r2–r12 → konsisten. `vendor/rounds.js` = sumber waktu tiap ronde.
+- Bug yang ketemu: angka "10.000" via GSAP textContent jadi "10" (fix U+2060); s08 cari kata "kirim" ketemu yang di r10 → posisi negatif → GSAP menggeser seluruh timeline (30 s!). **Cari kata selalu mulai dari awal scene.**
+- Kartu besar & chip tampil bareng 1 frame di akhir ronde → durasi terbang balik 0,36 → 0,34 s.
+Output: `out/BANKANIM_v2.mp4`.

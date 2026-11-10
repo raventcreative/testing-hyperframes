@@ -25,7 +25,7 @@ CLAUDE = '<img class="cl" src="assets/icons/claude.png" alt="Claude">'
 
 def frame(cls, body, swipe=False):
     sw = '<div class="bot">Swipe →</div>' if swipe else ''
-    return f'<section class="slide {cls}"><div class="top"><img class="logo" src="assets/logo_white.png" alt="AIpreneur"></div>{body}{sw}</section>'
+    return f'<section class="slide {cls}"><div class="top"><img class="logo" src="assets/logo_navy.png" alt="AIpreneur"></div>{body}{sw}</section>'
 
 # ---------- 1. COVER ----------
 def tile(cls, inner, tilt):

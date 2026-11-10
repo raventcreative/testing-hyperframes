@@ -22,7 +22,7 @@ export const LAYOUT = {
   clock: { x: 0.25, y: 1.8 },
 };
 
-export function buildSet({ round = 0 } = {}) {
+export function buildSet({ round = 0, seg = 1 } = {}) {
   const parts = [];
   const box = (w, h, d, r = round) => (r > 0 ? new RoundedBoxGeometry(w, h, d, 3, Math.min(r, w / 2.01, h / 2.01, d / 2.01)) : new THREE.BoxGeometry(w, h, d));
   const add = (geo, pal, p = [0, 0, 0], rot = [0, 0, 0], s) => {
@@ -36,8 +36,8 @@ export function buildSet({ round = 0 } = {}) {
   };
   const L = LAYOUT, WZ = L.wallZ, W = L.win;
   // floor + back wall with a window hole
-  add(new THREE.PlaneGeometry(9, 7), PAL.floor, [0, 0, 0.6], [-Math.PI / 2, 0, 0]);
-  const wall = (x0, x1, y0, y1) => add(new THREE.PlaneGeometry(x1 - x0, y1 - y0), PAL.wall, [(x0 + x1) / 2, (y0 + y1) / 2, WZ]);
+  add(new THREE.PlaneGeometry(9, 7, 9 * seg, 7 * seg), PAL.floor, [0, 0, 0.6], [-Math.PI / 2, 0, 0]);
+  const wall = (x0, x1, y0, y1) => add(new THREE.PlaneGeometry(x1 - x0, y1 - y0, Math.max(1, Math.round((x1 - x0) * seg)), Math.max(1, Math.round((y1 - y0) * seg))), PAL.wall, [(x0 + x1) / 2, (y0 + y1) / 2, WZ]);
   wall(-4.5, W.x0, 0, 3.4); wall(W.x1, 4.5, 0, 3.4); wall(W.x0, W.x1, 0, W.y0); wall(W.x0, W.x1, W.y1, 3.4);
   add(box(9, 0.07, 0.025, 0), PAL.trim, [0, 0.035, WZ + 0.012]);
   // window: frame, mullions, sill, sky + skyline outside

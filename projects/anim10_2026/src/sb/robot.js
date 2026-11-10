@@ -1,7 +1,7 @@
 // Robot loading + pose state (same state shape as src/robot_base.js) + PBR face injection for lit styles.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { FACE, LOGO } from './common.js';
+import { FACE, LOGO, NOISE } from './common.js';
 
 export async function loadRobot(url, logoUrl) {
   const gltf = await new GLTFLoader().loadAsync(url);
@@ -20,7 +20,7 @@ export async function loadRobot(url, logoUrl) {
   rig.shared = { faceU, map: { value: rig.orig.map }, emi: { value: rig.orig.emissiveMap }, logo: { value: logo } };
   rig.logoTex = logo;
   smoothNormals(m.geometry, 0.035, 2);
-  rig.texPix = { base: imagePixels(rig.orig.map.image, 1024), emi: imagePixels(rig.orig.emissiveMap.image, 512) };
+  rig.texPix = { base: imagePixels(rig.orig.map.image, 1024), emi: imagePixels(rig.orig.emissiveMap.image, 1024) };
   classifyVertices(m.geometry, rig.texPix);
   return rig;
 }
@@ -46,9 +46,9 @@ function classifyVertices(geo, tex) {
     const l = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
     raw[3 * i] = l > 0.5 ? 1 : 0; raw[3 * i + 1] = e[2] > 0.45 ? 1 : 0; raw[3 * i + 2] = l > 0.22 && l <= 0.5 ? 1 : 0;
   }
-  const cell = 0.016, grid = new Map(), key = (x, y, z) => (x + 512) * 1048576 + (y + 512) * 1024 + (z + 512);
+  const cell = 0.02, grid = new Map(), key = (x, y, z) => (x + 512) * 1048576 + (y + 512) * 1024 + (z + 512);
   for (let i = 0; i < n; i++) { const k = key(Math.floor(P[3 * i] / cell), Math.floor(P[3 * i + 1] / cell), Math.floor(P[3 * i + 2] / cell)); let a = grid.get(k); if (!a) grid.set(k, (a = [])); a.push(i); }
-  const out = new Float32Array(n * 3), R = [0.014, 0.007, 0.014];
+  const out = new Float32Array(n * 3), R = [0.02, 0.009, 0.016];
   for (let i = 0; i < n; i++) {
     const x = P[3 * i], y = P[3 * i + 1], z = P[3 * i + 2], cx = Math.floor(x / cell), cy = Math.floor(y / cell), cz = Math.floor(z / cell);
     const s = [0, 0, 0], w = [0, 0, 0];
@@ -60,6 +60,19 @@ function classifyVertices(geo, tex) {
       }
     }
     for (let k = 0; k < 3; k++) out[3 * i + k] = w[k] > 0 ? s[k] / w[k] : raw[3 * i + k];
+  }
+  // hands: replace the scanned white-cap boundary by a best-fit plane cut (clean curve on the mitten)
+  const si = geo.attributes.skinIndex, sw = geo.attributes.skinWeight;
+  for (const bone of [2, 3]) {
+    const ids = []; for (let i = 0; i < n; i++) if (si.getX(i) === bone && sw.getX(i) > 0.5) ids.push(i);
+    if (ids.length < 50) continue;
+    let c = [0, 0, 0], m = 0; for (const i of ids) { for (let k = 0; k < 3; k++) c[k] += P[3 * i + k]; m += out[3 * i]; }
+    c = c.map((v) => v / ids.length); m /= ids.length;
+    const a = [0, 0, 0]; for (const i of ids) for (let k = 0; k < 3; k++) a[k] += (P[3 * i + k] - c[k]) * (out[3 * i] - m);
+    const al = Math.hypot(...a) || 1; for (let k = 0; k < 3; k++) a[k] /= al;
+    const proj = ids.map((i) => (P[3 * i] - c[0]) * a[0] + (P[3 * i + 1] - c[1]) * a[1] + (P[3 * i + 2] - c[2]) * a[2]);
+    const sorted = [...proj].sort((x, y) => x - y); const th = sorted[Math.min(sorted.length - 1, Math.floor((1 - m) * sorted.length))];
+    ids.forEach((i, j) => { const d = (proj[j] - th) / 0.006; out[3 * i] = Math.max(0, Math.min(1, 0.5 + 0.5 * d)); });
   }
   geo.setAttribute('aCls', new THREE.BufferAttribute(out, 3));
 }
@@ -146,22 +159,37 @@ export function litRobotMaterial(rig, opts = {}) {
     uEyeK: { value: opts.eyeK ?? 0.95 }, uEmiK: { value: opts.emiK ?? 1.0 }, uVisorRough: { value: opts.visorRough ?? -1 },
   };
   mat.userData.u = P;
+  const CL = opts.classes;   // optional: recolour by surface class (clay / toy palettes) instead of the scan texture
+  if (CL) Object.assign(P, {
+    uCW: { value: new THREE.Vector3(...CL.white) }, uCD: { value: new THREE.Vector3(...CL.dark) }, uCB: { value: new THREE.Vector3(...CL.blue) },
+    uCV: { value: new THREE.Vector3(...CL.visor) }, uCL: { value: new THREE.Vector3(...(CL.logo || [0.05, 0.05, 0.08])) }, uLogo: rig.shared.logo,
+  });
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u, P);
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute vec3 _face;\nvarying vec3 vFace;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvFace = _face;');
+      .replace('#include <common>', '#include <common>\nattribute vec3 _face;\nattribute vec3 aCls;\nvarying vec3 vFace;\nvarying vec3 vCls;\nvarying vec3 vRestP;\nvarying vec3 vRestN;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvFace = _face; vCls = aCls; vRestP = position; vRestN = normal;');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vFace;\nuniform vec3 uTint; uniform vec3 uDarkTint; uniform vec3 uEmiCol; uniform vec3 uEyeCol; uniform vec3 uEyeAlb; uniform vec2 uRough; uniform float uEyeK; uniform float uEmiK; uniform float uVisorRough;\n' + FACE)
+      .replace('#include <common>', '#include <common>\nvarying vec3 vFace; varying vec3 vCls; varying vec3 vRestP; varying vec3 vRestN;\nuniform vec3 uTint; uniform vec3 uDarkTint; uniform vec3 uEmiCol; uniform vec3 uEyeCol; uniform vec3 uEyeAlb; uniform vec2 uRough; uniform float uEyeK; uniform float uEmiK; uniform float uVisorRough;\n' + FACE
+        + (CL ? 'uniform vec3 uCW; uniform vec3 uCD; uniform vec3 uCB; uniform vec3 uCV; uniform vec3 uCL;\n' + LOGO : ''))
       .replace('#include <map_fragment>', `#include <map_fragment>
         float faceA = vFace.z > 0.01 ? screenFace(vFace.xy) * vFace.z : 0.0;
         float lumA = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
         float wht = smoothstep(0.10, 0.45, lumA);
         diffuseColor.rgb *= mix(uDarkTint, uTint, wht);
+        float ellV = pow((vRestP.x - 0.078) / 0.27, 2.0) + pow((vRestP.y - 0.647) / 0.18, 2.0);
+        float frV = step(0.1, vRestP.z) * step(0.0, vRestN.z);
+        float visM = max(smoothstep(0.08, 0.3, vFace.z), (1.0 - smoothstep(1.17, 1.23, ellV)) * frV);
+        ${CL ? `
+        float cw = smoothstep(0.45, 0.55, vCls.x), cb = smoothstep(0.37, 0.47, vCls.y) * (1.0 - visM);
+        cw = max(cw, (1.0 - smoothstep(1.55, 1.65, ellV)) * frV);
+        vec3 cc = mix(uCD, uCW, cw); cc = mix(cc, uCB, cb); cc = mix(cc, uCV, visM);
+        cc = mix(cc, uCL, smoothstep(0.35, 0.6, logoMask(vRestP, vRestN)) * cw * (1.0 - visM));
+        diffuseColor.rgb = cc;` : ''}
         diffuseColor.rgb = mix(diffuseColor.rgb, uEyeAlb, faceA);`)
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
         roughnessFactor = clamp(roughnessFactor * uRough.y + uRough.x, 0.02, 1.0);
-        if (uVisorRough >= 0.0) roughnessFactor = mix(roughnessFactor, uVisorRough, smoothstep(0.4, 0.7, vFace.z));
+        if (uVisorRough >= 0.0) roughnessFactor = mix(roughnessFactor, uVisorRough, visM);
         roughnessFactor = mix(roughnessFactor, 0.35, faceA);`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
         totalEmissiveRadiance *= uEmiCol * uEmiK * uRing;

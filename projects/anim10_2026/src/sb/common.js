@@ -90,6 +90,9 @@ flat varying int vPal;
 #ifdef SNAP
 uniform vec2 uSnap;
 #endif
+#ifdef AFFINE
+varying vec3 vAff;
+#endif
 varying vec3 vN; varying vec3 vNV; varying vec3 vW; varying vec3 vRest; varying vec3 vRestN; varying vec2 vUv; varying float vDepth;
 #ifdef VLIGHT
 uniform vec3 uKeyDir; uniform vec3 uKeyCol; uniform vec3 uAmbUp; uniform vec3 uAmbDn;
@@ -125,6 +128,10 @@ void main() {
   #ifdef SNAP
   vec4 cp = gl_Position; cp.xy = floor(cp.xy / cp.w * uSnap + 0.5) / uSnap * cp.w; gl_Position = cp;
   #endif
+  #ifdef AFFINE
+  vec3 an = abs(vN); vec2 puv = an.y > 0.5 ? vW.xz : (an.z > 0.5 ? vW.xy : vW.zy);
+  vAff = vec3(puv * gl_Position.w, gl_Position.w);
+  #endif
   #ifdef VLIGHT
   float nl = max(dot(vN, normalize(uKeyDir)), 0.0);
   vGouraud = uKeyCol * nl + mix(uAmbDn, uAmbUp, vN.y * 0.5 + 0.5);
@@ -143,12 +150,14 @@ flat varying int vPal;
 varying vec3 vN; varying vec3 vNV; varying vec3 vW; varying vec3 vRest; varying vec3 vRestN; varying vec2 vUv; varying float vDepth;
 #ifdef MRT
 layout(location = 1) out highp vec4 gOut1;
+// G-buffer: view normal xy, inverse view depth (planes are linear in screen space -> clean Laplacian edges), surface id
+void writeG(float id) { vec3 n = normalize(vNV); n = gl_FrontFacing ? n : -n; gOut1 = vec4(n.xy * 0.5 + 0.5, 1.0 / max(vDepth, 1e-3), id); }
 #endif
 `;
 
 // robot surface classes from the textures: white shell / dark parts / blue lights / visor / eyes / wordmark
 export const ROBOT_CLASS = /* glsl */ `
-struct RobotSurf { float white; float dark; float grey; float blue; float visor; float eye; float eyeSD; float logo; vec3 alb; };
+struct RobotSurf { float white; float dark; float grey; float blue; float visor; float rim; float eye; float eyeSD; float logo; vec3 alb; };
 RobotSurf robotSurf() {
   RobotSurf s;
   s.alb = texture2D(uMap, vUv).rgb;
@@ -156,16 +165,100 @@ RobotSurf robotSurf() {
   float wv = smoothstep(0.5 - fw, 0.5 + fw, vCls.x);
   float fb = max(fwidth(vCls.y), 1e-3) * 0.8;
   s.blue = smoothstep(0.42 - fb, 0.42 + fb, vCls.y) * (1.0 - smoothstep(0.3, 0.8, vFace.z));
-  s.visor = smoothstep(0.08, 0.3, vFace.z);
+  // visor = geometric ellipse in rest space (front of the helmet) -> one clean visor outline in every style
+  float ell = pow((vRest.x - 0.078) / 0.27, 2.0) + pow((vRest.y - 0.647) / 0.18, 2.0);
+  float front = step(0.1, vRest.z) * step(0.0, vRestN.z);
+  float fe = fwidth(ell) + 1e-4;
+  s.visor = max(smoothstep(0.08, 0.3, vFace.z), (1.0 - smoothstep(1.2 - fe, 1.2 + fe, ell)) * front);
   s.eyeSD = vFace.z > 0.01 ? faceSD(vFace.xy) : 1e3;
   s.eye = vFace.z > 0.01 ? screenFace(vFace.xy) * smoothstep(0.2, 0.6, vFace.z) : 0.0;
+  // the dark bezel just outside the glass reads as white shell (the scan texture is ragged there)
+  float bez = (1.0 - smoothstep(1.55, 1.65, ell)) * front * (1.0 - s.visor);
+  wv = max(wv, bez * (1.0 - s.blue));
   s.white = wv * (1.0 - s.blue) * (1.0 - s.visor);
+  s.rim = 0.0;
   s.dark = (1.0 - s.white) * (1.0 - s.blue);
   s.grey = smoothstep(0.45, 0.55, vCls.z) * s.dark * (1.0 - s.visor);
   s.logo = logoMask(vRest, vRestN) * s.white;
   return s;
 }
 `;
+
+// robot surface ids for the G-buffer (set ids = palette index + 1)
+export const ROBOT_ID = /* glsl */ `
+float robotId(RobotSurf s) {
+  if (s.eye > 0.5) return 34.0;
+  if (s.visor > 0.5) return 33.0;
+  if (s.blue > 0.5) return 32.0;
+  if (s.white > 0.5) return 30.0;
+  return 31.0;
+}
+`;
+
+// edge detection on the G-buffer (tG = gOut1). Returns edge strength 0..1. r = sample radius in px.
+// k.x: relative inverse-depth Laplacian threshold (silhouettes, creases; near side only), k.y: normal threshold,
+// k.z: id-change weight (material / region boundaries; drawn on the higher-id side only)
+export const EDGES = /* glsl */ `
+uniform sampler2D tG; uniform vec2 uTexel;
+vec3 decN(vec2 e) { vec2 f = e * 2.0 - 1.0; return vec3(f, sqrt(max(0.0, 1.0 - dot(f, f)))); }
+float edgeTerm(vec4 c, vec3 n, vec4 a, vec4 b, vec3 k, inout float ie) {
+  float lap = (2.0 * c.z - a.z - b.z) / max(c.z, 1e-4);
+  float de = smoothstep(k.x, k.x * 2.5, lap);
+  float ne = 0.0;
+  if (a.w > 0.5) ne = max(ne, 1.0 - dot(n, decN(a.xy)));
+  if (b.w > 0.5) ne = max(ne, 1.0 - dot(n, decN(b.xy)));
+  ne = smoothstep(k.y, k.y * 1.7, ne) * step(abs(a.z - b.z) / max(c.z, 1e-4), 0.25);
+  ie = max(ie, max(step(0.5, c.w - a.w) * step(0.5, a.w), step(0.5, c.w - b.w) * step(0.5, b.w)) * step(c.w, 33.5));
+  return max(de, ne);
+}
+float edgeG(vec2 uv, float r, vec3 k) {
+  vec4 c = texture2D(tG, uv);
+  if (c.w < 0.5) return 0.0;
+  vec3 n = decN(c.xy);
+  vec2 o = uTexel * r;
+  float ie = 0.0, e = 0.0;
+  e = max(e, edgeTerm(c, n, texture2D(tG, uv + vec2(o.x, 0.0)), texture2D(tG, uv - vec2(o.x, 0.0)), k, ie));
+  e = max(e, edgeTerm(c, n, texture2D(tG, uv + vec2(0.0, o.y)), texture2D(tG, uv - vec2(0.0, o.y)), k, ie));
+  e = max(e, 0.85 * edgeTerm(c, n, texture2D(tG, uv + o), texture2D(tG, uv - o), k, ie));
+  e = max(e, 0.85 * edgeTerm(c, n, texture2D(tG, uv + vec2(o.x, -o.y)), texture2D(tG, uv + vec2(-o.x, o.y)), k, ie));
+  return max(e, ie * k.z);
+}
+// background silhouette: background pixel next to geometry (for outer outlines that grow outward)
+float silOut(vec2 uv, float r) {
+  vec4 c = texture2D(tG, uv); if (c.w > 0.5) return 0.0;
+  vec2 o = uTexel * r; float m = 0.0;
+  m = max(m, texture2D(tG, uv + vec2(o.x, 0.0)).w); m = max(m, texture2D(tG, uv - vec2(o.x, 0.0)).w);
+  m = max(m, texture2D(tG, uv + vec2(0.0, o.y)).w); m = max(m, texture2D(tG, uv - vec2(0.0, o.y)).w);
+  return step(0.5, m);
+}
+`;
+
+// separable gaussian blur pass (9 taps), dir in texels
+export const BLUR9 = /* glsl */ `
+uniform sampler2D tSrc; uniform vec2 uDir; varying vec2 vUv;
+void main() {
+  vec4 s = texture2D(tSrc, vUv) * 0.2270270270;
+  s += (texture2D(tSrc, vUv + uDir * 1.3846153846) + texture2D(tSrc, vUv - uDir * 1.3846153846)) * 0.3162162162;
+  s += (texture2D(tSrc, vUv + uDir * 3.2307692308) + texture2D(tSrc, vUv - uDir * 3.2307692308)) * 0.0702702703;
+  gl_FragColor = s;
+}`;
+export class Blur {
+  // blurs src (any size) into a w x h ping-pong pair; result in this.out.texture
+  constructor(w, h, type) {
+    this.a = makeRT(w, h, { depth: false, type }); this.b = makeRT(w, h, { depth: false, type });
+    this.p = new Pass(BLUR9, { tSrc: { value: null }, uDir: { value: new THREE.Vector2() } });
+    this.w = w; this.h = h; this.out = this.b;
+  }
+  run(renderer, src, radius = 1, iters = 1) {
+    let s = src;
+    for (let i = 0; i < iters; i++) {
+      this.p.u.tSrc.value = s; this.p.u.uDir.value.set(radius / this.w, 0); this.p.render(renderer, this.a);
+      this.p.u.tSrc.value = this.a.texture; this.p.u.uDir.value.set(0, radius / this.h); this.p.render(renderer, this.b);
+      s = this.b.texture;
+    }
+    return this.b.texture;
+  }
+}
 
 // ------------------------------------------------------------------ full-screen pass
 const FSQ_GEO = new THREE.BufferGeometry();

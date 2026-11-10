@@ -32,7 +32,7 @@ export class StyleBot {
     const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' }));
     r.setPixelRatio(1); r.setSize(width, height, false);
     r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.NoToneMapping; r.setClearColor(0x000000, 1);
-    r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap; r.shadowMap.autoUpdate = true;
+    r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap; r.shadowMap.autoUpdate = false;
     this.camera = new THREE.PerspectiveCamera(27, width / height, 0.05, 40);
     this.rig = await loadRobot(url, logoUrl);
     this.t = 0;
@@ -42,6 +42,7 @@ export class StyleBot {
       get t() { return self.t; },
       setGeo: { sharp: buildSet({ round: 0 }) },
       softSet() { return this.setGeo.soft || (this.setGeo.soft = buildSet({ round: 0.03 })); },
+      tessSet() { return this.setGeo.tess || (this.setGeo.tess = buildSet({ round: 0, seg: 3 })); },
       // a robot SkinnedMesh sharing the rig's geometry + skeleton (one per style scene)
       robotMesh(mat, geo) {
         const m = new THREE.SkinnedMesh(geo || self.rig.mesh.geometry, mat);

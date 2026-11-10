@@ -52,7 +52,7 @@ overview = frame("ov", f'''<div class="label">Claude + side hustle</div>
   <div class="ogrid">{cells}</div>''')
 
 # ---------- PROMPT TEMPLATE ----------
-def prompt_slide(n, t1, t2, lede, fields, prompt, extra, result, extra_first=False):
+def prompt_slide(n, t1, t2, lede, fields, prompt, extra, result, extra_first=False, label=None):
     f = "".join(f'<li><em>{i+1}</em><div><b>{a}</b><span>{b}</span></div></li>' for i, (a, b) in enumerate(fields))
     p = re.sub(r"\[([^\]]+)\]", r'<mark>[\1]</mark>', prompt).replace("\n\n", "</p><p>")
     two = f'''<div class="two">
@@ -62,7 +62,7 @@ def prompt_slide(n, t1, t2, lede, fields, prompt, extra, result, extra_first=Fal
   </div>'''
     ex = f'<div class="card ex"><h3><i>{"1" if extra_first else "3"}</i>{extra[0]}</h3>{extra[1]}</div>'
     body = (ex + two) if extra_first else (two + ex)
-    return frame(f"pp p{n}", f'''<div class="label">Prompt {n:02d}</div>
+    return frame(f"pp p{n}", f'''<div class="label">{label or f"Prompt {n:02d}"}</div>
   <h1>{t1} <span>{t2}</span></h1>
   <p class="lede">{lede}</p>
   {body}''')
@@ -103,7 +103,58 @@ p3 = prompt_slide(3, "Launch in", "7 days.",
   ("Follow a 7-day build plan", tl),
   "Ship the smallest version that keeps the promise.")
 
+def rows(items):
+    return '<div class="sl">' + "".join(f'<div class="sr sr3"><em>{i+1}</em><b>{a}</b><span>{b}</span></div>' for i, (a, b) in enumerate(items)) + '</div>'
+
+p4 = prompt_slide(4, "Turn your skill into a", "mini&#8209;course.",
+  "One clear outcome, five modules, and a plan for your first 10 buyers.",
+  [("Course topic", "What do you know really well?"), ("Your student", "Who needs this result?"),
+   ("Test price", "Rp149k to Rp299k."), ("First buyers", "10 of them, no paid ads.")],
+  "You're an instructional designer. I know [topic] well and I teach [student profile].\n\nDesign a 5-module mini-course I can test at Rp149k to Rp299k. Give me a title that hooks buyers, the main promise, what each module covers, and the worksheets or templates students get.\n\nThen give me 3 ways to land my first 10 buyers without paid ads.",
+  ("Example curriculum · Reels for café owners", rows([("Why your Reels flop", "See the gap"), ("Break down 3 Reels that work", "Make it concrete"),
+     ("Script with a template", "Give them a tool"), ("Shoot one at your café", "Build confidence"), ("Plan 30 days of posts", "Keep it going")])),
+  "")
+
+SC = [("Demand", "8", "Who wants it?"), ("Urgency", "7", "Why now?"), ("Ease", "9", "Can I build it?"), ("Edge", "6", "Why mine?"), ("Will pay", "8", "Real buyers?")]
+score = '<div class="sc">' + "".join(f'<div class="sb"><small>{a}</small><b>{v}<i>/10</i></b><span>{c}</span></div>' for a, v, c in SC) + \
+        '<div class="sb tot"><small>Total</small><b>38<i>/50</i></b><span>Test it first</span></div></div>'
+p5 = prompt_slide(5, "Test if people", "will pay.",
+  "Score your ideas, then check if someone actually buys.",
+  [("Demand", "Who is already looking for a fix?"), ("Urgency", "Why fix it now, not later?"),
+   ("Ease", "How fast can you build version one?"), ("Edge", "Why would they pick yours?")],
+  "You're a market validation researcher. I want to sell a digital product based on [skill] to [audience].\n\nGive me 10 ideas and score each 1 to 10 on demand, urgency, ease to build, uniqueness and likelihood to buy. Name the top 3 to sell first and explain why.\n\nFor each finalist, suggest one quick test that proves people will pay.",
+  ("Example score · Caption template pack", score), "")
+
+p6 = prompt_slide(6, "Outline the", "product.",
+  "Decide what buyers get, how they use it, and their first win.",
+  [("Format", "Guide, course, template or toolkit."), ("Topic", "What does it teach or do?"),
+   ("Buyer", "Who will use the finished product?"), ("Quick win", "What can they do on day one?")],
+  "I want to make a [format] about [topic] for [audience].\n\nBuild the full outline: product title, the promise, sections or modules, what goes in each one, bonus ideas, quick wins, and how the final file is structured.\n\nKeep it simple and practical, so a buyer sees the value before they pay.",
+  ("Example outline · Caption template pack", rows([("Start here", "First caption posted in 10 minutes"), ("30 caption templates", "Promo, story and menu posts"),
+     ("Bonus: 50 hooks", "Openers that stop the scroll"), ("Posting checklist", "Run it before you hit share")])),
+  "")
+
+TOOLS = ('<div class="ld fm">'
+  '<div class="st"><em>1</em><small>Google Docs</small><b>Checklist</b><span>A repeatable process</span></div>'
+  '<div class="st"><em>2</em><small>Canva</small><b>Worksheet</b><span>A guided exercise</span></div>'
+  '<div class="st hi"><em>3</em><small>Google Sheets</small><b>Tracker</b><span>Numbers that update</span></div></div>')
+b1 = prompt_slide(7, "Make a", "beginner version.",
+  "Use simple tools to build something you can finish and improve.",
+  [("Google Docs", "Checklists, guides and swipe files."), ("Canva", "Worksheets and design templates."),
+   ("Notion", "Planners and resource hubs."), ("Google Sheets", "Trackers and calculators.")],
+  "Help me turn my skill in [skill] into digital products for [audience].\n\nSuggest 10 products that need no technical skills and can be made in Google Docs, Canva, Notion or Google Sheets.\n\nFor each one: the product name, format, price range, how to make it, and why people would buy it.",
+  ("Start with a tool you already use", TOOLS), "", extra_first=True, label="Bonus 01")
+
+b2 = prompt_slide(8, "Choose where", "to sell it.",
+  "Pick a storefront by product, buyer, and how you will reach them.",
+  [("Product type", "What will buyers download or open?"), ("Your buyer", "Where do they already shop?"),
+   ("Your goal", "Fast setup, traffic or full control?"), ("Your country", "Can the platform pay you there?")],
+  "I want to sell a digital product about [skill]. Compare Gumroad, Lynk.id, Mayar, Etsy, Shopify and my own website.\n\nMy product is [product type], my buyers are [audience], and my goal is [goal]. Compare current fees, setup time, built-in traffic and how beginner-friendly each one is. Check payouts for [country].\n\nRecommend the best fit and explain why.",
+  ("Compare storefronts side by side", rows([("Fees", "Platform plus payment fees"), ("Setup", "How fast you can go live"),
+     ("Traffic", "Does it bring buyers to you?"), ("Payouts", "Paid to your local bank?")])),
+  "", label="Bonus 02")
+
 CSS = (D / "style.css").read_text()
 (D / "carousel.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Claude Side Hustle</title><style>{CSS}</style></head><body>
-{cover}{overview}{p1}{p2}{p3}</body></html>''')
+{cover}{overview}{p1}{p2}{p3}{p4}{p5}{p6}{b1}{b2}</body></html>''')
 print("ok")

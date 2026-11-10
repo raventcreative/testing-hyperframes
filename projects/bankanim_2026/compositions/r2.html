@@ -1,10 +1,181 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="r2" data-width="1080" data-height="1920"></div>
+  <style>
+    /* ===================== ROUND KIT (copied from r1, prefix r2-) ===================== */
+    .r2-a { position: absolute; }
+    .r2-grad { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #r2-badge { left: 80px; top: 404px; width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(160deg, #294b77, #0a0d2c);
+      box-shadow: 0 12px 26px -10px rgba(10,13,44,.5); color: #fff; font: 700 30px/72px Poppins, sans-serif; text-align: center; letter-spacing: -0.02em; }
+    #r2-name { left: 172px; top: 408px; height: 66px; overflow: hidden; white-space: nowrap; font: 700 54px/66px Poppins, sans-serif; letter-spacing: -0.02em; }
+    #r2-name span { display: inline-block; }
+    #r2-of { left: 172px; top: 470px; font: 400 21px/1 Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #r2-big { left: 80px; top: 512px; }
+    #r2-panel { left: 410px; top: 500px; width: 590px; height: 410px; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 26px 50px -26px rgba(10,13,44,.45), 0 0 0 1.5px rgba(10,13,44,.06); overflow: hidden; transform-origin: 0% 50%; }
+    .r2-ptag { position: absolute; left: 26px; top: 22px; height: 34px; padding: 0 14px; border-radius: 17px; background: #e9f0fc; color: #294b77;
+      font: 700 16px/34px Poppins, sans-serif; letter-spacing: .06em; white-space: nowrap; }
+    /* ===================== r2 LOADING example: a video export window (skeleton thumb, spinner, % bar) that completes ===================== */
+    #r2-wt { right: 26px; top: 22px; height: 34px; font: 700 20px/34px Poppins, sans-serif; color: #294b77; white-space: nowrap; padding-left: 30px; }
+    #r2-wt svg { position: absolute; left: 0; top: 6px; width: 22px; height: 22px; }
+    #r2-thumb { left: 26px; top: 76px; width: 176px; height: 308px; border-radius: 20px; background: #edf2fa; overflow: hidden; box-shadow: 0 0 0 1.5px #e3e9f4; }
+    .r2-sk { position: absolute; background: #dfe7f4; border-radius: 6px; }
+    #r2-shim { left: 0; top: 0; width: 96px; height: 308px; background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 100%); }
+    #r2-final { left: 0; top: 0; width: 176px; height: 308px; background: radial-gradient(circle at 30% 22%, rgba(91,140,240,.9) 0%, rgba(91,140,240,0) 55%),
+      radial-gradient(circle at 80% 70%, rgba(45,164,78,.55) 0%, rgba(45,164,78,0) 50%), linear-gradient(165deg, #294b77 0%, #0f1638 70%, #0a0d2c 100%); }
+    #r2-play { left: 56px; top: 102px; width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.22); box-shadow: 0 0 0 1.5px rgba(255,255,255,.35); }
+    #r2-play svg { position: absolute; left: 20px; top: 18px; width: 28px; height: 28px; }
+    .r2-fl { position: absolute; height: 9px; border-radius: 5px; background: rgba(255,255,255,.7); }
+    #r2-file { left: 228px; top: 78px; font: 700 24px/1.2 Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #r2-meta { left: 228px; top: 112px; font: 400 18px/1.2 Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #r2-stat { left: 228px; top: 160px; width: 336px; height: 38px; overflow: hidden; }
+    #r2-spin, #r2-ok { position: absolute; left: 0; top: 2px; width: 34px; height: 34px; }
+    #r2-s1, #r2-s2 { position: absolute; left: 46px; top: 0; font: 700 22px/38px Poppins, sans-serif; white-space: nowrap; }
+    #r2-s1 { color: #0a0d2c; } #r2-s2 { color: #2da44e; }
+    #r2-pct { left: 226px; top: 206px; font: 700 76px/80px Poppins, sans-serif; letter-spacing: -0.03em; white-space: nowrap; }
+    #r2-bar { left: 228px; top: 296px; width: 336px; height: 16px; border-radius: 8px; background: #e9f0fc; overflow: hidden; }
+    #r2-fill, #r2-fillok { position: absolute; left: 0; top: 0; width: 336px; height: 16px; border-radius: 8px; overflow: hidden; }
+    #r2-fill { background: linear-gradient(90deg, #6f9bf5, #3a6fe0); }
+    #r2-fillok { background: linear-gradient(90deg, #4cc06b, #2da44e); }
+    #r2-stripes { position: absolute; left: -46px; top: 0; width: 400px; height: 16px; background: repeating-linear-gradient(-45deg, rgba(255,255,255,.26) 0 8px, rgba(255,255,255,0) 8px 16px); }
+    .r2-step { position: absolute; top: 330px; height: 40px; }
+    .r2-step i { position: absolute; left: 0; top: 10px; width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 2.5px #c9d4e6; background: #fff; }
+    .r2-step i svg { position: absolute; left: 3px; top: 3px; width: 14px; height: 14px; }
+    .r2-step b { position: absolute; left: 28px; top: 0; font: 700 18px/40px Poppins, sans-serif; color: #9aa8c4; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="r2" data-width="1080" data-height="1920">
+    <div class="r2-a" id="r2-panel">
+      <div class="r2-ptag" id="r2-ptag">CONTOH PEMAKAIAN</div>
+      <div class="r2-a" id="r2-wt"><svg viewBox="0 0 24 24" fill="none" stroke="#294b77" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></svg>Ekspor video</div>
+      <div class="r2-a" id="r2-thumb">
+        <div class="r2-sk" style="left:14px;top:14px;width:148px;height:196px;border-radius:14px"></div>
+        <div class="r2-sk" style="left:14px;top:226px;width:30px;height:30px;border-radius:50%"></div>
+        <div class="r2-sk" style="left:54px;top:230px;width:96px;height:10px"></div>
+        <div class="r2-sk" style="left:54px;top:246px;width:64px;height:8px"></div>
+        <div class="r2-sk" style="left:14px;top:270px;width:148px;height:10px"></div>
+        <div class="r2-sk" style="left:14px;top:288px;width:104px;height:10px"></div>
+        <div class="r2-a" id="r2-shim"></div>
+        <div class="r2-a" id="r2-final">
+          <div class="r2-a" id="r2-play"><svg viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></div>
+          <div class="r2-a" style="left:14px;top:226px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.85)"></div>
+          <div class="r2-fl" style="left:54px;top:231px;width:90px"></div>
+          <div class="r2-fl" style="left:54px;top:247px;width:58px;opacity:.6"></div>
+          <div class="r2-fl" style="left:14px;top:271px;width:148px;opacity:.85"></div>
+          <div class="r2-fl" style="left:14px;top:289px;width:100px;opacity:.6"></div>
+        </div>
+      </div>
+      <div class="r2-a" id="r2-file">reels_promo.mp4</div>
+      <div class="r2-a" id="r2-meta">1080 × 1920 · 30 fps</div>
+      <div class="r2-a" id="r2-stat">
+        <svg id="r2-spin" viewBox="0 0 34 34"><circle cx="17" cy="17" r="13" fill="none" stroke="#e9f0fc" stroke-width="4.5"/><circle cx="17" cy="17" r="13" fill="none" stroke="#3a6fe0" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="26 56"/></svg>
+        <svg id="r2-ok" viewBox="0 0 34 34"><circle cx="17" cy="17" r="16" fill="#2da44e"/><path id="r2-okp" d="M10 17.5 L15 22.5 L24.5 12.5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="22" stroke-dashoffset="22"/></svg>
+        <div id="r2-s1">Memproses video</div>
+        <div id="r2-s2">Selesai · siap diunggah</div>
+      </div>
+      <div class="r2-a r2-grad" id="r2-pct">0%</div>
+      <div class="r2-a" id="r2-bar"><div id="r2-fill"><div id="r2-stripes"></div></div><div id="r2-fillok"></div></div>
+      <div id="r2-steps"></div>
+    </div>
+    <div class="r2-a" id="r2-bigwrap"></div>
+    <div class="r2-a" id="r2-badge">02</div>
+    <div class="r2-a" id="r2-name"><span class="r2-grad" id="r2-nm">Loading</span></div>
+    <div class="r2-a" id="r2-of">animasi 2 dari 12</div>
+  </div>
   <script>
     (function () {
+      // ROUND 2 — LOADING ("Dua, loading. Biar penonton tahu ada yang lagi diproses.")
+      // Round kit copied from r1 (big card out of its strip chip, badge on the number, name + example panel on the name, exit in the
+      // last 0.42 s with the big card flying back INTO its chip). Example: a video export window — skeleton thumbnail with a shimmer,
+      // a spinner + "Memproses video…", a % counter and a striped bar that crawl (realistic stop-and-go), 3 stage steps that tick;
+      // on "diproses." it completes: 100 %, bar turns green, spinner → ✓ "Selesai", the thumbnail resolves into the rendered frame.
+      const K = 1, R = window.ROUNDS[K], MA = window.MicroAnim, ST = R.start, D = R.dur;
+      const W = (txt) => { const w = R.words.find((x) => x[0] === txt); return (w ? w[1] : ST) - ST; };   // local time of a word of this round
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.69);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tNum = R.tNum - ST, tName = R.tName - ST, tUse = R.tUse - ST, tOut = D - 0.42;
+      // ---- kit: big card out of the chip
+      const BIG = 300, BX = 80, BY = 512, chip = MA.STRIP.chip(K), cs = MA.STRIP.size / BIG;
+      const big = MA.mount($("r2-bigwrap"), R.type, { size: BIG, label: true, id: "r2-bigcard" });
+      big.el.style.left = BX + "px"; big.el.style.top = BY + "px";
+      I(big.el, { x: chip.x - BX, y: chip.y - BY, scale: cs, rotation: 0, opacity: 1, transformOrigin: "0% 0%" });
+      ft(big.el, { x: chip.x - BX, y: chip.y - BY, scale: cs, rotation: 0 }, { x: 0, y: 0, scale: 1, rotation: 0, duration: Math.max(0.45, tName - 0.02), ease: "expo.inOut" }, 0.02);
+      ft(big.el, { rotation: 0 }, { rotation: -3, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tName);
+      ft(big.el, { x: 0, y: 0, scale: 1 }, { x: chip.x - BX, y: chip.y - BY, scale: cs, duration: 0.36, ease: "expo.in" }, tOut);
+      // ---- kit: number badge + name + "x dari 12"
+      const badge = $("r2-badge"), nm = $("r2-nm"), of = $("r2-of");
+      I(badge, { opacity: 0, scale: 0.3, rotation: -90 });
+      ft(badge, { opacity: 0, scale: 0.3, rotation: -90 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2)" }, tNum - 0.08);
+      I(nm, { yPercent: 110 }); ft(nm, { yPercent: 110 }, { yPercent: 0, duration: 0.42, ease: "power4.out" }, tName - 0.12);
+      I(of, { opacity: 0, x: -14 }); ft(of, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, tName + 0.05);
+      ft(badge, { opacity: 1, scale: 1, rotation: 0 }, { opacity: 0, scale: 0.6, rotation: 0, duration: 0.28, ease: "power2.in" }, tOut);
+      ft(nm, { yPercent: 0 }, { yPercent: 110, duration: 0.28, ease: "power3.in" }, tOut);
+      ft(of, { opacity: 1, x: 0 }, { opacity: 0, x: 0, duration: 0.2, ease: "power2.in" }, tOut);
+      // ---- kit: the example panel swings in (3D hinge from its left edge) and folds away
+      const panel = $("r2-panel");
+      I(panel, { opacity: 0, rotationY: -70, x: -30, transformPerspective: 1400 });
+      ft(panel, { opacity: 0, rotationY: -70, x: -30 }, { opacity: 1, rotationY: 0, x: 0, duration: 0.55, ease: "expo.out", transformPerspective: 1400 }, tName - 0.05);
+      ft(panel, { opacity: 1, rotationY: 0, x: 0 }, { opacity: 0, rotationY: 60, x: 40, duration: 0.34, ease: "power3.in", transformPerspective: 1400 }, tOut - 0.04);
+      // ===================== r2 LOADING: the export crawls while "biar penonton tahu ada yang lagi…", completes on "diproses."
+      const tDone = W("diproses.") - 0.07;                       // 100 % lands a hair before the word (reads as on it)
+      const tP0 = tName + 0.3;                                   // progress starts once the panel has landed
+      // stop-and-go crawl keyframes [t, progress] — realistic export feel (bursts, stalls), all sine.inOut segments
+      const KF = [[tP0, 0], [tP0 + 0.28, 0.16], [tP0 + 0.58, 0.22], [tUse + 0.32, 0.45], [W("tahu") + 0.12, 0.56], [W("yang") - 0.06, 0.84], [W("lagi") + 0.04, 0.93], [tDone, 1]];
+      const sio = (u) => 0.5 - 0.5 * Math.cos(Math.PI * Math.max(0, Math.min(1, u)));
+      const P = (t) => { if (t <= KF[0][0]) return 0; for (let i = 1; i < KF.length; i++) if (t <= KF[i][0]) { const a = KF[i - 1], b = KF[i]; return a[1] + (b[1] - a[1]) * sio((t - a[0]) / (b[0] - a[0])); } return 1; };
+      // entrance of the window parts (after the panel hinge)
+      ["r2-wt", "r2-thumb", "r2-file", "r2-meta", "r2-stat", "r2-pct", "r2-bar", "r2-steps"].forEach((id, i) => {
+        const e = $(id); I(e, { opacity: 0, x: 34 }); ft(e, { opacity: 0, x: 34 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, tName + 0.06 + i * 0.035);
+      });
+      // skeleton shimmer (looping sweep) until the frame is rendered
+      const shim = $("r2-shim"), nSh = Math.ceil((tDone - tName) / 0.72);
+      I(shim, { x: -110 }); ft(shim, { x: -110 }, { x: 200, duration: 0.72, ease: "power1.inOut", repeat: nSh - 1 }, tName);
+      const fin = $("r2-final");
+      I(fin, { opacity: 0, scale: 1.12 }); ft(fin, { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.36, ease: "power3.out" }, tDone - 0.04);
+      const play = $("r2-play");
+      I(play, { scale: 0.4 }); ft(play, { scale: 0.4 }, { scale: 1, duration: 0.4, ease: "back.out(2.4)" }, tDone + 0.02);
+      // spinner spins (one linear tween), then swaps to the green check
+      const spin = $("r2-spin"), ok = $("r2-ok"), okp = $("r2-okp");
+      I(spin, { rotation: 0, opacity: 1, scale: 1, transformOrigin: "50% 50%" });
+      ft(spin, { rotation: 0 }, { rotation: 360 * Math.round((tDone - tName) * 1.6), duration: tDone - tName, ease: "none" }, tName);
+      ft(spin, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4, duration: 0.12, ease: "power2.in" }, tDone - 0.04);
+      I(ok, { opacity: 0, scale: 0.3, transformOrigin: "50% 50%" }); ft(ok, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.34, ease: "back.out(2.6)" }, tDone);
+      I(okp, { attr: { "stroke-dashoffset": 22 } }); ft(okp, { attr: { "stroke-dashoffset": 22 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.2, ease: "power2.out" }, tDone + 0.08);
+      // status text: "Memproses video" + animated dots, then slides out for "Selesai · siap diunggah"
+      const s1 = $("r2-s1"), s2 = $("r2-s2");
+      I(s1, { textContent: "Memproses video", yPercent: 0, opacity: 1 });
+      for (let k = 0, t = tName; t < tDone; k++, t += 0.26) tl.set(s1, { textContent: "Memproses video" + ".".repeat(1 + (k % 3)) }, t);
+      ft(s1, { yPercent: 0, opacity: 1 }, { yPercent: -100, opacity: 0, duration: 0.22, ease: "power3.in" }, tDone - 0.02);
+      I(s2, { yPercent: 100, opacity: 0 }); ft(s2, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.3, ease: "power3.out" }, tDone + 0.06);
+      // % counter (per-frame tl.set, same curve as the bar)
+      const pct = $("r2-pct");
+      I(pct, { textContent: "0%", backgroundImage: "linear-gradient(172deg, #0a0d2c 8%, #294b77 92%)", scale: 1, transformOrigin: "0% 60%" });
+      for (let f = Math.ceil(tP0 * 30); f / 30 < tDone; f++) tl.set(pct, { textContent: Math.floor(100 * P(f / 30) + 1e-6) + "%" }, f / 30);
+      tl.set(pct, { textContent: "100%", backgroundImage: "linear-gradient(172deg, #1f8a3e 8%, #2da44e 92%)" }, tDone);
+      ft(pct, { scale: 1 }, { scale: 1.07, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tDone);
+      // the bar: a full-width fill translated in (keeps its rounded tip), one tween per keyframe segment; stripes drift
+      const fill = $("r2-fill"), fok = $("r2-fillok"), BW = 336;
+      I(fill, { x: -BW });
+      for (let i = 1; i < KF.length; i++) ft(fill, { x: -BW * (1 - KF[i - 1][1]) }, { x: -BW * (1 - KF[i][1]), duration: KF[i][0] - KF[i - 1][0], ease: "sine.inOut" }, KF[i - 1][0]);
+      const stp = $("r2-stripes"), nSt = Math.ceil((tDone - tName) / 0.5);
+      I(stp, { x: 0 }); ft(stp, { x: 0 }, { x: 22.63, duration: 0.5, ease: "none", repeat: nSt - 1 }, tName);
+      I(fok, { opacity: 0 }); ft(fok, { opacity: 0 }, { opacity: 1, duration: 0.16, ease: "power1.out" }, tDone);
+      // stage steps tick as the bar passes 1/3, 2/3, 100 %
+      const STEPS = ["Render", "Encode", "Simpan"], SX = [0, 118, 236];
+      $("r2-steps").innerHTML = STEPS.map((s, i) => `<div class="r2-step" id="r2-st${i}" style="left:${228 + SX[i]}px"><i id="r2-sd${i}"><svg viewBox="0 0 14 14" id="r2-sv${i}"><path d="M3 7.4 L6 10.2 L11 4.4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i><b id="r2-sb${i}">${s}</b></div>`).join("");
+      const cross = (v) => { for (let f = Math.ceil(tP0 * 30); f / 30 < tDone; f++) if (P(f / 30) >= v) return f / 30; return tDone; };
+      STEPS.forEach((_, i) => {
+        const tk = i < 2 ? cross((i + 1) / 3) : tDone + 0.04, d = $("r2-sd" + i), sv = $("r2-sv" + i), b = $("r2-sb" + i);
+        I(d, { backgroundColor: "#ffffff", boxShadow: "inset 0 0 0 2.5px #c9d4e6", scale: 1 }); I(sv, { opacity: 0 }); I(b, { color: "#9aa8c4" });
+        tl.set(d, { backgroundColor: "#2da44e", boxShadow: "inset 0 0 0 2.5px #2da44e" }, tk); tl.set(sv, { opacity: 1 }, tk); tl.set(b, { color: "#0a0d2c" }, tk);
+        ft(d, { scale: 1 }, { scale: 1.3, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, tk);
+      });
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      const drawBig = (tg) => big.draw(Math.max(0, tg - R.tName));
+      drawBig(ST);
+      window.addEventListener("hf-seek", (e) => drawBig(e.detail.time + (window.__T0 || 0)));
       window.__timelines = window.__timelines || {};
       window.__timelines["r2"] = tl;
     })();

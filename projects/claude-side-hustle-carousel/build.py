@@ -65,8 +65,7 @@ def prompt_slide(n, t1, t2, lede, fields, prompt, extra, result, extra_first=Fal
     return frame(f"pp p{n}", f'''<div class="label">Prompt {n:02d}</div>
   <h1>{t1} <span>{t2}</span></h1>
   <p class="lede">{lede}</p>
-  {body}
-  <div class="res">{I["check"]}<div><small>Result</small><b>{result}</b></div></div>''')
+  {body}''')
 
 p1 = prompt_slide(1, "Pick your first", "digital product.",
   "Turn a skill you already have into something people pay for.",

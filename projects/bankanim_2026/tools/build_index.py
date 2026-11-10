@@ -112,6 +112,8 @@ html = f"""<!doctype html>
         tl.fromTo("#gridhl", {{ x: 600, y: 180 }}, {{ x: 180, y: 640, duration: {total}, ease: "none", immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
         tl.set("#brandlogo", {{ opacity: 0.95 }}, 0);   // visible from frame 0
+        // the CTA end beat shows its own big logo: the small corner mark steps away
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, 27.95);
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;

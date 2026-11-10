@@ -1,6 +1,7 @@
-"""Synthesised SFX bed for the REPO9 reel (no samples, no downloads): per round: a card whoosh in, a red strike scratch on the paid app, a
-reveal sweep + chime on the free twin, a GRATIS stamp thud, a collect-swoosh into the tracker; hook slams, GitHub boom, CTA ticks.
-Deterministic (seeded). Writes assets/audio/sfx.wav (48 kHz mono, full reel length).
+"""Synthesised SFX bed for the BANKANIM reel (no samples, no downloads): an editing app whose clips fall off (thuds), a code window
+that types and compiles, a flash + 12 card pops, a spotlight per named animation (ding / tick / rise / bell / pops), a silky wave,
+copy click + paste + typing + Enter + birth chime, live-edit keystrokes, two "nope" stamps, the CTA (bundle, EDIT typing, heart, plane,
+DM chime). Deterministic (seeded). Writes assets/audio/sfx.wav (48 kHz mono, full reel length).
 Run: python3 tools/sfx.py ."""
 import json, sys, wave
 from pathlib import Path
@@ -120,60 +121,68 @@ def typing(t0, t1, gain=0.11, rate=16):
     while t < t1:
         put(t, tick(0.02, 3600 + 500 * (k % 3)), gain * (0.8 + 0.2 * (k % 2))); k += 1; t += 1.0 / rate * (0.8 + 0.4 * ((k * 7) % 5) / 5)
 
-def flap():
-    """split-flap clack: two quick clicks + a soft low knock"""
-    x = np.zeros(int(0.22 * SR)); a = tick(0.02, 3000); b = tick(0.02, 2400)
-    x[: len(a)] += a; i = int(0.11 * SR); x[i:i + len(b)] += 0.8 * b
-    k = pop(180, 90, 0.08); x[: len(k)] += 0.35 * k
-    return x / np.abs(x).max()
-
-def rise(dur=0.6, f0=300, f1=1200):
-    n = int(dur * SR); t = np.arange(n) / SR
-    x = np.sin(2 * np.pi * np.cumsum(f0 * (f1 / f0) ** (t / dur)) / SR) * env(n, 0.8, 1.0) * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * 14 * t)))
-    return x / np.abs(x).max()
-
-def buzz(dur=0.35):
-    n = int(dur * SR); t = np.arange(n) / SR
-    x = (np.sign(np.sin(2 * np.pi * 110 * t)) * 0.5 + np.sign(np.sin(2 * np.pi * 116 * t)) * 0.5) * env(n, 0.05, 1.0)
-    return x / np.abs(x).max()
-
-def typing(t0, t1, gain=0.11, rate=16):
-    k = 0; t = t0
-    while t < t1:
-        put(t, tick(0.02, 3600 + 500 * (k % 3)), gain * (0.8 + 0.2 * (k % 2))); k += 1; t += 1.0 / rate * (0.8 + 0.4 * ((k * 7) % 5) / 5)
 
 
-APPS = json.loads((P / "vendor/apps.js").read_text().split("window.APPS = ", 1)[1].rstrip().rstrip(";"))
 W = 0.15
-st = lambda i: S[i]["start"]
-# --- s01 / s02 ---
-for k in range(9): put(0.12 + k * 0.075 + 0.3, pop(260, 120, 0.12), 0.16)                  # tiles slam in
-for k in range(9): put(1.72 + k * 0.045 + 0.18, tick(0.03, 2200), 0.12)                    # BAYAR stamps
-put(2.3, whoosh(0.8, 300, 1400, 1.4, 0.4), W * 0.6)                                         # renew ring
-put(st("s02") + 0.15, whoosh(0.35, 1500, 400, 1.6, 0.3), W * 0.5)
-for k in range(9): put(st("s02") + 0.72 + k * 0.035, pop(700 + k * 40, 1100 + k * 40, 0.05), 0.07)   # twins
-put(wt("GitHub.") - 0.05, boom(0.7, 120, 55), 0.3); put(wt("GitHub.") + 0.02, chime((1046, 1568), 0.8), 0.06)
-put(st("r1") - 0.5, whoosh(0.5, 400, 2600, 1.2, 0.6), W)                                   # tiles fly into the tracker
-# --- the nine rounds ---
-for i, a in enumerate(APPS):
-    s0, tf, end = a["start"], a["tFree"], a["start"] + a["dur"]
-    put(s0 + 0.2, pop(500, 800, 0.08), 0.1)                                                 # use-case pill
-    put(s0 + 0.5, whoosh(0.4, 500, 2400, 1.3, 0.4), W * 0.8)                               # paid card in
-    put(tf - 0.6, whoosh(0.22, 3000, 1200, 2.0, 0.15), W * 0.7); put(tf - 0.45, buzz(0.12), 0.03)   # strike
-    put(tf - 0.25, whoosh(0.55, 300, 3200, 1.0, 0.5), W * 1.1)                             # signature transition
-    put(tf + 0.05, chime((1318 + 40 * i, 1760 + 40 * i, 2349), 0.9), 0.06)                # the free twin lands
-    put(tf + 0.25, tick(0.03, 3000), 0.12)                                                  # tracker flips
-    put(tf + 1.05, boom(0.28, 200, 90), 0.16)                                               # GRATIS stamp
-    put(end - 0.38, whoosh(0.4, 600, 3000, 1.5, 0.6), W * 0.8)                              # collect into the tracker
-    put(end - 0.04, pop(1200, 1800, 0.05), 0.08)
-# --- s12 CTA ---
-put(st("s12") + 0.05, whoosh(0.5, 2000, 500, 1.2, 0.4), W * 0.6)
-for k in range(9): put(st("s12") + 0.3 + k * 0.06, pop(900 + k * 50, 1300 + k * 50, 0.05), 0.07)
-for k in range(4): put(wt("OPEN,") - 0.02 + k * 0.06, tick(0.022, 4200), 0.14)
-put(wt("OPEN,") + 0.3, pop(900, 1600, 0.1), 0.15)
-put(wt("kirim") - 0.02, whoosh(0.7, 700, 3600, 1.2, 0.5), W)
+def bell(dur=0.9):
+    n = int(dur * SR); t = np.arange(n) / SR; x = np.zeros(n)
+    for k, f in enumerate((1568, 2349, 3136)):
+        x += np.sin(2 * np.pi * f * t) * np.exp(-t * (4 + 2 * k)) * (0.8 ** k)
+    x *= 0.75 + 0.25 * np.sin(2 * np.pi * 11 * t)
+    return x / np.abs(x).max()
+
+# --- s01: the editing app, its clips fall, the code window types, Claude stamps
+put(0.02, pop(500, 760, 0.08), 0.08)
+for k in range(9): put(0.05 + k * 0.1, tick(0.015, 5200), 0.035)               # playhead scrub
+put(wt("nggak") - 0.02, buzz(0.18), 0.03)
+for k in range(13): put(wt("After Effects,") + 0.05 + (k % 5) * 0.05 + (k // 5) * 0.03 + 0.4, pop(260 - 8 * k, 110, 0.1), 0.09)   # clips hit the floor
+put(wt("After Effects,") + 0.02, whoosh(0.5, 2200, 500, 1.4, 0.3), W * 0.6)
+put(wt("semuanya") - 0.3, whoosh(0.42, 600, 1800, 1.2, 0.5), W * 0.5)          # the app folds away
+put(wt("semuanya") - 0.06, whoosh(0.5, 300, 2600, 1.1, 0.55), W * 0.8)         # the code window flies in
+typing(wt("semuanya") + 0.2, wt("Claude.") - 0.1, 0.09, 18)
+put(wt("Claude.") - 0.02, boom(0.5, 140, 60), 0.22); put(wt("Claude.") + 0.06, chime((1318.5, 1975.5, 2637), 0.9), 0.07)
+# --- s02: compile → flash → 12 cards
+put(wt("Termasuk") - 0.1, rise(0.45, 400, 1600), 0.05)
+put(wt("bank") - 0.3, whoosh(0.3, 2600, 400, 1.6, 0.8), W * 0.7)
+put(wt("bank") - 0.02, boom(0.35, 220, 90), 0.16)
+for k in range(12): put(wt("bank") + 0.04 + k * 0.03, pop(700 + 40 * k, 1100 + 40 * k, 0.05), 0.06)
+put(wt("ini.") - 0.05, whoosh(0.3, 900, 2200, 1.5, 0.4), W * 0.3)
+# --- s03: spotlight per named animation
+for w in ("Centang,", "loading,", "angka", "notifikasi,", "grafik."):
+    put(wt(w) - 0.12, whoosh(0.28, 700, 2400, 1.4, 0.5), W * 0.55)
+put(wt("Centang,") + 0.1, chime((1760, 2637), 0.6), 0.06)
+for k in range(6): put(wt("loading,") + 0.05 + k * 0.08, tick(0.02, 3800), 0.05)
+put(wt("angka") + 0.02, rise(0.5, 500, 1500), 0.04)
+put(wt("notifikasi,") + 0.05, bell(0.8), 0.06)
+for k in range(4): put(wt("grafik.") + 0.05 + k * 0.07, pop(500 + 120 * k, 800 + 120 * k, 0.06), 0.08)
+# --- s04: silky wave + the easing editor
+put(wt("gerak") - 0.05, whoosh(0.9, 400, 1800, 0.9, 0.5), W * 0.6)
+put(wt("motion") - 0.15, whoosh(0.4, 1200, 3200, 1.6, 0.4), W * 0.5); put(wt("designer.") + 0.05, pop(1100, 1500, 0.05), 0.07)
+# --- s05: copy → paste → type → Enter → a new card is born
+put(wt("Caranya") - 0.05, whoosh(0.4, 2000, 600, 1.3, 0.4), W * 0.5)
+put(wt("Copy") - 0.02, tick(0.025, 2600), 0.16); put(wt("Copy") + 0.12, pop(900, 1500, 0.06), 0.08)
+put(wt("tempel") - 0.05, whoosh(0.35, 500, 2400, 1.3, 0.4), W * 0.6)
+typing(wt("tempel") + 0.1, wt("animasinya") - 0.05, 0.1, 20)
+put(wt("animasinya") - 0.02, pop(180, 90, 0.1), 0.18)                          # Enter
+put(wt("animasinya") + 0.05, rise(0.5, 300, 1400), 0.05)
+put(wt("jadi.") - 0.05, chime((1318.5, 1760, 2637), 0.9), 0.08); put(wt("jadi.") - 0.02, pop(900, 1600, 0.08), 0.1)
+# --- s06: live edit
+for k in range(5): put(wt("ganti") + 0.05 + k * 0.07, tick(0.02, 3600 + 300 * (k % 2)), 0.08)
+for k in range(4): put(wt("datanya,") + k * 0.06, pop(600 + 90 * k, 900 + 90 * k, 0.05), 0.07)
+put(wt("cocok") - 0.08, whoosh(0.45, 2400, 500, 1.2, 0.6), W * 0.6); put(wt("konten") - 0.05, pop(300, 160, 0.09), 0.12)
+# --- s07: two "nope" stamps
+put(wt("install") - 0.02, boom(0.3, 200, 80), 0.2); put(wt("aplikasi,") + 0.05, whoosh(0.35, 800, 3000, 1.4, 0.3), W * 0.7)
+put(wt("jago") - 0.02, boom(0.3, 180, 75), 0.2); put(wt("editing.") + 0.05, whoosh(0.4, 2800, 600, 1.3, 0.5), W * 0.6)
+# --- s08 CTA
+put(wt("panduan") - 0.05, whoosh(0.6, 400, 2600, 1.1, 0.6), W * 0.7)
+for k in range(12): put(wt("panduan") + 0.15 + k * 0.035, pop(900 + 30 * k, 1300 + 30 * k, 0.04), 0.045)
+put(wt("animasinya?") + 0.05, boom(0.3, 240, 110), 0.12)
+put(wt("Komen") - 0.1, whoosh(0.35, 1800, 600, 1.3, 0.4), W * 0.5)
+for k in range(4): put(wt("EDIT,") - 0.02 + k * 0.07, tick(0.022, 4200), 0.15)
+put(wt("EDIT,") + 0.35, pop(900, 1600, 0.1), 0.15)
+put(wt("kirim") - 0.05, whoosh(0.7, 700, 3600, 1.2, 0.5), W)
 put(wt("DM.") - 0.02, chime((1568, 2093), 0.8), 0.07)
-put(T["total_sec"] - 1.5, chime((1046, 1568, 2093, 2637), 1.6), 0.07)
+put(T["total_sec"] - 1.3, chime((1046, 1568, 2093, 2637), 1.3), 0.06)
 x = np.clip(out, -1, 1); x = (x * 32767).astype(np.int16)
 f = wave.open(str(P / "assets/audio/sfx.wav"), "wb"); f.setnchannels(1); f.setsampwidth(2); f.setframerate(SR); f.writeframes(x.tobytes()); f.close()
 print("sfx.wav", round(len(x) / SR, 2), "s, peak", round(float(np.abs(out).max()), 3))

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>Cover Reels — Bank animasi bikinan Claude</title>
+<script src="../vendor/mascot3d.js"></script>
+<script src="../vendor/robot3d.js"></script>
+<script src="../vendor/vo_words.js"></script>
+<script src="../vendor/microanim.js"></script>
+<!-- IG Reels cover 1080x1920 on the client's light background (+ its grid): "Bank animasi tanpa After Effects" (struck), the Claude
+     chip (lobehub mark, MIT), the 12 coded micro-animation cards of the reel (vendor/microanim.js, frozen at their best frame),
+     mascot (host) + robot. Poppins 700/400 in the navy gradient. Everything that matters sits inside the 4:5 crop (y 285-1635).
+     Render: node thumbnail/render_cover.cjs <out.png>   (static server on :8776 at the project root) -->
+<style>
+  @font-face { font-family: Poppins; src: url(../assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+  @font-face { font-family: Poppins; src: url(../assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f8fe; font-family: Poppins, sans-serif; color: #0a0d2c; -webkit-font-smoothing: antialiased; }
+  #c { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  .plate { position: absolute; inset: 0; background: url(../assets/brand/bg_1080x1920.png) center / 1080px 1920px no-repeat; }
+  #gridwrap { position: absolute; left: 330px; top: 160px; width: 900px; height: 820px;
+    -webkit-mask-image: radial-gradient(ellipse 430px 360px at 450px 405px, #000 35%, transparent 100%); mask-image: radial-gradient(ellipse 430px 360px at 450px 405px, #000 35%, transparent 100%); }
+  #grid { position: absolute; left: -473px; top: -473px; width: 1846px; height: 1766px; background-image: linear-gradient(90deg, rgba(104,132,186,.30) 2px, transparent 2px), linear-gradient(0deg, rgba(104,132,186,.30) 2px, transparent 2px); background-size: 43px 43px; }
+  #glow { position: absolute; left: 90px; top: 380px; width: 900px; height: 760px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.95), rgba(255,255,255,0) 66%); }
+  .grad { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; z-index: 30; }
+  #logo { position: absolute; left: 432px; top: 318px; width: 216px; height: auto; z-index: 30; }
+  #eyebrow { top: 372px; display: flex; justify-content: center; }
+  #eyebrow > span { height: 58px; padding: 0 24px 0 12px; border-radius: 29px; display: flex; align-items: center; gap: 12px; background: #ffffff;
+    box-shadow: 0 12px 26px -12px rgba(20,40,90,.4), 0 0 0 1.5px rgba(10,13,44,.07); font: 700 21px/1 Poppins; letter-spacing: 2px; }
+  #eyebrow img { width: 36px; height: 36px; }
+  #h1 { top: 452px; font: 700 132px/1 Poppins; letter-spacing: -5px; filter: drop-shadow(0 16px 26px rgba(10,13,44,.14)); }
+  #h2 { top: 600px; display: flex; justify-content: center; align-items: baseline; gap: 18px; font: 400 58px/1 Poppins; letter-spacing: -1px; }
+  #h2 b { position: relative; font-weight: 700; }
+  #h2 b::after { content: ""; position: absolute; left: -6px; right: -6px; top: 54%; height: 9px; border-radius: 5px; background: #e5484d; transform: rotate(-3deg); box-shadow: 0 3px 10px rgba(229,72,77,.35); }
+  #cards { position: absolute; left: 0; top: 0; z-index: 12; }
+  canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  #m { z-index: 22; } #r { z-index: 21; }
+</style>
+</head>
+<body>
+<div id="c">
+  <div class="plate"></div><div id="gridwrap"><div id="grid"></div></div><div id="glow" style="position:absolute"></div>
+  <div id="cards"></div>
+  <canvas id="r"></canvas>
+  <canvas id="m"></canvas>
+  <img id="logo" src="../assets/brand/logo_dark_trim.png" alt="AI PRENEUR">
+  <div id="eyebrow" class="ctr"><span><img src="../assets/icons/lobe-claude-color.svg" alt=""><b class="grad">100% DIBIKIN PAKAI CLAUDE</b></span></div>
+  <div id="h1" class="ctr"><span class="grad">Bank animasi</span></div>
+  <div id="h2" class="ctr"><span class="grad">tanpa</span><b class="grad">After Effects</b></div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search), P = (k, d) => parseFloat(q.get(k) || d);
+  const M3 = window.Mascot3D, VW = window.VO_WORDS, MA = window.MicroAnim;
+  // the 12 cards, each frozen at its most readable frame
+  const BEST = { check: 1.5, loading: 0.4, counter: 1.75, bell: 0.75, chart: 2.05, toggle: 0.8, heart: 0.6, ring: 1.8, typing: 0.3, upload: 1.75, search: 0.6, stars: 1.6 };
+  const S = P("cs", "158"), G = P("cg", "16"), X0 = (1080 - (4 * S + 3 * G)) / 2, Y0 = P("cy", "740");
+  MA.TYPES.forEach((ty, i) => { const h = MA.mount(document.getElementById("cards"), ty, { size: S, label: true });
+    h.el.style.left = (X0 + (i % 4) * (S + G)) + "px"; h.el.style.top = (Y0 + Math.floor(i / 4) * (S + G)) + "px";
+    h.el.style.transform = `rotate(${[-2, 1.5, -1, 2][i % 4] * (Math.floor(i / 4) === 1 ? -1 : 1)}deg)`; h.draw(BEST[ty]); });
+  async function buildRobot() {
+    const cv = document.getElementById("r"); cv.width = 1080; cv.height = 1920;
+    const rb = await window.Robot3D.Robot.create(cv, { url: "../assets/robot3d/robot_aipreneur.glb", width: 1080, height: 1920, envIntensity: 0.55 });
+    const HF = [-0.0775, -0.227, -0.1287];
+    rb.setView({ fx: P("rx", "815"), fy: P("ry", "1575"), h: P("rh", "235"), pitch: 5 });
+    rb.setState({ root: { x: 0, y: 0, z: 0, rx: 0, ry: -0.42, rz: 0, s: 1 },
+      bones: { body: [0, 0, 0], head: [HF[0] - 0.06, HF[1] - 0.12, HF[2]], hand_L: [-0.3, 0, -0.35], hand_R: [-0.3, 0, 0.35] },
+      offs: { hand_L: [-0.13, 0.26, 0.06], hand_R: [0.13, 0.26, 0.06], head: [0, 0, 0] },
+      face: { blink: 0, gaze: [-0.12, 0.06], happy: 1, squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 }, ring: 1.6, shadow: false });
+    rb.render();
+  }
+  async function buildMascot() {
+    const FACE = {"eyeA": {"c": [-0.1017, 0.6033], "r": [0.037, 0.034], "n": 344, "J": [-0.8070804081852212, -0.28336927447264443, -0.2689292148517819, 0.767464652853189], "uv0": [0.41428961906002, 0.6508527738073399], "maxErr": 0.0075728971647898765}, "eyeB": {"c": [0.1, 0.602], "r": [0.037, 0.034], "n": 344, "J": [0.7239884387099991, -0.06125307155111093, -0.04553605872381199, -0.7027396856405153], "uv0": [0.10665626011522979, 0.44039104240012367], "maxErr": 0.005958813097786782}, "browA": {"c": [-0.101, 0.689], "n": 99, "J": [-0.2397367555212638, 0.8539817292816768, 0.7021133260473107, 0.3275224085304049], "uv0": [0.6104683461950666, 0.4751860845807758], "maxErr": 0.0034168031311564056}, "browB": {"c": [0.1, 0.689], "n": 183, "J": [0.7452202855149699, -0.1768453408899853, -0.1387417639801932, -0.7149624190012184], "uv0": [0.09597917118934614, 0.3768964421328661], "maxErr": 0.004863166031021183}, "mouth": {"c": [0, 0.547], "r": [0.03, 0.016]}, "skin": [253, 200, 156], "skinEye": [243, 186, 141], "coverNormal": 0, "lidLit": [1, 1, 1], "mouthDy": 0, "faceSmooth": 1, "lidRing": 1.5, "browNy": 0.98, "headC": [0, 0.72, 0]};
+    const src = await (await fetch("../compositions/mascot.html")).text();
+    const DECALS = JSON.parse(src.match(/const DECALS = (\[.*?\]);\n/s)[1].replace(/"assets\//g, '"../assets/'));
+    const cv = document.getElementById("m"); cv.width = 1080; cv.height = 1920;
+    const m = await M3.Mascot.create(cv, { url: "../assets/mascot3d/mascot_biz_rigged.glb", face: FACE, decals: DECALS, width: 1080, height: 1920, envIntensity: 0.6 });
+    for (const o of m.scene.children) if (o.isDirectionalLight && o.position.z < 0) { o.intensity = 1.6; o.color.setRGB(0.72, 0.84, 1.0); o.position.set(1.6, 1.5, -1.4); }
+    if (m.shadow) m.shadow.visible = false;
+    const DIR = M3.direct(VW, 60, { intents: [{ t: 0.4, action: "idle" }], seed: 9, quiet: 0, look: 0 });
+    const PERF = M3.buildPerformance(DIR.tracks, 60.05, { smooth: 1 });
+    m.setView({ fx: P("mx", "300"), fy: P("my", "2050"), h: P("mh", "760"), yaw: 0, pitch: 4 });
+    const B = Object.assign({}, PERF(0).bones);
+    B.upperarm_R = [-2.7, 0, -0.25]; B.forearm_R = [0, 0, 0]; B.hand_R = [-0.12, 0.1, -0.12];
+    B.head = [-0.08, 0.08, 0.04]; B.neck = [-0.02, 0.03, 0.02];
+    m.setState({ root: { x: 0, y: 0, ry: 0.22, rz: 0, rx: 0, s: 1 }, bones: B, face: { blink: [0, 0], gaze: [-0.003, 0.006], mouthMix: 1, mouth: [0.04, 0.012, 0.005, 0.2] } });
+    m.render();
+  }
+  window.COVER_READY = Promise.all([document.fonts.ready, buildRobot(), buildMascot()]);
+</script>
+</body>
+</html>

@@ -1,10 +1,199 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="r10" data-width="1080" data-height="1920"></div>
+  <style>
+    /* ===================== ROUND KIT (copied from r1, prefix r10-) ===================== */
+    .r10-a { position: absolute; }
+    .r10-grad { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #r10-badge { left: 80px; top: 404px; width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(160deg, #294b77, #0a0d2c);
+      box-shadow: 0 12px 26px -10px rgba(10,13,44,.5); color: #fff; font: 700 30px/72px Poppins, sans-serif; text-align: center; letter-spacing: -0.02em; }
+    #r10-name { left: 172px; top: 408px; height: 66px; overflow: hidden; white-space: nowrap; font: 700 54px/66px Poppins, sans-serif; letter-spacing: -0.02em; }
+    #r10-name span { display: inline-block; }
+    #r10-of { left: 172px; top: 470px; font: 400 21px/1 Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #r10-big { left: 80px; top: 512px; }                                   /* the big card (300 px) — grows out of its strip chip */
+    #r10-panel { left: 410px; top: 500px; width: 590px; height: 410px; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 26px 50px -26px rgba(10,13,44,.45), 0 0 0 1.5px rgba(10,13,44,.06); overflow: hidden; transform-origin: 0% 50%; }
+    .r10-ptag { position: absolute; left: 26px; top: 22px; height: 34px; padding: 0 14px; border-radius: 17px; background: #e9f0fc; color: #294b77;
+      font: 700 16px/34px Poppins, sans-serif; letter-spacing: .06em; white-space: nowrap; }
+    /* ===================== r10 UPLOAD example: a file is dragged into a dropzone, uploads, "Terkirim" ===================== */
+    #r10-dz { left: 26px; top: 74px; width: 538px; height: 312px; border-radius: 24px; background: #f7f9fe; }
+    #r10-dzb { left: 0; top: 0; width: 538px; height: 312px; border-radius: 24px; border: 3px dashed #b9c6dc; }
+    #r10-idle { left: 0; top: 0; width: 538px; height: 312px; }
+    #r10-ic { left: 221px; top: 36px; width: 96px; height: 96px; border-radius: 50%; background: #e9f0fc; }
+    #r10-ic svg { position: absolute; left: 22px; top: 21px; width: 52px; height: 52px; }
+    #r10-t1 { left: 0; top: 148px; width: 538px; text-align: center; font: 700 27px/36px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #r10-t2 { left: 0; top: 188px; width: 538px; text-align: center; font: 400 20px/28px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #r10-fmt { left: 0; top: 236px; width: 538px; display: flex; justify-content: center; gap: 10px; }
+    #r10-fmt span { height: 36px; padding: 0 16px; border-radius: 18px; background: #ffffff; box-shadow: 0 0 0 1.5px #dbe4f3; font: 700 18px/36px Poppins, sans-serif; color: #294b77; letter-spacing: .04em; }
+    #r10-hint { left: 0; top: 238px; width: 538px; display: flex; justify-content: center; align-items: center; gap: 10px; font: 700 23px/34px Poppins, sans-serif; color: #3a6fe0; white-space: nowrap; }
+    #r10-hint svg { width: 28px; height: 28px; }
+    /* the file card (the flying copy in the root + the identical one that lives in the dropzone) */
+    .r10-file { position: absolute; width: 470px; height: 100px; border-radius: 20px; background: #ffffff; box-shadow: 0 16px 30px -18px rgba(10,13,44,.42), 0 0 0 1.5px #e3e9f4; }
+    .r10-fi { position: absolute; left: 18px; top: 18px; width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(160deg, #3a6fe0, #294b77); }
+    .r10-fi svg { position: absolute; left: 15px; top: 15px; width: 34px; height: 34px; }
+    .r10-file b { position: absolute; left: 100px; top: 19px; font: 700 24px/32px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .r10-file em { position: absolute; left: 100px; top: 53px; font: 400 19px/26px Poppins, sans-serif; font-style: normal; color: #5d6f8f; white-space: nowrap; }
+    .r10-fs { position: absolute; left: 404px; top: 28px; width: 44px; height: 44px; }
+    #r10-fly { left: 470px; top: 636px; transform-origin: 400px 58px; box-shadow: 0 30px 46px -20px rgba(10,13,44,.5), 0 0 0 1.5px #e3e9f4; }
+    #r10-row { left: 34px; top: 62px; transform-origin: 50% 100%; }
+    #r10-rip { left: 34px; top: 62px; width: 470px; height: 100px; border-radius: 20px; border: 3px solid #3a6fe0; }
+    #r10-pb { left: 34px; top: 192px; width: 470px; height: 14px; border-radius: 7px; background: #e3eaf6; overflow: hidden; }
+    #r10-pbf, #r10-pbg { position: absolute; left: 0; top: 0; width: 470px; height: 14px; border-radius: 7px; }
+    #r10-pbf { background: linear-gradient(90deg, #3a6fe0, #6b94f0); }
+    #r10-pbg { background: linear-gradient(90deg, #2da44e, #4cc06e); }
+    #r10-pl { left: 34px; top: 220px; width: 470px; height: 32px; }
+    #r10-pl b { position: absolute; left: 0; top: 0; font: 700 21px/32px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    #r10-pct { position: absolute; right: 0; top: 0; font: 700 22px/32px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #r10-ok { left: 139px; top: 214px; width: 260px; height: 60px; border-radius: 30px; background: linear-gradient(160deg, #2da44e, #1f8a3e);
+      box-shadow: 0 16px 28px -14px rgba(17,99,41,.7); display: flex; justify-content: center; align-items: center; gap: 12px; color: #fff; font: 700 26px/1 Poppins, sans-serif; white-space: nowrap; }
+    #r10-ok svg { width: 34px; height: 34px; }
+    .r10-dot { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; }
+    /* the cursor (drag) */
+    #r10-cg { left: 870px; top: 694px; width: 0; height: 0; }
+    #r10-cur { position: absolute; left: -8.4px; top: -9.8px; width: 50px; height: 50px; transform-origin: 8.4px 9.8px; filter: drop-shadow(0 6px 8px rgba(10,13,44,.35)); }
+    #r10-cur svg { width: 50px; height: 50px; display: block; }
+  </style>
+  <div id="root" data-composition-id="r10" data-width="1080" data-height="1920">
+    <div class="r10-a" id="r10-panel">
+      <div class="r10-ptag" id="r10-ptag">CONTOH PEMAKAIAN</div>
+      <div class="r10-a" id="r10-dz">
+        <div class="r10-a" id="r10-dzb"></div>
+        <div class="r10-a" id="r10-idle">
+          <div class="r10-a" id="r10-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#3a6fe0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 13v8"/><path d="m8 17 4-4 4 4"/></svg></div>
+          <div class="r10-a" id="r10-t1">Tarik file ke sini</div>
+          <div class="r10-a" id="r10-t2">atau pilih dari perangkat</div>
+          <div class="r10-a" id="r10-fmt"><span>MP4</span><span>JPG</span><span>PDF</span></div>
+        </div>
+        <div class="r10-a" id="r10-hint"><svg viewBox="0 0 24 24" fill="none" stroke="#3a6fe0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Lepas untuk upload</div>
+        <div class="r10-a" id="r10-rip"></div>
+        <div id="r10-rowslot"></div>
+        <div class="r10-a" id="r10-pb"><div id="r10-pbf"></div><div id="r10-pbg"></div></div>
+        <div class="r10-a" id="r10-pl"><b>Mengunggah…</b><span id="r10-pct">0%</span></div>
+        <div id="r10-dots"></div>
+        <div class="r10-a" id="r10-ok"><svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="15" fill="rgba(255,255,255,.24)"/><path id="r10-okk" d="M10 17.5 L15 22.5 L24.5 12.5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="22" stroke-dashoffset="22"/></svg>Terkirim</div>
+      </div>
+    </div>
+    <div class="r10-a" id="r10-bigwrap"></div>
+    <div class="r10-a" id="r10-badge">10</div>
+    <div class="r10-a" id="r10-name"><span class="r10-grad" id="r10-nm">Upload</span></div>
+    <div class="r10-a" id="r10-of">animasi 10 dari 12</div>
+    <div id="r10-flyslot"></div>
+    <div class="r10-a" id="r10-cg"><div id="r10-cur"><svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#0a0d2c" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+  </div>
   <script>
     (function () {
+      // ROUND 10 — UPLOAD ("Sepuluh, upload. Buat momen kirim file.")
+      // ROUND KIT (shared by r1–r12, copied from r1): the round's card LIFTS OUT of its strip chip and grows into a 300 px card on the
+      // left; the number badge pops on the spoken number, the name rises on the spoken name; the example panel ("CONTOH PEMAKAIAN")
+      // swings in on the right. EXIT (last 0.42 s): the panel folds away, the title drops, the big card flies back into its chip.
+      // EXAMPLE: right after "Upload," a file card ("video_final.mp4") is picked up above the panel and DRAGGED into the dashed
+      // dropzone (the zone lights blue: "Lepas untuk upload") · "buat": drop (squash + ripple) · "momen": the upload bar crawls
+      // 0 → 100 % · "kirim": done → green, ✓ on the file, "Terkirim" pill pops (holds through "file." while the panel folds).
+      const K = 9, R = window.ROUNDS[K], MA = window.MicroAnim, ST = R.start, D = R.dur;
+      const W = (txt) => { const w = R.words.find((x) => x[0] === txt); return (w ? w[1] : ST) - ST; };   // local time of a word of this round
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 2.723);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tNum = R.tNum - ST, tName = R.tName - ST, tUse = R.tUse - ST, tOut = D - 0.42;
+      // ---- kit: big card out of the chip
+      const BIG = 300, BX = 80, BY = 512, chip = MA.STRIP.chip(K), cs = MA.STRIP.size / BIG;
+      const big = MA.mount($("r10-bigwrap"), R.type, { size: BIG, label: true, id: "r10-bigcard" });
+      big.el.style.left = BX + "px"; big.el.style.top = BY + "px";
+      I(big.el, { x: chip.x - BX, y: chip.y - BY, scale: cs, rotation: 0, opacity: 1, transformOrigin: "0% 0%" });
+      ft(big.el, { x: chip.x - BX, y: chip.y - BY, scale: cs, rotation: 0 }, { x: 0, y: 0, scale: 1, rotation: 0, duration: Math.max(0.45, tName - 0.02), ease: "expo.inOut" }, 0.02);
+      ft(big.el, { rotation: 0 }, { rotation: -3, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tName);
+      ft(big.el, { x: 0, y: 0, scale: 1 }, { x: chip.x - BX, y: chip.y - BY, scale: cs, duration: 0.36, ease: "expo.in" }, tOut);
+      // ---- kit: number badge + name + "x dari 12"
+      const badge = $("r10-badge"), nm = $("r10-nm"), of = $("r10-of");
+      I(badge, { opacity: 0, scale: 0.3, rotation: -90 });
+      ft(badge, { opacity: 0, scale: 0.3, rotation: -90 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2)" }, tNum - 0.08);
+      I(nm, { yPercent: 110 }); ft(nm, { yPercent: 110 }, { yPercent: 0, duration: 0.42, ease: "power4.out" }, tName - 0.12);
+      I(of, { opacity: 0, x: -14 }); ft(of, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, tName + 0.05);
+      ft(badge, { opacity: 1, scale: 1, rotation: 0 }, { opacity: 0, scale: 0.6, rotation: 0, duration: 0.28, ease: "power2.in" }, tOut);
+      ft(nm, { yPercent: 0 }, { yPercent: 110, duration: 0.28, ease: "power3.in" }, tOut);
+      ft(of, { opacity: 1, x: 0 }, { opacity: 0, x: 0, duration: 0.2, ease: "power2.in" }, tOut);
+      // ---- kit: the example panel swings in (3D hinge from its left edge) and folds away
+      const panel = $("r10-panel");
+      I(panel, { opacity: 0, rotationY: -70, x: -30, transformPerspective: 1400 });
+      ft(panel, { opacity: 0, rotationY: -70, x: -30 }, { opacity: 1, rotationY: 0, x: 0, duration: 0.55, ease: "expo.out", transformPerspective: 1400 }, tName - 0.05);
+      ft(panel, { opacity: 1, rotationY: 0, x: 0 }, { opacity: 0, rotationY: 60, x: 40, duration: 0.34, ease: "power3.in", transformPerspective: 1400 }, tOut - 0.04);
+      // ===================== r10 UPLOAD: drag a file into the dropzone → upload bar → "Terkirim"
+      const tBuat = W("buat"), tMomen = W("momen"), tKirim = W("kirim");
+      const FILE = (id) => `<div class="r10-a r10-file" id="${id}"><div class="r10-fi"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/>
+          <path d="M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z" fill="#ffffff"/></svg></div>
+          <b>video_final.mp4</b><em>48 MB · MP4</em>
+          <svg class="r10-fs" viewBox="0 0 44 44"><circle id="${id}-c" cx="22" cy="22" r="19" fill="#ffffff" stroke="#dbe4f3" stroke-width="3"/>
+          <path id="${id}-k" d="M13.5 22.5 L19.5 28.5 L31 16.5" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="28" stroke-dashoffset="28"/></svg></div>`;
+      $("r10-rowslot").outerHTML = FILE("r10-row");
+      $("r10-flyslot").outerHTML = FILE("r10-fly");
+      const fly = $("r10-fly"), cg = $("r10-cg"), cur = $("r10-cur"), row = $("r10-row");
+      // the file is picked up above the panel (grab point 930,440 → lands at the dropzone row, grab point 870,694)
+      const DX = 60, DY = -254, tPick = tName + 0.07, tDrag = tPick + 0.16, tDrop = tBuat;
+      I(fly, { x: DX, y: DY, scale: 0.5, rotation: -6, opacity: 0 }); I(cg, { x: DX, y: DY, opacity: 0 }); I(cur, { scale: 1 });
+      ft(fly, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 0.62, duration: 0.16, ease: "back.out(2.4)" }, tPick);
+      ft(cg, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "none" }, tPick);
+      ft(cur, { scale: 1 }, { scale: 0.82, duration: 0.06, ease: "power2.out", yoyo: true, repeat: 1 }, tPick + 0.02);   // grab
+      ft(fly, { x: DX }, { x: 0, duration: tDrop - tDrag, ease: "power2.out" }, tDrag);
+      ft(fly, { y: DY }, { y: 0, duration: tDrop - tDrag, ease: "power3.inOut" }, tDrag);
+      ft(fly, { rotation: -6, scale: 0.62 }, { rotation: 0, scale: 1, duration: tDrop - tDrag, ease: "power2.inOut" }, tDrag);
+      ft(cg, { x: DX }, { x: 0, duration: tDrop - tDrag, ease: "power2.out" }, tDrag);
+      ft(cg, { y: DY }, { y: 0, duration: tDrop - tDrag, ease: "power3.inOut" }, tDrag);
+      // hover: the zone lights up, the idle copy steps aside, "Lepas untuk upload"
+      const dz = $("r10-dz"), dzb = $("r10-dzb"), idle = $("r10-idle"), hint = $("r10-hint"), tHov = tDrag + 0.14;
+      I(dz, { backgroundColor: "#f7f9fe" }); I(dzb, { borderColor: "#b9c6dc", borderStyle: "dashed" }); I(idle, { opacity: 1, y: 0, scale: 1 });
+      I(hint, { opacity: 0, y: 12 });
+      tl.set(dzb, { borderStyle: "solid" }, tHov);
+      ft(dzb, { borderColor: "#b9c6dc" }, { borderColor: "#3a6fe0", duration: 0.18, ease: "power1.out" }, tHov);
+      ft(dz, { backgroundColor: "#f7f9fe" }, { backgroundColor: "#eef4ff", duration: 0.2, ease: "power1.out" }, tHov);
+      ft(idle, { opacity: 1, y: 0, scale: 1 }, { opacity: 0, y: 16, scale: 0.96, duration: 0.18, ease: "power2.in" }, tHov - 0.02);
+      ft(hint, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.2, ease: "power3.out" }, tHov + 0.08);
+      ft(hint.querySelector("svg"), { y: 0 }, { y: 5, duration: 0.12, ease: "sine.inOut", yoyo: true, repeat: 1 }, tHov + 0.14);
+      ft(hint, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.in" }, tDrop);
+      // "buat": DROP — the flying card hands over to the identical card inside the zone (same spot, same scale) → squash + ripple
+      I(row, { opacity: 0, scaleX: 1, scaleY: 1 });
+      tl.set(row, { opacity: 1 }, tDrop - 0.005);
+      ft(fly, { opacity: 1 }, { opacity: 0, duration: 0.08, ease: "power1.in" }, tDrop);
+      ft(row, { scaleX: 1, scaleY: 1 }, { scaleX: 1.03, scaleY: 0.94, duration: 0.07, ease: "power2.out", yoyo: true, repeat: 1 }, tDrop);
+      ft(cur, { scale: 1 }, { scale: 0.8, duration: 0.06, ease: "power2.out" }, tDrop - 0.06);
+      ft(cur, { scale: 0.8 }, { scale: 1, duration: 0.16, ease: "back.out(3)" }, tDrop);
+      ft(cg, { x: 0, y: 0, opacity: 1 }, { x: 70, y: 56, opacity: 0, duration: 0.26, ease: "power2.in" }, tDrop + 0.1);
+      const rip = $("r10-rip"); I(rip, { opacity: 0, scale: 1 });
+      ft(rip, { opacity: 0.85, scale: 1 }, { opacity: 0, scale: 1.12, duration: 0.42, ease: "power2.out" }, tDrop);
+      // "momen": the upload bar crawls 0 → 100 % (per-frame % sets on the same quad-out curve as the bar)
+      const pb = $("r10-pb"), pl = $("r10-pl"), pbf = $("r10-pbf"), pbg = $("r10-pbg"), pct = $("r10-pct");
+      [[pb, 0.06], [pl, 0.09]].forEach(([e, d]) => { I(e, { opacity: 0, y: 10 }); ft(e, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.2, ease: "power3.out" }, tDrop + d); });
+      const p0 = tDrop + 0.1, p1 = Math.max(p0 + 0.3, tKirim - 0.09);
+      I(pbf, { xPercent: -100 }); ft(pbf, { xPercent: -100 }, { xPercent: 0, duration: p1 - p0, ease: "power1.out" }, p0);
+      I(pct, { textContent: "0%" });
+      for (let f = 1; p0 + f / 30 < p1; f++) { const u = f / 30 / (p1 - p0); tl.set(pct, { textContent: Math.round(100 * (1 - (1 - u) * (1 - u))) + "%" }, p0 + f / 30); }
+      tl.set(pct, { textContent: "100%" }, p1);
+      // "kirim": done — green bar, green zone, ✓ on the file, the "Terkirim" pill pops with a little burst
+      const tDone = p1 + 0.01, rc = $("r10-row-c"), rk = $("r10-row-k"), rs = row.querySelector(".r10-fs");
+      I(pbg, { opacity: 0 }); ft(pbg, { opacity: 0 }, { opacity: 1, duration: 0.14, ease: "power1.out" }, tDone);
+      ft(dzb, { borderColor: "#3a6fe0" }, { borderColor: "#2da44e", duration: 0.18, ease: "power1.out" }, tDone);
+      ft(dz, { backgroundColor: "#eef4ff" }, { backgroundColor: "#effaf2", duration: 0.2, ease: "power1.out" }, tDone);
+      I(rc, { attr: { fill: "#ffffff", stroke: "#dbe4f3" } }); tl.set(rc, { attr: { fill: "#2da44e", stroke: "#2da44e" } }, tDone);
+      I(rk, { attr: { "stroke-dashoffset": 28 } }); ft(rk, { attr: { "stroke-dashoffset": 28 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.2, ease: "power2.out" }, tDone + 0.02);
+      I(rs, { scale: 1, transformOrigin: "50% 50%" }); ft(rs, { scale: 1 }, { scale: 1.25, duration: 0.09, ease: "power2.out", yoyo: true, repeat: 1 }, tDone);
+      ft(pl, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.in" }, tDone);
+      const ok = $("r10-ok"), okk = $("r10-okk"), tOk = tDone + 0.03;
+      I(ok, { opacity: 0, scale: 0.55, y: 10 });
+      ft(ok, { opacity: 0, scale: 0.55, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.36, ease: "back.out(2.2)" }, tOk);
+      I(okk, { attr: { "stroke-dashoffset": 22 } }); ft(okk, { attr: { "stroke-dashoffset": 22 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.2, ease: "power2.out" }, tOk + 0.1);
+      const CX = 269, CY = 244, DOTC = ["#2da44e", "#3a6fe0", "#f4b400", "#2da44e", "#3a6fe0", "#f4b400", "#2da44e", "#3a6fe0"];
+      $("r10-dots").innerHTML = DOTC.map((c, i) => `<i class="r10-dot" id="r10-d${i}" style="left:${CX}px;top:${CY}px;background:${c}"></i>`).join("");
+      DOTC.forEach((_, i) => {
+        const a = (i / DOTC.length) * Math.PI * 2 + 0.3, rx = 168 * Math.cos(a), ry = 62 * Math.sin(a), d = $("r10-d" + i);
+        I(d, { x: rx * 0.55, y: ry * 0.55, opacity: 0, scale: 1 });
+        ft(d, { x: rx * 0.55, y: ry * 0.55, opacity: 1, scale: 1 }, { x: rx, y: ry, opacity: 0, scale: 0.3, duration: 0.42, ease: "power2.out" }, tOk + 0.06);
+      });
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      const drawBig = (tg) => big.draw(Math.max(0, tg - R.tName));
+      drawBig(ST);
+      window.addEventListener("hf-seek", (e) => drawBig(e.detail.time + (window.__T0 || 0)));
       window.__timelines = window.__timelines || {};
       window.__timelines["r10"] = tl;
     })();

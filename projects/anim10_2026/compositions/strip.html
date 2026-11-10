@@ -1,0 +1,78 @@
+<template>
+  <style>
+    #sp-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #sp-wrap { position: absolute; left: 0; top: 330px; width: 1080px; height: 110px; }
+    .sp-c { position: absolute; top: 0; width: 72px; height: 72px; perspective: 420px; }
+    .sp-f { position: absolute; inset: 0; border-radius: 18px; overflow: hidden; backface-visibility: hidden; }
+    .sp-f.lk { background: linear-gradient(160deg, rgba(26,44,96,.88), rgba(8,14,46,.92)); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12), 0 10px 22px -10px rgba(0,0,0,.6); }
+    .sp-f.lk b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 700 27px/1 Poppins, sans-serif; color: rgba(227,237,250,.62); letter-spacing: -0.02em; }
+    .sp-f.lk i { position: absolute; right: 7px; top: 7px; width: 13px; height: 13px; background: rgba(227,237,250,.42);
+      -webkit-mask: url(assets/icons/lucide-lock.svg) center / contain no-repeat; mask: url(assets/icons/lucide-lock.svg) center / contain no-repeat; }
+    .sp-f.th { transform: rotateY(180deg); background: #0b1440 center / cover no-repeat; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18), 0 10px 22px -10px rgba(0,0,0,.6); }
+    .sp-f.th b { position: absolute; left: 5px; bottom: 5px; min-width: 21px; height: 19px; padding: 0 5px; border-radius: 10px; background: rgba(8,14,46,.82);
+      font: 700 12px/19px Poppins, sans-serif; color: #fff; text-align: center; }
+    .sp-ring { position: absolute; left: -7px; top: -7px; width: 86px; height: 86px; border-radius: 24px; border: 3px solid #01ccf7; opacity: 0;
+      box-shadow: 0 0 18px rgba(1,204,247,.55), inset 0 0 12px rgba(1,204,247,.25); }
+    .sp-q { position: absolute; inset: 0; border-radius: 18px; opacity: 0; box-shadow: 0 0 0 2px #01ccf7, 0 0 26px rgba(1,204,247,.7); }
+    #sp-track { position: absolute; left: 135px; top: 88px; width: 810px; height: 4px; border-radius: 2px; background: rgba(227,237,250,.14); overflow: hidden; }
+    #sp-fill { position: absolute; left: 0; top: 0; height: 4px; width: 810px; border-radius: 2px; background: linear-gradient(90deg, #6adfff, #01ccf7);
+      transform-origin: 0 50%; transform: scaleX(0); box-shadow: 0 0 10px rgba(1,204,247,.8); }
+  </style>
+  <div id="sp-root" data-composition-id="strip" data-width="1080" data-height="1920">
+    <div id="sp-wrap"><div id="sp-chips"></div><div id="sp-track"><div id="sp-fill"></div></div></div>
+  </div>
+  <script>
+    (function () {
+      // Persistent STYLE STRIP: ten chips (one per animation style) under the logo. They drop in LOCKED on "Tahan sampai nomor 10"
+      // (chip 10 glows as the teaser), and each round FLIPS its chip open to a thumbnail of the robot in that style right as the
+      // stage sweep lands on the style name; the active chip lifts with a cyan ring and the progress line fills to it.
+      // s12 (CTA) takes the ten thumbnails over at its first frame (exact copies), so the strip hides there.
+      // Pure function of global time (hf-seek, __T0 for chunked renders).
+      const R = window.ROUNDS, H = window.HOOK, C = window.CTA, D = window.TOTAL;
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const e3 = (u) => { u = one(u); return 1 - Math.pow(1 - u, 3); };
+      const io = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const back = (u) => { u = one(u); const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };
+      const W = 72, G = 10, X0 = (1080 - (10 * W + 9 * G)) / 2;
+      window.STRIP = { W, G, X0, top: 330 };   // shared with s12 (hand-over)
+      document.getElementById("sp-chips").innerHTML = R.map((r, i) => `<div class="sp-c" id="sp-c${i}" style="left:${X0 + i * (W + G)}px">
+          <div class="sp-ring" id="sp-r${i}"></div>
+          <div class="sp-f lk" id="sp-l${i}"><b>${r.k}</b><i></i></div>
+          <div class="sp-f th" id="sp-t${i}" style="background-image:url(assets/thumbs/${r.style}.png)"><b>${r.k}</b></div>
+          ${i === 9 ? '<div class="sp-q" id="sp-q"></div>' : ""}</div>`).join("");
+      const $ = (id) => document.getElementById(id);
+      const set = (el, k, v) => { if (el.style[k] !== v) el.style[k] = v; };
+      const wrap = $("sp-wrap"), fill = $("sp-fill");
+      const T_IN = H.tTahan - 0.05;
+      function draw(t) {
+        if (t < T_IN || t >= C.start) { set(wrap, "opacity", "0"); return; }
+        set(wrap, "opacity", "1");
+        let prog = 0;
+        R.forEach((r, i) => {
+          const c = $("sp-c" + i);
+          const drop = back((t - (T_IN + i * 0.045)) / 0.42);                  // drop in, left to right
+          const tf = r.sweep[1] - 0.08;                                        // flip open right as the sweep lands
+          const flip = io((t - tf) / 0.36);
+          const act = one((t - tf + 0.05) / 0.25) * (1 - one((t - (r.start + r.dur) + 0.12) / 0.25));
+          const lift = -8 * e3(act), sc = (0.6 + 0.4 * drop) * (1 + 0.16 * e3(act));
+          set(c, "transform", `translateY(${(lift - 46 * (1 - drop)).toFixed(2)}px) scale(${sc.toFixed(4)})`);
+          set(c, "opacity", one(drop * 1.6).toFixed(3));
+          set($("sp-l" + i), "transform", `rotateY(${(180 * flip).toFixed(2)}deg)`);
+          set($("sp-t" + i), "transform", `rotateY(${(180 * flip - 180).toFixed(2)}deg)`);
+          set($("sp-r" + i), "opacity", act.toFixed(3));
+          if (t >= tf) prog = i + io((t - tf) / 0.4);
+        });
+        // chip 10 = the teaser: glows on "nomor 10" and keeps a soft pulse until its round
+        const q = $("sp-q"), q0 = H.t10b - 0.05, qEnd = R[9].sweep[1] - 0.1;
+        const pulse = t < q0 ? 0 : t < qEnd ? (0.55 + 0.45 * Math.cos((t - q0) * 2 * Math.PI / 1.1)) * one((t - q0) / 0.25) * (1 - one((t - qEnd + 0.3) / 0.3)) : 0;
+        set(q, "opacity", pulse.toFixed(3));
+        set(fill, "transform", `scaleX(${(prog <= 0 ? 0 : Math.min(1, (prog * (W + G) + W) / 810)).toFixed(4)})`);
+      }
+      draw(0);
+      window.addEventListener("hf-seek", (e) => draw(e.detail.time + (window.__T0 || 0)));
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02);
+      window.__timelines["strip"] = tl;
+    })();
+  </script>
+</template>

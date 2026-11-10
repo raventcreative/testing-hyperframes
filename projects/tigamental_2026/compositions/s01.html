@@ -65,22 +65,27 @@
       background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
     /* s01 HOOK: the target "100" drawn as a streak board (pixel digits made of cells) */
-    #s01-mx { left: 200px; top: 372px; width: 673px; height: 273px; transform-origin: 0 0; }
+    #s01-hk { left: 152px; top: 318px; width: 776px; height: 472px; transform-origin: 0 0; }
+    #s01-hkc { position: absolute; left: 0; top: 0; width: 776px; height: 472px; border-radius: 34px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 40px 70px -40px rgba(10,13,44,.45), 0 0 0 1.5px rgba(10,13,44,.06); }
+    #s01-chip { left: 30px; top: 26px; height: 36px; padding: 0 16px 0 10px; border-radius: 18px; background: #eef2f9; display: flex; align-items: center; gap: 8px;
+      font: 700 15px/36px Poppins, sans-serif; letter-spacing: .16em; color: #5d6f8f; white-space: nowrap; }
+    #s01-chip svg { width: 20px; height: 20px; fill: none; stroke: #294b77; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    #s01-mx { left: 52px; top: 62px; width: 673px; height: 273px; }
     #s01-mx svg { position: absolute; left: 0; top: 0; width: 673px; height: 273px; overflow: visible; }
-    #s01-hari { left: 240px; top: 664px; width: 600px; text-align: center; font: 700 70px/80px Poppins, sans-serif; letter-spacing: .32em; text-indent: .32em;
-      transform-origin: 50% 0; background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #s01-hari { left: 88px; top: 346px; width: 600px; text-align: center; font: 700 60px/66px Poppins, sans-serif; letter-spacing: .34em; text-indent: .34em;
+      background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
   </style>
   <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
     <div id="s01-cam">
-      <div class="s01-a" id="s01-mx"></div>
-      <div class="s01-a" id="s01-hari">HARI</div>
+      <div class="s01-a" id="s01-hk"><div id="s01-hkc"></div><div class="s01-a" id="s01-chip"></div><div class="s01-a" id="s01-mx"></div><div class="s01-a" id="s01-hari">HARI</div></div>
     </div>
   </div>
   <script>
     (function () {
       // s01 HOOK (0–4.533) "Tiga orang, target yang sama. Posting konten 100 hari."
-      // Frame 0: the target "100" drawn as a streak board (17×7 cells, navy digits) with a goal flag planted on it, "HARI" under it,
-      // three grey people badges (ORANG 1/2/3) in a row below · "Tiga orang,": the badges pop 1-2-3 and fly into their lanes (left column)
+      // Frame 0: a white TARGET card: "100" drawn as a streak board (17×7 cells, navy digits) with a goal flag planted on it, "HARI" under
+      // it, three grey people badges (ORANG 1/2/3) sitting on its bottom edge · "Tiga orang,": the badges pop 1-2-3 and fly into their lanes (left column)
       // while the "100" slides right · "target yang sama.": the flag sways, then SPLITS into three flags that fly to the end of each lane
       // · "Posting konten": three white lane cards wipe in over the "100" and each 100-cell board cascades in column by column, finishing on
       // "100" · "hari.": counters "HARI 0" + the today cell (send icon) pop.
@@ -230,17 +235,18 @@
         <linearGradient id="s01-shg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#cfe0ff" stop-opacity=".62"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
         <clipPath id="s01-mc">${clip}</clipPath></defs>${rects}
         <rect id="s01-sh" x="-240" y="-10" width="200" height="293" fill="url(#s01-shg)" clip-path="url(#s01-mc)"/></svg>`;
-      const mx = $("s01-mx"), hari = $("s01-hari"), sh = $("s01-sh");
-      I(mx, { x: 0, y: 0, scale: 1, opacity: 1 }); I(hari, { x: 0, y: 0, scale: 1, opacity: 1 });
+      $("s01-chip").innerHTML = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>TARGET · POSTING KONTEN`;
+      const hk = $("s01-hk"), sh = $("s01-sh");
+      I(hk, { x: 0, y: 0, scale: 1, opacity: 1 });
       I(sh, { attr: { x: -240 } }); ft(sh, { attr: { x: -240 } }, { attr: { x: 720 }, duration: 1.0, ease: "power1.inOut" }, 0.02);
       const tT = L("Tiga"), tO = L("orang,"), tTg = L("target"), tY = L("yang"), tSa = L("sama."), tP = L("Posting"), tK = L("konten"), t100 = L("100"), tH = L("hari.");
       // ---- HOOK positions of the lane elements (lanes are flat & untransformed in s01, so offsets are screen px)
       const CX = [300, 540, 780];
       const kH = 2.8, kM = 2.464;                                   // flag scale on the HOOK / after the "100" moved
-      const FH = { x: 766 - 8 * kH, y: 372 - 27.5 * kH }, FM = { x: 788 - 8 * kM, y: 420 - 27.5 * kM };   // flag element origin (pole base on the "0")
+      const FH = { x: 770 - 8 * kH, y: 380 - 27.5 * kH }, FM = { x: 788 - 8 * kM, y: 420 - 27.5 * kM };   // flag element origin (pole base on the "0")
       const tMove = tO + 0.18;
       R.forEach((r, i) => {
-        const dx = CX[i] - 38 - 102, dy = 772 - (LT[i] + 30);
+        const dx = CX[i] - 38 - 102, dy = 754 - (LT[i] + 30);
         idI(r, "grey"); boardI(r, 0);
         gsap.set(r.ring, { boxShadow: "0 0 0 3px #b5c1d6" });
         I(r.badge, { x: dx, y: dy, scale: 1 }); I(r.pill, { x: dx, y: dy }); I(r.ring, { x: dx, y: dy, opacity: 0, scale: 1 });
@@ -279,12 +285,10 @@
       ft(f0, { rotation: 0 }, { rotation: -10, duration: 0.14, ease: "power2.out" }, tTg - 0.03);
       ft(f0, { rotation: -10 }, { rotation: 7, duration: 0.22, ease: "sine.inOut" }, tTg + 0.11);
       ft(f0, { rotation: 7 }, { rotation: 0, duration: 0.24, ease: "power2.out" }, tTg + 0.33);
-      // "Tiga orang,": the "100" slides right to make room for the people column
-      ft(mx, { x: 0, y: 0, scale: 1 }, { x: 90, y: 48, scale: 0.88, duration: 0.62, ease: "power3.inOut" }, tMove);
-      ft(hari, { x: 0, y: 0, scale: 1 }, { x: 46, y: 10, scale: 0.88, duration: 0.62, ease: "power3.inOut" }, tMove);
-      // "Posting": the "100" hands over to the boards (fades under the card wipe)
-      ft(mx, { opacity: 1 }, { opacity: 0, duration: 0.42, ease: "power2.in" }, tP - 0.06);
-      ft(hari, { opacity: 1 }, { opacity: 0, duration: 0.32, ease: "power2.in" }, tP - 0.1);
+      // "Tiga orang,": the target card slides right to make room for the people column
+      ft(hk, { x: 0, y: 0, scale: 1 }, { x: 92.2, y: 47.4, scale: 0.88, duration: 0.62, ease: "power3.inOut" }, tMove);
+      // "Posting": the target hands over to the boards (fades under the lane-card wipe)
+      ft(hk, { opacity: 1 }, { opacity: 0, duration: 0.42, ease: "power2.in" }, tP - 0.06);
       tl.set({}, {}, D - 0.01);
       (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};

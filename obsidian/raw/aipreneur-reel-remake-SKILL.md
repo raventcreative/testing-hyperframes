@@ -130,6 +130,8 @@ Playwright + static server (`python3 -m http.server`). Render 3D live (robot/Sty
 - **Jangan pakai onUpdate** (gak reliable saat seek): counter/ngetik pakai `tl.set` per nilai. Gerak stop-motion = waktu dikuantisasi (12 fps).
 - fromTo dengan from-value sebagian → properti lain mulai dari state t=0 (elemen loncat). **Selalu isi from-value lengkap.**
 - Satu tween `attr`/`clip-path` per properti; jangan `svgOrigin` di SVG yang di-transform CSS.
+- **Satu elemen, satu set di t=0.** Kalau `I()` dipanggil 2× buat elemen yang sama dengan nilai beda (mis. state akhir lalu state awal hook), PREVIEW benar tapi RENDER bisa pakai urutan lain → hook rusak (kejadian di V4: lajur muncul dari frame 0). Fix: `I()` menggabungkan semua set t=0 per elemen (`_I0` Map) — sekarang standar. Cek tiap reel: `scratchpad/conflicts.cjs <port> <project> <ids…>`, lalu bandingkan frame MP4 vs snapshot di awal tiap scene.
+- Disk cloud penuh diam-diam (`~/.cache/hyperframes/history` bisa 9 GB) → render gagal "Low disk space". Hapus history project yang sudah selesai.
 - **GSAP baca `textContent` yang mirip angka sebagai angka**: `tl.set(el, { textContent: "10.000" })` tampil "10", "1.200" jadi "1.2". Tempel karakter tak terlihat U+2060 (`"10.000⁠"`). Integer polos, teks berhuruf/spasi/%/× aman.
 - Caption: cek lebar tiap chunk (≤ 930 px navy / host terang) sebelum build; kalau wrap, tambah cut di `SC` timing.py. Kata yang sama muncul 2× dengan display beda → `FIXI` per index raw, jangan `FIX` (kena semua kemunculan).
 - Deterministik: no `Math.random` (PRNG seed), no `Date`, no CSS animation/transition, no rAF.

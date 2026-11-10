@@ -1,7 +1,6 @@
-"""Synthesised SFX bed for the BANKANIM reel (no samples, no downloads): an editing app whose clips fall off (thuds), a code window
-that types and compiles, a flash + 12 card pops, a spotlight per named animation (ding / tick / rise / bell / pops), a silky wave,
-copy click + paste + typing + Enter + birth chime, live-edit keystrokes, two "nope" stamps, the CTA (bundle, EDIT typing, heart, plane,
-DM chime). Deterministic (seeded). Writes assets/audio/sfx.wav (48 kHz mono, full reel length).
+"""Synthesised SFX bed for the PROMPTBUILDER reel (no samples, no downloads): a STOP stamp + price strikes, 6 prompt blocks snapping in,
+a calendar flip + collapse on "capek", Claude chime, the 5-step rail (tick on each step, check on each done), paste / send / build /
+typing / copy clicks, the s10 tear + crumple, the CTA (MASTER typing, heart, plane, DM chime). Deterministic. Writes assets/audio/sfx.wav.
 Run: python3 tools/sfx.py ."""
 import json, sys, wave
 from pathlib import Path
@@ -131,77 +130,66 @@ def bell(dur=0.9):
     x *= 0.75 + 0.25 * np.sin(2 * np.pi * 11 * t)
     return x / np.abs(x).max()
 
-# --- s01: the editing app, its clips fall, the code window types, Claude stamps
+st = lambda i: S[i]["start"]
+# --- s01 hook: STOP stamp, prices struck, blocks build the tool, GRATIS stamp
 put(0.02, pop(500, 760, 0.08), 0.08)
-for k in range(9): put(0.05 + k * 0.1, tick(0.015, 5200), 0.035)               # playhead scrub
-put(wt("nggak") - 0.02, buzz(0.18), 0.03)
-for k in range(13): put(wt("After Effects,") + 0.05 + (k % 5) * 0.05 + (k // 5) * 0.03 + 0.4, pop(260 - 8 * k, 110, 0.1), 0.09)
-put(wt("After Effects,") + 0.02, whoosh(0.5, 2200, 500, 1.4, 0.3), W * 0.6)
-put(wt("semuanya") - 0.3, whoosh(0.42, 600, 1800, 1.2, 0.5), W * 0.5)
-put(wt("semuanya") - 0.06, whoosh(0.5, 300, 2600, 1.1, 0.55), W * 0.8)
-typing(wt("semuanya") + 0.2, wt("Claude,") - 0.1, 0.09, 18)
-put(wt("Claude,") - 0.02, boom(0.5, 140, 60), 0.22); put(wt("Claude,") + 0.06, chime((1318.5, 1975.5, 2637), 0.9), 0.07)
-# --- s02: compile → flash → 12 cards → filed into the strip
-put(wt("Termasuk") - 0.1, rise(0.45, 400, 1600), 0.05)
-put(wt("dua belas") - 0.3, whoosh(0.3, 2600, 400, 1.6, 0.8), W * 0.7)
-put(wt("dua belas") - 0.02, boom(0.35, 220, 90), 0.16)
-for k in range(12): put(wt("dua belas") + 0.04 + k * 0.03, pop(700 + 40 * k, 1100 + 40 * k, 0.05), 0.06)
-put(wt("ini.") - 0.05, whoosh(0.3, 900, 2200, 1.5, 0.4), W * 0.3)
-put(wt("Aku") - 0.05, whoosh(0.8, 500, 2600, 1.2, 0.4), W * 0.6)
-for k in range(12): put(wt("Aku") + 0.45 + k * 0.045, tick(0.02, 3000 + 80 * k), 0.06)
-# --- the 12 rounds
-ROUNDS = json.loads((P / "vendor/rounds.js").read_text().split("window.ROUNDS = ", 1)[1].split(";\n", 1)[0])
-def bellsnd(dur=0.8):
-    n = int(dur * SR); t = np.arange(n) / SR; x = np.zeros(n)
-    for k, f in enumerate((1568, 2349, 3136)): x += np.sin(2 * np.pi * f * t) * np.exp(-t * (4 + 2 * k)) * (0.8 ** k)
-    x *= 0.75 + 0.25 * np.sin(2 * np.pi * 11 * t); return x / np.abs(x).max()
-for i, r in enumerate(ROUNDS):
-    st, end, ty = r["start"], r["start"] + r["dur"], r["type"]
-    put(st + 0.02, whoosh(0.45, 600, 2400, 1.3, 0.5), W * 0.55)                  # the card lifts out of its chip
-    put(r["tNum"] - 0.06, boom(0.22, 220, 110), 0.12)                             # number badge
-    put(r["tName"] - 0.02, pop(900, 1400, 0.06), 0.09)                            # lands on the name
-    if ty == "check": put(r["tName"] + 0.3, chime((1760, 2637), 0.6), 0.05)
-    if ty == "loading":
-        for k in range(8): put(r["tUse"] + k * 0.12, tick(0.018, 3800), 0.04)
-    if ty == "counter": put(r["tUse"] - 0.1, rise(0.8, 400, 1500), 0.04)
-    if ty == "bell": put(r["tName"] + 0.1, bellsnd(0.8), 0.05); put(r["tUse"] + 0.3, bellsnd(0.6), 0.04)
-    if ty == "chart":
-        for k in range(4): put(r["tUse"] + 0.5 + k * 0.07, pop(500 + 120 * k, 800 + 120 * k, 0.06), 0.07)
-    if ty == "toggle": put(r["tUse"] + 0.9, tick(0.03, 1800), 0.14); put(r["tUse"] + 1.4, tick(0.03, 1500), 0.12)
-    if ty == "heart": put(r["tUse"] + 0.1, pop(400, 900, 0.1), 0.14); put(r["tUse"] + 0.15, chime((2093, 2637), 0.5), 0.04)
-    if ty == "ring": put(r["tUse"] - 0.1, rise(0.9, 350, 1300), 0.04)
-    if ty == "typing": typing(r["tUse"] + 0.2, r["tUse"] + 0.75, 0.06, 14); put(r["speechEnd"] - 0.25, pop(800, 1300, 0.06), 0.08)
-    if ty == "upload": put(r["tUse"] - 0.05, whoosh(0.4, 400, 2800, 1.3, 0.5), W * 0.5); put(r["speechEnd"] - 0.1, chime((1568, 2093), 0.5), 0.05)
-    if ty == "search": typing(r["tUse"] - 0.3, r["tUse"] + 0.4, 0.06, 18); put(r["speechEnd"] - 0.1, pop(1200, 1800, 0.05), 0.08)
-    if ty == "stars":
-        for k in range(5): put(r["tUse"] - 0.2 + k * 0.09, pop(900 + 150 * k, 1300 + 150 * k, 0.05), 0.06)
-    put(end - 0.42, whoosh(0.35, 2200, 700, 1.4, 0.3), W * 0.45)                  # exit back into the chip
-    put(end - 0.08, tick(0.025, 3200), 0.08)                                       # chip comes back with a ✓
-# strip grows back into the GRID
-G0 = ROUNDS[-1]["start"] + ROUNDS[-1]["dur"] - 0.5
-put(G0, whoosh(0.5, 400, 2000, 1.1, 0.5), W * 0.6)
-for k in range(12): put(G0 + 0.1 + k * 0.03, pop(700 + 30 * k, 1000 + 30 * k, 0.04), 0.045)
-# --- s05: copy → paste → type → Enter → a new card is born
-put(wt("Caranya") - 0.05, whoosh(0.4, 2000, 600, 1.3, 0.4), W * 0.5)
-put(wt("Copy") - 0.02, tick(0.025, 2600), 0.16); put(wt("Copy") + 0.12, pop(900, 1500, 0.06), 0.08)
-put(wt("tempel") - 0.05, whoosh(0.35, 500, 2400, 1.3, 0.4), W * 0.6)
-typing(wt("tempel") + 0.1, wt("animasinya") - 0.05, 0.1, 20)
-put(wt("animasinya") - 0.02, pop(180, 90, 0.1), 0.18)
-put(wt("animasinya") + 0.05, rise(0.5, 300, 1400), 0.05)
-put(wt("jadi.") - 0.05, chime((1318.5, 1760, 2637), 0.9), 0.08); put(wt("jadi.") - 0.02, pop(900, 1600, 0.08), 0.1)
-# --- s06: live edit
-for k in range(5): put(wt("ganti") + 0.05 + k * 0.07, tick(0.02, 3600 + 300 * (k % 2)), 0.08)
-for k in range(4): put(wt("datanya.") + k * 0.06, pop(600 + 90 * k, 900 + 90 * k, 0.05), 0.07)
-# --- s08 CTA
-put(wt("panduan") - 0.05, whoosh(0.6, 400, 2600, 1.1, 0.6), W * 0.7)
-for k in range(12): put(wt("panduan") + 0.15 + k * 0.035, pop(900 + 30 * k, 1300 + 30 * k, 0.04), 0.045)
-put(wt("animasinya?") + 0.05, boom(0.3, 240, 110), 0.12)
-put(wt("Komen") - 0.1, whoosh(0.35, 1800, 600, 1.3, 0.4), W * 0.5)
-for k in range(4): put(wt("EDIT,") - 0.02 + k * 0.07, tick(0.022, 4200), 0.15)
-put(wt("EDIT,") + 0.35, pop(900, 1600, 0.1), 0.15)
-put(wt("kirim") - 0.05, whoosh(0.7, 700, 3600, 1.2, 0.5), W)
+put(wt("Stop") - 0.04, boom(0.45, 160, 60), 0.3); put(wt("Stop") - 0.02, pop(300, 140, 0.12), 0.22)
+put(wt("mahal-mahal.") - 0.02, scribble(0.4), 0.1); put(wt("mahal-mahal.") + 0.25, scribble(0.35), 0.08)
+for k in range(6): put(wt("Bikin") + 0.05 + k * 0.09, whoosh(0.2, 900, 2600, 1.6, 0.3), W * 0.35); put(wt("Bikin") + 0.2 + k * 0.09, pop(700 + 60 * k, 1100 + 60 * k, 0.06), 0.1)
+put(wt("gratis.") - 0.04, boom(0.35, 200, 90), 0.18); put(wt("gratis.") + 0.02, chime((1318.5, 1760, 2637), 1.0), 0.07)
+# --- s02: the 6 parts drop into the prompt
+put(st("s02") - 0.2, whoosh(0.4, 500, 2200), W * 0.6)
+put(wt("6") - 0.02, pop(600, 1000, 0.09), 0.14)
+for w in ["Peran,", "konteks,", "tugas,", "format,", "contoh,", "batasan."]: put(wt(w) - 0.03, whoosh(0.18, 2400, 900, 2.0, 0.2), W * 0.3); put(wt(w) + 0.05, pop(800, 1300, 0.07), 0.13)
+put(wt("batasan.") + 0.35, chime((1568, 2093), 0.7), 0.05)
+# --- s03: every day again, then the pile collapses on "capek."
+put(st("s03") - 0.2, whoosh(0.4, 2000, 600, 1.3, 0.35), W * 0.6)
+for k in range(5): put(wt("tiap") - 0.3 + k * 0.22, flap(), 0.12)
+put(wt("capek.") - 0.05, rumble(0.6), 0.12); put(wt("capek.") + 0.05, boom(0.5, 110, 45), 0.26); put(wt("capek.") + 0.1, buzz(0.25), 0.04)
+# --- s04: Claude arrives, the pile becomes the tool, the 5-step rail
+put(wt("Claude", st("s04")) - 0.04, chime((1046, 1318, 1568), 1.1), 0.08)
+put(wt("alatnya.") - 0.05, whoosh(0.5, 400, 2400, 1.2, 0.5), W * 0.7)
+for k in range(5): put(wt("5", st("s04")) + k * 0.07, tick(0.025, 2600 + 300 * k), 0.12)
+# --- the 5 steps: a tick when a step becomes active, a check pop when it is done
+for w, after in [("Satu,", 19), ("Dua,", 21), ("Tiga,", 24), ("Empat,", 28), ("Lima,", 33)]:
+    put(wt(w, after) - 0.02, tick(0.03, 2200), 0.2); put(wt(w, after) + 0.02, pop(600, 950, 0.07), 0.1)
+for t in (20.82, 23.82, 27.69, 32.94, 36.85): put(t, pop(1100, 1700, 0.06), 0.12)
+# r1: open Claude
+put(wt("buka") - 0.02, tick(0.03, 1800), 0.22); put(wt("buka") + 0.02, whoosh(0.45, 400, 2000, 1.3, 0.45), W * 0.7)
+for k in range(3): put(wt("Claude.", 20) + k * 0.08, pop(800 + 120 * k, 1200 + 120 * k, 0.05), 0.08)
+# r2: Ctrl+V, paste, send
+put(wt("tempel") - 0.25, tick(0.03, 1600), 0.18); put(wt("tempel") - 0.12, tick(0.03, 1700), 0.18)
+put(wt("tempel") + 0.02, whoosh(0.35, 2400, 700, 1.6, 0.3), W * 0.6)
+for k in range(10): put(wt("tempel") + 0.1 + k * 0.05, tick(0.015, 5000), 0.04)
+put(23.2, tick(0.03, 2000), 0.22); put(23.24, whoosh(0.4, 700, 2600, 1.4, 0.4), W * 0.6); put(wt("aku", 23) + 0.02, pop(900, 1500, 0.07), 0.1)
+# r3: Claude builds the app
+put(24.63, rise(0.9, 300, 1200), 0.05); put(wt("Claude", 25) - 0.02, whoosh(0.6, 2000, 6000, 2.0, 0.3), W * 0.4)
+put(wt("aplikasi") - 0.02, pop(700, 1100, 0.08), 0.12); put(wt("kecilnya") - 0.02, pop(800, 1300, 0.08), 0.12)
+put(wt("chat.") - 0.02, chime((1568, 2093, 2637), 0.9), 0.07)
+# r4: type the idea, press the button
+put(wt("ketik") - 0.02, tick(0.03, 1900), 0.22)
+typing(30.94, 32.88, 0.1, 20)
+put(32.92, tick(0.03, 1800), 0.24); put(32.96, rise(0.5, 400, 1100), 0.05)
+# r5: the master prompt fills, copy
+put(wt("alatnya", 33) - 0.02, whoosh(0.4, 500, 2400, 1.2, 0.5), W * 0.6)
+for k in range(6): put(wt("nyusun") + k * 0.2, pop(700 + 90 * k, 1100 + 90 * k, 0.06), 0.12)
+put(wt("lengkap.") - 0.02, chime((1318.5, 1760), 0.7), 0.05)
+put(wt("salin.") - 0.02, tick(0.03, 2000), 0.24); put(wt("salin.") + 0.08, chime((1760, 2349, 2637), 0.9), 0.07)
+# --- s10: no paid class, no paid prompts
+for k in range(6): put(37.2 + k * 0.09, pop(900 + 50 * k, 1300 + 50 * k, 0.05), 0.08)
+put(37.37, whoosh(0.35, 600, 2000, 1.4, 0.35), W * 0.5); put(37.47, whoosh(0.35, 700, 2200, 1.4, 0.35), W * 0.5)
+put(wt("mahal,") - 0.02, scribble(0.3), 0.1); put(38.35, rip(0.45), 0.14)
+put(wt("beli", 39) - 0.02, scribble(0.3), 0.1); put(wt("prompt.", 39) - 0.02, scribble(0.35), 0.1); put(39.68, rip(0.35), 0.1); put(39.72, boom(0.3, 150, 70), 0.12)
+put(39.85, pop(700, 1200, 0.09), 0.16); put(39.9, chime((1568, 2093), 0.7), 0.05)
+# --- s11 CTA
+put(wt("Mau", 40) - 0.02, whoosh(0.5, 400, 1800, 1.3, 0.4), W * 0.6)
+for k in range(6): put(wt("alatnya?") + k * 0.06, pop(900 + 60 * k, 1400 + 60 * k, 0.05), 0.08)
+put(wt("Komen") - 0.05, whoosh(0.35, 600, 2000, 1.4, 0.5), W * 0.6)
+for k in range(6): put(42.13 + k * 0.06, tick(0.022, 4200), 0.14)
+put(42.55, pop(900, 1600, 0.1), 0.15)
+put(wt("aku", 42) - 0.02, tick(0.03, 2000), 0.2); put(wt("kirim", 42) - 0.02, whoosh(0.7, 700, 3600, 1.2, 0.5), W)
 put(wt("DM.") - 0.02, chime((1568, 2093), 0.8), 0.07)
-put(T["total_sec"] - 1.3, chime((1046, 1568, 2093, 2637), 1.3), 0.06)
+put(T["total_sec"] - 1.5, chime((1046, 1568, 2093, 2637), 1.6), 0.07)
 x = np.clip(out, -1, 1); x = (x * 32767).astype(np.int16)
 f = wave.open(str(P / "assets/audio/sfx.wav"), "wb"); f.setnchannels(1); f.setsampwidth(2); f.setframerate(SR); f.writeframes(x.tobytes()); f.close()
 print("sfx.wav", round(len(x) / SR, 2), "s, peak", round(float(np.abs(out).max()), 3))

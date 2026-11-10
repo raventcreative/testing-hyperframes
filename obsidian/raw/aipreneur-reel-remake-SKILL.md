@@ -130,6 +130,8 @@ Playwright + static server (`python3 -m http.server`). Render 3D live (robot/Sty
 - **Jangan pakai onUpdate** (gak reliable saat seek): counter/ngetik pakai `tl.set` per nilai. Gerak stop-motion = waktu dikuantisasi (12 fps).
 - fromTo dengan from-value sebagian → properti lain mulai dari state t=0 (elemen loncat). **Selalu isi from-value lengkap.**
 - Satu tween `attr`/`clip-path` per properti; jangan `svgOrigin` di SVG yang di-transform CSS.
+- **GSAP baca `textContent` yang mirip angka sebagai angka**: `tl.set(el, { textContent: "10.000" })` tampil "10", "1.200" jadi "1.2". Tempel karakter tak terlihat U+2060 (`"10.000⁠"`). Integer polos, teks berhuruf/spasi/%/× aman.
+- Caption: cek lebar tiap chunk (≤ 930 px navy / host terang) sebelum build; kalau wrap, tambah cut di `SC` timing.py. Kata yang sama muncul 2× dengan display beda → `FIXI` per index raw, jangan `FIX` (kena semua kemunculan).
 - Deterministik: no `Math.random` (PRNG seed), no `Date`, no CSS animation/transition, no rAF.
 - Snapshot ≤ 10 `--at` per run, `--describe false --timeout 60000`. Snapshot gagal **diam-diam** kalau script scene error → `node tools/check_scene.cjs <ids>` (butuh preview server).
 - Lint warning `nested_structure_needs_subcomposition` untuk `#bg/#fx` di index aman diabaikan.

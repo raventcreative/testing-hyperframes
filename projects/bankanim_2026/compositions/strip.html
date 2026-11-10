@@ -1,0 +1,65 @@
+<template>
+  <style>
+    #st-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #st-wrap { position: absolute; inset: 0; opacity: 0; }
+    #st-wrap .ma-card { transform-origin: 0 0; }
+    .st-slot { position: absolute; width: 66px; height: 66px; border-radius: 18px; border: 2.5px dashed rgba(58,111,224,.55); opacity: 0; }
+    .st-ok { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(160deg, #2da44e, #116329); box-shadow: 0 0 0 3px #ffffff, 0 4px 10px rgba(17,99,41,.35); opacity: 0; }
+    .st-ok i { position: absolute; left: 5px; top: 5px; width: 14px; height: 14px; background: #fff; -webkit-mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; }
+    #st-count { position: absolute; right: 89px; top: 262px; height: 30px; padding: 0 14px; border-radius: 15px; background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%);
+      color: #fff; font: 700 17px/30px Poppins, sans-serif; letter-spacing: .04em; opacity: 0; }
+  </style>
+  <div id="st-root" data-composition-id="strip" data-width="1080" data-height="1920">
+    <div id="st-wrap"><div id="st-slots"></div><div id="st-cards"></div><div id="st-oks"></div><div id="st-count"></div></div>
+  </div>
+  <script>
+    (function () {
+      // THE STRIP (persistent, hf-seek) during the 12 rounds: the bank's 12 cards as mini chips under the logo (y 300–366).
+      // s02 shrinks the GRID into exactly these chips by r1.start. Each round's overlay (r1–r12) LIFTS its chip out into a big card
+      // (the chip slot shows a dashed outline meanwhile) and puts it back by its round end → the chip comes back with a green check.
+      // Upcoming chips are dimmed. In the last 0.5 s of r12 the 12 chips grow back into the full GRID (s05 starts on the GRID).
+      // Pure function of global time (__T0 for chunked renders).
+      const R = window.ROUNDS, MA = window.MicroAnim, ST = MA.STRIP;
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const io = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const back = (u) => { u = one(u); const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };
+      const $ = (id) => document.getElementById(id);
+      const set = (el, k, v) => { if (el.style[k] !== v) el.style[k] = v; };
+      const H = MA.grid($("st-cards"), "st-k");
+      const LB = H.map((h) => h.el.querySelector(".ma-lb"));
+      $("st-slots").innerHTML = H.map((_, i) => { const c = ST.chip(i); return `<div class="st-slot" id="st-s${i}" style="left:${c.x}px;top:${c.y}px"></div>`; }).join("");
+      $("st-oks").innerHTML = H.map((_, i) => { const c = ST.chip(i); return `<div class="st-ok" id="st-o${i}" style="left:${c.x + ST.size - 18}px;top:${c.y + ST.size - 18}px"><i></i></div>`; }).join("");
+      const wrap = $("st-wrap"), count = $("st-count");
+      const T_IN = R[0].start, EX1 = R[11].start + R[11].dur, EX0 = EX1 - 0.5;
+      function draw(t) {
+        if (t < T_IN - 1e-4 || t >= EX1) { set(wrap, "opacity", "0"); return; }
+        set(wrap, "opacity", "1");
+        const ex = io((t - EX0) / (EX1 - EX0));                  // 0 = strip, 1 = GRID
+        let done = 0;
+        H.forEach((h, i) => {
+          const c = ST.chip(i), g = h.home, r = R[i], end = r.start + r.dur;
+          const dx = (c.x - g.x) * (1 - ex), dy = (c.y - g.y) * (1 - ex), sc = ST.scale + (1 - ST.scale) * ex;
+          set(h.el, "transform", `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px) scale(${sc.toFixed(4)})`);
+          const live = t >= r.start && t < end - 0.08 && ex === 0;  // lifted out by its round
+          const isDone = t >= end - 0.08;
+          const pop = isDone ? back((t - (end - 0.08)) / 0.3) : 0;
+          let op = live ? 0 : isDone ? 1 : 0.62;
+          op = op + (1 - op) * ex;
+          set(h.el, "opacity", op.toFixed(3));
+          set(LB[i], "opacity", ex.toFixed(3));
+          set($("st-s" + i), "opacity", (live ? 1 : 0).toFixed(3));
+          const ok = $("st-o" + i); set(ok, "opacity", (isDone ? one(pop * 3) * (1 - ex) : 0).toFixed(3)); set(ok, "transform", `scale(${(isDone ? pop : 0).toFixed(3)})`);
+          if (t >= r.start) done = i + 1;
+          h.draw(t);
+        });
+        set(count, "opacity", (1 - ex).toFixed(3));
+        const txt = `${Math.max(1, done)} / 12`; if (count.textContent !== txt) count.textContent = txt;
+      }
+      draw(0);
+      window.addEventListener("hf-seek", (e) => draw(e.detail.time + (window.__T0 || 0)));
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, window.TOTAL - 0.02);
+      window.__timelines["strip"] = tl;
+    })();
+  </script>
+</template>

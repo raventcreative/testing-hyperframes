@@ -9,9 +9,10 @@ P = Path(sys.argv[1]).resolve(); OUT = Path(sys.argv[2]).resolve(); Q = sys.argv
 T = json.loads((P / "production/timing.json").read_text()); TOTAL = T["total_sec"]; FPS = 30
 S = {s["id"]: s for s in T["scenes"]}
 # (render start, keep from, end): scenes do not overlap in this reel, so no pre-roll is needed
-CH = [(0.0, 0.0, S["s04"]["start"]),
-      (S["s04"]["start"], S["s04"]["start"], S["s07"]["start"]),
-      (S["s07"]["start"], S["s07"]["start"], TOTAL)]
+CH = [(0.0, 0.0, S["r3"]["start"]),
+      (S["r3"]["start"], S["r3"]["start"], S["r7"]["start"]),
+      (S["r7"]["start"], S["r7"]["start"], S["r11"]["start"]),
+      (S["r11"]["start"], S["r11"]["start"], TOTAL)]
 WORK = OUT.parent / (OUT.stem + "_chunks"); WORK.mkdir(parents=True, exist_ok=True)
 src = (P / "index.html").read_text()
 ease_sine = lambda u: -(__import__("math").cos(__import__("math").pi * u) - 1) / 2
@@ -19,7 +20,7 @@ ease_sine = lambda u: -(__import__("math").cos(__import__("math").pi * u) - 1) /
 def chunk_index(t0, t1):
     d = round(t1 - t0, 4); h = src
     h = re.sub(r'(<div[^>]*\bid="main-root"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)   # tolerant of injected data-hf-id attributes
-    for lid in ("bg", "fx", "caps", "robot", "mascot"):
+    for lid in ("bg", "fx", "caps", "strip", "robot", "mascot"):
         h = re.sub(rf'(<div[^>]*\bid="{lid}"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)
     def slot(m):
         st = float(m.group(2))

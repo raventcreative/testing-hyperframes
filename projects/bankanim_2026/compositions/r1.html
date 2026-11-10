@@ -1,0 +1,110 @@
+<template>
+  <style>
+    /* ===================== ROUND KIT (copy into r2–r12, rename the r1- prefix) ===================== */
+    .r1-a { position: absolute; }
+    .r1-grad { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #r1-badge { left: 80px; top: 404px; width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(160deg, #294b77, #0a0d2c);
+      box-shadow: 0 12px 26px -10px rgba(10,13,44,.5); color: #fff; font: 700 30px/72px Poppins, sans-serif; text-align: center; letter-spacing: -0.02em; }
+    #r1-name { left: 172px; top: 408px; height: 66px; overflow: hidden; white-space: nowrap; font: 700 54px/66px Poppins, sans-serif; letter-spacing: -0.02em; }
+    #r1-name span { display: inline-block; }
+    #r1-of { left: 172px; top: 470px; font: 400 21px/1 Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #r1-big { left: 80px; top: 512px; }                                   /* the big card (300 px) — grows out of its strip chip */
+    #r1-panel { left: 410px; top: 500px; width: 590px; height: 410px; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 26px 50px -26px rgba(10,13,44,.45), 0 0 0 1.5px rgba(10,13,44,.06); overflow: hidden; transform-origin: 0% 50%; }
+    .r1-ptag { position: absolute; left: 26px; top: 22px; height: 34px; padding: 0 14px; border-radius: 17px; background: #e9f0fc; color: #294b77;
+      font: 700 16px/34px Poppins, sans-serif; letter-spacing: .06em; white-space: nowrap; }
+    /* ===================== r1 CENTANG example: today's task list + an order-success toast ===================== */
+    .r1-row { position: absolute; left: 26px; width: 538px; height: 64px; border-radius: 18px; background: #ffffff; box-shadow: 0 0 0 1.5px #e3e9f4; }
+    .r1-row b { position: absolute; left: 76px; top: 0; font: 700 23px/64px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .r1-row .st { position: absolute; left: 76px; top: 32px; height: 3px; border-radius: 2px; background: #9aa8c4; transform-origin: 0 50%; }
+    .r1-row svg { position: absolute; left: 18px; top: 13px; width: 38px; height: 38px; }
+    #r1-toast { left: 26px; top: 300px; width: 538px; height: 86px; border-radius: 22px; background: linear-gradient(160deg, #2da44e, #1f8a3e);
+      box-shadow: 0 16px 30px -14px rgba(17,99,41,.7); color: #fff; }
+    #r1-toast svg { position: absolute; left: 20px; top: 19px; width: 48px; height: 48px; }
+    #r1-toast b { position: absolute; left: 86px; top: 16px; font: 700 24px/1.2 Poppins, sans-serif; white-space: nowrap; }
+    #r1-toast em { position: absolute; left: 86px; top: 48px; font: 400 18px/1.2 Poppins, sans-serif; font-style: normal; opacity: .9; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="r1" data-width="1080" data-height="1920">
+    <div class="r1-a" id="r1-panel">
+      <div class="r1-ptag" id="r1-ptag">CONTOH PEMAKAIAN</div>
+      <div id="r1-rows"></div>
+      <div class="r1-a" id="r1-toast">
+        <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="rgba(255,255,255,.22)"/><path id="r1-tk" d="M14 25 L21 32 L35 17" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="34" stroke-dashoffset="34"/></svg>
+        <b>Pembayaran berhasil</b><em>Pesanan #1024 · diproses hari ini</em>
+      </div>
+    </div>
+    <div class="r1-a" id="r1-bigwrap"></div>
+    <div class="r1-a" id="r1-badge">01</div>
+    <div class="r1-a" id="r1-name"><span class="r1-grad" id="r1-nm">Centang</span></div>
+    <div class="r1-a" id="r1-of">animasi 1 dari 12</div>
+  </div>
+  <script>
+    (function () {
+      // ROUND 1 — CENTANG ("Satu, centang. Buat tanda tugas beres atau pesanan sukses.")
+      // ROUND KIT (shared by r1–r12): the round's card LIFTS OUT of its strip chip (strip.html hides the chip and shows a dashed slot
+      // while the round runs) and grows into a 300 px card on the left; the number badge pops on the spoken number, the name rises
+      // on the spoken name; an example panel ("CONTOH PEMAKAIAN") swings in on the right and acts out the use the VO describes.
+      // EXIT (last 0.4 s): the panel folds away, the title drops, the big card flies back into its chip (strip shows it with a ✓).
+      // The big card is drawn from LOCAL time so its animation starts fresh when it lands (on the name).
+      const K = 0, R = window.ROUNDS[K], MA = window.MicroAnim, ST = R.start, D = R.dur;
+      const W = (txt) => { const w = R.words.find((x) => x[0] === txt); return (w ? w[1] : ST) - ST; };   // local time of a word of this round
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tNum = R.tNum - ST, tName = R.tName - ST, tUse = R.tUse - ST, tOut = D - 0.42;
+      // ---- kit: big card out of the chip
+      const BIG = 300, BX = 80, BY = 512, chip = MA.STRIP.chip(K), cs = MA.STRIP.size / BIG;
+      const big = MA.mount($("r1-bigwrap"), R.type, { size: BIG, label: true, id: "r1-bigcard" });
+      big.el.style.left = BX + "px"; big.el.style.top = BY + "px";
+      I(big.el, { x: chip.x - BX, y: chip.y - BY, scale: cs, rotation: 0, opacity: 1, transformOrigin: "0% 0%" });
+      ft(big.el, { x: chip.x - BX, y: chip.y - BY, scale: cs, rotation: 0 }, { x: 0, y: 0, scale: 1, rotation: 0, duration: Math.max(0.45, tName - 0.02), ease: "expo.inOut" }, 0.02);
+      ft(big.el, { rotation: 0 }, { rotation: -3, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tName);
+      ft(big.el, { x: 0, y: 0, scale: 1 }, { x: chip.x - BX, y: chip.y - BY, scale: cs, duration: 0.36, ease: "expo.in" }, tOut);
+      // ---- kit: number badge + name + "x dari 12"
+      const badge = $("r1-badge"), nm = $("r1-nm"), of = $("r1-of");
+      I(badge, { opacity: 0, scale: 0.3, rotation: -90 });
+      ft(badge, { opacity: 0, scale: 0.3, rotation: -90 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2)" }, tNum - 0.08);
+      I(nm, { yPercent: 110 }); ft(nm, { yPercent: 110 }, { yPercent: 0, duration: 0.42, ease: "power4.out" }, tName - 0.12);
+      I(of, { opacity: 0, x: -14 }); ft(of, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, tName + 0.05);
+      ft(badge, { opacity: 1, scale: 1, rotation: 0 }, { opacity: 0, scale: 0.6, rotation: 0, duration: 0.28, ease: "power2.in" }, tOut);
+      ft(nm, { yPercent: 0 }, { yPercent: 110, duration: 0.28, ease: "power3.in" }, tOut);
+      ft(of, { opacity: 1, x: 0 }, { opacity: 0, x: 0, duration: 0.2, ease: "power2.in" }, tOut);
+      // ---- kit: the example panel swings in (3D hinge from its left edge) and folds away
+      const panel = $("r1-panel");
+      I(panel, { opacity: 0, rotationY: -70, x: -30, transformPerspective: 1400 });
+      ft(panel, { opacity: 0, rotationY: -70, x: -30 }, { opacity: 1, rotationY: 0, x: 0, duration: 0.55, ease: "expo.out", transformPerspective: 1400 }, tName - 0.05);
+      ft(panel, { opacity: 1, rotationY: 0, x: 0 }, { opacity: 0, rotationY: 60, x: 40, duration: 0.34, ease: "power3.in", transformPerspective: 1400 }, tOut - 0.04);
+      // ===================== r1 CENTANG: today's tasks get checked on "tugas beres", the order toast lands on "pesanan sukses"
+      const TASKS = ["Edit video", "Tulis caption", "Upload konten"];
+      $("r1-rows").innerHTML = TASKS.map((txt, i) => `<div class="r1-row" id="r1-row${i}" style="top:${74 + i * 74}px">
+          <svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="16" fill="#ffffff" stroke="#c9d4e6" stroke-width="3" id="r1-cc${i}"/>
+          <path id="r1-ck${i}" d="M11 19.5 L16.5 25 L27 13.5" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="26" stroke-dashoffset="26"/></svg>
+          <b>${txt}</b><div class="st" id="r1-st${i}" style="width:${txt.length * 12.5}px"></div></div>`).join("");
+      const tTask = W("tugas"), tBeres = W("beres"), tPes = W("pesanan"), tSuk = W("sukses.");
+      TASKS.forEach((_, i) => {
+        const row = $("r1-row" + i), cc = $("r1-cc" + i), ck = $("r1-ck" + i), st = $("r1-st" + i), t0 = tTask - 0.15 + i * ((tBeres + 0.2 - tTask) / 2.2);
+        I(row, { opacity: 0, x: 40 }); ft(row, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, tName + 0.08 + i * 0.06);
+        I(cc, { attr: { fill: "#ffffff", stroke: "#c9d4e6" } }); tl.set(cc, { attr: { fill: "#2da44e", stroke: "#2da44e" } }, t0);
+        I(ck, { attr: { "stroke-dashoffset": 26 } }); ft(ck, { attr: { "stroke-dashoffset": 26 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.2, ease: "power2.out" }, t0 + 0.02);
+        ft(row, { scale: 1 }, { scale: 1.03, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, t0);
+        I(st, { scaleX: 0 }); ft(st, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power2.out" }, t0 + 0.06);
+        tl.set(row.querySelector("b"), { color: "#9aa8c4" }, t0 + 0.06); I(row.querySelector("b"), { color: "#0a0d2c" });
+      });
+      const toast = $("r1-toast"), tk = $("r1-tk");
+      I(toast, { opacity: 0, y: 70, scale: 0.9 });
+      ft(toast, { opacity: 0, y: 70, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.8)" }, tPes - 0.1);
+      I(tk, { attr: { "stroke-dashoffset": 34 } }); ft(tk, { attr: { "stroke-dashoffset": 34 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.25, ease: "power2.out" }, tSuk - 0.05);
+      ft(toast, { scale: 1 }, { scale: 1.04, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, tSuk + 0.2);
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      const drawBig = (tg) => big.draw(Math.max(0, tg - R.tName));
+      drawBig(ST);
+      window.addEventListener("hf-seek", (e) => drawBig(e.detail.time + (window.__T0 || 0)));
+      window.__timelines = window.__timelines || {};
+      window.__timelines["r1"] = tl;
+    })();
+  </script>
+</template>

@@ -190,5 +190,9 @@
   function grid(parent, prefix, opts = {}) {
     return GRID.map((g, i) => { const h = mount(parent, g.type, Object.assign({ size: GS, label: true, id: prefix + i }, opts)); h.el.style.left = g.x + "px"; h.el.style.top = g.y + "px"; h.home = g; return h; });
   }
-  window.MicroAnim = { mount, grid, GRID, GRID_SIZE: GS, TYPES, LABEL, PERIOD, C };
+  // the STRIP (12 mini chips under the logo during the 12 rounds): chip i top-left + size. A GRID card shrinks into its chip with
+  // transform-origin 0 0: translate(chip.x - grid.x, chip.y - grid.y) scale(STRIP.size / GS).
+  const SS = 66, SG = 10, SX = (1080 - (12 * SS + 11 * SG)) / 2, SY = 300;
+  const STRIP = { size: SS, gap: SG, x0: SX, y: SY, scale: SS / GS, chip: (i) => ({ x: SX + i * (SS + SG), y: SY }) };
+  window.MicroAnim = { mount, grid, GRID, GRID_SIZE: GS, STRIP, TYPES, LABEL, PERIOD, C };
 })();

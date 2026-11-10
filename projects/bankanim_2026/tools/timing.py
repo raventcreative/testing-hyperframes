@@ -12,11 +12,14 @@ R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {5: (6, "After Effects,", "afterefek"), 35: (36, "Claude Code,", "klodkod")}
-FIX = {"cloud.": "Claude.", "Kopi": "Copy", "Comment": "Komen", "edit,": "EDIT,"}
-FIXI = {}
-PRON = {"claude": "klod", "loading": "loding", "motion": "mosyen", "designer": "desainer", "copy": "kopi", "install": "instol",
-        "editing": "editing", "dm": "diem", "edit": "edit"}
+MERGE = {5: (6, "After Effects,", "afterefek"), 17: (18, "satu-satu.", "satusatu"), 113: (114, "Claude Code,", "klodkod")}
+FIX = {"cloud,": "Claude,", "Progress,": "Progres,", "reaksi": "reaksi.", "target": "target.", "file": "file.",
+       "solusi": "solusi.", "ulasan": "ulasan.", "text": "teks", "datanya": "datanya.", "Comment": "Komen", "edit,": "EDIT,",
+       "DM": "DM.", "copy": "Copy", "tau": "tahu"}
+FIXI = {11: "Termasuk", 12: "dua belas", 19: "Satu,", 28: "Dua,", 37: "Tiga,", 46: "Empat,", 54: "Lima,", 60: "Enam,", 68: "Tujuh,", 74: "Delapan,",
+        81: "Sembilan,", 86: "langsung.", 87: "Sepuluh,", 93: "Sebelas,", 100: "Dua belas,", 117: "jadi."}
+PRON = {"claude": "klod", "loading": "loding", "copy": "kopi", "dm": "diem", "edit": "edit", "toggle": "togel", "like": "laik", "upload": "aplod",
+        "rating": "reting", "duabelas": "duabelas", "progres": "progres"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -69,13 +72,22 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Video", [4, 6], ["After Effects,", "Claude."], []),
-    ("s02", "Termasuk", [], ["bank", "animasi"], []),
-    ("s03", "Centang,", [2], [], []),
-    ("s04", "Semuanya", [3], ["motion", "designer."], []),
+    ("s01", "Video", [4, 6], ["After Effects,", "Claude,"], []),
+    ("s02", "Termasuk", [4], ["dua belas"], []),
+    ("r1", "Satu,", [2, 6], ["Centang,"], ["Satu,"]),
+    ("r2", "Dua,", [2, 5], ["Loading,"], ["Dua,"]),
+    ("r3", "Tiga,", [3, 7], ["Angka", "naik,"], ["Tiga,"]),
+    ("r4", "Empat,", [2, 5], ["Notifikasi,"], ["Empat,"]),
+    ("r5", "Lima,", [2], ["Grafik,"], ["Lima,"]),
+    ("r6", "Enam,", [2], ["Toggle,"], ["Enam,"]),
+    ("r7", "Tujuh,", [2], ["Like,"], ["Tujuh,"]),
+    ("r8", "Delapan,", [2], ["Progres,"], ["Delapan,"]),
+    ("r9", "Sembilan,", [2], ["Mengetik,"], ["Sembilan,"]),
+    ("r10", "Sepuluh,", [2], ["Upload,"], ["Sepuluh,"]),
+    ("r11", "Sebelas,", [2], ["Cari,"], ["Sebelas,"]),
+    ("r12", "Dua belas,", [2], ["Rating,"], ["Dua belas,"]),
     ("s05", "Caranya", [2, 5, 8], ["Claude Code,"], ["Copy"]),
-    ("s06", "Tinggal", [5], ["teks", "datanya,"], []),
-    ("s07", "Nggak", [4], ["install", "editing."], []),
+    ("s06", "Tinggal", [], ["teks", "datanya."], []),
     ("s08", "Mau", [3, 5], ["DM."], ["EDIT,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",

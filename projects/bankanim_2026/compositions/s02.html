@@ -32,8 +32,8 @@
       // s02 "Termasuk bank animasi ini." — starts on s01's exact code window (6 typed lines + Claude chip) · "Termasuk": a light scan runs
       // down the code and the window glows (it compiles) · "bank animasi": the window collapses into a white flash at the grid centre and
       // the 12 micro-animation cards burst out centre-first onto the BANK GRID (MicroAnim.GRID) · "ini.": the grid ripples once.
-      // Ends exactly on the GRID (s03 starts from it). Cards are drawn from GLOBAL time (hf-seek) so they never jump between scenes.
-      const D = 1.7, ST = 4.2667, VW = window.VO_WORDS, MA = window.MicroAnim;
+      // "Aku tunjukin satu-satu.": the grid files itself into the STRIP (strip.html takes over at r1.start). Cards are drawn from GLOBAL time (hf-seek) so they never jump between scenes.
+      const D = 3.3, ST = 4.3333, VW = window.VO_WORDS, MA = window.MicroAnim;
       const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
       const L = (txt) => wt(txt) - ST;   // local time of a word
       const $ = (id) => document.getElementById(id);
@@ -60,7 +60,7 @@
       LINES.forEach((_, i) => { const ln = $("s02-l" + i); I(ln, { color: "#dbe6ff" }); tl.set(ln, { textShadow: "0 0 14px rgba(127,180,255,.9)" }, tT - 0.1 + 0.07 * i); tl.set(ln, { textShadow: "none" }, tT + 0.06 + 0.07 * i); });
       I(glow, { opacity: 0 }); ft(glow, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, tT + 0.12);
       // "bank animasi": the window collapses into a flash at the grid centre
-      const tB = L("bank");
+      const tB = L("dua belas");
       ft(cl, { opacity: 1, scale: 1, x: 0, y: 0 }, { opacity: 0, scale: 0.4, x: -160, y: 260, duration: 0.24, ease: "power3.in" }, tB - 0.3);
       ft(code, { opacity: 1, scale: 1, y: 0, rotation: 0 }, { opacity: 0, scale: 0.08, y: -3, rotation: 6, duration: 0.3, ease: "expo.in" }, tB - 0.3);
       const fl = $("s02-flash"); I(fl, { opacity: 0, scale: 0.2 });
@@ -72,11 +72,20 @@
       const order = H.map((h, i) => [i, Math.hypot(h.home.x - CX, h.home.y - CY)]).sort((a, b) => a[1] - b[1]).map((a) => a[0]);
       order.forEach((i, k) => {
         const h = H[i], dx = CX - h.home.x, dy = CY - h.home.y, t0 = tB + 0.02 + k * 0.03;
-        I(h.el, { x: dx, y: dy, scale: 0.2, rotation: (i % 2 ? 1 : -1) * 20, opacity: 0 });
+        I(h.el, { x: dx, y: dy, scale: 0.2, rotation: (i % 2 ? 1 : -1) * 20, opacity: 0, transformOrigin: "0% 0%" });
         tl.set(h.el, { opacity: 1 }, t0);
         ft(h.el, { x: dx, y: dy, scale: 0.2, rotation: (i % 2 ? 1 : -1) * 20 }, { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.5, ease: "back.out(1.5)" }, t0);
         // "ini.": one ripple across the grid
-        ft(h.el, { scale: 1 }, { scale: 1.05, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, L("ini.") - 0.05 + k * 0.02);
+        ft(h.el, { y: 0 }, { y: -10, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, L("ini.") - 0.05 + k * 0.02);
+      });
+      // "Aku tunjukin satu-satu.": the GRID files itself into the STRIP (12 dimmed chips under the logo, compositions/strip.html takes
+      // over at r1.start with the identical transform: translate(chip − grid) scale(STRIP.scale), origin 0 0, opacity .62, no labels)
+      const SP = MA.STRIP, tA = L("Aku") - 0.05, tEnd = D - 0.02;
+      H.forEach((h, i) => {
+        const c = SP.chip(i), dx = c.x - h.home.x, dy = c.y - h.home.y, t0 = tA + i * 0.045, dur = Math.max(0.3, tEnd - t0 - 0.02);
+        const lb = h.el.querySelector(".ma-lb"); lb.id = "s02-lb" + i;
+        ft(h.el, { x: 0, y: 0, scale: 1, opacity: 1, transformOrigin: "0% 0%" }, { x: dx, y: dy, scale: SP.scale, opacity: 0.62, duration: dur, ease: "expo.inOut", transformOrigin: "0% 0%" }, t0);
+        I(lb, { opacity: 1 }); ft(lb, { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "power2.out" }, t0);
       });
       tl.set({}, {}, D - 0.01);
       (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);

@@ -28,6 +28,7 @@ html = f"""<!doctype html>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/microanim.js"></script>
+    <script src="vendor/rounds.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -67,7 +68,8 @@ html = f"""<!doctype html>
       <div id="bg" class="clip layer" data-start="0" data-duration="{total}" data-track-index="0">
         <div class="plate"></div><div id="gridtint"></div><div id="gridwrap"><div id="grid"></div><div id="gridhl"></div></div>
       </div>
-{slots}      <div id="robot" class="clip" data-composition-id="robot" data-composition-src="compositions/robot.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
+{slots}      <div id="strip" class="clip" data-composition-id="strip" data-composition-src="compositions/strip.html" data-start="0" data-duration="{total}" data-track-index="5" data-width="1080" data-height="1920"></div>
+      <div id="robot" class="clip" data-composition-id="robot" data-composition-src="compositions/robot.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
       <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{total}" data-track-index="7" data-width="1080" data-height="1920"></div>
       <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_dark_trim.png" alt="AI PRENEUR"></div>
       <div id="caps" class="clip layer" data-start="0" data-duration="{total}" data-track-index="9"></div>
@@ -113,7 +115,7 @@ html = f"""<!doctype html>
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
         tl.set("#brandlogo", {{ opacity: 0.95 }}, 0);   // visible from frame 0
         // the CTA end beat shows its own big logo: the small corner mark steps away
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, 27.95);
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s08"]["start"] + 3.88, 3)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;
@@ -139,7 +141,7 @@ PLACE = """<template>
 for s in T["scenes"]:
     f = P / f"compositions/{s['id']}.html"
     if not f.exists(): f.write_text(PLACE.format(id=s["id"], dur=round(s["dur"] + ovl(s["id"]) - 0.01, 3)))
-for cid in ("robot", "mascot"):
+for cid in ("strip", "robot", "mascot"):
     f = P / f"compositions/{cid}.html"
     if not f.exists(): f.write_text(PLACE.format(id=cid, dur=round(total - 0.02, 3)))
 print("index.html ok:", len(T["scenes"]), "scenes,", len(T["words"]), "words,", len(T["caps"]), "caption chunks, total", total)

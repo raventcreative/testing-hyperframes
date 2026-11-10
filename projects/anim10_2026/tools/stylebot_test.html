@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>StyleBot lookdev</title>
+<style>
+  html, body { margin: 0; background: #0b1030; }
+  #stage { display: block; }
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<script src="../vendor/stylebot3d.js"></script>
+<script>
+  // Lookdev harness for vendor/stylebot3d.js, driven by tools/shoot_styles.cjs (also usable by hand: ?style=pixel).
+  const q = new URLSearchParams(location.search);
+  const W = +(q.get('w') || 820), H = +(q.get('h') || 980);
+  const cv = document.getElementById('stage'); cv.width = W; cv.height = H;
+  const HEAD_FIX = [-0.0775, -0.227, -0.1287];
+  // lookdev pose: slight 3/4 view, hand_L raised in a wave, happy eyes
+  window.lookdevPose = (k = 0) => ({
+    root: { x: 0, y: 0.075, z: 0, rx: 0.02, ry: 0.26, rz: -0.025 },
+    bones: { body: [0, 0, 0], head: [HEAD_FIX[0] - 0.02, HEAD_FIX[1] + 0.14, HEAD_FIX[2] + 0.05], hand_L: [-0.35, 0, -0.1 + 0.25 * Math.sin(k)], hand_R: [0.1, 0, 0.06] },
+    offs: { hand_L: [0.05, 0.31, 0.1], hand_R: [0.06, 0.0, 0.03], head: [0, 0, 0] },
+    face: { blink: 0, happy: 1, gaze: [-0.04, 0.05], squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 },
+    ring: 1, shadow: true,
+  });
+  const sync = (bot) => { const gl = bot.renderer.getContext(); const px = new Uint8Array(4); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); };
+  window.__ready = (async () => {
+    const t0 = performance.now();
+    const bot = await StyleBot.create(cv, { url: '../assets/robot3d/robot_aipreneur.glb', logoUrl: '../assets/brand/logo_white_trim.png', width: W, height: H });
+    window.bot = bot; window.createMs = performance.now() - t0;
+    bot.setState(lookdevPose()); bot.setCamera({});
+    if (q.get('style')) { bot.setStyle(q.get('style')); bot.render(); }
+    return true;
+  })();
+  // render one style, return timing (median of n renders) + PNG
+  window.shoot = (id, n = 3, cam) => {
+    const bot = window.bot; bot.setStyle(id); bot.setState(lookdevPose()); bot.setCamera(cam || {});
+    const ts = [];
+    for (let i = 0; i < n; i++) { const t0 = performance.now(); bot.render(); sync(bot); ts.push(performance.now() - t0); }
+    ts.sort((a, b) => a - b);
+    return { id, ms: ts[Math.floor(n / 2)], all: ts, png: cv.toDataURL('image/png') };
+  };
+  window.shootSweep = (a, b, u, ang = 18, n = 1) => {
+    const bot = window.bot; bot.setState(lookdevPose()); bot.setCamera({});
+    const ts = [];
+    for (let i = 0; i < n; i++) { const t0 = performance.now(); bot.renderSweep(a, b, u, ang); sync(bot); ts.push(performance.now() - t0); }
+    return { ms: ts[0], png: cv.toDataURL('image/png') };
+  };
+  // contact sheet: cards on the reel's dark navy, labelled
+  window.makeSheet = async (items, cols = 5) => {
+    const imgs = await Promise.all(items.map((it) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.src = it.png; })));
+    const s = 0.42, cw = Math.round(W * s), ch = Math.round(H * s), pad = 26, lab = 44;
+    const rows = Math.ceil(items.length / cols);
+    const c = document.createElement('canvas'); c.width = cols * cw + (cols + 1) * pad; c.height = rows * (ch + lab) + (rows + 1) * pad;
+    const g = c.getContext('2d'); g.fillStyle = '#0b1030'; g.fillRect(0, 0, c.width, c.height);
+    items.forEach((it, i) => {
+      const x = pad + (i % cols) * (cw + pad), y = pad + Math.floor(i / cols) * (ch + lab + pad);
+      g.drawImage(imgs[i], x, y + lab, cw, ch);
+      g.fillStyle = '#ffffff'; g.font = '600 22px sans-serif'; g.fillText(it.label, x, y + 28);
+      if (it.sub) { g.fillStyle = '#7fd6ff'; g.font = '16px sans-serif'; g.fillText(it.sub, x + cw - g.measureText(it.sub).width, y + 28); }
+    });
+    return c.toDataURL('image/png');
+  };
+</script>
+</body>
+</html>

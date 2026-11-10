@@ -19,7 +19,96 @@ export async function loadRobot(url, logoUrl) {
   logo.flipY = false; logo.colorSpace = THREE.NoColorSpace; logo.anisotropy = 4; logo.needsUpdate = true;
   rig.shared = { faceU, map: { value: rig.orig.map }, emi: { value: rig.orig.emissiveMap }, logo: { value: logo } };
   rig.logoTex = logo;
+  smoothNormals(m.geometry, 0.035, 2);
+  rig.texPix = { base: imagePixels(rig.orig.map.image, 1024), emi: imagePixels(rig.orig.emissiveMap.image, 512) };
+  classifyVertices(m.geometry, rig.texPix);
   return rig;
+}
+
+export function imagePixels(img, size) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, size, size);
+  return { size, data: g.getImageData(0, 0, size, size).data };
+}
+export function samplePix(p, u, v) {
+  const x = Math.min(p.size - 1, Math.max(0, Math.floor(u * p.size))), y = Math.min(p.size - 1, Math.max(0, Math.floor(v * p.size)));
+  const i = 4 * (y * p.size + x); return [p.data[i] / 255, p.data[i + 1] / 255, p.data[i + 2] / 255];
+}
+
+// aCls (white, blue, dark-grey): per-vertex surface classes sampled from the textures, then spatially filtered so region
+// boundaries are clean curves (graphic styles threshold these instead of the noisy scan texture).
+function classifyVertices(geo, tex) {
+  const pa = geo.attributes.position, ua = geo.attributes.uv, n = pa.count;
+  const P = new Float32Array(n * 3); for (let i = 0; i < n; i++) { P[3 * i] = pa.getX(i); P[3 * i + 1] = pa.getY(i); P[3 * i + 2] = pa.getZ(i); }
+  const raw = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const u = ua.getX(i), v = ua.getY(i), c = samplePix(tex.base, u, v), e = samplePix(tex.emi, u, v);
+    const l = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    raw[3 * i] = l > 0.5 ? 1 : 0; raw[3 * i + 1] = e[2] > 0.45 ? 1 : 0; raw[3 * i + 2] = l > 0.22 && l <= 0.5 ? 1 : 0;
+  }
+  const cell = 0.016, grid = new Map(), key = (x, y, z) => (x + 512) * 1048576 + (y + 512) * 1024 + (z + 512);
+  for (let i = 0; i < n; i++) { const k = key(Math.floor(P[3 * i] / cell), Math.floor(P[3 * i + 1] / cell), Math.floor(P[3 * i + 2] / cell)); let a = grid.get(k); if (!a) grid.set(k, (a = [])); a.push(i); }
+  const out = new Float32Array(n * 3), R = [0.014, 0.007, 0.014];
+  for (let i = 0; i < n; i++) {
+    const x = P[3 * i], y = P[3 * i + 1], z = P[3 * i + 2], cx = Math.floor(x / cell), cy = Math.floor(y / cell), cz = Math.floor(z / cell);
+    const s = [0, 0, 0], w = [0, 0, 0];
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (let dz = -1; dz <= 1; dz++) {
+      const a = grid.get(key(cx + dx, cy + dy, cz + dz)); if (!a) continue;
+      for (const j of a) {
+        const ex = P[3 * j] - x, ey = P[3 * j + 1] - y, ez = P[3 * j + 2] - z, d2 = ex * ex + ey * ey + ez * ez;
+        for (let k = 0; k < 3; k++) { const r2 = R[k] * R[k]; if (d2 < r2) { const ww = 1 - d2 / r2; s[k] += raw[3 * j + k] * ww; w[k] += ww; } }
+      }
+    }
+    for (let k = 0; k < 3; k++) out[3 * i + k] = w[k] > 0 ? s[k] / w[k] : raw[3 * i + k];
+  }
+  geo.setAttribute('aCls', new THREE.BufferAttribute(out, 3));
+}
+
+// aSmoothN: normals averaged over a small radius (same-facing neighbours only, so thin shells keep both sides).
+// Toon / line styles shade with these: clean terminator shapes, no faceting noise from the scan mesh.
+function smoothNormals(geo, r, iters = 1) {
+  // (GLB attributes may be interleaved: read them through the accessor, not .array)
+  const pa = geo.attributes.position, na = geo.attributes.normal, n = pa.count;
+  const P = new Float32Array(n * 3), N = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { P[3 * i] = pa.getX(i); P[3 * i + 1] = pa.getY(i); P[3 * i + 2] = pa.getZ(i); N[3 * i] = na.getX(i); N[3 * i + 1] = na.getY(i); N[3 * i + 2] = na.getZ(i); }
+  const cell = r, grid = new Map(), key = (x, y, z) => (x + 512) * 1048576 + (y + 512) * 1024 + (z + 512);
+  for (let i = 0; i < n; i++) {
+    const k = key(Math.floor(P[3 * i] / cell), Math.floor(P[3 * i + 1] / cell), Math.floor(P[3 * i + 2] / cell));
+    let a = grid.get(k); if (!a) grid.set(k, (a = [])); a.push(i);
+  }
+  let out = new Float32Array(n * 3); const r2 = r * r;
+  for (let it = 0; it < iters; it++) {
+  if (it > 0) { const src = out; out = new Float32Array(n * 3); for (let i = 0; i < 3 * n; i++) N[i] = src[i]; }
+  for (let i = 0; i < n; i++) {
+    const x = P[3 * i], y = P[3 * i + 1], z = P[3 * i + 2], nx = N[3 * i], ny = N[3 * i + 1], nz = N[3 * i + 2];
+    const cx = Math.floor(x / cell), cy = Math.floor(y / cell), cz = Math.floor(z / cell);
+    let sx = 0, sy = 0, sz = 0;
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (let dz = -1; dz <= 1; dz++) {
+      const a = grid.get(key(cx + dx, cy + dy, cz + dz)); if (!a) continue;
+      for (const j of a) {
+        const ex = P[3 * j] - x, ey = P[3 * j + 1] - y, ez = P[3 * j + 2] - z, d2 = ex * ex + ey * ey + ez * ez;
+        if (d2 > r2) continue;
+        const dt = nx * N[3 * j] + ny * N[3 * j + 1] + nz * N[3 * j + 2]; if (dt <= 0.2) continue;
+        const w = (1 - d2 / r2) * dt; sx += N[3 * j] * w; sy += N[3 * j + 1] * w; sz += N[3 * j + 2] * w;
+      }
+    }
+    const l = Math.hypot(sx, sy, sz) || 1; out[3 * i] = sx / l; out[3 * i + 1] = sy / l; out[3 * i + 2] = sz / l;
+  }
+  }
+  geo.setAttribute('aSmoothN', new THREE.BufferAttribute(out, 3));
+  // aBlobN: smoothed normal pulled towards the radial direction from its part's centre -> big, simple light shapes
+  // (vector / pixel styles). Part = dominant skin bone (0 body, 1 head, 2 hand_L, 3 hand_R).
+  const C = [[0.02, 0.33, 0.0], [0.03, 0.63, 0.03], [0.386, 0.224, 0.02], [-0.38, 0.282, 0.142]];
+  const si = geo.attributes.skinIndex, sw = geo.attributes.skinWeight, blob = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    let b = si.getX(i), w = sw.getX(i); if (sw.getY(i) > w) { b = si.getY(i); w = sw.getY(i); }
+    const c = C[b] || C[0];
+    let rx = P[3 * i] - c[0], ry = (P[3 * i + 1] - c[1]) * (b === 0 ? 0.6 : 1), rz = P[3 * i + 2] - c[2]; const rl = Math.hypot(rx, ry, rz) || 1;
+    rx /= rl; ry /= rl; rz /= rl;
+    let bx = out[3 * i] * 0.45 + rx * 0.55, by = out[3 * i + 1] * 0.45 + ry * 0.55, bz = out[3 * i + 2] * 0.45 + rz * 0.55; const bl = Math.hypot(bx, by, bz) || 1;
+    blob[3 * i] = bx / bl; blob[3 * i + 1] = by / bl; blob[3 * i + 2] = bz / bl;
+  }
+  geo.setAttribute('aBlobN', new THREE.BufferAttribute(blob, 3));
 }
 
 // pose: root {x,y,z,rx,ry,rz,s}, bones {name:[rx,ry,rz]}, offs {name:[dx,dy,dz]}, face {...}, ring, visible

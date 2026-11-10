@@ -78,7 +78,11 @@ export const VERT = /* glsl */ `
 #include <skinning_pars_vertex>
 #ifdef ROBOT
 attribute vec3 _face;
+attribute vec3 aSmoothN;
+attribute vec3 aBlobN;
+attribute vec3 aCls;
 varying vec3 vFace;
+varying vec3 vCls;
 #else
 attribute float aPal;
 flat varying int vPal;
@@ -94,6 +98,11 @@ varying vec3 vGouraud;
 void main() {
   vUv = uv;
   #include <beginnormal_vertex>
+  #if defined(ROBOT) && defined(BLOBN)
+  objectNormal = aBlobN;
+  #elif defined(ROBOT) && defined(SMOOTHN)
+  objectNormal = aSmoothN;
+  #endif
   #include <skinbase_vertex>
   #include <skinnormal_vertex>
   #include <defaultnormal_vertex>
@@ -104,9 +113,12 @@ void main() {
   vN = normalize((vec4(transformedNormal, 0.0) * viewMatrix).xyz);
   vW = (modelMatrix * vec4(transformed, 1.0)).xyz;
   vRest = position; vRestN = normal;
+  #if defined(ROBOT) && defined(SMOOTHN)
+  vRestN = aSmoothN;
+  #endif
   vDepth = -mvPosition.z;
   #ifdef ROBOT
-  vFace = _face;
+  vFace = _face; vCls = aCls;
   #else
   vPal = int(aPal + 0.5);
   #endif
@@ -123,7 +135,7 @@ void main() {
 // fragment preamble for custom style materials (MRT outputs declared when MRT is defined)
 export const FRAG_HEAD = /* glsl */ `
 #ifdef ROBOT
-varying vec3 vFace;
+varying vec3 vFace; varying vec3 vCls;
 uniform sampler2D uMap; uniform sampler2D uEmi;
 #else
 flat varying int vPal;
@@ -136,18 +148,20 @@ layout(location = 1) out highp vec4 gOut1;
 
 // robot surface classes from the textures: white shell / dark parts / blue lights / visor / eyes / wordmark
 export const ROBOT_CLASS = /* glsl */ `
-struct RobotSurf { float white; float dark; float blue; float visor; float eye; float eyeSD; float logo; vec3 alb; };
+struct RobotSurf { float white; float dark; float grey; float blue; float visor; float eye; float eyeSD; float logo; vec3 alb; };
 RobotSurf robotSurf() {
   RobotSurf s;
-  vec3 a = texture2D(uMap, vUv).rgb; s.alb = a;
-  float l = luma(a);
-  float em = texture2D(uEmi, vUv).b;
-  s.blue = smoothstep(0.25, 0.55, em) * (1.0 - smoothstep(0.3, 0.8, vFace.z));
-  s.visor = smoothstep(0.35, 0.65, vFace.z);
+  s.alb = texture2D(uMap, vUv).rgb;
+  float fw = max(fwidth(vCls.x), 1e-3) * 0.8;
+  float wv = smoothstep(0.5 - fw, 0.5 + fw, vCls.x);
+  float fb = max(fwidth(vCls.y), 1e-3) * 0.8;
+  s.blue = smoothstep(0.42 - fb, 0.42 + fb, vCls.y) * (1.0 - smoothstep(0.3, 0.8, vFace.z));
+  s.visor = smoothstep(0.08, 0.3, vFace.z);
   s.eyeSD = vFace.z > 0.01 ? faceSD(vFace.xy) : 1e3;
   s.eye = vFace.z > 0.01 ? screenFace(vFace.xy) * smoothstep(0.2, 0.6, vFace.z) : 0.0;
-  s.white = smoothstep(0.16, 0.30, l) * (1.0 - s.blue) * (1.0 - s.visor);
+  s.white = wv * (1.0 - s.blue) * (1.0 - s.visor);
   s.dark = (1.0 - s.white) * (1.0 - s.blue);
+  s.grey = smoothstep(0.45, 0.55, vCls.z) * s.dark * (1.0 - s.visor);
   s.logo = logoMask(vRest, vRestN) * s.white;
   return s;
 }
@@ -180,8 +194,8 @@ export function makeRT(w, h, opts = {}) {
 }
 
 // custom style material: shared vertex shader + style fragment (fragment gets NOISE, FACE, LOGO, ROBOT_CLASS when robot)
-export function styleMat({ robot, frag, uniforms = {}, defines = {}, shared, side = THREE.FrontSide, extra = '' }) {
-  const d = { ...defines }; if (robot) d.ROBOT = '';
+export function styleMat({ robot, frag, uniforms = {}, defines = {}, shared, side = THREE.FrontSide, extra = '', rawNormals = false, blob = false }) {
+  const d = { ...defines }; if (robot) { d.ROBOT = ''; if (!rawNormals) d.SMOOTHN = ''; if (blob) d.BLOBN = ''; }
   const u = { ...uniforms };
   if (robot && shared) Object.assign(u, shared.faceU, { uMap: shared.map, uEmi: shared.emi, uLogo: shared.logo });
   const fs = NOISE + (robot ? FACE + LOGO : '') + FRAG_HEAD + (robot ? ROBOT_CLASS : '') + extra + frag;

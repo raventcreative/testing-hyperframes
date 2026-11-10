@@ -67,6 +67,7 @@ export class StyleBot {
     for (const id of Object.keys(this.styles)) this.styles[id].render(this.rtA);
     this.sweep.render(this.rtA.texture, this.rtB.texture, 0.5, 20, null);
     this.renderer.setRenderTarget(null);
+    const gl = this.renderer.getContext(), px = new Uint8Array(4); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
   }
 
   setStyle(id) { if (!this.styles[id]) throw new Error('StyleBot: unknown style ' + id); this.style = id; }
@@ -75,7 +76,7 @@ export class StyleBot {
 
   // perspective camera orbiting `target`: yaw/pitch in degrees, dist in world units (robot = 0.9 tall), fov in degrees,
   // roll in degrees, shift [x,y] = lens shift as a fraction of the frame (moves the subject without changing perspective)
-  setCamera({ yaw = 18, pitch = 7, dist = 3.85, target = [0.02, 0.68, 0], fov = 27, roll = 0, shift = [0, 0] } = {}) {
+  setCamera({ yaw = 15, pitch = 6, dist = 4.5, target = [0.0, 0.8, 0], fov = 27, roll = 0, shift = [0, 0] } = {}) {
     const c = this.camera, a = THREE.MathUtils.degToRad(yaw), p = THREE.MathUtils.degToRad(pitch);
     c.fov = fov; c.aspect = this.W / this.H;
     c.position.set(target[0] + Math.sin(a) * Math.cos(p) * dist, target[1] + Math.sin(p) * dist, target[2] + Math.cos(a) * Math.cos(p) * dist);

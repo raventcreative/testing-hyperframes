@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<script src="../vendor/mascot3d.js"></script>
+<script src="../vendor/stylebot3d.js"></script>
+<script src="../vendor/vo_words.js"></script>
+<style>
+  /* ANIM10 reel cover (1080×1920): the client's navy background, white + cyan Poppins, the AI PRENEUR robot rendered LIVE by the reel's own
+     StyleBot engine in all 10 genres (tiles), the Claude mark (lobehub, MIT), the mascot host waving. Everything that matters sits
+     inside the 4:5 grid crop (y 285–1635). */
+  @font-face { font-family: Poppins; src: url(../assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+  @font-face { font-family: Poppins; src: url(../assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0a1033; font-family: Poppins, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #bg { position: absolute; inset: 0; background: url(../assets/brand/bg_1080x1920.png) center / 1080px 1920px no-repeat; }
+  .glow { position: absolute; border-radius: 50%; mix-blend-mode: screen; }
+  #g1 { left: -300px; top: 160px; width: 1000px; height: 1000px; background: radial-gradient(circle, rgba(48,93,143,.32), rgba(48,93,143,0) 66%); }
+  #g2 { left: 420px; top: 900px; width: 900px; height: 900px; background: radial-gradient(circle, rgba(1,204,247,.16), rgba(1,204,247,0) 66%); }
+  #logo { position: absolute; left: 84px; top: 300px; width: 236px; }
+  #h { position: absolute; left: 80px; top: 360px; display: flex; align-items: flex-start; gap: 26px; }
+  #h .n { font-weight: 700; font-size: 268px; line-height: .82; letter-spacing: -0.06em; color: #01ccf7; text-shadow: 0 0 40px rgba(1,204,247,.35); }
+  #h .w { padding-top: 6px; font-weight: 700; font-size: 112px; line-height: .98; letter-spacing: -0.02em; }
+  #sub { position: absolute; left: 84px; top: 616px; height: 66px; padding: 0 28px 0 16px; border-radius: 33px; display: flex; align-items: center; gap: 14px;
+    background: rgba(8,14,46,.82); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14); font-weight: 400; font-size: 30px; color: #e3edfa; white-space: nowrap; }
+  #sub img { width: 40px; height: 40px; }
+  #sub b { font-weight: 700; color: #fff; }
+  #tiles { position: absolute; left: 58px; top: 716px; width: 964px; display: grid; grid-template-columns: repeat(5, 180px); gap: 18px 16px; }
+  .tile { position: relative; width: 180px; height: 215px; border-radius: 22px; overflow: hidden; background: #050a24;
+    box-shadow: 0 14px 30px -12px rgba(0,0,0,.75), inset 0 0 0 1.5px rgba(255,255,255,.14); }
+  .tile canvas { position: absolute; inset: 0; width: 180px; height: 215px; }
+  .tile .k { position: absolute; left: 9px; top: 9px; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(150deg, #6adfff, #01ccf7 55%, #0396c4); color: #071038; font-weight: 700; font-size: 17px; box-shadow: 0 0 0 3px rgba(8,14,46,.9); }
+  .tile .l { position: absolute; left: 8px; right: 8px; bottom: 8px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    background: rgba(8,14,46,.86); font-weight: 700; font-size: 16px; color: #fff; white-space: nowrap; }
+  .tile.hero { box-shadow: 0 0 0 3px #01ccf7, 0 0 30px rgba(1,204,247,.6), 0 14px 30px -12px rgba(0,0,0,.75); }
+  #q { position: absolute; left: 84px; top: 1262px; font-weight: 700; font-size: 70px; line-height: 1.08; letter-spacing: -0.02em; }
+  #q span { color: #01ccf7; }
+  #q2 { position: absolute; left: 86px; top: 1440px; font-weight: 400; font-size: 32px; color: #e3edfa; }
+  #m { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  #bot { position: absolute; left: -9999px; top: 0; }
+</style>
+</head>
+<body>
+  <div id="bg"></div><div id="g1" class="glow"></div><div id="g2" class="glow"></div>
+  <canvas id="m"></canvas>
+  <img id="logo" src="../assets/brand/logo_white_trim.png" alt="AI PRENEUR">
+  <div id="h"><div class="n">10</div><div class="w">GAYA<br>ANIMASI</div></div>
+  <div id="sub"><img src="../assets/icons/lobe-claude-color.svg" alt="Claude"><span>1 robot, 10 genre, <b>semuanya pakai Claude</b></span></div>
+  <div id="tiles"></div>
+  <div id="q">Mana yang<br>paling <span>keren?</span></div>
+  <div id="q2">Nomor 10 bikin kaget.</div>
+  <canvas id="bot" width="820" height="980"></canvas>
+<script>
+  const q = new URLSearchParams(location.search), P = (k, d) => +(q.get(k) || d);
+  const STY = [["lego", "Lego"], ["glow", "Glow Sketch"], ["comic", "Comic"], ["chalk", "Chalkboard"], ["pixel", "Pixel Art"],
+               ["line", "Minimal Line"], ["explainer", "Explainer 3D"], ["ps2", "PS2 Style"], ["flat", "Flat Vector"], ["cgi", "CGI Motion"]];
+  document.getElementById("tiles").innerHTML = STY.map(([id, nm], i) =>
+    `<div class="tile${i === 9 ? " hero" : ""}"><canvas id="c-${id}" width="360" height="430"></canvas><div class="k">${String(i + 1).padStart(2, "0")}</div><div class="l">${nm}</div></div>`).join("");
+  const HF = [-0.0775, -0.227, -0.1287];
+  async function buildTiles() {
+    const cv = document.getElementById("bot");
+    const bot = await StyleBot.create(cv, { url: "../assets/robot3d/robot_aipreneur.glb", logoUrl: "../assets/brand/logo_white_trim.png", width: 820, height: 980 });
+    bot.setState({ root: { x: 0, y: 0.075, z: 0, rx: 0.02, ry: 0.26, rz: -0.025 },
+      bones: { body: [0, 0, 0], head: [HF[0] - 0.02, HF[1] + 0.14, HF[2] + 0.05], hand_L: [-0.35, 0, -0.1], hand_R: [0.1, 0, 0.06] },
+      offs: { hand_L: [0.05, 0.31, 0.1], hand_R: [0.06, 0.0, 0.03], head: [0, 0, 0] },
+      face: { blink: 0, happy: 1, gaze: [-0.04, 0.05], squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 }, ring: 1.2 });
+    bot.setTime(1.2);
+    for (const [id] of STY) {
+      bot.setCamera({ yaw: 14, pitch: 5, dist: P("dist", "3.05"), target: [0, 0.6, 0], fov: 27 });
+      bot.setStyle(id); bot.render();
+      const g = document.getElementById("c-" + id).getContext("2d");
+      // crop the 820×980 frame around the robot to the tile's 180:215 ratio
+      const sw = 640, sh = Math.round(640 * 215 / 180), sx = 90, sy = P("sy", "120");
+      g.imageSmoothingEnabled = id !== "pixel"; g.drawImage(cv, sx, sy, sw, sh, 0, 0, 360, 430);
+    }
+  }
+  async function buildMascot() {
+    const M3 = window.Mascot3D, VW = window.VO_WORDS;
+    const FACE = {"eyeA": {"c": [-0.1017, 0.6033], "r": [0.037, 0.034], "n": 344, "J": [-0.8070804081852212, -0.28336927447264443, -0.2689292148517819, 0.767464652853189], "uv0": [0.41428961906002, 0.6508527738073399], "maxErr": 0.0075728971647898765}, "eyeB": {"c": [0.1, 0.602], "r": [0.037, 0.034], "n": 344, "J": [0.7239884387099991, -0.06125307155111093, -0.04553605872381199, -0.7027396856405153], "uv0": [0.10665626011522979, 0.44039104240012367], "maxErr": 0.005958813097786782}, "browA": {"c": [-0.101, 0.689], "n": 99, "J": [-0.2397367555212638, 0.8539817292816768, 0.7021133260473107, 0.3275224085304049], "uv0": [0.6104683461950666, 0.4751860845807758], "maxErr": 0.0034168031311564056}, "browB": {"c": [0.1, 0.689], "n": 183, "J": [0.7452202855149699, -0.1768453408899853, -0.1387417639801932, -0.7149624190012184], "uv0": [0.09597917118934614, 0.3768964421328661], "maxErr": 0.004863166031021183}, "mouth": {"c": [0, 0.547], "r": [0.03, 0.016]}, "skin": [253, 200, 156], "skinEye": [243, 186, 141], "coverNormal": 0, "lidLit": [1, 1, 1], "mouthDy": 0, "faceSmooth": 1, "lidRing": 1.5, "browNy": 0.98, "headC": [0, 0.72, 0]};
+    const src = await (await fetch("../compositions/mascot.html")).text();
+    const DECALS = JSON.parse(src.match(/const DECALS = (\[.*?\]);\n/s)[1].replace(/"assets\//g, '"../assets/'));
+    const cv = document.getElementById("m"); cv.width = 1080; cv.height = 1920;
+    const m = await M3.Mascot.create(cv, { url: "../assets/mascot3d/mascot_biz_rigged.glb", face: FACE, decals: DECALS, width: 1080, height: 1920, envIntensity: 0.6 });
+    for (const o of m.scene.children) if (o.isDirectionalLight && o.position.z < 0) { o.intensity = 1.9; o.color.setRGB(0.5, 0.86, 1.0); o.position.set(1.6, 1.5, -1.4); }
+    if (m.shadow) m.shadow.visible = false;
+    const DIR = M3.direct(VW, 60, { intents: [{ t: 0.4, action: "idle" }], seed: 9, quiet: 0, look: 0 });
+    const PERF = M3.buildPerformance(DIR.tracks, 60.05, { smooth: 1 });
+    m.setView({ fx: P("mx", "800"), fy: P("my", "2090"), h: P("mh", "820"), yaw: 0, pitch: 4 });
+    const B = Object.assign({}, PERF(0).bones);
+    B.upperarm_R = [-2.7, 0, -0.25]; B.forearm_R = [0, 0, 0]; B.hand_R = [-0.12, 0.1, -0.12];
+    B.head = [-0.08, -0.06, 0.04]; B.neck = [-0.02, -0.03, 0.02];
+    m.setState({ root: { x: 0, y: 0, ry: -0.2, rz: 0, rx: 0, s: 1 }, bones: B, face: { blink: [0, 0], gaze: [-0.004, 0.006], mouthMix: 1, mouth: [0.04, 0.012, 0.005, 0.2] } });
+    m.render();
+  }
+  window.COVER_READY = Promise.all([document.fonts.ready, buildTiles(), buildMascot()]);
+</script>
+</body>
+</html>

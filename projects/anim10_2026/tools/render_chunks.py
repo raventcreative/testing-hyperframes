@@ -1,6 +1,6 @@
 """Resumable chunked render (the cloud container restarts now and then; one long render is too fragile).
 The reel is cut into chunks at scene starts (frame-aligned). Each chunk renders from its own project copy (scene
-slots shifted, host captions/ambient shifted, persistent 3D/rocket layers offset via window.__T0, no audio); chunks already on disk are
+slots shifted, host captions/ambient shifted, persistent stage/title/strip/mascot layers offset via window.__T0, no audio); chunks already on disk are
 skipped. Then: trim + concat (x264) and mux the VO (+ SFX) normalised to -14 LUFS.
 Usage: python3 tools/render_chunks.py <project_dir> <out.mp4> [quality]"""
 import json, re, shutil, subprocess, sys
@@ -20,7 +20,7 @@ ease_sine = lambda u: -(__import__("math").cos(__import__("math").pi * u) - 1) /
 def chunk_index(t0, t1):
     d = round(t1 - t0, 4); h = src
     h = re.sub(r'(<div[^>]*\bid="main-root"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)   # tolerant of injected data-hf-id attributes
-    for lid in ("bg", "fx", "caps", "tracker", "robot", "mascot"):
+    for lid in ("bg", "fx", "caps", "stage", "title", "strip", "mascot"):
         h = re.sub(rf'(<div[^>]*\bid="{lid}"[^>]*data-duration=")[0-9.]+"', rf'\g<1>{d}"', h)
     def slot(m):
         st = float(m.group(2))
@@ -34,13 +34,8 @@ def chunk_index(t0, t1):
         e0, e1 = ease_sine(t0 / TOTAL), ease_sine(t1 / TOTAL)
         return (f'tl.fromTo("{sel}", {{ x: {round(x1 * e0, 2)}, y: {round(y1 * e0, 2)} }}, {{ x: {round(x1 * e1, 2)}, y: {round(y1 * e1, 2)}, '
                 f'duration: {d}, ease: "none", immediateRender: false }}, 0);')
-    # the animated grid + its wandering light are linear over the whole reel: give each chunk its exact slice
-    def lin(sel, x0, y0, x1, y1):
-        f0, f1 = t0 / TOTAL, t1 / TOTAL
-        return (f'tl.fromTo("{sel}", {{ x: {round(x0 + (x1 - x0) * f0, 3)}, y: {round(y0 + (y1 - y0) * f0, 3)} }}, {{ x: {round(x0 + (x1 - x0) * f1, 3)}, '
-                f'y: {round(y0 + (y1 - y0) * f1, 3)}, duration: {d}, ease: "none", immediateRender: false }}, 0);')
-    h = re.sub(r'tl\.fromTo\("#grid",[^\n]*', lin("#grid", 0, 0, 430, 430), h)
-    h = re.sub(r'tl\.fromTo\("#gridhl",[^\n]*', lin("#gridhl", 600, 180, 180, 640), h)
+    h = re.sub(r'tl\.fromTo\("#glow-a",[^\n]*', amb("#glow-a", 90, 70), h)
+    h = re.sub(r'tl\.fromTo\("#glow-b",[^\n]*', amb("#glow-b", -110, -60), h)
     h = re.sub(r'tl\.fromTo\("#grain"[^\n]*', f'tl.fromTo("#grain", {{ x: {round(64 * t0 / TOTAL, 2)}, y: {round(40 * t0 / TOTAL, 2)} }}, '
                f'{{ x: {round(64 * t1 / TOTAL, 2)}, y: {round(40 * t1 / TOTAL, 2)}, duration: {d}, ease: "steps({max(1, int(d * 15))})", immediateRender: false }}, 0);', h)
     if t0 > 0:

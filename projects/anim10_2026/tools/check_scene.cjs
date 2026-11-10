@@ -1,15 +1,15 @@
 // Script-error check for scene compositions (snapshots fail SILENTLY when a scene script throws: the scene just stays static).
-// Needs the shared preview server:  npx --yes hyperframes@0.8.186 preview . --port 3013 --no-open   (already running? curl localhost:3011)
+// Needs the shared preview server:  npx --yes hyperframes@0.8.186 preview . --port 3014 --no-open   (already running? curl localhost:3014)
 // Usage: node tools/check_scene.cjs w02 w03      -> prints "ok <duration>" per scene, or the exception thrown by its script.
 const { chromium } = require("playwright");
 const ids = process.argv.slice(2);
 (async () => {
   const b = await chromium.launch({ args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] });
   const p = await b.newPage({ viewport: { width: 1400, height: 1000 } });
-  await p.goto("http://localhost:3013/#project/repo9_2026", { waitUntil: "load" });
+  await p.goto("http://localhost:3014/#project/anim10_2026", { waitUntil: "load" });
   let f = null;
   for (let i = 0; i < 40 && !f; i++) { await p.waitForTimeout(500); f = p.frames().find((x) => x.url().includes("/preview")); }
-  await p.waitForTimeout(6000);
+  await p.waitForTimeout(16000);
   for (const id of ids) {
     const r = await f.evaluate(async (id) => {
       const tl = (window.__timelines || {})[id];

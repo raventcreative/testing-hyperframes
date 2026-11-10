@@ -45,7 +45,7 @@ void main() {
   coc = smoothstep(0.08, 0.6, coc);
   vec3 blurred = texture2D(tDof, uv).rgb;
   vec3 col = mix(sharp, blurred, coc);
-  col += texture2D(tB1, uv).rgb * 0.55 + texture2D(tB2, uv).rgb * 0.45 + texture2D(tB3, uv).rgb * 0.35;
+  col += texture2D(tB1, uv).rgb * 0.40 + texture2D(tB2, uv).rgb * 0.32 + texture2D(tB3, uv).rgb * 0.24;
   col *= uExp;
   col = aces(col);
   // grade: teal shadows, warm highlights
@@ -134,7 +134,7 @@ export default function createCgi(ctx) {
   const rtDofH = makeRT(hw, hh, { depth: false, type: THREE.HalfFloatType });
   const dofBlur = new Blur(qw, qh, THREE.HalfFloatType);
   const comp = new Pass(COMP, { tC: { value: rt.texture }, tD: { value: rt.depthTexture }, tB1: { value: null }, tB2: { value: null }, tB3: { value: null }, tDof: { value: null },
-    uRes: { value: new THREE.Vector2(W, H) }, uT: { value: 0 }, uNF: { value: new THREE.Vector2() }, uFocus: { value: 4.5 }, uExp: { value: 1.0 } });
+    uRes: { value: new THREE.Vector2(W, H) }, uT: { value: 0 }, uNF: { value: new THREE.Vector2() }, uFocus: { value: 4.5 }, uExp: { value: 0.95 } });
   return {
     render(target) {
       const r = ctx.renderer, cam = ctx.camera, rr = ctx.rig.rigRoot;

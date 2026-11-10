@@ -1,11 +1,234 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="stage" data-width="1080" data-height="1920"></div>
+  <style>
+    #sg-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    #sg-wrap { position: absolute; left: 130px; top: 450px; width: 820px; height: 980px; transform-origin: 50% 50%; opacity: 0; }
+    #sg-shadow { position: absolute; left: 30px; right: 30px; top: 60px; bottom: -40px; border-radius: 60px; background: rgba(2,5,22,.62); filter: blur(34px); }
+    #sg-win { position: absolute; inset: 0; border-radius: 34px; overflow: hidden; background: #050a24; }
+    #sg-canvas { position: absolute; left: 0; top: 0; width: 820px; height: 980px; }
+    /* glass rim: thin light edge + cyan kiss on the top-left, reads as a premium screen on the navy background */
+    #sg-rim { position: absolute; inset: 0; border-radius: 34px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.13), inset 0 0 0 1px rgba(1,204,247,.18); }
+    #sg-glare { position: absolute; inset: 0; border-radius: 34px; background: linear-gradient(155deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 22%); mix-blend-mode: screen; }
+    #sg-edge { position: absolute; left: -2px; top: -2px; right: -2px; bottom: -2px; border-radius: 36px; border: 2px solid rgba(1,204,247,0);
+      box-shadow: 0 0 0 0 rgba(1,204,247,0); }
+  </style>
+  <div data-hf-id="hf-3ozi" id="sg-root" data-composition-id="stage" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-s9og" id="sg-wrap">
+      <div data-hf-id="hf-gh3k" id="sg-shadow"></div>
+      <div data-hf-id="hf-5zn2" id="sg-win"><canvas data-hf-id="hf-9ntu" id="sg-canvas" width="820" height="980" data-layout-ignore data-layout-allow-occlusion></canvas><div data-hf-id="hf-idet" id="sg-glare"></div></div>
+      <div data-hf-id="hf-a0jw" id="sg-rim"></div><div data-hf-id="hf-jclv" id="sg-edge"></div>
+    </div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 46.547);
+      // THE STAGE (persistent, hf-seek): a premium screen (820×980 at x 130, y 450) where the AI PRENEUR robot lives in a small office
+      // set, rendered by StyleBot in one of 10 animation genres. HOOK: the robot (CGI look) flickers through all 10 styles on "aku ubah
+      // jadi 10 gaya animasi". ROUNDS: right on each style NAME a cyan "re-render" scan sweeps the previous genre into the new one,
+      // the camera whips into a new angle, and the robot acts the genre (stop-motion stepping for Lego/Pixel/Chalk/Comic). CTA: the
+      // stage shrinks up (s12 builds below it) and keeps cycling the ten styles. Pure function of global time (__T0 for chunked renders).
+      const R = window.ROUNDS, H = window.HOOK, C = window.CTA, D = window.TOTAL, VW = window.VO_WORDS;
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
+      const io3 = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const e3 = (u) => { u = one(u); return 1 - Math.pow(1 - u, 3); };
+      const back = (u) => { u = one(u); const c1 = 1.7, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };
+      const L = (a, b, u) => a + (b - a) * u;
+      const hsh = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+      const vn = (t, seed, f) => { const x = t * f + seed * 17.13, i = Math.floor(x), u = x - i, w = u * u * (3 - 2 * u); return L(hsh(i + seed * 31), hsh(i + 1 + seed * 31), w) * 2 - 1; };
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : -99; };
+      const STY = R.map((r) => r.style);
+
+      // ------------------------------------------------------------------ style schedule: { a, b, u, ang }
+      const FL0 = H.tRobot + 0.15, FLD = (H.tAnimasi - FL0) / 10;                   // hook flicker: 10 styles, last lands on "animasi"
+      const CYC0 = C.start + 0.75, CYCD = 0.42;                                     // CTA: keeps cycling the ten styles
+      const ANG = [18, 162, 90, 200, 30, 270, 150, 0, 120, 60];
+      function styleAt(t) {
+        if (t < FL0) return { a: "cgi", u: 0 };
+        if (t < R[0].sweep[0]) {
+          const k = Math.floor((t - FL0) / FLD);
+          if (k >= 10) return { a: "cgi", u: 0 };
+          const prev = k === 0 ? "cgi" : STY[k - 1], lt = (t - FL0) - k * FLD, sw = Math.min(0.11, FLD * 0.65);
+          return lt < sw ? { a: prev, b: STY[k], u: io3(lt / sw), ang: ANG[(k * 3) % 10] } : { a: STY[k], u: 0 };
+        }
+        if (t < C.start + 0.1) {
+          let i = 0; while (i + 1 < R.length && t >= R[i + 1].sweep[0]) i++;
+          const r = R[i], prev = i === 0 ? "cgi" : STY[i - 1];
+          if (t < r.sweep[0]) return { a: prev, u: 0 };
+          if (t < r.sweep[1]) return { a: prev, b: r.style, u: io3((t - r.sweep[0]) / (r.sweep[1] - r.sweep[0])), ang: ANG[i] };
+          return { a: r.style, u: 0 };
+        }
+        if (t < CYC0) return { a: "cgi", u: 0 };
+        const k = Math.floor((t - CYC0) / CYCD), lt = (t - CYC0) - k * CYCD, sw = 0.2;
+        const cur = STY[k % 10], prev = k === 0 ? "cgi" : STY[(k - 1) % 10];
+        return lt < sw ? { a: prev, b: cur, u: io3(lt / sw), ang: ANG[k % 10] } : { a: cur, u: 0 };
+      }
+      // stop-motion stepping (pose time quantised) for the hand-made genres
+      const STEP = { lego: 12, pixel: 10, chalk: 12, comic: 12 };
+
+      // ------------------------------------------------------------------ camera: whip into a new angle during each sweep, drift slowly inside the round
+      const CAM = {
+        h0: { yaw: 24, pitch: 4, dist: 3.15, ty: 0.62, roll: 0 }, h1: { yaw: 18, pitch: 5, dist: 3.6, ty: 0.68, roll: 0 },
+        h2: { yaw: -8, pitch: 6, dist: 4.25, ty: 0.76, roll: 0 }, h3: { yaw: 2, pitch: 6, dist: 4.45, ty: 0.8, roll: 0 },
+        lego: [{ yaw: 8, pitch: 11, dist: 4.3, ty: 0.72 }, { yaw: 19, pitch: 9, dist: 3.95, ty: 0.7 }],
+        glow: [{ yaw: -18, pitch: 4, dist: 3.8, ty: 0.74 }, { yaw: -6, pitch: 6, dist: 3.45, ty: 0.72 }],
+        comic: [{ yaw: 27, pitch: 2, dist: 3.7, ty: 0.72, roll: -4 }, { yaw: 20, pitch: 4, dist: 3.4, ty: 0.7, roll: -6 }],
+        chalk: [{ yaw: 3, pitch: 6, dist: 4.6, ty: 0.84, tx: 0.1 }, { yaw: 10, pitch: 6, dist: 4.35, ty: 0.82, tx: 0.12 }],
+        pixel: [{ yaw: 0, pitch: 4, dist: 4.45, ty: 0.8 }, { yaw: 0, pitch: 4, dist: 4.3, ty: 0.79 }],
+        line: [{ yaw: -24, pitch: 8, dist: 3.9, ty: 0.74 }, { yaw: -33, pitch: 6, dist: 3.5, ty: 0.7 }],
+        explainer: [{ yaw: 14, pitch: 9, dist: 4.3, ty: 0.8, tx: 0.08 }, { yaw: 24, pitch: 7, dist: 3.95, ty: 0.78, tx: 0.1 }],
+        ps2: [{ yaw: -22, pitch: 5, dist: 4.0, ty: 0.74 }, { yaw: 22, pitch: 5, dist: 4.0, ty: 0.74 }],
+        flat: [{ yaw: 0, pitch: 5, dist: 4.5, ty: 0.8 }, { yaw: 4, pitch: 5, dist: 4.2, ty: 0.78 }],
+        cgi: [{ yaw: 30, pitch: -2, dist: 3.55, ty: 0.7 }, { yaw: 12, pitch: 3, dist: 4.0, ty: 0.74 }],
+        cta: { yaw: 15, pitch: 6, dist: 4.4, ty: 0.8 },
+      };
+      const KEYS = [];   // [time, cam, ease-into-this-key]
+      KEYS.push([0, CAM.h0, "io"], [FL0, CAM.h1, "e3"], [H.tAnimasi, CAM.h2, "io"], [R[0].sweep[0], CAM.h3, "io"]);
+      R.forEach((r, i) => {
+        const [S0, S1] = CAM[r.style];
+        KEYS.push([r.sweep[1], S0, "io"]);
+        KEYS.push([i + 1 < R.length ? R[i + 1].sweep[0] : C.start + 0.1, S1, "sin"]);
+      });
+      KEYS.push([C.start + 0.75, CAM.cta, "io"], [D + 1, CAM.cta, "sin"]);
+      const camLerp = (a, b, u) => ({ yaw: L(a.yaw, b.yaw, u), pitch: L(a.pitch, b.pitch, u), dist: L(a.dist, b.dist, u), ty: L(a.ty || 0.8, b.ty || 0.8, u),
+        tx: L(a.tx || 0, b.tx || 0, u), roll: L(a.roll || 0, b.roll || 0, u) });
+      function camAt(t) {
+        let k = 0; while (k + 1 < KEYS.length && t >= KEYS[k + 1][0]) k++;
+        if (k + 1 >= KEYS.length) return KEYS[k][1];
+        const [t0, c0] = KEYS[k], [t1, c1, ez] = KEYS[k + 1], u = (t - t0) / Math.max(1e-3, t1 - t0);
+        const w = ez === "e3" ? e3(u) : ez === "sin" ? 0.5 - 0.5 * Math.cos(Math.PI * one(u)) : io3(u);
+        const c = camLerp(c0, c1, w);
+        // a breath of handheld drift so holds never freeze
+        c.yaw += 0.6 * vn(t, 3, 0.35); c.pitch += 0.35 * vn(t, 4, 0.3);
+        return c;
+      }
+
+      // ------------------------------------------------------------------ robot acting
+      const HEAD_FIX = [-0.0775, -0.227, -0.1287];
+      const G = [];
+      const add = (t, k, d = 0.9, x) => G.push(Object.assign({ t, k, d }, x || {}));
+      // hook
+      add(0.05, "wave", 0.9); add(FL0 - 0.05, "power", H.tAnimasi - FL0 + 0.25); add(H.tClaude - 0.2, "present", 0.9, { side: "L" });
+      add(H.tTahan - 0.1, "pointUp", 1.0);
+      // rounds: each genre has its own acting
+      const ACT = {
+        lego: (r) => { add(r.sweep[1] - 0.05, "hop", 0.9); add(wt("hidup.") - 0.25, "wave", 0.9); },
+        glow: (r) => { add(r.sweep[1] - 0.05, "rise", 2.2); add(wt("neon") - 0.15, "present", 1.2, { side: "L" }); },
+        comic: (r) => { add(r.sweep[1] - 0.08, "punch", 0.7); add(wt("panel") - 0.2, "point", 1.1, { side: "R", up: 1 }); },
+        chalk: (r) => { add(r.sweep[1], "nod", 0.6); add(wt("kapur") - 0.25, "point", 1.6, { side: "L", up: 1 }); },
+        pixel: (r) => { add(r.sweep[1] - 0.02, "jump", 0.55); add(wt("game", r.start) - 0.2, "jump", 0.55); },
+        line: (r) => { add(r.sweep[1], "turn", 2.4); add(wt("elegan.") - 0.25, "wave", 0.9, { soft: 1 }); },
+        explainer: (r) => { add(r.sweep[1] - 0.05, "present", 1.4, { side: "L" }); add(wt("produk.") - 0.3, "nod", 0.7); },
+        ps2: (r) => { add(r.sweep[1] - 0.05, "turntable", r.start + r.dur - r.sweep[1] + 0.1); },
+        flat: (r) => { add(r.sweep[1] - 0.05, "glide", 1.4); add(wt("brand.") - 0.25, "wave", 0.9); },
+        cgi: (r) => { add(r.sweep[1] - 0.05, "ascend", 2.4); add(wt("film.") - 0.3, "cheer", 1.0); },
+      };
+      R.forEach((r) => ACT[r.style](r));
+      // CTA
+      add(C.tKomen - 0.1, "pointFwd", 1.2); add(C.tDM - 0.2, "wave", 1.2);
+      const envG = (t, g) => sm((t - g.t + 0.16) / 0.2) * (1 - sm((t - (g.t + g.d)) / 0.26));
+      const BL = []; { let x = 1.1, h = 29; while (x < D) { BL.push(x); h = (h * 9301 + 49297) % 233280; x += 2.0 + (h / 233280) * 2.2; } }
+      const blinkAt = (t) => { let v = 0; for (const b of BL) { const d = t - b; if (d > -0.06 && d < 0.18) v = Math.max(v, d < 0 ? 1 + d / 0.06 : 1 - sm((d - 0.04) / 0.14)); } return Math.max(0, v); };
+      const HAND = (side) => side === "R" ? "hand_R" : "hand_L";
+      function perf(t) {
+        const root = { x: 0, y: 0.075, z: 0, rx: 0.02, ry: 0.18, rz: -0.02 };
+        const bones = { body: [0, 0, 0], head: [HEAD_FIX[0], HEAD_FIX[1], HEAD_FIX[2]], hand_L: [0, 0, 0], hand_R: [0, 0, 0] };
+        const offs = { hand_L: [0, 0, 0], hand_R: [0, 0, 0], head: [0, 0, 0] };
+        const face = { blink: blinkAt(t), gaze: [0, 0.03], happy: 0, squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 };
+        // hover idle
+        root.y += 0.016 * Math.sin(2 * Math.PI * 0.55 * t) + 0.006 * Math.sin(2 * Math.PI * 1.27 * t + 1.1);
+        root.rz += 0.03 * Math.sin(2 * Math.PI * 0.41 * t + 0.4);
+        root.rx += 0.018 * Math.sin(2 * Math.PI * 0.5 * t + 1.7);
+        bones.head = [HEAD_FIX[0] + 0.02 * vn(t, 5, 0.25), HEAD_FIX[1] + 0.06 * vn(t, 6, 0.18), HEAD_FIX[2] + 0.03 * vn(t, 7, 0.2)];
+        offs.hand_L = [-0.07 + 0.006 * vn(t, 11, 0.4), 0.018 * Math.sin(2 * Math.PI * 0.55 * t + 1.3), 0.008 * vn(t, 12, 0.35)];
+        offs.hand_R = [0.07 + 0.006 * vn(t, 13, 0.4), 0.018 * Math.sin(2 * Math.PI * 0.55 * t + 2.4), 0.008 * vn(t, 14, 0.35)];
+        bones.hand_L = [0.08 * Math.sin(2 * Math.PI * 0.5 * t), 0, 0.06 * vn(t, 15, 0.3)];
+        bones.hand_R = [0.08 * Math.sin(2 * Math.PI * 0.5 * t + 1), 0, 0.06 * vn(t, 16, 0.3)];
+        face.gaze = [-0.04 + 0.05 * vn(t, 21, 0.22), 0.05 + 0.04 * vn(t, 22, 0.2)];
+        let ring = 1;
+        for (const g of G) {
+          const w = envG(t, g); if (w < 1e-3) continue;
+          const lt = t - g.t, hd = HAND(g.side);
+          switch (g.k) {
+            case "wave": { const k = w * (g.soft ? 0.7 : 1);
+              offs.hand_L = [L(offs.hand_L[0], 0.05, k), L(offs.hand_L[1], 0.31, k), L(offs.hand_L[2], 0.1, k)];
+              bones.hand_L = [L(bones.hand_L[0], -0.35, k), 0, L(bones.hand_L[2], -0.1, k) + 0.4 * k * Math.sin(lt * 2 * Math.PI * (g.soft ? 1.3 : 2.2))];
+              face.happy = Math.max(face.happy, 0.8 * w); break; }
+            case "power": { const b = 0.5 + 0.5 * Math.sin(lt * 2 * Math.PI * 2.6);
+              offs.hand_L = [L(offs.hand_L[0], -0.16, w), L(offs.hand_L[1], 0.12 + 0.03 * b, w), L(offs.hand_L[2], 0.04, w)];
+              offs.hand_R = [L(offs.hand_R[0], 0.16, w), L(offs.hand_R[1], 0.12 + 0.03 * (1 - b), w), L(offs.hand_R[2], 0.04, w)];
+              root.y += 0.03 * w; face.happy = Math.max(face.happy, w); ring += 0.9 * w; break; }
+            case "present": { const up = w * (1 + 0.06 * Math.sin(lt * 9) * Math.exp(-lt * 3)), sx = hd === "hand_L" ? 1 : -1;
+              offs[hd] = [L(offs[hd][0], 0.06 * sx, up), L(offs[hd][1], 0.28, up), L(offs[hd][2], 0.12, up)];
+              bones[hd] = [L(bones[hd][0], -0.5, w), 0, L(bones[hd][2], -0.4 * sx, w)];
+              face.gaze = [L(face.gaze[0], 0.14 * sx, w), L(face.gaze[1], 0.18, w)]; face.happy = Math.max(face.happy, 0.5 * w); break; }
+            case "point": { const up = g.up ? 0.12 : 0, sx = hd === "hand_L" ? 1 : -1;
+              offs[hd] = [L(offs[hd][0], 0.1 * sx, w), L(offs[hd][1], 0.14 + up, w), L(offs[hd][2], 0.2, w)];
+              bones[hd] = [L(bones[hd][0], -0.35 - up, w), 0, L(bones[hd][2], -0.35 * sx, w)];
+              root.ry += 0.22 * sx * w; face.gaze = [L(face.gaze[0], 0.24 * sx, w), L(face.gaze[1], 0.12 + up, w)]; break; }
+            case "pointUp":
+              offs.hand_L = [L(offs.hand_L[0], 0.02, w), L(offs.hand_L[1], 0.36, w), L(offs.hand_L[2], 0.06, w)];
+              bones.hand_L = [L(bones.hand_L[0], -0.7, w), 0, L(bones.hand_L[2], -0.15, w)];
+              bones.head[0] -= 0.12 * w; face.gaze = [L(face.gaze[0], 0.05, w), L(face.gaze[1], 0.32, w)]; face.happy = Math.max(face.happy, 0.6 * w); break;
+            case "pointFwd":
+              offs.hand_R = [L(offs.hand_R[0], -0.02, w), L(offs.hand_R[1], 0.1, w), L(offs.hand_R[2], 0.32, w)];
+              bones.hand_R = [L(bones.hand_R[0], -0.2, w), 0, 0]; face.happy = Math.max(face.happy, 0.7 * w); root.ry = L(root.ry, 0, w); break;
+            case "hop": { const h = Math.max(0, Math.sin(Math.PI * one(lt / 0.42))) + 0.5 * Math.max(0, Math.sin(Math.PI * one((lt - 0.42) / 0.3)));
+              root.y += 0.11 * h * w; root.rz += 0.06 * Math.sin(lt * 14) * w * h; face.happy = Math.max(face.happy, w); break; }
+            case "rise": root.y += 0.07 * sm(lt / 1.2) * w; root.ry += 0.25 * Math.sin(lt * 1.6) * w; face.gaze = [face.gaze[0], L(face.gaze[1], 0.28, w)]; ring += 0.8 * w; break;
+            case "punch": { const k = e3(lt / 0.14) * w;
+              offs.hand_R = [L(offs.hand_R[0], -0.04, k), L(offs.hand_R[1], 0.18, k), L(offs.hand_R[2], 0.34, k)];
+              bones.hand_R = [L(bones.hand_R[0], -0.6, k), 0, 0]; root.rx += 0.12 * k; root.ry -= 0.2 * k; face.happy = Math.max(face.happy, w); ring += 0.5 * w; break; }
+            case "nod": bones.head[0] += 0.13 * w * Math.max(0, Math.sin(lt * 2 * Math.PI * 1.7)); face.happy = Math.max(face.happy, 0.5 * w); break;
+            case "jump": { const u = one(lt / 0.5), h = 4 * u * (1 - u);
+              root.y += 0.2 * h * w; offs.hand_L[1] += 0.12 * h * w; offs.hand_R[1] += 0.12 * h * w; face.happy = Math.max(face.happy, w); break; }
+            case "turn": root.ry += L(0, -0.55, sm(lt / 2.2)) * w; face.gaze = [L(face.gaze[0], -0.12, w), face.gaze[1]]; break;
+            case "turntable": root.ry += (lt * 1.15 - 0.55) * w; offs.hand_L[1] -= 0.02 * w; offs.hand_R[1] -= 0.02 * w; break;
+            case "glide": root.x += L(-0.32, 0.05, e3(lt / 1.1)) * w; root.rz += 0.12 * Math.sin(Math.PI * one(lt / 1.1)) * w; break;
+            case "ascend": root.y += 0.12 * sm(lt / 1.4) * w; root.rx -= 0.06 * w; ring += 1.6 * w * sm(lt / 0.6); face.glow = 1 + 0.6 * w; break;
+            case "cheer": { const b = 0.5 + 0.5 * Math.sin(lt * 2 * Math.PI * 3);
+              offs.hand_L = [L(offs.hand_L[0], -0.13, w), L(offs.hand_L[1], 0.26 + 0.04 * b, w), L(offs.hand_L[2], 0.06, w)];
+              offs.hand_R = [L(offs.hand_R[0], 0.13, w), L(offs.hand_R[1], 0.26 + 0.04 * (1 - b), w), L(offs.hand_R[2], 0.06, w)];
+              root.y += 0.02 * w * b; face.happy = Math.max(face.happy, w); ring += 0.7 * w; break; }
+          }
+        }
+        face.blink *= 1 - face.happy;
+        return { root, bones, offs, face, ring, shadow: true };
+      }
+
+      // ------------------------------------------------------------------ the screen itself: pop-in, sweep edge glow, CTA shrink
+      const wrap = document.getElementById("sg-wrap"), edge = document.getElementById("sg-edge");
+      const set = (el, k, v) => { if (el.style[k] !== v) el.style[k] = v; };
+      function frameCss(t) {
+        const pin = back(t / 0.45), op = one(t / 0.18);
+        const cu = io3((t - C.start - 0.05) / 0.6);                                           // CTA: shrink up, s12 builds below
+        const sc = L(0.86, 1, pin) * L(1, 0.6, cu), ty = L(0, -258, cu);
+        set(wrap, "opacity", op.toFixed(3));
+        set(wrap, "transform", `translateY(${ty.toFixed(1)}px) scale(${sc.toFixed(4)})`);
+        // the rim flares cyan while a sweep is running
+        const s = styleAt(t), g = s.b ? Math.sin(Math.PI * s.u) : 0;
+        set(edge, "borderColor", `rgba(1,204,247,${(0.85 * g).toFixed(3)})`);
+        set(edge, "boxShadow", `0 0 ${(34 * g).toFixed(1)}px rgba(1,204,247,${(0.55 * g).toFixed(3)})`);
+      }
+
+      const canvas = document.getElementById("sg-canvas");
+      let bot = null;
+      function apply(t) {
+        frameCss(t);
+        const s = styleAt(t), cur = s.b && s.u > 0.5 ? s.b : s.a, fps = STEP[cur];
+        const tp = fps ? Math.floor(t * fps) / fps : t;
+        const c = camAt(t);
+        bot.setTime(t);
+        bot.setState(perf(tp));
+        bot.setCamera({ yaw: c.yaw, pitch: c.pitch, dist: c.dist, target: [c.tx, c.ty, 0], fov: 27, roll: c.roll });
+        if (s.b) bot.renderSweep(s.a, s.b, s.u, s.ang); else { bot.setStyle(s.a); bot.render(); }
+      }
+      window.__STAGE = { styleAt, camAt, perf };   // for the overlays / debugging
+      window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+      const ready = window.StyleBot.create(canvas, { url: "assets/robot3d/robot_aipreneur.glb", logoUrl: "assets/brand/logo_white_trim.png", width: 820, height: 980 })
+        .then((b) => { bot = b; apply(0); });
+      window.__hf.buildReady["stage"] = ready;
+      window.addEventListener("hf-seek", (e) => { const t = e.detail.time + (window.__T0 || 0); if (bot) apply(t); else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => apply(t))); });
       window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02);
       window.__timelines["stage"] = tl;
     })();
   </script>

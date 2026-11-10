@@ -1,0 +1,76 @@
+<template>
+  <style>
+    #tt-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    /* the round title straddles the stage's top edge (stage: x 130–950, y 450–1430) */
+    #tt-box { position: absolute; left: 152px; top: 414px; height: 84px; }
+    #tt-pill { position: absolute; left: 38px; top: 6px; height: 72px; padding: 0 34px 0 64px; border-radius: 36px; display: flex; align-items: center; gap: 12px;
+      white-space: nowrap; overflow: hidden; background: linear-gradient(160deg, rgba(22,40,96,.97), rgba(8,14,46,.97));
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14), 0 14px 30px -12px rgba(0,0,0,.7), 0 0 24px -6px rgba(1,204,247,.35); }
+    #tt-pill .a, #tt-pill .b { display: inline-flex; font: 700 42px/1 Poppins, sans-serif; letter-spacing: -0.01em; }
+    #tt-pill .a { color: #ffffff; }
+    #tt-pill .b { color: #01ccf7; }
+    #tt-pill .l { display: inline-block; white-space: pre; }
+    #tt-badge { position: absolute; left: 0; top: 0; width: 84px; height: 84px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(150deg, #6adfff, #01ccf7 55%, #0396c4); color: #071038; font: 700 34px/1 Poppins, sans-serif; letter-spacing: -0.03em;
+      box-shadow: 0 0 0 4px rgba(8,14,46,.95), 0 10px 24px -8px rgba(1,204,247,.75); }
+    #tt-flash { position: absolute; left: 0; top: 0; width: 84px; height: 84px; border-radius: 50%; border: 3px solid #01ccf7; opacity: 0; }
+  </style>
+  <div data-hf-id="hf-b62s" id="tt-root" data-composition-id="title" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-bry9" id="tt-box"><div data-hf-id="hf-7y6j" id="tt-pill"><span data-hf-id="hf-x1oa" class="a" id="tt-a"></span><span data-hf-id="hf-z2he" class="b" id="tt-b"></span></div><div data-hf-id="hf-jftg" id="tt-flash"></div><div data-hf-id="hf-2nbr" id="tt-badge"><span data-hf-id="hf-czln" id="tt-n"></span></div></div>
+  </div>
+  <script>
+    (function () {
+      // ROUND TITLE (persistent, hf-seek): a cyan number badge + navy name pill straddling the stage's top edge. On the spoken number the
+      // badge pops in with a ring flash; on the style name the pill unrolls and the letters rise in (so the name is read the moment it is
+      // heard and the stage sweep lands); before the next number it rolls back into the badge, which spins to the next number.
+      // Hidden in the hook (the strip/hook own that space) and from the CTA on. Pure function of global time (__T0 for chunked renders).
+      const R = window.ROUNDS, C = window.CTA, D = window.TOTAL;
+      const one = (x) => Math.max(0, Math.min(1, x));
+      const e3 = (u) => { u = one(u); return 1 - Math.pow(1 - u, 3); };
+      const io = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const back = (u) => { u = one(u); const c1 = 2.0, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };
+      const $ = (id) => document.getElementById(id);
+      const set = (el, k, v) => { if (el.style[k] !== v) el.style[k] = v; };
+      const box = $("tt-box"), pill = $("tt-pill"), badge = $("tt-badge"), flash = $("tt-flash"), nEl = $("tt-n"), aEl = $("tt-a"), bEl = $("tt-b");
+      const letters = (s, pre) => [...s].map((ch, i) => `<span class="l" id="${pre}${i}">${ch === " " ? " " : ch}</span>`).join("");
+      let shown = -1, LET = [];
+      function load(i) {
+        if (shown === i) return; shown = i;
+        const r = R[i];
+        nEl.textContent = String(r.k).padStart(2, "0");
+        aEl.innerHTML = letters(r.a, "tt-la"); bEl.innerHTML = letters(r.b, "tt-lb");
+        LET = [...aEl.children, ...bEl.children];
+      }
+      function draw(t) {
+        // which round owns the title now: from just before its number until just before the next number
+        let i = -1; for (let k = 0; k < R.length; k++) if (t >= R[k].tNum - 0.14) i = k;
+        if (i < 0 || t >= C.start) { set(box, "opacity", "0"); return; }
+        load(i);
+        const r = R[i], nx = R[i + 1], tOut = nx ? nx.tNum - 0.14 : C.start;
+        set(box, "opacity", "1");
+        // badge: pops in on the first round; afterwards it stays and spins to the new number
+        const t0 = r.tNum - 0.14, pop = i === 0 ? back((t - t0) / 0.38) : 1, spin = i === 0 ? 0 : 1 - e3((t - t0) / 0.42);
+        const outU = io((t - (tOut - 0.24)) / 0.24);
+        set(badge, "transform", `scale(${(pop * (1 + 0.12 * Math.sin(Math.PI * one((t - t0) / 0.3)))).toFixed(4)}) rotate(${(-200 * spin).toFixed(1)}deg)`);
+        const fl = one((t - t0) / 0.45);
+        set(flash, "opacity", (fl > 0 && fl < 1 ? 0.9 * (1 - fl) : 0).toFixed(3));
+        set(flash, "transform", `scale(${(1 + 0.9 * e3(fl)).toFixed(3)})`);
+        // pill: unrolls on the style name, rolls back before the next number
+        const inU = e3((t - (r.tName - 0.16)) / 0.34), w = Math.min(inU, 1 - outU);
+        set(pill, "clipPath", `inset(0 ${(100 * (1 - w)).toFixed(2)}% 0 0 round 36px)`);
+        LET.forEach((el, k) => {
+          const u = e3((t - (r.tName - 0.12 + 0.022 * k)) / 0.3);
+          set(el, "transform", `translateY(${(46 * (1 - u)).toFixed(1)}px)`);
+          set(el, "opacity", u.toFixed(3));
+        });
+        // whole title steps away at the CTA
+        set(box, "transform", `translateY(${(-14 * io((t - (C.start - 0.25)) / 0.25)).toFixed(1)}px)`);
+      }
+      draw(0);
+      window.addEventListener("hf-seek", (e) => draw(e.detail.time + (window.__T0 || 0)));
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true }); tl.set({}, {}, D - 0.02);
+      window.__timelines["title"] = tl;
+    })();
+  </script>
+</template>

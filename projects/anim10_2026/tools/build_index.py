@@ -46,7 +46,7 @@ html = f"""<!doctype html>
       /* captions: every word sits on its own navy chip, so it reads over every world */
       .cap {{ opacity: 0; position: absolute; left: 70px; right: 70px; text-align: center; font-size: 44px; line-height: 1.5; letter-spacing: -0.005em; }}
       .cap.mid {{ top: 960px; }}
-      .cap.low {{ top: 1345px; }}
+      .cap.low {{ top: 1328px; }}
       .cap .m {{ display: inline-block; overflow: hidden; vertical-align: top; padding: 0.06em 0.06em 0.12em; margin: -0.06em -0.06em -0.12em; }}
       .cap .w {{ display: inline-block; position: relative; padding: 0.02em 0.26em 0.06em; border-radius: 0.22em; background: var(--chip);
                  box-shadow: 0 6px 18px rgba(4,8,30,.35), inset 0 0 0 1.5px rgba(255,255,255,.08); }}
@@ -64,12 +64,13 @@ html = f"""<!doctype html>
         <div class="plate"></div><div id="glow-a" class="glow"></div><div id="glow-b" class="glow"></div>
       </div>
       <div id="stage" class="clip" data-composition-id="stage" data-composition-src="compositions/stage.html" data-start="0" data-duration="{total}" data-track-index="1" data-width="1080" data-height="1920"></div>
-{slots}      <div id="strip" class="clip" data-composition-id="strip" data-composition-src="compositions/strip.html" data-start="0" data-duration="{total}" data-track-index="5" data-width="1080" data-height="1920"></div>
-      <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
-      <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="7"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_white_trim.png" alt="AI PRENEUR"></div>
-      <div id="caps" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"></div>
-      <audio id="vo" src="assets/audio/vo.mp3" data-start="{off}" data-duration="{T['vo_sec']}" data-track-index="9" data-volume="1"></audio>
-      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="{total}" data-track-index="10" data-volume="0.9"></audio>
+{slots}      <div id="title" class="clip" data-composition-id="title" data-composition-src="compositions/title.html" data-start="0" data-duration="{total}" data-track-index="5" data-width="1080" data-height="1920"></div>
+      <div id="strip" class="clip" data-composition-id="strip" data-composition-src="compositions/strip.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
+      <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{total}" data-track-index="7" data-width="1080" data-height="1920"></div>
+      <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_white_trim.png" alt="AI PRENEUR"></div>
+      <div id="caps" class="clip layer" data-start="0" data-duration="{total}" data-track-index="9"></div>
+      <audio id="vo" src="assets/audio/vo.mp3" data-start="{off}" data-duration="{T['vo_sec']}" data-track-index="10" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="{total}" data-track-index="11" data-volume="0.9"></audio>
     </div>
     <script>
       (function () {{
@@ -135,7 +136,7 @@ PLACE = """<template>
 for s in T["scenes"]:
     f = P / f"compositions/{s['id']}.html"
     if not f.exists(): f.write_text(PLACE.format(id=s["id"], dur=round(s["dur"] + ovl(s["id"]) - 0.01, 3)))
-for cid in ("stage", "strip", "mascot"):
+for cid in ("stage", "title", "strip", "mascot"):
     f = P / f"compositions/{cid}.html"
     if not f.exists(): f.write_text(PLACE.format(id=cid, dur=round(total - 0.02, 3)))
 print("index.html ok:", len(T["scenes"]), "scenes,", len(T["words"]), "words,", len(T["caps"]), "caption chunks, total", total)

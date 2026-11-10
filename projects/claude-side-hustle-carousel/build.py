@@ -38,7 +38,7 @@ cover = frame("cover", f'''<div class="label">Claude side hustle</div>
   <h1>AI side hustle,<br><span>the smart way.</span></h1>
   <div class="eq">{eq}</div>
   <div class="eqcap"><span>Build with Claude</span><span>Sell on Instagram</span><span>Get paid on Gumroad</span></div>
-  <div class="robot"><img src="assets/robot.png" alt="Robot working on a laptop"></div>''', swipe=True)
+''', swipe=True)
 
 # ---------- 2. OVERVIEW ----------
 OV = [("bulb", "Pick your first product"), ("ladder", "Map your offer ladder"), ("rocket", "Launch in 7 days"),

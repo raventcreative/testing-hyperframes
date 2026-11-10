@@ -209,9 +209,11 @@ function designColours(Bb, Bh) {
     const c = cid(x, y, z), py = Y0 + (y + 0.5) * PH; if (occ[c] && col[c] === C_BLUE && py > 0.1 && py < 0.32) { r0 = Math.min(r0, py); r1 = Math.max(r1, py); }
   }
   if (r0 > r1) { r0 = 0.2; r1 = 0.24; }
+  const { X0, Z0 } = Bb, xc = X0 + NX * S / 2;
   for (let y = 0; y < NY; y++) for (let z = 0; z < NZ; z++) for (let x = 0; x < NX; x++) {
     const c = cid(x, y, z), py = Y0 + (y + 0.5) * PH; if (!occ[c]) continue;
-    if (py > r1) col[c] = C_WHITE; else if (py >= r0 && py <= r1) col[c] = col[c] === C_BLUE ? C_BLUE : C_BLACK; else if (col[c] !== C_BLUE || py > 0.06) col[c] = C_BLACK;
+    const rad = Math.hypot(X0 + (x + 0.5) * S - xc, Z0 + (z + 0.5) * S);
+    if (py > r1 || (py > r0 - 0.03 && rad > 0.25)) col[c] = C_WHITE;   // (cape, incl. the flap tips that hang past the ring) else if (py >= r0 && py <= r1) col[c] = col[c] === C_BLUE ? C_BLUE : C_BLACK; else if (col[c] !== C_BLUE || py > 0.06) col[c] = C_BLACK;
   }
   Bb.ring = [r0, r1];
 }
@@ -307,15 +309,17 @@ function emitGroup(B, cols, { noStud } = {}) {
 }
 
 // ABS plastic: vertex colours + world-unit bevels / seam grooves (box-filtered), glowing trans-blue light bricks
-function brickMaterial() {
+// (uRing: the robot's light-ring level from the pose state, shared with every style)
+function brickMaterial(uRing) {
   const m = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.24, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.12 });
   m.onBeforeCompile = (sh) => {
+    sh.uniforms.uRing = uRing;
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute vec2 aLuv; attribute vec2 aSz; attribute vec4 aSeam; attribute vec3 aT1; attribute vec3 aT2; attribute float aPh;\nvarying vec2 vLuv; varying vec2 vSz; varying vec4 vSeam; varying vec3 vT1; varying vec3 vT2; varying float vPh;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvLuv = aLuv; vSz = aSz; vSeam = aSeam; vPh = aPh; vT1 = normalize(mat3(modelViewMatrix) * aT1); vT2 = normalize(mat3(modelViewMatrix) * aT2);');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
-        varying vec2 vLuv; varying vec2 vSz; varying vec4 vSeam; varying vec3 vT1; varying vec3 vT2; varying float vPh;
+        varying vec2 vLuv; varying vec2 vSz; varying vec4 vSeam; varying vec3 vT1; varying vec3 vT2; varying float vPh; uniform float uRing;
         // box-filtered coverage of the band [0, w] at distance d (footprint fw)
         float band(float d, float w, float fw) { fw = max(fw, 1e-6); return clamp((min(w, d + 0.5 * fw) - max(0.0, d - 0.5 * fw)) / fw, 0.0, 1.0); }`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
@@ -330,17 +334,18 @@ function brickMaterial() {
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
         float isBlue = step(0.8, vColor.b) * step(vColor.r, 0.4);
         diffuseColor.rgb *= 1.0 - 0.8 * groove;
-        totalEmissiveRadiance += vColor.rgb * isBlue * (2.2 - 1.6 * groove);`);
+        totalEmissiveRadiance += vColor.rgb * isBlue * (2.2 - 1.6 * groove) * max(0.0, 0.4 + 0.6 * uRing);`);
   };
   m.customProgramCacheKey = () => 'sb-lego-brick2';
   return m;
 }
-function studMaterial() {
+function studMaterial(uRing) {
   const m = new THREE.MeshPhysicalMaterial({ roughness: 0.24, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.12 });
   m.onBeforeCompile = (sh) => {
-    sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+    sh.uniforms.uRing = uRing;
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uRing;').replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
       #ifdef USE_INSTANCING_COLOR
-      float isBlue = step(0.8, vColor.b) * step(vColor.r, 0.4); totalEmissiveRadiance += vColor.rgb * isBlue * 2.2;
+      float isBlue = step(0.8, vColor.b) * step(vColor.r, 0.4); totalEmissiveRadiance += vColor.rgb * isBlue * 2.2 * max(0.0, 0.4 + 0.6 * uRing);
       #endif`);
   };
   m.customProgramCacheKey = () => 'sb-lego-stud2';
@@ -484,7 +489,7 @@ export default function createLego(ctx) {
   const { B, F } = buildRobot(rig);
   const bones = rig.mesh.skeleton.bones, inv = rig.mesh.skeleton.boneInverses;
   const Finv = F.map((m) => m.clone().invert());
-  const bmat = brickMaterial(), smat = studMaterial(), studGeo = studGeometry(12), studGeoLo = studGeometry(8);
+  const bmat = brickMaterial(rig.shared.faceU.uRing), smat = studMaterial(rig.shared.faceU.uRing), studGeo = studGeometry(12), studGeoLo = studGeometry(8);
   const brickCols = BRICK.map((h) => lc(h));
   // head: open the visor (cells in front of the glass) and frame it with white bricks
   const H1 = B[1];

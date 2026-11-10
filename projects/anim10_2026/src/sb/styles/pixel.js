@@ -43,20 +43,9 @@ function hudTexture(w, h) {
   rect(0, 0, w, 9, C.ink); rect(0, 9, w, 1, C.d2);
   const heart = [[0, 1, 1, 0, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 0], [0, 0, 1, 1, 1, 0, 0], [0, 0, 0, 1, 0, 0, 0]];
   for (let k = 0; k < 3; k++) heart.forEach((row, j) => row.forEach((v, i) => { if (v) put(2 + k * 8 + i, 2 + j, k < 2 ? (j === 1 && i === 1 ? C.y3 : C.r2) : C.d3); }));
-  text('AI PRENEUR', Math.floor(w / 2) - 19, 2, C.w3);
-  rect(w - 26, 2, 24, 5, C.d2); rect(w - 25, 3, 16, 3, C.g3); rect(w - 25, 3, 16, 1, 0xa8f0a0);
-  // bottom hotbar: 5 slots with tiny items
-  const sy = h - 12, sx0 = Math.floor(w / 2) - 27;
-  for (let k = 0; k < 5; k++) {
-    const x = sx0 + k * 11; rect(x, sy, 10, 10, C.ink); rect(x + 1, sy + 1, 8, 8, k === 2 ? C.d3 : C.d2);
-    if (k === 2) { rect(x, sy, 10, 1, C.y2); rect(x, sy + 9, 10, 1, C.y2); rect(x, sy, 1, 10, C.y2); rect(x + 9, sy, 1, 10, C.y2); }
-  }
-  const it = (k, f) => f(sx0 + k * 11 + 2, sy + 2);
-  it(0, (x, y) => { rect(x + 1, y, 4, 6, C.y2); rect(x, y + 1, 6, 4, C.y2); rect(x + 2, y + 1, 1, 4, C.y3); });                         // coin
-  it(1, (x, y) => { rect(x, y + 4, 1, 2, C.g3); rect(x + 2, y + 2, 1, 4, C.y2); rect(x + 4, y, 1, 6, C.r2); });                          // chart
-  it(2, (x, y) => { rect(x + 1, y, 4, 4, C.y3); rect(x + 2, y + 4, 2, 2, C.w1); rect(x + 2, y + 1, 1, 1, C.w3); });                     // bulb
-  it(3, (x, y) => { rect(x, y + 1, 6, 4, C.w3); rect(x + 1, y + 2, 1, 1, C.d3); rect(x + 4, y + 2, 1, 1, C.d3); rect(x + 2, y + 3, 2, 1, C.d3); });   // mail
-  it(4, (x, y) => { rect(x + 2, y, 2, 6, C.b3); rect(x, y + 2, 6, 2, C.b3); rect(x + 2, y + 2, 2, 2, C.w3); });                        // spark
+  text('AI PRENEUR', w - 17 - 40, 2, C.w3);                               // right side: the round title covers the top-left
+  rect(w - 15, 2, 13, 5, C.d2); rect(w - 14, 3, 8, 3, C.g3); rect(w - 14, 3, 8, 1, 0xa8f0a0);
+  // (no bottom hotbar: the reel captions sit on the stage floor)
   const t = new THREE.DataTexture(d, w, h, THREE.RGBAFormat); t.magFilter = t.minFilter = THREE.NearestFilter; t.needsUpdate = true;
   return t;
 }

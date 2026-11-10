@@ -124,10 +124,11 @@
         const e = $(id); I(e, { opacity: 0, x: 34 }); ft(e, { opacity: 0, x: 34 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, tName + 0.06 + i * 0.03);
       });
       // the big number (Indonesian thousands separator), per-frame values
-      const num = $("r3-num"), fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      I(num, { textContent: "0", scale: 1, transformOrigin: "0% 70%" });
+      // NB: GSAP parses numeric-looking strings ("10.000" → 10, "1.200" → "1.2"); a trailing U+2060 (invisible word joiner) keeps them as text
+      const num = $("r3-num"), fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "\u2060";
+      I(num, { textContent: "0\u2060", scale: 1, transformOrigin: "0% 70%" });
       for (let f = Math.ceil(tC0 * 30); f / 30 < tC1; f++) tl.set(num, { textContent: fmt(Math.round(10000 * prog(f / 30))) }, f / 30);
-      tl.set(num, { textContent: "10.000" }, tC1);
+      tl.set(num, { textContent: fmt(10000) }, tC1);
       ft(num, { scale: 1 }, { scale: 1.06, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tC1);
       // "+2.400 bulan ini" on "hasil"
       const delta = $("r3-delta");

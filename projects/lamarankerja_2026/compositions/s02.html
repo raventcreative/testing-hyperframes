@@ -1,10 +1,266 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920"></div>
+  <style>
+    .s02-a { position: absolute; }
+    /* ---- s01's end state, copied 1:1 (clock, CV, skyline) ---- */
+    #s02-clock { left: 130px; top: 330px; display: flex; gap: 10px; align-items: center; }
+    .s02-fl { position: relative; width: 104px; height: 140px; border-radius: 18px; background: linear-gradient(180deg, #1d2c66 0 50%, #172457 50% 100%);
+      box-shadow: 0 18px 34px -16px rgba(0,0,0,.7), inset 0 0 0 1.5px rgba(255,255,255,.08); font: 700 96px/140px Poppins, sans-serif; color: #ffffff; text-align: center; overflow: hidden; }
+    .s02-fl::after { content: ""; position: absolute; left: 0; right: 0; top: 69px; height: 2px; background: rgba(6,10,36,.8); }
+    #s02-colon { font: 700 80px/1 Poppins, sans-serif; color: #01ccf7; margin: 0 2px; }
+    #s02-am { left: 140px; top: 482px; font: 700 22px/1 Poppins, sans-serif; letter-spacing: .2em; color: #6adfff; }
+    #s02-cv { left: 400px; top: 360px; width: 280px; height: 370px; border-radius: 24px; background: linear-gradient(180deg, #ffffff, #eef3fb);
+      box-shadow: 0 26px 50px -22px rgba(0,0,0,.65); transform-origin: 50% 50%; }
+    #s02-cv .av { position: absolute; left: 26px; top: 26px; width: 72px; height: 72px; border-radius: 50%; background: #e3ecfb; }
+    #s02-cv .av i { position: absolute; left: 16px; top: 14px; width: 40px; height: 40px; background: #294b77; -webkit-mask: url(assets/icons/lucide-user-round.svg) center / contain no-repeat; mask: url(assets/icons/lucide-user-round.svg) center / contain no-repeat; }
+    #s02-cv .tg { position: absolute; right: 22px; top: 30px; height: 30px; padding: 0 12px; border-radius: 15px; background: #0b1440; color: #01ccf7; font: 700 16px/30px Poppins, sans-serif; letter-spacing: .1em; }
+    #s02-cv .ln { position: absolute; left: 26px; height: 12px; border-radius: 6px; background: #d4def0; }
+    #s02-cv .ln.d { background: #8fa3c7; height: 16px; }
+    #s02-cv .ch { position: absolute; top: 300px; height: 30px; padding: 0 12px; border-radius: 15px; background: #e3ecfb; color: #294b77; font: 700 15px/30px Poppins, sans-serif; }
+    #s02-city { left: 60px; top: 690px; width: 960px; height: 240px; }
+    .s02-bd { position: absolute; bottom: 0; border-radius: 10px 10px 0 0; background: linear-gradient(180deg, #1a2a63, #121e4c); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.06); }
+    .s02-win { position: absolute; width: 14px; height: 18px; border-radius: 3px; background: rgba(227,237,250,.10); }
+    .s02-win.on { background: #ffd66b; box-shadow: 0 0 12px rgba(255,214,107,.8); }
+    /* ---- horizon line that becomes the rising edge of the app window ---- */
+    #s02-hz { left: 60px; top: 926px; width: 960px; height: 4px; border-radius: 2px; transform-origin: 50% 50%;
+      background: linear-gradient(90deg, rgba(1,204,247,0), #01ccf7 14%, #bdf3ff 50%, #01ccf7 86%, rgba(1,204,247,0)); box-shadow: 0 0 18px rgba(1,204,247,.9), 0 0 4px #ffffff; }
+    /* ---- the InstaJob app window ---- */
+    #s02-app { left: 70px; top: 312px; width: 940px; height: 616px; border-radius: 34px; overflow: hidden;
+      background: linear-gradient(180deg, rgba(18,31,84,.975), rgba(10,18,58,.965)); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10); }
+    /* the app lives in a hero-zone wrapper: during the dive nothing may spill over the captions (soft cut at y 930-945) */
+    #s02-zone { left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, #000 0, #000 930px, transparent 945px); mask-image: linear-gradient(180deg, #000 0, #000 930px, transparent 945px); }
+    #s02-pg { left: 170px; top: 130px; width: 600px; height: 380px; border-radius: 50%; background: radial-gradient(closest-side, rgba(1,204,247,.32), rgba(1,204,247,0)); }
+    #s02-pill { left: 30px; top: 20px; width: 284px; height: 66px; border-radius: 33px; overflow: hidden; background: linear-gradient(180deg, #ffffff, #eef3fb);
+      box-shadow: 0 14px 30px -14px rgba(0,0,0,.6); transform-origin: 50% 50%; }
+    #s02-pill .ic { position: absolute; left: 9px; top: 9px; width: 48px; height: 48px; border-radius: 50%; background: #01ccf7; }
+    #s02-pill .ic i { position: absolute; left: 11px; top: 11px; width: 26px; height: 26px; background: #0b1440; -webkit-mask: url(assets/icons/lucide-briefcase.svg) center / contain no-repeat; mask: url(assets/icons/lucide-briefcase.svg) center / contain no-repeat; }
+    #s02-pill .tx { position: absolute; left: 70px; top: 0; height: 66px; font: 700 36px/66px Poppins, sans-serif; color: #0b1440; white-space: nowrap; letter-spacing: -.01em; }
+    #s02-pill .tx span { display: inline-block; }
+    #s02-shine { left: -90px; top: -20px; width: 56px; height: 106px; transform: skewX(-20deg); background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    .s02-st { position: absolute; right: 30px; top: 30px; height: 46px; padding: 0 20px 0 16px; border-radius: 23px; display: flex; align-items: center; gap: 10px; white-space: nowrap;
+      background: rgba(1,204,247,.12); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.38); font: 700 24px/46px Poppins, sans-serif; color: #6adfff; }
+    .s02-st i { display: block; width: 24px; height: 24px; background: #6adfff; }
+    .s02-st i.dot { width: 14px; height: 14px; border-radius: 50%; background: #01ccf7; box-shadow: 0 0 10px #01ccf7; }
+    .s02-st.ok { background: rgba(45,164,78,.18); box-shadow: inset 0 0 0 1.5px rgba(45,164,78,.7); color: #ffffff; }
+    .s02-st.ok i { background: #4cd16f; }
+    .s02-i-search { -webkit-mask: url(assets/icons/lucide-search.svg) center / contain no-repeat; mask: url(assets/icons/lucide-search.svg) center / contain no-repeat; }
+    .s02-i-check { -webkit-mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; mask: url(assets/icons/lucide-check.svg) center / contain no-repeat; }
+    .s02-i-send { -webkit-mask: url(assets/icons/lucide-send.svg) center / contain no-repeat; mask: url(assets/icons/lucide-send.svg) center / contain no-repeat; }
+    #s02-stx { left: 132px; top: 100px; font: 400 24px/34px Poppins, sans-serif; color: #e3edfa; white-space: nowrap; }
+    #s02-stx b { font-weight: 700; color: #ffffff; }
+    #s02-chips { left: 132px; top: 144px; display: flex; gap: 10px; }
+    #s02-chips span { height: 40px; padding: 0 16px; border-radius: 20px; background: rgba(1,204,247,.12); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.3); font: 700 22px/40px Poppins, sans-serif; color: #6adfff; }
+    #s02-div { left: 30px; top: 220px; width: 880px; height: 2px; background: rgba(255,255,255,.09); transform-origin: 0 50%; }
+    #s02-vp { left: 24px; top: 234px; width: 892px; height: 372px; overflow: hidden; }
+    #s02-list { left: 0; top: 0; width: 892px; height: 960px; }
+    .s02-card, .s02-sent { position: absolute; left: 0; width: 892px; height: 84px; border-radius: 20px; }
+    .s02-card { background: rgba(227,237,250,.07); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.08); }
+    .s02-card .gl { position: absolute; inset: 0; border-radius: 20px; box-shadow: inset 0 0 0 2.5px #01ccf7, inset 0 0 26px rgba(1,204,247,.28); background: rgba(1,204,247,.07); }
+    .s02-card .ic, .s02-sent .ic { position: absolute; left: 16px; top: 16px; width: 52px; height: 52px; border-radius: 14px; background: rgba(1,204,247,.14); }
+    .s02-card .ic i { position: absolute; left: 13px; top: 13px; width: 26px; height: 26px; background: #6adfff; -webkit-mask: url(assets/icons/lucide-briefcase.svg) center / contain no-repeat; mask: url(assets/icons/lucide-briefcase.svg) center / contain no-repeat; }
+    .s02-card .ok { position: absolute; left: 16px; top: 16px; width: 52px; height: 52px; border-radius: 50%; background: #2da44e; box-shadow: 0 0 16px rgba(45,164,78,.7); }
+    .s02-card .ok i, .s02-sent .ic i { position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; background: #ffffff; }
+    .s02-card .rl, .s02-sent .rl { position: absolute; left: 86px; top: 9px; font: 700 28px/38px Poppins, sans-serif; color: #ffffff; white-space: nowrap; }
+    .s02-card .mt, .s02-sent .mt { position: absolute; left: 86px; top: 47px; font: 400 20px/26px Poppins, sans-serif; color: #c9d6ee; white-space: nowrap; }
+    .s02-card .mc { position: absolute; right: 18px; top: 20px; height: 44px; padding: 0 16px; border-radius: 22px; font: 700 22px/44px Poppins, sans-serif; white-space: nowrap;
+      background: rgba(255,255,255,.08); color: #c9d6ee; transform-origin: 100% 50%; }
+    .s02-card .mc.hi { background: #01ccf7; color: #0b1440; }
+    .s02-sent { background: linear-gradient(90deg, rgba(45,164,78,.34), rgba(45,164,78,.12)); box-shadow: inset 0 0 0 2px rgba(76,209,111,.75); }
+    .s02-sent .ic { border-radius: 50%; background: #2da44e; }
+    .s02-sent .sd { position: absolute; right: 26px; top: 26px; width: 32px; height: 32px; background: #4cd16f; }
+    #s02-beam { left: 0; top: 0; width: 892px; height: 70px; background: linear-gradient(180deg, rgba(1,204,247,0), rgba(1,204,247,.30));
+      box-shadow: 0 3px 0 #6adfff, 0 6px 18px rgba(1,204,247,.85); }
+    /* screen-space fx */
+    #s02-cvr { left: 74px; top: 397px; width: 130px; height: 130px; border-radius: 50%; box-shadow: 0 0 0 3px #01ccf7, 0 0 18px rgba(1,204,247,.8); }
+    .s02-pl { position: absolute; left: 0; top: 0; width: 58px; height: 58px; margin: -29px 0 0 -29px; background: #ffffff;
+      -webkit-mask: url(assets/icons/lucide-send.svg) center / contain no-repeat; mask: url(assets/icons/lucide-send.svg) center / contain no-repeat; filter: drop-shadow(0 0 8px rgba(1,204,247,.8)); }
+    .s02-dt { position: absolute; left: 0; top: 0; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: #6adfff; box-shadow: 0 0 10px rgba(1,204,247,.9); }
+  </style>
+  <div data-hf-id="hf-53e6" id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div class="s02-a" id="s02-clock"><div class="s02-fl" id="s02-h1">0</div><div class="s02-fl" id="s02-h2">2</div><span id="s02-colon">:</span><div class="s02-fl" id="s02-m1">0</div><div class="s02-fl" id="s02-m2">1</div></div>
+    <div class="s02-a" id="s02-am">DINI HARI</div>
+    <div class="s02-a" id="s02-city"></div>
+    <div class="s02-a" id="s02-zone"><div class="s02-a" id="s02-app">
+      <div class="s02-a" id="s02-pg"></div>
+      <div class="s02-a" id="s02-stx">Dicocokkan dengan <b>CV kamu</b></div>
+      <div class="s02-a" id="s02-chips"><span id="s02-c0">Desain</span><span id="s02-c1">Konten</span><span id="s02-c2">Excel</span></div>
+      <div class="s02-a" id="s02-div"></div>
+      <div class="s02-a" id="s02-vp"><div class="s02-a" id="s02-list"></div><div class="s02-a" id="s02-beam"></div></div>
+      <div class="s02-st" id="s02-st0"><i class="dot"></i>AI aktif</div>
+      <div class="s02-st" id="s02-st1"><i class="s02-i-search"></i>Mencari lowongan…</div>
+      <div class="s02-st" id="s02-st2"><i class="s02-i-check"></i>Cocok dengan CV</div>
+      <div class="s02-st" id="s02-st3"><i class="s02-i-send"></i>Mengirim lamaran…</div>
+      <div class="s02-st ok" id="s02-st4"><i class="s02-i-check"></i>Terkirim otomatis</div>
+      <div class="s02-a" id="s02-pill"><div class="ic"><i></i></div><div class="tx" id="s02-ptx"></div><div class="s02-a" id="s02-shine"></div></div>
+    </div></div>
+    <div class="s02-a" id="s02-hz"></div>
+    <div class="s02-a" id="s02-cvr"></div>
+    <div class="s02-a" id="s02-cv"><div class="av"><i></i></div><div class="tg">CV</div>
+      <div class="ln d" style="top:122px;width:170px"></div><div class="ln" style="top:154px;width:220px"></div><div class="ln" style="top:178px;width:196px"></div>
+      <div class="ln" style="top:214px;width:226px"></div><div class="ln" style="top:238px;width:160px"></div>
+      <div class="ch" style="left:26px">Desain</div><div class="ch" style="left:112px">Konten</div><div class="ch" style="left:200px">Excel</div></div>
+    <div id="s02-fx"></div>
+  </div>
   <script>
     (function () {
+      // s02 "Namanya InstaJob. AI ini nyariin lowongan yang pas, terus ngirim lamaranmu otomatis."
+      // Frame 0 = s01's exact end state (dimmed flip clock 02:01, the CV, the lit skyline) · "Namanya": the clock cards flip shut, the
+      // skyline folds flat into a glowing horizon line, the line rises as the edge of the InstaJob app window while the CV shrinks and
+      // docks into the window's profile strip · "InstaJob.": the name pill pops big (shine) then docks in the header · "AI ini": status
+      // chip + job cards · "nyariin lowongan": the feed scrolls, a scan beam (with the robot's scan) sweeps · "yang pas,": the last pass
+      // ticks the matching cards · "ngirim / lamaranmu / otomatis.": each match whooshes off as a paper plane, a "Terkirim" toast takes
+      // its slot · OUT: the camera dives into the docked CV (app scales past camera around it) → s03 starts on that CV at the centre.
+      const SC = window.VO_SCENES.find((s) => s.id === "s02");
+      const D = SC.dur, ST = SC.start, VW = window.VO_WORDS;
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const L = (txt) => wt(txt, ST - 0.05) - ST;   // local time of a word in this scene
+      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.923);
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tNam = L("Namanya"), tIJ = L("InstaJob."), tAI = L("AI"), tNya = L("nyariin"), tPas = L("pas,");
+      const tNgi = L("ngirim"), tLam = L("lamaranmu"), tOto = L("otomatis.");
+
+      // ================================================================ 1) s01's end state, rebuilt exactly
+      const tKel = wt("keliling"), tKan = wt("kantor.");
+      const B = [[0, 120, 150], [140, 110, 210], [270, 130, 170], [420, 120, 232], [560, 140, 190], [720, 110, 220], [850, 110, 160]];
+      const city = $("s02-city"); const late = [];
+      let html = "";
+      B.forEach(([x, w, h], i) => {
+        const t0 = tKel - 0.05 + i * ((tKan + 0.15 - tKel) / B.length), dur = 0.55;
+        html += `<div class="s02-bd" id="s02-b${i}" style="left:${x}px;width:${w}px;height:${h}px">`;
+        const cols = Math.floor((w - 16) / 26), rows = Math.floor((h - 26) / 30); let k = 0;
+        for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++, k++) {
+          const lit = (k * 7 + i * 3) % 5 !== 0, on = t0 + dur + 0.02 + (k % 4) * 0.05 - ST;   // same rule + clock as s01
+          if (lit && on > 0) late.push([`s02-w${i}_${r}_${c}`, on]);
+          html += `<i class="s02-win${lit && on <= 0 ? " on" : ""}" id="s02-w${i}_${r}_${c}" style="left:${12 + c * 26}px;top:${16 + r * 30}px"></i>`;
+        }
+        html += `</div>`;
+      });
+      city.innerHTML = html;
+      late.forEach(([id, on]) => { tl.set($(id), { className: "s02-win" }, 0); tl.set($(id), { className: "s02-win on" }, on); });
+      B.forEach((_, i) => {   // a building still finishing s01's landing bounce continues it
+        const t0 = tKel - 0.05 + i * ((tKan + 0.15 - tKel) / B.length), e = ST - (t0 + 0.55), b = $("s02-b" + i);
+        if (e >= 0 && e < 0.16) { const u = e < 0.08 ? e / 0.08 : 1 - (e - 0.08) / 0.08, y0 = -6 * (1 - (1 - u) * (1 - u));
+          I(b, { y: y0 }); ft(b, { y: y0 }, { y: 0, duration: 0.16 - e, ease: "power1.in" }, 0); }
+      });
+      const clk = $("s02-clock"), am = $("s02-am"), colon = $("s02-colon"), cv = $("s02-cv");
+      I(clk, { y: -20, opacity: 0.45 }); I(am, { opacity: 0.4, y: 0 }); I(colon, { opacity: 1 });
+      I(cv, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1 });
+
+      // ================================================================ 2) "Namanya": fold the night into the app window
+      ["s02-h1", "s02-h2", "s02-m1", "s02-m2"].forEach((id, k) => { const c = $(id);
+        I(c, { rotationX: 0, opacity: 1, transformPerspective: 500 });
+        ft(c, { rotationX: 0, opacity: 1 }, { rotationX: -90, opacity: 0, duration: 0.24, ease: "power2.in", transformPerspective: 500 }, 0.03 + k * 0.04); });
+      ft(colon, { opacity: 1 }, { opacity: 0, duration: 0.14 }, 0.1);
+      ft(am, { opacity: 0.4, y: 0 }, { opacity: 0, y: 12, duration: 0.2, ease: "power1.in" }, 0.05);
+      B.forEach((_, i) => { const b = $("s02-b" + i), t = 0.02 + Math.abs(i - 3) * 0.035;   // centre-out
+        I(b, { scaleY: 1, opacity: 1, transformOrigin: "50% 100%" });
+        ft(b, { scaleY: 1 }, { scaleY: 0, duration: 0.26, ease: "power3.in" }, t);
+        ft(b, { opacity: 1 }, { opacity: 0, duration: 0.06 }, t + 0.2); });
+      const hz = $("s02-hz"), app = $("s02-app");
+      I(hz, { scaleX: 0, opacity: 0, y: 0 });
+      ft(hz, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.26, ease: "power3.out" }, 0.06);
+      ft(hz, { y: 0 }, { y: -614, duration: 0.46, ease: "power3.inOut" }, 0.3);
+      ft(hz, { opacity: 1 }, { opacity: 0, duration: 0.14 }, 0.74);
+      I(app, { clipPath: "inset(100% 0% 0% 0% round 34px)", x: 0, y: 0, scale: 1, opacity: 1 });
+      ft(app, { clipPath: "inset(100% 0% 0% 0% round 34px)" }, { clipPath: "inset(0% 0% 0% 0% round 34px)", duration: 0.46, ease: "power3.inOut" }, 0.3);
+      // the CV lifts, then shrinks into the profile strip (mini CV centre 139.2, 461.8 @ .28)
+      const MS = 0.28, MX = 100 + 140 * MS - 540, MY = 410 + 185 * MS - 545;
+      ft(cv, { x: 0, y: 0, scale: 1, rotation: 0 }, { x: 8, y: -26, scale: 1.04, rotation: 3, duration: 0.2, ease: "power2.out" }, 0.05);
+      ft(cv, { x: 8, y: -26, scale: 1.04, rotation: 3 }, { x: MX, y: MY, scale: MS, rotation: 0, duration: 0.54, ease: "power3.inOut" }, 0.26);
+
+      // ================================================================ 3) "InstaJob.": the name, big, then docked
+      const pill = $("s02-pill"), ptx = $("s02-ptx"), pg = $("s02-pg");
+      ptx.innerHTML = "InstaJob".split("").map((ch, i) => `<span id="s02-pl${i}">${ch}</span>`).join("");
+      I(pill, { x: 298, y: 277, scale: 0.4, opacity: 0 });
+      ft(pill, { scale: 0.4, opacity: 0 }, { scale: 1.7, opacity: 1, duration: 0.42, ease: "back.out(1.7)" }, tIJ - 0.1);
+      "InstaJob".split("").forEach((_, i) => { const s = $("s02-pl" + i); I(s, { y: 46, opacity: 0 });
+        ft(s, { y: 46, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power3.out" }, tIJ - 0.06 + i * 0.03); });
+      I($("s02-shine"), { x: 0 }); ft($("s02-shine"), { x: 0 }, { x: 460, duration: 0.5, ease: "power2.inOut" }, tIJ + 0.3);
+      I(pg, { opacity: 0, scale: 0.7 });
+      ft(pg, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" }, tIJ - 0.08);
+      ft(pg, { opacity: 1 }, { opacity: 0, duration: 0.35 }, 1.5);
+      ft(pill, { x: 298, y: 277, scale: 1.7 }, { x: 0, y: 0, scale: 1, duration: 0.38, ease: "power3.inOut" }, 1.54);
+
+      // ================================================================ 4) "AI ini": status chip, profile strip, the job feed
+      const ST_ = [0, 1, 2, 3, 4].map((k) => $("s02-st" + k)), stT = [tAI - 0.04, tNya - 0.02, tPas - 0.01, tNgi - 0.02, tOto - 0.02];
+      ST_.forEach((c, k) => { I(c, { opacity: 0, y: 14, scale: 0.9, transformOrigin: "100% 50%" });
+        ft(c, { opacity: 0, y: 14, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.26, ease: "back.out(2)" }, stT[k]);
+        if (k < 4) ft(c, { opacity: 1, y: 0 }, { opacity: 0, y: -14, duration: 0.12, ease: "power2.in" }, stT[k + 1] - 0.12); });
+      const dot = ST_[0].querySelector("i"); I(dot, { scale: 1 });
+      for (let k = 0; k < 2; k++) ft(dot, { scale: 1 }, { scale: 1.5, duration: 0.18, yoyo: true, repeat: 1, ease: "sine.inOut" }, tAI + 0.2 + k * 0.36);
+      const stx = $("s02-stx"), chips = [0, 1, 2].map((k) => $("s02-c" + k)), dv = $("s02-div");
+      I(stx, { opacity: 0, x: -20 }); ft(stx, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, 1.82);
+      chips.forEach((c, k) => { I(c, { opacity: 0, y: 14 }); ft(c, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, 1.92 + k * 0.06); });
+      I(dv, { scaleX: 0 }); ft(dv, { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, 1.86);
+      const JOBS = [
+        ["Content Writer", "Bandung · Hybrid", 72], ["Admin Gudang", "Surabaya · Full-time", 28], ["Video Editor", "Remote · Freelance", 64],
+        ["Customer Service", "Bekasi · Shift", 41], ["Desainer UI", "Yogyakarta · Full-time", 69], ["Staf Akuntansi", "Medan · Full-time", 33],
+        ["Social Media Specialist", "Remote · Full-time", 94], ["Barista", "Depok · Part-time", 31], ["Content Creator", "Jakarta · Full-time", 91],
+        ["Desainer Grafis", "Jakarta · Hybrid", 87]];
+      const SENT = [[6, tNgi - 0.04], [8, tLam - 0.04], [9, tOto - 0.04]];
+      const list = $("s02-list");
+      list.innerHTML = JOBS.map(([r, m, p], i) => `<div class="s02-card" id="s02-k${i}" style="top:${i * 96}px"><div class="gl" id="s02-kg${i}"></div><div class="ic"><i></i></div>` +
+        `<div class="ok" id="s02-ko${i}"><i class="s02-i-check"></i></div><div class="rl">${r}</div><div class="mt">${m}</div><div class="mc${p >= 80 ? " hi" : ""}" id="s02-km${i}">${p}% cocok</div></div>`).join("") +
+        SENT.map(([i]) => `<div class="s02-sent" id="s02-s${i}" style="top:${i * 96}px"><div class="ic" id="s02-si${i}"><i class="s02-i-check"></i></div><div class="rl">Terkirim</div>` +
+        `<div class="mt">${JOBS[i][0]} · ${JOBS[i][1].split(" · ")[0]}</div><i class="sd s02-i-send"></i></div>`).join("");
+      JOBS.forEach((_, i) => { const k = $("s02-k" + i);
+        I($("s02-kg" + i), { opacity: 0 }); I($("s02-ko" + i), { opacity: 0, scale: 0 });
+        if (i < 4) { I(k, { opacity: 0, y: 26 }); ft(k, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 1.94 + i * 0.06); }
+        else I(k, { opacity: 1, y: 0 }); });
+      // "nyariin lowongan": the feed scrolls six cards, landing on the last four
+      I(list, { y: 0 }); ft(list, { y: 0 }, { y: -576, duration: 0.7, ease: "power2.inOut" }, tNya - 0.03);
+      // scan beam: three downward sweeps (robot scans meanwhile); the last one ticks the matches, landing on "pas,"
+      const beam = $("s02-beam"), d3 = 0.4, t3 = tPas - 0.005 - (340 / 460) * d3;
+      I(beam, { y: -80, opacity: 0 }); tl.set(beam, { opacity: 1 }, tNya - 0.04); tl.set(beam, { opacity: 0 }, t3 + d3);
+      ft(beam, { y: -80 }, { y: 380, duration: t3 - (tNya - 0.04) - 0.34, ease: "sine.inOut" }, tNya - 0.04);
+      ft(beam, { y: -80 }, { y: 380, duration: 0.34, ease: "sine.inOut" }, t3 - 0.34);
+      ft(beam, { y: -80 }, { y: 380, duration: d3, ease: "none" }, t3);
+      [6, 7, 8, 9].forEach((i) => { const tc = t3 + (((i - 6) * 96 + 42 + 10) / 460) * d3;
+        if (JOBS[i][2] >= 80) {
+          ft($("s02-ko" + i), { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.6)" }, tc);
+          ft($("s02-kg" + i), { opacity: 0 }, { opacity: 1, duration: 0.16 }, tc);
+          ft($("s02-km" + i), { scale: 1 }, { scale: 1.14, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tc);
+        } else ft($("s02-k" + i), { opacity: 1 }, { opacity: 0.3, duration: 0.22 }, tc); });
+      const cvr = $("s02-cvr"); I(cvr, { opacity: 0, scale: 0.7 });
+      ft(cvr, { opacity: 0.95, scale: 0.7 }, { opacity: 0, scale: 1.45, duration: 0.5, ease: "power2.out" }, tPas - 0.02);
+
+      // ================================================================ 5) "ngirim lamaranmu otomatis.": planes + "Terkirim" toasts
+      const fx = $("s02-fx"); const FR = 1 / 30, FL = 0.46, ND = 9;
+      SENT.forEach(([i, t], n) => {
+        const k = $("s02-k" + i), s = $("s02-s" + i), cy = 546 + (i - 6) * 96 + 42;
+        I(s, { opacity: 0, x: -50 }); I($("s02-si" + i), { scale: 0 });
+        ft($("s02-km" + i), { scale: 1 }, { scale: 1.12, duration: 0.08, ease: "power2.out" }, t);
+        ft(k, { x: 0, skewX: 0 }, { x: 760, skewX: -16, duration: 0.2, ease: "power2.in" }, t + 0.02);
+        ft(k, { opacity: 1 }, { opacity: 0, duration: 0.12 }, t + 0.08);
+        ft(s, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.28, ease: "power3.out" }, t + 0.18);
+        ft($("s02-si" + i), { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2.6)" }, t + 0.24);
+        // the paper plane: a quadratic arc up and out of the hero zone, per-frame sets (no onUpdate), dotted trail
+        const P0 = [900, cy], P1 = [720, cy - 230], P2 = [1000, 300];
+        const at = (u) => [(1 - u) * (1 - u) * P0[0] + 2 * (1 - u) * u * P1[0] + u * u * P2[0], (1 - u) * (1 - u) * P0[1] + 2 * (1 - u) * u * P1[1] + u * u * P2[1]];
+        const hd = (u) => Math.atan2(2 * (1 - u) * (P1[1] - P0[1]) + 2 * u * (P2[1] - P1[1]), 2 * (1 - u) * (P1[0] - P0[0]) + 2 * u * (P2[0] - P1[0])) * 180 / Math.PI + 45;
+        const p = document.createElement("div"); p.className = "s02-pl"; p.id = "s02-p" + n; fx.appendChild(p);
+        I(p, { x: P0[0], y: P0[1], rotation: hd(0), scale: 0.5, opacity: 0 });
+        for (let j = 0; j * FR <= FL + 1e-6; j++) { const u = Math.pow(j * FR / FL, 2), [x, y] = at(u);
+          tl.set(p, { x, y, rotation: hd(u), scale: 0.55 + 0.45 * Math.sin(Math.min(1, u * 1.6) * Math.PI / 2) - 0.25 * Math.max(0, u - 0.6), opacity: u > 0.82 ? Math.max(0, (1 - u) / 0.18) : 1 }, t + j * FR); }
+        tl.set(p, { opacity: 0 }, t + FL + FR);
+        for (let d = 1; d <= ND; d++) { const u = d / (ND + 1), [x, y] = at(u), td = t + FL * Math.sqrt(u);
+          const e = document.createElement("div"); e.className = "s02-dt"; e.id = `s02-d${n}_${d}`; fx.appendChild(e);
+          I(e, { x, y, opacity: 0, scale: 1 }); tl.set(e, { opacity: 0.9 }, td);
+          ft(e, { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 0.4, duration: 0.2, ease: "power1.in" }, td + 0.04); }
+      });
+
+      // ================================================================ 6) OUT: dive into the docked CV → s03's hub centre (540, 625) @ .6
+      const k = 0.6 / MS, tD = 5.5, dd = 0.4;
+      tl.set(app, { transformOrigin: `${100 + 140 * MS - 70}px ${410 + 185 * MS - 312}px` }, tD - 0.01);
+      ft(app, { x: 0, y: 0, scale: 1 }, { x: 540 - (100 + 140 * MS), y: 625 - (410 + 185 * MS), scale: k, duration: dd, ease: "power3.inOut" }, tD);
+      ft(app, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tD);
+      ft(cv, { x: MX, y: MY, scale: MS }, { x: 0, y: 80, scale: 0.6, duration: dd, ease: "power3.inOut" }, tD);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines["s02"] = tl;
     })();

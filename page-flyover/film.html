@@ -1,0 +1,485 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Page Fly-over</title>
+<style>
+@font-face{font-family:Geist;src:url(assets/geist500.woff2) format('woff2');font-weight:500}
+@font-face{font-family:'Instrument Serif';src:url(assets/instrument-italic.woff2) format('woff2');font-style:italic}
+html,body{margin:0;background:#f5f7f8;overflow:hidden}
+canvas{display:block;width:1440px;height:1152px}
+</style></head><body>
+<canvas id="c" width="1440" height="1152"></canvas>
+<script>
+// ============================================================
+// 3D fly-over film. Every frame is a pure function of t: seek(t).
+// ============================================================
+const CFG = {
+  brand: 'AIpreneur',
+  line1: 'Modal ratusan ribu.',
+  tail:  'Hemat ratusan juta.',
+};
+const W = 1440, H = 1152, FOC = 1880, DEG = Math.PI / 180;
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const mix = (a, b, k) => a + (b - a) * k;
+const sstep = (a, b, x) => { x = clamp((x - a) / (b - a), 0, 1); return x * x * (3 - 2 * x); };
+const easeOutCubic = x => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
+const quadInOut = x => (x = clamp(x, 0, 1), x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+
+let PAGE, GL, P = {}, TEX = {}, LAYERS = [], WORDS = [], SPR = {};
+
+// ---------------- camera from one speed curve ----------------
+const DT = 1 / 2400, TMAX = 14.6;
+let I_TAB, V_TAB, CRUISE, LY0 = 520, DOVER, DEND, PAGE_H;
+function speedShare(t) {
+  if (t < 0.6) return 0.5 * sstep(0, 0.6, t);
+  if (t < 1.25) return 0.5;
+  if (t < 1.6) return 0.5 + 0.5 * sstep(1.25, 1.6, t);
+  if (t < 7.3) return 1.0;
+  return 1.0 - 0.88 * sstep(7.3, 8.3, t);
+}
+function riseVel(t) { // trapezoid zoom-out speed in log scale
+  if (t < 7.75 || t > 9.25) return 0;
+  if (t < 8.35) return sstep(7.75, 8.35, t);
+  if (t < 8.95) return 1;
+  return 1 - sstep(8.95, 9.25, t);
+}
+function buildTables() {
+  const n = Math.ceil(TMAX / DT) + 2; I_TAB = new Float64Array(n); V_TAB = new Float64Array(n);
+  for (let i = 1; i < n; i++) {
+    const t = (i - 0.5) * DT;
+    I_TAB[i] = I_TAB[i - 1] + speedShare(t) * DT;
+    V_TAB[i] = V_TAB[i - 1] + riseVel(t) * DT;
+  }
+  PAGE_H = PAGE.height;
+  const footerTitle = PAGE.footerTitleY;
+  CRUISE = (footerTitle - LY0) / tab(I_TAB, 8.0);       // footer title at frame centre at 8.0s
+  DOVER = FOC * PAGE_H / (H - 84);                       // whole page fits with 42px top & bottom
+  DEND = FOC * 1440 / 1018;                              // hero lands 1018px wide
+}
+function tab(T, t) { const f = clamp(t, 0, TMAX) / DT, i = Math.floor(f); return mix(T[i], T[i + 1], f - i); }
+const lyGlide = t => LY0 + CRUISE * tab(I_TAB, t);
+const dGlide = t => { const u = clamp(t / 8.2, 0, 1); return 1360 + 340 * (1 - (1 - u) * (1 - u)); };
+function tAtLy(y) { let a = 0, b = 8.3; for (let k = 0; k < 40; k++) { const m = (a + b) / 2; lyGlide(m) < y ? a = m : b = m; } return a; }
+
+function camBasis(phi) { // looking up the page, tilted phi from straight down
+  const s = Math.sin(phi), c = Math.cos(phi);
+  return { f: [0, -s, -c], u: [0, -c, s], r: [1, 0, 0], back: [0, s, c] };
+}
+function projectY(cam, X, Y, Z) { // screen y (top-down) of a world point
+  const v = [X - cam.pos[0], Y - cam.pos[1], Z - cam.pos[2]];
+  const z = v[1] * cam.f[1] + v[2] * cam.f[2], y = v[1] * cam.u[1] + v[2] * cam.u[2];
+  return H / 2 - FOC * y / z;
+}
+function makeCam(Lx, Ly, d, phi) {
+  const b = camBasis(phi);
+  return { ...b, pos: [Lx + d * b.back[0], Ly + d * b.back[1], d * b.back[2]], d, phi, Lx, Ly };
+}
+function solveLyFor(Ywp, syTarget, d, phi) { // look-at so page row Ywp lands on screen y
+  let a = -50000, b = 60000;
+  for (let k = 0; k < 60; k++) { const m = (a + b) / 2; projectY(makeCam(720, m, d, phi), 720, Ywp, 0) > syTarget ? a = m : b = m; }
+  return (a + b) / 2;
+}
+function camera(t) {
+  let d, phi = 56 * DEG * (1 - sstep(8.15, 8.95, t)), Ly, mask = { bottom: PAGE_H, r: 24, fade: 0 };
+  if (t < 9.25) {
+    const dg = dGlide(t), riseTotal = Math.log(DOVER / dGlide(9.25)), vTot = tab(V_TAB, 9.3);
+    d = dg * Math.exp(riseTotal * tab(V_TAB, t) / vTot);
+    Ly = lyGlide(t);
+    if (t > 8.3) { const pin = solveLyFor(PAGE_H, H - 42, d, phi); Ly = mix(Ly, pin, sstep(8.3, 8.65, t)); }
+  } else if (t < 9.47) {
+    d = DOVER / (1 + 0.035 * sstep(9.25, 9.47, t)); Ly = PAGE_H / 2; phi = 0;
+  } else {
+    phi = 0;
+    const d0 = DOVER / 1.035, T0 = H / 2 - FOC * (PAGE_H / 2) / d0; // page top at dive start
+    const u = clamp((t - 9.47) / 0.5, 0, 1), e = quadInOut(u);
+    if (t < 9.97) {
+      d = Math.exp(mix(Math.log(d0), Math.log(DEND), e));
+      const top = mix(T0, 283, sstep(0.55, 1.0, u));
+      Ly = (H / 2 - top) * d / FOC;
+    } else {
+      d = DEND / (1 + 0.02 * sstep(10.6, 14.5, t));
+      const syc = 283 + 561 * FOC / DEND;              // hero centre stays put on screen
+      Ly = 561 - (syc - H / 2) * d / FOC;
+    }
+    const mb = sstep(0.05, 0.8, u);
+    mask = { bottom: Math.exp(mix(Math.log(PAGE_H), Math.log(1122), mb)), r: mix(24, 38 * DEND / FOC, mb), fade: sstep(0.0, 0.45, u) };
+  }
+  const cam = makeCam(720, Ly, d, phi); cam.mask = mask; cam.t = t;
+  // focus: whatever crosses frame centre (= look-at depth); starts on the hero mockup
+  const mock = LAYERS.find(l => l.kind === 'mock');
+  let focus = d;
+  if (mock) {
+    const zMock = d - (mock.cy + mock.ch / 2 - Ly) * Math.sin(phi) - 22 * Math.cos(phi);
+    focus = mix(zMock, d, sstep(0.5, 1.5, t));
+  }
+  cam.focus = focus;
+  return cam;
+}
+
+// ---------------- lifted pieces ----------------
+function layerConfig(l) {
+  const id = l.id, k = l.kind;
+  const c = { z: 22, th: 0, t0: null, t1: null, dx: 0, edge: 0, zStart: 4 };
+  const auto = (z, th, dur = 0.75) => { c.z = z; c.th = th; c.t0 = Math.max(0, tAtLy(l.y - 760)); c.t1 = c.t0 + dur; };
+  if (k === 'mock') { c.z = 22; c.t0 = 0.0; c.t1 = 1.0; }
+  else if (k === 'btn' && l.y < 1200) { c.z = 18; c.t0 = 0.2; c.t1 = 1.0; }
+  else if (k === 'toolchip') { c.z = 60 + (id * 7 % 21); c.th = 30; c.t0 = 0.1 + (id % 4) * 0.05; c.t1 = 1.35; }
+  else if (k === 'stat') {
+    const left = l.x < 400, right = l.x > 800;
+    if (left || right) { c.z = 200; c.th = 54; c.t0 = 1.35; c.t1 = 2.5; c.dx = left ? -640 : 640; }
+    else auto(30, 10);
+  }
+  else if (k === 'photo') { c.z = [110, 130, 100][id % 3]; c.th = 46; c.t0 = 1.35; c.t1 = 2.7; }
+  else if (k === 'testi' && /2$/.test(l.label)) { c.zStart = 22; c.z = 112; c.th = 30; c.t0 = 5.45; c.t1 = 6.3; c.edge = 34; }
+  else if (k === 'testi') auto(24, 8);
+  else if (k === 'tcard') auto(26, 10);
+  else if (k === 'chip') auto(l.w < 300 ? 40 : 20, l.w < 300 ? 18 : 6);
+  else if (k === 'btn') auto(22, 8);
+  else auto(l.w * l.h > 200000 ? 30 : 24, 8);
+  return c;
+}
+function layerState(l, t) {
+  const c = l.cfg, k = easeOutCubic((t - c.t0) / (c.t1 - c.t0));
+  return { z: mix(c.zStart, c.z, k), th: c.th * DEG * k, dx: c.dx * k * k };
+}
+
+// ---------------- logo tiles ----------------
+function tileStates(t, cam) {
+  const out = [];
+  // four tiles: start flat beside the hero button, lift and hang outside the page's top corners
+  const hang = [[-130, 260, 110, 220], [-10, 120, 60, 180], [1570, 240, 120, 240], [1450, 110, 70, 190]];
+  for (let i = 0; i < 4; i++) {
+    const start = [960 + i * 42, 1022, 1, 32];
+    const k = easeOutCubic((t - 0.1 - i * 0.06) / 1.15);
+    const p = start.map((v, j) => mix(v, hang[i][j], k));
+    p[1] += 600 * sstep(1.2, 2.4, t);                   // trail the camera down the page (page is ~2x the brief's length)
+    const orient = sstep(0.1, 0.9, t - i * 0.05);
+    if (i === 0 && t > 4.7 && t < 6.1) continue;        // tile 0 is re-used for the close pass
+    out.push({ X: p[0], Y: p[1], Z: p[2], s: p[3], orient, alpha: 1 });
+  }
+  if (t > 4.7 && t < 6.1) { // one tile drifts past the left edge, close and soft
+    const xc = -100 - 320 * (t - 4.9), yc = -60 + 20 * (t - 4.9), zc = 700;
+    const w = [cam.pos[0] + xc * cam.r[0] + yc * cam.u[0] + zc * cam.f[0],
+               cam.pos[1] + xc * cam.r[1] + yc * cam.u[1] + zc * cam.f[1],
+               cam.pos[2] + xc * cam.r[2] + yc * cam.u[2] + zc * cam.f[2]];
+    out.push({ X: w[0], Y: w[1], Z: w[2], s: 120, orient: 1, alpha: sstep(4.7, 4.9, t) * (1 - sstep(5.9, 6.1, t)) });
+  }
+  return t < 9.6 ? out : [];
+}
+
+// ---------------- GL helpers ----------------
+function sh(type, src) { const s = GL.createShader(type); GL.shaderSource(s, src); GL.compileShader(s); if (!GL.getShaderParameter(s, GL.COMPILE_STATUS)) throw new Error(GL.getShaderInfoLog(s) + '\n' + src); return s; }
+function prog(vs, fs) {
+  const p = GL.createProgram(); GL.attachShader(p, sh(GL.VERTEX_SHADER, '#version 300 es\nprecision highp float;\n' + vs)); GL.attachShader(p, sh(GL.FRAGMENT_SHADER, '#version 300 es\nprecision highp float;\n' + fs)); GL.linkProgram(p);
+  if (!GL.getProgramParameter(p, GL.LINK_STATUS)) throw new Error(GL.getProgramInfoLog(p));
+  const u = {}; const n = GL.getProgramParameter(p, GL.ACTIVE_UNIFORMS); for (let i = 0; i < n; i++) { const a = GL.getActiveUniform(p, i); u[a.name.replace('[0]', '')] = GL.getUniformLocation(p, a.name); }
+  return { p, u };
+}
+let ANISO = null;
+function texFrom(src, { mip = true, aniso = true } = {}) {
+  const t = GL.createTexture(); GL.bindTexture(GL.TEXTURE_2D, t);
+  GL.pixelStorei(GL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA8, GL.RGBA, GL.UNSIGNED_BYTE, src);
+  GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE); GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+  GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+  if (mip) { GL.generateMipmap(GL.TEXTURE_2D); GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR_MIPMAP_LINEAR); }
+  else GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+  if (aniso && ANISO) GL.texParameterf(GL.TEXTURE_2D, ANISO.TEXTURE_MAX_ANISOTROPY_EXT, 16);
+  return t;
+}
+function fbo(w, h, formats, mipFirst = false) {
+  const f = GL.createFramebuffer(); GL.bindFramebuffer(GL.FRAMEBUFFER, f); const texs = [];
+  formats.forEach((fmt, i) => {
+    const t = GL.createTexture(); GL.bindTexture(GL.TEXTURE_2D, t);
+    const levels = mipFirst && i === 0 ? Math.floor(Math.log2(Math.max(w, h))) + 1 : 1;
+    GL.texStorage2D(GL.TEXTURE_2D, levels, fmt, w, h);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, levels > 1 ? GL.LINEAR_MIPMAP_LINEAR : GL.LINEAR);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE); GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+    GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0 + i, GL.TEXTURE_2D, t, 0); texs.push(t);
+  });
+  GL.drawBuffers(formats.map((_, i) => GL.COLOR_ATTACHMENT0 + i));
+  const st = GL.checkFramebufferStatus(GL.FRAMEBUFFER); if (st !== GL.FRAMEBUFFER_COMPLETE) throw new Error('fbo ' + st);
+  return { f, texs };
+}
+
+// ---------------- shaders ----------------
+const CAM_U = `uniform vec3 uPos,uR,uU,uF;uniform float uFoc;uniform vec2 uRes;
+vec4 proj(vec3 w,out float zc){vec3 v=w-uPos;float x=dot(v,uR),y=dot(v,uU);zc=dot(v,uF);
+ return vec4(uFoc*x/(uRes.x*.5),uFoc*y/(uRes.y*.5),zc-2.0,zc);}`;
+const FLOOR_F = `uniform vec2 uRes;vec3 floorCol(vec2 fc){vec2 q=(fc/uRes-.5)*2.;float k=clamp(length(q)/1.41421,0.,1.);k=k*k*(3.-2.*k);
+ return mix(vec3(0.9765,0.9843,0.9843),vec3(0.949,0.953,0.9647),k);}`;
+// page / layer / tile quad: corners via uniforms (world space), uv 0..1
+const QUAD_V = CAM_U + `layout(location=0) in vec2 aP;uniform vec3 uC00,uC10,uC01,uC11;out vec2 vUV;out float vZ;out vec3 vW;
+void main(){vec3 w=mix(mix(uC00,uC10,aP.x),mix(uC01,uC11,aP.x),aP.y);vW=w;vUV=aP;float z;gl_Position=proj(w,z);vZ=z;}`;
+const MASK_F = `uniform vec4 uMask;uniform float uMaskR,uFade;
+float rbox(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,q.y),0.)-r;}
+float maskA(vec3 w){vec2 c=vec2((uMask.x+uMask.z)*.5,(uMask.y+uMask.w)*.5),b=vec2((uMask.z-uMask.x)*.5,(uMask.w-uMask.y)*.5);
+ float d=rbox(w.xy-c,b,uMaskR);float px=fwidth(w.y)+fwidth(w.x)*.5+1e-3;return clamp(.5-d/px,0.,1.);}`;
+const PAGE_F = FLOOR_F + MASK_F + `uniform sampler2D uTex;uniform float uHeroY,uAlpha;in vec2 vUV;in float vZ;in vec3 vW;
+layout(location=0) out vec4 o;layout(location=1) out vec4 oD;
+void main(){vec4 c=texture(uTex,vUV);float a=maskA(vW)*uAlpha;
+ float below=smoothstep(uHeroY-6.,uHeroY+6.,vW.y);vec3 col=mix(c.rgb,floorCol(gl_FragCoord.xy)*c.a,below*uFade);
+ o=vec4(col,c.a)*a;oD=vec4(vZ,0,0,1)*c.a*a;}`;
+const SHADOW_F = MASK_F + `uniform sampler2D uTex;uniform float uLod,uOp,uSoft;uniform vec4 uUVr;in vec2 vUV;in float vZ;in vec3 vW;
+layout(location=0) out vec4 o;layout(location=1) out vec4 oD;
+void main(){vec2 uv=mix(uUVr.xy,uUVr.zw,vUV);vec2 cu=clamp(uv,0.,1.);float out_=length((uv-cu)*uSoft);
+ float a=textureLod(uTex,cu,uLod).a*exp(-out_*out_)*uOp*maskA(vW);
+ o=vec4(0.102,0.129,0.2,1.)*a;oD=vec4(vZ,0,0,1)*a;}`;
+const LAYER_F = FLOOR_F + MASK_F + `uniform sampler2D uTex;uniform float uHeroY,uAlpha,uSolid;uniform vec3 uSolidCol;in vec2 vUV;in float vZ;in vec3 vW;
+layout(location=0) out vec4 o;layout(location=1) out vec4 oD;
+void main(){vec4 c=uSolid>.5?vec4(uSolidCol*mix(1.,.9,vUV.y),1.):texture(uTex,vUV);float a=maskA(vW)*uAlpha;
+ vec3 col=mix(c.rgb,floorCol(gl_FragCoord.xy)*c.a,uFade*step(uHeroY,vW.y));
+ o=vec4(col,c.a)*a;oD=vec4(vZ,0,0,1)*c.a*a;}`;
+const FLOOR_PROG_V = `layout(location=0) in vec2 aP;void main(){gl_Position=vec4(aP*2.-1.,0,1);}`;
+const FLOORP_F = FLOOR_F + `uniform vec3 uPos,uR,uU,uF;uniform float uFoc;layout(location=0) out vec4 o;layout(location=1) out vec4 oD;
+void main(){vec2 s=gl_FragCoord.xy-uRes*.5;vec3 dir=uR*s.x/uFoc+uU*s.y/uFoc+uF;float k=-uPos.z/dir.z;float z=k>0.?k:1e5;
+ o=vec4(floorCol(gl_FragCoord.xy),1);oD=vec4(min(z,6e4),0,0,1);}`;
+// page drop shadow: analytic soft rounded box on the floor
+const PSH_F = MASK_F + `uniform float uSig,uOp;in vec2 vUV;in float vZ;in vec3 vW;layout(location=0) out vec4 o;layout(location=1) out vec4 oD;
+void main(){vec2 c=vec2((uMask.x+uMask.z)*.5,(uMask.y+uMask.w)*.5+uSig*.35),b=vec2((uMask.z-uMask.x)*.5,(uMask.w-uMask.y)*.5);
+ float d=rbox(vW.xy-c,b,uMaskR);float a=uOp*exp(-max(d+uSig*.4,0.)*max(d+uSig*.4,0.)/(2.*uSig*uSig));
+ o=vec4(0.102,0.129,0.2,1.)*a;oD=vec4(vZ,0,0,1)*a;}`;
+// 2D sprite in screen space with an assigned blur (via depth)
+const SPR_V = `layout(location=0) in vec2 aP;uniform vec4 uRect;uniform vec2 uRes;out vec2 vUV;
+void main(){vUV=aP;vec2 s=uRect.xy+aP*uRect.zw;gl_Position=vec4(s.x/uRes.x*2.-1.,1.-s.y/uRes.y*2.,0,1);}`;
+const SPR_F = `uniform sampler2D uTex;uniform float uAlpha,uDepth;in vec2 vUV;layout(location=0) out vec4 o;layout(location=1) out vec4 oD;
+void main(){vec4 c=texture(uTex,vUV)*uAlpha;o=c;oD=vec4(uDepth,0,0,1)*c.a;}`;
+// circle of confusion
+const PREP_F = `uniform sampler2D uCol,uDep;uniform float uFocus;uniform vec2 uRes;out vec4 o;
+void main(){vec2 uv=gl_FragCoord.xy/uRes;vec3 c=texture(uCol,uv).rgb;vec4 dd=texture(uDep,uv);float d=dd.r/max(dd.a,1e-4);
+ float r=d<uFocus?75.*(uFocus-d)/max(d,1.):6.*(d-uFocus)/d;o=vec4(c,min(r,120.)/120.);}`;
+const DOF_F = `uniform sampler2D uPrep;uniform vec2 uRes;uniform float uW;out vec4 o;
+void main(){vec2 uv=gl_FragCoord.xy/uRes;vec4 c0=texture(uPrep,uv);float r0=c0.a*120.;
+ float spread=textureLod(uPrep,uv,5.).a*120.;float R=min(120.,max(r0,spread*1.35));
+ if(R<.6){o=vec4(c0.rgb*uW,uW);return;}
+ int N=R<3.?10:(R<10.?24:40);float fN=float(N);
+ float lod=clamp(log2(R*1.6/sqrt(fN)),0.,6.);vec3 acc=vec3(0);float ws=0.;
+ for(int i=0;i<40;i++){if(i>=N)break;float fi=float(i)+.5;float rr=sqrt(fi/fN)*R;float an=fi*2.39996323;
+  vec4 s=textureLod(uPrep,uv+vec2(cos(an),sin(an))*rr/uRes,lod);float w=clamp((s.a*120.-rr)*.5+1.,0.,1.);acc+=s.rgb*w;ws+=w;}
+ vec3 col=ws>.01?acc/ws:c0.rgb;o=vec4(col*uW,uW);}`;
+const FINAL_F = `uniform sampler2D uAcc;uniform vec2 uRes;out vec4 o;
+float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+void main(){vec4 a=texture(uAcc,gl_FragCoord.xy/uRes);vec3 c=a.rgb/max(a.a,1e-4);c+=(h(gl_FragCoord.xy)-.5)/255.;o=vec4(c,1);}`;
+
+let QUAD_VAO, FB_SCENE, FB_PREP, FB_ACC;
+function init() {
+  const cv = document.getElementById('c');
+  GL = cv.getContext('webgl2', { antialias: false, alpha: false, preserveDrawingBuffer: true, premultipliedAlpha: false });
+  if (!GL.getExtension('EXT_color_buffer_float')) throw new Error('no EXT_color_buffer_float');
+  ANISO = GL.getExtension('EXT_texture_filter_anisotropic');
+  QUAD_VAO = GL.createVertexArray(); GL.bindVertexArray(QUAD_VAO);
+  const b = GL.createBuffer(); GL.bindBuffer(GL.ARRAY_BUFFER, b);
+  GL.bufferData(GL.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), GL.STATIC_DRAW);
+  GL.enableVertexAttribArray(0); GL.vertexAttribPointer(0, 2, GL.FLOAT, false, 0, 0);
+  P.floor = prog(FLOOR_PROG_V, FLOORP_F); P.page = prog(QUAD_V, PAGE_F); P.shadow = prog(QUAD_V, SHADOW_F);
+  P.layer = prog(QUAD_V, LAYER_F); P.psh = prog(QUAD_V, PSH_F); P.spr = prog(SPR_V, SPR_F);
+  P.prep = prog(FLOOR_PROG_V, PREP_F); P.dof = prog(FLOOR_PROG_V, DOF_F); P.fin = prog(FLOOR_PROG_V, FINAL_F);
+  FB_SCENE = fbo(W, H, [GL.RGBA8, GL.RGBA16F]); FB_PREP = fbo(W, H, [GL.RGBA8], true); FB_ACC = fbo(W, H, [GL.RGBA16F]);
+}
+function setCam(pr, cam) {
+  GL.uniform3fv(pr.u.uPos, cam.pos); GL.uniform3fv(pr.u.uR, cam.r); GL.uniform3fv(pr.u.uU, cam.u); GL.uniform3fv(pr.u.uF, cam.f);
+  GL.uniform1f(pr.u.uFoc, FOC); GL.uniform2f(pr.u.uRes, W, H);
+}
+function setMask(pr, cam) {
+  GL.uniform4f(pr.u.uMask, 0, 0, 1440, cam.mask.bottom); GL.uniform1f(pr.u.uMaskR, cam.mask.r);
+  if (pr.u.uFade) GL.uniform1f(pr.u.uFade, cam.mask.fade);
+  if (pr.u.uHeroY) GL.uniform1f(pr.u.uHeroY, 1122);
+}
+function corners(pr, c) { GL.uniform3fv(pr.u.uC00, c[0]); GL.uniform3fv(pr.u.uC10, c[1]); GL.uniform3fv(pr.u.uC01, c[2]); GL.uniform3fv(pr.u.uC11, c[3]); }
+const draw = () => GL.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
+function flatRect(x0, y0, x1, y1, z = 0) { return [[x0, y0, z], [x1, y0, z], [x0, y1, z], [x1, y1, z]]; }
+
+// lifted piece geometry: tilt about its own middle, top edge rising toward the lens
+function pieceCorners(x, y, w, h, z, th, dx = 0) {
+  const cy = y + h / 2, hy = h / 2 * Math.cos(th), hz = h / 2 * Math.sin(th);
+  return [[x + dx, cy - hy, z + hz], [x + w + dx, cy - hy, z + hz], [x + dx, cy + hy, z - hz], [x + w + dx, cy + hy, z - hz]];
+}
+function drawShadow(cam, tex, x, y, w, h, z, th, dx, texScale, op = 0.26) {
+  // same picture in flat #1a2133, offset (0.10z, 4+0.36z), blurred 7+0.5z, 26%
+  const blur = 7 + 0.5 * z, ox = 0.10 * z + dx, oy = 4 + 0.36 * z;
+  const cy = y + h / 2, hy = h / 2 * Math.cos(th), m = blur * 1.6;
+  const x0 = x + ox - m, x1 = x + w + ox + m, y0 = cy - hy + oy - m, y1 = cy + hy + oy + m;
+  const pr = P.shadow; GL.useProgram(pr.p); setCam(pr, cam); setMask(pr, cam);
+  corners(pr, flatRect(x0, y0, x1, y1, 0));
+  // uv range of the expanded quad relative to the projected piece
+  GL.uniform4f(pr.u.uUVr, -m / w, -m / (2 * hy), 1 + m / w, 1 + m / (2 * hy));
+  GL.uniform1f(pr.u.uLod, Math.max(0, Math.log2(blur * texScale * 0.9)));
+  GL.uniform1f(pr.u.uOp, op); GL.uniform1f(pr.u.uSoft, Math.min(w, 2 * hy) / (blur * 0.8));
+  GL.activeTexture(GL.TEXTURE0); GL.bindTexture(GL.TEXTURE_2D, tex); GL.uniform1i(pr.u.uTex, 0); draw();
+}
+
+function renderScene(t) {
+  const cam = camera(t);
+  GL.bindFramebuffer(GL.FRAMEBUFFER, FB_SCENE.f); GL.viewport(0, 0, W, H);
+  GL.disable(GL.BLEND);
+  let pr = P.floor; GL.useProgram(pr.p); setCam(pr, cam); draw();
+  GL.enable(GL.BLEND); GL.blendFunc(GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
+  // page shadow (soft and wide)
+  pr = P.psh; GL.useProgram(pr.p); setCam(pr, cam); setMask(pr, cam);
+  const sig = 22 * cam.d / FOC + 18; GL.uniform1f(pr.u.uSig, sig); GL.uniform1f(pr.u.uOp, 0.2);
+  corners(pr, flatRect(-5 * sig, -5 * sig, 1440 + 5 * sig, cam.mask.bottom + 5 * sig, 0)); draw();
+  // page
+  pr = P.page; GL.useProgram(pr.p); setCam(pr, cam); setMask(pr, cam); GL.uniform1f(pr.u.uAlpha, 1);
+  for (const ch of PAGE.chunks) {
+    if (ch.y > cam.mask.bottom) continue;
+    corners(pr, flatRect(0, ch.y, 1440, ch.y + ch.h, 0));
+    GL.activeTexture(GL.TEXTURE0); GL.bindTexture(GL.TEXTURE_2D, ch.tex); GL.uniform1i(pr.u.uTex, 0); draw();
+  }
+  // lifted pieces, lowest first
+  const items = [];
+  for (const l of LAYERS) {
+    if (l.cy > cam.mask.bottom) continue;
+    const st = layerState(l, t);
+    const rel = l.cy - cam.Ly; if (cam.phi > 0.5 && (rel > 2600 || rel < -4200)) continue; // far off-frame
+    items.push({ l, st });
+  }
+  items.sort((a, b) => a.st.z - b.st.z);
+  for (const { l, st } of items) {
+    drawShadow(cam, l.tex, l.cx, l.cy, l.cw, l.ch, st.z, st.th, st.dx, PAGE.dpr);
+    pr = P.layer; GL.useProgram(pr.p); setCam(pr, cam); setMask(pr, cam); GL.uniform1f(pr.u.uAlpha, 1);
+    if (l.cfg.edge > 0 && st.th > 0.01) { // white card edge (thickness), visible below the front face
+      const p = PAGE.pad, x0 = l.cx + p + 8, x1 = l.cx + l.cw - p - 8, cy = l.cy + l.ch / 2, hh = (l.ch / 2 - p);
+      const n = [0, Math.sin(st.th), Math.cos(st.th)], e = l.cfg.edge * Math.min(1, st.th / (l.cfg.th * DEG));
+      const by = cy + hh * Math.cos(st.th), bz = st.z - hh * Math.sin(st.th);
+      GL.uniform1f(pr.u.uSolid, 1); GL.uniform3f(pr.u.uSolidCol, 1, 1, 1);
+      corners(pr, [[x0, by, bz], [x1, by, bz], [x0, by - e * n[1], bz - e * n[2]], [x1, by - e * n[1], bz - e * n[2]]]); draw();
+    }
+    GL.uniform1f(pr.u.uSolid, 0);
+    corners(pr, pieceCorners(l.cx, l.cy, l.cw, l.ch, st.z, st.th, st.dx));
+    GL.activeTexture(GL.TEXTURE0); GL.bindTexture(GL.TEXTURE_2D, l.tex); GL.uniform1i(pr.u.uTex, 0); draw();
+  }
+  // logo tiles in 3D
+  for (const tl of tileStates(t, cam)) {
+    const up = norm(mixv([0, -1, 0], cam.u, tl.orient)), r = [1, 0, 0], hs = tl.s / 2;
+    const c = [tl.X, tl.Y, tl.Z];
+    const C = (a, b) => [c[0] + r[0] * a * hs + up[0] * b * hs, c[1] + r[1] * a * hs + up[1] * b * hs, c[2] + r[2] * a * hs + up[2] * b * hs];
+    if (tl.Z < 2000) drawShadow(cam, TEX.tile, tl.X - hs, tl.Y - hs, tl.s, tl.s, Math.max(0, tl.Z), 0, 0, 256 / tl.s, 0.26 * tl.alpha);
+    pr = P.layer; GL.useProgram(pr.p); setCam(pr, cam); setMask(pr, cam); GL.uniform1f(pr.u.uAlpha, tl.alpha); GL.uniform1f(pr.u.uSolid, 0);
+    corners(pr, [C(-1, 1), C(1, 1), C(-1, -1), C(1, -1)]);
+    GL.activeTexture(GL.TEXTURE0); GL.bindTexture(GL.TEXTURE_2D, TEX.tile); GL.uniform1i(pr.u.uTex, 0); draw();
+  }
+  drawEndCard(t, cam);
+  return cam;
+}
+const norm = v => { const l = Math.hypot(...v); return v.map(x => x / l); };
+const mixv = (a, b, k) => a.map((x, i) => mix(x, b[i], k));
+const depthForCoc = (coc, focus) => 75 * focus / (coc + 75);
+
+function sprite(tex, x, y, w, h, alpha, coc, focus) {
+  const pr = P.spr; GL.useProgram(pr.p); GL.uniform4f(pr.u.uRect, x, y, w, h); GL.uniform2f(pr.u.uRes, W, H);
+  GL.uniform1f(pr.u.uAlpha, alpha); GL.uniform1f(pr.u.uDepth, depthForCoc(coc, focus));
+  GL.activeTexture(GL.TEXTURE0); GL.bindTexture(GL.TEXTURE_2D, tex); GL.uniform1i(pr.u.uTex, 0); draw();
+}
+function drawEndCard(t, cam) {
+  if (t < 9.7) return;
+  const f = cam.focus, drift = (t - 10) * 1.0;
+  // logo tiles around the landed hero card (card: x 211..1229, top 283)
+  const a = sstep(9.72, 9.97, t), slide = 1 - easeOutCubic((t - 9.7) / 0.6);
+  const tiles = [
+    [211, 283 + 2 * Math.sin(drift * 0.8), 88, 0],           // top-left corner
+    [1229, 283 - 2 * Math.sin(drift * 0.7), 88, 0],          // top-right corner
+    [1392 + 2 * Math.sin(drift), 640, 104, 0],               // crisp at the right edge
+    [70 - 140 * slide + drift * 3, 1115 + 120 * slide, 430, 64],   // huge soft blur, bottom-left
+    [1370 + 140 * slide - drift * 3, 1140 + 120 * slide, 380, 72], // huge soft blur, bottom-right
+  ];
+  for (const [x, y, s, coc] of tiles) sprite(TEX.tile, x - s / 2, y - s / 2, s, s, a, coc, f);
+  // badge
+  const ba = sstep(10.02, 10.32, t);
+  if (ba > 0) sprite(SPR.badge.tex, W / 2 - SPR.badge.w / 2, 44 + 8 * (1 - ba), SPR.badge.w, SPR.badge.h, ba, 6 * (1 - ba), f);
+  for (const wd of WORDS) {
+    const k = clamp((t - wd.t0) / 0.34, 0, 1), e = easeOutCubic(k);
+    if (k <= 0) continue;
+    sprite(wd.tex, wd.x, wd.y + 16 * (1 - e), wd.w, wd.h, e, 12 * (1 - e), f);
+  }
+}
+
+// ---------------- frame ----------------
+window.seek = function (t, sub = 16, shutter = 0.7) {
+  GL.bindFramebuffer(GL.FRAMEBUFFER, FB_ACC.f); GL.viewport(0, 0, W, H); GL.clearColor(0, 0, 0, 0); GL.clear(GL.COLOR_BUFFER_BIT);
+  let cam;
+  for (let s = 0; s < sub; s++) {
+    const ts = Math.max(0, t + ((s + 0.5) / sub - 0.5) * shutter / 60);
+    cam = renderScene(ts);
+    GL.disable(GL.BLEND);
+    GL.bindFramebuffer(GL.FRAMEBUFFER, FB_PREP.f); let pr = P.prep; GL.useProgram(pr.p);
+    GL.activeTexture(GL.TEXTURE0); GL.bindTexture(GL.TEXTURE_2D, FB_SCENE.texs[0]); GL.uniform1i(pr.u.uCol, 0);
+    GL.activeTexture(GL.TEXTURE1); GL.bindTexture(GL.TEXTURE_2D, FB_SCENE.texs[1]); GL.uniform1i(pr.u.uDep, 1);
+    GL.uniform1f(pr.u.uFocus, cam.focus); GL.uniform2f(pr.u.uRes, W, H); draw();
+    GL.activeTexture(GL.TEXTURE0); GL.bindTexture(GL.TEXTURE_2D, FB_PREP.texs[0]); GL.generateMipmap(GL.TEXTURE_2D);
+    GL.bindFramebuffer(GL.FRAMEBUFFER, FB_ACC.f); pr = P.dof; GL.useProgram(pr.p);
+    GL.uniform1i(pr.u.uPrep, 0); GL.uniform2f(pr.u.uRes, W, H); GL.uniform1f(pr.u.uW, 1 / sub);
+    GL.enable(GL.BLEND); GL.blendFunc(GL.ONE, GL.ONE); draw();
+  }
+  GL.disable(GL.BLEND); GL.bindFramebuffer(GL.FRAMEBUFFER, null); GL.viewport(0, 0, W, H);
+  const pr = P.fin; GL.useProgram(pr.p); GL.activeTexture(GL.TEXTURE0); GL.bindTexture(GL.TEXTURE_2D, FB_ACC.texs[0]);
+  GL.uniform1i(pr.u.uAcc, 0); GL.uniform2f(pr.u.uRes, W, H); draw();
+  GL.finish();
+  return { Ly: cam.Ly, d: cam.d, phi: cam.phi / DEG, focus: cam.focus };
+};
+const PIX = new Uint8Array(W * H * 4);
+window.grab = function () { // raw RGBA, bottom-up rows, as base64
+  GL.bindFramebuffer(GL.FRAMEBUFFER, null); GL.readPixels(0, 0, W, H, GL.RGBA, GL.UNSIGNED_BYTE, PIX);
+  let s = ''; const CH = 0x8000; for (let i = 0; i < PIX.length; i += CH) s += String.fromCharCode.apply(null, PIX.subarray(i, i + CH));
+  return btoa(s);
+};
+window.camInfo = t => { const c = camera(t); return { Ly: c.Ly, d: c.d, phi: c.phi / DEG, sy0: projectY(c, 720, 0, 0), syB: projectY(c, 720, PAGE_H, 0) }; };
+
+// ---------------- assets ----------------
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
+async function makeTile(logo) {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+  const rr = (x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
+  const grd = g.createLinearGradient(0, 0, 0, 256); grd.addColorStop(0, '#1b2438'); grd.addColorStop(1, '#0a0f1b');
+  rr(4, 4, 248, 248, 58); g.fillStyle = grd; g.fill();
+  g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,0.14)'; rr(5.5, 5.5, 245, 245, 57); g.stroke();
+  g.filter = 'brightness(1.12)'; g.drawImage(logo, 50, 46, 156, 156); g.filter = 'none';
+  return c;
+}
+function textCanvas(text, font, color, scale = 2) {
+  const c = document.createElement('canvas'), g = c.getContext('2d'); g.font = font;
+  const m = g.measureText(text), pad = 28, asc = m.fontBoundingBoxAscent, desc = m.fontBoundingBoxDescent;
+  c.width = Math.ceil((m.width + pad * 2) * scale); c.height = Math.ceil((asc + desc + pad * 2) * scale);
+  g.scale(scale, scale); g.font = font; g.fillStyle = color; g.textBaseline = 'alphabetic'; g.fillText(text, pad, pad + asc);
+  return { c, w: m.width, pad, asc, desc, cw: c.width / scale, ch: c.height / scale };
+}
+function layoutLine(text, font, color, centerY, t0, step) {
+  const ctx = document.createElement('canvas').getContext('2d'); ctx.font = font;
+  const words = text.split(' '), space = ctx.measureText(' ').width;
+  const widths = words.map(w => ctx.measureText(w).width), total = widths.reduce((a, b) => a + b, 0) + space * (words.length - 1);
+  const m = ctx.measureText('Hg'), base = centerY + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+  let x = W / 2 - total / 2;
+  words.forEach((w, i) => {
+    const tc = textCanvas(w, font, color);
+    WORDS.push({ tex: texFrom(tc.c, { aniso: false }), x: x - tc.pad, y: base - tc.asc - tc.pad, w: tc.cw, h: tc.ch, t0: t0 + i * step });
+    x += widths[i] + space;
+  });
+}
+async function makeBadge(logo) {
+  const s = 2, font = '500 21px Geist', g0 = document.createElement('canvas').getContext('2d'); g0.font = font;
+  const tw = g0.measureText(CFG.brand).width, h = 46, logoS = 22, w = 18 + logoS + 9 + tw + 20, pad = 20;
+  const c = document.createElement('canvas'); c.width = (w + pad * 2) * s; c.height = (h + pad * 2) * s; const g = c.getContext('2d'); g.scale(s, s);
+  g.shadowColor = 'rgba(26,33,51,0.12)'; g.shadowBlur = 14; g.shadowOffsetY = 4;
+  g.beginPath(); g.roundRect(pad, pad, w, h, h / 2); g.fillStyle = '#fff'; g.fill(); g.shadowColor = 'transparent';
+  g.lineWidth = 1; g.strokeStyle = 'rgba(26,33,51,0.07)'; g.stroke();
+  const lc = document.createElement('canvas'); lc.width = lc.height = 96; const lg = lc.getContext('2d');
+  lg.drawImage(logo, 0, 0, 96, 96); lg.globalCompositeOperation = 'source-in'; lg.fillStyle = '#0e1320'; lg.fillRect(0, 0, 96, 96);
+  g.drawImage(lc, pad + 18, pad + (h - logoS) / 2, logoS, logoS);
+  g.font = font; g.fillStyle = '#0e1320'; g.textBaseline = 'middle'; g.fillText(CFG.brand, pad + 18 + logoS + 9, pad + h / 2 + 1);
+  return { tex: texFrom(c, { aniso: false }), w: w + pad * 2, h: h + pad * 2 };
+}
+window.ready = (async () => {
+  init();
+  PAGE = await (await fetch('assets/page.json')).json();
+  const fin = PAGE.sections.find(s => /Kerja Pintar/.test(s.title)) || PAGE.sections[PAGE.sections.length - 1];
+  PAGE.footerTitleY = fin.ty || fin.y + 100;
+  await Promise.all([document.fonts.load('500 74px Geist'), document.fonts.load('italic 82px "Instrument Serif"')]);
+  for (const ch of PAGE.chunks) ch.tex = texFrom(await loadImg('assets/' + ch.file));
+  buildTables();
+  for (const l of PAGE.layers) { l.tex = texFrom(await loadImg('assets/' + l.file)); l.cfg = layerConfig(l); LAYERS.push(l); }
+  const logo = await loadImg('assets/logo.png');
+  TEX.tile = texFrom(await makeTile(logo));
+  SPR.badge = await makeBadge(logo);
+  layoutLine(CFG.line1, '500 74px Geist', '#0e1320', 146, 10.12, 0.06);
+  layoutLine(CFG.tail, 'italic 82px "Instrument Serif"', '#8b8b92', 228, 10.36, 0.05);
+  return { cruise: CRUISE, dover: DOVER, dend: DEND, H: PAGE_H, aniso: !!ANISO, renderer: GL.getParameter(GL.RENDERER) };
+})();
+</script></body></html>

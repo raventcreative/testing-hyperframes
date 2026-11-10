@@ -59,9 +59,9 @@
       // ROUND 5 — GRAFIK ("Lima, grafik. Data jadi gampang dibaca.")
       // Round kit copied from r1 (big card out of its strip chip, badge on the number, name + example panel on the name, exit in the
       // last 0.42 s with the big card flying back INTO its chip). Example: "Penayangan per minggu" as a raw 4-row TABLE; on "data" a
-      // scan highlight reads down the numbers; on "jadi" the Tabel|Grafik switch flips and the table MORPHS: each row's pill collapses
-      // into a bar seed on the baseline, the week labels slide under their bars, the numbers fly to the bar tips; on "gampang" the bars
-      // grow (numbers ride on top); on "dibaca." the highest bar (not the last one — the chart makes it obvious) turns green with a
+      // scan highlight reads down the numbers; on "jadi" the Tabel|Grafik switch flips and the table MORPHS: each row's pill shrinks
+      // into a chip in its own column (a staircase, still in table order), the week labels re-appear under their bars, the numbers sit on the
+      // chips; on "gampang" the chips stretch into bars down to the baseline (numbers ride on the tips); on "dibaca." the highest bar (not the last one — the chart makes it obvious) turns green with a
       // "Tertinggi" chip while the others dim.
       const K = 4, R = window.ROUNDS[K], MA = window.MicroAnim, ST = R.start, D = R.dur;
       const W = (txt) => { const w = R.words.find((x) => x[0] === txt); return (w ? w[1] : ST) - ST; };   // local time of a word of this round
@@ -99,9 +99,11 @@
       const MAX = Math.max.apply(null, NUM), HI = NUM.indexOf(MAX);
       const RY0 = 104, RS = 60, RH = 50, RX = 26, RW = 538;            // table rows (panel coords)
       const BASE = 352, BW = 76, HMAX = 170, CX = (i) => RX + (RW * (i + 0.5)) / 4;   // chart (bar centres, baseline, tallest bar)
-      $("r5-rows").innerHTML = LBL.map((l, i) => `<div class="r5-bar" id="r5-bar${i}"><i class="r5-bf" id="r5-bf${i}"></i><i class="r5-bh" id="r5-bh${i}"></i></div>` +
-        `<div class="r5-lb" id="r5-lb${i}" style="left:40px;top:${RY0 + i * RS}px">${l}</div><div class="r5-v" id="r5-v${i}" style="left:${RX + RW - 16 - 130}px;top:${RY0 + i * RS}px">${VAL[i]}</div>`).join("");
-      const tRows = tName + 0.1, tScan = W("data") - 0.14, tJadi = W("jadi") - 0.06, tGrow = W("gampang") - 0.04, tHi = W("dibaca.") - 0.06;
+      const AT = (i) => 130 + i * 54, AH = 40;                        // mid-morph "staircase": one chip per column, still in table order
+      $("r5-rows").innerHTML = LBL.map((l, i) => `<div class="r5-bar" id="r5-bar${i}"><i class="r5-bf" id="r5-bf${i}"></i><i class="r5-bh" id="r5-bh${i}"></i></div>`).join("") +
+        LBL.map((l, i) => `<div class="r5-lb" id="r5-lb${i}" style="left:40px;top:${RY0 + i * RS}px">${l}</div>`).join("") +
+        VAL.map((v, i) => `<div class="r5-v" id="r5-v${i}" style="left:${RX + RW - 16 - 130}px;top:${RY0 + i * RS}px">${v}</div>`).join("");
+      const tRows = tName + 0.1, tScan = W("data") - 0.14, tJadi = W("jadi") - 0.08, tGrow = W("gampang") - 0.04, tHi = W("dibaca.") - 0.06;
       // header parts + rows enter after the panel hinge
       ["r5-seg", "r5-sub"].forEach((id, i) => { const e = $(id); I(e, { opacity: 0, x: 34 }); ft(e, { opacity: 0, x: 34 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, tName + 0.06 + i * 0.035); });
       // segmented control: "Tabel" active, flips to "Grafik" on "jadi"
@@ -117,25 +119,29 @@
       const scan = $("r5-scan");
       I(scan, { opacity: 0, y: 0 });
       ft(scan, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "power1.out" }, tScan);
-      ft(scan, { y: 0 }, { y: 3 * RS, duration: 0.3, ease: "power1.inOut" }, tScan + 0.04);
-      ft(scan, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.in" }, tScan + 0.36);
+      ft(scan, { y: 0 }, { y: 3 * RS, duration: 0.26, ease: "power1.inOut" }, tScan + 0.04);
+      ft(scan, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.in" }, tScan + 0.3);
       LBL.forEach((_, i) => {
         const bar = $("r5-bar" + i), bf = $("r5-bf" + i), bh = $("r5-bh" + i), lb = $("r5-lb" + i), v = $("r5-v" + i);
-        const ry = RY0 + i * RS, cx = CX(i), h = (HMAX * NUM[i]) / MAX, tA = tJadi + i * 0.025, tG = tGrow + i * 0.04;
+        const ry = RY0 + i * RS, cx = CX(i), h = (HMAX * NUM[i]) / MAX, tA = tJadi + i * 0.03, tG = tGrow + i * 0.04;
         // rows slide in
         I(bar, { left: RX, top: ry, width: RW, height: RH, backgroundColor: "#f3f6fb", boxShadow: "inset 0 0 0 1.5px #e3e9f4", opacity: 0, x: 34 });
         [bar, lb, v].forEach((e, k) => { if (k) I(e, { opacity: 0, x: 34, y: 0, scale: 1, transformOrigin: "50% 50%" }); ft(e, { opacity: 0, x: 34 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, tRows + i * 0.05 + k * 0.02); });
         // "data": each number lights up as the scan passes
-        I(v, { color: "#0a0d2c" }); tl.set(v, { color: "#3a6fe0" }, tScan + 0.04 + i * 0.1); tl.set(v, { color: "#0a0d2c" }, tScan + 0.28 + i * 0.1);
-        // "jadi": the row pill collapses into a bar seed on the baseline; label → under the bar; number → above the seed
+        I(v, { color: "#0a0d2c" }); tl.set(v, { color: "#3a6fe0" }, tScan + 0.04 + i * 0.08); tl.set(v, { color: "#0a0d2c" }, Math.min(tScan + 0.24 + i * 0.08, tJadi - 0.01));
+        // "jadi": each row pill shrinks into a chip in ITS OWN column (no lane crossings); label → under its bar; number → above the chip
         ft(bar, { left: RX, top: ry, width: RW, height: RH, backgroundColor: "#f3f6fb", boxShadow: "inset 0 0 0 1.5px #e3e9f4" },
-          { left: cx - BW / 2, top: BASE - 10, width: BW, height: 10, backgroundColor: "#cfdcf3", boxShadow: "inset 0 0 0 0px #e3e9f4", duration: 0.28, ease: "power3.inOut" }, tA);
-        ft(lb, { x: 0, y: 0, scale: 1 }, { x: cx - (40 + 65), y: BASE + 22 - (ry + RH / 2), scale: 0.88, duration: 0.3, ease: "power3.inOut" }, tA);
-        const vx = cx - (RX + RW - 16 - 65), vy0 = BASE - 10 - 20 - (ry + RH / 2);
-        ft(v, { x: 0, y: 0, scale: 1 }, { x: vx, y: vy0, scale: 0.9, duration: 0.28, ease: "power3.inOut" }, tA);
-        // "gampang": the bar grows from the seed, its number riding on the tip
-        ft(bar, { top: BASE - 10, height: 10 }, { top: BASE - h, height: h, duration: 0.32, ease: "back.out(1.4)" }, tG);
-        ft(v, { y: vy0 }, { y: vy0 - (h - 10), duration: 0.32, ease: "back.out(1.4)" }, tG);
+          { left: cx - BW / 2, top: AT(i), width: BW, height: AH, backgroundColor: "#cfdcf3", boxShadow: "inset 0 0 0 0px #e3e9f4", duration: 0.28, ease: "power3.inOut" }, tA);
+        // (labels cross-fade instead of travelling: four diagonal paths would pile up mid-way)
+        const lx = cx - (40 + 65), ly = BASE + 22 - (ry + RH / 2);
+        ft(lb, { opacity: 1, x: 0 }, { opacity: 0, x: -14, duration: 0.12, ease: "power2.in" }, tA);
+        tl.set(lb, { x: lx, y: ly + 14, scale: 0.88 }, tA + 0.13);
+        ft(lb, { opacity: 0, y: ly + 14 }, { opacity: 1, y: ly, duration: 0.24, ease: "power3.out" }, tA + 0.18);
+        const vx = cx - (RX + RW - 16 - 65), vyA = AT(i) - 20 - (ry + RH / 2);
+        ft(v, { x: 0, y: 0, scale: 1 }, { x: vx, y: vyA, scale: 0.9, duration: 0.28, ease: "power3.inOut" }, tA);
+        // "gampang": the chip stretches into its bar down to the baseline, the number riding on the tip
+        ft(bar, { top: AT(i), height: AH }, { top: BASE - h, height: h, duration: 0.32, ease: "back.out(1.4)" }, tG);
+        ft(v, { y: vyA }, { y: BASE - h - 20 - (ry + RH / 2), duration: 0.32, ease: "back.out(1.4)" }, tG);
         I(bf, { opacity: 0 }); ft(bf, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, tG);
         // "dibaca.": the highest bar turns green and its number pops; the others step back
         I(bh, { opacity: 0 });

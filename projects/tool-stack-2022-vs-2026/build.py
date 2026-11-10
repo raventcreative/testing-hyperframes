@@ -17,8 +17,27 @@ G = [
 ]
 assert sum(len(r) for _, r in G) == 23
 
+import json
+SVG = json.load(open(D / "assets/icons/svg.json"))
+ICON = {"Zapier":"zapier","Fireflies":"fireflies","Google Search":"google","Midjourney":"midjourney","PowerPoint":"powerpoint",
+ "Basic AI video demos":"basic","WordPress":"wordpress","Power BI":"powerbi","Manual typing":"typing","Premiere Pro":"adobepremierepro",
+ "Canva":"canva","Google Sheets":"googlesheets","ChatGPT":"openai","VS Code":"vscode","Trello":"trello","Jasper":"jasper",
+ "Otter.ai":"otter","Mailchimp":"mailchimp","HubSpot":"hubspot","Google Drive":"googledrive","Google Forms":"googleforms","n8n":"n8n",
+ "Claude":"claude","Granola":"granola","GPT Image":"openai","Higgsfield":"higgsfield","Remotion":"remotion","Wispr Flow":"wispr",
+ "Perplexity":"perplexity","Supabase":"supabase","Cursor":"cursor","Linear":"linear","Whisper":"openai","Kit":"kit",
+ "Twenty CRM":"twenty","Obsidian":"obsidian","Tally":"tally","Grok Bot":"grok"}
+def logo(key):
+    k = ICON[key]
+    if k in SVG:
+        d, fg, bg = SVG[k]
+        return f'<span class="lg" style="background:{bg}"><svg viewBox="0 0 24 24"><path fill="{fg}" d="{d}"/></svg></span>'
+    return f'<span class="lg"><img src="assets/icons/{k}.png" alt=""></span>'
+def logos(name):
+    if name.startswith("Claude + "): return logo("Claude") + logo(name[9:])
+    if name.startswith("Claude"): return logo("Claude")
+    return logo(name)
 def group(name, rows):
-    li = "".join(f'<li><small>{c}</small><p><s>{o}</s><i>→</i><b class="g">{n}</b></p></li>' for c, o, n in rows)
+    li = "".join(f'<li><small>{c}</small><p>{logos(o)}<s>{o}</s><i>→</i>{logos(n)}<b class="g">{n}</b></p></li>' for c, o, n in rows)
     return f'<div class="grp"><h3><span>{name}</span><em>{len(rows)}</em></h3><ul>{li}</ul></div>'
 
 left = group(*G[0]) + group(*G[1])

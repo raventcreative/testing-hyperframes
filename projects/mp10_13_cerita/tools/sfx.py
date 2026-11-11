@@ -1,17 +1,19 @@
-"""Synthesised SFX for MasterPajak AI Video 1 (Berita Pajak): stabilo marker strokes, browser clicks, transitions (sits under the VO) (no samples, no music, per the client's rule). Deterministic.
-Every cut on the 120 BPM grid gets its own whoosh flavour; pops on chips/stars, ticks on the typewriter, impact on the puzzle snap,
-shimmer + soft impact on the M-to-wordmark outro. Writes assets/audio/sfx.wav (48 kHz mono, 15 s). Run: python3 tools/sfx.py ."""
-import sys, wave
+"""Synthesised SFX for MasterPajak AI Video 13 (Laris Tapi Saldo Tipis) — sits under the VO (no samples, no music, per the client's rule).
+Deterministic. Every beat time is read from window.TM in index.html, so a VO re-time moves the sound with the picture.
+S1 paper pops, parcel thuds, order pings, odometer ticks · whip · S2 balance roll-down (descending ticks + deflating tone), marker ·
+vertical whip · S3 X-ray scanner hum + token sparkles, four coin chimes · wipe "light on" + ribbon swishes + card pops + ring ping ·
+brand bands, hologram fx, report row pops + coin docks + marker · beam/iris, end-card hologram, CTA pops, chime.
+Writes assets/audio/sfx.wav (48 kHz mono, TM.total s). Run: python3 tools/sfx.py ."""
+import sys, wave, re
 from pathlib import Path
 import numpy as np
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-import re
 SR = 48000
 _tm = re.search(r'window\.TM = (\{.*?\});', (P / 'index.html').read_text()).group(1)
 TM = {k: float(v) for k, v in re.findall(r'(\w+):\s*([\d.]+)', _tm)}
 TOTAL = TM['total']; N = int(TOTAL * SR) + SR
 out = np.zeros(N)
-rng = np.random.default_rng(11)
+rng = np.random.default_rng(13)
 def put(t, x, g=1.0):
     i = int(t * SR); j = min(N, i + len(x))
     if i < 0 or i >= N: return
@@ -26,7 +28,7 @@ def svf_bp(x, f, q=1.2):
     return y
 
 def env(n, a=0.35, shape=2.0):
-    u = np.linspace(0, 1, n); k = int(n * a)
+    k = max(1, int(n * a))
     e = np.ones(n); e[:k] = np.sin(np.linspace(0, np.pi / 2, k)) ** shape; e[k:] = np.cos(np.linspace(0, np.pi / 2, n - k)) ** shape
     return e
 
@@ -74,68 +76,116 @@ def chime(freqs=(1318.5, 1760, 2637), dur=1.4):
         x[d:] += np.sin(2 * np.pi * f * tt) * np.exp(-tt * 3.5) * (0.8 ** k)
     return x / np.abs(x).max()
 
-def rip(dur=0.55):
-    n = int(dur * SR); t = np.arange(n) / SR
-    jit = np.repeat(rng.random(n // 240 + 1), 240)[:n] ** 3
-    x = svf_bp(rng.standard_normal(n), np.linspace(1400, 3600, n), 1.4) * jit * env(n, 0.2)
-    return x / np.abs(x).max()
-
-def scribble(dur=0.6):
-    n = int(dur * SR); t = np.arange(n) / SR
-    am = 0.5 + 0.5 * np.sign(np.sin(2 * np.pi * 13 * t))
-    x = svf_bp(rng.standard_normal(n), 2600 + 900 * np.sin(2 * np.pi * 6.5 * t), 1.6) * am * env(n, 0.2)
-    return x / np.abs(x).max()
-
-def rumble(dur=1.5):
-    n = int(dur * SR); t = np.arange(n) / SR
-    x = svf_bp(rng.standard_normal(n), np.linspace(70, 260, n), 0.7)
-    x = x / np.abs(x).max() * env(n, 0.3, 1.0)
-    return x
-
-W = 0.22
-P_ = 0.15
-def wh(t, a=0.5, f0=300, f1=2600, q=1.1, at=0.6, g=1.0): put(t, whoosh(a, f0, f1, q, at), W * g)
 def marker(dur=0.4):
-    """felt-tip highlighter stroke: band-passed noise with a scratchy 40-70 Hz texture and a slight pitch drift"""
+    """felt-tip highlighter stroke: band-passed noise with a scratchy texture and a slight pitch drift"""
     n = int(dur * SR); t = np.arange(n) / SR
     f = 2600 + 900 * np.sin(np.pi * t / dur)
     x = svf_bp(rng.standard_normal(n), f, 1.6)
     tex = 0.6 + 0.4 * np.abs(np.sin(2 * np.pi * (45 + 25 * rng.random()) * t + rng.random() * 6))
     e = np.minimum(1, t / 0.025) * np.minimum(1, (dur - t) / 0.06)
     x = x * tex * e; return x / (np.abs(x).max() + 1e-9)
-def click():
-    return tick(0.012, 5200) * 0.8 + np.concatenate([np.zeros(int(0.03 * SR)), pop(1800, 900, 0.03)])[: int(0.06 * SR)] if False else tick(0.014, 5200)
+
+def thud(f0=150, dur=0.16):
+    """cardboard parcel landing: a short low body + a papery noise burst"""
+    n = int(dur * SR); t = np.arange(n) / SR
+    body = np.sin(2 * np.pi * np.cumsum(f0 * (0.55) ** (t / dur)) / SR) * np.exp(-t * 30)
+    pap = svf_bp(rng.standard_normal(n), np.full(n, 1100.0), 0.9) * np.exp(-t * 55) * 0.5
+    x = body + pap; return x / np.abs(x).max()
+
+def ping(f=1568, f2=2093, dur=0.32):
+    """generic soft two-note notification (no brand sound)"""
+    n = int(dur * SR); t = np.arange(n) / SR; h = n // 2
+    x = np.zeros(n)
+    x[:h] += np.sin(2 * np.pi * f * t[:h]) * np.exp(-t[:h] * 22)
+    x[h:] += np.sin(2 * np.pi * f2 * t[: n - h]) * np.exp(-t[: n - h] * 14)
+    return x / np.abs(x).max()
+
+def coin(f=2350, dur=0.9):
+    """metal coin ring: inharmonic partials, fast attack"""
+    n = int(dur * SR); t = np.arange(n) / SR; x = np.zeros(n)
+    for r, a, dcy in ((1.0, 1.0, 5.5), (2.76, 0.55, 8), (5.4, 0.3, 12), (8.93, 0.18, 16)):
+        x += a * np.sin(2 * np.pi * f * r * t + rng.random()) * np.exp(-t * dcy)
+    x += svf_bp(rng.standard_normal(n), np.full(n, 6000.0), 1.5) * np.exp(-t * 90) * 0.5
+    return x / np.abs(x).max()
+
+def hum(dur=1.7):
+    """X-ray scanner: mains hum harmonics + a band-passed buzz that brightens as it sweeps"""
+    n = int(dur * SR); t = np.arange(n) / SR; u = t / dur
+    x = sum(np.sin(2 * np.pi * 100 * k * t) / k for k in (1, 2, 3, 5)) * 0.35
+    x += svf_bp(rng.standard_normal(n), 900 + 2400 * u, 3.0) * 0.8
+    x *= env(n, 0.18, 1.0)
+    return x / np.abs(x).max()
+
+def deflate(dur=1.35, f0=520, f1=140):
+    """descending tone for the shrinking balance"""
+    n = int(dur * SR); t = np.arange(n) / SR
+    x = np.sin(2 * np.pi * np.cumsum(f0 * (f1 / f0) ** ((t / dur) ** 0.8)) / SR)
+    x = np.tanh(1.4 * x) * env(n, 0.12, 1.0)
+    return x / np.abs(x).max()
+
+W = 0.22
+P_ = 0.15
+def wh(t, a=0.5, f0=300, f1=2600, q=1.1, at=0.6, g=1.0): put(t, whoosh(a, f0, f1, q, at), W * g)
 MK = 0.11
-# S0 · page reveal + camera reading the headline (soft air moves), paragraph zoom + stabilo
-wh(TM['hd'] - 0.05, 0.7, 300, 1400, 1.0, 0.6, 0.35)
-wh(TM['zo'] - 0.02, 0.6, 1400, 400, 1.0, 0.5, 0.3); wh(TM['par'] - 0.02, 0.7, 300, 1300, 1.0, 0.6, 0.35)
-put(TM['par'] + 0.85, marker(0.42), MK)
-for j in range(4): put(TM['fl'] + j * 0.12, tick(0.012, 3600), 0.08)   # fast re-cuts
-# excerpts: direct cuts (a soft paper tick) + stabilo
-for t0 in (TM['e2'], TM['e3'], TM['e4']):
-    put(t0, tick(0.012, 3200), 0.09); put(t0 + 0.45, marker(0.42), MK)
-# the stabilo floods the screen -> question on navy
-put(TM['conf'] - 0.42, marker(0.42), MK * 1.2); wh(TM['conf'] - 0.4, 0.5, 600, 2600, 1.2, 0.8, 0.6)
-for k in range(4): put(TM['conf'] + 0.15 + k * 0.12, pop(500 + 120 * k, 1000 + 150 * k, 0.08), 0.12)
-for k in range(3): put(TM['conf'] + 1.1 + k * 0.15, pop(900 + 200 * k, 1500, 0.08), 0.12)
-for j in range(6): put(TM['conf'] + 1.6 + j * 0.09, tick(0.02, 4800), 0.06)
-# band sweep -> solution
-for k in range(3): wh(TM['sol'] - 0.5 + k * 0.06, 0.45, 300 + 200 * k, 1800 + 400 * k, 1.1, 0.7, 0.5)
 def holo_fx(t0, g=1.0):
     put(t0, zap(0.35), 0.05 * g); put(t0 + 0.02, whoosh(1.1, 300, 4200, 1.8, 0.9), W * 0.45 * g)
     put(t0 + 1.15, chime((1046, 1568, 2093, 2637), 1.6), 0.06 * g)
+
+# ---------------- S1 · Rina's shop ----------------
+wh(0.0, 0.9, 250, 900, 0.9, 0.6, 0.25)                                   # room tone swell
+put(TM['rina'] + 0.45, pop(700, 1300, 0.08), 0.12)                        # name tag
+put(TM['laris'] + 0.05, pop(500, 1000, 0.1), P_)                          # order card
+for k in range(10): put(TM['laris'] + 0.18 + k * 0.21, thud(140 + 12 * (k % 3)), 0.13)      # parcels
+for k in range(8): put(TM['laris'] + 0.3 + k * 0.3, ping(1568 + 60 * (k % 3), 2093 + 60 * (k % 3)), 0.045)   # order bubbles
+t = TM['laris'] + 0.25; d = 2.5
+for j in range(26):                                                        # odometer ticks (ease in/out)
+    u = j / 25; tt = t + d * (0.5 - 0.5 * np.cos(np.pi * u)); put(tt, tick(0.012, 3800), 0.035)
+# whip to the balance
+wh(TM['tipis'] - 0.34, 0.5, 400, 2800, 1.1, 0.7, 0.9)
+# ---------------- S2 · the balance thins out ----------------
+s0 = TM['sal'] - 0.55; sD = 1.35
+put(s0, deflate(sD), 0.05)
+for j in range(30):
+    u = j / 29; tt = s0 + sD * (0.5 - 0.5 * np.cos(np.pi * u)); put(tt, tick(0.012, 3400 - 1500 * u), 0.04)
+put(s0 + sD + 0.02, thud(110, 0.2), 0.12)
+put(TM['sal'] + 0.95, marker(0.42), MK)
+# vertical whip down to the month
+wh(TM['ternyata'] - 0.36, 0.55, 2400, 300, 1.0, 0.5, 0.9)
+# ---------------- S3 · X-ray ----------------
+sw0 = TM['ternyata'] + 1.25
+put(sw0 - 0.05, tick(0.02, 2000), 0.08); put(sw0, hum(1.7), 0.07)
+for j in range(14): put(sw0 + 0.2 + j * 0.1, tick(0.01, 5200 + 300 * (j % 4)), 0.03)   # tokens light up as the line passes
+CT = [TM['ongkir'], TM['kemasan'], TM['iklan'], TM['potongan']]
+wh(TM['ongkir'] - 0.3, 0.45, 300, 1200, 1.0, 0.6, 0.35)                    # month dims
+for k, t0 in enumerate(CT):
+    wh(t0 - 0.1, 0.45, 400, 2400, 1.2, 0.7, 0.45)
+    put(t0 + 0.35, coin(2100 + 180 * k), 0.06)
+# ---------------- S4 · the light comes back on ----------------
+wp0 = TM['rapi'] - 0.12
+put(wp0, tick(0.02, 2400), 0.12); put(wp0 + 0.01, pop(1600, 2400, 0.04), 0.06)  # "switch"
+wh(wp0, 0.75, 500, 3200, 1.0, 0.7, 0.6)
+for k in range(4): wh(TM['rapi'] + 0.12 + k * 0.12, 0.5, 600, 1800, 1.3, 0.5, 0.25)  # coins fly to their cards
+wh(TM['rapi'] + 0.15, 0.5, 200, 900, 0.9, 0.5, 0.35)                              # source bar fills
+for k in range(6): wh(TM['rapi'] + 0.45 + k * 0.12, 0.55, 300, 1500, 1.4, 0.5, 0.22)  # ribbons
+for k in range(6): put(TM['rapi'] + 0.72 + k * 0.12, pop(600 + 70 * k, 1200 + 80 * k, 0.07), 0.08)
+put(TM['pergi'] + 1.1, marker(0.42), MK)
+put(TM['pergi'] + 1.25, ping(1318, 1760, 0.4), 0.06)
+# band sweep -> brand
+for k in range(3): wh(TM['sol'] - 0.5 + k * 0.06, 0.45, 300 + 200 * k, 1800 + 400 * k, 1.1, 0.7, 0.5)
 holo_fx(TM['sol'] + 0.55)
-put(TM['sol'] + 2.2, pop(500, 1000, 0.1), P_); put(TM['sol'] + 3.6, marker(0.45), MK)
-put(TM['sol'] + 4.6, pop(500, 1000, 0.1), P_); put(TM['sol'] + 5.9, marker(0.45), MK)
-for g0 in (TM['sol'] + 3.2, TM['sol'] + 6.3, TM['end'] + 4.4, TM['end'] + 7.0): put(g0, square_blips([1800, 900, 1500], 0.02), 0.02)
-# slide-over -> help
-wh(TM['help'] - 0.6, 0.62, 250, 2600, 1.0, 0.7, 0.9); put(TM['help'] - 0.02, pop(220, 90, 0.16), 0.16)
-put(TM['help'] + 0.6, pop(700, 1300, 0.1), P_); put(TM['help'] + 1.5, pop(760, 1400, 0.1), P_); put(TM['help'] + 2.6, marker(0.4), MK)
-# beam + iris -> end
+# ---------------- S5 · laporan laba rugi ----------------
+wh(TM['lap'] - 0.5, 0.8, 250, 1600, 1.0, 0.6, 0.6)                               # report flies in from depth
+RT = [TM['lap'] + 0.3, TM['lap'] + 0.55, TM['lap'] + 0.95, TM['lap'] + 1.25, TM['lap'] + 1.55, TM['lap'] + 1.85, TM['baca'] + 0.2]
+for k, t0 in enumerate(RT): put(t0, pop(560 + 60 * k, 1100 + 70 * k, 0.08), 0.1)
+for k in range(4): put(RT[k + 2] + 0.06, coin(2600 + 150 * k, 0.5), 0.035)        # coins dock
+put(TM['baca'] + 0.75, marker(0.45), MK)
+for g0 in (TM['sol'] + 3.0, TM['sol'] + 5.6, TM['end'] + 4.4, TM['end'] + 7.0): put(g0, square_blips([1800, 900, 1500], 0.02), 0.02)
+# ---------------- beam + iris -> end card ----------------
 put(TM['end'] - 0.5, pop(500, 1000, 0.1), 0.12); wh(TM['end'] - 0.45, 0.5, 200, 2400, 1.0, 0.9, 1.0); put(TM['end'] - 0.02, boom(0.7, 140, 50), 0.2)
 holo_fx(TM['end'] + 0.55)
-put(TM['end'] + 3.6, pop(500, 1000, 0.12), P_); put(TM['end'] + 5.0, pop(900, 1500, 0.08), 0.1)
-put(TM['end'] + 7.0, chime((784, 1046, 1568), 1.4), 0.05)
+put(TM['cta'], pop(500, 1000, 0.12), P_); put(TM['bio'], pop(900, 1500, 0.08), 0.1)
+put(TM['bio'] + 1.2, chime((784, 1046, 1568), 1.4), 0.05)
+
 x = out[: int(TOTAL * SR)]
 x = x / max(1e-9, np.abs(x).max()) * 0.89
 x16 = (np.clip(x, -1, 1) * 32767).astype(np.int16)

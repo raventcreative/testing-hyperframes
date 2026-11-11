@@ -68,8 +68,8 @@
   holoGlitch(TM.brand + 2.9);
   pose(TM.brand + 1.2, { hYaw: 26, hPitch: 4, lookX: 1, lookY: -0.3, happy: 1 });           // admires its logo
   pose(TM.brand + 2.2, { hYaw: 18, hPitch: -14, lookX: 0.8, lookY: 0.7, happy: 0 });          // looks up at the phone
-  armL(TM.brand + 2.6, 20, -50, 14, 0); armL(TM.brand + 3.0, 132, 30, 14, 0, "o"); armL(TM.brand + 4.1, 132, 30, 14, 0);   // points at "Mulai hitung"
-  pose(TM.s1 - 0.6, { happy: 1 });
+  // (no arm point here: from bottom-left the hand would cross the hologram logo) — it glances at the phone and nods at the tap
+  pose(TM.s1 - 0.85, { hPitch: -8, lookY: 0.5 }); pose(TM.s1 - 0.6, { hPitch: -18, lookY: 0.8, happy: 1 }); pose(TM.s1 - 0.35, { hPitch: -10 });
   key("holoA", TM.s1 - 0.2, 1, "hold"); key("holoA", TM.s1 + 0.05, 0, "i"); pose(TM.s1 - 0.2, { chest: 1 }); pose(TM.s1 + 0.05, { chest: 0 });   // full-alpha hologram ~4.1 s
 
   // steps: stays bottom-left (a bit smaller/lower so the phone keeps clear), guides each step

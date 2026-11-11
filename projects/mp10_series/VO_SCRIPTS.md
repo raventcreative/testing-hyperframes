@@ -86,3 +86,43 @@ Ini cara sekarang: catatan jualan, pembukuan, dan laporan dalam satu alur.
 Sebelum: nebak-nebak untung. Sesudah: laporan laba rugi yang jelas.
 Sebelum: bingung pajaknya berapa. Sesudah: ada estimasi pajak, plus tim ahli kalau perlu.
 Jualan jalan terus, pajaknya AI yang urus. Coba kalkulator pajak gratisnya. Link di bio.
+
+## 11 · Mitos vs Fakta Pembukuan
+Tiga mitos pembukuan yang sering dipercaya seller.
+Mitos satu: pembukuan cuma buat usaha gede. Faktanya, toko kecil juga perlu tahu untungnya berapa.
+Mitos dua: catat omzet aja udah cukup. Faktanya, tanpa catat biaya, kamu nggak tahu labanya.
+Mitos tiga: nanti aja, akhir tahun sekalian. Faktanya, dicicil tiap bulan jauh lebih ringan.
+MasterPajak AI bantu menata catatan jualanmu jadi pembukuan dan laporan laba rugi.
+Jualan jalan terus, pajaknya AI yang urus. Coba kalkulator pajak gratisnya. Link di bio.
+
+## 12 · Uang Pribadi vs Uang Usaha
+Uang jualan masuk... eh, kepake buat jajan, bayar cicilan, kirim ke keluarga.
+Pas dicek, untungnya ke mana?
+Kalau uang pribadi dan uang usaha campur, angka usahamu jadi nggak kebaca.
+Pisahin dulu catatannya: mana pemasukan usaha, mana pengeluaran pribadi.
+MasterPajak AI bantu menata catatan usahamu jadi pembukuan yang bisa ditelusuri.
+Jualan jalan terus, pajaknya AI yang urus. Coba kalkulator pajak gratisnya. Link di bio.
+
+## 13 · Laris Tapi Saldo Tipis (cerita, tokoh fiktif "Rina" — label "Ilustrasi cerita")
+Ini Rina. Jualannya laris, pesanan tiap hari penuh.
+Tapi tiap akhir bulan, saldonya kok tipis?
+Ternyata biaya kecil-kecil nggak pernah kecatat: ongkir, kemasan, iklan, potongan platform.
+Pas dirapikan, baru kelihatan ke mana aja uangnya pergi.
+Dengan MasterPajak AI, catatan jualan dan biaya ditata jadi laporan laba rugi yang gampang dibaca.
+Jualan jalan terus, pajaknya AI yang urus. Coba kalkulator pajak gratisnya. Link di bio.
+
+## 14 · Siapin 4 Data Ini
+Mau tahu gambaran pajak usahamu? Siapin empat data ini dulu.
+Satu: catatan penjualan.
+Dua: catatan biaya, termasuk ongkir dan iklan.
+Tiga: mutasi rekening usaha.
+Empat: nota dan bukti transfer.
+Udah kekumpul? MasterPajak AI bantu menata semuanya jadi pembukuan, terus bantu hitung estimasi pajaknya.
+Jualan jalan terus, pajaknya AI yang urus. Coba kalkulator pajak gratisnya. Link di bio.
+
+## 15 · Tanya Cepat ke Robot (FAQ)
+Tiga pertanyaan yang paling sering ditanya seller.
+"Usahaku masih kecil, perlu pembukuan?" Perlu, biar kamu tahu untungnya beneran berapa.
+"Harus ngerti akuntansi dulu?" Nggak harus. MasterPajak AI bantu menata catatanmu jadi laporan yang gampang dibaca.
+"Kalau bingung, tanya siapa?" Ada asisten AI, dan tim ahli sesuai layanan.
+Jualan jalan terus, pajaknya AI yang urus. Coba kalkulator pajak gratisnya. Link di bio.

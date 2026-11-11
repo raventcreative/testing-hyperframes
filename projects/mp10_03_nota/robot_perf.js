@@ -25,7 +25,7 @@
   }
   const TM = window.TM;
   // hard cuts (robot hidden / off-frame when it jumps): springs never look back across them
-  const SWAP = TM.read + 0.72;                      // below the frame: bottom-left -> bottom-right
+  const SWAP = TM.read + 0.98;                      // below the frame: bottom-left -> bottom-right
   const CUTS = [TM.brand - 0.05, SWAP, TM.end - 0.01];
   const lastCut = (t) => { let c = -1e9; for (const q of CUTS) if (q <= t) c = q; return c; };
   function filt(ch, t, f, z) { const c = lastCut(t), k = kernel(f, z); let y = 0; for (let i = 0; i < k.length; i++) y += k[i] * raw(ch, Math.max(c, t - i * DT)); return y; }
@@ -72,8 +72,8 @@
   armR(TM.up + 0.05, 18, 0, 12, 0); armR(TM.up + 0.4, 150, 25, 10, 0, "o"); armR(TM.up + 1.15, 150, 25, 10, 0); armR(TM.up + 1.45, 18, 0, 12, 0);
   pose(TM.snap - 0.02, { squint: 0, happy: 0 }); pose(TM.snap + 0.06, { squint: 0.75 }, "o"); pose(TM.snap + 0.45, { squint: 0, happy: 1 }); pose(TM.snap + 1.3, { happy: 0 });
   // hologram fades, the robot ducks (left) and comes back bottom-right while the camera pushes into the phone
-  key("holoA", TM.read + 0.05, 1, "hold"); key("holoA", TM.read + 0.28, 0, "i"); pose(TM.read + 0.05, { chest: 1 }); pose(TM.read + 0.3, { chest: 0 });
-  pose(TM.read + 0.3, { y: 1660 }); pose(TM.read + 0.68, { y: 2700 }, "i");
+  key("holoA", TM.read + 0.32, 1, "hold"); key("holoA", TM.read + 0.55, 0, "i"); pose(TM.read + 0.32, { chest: 1 }); pose(TM.read + 0.57, { chest: 0 });
+  pose(TM.read + 0.56, { y: 1660 }); pose(TM.read + 0.94, { y: 2700 }, "i");
   pose(SWAP, Object.assign({ x: 950, y: 2700, h: 660, yaw: -28, roll: 0, hYaw: -18, hPitch: -14, hRoll: 0, lookX: -0.8, lookY: -1, smile: 1, happy: 0, chest: 0 }, NAVY), "hold");
   armL(SWAP, 15, 0, 10, 0, "hold"); armR(SWAP, 15, 0, 10, 0, "hold");
   pose(SWAP + 0.55, { y: 1890 }, "o");

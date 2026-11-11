@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>MasterPajak AI · Video 1 — Berita Pajak</title>
+    <!-- Client request: a browser / web-newspaper; 4 real 2026 tax headlines (recreated layout, no outlet logos, source + date on
+         screen), the camera zooms into each headline and a stabilo marker sweeps over the tax words (marker SFX); then "mulai dari
+         mana?" -> MasterPajak AI (robot host + chest hologram) -> AI assistant + expert team -> CTA. All beat times live in TM
+         below so the whole film can be re-timed to the VO word stamps in one place. -->
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/robot_mp.js"></script>
+    <script>window.TM = { hd: 0.4, zo: 4.0, par: 4.7, e2: 6.6, e3: 8.5, e4: 10.4, fl: 11.7, conf: 12.6, sol: 15.2, help: 23.0, end: 26.8, total: 34.5 };</script>
+    <script src="lipsync.js" onerror="window.LIPSYNC = null"></script>
+    <style>
+      @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+      @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-800-normal.woff2) format("woff2"); font-weight: 800; }
+      @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+      @font-face { font-family: PFR; src: url(assets/fonts/playfair-display-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+      @font-face { font-family: PPN; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+      @font-face { font-family: PPN; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+      @font-face { font-family: INT; src: url(assets/fonts/inter-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+      @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-600-normal.woff2) format("woff2"); font-weight: 600; }
+      @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+      @font-face { font-family: PF; src: url(assets/fonts/playfair-display-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; }
+      @font-face { font-family: PFD; src: url(assets/fonts/playfair-display-latin-900-normal.woff2) format("woff2"); font-weight: 900; }
+      @font-face { font-family: PFD; src: url(assets/fonts/playfair-display-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+      :root { --navy: #212C5F; --royal: #26367A; --deep: #131B40; --y: #FED111; --cloud: #F6F7FB; --n100: #EDEFF5; --n200: #E1E5EE;
+              --lb: #DDE1EE; --muted: #5B6478; --text: #161D3A; --n300: #8E99C2; --stabilo: rgba(255, 228, 64, .92); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--deep); }
+      #main-root { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: PS, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+      .full { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .scene { visibility: hidden; opacity: 0; overflow: hidden; }
+      .navybg { background: radial-gradient(ellipse 1000px 1200px at 50% 42%, #26367A 0%, #212C5F 55%, #1a234b 100%); }
+      .deepbg { background: radial-gradient(ellipse 1000px 1300px at 50% 40%, #1b2554 0%, #131B40 60%, #0c1230 100%); }
+      .paper { background-color: var(--cloud);
+        background-image: linear-gradient(90deg, rgba(33,44,95,.07) 0 1.5px, transparent 1.5px), linear-gradient(0deg, rgba(33,44,95,.07) 0 1.5px, transparent 1.5px);
+        background-size: 54px 54px; background-position: 26px 20px; }
+      .ngrid { position: absolute; inset: 0; opacity: .10;
+        background-image: linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px), linear-gradient(0deg, #fff 0 1.5px, transparent 1.5px);
+        background-size: 108px 108px; background-position: -0.75px 12px;
+        -webkit-mask-image: radial-gradient(ellipse 620px 900px at 50% 50%, #000 30%, transparent 100%); mask-image: radial-gradient(ellipse 620px 900px at 50% 50%, #000 30%, transparent 100%); }
+      .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .1em .06em .18em; margin: -.1em -.06em -.18em; }
+      .c { display: inline-block; }
+      .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; }
+      /* stabilo: grows left->right under the words, marker-ish soft ends, multiply so the ink stays crisp */
+      .hl { background-image: linear-gradient(100deg, rgba(255,228,64,0) 0%, var(--stabilo) 1.2%, var(--stabilo) 98.6%, rgba(255,228,64,0) 100%);
+            background-repeat: no-repeat; background-position: 0 88%; background-size: 0% 72%; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+            padding: 0 .08em; margin: 0 -.08em; mix-blend-mode: multiply; }
+
+      /* S0 · news pages in 3D: each shot is a flat web page tilted in perspective, a macro camera and depth of field
+         (layouts recreated, no outlet logos, sources credited). The keyword always lands on the same screen spot. */
+      .shot3 { background: #d6dbe5; }
+      .stage { position: absolute; inset: 0; perspective: 1300px; perspective-origin: 540px 960px; }
+      .foc { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+      .pan { position: absolute; left: 0; top: 0; }
+      .sheet { position: absolute; left: 0; top: 0; background: #fff; padding: 0 500px 360px; color: #1d2333; }
+      .sheet .hl { mix-blend-mode: normal; background-position: 0 84%; }
+      .sheet .nav { margin: 0 -500px; padding-left: 500px; height: 240px; border-bottom: 4px solid #E3E6EE; display: flex; align-items: center; gap: 84px; font: 600 54px/1 PS; color: #8a93a8; white-space: nowrap; overflow: hidden; }
+      .sheet .nav .on { color: #161D3A; }
+      .sheet .nav i { display: block; width: 84px; height: 9px; background: #5B6478; box-shadow: 0 -26px 0 #5B6478, 0 26px 0 #5B6478; margin-right: 10px; flex: none; }
+      .sheet .kick { margin-top: 150px; font: 700 54px/1 PS; letter-spacing: .14em; color: #b23a2a; }
+      .sheet .by { margin-top: 130px; font: 600 56px/1 PS; color: #8a93a8; }
+      .sheet .lead { position: relative; margin-top: 80px; height: 1400px; border-radius: 22px; overflow: hidden; }
+      .sheet .cap { margin-top: 34px; font: 400 46px/1.3 PS; color: #9aa3b8; }
+      .sheet p { margin-top: 96px; }
+      #sA .hd { margin-top: 46px; font: 900 170px/1.12 PFD; color: #161D3A; }
+      #sA .meta { margin-top: 70px; display: flex; align-items: center; gap: 30px; font: 600 58px/1 PS; color: #5B6478; }
+      #sA .meta i { width: 96px; height: 96px; border-radius: 50%; background: #E1E5EE; }
+      #sA .lead { background: linear-gradient(135deg, #2b3b86, #212C5F 60%, #172051); }
+      #sA .lead::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 40px, transparent 40px 80px); }
+      #sA .lead svg { position: absolute; left: 50%; top: 50%; width: 420px; height: 420px; margin: -210px 0 0 -210px; }
+      #sA p { font: 400 84px/1.6 PS; color: #26304f; }
+      #sB { padding: 0 600px 360px; } #sB .nav { margin: 0 -600px; padding-left: 600px; }
+      #sB .lead, #sC .lead, #sD .lead { height: 1000px; }
+      #sB .lead { background: radial-gradient(ellipse 900px 600px at 30% 40%, rgba(255,240,215,.55), transparent 70%), linear-gradient(160deg, #b9a58a, #7d6c58 70%, #5d4f40); }
+      #sB p { font: 400 88px/1.6 PFR; color: #1f2430; }
+      #sC .lead { background: radial-gradient(ellipse 800px 560px at 70% 35%, rgba(210,245,240,.45), transparent 70%), linear-gradient(150deg, #3c7f83, #24575a 65%, #173b3d); }
+      #sC .nav, #sD .nav { font-family: PPN; font-weight: 400; }
+      #sC .kick, #sD .kick { font-family: PPN; color: #1f5fbf; }
+      #sC p { font: 400 80px/1.68 PPN; color: #222833; }
+      #sD .lead { background: radial-gradient(ellipse 900px 600px at 35% 30%, rgba(220,228,250,.45), transparent 70%), linear-gradient(155deg, #66789c, #3a4766 65%, #262f47); }
+      #sD p { font: 400 84px/1.62 INT; color: #1e2431; }
+      .dof { position: absolute; inset: 0; pointer-events: none; }
+      #dofA { backdrop-filter: blur(3px); -webkit-mask-image: radial-gradient(ellipse 640px 150px at 560px 980px, transparent 42%, #000 100%); mask-image: radial-gradient(ellipse 640px 150px at 560px 980px, transparent 42%, #000 100%); }
+      #dofB { backdrop-filter: blur(10px);
+              -webkit-mask-image: linear-gradient(180deg, #000 0px, #000 430px, transparent 760px, transparent 1200px, #000 1560px), linear-gradient(90deg, transparent 0px, transparent 830px, #000 1080px);
+              mask-image: linear-gradient(180deg, #000 0px, #000 430px, transparent 760px, transparent 1200px, #000 1560px), linear-gradient(90deg, transparent 0px, transparent 830px, #000 1080px); }
+      #vig3 { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 1300px at 42% 52%, rgba(0,0,0,0) 55%, rgba(20,26,50,.18) 100%); }
+      .srcchip { position: absolute; left: 60px; top: 1648px; padding: 18px 26px; border-radius: 14px; background: rgba(255,255,255,.94); box-shadow: 0 12px 34px rgba(19,27,64,.2); font: 700 26px/1 PS; letter-spacing: .06em; color: #8E99C2; white-space: nowrap; }
+      .srcchip b { color: #161D3A; }
+      #flood { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; background: #FFE440; transform-origin: 0 50%; }
+      /* S2 · confusion: clippings */
+      .pchip { position: absolute; padding: 10px 26px 14px; font: 600 64px/1 PS; color: #161D3A; background: #FFE440; border-radius: 6px; transform: rotate(-3deg); }
+      #conf .clip { position: absolute; width: 470px; padding: 26px 28px 30px; background: #fbf8ef; font: 900 38px/1.15 PFD; color: var(--text);
+                    clip-path: polygon(0 3%, 6% 0, 13% 2.5%, 21% 0.5%, 30% 2%, 38% 0, 47% 2.4%, 56% .4%, 64% 2.2%, 73% 0, 82% 2%, 91% .3%, 100% 2.6%, 99% 30%, 100% 62%, 98.6% 100%, 90% 97.6%, 81% 100%, 72% 97.8%, 63% 99.6%, 54% 97.6%, 45% 100%, 36% 98%, 27% 99.8%, 18% 97.5%, 9% 99.5%, 0 97.4%, 1.2% 66%, 0 33%);
+                    box-shadow: 0 20px 40px rgba(0,0,0,.35); }
+      #conf .clip small { display: block; margin-top: 14px; font: 700 17px/1 PS; letter-spacing: .06em; color: var(--muted); }
+      #q1 { top: 520px; font: 800 120px/1 Rubik; color: #fff; letter-spacing: -3px; }
+      #q0 { top: 430px; font: italic 400 64px/1 PF; color: var(--lb); }
+      .qm { position: absolute; font: 800 110px/1 Rubik; color: var(--y); opacity: 0; }
+
+      /* S3 · solution */
+      #sol .whis { top: 300px; font: italic 400 72px/1 PF; color: var(--lb); }
+      .feat { position: absolute; left: 110px; width: 860px; padding: 30px 34px; border-radius: 28px; background: #fff; box-shadow: 0 24px 50px rgba(3,6,24,.45);
+              display: flex; align-items: center; gap: 26px; }
+      .feat .ic { flex: none; width: 92px; height: 92px; border-radius: 24px; background: var(--n100); display: flex; align-items: center; justify-content: center; }
+      .feat .ic svg { width: 56px; height: 56px; }
+      .feat .tx { font: 700 40px/1.22 PS; color: var(--navy); }
+      .feat .tx small { display: block; font: 600 24px/1.2 PS; color: var(--muted); margin-bottom: 8px; letter-spacing: .04em; }
+      #f1 { top: 430px; } #f2 { top: 700px; }
+      #f1 .flow { display: flex; align-items: center; gap: 14px; }
+      #f1 .flow svg { width: 40px; height: 40px; }
+
+      /* S4 · help */
+      #help .whis { top: 300px; font: italic 400 72px/1 PF; color: var(--lb); }
+      .hcard { position: absolute; left: 90px; width: 600px; padding: 30px 34px; border-radius: 30px; background: #fff; box-shadow: 0 24px 50px rgba(3,6,24,.45); }
+      .hcard .t { display: flex; align-items: center; gap: 18px; font: 800 44px/1 Rubik; color: var(--navy); }
+      .hcard .t .av { width: 76px; height: 76px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; }
+      .hcard .t .av img { width: 44px; } .hcard .t .av svg { width: 44px; height: 44px; }
+      .hcard .s { margin-top: 14px; font: 600 28px/1.3 PS; color: var(--muted); }
+      #h1c { top: 430px; } #h2c { top: 700px; }
+      #h2c .avs { display: flex; margin-top: 18px; } #h2c .avs i { display: flex; width: 66px; height: 66px; margin-right: -14px; border-radius: 50%; background: var(--n100); border: 4px solid #fff; align-items: center; justify-content: center; }
+      #h2c .avs svg { width: 34px; height: 34px; }
+      #cap5 { position: absolute; left: 90px; top: 1010px; font: 600 22px/1 PS; letter-spacing: .06em; color: var(--n300); }
+
+      /* S5 · end */
+      #end .content { position: absolute; inset: 0; transform-origin: 540px 960px; }
+      #t7a, #t7b { font: 700 78px/1.05 Rubik; letter-spacing: -1.5px; color: #fff; }
+      #t7a { top: 400px; } #t7b { top: 492px; } #t7b .yy { color: var(--y); }
+      #cta7 { position: absolute; left: 0; width: 1080px; top: 650px; text-align: center; }
+      #cta7 span { display: inline-flex; align-items: center; gap: 18px; padding: 28px 52px; border-radius: 999px; background: #fff; color: var(--navy); font: 700 44px/1 PS; }
+      #cta7 svg { width: 40px; height: 40px; }
+      #bio7 { top: 780px; font: 600 30px/1 PS; letter-spacing: .04em; color: var(--lb); }
+
+      /* transitions */
+      #bands .bd { position: absolute; left: 0; width: 1080px; height: 322px; overflow: hidden; }
+      #mq { position: absolute; left: 0; top: 104px; white-space: nowrap; font: 800 104px/1 Rubik; letter-spacing: -2px; color: #fff; }
+      #mq b { color: var(--y); font-weight: 800; }
+      #slide { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; background: var(--deep); }
+      #slideEdge { position: absolute; left: -16px; top: 0; width: 16px; height: 1920px; background: var(--y); }
+      #beamwrap { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
+      #disc { position: absolute; left: 30px; top: 1560px; width: 280px; height: 280px; border-radius: 50%; background: var(--royal); }
+      #beam { position: absolute; left: 170px; top: 1550px; width: 2800px; height: 300px; background: var(--royal); transform-origin: 0 50%; }
+      #endWrap { clip-path: circle(0% at 50% 50%); }
+      #robot { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; pointer-events: none; }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/grain_256.png); opacity: .05; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="main-root" data-composition-id="main" data-start="0" data-duration="34.5" data-width="1080" data-height="1920">
+      <!-- S0 · news pages in 3D. A: the opening article (headline read by the camera), B–D: excerpts (direct cuts) -->
+      <div id="shA" class="full scene shot3" style="visibility:visible;opacity:1"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sA">
+        <div class="nav"><i></i><span>Nasional</span><span>Internasional</span><span class="on">Ekonomi</span><span>Olahraga</span><span>Teknologi</span><span>Hiburan</span><span>Gaya Hidup</span></div>
+        <div class="kick">EKONOMI · PAJAK</div>
+        <div class="hd">DJP Pungut Pajak Seller Marketplace Mulai 1 Oktober</div>
+        <div class="meta"><i></i>CNN Indonesia · 17 September 2026</div>
+        <div class="lead"><svg viewBox="0 0 24 24" fill="none" stroke="#FED111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></div>
+        <div class="cap">Ilustrasi · tampilan halaman dibuat ulang</div>
+        <p>Penerapan <span class="hl kw" id="kA">pajak</span> seller marketplace ini awalnya diterapkan pada 1 Agustus 2026, tetapi kemudian ditunda.</p>
+        <p>Direktur Jenderal Pajak Bimo Wijayanto mengatakan seluruh pihak, termasuk keempat platform e-commerce sudah siap mengimplementasikan kebijakan ini.</p>
+        <p>"Mereka kan sudah siap sebenarnya, tapi ada penundaan sampai 1 Oktober. Nanti Insyaallah kita akan segera aktivasi aturannya dan implementasinya mereka sudah siap. Kita juga sudah siap," ujar Bimo di Kantor Pusat Direktorat Jenderal Pajak Kementerian Keuangan, Rabu (16/9) dikutip Detikfinance.</p>
+        <p>DJP bersama pihak platform digital terkait telah melakukan uji coba sistem (sandbox) serta stabilisasi sejak tahun lalu, sehingga dapat dipastikan pelaksanaan penarikan PPh seller online melalui empat platform e-commerce pada 1 Oktober dapat berjalan lancar tanpa hambatan.</p>
+      </div></div></div></div></div>
+      <div id="shB" class="full scene shot3"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sB">
+        <div class="nav"><span>News</span><span>Nasional</span><span>Regional</span><span class="on">Money</span><span>Tren</span><span>Global</span><span>Edukasi</span></div>
+        <div class="by">KOMPAS.com · 27 Maret 2026</div>
+        <div class="lead"></div><div class="cap">Ilustrasi</div>
+        <p>KOMPAS.com – Cara lapor SPT tahunan pribadi kini semakin praktis karena dapat dilakukan secara online melalui sistem Coretax DJP. Wajib <span class="hl kw" id="kB">pajak</span> tidak perlu lagi datang ke kantor pajak, cukup menggunakan perangkat yang terhubung internet.</p>
+        <p>Kabar baiknya, pemerintah resmi memperpanjang batas waktu pelaporan SPT Tahunan 2025 untuk wajib pajak orang pribadi. Jika sebelumnya jatuh pada 31 Maret 2026, kini diperpanjang hingga 30 April 2026.</p>
+        <p>Dengan tambahan waktu ini, masyarakat diimbau segera memanfaatkan kesempatan untuk lapor SPT Tahunan tanpa terburu-buru.</p>
+      </div></div></div></div></div>
+      <div id="shC" class="full scene shot3"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sC">
+        <div class="nav"><span>Berita</span><span class="on">Makro</span><span>Finansial</span><span>Korporasi</span><span>Energi</span><span>Digital</span></div>
+        <div class="kick">MAKRO</div><div class="by">Katadata.co.id · 3 Juni 2026, 08:30</div>
+        <div class="lead"></div><div class="cap">Ilustrasi</div>
+        <p>Pemerintah menerbitkan Peraturan Pemerintah (PP) Nomor 20 Tahun 2026 guna merevisi ketentuan dalam PP Nomor 55 Tahun 2022 tentang Penyesuaian Pengaturan di Bidang Pajak Penghasilan.</p>
+        <p>Dalam aturan ini, pemerintah merevisi ketentuan <span class="hl kw" id="kC">Pajak</span> Penghasilan (PPh) Final sebesar 0,5% bagi pelaku usaha mikro, kecil, dan menengah (UMKM). Aturan ini merupakan perubahan atas PP 55/2022 yang secara khusus mengatur kembali penerima fasilitas tarif PPh Final 0,5% bagi wajib pajak dengan peredaran bruto tertentu.</p>
+        <p>Fasilitas serupa juga diberikan kepada koperasi yang telah terdaftar sebelum PP ini berlaku. Koperasi dapat tetap menggunakan skema PPh Final hingga Tahun Pajak 2029 sepanjang memenuhi persyaratan yang ditetapkan.</p>
+      </div></div></div></div></div>
+      <div id="shD" class="full scene shot3"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sD">
+        <div class="nav"><span>Berita</span><span>Makro</span><span>Finansial</span><span>Korporasi</span><span class="on">Digital</span><span>Energi</span></div>
+        <div class="kick">E-COMMERCE</div><div class="by">Katadata.co.id · 31 Juli 2026, 13:25</div>
+        <div class="lead"></div><div class="cap">Ilustrasi</div>
+        <p>Salah satu seller mengeluhkan pajak marketplace 0,5% dipotong dari total omzet bruto atau gross merchandise value (GMV), mengingat biaya yang dikenakan platform dinilai cukup banyak. Direktorat Jenderal Pajak Kementerian Keuangan atau DJP Kemenkeu pun merespons hal ini.</p>
+        <p>Direktur Penyuluhan, Pelayanan, dan Hubungan Masyarakat DJP Kemenkeu Inge Diana Rismawanti menegaskan aturan <span class="hl kw" id="kD">pajak</span> marketplace hanya mengubah mekanisme pembayaran, bukan menambah beban baru bagi pelaku usaha.</p>
+        <p>Dia juga menyampaikan, kewajiban membayar pajak atas penghasilan usaha sebenarnya sudah lama berlaku, baik bagi pedagang offline maupun online.</p>
+        <p>Oleh karena itu, menurut dia tidak seharusnya muncul anggapan bahwa kebijakan baru itu akan memicu kenaikan harga barang.</p>
+      </div></div></div></div></div>
+      <div id="dofA" class="dof"></div><div id="dofB" class="dof"></div><div id="vig3"></div>
+      <div id="cA" class="srcchip" style="visibility:hidden"><b>CNN INDONESIA</b> · 17 SEPTEMBER 2026</div>
+      <div id="cB" class="srcchip" style="visibility:hidden"><b>KOMPAS.COM</b> · 27 MARET 2026</div>
+      <div id="cC" class="srcchip" style="visibility:hidden"><b>KATADATA.CO.ID</b> · 3 JUNI 2026</div>
+      <div id="cD" class="srcchip" style="visibility:hidden"><b>KATADATA.CO.ID</b> · 31 JULI 2026</div>
+      <div id="flood" style="visibility:hidden"></div>
+
+      <!-- S2 · confusion -->
+      <div id="conf" class="full scene navybg">
+        <div class="ngrid"></div>
+        <div class="pchip" id="pc1" style="left: 90px; top: 760px">pajak</div>
+        <div class="pchip" id="pc2" style="left: 640px; top: 820px">Pajak</div>
+        <div class="pchip" id="pc3" style="left: 150px; top: 1010px">pajak</div>
+        <div class="pchip" id="pc4" style="left: 600px; top: 1080px">pajak</div>
+        <div id="q0" class="ctr">terus…</div>
+        <div id="q1" class="ctr">mulai dari mana?</div>
+        <div class="qm" id="qm1" style="left: 900px; top: 610px">?</div>
+        <div class="qm" id="qm2" style="left: 40px; top: 900px">?</div>
+        <div class="qm" id="qm3" style="left: 960px; top: 1050px">?</div>
+      </div>
+
+      <!-- transition bands (conf -> sol) -->
+      <div id="bands" class="full" style="visibility:hidden"></div>
+
+      <!-- S3 · solution -->
+      <div id="sol" class="full scene navybg">
+        <div class="ngrid"></div>
+        <div class="ctr whis" id="solW">tenang.</div>
+        <div class="feat" id="f1">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></div>
+          <div class="tx"><small>CATATAN JUALAN →</small>pembukuan yang <span class="hl" id="sx1">bisa ditelusuri</span></div>
+        </div>
+        <div class="feat" id="f2">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M16 11v6"/></svg></div>
+          <div class="tx"><small>DARI DATA USAHAMU →</small>bantu hitung <span class="hl" id="sx2">estimasi pajak</span></div>
+        </div>
+      </div>
+
+      <!-- S4 · help (slides over) -->
+      <div id="help" class="full scene deepbg">
+        <div id="slideEdge"></div>
+        <div class="ngrid"></div>
+        <div class="ctr whis">masih bingung?</div>
+        <div class="hcard" id="h1c"><div class="t"><div class="av"><img src="assets/mp/mp_m_reverse.png" alt="" /></div>Asisten AI</div><div class="s">bantu jelasin angka usahamu</div></div>
+        <div class="hcard" id="h2c"><div class="t"><div class="av"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></div>Tim ahli</div><div class="s"><span class="hl" id="hx">sesuai layanan</span></div>
+          <div class="avs"><i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i></div>
+        </div>
+        <div id="cap5"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#8E99C2;margin-right:10px"></span>MUAMALAH PAJAK · PENDAMPINGAN SESUAI LAYANAN</div>
+      </div>
+      <div id="beamwrap"><div id="beam"></div><div id="disc"></div></div>
+
+      <!-- S5 · end -->
+      <div id="endWrap" class="full scene deepbg">
+        <div id="end" class="full"><div class="content">
+          <div class="ngrid"></div>
+          <div id="t7a" class="ctr">Jualan jalan terus,</div>
+          <div id="t7b" class="ctr">pajaknya <span class="yy">AI</span> yang urus.</div>
+          <div id="cta7"><span>Coba kalkulator gratis<svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+          <div id="bio7" class="ctr">Link di bio</div>
+        </div></div>
+      </div>
+      <canvas id="robot" width="1080" height="1920"></canvas>
+      <div id="grain"></div>
+    </div>
+
+    <script>
+      (function () {
+        const TM = window.TM, $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
+        function split(el) { const txt = el.textContent; el.textContent = ""; return [...txt].map((ch) => { const m = document.createElement("span"); m.className = "m"; const c = document.createElement("span"); c.className = "c"; c.textContent = ch === " " ? " " : ch; m.appendChild(c); el.appendChild(m); return c; }); }
+        for (let k = 0; k < 6; k++) { const b = document.createElement("div"); b.className = "bd"; b.style.top = (k * 320) + "px"; b.style.background = k % 2 ? "#26367A" : "#212C5F"; $("#bands").appendChild(b); }
+        const mq = document.createElement("div"); mq.id = "mq"; mq.innerHTML = "MasterPajak <b>AI</b>&nbsp;—&nbsp;MasterPajak <b>AI</b>&nbsp;—&nbsp;MasterPajak <b>AI</b>"; $$("#bands .bd")[2].appendChild(mq);
+        const Q1 = split($("#q1")), Q0 = split($("#q0")), T7A = split($("#t7a")), SW = split($("#solW"));
+
+        // ---- initial states ----
+        gsap.set("#pc1, #pc2, #pc3, #pc4", { scale: 0, opacity: 0 });
+        gsap.set([...Q1, ...Q0, ...SW], { yPercent: 115 }); gsap.set(".qm", { scale: 0 });
+        $$("#bands .bd").forEach((b, k) => gsap.set(b, { x: k % 2 ? 1100 : -1100 }));
+        gsap.set(".feat", { y: 80, opacity: 0 });
+        gsap.set("#help", { x: 1096 }); gsap.set(".hcard", { y: 80, opacity: 0 }); gsap.set("#cap5", { opacity: 0 });
+        gsap.set("#disc", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#beam", { rotation: -58, scaleX: 0, scaleY: 1, transformOrigin: "0% 50%" });
+        gsap.set([...T7A], { yPercent: 115 }); gsap.set("#t7b", { opacity: 0, y: 50 });
+        gsap.set("#cta7 span", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#bio7", { opacity: 0 });
+        gsap.set("#flood", { scaleX: 0 });
+
+        // ---- timeline ----
+        const tl = gsap.timeline({ paused: true });
+        const F = (t, a, b, at) => tl.fromTo(t, a, Object.assign({ immediateRender: false }, b), at);
+        const show = (t, at) => tl.set(t, { autoAlpha: 1 }, at), hide = (t, at) => tl.set(t, { autoAlpha: 0 }, at);
+        const HL = (sel, at, d) => F(sel, { backgroundSize: "0% 72%" }, { backgroundSize: "100% 72%", duration: d || 0.32, ease: "power1.inOut" }, at);
+        tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: TM.total, ease: "steps(" + Math.round(TM.total * 15) + ")", immediateRender: false }, 0);
+
+        // S0 · 3D news shots: built in buildReady["news3d"] below (needs font metrics)
+        // T · the last stabilo stroke floods the screen yellow, then the question on navy (no robot yet)
+        show("#flood", TM.conf - 0.42);
+        F("#flood", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.in" }, TM.conf - 0.42);
+        show("#conf", TM.conf); hide(["#shA", "#shB", "#shC", "#shD", "#dofA", "#dofB", "#vig3", "#cA", "#cB", "#cC", "#cD"], TM.conf + 0.02);
+        F("#flood", { scaleX: 1, transformOrigin: "100% 50%" }, { scaleX: 0, transformOrigin: "100% 50%", duration: 0.45, ease: "power3.out" }, TM.conf);
+        hide("#flood", TM.conf + 0.5);
+        Q0.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.35, ease: "power3.out" }, TM.conf + 0.3 + k * 0.03));
+        Q1.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.42, ease: "power4.out" }, TM.conf + 0.6 + k * 0.022));
+        ["#pc1", "#pc2", "#pc3", "#pc4"].forEach((s, k) => F(s, { scale: 0, opacity: 0, rotation: -20 }, { scale: 1, opacity: 1, rotation: [-6, 5, 4, -5][k], duration: 0.45, ease: "back.out(2)" }, TM.conf + 0.15 + k * 0.12));
+        ["#qm1", "#qm2", "#qm3"].forEach((s, k) => F(s, { scale: 0, rotation: -30, opacity: 1 }, { scale: 1, rotation: 0, opacity: 1, duration: 0.4, ease: "back.out(2.5)" }, TM.conf + 1.1 + k * 0.15));
+        for (let j = 0; j < 6; j++) ["#pc1", "#pc2", "#pc3", "#pc4"].forEach((c, k) => tl.set(c, { x: Math.sin(j * 3.1 + k) * 6, y: Math.cos(j * 2.3 + k) * 5 }, TM.conf + 1.6 + j * 0.09));
+        // T · band sweep with the brand marquee
+        show("#bands", TM.sol - 0.48);
+        $$("#bands .bd").forEach((b, k) => F(b, { x: k % 2 ? 1100 : -1100 }, { x: 0, duration: 0.4, ease: "power4.inOut" }, TM.sol - 0.45 + k * 0.03));
+        F("#mq", { x: 140 }, { x: -620, duration: 0.95, ease: "none" }, TM.sol - 0.45);
+        show("#sol", TM.sol); hide("#conf", TM.sol + 0.05); hide("#bands", TM.sol + 0.08);
+
+        // S3 · solution: "tenang." + two feature cards, stabilo on the promise
+        SW.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.4, ease: "power3.out" }, TM.sol + 0.15 + k * 0.03));
+        F("#f1", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.sol + 2.2);
+        HL("#sx1", TM.sol + 3.6, 0.45);
+        F("#f2", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.sol + 4.6);
+        HL("#sx2", TM.sol + 5.9, 0.45);
+        // T · slide-over
+        show("#help", TM.help - 0.5);
+        F("#help", { x: 1096 }, { x: 0, duration: 0.47, ease: "power4.inOut" }, TM.help - 0.47);
+        hide("#sol", TM.help + 0.05);
+        // S4 · help: assistant + experts
+        F("#h1c", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.help + 0.6);
+        F("#h2c", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.help + 1.5);
+        HL("#hx", TM.help + 2.6, 0.4);
+        F("#cap5", { opacity: 0 }, { opacity: 1, duration: 0.3 }, TM.help + 1.8);
+        // T · beam flood + iris
+        show("#beamwrap", TM.end - 0.52);
+        F("#disc", { scale: 0 }, { scale: 1, duration: 0.25, ease: "back.out(2.2)" }, TM.end - 0.5);
+        F("#beam", { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power3.in" }, TM.end - 0.4);
+        F("#beam", { scaleY: 1 }, { scaleY: 16, duration: 0.24, ease: "power3.in" }, TM.end - 0.2);
+        show("#endWrap", TM.end - 0.02);
+        F("#endWrap", { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(82% at 50% 50%)", duration: 0.5, ease: "power3.inOut" }, TM.end);
+        hide("#help", TM.end + 0.55); hide("#beamwrap", TM.end + 0.55);
+        // S5 · end card
+        T7A.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.4, ease: "power3.out" }, TM.end + 0.1 + k * 0.014));
+        F("#t7b", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.45, ease: "power4.out" }, TM.end + 1.3);
+        F("#cta7 span", { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(2.2)" }, TM.end + 3.6);
+        F("#bio7", { opacity: 0 }, { opacity: 1, duration: 0.35 }, TM.end + 5.0);
+        F("#cta7 span", { scale: 1 }, { scale: 1.05, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, TM.end + 4.6);
+        tl.set({}, {}, TM.total - 0.01);
+
+        // S0 · 3D news. Camera per shot: .foc = anchor on screen (x, y) + zoom + tilt, .pan = page point that sits on the anchor.
+        // screen = anchor + tilt(zoom * (page point - focus)), so the focus point is pinned to the anchor whatever the tilt.
+        window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+        window.__hf.buildReady["news3d"] = document.fonts.ready.then(() => {
+          const AX = 400, AY = 980, ZM = 1.1, TILT = { rotationX: 20, rotationY: 15, transformOrigin: "0px 0px" };
+          const at = (el, sheet) => { let x = 0, y = 0; for (let e = el; e && e !== sheet; e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; } return { x, y }; };
+          const kwPos = (id) => { const k = $("#" + id), sh = k.closest(".sheet"), q = at(k, sh); return { x: q.x, y: q.y + k.offsetHeight / 2 }; };
+          // excerpt pages: pick the column width that puts the keyword mid-line (text runs off both frame edges)
+          [["#sB", "kB", 600], ["#sC", "kC", 500], ["#sD", "kD", 500]].forEach(([sid, kid, pad]) => {
+            const sh = $(sid), k = $("#" + kid); let best = null;
+            const par = k.closest("p"), lh = parseFloat(getComputedStyle(par).lineHeight);
+            for (let w = 1800; w <= 3600; w += 20) { sh.style.width = w + 2 * pad + "px"; const q = at(k, sh), r = q.x - pad, li = Math.round((q.y - at(par, sh).y) / lh);
+              const sc = Math.abs(r - 1000) + (li < 3 ? 3000 : 0) + (w < 2200 ? (2200 - w) : 0); if (!best || sc < best[0]) best = [sc, w]; }
+            sh.style.width = best[1] + 2 * pad + "px";
+          });
+          $("#sA").style.width = "4000px";
+          const key = (ax, ay, fx, fy, z) => ({ ax, ay, fx, fy, z });
+          const setCam = (sh, k) => { gsap.set(sh + " .foc", Object.assign({ x: k.ax, y: k.ay, scale: k.z }, TILT)); gsap.set(sh + " .pan", { x: -k.fx, y: -k.fy }); };
+          const cam3 = (sh, a, b, t0, d, ease) => {
+            F(sh + " .foc", { x: a.ax, y: a.ay, scale: a.z }, { x: b.ax, y: b.ay, scale: b.z, duration: d, ease: ease || "sine.inOut" }, t0);
+            F(sh + " .pan", { x: -a.fx, y: -a.fy }, { x: -b.fx, y: -b.fy, duration: d, ease: ease || "sine.inOut" }, t0);
+          };
+          const HL3 = (sel, t0, d) => F(sel, { backgroundSize: "0% 80%" }, { backgroundSize: "100% 80%", duration: d || 0.42, ease: "power1.inOut" }, t0);
+          gsap.set("#shA .foc", { rotation: -4 }); gsap.set("#shB .foc", { rotation: -3 }); gsap.set("#shC .foc", { rotation: -5 }); gsap.set("#shD .foc", { rotation: -3.5 });
+
+          // A · the opening article. Headline lines from word positions.
+          const hd = $("#sA .hd"), words = hd.textContent.trim().split(/\s+/); hd.textContent = "";
+          words.forEach((w, i) => { const s = document.createElement("span"); s.textContent = w; hd.appendChild(s); if (i < words.length - 1) hd.appendChild(document.createTextNode(" ")); });
+          const lines = [];
+          [...hd.children].forEach((s) => { const q = at(s, $("#sA")); const L = lines.find((l) => Math.abs(l.y - q.y) < 20); if (L) { L.x1 = q.x + s.offsetWidth; } else lines.push({ y: q.y, h: s.offsetHeight, x0: q.x, x1: q.x + s.offsetWidth }); });
+          const sA = $("#sA"), W = 4000, H = sA.offsetHeight, ZH = 0.62;
+          const OV = key(560, 940, W / 2, H * 0.40, 0.28), OV1 = key(560, 940, W / 2, H * 0.38, 0.30), OV2 = key(560, 940, W / 2, H * 0.47, 0.30);
+          const kA = kwPos("kA"), PAR = key(AX, AY, kA.x, kA.y, ZM);
+          const LK = lines.map((l) => [key(AX, AY, l.x0 + 140, l.y + l.h / 2, ZH), key(AX, AY, Math.max(l.x0 + 140, l.x1 - 260), l.y + l.h / 2, ZH)]);
+          setCam("#shA", OV);
+          tl.set("#shA .foc", { x: OV.ax, y: OV.ay, scale: OV.z }, 0); tl.set("#shA .pan", { x: -OV.fx, y: -OV.fy }, 0);
+          tl.set("#dofA, #dofB", { opacity: 0.55 }, 0);
+          cam3("#shA", OV, OV1, 0, TM.hd, "none");                                          // the whole page, drifting in
+          cam3("#shA", OV1, LK[0][0], TM.hd, 0.65, "power2.inOut");                          // zoom into the first word of the headline
+          F("#dofA, #dofB", { opacity: 0.55 }, { opacity: 1, duration: 0.65, ease: "power2.inOut" }, TM.hd);
+          const rd0 = TM.hd + 0.65, rdT = TM.zo - rd0, sac = 0.3, tot = lines.reduce((a, l) => a + (l.x1 - l.x0), 0);
+          let t = rd0;
+          LK.forEach((k, i) => {                                                              // eyes read each line left -> right, then return
+            if (i) { cam3("#shA", LK[i - 1][1], k[0], t, sac, "power1.inOut"); t += sac; }
+            const d = (rdT - sac * (LK.length - 1)) * (lines[i].x1 - lines[i].x0) / tot;
+            cam3("#shA", k[0], k[1], t, d, "sine.inOut"); t += d;
+          });
+          cam3("#shA", LK[LK.length - 1][1], OV2, TM.zo, 0.55, "power2.inOut");           // pull back: the page
+          F("#dofA, #dofB", { opacity: 1 }, { opacity: 0.55, duration: 0.55, ease: "power2.inOut" }, TM.zo);
+          cam3("#shA", OV2, PAR, TM.par, 0.75, "power3.inOut");                            // into the paragraph with "pajak"
+          F("#dofA, #dofB", { opacity: 0.55 }, { opacity: 1, duration: 0.75, ease: "power2.inOut" }, TM.par);
+          cam3("#shA", PAR, key(AX, AY, kA.x, kA.y, ZM * 1.03), TM.par + 0.75, TM.e2 - TM.par - 0.75, "none");
+          HL3("#kA", TM.par + 0.85); show("#cA", TM.par + 0.75);
+
+          // B–D · excerpts: direct cuts, keyword pinned to the same spot, highlight + a slow push are the only motion
+          const EX = [["#shB", "kB", "#cB", TM.e2, TM.e3], ["#shC", "kC", "#cC", TM.e3, TM.e4], ["#shD", "kD", "#cD", TM.e4, TM.fl]];
+          EX.forEach(([sh, kid, chip, t0, t1], i) => {
+            const q = kwPos(kid), k0 = key(AX, AY, q.x, q.y, ZM), k1 = key(AX, AY, q.x, q.y, ZM * 1.035);
+            setCam(sh, k0); cam3(sh, k0, k1, t0, t1 - t0, "none");
+            show(sh, t0); hide(i ? EX[i - 1][0] : "#shA", t0 + 0.02);
+            show(chip, t0); hide(i ? EX[i - 1][2] : "#cA", t0 + 0.02);
+            HL3("#" + kid, t0 + 0.45);
+          });
+          // fast re-cuts through all four, every keyword already marked (the reference rhythm), then the flood
+          const R = [["#shA", "#cA"], ["#shB", "#cB"], ["#shC", "#cC"], ["#shD", "#cD"]];
+          let prev = ["#shD", "#cD"];
+          R.forEach((r, j) => { const tc = TM.fl + j * 0.12; show(r, tc); if (prev[0] !== r[0]) hide(prev, tc + 0.02); prev = r; });
+          return 1;
+        });
+        tl.eventCallback("onUpdate", () => { if (window.ROBOT_APPLY) window.ROBOT_APPLY(tl.time()); });
+        (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+        window.__timelines = window.__timelines || {}; window.__timelines["main"] = tl;
+      })();
+    </script>
+    <script src="robot_perf.js"></script>
+  </body>
+</html>

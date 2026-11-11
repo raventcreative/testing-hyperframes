@@ -584,7 +584,9 @@
         // ===== slider rig: the knob rides in the robot's hand (sampled from the robot's filtered motion), then snaps open =====
         window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
         const domReady = new Promise((r) => (document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", () => r(1)) : r(1)));
-        window.__hf.buildReady["rig"] = domReady.then(() => document.fonts.ready).then(() => {
+        // the renderer may run scripts in a different order: wait until robot_perf.js has defined ROBOT_POS
+        const posReady = new Promise((r) => { const k = () => (typeof window.ROBOT_POS === "function" ? r(1) : setTimeout(k, 20)); k(); });
+        window.__hf.buildReady["rig"] = domReady.then(() => document.fonts.ready).then(() => posReady).then(() => {
           // headline lines: shrink any line that would not fit its 940 px column (never overflow)
           $$(".hd .tx").forEach((e) => { let fs = parseFloat(getComputedStyle(e).fontSize); while (e.offsetWidth > +(e.closest(".hd").dataset.w || 932) && fs > 40) { fs -= 1; e.style.fontSize = fs + "px"; } });
           const P = window.ROBOT_POS, Y0 = RIG.Y + RIG.DY * RIG.H;

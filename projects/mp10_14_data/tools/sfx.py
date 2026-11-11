@@ -130,8 +130,8 @@ wh(0.0, 2.6, 200, 900, 0.9, 0.5, 0.35)
 put(TM['hook'] + 0.3, pop(500, 900, 0.08), 0.08); put(TM['hook'] + 0.75, pop(560, 1000, 0.08), 0.08)
 put(TM['hook'] + 1.25, marker(0.45), MK)
 for j in range(3): put(0.5 + j * 0.81, tick(0.02, 3800), 0.03)
-# S2 · siapin: ghost card whips away, the lid swings open and knocks, HUD drops in with four bar ticks
-wh(TM['siap'] + 0.02, 0.55, 600, 2600, 1.2, 0.7, 0.55)
+# S2 · siapin: ghost card recedes into depth, the lid swings open and knocks, HUD drops in with four bar ticks
+wh(TM['siap'] + 0.02, 0.55, 2400, 500, 1.2, 0.3, 0.5)
 put(TM['siap'] + 0.1, knock(170, 0.2), 0.16); wh(TM['siap'] + 0.24, 0.45, 300, 1500, 1.0, 0.6, 0.45); put(TM['siap'] + 0.62, knock(120, 0.25), 0.14)
 put(TM['siap'] + 0.45, pop(500, 950, 0.08), 0.08); put(TM['siap'] + 1.05, marker(0.38), MK)
 wh(TM['siap'] + 0.9, 0.35, 900, 2400, 1.2, 0.5, 0.25)

@@ -8,7 +8,7 @@ Buka berita... isinya pajak lagi, pajak lagi.
 Pajak seller marketplace mulai dipungut.
 Lapor SPT sekarang lewat Coretax.
 Aturan PPh final UMKM direvisi.
-Sampai pajak e-commerce dan harga barang.
+Sampai pajak marketplace yang dipotong dari omzet.
 Terus... kamu harus mulai dari mana?
 Tenang. MasterPajak AI bantu rapikan catatan jualanmu jadi pembukuan yang bisa ditelusuri, dan bantu hitung estimasi pajaknya.
 Masih bingung? Ada asisten AI, dan tim ahli sesuai layanan.

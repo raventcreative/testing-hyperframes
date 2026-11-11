@@ -109,7 +109,8 @@ MK = 0.11
 # S0 · page reveal + camera reading the headline (soft air moves), paragraph zoom + stabilo
 wh(TM['hd'] - 0.05, 0.7, 300, 1400, 1.0, 0.6, 0.35)
 wh(TM['zo'] - 0.02, 0.6, 1400, 400, 1.0, 0.5, 0.3); wh(TM['par'] - 0.02, 0.7, 300, 1300, 1.0, 0.6, 0.35)
-put(TM['par'] + 0.75, marker(0.42), MK)
+put(TM['par'] + 0.85, marker(0.42), MK)
+for j in range(4): put(TM['fl'] + j * 0.12, tick(0.012, 3600), 0.08)   # fast re-cuts
 # excerpts: direct cuts (a soft paper tick) + stabilo
 for t0 in (TM['e2'], TM['e3'], TM['e4']):
     put(t0, tick(0.012, 3200), 0.09); put(t0 + 0.45, marker(0.42), MK)

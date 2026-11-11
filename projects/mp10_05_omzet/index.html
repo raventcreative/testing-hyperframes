@@ -55,6 +55,8 @@
       .seg > i.tp, .seg > i.bt { background-color: #3c50a8; background-image: radial-gradient(ellipse 70% 70% at 40% 40%, rgba(255,255,255,.16), rgba(255,255,255,0)); box-shadow: inset 0 0 0 18px rgba(255,255,255,.06), inset 0 0 0 21px rgba(254,209,17,.55); }
       .seg .lab { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; text-align: center; font: 800 34px/1.08 Rubik; color: var(--navy); opacity: 0; white-space: nowrap; }
       .seg .shine { position: absolute; inset: 0; overflow: hidden; }
+      .seg .fill { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 50% 100%; background-color: #D3A800; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.10) 0 2px, transparent 2px 13px); }
+      .seg > i.fr .fill { background-color: #FED111; background-image: linear-gradient(90deg, rgba(255,255,255,.22), rgba(255,255,255,0) 40%, rgba(0,0,0,.06)), repeating-linear-gradient(0deg, rgba(255,255,255,.14) 0 2px, transparent 2px 13px); }
       .seg .shine b { position: absolute; top: -20%; bottom: -20%; left: 0; width: 140px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.75), rgba(255,255,255,0)); transform: translateX(-200px) skewX(-18deg); }
       .ghost > i { border: 3px dashed rgba(33,44,95,.34); background: rgba(33,44,95,.035); }
       .laser { position: absolute; height: 8px; background: linear-gradient(90deg, rgba(254,209,17,0), #FFE440 12%, #fff 50%, #FFE440 88%, rgba(254,209,17,0)); box-shadow: 0 0 18px 6px rgba(254,209,17,.55); border-radius: 4px; }
@@ -148,8 +150,8 @@
       #mq { position: absolute; left: 0; top: 104px; white-space: nowrap; font: 800 104px/1 Rubik; letter-spacing: -2px; color: #fff; }
       #mq b { color: var(--y); font-weight: 800; }
       #beamwrap { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
-      #disc { position: absolute; left: 30px; top: 1560px; width: 280px; height: 280px; border-radius: 50%; background: var(--royal); }
-      #beam { position: absolute; left: 170px; top: 1550px; width: 2800px; height: 300px; background: var(--royal); transform-origin: 0 50%; }
+      #disc { position: absolute; left: 770px; top: 1560px; width: 280px; height: 280px; border-radius: 50%; background: var(--royal); }
+      #beam { position: absolute; left: 910px; top: 1550px; width: 2800px; height: 300px; background: var(--royal); transform-origin: 0 50%; }
       #endWrap { clip-path: circle(0% at 50% 50%); }
       #whipfx { position: absolute; width: 0; height: 0; }
       #robot { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; pointer-events: none; }
@@ -272,6 +274,7 @@
         const SEG = { L: [0, 220, "LABA"], I: [220, 130, "Iklan"], O2: [350, 80, "Biaya platform"], O1: [430, 100, "Ongkir"], P: [530, 470, "Biaya produk"] };
         const ALL6 = ["bk", "lf", "bt", "rt", "tp", "fr"];
         for (const k in SEG) { const [y0, h, lab] = SEG[k]; const b = box(bar, "sg" + k, "seg", 0, -(y0 + h), W, h, D, ALL6);
+          if (k === "L") ["fr", "rt", "lf", "bk"].forEach((f) => mk("div", "fill", b.querySelector("." + f)));
           const fr = b.querySelector(".fr"); mk("div", "shine", fr).appendChild(document.createElement("b")); const l = mk("div", "lab", fr); l.textContent = lab; if (k === "L") l.style.fontSize = "66px"; }
         // ghosts (wireframes of what fell away) + slicing lasers + side tags
         box(P1, "ghP", "ghost", 0, -1000, W, 470, D, ["rt", "tp", "fr"]); box(P1, "ghO", "ghost", 0, -530, W, 180, D, ["rt", "fr"]); box(P1, "ghI", "ghost", 0, -350, W, 130, D, ["rt", "fr"]);
@@ -295,14 +298,14 @@
 
         // ---------- initial states ----------
         $$(".seg > i.tp, .seg > i.bt").forEach((e) => gsap.set(e, { autoAlpha: 0 })); gsap.set("#sgP > i.tp", { autoAlpha: 1 });
-        gsap.set(".ghost, #lzP, #lzO, #lzI", { autoAlpha: 0 }); gsap.set(".laser", { scaleX: 0 });
+        gsap.set(".ghost, #lzP, #lzO, #lzI", { autoAlpha: 0 }); gsap.set(".seg .fill", { scaleY: 0 }); gsap.set(".laser", { scaleX: 0 });
         gsap.set(".tag", { autoAlpha: 0, x: 60 });
         gsap.set(bar, { scaleY: 0.32, transformOrigin: "0px 0px 0px" });
         gsap.set([...AS, ...AA, ...H1A, ...H1B, ...H2A, ...SW, ...T7A], { yPercent: 115 });
         gsap.set("#hd2 .hb", { opacity: 0, y: 40 });
         cols.forEach((st, i) => gsap.set(st, { backgroundPositionY: -(BASE + digs(ODO[0])[i]) * LH + "px" }));
         $$("#bands .bd").forEach((b, k) => gsap.set(b, { x: k % 2 ? 1100 : -1100 }));
-        gsap.set("#disc", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#beam", { rotation: -58, scaleX: 0, scaleY: 1, transformOrigin: "0% 50%" });
+        gsap.set("#disc", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#beam", { rotation: -122, scaleX: 0, scaleY: 1, transformOrigin: "0% 50%" });
         gsap.set("#t7b", { opacity: 0, y: 50 }); gsap.set("#cta7 span", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#bio7", { opacity: 0 });
         gsap.set("#cardB", { z: -900, filter: "blur(9px)" }); gsap.set("#cardA", { filter: "blur(0px)" });
         gsap.set(".dchip", { z: -1500, autoAlpha: 0 }); gsap.set(["#dc1", "#dc2", "#dc3", "#trV", "#trH1", "#trH2", "#trH3"], { z: -900 });
@@ -395,9 +398,9 @@
         const VL0 = K(480, 1080, 40, -150, 0, -21, -30, 380), VL1 = K(482, 1092, 40, -140, 0, -22, -27, 440);
         cam(C1, V3, VL0, TM.laba, 1.6, "power2.inOut");
         cam(C1, VL0, VL1, TM.laba + 1.6, TM.seller - 0.35 - TM.laba - 1.6, "none");
-        F("#sgL > i.fr", { backgroundColor: "#26367A" }, { backgroundColor: "#FED111", duration: 0.5, ease: "power1.inOut" }, TM.laba + 1.0);
-        F("#sgL > i.rt, #sgL > i.lf, #sgL > i.bk", { backgroundColor: "#19235a" }, { backgroundColor: "#D3A800", duration: 0.5, ease: "power1.inOut" }, TM.laba + 1.0);
-        F("#sgL > i.tp", { backgroundColor: "#3c50a8" }, { backgroundColor: "#FFE440", duration: 0.5, ease: "power1.inOut" }, TM.laba + 1.0);
+        // the rest fills up with yellow from the floor (a wipe, so no muddy navy->yellow midpoint), then the top lights up
+        F("#sgL .fill", { scaleY: 0 }, { scaleY: 1, duration: 0.6, ease: "power2.inOut" }, TM.laba + 1.0);
+        F("#sgL > i.tp", { backgroundColor: "#3c50a8" }, { backgroundColor: "#FFE440", duration: 0.12, ease: "none" }, TM.laba + 1.56);
         F("#sgL .lab", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, TM.labaW - 0.1);
         F("#sgL .shine b", { x: -200 }, { x: 520, duration: 0.7, ease: "power2.inOut" }, TM.labaW + 0.1);
         F(".tag", { opacity: 1 }, { opacity: 0, duration: 0.42, ease: "power1.in" }, TM.laba + 0.02);

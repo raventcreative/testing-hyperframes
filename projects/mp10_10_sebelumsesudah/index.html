@@ -3,40 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>MasterPajak AI · Video 1 — Berita Pajak</title>
-    <!-- Client request: a browser / web-newspaper; 4 real 2026 tax headlines (recreated layout, no outlet logos, source + date on
-         screen), the camera zooms into each headline and a stabilo marker sweeps over the tax words (marker SFX); then "mulai dari
-         mana?" -> MasterPajak AI (robot host + chest hologram) -> AI assistant + expert team -> CTA. All beat times live in TM
-         below so the whole film can be re-timed to the VO word stamps in one place. -->
+    <title>MasterPajak AI · Video 10 — Sebelum vs Sesudah</title>
+    <!-- Three before/after comparisons on a 3D slider rig. Each comparison is two worlds sharing one frame: SEBELUM (paper desk,
+         the problem) and SESUDAH (navy, the brand), with a yellow divider the robot host grabs and drags across, then the divider snaps
+         open. 1: rekap manual + tiga file -> satu alur (brand moment: chest hologram). 2: nebak-nebak untung -> laporan laba rugi.
+         3: bingung pajaknya -> estimasi pajak + tim ahli (sesuai layanan). Then the series end card. All beat times live in TM (one key
+         per VO line + sub-beats) so the film can be re-timed to the real VO in one place. Dashboard UI = "Simulasi alur", numbers =
+         "Ilustrasi data". -->
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/robot_mp.js"></script>
-    <script>window.TM = { hd: 0.4, zo: 4.0, par: 4.7, e2: 6.6, e3: 8.5, e4: 10.4, fl: 11.7, conf: 12.6, sol: 15.2, help: 23.0, end: 26.8, total: 34.5 };</script>
+    <script>window.TM = { l1: 0.3, rk: 1.45, tf: 2.5, nc: 3.35, l2: 5.9, cj: 7.2, pb: 8.2, lp: 9.0, sa: 9.6, l3: 11.4, l3b: 13.5, jl: 14.9, l4: 16.4, l4b: 18.6, ta: 20.3, l5: 22.6, cta: 26.1, bio: 28.0, total: 32.0 };</script>
+    <script>
+      // slider rig shared by index.html (divider/knob) and robot_perf.js (robot drags it). Times derive from TM.
+      window.RIG = (function (T) {
+        const H = 900, Y = 1660;
+        const off = (x) => 0.502 - 0.000025 * Math.abs(x - 540);            // hand offset (x h) measured from the robot render
+        const d = (c, dir, tg, kx0, kx1) => { const side = dir === "rl" ? 1 : -1;
+          return { c, dir, side, reach: tg - 0.75, grab: tg - 0.4, t0: tg - 0.05, t1: tg + 0.75, rel: tg + 0.95, snap0: tg + 0.95, snap1: tg + 1.3,
+                   kx0, kx1, kxEnd: dir === "rl" ? -40 : 1120, rx0: kx0 - side * H * off(kx0 - side * H * 0.5), rx1: kx1 - side * H * off(kx1 - side * H * 0.5) }; };
+        return { H, Y, off, DY: 0.009, drags: [d("#c1", "rl", T.l2, 1010, 650), d("#c2", "lr", T.l3b, 70, 430), d("#c3", "rl", T.l4b, 1010, 650)] };
+      })(window.TM);
+    </script>
     <script src="lipsync.js" onerror="window.LIPSYNC = null"></script>
     <style>
       @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
       @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-800-normal.woff2) format("woff2"); font-weight: 800; }
       @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
-      @font-face { font-family: PFR; src: url(assets/fonts/playfair-display-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
-      @font-face { font-family: PPN; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
-      @font-face { font-family: PPN; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
-      @font-face { font-family: INT; src: url(assets/fonts/inter-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
       @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-600-normal.woff2) format("woff2"); font-weight: 600; }
       @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
       @font-face { font-family: PF; src: url(assets/fonts/playfair-display-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; }
-      @font-face { font-family: PFD; src: url(assets/fonts/playfair-display-latin-900-normal.woff2) format("woff2"); font-weight: 900; }
-      @font-face { font-family: PFD; src: url(assets/fonts/playfair-display-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+      @font-face { font-family: PF; src: url(assets/fonts/playfair-display-latin-700-italic.woff2) format("woff2"); font-weight: 700; font-style: italic; }
       :root { --navy: #212C5F; --royal: #26367A; --deep: #131B40; --y: #FED111; --cloud: #F6F7FB; --n100: #EDEFF5; --n200: #E1E5EE;
-              --lb: #DDE1EE; --muted: #5B6478; --text: #161D3A; --n300: #8E99C2; --stabilo: rgba(255, 228, 64, .92); }
+              --lb: #DDE1EE; --muted: #5B6478; --text: #161D3A; --n300: #8E99C2; --stabilo: rgba(255, 228, 64, .92); --ink: #26367A; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--deep); }
-      #main-root { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: PS, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+      #main-root { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: PS, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; background: var(--deep); }
       .full { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
       .scene { visibility: hidden; opacity: 0; overflow: hidden; }
-      .navybg { background: radial-gradient(ellipse 1000px 1200px at 50% 42%, #26367A 0%, #212C5F 55%, #1a234b 100%); }
       .deepbg { background: radial-gradient(ellipse 1000px 1300px at 50% 40%, #1b2554 0%, #131B40 60%, #0c1230 100%); }
-      .paper { background-color: var(--cloud);
-        background-image: linear-gradient(90deg, rgba(33,44,95,.07) 0 1.5px, transparent 1.5px), linear-gradient(0deg, rgba(33,44,95,.07) 0 1.5px, transparent 1.5px);
-        background-size: 54px 54px; background-position: 26px 20px; }
       .ngrid { position: absolute; inset: 0; opacity: .10;
         background-image: linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px), linear-gradient(0deg, #fff 0 1.5px, transparent 1.5px);
         background-size: 108px 108px; background-position: -0.75px 12px;
@@ -44,88 +48,166 @@
       .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .1em .06em .18em; margin: -.1em -.06em -.18em; }
       .c { display: inline-block; }
       .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; }
-      /* stabilo: grows left->right under the words, marker-ish soft ends, multiply so the ink stays crisp */
       .hl { background-image: linear-gradient(100deg, rgba(255,228,64,0) 0%, var(--stabilo) 1.2%, var(--stabilo) 98.6%, rgba(255,228,64,0) 100%);
             background-repeat: no-repeat; background-position: 0 88%; background-size: 0% 72%; -webkit-box-decoration-break: clone; box-decoration-break: clone;
-            padding: 0 .08em; margin: 0 -.08em; mix-blend-mode: multiply; }
+            padding: 0 .08em; margin: 0 -.08em; }
 
-      /* S0 · news pages in 3D: each shot is a flat web page tilted in perspective, a macro camera and depth of field
-         (layouts recreated, no outlet logos, sources credited). The keyword always lands on the same screen spot. */
-      .shot3 { background: #d6dbe5; }
-      .stage { position: absolute; inset: 0; perspective: 1300px; perspective-origin: 540px 960px; }
-      .foc { position: absolute; left: 0; top: 0; width: 0; height: 0; }
-      .pan { position: absolute; left: 0; top: 0; }
-      .sheet { position: absolute; left: 0; top: 0; background: #fff; padding: 0 500px 360px; color: #1d2333; }
-      .sheet .hl { mix-blend-mode: normal; background-position: 0 84%; }
-      .sheet .nav { margin: 0 -500px; padding-left: 500px; height: 240px; border-bottom: 4px solid #E3E6EE; display: flex; align-items: center; gap: 84px; font: 600 54px/1 PS; color: #8a93a8; white-space: nowrap; overflow: hidden; }
-      .sheet .nav .on { color: #161D3A; }
-      .sheet .nav i { display: block; width: 84px; height: 9px; background: #5B6478; box-shadow: 0 -26px 0 #5B6478, 0 26px 0 #5B6478; margin-right: 10px; flex: none; }
-      .sheet .kick { margin-top: 150px; font: 700 54px/1 PS; letter-spacing: .14em; color: #b23a2a; }
-      .sheet .by { margin-top: 130px; font: 600 56px/1 PS; color: #8a93a8; }
-      .sheet .lead { position: relative; margin-top: 80px; height: 1400px; border-radius: 22px; overflow: hidden; }
-      .sheet .cap { margin-top: 34px; font: 400 46px/1.3 PS; color: #9aa3b8; }
-      .sheet p { margin-top: 96px; }
-      #sA .hd { margin-top: 46px; font: 900 170px/1.12 PFD; color: #161D3A; }
-      #sA .meta { margin-top: 70px; display: flex; align-items: center; gap: 30px; font: 600 58px/1 PS; color: #5B6478; }
-      #sA .meta i { width: 96px; height: 96px; border-radius: 50%; background: #E1E5EE; }
-      #sA .lead { background: linear-gradient(135deg, #2b3b86, #212C5F 60%, #172051); }
-      #sA .lead::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 40px, transparent 40px 80px); }
-      #sA .lead svg { position: absolute; left: 50%; top: 50%; width: 420px; height: 420px; margin: -210px 0 0 -210px; }
-      #sA p { font: 400 84px/1.6 PS; color: #26304f; }
-      #sB { padding: 0 600px 360px; } #sB .nav { margin: 0 -600px; padding-left: 600px; }
-      #sB .lead, #sC .lead, #sD .lead { height: 1000px; }
-      #sB .lead { background: radial-gradient(ellipse 900px 600px at 30% 40%, rgba(255,240,215,.55), transparent 70%), linear-gradient(160deg, #b9a58a, #7d6c58 70%, #5d4f40); }
-      #sB p { font: 400 88px/1.6 PFR; color: #1f2430; }
-      #sC .lead { background: radial-gradient(ellipse 800px 560px at 70% 35%, rgba(210,245,240,.45), transparent 70%), linear-gradient(150deg, #3c7f83, #24575a 65%, #173b3d); }
-      #sC .nav, #sD .nav { font-family: PPN; font-weight: 400; }
-      #sC .kick, #sD .kick { font-family: PPN; color: #1f5fbf; }
-      #sC p { font: 400 80px/1.68 PPN; color: #222833; }
-      #sD .lead { background: radial-gradient(ellipse 900px 600px at 35% 30%, rgba(220,228,250,.45), transparent 70%), linear-gradient(155deg, #66789c, #3a4766 65%, #262f47); }
-      #sD p { font: 400 84px/1.62 INT; color: #1e2431; }
-      .dof { position: absolute; inset: 0; pointer-events: none; }
-      #dofA { backdrop-filter: blur(3px); -webkit-mask-image: radial-gradient(ellipse 640px 150px at 560px 980px, transparent 42%, #000 100%); mask-image: radial-gradient(ellipse 640px 150px at 560px 980px, transparent 42%, #000 100%); }
-      #dofB { backdrop-filter: blur(10px);
-              -webkit-mask-image: linear-gradient(180deg, #000 0px, #000 430px, transparent 760px, transparent 1200px, #000 1560px), linear-gradient(90deg, transparent 0px, transparent 830px, #000 1080px);
-              mask-image: linear-gradient(180deg, #000 0px, #000 430px, transparent 760px, transparent 1200px, #000 1560px), linear-gradient(90deg, transparent 0px, transparent 830px, #000 1080px); }
-      #vig3 { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 1300px at 42% 52%, rgba(0,0,0,0) 55%, rgba(20,26,50,.18) 100%); }
-      .srcchip { position: absolute; left: 60px; top: 1648px; padding: 18px 26px; border-radius: 14px; background: rgba(255,255,255,.94); box-shadow: 0 12px 34px rgba(19,27,64,.2); font: 700 26px/1 PS; letter-spacing: .06em; color: #8E99C2; white-space: nowrap; }
-      .srcchip b { color: #161D3A; }
-      #flood { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; background: #FFE440; transform-origin: 0 50%; }
-      /* S2 · confusion: clippings */
-      .pchip { position: absolute; padding: 10px 26px 14px; font: 600 64px/1 PS; color: #161D3A; background: #FFE440; border-radius: 6px; transform: rotate(-3deg); }
-      #conf .clip { position: absolute; width: 470px; padding: 26px 28px 30px; background: #fbf8ef; font: 900 38px/1.15 PFD; color: var(--text);
-                    clip-path: polygon(0 3%, 6% 0, 13% 2.5%, 21% 0.5%, 30% 2%, 38% 0, 47% 2.4%, 56% .4%, 64% 2.2%, 73% 0, 82% 2%, 91% .3%, 100% 2.6%, 99% 30%, 100% 62%, 98.6% 100%, 90% 97.6%, 81% 100%, 72% 97.8%, 63% 99.6%, 54% 97.6%, 45% 100%, 36% 98%, 27% 99.8%, 18% 97.5%, 9% 99.5%, 0 97.4%, 1.2% 66%, 0 33%);
-                    box-shadow: 0 20px 40px rgba(0,0,0,.35); }
-      #conf .clip small { display: block; margin-top: 14px; font: 700 17px/1 PS; letter-spacing: .06em; color: var(--muted); }
-      #q1 { top: 520px; font: 800 120px/1 Rubik; color: #fff; letter-spacing: -3px; }
-      #q0 { top: 430px; font: italic 400 64px/1 PF; color: var(--lb); }
-      .qm { position: absolute; font: 800 110px/1 Rubik; color: var(--y); opacity: 0; }
+      /* ---------- slider rig: two worlds in one frame, the divider clips the SESUDAH world ---------- */
+      .cmp { --dx: 1080px; }
+      .world { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden; }
+      .cmp.rl .wA { clip-path: inset(0px 0px 0px max(0px, var(--dx))); }
+      .cmp.lr .wA { clip-path: inset(0px max(0px, calc(1080px - var(--dx))) 0px 0px); }
+      .wB { background: radial-gradient(ellipse 980px 1150px at 50% 36%, #ffffff 0%, #F6F7FB 52%, #E6E9F2 100%); }
+      .wA { background: radial-gradient(ellipse 1000px 1250px at 50% 38%, #2c3c88 0%, #212C5F 52%, #151d48 100%); }
+      .stage { position: absolute; inset: 0; perspective: 1400px; perspective-origin: 540px 860px; }
+      .cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-style: preserve-3d; }
+      .floor { position: absolute; left: -1260px; top: -1480px; width: 3600px; height: 3400px; }
+      .wB .floor { background-image: linear-gradient(90deg, rgba(33,44,95,.11) 0 2px, transparent 2px), linear-gradient(0deg, rgba(33,44,95,.11) 0 2px, transparent 2px); background-size: 90px 90px;
+        -webkit-mask-image: linear-gradient(0deg, #000 0%, #000 34%, transparent 80%); mask-image: linear-gradient(0deg, #000 0%, #000 34%, transparent 80%); }
+      .wA .floor { background-image: linear-gradient(90deg, rgba(255,255,255,.10) 0 2px, transparent 2px), linear-gradient(0deg, rgba(255,255,255,.10) 0 2px, transparent 2px); background-size: 108px 108px;
+        -webkit-mask-image: linear-gradient(0deg, #000 0%, #000 30%, transparent 78%); mask-image: linear-gradient(0deg, #000 0%, #000 30%, transparent 78%); }
+      .glowA { position: absolute; left: -60px; top: 330px; width: 1200px; height: 1120px; border-radius: 50%; background: radial-gradient(closest-side, rgba(90,120,230,.35), rgba(90,120,230,0)); }
+      .vigB { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 820px 1200px at 50% 46%, rgba(0,0,0,0) 60%, rgba(33,44,95,.10) 100%); }
+      .vigA { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 820px 1200px at 50% 46%, rgba(0,0,0,0) 55%, rgba(8,12,34,.35) 100%); }
+      .o3 { position: absolute; }
+      .dvd { position: absolute; left: 0; top: 0; width: 0; height: 1920px; transform: translateX(var(--dx)); }
+      .dvd .sh { position: absolute; top: 0; width: 120px; height: 1920px; }
+      .rl .dvd .sh { left: -120px; background: linear-gradient(90deg, rgba(19,27,64,0), rgba(19,27,64,.16)); }
+      .lr .dvd .sh { left: 0; background: linear-gradient(90deg, rgba(19,27,64,.16), rgba(19,27,64,0)); }
+      .dvd .ln { position: absolute; left: -4px; top: 0; width: 8px; height: 1920px; background: var(--y); box-shadow: 0 0 22px rgba(254,209,17,.85), 0 0 70px rgba(254,209,17,.35); }
+      .knob { position: absolute; left: -56px; top: 0; width: 112px; height: 112px; border-radius: 50%; background: var(--y); display: flex; align-items: center; justify-content: center;
+              box-shadow: 0 0 0 9px rgba(254,209,17,.28), 0 18px 34px rgba(19,27,64,.38); }
+      .knob svg { width: 70px; height: 40px; }
 
-      /* S3 · solution */
-      #sol .whis { top: 300px; font: italic 400 72px/1 PF; color: var(--lb); }
-      .feat { position: absolute; left: 110px; width: 860px; padding: 30px 34px; border-radius: 28px; background: #fff; box-shadow: 0 24px 50px rgba(3,6,24,.45);
-              display: flex; align-items: center; gap: 26px; }
-      .feat .ic { flex: none; width: 92px; height: 92px; border-radius: 24px; background: var(--n100); display: flex; align-items: center; justify-content: center; }
-      .feat .ic svg { width: 56px; height: 56px; }
-      .feat .tx { font: 700 40px/1.22 PS; color: var(--navy); }
-      .feat .tx small { display: block; font: 600 24px/1.2 PS; color: var(--muted); margin-bottom: 8px; letter-spacing: .04em; }
-      #f1 { top: 430px; } #f2 { top: 700px; }
-      #f1 .flow { display: flex; align-items: center; gap: 14px; }
-      #f1 .flow svg { width: 40px; height: 40px; }
+      /* flat overlays: tag + headline + labels (never in perspective, always readable) */
+      .hdr { position: absolute; left: 70px; top: 228px; width: 940px; height: 66px; display: flex; align-items: center; gap: 22px; }
+      .hdr.R { justify-content: flex-end; }
+      .tag { flex: none; display: inline-flex; align-items: center; gap: 14px; height: 66px; padding: 0 30px 0 16px; border-radius: 999px; font: 800 30px/1 Rubik; letter-spacing: .14em; white-space: nowrap; }
+      .tag i { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+      .tag i svg { width: 24px; height: 24px; }
+      .wB .tag { background: var(--navy); color: #fff; box-shadow: 0 10px 24px rgba(33,44,95,.22); } .wB .tag i { background: rgba(255,255,255,.14); }
+      .wA .tag { background: var(--y); color: var(--navy); box-shadow: 0 10px 30px rgba(254,209,17,.25); } .wA .tag i { background: var(--navy); }
+      .whis { flex: none; font: italic 400 52px/1 PF; white-space: nowrap; }
+      .wB .whis { color: var(--muted); } .wA .whis { color: var(--lb); }
+      .hd { position: absolute; left: 70px; top: 318px; width: 940px; }
+      .hd.R { text-align: right; }
+      .hd .ln { display: block; overflow: hidden; padding: 4px 8px 14px; margin: -4px -8px -14px; white-space: nowrap; }
+      .hd .tx { display: inline-block; font: 800 84px/1.0 Rubik; letter-spacing: -2px; white-space: nowrap; }
+      .hd .ln + .ln { margin-top: -6px; }
+      .wB .hd .tx { color: var(--navy); } .wA .hd .tx { color: #fff; } .wA .hd .tx.y { color: var(--y); }
+      .lbl { position: absolute; display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 16px; border-radius: 10px; font: 700 20px/1 PS; letter-spacing: .1em; white-space: nowrap; }
+      .lbl i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex: none; }
+      .wB .lbl { background: rgba(255,255,255,.9); color: var(--muted); box-shadow: 0 6px 16px rgba(19,27,64,.10); }
+      .wA .lbl { background: rgba(255,255,255,.07); color: #AEB6D6; border: 1.5px solid rgba(255,255,255,.16); }
 
-      /* S4 · help */
-      #help .whis { top: 300px; font: italic 400 72px/1 PF; color: var(--lb); }
-      .hcard { position: absolute; left: 90px; width: 600px; padding: 30px 34px; border-radius: 30px; background: #fff; box-shadow: 0 24px 50px rgba(3,6,24,.45); }
-      .hcard .t { display: flex; align-items: center; gap: 18px; font: 800 44px/1 Rubik; color: var(--navy); }
-      .hcard .t .av { width: 76px; height: 76px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; }
-      .hcard .t .av img { width: 44px; } .hcard .t .av svg { width: 44px; height: 44px; }
-      .hcard .s { margin-top: 14px; font: 600 28px/1.3 PS; color: var(--muted); }
-      #h1c { top: 430px; } #h2c { top: 700px; }
-      #h2c .avs { display: flex; margin-top: 18px; } #h2c .avs i { display: flex; width: 66px; height: 66px; margin-right: -14px; border-radius: 50%; background: var(--n100); border: 4px solid #fff; align-items: center; justify-content: center; }
-      #h2c .avs svg { width: 34px; height: 34px; }
-      #cap5 { position: absolute; left: 90px; top: 1010px; font: 600 22px/1 PS; letter-spacing: .06em; color: var(--n300); }
+      /* C1 · SEBELUM: three spreadsheet windows cascading in depth */
+      .win { width: 660px; border-radius: 24px; background: #fff; overflow: hidden;
+             box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 34px 60px rgba(19,27,64,.20), 0 6px 14px rgba(19,27,64,.10); }
+      .win .bar { position: relative; height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 24px; background: var(--n100); border-bottom: 2px solid var(--n200); }
+      .win .bar i { width: 14px; height: 14px; border-radius: 50%; background: #C9CFDF; flex: none; }
+      .win .bar .fn { margin-left: 10px; font: 600 25px/1 PS; color: var(--muted); white-space: nowrap; }
+      .win .bar .fn b { font-weight: 700; color: var(--text); }
+      .win .sum { display: flex; justify-content: space-between; align-items: center; height: 90px; padding: 0 28px; border-bottom: 2px solid var(--n100); }
+      .win .sum span { font: 700 22px/1 PS; letter-spacing: .1em; color: var(--n300); white-space: nowrap; }
+      .win .sum b { font: 800 50px/1 Rubik; color: var(--text); white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .win .rw { display: flex; justify-content: space-between; align-items: center; height: 48px; padding: 0 28px; font: 600 24px/1 PS; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .win .rw:nth-child(even) { background: #F6F7FB; }
+      .win .cnt { position: absolute; right: 12px; top: 6px; width: 48px; height: 48px; perspective: 300px; }
+      .win .cnt > span { position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font: 800 28px/1 Rubik; backface-visibility: hidden; }
+      .win .cnt .n { background: var(--navy); color: var(--y); }
+      .win .cnt .q { background: var(--y); color: var(--navy); font-size: 36px; box-shadow: 0 0 0 5px rgba(254,209,17,.3); }
+      #w1 { left: 60px; top: 590px; } #w2 { left: 200px; top: 730px; } #w3 { left: 340px; top: 870px; }
+      .caret { display: inline-block; width: 4px; height: 46px; margin-left: 3px; vertical-align: -4px; background: #2f6bff; }
+      .scrap { position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 16px 30px rgba(19,27,64,.18); }
+      .scrap::before { content: ""; position: absolute; left: 22px; right: 22px; top: 26px; height: 60%; background: repeating-linear-gradient(180deg, #DDE1EE 0 8px, transparent 8px 22px); }
 
-      /* S5 · end */
+      /* C1 · SESUDAH: one flow, catatan jualan -> pembukuan -> laporan */
+      .fc { width: 600px; height: 160px; border-radius: 30px; background: #fff; display: flex; align-items: center; gap: 24px; padding: 0 26px;
+            box-shadow: 0 30px 60px rgba(3,6,24,.45), 0 0 0 0 rgba(254,209,17,0); }
+      .fc .ic { flex: none; width: 92px; height: 92px; border-radius: 24px; background: var(--navy); display: flex; align-items: center; justify-content: center; }
+      .fc .ic svg { width: 50px; height: 50px; }
+      .fc .tx { flex: 1; min-width: 0; }
+      .fc .tx b { display: block; font: 700 46px/1.05 Rubik; color: var(--navy); white-space: nowrap; }
+      .fc .tx small { display: block; margin-top: 8px; font: 600 25px/1.2 PS; color: var(--muted); white-space: nowrap; }
+      .fc .ok { flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--n100); display: flex; align-items: center; justify-content: center; }
+      .fc .ok svg { width: 30px; height: 30px; }
+      .fc .no { position: absolute; left: -16px; top: -16px; width: 46px; height: 46px; border-radius: 50%; background: var(--y); color: var(--navy); font: 800 26px/46px Rubik; text-align: center; box-shadow: 0 6px 14px rgba(3,6,24,.35); }
+      #fc1 { left: 60px; top: 600px; } #fc2 { left: 240px; top: 790px; } #fc3 { left: 420px; top: 980px; }
+      #flowsvg { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .dot { position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%; background: var(--y); box-shadow: 0 0 18px rgba(254,209,17,.9), 0 0 44px rgba(254,209,17,.5); }
+      .orb { position: absolute; border-radius: 50%; }
+
+      /* C2 · SEBELUM: notebook guesses */
+      .nb { left: 150px; top: 600px; width: 780px; height: 540px; border-radius: 18px; padding: 74px 46px 0 116px;
+            background: repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 77px, rgba(38,54,122,.16) 77px 79px) 0 56px / 100% 100% no-repeat, #FFFDF6;
+            box-shadow: 0 2px 0 #fff inset, 0 40px 70px rgba(19,27,64,.22), 0 8px 16px rgba(19,27,64,.10); }
+      .nb::before { content: ""; position: absolute; left: 86px; top: 0; bottom: 0; width: 3px; background: rgba(38,54,122,.22); }
+      .nb .rings { position: absolute; left: 40px; right: 40px; top: -18px; height: 46px; background: radial-gradient(circle at 50% 50%, #fff 0 8px, #8E99C2 8px 13px, transparent 13.5px) 0 0 / 44px 46px repeat-x; }
+      .nr { position: relative; display: flex; justify-content: space-between; align-items: baseline; height: 79px; padding-top: 14px; font: italic 400 50px/1 PF; color: var(--ink); white-space: nowrap; }
+      .nr .v { font-weight: 700; }
+      .nr.tt { font-weight: 700; }
+      .nr s { position: relative; text-decoration: none; display: inline-block; margin-left: 14px; color: #6d78a6; }
+      .nr s i { position: absolute; left: -6px; right: -6px; top: 52%; height: 5px; border-radius: 3px; background: var(--ink); transform-origin: 0 50%; }
+      .nr .qq { position: relative; display: inline-block; margin-left: 16px; }
+      .nr .qq svg { position: absolute; left: -26px; top: -24px; width: calc(100% + 52px); height: 104px; overflow: visible; }
+      .qf { position: absolute; font: 800 150px/1 Rubik; color: var(--navy); }
+      .pencil { position: absolute; left: 640px; top: 1060px; width: 380px; height: 30px; border-radius: 6px 15px 15px 6px;
+                background: linear-gradient(180deg, #FFE440, #FED111 55%, #e6b800); box-shadow: 0 14px 22px rgba(19,27,64,.22); }
+      .pencil::before { content: ""; position: absolute; left: -46px; top: 0; border-right: 46px solid #f1d6a9; border-top: 15px solid transparent; border-bottom: 15px solid transparent; }
+      .pencil::after { content: ""; position: absolute; left: -46px; top: 11px; border-right: 14px solid #26367A; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+
+      /* C2 · SESUDAH: laporan laba rugi */
+      .rep { left: 110px; top: 590px; width: 860px; height: 572px; border-radius: 30px; background: #fff; padding: 30px 44px 0;
+             box-shadow: 0 44px 90px rgba(3,6,24,.55), 0 8px 18px rgba(3,6,24,.25); }
+      .rep .rh { display: flex; align-items: center; gap: 22px; height: 104px; border-bottom: 2px solid var(--n100); }
+      .rep .ri { flex: none; width: 76px; height: 76px; border-radius: 20px; background: var(--navy); display: flex; align-items: center; justify-content: center; }
+      .rep .ri svg { width: 42px; height: 42px; }
+      .rep .rt { font: 700 42px/1 Rubik; color: var(--navy); white-space: nowrap; }
+      .rep .rt small { display: block; margin-top: 10px; font: 600 22px/1 PS; color: var(--n300); letter-spacing: .03em; }
+      .rep .rr { display: flex; justify-content: space-between; align-items: center; height: 68px; border-bottom: 2px solid #F1F3F8; font: 600 30px/1 PS; color: var(--muted); white-space: nowrap; }
+      .rep .rr b { font: 700 32px/1 PS; color: var(--text); font-variant-numeric: tabular-nums; }
+      .rep .rr.lb { height: 104px; border-bottom: 0; }
+      .rep .rr.lb span { font: 800 42px/1 Rubik; color: var(--navy); }
+      .rep .rr.lb b { font: 800 52px/1 Rubik; color: var(--navy); padding: 4px .12em; margin: -4px -.12em; background-position: 0 92%; }
+      .rep .rf, .est .rf { position: absolute; left: 44px; bottom: 24px; display: flex; gap: 16px; font: 700 18px/1 PS; letter-spacing: .1em; color: var(--n300); white-space: nowrap; }
+      .rf i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: currentColor; margin-right: 8px; vertical-align: 2px; }
+
+      /* C3 · SEBELUM: calculator + sticky notes */
+      .calc { left: 96px; top: 610px; width: 400px; height: 540px; border-radius: 44px; padding: 34px; background: linear-gradient(160deg, #34448a, #212C5F 60%, #19214d);
+              box-shadow: 0 2px 0 rgba(255,255,255,.18) inset, 0 40px 70px rgba(19,27,64,.30), 0 8px 16px rgba(19,27,64,.14); }
+      .calc .scr { height: 130px; border-radius: 22px; background: linear-gradient(180deg, #E8EBF4, #D3D8E8); text-align: right; padding: 0 26px; font: 800 70px/130px Rubik; color: var(--navy); white-space: nowrap; overflow: hidden; }
+      .calc .keys { margin-top: 26px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+      .calc .keys i { height: 62px; border-radius: 18px; background: #3a4a8c; box-shadow: 0 4px 0 #18204a; }
+      .calc .keys i.y { background: var(--y); box-shadow: 0 4px 0 #b99600; }
+      .stk { width: 330px; height: 196px; padding: 30px 30px 0; background: linear-gradient(170deg, #FFF3A6, #FFE873); box-shadow: 0 26px 40px rgba(19,27,64,.20), 0 4px 8px rgba(19,27,64,.10);
+             font: italic 700 46px/1.12 PF; color: var(--ink); white-space: nowrap; }
+      .stk::before { content: ""; position: absolute; left: 110px; top: -14px; width: 110px; height: 30px; background: rgba(255,255,255,.55); }
+
+      /* C3 · SESUDAH: estimasi pajak + tim ahli */
+      .card { background: #fff; border-radius: 30px; box-shadow: 0 40px 80px rgba(3,6,24,.5), 0 8px 18px rgba(3,6,24,.22); }
+      .est { left: 110px; top: 590px; width: 860px; height: 318px; padding: 28px 40px 0; }
+      .est .eh { display: flex; align-items: center; gap: 20px; }
+      .est .ei { flex: none; width: 72px; height: 72px; border-radius: 20px; background: var(--navy); display: flex; align-items: center; justify-content: center; }
+      .est .ei svg { width: 40px; height: 40px; }
+      .est .et { flex: 1; font: 700 42px/1 Rubik; color: var(--navy); white-space: nowrap; }
+      .est .chip { flex: none; height: 44px; padding: 0 18px; border-radius: 999px; background: var(--n100); font: 700 21px/44px PS; color: var(--muted); white-space: nowrap; }
+      .est .val { margin-top: 28px; font: 800 88px/1 Rubik; color: var(--navy); letter-spacing: -2px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .est .bar2 { position: absolute; right: 40px; top: 150px; width: 170px; height: 88px; display: flex; align-items: flex-end; gap: 12px; }
+      .est .bar2 i { flex: 1; border-radius: 8px 8px 3px 3px; background: var(--n200); transform-origin: 50% 100%; }
+      .est .bar2 i:last-child { background: var(--y); }
+      .ahl { left: 110px; top: 940px; width: 860px; height: 206px; padding: 0 36px; display: flex; align-items: center; gap: 26px; }
+      .ahl .avs { flex: none; display: flex; }
+      .ahl .avs i { width: 84px; height: 84px; margin-right: -22px; border-radius: 50%; background: var(--n100); border: 5px solid #fff; display: flex; align-items: center; justify-content: center; }
+      .ahl .avs i:first-child { background: var(--navy); }
+      .ahl .avs svg { width: 44px; height: 44px; }
+      .ahl .at { flex: 1; min-width: 0; padding-left: 20px; }
+      .ahl .at b { display: block; font: 700 40px/1.05 Rubik; color: var(--navy); white-space: nowrap; }
+      .ahl .at small { display: block; margin-top: 10px; font: 600 26px/1.2 PS; color: var(--muted); white-space: nowrap; }
+      .ahl .at small .hl { color: var(--text); }
+      .ahl .kp { position: absolute; right: 36px; top: -26px; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; background: var(--navy); color: #fff; font: 700 22px/1 PS; white-space: nowrap; box-shadow: 0 10px 22px rgba(3,6,24,.35); }
+      .ahl .kp svg { width: 26px; height: 26px; }
+
+      /* end card (series template) */
       #end .content { position: absolute; inset: 0; transform-origin: 540px 960px; }
       #t7a, #t7b { font: 700 78px/1.05 Rubik; letter-spacing: -1.5px; color: #fff; }
       #t7a { top: 400px; } #t7b { top: 492px; } #t7b .yy { color: var(--y); }
@@ -133,13 +215,6 @@
       #cta7 span { display: inline-flex; align-items: center; gap: 18px; padding: 28px 52px; border-radius: 999px; background: #fff; color: var(--navy); font: 700 44px/1 PS; }
       #cta7 svg { width: 40px; height: 40px; }
       #bio7 { top: 780px; font: 600 30px/1 PS; letter-spacing: .04em; color: var(--lb); }
-
-      /* transitions */
-      #bands .bd { position: absolute; left: 0; width: 1080px; height: 322px; overflow: hidden; }
-      #mq { position: absolute; left: 0; top: 104px; white-space: nowrap; font: 800 104px/1 Rubik; letter-spacing: -2px; color: #fff; }
-      #mq b { color: var(--y); font-weight: 800; }
-      #slide { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; background: var(--deep); }
-      #slideEdge { position: absolute; left: -16px; top: 0; width: 16px; height: 1920px; background: var(--y); }
       #beamwrap { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
       #disc { position: absolute; left: 30px; top: 1560px; width: 280px; height: 280px; border-radius: 50%; background: var(--royal); }
       #beam { position: absolute; left: 170px; top: 1550px; width: 2800px; height: 300px; background: var(--royal); transform-origin: 0 50%; }
@@ -149,97 +224,166 @@
     </style>
   </head>
   <body>
-    <div id="main-root" data-composition-id="main" data-start="0" data-duration="34.5" data-width="1080" data-height="1920">
-      <!-- S0 · news pages in 3D. A: the opening article (headline read by the camera), B–D: excerpts (direct cuts) -->
-      <div id="shA" class="full scene shot3" style="visibility:visible;opacity:1"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sA">
-        <div class="nav"><i></i><span>Nasional</span><span>Internasional</span><span class="on">Ekonomi</span><span>Olahraga</span><span>Teknologi</span><span>Hiburan</span><span>Gaya Hidup</span></div>
-        <div class="kick">EKONOMI · PAJAK</div>
-        <div class="hd">DJP Pungut Pajak Seller Marketplace Mulai 1 Oktober</div>
-        <div class="meta"><i></i>CNN Indonesia · 17 September 2026</div>
-        <div class="lead"><svg viewBox="0 0 24 24" fill="none" stroke="#FED111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></div>
-        <div class="cap">Ilustrasi · tampilan halaman dibuat ulang</div>
-        <p>Penerapan <span class="hl kw" id="kA">pajak</span> seller marketplace ini awalnya diterapkan pada 1 Agustus 2026, tetapi kemudian ditunda.</p>
-        <p>Direktur Jenderal Pajak Bimo Wijayanto mengatakan seluruh pihak, termasuk keempat platform e-commerce sudah siap mengimplementasikan kebijakan ini.</p>
-        <p>"Mereka kan sudah siap sebenarnya, tapi ada penundaan sampai 1 Oktober. Nanti Insyaallah kita akan segera aktivasi aturannya dan implementasinya mereka sudah siap. Kita juga sudah siap," ujar Bimo di Kantor Pusat Direktorat Jenderal Pajak Kementerian Keuangan, Rabu (16/9) dikutip Detikfinance.</p>
-        <p>DJP bersama pihak platform digital terkait telah melakukan uji coba sistem (sandbox) serta stabilisasi sejak tahun lalu, sehingga dapat dipastikan pelaksanaan penarikan PPh seller online melalui empat platform e-commerce pada 1 Oktober dapat berjalan lancar tanpa hambatan.</p>
-      </div></div></div></div></div>
-      <div id="shB" class="full scene shot3"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sB">
-        <div class="nav"><span>News</span><span>Nasional</span><span>Regional</span><span class="on">Money</span><span>Tren</span><span>Global</span><span>Edukasi</span></div>
-        <div class="by">KOMPAS.com · 27 Maret 2026</div>
-        <div class="lead"></div><div class="cap">Ilustrasi</div>
-        <p>KOMPAS.com – Cara lapor SPT tahunan pribadi kini semakin praktis karena dapat dilakukan secara online melalui sistem Coretax DJP. Wajib <span class="hl kw" id="kB">pajak</span> tidak perlu lagi datang ke kantor pajak, cukup menggunakan perangkat yang terhubung internet.</p>
-        <p>Kabar baiknya, pemerintah resmi memperpanjang batas waktu pelaporan SPT Tahunan 2025 untuk wajib pajak orang pribadi. Jika sebelumnya jatuh pada 31 Maret 2026, kini diperpanjang hingga 30 April 2026.</p>
-        <p>Dengan tambahan waktu ini, masyarakat diimbau segera memanfaatkan kesempatan untuk lapor SPT Tahunan tanpa terburu-buru.</p>
-      </div></div></div></div></div>
-      <div id="shC" class="full scene shot3"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sC">
-        <div class="nav"><span>Berita</span><span class="on">Makro</span><span>Finansial</span><span>Korporasi</span><span>Energi</span><span>Digital</span></div>
-        <div class="kick">MAKRO</div><div class="by">Katadata.co.id · 3 Juni 2026, 08:30</div>
-        <div class="lead"></div><div class="cap">Ilustrasi</div>
-        <p>Pemerintah menerbitkan Peraturan Pemerintah (PP) Nomor 20 Tahun 2026 guna merevisi ketentuan dalam PP Nomor 55 Tahun 2022 tentang Penyesuaian Pengaturan di Bidang Pajak Penghasilan.</p>
-        <p>Dalam aturan ini, pemerintah merevisi ketentuan <span class="hl kw" id="kC">Pajak</span> Penghasilan (PPh) Final sebesar 0,5% bagi pelaku usaha mikro, kecil, dan menengah (UMKM). Aturan ini merupakan perubahan atas PP 55/2022 yang secara khusus mengatur kembali penerima fasilitas tarif PPh Final 0,5% bagi wajib pajak dengan peredaran bruto tertentu.</p>
-        <p>Fasilitas serupa juga diberikan kepada koperasi yang telah terdaftar sebelum PP ini berlaku. Koperasi dapat tetap menggunakan skema PPh Final hingga Tahun Pajak 2029 sepanjang memenuhi persyaratan yang ditetapkan.</p>
-      </div></div></div></div></div>
-      <div id="shD" class="full scene shot3"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sD">
-        <div class="nav"><span>Berita</span><span>Makro</span><span>Finansial</span><span>Korporasi</span><span class="on">Digital</span><span>Energi</span></div>
-        <div class="kick">E-COMMERCE</div><div class="by">Katadata.co.id · 31 Juli 2026, 13:25</div>
-        <div class="lead"></div><div class="cap">Ilustrasi</div>
-        <p>Salah satu seller mengeluhkan pajak marketplace 0,5% dipotong dari total omzet bruto atau gross merchandise value (GMV), mengingat biaya yang dikenakan platform dinilai cukup banyak. Direktorat Jenderal Pajak Kementerian Keuangan atau DJP Kemenkeu pun merespons hal ini.</p>
-        <p>Direktur Penyuluhan, Pelayanan, dan Hubungan Masyarakat DJP Kemenkeu Inge Diana Rismawanti menegaskan aturan <span class="hl kw" id="kD">pajak</span> marketplace hanya mengubah mekanisme pembayaran, bukan menambah beban baru bagi pelaku usaha.</p>
-        <p>Dia juga menyampaikan, kewajiban membayar pajak atas penghasilan usaha sebenarnya sudah lama berlaku, baik bagi pedagang offline maupun online.</p>
-        <p>Oleh karena itu, menurut dia tidak seharusnya muncul anggapan bahwa kebijakan baru itu akan memicu kenaikan harga barang.</p>
-      </div></div></div></div></div>
-      <div id="dofA" class="dof"></div><div id="dofB" class="dof"></div><div id="vig3"></div>
-      <div id="cA" class="srcchip" style="visibility:hidden"><b>CNN INDONESIA</b> · 17 SEPTEMBER 2026</div>
-      <div id="cB" class="srcchip" style="visibility:hidden"><b>KOMPAS.COM</b> · 27 MARET 2026</div>
-      <div id="cC" class="srcchip" style="visibility:hidden"><b>KATADATA.CO.ID</b> · 3 JUNI 2026</div>
-      <div id="cD" class="srcchip" style="visibility:hidden"><b>KATADATA.CO.ID</b> · 31 JULI 2026</div>
-      <div id="flood" style="visibility:hidden"></div>
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <filter id="hb" x="-20%" y="0%" width="140%" height="100%" color-interpolation-filters="sRGB"><feGaussianBlur id="hbB" stdDeviation="0 0" /></filter>
+        <symbol id="i-x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></symbol>
+        <symbol id="i-ok" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+        <symbol id="i-knob" viewBox="0 0 70 40"><path d="M24 8L12 20l12 12M46 8l12 12-12 12" fill="none" stroke="#212C5F" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+        <symbol id="i-bag" viewBox="0 0 24 24"><g fill="none" stroke="#FED111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z" /><path d="M9 8V6.5a3 3 0 0 1 6 0V8" /></g></symbol>
+        <symbol id="i-book" viewBox="0 0 24 24"><g fill="none" stroke="#FED111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z" /><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19M9 7.5h6M9 11h6" /></g></symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24"><g fill="none" stroke="#FED111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16" /><path d="M8 16v-4M12 16V8M16 16v-6" /></g></symbol>
+        <symbol id="i-doc" viewBox="0 0 24 24"><g fill="none" stroke="#FED111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z" /><path d="M14 3v5h5M9 13h7M9 17h5" /></g></symbol>
+        <symbol id="i-calc" viewBox="0 0 24 24"><g fill="none" stroke="#FED111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M16 11v6" /></g></symbol>
+        <symbol id="i-user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></g></symbol>
+        <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9.5L5 20z" fill="none" stroke="#FED111" stroke-width="2" stroke-linejoin="round" /></symbol>
+      </defs>
+    </svg>
+    <div id="main-root" data-composition-id="main" data-start="0" data-duration="32.0" data-width="1080" data-height="1920">
 
-      <!-- S2 · confusion -->
-      <div id="conf" class="full scene navybg">
-        <div class="ngrid"></div>
-        <div class="pchip" id="pc1" style="left: 90px; top: 760px">pajak</div>
-        <div class="pchip" id="pc2" style="left: 640px; top: 820px">Pajak</div>
-        <div class="pchip" id="pc3" style="left: 150px; top: 1010px">pajak</div>
-        <div class="pchip" id="pc4" style="left: 600px; top: 1080px">pajak</div>
-        <div id="q0" class="ctr">terus…</div>
-        <div id="q1" class="ctr">mulai dari mana?</div>
-        <div class="qm" id="qm1" style="left: 900px; top: 610px">?</div>
-        <div class="qm" id="qm2" style="left: 40px; top: 900px">?</div>
-        <div class="qm" id="qm3" style="left: 960px; top: 1050px">?</div>
+      <!-- ============ C1 · cara lama (rekap manual, tiga file) | cara sekarang (satu alur) ============ -->
+      <div id="c1" class="full scene cmp rl" style="visibility:visible;opacity:1">
+        <div class="world wB" id="c1B">
+          <div class="stage"><div class="cam" id="k1B">
+            <div class="floor"></div>
+            <div class="scrap o3" id="sc1" style="left:-60px; top:1010px; width:230px; height:300px"></div>
+            <div class="scrap o3" id="sc2" style="left:900px; top:470px; width:210px; height:260px"></div>
+            <div class="win o3" id="w1">
+              <div class="bar"><i></i><i></i><i></i><span class="fn"><b>rekap_manual</b>_FINAL_v3.xlsx</span><div class="cnt"><span class="n">1</span><span class="q">≠</span></div></div>
+              <div class="sum"><span>TOTAL REKAP</span><b><span class="hl" id="tot1"><span id="typ1"></span><span class="caret" id="car1"></span></span></b></div>
+              <div class="rw"><span>Minggu 1</span><span>Rp11.420.000</span></div><div class="rw"><span>Minggu 2</span><span>Rp12.105.000</span></div><div class="rw"><span>Minggu 3</span><span>Rp10.870.000</span></div>
+            </div>
+            <div class="win o3" id="w2">
+              <div class="bar"><i></i><i></i><i></i><span class="fn"><b>pesanan_toko</b>.csv</span><div class="cnt"><span class="n">2</span><span class="q">≠</span></div></div>
+              <div class="sum"><span>TOTAL PESANAN</span><b><span class="hl" id="tot2">Rp48.250.000</span></b></div>
+              <div class="rw"><span>Minggu 1</span><span>Rp11.650.000</span></div><div class="rw"><span>Minggu 2</span><span>Rp12.105.000</span></div><div class="rw"><span>Minggu 3</span><span>Rp11.330.000</span></div>
+            </div>
+            <div class="win o3" id="w3">
+              <div class="bar"><i></i><i></i><i></i><span class="fn"><b>mutasi_bank</b>.pdf</span><div class="cnt"><span class="n">3</span><span class="q">≠</span></div></div>
+              <div class="sum"><span>UANG MASUK</span><b><span class="hl" id="tot3">Rp44.730.000</span></b></div>
+              <div class="rw"><span>Transfer masuk</span><span>Rp10.980.000</span></div><div class="rw"><span>Transfer masuk</span><span>Rp11.640.000</span></div><div class="rw"><span>Transfer masuk</span><span>Rp10.215.000</span></div>
+            </div>
+            <div class="scrap o3" id="sc3" style="left:880px; top:1180px; width:240px; height:320px"></div>
+          </div></div>
+          <div class="vigB"></div>
+          <div class="hdr" id="g1B"><div class="tag"><i><svg><use href="#i-x" /></svg></i>SEBELUM</div><div class="whis">cara lama</div></div>
+          <div class="hd" id="h1B" data-w="850"><div class="ln"><span class="tx">Rekap manual,</span></div><div class="ln"><span class="tx">tiga file,</span></div><div class="ln"><span class="tx">angka <span class="hl" id="hx1">nggak pernah cocok.</span></span></div></div>
+          <div class="lbl" id="lb1B" style="right:130px; top:590px"><i></i>ILUSTRASI DATA</div>
+        </div>
+        <div class="world wA" id="c1A">
+          <div class="stage"><div class="cam" id="k1A">
+            <div class="floor"></div>
+            <div class="glowA"></div>
+            <div class="orb o3" id="ob1" style="left:880px; top:520px; width:120px; height:120px; background:radial-gradient(circle, rgba(254,209,17,.55), rgba(254,209,17,0) 70%)"></div>
+            <div class="orb o3" id="ob2" style="left:20px; top:1040px; width:160px; height:160px; background:radial-gradient(circle, rgba(140,170,255,.45), rgba(140,170,255,0) 70%)"></div>
+            <svg id="flowsvg" class="o3" viewBox="0 0 1080 1920">
+              <path id="fp1" d="M150 760 V 840 Q 150 870 180 870 H 240" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="6" stroke-linecap="round" />
+              <path id="fp2" d="M330 950 V 1030 Q 330 1060 360 1060 H 420" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="6" stroke-linecap="round" />
+              <path id="fq1" d="M150 760 V 840 Q 150 870 180 870 H 240" fill="none" stroke="#FED111" stroke-width="7" stroke-linecap="round" stroke-dasharray="260" stroke-dashoffset="260" />
+              <path id="fq2" d="M330 950 V 1030 Q 330 1060 360 1060 H 420" fill="none" stroke="#FED111" stroke-width="7" stroke-linecap="round" stroke-dasharray="260" stroke-dashoffset="260" />
+            </svg>
+            <div class="fc o3" id="fc1"><div class="no">1</div><div class="ic"><svg><use href="#i-bag" /></svg></div><div class="tx"><b>Catatan jualan</b><small>pesanan · pencairan · biaya</small></div><div class="ok"><svg style="color:#8E99C2"><use href="#i-ok" /></svg></div></div>
+            <div class="fc o3" id="fc2"><div class="no">2</div><div class="ic"><svg><use href="#i-book" /></svg></div><div class="tx"><b>Pembukuan</b><small>rapi, bisa ditelusuri</small></div><div class="ok"><svg style="color:#8E99C2"><use href="#i-ok" /></svg></div></div>
+            <div class="fc o3" id="fc3"><div class="no">3</div><div class="ic"><svg><use href="#i-chart" /></svg></div><div class="tx"><b>Laporan</b><small>laba rugi siap dibaca</small></div><div class="ok"><svg style="color:#8E99C2"><use href="#i-ok" /></svg></div></div>
+            <div class="dot o3" id="fdot"></div>
+          </div></div>
+          <div class="vigA"></div>
+          <div class="hdr R" id="g1A"><div class="whis">cara sekarang</div><div class="tag"><i><svg style="color:#FED111"><use href="#i-ok" /></svg></i>SESUDAH</div></div>
+          <div class="hd R" id="h1A"><div class="ln"><span class="tx">Dari catatan jualan</span></div><div class="ln"><span class="tx">sampai laporan,</span></div><div class="ln"><span class="tx y">satu alur.</span></div></div>
+          <div class="lbl" id="lb1A" style="right:70px; top:592px"><i></i>SIMULASI ALUR</div>
+        </div>
+        <div class="dvd"><div class="sh"></div><div class="ln"></div><div class="knob"><svg><use href="#i-knob" /></svg></div></div>
       </div>
 
-      <!-- transition bands (conf -> sol) -->
-      <div id="bands" class="full" style="visibility:hidden"></div>
-
-      <!-- S3 · solution -->
-      <div id="sol" class="full scene navybg">
-        <div class="ngrid"></div>
-        <div class="ctr whis" id="solW">tenang.</div>
-        <div class="feat" id="f1">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></div>
-          <div class="tx"><small>CATATAN JUALAN →</small>pembukuan yang <span class="hl" id="sx1">bisa ditelusuri</span></div>
+      <!-- ============ C2 · nebak-nebak untung | laporan laba rugi ============ -->
+      <div id="c2" class="full scene cmp lr">
+        <div class="world wB" id="c2B">
+          <div class="stage"><div class="cam" id="k2B">
+            <div class="floor"></div>
+            <div class="qf o3" id="q21" style="left:40px; top:470px">?</div>
+            <div class="qf o3" id="q22" style="left:930px; top:640px; color:#FED111">?</div>
+            <div class="nb o3" id="nb">
+              <div class="rings"></div>
+              <div class="nr"><span>Omzet</span><span class="v">48 jt</span></div>
+              <div class="nr"><span>− modal</span><span class="v">?</span></div>
+              <div class="nr"><span>− ongkir</span><span class="v">?</span></div>
+              <div class="nr"><span>− iklan</span><span class="v">??</span></div>
+              <div class="nr tt"><span>Untung ≈</span><span class="v"><s>5 jt?<i id="sk1"></i></s><s>8 jt?<i id="sk2"></i></s><span class="qq">3 jt??<svg viewBox="0 0 200 104" preserveAspectRatio="none"><path id="cir" d="M100 6 C 168 4 196 30 194 54 C 192 84 150 100 96 98 C 40 96 6 82 8 52 C 10 24 52 8 118 10" fill="none" stroke="#26367A" stroke-width="4" stroke-linecap="round" stroke-dasharray="560" stroke-dashoffset="560" /></svg></span></span></div>
+            </div>
+            <div class="pencil o3" id="pcl"></div>
+            <div class="qf o3" id="q23" style="left:820px; top:1150px; font-size:210px">?</div>
+          </div></div>
+          <div class="vigB"></div>
+          <div class="hdr R" id="g2B"><div class="tag"><i><svg><use href="#i-x" /></svg></i>SEBELUM</div></div>
+          <div class="hd R" id="h2B" data-w="850"><div class="ln"><span class="tx" id="nbk">Nebak-nebak</span></div><div class="ln"><span class="tx">untung.</span></div></div>
+          <div class="lbl" id="lb2B" style="right:70px; top:530px"><i></i>ILUSTRASI DATA</div>
         </div>
-        <div class="feat" id="f2">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M16 11v6"/></svg></div>
-          <div class="tx"><small>DARI DATA USAHAMU →</small>bantu hitung <span class="hl" id="sx2">estimasi pajak</span></div>
+        <div class="world wA" id="c2A">
+          <div class="stage"><div class="cam" id="k2A">
+            <div class="floor"></div>
+            <div class="glowA"></div>
+            <div class="orb o3" id="ob3" style="left:-20px; top:560px; width:150px; height:150px; background:radial-gradient(circle, rgba(254,209,17,.45), rgba(254,209,17,0) 70%)"></div>
+            <div class="rep o3" id="rep">
+              <div class="rh"><div class="ri"><svg><use href="#i-doc" /></svg></div><div class="rt">Laporan Laba Rugi<small>Bulan ini · dari pembukuanmu</small></div></div>
+              <div class="rr" id="rr1"><span>Penjualan</span><b>Rp48.250.000</b></div>
+              <div class="rr" id="rr2"><span>Biaya produk</span><b>−Rp21.400.000</b></div>
+              <div class="rr" id="rr3"><span>Ongkir &amp; biaya platform</span><b>−Rp9.870.000</b></div>
+              <div class="rr" id="rr4"><span>Iklan</span><b>−Rp6.120.000</b></div>
+              <div class="rr lb" id="rr5"><span>Laba</span><b class="hl" id="lbv">Rp10.860.000</b></div>
+              <div class="rf"><span><i></i>ILUSTRASI DATA</span><span><i></i>SIMULASI ALUR</span></div>
+            </div>
+          </div></div>
+          <div class="vigA"></div>
+          <div class="hdr" id="g2A"><div class="tag"><i><svg style="color:#FED111"><use href="#i-ok" /></svg></i>SESUDAH</div></div>
+          <div class="hd" id="h2A"><div class="ln"><span class="tx">Laporan laba rugi</span></div><div class="ln"><span class="tx">yang <span class="hl" id="hx2">jelas.</span></span></div></div>
         </div>
+        <div class="dvd"><div class="sh"></div><div class="ln"></div><div class="knob"><svg><use href="#i-knob" /></svg></div></div>
       </div>
 
-      <!-- S4 · help (slides over) -->
-      <div id="help" class="full scene deepbg">
-        <div id="slideEdge"></div>
-        <div class="ngrid"></div>
-        <div class="ctr whis">masih bingung?</div>
-        <div class="hcard" id="h1c"><div class="t"><div class="av"><img src="assets/mp/mp_m_reverse.png" alt="" /></div>Asisten AI</div><div class="s">bantu jelasin angka usahamu</div></div>
-        <div class="hcard" id="h2c"><div class="t"><div class="av"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></div>Tim ahli</div><div class="s"><span class="hl" id="hx">sesuai layanan</span></div>
-          <div class="avs"><i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i></div>
+      <!-- ============ C3 · bingung pajaknya berapa | estimasi pajak + tim ahli ============ -->
+      <div id="c3" class="full scene cmp rl">
+        <div class="world wB" id="c3B">
+          <div class="stage"><div class="cam" id="k3B">
+            <div class="floor"></div>
+            <div class="qf o3" id="q31" style="left:880px; top:470px; font-size:120px">?</div>
+            <div class="calc o3" id="calc"><div class="scr"><span id="scr">Rp ???</span></div>
+              <div class="keys"><i></i><i></i><i></i><i class="y"></i><i></i><i></i><i></i><i class="y"></i><i></i><i></i><i></i><i class="y"></i><i></i><i></i><i></i><i class="y"></i></div></div>
+            <div class="stk o3" id="st1" style="left:560px; top:600px">pajaknya<br />berapa?</div>
+            <div class="stk o3" id="st2" style="left:600px; top:800px">hitungnya<br />gimana?</div>
+            <div class="stk o3" id="st3" style="left:550px; top:990px">pakai data<br />yang mana?</div>
+            <div class="qf o3" id="q32" style="left:20px; top:1180px; font-size:200px; color:#FED111">?</div>
+          </div></div>
+          <div class="vigB"></div>
+          <div class="hdr" id="g3B"><div class="tag"><i><svg><use href="#i-x" /></svg></i>SEBELUM</div></div>
+          <div class="hd" id="h3B" data-w="850"><div class="ln"><span class="tx">Bingung pajaknya</span></div><div class="ln"><span class="tx">berapa?</span></div></div>
         </div>
-        <div id="cap5"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#8E99C2;margin-right:10px"></span>MUAMALAH PAJAK · PENDAMPINGAN SESUAI LAYANAN</div>
+        <div class="world wA" id="c3A">
+          <div class="stage"><div class="cam" id="k3A">
+            <div class="floor"></div>
+            <div class="glowA"></div>
+            <div class="orb o3" id="ob4" style="left:900px; top:1120px; width:170px; height:170px; background:radial-gradient(circle, rgba(254,209,17,.4), rgba(254,209,17,0) 70%)"></div>
+            <div class="card est o3" id="est">
+              <div class="eh"><div class="ei"><svg><use href="#i-calc" /></svg></div><div class="et">Estimasi pajak</div><div class="chip">dari data usahamu</div></div>
+              <div class="val"><span id="estv">Rp0</span></div>
+              <div class="bar2"><i style="height:38%"></i><i style="height:55%"></i><i style="height:47%"></i><i style="height:80%"></i></div>
+              <div class="rf"><span><i></i>ILUSTRASI DATA</span><span><i></i>SIMULASI ALUR</span></div>
+            </div>
+            <div class="card ahl o3" id="ahl">
+              <div class="avs"><i><svg style="color:#fff"><use href="#i-user" /></svg></i><i><svg style="color:#212C5F"><use href="#i-user" /></svg></i><i><svg style="color:#212C5F"><use href="#i-user" /></svg></i></div>
+              <div class="at"><b>Tim ahli Muamalah Pajak</b><small><span class="hl" id="hx3">sesuai layanan</span></small></div>
+              <div class="kp"><svg><use href="#i-chat" /></svg>kalau perlu</div>
+            </div>
+          </div></div>
+          <div class="vigA"></div>
+          <div class="hdr R" id="g3A"><div class="tag"><i><svg style="color:#FED111"><use href="#i-ok" /></svg></i>SESUDAH</div></div>
+          <div class="hd R" id="h3A"><div class="ln"><span class="tx">Ada estimasi pajak,</span></div><div class="ln"><span class="tx y">+ tim ahli kalau perlu.</span></div></div>
+        </div>
+        <div class="dvd"><div class="sh"></div><div class="ln"></div><div class="knob"><svg><use href="#i-knob" /></svg></div></div>
       </div>
+
       <div id="beamwrap"><div id="beam"></div><div id="disc"></div></div>
 
-      <!-- S5 · end -->
+      <!-- ============ END · series end card ============ -->
       <div id="endWrap" class="full scene deepbg">
         <div id="end" class="full"><div class="content">
           <div class="ngrid"></div>
@@ -255,146 +399,206 @@
 
     <script>
       (function () {
-        const TM = window.TM, $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
+        const TM = window.TM, RIG = window.RIG, $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
         function split(el) { const txt = el.textContent; el.textContent = ""; return [...txt].map((ch) => { const m = document.createElement("span"); m.className = "m"; const c = document.createElement("span"); c.className = "c"; c.textContent = ch === " " ? " " : ch; m.appendChild(c); el.appendChild(m); return c; }); }
-        for (let k = 0; k < 6; k++) { const b = document.createElement("div"); b.className = "bd"; b.style.top = (k * 320) + "px"; b.style.background = k % 2 ? "#26367A" : "#212C5F"; $("#bands").appendChild(b); }
-        const mq = document.createElement("div"); mq.id = "mq"; mq.innerHTML = "MasterPajak <b>AI</b>&nbsp;—&nbsp;MasterPajak <b>AI</b>&nbsp;—&nbsp;MasterPajak <b>AI</b>"; $$("#bands .bd")[2].appendChild(mq);
-        const Q1 = split($("#q1")), Q0 = split($("#q0")), T7A = split($("#t7a")), SW = split($("#solW"));
+        const T7A = split($("#t7a"));
+
+        // ---- static 3D layout (gsap.set so later tweens compose with it) ----
+        gsap.set(".cam", { transformOrigin: "540px 860px" });
+        gsap.set(".floor", { transformOrigin: "50% 100%", rotationX: 62, z: 0 });
+        const P3 = (s, o) => gsap.set(s, Object.assign({ transformOrigin: "50% 50%" }, o));
+        P3("#w1", { z: -150, rotationY: 14, rotationX: 6, rotation: -3 }); P3("#w2", { z: -60, rotationY: 10, rotationX: 6, rotation: 1.5 }); P3("#w3", { z: 30, rotationY: 6, rotationX: 6, rotation: 3 });
+        P3("#sc1", { z: 320, rotation: -18, rotationY: 20, filter: "blur(7px)" }); P3("#sc2", { z: -420, rotation: 14, filter: "blur(4px)" }); P3("#sc3", { z: 360, rotation: 12, filter: "blur(9px)" });
+        P3(".win .cnt .q", { rotationY: 180 });
+        P3("#fc1", { z: -90, rotationY: -8, rotationX: 4 }); P3("#fc2", { z: -20, rotationY: -8, rotationX: 4 }); P3("#fc3", { z: 50, rotationY: -8, rotationX: 4 });
+        P3("#flowsvg", { z: -21, rotationY: -8, rotationX: 4, transformOrigin: "540px 860px" });
+        P3("#ob1", { z: -300, filter: "blur(10px)" }); P3("#ob2", { z: 300, filter: "blur(12px)" }); P3("#ob3", { z: 260, filter: "blur(10px)" }); P3("#ob4", { z: 280, filter: "blur(12px)" });
+        P3("#nb", { rotationX: 24, rotation: -4, z: -40 }); P3("#pcl", { rotationX: 24, rotation: -28, z: 30 });
+        P3("#q21", { z: -380, rotation: -12, filter: "blur(5px)", opacity: 0.35 }); P3("#q22", { z: 160, rotation: 14, filter: "blur(3px)" }); P3("#q23", { z: 420, rotation: -10, filter: "blur(10px)", opacity: 0.8 });
+        P3("#rep", { rotationX: 14, rotation: -1.5, z: -30 });
+        P3("#calc", { rotationX: 18, rotationY: 20, rotation: -4, z: -40 }); P3("#st1", { rotation: 6, z: 40, rotationY: -10 }); P3("#st2", { rotation: -5, z: -60, rotationY: -12 }); P3("#st3", { rotation: 4, z: 90, rotationY: -8 });
+        P3("#q31", { z: -360, rotation: 12, filter: "blur(5px)", opacity: 0.4 }); P3("#q32", { z: 380, rotation: -14, filter: "blur(10px)" });
+        P3("#est", { rotationX: 10, rotationY: 8, z: -50 }); P3("#ahl", { rotationX: 10, rotationY: 8, z: 30 });
+        P3(".glowA", { z: -600 });
 
         // ---- initial states ----
-        gsap.set("#pc1, #pc2, #pc3, #pc4", { scale: 0, opacity: 0 });
-        gsap.set([...Q1, ...Q0, ...SW], { yPercent: 115 }); gsap.set(".qm", { scale: 0 });
-        $$("#bands .bd").forEach((b, k) => gsap.set(b, { x: k % 2 ? 1100 : -1100 }));
-        gsap.set(".feat", { y: 80, opacity: 0 });
-        gsap.set("#help", { x: 1096 }); gsap.set(".hcard", { y: 80, opacity: 0 }); gsap.set("#cap5", { opacity: 0 });
+        gsap.set(".hd .tx", { yPercent: 108 });
+        gsap.set(".hdr .tag, .hdr .whis", { opacity: 0, y: 30 });
+        gsap.set(".lbl", { opacity: 0 });
+        gsap.set("#c1", { "--dx": "1160px" }); gsap.set("#c2", { "--dx": RIG.drags[1].kx0 + "px" }); gsap.set("#c3", { "--dx": RIG.drags[2].kx0 + "px" });
+        gsap.set(".knob", { y: RIG.Y + RIG.DY * RIG.H - 56 });
+        gsap.set("#car1", { opacity: 1 });
+        gsap.set("#c1B .cnt", { scale: 0 });
+        gsap.set("#w2", { filter: "blur(5px)" }); gsap.set("#w3", { filter: "blur(9px)" });
+        gsap.set("#fdot", { x: 150, y: 680, opacity: 0, z: 10, scale: 1 });
+        gsap.set("#sk1, #sk2", { scaleX: 0 });
+        gsap.set("#rr1, #rr2, #rr3, #rr4, #rr5", { opacity: 0, x: -30 });
+        gsap.set("#st1, #st2, #st3", { opacity: 0, scale: 0.6 });
+        gsap.set("#est", { opacity: 0, z: -200 }); gsap.set("#ahl", { opacity: 0, z: -150 });
+        gsap.set("#est .bar2 i", { scaleY: 0 });
         gsap.set("#disc", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#beam", { rotation: -58, scaleX: 0, scaleY: 1, transformOrigin: "0% 50%" });
         gsap.set([...T7A], { yPercent: 115 }); gsap.set("#t7b", { opacity: 0, y: 50 });
         gsap.set("#cta7 span", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#bio7", { opacity: 0 });
-        gsap.set("#flood", { scaleX: 0 });
 
         // ---- timeline ----
         const tl = gsap.timeline({ paused: true });
         const F = (t, a, b, at) => tl.fromTo(t, a, Object.assign({ immediateRender: false }, b), at);
         const show = (t, at) => tl.set(t, { autoAlpha: 1 }, at), hide = (t, at) => tl.set(t, { autoAlpha: 0 }, at);
         const HL = (sel, at, d) => F(sel, { backgroundSize: "0% 72%" }, { backgroundSize: "100% 72%", duration: d || 0.32, ease: "power1.inOut" }, at);
+        const LN = (sel, k, at, d) => F($$(sel + " .tx")[k], { yPercent: 108 }, { yPercent: 0, duration: d || 0.55, ease: "power4.out" }, at);
+        const HDR = (sel, at) => $$(sel + " > *").forEach((e, k) => F(e, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, at + k * 0.12));
+        const FADE = (sel, at, d) => F(sel, { opacity: 0 }, { opacity: 1, duration: d || 0.35 }, at);
+        const CAM = (sel, a, b, at, d, ease) => F(sel, a, Object.assign({}, b, { duration: d, ease: ease || "sine.inOut" }), at);
         tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: TM.total, ease: "steps(" + Math.round(TM.total * 15) + ")", immediateRender: false }, 0);
+        const D1 = RIG.drags[0], D2 = RIG.drags[1], D3 = RIG.drags[2];
 
-        // S0 · 3D news shots: built in buildReady["news3d"] below (needs font metrics)
-        // T · the last stabilo stroke floods the screen yellow, then the question on navy (no robot yet)
-        show("#flood", TM.conf - 0.42);
-        F("#flood", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.in" }, TM.conf - 0.42);
-        show("#conf", TM.conf); hide(["#shA", "#shB", "#shC", "#shD", "#dofA", "#dofB", "#vig3", "#cA", "#cB", "#cC", "#cD"], TM.conf + 0.02);
-        F("#flood", { scaleX: 1, transformOrigin: "100% 50%" }, { scaleX: 0, transformOrigin: "100% 50%", duration: 0.45, ease: "power3.out" }, TM.conf);
-        hide("#flood", TM.conf + 0.5);
-        Q0.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.35, ease: "power3.out" }, TM.conf + 0.3 + k * 0.03));
-        Q1.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.42, ease: "power4.out" }, TM.conf + 0.6 + k * 0.022));
-        ["#pc1", "#pc2", "#pc3", "#pc4"].forEach((s, k) => F(s, { scale: 0, opacity: 0, rotation: -20 }, { scale: 1, opacity: 1, rotation: [-6, 5, 4, -5][k], duration: 0.45, ease: "back.out(2)" }, TM.conf + 0.15 + k * 0.12));
-        ["#qm1", "#qm2", "#qm3"].forEach((s, k) => F(s, { scale: 0, rotation: -30, opacity: 1 }, { scale: 1, rotation: 0, opacity: 1, duration: 0.4, ease: "back.out(2.5)" }, TM.conf + 1.1 + k * 0.15));
-        for (let j = 0; j < 6; j++) ["#pc1", "#pc2", "#pc3", "#pc4"].forEach((c, k) => tl.set(c, { x: Math.sin(j * 3.1 + k) * 6, y: Math.cos(j * 2.3 + k) * 5 }, TM.conf + 1.6 + j * 0.09));
-        // T · band sweep with the brand marquee
-        show("#bands", TM.sol - 0.48);
-        $$("#bands .bd").forEach((b, k) => F(b, { x: k % 2 ? 1100 : -1100 }, { x: 0, duration: 0.4, ease: "power4.inOut" }, TM.sol - 0.45 + k * 0.03));
-        F("#mq", { x: 140 }, { x: -620, duration: 0.95, ease: "none" }, TM.sol - 0.45);
-        show("#sol", TM.sol); hide("#conf", TM.sol + 0.05); hide("#bands", TM.sol + 0.08);
+        // ===== C1 · SEBELUM: close on the hand-typed rekap total, pull back to three files, totals never match =====
+        HDR("#g1B", 0.05);
+        const C1a = { x: 140, y: 30, z: 470, rotationX: 2, rotationY: -3 }, C1b = { x: 132, y: 30, z: 440, rotationX: 2, rotationY: -4 },
+              C1c = { x: -40, y: -40, z: 0, rotationX: 6, rotationY: -8 }, C1d = { x: -45, y: -55, z: 80, rotationX: 5, rotationY: -4 }, C1e = { x: -50, y: -60, z: 130, rotationX: 4, rotationY: 1 };
+        gsap.set("#k1B", C1a); tl.set("#k1B", C1a, 0);
+        CAM("#k1B", C1a, C1b, 0, TM.tf - 0.55, "none");
+        CAM("#k1B", C1b, C1c, TM.tf - 0.55, 0.95, "power3.inOut");                     // "tiga file": pull back, the stack in depth
+        F("#w2", { filter: "blur(5px)" }, { filter: "blur(0px)", duration: 0.8, ease: "power2.inOut" }, TM.tf - 0.5);
+        F("#w3", { filter: "blur(9px)" }, { filter: "blur(0px)", duration: 0.8, ease: "power2.inOut" }, TM.tf - 0.45);
+        tl.set(["#w2", "#w3"], { filter: "none" }, TM.tf + 0.4);
+        CAM("#k1B", C1c, C1d, TM.nc - 0.1, 0.8, "power2.inOut");                        // "nggak pernah cocok": lean in on the totals
+        CAM("#k1B", C1d, C1e, TM.nc + 0.7, D1.snap1 - TM.nc - 0.7, "none");
+        // typing "Rp47.180.000" by hand (rekap manual)
+        const TY = "Rp47.180.000", ty0 = 0.2, tyd = 0.085;
+        for (let i = 1; i <= TY.length; i++) tl.set("#typ1", { textContent: TY.slice(0, i) }, ty0 + (i - 1) * tyd + (i > 4 ? 0.12 : 0) + (i > 8 ? 0.1 : 0));
+        for (let j = 0; j < 8; j++) tl.set("#car1", { opacity: j % 2 ? 1 : 0 }, ty0 + TY.length * tyd + 0.25 + j * 0.28);
+        hide("#car1", TM.tf - 0.5);
+        LN("#h1B", 0, TM.rk - 0.1); LN("#h1B", 1, TM.tf - 0.05); LN("#h1B", 2, TM.nc - 0.05);
+        // three files: count badges pop (1,2,3) as the camera reveals them, then flip to ≠
+        $$("#c1B .cnt").forEach((c, k) => { F(c, { scale: 0 }, { scale: 1, duration: 0.42, ease: "back.out(2.4)" }, TM.tf - 0.1 + k * 0.16); });
+        $$("#c1B .cnt .n").forEach((c, k) => F(c, { rotationY: 0 }, { rotationY: -180, duration: 0.45, ease: "power2.inOut" }, TM.nc + 0.15 + k * 0.12));
+        $$("#c1B .cnt .q").forEach((c, k) => F(c, { rotationY: 180 }, { rotationY: 0, duration: 0.45, ease: "power2.inOut" }, TM.nc + 0.15 + k * 0.12));
+        ["#tot1", "#tot2", "#tot3"].forEach((s, k) => HL(s, TM.nc + 0.1 + k * 0.14, 0.34));
+        HL("#hx1", TM.nc + 0.55, 0.45);
+        FADE("#lb1B", TM.tf + 0.2);
+        // the files jitter: numbers refuse to match
+        for (let j = 0; j < 7; j++) ["#w1", "#w2", "#w3"].forEach((w, k) => tl.set(w, { x: Math.sin(j * 2.7 + k * 1.3) * 7 * (1 - j / 7), y: Math.cos(j * 1.9 + k) * 5 * (1 - j / 7) }, TM.nc + 0.5 + j * 0.06));
+        ["#w1", "#w2", "#w3"].forEach((w) => tl.set(w, { x: 0, y: 0 }, TM.nc + 0.5 + 7 * 0.06));
+        // the divider slides in from the edge (a sliver of SESUDAH stays visible), knob hint pulses while the robot presents
+        F("#c1", { "--dx": "1160px" }, { "--dx": D1.kx0 + "px", duration: 0.65, ease: "back.out(1.4)" }, 0.12);
+        [1.6, 3.0, 4.4].forEach((t0) => F("#c1 .knob", { scale: 1 }, { scale: 1.12, duration: 0.22, ease: "sine.inOut", yoyo: true, repeat: 1 }, t0));
 
-        // S3 · solution: "tenang." + two feature cards, stabilo on the promise
-        SW.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.4, ease: "power3.out" }, TM.sol + 0.15 + k * 0.03));
-        F("#f1", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.sol + 2.2);
-        HL("#sx1", TM.sol + 3.6, 0.45);
-        F("#f2", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.sol + 4.6);
-        HL("#sx2", TM.sol + 5.9, 0.45);
-        // T · slide-over
-        show("#help", TM.help - 0.5);
-        F("#help", { x: 1096 }, { x: 0, duration: 0.47, ease: "power4.inOut" }, TM.help - 0.47);
-        hide("#sol", TM.help + 0.05);
-        // S4 · help: assistant + experts
-        F("#h1c", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.help + 0.6);
-        F("#h2c", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.help + 1.5);
-        HL("#hx", TM.help + 2.6, 0.4);
-        F("#cap5", { opacity: 0 }, { opacity: 1, duration: 0.3 }, TM.help + 1.8);
-        // T · beam flood + iris
-        show("#beamwrap", TM.end - 0.52);
-        F("#disc", { scale: 0 }, { scale: 1, duration: 0.25, ease: "back.out(2.2)" }, TM.end - 0.5);
-        F("#beam", { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power3.in" }, TM.end - 0.4);
-        F("#beam", { scaleY: 1 }, { scaleY: 16, duration: 0.24, ease: "power3.in" }, TM.end - 0.2);
-        show("#endWrap", TM.end - 0.02);
-        F("#endWrap", { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(82% at 50% 50%)", duration: 0.5, ease: "power3.inOut" }, TM.end);
-        hide("#help", TM.end + 0.55); hide("#beamwrap", TM.end + 0.55);
-        // S5 · end card
-        T7A.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.4, ease: "power3.out" }, TM.end + 0.1 + k * 0.014));
-        F("#t7b", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.45, ease: "power4.out" }, TM.end + 1.3);
-        F("#cta7 span", { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(2.2)" }, TM.end + 3.6);
-        F("#bio7", { opacity: 0 }, { opacity: 1, duration: 0.35 }, TM.end + 5.0);
-        F("#cta7 span", { scale: 1 }, { scale: 1.05, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, TM.end + 4.6);
+        // ===== C1 · SESUDAH: the robot drags the divider (rig below), satu alur =====
+        const C1A0 = { x: 30, y: 0, z: -60, rotationX: 4, rotationY: 6 }, C1A1 = { x: 0, y: 0, z: 40, rotationX: 3, rotationY: -2 }, C1A2 = { x: -10, y: 10, z: 70, rotationX: 2, rotationY: -6 };
+        gsap.set("#k1A", C1A0); tl.set("#k1A", C1A0, 0);
+        CAM("#k1A", C1A0, C1A1, D1.t0, TM.sa - D1.t0, "sine.inOut");
+        CAM("#k1A", C1A1, C1A2, TM.sa, TM.l3 - TM.sa, "sine.inOut");
+        F("#g1A .tag", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, D1.t0 + 0.15);
+        F("#g1A .whis", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, D1.snap1 - 0.1);
+        LN("#h1A", 0, Math.max(TM.cj - 0.1, D1.snap1 - 0.08)); LN("#h1A", 1, TM.lp - 0.15); LN("#h1A", 2, TM.sa);
+        FADE("#lb1A", D1.snap1);
+        const ACT = (id, at) => {                                                      // a step lights up: lift, yellow ring, check
+          F(id, { z: gsap.getProperty(id, "z") }, { z: gsap.getProperty(id, "z") + 40, duration: 0.4, ease: "back.out(2)" }, at);
+          F(id, { boxShadow: "0 30px 60px rgba(3,6,24,.45), 0 0 0 0px rgba(254,209,17,0)" }, { boxShadow: "0 40px 70px rgba(3,6,24,.5), 0 0 0 6px rgba(254,209,17,1)", duration: 0.35, ease: "power2.out" }, at);
+          F(id + " .ok", { backgroundColor: "#EDEFF5" }, { backgroundColor: "#FED111", duration: 0.25 }, at + 0.15);
+          F(id + " .ok svg", { color: "#8E99C2" }, { color: "#212C5F", duration: 0.25 }, at + 0.15);
+          F(id + " .ok", { scale: 1 }, { scale: 1.22, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }, at + 0.15);
+        };
+        ACT("#fc1", TM.cj); ACT("#fc2", TM.pb); ACT("#fc3", TM.lp);
+        F("#fq1", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, TM.pb - 0.45);
+        F("#fq2", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, TM.lp - 0.45);
+        // "satu alur": a pulse runs the whole flow
+        const FD = [[150, 680], [150, 855], [240, 870], [330, 870], [330, 1045], [420, 1060], [720, 1060]];
+        F("#fdot", { opacity: 0 }, { opacity: 1, duration: 0.15 }, TM.sa);
+        FD.slice(1).forEach((p, k) => F("#fdot", { x: FD[k][0], y: FD[k][1] }, { x: p[0], y: p[1], duration: 0.16, ease: "none" }, TM.sa + k * 0.16));
+        F("#fdot", { opacity: 1, scale: 1 }, { opacity: 0, scale: 2.2, duration: 0.35 }, TM.sa + 6 * 0.16);
+        ["#fc1", "#fc2", "#fc3"].forEach((s, k) => F(s, { scale: 1 }, { scale: 1.035, duration: 0.18, yoyo: true, repeat: 1, ease: "sine.inOut" }, TM.sa + [0.05, 0.4, 0.85][k]));
+
+        // ===== whip pan C1 -> C2 =====
+        const whip = (a, b, t0, dir) => {
+          show(b, t0);
+          F(a, { x: 0 }, { x: -1080 * dir, duration: 0.42, ease: "power3.inOut" }, t0);
+          F(b, { x: 1080 * dir }, { x: 0, duration: 0.42, ease: "power3.inOut" }, t0);
+          tl.set([a, b], { filter: "url(#hb)" }, t0); tl.set([a, b], { filter: "none" }, t0 + 0.43);
+          F("#hbB", { attr: { stdDeviation: "0 0" } }, { attr: { stdDeviation: "34 0" }, duration: 0.21, ease: "power2.in" }, t0);
+          F("#hbB", { attr: { stdDeviation: "34 0" } }, { attr: { stdDeviation: "0 0" }, duration: 0.21, ease: "power2.out" }, t0 + 0.21);
+          hide(a, t0 + 0.44);
+        };
+        whip("#c1", "#c2", TM.l3 - 0.3, 1);
+
+        // ===== C2 · SEBELUM: nebak-nebak untung =====
+        const C2a = { x: 0, y: 40, z: -40, rotationX: 8, rotationY: 6 }, C2b = { x: 0, y: 10, z: 110, rotationX: 4, rotationY: -2 }, C2c = { x: 0, y: 0, z: 150, rotationX: 2, rotationY: -6 };
+        gsap.set(["#k2B", "#k2A"], C2a); tl.set(["#k2B", "#k2A"], C2a, 0);
+        CAM(["#k2B", "#k2A"], C2a, C2b, TM.l3 - 0.3, D2.t1 - TM.l3 + 0.3, "sine.inOut");
+        CAM(["#k2B", "#k2A"], C2b, C2c, D2.t1, TM.l4 - D2.t1, "sine.inOut");
+        HDR("#g2B", TM.l3 - 0.05); LN("#h2B", 0, TM.l3 + 0.15); LN("#h2B", 1, TM.l3 + 0.45); FADE("#lb2B", TM.l3 + 0.4);
+        for (let j = 0; j < 8; j++) tl.to("#nbk", { rotation: j % 2 ? 2.5 : -2.5, duration: 0.16, ease: "sine.inOut" }, TM.l3 + 0.75 + j * 0.16);
+        tl.to("#nbk", { rotation: 0, duration: 0.16 }, TM.l3 + 0.75 + 8 * 0.16);
+        F("#sk1", { scaleX: 0 }, { scaleX: 1, duration: 0.22, ease: "power2.out" }, TM.l3 + 0.7);
+        F("#sk2", { scaleX: 0 }, { scaleX: 1, duration: 0.22, ease: "power2.out" }, TM.l3 + 1.05);
+        F("#cir", { strokeDashoffset: 560 }, { strokeDashoffset: 0, duration: 0.5, ease: "power1.inOut" }, TM.l3 + 1.4);
+        F("#q22", { y: 0 }, { y: -40, duration: 3, ease: "sine.inOut" }, TM.l3 - 0.3); F("#q21", { y: 0 }, { y: 30, duration: 3, ease: "sine.inOut" }, TM.l3 - 0.3);
+
+        // ===== C2 · SESUDAH: laporan laba rugi =====
+        HDR("#g2A", D2.t0 + 0.2);
+        LN("#h2A", 0, D2.snap1 - 0.08); LN("#h2A", 1, D2.snap1 + 0.17);
+        ["#rr1", "#rr2", "#rr3", "#rr4", "#rr5"].forEach((s, k) => F(s, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, D2.t0 + 0.1 + k * 0.12));
+        HL("#lbv", TM.jl, 0.4); HL("#hx2", TM.jl + 0.05, 0.4);
+        F("#rr5", { scale: 1 }, { scale: 1.04, duration: 0.25, yoyo: true, repeat: 1, ease: "sine.inOut", transformOrigin: "0% 50%" }, TM.jl + 0.3);
+
+        whip("#c2", "#c3", TM.l4 - 0.3, -1);
+
+        // ===== C3 · SEBELUM: bingung pajaknya berapa =====
+        const C3a = { x: 0, y: 30, z: -30, rotationX: 7, rotationY: -6 }, C3b = { x: 0, y: 10, z: 110, rotationX: 4, rotationY: 2 }, C3c = { x: 0, y: 0, z: 150, rotationX: 2, rotationY: 6 };
+        gsap.set(["#k3B", "#k3A"], C3a); tl.set(["#k3B", "#k3A"], C3a, 0);
+        CAM(["#k3B", "#k3A"], C3a, C3b, TM.l4 - 0.3, D3.t1 - TM.l4 + 0.3, "sine.inOut");
+        CAM(["#k3B", "#k3A"], C3b, C3c, D3.t1, TM.l5 - D3.t1, "sine.inOut");
+        HDR("#g3B", TM.l4 - 0.05); LN("#h3B", 0, TM.l4 + 0.15); LN("#h3B", 1, TM.l4 + 0.5);
+        ["#st1", "#st2", "#st3"].forEach((s, k) => F(s, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, TM.l4 + 0.3 + k * 0.28));
+        for (let j = 0; j < 10; j++) tl.set("#scr", { textContent: ["Rp ???", "Rp ?.???", "Err", "Rp ??", "Rp ???"][j % 5] }, TM.l4 + 0.2 + j * 0.2);
+        for (let j = 0; j < 8; j++) tl.to("#calc", { rotation: -4 + (j % 2 ? 1.6 : -1.6), duration: 0.12, ease: "sine.inOut" }, TM.l4 + 1.0 + j * 0.12);
+        tl.to("#calc", { rotation: -4, duration: 0.12 }, TM.l4 + 1.0 + 8 * 0.12);
+
+        // ===== C3 · SESUDAH: estimasi pajak + tim ahli =====
+        HDR("#g3A", D3.t0 + 0.2);
+        LN("#h3A", 0, D3.snap1 - 0.08); LN("#h3A", 1, TM.ta - 0.1);
+        F("#est", { opacity: 0.0, z: -200 }, { opacity: 1, z: -50, duration: 0.6, ease: "power3.out" }, D3.t0 + 0.05);
+        F("#ahl", { opacity: 0, z: -150 }, { opacity: 1, z: 30, duration: 0.6, ease: "power3.out" }, TM.ta - 0.25);
+        const EV = 1215000, fmt = (v) => (v < 1000 ? "Rp0" : "Rp" + Math.round(v / 1000).toLocaleString("de-DE") + ".000");
+        for (let j = 0; j <= 18; j++) { const u = j / 18, e = 1 - Math.pow(1 - u, 3); tl.set("#estv", { textContent: fmt(EV * e) }, TM.l4b + 0.55 + j * 0.045); }
+        $$("#est .bar2 i").forEach((b, k) => F(b, { scaleY: 0 }, { scaleY: 1, duration: 0.45, ease: "back.out(1.8)" }, TM.l4b + 0.7 + k * 0.08));
+        HL("#hx3", TM.ta + 0.6, 0.4);
+
+        // ===== T · beam flood + iris -> end card =====
+        const EN = TM.l5;
+        show("#beamwrap", EN - 0.52);
+        F("#disc", { scale: 0 }, { scale: 1, duration: 0.25, ease: "back.out(2.2)" }, EN - 0.5);
+        F("#beam", { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power3.in" }, EN - 0.4);
+        F("#beam", { scaleY: 1 }, { scaleY: 16, duration: 0.24, ease: "power3.in" }, EN - 0.2);
+        show("#endWrap", EN - 0.02);
+        F("#endWrap", { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(82% at 50% 50%)", duration: 0.5, ease: "power3.inOut" }, EN);
+        hide("#c3", EN + 0.55); hide("#beamwrap", EN + 0.55);
+        T7A.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.4, ease: "power3.out" }, EN + 0.1 + k * 0.014));
+        F("#t7b", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.45, ease: "power4.out" }, EN + 1.3);
+        F("#cta7 span", { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(2.2)" }, TM.cta);
+        F("#bio7", { opacity: 0 }, { opacity: 1, duration: 0.35 }, TM.bio);
+        F("#cta7 span", { scale: 1 }, { scale: 1.05, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, TM.cta + 1.0);
         tl.set({}, {}, TM.total - 0.01);
 
-        // S0 · 3D news. Camera per shot: .foc = anchor on screen (x, y) + zoom + tilt, .pan = page point that sits on the anchor.
-        // screen = anchor + tilt(zoom * (page point - focus)), so the focus point is pinned to the anchor whatever the tilt.
+        // ===== slider rig: the knob rides in the robot's hand (sampled from the robot's filtered motion), then snaps open =====
         window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
-        window.__hf.buildReady["news3d"] = document.fonts.ready.then(() => {
-          const AX = 400, AY = 980, ZM = 1.1, TILT = { rotationX: 20, rotationY: 15, transformOrigin: "0px 0px" };
-          const at = (el, sheet) => { let x = 0, y = 0; for (let e = el; e && e !== sheet; e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; } return { x, y }; };
-          const kwPos = (id) => { const k = $("#" + id), sh = k.closest(".sheet"), q = at(k, sh); return { x: q.x, y: q.y + k.offsetHeight / 2 }; };
-          // excerpt pages: pick the column width that puts the keyword mid-line (text runs off both frame edges)
-          [["#sB", "kB", 600], ["#sC", "kC", 500], ["#sD", "kD", 500]].forEach(([sid, kid, pad]) => {
-            const sh = $(sid), k = $("#" + kid); let best = null;
-            const par = k.closest("p"), lh = parseFloat(getComputedStyle(par).lineHeight);
-            for (let w = 1800; w <= 3600; w += 20) { sh.style.width = w + 2 * pad + "px"; const q = at(k, sh), r = q.x - pad, li = Math.round((q.y - at(par, sh).y) / lh);
-              const sc = Math.abs(r - 1000) + (li < 3 ? 3000 : 0) + (w < 2200 ? (2200 - w) : 0); if (!best || sc < best[0]) best = [sc, w]; }
-            sh.style.width = best[1] + 2 * pad + "px";
+        const domReady = new Promise((r) => (document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", () => r(1)) : r(1)));
+        window.__hf.buildReady["rig"] = domReady.then(() => document.fonts.ready).then(() => {
+          // headline lines: shrink any line that would not fit its 940 px column (never overflow)
+          $$(".hd .tx").forEach((e) => { let fs = parseFloat(getComputedStyle(e).fontSize); while (e.offsetWidth > +(e.closest(".hd").dataset.w || 932) && fs > 40) { fs -= 1; e.style.fontSize = fs + "px"; } });
+          const P = window.ROBOT_POS, Y0 = RIG.Y + RIG.DY * RIG.H;
+          RIG.drags.forEach((g) => {
+            const knob = $(g.c + " .knob"), hand = (t) => { const s = P(t); return [s.x + g.side * s.h * RIG.off(s.x), s.y + RIG.DY * s.h]; };
+            const ta = g.grab - 0.15, hx0 = hand(g.t0)[0]; let lx = g.kx0;
+            for (let i = 0, t = ta; t <= g.rel + 1e-6; i++, t = ta + i / 60) {
+              const [hx, hy] = hand(t), w = Math.min(1, Math.max(0, (t - ta) / 0.35)), ws = w * w * (3 - 2 * w);
+              lx = t < g.t0 ? g.kx0 : g.kx0 + (hx - hx0);
+              tl.set(g.c, { "--dx": lx.toFixed(1) + "px" }, t); tl.set(knob, { y: Y0 + (hy - Y0) * ws - 56 }, t);
+            }
+            F(g.c, { "--dx": lx.toFixed(1) + "px" }, { "--dx": g.kxEnd + "px", duration: g.snap1 - g.snap0, ease: "power3.in" }, g.rel + 1 / 60);
+            F(knob, { scale: 1 }, { scale: 0.7, duration: g.snap1 - g.snap0, ease: "power2.in" }, g.rel + 1 / 60);
           });
-          $("#sA").style.width = "4000px";
-          const key = (ax, ay, fx, fy, z) => ({ ax, ay, fx, fy, z });
-          const setCam = (sh, k) => { gsap.set(sh + " .foc", Object.assign({ x: k.ax, y: k.ay, scale: k.z }, TILT)); gsap.set(sh + " .pan", { x: -k.fx, y: -k.fy }); };
-          const cam3 = (sh, a, b, t0, d, ease) => {
-            F(sh + " .foc", { x: a.ax, y: a.ay, scale: a.z }, { x: b.ax, y: b.ay, scale: b.z, duration: d, ease: ease || "sine.inOut" }, t0);
-            F(sh + " .pan", { x: -a.fx, y: -a.fy }, { x: -b.fx, y: -b.fy, duration: d, ease: ease || "sine.inOut" }, t0);
-          };
-          const HL3 = (sel, t0, d) => F(sel, { backgroundSize: "0% 80%" }, { backgroundSize: "100% 80%", duration: d || 0.42, ease: "power1.inOut" }, t0);
-          gsap.set("#shA .foc", { rotation: -4 }); gsap.set("#shB .foc", { rotation: -3 }); gsap.set("#shC .foc", { rotation: -5 }); gsap.set("#shD .foc", { rotation: -3.5 });
-
-          // A · the opening article. Headline lines from word positions.
-          const hd = $("#sA .hd"), words = hd.textContent.trim().split(/\s+/); hd.textContent = "";
-          words.forEach((w, i) => { const s = document.createElement("span"); s.textContent = w; hd.appendChild(s); if (i < words.length - 1) hd.appendChild(document.createTextNode(" ")); });
-          const lines = [];
-          [...hd.children].forEach((s) => { const q = at(s, $("#sA")); const L = lines.find((l) => Math.abs(l.y - q.y) < 20); if (L) { L.x1 = q.x + s.offsetWidth; } else lines.push({ y: q.y, h: s.offsetHeight, x0: q.x, x1: q.x + s.offsetWidth }); });
-          const sA = $("#sA"), W = 4000, H = sA.offsetHeight, ZH = 0.62;
-          const OV = key(560, 940, W / 2, H * 0.40, 0.28), OV1 = key(560, 940, W / 2, H * 0.38, 0.30), OV2 = key(560, 940, W / 2, H * 0.47, 0.30);
-          const kA = kwPos("kA"), PAR = key(AX, AY, kA.x, kA.y, ZM);
-          const LK = lines.map((l) => [key(AX, AY, l.x0 + 140, l.y + l.h / 2, ZH), key(AX, AY, Math.max(l.x0 + 140, l.x1 - 260), l.y + l.h / 2, ZH)]);
-          setCam("#shA", OV);
-          tl.set("#shA .foc", { x: OV.ax, y: OV.ay, scale: OV.z }, 0); tl.set("#shA .pan", { x: -OV.fx, y: -OV.fy }, 0);
-          tl.set("#dofA, #dofB", { opacity: 0.55 }, 0);
-          cam3("#shA", OV, OV1, 0, TM.hd, "none");                                          // the whole page, drifting in
-          cam3("#shA", OV1, LK[0][0], TM.hd, 0.65, "power2.inOut");                          // zoom into the first word of the headline
-          F("#dofA, #dofB", { opacity: 0.55 }, { opacity: 1, duration: 0.65, ease: "power2.inOut" }, TM.hd);
-          const rd0 = TM.hd + 0.65, rdT = TM.zo - rd0, sac = 0.3, tot = lines.reduce((a, l) => a + (l.x1 - l.x0), 0);
-          let t = rd0;
-          LK.forEach((k, i) => {                                                              // eyes read each line left -> right, then return
-            if (i) { cam3("#shA", LK[i - 1][1], k[0], t, sac, "power1.inOut"); t += sac; }
-            const d = (rdT - sac * (LK.length - 1)) * (lines[i].x1 - lines[i].x0) / tot;
-            cam3("#shA", k[0], k[1], t, d, "sine.inOut"); t += d;
-          });
-          cam3("#shA", LK[LK.length - 1][1], OV2, TM.zo, 0.55, "power2.inOut");           // pull back: the page
-          F("#dofA, #dofB", { opacity: 1 }, { opacity: 0.55, duration: 0.55, ease: "power2.inOut" }, TM.zo);
-          cam3("#shA", OV2, PAR, TM.par, 0.75, "power3.inOut");                            // into the paragraph with "pajak"
-          F("#dofA, #dofB", { opacity: 0.55 }, { opacity: 1, duration: 0.75, ease: "power2.inOut" }, TM.par);
-          cam3("#shA", PAR, key(AX, AY, kA.x, kA.y, ZM * 1.03), TM.par + 0.75, TM.e2 - TM.par - 0.75, "none");
-          HL3("#kA", TM.par + 0.85); show("#cA", TM.par + 0.75);
-
-          // B–D · excerpts: direct cuts, keyword pinned to the same spot, highlight + a slow push are the only motion
-          const EX = [["#shB", "kB", "#cB", TM.e2, TM.e3], ["#shC", "kC", "#cC", TM.e3, TM.e4], ["#shD", "kD", "#cD", TM.e4, TM.fl]];
-          EX.forEach(([sh, kid, chip, t0, t1], i) => {
-            const q = kwPos(kid), k0 = key(AX, AY, q.x, q.y, ZM), k1 = key(AX, AY, q.x, q.y, ZM * 1.035);
-            setCam(sh, k0); cam3(sh, k0, k1, t0, t1 - t0, "none");
-            show(sh, t0); hide(i ? EX[i - 1][0] : "#shA", t0 + 0.02);
-            show(chip, t0); hide(i ? EX[i - 1][2] : "#cA", t0 + 0.02);
-            HL3("#" + kid, t0 + 0.45);
-          });
-          // fast re-cuts through all four, every keyword already marked (the reference rhythm), then the flood
-          const R = [["#shA", "#cA"], ["#shB", "#cB"], ["#shC", "#cC"], ["#shD", "#cD"]];
-          let prev = ["#shD", "#cD"];
-          R.forEach((r, j) => { const tc = TM.fl + j * 0.12; show(r, tc); if (prev[0] !== r[0]) hide(prev, tc + 0.02); prev = r; });
           return 1;
         });
         tl.eventCallback("onUpdate", () => { if (window.ROBOT_APPLY) window.ROBOT_APPLY(tl.time()); });

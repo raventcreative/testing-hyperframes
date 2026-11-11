@@ -3,28 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>MasterPajak AI · Video 1 — Berita Pajak</title>
-    <!-- Client request: a browser / web-newspaper; 4 real 2026 tax headlines (recreated layout, no outlet logos, source + date on
-         screen), the camera zooms into each headline and a stabilo marker sweeps over the tax words (marker SFX); then "mulai dari
-         mana?" -> MasterPajak AI (robot host + chest hologram) -> AI assistant + expert team -> CTA. All beat times live in TM
-         below so the whole film can be re-timed to the VO word stamps in one place. -->
+    <title>MasterPajak AI · Video 8 — Asisten AI vs Tim Ahli</title>
+    <!-- Video 8 · "Asisten AI vs Tim Ahli". Two lanes in depth: a 3D versus set (AI panel | AHLI panel, robot host at the fork) ->
+         camera dives into the AI lane: a tilted 3D chat (generic UI, "Simulasi alur"), the robot plays the assistant and explains
+         "angka laba ini dari mana?" from the user's own data (data cards fly out of depth into the answer, "Ilustrasi data") ->
+         whip pan to the AHLI lane: a tangled case file flips over into the "Tim ahli Muamalah Pajak · sesuai layanan" card ->
+         MasterPajak AI band sweep: "kamu nggak sendirian" (asisten AI + tim ahli around your business, chest hologram) -> series
+         end card. All beat times live in TM below (one key per VO line + sub-beats) so the film can be re-timed to the real VO. -->
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/robot_mp.js"></script>
-    <script>window.TM = { hd: 0.4, zo: 4.0, par: 4.7, e2: 6.6, e3: 8.5, e4: 10.4, fl: 11.7, conf: 12.6, sol: 15.2, help: 23.0, end: 26.8, total: 34.5 };</script>
+    <script>window.TM = { q: 0.3, q2: 2.0, ai: 4.4, ask: 5.6, ans: 7.8, dat: 9.5, ex: 11.4, tim: 15.0, sl: 17.1, sol: 18.6, end: 24.0, cta: 27.5, bio: 29.2, total: 31.7 };</script>
     <script src="lipsync.js" onerror="window.LIPSYNC = null"></script>
     <style>
       @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
       @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-800-normal.woff2) format("woff2"); font-weight: 800; }
       @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
-      @font-face { font-family: PFR; src: url(assets/fonts/playfair-display-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
-      @font-face { font-family: PPN; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
-      @font-face { font-family: PPN; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
-      @font-face { font-family: INT; src: url(assets/fonts/inter-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
       @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-600-normal.woff2) format("woff2"); font-weight: 600; }
       @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
       @font-face { font-family: PF; src: url(assets/fonts/playfair-display-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; }
-      @font-face { font-family: PFD; src: url(assets/fonts/playfair-display-latin-900-normal.woff2) format("woff2"); font-weight: 900; }
-      @font-face { font-family: PFD; src: url(assets/fonts/playfair-display-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
       :root { --navy: #212C5F; --royal: #26367A; --deep: #131B40; --y: #FED111; --cloud: #F6F7FB; --n100: #EDEFF5; --n200: #E1E5EE;
               --lb: #DDE1EE; --muted: #5B6478; --text: #161D3A; --n300: #8E99C2; --stabilo: rgba(255, 228, 64, .92); }
       * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -42,90 +38,162 @@
         background-size: 108px 108px; background-position: -0.75px 12px;
         -webkit-mask-image: radial-gradient(ellipse 620px 900px at 50% 50%, #000 30%, transparent 100%); mask-image: radial-gradient(ellipse 620px 900px at 50% 50%, #000 30%, transparent 100%); }
       .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .1em .06em .18em; margin: -.1em -.06em -.18em; }
+      .m.wide { padding: .12em .2em .2em; margin: -.12em -.2em -.2em; }
       .c { display: inline-block; }
       .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; }
-      /* stabilo: grows left->right under the words, marker-ish soft ends, multiply so the ink stays crisp */
+      .in { display: inline-block; white-space: nowrap; }
       .hl { background-image: linear-gradient(100deg, rgba(255,228,64,0) 0%, var(--stabilo) 1.2%, var(--stabilo) 98.6%, rgba(255,228,64,0) 100%);
             background-repeat: no-repeat; background-position: 0 88%; background-size: 0% 72%; -webkit-box-decoration-break: clone; box-decoration-break: clone;
             padding: 0 .08em; margin: 0 -.08em; mix-blend-mode: multiply; }
+      /* 3D rig: .stage = lens (perspective), .cam = camera (translate + orbit), .piv = focus point (world shifted so it sits on the cam) */
+      .stage { position: absolute; inset: 0; perspective: 1200px; perspective-origin: 540px 880px; }
+      .cam { position: absolute; left: 540px; top: 960px; width: 0; height: 0; transform-style: preserve-3d; }
+      .piv { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
+      .ico svg { display: block; width: 100%; height: 100%; }
+      /* lane tag (flat, top of the safe zone) */
+      .lane { position: absolute; left: 0; width: 1080px; top: 228px; text-align: center; }
+      .lane .pill { display: inline-flex; align-items: center; gap: 16px; padding: 12px 28px 12px 12px; border-radius: 999px; background: #fff;
+                    box-shadow: 0 14px 34px rgba(3,6,24,.26); white-space: nowrap; }
+      .lane .no { width: 50px; height: 50px; border-radius: 50%; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font: 800 28px/1 Rubik; }
+      .lane .no.y { background: var(--y); color: var(--navy); }
+      .lane b { font: 800 32px/1 Rubik; letter-spacing: .05em; color: var(--navy); }
+      .lane i { display: block; width: 2px; height: 30px; background: var(--lb); }
+      .lane span.s { font: 600 28px/1 PS; color: var(--muted); }
 
-      /* S0 · news pages in 3D: each shot is a flat web page tilted in perspective, a macro camera and depth of field
-         (layouts recreated, no outlet logos, sources credited). The keyword always lands on the same screen spot. */
-      .shot3 { background: #d6dbe5; }
-      .stage { position: absolute; inset: 0; perspective: 1300px; perspective-origin: 540px 960px; }
-      .foc { position: absolute; left: 0; top: 0; width: 0; height: 0; }
-      .pan { position: absolute; left: 0; top: 0; }
-      .sheet { position: absolute; left: 0; top: 0; background: #fff; padding: 0 500px 360px; color: #1d2333; }
-      .sheet .hl { mix-blend-mode: normal; background-position: 0 84%; }
-      .sheet .nav { margin: 0 -500px; padding-left: 500px; height: 240px; border-bottom: 4px solid #E3E6EE; display: flex; align-items: center; gap: 84px; font: 600 54px/1 PS; color: #8a93a8; white-space: nowrap; overflow: hidden; }
-      .sheet .nav .on { color: #161D3A; }
-      .sheet .nav i { display: block; width: 84px; height: 9px; background: #5B6478; box-shadow: 0 -26px 0 #5B6478, 0 26px 0 #5B6478; margin-right: 10px; flex: none; }
-      .sheet .kick { margin-top: 150px; font: 700 54px/1 PS; letter-spacing: .14em; color: #b23a2a; }
-      .sheet .by { margin-top: 130px; font: 600 56px/1 PS; color: #8a93a8; }
-      .sheet .lead { position: relative; margin-top: 80px; height: 1400px; border-radius: 22px; overflow: hidden; }
-      .sheet .cap { margin-top: 34px; font: 400 46px/1.3 PS; color: #9aa3b8; }
-      .sheet p { margin-top: 96px; }
-      #sA .hd { margin-top: 46px; font: 900 170px/1.12 PFD; color: #161D3A; }
-      #sA .meta { margin-top: 70px; display: flex; align-items: center; gap: 30px; font: 600 58px/1 PS; color: #5B6478; }
-      #sA .meta i { width: 96px; height: 96px; border-radius: 50%; background: #E1E5EE; }
-      #sA .lead { background: linear-gradient(135deg, #2b3b86, #212C5F 60%, #172051); }
-      #sA .lead::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 40px, transparent 40px 80px); }
-      #sA .lead svg { position: absolute; left: 50%; top: 50%; width: 420px; height: 420px; margin: -210px 0 0 -210px; }
-      #sA p { font: 400 84px/1.6 PS; color: #26304f; }
-      #sB { padding: 0 600px 360px; } #sB .nav { margin: 0 -600px; padding-left: 600px; }
-      #sB .lead, #sC .lead, #sD .lead { height: 1000px; }
-      #sB .lead { background: radial-gradient(ellipse 900px 600px at 30% 40%, rgba(255,240,215,.55), transparent 70%), linear-gradient(160deg, #b9a58a, #7d6c58 70%, #5d4f40); }
-      #sB p { font: 400 88px/1.6 PFR; color: #1f2430; }
-      #sC .lead { background: radial-gradient(ellipse 800px 560px at 70% 35%, rgba(210,245,240,.45), transparent 70%), linear-gradient(150deg, #3c7f83, #24575a 65%, #173b3d); }
-      #sC .nav, #sD .nav { font-family: PPN; font-weight: 400; }
-      #sC .kick, #sD .kick { font-family: PPN; color: #1f5fbf; }
-      #sC p { font: 400 80px/1.68 PPN; color: #222833; }
-      #sD .lead { background: radial-gradient(ellipse 900px 600px at 35% 30%, rgba(220,228,250,.45), transparent 70%), linear-gradient(155deg, #66789c, #3a4766 65%, #262f47); }
-      #sD p { font: 400 84px/1.62 INT; color: #1e2431; }
-      .dof { position: absolute; inset: 0; pointer-events: none; }
-      #dofA { backdrop-filter: blur(3px); -webkit-mask-image: radial-gradient(ellipse 640px 150px at 560px 980px, transparent 42%, #000 100%); mask-image: radial-gradient(ellipse 640px 150px at 560px 980px, transparent 42%, #000 100%); }
-      #dofB { backdrop-filter: blur(10px);
-              -webkit-mask-image: linear-gradient(180deg, #000 0px, #000 430px, transparent 760px, transparent 1200px, #000 1560px), linear-gradient(90deg, transparent 0px, transparent 830px, #000 1080px);
-              mask-image: linear-gradient(180deg, #000 0px, #000 430px, transparent 760px, transparent 1200px, #000 1560px), linear-gradient(90deg, transparent 0px, transparent 830px, #000 1080px); }
-      #vig3 { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 1300px at 42% 52%, rgba(0,0,0,0) 55%, rgba(20,26,50,.18) 100%); }
-      .srcchip { position: absolute; left: 60px; top: 1648px; padding: 18px 26px; border-radius: 14px; background: rgba(255,255,255,.94); box-shadow: 0 12px 34px rgba(19,27,64,.2); font: 700 26px/1 PS; letter-spacing: .06em; color: #8E99C2; white-space: nowrap; }
-      .srcchip b { color: #161D3A; }
-      #flood { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; background: #FFE440; transform-origin: 0 50%; }
-      /* S2 · confusion: clippings */
-      .pchip { position: absolute; padding: 10px 26px 14px; font: 600 64px/1 PS; color: #161D3A; background: #FFE440; border-radius: 6px; transform: rotate(-3deg); }
-      #conf .clip { position: absolute; width: 470px; padding: 26px 28px 30px; background: #fbf8ef; font: 900 38px/1.15 PFD; color: var(--text);
-                    clip-path: polygon(0 3%, 6% 0, 13% 2.5%, 21% 0.5%, 30% 2%, 38% 0, 47% 2.4%, 56% .4%, 64% 2.2%, 73% 0, 82% 2%, 91% .3%, 100% 2.6%, 99% 30%, 100% 62%, 98.6% 100%, 90% 97.6%, 81% 100%, 72% 97.8%, 63% 99.6%, 54% 97.6%, 45% 100%, 36% 98%, 27% 99.8%, 18% 97.5%, 9% 99.5%, 0 97.4%, 1.2% 66%, 0 33%);
-                    box-shadow: 0 20px 40px rgba(0,0,0,.35); }
-      #conf .clip small { display: block; margin-top: 14px; font: 700 17px/1 PS; letter-spacing: .06em; color: var(--muted); }
-      #q1 { top: 520px; font: 800 120px/1 Rubik; color: #fff; letter-spacing: -3px; }
-      #q0 { top: 430px; font: italic 400 64px/1 PF; color: var(--lb); }
-      .qm { position: absolute; font: 800 110px/1 Rubik; color: var(--y); opacity: 0; }
+      /* S0 · hook: versus set in depth (AI panel | AHLI panel hinged like an open book, VS medallion, floor grid) */
+      #hkGlow { position: absolute; inset: 0; background: radial-gradient(ellipse 820px 700px at 50% 52%, rgba(255,255,255,.96) 0%, rgba(255,255,255,0) 72%); }
+      #hkStage { perspective-origin: 540px 820px; }
+      #hkFloor { position: absolute; left: -1300px; top: -1530px; width: 2600px; height: 1900px;
+        background-image: linear-gradient(90deg, rgba(33,44,95,.16) 0 3px, transparent 3px), linear-gradient(0deg, rgba(33,44,95,.16) 0 3px, transparent 3px);
+        background-size: 130px 130px; background-position: 15px 0;
+        -webkit-mask-image: radial-gradient(ellipse 46% 52% at 50% 74%, #000 25%, transparent 80%); mask-image: radial-gradient(ellipse 46% 52% at 50% 74%, #000 25%, transparent 80%); }
+      #hkFloor i { position: absolute; left: 780px; top: 1290px; width: 1040px; height: 380px; border-radius: 50%; background: radial-gradient(ellipse at 50% 50%, rgba(19,27,64,.42), rgba(19,27,64,0) 70%); }
+      .pnl { position: absolute; top: -330px; width: 440px; height: 700px; border-radius: 40px; overflow: hidden; display: flex; flex-direction: column; padding: 40px 40px 44px; }
+      #pA { left: -447px; color: #fff; background: linear-gradient(165deg, #3a4ea6 0%, #26367A 38%, #18214f 100%); box-shadow: 0 50px 90px rgba(19,27,64,.38), inset 0 0 0 2px rgba(255,255,255,.12); }
+      #pB { left: 7px; align-items: flex-end; text-align: right; color: var(--navy); background: linear-gradient(165deg, #FFEB6B 0%, #FED111 50%, #f0c000 100%); box-shadow: 0 50px 90px rgba(19,27,64,.30), inset 0 0 0 2px rgba(255,255,255,.35); }
+      .pnl .k { font: 700 26px/1 PS; letter-spacing: .18em; opacity: .78; }
+      .pnl .ib { margin-top: 30px; height: 120px; display: flex; align-items: center; }
+      #pA .ib .bub { position: relative; width: 150px; height: 112px; border-radius: 30px; background: #fff; display: flex; align-items: center; justify-content: center; }
+      #pA .ib .bub::after { content: ""; position: absolute; left: 24px; bottom: -16px; border: 12px solid transparent; border-top: 16px solid #fff; border-left-width: 6px; }
+      #pA .ib img { width: 72px; }
+      .avs { display: flex; } .avs i { display: flex; width: 96px; height: 96px; margin-right: -22px; border-radius: 50%; background: var(--navy); border: 5px solid #FED111; align-items: center; justify-content: center; }
+      .avs i svg { width: 52px; height: 52px; }
+      #pB .avs i { margin-right: 0; margin-left: -22px; } #pB .avs i:first-child { margin-left: 0; }
+      .pnl .sp { flex: 1; }
+      .pnl .big { font: 800 250px/.8 Rubik; letter-spacing: -8px; } #pA .big { margin-left: -8px; } #pB .big { margin-right: -4px; }
+      .pnl .cap { margin-top: 26px; font: 600 36px/1 PS; }
+      #pA .cap { color: var(--lb); } #pB .cap { color: rgba(33,44,95,.82); } #pB .cap small { display: block; margin-top: 10px; font: 700 26px/1 PS; color: var(--navy); }
+      #pA::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 38%); pointer-events: none; }
+      #pB::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255,255,255,.45) 0%, rgba(255,255,255,0) 40%); pointer-events: none; }
+      #vs { position: absolute; left: -84px; top: -150px; width: 168px; height: 168px; border-radius: 50%; background: #fff; border: 9px solid var(--navy);
+            display: flex; align-items: center; justify-content: center; font: 800 66px/1 Rubik; letter-spacing: -2px; color: var(--navy); box-shadow: 0 30px 60px rgba(19,27,64,.4); }
+      .qb { position: absolute; width: 132px; height: 104px; border-radius: 30px; background: #fff; box-shadow: 0 18px 40px rgba(19,27,64,.18);
+            display: flex; align-items: center; justify-content: center; font: 800 66px/1 Rubik; color: var(--navy); }
+      .qb::after { content: ""; position: absolute; left: 26px; bottom: -14px; border: 10px solid transparent; border-top: 14px solid #fff; border-left-width: 5px; }
+      .qb.n { background: var(--navy); color: #fff; } .qb.n::after { border-top-color: var(--navy); }
+      .qb.y { background: var(--y); } .qb.y::after { border-top-color: var(--y); }
+      .hk { font: 800 88px/1.08 Rubik; letter-spacing: -2px; color: var(--text); }
+      #hkT1 { top: 300px; } #hkT2 { top: 408px; }
+      .aiw { display: inline-block; color: #fff; background: var(--navy); border-radius: .2em; padding: 0 .16em; line-height: 1.2; }
 
-      /* S3 · solution */
-      #sol .whis { top: 300px; font: italic 400 72px/1 PF; color: var(--lb); }
-      .feat { position: absolute; left: 110px; width: 860px; padding: 30px 34px; border-radius: 28px; background: #fff; box-shadow: 0 24px 50px rgba(3,6,24,.45);
-              display: flex; align-items: center; gap: 26px; }
-      .feat .ic { flex: none; width: 92px; height: 92px; border-radius: 24px; background: var(--n100); display: flex; align-items: center; justify-content: center; }
-      .feat .ic svg { width: 56px; height: 56px; }
-      .feat .tx { font: 700 40px/1.22 PS; color: var(--navy); }
-      .feat .tx small { display: block; font: 600 24px/1.2 PS; color: var(--muted); margin-bottom: 8px; letter-spacing: .04em; }
-      #f1 { top: 430px; } #f2 { top: 700px; }
-      #f1 .flow { display: flex; align-items: center; gap: 14px; }
-      #f1 .flow svg { width: 40px; height: 40px; }
+      /* S1 · AI lane: tilted 3D chat (generic simulation), data cards in depth */
+      #aiStage { perspective: 1400px; perspective-origin: 560px 900px; }
+      #chat { position: absolute; left: -290px; top: -520px; width: 700px; height: 840px; border-radius: 46px; background: #fff;
+              box-shadow: 0 60px 110px rgba(3,6,24,.55), inset 0 0 0 2px rgba(33,44,95,.06); transform-style: preserve-3d; }
+      #chat .hdr { position: absolute; left: 0; top: 0; width: 700px; height: 128px; display: flex; align-items: center; gap: 20px; padding: 0 34px; border-bottom: 2px solid var(--n100); }
+      #chat .av { width: 80px; height: 80px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; flex: none; }
+      #chat .av img { width: 46px; }
+      #chat .ttl { font: 800 40px/1 Rubik; color: var(--navy); }
+      #chat .ttl small { display: block; margin-top: 8px; font: 600 24px/1 PS; color: var(--muted); }
+      #chat .sim { margin-left: auto; padding: 10px 16px; border-radius: 12px; border: 2px solid var(--n200); font: 700 19px/1 PS; letter-spacing: .08em; color: var(--n300); white-space: nowrap; }
+      .bub2 { position: absolute; }
+      #uq { right: 34px; top: 162px; padding: 24px 30px; border-radius: 34px 34px 10px 34px; background: var(--navy); color: #fff; font: 700 36px/1.2 PS; white-space: nowrap; }
+      #typ { left: 34px; top: 296px; width: 130px; height: 74px; border-radius: 30px 30px 30px 10px; background: var(--n100); display: flex; align-items: center; justify-content: center; gap: 12px; }
+      #typ i { width: 16px; height: 16px; border-radius: 50%; background: var(--n300); }
+      #ans { left: 34px; top: 296px; width: 560px; padding: 26px 30px 22px; border-radius: 34px 34px 34px 10px; background: var(--n100); }
+      #ans .lead { font: 600 30px/1.25 PS; color: var(--text); }
+      #ans .row { margin-top: 18px; display: flex; justify-content: space-between; align-items: baseline; font: 600 30px/1 PS; color: var(--muted); }
+      #ans .row b { font: 700 34px/1 Rubik; color: var(--navy); }
+      #ans .rule { margin-top: 18px; height: 2px; background: var(--n200); }
+      #ans .tot { margin-top: 16px; color: var(--text); font-weight: 700; }
+      #ans .tot b { font: 800 44px/1 Rubik; color: var(--text); }
+      .roll { display: inline-block; height: 1em; overflow: hidden; vertical-align: top; line-height: 1; }
+      .roll .col { display: block; } .roll .col span { display: block; height: 1em; }
+      #ans .src { margin-top: 20px; display: flex; gap: 10px; flex-wrap: nowrap; }
+      .sc { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 14px; background: #fff; border: 2px solid var(--n200); font: 700 22px/1 PS; color: var(--navy); white-space: nowrap; }
+      .sc .fl { position: absolute; inset: -2px; border-radius: 14px; background: var(--y); opacity: 0; }
+      .sc span { position: relative; }
+      #ans .ill { margin-top: 16px; font: 700 18px/1 PS; letter-spacing: .12em; color: var(--n300); text-align: right; }
+      #inp { position: absolute; left: 34px; right: 34px; bottom: 32px; height: 86px; border-radius: 43px; background: var(--n100); display: flex; align-items: center; padding: 0 12px 0 30px; }
+      #inp span { font: 400 26px/1 PS; color: var(--n300); white-space: nowrap; }
+      #inp i { margin-left: auto; width: 62px; height: 62px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; }
+      #inp i svg { width: 30px; height: 30px; }
+      .dc { position: absolute; width: 340px; height: 118px; border-radius: 24px; background: #fff; box-shadow: 0 24px 50px rgba(3,6,24,.4); display: flex; align-items: center; gap: 18px; padding: 0 22px; }
+      .dc .ic { flex: none; width: 70px; height: 70px; border-radius: 20px; background: var(--n100); display: flex; align-items: center; justify-content: center; }
+      .dc .ic svg { width: 40px; height: 40px; }
+      .dc .t { font: 700 19px/1.2 PS; letter-spacing: .08em; color: var(--muted); white-space: nowrap; }
+      .dc .ln { margin-top: 14px; height: 12px; width: 150px; border-radius: 6px; background: var(--n200); }
+      .dc .ln + .ln { margin-top: 10px; width: 104px; }
+      .bok { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255,228,64,.55), rgba(255,228,64,0) 70%); }
+      .bok.w { background: radial-gradient(circle, rgba(221,225,238,.45), rgba(221,225,238,0) 70%); }
 
-      /* S4 · help */
-      #help .whis { top: 300px; font: italic 400 72px/1 PF; color: var(--lb); }
-      .hcard { position: absolute; left: 90px; width: 600px; padding: 30px 34px; border-radius: 30px; background: #fff; box-shadow: 0 24px 50px rgba(3,6,24,.45); }
-      .hcard .t { display: flex; align-items: center; gap: 18px; font: 800 44px/1 Rubik; color: var(--navy); }
-      .hcard .t .av { width: 76px; height: 76px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; }
-      .hcard .t .av img { width: 44px; } .hcard .t .av svg { width: 44px; height: 44px; }
-      .hcard .s { margin-top: 14px; font: 600 28px/1.3 PS; color: var(--muted); }
-      #h1c { top: 430px; } #h2c { top: 700px; }
-      #h2c .avs { display: flex; margin-top: 18px; } #h2c .avs i { display: flex; width: 66px; height: 66px; margin-right: -14px; border-radius: 50%; background: var(--n100); border: 4px solid #fff; align-items: center; justify-content: center; }
-      #h2c .avs svg { width: 34px; height: 34px; }
-      #cap5 { position: absolute; left: 90px; top: 1010px; font: 600 22px/1 PS; letter-spacing: .06em; color: var(--n300); }
+      /* S2 · AHLI lane: case file (front) flips into the expert card (back) */
+      #cNavy { clip-path: circle(0% at 50% 52%); }
+      #cStage { perspective: 1300px; perspective-origin: 540px 900px; }
+      #flip { position: absolute; left: -300px; top: -350px; width: 600px; height: 700px; transform-style: preserve-3d; }
+      .face { position: absolute; inset: 0; border-radius: 40px; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
+      #cFront { background: #fbf6e6; box-shadow: 0 50px 90px rgba(19,27,64,.30), inset 0 0 0 2px rgba(120,100,60,.12); }
+      #cFront .tab { position: absolute; left: 40px; top: 34px; padding: 12px 20px; border-radius: 12px; background: #fff; box-shadow: 0 6px 14px rgba(19,27,64,.12); font: 700 24px/1 PS; letter-spacing: .16em; color: var(--muted); }
+      .md { position: absolute; width: 132px; height: 168px; border-radius: 12px; background: #fff; box-shadow: 0 10px 24px rgba(19,27,64,.16); padding: 22px 16px; }
+      .md i { display: block; height: 10px; border-radius: 5px; background: var(--n200); margin-bottom: 12px; }
+      .md i:nth-child(2) { width: 70%; } .md i:nth-child(4) { width: 55%; }
+      .md b { position: absolute; left: 50%; top: -12px; width: 26px; height: 26px; margin-left: -13px; border-radius: 50%; background: var(--y); box-shadow: 0 3px 6px rgba(0,0,0,.25); }
+      #knot { position: absolute; left: 50px; top: 120px; width: 500px; height: 440px; overflow: visible; }
+      #sticky { position: absolute; right: 44px; bottom: 44px; width: 150px; height: 150px; background: var(--y); box-shadow: 0 12px 24px rgba(19,27,64,.2); display: flex; align-items: center; justify-content: center; font: 800 96px/1 Rubik; color: var(--navy); }
+      #cBack { background: #fff; transform: rotateY(180deg); box-shadow: 0 60px 110px rgba(3,6,24,.55); display: flex; flex-direction: column; align-items: center; padding: 46px 40px 40px; }
+      #cBack .avs { margin-top: 2px; } #cBack .avs i { width: 118px; height: 118px; border: 6px solid #fff; margin: 0 -14px; } #cBack .avs i.mid { width: 140px; height: 140px; border-color: var(--y); position: relative; z-index: 2; }
+      #cBack .avs i svg { width: 60px; height: 60px; } #cBack .avs i.mid svg { width: 72px; height: 72px; }
+      #cBack .avs { align-items: center; }
+      #cBack .t1 { margin-top: 26px; font: 800 84px/1 Rubik; letter-spacing: -2px; color: var(--navy); white-space: nowrap; }
+      #cBack .t2 { margin-top: 12px; font: 700 50px/1 Rubik; color: var(--royal); white-space: nowrap; }
+      #cBack .rule { margin-top: 30px; width: 100%; height: 2px; background: var(--n100); }
+      #cBack ul { margin-top: 26px; list-style: none; align-self: stretch; padding-left: 36px; }
+      #cBack li { display: flex; align-items: center; gap: 18px; font: 600 36px/1 PS; color: var(--text); white-space: nowrap; margin-bottom: 18px; }
+      #cBack li i { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; }
+      #cBack li i svg { width: 26px; height: 26px; }
+      #cBack .sl { margin-top: auto; font: 800 44px/1 Rubik; color: var(--navy); white-space: nowrap; }
+      .sheetf { position: absolute; width: 230px; height: 300px; border-radius: 16px; background: #fff; box-shadow: 0 24px 50px rgba(19,27,64,.18); padding: 34px 24px; }
+      .sheetf i { display: block; height: 12px; border-radius: 6px; background: var(--n200); margin-bottom: 16px; }
+      .sheetf i:nth-child(3n) { width: 62%; }
+      #cK0 { top: 320px; font: italic 400 64px/1 PF; color: var(--muted); }
+      #cK1 { top: 398px; font: 800 112px/1.04 Rubik; letter-spacing: -3px; color: var(--text); }
+      #cK2 { top: 536px; font: 700 46px/1.1 PS; color: var(--navy); }
+      .spk { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #FFE440; box-shadow: 0 0 18px 6px rgba(255,228,64,.45); }
 
-      /* S5 · end */
+      /* S3 · brand: kamu nggak sendirian */
+      #sStage { perspective: 1300px; perspective-origin: 540px 860px; }
+      .wing { position: absolute; top: -380px; width: 410px; height: 400px; border-radius: 38px; padding: 34px 34px 30px; display: flex; flex-direction: column; overflow: hidden; }
+      #wA { left: -430px; color: #fff; background: linear-gradient(160deg, #3a4ea6 0%, #26367A 45%, #1b2556 100%); box-shadow: 0 40px 80px rgba(3,6,24,.5), inset 0 0 0 2px rgba(255,255,255,.16); }
+      #wB { left: 20px; color: var(--navy); background: #fff; box-shadow: 0 40px 80px rgba(3,6,24,.5); }
+      .wing .ho { width: 96px; height: 96px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
+      #wA .ho { background: #fff; } #wA .ho img { width: 58px; }
+      #wB .avs i { width: 86px; height: 86px; border: 5px solid #fff; margin-right: -20px; } #wB .avs i svg { width: 46px; height: 46px; }
+      .wing .t1 { margin-top: 30px; font: 800 54px/1 Rubik; letter-spacing: -1px; white-space: nowrap; }
+      .wing .t2 { margin-top: 14px; font: 600 30px/1.15 PS; white-space: nowrap; }
+      #wA .t2 { color: var(--lb); } #wB .t2 { font: 700 34px/1 Rubik; color: var(--royal); }
+      .wing .pl { margin-top: auto; align-self: flex-start; padding: 12px 20px; border-radius: 999px; font: 700 24px/1 PS; white-space: nowrap; }
+      #wA .pl { background: rgba(255,255,255,.12); color: #fff; } #wB .pl { background: var(--y); color: var(--navy); }
+      #you { position: absolute; left: -100px; top: 70px; width: 200px; height: 200px; border-radius: 50%; background: #fff; border: 10px solid var(--y); display: flex; align-items: center; justify-content: center; box-shadow: 0 30px 60px rgba(3,6,24,.5); }
+      #you svg { width: 104px; height: 104px; }
+      #youL { position: absolute; left: -150px; top: 290px; width: 300px; text-align: center; font: 800 42px/1 Rubik; color: #fff; white-space: nowrap; }
+      #links { position: absolute; left: -400px; top: -60px; width: 800px; height: 260px; overflow: visible; }
+      .dot { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #FFE440; box-shadow: 0 0 16px 6px rgba(255,228,64,.5); }
+      #sW { top: 268px; font: italic 400 62px/1 PF; color: var(--lb); }
+      #sT { top: 340px; font: 800 96px/1.05 Rubik; letter-spacing: -2.5px; color: #fff; }
+      #sT .yy { color: var(--y); }
+      #sS { top: 462px; font: 600 40px/1 PS; color: var(--lb); }
+
+      /* S4 · end (series template) */
       #end .content { position: absolute; inset: 0; transform-origin: 540px 960px; }
       #t7a, #t7b { font: 700 78px/1.05 Rubik; letter-spacing: -1.5px; color: #fff; }
       #t7a { top: 400px; } #t7b { top: 492px; } #t7b .yy { color: var(--y); }
@@ -138,8 +206,8 @@
       #bands .bd { position: absolute; left: 0; width: 1080px; height: 322px; overflow: hidden; }
       #mq { position: absolute; left: 0; top: 104px; white-space: nowrap; font: 800 104px/1 Rubik; letter-spacing: -2px; color: #fff; }
       #mq b { color: var(--y); font-weight: 800; }
-      #slide { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; background: var(--deep); }
-      #slideEdge { position: absolute; left: -16px; top: 0; width: 16px; height: 1920px; background: var(--y); }
+      #whip { position: absolute; inset: 0; pointer-events: none; }
+      #whip i { position: absolute; left: 0; width: 1400px; border-radius: 99px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.95) 40%, rgba(255,228,64,.9) 60%, rgba(255,255,255,0)); filter: blur(3px); }
       #beamwrap { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
       #disc { position: absolute; left: 30px; top: 1560px; width: 280px; height: 280px; border-radius: 50%; background: var(--royal); }
       #beam { position: absolute; left: 170px; top: 1550px; width: 2800px; height: 300px; background: var(--royal); transform-origin: 0 50%; }
@@ -149,97 +217,144 @@
     </style>
   </head>
   <body>
-    <div id="main-root" data-composition-id="main" data-start="0" data-duration="34.5" data-width="1080" data-height="1920">
-      <!-- S0 · news pages in 3D. A: the opening article (headline read by the camera), B–D: excerpts (direct cuts) -->
-      <div id="shA" class="full scene shot3" style="visibility:visible;opacity:1"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sA">
-        <div class="nav"><i></i><span>Nasional</span><span>Internasional</span><span class="on">Ekonomi</span><span>Olahraga</span><span>Teknologi</span><span>Hiburan</span><span>Gaya Hidup</span></div>
-        <div class="kick">EKONOMI · PAJAK</div>
-        <div class="hd">DJP Pungut Pajak Seller Marketplace Mulai 1 Oktober</div>
-        <div class="meta"><i></i>CNN Indonesia · 17 September 2026</div>
-        <div class="lead"><svg viewBox="0 0 24 24" fill="none" stroke="#FED111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></div>
-        <div class="cap">Ilustrasi · tampilan halaman dibuat ulang</div>
-        <p>Penerapan <span class="hl kw" id="kA">pajak</span> seller marketplace ini awalnya diterapkan pada 1 Agustus 2026, tetapi kemudian ditunda.</p>
-        <p>Direktur Jenderal Pajak Bimo Wijayanto mengatakan seluruh pihak, termasuk keempat platform e-commerce sudah siap mengimplementasikan kebijakan ini.</p>
-        <p>"Mereka kan sudah siap sebenarnya, tapi ada penundaan sampai 1 Oktober. Nanti Insyaallah kita akan segera aktivasi aturannya dan implementasinya mereka sudah siap. Kita juga sudah siap," ujar Bimo di Kantor Pusat Direktorat Jenderal Pajak Kementerian Keuangan, Rabu (16/9) dikutip Detikfinance.</p>
-        <p>DJP bersama pihak platform digital terkait telah melakukan uji coba sistem (sandbox) serta stabilisasi sejak tahun lalu, sehingga dapat dipastikan pelaksanaan penarikan PPh seller online melalui empat platform e-commerce pada 1 Oktober dapat berjalan lancar tanpa hambatan.</p>
-      </div></div></div></div></div>
-      <div id="shB" class="full scene shot3"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sB">
-        <div class="nav"><span>News</span><span>Nasional</span><span>Regional</span><span class="on">Money</span><span>Tren</span><span>Global</span><span>Edukasi</span></div>
-        <div class="by">KOMPAS.com · 27 Maret 2026</div>
-        <div class="lead"></div><div class="cap">Ilustrasi</div>
-        <p>KOMPAS.com – Cara lapor SPT tahunan pribadi kini semakin praktis karena dapat dilakukan secara online melalui sistem Coretax DJP. Wajib <span class="hl kw" id="kB">pajak</span> tidak perlu lagi datang ke kantor pajak, cukup menggunakan perangkat yang terhubung internet.</p>
-        <p>Kabar baiknya, pemerintah resmi memperpanjang batas waktu pelaporan SPT Tahunan 2025 untuk wajib pajak orang pribadi. Jika sebelumnya jatuh pada 31 Maret 2026, kini diperpanjang hingga 30 April 2026.</p>
-        <p>Dengan tambahan waktu ini, masyarakat diimbau segera memanfaatkan kesempatan untuk lapor SPT Tahunan tanpa terburu-buru.</p>
-      </div></div></div></div></div>
-      <div id="shC" class="full scene shot3"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sC">
-        <div class="nav"><span>Berita</span><span class="on">Makro</span><span>Finansial</span><span>Korporasi</span><span>Energi</span><span>Digital</span></div>
-        <div class="kick">MAKRO</div><div class="by">Katadata.co.id · 3 Juni 2026, 08:30</div>
-        <div class="lead"></div><div class="cap">Ilustrasi</div>
-        <p>Pemerintah menerbitkan Peraturan Pemerintah (PP) Nomor 20 Tahun 2026 guna merevisi ketentuan dalam PP Nomor 55 Tahun 2022 tentang Penyesuaian Pengaturan di Bidang Pajak Penghasilan.</p>
-        <p>Dalam aturan ini, pemerintah merevisi ketentuan <span class="hl kw" id="kC">Pajak</span> Penghasilan (PPh) Final sebesar 0,5% bagi pelaku usaha mikro, kecil, dan menengah (UMKM). Aturan ini merupakan perubahan atas PP 55/2022 yang secara khusus mengatur kembali penerima fasilitas tarif PPh Final 0,5% bagi wajib pajak dengan peredaran bruto tertentu.</p>
-        <p>Fasilitas serupa juga diberikan kepada koperasi yang telah terdaftar sebelum PP ini berlaku. Koperasi dapat tetap menggunakan skema PPh Final hingga Tahun Pajak 2029 sepanjang memenuhi persyaratan yang ditetapkan.</p>
-      </div></div></div></div></div>
-      <div id="shD" class="full scene shot3"><div class="stage"><div class="foc"><div class="pan"><div class="sheet" id="sD">
-        <div class="nav"><span>Berita</span><span>Makro</span><span>Finansial</span><span>Korporasi</span><span class="on">Digital</span><span>Energi</span></div>
-        <div class="kick">E-COMMERCE</div><div class="by">Katadata.co.id · 31 Juli 2026, 13:25</div>
-        <div class="lead"></div><div class="cap">Ilustrasi</div>
-        <p>Salah satu seller mengeluhkan pajak marketplace 0,5% dipotong dari total omzet bruto atau gross merchandise value (GMV), mengingat biaya yang dikenakan platform dinilai cukup banyak. Direktorat Jenderal Pajak Kementerian Keuangan atau DJP Kemenkeu pun merespons hal ini.</p>
-        <p>Direktur Penyuluhan, Pelayanan, dan Hubungan Masyarakat DJP Kemenkeu Inge Diana Rismawanti menegaskan aturan <span class="hl kw" id="kD">pajak</span> marketplace hanya mengubah mekanisme pembayaran, bukan menambah beban baru bagi pelaku usaha.</p>
-        <p>Dia juga menyampaikan, kewajiban membayar pajak atas penghasilan usaha sebenarnya sudah lama berlaku, baik bagi pedagang offline maupun online.</p>
-        <p>Oleh karena itu, menurut dia tidak seharusnya muncul anggapan bahwa kebijakan baru itu akan memicu kenaikan harga barang.</p>
-      </div></div></div></div></div>
-      <div id="dofA" class="dof"></div><div id="dofB" class="dof"></div><div id="vig3"></div>
-      <div id="cA" class="srcchip" style="visibility:hidden"><b>CNN INDONESIA</b> · 17 SEPTEMBER 2026</div>
-      <div id="cB" class="srcchip" style="visibility:hidden"><b>KOMPAS.COM</b> · 27 MARET 2026</div>
-      <div id="cC" class="srcchip" style="visibility:hidden"><b>KATADATA.CO.ID</b> · 3 JUNI 2026</div>
-      <div id="cD" class="srcchip" style="visibility:hidden"><b>KATADATA.CO.ID</b> · 31 JULI 2026</div>
-      <div id="flood" style="visibility:hidden"></div>
-
-      <!-- S2 · confusion -->
-      <div id="conf" class="full scene navybg">
-        <div class="ngrid"></div>
-        <div class="pchip" id="pc1" style="left: 90px; top: 760px">pajak</div>
-        <div class="pchip" id="pc2" style="left: 640px; top: 820px">Pajak</div>
-        <div class="pchip" id="pc3" style="left: 150px; top: 1010px">pajak</div>
-        <div class="pchip" id="pc4" style="left: 600px; top: 1080px">pajak</div>
-        <div id="q0" class="ctr">terus…</div>
-        <div id="q1" class="ctr">mulai dari mana?</div>
-        <div class="qm" id="qm1" style="left: 900px; top: 610px">?</div>
-        <div class="qm" id="qm2" style="left: 40px; top: 900px">?</div>
-        <div class="qm" id="qm3" style="left: 960px; top: 1050px">?</div>
+    <div id="main-root" data-composition-id="main" data-start="0" data-duration="31.7" data-width="1080" data-height="1920">
+      <!-- S0 · hook: versus set in depth -->
+      <div id="hook" class="full scene paper" style="visibility:visible;opacity:1">
+        <div id="hkGlow"></div>
+        <div class="stage" id="hkStage"><div class="cam" id="hkCam"><div class="piv" id="hkPiv">
+          <div id="hkFloor"><i></i></div>
+          <div class="qb" id="qb1">?</div>
+          <div class="qb y" id="qb2">?</div>
+          <div class="pnl" id="pA">
+            <div class="k">TANYA</div>
+            <div class="ib"><div class="bub"><img src="assets/mp/mp_m.png" alt="" /></div></div>
+            <div class="sp"></div>
+            <div class="big"><span class="in" id="pAbig">AI</span></div>
+            <div class="cap">asisten AI</div>
+          </div>
+          <div class="pnl" id="pB">
+            <div class="k">TANYA</div>
+            <div class="ib"><div class="avs"><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i></div></div>
+            <div class="sp"></div>
+            <div class="big"><span class="in" id="pBbig">AHLI</span></div>
+            <div class="cap">tim ahli<small>sesuai layanan</small></div>
+          </div>
+          <div id="vs">VS</div>
+          <div class="qb n" id="qb3">?</div>
+          <div class="qb" id="qb4">?</div>
+        </div></div></div>
+        <div id="hkVeil" class="full navybg" style="opacity:0"></div>
+        <div id="hkT1" class="ctr hk"><span class="in">Kapan cukup tanya <span class="aiw">AI</span>…</span></div>
+        <div id="hkT2" class="ctr hk"><span class="in">kapan perlu tanya <span class="hl" id="hkHl">ahli</span>?</span></div>
       </div>
 
-      <!-- transition bands (conf -> sol) -->
+      <!-- S1 · AI lane: the robot is the assistant; generic chat simulation -->
+      <div id="ai" class="full scene navybg">
+        <div class="ngrid"></div>
+        <div class="bok w" style="left: 60px; top: 1500px; width: 140px; height: 140px"></div>
+        <div class="stage" id="aiStage"><div class="cam" id="aiCam"><div class="piv" id="aiPiv">
+          <div id="chat">
+            <div class="dc" id="d1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></div><div><div class="t">CATATAN JUALAN</div><div class="ln"></div><div class="ln"></div></div></div>
+            <div class="dc" id="d2"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></div><div><div class="t">FOTO NOTA</div><div class="ln"></div><div class="ln"></div></div></div>
+            <div class="dc" id="d3"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></svg></div><div><div class="t">PENCAIRAN</div><div class="ln"></div><div class="ln"></div></div></div>
+            <div class="hdr">
+              <div class="av"><img src="assets/mp/mp_m_reverse.png" alt="" /></div>
+              <div class="ttl">Asisten AI<small>MasterPajak AI</small></div>
+              <div class="sim">SIMULASI ALUR</div>
+            </div>
+            <div class="bub2" id="uq">Angka laba ini dari mana?</div>
+            <div class="bub2" id="typ"><i></i><i></i><i></i></div>
+            <div class="bub2" id="ans">
+              <div class="lead">Dari data usahamu bulan ini:</div>
+              <div class="row" id="r1"><span>Penjualan</span><b>Rp42.500.000</b></div>
+              <div class="row" id="r2"><span>Biaya</span><b>−Rp27.100.000</b></div>
+              <div class="rule" id="r3"></div>
+              <div class="row tot" id="r4"><span>Laba</span><b><span class="hl" id="nHl"><span id="labaV">Rp15.400.000</span></span></b></div>
+              <div class="src" id="r5"><span class="sc" id="c1"><i class="fl"></i><span>312 pesanan</span></span><span class="sc" id="c2"><i class="fl"></i><span>46 nota</span></span><span class="sc" id="c3"><i class="fl"></i><span>3 pencairan</span></span></div>
+              <div class="ill">ILUSTRASI DATA</div>
+            </div>
+            <div id="inp"><span>Tanya soal angka usahamu…</span><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i></div>
+          </div>
+          <div class="bok" id="bk1" style="left: 380px; top: -640px; width: 120px; height: 120px"></div>
+          <div class="bok w" id="bk2" style="left: -560px; top: 120px; width: 160px; height: 160px"></div>
+        </div></div></div>
+        <div id="aiVeil" class="full navybg"></div>
+        <div class="lane" id="aiTag"><span class="pill"><span class="no">1</span><b>CUKUP AI</b><i></i><span class="s">pertanyaan ringan</span></span></div>
+      </div>
+
+      <!-- S2 · AHLI lane: tangled case -> flips into the expert card -->
+      <div id="case" class="full scene paper">
+        <div id="cNavy" class="full navybg"><div class="ngrid"></div></div>
+        <div class="stage" id="cStage"><div class="cam" id="cCam"><div class="piv" id="cPiv">
+          <div class="sheetf" id="sf1"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="sheetf" id="sf2"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="sheetf" id="sf3"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="spk" id="sp1" style="left: -420px; top: -380px"></div><div class="spk" id="sp2" style="left: 400px; top: -300px"></div><div class="spk" id="sp3" style="left: 430px; top: 330px"></div><div class="spk" id="sp4" style="left: -440px; top: 260px"></div>
+          <div id="flip">
+            <div class="face" id="cFront">
+              <div class="tab">KASUS</div>
+              <div class="md" style="left: 60px; top: 150px; transform: rotate(-7deg)"><b></b><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="md" style="left: 330px; top: 120px; transform: rotate(6deg)"><b></b><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="md" style="left: 90px; top: 440px; transform: rotate(4deg)"><b></b><i></i><i></i><i></i><i></i><i></i></div>
+              <svg id="knot" viewBox="0 0 500 440" fill="none" stroke="#212C5F" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+                <path id="knotP" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M76 114 C 160 20, 300 40, 250 150 S 80 260, 160 300 S 380 300, 346 84 C 330 20, 200 60, 230 170 S 420 260, 380 330 S 180 420, 106 404 C 40 390, 60 300, 150 330 S 300 420, 330 300 S 200 200, 300 210 S 470 320, 440 380"/>
+              </svg>
+              <div id="sticky">?</div>
+            </div>
+            <div class="face" id="cBack">
+              <div class="avs"><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i class="mid"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i></div>
+              <div class="t1"><span class="in" id="ebT1">Tim ahli</span></div>
+              <div class="t2"><span class="in" id="ebT2">Muamalah Pajak</span></div>
+              <div class="rule"></div>
+              <ul>
+                <li id="li1"><i><svg viewBox="0 0 24 24" fill="none" stroke="#FED111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></i>kasus rumit</li>
+                <li id="li2"><i><svg viewBox="0 0 24 24" fill="none" stroke="#FED111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></i>pertimbangan khusus</li>
+              </ul>
+              <div class="sl"><span class="hl" id="slHl">sesuai layanan</span></div>
+            </div>
+          </div>
+        </div></div></div>
+        <div id="cK0" class="ctr">tapi kalau…</div>
+        <div id="cK1" class="ctr"><span class="in">kasusnya rumit</span></div>
+        <div id="cK2" class="ctr"><span class="in">&amp; butuh <span class="hl" id="cHl">pertimbangan khusus</span></span></div>
+        <div class="lane" id="cTag"><span class="pill"><span class="no y">2</span><b>PERLU AHLI</b><i></i><span class="s">kasus rumit</span></span></div>
+      </div>
+
+      <!-- transition bands (case -> brand) -->
       <div id="bands" class="full" style="visibility:hidden"></div>
 
-      <!-- S3 · solution -->
+      <!-- S3 · brand moment: kamu nggak sendirian -->
       <div id="sol" class="full scene navybg">
         <div class="ngrid"></div>
-        <div class="ctr whis" id="solW">tenang.</div>
-        <div class="feat" id="f1">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></div>
-          <div class="tx"><small>CATATAN JUALAN →</small>pembukuan yang <span class="hl" id="sx1">bisa ditelusuri</span></div>
-        </div>
-        <div class="feat" id="f2">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M16 11v6"/></svg></div>
-          <div class="tx"><small>DARI DATA USAHAMU →</small>bantu hitung <span class="hl" id="sx2">estimasi pajak</span></div>
-        </div>
-      </div>
-
-      <!-- S4 · help (slides over) -->
-      <div id="help" class="full scene deepbg">
-        <div id="slideEdge"></div>
-        <div class="ngrid"></div>
-        <div class="ctr whis">masih bingung?</div>
-        <div class="hcard" id="h1c"><div class="t"><div class="av"><img src="assets/mp/mp_m_reverse.png" alt="" /></div>Asisten AI</div><div class="s">bantu jelasin angka usahamu</div></div>
-        <div class="hcard" id="h2c"><div class="t"><div class="av"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></div>Tim ahli</div><div class="s"><span class="hl" id="hx">sesuai layanan</span></div>
-          <div class="avs"><i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i></div>
-        </div>
-        <div id="cap5"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#8E99C2;margin-right:10px"></span>MUAMALAH PAJAK · PENDAMPINGAN SESUAI LAYANAN</div>
+        <div class="stage" id="sStage"><div class="cam" id="sCam"><div class="piv" id="sPiv">
+          <svg id="links" viewBox="0 0 800 260" fill="none" stroke-linecap="round">
+            <path id="lk1" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M400 160 C 330 130, 250 110, 195 20" stroke="#FFE440" stroke-width="6"/>
+            <path id="lk2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M400 160 C 470 130, 550 110, 605 20" stroke="#FFE440" stroke-width="6"/>
+          </svg>
+          <div class="wing" id="wA">
+            <div class="ho"><img src="assets/mp/mp_m.png" alt="" /></div>
+            <div class="t1"><span class="in" id="wAt">Asisten AI</span></div>
+            <div class="t2"><span class="in">jelasin dari datamu</span></div>
+            <div class="pl">pertanyaan ringan</div>
+          </div>
+          <div class="wing" id="wB">
+            <div class="avs"><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i></div>
+            <div class="t1"><span class="in" id="wBt">Tim ahli</span></div>
+            <div class="t2"><span class="in">Muamalah Pajak</span></div>
+            <div class="pl">sesuai layanan</div>
+          </div>
+          <div class="dot" id="dt1"></div><div class="dot" id="dt2"></div>
+          <div class="spk" id="ss1" style="left: -470px; top: -560px"></div><div class="spk" id="ss2" style="left: 450px; top: -520px"></div><div class="spk" id="ss3" style="left: 400px; top: 300px"></div><div class="spk" id="ss4" style="left: -420px; top: 200px"></div><div class="spk" id="ss5" style="left: 120px; top: -640px"></div>
+          <div id="you"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5V20h16v-9.5"/><path d="M3 10.5 5 4h14l2 6.5"/><path d="M3 10.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M10 20v-5h4v5"/></svg></div>
+          <div id="youL">usahamu</div>
+        </div></div></div>
+        <div id="sW" class="ctr">jadi…</div>
+        <div id="sT" class="ctr"><span class="in">kamu nggak <span class="yy">sendirian.</span></span></div>
+        <div id="sS" class="ctr"><span class="in">ngurusin pajak usahamu</span></div>
       </div>
       <div id="beamwrap"><div id="beam"></div><div id="disc"></div></div>
 
-      <!-- S5 · end -->
+      <!-- S4 · end (series template) -->
       <div id="endWrap" class="full scene deepbg">
         <div id="end" class="full"><div class="content">
           <div class="ngrid"></div>
@@ -249,6 +364,7 @@
           <div id="bio7" class="ctr">Link di bio</div>
         </div></div>
       </div>
+      <div id="whip" style="visibility:hidden"><i style="top: 610px; height: 16px"></i><i style="top: 980px; height: 34px"></i><i style="top: 1330px; height: 10px"></i></div>
       <canvas id="robot" width="1080" height="1920"></canvas>
       <div id="grain"></div>
     </div>
@@ -256,145 +372,223 @@
     <script>
       (function () {
         const TM = window.TM, $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
-        function split(el) { const txt = el.textContent; el.textContent = ""; return [...txt].map((ch) => { const m = document.createElement("span"); m.className = "m"; const c = document.createElement("span"); c.className = "c"; c.textContent = ch === " " ? " " : ch; m.appendChild(c); el.appendChild(m); return c; }); }
+        function split(el) { const txt = el.textContent; el.textContent = ""; return [...txt].map((ch) => { const m = document.createElement("span"); m.className = "m"; const c = document.createElement("span"); c.className = "c"; c.textContent = ch === " " ? "\u00a0" : ch; m.appendChild(c); el.appendChild(m); return c; }); }
+        // word masks that keep inline markup (stabilo / pills): every word or inline element rides in its own clip
+        function words(el) {
+          const out = [], mk = (wide) => { const m = document.createElement("span"); m.className = "m" + (wide ? " wide" : ""); const c = document.createElement("span"); c.className = "c"; m.appendChild(c); return [m, c]; };
+          [...el.childNodes].forEach((n) => {
+            if (n.nodeType === 3) {
+              const fr = document.createDocumentFragment();
+              n.textContent.split(/(\s+)/).forEach((p) => { if (!p) return; if (/^\s+$/.test(p)) { fr.appendChild(document.createTextNode(" ")); return; } const [m, c] = mk(); c.textContent = p; fr.appendChild(m); out.push(c); });
+              el.replaceChild(fr, n);
+            } else { const [m, c] = mk(n.classList && n.classList.contains("aiw")); el.insertBefore(m, n); c.appendChild(n); out.push(c); }
+          });
+          return out;
+        }
         for (let k = 0; k < 6; k++) { const b = document.createElement("div"); b.className = "bd"; b.style.top = (k * 320) + "px"; b.style.background = k % 2 ? "#26367A" : "#212C5F"; $("#bands").appendChild(b); }
         const mq = document.createElement("div"); mq.id = "mq"; mq.innerHTML = "MasterPajak <b>AI</b>&nbsp;—&nbsp;MasterPajak <b>AI</b>&nbsp;—&nbsp;MasterPajak <b>AI</b>"; $$("#bands .bd")[2].appendChild(mq);
-        const Q1 = split($("#q1")), Q0 = split($("#q0")), T7A = split($("#t7a")), SW = split($("#solW"));
+        // laba value: digit rollers (pure transforms, seek-safe)
+        const ROLL = []; (function () { const el = $("#labaV"), txt = el.textContent; el.textContent = "";
+          [...txt].forEach((ch, i) => { if (!/\d/.test(ch)) { el.appendChild(document.createTextNode(ch)); return; }
+            const d = +ch, r = document.createElement("span"); r.className = "roll"; const col = document.createElement("span"); col.className = "col";
+            const n = 8 + (i % 4); for (let k = n; k >= 0; k--) { const s = document.createElement("span"); s.textContent = String((d + 10 * 3 - k) % 10); col.appendChild(s); }
+            r.appendChild(col); el.appendChild(r); ROLL.push([col, n]); }); })();
+        const W1 = words($("#hkT1 .in")), W2 = words($("#hkT2 .in")), WK1 = words($("#cK1 .in")), WK2 = words($("#cK2 .in"));
+        const WS = words($("#sT .in")), WSS = words($("#sS .in"));
+        const CK0 = split($("#cK0")), SW = split($("#sW")), T7A = split($("#t7a"));
 
         // ---- initial states ----
-        gsap.set("#pc1, #pc2, #pc3, #pc4", { scale: 0, opacity: 0 });
-        gsap.set([...Q1, ...Q0, ...SW], { yPercent: 115 }); gsap.set(".qm", { scale: 0 });
+        // S0 world
+        gsap.set("#hkCam", { x: 0, y: -40, z: -220, rotationY: -4 }); gsap.set("#hkPiv", { x: 0, y: 0, z: 0 });
+        gsap.set("#pA", { rotationY: 52, transformOrigin: "100% 50%" }); gsap.set("#pB", { rotationY: -52, transformOrigin: "0% 50%" });
+        gsap.set("#vs", { z: 250, scale: 0 }); gsap.set("#hkFloor", { z: 500, rotationX: 90, transformOrigin: "50% 100%" });
+        gsap.set("#qb1", { left: -640, top: 120, z: -700, rotation: -8, filter: "blur(4px)" }); gsap.set("#qb2", { left: 520, top: -40, z: -760, rotation: 7, filter: "blur(4px)" });
+        gsap.set("#qb3", { left: -400, top: 300, z: 300, rotation: 6, filter: "blur(6px)" }); gsap.set("#qb4", { left: 330, top: 360, z: 260, rotation: -7, filter: "blur(6px)" });
+        gsap.set(".qb", { opacity: 0 });
+        gsap.set([...W1, ...W2], { yPercent: 118 });
+        // S1
+        gsap.set("#aiCam", { x: 0, y: 0, z: 0, rotationY: -3 });
+        gsap.set("#chat", { rotationY: -13, rotationX: 5, transformOrigin: "50% 50%" });
+        gsap.set("#d1", { left: -560, top: 20, x: 0, y: 0, z: -620, rotationY: 14, filter: "blur(5px)" }); gsap.set("#d2", { left: 430, top: 1130, x: 0, y: 0, z: -720, rotationY: -10, filter: "blur(6px)" });
+        gsap.set("#d3", { left: -560, top: 560, x: 0, y: 0, z: -520, rotationY: 12, filter: "blur(4px)" });
+        gsap.set(["#bk1", "#bk2"], { z: 360 }); gsap.set("#bk1", { filter: "blur(6px)" }); gsap.set("#bk2", { filter: "blur(8px)" });
+        gsap.set("#aiTag", { y: -30, opacity: 0 });
+        gsap.set("#uq", { opacity: 0, scale: 0.6, z: 120, transformOrigin: "100% 100%" }); gsap.set("#typ", { opacity: 0, scale: 0.5, transformOrigin: "0% 100%" });
+        gsap.set("#ans", { opacity: 0, scale: 0.86, z: 90, transformOrigin: "0% 100%" });
+        gsap.set(["#ans .lead", "#r1", "#r2", "#r4", "#r5"], { opacity: 0, y: 18 }); gsap.set("#r3", { scaleX: 0, transformOrigin: "0% 50%" });
+        ROLL.forEach(([col]) => gsap.set(col, { yPercent: 0 }));
+        // S2
+        gsap.set("#case", { x: 1080 });
+        gsap.set("#cCam", { x: 0, y: 0, z: -60, rotationY: 5 });
+        gsap.set("#flip", { rotationX: 12, rotationY: 12, rotationZ: -3, z: 0, transformOrigin: "50% 50%" });
+        gsap.set("#sf1", { left: -560, top: -470, z: -420, rotation: -12, rotationY: 20, filter: "blur(5px)" }); gsap.set("#sf2", { left: 330, top: -560, z: -600, rotation: 9, rotationY: -18, filter: "blur(6px)" });
+        gsap.set("#sf3", { left: 300, top: 240, z: 260, rotation: 14, rotationY: -12, filter: "blur(7px)" });
+        gsap.set(".spk", { opacity: 0, scale: 0 }); gsap.set("#sp1", { z: -300 }); gsap.set("#sp2", { z: 200 }); gsap.set("#sp3", { z: -200 }); gsap.set("#sp4", { z: 260 });
+        gsap.set([...CK0, ...WK1, ...WK2], { yPercent: 118 }); gsap.set("#cTag", { y: -30, opacity: 0 });
+        gsap.set("#cBack .avs i", { scale: 0.001 }); gsap.set(["#li1", "#li2"], { opacity: 0, x: -24 });
+        // S3
         $$("#bands .bd").forEach((b, k) => gsap.set(b, { x: k % 2 ? 1100 : -1100 }));
-        gsap.set(".feat", { y: 80, opacity: 0 });
-        gsap.set("#help", { x: 1096 }); gsap.set(".hcard", { y: 80, opacity: 0 }); gsap.set("#cap5", { opacity: 0 });
+        gsap.set("#sCam", { x: 0, y: 0, z: -40, rotationY: -5 });
+        gsap.set("#wA", { rotationY: 20, rotationX: 4, transformOrigin: "100% 50%", x: -700, opacity: 0 }); gsap.set("#wB", { rotationY: -20, rotationX: 4, transformOrigin: "0% 50%", x: 700, opacity: 0 });
+        gsap.set("#you", { z: 110, scale: 0 }); gsap.set("#youL", { z: 110, opacity: 0, y: 20 }); gsap.set("#links", { z: 30 }); gsap.set(".dot", { z: 60, opacity: 0 });
+        gsap.set([...SW, ...WS, ...WSS], { yPercent: 118 });
+        [["#ss1", -400], ["#ss2", 250], ["#ss3", -250], ["#ss4", 300], ["#ss5", -600]].forEach(([q, z]) => gsap.set(q, { z: z, opacity: 0, scale: 0 }));
+        // S4
         gsap.set("#disc", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#beam", { rotation: -58, scaleX: 0, scaleY: 1, transformOrigin: "0% 50%" });
         gsap.set([...T7A], { yPercent: 115 }); gsap.set("#t7b", { opacity: 0, y: 50 });
         gsap.set("#cta7 span", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#bio7", { opacity: 0 });
-        gsap.set("#flood", { scaleX: 0 });
+        gsap.set("#whip i", { x: 1300 });
 
         // ---- timeline ----
         const tl = gsap.timeline({ paused: true });
         const F = (t, a, b, at) => tl.fromTo(t, a, Object.assign({ immediateRender: false }, b), at);
         const show = (t, at) => tl.set(t, { autoAlpha: 1 }, at), hide = (t, at) => tl.set(t, { autoAlpha: 0 }, at);
         const HL = (sel, at, d) => F(sel, { backgroundSize: "0% 72%" }, { backgroundSize: "100% 72%", duration: d || 0.32, ease: "power1.inOut" }, at);
+        const UP = (arr, at, st, d, e) => arr.forEach((c, k) => F(c, { yPercent: 118 }, { yPercent: 0, duration: d || 0.42, ease: e || "power4.out" }, at + k * st));
         tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: TM.total, ease: "steps(" + Math.round(TM.total * 15) + ")", immediateRender: false }, 0);
 
-        // S0 · 3D news shots: built in buildReady["news3d"] below (needs font metrics)
-        // T · the last stabilo stroke floods the screen yellow, then the question on navy (no robot yet)
-        show("#flood", TM.conf - 0.42);
-        F("#flood", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.in" }, TM.conf - 0.42);
-        show("#conf", TM.conf); hide(["#shA", "#shB", "#shC", "#shD", "#dofA", "#dofB", "#vig3", "#cA", "#cB", "#cC", "#cD"], TM.conf + 0.02);
-        F("#flood", { scaleX: 1, transformOrigin: "100% 50%" }, { scaleX: 0, transformOrigin: "100% 50%", duration: 0.45, ease: "power3.out" }, TM.conf);
-        hide("#flood", TM.conf + 0.5);
-        Q0.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.35, ease: "power3.out" }, TM.conf + 0.3 + k * 0.03));
-        Q1.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.42, ease: "power4.out" }, TM.conf + 0.6 + k * 0.022));
-        ["#pc1", "#pc2", "#pc3", "#pc4"].forEach((s, k) => F(s, { scale: 0, opacity: 0, rotation: -20 }, { scale: 1, opacity: 1, rotation: [-6, 5, 4, -5][k], duration: 0.45, ease: "back.out(2)" }, TM.conf + 0.15 + k * 0.12));
-        ["#qm1", "#qm2", "#qm3"].forEach((s, k) => F(s, { scale: 0, rotation: -30, opacity: 1 }, { scale: 1, rotation: 0, opacity: 1, duration: 0.4, ease: "back.out(2.5)" }, TM.conf + 1.1 + k * 0.15));
-        for (let j = 0; j < 6; j++) ["#pc1", "#pc2", "#pc3", "#pc4"].forEach((c, k) => tl.set(c, { x: Math.sin(j * 3.1 + k) * 6, y: Math.cos(j * 2.3 + k) * 5 }, TM.conf + 1.6 + j * 0.09));
+        // ===== S0 · hook: the set opens, the camera looks at AI, then at AHLI, then dives into the AI lane =====
+        F("#pA", { rotationY: 52 }, { rotationY: 28, duration: 0.95, ease: "power3.out" }, 0);
+        F("#pB", { rotationY: -52 }, { rotationY: -28, duration: 0.95, ease: "power3.out" }, 0.06);
+        F("#vs", { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, TM.q + 0.45);
+        [["#qb1", 0.2], ["#qb2", 0.35], ["#qb3", 0.5], ["#qb4", 0.62]].forEach(([s, d]) => {
+          F(s, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, d);
+          F(s, { y: 40 }, { y: -70, duration: TM.ai - d, ease: "none" }, d);
+        });
+        const C0 = { x: 0, y: -40, z: -220, rotationY: -4 }, C1 = { x: 60, y: -40, z: -140, rotationY: 8 }, C2 = { x: -60, y: -40, z: -100, rotationY: -8 }, C3 = { x: 0, y: -40, z: -70, rotationY: 0 };
+        F("#hkCam", C0, Object.assign({}, C1, { duration: TM.q + 1.25, ease: "sine.inOut" }), 0);
+        F("#hkCam", C1, Object.assign({}, C2, { duration: 1.2, ease: "sine.inOut" }), TM.q2 + 0.1);
+        F("#hkCam", C2, Object.assign({}, C3, { duration: TM.ai - 0.72 - (TM.q2 + 1.3), ease: "sine.inOut" }), TM.q2 + 1.3);
+        UP(W1, TM.q, 0.07); UP(W2, TM.q2, 0.07);
+        HL("#hkHl", TM.q2 + 0.75, 0.38);
+        // dive into the AI panel: the camera turns to face it and pushes through; motion blur hides the cut to the navy scene
+        const PA = { x: 7 + 220 * Math.cos(28 * Math.PI / 180), z: -220 * Math.sin(28 * Math.PI / 180) };
+        F(["#hkT1", "#hkT2"], { opacity: 1, y: 0 }, { opacity: 0, y: -90, duration: 0.34, ease: "power2.in" }, TM.ai - 0.7);
+        F(["#vs", "#qb1", "#qb2", "#qb3", "#qb4"], { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "power1.in" }, TM.ai - 0.7);
+        F("#hkPiv", { x: 0, y: 0, z: 0 }, { x: PA.x, y: -20, z: PA.z, duration: 0.72, ease: "power2.inOut" }, TM.ai - 0.72);
+        F("#hkCam", C3, { x: 0, y: -140, z: 900, rotationY: -28, duration: 0.72, ease: "power3.in" }, TM.ai - 0.72);
+        F("#hkStage", { filter: "blur(0px)" }, { filter: "blur(14px)", duration: 0.3, ease: "power2.in" }, TM.ai - 0.3);
+        F("#hkVeil", { opacity: 0 }, { opacity: 1, duration: 0.16, ease: "power1.in" }, TM.ai - 0.16);
+        show("#ai", TM.ai); hide("#hook", TM.ai + 0.02);
+
+        // ===== S1 · AI lane =====
+        F("#aiStage", { filter: "blur(14px)" }, { filter: "blur(0px)", duration: 0.42, ease: "power2.out" }, TM.ai);
+        F("#aiCam", { z: -800, rotationY: -14, y: 60 }, { z: 0, rotationY: -3, y: 0, duration: 0.95, ease: "power3.out" }, TM.ai);
+        F("#aiVeil", { opacity: 1 }, { opacity: 0, duration: 0.4, ease: "power1.out" }, TM.ai);
+        F("#aiCam", { z: 0, rotationY: -3, y: 0 }, { z: 50, rotationY: 1, y: -40, duration: TM.ans - TM.ai - 0.85, ease: "sine.inOut" }, TM.ai + 0.85);
+        F("#aiCam", { z: 50, rotationY: 1, y: -40 }, { z: 110, rotationY: 4, y: -70, duration: TM.ex - 0.42 - TM.ans, ease: "sine.inOut" }, TM.ans);
+        F("#aiTag", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, TM.ai + 0.3);
+        F("#bk1", { y: 0 }, { y: 120, duration: TM.ex - TM.ai, ease: "none" }, TM.ai); F("#bk2", { y: 0 }, { y: -90, duration: TM.ex - TM.ai, ease: "none" }, TM.ai);
+        ["#d1", "#d2", "#d3"].forEach((s, k) => F(s, { y: 0 }, { y: [-26, 22, -18][k], duration: TM.dat - TM.ai, ease: "sine.inOut" }, TM.ai));
+        // user question
+        F("#uq", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.7)" }, TM.ask);
+        F("#uq", { z: 120 }, { z: 1, duration: 0.45, ease: "power3.out" }, TM.ask);
+        // typing
+        F("#typ", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, TM.ask + 0.75);
+        $$("#typ i").forEach((d, k) => F(d, { y: 0 }, { y: -10, duration: 0.2, ease: "sine.inOut", yoyo: true, repeat: Math.max(1, Math.floor((TM.ans - TM.ask - 1.0) / 0.2)) }, TM.ask + 0.95 + k * 0.1));
+        F("#typ", { opacity: 1 }, { opacity: 0, duration: 0.12 }, TM.ans - 0.05);
+        // answer from your data
+        F("#ans", { opacity: 0, scale: 0.86 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, TM.ans);
+        F("#ans", { z: 90 }, { z: 1, duration: 0.5, ease: "power3.out" }, TM.ans);
+        [["#ans .lead", 0.15], ["#r1", 0.4], ["#r2", 0.62], ["#r4", 0.9], ["#r5", 1.15]].forEach(([s, d]) => F(s, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, TM.ans + d));
+        F("#r3", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.out" }, TM.ans + 0.8);
+        ROLL.forEach(([col, n], k) => F(col, { yPercent: 0 }, { yPercent: -100 * n / (n + 1), duration: 0.75 + k * 0.04, ease: "power3.out" }, TM.ans + 0.92));
+        HL("#nHl", TM.ans + 1.55, 0.45);
+        // S1 -> S2: whip pan to the right lane (both scenes ride one push, motion blur + light streaks)
+        show("#case", TM.ex - 0.44); show("#whip", TM.ex - 0.44);
+        F("#ai", { x: 0 }, { x: -1080, duration: 0.6, ease: "power3.inOut" }, TM.ex - 0.42);
+        F("#case", { x: 1080 }, { x: 0, duration: 0.6, ease: "power3.inOut" }, TM.ex - 0.42);
+        F(["#ai", "#case"], { filter: "blur(0px)" }, { filter: "blur(16px)", duration: 0.3, ease: "power2.in" }, TM.ex - 0.42);
+        F(["#ai", "#case"], { filter: "blur(16px)" }, { filter: "blur(0px)", duration: 0.3, ease: "power2.out" }, TM.ex - 0.12);
+        $$("#whip i").forEach((b, k) => F(b, { x: 1300 }, { x: -1500, duration: 0.5, ease: "power2.inOut" }, TM.ex - 0.4 + k * 0.04));
+        hide("#ai", TM.ex + 0.2); hide("#whip", TM.ex + 0.2);
+
+        // ===== S2 · AHLI lane: tangled case, then the expert card =====
+        F("#cTag", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, TM.ex + 0.2);
+        UP(CK0, TM.ex + 0.05, 0.02, 0.38, "power3.out");
+        UP(WK1, TM.ex + 0.55, 0.12);
+        UP(WK2, TM.ex + 1.55, 0.06);
+        HL("#cHl", TM.ex + 2.2, 0.5);
+        F("#knotP", { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.5, ease: "power1.inOut" }, TM.ex + 0.45);
+        F("#sticky", { scale: 0, rotation: -25 }, { scale: 1, rotation: 6, duration: 0.45, ease: "back.out(2.2)" }, TM.ex + 1.6);
+        F("#cCam", { z: -60, rotationY: 5, y: 0 }, { z: 70, rotationY: -4, y: 0, duration: TM.tim - 0.45 - TM.ex, ease: "sine.inOut" }, TM.ex);
+        F("#flip", { rotationZ: -3 }, { rotationZ: 1.5, duration: TM.tim - 0.45 - TM.ex, ease: "sine.inOut" }, TM.ex);
+        F("#sf1", { y: 0, rotation: -12 }, { y: -80, rotation: -4, duration: TM.tim - TM.ex, ease: "none" }, TM.ex);
+        F("#sf2", { y: 0, rotation: 9 }, { y: 60, rotation: 15, duration: TM.tim - TM.ex, ease: "none" }, TM.ex);
+        F("#sf3", { y: 0, rotation: 14 }, { y: -100, rotation: 6, duration: TM.tim - TM.ex, ease: "none" }, TM.ex);
+        // the case flips over: the AHLI lane answer (navy iris from the card)
+        F(["#cK0", "#cK1", "#cK2"], { opacity: 1, y: 0 }, { opacity: 0, y: -70, duration: 0.32, ease: "power2.in" }, TM.tim - 0.55);
+        F(["#sf1", "#sf2", "#sf3"], { opacity: 1 }, { opacity: 0, duration: 0.3 }, TM.tim - 0.4);
+        F("#flip", { rotationY: 12, rotationX: 12, z: 0 }, { rotationY: 198, rotationX: 6, z: 170, duration: 0.62, ease: "power3.inOut" }, TM.tim - 0.45);
+        F("#flip", { z: 170 }, { z: 60, duration: 0.6, ease: "power2.out" }, TM.tim + 0.17);
+        F("#cNavy", { clipPath: "circle(0% at 50% 52%)" }, { clipPath: "circle(80% at 50% 52%)", duration: 0.6, ease: "power3.inOut" }, TM.tim - 0.4);
+        F("#cCam", { z: 70, rotationY: -4 }, { z: 20, rotationY: 4, duration: TM.sol - 0.45 - (TM.tim - 0.45), ease: "sine.inOut" }, TM.tim - 0.45);
+        F("#flip", { rotationY: 198 }, { rotationY: 189, duration: TM.sol - 0.5 - (TM.tim + 0.17), ease: "sine.inOut" }, TM.tim + 0.17);
+        $$(".spk").forEach((s, k) => { F(s, { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, TM.tim + 0.2 + k * 0.12); F(s, { y: 0 }, { y: -60 - 20 * k, duration: TM.sol - TM.tim, ease: "none" }, TM.tim); });
+        $$("#cBack .avs i").forEach((a, k) => F(a, { scale: 0.001 }, { scale: 1, duration: 0.42, ease: "back.out(2.2)" }, TM.tim - 0.1 + [0.12, 0, 0.2][k]));
+        F("#li1", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, TM.tim + 0.9);
+        F("#li2", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, TM.tim + 1.1);
+        HL("#slHl", TM.sl + 0.15, 0.45);
+
         // T · band sweep with the brand marquee
         show("#bands", TM.sol - 0.48);
         $$("#bands .bd").forEach((b, k) => F(b, { x: k % 2 ? 1100 : -1100 }, { x: 0, duration: 0.4, ease: "power4.inOut" }, TM.sol - 0.45 + k * 0.03));
         F("#mq", { x: 140 }, { x: -620, duration: 0.95, ease: "none" }, TM.sol - 0.45);
-        show("#sol", TM.sol); hide("#conf", TM.sol + 0.05); hide("#bands", TM.sol + 0.08);
+        show("#sol", TM.sol); hide("#case", TM.sol + 0.05); hide("#bands", TM.sol + 0.08);
 
-        // S3 · solution: "tenang." + two feature cards, stabilo on the promise
-        SW.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.4, ease: "power3.out" }, TM.sol + 0.15 + k * 0.03));
-        F("#f1", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.sol + 2.2);
-        HL("#sx1", TM.sol + 3.6, 0.45);
-        F("#f2", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.sol + 4.6);
-        HL("#sx2", TM.sol + 5.9, 0.45);
-        // T · slide-over
-        show("#help", TM.help - 0.5);
-        F("#help", { x: 1096 }, { x: 0, duration: 0.47, ease: "power4.inOut" }, TM.help - 0.47);
-        hide("#sol", TM.help + 0.05);
-        // S4 · help: assistant + experts
-        F("#h1c", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.help + 0.6);
-        F("#h2c", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.6)" }, TM.help + 1.5);
-        HL("#hx", TM.help + 2.6, 0.4);
-        F("#cap5", { opacity: 0 }, { opacity: 1, duration: 0.3 }, TM.help + 1.8);
-        // T · beam flood + iris
+        // ===== S3 · brand: kamu nggak sendirian (asisten AI + tim ahli around your business) =====
+        UP(SW, TM.sol + 0.05, 0.03, 0.4, "power3.out");
+        UP(WS, TM.sol + 0.35, 0.22);
+        UP(WSS, TM.sol + 1.6, 0.08, 0.4, "power3.out");
+        F("#sCam", { z: -40, rotationY: -5 }, { z: 60, rotationY: 5, duration: TM.end - 0.5 - TM.sol, ease: "sine.inOut" }, TM.sol);
+        ["#ss1", "#ss2", "#ss3", "#ss4", "#ss5"].forEach((q, k) => { F(q, { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, TM.sol + 0.3 + k * 0.1); F(q, { y: 0 }, { y: -70 - 18 * k, duration: TM.end - TM.sol, ease: "none" }, TM.sol); });
+        F("#you", { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2)" }, TM.sol + 0.4);
+        F("#youL", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, TM.sol + 0.6);
+        F("#wA", { x: -700, opacity: 0, rotationY: 70 }, { x: 0, opacity: 1, rotationY: 20, duration: 0.7, ease: "power3.out" }, TM.sol + 0.55);
+        F("#wB", { x: 700, opacity: 0, rotationY: -70 }, { x: 0, opacity: 1, rotationY: -20, duration: 0.7, ease: "power3.out" }, TM.sol + 0.75);
+        F("#lk1", { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.5, ease: "power2.out" }, TM.sol + 1.15);
+        F("#lk2", { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.5, ease: "power2.out" }, TM.sol + 1.3);
+        // pulses travel from the business to both helpers (loops, seek-safe)
+        [["#dt1", -205], ["#dt2", 205]].forEach(([s, ex], k) => {
+          F(s, { opacity: 0 }, { opacity: 1, duration: 0.2 }, TM.sol + 1.6 + k * 0.2);
+          F(s, { left: 0, top: 100 }, { left: ex, top: -40, duration: 0.9, ease: "power1.inOut", repeat: Math.floor((TM.end - 0.6 - TM.sol - 1.6) / 0.9) - 1 }, TM.sol + 1.6 + k * 0.2);
+        });
+        // T · beam flood + iris (series template)
         show("#beamwrap", TM.end - 0.52);
         F("#disc", { scale: 0 }, { scale: 1, duration: 0.25, ease: "back.out(2.2)" }, TM.end - 0.5);
         F("#beam", { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power3.in" }, TM.end - 0.4);
         F("#beam", { scaleY: 1 }, { scaleY: 16, duration: 0.24, ease: "power3.in" }, TM.end - 0.2);
         show("#endWrap", TM.end - 0.02);
         F("#endWrap", { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(82% at 50% 50%)", duration: 0.5, ease: "power3.inOut" }, TM.end);
-        hide("#help", TM.end + 0.55); hide("#beamwrap", TM.end + 0.55);
-        // S5 · end card
+        hide("#sol", TM.end + 0.55); hide("#beamwrap", TM.end + 0.55);
+        // S4 · end card
+        F("#end .content", { scale: 1.04 }, { scale: 1, duration: TM.total - TM.end, ease: "sine.out" }, TM.end);
         T7A.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.4, ease: "power3.out" }, TM.end + 0.1 + k * 0.014));
         F("#t7b", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.45, ease: "power4.out" }, TM.end + 1.3);
-        F("#cta7 span", { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(2.2)" }, TM.end + 3.6);
-        F("#bio7", { opacity: 0 }, { opacity: 1, duration: 0.35 }, TM.end + 5.0);
-        F("#cta7 span", { scale: 1 }, { scale: 1.05, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, TM.end + 4.6);
+        F("#cta7 span", { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(2.2)" }, TM.cta);
+        F("#bio7", { opacity: 0 }, { opacity: 1, duration: 0.35 }, TM.bio);
+        F("#cta7 span", { scale: 1 }, { scale: 1.05, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, TM.cta + 1.0);
         tl.set({}, {}, TM.total - 0.01);
 
-        // S0 · 3D news. Camera per shot: .foc = anchor on screen (x, y) + zoom + tilt, .pan = page point that sits on the anchor.
-        // screen = anchor + tilt(zoom * (page point - focus)), so the focus point is pinned to the anchor whatever the tilt.
+        // font-metric work: fit every nowrap line into its box, then fly the data cards into their source chips
         window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
-        window.__hf.buildReady["news3d"] = document.fonts.ready.then(() => {
-          const AX = 400, AY = 980, ZM = 1.1, TILT = { rotationX: 20, rotationY: 15, transformOrigin: "0px 0px" };
-          const at = (el, sheet) => { let x = 0, y = 0; for (let e = el; e && e !== sheet; e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; } return { x, y }; };
-          const kwPos = (id) => { const k = $("#" + id), sh = k.closest(".sheet"), q = at(k, sh); return { x: q.x, y: q.y + k.offsetHeight / 2 }; };
-          // excerpt pages: pick the column width that puts the keyword mid-line (text runs off both frame edges)
-          [["#sB", "kB", 600], ["#sC", "kC", 500], ["#sD", "kD", 500]].forEach(([sid, kid, pad]) => {
-            const sh = $(sid), k = $("#" + kid); let best = null;
-            const par = k.closest("p"), lh = parseFloat(getComputedStyle(par).lineHeight);
-            for (let w = 1800; w <= 3600; w += 20) { sh.style.width = w + 2 * pad + "px"; const q = at(k, sh), r = q.x - pad, li = Math.round((q.y - at(par, sh).y) / lh);
-              const sc = Math.abs(r - 1000) + (li < 3 ? 3000 : 0) + (w < 2200 ? (2200 - w) : 0); if (!best || sc < best[0]) best = [sc, w]; }
-            sh.style.width = best[1] + 2 * pad + "px";
+        window.__hf.buildReady["layout"] = document.fonts.ready.then(() => {
+          const fit = (el, maxW) => { const w = el.offsetWidth; if (w > maxW) { const fs = parseFloat(getComputedStyle(el).fontSize); el.style.fontSize = (fs * maxW / w * 0.995).toFixed(2) + "px"; } };
+          fit($("#hkT1 .in"), 960); fit($("#hkT2 .in"), 960); fit($("#cK1 .in"), 960); fit($("#cK2 .in"), 960); fit($("#sT .in"), 960); fit($("#sS .in"), 940);
+          fit($("#pAbig"), 360); fit($("#pBbig"), 360); fit($("#ebT1"), 520); fit($("#ebT2"), 520);
+          fit($("#wAt"), 342); fit($("#wBt"), 342); $$(".wing .t2 .in").forEach((e) => fit(e, 342));
+          const at = (el, root) => { let x = 0, y = 0; for (let e = el; e && e !== root; e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; } return { x, y }; };
+          const chat = $("#chat");
+          [["#d1", "#c1"], ["#d2", "#c2"], ["#d3", "#c3"]].forEach(([ds, cs], k) => {
+            const d = $(ds), c = $(cs), cp = at(c, chat), t0 = TM.dat + k * 0.2;
+            const dx = cp.x + c.offsetWidth / 2 - (d.offsetLeft + d.offsetWidth / 2), dy = cp.y + c.offsetHeight / 2 - (d.offsetTop + d.offsetHeight / 2);
+            const y0 = [-26, 22, -18][k], rY = [14, -10, -6][k], z0 = [-620, -720, -520][k], b0 = [5, 6, 4][k];
+            F(ds, { x: 0, y: y0, z: z0, rotationY: rY, scale: 1, filter: "blur(" + b0 + "px)" }, { x: dx, y: dy, z: 4, rotationY: 0, scale: c.offsetWidth / d.offsetWidth, filter: "blur(0px)", duration: 0.62, ease: "power3.inOut" }, t0);
+            F(ds, { opacity: 1 }, { opacity: 0, duration: 0.12 }, t0 + 0.56);
+            F(cs + " .fl", { opacity: 0 }, { opacity: 1, duration: 0.08 }, t0 + 0.56);
+            F(cs + " .fl", { opacity: 1 }, { opacity: 0, duration: 0.6, ease: "power2.out" }, t0 + 0.7);
+            F(cs, { scale: 1 }, { scale: 1.12, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1 }, t0 + 0.56);
           });
-          $("#sA").style.width = "4000px";
-          const key = (ax, ay, fx, fy, z) => ({ ax, ay, fx, fy, z });
-          const setCam = (sh, k) => { gsap.set(sh + " .foc", Object.assign({ x: k.ax, y: k.ay, scale: k.z }, TILT)); gsap.set(sh + " .pan", { x: -k.fx, y: -k.fy }); };
-          const cam3 = (sh, a, b, t0, d, ease) => {
-            F(sh + " .foc", { x: a.ax, y: a.ay, scale: a.z }, { x: b.ax, y: b.ay, scale: b.z, duration: d, ease: ease || "sine.inOut" }, t0);
-            F(sh + " .pan", { x: -a.fx, y: -a.fy }, { x: -b.fx, y: -b.fy, duration: d, ease: ease || "sine.inOut" }, t0);
-          };
-          const HL3 = (sel, t0, d) => F(sel, { backgroundSize: "0% 80%" }, { backgroundSize: "100% 80%", duration: d || 0.42, ease: "power1.inOut" }, t0);
-          gsap.set("#shA .foc", { rotation: -4 }); gsap.set("#shB .foc", { rotation: -3 }); gsap.set("#shC .foc", { rotation: -5 }); gsap.set("#shD .foc", { rotation: -3.5 });
-
-          // A · the opening article. Headline lines from word positions.
-          const hd = $("#sA .hd"), words = hd.textContent.trim().split(/\s+/); hd.textContent = "";
-          words.forEach((w, i) => { const s = document.createElement("span"); s.textContent = w; hd.appendChild(s); if (i < words.length - 1) hd.appendChild(document.createTextNode(" ")); });
-          const lines = [];
-          [...hd.children].forEach((s) => { const q = at(s, $("#sA")); const L = lines.find((l) => Math.abs(l.y - q.y) < 20); if (L) { L.x1 = q.x + s.offsetWidth; } else lines.push({ y: q.y, h: s.offsetHeight, x0: q.x, x1: q.x + s.offsetWidth }); });
-          const sA = $("#sA"), W = 4000, H = sA.offsetHeight, ZH = 0.62;
-          const OV = key(560, 940, W / 2, H * 0.40, 0.28), OV1 = key(560, 940, W / 2, H * 0.38, 0.30), OV2 = key(560, 940, W / 2, H * 0.47, 0.30);
-          const kA = kwPos("kA"), PAR = key(AX, AY, kA.x, kA.y, ZM);
-          const LK = lines.map((l) => [key(AX, AY, l.x0 + 140, l.y + l.h / 2, ZH), key(AX, AY, Math.max(l.x0 + 140, l.x1 - 260), l.y + l.h / 2, ZH)]);
-          setCam("#shA", OV);
-          tl.set("#shA .foc", { x: OV.ax, y: OV.ay, scale: OV.z }, 0); tl.set("#shA .pan", { x: -OV.fx, y: -OV.fy }, 0);
-          tl.set("#dofA, #dofB", { opacity: 0.55 }, 0);
-          cam3("#shA", OV, OV1, 0, TM.hd, "none");                                          // the whole page, drifting in
-          cam3("#shA", OV1, LK[0][0], TM.hd, 0.65, "power2.inOut");                          // zoom into the first word of the headline
-          F("#dofA, #dofB", { opacity: 0.55 }, { opacity: 1, duration: 0.65, ease: "power2.inOut" }, TM.hd);
-          const rd0 = TM.hd + 0.65, rdT = TM.zo - rd0, sac = 0.3, tot = lines.reduce((a, l) => a + (l.x1 - l.x0), 0);
-          let t = rd0;
-          LK.forEach((k, i) => {                                                              // eyes read each line left -> right, then return
-            if (i) { cam3("#shA", LK[i - 1][1], k[0], t, sac, "power1.inOut"); t += sac; }
-            const d = (rdT - sac * (LK.length - 1)) * (lines[i].x1 - lines[i].x0) / tot;
-            cam3("#shA", k[0], k[1], t, d, "sine.inOut"); t += d;
-          });
-          cam3("#shA", LK[LK.length - 1][1], OV2, TM.zo, 0.55, "power2.inOut");           // pull back: the page
-          F("#dofA, #dofB", { opacity: 1 }, { opacity: 0.55, duration: 0.55, ease: "power2.inOut" }, TM.zo);
-          cam3("#shA", OV2, PAR, TM.par, 0.75, "power3.inOut");                            // into the paragraph with "pajak"
-          F("#dofA, #dofB", { opacity: 0.55 }, { opacity: 1, duration: 0.75, ease: "power2.inOut" }, TM.par);
-          cam3("#shA", PAR, key(AX, AY, kA.x, kA.y, ZM * 1.03), TM.par + 0.75, TM.e2 - TM.par - 0.75, "none");
-          HL3("#kA", TM.par + 0.85); show("#cA", TM.par + 0.75);
-
-          // B–D · excerpts: direct cuts, keyword pinned to the same spot, highlight + a slow push are the only motion
-          const EX = [["#shB", "kB", "#cB", TM.e2, TM.e3], ["#shC", "kC", "#cC", TM.e3, TM.e4], ["#shD", "kD", "#cD", TM.e4, TM.fl]];
-          EX.forEach(([sh, kid, chip, t0, t1], i) => {
-            const q = kwPos(kid), k0 = key(AX, AY, q.x, q.y, ZM), k1 = key(AX, AY, q.x, q.y, ZM * 1.035);
-            setCam(sh, k0); cam3(sh, k0, k1, t0, t1 - t0, "none");
-            show(sh, t0); hide(i ? EX[i - 1][0] : "#shA", t0 + 0.02);
-            show(chip, t0); hide(i ? EX[i - 1][2] : "#cA", t0 + 0.02);
-            HL3("#" + kid, t0 + 0.45);
-          });
-          // fast re-cuts through all four, every keyword already marked (the reference rhythm), then the flood
-          const R = [["#shA", "#cA"], ["#shB", "#cB"], ["#shC", "#cC"], ["#shD", "#cD"]];
-          let prev = ["#shD", "#cD"];
-          R.forEach((r, j) => { const tc = TM.fl + j * 0.12; show(r, tc); if (prev[0] !== r[0]) hide(prev, tc + 0.02); prev = r; });
           return 1;
         });
         tl.eventCallback("onUpdate", () => { if (window.ROBOT_APPLY) window.ROBOT_APPLY(tl.time()); });

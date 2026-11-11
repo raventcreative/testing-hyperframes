@@ -144,8 +144,8 @@ MT, FT = [TM['m1'], TM['m2'], TM['m3']], [TM['f1'], TM['f2'], TM['f3']]
 for k in range(3): put(TM['hook'] + 0.14 + k * 0.1, flick(0.15), 0.1 + 0.015 * k)
 put(TM['hook'] + 1.0, marker(0.42), MK)
 # the camera swings in while the cards are dealt out to their stations
-wh(TM['m1'] - 0.7, 0.8, 250, 2400, 1.0, 0.6, 0.8)
-for k in range(3): put(TM['m1'] - 0.62 + k * 0.05 + 0.3, flick(0.14), 0.08)
+wh(TM['m1'] - 0.55, 0.8, 250, 2400, 1.0, 0.6, 0.8)
+for k in range(3): put(TM['m1'] - 0.5 + k * 0.05 + 0.3, flick(0.14), 0.08)
 put(TM['m1'] - 0.2, pop(500, 1000, 0.09), 0.09)                    # top bar drops in
 # MITOS stamps (land at m + 0.58)
 for m in MT: wh(m + 0.36, 0.24, 2400, 600, 1.2, 0.8, 0.35); put(m + 0.58, thump(0.3), 0.32)

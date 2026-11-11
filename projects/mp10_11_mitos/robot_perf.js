@@ -57,7 +57,7 @@
   POINT(TM.hook + 1.95, TM.hook + 2.65);
   pose(TM.hook + 2.0, { happy: 1 }); pose(TM.hook + 2.75, { happy: 0, hYaw: -14, hPitch: -6, lookX: -0.5, lookY: -0.3 });
   // camera swing / whips: the robot leans into the move
-  for (const w of [TM.m1 - 0.3, TM.m2 - 0.12, TM.m3 - 0.12]) { pose(w - 0.25, { roll: 0, yaw: -18 }); pose(w, { roll: 7, yaw: -4 }); pose(w + 0.4, { roll: 0, yaw: -18 }); }
+  for (const w of [TM.m1 - 0.15, TM.m2 - 0.12, TM.m3 - 0.12]) { pose(w - 0.25, { roll: 0, yaw: -18 }); pose(w, { roll: 7, yaw: -4 }); pose(w + 0.4, { roll: 0, yaw: -18 }); }
 
   // every MITOS stamp: a flinch on the slam, then it studies the card
   MT.forEach((m) => {

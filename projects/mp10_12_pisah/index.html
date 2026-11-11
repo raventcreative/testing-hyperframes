@@ -221,7 +221,10 @@
 
       <!-- S1–S4 · paper studio: the jar, the gauge, the swirl, the two lanes (one 3D world, built in script) -->
       <div id="s1" class="full scene lightbg" style="visibility:visible;opacity:1">
+        <!-- two stacked 3D contexts with one camera: A = floor, jar, gauge, lane floors; B = cards and coins (keeps the jar's cylinders out of
+             the cards' depth sorting — HyperFrames' software compositor drops pieces of planes that are split against the cylinder strips) -->
         <div class="stage" id="w1"><div class="cam" id="cam1"><div class="yaw" id="yaw1"><div class="pan" id="pan1"></div></div></div></div>
+        <div class="stage" id="w1b"><div class="cam" id="cam1b"><div class="yaw" id="yaw1b"><div class="pan" id="pan1b"></div></div></div></div>
         <div class="vig"></div>
         <div id="dof1a" class="dof"></div><div id="dof1b" class="dof"></div><div id="dofK" class="dof"></div>
         <div id="flash2" class="full"></div>
@@ -322,7 +325,7 @@
         const D2R = Math.PI / 180;
 
         // =========================== world 1 (units = px at the focus plane, floor y = 0, up = -y, z toward the camera) ===========================
-        const P1 = $("#pan1");
+        const P1 = $("#pan1"), P2 = $("#pan1b");
         const o3 = (parent, id, css) => { const e = mk("div", "o3", parent, css); if (id) e.id = id; return e; };
         mk("div", "floor", P1);
         const shJ = mk("div", "fshadow", P1, "left:-330px; top:-330px; width:660px; height:660px;"); gsap.set(shJ, { rotationX: 90, y: -1, x: 30, z: -20 });
@@ -366,7 +369,7 @@
           background: radial-gradient(circle at 42% 40%, #4357b4, #2a3a86 58%, #1c2861 100%); box-shadow: inset 0 0 0 12px rgba(255,255,255,.06), inset 0 0 0 15px rgba(254,209,17,.55);`,
           '<i style="position:absolute; left:' + (LR - 82) + 'px; top:' + (LR - 14) + 'px; width:164px; height:28px; border-radius:14px; background:#070b22; box-shadow: inset 0 4px 7px rgba(0,0,0,.7), 0 2px 0 rgba(255,255,255,.18);"></i>');
         // hanging tag (balance) — hole at the top, string up over the lid
-        const tagW = o3(P1, "tagW");
+        const tagW = o3(P2, "tagW");
         mk("div", "string", tagW, "top:-96px; height:118px;");
         const tag = mk("div", "tagc", tagW, "", '<div class="hole"></div><div class="k">UANG JUALAN</div><div class="v"><div class="strip" id="tagStrip"></div></div><div class="il"><span class="ilus">Ilustrasi data</span></div>');
         tag.id = "tag";
@@ -398,8 +401,8 @@
         const xtHTML = (ic, n, a) => '<div class="ic">' + NS(IC[ic], "#4b536a", 2.2) + '</div><div class="tx" data-fit="w"><div class="n">' + n + '</div><div class="a">' + a + "</div></div>";
         const INC = [["Jualan masuk", "+Rp1.250.000"], ["Jualan masuk", "+Rp1.230.000"], ["Jualan masuk", "+Rp1.120.000"]];
         const EXP = [["cup", "Jajan", "&minus;Rp150.000"], ["cal", "Bayar cicilan", "&minus;Rp1.200.000"], ["fam", "Kirim ke keluarga", "&minus;Rp1.000.000"]];
-        const chips = INC.map((c, k) => { const w = o3(P1, "ch" + k); mk("div", "chip", w, "", chipHTML(c[0], c[1])); return w; });
-        const tiles = EXP.map((c, k) => { const w = o3(P1, "xt" + k); mk("div", "xt", w, "", xtHTML(c[0], c[1], c[2])); return w; });
+        const chips = INC.map((c, k) => { const w = o3(P2, "ch" + k); mk("div", "chip", w, "", chipHTML(c[0], c[1])); return w; });
+        const tiles = EXP.map((c, k) => { const w = o3(P2, "xt" + k); mk("div", "xt", w, "", xtHTML(c[0], c[1], c[2])); return w; });
 
         // ---- coins ----
         function coin(parent, kind) {
@@ -408,10 +411,10 @@
           mk("i", "fc", c, "transform:translateZ(4.5px)", kind === "u" ? NS(IC.bag, "#212C5F", 2.6) : NS(IC.home, "#5B6478", 2.6));
           return w;
         }
-        const inCoins = [0, 1, 2, 3, 4, 5].map(() => coin(P1, "u"));
-        const outCoins = [0, 1, 2, 3, 4, 5].map(() => { const w = o3(P1); return { w, arc: coin(w, "u") }; });
+        const inCoins = [0, 1, 2, 3, 4, 5].map(() => coin(P2, "u"));
+        const outCoins = [0, 1, 2, 3, 4, 5].map(() => { const w = o3(P2); return { w, arc: coin(w, "u") }; });
         // swirl: orbit (rotY about the jar axis) > local position > counter-rotation (faces the camera) > coin (tumble)
-        const swirl = o3(P1, "swirl"), SWC = [];
+        const swirl = o3(P2, "swirl"), SWC = [];
         // wind rings: comet-tail arcs lying in horizontal planes around the jar (spin with the coins)
         const RINGS = [[-120, 340, "rgba(33,44,95,.26)"], [-285, 410, "rgba(254,209,17,.75)"], [-450, 480, "rgba(33,44,95,.2)"]];
         const ringEls = RINGS.map(([y, r, col], k) => { const w = o3(swirl, "ring" + k);
@@ -437,8 +440,9 @@
           -webkit-mask-image: linear-gradient(90deg, #000 0, #000 40%, transparent 76%); mask-image: linear-gradient(90deg, #000 0, #000 40%, transparent 76%);`); divIn.id = "divIn";
         const divL = mk("i", "lanef", lanes, `left:-9px; top:${LZ1}px; width:18px; height:${LLEN}px; transform-origin:50% ${-LZ1}px; transform:rotateX(90deg) translateZ(1px); border-radius:9px;
           background: linear-gradient(0deg, #FFE440 0, #fff 18%, rgba(255,255,255,.9) 42%, rgba(255,255,255,0) 74%); box-shadow: 0 0 24px 8px rgba(254,209,17,.6);`); divL.id = "divL";
-        const LCH = INC.map((c, k) => { const w = o3(lanes, "lc" + k); mk("div", "chip", w, "", chipHTML(c[0], c[1])); return w; });
-        const LXT = EXP.map((c, k) => { const w = o3(lanes, "lx" + k); mk("div", "xt", w, "", xtHTML(c[0], c[1], c[2])); return w; });
+        const lanesB = o3(P2, "lanesB");
+        const LCH = INC.map((c, k) => { const w = o3(lanesB, "lc" + k); mk("div", "chip", w, "", chipHTML(c[0], c[1])); return w; });
+        const LXT = EXP.map((c, k) => { const w = o3(lanesB, "lx" + k); mk("div", "xt", w, "", xtHTML(c[0], c[1], c[2])); return w; });
 
         const C1A = split($("#c1a")), C1B = split($("#c1b")), C2A = split($("#c2a")), C2B = split($("#c2b")), C2C = split($("#c2c")), C2D = split($("#c2d"));
         const C3A = split($("#c3a")), C3B = split($("#c3b")), C3C = split($("#c3c")), C4A = split($("#c4a")), C4B = split($("#c4b")), C5A = split($("#c5a")), C5B = split($("#c5b"));
@@ -457,11 +461,12 @@
         const drop = (chars, at) => { chars.forEach((c, k) => F(c, { yPercent: 0 }, { yPercent: -115, duration: 0.26, ease: "power2.in" }, at + k * 0.008)); hide(capOf(chars), at + 0.3 + chars.length * 0.008); };
         // camera: K = anchor on screen (ax, ay), focus (fx, fy, fz), tilt rx, orbit ry, dolly z
         const K = (ax, ay, fx, fy, fz, rx, ry, z) => ({ ax, ay, fx, fy, fz, rx, ry, z });
-        const camSet = (k) => { pin("#cam1", { x: k.ax, y: k.ay, z: k.z, rotationX: k.rx }); pin("#yaw1", { rotationY: k.ry }); pin("#pan1", { x: -k.fx, y: -k.fy, z: -k.fz }); };
+        const CAM = ["#cam1", "#cam1b"], YAW = ["#yaw1", "#yaw1b"], PAN = ["#pan1", "#pan1b"];   // both contexts share one camera
+        const camSet = (k) => { pin(CAM, { x: k.ax, y: k.ay, z: k.z, rotationX: k.rx }); pin(YAW, { rotationY: k.ry }); pin(PAN, { x: -k.fx, y: -k.fy, z: -k.fz }); };
         const cam = (a, b, t0, d, ease) => {
-          F("#cam1", { x: a.ax, y: a.ay, z: a.z, rotationX: a.rx }, { x: b.ax, y: b.ay, z: b.z, rotationX: b.rx, duration: d, ease: ease || "sine.inOut" }, t0);
-          F("#yaw1", { rotationY: a.ry }, { rotationY: b.ry, duration: d, ease: ease || "sine.inOut" }, t0);
-          F("#pan1", { x: -a.fx, y: -a.fy, z: -a.fz }, { x: -b.fx, y: -b.fy, z: -b.fz, duration: d, ease: ease || "sine.inOut" }, t0);
+          F(CAM, { x: a.ax, y: a.ay, z: a.z, rotationX: a.rx }, { x: b.ax, y: b.ay, z: b.z, rotationX: b.rx, duration: d, ease: ease || "sine.inOut" }, t0);
+          F(YAW, { rotationY: a.ry }, { rotationY: b.ry, duration: d, ease: ease || "sine.inOut" }, t0);
+          F(PAN, { x: -a.fx, y: -a.fy, z: -a.fz }, { x: -b.fx, y: -b.fy, z: -b.fz, duration: d, ease: ease || "sine.inOut" }, t0);
         };
         const MB = (sel, sx, sy, t0, tc, t2) => {
           tl.set(sel, { filter: "url(#mb)" }, t0);
@@ -513,10 +518,13 @@
           F(ch, { scale: 1, autoAlpha: 1 }, { scale: 0.2, autoAlpha: 0, duration: 0.2, ease: "power2.in" }, t0 + 0.5);
           [0, 1].forEach((j) => {
             const c = inCoins[2 * k + j], tj = t0 + 0.52 + j * 0.09;
-            pin(c, { x: 50, y: -640, z: 30, autoAlpha: 0 }); pin(c.firstChild, { rotationY: 0, rotationX: 0 });
-            F(c, { x: 60 - j * 30, y: -660, z: 40, autoAlpha: 0 }, { x: 0, y: -400, z: 0, autoAlpha: 1, duration: 0.36, ease: "power2.in" }, tj);
-            F(c.firstChild, { rotationY: 0 }, { rotationY: -14, duration: 0.36, ease: "none" }, tj);
-            tl.set(c, { autoAlpha: 0 }, tj + 0.37);
+            pin(c, { x: 60 - j * 30, y: -660, z: 40, visibility: "hidden", opacity: 0 }); pin(c.firstChild, { rotationY: 0, rotationX: 0 });
+            tl.set(c, { visibility: "visible" }, tj);
+            F(c, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, tj);
+            F(c, { x: 60 - j * 30, y: -660, z: 40 }, { x: 0, y: -478, z: 0, duration: 0.34, ease: "power2.in" }, tj);   // edge-first into the slot
+            F(c.firstChild, { rotationY: 0 }, { rotationY: -14, duration: 0.34, ease: "none" }, tj);
+            F(c, { opacity: 1 }, { opacity: 0, duration: 0.07, ease: "none" }, tj + 0.27);
+            tl.set(c, { visibility: "hidden" }, tj + 0.35);
           });
           step(k + 1, t0 + 0.86);
         });
@@ -552,7 +560,7 @@
         // =========================== S2 · "Pas dicek, untungnya ke mana?" — whip to the gauge ===========================
         const gx = -700, gy = -270, gz = -380;
         const G0 = K(540, 930, gx + 20, gy, gz + 40, -6, 6, 420), G1 = K(540, 935, gx + 20, gy, gz + 40, -7, 2, 470);
-        cam(A3, G0, TM.cek - 0.35, 0.5, "power3.inOut"); MB("#w1", 46, 0, TM.cek - 0.35, TM.cek - 0.1, TM.cek + 0.15);
+        cam(A3, G0, TM.cek - 0.35, 0.5, "power3.inOut"); MB("#w1, #w1b", 46, 0, TM.cek - 0.35, TM.cek - 0.1, TM.cek + 0.15);
         cam(G0, G1, TM.cek + 0.15, TM.campur - 0.35 - TM.cek - 0.15, "none");
         // needle hunts, then collapses; the arc empties; "?" pops
         const nd = [[TM.cek + 0.35, -54, 6, 0.32], [TM.cek + 0.67, 6, -36, 0.3], [TM.cek + 0.97, -36, -14, 0.26], [TM.mana - 0.05, -14, -88, 0.5]];
@@ -565,15 +573,15 @@
 
         // =========================== S3 · "Kalau uang pribadi dan uang usaha campur" — the swirl ===========================
         const C0 = K(540, 930, 0, -280, 0, -12, 18, -130), C1 = K(540, 920, 0, -280, 0, -14, -14, -90);
-        cam(G1, C0, TM.campur - 0.35, 0.5, "power3.inOut"); MB("#w1", 50, 0, TM.campur - 0.35, TM.campur - 0.1, TM.campur + 0.15);
+        cam(G1, C0, TM.campur - 0.35, 0.5, "power3.inOut"); MB("#w1, #w1b", 50, 0, TM.campur - 0.35, TM.campur - 0.1, TM.campur + 0.15);
         cam(C0, C1, TM.campur + 0.15, TM.pisah + 0.4 - TM.campur - 0.15, "sine.inOut");
         // the gauge and the tiles leave the frame (fade their flat parts)
         F(["#gcard", "#gaugeW .gback", "#gaugeW .bx > i", "#gaugeW .fshadow"], { opacity: 1 }, { opacity: 0, duration: 0.3 }, TM.campur - 0.1); hide(qW, TM.campur - 0.05);
         tiles.forEach((tw, k) => F(tw, { autoAlpha: 1, z: TPOS[k][2] }, { autoAlpha: 0, z: TPOS[k][2] - 400, duration: 0.35, ease: "power2.in" }, TM.campur - 0.1));
         // lid blows off, the yellow coins erupt out of the jar, grey coins rush in from the right, one tornado
         const tS0 = TM.campur + 0.2, tS1 = TM.pisah + 0.4, tS2 = tS1 + 0.95;
-        F(lid, { y: 0, x: 0, rotationX: 0, rotation: 0 }, { y: -760, x: -260, rotationX: -70, rotation: -40, duration: 0.8, ease: "power2.out" }, tS0 - 0.05);
-        F("#lid .lids", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tS0 + 0.45);
+        F(lid, { y: 0, x: 0, z: 0, rotationX: 0, rotation: 0 }, { y: -520, x: 380, z: -700, rotationX: -55, rotation: 34, duration: 0.8, ease: "power2.out" }, tS0 - 0.05);
+        F("#lid .lids", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tS0 + 0.3);
         F(fillG, { scaleY: LEV[6] }, { scaleY: 0.001, duration: 0.8, ease: "power2.in" }, tS0 + 0.05);
         F(fillTop, { y: -FH * LEV[6] - 1 }, { y: -2, duration: 0.8, ease: "power2.in" }, tS0 + 0.05); hide(fillTop, tS0 + 0.86);
         ringEls.forEach((o, k) => {
@@ -645,9 +653,9 @@
         F(jarL, { x: 0 }, { x: -420, duration: 0.8, ease: "power3.out" }, tB + 0.12); F(jarR, { x: 0 }, { x: 420, duration: 0.8, ease: "power3.out" }, tB + 0.12);
         F(["#jar .gl", "#jar .gb"], { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power1.in" }, tB + 0.4);
         F(tagW, { y: -404, rotation: -3, z: GR + 30 }, { y: 400, rotation: -40, z: GR + 120, duration: 0.7, ease: "power2.in" }, tB + 0.12); hide(tagW, tB + 0.8);
-        pin(lanes, { autoAlpha: 0 }); pin("#laneL", { opacity: 0 }); pin("#laneR", { opacity: 0 }); pin(divIn, { scaleY: 0 }); pin(divL, { opacity: 0 });
+        pin(lanes, { autoAlpha: 0, y: -1 }); pin(lanesB, { autoAlpha: 0 }); pin("#laneL", { opacity: 0 }); pin("#laneR", { opacity: 0 }); pin(divIn, { scaleY: 0 }); pin(divL, { opacity: 0 });
         pin(["#laneL", "#laneR"], { backgroundPositionY: "0px" });
-        show(lanes, tB + 0.1);
+        show([lanes, lanesB], tB + 0.1);
         F(divL, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tB + 0.1);
         F(divIn, { scaleY: 0 }, { scaleY: 1, duration: 0.6, ease: "power3.out" }, tB + 0.2);
         F(["#laneL", "#laneR"], { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" }, tB + 0.35);

@@ -78,6 +78,16 @@ Planned at ~2.4 words/s with short pauses. When the ElevenLabs VO exists: set ea
   `CUTS` at `sol − 0.05` and `end − 0.01`), `tools/sfx.py` → `assets/audio/sfx.wav` (35.0 s, 48 kHz mono),
   `thumbnail/cover.html` → `thumbnail/COVER_MP06_BULANAN_TAHUNAN.png`.
 
+## QA done (no full render)
+- Snapshots at every scene and transition midpoint (30 frames, contact sheets `CONTACT_MP06_A.jpg` / `_B.jpg` in the agent
+  scratchpad `v06/`), plus targeted re-shoots after each fix. Console: only the expected `lipsync.js` 404.
+- Text-edge check over 0–35 s (step 0.25): no visible text crosses the frame edge. The only hits are (a) text inside the
+  magnifier clone (clipped by the round glass), (b) the band marquee (by design, as in Video 1), (c) far/near spreadsheet rows
+  in the steep-perspective shots that sit under the opaque top/bottom paper fades (y < 470 or y > 1600).
+- Fixed during QA: depth-sorting at the start (card L began below its own stack plates → blank amount for 0.3 s), the lifted
+  duplicate row hiding its twin, sheet tag/edge too close to the frame, robot hand crossing the hologram logo, card R fading
+  in behind the robot, odometer smear (now one clean value per month).
+
 ## Not done / notes for the lead
 - Full HyperFrames render not run (lead renders). `lipsync.js` absent until the VO is recorded (loads with `onerror`, 404 in the
   console is expected).

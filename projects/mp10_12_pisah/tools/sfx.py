@@ -166,7 +166,7 @@ for k in range(3): put(TM['lane1'] + 0.1 + k * 0.16 + 0.35, pop(800 + 120 * k, 1
 # band sweep -> brand
 for k in range(3): wh(TM['sol'] - 0.5 + k * 0.06, 0.45, 300 + 200 * k, 1800 + 400 * k, 1.1, 0.7, 0.5)
 holo_fx(TM['sol'] + 0.55)
-wh(TM['sol'] + 0.6, 0.8, 300, 1400, 1.0, 0.5, 0.4)
+wh(TM['sol'] + 0.35, 0.8, 300, 1400, 1.0, 0.5, 0.4)
 for k in range(4): put(TM['sol'] + 1.45 + k * 0.3 + 0.48, pop(600 + 90 * k, 1200, 0.07), 0.1); put(TM['sol'] + 1.45 + k * 0.3, whoosh(0.4, 800, 2600, 1.6, 0.6), W * 0.15)
 for g0 in (TM['sol'] + 2.6, TM['telusur'] + 1.6, TM['end'] + 4.4, TM['end'] + 7.0): put(g0, square_blips([1800, 900, 1500], 0.02), 0.02)
 put(TM['telusur'] + 0.35, marker(0.45), MK); put(TM['telusur'] + 0.8, marker(0.6), MK * 0.7)

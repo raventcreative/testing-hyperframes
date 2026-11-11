@@ -24,7 +24,7 @@
     for (let i = 0; i < n; i++) k[i] /= s; return (KER[id] = k);
   }
   // hard cuts (robot hidden / off-frame when it jumps): springs never look back across them
-  const CUTS = [window.TM.end - 0.01];
+  const CUTS = [window.TM.sol - 0.05, window.TM.end - 0.01];
   const lastCut = (t) => { let c = -1e9; for (const q of CUTS) if (q <= t) c = q; return c; };
   function filt(ch, t, f, z) { const c = lastCut(t), k = kernel(f, z); let y = 0; for (let i = 0; i < k.length; i++) y += k[i] * raw(ch, Math.max(c, t - i * DT)); return y; }
   const GRP = { pos: [1.5, 0.74], body: [1.7, 0.6], head: [2.3, 0.52], arm: [2.0, 0.56], look: [5.5, 0.92], face: [4.0, 0.95] };
@@ -44,34 +44,11 @@
   const armL = (t, r, f, b, y, e) => pose(t, { lR: r, lF: f, lB: b, lY: y }, e), armR = (t, r, f, b, y, e) => pose(t, { rR: r, rF: f, rB: b, rY: y }, e);
   const NAVY = { sh: 0.5, rim: 2.0 };
   const REST = (t) => { armL(t, 15, 0, 10, 0); armR(t, 15, 0, 10, 0); };
-  // S0 · rises bottom-right beside the browser, reads, gets annoyed at "pajak lagi"
-  pose(0, Object.assign({ x: 880, y: 2300, h: 470 }, NAVY)); pose(0.15, { y: 2300 }); pose(0.65, { y: 1650 }, "o");
-  REST(0.7); pose(0.8, { hYaw: -26, hPitch: -14, yaw: -14, lookX: -1, lookY: 0.8 });
-  pose(1.55, { squint: 0, smile: 1 }); pose(1.8, { squint: 0.35, smile: 0, hRoll: 10 });
-  [[2.0, -30], [2.15, -18], [2.3, -30], [2.45, -22]].forEach(([t, v]) => pose(t, { hYaw: v }));
-  pose(2.7, { squint: 0, hRoll: 0, smile: 0.6 });
-  // articles: reads each headline; a different reaction per article
-  const A = [TM.a1, TM.a2, TM.a3, TM.a4];
-  A.forEach((t0, i) => pose(t0 + 0.2, { hYaw: -24, hPitch: -18, lookX: -1, lookY: 1, smile: 0.5 }));
-  armR(A[0] + 0.7, 15, 0, 10, 0); armR(A[0] + 1.0, 140, 22, 10, 0, "o"); armR(A[0] + 1.9, 140, 22, 10, 0); armR(A[0] + 2.2, 15, 0, 10, 0);   // points at the headline
-  armR(A[1] + 0.5, 15, 0, 10, 0); armR(A[1] + 0.8, 22, 72, 118, 0); armR(A[1] + 2.3, 22, 72, 118, 0); armR(A[1] + 2.6, 15, 0, 10, 0);      // hand to chin
-  pose(A[1] + 0.8, { squint: 0.35, smile: 0 }); pose(A[1] + 2.4, { squint: 0, smile: 0.6 });
-  pose(A[2] + 0.85, { mo: 0, smile: 0.5 }); pose(A[2] + 1.0, { mo: 1, smile: 0 }); pose(A[2] + 1.7, { mo: 0, smile: 0.4 });                 // "oh!"
-  pose(A[2] + 0.85, { y: 1650 }); pose(A[2] + 1.0, { y: 1615 }, "o"); pose(A[2] + 1.25, { y: 1650 });
-  armL(A[2] + 0.85, 15, 0, 10, 0); armL(A[2] + 1.0, 60, 20, 40, 90); armL(A[2] + 1.6, 15, 0, 10, 0);
-  armL(A[3] + 0.8, 15, 0, 10, 0); armR(A[3] + 0.8, 15, 0, 10, 0); armL(A[3] + 1.1, 75, 10, 70, 90); armR(A[3] + 1.1, 75, 10, 70, 90);       // shrug
-  pose(A[3] + 1.1, { hRoll: -12, smile: 0.2 }); REST(A[3] + 2.0); pose(A[3] + 2.0, { hRoll: 0 });
-  // S2 · confusion: walks to centre, X eyes and flailing at "mulai dari mana?"
-  pose(TM.conf - 0.5, { x: 880, y: 1650, h: 470 }); pose(TM.conf + 0.3, { x: 540, y: 1660, h: 560 });
-  pose(TM.conf - 0.2, { hYaw: 0, hPitch: -6, lookX: 0, lookY: 0.2, yaw: 0 });
-  pose(TM.conf + 0.75, { xe: 0 }); pose(TM.conf + 0.9, { xe: 1, smile: 0 });
-  [[0.9, 120, 40], [1.06, 150, 80], [1.22, 115, 30], [1.38, 150, 70], [1.54, 120, 40]].forEach(([d, a, b], i) => {
-    armL(TM.conf + d, i % 2 ? a : 150 - (a - 115), 10, b, 90); armR(TM.conf + d, i % 2 ? 150 - (a - 115) : a, 10, 110 - b, 90); });
-  [[0.9, -6], [1.02, 6], [1.14, -5], [1.26, 6], [1.38, -4], [1.6, 0]].forEach(([d, r]) => pose(TM.conf + d, { roll: r, hRoll: -r * 0.8 }));
-  pose(TM.conf + 2.1, { xe: 0, smile: 0.5 }); armL(TM.conf + 1.9, 22, 0, 10, 90); armR(TM.conf + 1.9, 22, 0, 10, 90); REST(TM.conf + 2.4);
+  // News opening has NO robot (client brief): the robot waits below the frame and rises with MasterPajak AI at TM.sol
+  pose(0, Object.assign({ x: 200, y: 2700, h: 900, yaw: 30 }, NAVY)); REST(0);
   // S3 · solution: half-body bottom-left, chest hologram to the right (build 1.2 s, on screen ~7 s)
-  pose(TM.sol - 0.5, { x: 540, y: 1660, h: 560 }); pose(TM.sol + 0.25, { x: 200, y: 1660, h: 900 });
-  pose(TM.sol - 0.2, { yaw: 12 }); pose(TM.sol + 0.35, { yaw: 30 });
+  pose(TM.sol - 0.05, { x: 200, y: 2700, h: 900 }, "hold"); pose(TM.sol + 0.55, { x: 200, y: 1660, h: 900 }, "o");
+  pose(TM.sol + 0.35, { yaw: 30 });
   pose(TM.sol + 0.3, { hYaw: 6, hPitch: 0, lookX: 0.2, lookY: 0, smile: 1, happy: 0 });
   armR(TM.sol + 0.3, 15, 0, 12, 0); armR(TM.sol + 0.65, 85, 35, 40, 0, "o"); armR(TM.sol + 1.3, 85, 35, 40, 0); armR(TM.sol + 1.6, 18, 0, 12, 0);
   armL(TM.sol + 0.3, 20, -50, 14, 0);

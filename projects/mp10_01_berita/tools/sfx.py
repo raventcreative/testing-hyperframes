@@ -106,19 +106,16 @@ def marker(dur=0.4):
 def click():
     return tick(0.012, 5200) * 0.8 + np.concatenate([np.zeros(int(0.03 * SR)), pop(1800, 900, 0.03)])[: int(0.06 * SR)] if False else tick(0.014, 5200)
 MK = 0.11
-# S0
-wh(0.0, 0.55, 200, 1600, g=0.6)
-for k in range(8): put(0.75 + k * 0.2, marker(0.18), MK * 0.9)
-put(1.6, pop(600, 1200, 0.1), P_); put(1.75, marker(0.4), MK)
-# articles
-for i, (t0, n) in enumerate([(TM['a1'], 1), (TM['a2'], 2), (TM['a3'], 2), (TM['a4'], 1)]):
-    put(t0 - 0.05, tick(0.012, 5200), 0.16); put(t0 - 0.03, pop(1600, 900, 0.035), 0.08)
-    wh(t0, 0.3, 800, 2200, 1.4, 0.4, 0.35); wh(t0 + 0.28, 0.6, 300, 1200, 1.0, 0.6, 0.45)
-    for k in range(n): put(t0 + 0.85 + k * 0.55, marker(0.42), MK)
-    wh(t0 + 2.42, 0.45, 1200, 400, 1.1, 0.5, 0.35)
-# confusion
-wh(TM['conf'] - 0.48, 0.5, 2400, 300, 1.0, 0.7, 0.8)
-for k in range(4): put(TM['conf'] + 0.05 + k * 0.1, rip(0.25), 0.05); put(TM['conf'] + 0.1 + k * 0.1, pop(400, 200, 0.1), 0.12)
+# S0 · page reveal + camera reading the headline (soft air moves), paragraph zoom + stabilo
+wh(TM['hd'] - 0.05, 0.7, 300, 1400, 1.0, 0.6, 0.35)
+wh(TM['zo'] - 0.02, 0.6, 1400, 400, 1.0, 0.5, 0.3); wh(TM['par'] - 0.02, 0.7, 300, 1300, 1.0, 0.6, 0.35)
+put(TM['par'] + 0.75, marker(0.42), MK)
+# excerpts: direct cuts (a soft paper tick) + stabilo
+for t0 in (TM['e2'], TM['e3'], TM['e4']):
+    put(t0, tick(0.012, 3200), 0.09); put(t0 + 0.45, marker(0.42), MK)
+# the stabilo floods the screen -> question on navy
+put(TM['conf'] - 0.42, marker(0.42), MK * 1.2); wh(TM['conf'] - 0.4, 0.5, 600, 2600, 1.2, 0.8, 0.6)
+for k in range(4): put(TM['conf'] + 0.15 + k * 0.12, pop(500 + 120 * k, 1000 + 150 * k, 0.08), 0.12)
 for k in range(3): put(TM['conf'] + 1.1 + k * 0.15, pop(900 + 200 * k, 1500, 0.08), 0.12)
 for j in range(6): put(TM['conf'] + 1.6 + j * 0.09, tick(0.02, 4800), 0.06)
 # band sweep -> solution

@@ -129,7 +129,12 @@ for k in range(24): put(10.78 + k * 0.028, tick(0.022, 3600 + 500 * (k % 3)), 0.
 put(11.48, pop(500, 1000, 0.1), 0.18); put(11.55, whoosh(0.5, 200, 2400, 1.0, 0.9), W); put(11.98, boom(0.7, 140, 50), 0.30)
 # S7 outro: M pop, slide, wordmark, shimmer
 put(12.35, pop(600, 1200, 0.12), 0.24); put(12.82, whoosh(0.5, 900, 2600, 1.2, 0.5), W * 0.5)
-put(13.1, chime((1046, 1568, 2093, 2637), 1.8), 0.08); put(13.12, boom(1.2, 90, 40), 0.18)
+# hologram power-ups (S5 + end card): projector zap, rising shimmer, soft chime when the logo resolves
+for t0, g in ((8.78, 0.9), (12.76, 1.0)):
+    put(t0, zap(0.35), 0.06 * g); put(t0 + 0.02, whoosh(0.6, 400, 4200, 1.8, 0.85), W * 0.45 * g)
+    put(t0 + 0.55, chime((1046, 1568, 2093, 2637), 1.5), 0.07 * g)
+put(13.5, boom(0.9, 110, 45), 0.14)
+for t0 in (9.42, 13.9, 14.6): put(t0, square_blips([1800, 900, 1500], 0.02), 0.025)   # hologram glitches
 # robot voice: tiny square-wave chirps on its reactions (cute, low in the mix)
 RB = 0.05
 put(0.32, square_blips([784, 1175, 1568], 0.045), RB)          # wakes up
@@ -142,7 +147,7 @@ put(6.85, square_blips([740, 990], 0.05), RB)                  # "oh!"
 put(8.92, square_blips([784, 988, 1175, 1568], 0.045), RB * 1.1)   # yay
 put(10.15, whoosh(0.35, 700, 2600, 1.4, 0.4), W * 0.45)        # slides in
 put(12.4, square_blips([988, 1319, 1760], 0.05), RB)           # hello
-put(13.8, square_blips([1175, 1568], 0.05), RB * 0.9)          # points at the CTA
+put(13.58, square_blips([1175, 1568], 0.05), RB * 0.9)         # points at the CTA
 x = out[: int(TOTAL * SR)]
 x = x / max(1e-9, np.abs(x).max()) * 0.89
 x16 = (np.clip(x, -1, 1) * 32767).astype(np.int16)

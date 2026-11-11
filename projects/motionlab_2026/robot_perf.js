@@ -4,13 +4,14 @@
 // blinks) -> derived secondary motion (squash from vertical acceleration, antenna lag + wobble). Then RobotMP.render().
 (function () {
   const KEYS = {};
+  const RAW = { op: 1, holoA: 1, holoRev: 1, holoGl: 1, hx: 1, hy: 1, hw: 1 };
   const key = (ch, t, v, e) => { (KEYS[ch] = KEYS[ch] || []).push([t, v, e || "io"]); };
   const EASE = {
     io: (p) => p * p * p * (p * (p * 6 - 15) + 10),            // smootherstep
     o: (p) => 1 - Math.pow(1 - p, 3), i: (p) => p * p * p, lin: (p) => p, hold: (p) => (p < 1 ? 0 : 1),
   };
   const DEF = { x: 790, y: 2250, h: 500, op: 1, yaw: 0, pitch: 0, roll: 0, hYaw: 0, hPitch: 0, hRoll: 0,
-    lR: 6, lF: 0, lB: 6, lY: 0, rR: 6, rF: 0, rB: 6, rY: 0, lookX: 0, lookY: 0, happy: 0, xe: 0, smile: 1, mo: 0, squint: 0, rim: 1, sh: 0.32 };
+    lR: 6, lF: 0, lB: 6, lY: 0, rR: 6, rF: 0, rB: 6, rY: 0, lookX: 0, lookY: 0, happy: 0, xe: 0, smile: 1, mo: 0, squint: 0, rim: 1, sh: 0.32, chest: 0, holoA: 0, holoRev: 0, holoGl: 0, hx: 540, hy: 1700, hw: 560 };
   function raw(ch, t) {
     const ks = KEYS[ch]; if (!ks) return DEF[ch];
     if (t <= ks[0][0]) return ks[0][1];
@@ -35,8 +36,8 @@
   const GRP = { pos: [1.5, 0.74], body: [1.7, 0.6], head: [2.3, 0.52], arm: [2.0, 0.56], look: [5.5, 0.92], face: [4.0, 0.95] };
   const G = { x: "pos", y: "pos", h: "pos", yaw: "body", pitch: "body", roll: "body", hYaw: "head", hPitch: "head", hRoll: "head",
     lR: "arm", lF: "arm", lB: "arm", lY: "arm", rR: "arm", rF: "arm", rB: "arm", rY: "arm", lookX: "look", lookY: "look",
-    happy: "face", xe: "face", smile: "face", mo: "face", squint: "face", rim: "face", sh: "face" };
-  const F = (ch, t) => (ch === "op" ? raw(ch, t) : filt(ch, t, GRP[G[ch]][0], GRP[G[ch]][1]));
+    happy: "face", xe: "face", smile: "face", mo: "face", squint: "face", rim: "face", sh: "face", chest: "face" };
+  const F = (ch, t) => (RAW[ch] ? raw(ch, t) : filt(ch, t, GRP[G[ch]][0], GRP[G[ch]][1]));
   const hover = (t, h) => Math.sin((2 * Math.PI * t) / 1.9) * 0.014 * h;
   const BLINKS = [0.42, 1.25, 2.3, 3.86, 5.45, 7.15, 8.3, 9.25, 11.02, 12.5, 13.95, 14.6];
   function blink(t) { let b = 0; for (const t0 of BLINKS) { const u = (t - t0) / 0.15; if (u > 0 && u < 1) b = Math.max(b, Math.sin(Math.PI * u)); } return b; }
@@ -82,39 +83,42 @@
   pose(4.78, { y: 1700 }); pose(4.92, { y: 1650 }, "o"); pose(5.15, { y: 1700 });
   armL(4.78, 12, 0, 10, 0); armL(4.95, 60, 20, 40, 90); armL(5.3, 15, 0, 10, 0);
   pose(5.15, { mo: 0, smile: 1, hPitch: -14 }); pose(5.3, { hPitch: -4 }); pose(5.45, { hPitch: -14 });
-  // T3 -> S4: slides down-left with the diagonal wipe
+  // T3 -> S4: slides down-left with the diagonal wipe and comes forward to HALF-BODY (explaining)
   armR(5.5, 128, 28, 10, 0); armR(5.75, 25, 0, 15, 0);
-  pose(5.55, { x: 840, y: 1700, h: 460 }); pose(6.05, { x: 290, y: 1620, h: 520 });
-  pose(5.55, { roll: 0, yaw: -15 }); pose(5.8, { roll: 14, yaw: -30 }); pose(6.1, { roll: 0, yaw: 14 });
-  // S4 · thinking (hand to chin, squint) -> flinch at the slice -> points at "Perlu dicek"
-  pose(6.15, { hYaw: 20, hPitch: -6, lookX: 1, lookY: 0.4, squint: 0.4, smile: 0 });
+  pose(5.55, { x: 840, y: 1700, h: 460 }); pose(6.12, { x: 290, y: 1640, h: 820 });
+  pose(5.55, { roll: 0, yaw: -15 }); pose(5.8, { roll: 12, yaw: -28 }); pose(6.15, { roll: 0, yaw: 16 });
+  // S4 · half-body: thinking (hand to chin, squint) -> flinch at the slice -> points up at "Perlu dicek", nods
+  pose(6.15, { hYaw: 16, hPitch: -10, lookX: 1, lookY: 0.6, squint: 0.4, smile: 0 });
   armR(6.0, 25, 0, 15, 0); armR(6.3, 22, 72, 118, 0);
-  pose(6.4, { y: 1620 }); pose(6.5, { y: 1636 }); pose(6.62, { y: 1620 });
-  pose(6.72, { squint: 0.4, mo: 0 }); pose(6.85, { squint: 0, mo: 0.5, hPitch: 8, lookY: -0.4 });
-  armL(6.7, 10, 0, 10, 0); armL(6.95, 80, 32, 6, 0, "o");
-  pose(7.2, { mo: 0, smile: 0.8 }); pose(7.3, { hPitch: 2 }); pose(7.42, { hPitch: 10 }); pose(7.55, { hPitch: 2 });
-  pose(7.45, { hYaw: 20 }); pose(7.6, { hYaw: -10, lookX: -0.5 });
-  // T4 -> S5: drops to the bottom centre
-  armR(7.4, 22, 72, 118, 0); armR(7.7, 20, 0, 15, 0); armL(7.45, 80, 32, 6, 0); armL(7.75, 20, 0, 15, 0);
-  pose(7.5, { x: 290, y: 1620, h: 520 }); pose(8.08, { x: 540, y: 1765, h: 420 });
+  pose(6.4, { y: 1640 }); pose(6.5, { y: 1656 }); pose(6.62, { y: 1640 });
+  pose(6.72, { squint: 0.4, mo: 0 }); pose(6.85, { squint: 0, mo: 0.5, hPitch: -6, lookY: 0.6 });
+  armL(6.7, 12, 0, 10, 0); armL(6.95, 118, 30, 8, 0, "o");
+  pose(7.2, { mo: 0, smile: 0.8 }); pose(7.3, { hPitch: -14 }); pose(7.42, { hPitch: -2 }); pose(7.55, { hPitch: -10 });
+  // T4 -> S5: stays half-body, settles bottom-left and turns toward the right (where the hologram will appear)
+  armR(7.4, 22, 72, 118, 0); armR(7.7, 18, 0, 14, 0); armL(7.45, 118, 30, 8, 0); armL(7.75, 15, 0, 12, 0);
+  pose(7.5, { x: 290, y: 1640, h: 820 }); pose(8.12, { x: 250, y: 1620, h: 1000 });
   pose(7.5, { sh: 0.3, rim: 1 }); pose(7.95, { sh: 0.5, rim: 2.0 });
-  pose(7.9, { yaw: 14 }); pose(8.15, { yaw: 0 });
-  // S5 · watches the pieces, "push" gesture, snap -> celebrates (jump, arms up, ^ ^)
-  pose(8.1, { hYaw: 0, hPitch: -18, lookX: 0, lookY: 1, smile: 0.6, squint: 0 });
-  armL(8.15, 20, 0, 15, 0); armR(8.15, 20, 0, 15, 0);
-  armL(8.45, 22, 62, 24, 0); armR(8.45, 22, 62, 24, 0); armL(8.66, 18, 80, 10, 0); armR(8.66, 18, 80, 10, 0);
-  armL(8.92, 152, 0, 22, 90, "o"); armR(8.92, 152, 0, 22, 90, "o");
-  pose(8.74, { happy: 0, smile: 0.6 }); pose(8.9, { happy: 1, smile: 1, hPitch: -8 });
-  pose(8.76, { y: 1765 }); pose(8.98, { y: 1725 }, "o"); pose(9.22, { y: 1765 }, "i");
-  pose(9.1, { roll: 0 }); pose(9.2, { roll: 6 }); pose(9.32, { roll: -6 }); pose(9.44, { roll: 0 });
-  armL(9.3, 150, 0, 40, 90); armR(9.3, 150, 0, 40, 90);
-  // T5 · flies into the camera with the zoom-through, fades under the flash
-  pose(9.5, { x: 540, y: 1765, h: 420 }); pose(9.98, { x: 540, y: 1180, h: 2100 }, "i");
+  pose(7.6, { yaw: 16 }); pose(8.15, { yaw: 30 });
+  // S5 · watches the puzzle snap above, celebrates, then the chest M projects the MasterPajak AI hologram
+  pose(8.12, { hYaw: 6, hPitch: -22, lookX: 0.3, lookY: 1, smile: 0.6, squint: 0 });
+  pose(8.74, { happy: 0, smile: 0.6 }); pose(8.9, { happy: 1, smile: 1 });
+  pose(8.76, { y: 1620 }); pose(8.95, { y: 1592 }, "o"); pose(9.15, { y: 1620 });
+  armR(8.15, 15, 0, 12, 0); armR(8.92, 145, 0, 30, 90, "o"); armR(9.12, 145, 0, 62, 90); armR(9.32, 145, 0, 30, 90);
+  armL(8.15, 15, 0, 12, 0); armL(8.7, 20, -50, 14, 0);
+  pose(9.0, { hYaw: 24, hPitch: 0, lookX: 1, lookY: -0.4 });
+  key("hx", 0, 808, "hold"); key("hy", 0, 1560, "hold"); key("hw", 0, 500, "hold");
+  pose(8.6, { chest: 0 }); pose(8.8, { chest: 1 });
+  key("holoA", 0, 0, "hold"); key("holoA", 8.78, 0, "hold"); key("holoA", 8.92, 1, "o");
+  key("holoRev", 0, 0, "hold"); key("holoRev", 8.82, 0, "hold"); key("holoRev", 9.3, 1.1, "o");
+  key("holoGl", 0, 0, "hold"); key("holoGl", 9.38, 0, "hold"); key("holoGl", 9.42, 0.8, "lin"); key("holoGl", 9.5, 0, "lin");
+  // T5 · flies into the camera with the zoom-through (hologram powers down), fades under the flash
+  armR(9.5, 145, 0, 30, 90); armR(9.78, 60, 40, 20, 0);
+  pose(9.5, { x: 250, y: 1620, h: 1000 }); pose(9.98, { x: 420, y: 1250, h: 3200 }, "i");
   key("op", 0, 1, "hold"); key("op", 9.86, 1, "hold"); key("op", 9.97, 0, "lin");
-  armL(9.5, 150, 0, 40, 90); armR(9.5, 150, 0, 40, 90); armL(9.75, 60, 40, 20, 0); armR(9.75, 60, 40, 20, 0);
-  pose(9.5, { happy: 1 }); pose(9.7, { happy: 0, mo: 0.8, hPitch: 0, lookY: 0 });
-  // S6 · slides in from the right, points at the "?", reads the typewriter line, nods
-  pose(10.0, { x: 1320, y: 1000, h: 440, mo: 0, smile: 1 }, "hold"); key("op", 10.02, 1, "hold");
+  key("holoA", 9.52, 1, "hold"); key("holoA", 9.72, 0, "i"); pose(9.5, { chest: 1 }); pose(9.72, { chest: 0 });
+  pose(9.5, { happy: 1 }); pose(9.7, { happy: 0, mo: 0.8, hPitch: 0, lookY: 0, hYaw: 0 });
+  // S6 · full body: slides in from the right, points at the "?", reads the typewriter line, nods
+  pose(10.0, { x: 1320, y: 1000, h: 440, mo: 0, smile: 1, chest: 0 }, "hold"); key("op", 10.02, 1, "hold");
   pose(10.45, { x: 920, y: 1000, h: 440 }, "o");
   pose(10.0, { roll: -14, yaw: -25 }, "hold"); pose(10.5, { roll: 0, yaw: -12 });
   pose(10.0, { sh: 0.3, rim: 1 }, "hold");
@@ -128,23 +132,38 @@
   // T6 · ducks out of the frame as the beam floods
   pose(11.55, { x: 920, y: 1000, h: 440 }); pose(11.92, { x: 920, y: 2400, h: 440 }, "i");
   pose(11.55, { roll: 0 }); pose(11.8, { roll: 10 });
-  // S7 · rises into the end card, waves, points at the CTA, holds
-  pose(11.99, { x: 540, y: 2400, h: 640, roll: 0, yaw: 0, hYaw: 0, hPitch: 0, lookX: 0, lookY: 0, happy: 0 }, "hold");
+  // S7 · HALF-BODY end card: rises bottom-right, waves, projects the logo hologram to the left, points at the CTA
+  pose(11.99, { x: 830, y: 2650, h: 1000, roll: 0, yaw: -30, hYaw: 0, hPitch: 0, lookX: 0, lookY: 0, happy: 0, chest: 0 }, "hold");
   pose(11.99, { sh: 0.5, rim: 2.0 }, "hold");
-  armL(11.99, 30, 0, 15, 0, "hold"); armR(11.99, 30, 0, 15, 0, "hold");
-  pose(12.5, { y: 1585 }, "o");
-  pose(12.55, { happy: 1, smile: 1 });
-  armL(12.55, 148, 0, 30, 90, "o");
-  [12.8, 13.02, 13.24, 13.46].forEach((t, i) => armL(t, 148, 0, i % 2 ? 30 : 64, 90));
-  pose(12.6, { hRoll: 8 }); pose(13.0, { hRoll: -6 }); pose(13.4, { hRoll: 4 });
-  armL(13.62, 148, 0, 30, 90); armL(13.9, 20, 0, 14, 0);
-  armR(13.5, 30, 0, 15, 0); armR(13.78, 158, 22, 8, 0, "o");
-  pose(13.6, { hRoll: 0, hPitch: 0, happy: 1 }); pose(13.85, { hPitch: -20, lookY: 1, lookX: -0.2, happy: 0, smile: 1, hYaw: -6 });
-  armR(14.4, 158, 22, 8, 0); armR(14.75, 22, 0, 14, 0);
-  pose(14.45, { hPitch: -20, lookY: 1 }); pose(14.75, { hPitch: 0, lookY: 0, lookX: 0, hYaw: 0, happy: 1 });
+  armL(11.99, 18, 0, 14, 0, "hold"); armR(11.99, 20, -50, 14, 0, "hold");
+  pose(12.48, { y: 1620 }, "o");
+  pose(12.5, { happy: 1, smile: 1 });
+  armL(12.5, 145, 0, 30, 90, "o"); armL(12.72, 145, 0, 62, 90); armL(12.94, 145, 0, 30, 90); armL(13.16, 145, 0, 60, 90); armL(13.36, 145, 0, 32, 90);
+  key("hx", 11.99, 272, "hold"); key("hy", 11.99, 1560, "hold"); key("hw", 11.99, 500, "hold");
+  pose(12.62, { chest: 0 }); pose(12.8, { chest: 1 });
+  key("holoA", 12.74, 0, "hold"); key("holoA", 12.9, 1, "o");
+  key("holoRev", 12.78, 0, "hold"); key("holoRev", 13.42, 1.1, "o");
+  key("holoGl", 13.86, 0, "hold"); key("holoGl", 13.9, 0.85, "lin"); key("holoGl", 13.98, 0, "lin");
+  key("holoGl", 14.56, 0, "hold"); key("holoGl", 14.6, 0.6, "lin"); key("holoGl", 14.67, 0, "lin");
+  pose(12.85, { hYaw: -22, hPitch: 8, lookX: -1, lookY: -0.5, happy: 0 }); pose(13.4, { hYaw: -4, hPitch: 0, lookX: 0, lookY: 0, happy: 1 });
+  armL(13.55, 162, 18, 8, 0, "o"); pose(13.62, { hPitch: -22, lookY: 1, lookX: -0.4, hYaw: -10, happy: 0 });
+  armL(14.35, 162, 18, 8, 0); armL(14.7, 18, 0, 14, 0);
+  pose(14.4, { hPitch: -22 }); pose(14.7, { hPitch: 0, lookY: 0, lookX: 0, hYaw: -6, happy: 1 });
 
   // sort keys (they are added out of order)
   for (const ch in KEYS) KEYS[ch].sort((a, b) => a[0] - b[0]);
+  // hold-then-move: a key is the moment a pose is REACHED; the move into it takes at most MAXD[group] seconds and the
+  // previous pose is held until then (sparse keys would otherwise drift for seconds, e.g. a mouth slowly opening)
+  const MAXD = { pos: 0.75, body: 0.55, head: 0.45, arm: 0.5, look: 0.3, face: 0.3 };
+  for (const ch in KEYS) {
+    if (RAW[ch]) continue; const md = MAXD[G[ch]] || 0.5, ks = KEYS[ch], out = [ks[0]];
+    for (let i = 1; i < ks.length; i++) {
+      const a = out[out.length - 1], b = ks[i];
+      if (b[0] - a[0] > md + 1e-6 && b[2] !== "hold" && a[1] !== b[1]) out.push([b[0] - md, a[1], "hold"]);
+      out.push(b);
+    }
+    KEYS[ch] = out;
+  }
 
   // ---------------- per-frame state ----------------
   function state(t) {
@@ -168,7 +187,8 @@
       aL: { raise: v.lR + idleL, fwd: v.lF, bend: v.lB + idleL, bendYaw: v.lY }, aR: { raise: v.rR + idleR, fwd: v.rF, bend: v.rB + idleR, bendYaw: v.rY },
       face: { blink: Math.max(blink(t), v.squint), lookX: v.lookX, lookY: v.lookY, happy: Math.max(0, Math.min(1, v.happy)), x: Math.max(0, Math.min(1, v.xe)),
               smile: v.smile, o: Math.max(0, Math.min(1, v.mo)) },
-      rim: v.rim, shadow: v.sh,
+      rim: v.rim, shadow: v.sh, t, chest: Math.max(0, Math.min(1, v.chest)),
+      holo: { a: Math.max(0, Math.min(1, v.holoA)), rev: v.holoRev, glitch: v.holoGl, x: v.hx, y: v.hy, w: v.hw },
     };
   }
   window.ROBOT_STATE = state;

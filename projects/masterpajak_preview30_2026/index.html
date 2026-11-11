@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>MasterPajak AI — preview 38 s (VO + 3D robot, trial)</title>
+    <!-- TRIAL preview for the client MasterPajak AI (not a template). Every beat is locked to the client's ElevenLabs VO
+         (word stamps in production/vo_words.json). Design System v1.0: navy #212C5F, royal #26367A, yellow #FED111, cloud
+         #F6F7FB, Rubik + Public Sans; Playfair italic only for small editorial whispers. The 3D robot host (robot_perf.js)
+         lip-syncs to the VO (lipsync.js) and projects the MasterPajak AI hologram from its chest.
+         Cuts: 3.40 · 8.85 · 10.90 · 14.95 · 22.70 · 24.45 · 30.30 (end 38.5)
+         T1 panel slide-over · T2 blinds · T3 diagonal slice wipe · T4 band sweep + tagline marquee · T5 zoom-through + flash
+         T5b dot iris (the "?" dot opens the chat) · T6 beam flood + circle iris -->
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/robot_mp.js"></script>
+    <script src="lipsync.js"></script>
+    <style>
+      @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-500-normal.woff2) format("woff2"); font-weight: 500; }
+      @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+      @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-800-normal.woff2) format("woff2"); font-weight: 800; }
+      @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+      @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-600-normal.woff2) format("woff2"); font-weight: 600; }
+      @font-face { font-family: PS; src: url(assets/fonts/public-sans-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+      @font-face { font-family: PF; src: url(assets/fonts/playfair-display-latin-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; }
+      :root { --navy: #212C5F; --royal: #26367A; --deep: #131B40; --y: #FED111; --cloud: #F6F7FB; --n100: #EDEFF5; --n200: #E1E5EE;
+              --lb: #DDE1EE; --muted: #5B6478; --text: #161D3A; --n300: #8E99C2; --n500: #3A4889; --warnbg: #FBE6D2; --warn: #A85B12; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--deep); }
+      #main-root { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: PS, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+      .full { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .scene { visibility: hidden; opacity: 0; overflow: hidden; }
+      #s1 { visibility: visible; opacity: 1; }
+      .paper { background-color: var(--cloud);
+        background-image: linear-gradient(90deg, rgba(33,44,95,.07) 0 1.5px, transparent 1.5px), linear-gradient(0deg, rgba(33,44,95,.07) 0 1.5px, transparent 1.5px);
+        background-size: 54px 54px; background-position: 26px 20px; }
+      .vig { position: absolute; inset: 0; background: radial-gradient(ellipse 800px 1200px at 50% 46%, rgba(246,247,251,0) 55%, rgba(19,27,64,.10) 100%); pointer-events: none; }
+      .navybg { background: radial-gradient(ellipse 1000px 1200px at 50% 42%, #26367A 0%, #212C5F 55%, #1a234b 100%); }
+      .deepbg { background: radial-gradient(ellipse 1000px 1300px at 50% 40%, #1b2554 0%, #131B40 60%, #0c1230 100%); }
+      .ngrid { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; opacity: .10;
+        background-image: linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px), linear-gradient(0deg, #fff 0 1.5px, transparent 1.5px);
+        background-size: 108px 108px; background-position: -0.75px 12px;
+        -webkit-mask-image: radial-gradient(ellipse 620px 900px at 50% 50%, #000 30%, transparent 100%); mask-image: radial-gradient(ellipse 620px 900px at 50% 50%, #000 30%, transparent 100%); }
+      .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .1em .06em .18em; margin: -.1em -.06em -.18em; }
+      .c { display: inline-block; will-change: transform; }
+      .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; }
+      .chip { display: inline-block; position: relative; padding: .14em .44em .18em; border-radius: .28em; }
+      .whisper { font: italic 400 62px/1 PF; color: var(--muted); }
+      .cap { font: 600 22px/1 PS; letter-spacing: .06em; color: var(--muted); }
+      .cap i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--n300); margin-right: 10px; vertical-align: 1px; }
+      .card { position: absolute; background: #fff; border-radius: 24px; box-shadow: 0 8px 24px rgba(19,27,64,.12), 0 0 0 1.5px var(--n200); }
+      .dl { font: 700 24px/1 PS; letter-spacing: .08em; color: var(--muted); }
+      .dn { font: 700 80px/1 PS; font-variant-numeric: tabular-nums; letter-spacing: -2px; color: var(--navy); }
+
+      /* S1 · hook A */
+      #s1 .content { position: absolute; inset: 0; }
+      #lock1 { position: absolute; left: 120px; top: 250px; display: flex; align-items: center; gap: 12px; font: 700 30px/1 Rubik; color: var(--navy); }
+      #lock1 img { height: 34px; width: auto; }
+      #h1a { top: 420px; font: 800 132px/1 Rubik; letter-spacing: -3px; color: var(--navy); }
+      #row1 { position: absolute; left: 0; width: 1080px; top: 588px; display: flex; justify-content: center; align-items: center; gap: 22px; white-space: nowrap; }
+      #chip1 { font: 800 64px/1 Rubik; color: var(--y); background: var(--navy); clip-path: inset(0 100% 0 0); }
+      .dcard { width: 400px; height: 206px; padding: 34px 36px; }
+      .dcard .dn { margin-top: 22px; }
+      .dcard svg { position: absolute; right: 30px; top: 26px; width: 52px; height: 52px; }
+      #cardA { left: 130px; top: 790px; } #cardB { left: 550px; top: 1040px; }
+      #neq { position: absolute; left: 488px; top: 965px; width: 112px; height: 112px; border-radius: 50%; background: var(--y); text-align: center;
+             font: 800 76px/108px Rubik; color: var(--navy); box-shadow: 0 8px 24px rgba(19,27,64,.18); }
+      #cap1 { position: absolute; left: 130px; top: 1310px; }
+      #s1shade { position: absolute; inset: 0; background: var(--deep); opacity: 0; }
+
+      /* S2 · hook B + the three files */
+      #s2edge { position: absolute; left: -16px; top: 0; width: 16px; height: 1920px; background: var(--y); }
+      #col { position: absolute; left: 400px; top: 0; width: 280px; height: 1920px; background: var(--cloud); transform-origin: 50% 0; }
+      .tw { position: absolute; inset: 0; }
+      #t2n { clip-path: inset(0px 400px 1920px 400px); }
+      .tw .a { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; top: 520px; font: italic 400 66px/1 PF; }
+      .tw .b, .tw .d { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; font: 800 206px/1 Rubik; letter-spacing: -5px; }
+      .tw .b { top: 612px; } .tw .d { top: 830px; }
+      #t2w { color: #fff; } #t2w .a { color: var(--lb); } #t2n { color: var(--navy); }
+      .tool { position: absolute; padding: 14px 28px; border-radius: 999px; font: 700 30px/1 PS; color: var(--navy); background: #fff; box-shadow: 6px 8px 0 var(--deep); white-space: nowrap; }
+      .fcard { position: absolute; top: 1150px; width: 260px; height: 200px; padding: 26px 26px; border-radius: 22px; background: #fff;
+               box-shadow: 0 14px 30px rgba(5,9,30,.45), 0 0 0 1.5px rgba(255,255,255,.4); }
+      .fcard::after { content: ""; position: absolute; right: 0; top: 0; width: 44px; height: 44px; border-radius: 0 22px 0 14px; background: linear-gradient(225deg, var(--cloud) 50%, var(--n200) 50%); }
+      .fcard svg { width: 54px; height: 54px; }
+      .fcard .fl { margin-top: 18px; font: 700 34px/1 PS; color: var(--navy); white-space: nowrap; }
+      .fcard .fx { margin-top: 10px; font: 600 20px/1 PS; letter-spacing: .04em; color: var(--muted); }
+      #fc1 { left: 130px; } #fc2 { left: 410px; } #fc3 { left: 690px; }
+      #s2shade { position: absolute; inset: 0; background: var(--deep); opacity: 0; }
+      #strips .st { position: absolute; top: 0; width: 182px; height: 1920px; background: var(--cloud); }
+
+      /* S3 · the same money */
+      #s3c { position: absolute; inset: 0; }
+      #t3a { top: 400px; }
+      #t3b { top: 474px; font: 800 120px/1 Rubik; letter-spacing: -3px; color: var(--navy); }
+      #coin { position: absolute; left: 280px; top: 740px; width: 520px; height: 520px; overflow: visible; }
+      #lead { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .lab { position: absolute; font: 700 40px/1 PS; letter-spacing: .08em; color: var(--navy); white-space: nowrap; }
+
+      /* T3 + S4 · potongan, retur, selisih */
+      #w4o { position: absolute; left: -1060px; top: -1140px; width: 3200px; height: 4200px; overflow: hidden; visibility: hidden; }
+      #w4i { position: absolute; left: 0; top: 0; width: 3200px; height: 4200px; }
+      #w4e { position: absolute; left: 0; top: 0; width: 40px; height: 4200px; background: var(--y); }
+      #w4l { position: absolute; left: 40px; top: 0; width: 8px; height: 4200px; background: var(--navy); }
+      #s4 { position: absolute; left: 1060px; top: 1140px; width: 1080px; height: 1920px; overflow: hidden; }
+      .mcard { position: absolute; top: 400px; width: 370px; height: 160px; padding: 30px 34px; overflow: hidden; }
+      .mcard .dl { font-size: 22px; } .mcard .dn { margin-top: 16px; font-size: 64px; letter-spacing: -1.5px; }
+      .roll { position: relative; height: 1.12em; overflow: hidden; }
+      .roll span { position: absolute; left: 0; top: 0; display: block; white-space: nowrap; }
+      .roll span + span { top: 1.12em; }
+      .dl.roll { height: 1.2em; } .dl.roll span + span { top: 1.2em; }
+      #mc1 { left: 150px; } #mc2 { left: 560px; }
+      #vs4 { position: absolute; left: 508px; top: 448px; width: 64px; height: 64px; border-radius: 50%; background: var(--navy); color: #fff; font: 800 26px/64px Rubik; text-align: center; }
+      .tag { position: absolute; top: 600px; padding: 14px 26px; border-radius: 999px; background: var(--warnbg); color: var(--warn); font: 700 32px/1 PS; white-space: nowrap; }
+      #tg1 { left: 150px; } #tg2 { left: 420px; }
+      .n5 { position: absolute; left: 0; top: 640px; width: 1080px; height: 400px; text-align: center; font: 800 196px/400px Rubik; letter-spacing: -6px; color: var(--navy); white-space: nowrap; }
+      #n5a { clip-path: polygon(0 0, 1080px 0, 1080px 85px, 0 315px); }
+      #n5b { clip-path: polygon(0 315px, 1080px 85px, 1080px 400px, 0 400px); }
+      #cutbox { position: absolute; left: 0; top: 640px; width: 1080px; height: 400px; }
+      #cut { position: absolute; left: -110px; top: 338px; width: 1300px; height: 30px; margin-top: -15px; background: var(--y); transform-origin: 0 50%; }
+      #badge4 { position: absolute; left: 0; width: 1080px; top: 1090px; text-align: center; }
+      #badge4 span { display: inline-flex; align-items: center; gap: 16px; padding: 18px 38px; border-radius: 999px; background: var(--warnbg); color: var(--warn); font: 700 46px/1 PS; }
+      #badge4 i { display: block; width: 18px; height: 18px; border-radius: 50%; background: #D9822B; }
+      #cap4 { top: 1212px; }
+      #bands .bd { position: absolute; left: 0; width: 1080px; height: 322px; overflow: hidden; }
+      #mq { position: absolute; left: 0; top: 104px; white-space: nowrap; font: 800 104px/1 Rubik; letter-spacing: -2px; color: #fff; }
+      #mq b { color: var(--y); font-weight: 800; }
+
+      /* S5 · MasterPajak AI: hologram + the flow jualan -> pembukuan -> pajak */
+      #s5 .zw { position: absolute; inset: 0; transform-origin: 790px 555px; }
+      #t5k { top: 640px; font: italic 400 96px/1 PF; color: var(--lb); }
+      #t5a { top: 330px; font: italic 400 64px/1 PF; color: var(--lb); }
+      .pz { position: absolute; top: 430px; width: 250px; height: 250px; }
+      .pz svg { position: absolute; left: 0; top: 0; overflow: visible; filter: drop-shadow(0 16px 22px rgba(8,12,34,.45)); }
+      .pz .pl { position: absolute; left: 0; top: 0; width: 250px; height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; font: 800 40px/1 Rubik; letter-spacing: -.5px; color: var(--navy); }
+      .pz .pl svg { position: static; width: 56px; height: 56px; filter: none; }
+      #pA { left: 165px; } #pB { left: 415px; } #pC { left: 665px; }
+      #pB .pl { font-size: 32px; }
+      #trace { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .ring { position: absolute; width: 160px; height: 160px; margin: -80px 0 0 -80px; border-radius: 50%; border: 6px solid #fff; opacity: 0; }
+      #t5b { top: 760px; font: 600 48px/1 PS; color: var(--lb); }
+      #t5c { top: 826px; font: 800 104px/1 Rubik; letter-spacing: -3px; color: #fff; }
+      #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+
+      /* S6a · the question */
+      #s6 .content { position: absolute; inset: 0; }
+      #chip6 { position: absolute; left: 0; width: 1080px; top: 400px; text-align: center; }
+      #chip6 span { font: 700 56px/1 Rubik; color: #fff; background: var(--navy); clip-path: inset(0 100% 0 0); }
+      #q6 { position: absolute; left: 290px; top: 560px; width: 500px; height: 700px; overflow: visible; }
+      #idot { position: absolute; left: 488px; top: 1073px; width: 104px; height: 104px; border-radius: 50%; background: #131B40; opacity: 0; }
+
+      /* S6b · AI assistant chat + expert team */
+      #chat { position: absolute; left: 90px; top: 290px; width: 900px; height: 800px; border-radius: 36px; background: #fff; overflow: hidden;
+              box-shadow: 0 30px 70px rgba(2,5,20,.55), 0 0 0 1.5px rgba(255,255,255,.2); }
+      #chHead { position: absolute; left: 0; top: 0; width: 900px; height: 104px; display: flex; align-items: center; gap: 18px; padding: 0 34px; border-bottom: 1.5px solid var(--n200); background: #fff; z-index: 2; }
+      #chHead .av { width: 60px; height: 60px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; }
+      #chHead .av img { width: 36px; height: auto; }
+      #chHead .nm { font: 700 32px/1 Rubik; color: var(--navy); }
+      #chHead .st { font: 600 20px/1 PS; color: #2E9B5B; margin-top: 6px; }
+      #chHead .sim { margin-left: auto; font: 700 18px/1 PS; letter-spacing: .1em; color: var(--muted); padding: 10px 16px; border-radius: 999px; background: var(--n100); }
+      #chBody { position: absolute; left: 0; top: 104px; width: 900px; height: 696px; overflow: hidden; }
+      #chScroll { position: absolute; left: 0; top: 0; width: 900px; }
+      .bub { position: absolute; max-width: 640px; padding: 22px 28px; border-radius: 28px; font: 600 30px/1.35 PS; }
+      .bub.u { right: 34px; background: var(--navy); color: #fff; border-bottom-right-radius: 8px; }
+      .bub.a { left: 34px; background: var(--n100); color: var(--navy); border-bottom-left-radius: 8px; }
+      #u1 { top: 34px; } #typ { top: 140px; } #a1 { top: 140px; width: 640px; } #u2 { top: 470px; } #xp { top: 576px; }
+      #typ { display: flex; gap: 10px; padding: 26px 28px; }
+      #typ i { display: block; width: 14px; height: 14px; border-radius: 50%; background: var(--n300); }
+      .rows { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+      .rw { display: flex; align-items: center; gap: 16px; font: 700 22px/1 PS; letter-spacing: .06em; color: var(--muted); }
+      .rw span { width: 100px; } .rw b { display: block; height: 16px; border-radius: 8px; background: var(--navy); transform-origin: 0 50%; }
+      .rw:nth-child(2) b { background: var(--n300); } .rw:nth-child(3) b { background: var(--y); }
+      #xp { position: absolute; left: 34px; width: 832px; padding: 26px 30px; border-radius: 28px; background: #fff; box-shadow: 0 10px 28px rgba(19,27,64,.14), 0 0 0 1.5px var(--n200); }
+      #xp .t { font: 700 32px/1 Rubik; color: var(--navy); } #xp .s { margin-top: 8px; font: 600 24px/1.2 PS; color: var(--muted); }
+      #xp .avs { position: absolute; right: 30px; top: 26px; display: flex; }
+      #xp .avs i { display: flex; width: 64px; height: 64px; margin-left: -14px; border-radius: 50%; background: var(--n100); border: 4px solid #fff; align-items: center; justify-content: center; }
+      #xp .avs svg { width: 34px; height: 34px; }
+      #xp .btn { display: inline-flex; margin-top: 20px; align-items: center; gap: 12px; padding: 18px 30px; border-radius: 999px; background: var(--navy); color: #fff; font: 700 28px/1 PS; }
+      #xp .hl { background: linear-gradient(transparent 60%, rgba(254,209,17,.95) 60%); background-size: 0% 100%; background-repeat: no-repeat; }
+      #cap6 { position: absolute; left: 90px; top: 1112px; font: 600 22px/1 PS; letter-spacing: .06em; color: var(--n300); }
+
+      /* T6 beam */
+      #beamwrap { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
+      #disc { position: absolute; left: 30px; top: 1560px; width: 280px; height: 280px; border-radius: 50%; background: var(--royal); }
+      #beam { position: absolute; left: 170px; top: 1550px; width: 2800px; height: 300px; background: var(--royal); transform-origin: 0 50%; }
+
+      /* S7 · end card */
+      #s7 { background: var(--deep); clip-path: circle(0% at 50% 50%); }
+      #s7 .content { position: absolute; inset: 0; transform-origin: 540px 960px; }
+      #t7a, #t7b { font: 700 78px/1.05 Rubik; letter-spacing: -1.5px; color: #fff; }
+      #t7a { top: 400px; } #t7b { top: 492px; }
+      #t7b .yy { color: var(--y); }
+      #cta7 { position: absolute; left: 0; width: 1080px; top: 650px; text-align: center; }
+      #cta7 span { display: inline-flex; align-items: center; gap: 18px; padding: 28px 52px; border-radius: 999px; background: #fff; color: var(--navy); font: 700 44px/1 PS; }
+      #cta7 svg { width: 40px; height: 40px; }
+      #bio7 { top: 780px; font: 600 30px/1 PS; letter-spacing: .04em; color: var(--lb); }
+
+      #robot { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; pointer-events: none; }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/grain_256.png); opacity: .05; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="main-root" data-composition-id="main" data-start="0" data-duration="38.5" data-width="1080" data-height="1920">
+
+      <!-- S1 -->
+      <div id="s1" class="full scene paper">
+        <div class="vig"></div>
+        <div class="content">
+          <div id="lock1"><img src="assets/mp/mp_m_trim.png" alt="" /><span>MasterPajak AI</span></div>
+          <div id="h1a" class="ctr">Pesanan rame,</div>
+          <div id="row1"><span class="m whisper" id="w1"><span class="c">kok uangnya</span></span><span id="chip1" class="chip">beda?</span></div>
+          <div class="card dcard" id="cardA">
+            <div class="dl">PESANAN</div><div class="dn">Rp10 jt</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+          </div>
+          <div class="card dcard" id="cardB">
+            <div class="dl">MASUK BANK</div><div class="dn">Rp8,5 jt</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>
+          </div>
+          <div id="neq">≠</div>
+          <div id="cap1" class="cap"><i></i>ILUSTRASI DATA</div>
+        </div>
+        <div id="s1shade"></div>
+      </div>
+
+      <!-- S2 -->
+      <div id="s2" class="full scene navybg">
+        <div id="s2edge"></div>
+        <div id="col"></div>
+        <div class="tw" id="t2w"><div class="a">tiap tutup bulan,</div><div class="b">COCOKIN</div><div class="d">3 FILE?</div></div>
+        <div class="tw" id="t2n"><div class="a">tiap tutup bulan,</div><div class="b">COCOKIN</div><div class="d">3 FILE?</div></div>
+        <div id="tools"></div>
+        <div class="fcard" id="fc1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+          <div class="fl">Pesanan</div><div class="fx">PESANAN.XLSX</div>
+        </div>
+        <div class="fcard" id="fc2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></svg>
+          <div class="fl">Pencairan</div><div class="fx">PENCAIRAN.CSV</div>
+        </div>
+        <div class="fcard" id="fc3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>
+          <div class="fl">Mutasi bank</div><div class="fx">MUTASI.PDF</div>
+        </div>
+        <div id="s2shade"></div>
+      </div>
+      <div id="strips" class="full" style="visibility:hidden"></div>
+
+      <!-- S3 -->
+      <div id="s3" class="full scene paper">
+        <div class="vig"></div>
+        <div id="s3c">
+          <div id="t3a" class="ctr whisper">padahal itu</div>
+          <div id="t3b" class="ctr">uang yang sama.</div>
+          <svg id="lead" viewBox="0 0 1080 1920"></svg>
+          <svg id="coin" viewBox="0 0 520 520"></svg>
+          <div class="lab" id="lbL" style="left: 120px; top: 670px">PESANAN</div>
+          <div class="lab" id="lbR" style="left: 0; width: 960px; text-align: right; top: 670px">PENCAIRAN</div>
+          <div class="lab" id="lbD" style="left: 0; width: 1080px; text-align: center; top: 1420px">BANK</div>
+        </div>
+      </div>
+
+      <!-- S4 inside the diagonal wipe -->
+      <div id="w4o">
+        <div id="w4i">
+          <div id="s4" class="paper">
+            <div class="vig"></div>
+            <div class="card mcard" id="mc1"><div class="dl roll"><span>PESANAN</span><span>PENCAIRAN</span></div><div class="dn roll"><span>Rp10 jt</span><span>Rp9 jt</span></div></div>
+            <div class="card mcard" id="mc2"><div class="dl">MASUK BANK</div><div class="dn">Rp8,5 jt</div></div>
+            <div id="vs4">vs</div>
+            <div class="tag" id="tg1">− Potongan</div>
+            <div class="tag" id="tg2">− Retur</div>
+            <div class="n5" id="n5a">Rp500 rb</div>
+            <div class="n5" id="n5b">Rp500 rb</div>
+            <div id="cutbox"><div id="cut"></div></div>
+            <div id="badge4"><span><i></i>Perlu dicek</span></div>
+            <div id="cap4" class="ctr cap"><i></i>ILUSTRASI DATA</div>
+          </div>
+        </div>
+        <div id="w4e"></div><div id="w4l"></div>
+      </div>
+      <div id="bands" class="full" style="visibility:hidden"></div>
+
+      <!-- S5 -->
+      <div id="s5" class="full scene navybg">
+        <div class="zw">
+          <div class="ngrid"></div>
+          <div id="t5k" class="ctr">kenalin,</div>
+          <div id="t5a" class="ctr">satu alur:</div>
+          <svg id="trace" viewBox="0 0 1080 1920"><path id="trp" d="M250 555 H830" fill="none" stroke="#FED111" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 18"/><circle id="trd" cx="250" cy="555" r="12" fill="#FED111"/></svg>
+          <div class="pz" id="pA">
+            <svg width="300" height="250" viewBox="0 0 300 250"><path d="M0 0H250V87A40 40 0 1 1 250 163V250H0Z" fill="#FED111"/></svg>
+            <div class="pl"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>JUALAN</div>
+          </div>
+          <div class="pz" id="pB">
+            <svg width="300" height="250" viewBox="0 0 300 250"><path d="M0 0H250V87A40 40 0 1 1 250 163V250H0V163A40 40 0 1 0 0 87Z" fill="#ffffff"/></svg>
+            <div class="pl"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg>PEMBUKUAN</div>
+          </div>
+          <div class="pz" id="pC">
+            <svg width="300" height="250" viewBox="0 0 300 250"><path d="M0 0H250V250H0V163A40 40 0 1 0 0 87Z" fill="#DDE1EE"/></svg>
+            <div class="pl"><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15v2"/></svg>PAJAK</div>
+          </div>
+          <div class="ring" id="rg1" style="left: 415px; top: 555px"></div>
+          <div class="ring" id="rg2" style="left: 665px; top: 555px"></div>
+          <div id="t5b" class="ctr">pembukuan yang</div>
+          <div id="t5c" class="ctr">bisa ditelusuri.</div>
+        </div>
+      </div>
+
+      <!-- S6a -->
+      <div id="s6" class="full scene paper">
+        <div class="vig"></div>
+        <div class="content">
+          <div id="chip6"><span class="chip">Angka pajaknya dari mana?</span></div>
+          <svg id="q6" viewBox="-250 -330 500 700">
+            <path id="qhook" d="M-120 -130C-120 -270 130 -270 130 -130C130 -30 0 -10 0 80" fill="none" stroke="#212C5F" stroke-width="78" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle id="qdot" cx="0" cy="235" r="52" fill="#FED111"/>
+          </svg>
+          <div id="idot"></div>
+        </div>
+      </div>
+
+      <!-- S6b -->
+      <div id="s6b" class="full scene deepbg">
+        <div class="ngrid"></div>
+        <div id="chat">
+          <div id="chHead">
+            <div class="av"><img src="assets/mp/mp_m_reverse.png" alt="" /></div>
+            <div><div class="nm">Asisten AI</div><div class="st">● online</div></div>
+            <div class="sim">SIMULASI ALUR</div>
+          </div>
+          <div id="chBody"><div id="chScroll">
+            <div class="bub u" id="u1">Angka pajak ini dari mana?</div>
+            <div class="bub a" id="typ"><i></i><i></i><i></i></div>
+            <div class="bub a" id="a1">Dari omzet dan biaya yang kamu catat. Aku rincikan ya:
+              <div class="rows"><div class="rw"><span>OMZET</span><b style="width: 380px"></b></div><div class="rw"><span>BIAYA</span><b style="width: 230px"></b></div><div class="rw"><span>LABA</span><b style="width: 150px"></b></div></div>
+            </div>
+            <div class="bub u" id="u2">Kasusku agak rumit…</div>
+            <div id="xp">
+              <div class="t">Tim ahli Muamalah Pajak</div>
+              <div class="s"><span class="hl">Pendampingan sesuai layanan</span></div>
+              <div class="avs">
+                <i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i>
+                <i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i>
+                <i><svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></i>
+              </div>
+              <div class="btn" id="xpbtn">Hubungkan ke ahli <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+            </div>
+          </div></div>
+        </div>
+        <div id="cap6"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#8E99C2;margin-right:10px"></span>ILUSTRASI PERCAKAPAN</div>
+      </div>
+
+      <!-- T6 beam (over S6b) -->
+      <div id="beamwrap"><div id="beam"></div><div id="disc"></div></div>
+
+      <!-- S7 -->
+      <div id="s7" class="full scene">
+        <div class="content">
+          <div class="ngrid"></div>
+          <div id="t7a" class="ctr">Jualan jalan terus,</div>
+          <div id="t7b" class="ctr">pajaknya <span class="yy">AI</span> yang urus.</div>
+          <div id="cta7"><span>Coba kalkulator gratis<svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+          <div id="bio7" class="ctr">Link di bio</div>
+        </div>
+      </div>
+      <canvas id="robot" width="1080" height="1920"></canvas>
+      <div id="flash"></div>
+      <div id="grain"></div>
+    </div>
+
+    <script>
+      (function () {
+        let seed = 7; const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+        const $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
+        const NS = "http://www.w3.org/2000/svg";
+        const svgEl = (parent, n, a) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); parent.appendChild(e); return e; };
+        function split(el) {
+          const txt = el.textContent; el.textContent = "";
+          return [...txt].map((ch) => { const m = document.createElement("span"); m.className = "m"; const c = document.createElement("span"); c.className = "c"; c.textContent = ch === " " ? " " : ch; m.appendChild(c); el.appendChild(m); return c; });
+        }
+        // coin = the same money, three records
+        const coin = $("#coin"), C = 260, R = 250, P = (a, r) => [C + r * Math.cos(a * Math.PI / 180), C + r * Math.sin(a * Math.PI / 180)];
+        const FILL = ["#26367A", "#3A4889", "#212C5F"];
+        const wedges = [[-90, 30], [30, 150], [150, 270]].map(([a0, a1], w) => {
+          const g = svgEl(coin, "g", {}); const p0 = P(a0, R), p1 = P(a1, R);
+          svgEl(g, "path", { d: `M${C} ${C}L${p0[0]} ${p0[1]}A${R} ${R} 0 0 1 ${p1[0]} ${p1[1]}Z`, fill: FILL[w], stroke: "#F6F7FB", "stroke-width": 6, "stroke-linejoin": "round" });
+          for (let k = 0; k < 12; k++) { const a = a0 + 5 + k * 10, q0 = P(a, 214), q1 = P(a, 234); svgEl(g, "line", { x1: q0[0], y1: q0[1], x2: q1[0], y2: q1[1], stroke: "#ffffff", "stroke-opacity": .45, "stroke-width": 4, "stroke-linecap": "round" }); }
+          return g;
+        });
+        const face = svgEl(coin, "g", {});
+        svgEl(face, "circle", { cx: C, cy: C, r: 196, fill: "none", stroke: "#ffffff", "stroke-opacity": .5, "stroke-width": 3 });
+        const rp = svgEl(face, "text", { x: C, y: C + 52, "text-anchor": "middle", fill: "#ffffff", "font-family": "Rubik", "font-weight": 800, "font-size": 150, "letter-spacing": -4 }); rp.textContent = "Rp";
+        svgEl(face, "circle", { cx: C + 118, cy: C - 70, r: 16, fill: "#FED111" });
+        const leads = [[[790, 850], [880, 722], [960, 722]], [[540, 1318], [540, 1406]], [[290, 850], [200, 722], [120, 722]]].map((pts) => {
+          const pl = svgEl($("#lead"), "polyline", { points: pts.map((p) => p.join(",")).join(" "), fill: "none", stroke: "#212C5F", "stroke-width": 3 });
+          let L = 0; for (let k = 1; k < pts.length; k++) L += Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]);
+          pl.style.strokeDasharray = L; pl.style.strokeDashoffset = L; pl.dataset.len = L; return pl;
+        });
+        const TOOLS = [["Nota", 110, 420, -8], ["Retur", 820, 440, 7], ["Potongan", 90, 1050, 6], ["Spreadsheet", 690, 1046, -6]];
+        const toolEls = TOOLS.map(([t, x, y, r]) => { const d = document.createElement("div"); d.className = "tool"; d.textContent = t; d.style.left = x + "px"; d.style.top = y + "px"; $("#tools").appendChild(d); return { d, r, x, y }; });
+        for (let k = 0; k < 6; k++) { const s = document.createElement("div"); s.className = "st"; s.style.left = (k * 180) + "px"; $("#strips").appendChild(s); }
+        for (let k = 0; k < 6; k++) { const b = document.createElement("div"); b.className = "bd"; b.style.top = (k * 320) + "px"; b.style.background = k % 2 ? "#26367A" : "#212C5F"; $("#bands").appendChild(b); }
+        const mq = document.createElement("div"); mq.id = "mq"; mq.innerHTML = "Jualan jalan terus, pajaknya <b>AI</b> yang urus.&nbsp;—&nbsp;Jualan jalan terus"; $$("#bands .bd")[2].appendChild(mq);
+
+        const H1 = split($("#h1a")), T3A = split($("#t3a")), T3B = split($("#t3b")), T5A = split($("#t5a")), T5K = split($("#t5k")), T7A = split($("#t7a"));
+        const pair = (sel) => [split($("#t2w " + sel)), split($("#t2n " + sel))];
+        const T2A = pair(".a"), T2B = pair(".b"), T2D = pair(".d");
+        const both = (P2, k) => [P2[0][k], P2[1][k]];
+
+        // ---------- load-time initial states ----------
+        gsap.set(H1, { yPercent: 115, rotation: 6 });
+        gsap.set("#cardA", { x: 1000, y: -760, rotation: -40 }); gsap.set("#cardB", { x: -1100, y: 900, rotation: 40 });
+        gsap.set("#w1 .c", { yPercent: 115 }); gsap.set("#neq", { scale: 0 }); gsap.set("#cap1", { opacity: 0 }); gsap.set("#lock1", { opacity: 0, y: -16 });
+        gsap.set("#s2", { x: 1096 }); gsap.set("#col", { scaleY: 0 });
+        gsap.set([...T2A[0], ...T2A[1]], { yPercent: 115 }); gsap.set([...T2B[0], ...T2B[1], ...T2D[0], ...T2D[1]], { yPercent: -115 });
+        toolEls.forEach((t, k) => gsap.set(t.d, { x: (t.x < 540 ? -760 : 760), y: (k % 2 ? 260 : -260), rotation: t.r * 6 }));
+        gsap.set(".fcard", { y: 900, rotation: 0, opacity: 1 });
+        $$("#strips .st").forEach((s, k) => gsap.set(s, { y: k % 2 ? 1940 : -1940 }));
+        gsap.set([...T3A, ...T3B], { yPercent: 115 });
+        gsap.set("#coin", { scale: 0.3, rotation: -140, transformOrigin: "50% 50%" }); gsap.set(".lab", { opacity: 0, y: 18 });
+        const D4 = 2750, U = [Math.cos(-24 * Math.PI / 180), Math.sin(-24 * Math.PI / 180)];
+        gsap.set("#w4o", { rotation: -24, x: D4 * U[0], y: D4 * U[1], transformOrigin: "50% 50%" }); gsap.set("#w4i", { rotation: 24, x: -D4, transformOrigin: "50% 50%" });
+        gsap.set("#mc1", { y: 40, opacity: 0 }); gsap.set("#mc2", { x: 120, opacity: 0 }); gsap.set("#vs4", { scale: 0 });
+        gsap.set(".tag", { scale: 0, transformOrigin: "50% 50%" });
+        gsap.set(".n5", { scale: 0.6, opacity: 0, transformOrigin: "50% 50%" });
+        gsap.set("#cut", { rotation: -12, scaleX: 0, transformOrigin: "0% 50%" });
+        gsap.set("#badge4 span", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#cap4", { opacity: 0 });
+        $$("#bands .bd").forEach((b, k) => gsap.set(b, { x: k % 2 ? 1100 : -1100 }));
+        gsap.set([...T5A, ...T5K], { yPercent: 115 });
+        gsap.set("#pA", { x: -700, rotation: -14 }); gsap.set("#pB", { y: -700, rotation: 10 }); gsap.set("#pC", { x: 700, rotation: 14 });
+        const trp = $("#trp"); gsap.set(trp, { strokeDashoffset: 0, opacity: 0 }); gsap.set("#trd", { opacity: 0 });
+        gsap.set("#t5b", { opacity: 0, y: 24 }); gsap.set("#t5c", { opacity: 0, y: 40, scale: 0.92, transformOrigin: "50% 50%" });
+        const qh = $("#qhook"), QL = qh.getTotalLength(); qh.style.strokeDasharray = QL; qh.style.strokeDashoffset = QL;
+        gsap.set("#qdot", { scale: 0, transformOrigin: "50% 50%" });
+        gsap.set("#chat", { y: 140, opacity: 0 }); gsap.set(".bub, #xp", { opacity: 0, y: 30, scale: 0.92 });
+        gsap.set("#typ i", { y: 0 }); gsap.set(".rw b", { scaleX: 0 }); gsap.set("#cap6", { opacity: 0 });
+        gsap.set("#disc", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#beam", { rotation: -58, scaleX: 0, scaleY: 1, transformOrigin: "0% 50%" });
+        gsap.set([...T7A], { yPercent: 115 }); gsap.set("#t7b", { opacity: 0, y: 50 });
+        gsap.set("#cta7 span", { scale: 0, transformOrigin: "50% 50%" }); gsap.set("#bio7", { opacity: 0 });
+
+        // ---------- timeline ----------
+        const tl = gsap.timeline({ paused: true });
+        const F = (t, a, b, at) => tl.fromTo(t, a, Object.assign({ immediateRender: false }, b), at);
+        const show = (t, at) => tl.set(t, { autoAlpha: 1 }, at), hide = (t, at) => tl.set(t, { autoAlpha: 0 }, at);
+        tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: 38.5, ease: "steps(578)", immediateRender: false }, 0);
+
+        // S1 · 0 – 3.40   "Pesanan rame, tapi kok uang yang masuk beda?"
+        H1.forEach((c, k) => F(c, { yPercent: 115, rotation: 6 }, { yPercent: 0, rotation: 0, duration: 0.42, ease: "power4.out" }, 0.0 + k * 0.022));
+        F("#lock1", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 0.0);
+        F("#cardA", { x: 1000, y: -760, rotation: -40 }, { x: 0, y: 0, rotation: -4, duration: 0.62, ease: "power3.out" }, 0.3);
+        F("#w1 .c", { yPercent: 115 }, { yPercent: 0, duration: 0.4, ease: "power4.out" }, 1.66);
+        F("#cardB", { x: -1100, y: 900, rotation: 40 }, { x: 0, y: 0, rotation: 3, duration: 0.62, ease: "power3.out" }, 1.95);
+        F("#chip1", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "power3.out" }, 2.56);
+        F("#chip1", { scale: 0.7 }, { scale: 1, duration: 0.45, ease: "back.out(2.6)" }, 2.56);
+        F("#neq", { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2.4)" }, 2.7);
+        F("#cardA", { rotation: -4 }, { rotation: -6, duration: 1.6, ease: "sine.inOut" }, 0.92);
+        F("#cardB", { rotation: 3 }, { rotation: 5, duration: 0.9, ease: "sine.inOut" }, 2.57);
+        F("#cap1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 2.8);
+        // T1 · panel slide-over + parallax push
+        show("#s2", 2.9);
+        F("#s2", { x: 1096 }, { x: 0, duration: 0.47, ease: "power4.inOut" }, 2.93);
+        F("#s1 .content", { x: 0 }, { x: -320, duration: 0.47, ease: "power4.inOut" }, 2.93);
+        F("#s1shade", { opacity: 0 }, { opacity: 0.7, duration: 0.47, ease: "power2.in" }, 2.93);
+        hide("#s1", 3.42);
+
+        // S2 · 3.40 – 8.85   "Tiap tutup bulan masih cocok-cocokin 3 file. Pesanan, pencairan, mutasi bank."
+        F("#col", { scaleY: 0 }, { scaleY: 1, duration: 0.5, ease: "power3.out" }, 3.3);
+        F("#t2n", { clipPath: "inset(0px 400px 1920px 400px)" }, { clipPath: "inset(0px 400px 0px 400px)", duration: 0.5, ease: "power3.out" }, 3.3);
+        T2A[0].forEach((_, k) => F(both(T2A, k), { yPercent: 115 }, { yPercent: 0, duration: 0.35, ease: "power3.out" }, 3.5 + k * 0.016));
+        T2B[0].forEach((_, k) => F(both(T2B, k), { yPercent: -115 }, { yPercent: 0, duration: 0.42, ease: "back.out(1.7)" }, 4.86 + k * 0.04));
+        T2D[0].forEach((_, k) => F(both(T2D, k), { yPercent: -115 }, { yPercent: 0, duration: 0.42, ease: "back.out(1.7)" }, 5.5 + k * 0.045));
+        toolEls.forEach((t, k) => F(t.d, { x: (t.x < 540 ? -760 : 760), y: (k % 2 ? 260 : -260), rotation: t.r * 6 }, { x: 0, y: 0, rotation: t.r, duration: 0.5, ease: "back.out(1.5)" }, 4.95 + k * 0.06));
+        for (let j = 0; j < 7; j++) {
+          const at = 5.86 + j * 0.083;
+          T2D[0].forEach((_, k) => tl.set(both(T2D, k), { x: (rnd() - 0.5) * 22, y: (rnd() - 0.5) * 18, rotation: (rnd() - 0.5) * 9 }, at));
+          toolEls.forEach((t) => tl.set(t.d, { x: (rnd() - 0.5) * 26, y: (rnd() - 0.5) * 22, rotation: t.r + (rnd() - 0.5) * 12 }, at));
+        }
+        T2D[0].forEach((_, k) => tl.set(both(T2D, k), { x: 0, y: 0, rotation: 0 }, 6.45));
+        toolEls.forEach((t) => tl.set(t.d, { x: 0, y: 0, rotation: t.r }, 6.45));
+        [["#fc1", 6.52, -7], ["#fc2", 7.26, 4], ["#fc3", 7.98, -3]].forEach(([s, t, r]) => {
+          F(s, { y: 900, rotation: r * 4 }, { y: 0, rotation: r, duration: 0.5, ease: "back.out(1.6)" }, t);
+          F(s, { scale: 1 }, { scale: 1.05, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1 }, t + 0.42);
+        });
+        // T2 · blinds
+        show("#strips", 8.4);
+        $$("#strips .st").forEach((s, k) => F(s, { y: k % 2 ? 1940 : -1940 }, { y: 0, duration: 0.4, ease: "power4.inOut" }, 8.43 + 0.012 * (k % 2 ? 5 - k : k)));
+        F("#s2shade", { opacity: 0 }, { opacity: 0.5, duration: 0.4, ease: "power2.in" }, 8.43);
+        show("#s3", 8.85); hide("#s2", 8.88); hide("#strips", 8.88);
+
+        // S3 · 8.85 – 10.90   "Padahal itu uang yang sama."
+        T3A.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.38, ease: "power3.out" }, 8.98 + k * 0.016));
+        T3B.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.42, ease: "power4.out" }, 9.7 + k * 0.024));
+        F("#coin", { scale: 0.3, rotation: -140 }, { scale: 1, rotation: 0, duration: 0.65, ease: "back.out(1.4)" }, 8.95);
+        F(face, { opacity: 1 }, { opacity: 0, duration: 0.12 }, 10.02);
+        [-30, 90, 210].forEach((a, k) => {
+          const dx = 62 * Math.cos(a * Math.PI / 180), dy = 62 * Math.sin(a * Math.PI / 180);
+          F(wedges[k], { x: 0, y: 0, rotation: 0 }, { x: dx, y: dy, rotation: [8, -6, -8][k], svgOrigin: C + " " + C, duration: 0.45, ease: "back.out(2.2)" }, 10.04);
+        });
+        leads.forEach((pl, k) => F(pl, { strokeDashoffset: +pl.dataset.len }, { strokeDashoffset: 0, duration: 0.24, ease: "power2.out" }, 10.12 + k * 0.05));
+        ["#lbR", "#lbD", "#lbL"].forEach((s, k) => F(s, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.24, ease: "power3.out" }, 10.18 + k * 0.05));
+        // T3 · diagonal slice wipe
+        show("#w4o", 10.46);
+        F("#w4o", { x: D4 * U[0], y: D4 * U[1] }, { x: 0, y: 0, duration: 0.44, ease: "power4.inOut" }, 10.48);
+        F("#w4i", { x: -D4 }, { x: 0, duration: 0.44, ease: "power4.inOut" }, 10.48);
+        F("#s3c", { x: 0, y: 0 }, { x: -170, y: 76, duration: 0.44, ease: "power4.inOut" }, 10.48);
+        hide("#s3", 10.94);
+
+        // S4 · 10.90 – 14.95   "Ada potongan, ada retur, dan masih ada selisih yang perlu dicek."
+        F("#mc1", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 10.86);
+        F("#tg1", { scale: 0, rotation: -8 }, { scale: 1, rotation: -3, duration: 0.42, ease: "back.out(2.4)" }, 11.18);
+        F("#tg2", { scale: 0, rotation: 8 }, { scale: 1, rotation: 3, duration: 0.42, ease: "back.out(2.4)" }, 12.14);
+        F("#tg1", { x: 0, y: 0, scale: 1, opacity: 1 }, { x: 60, y: -150, scale: 0.4, opacity: 0, duration: 0.32, ease: "power3.in" }, 12.62);
+        F("#tg2", { x: 0, y: 0, scale: 1, opacity: 1 }, { x: -150, y: -150, scale: 0.4, opacity: 0, duration: 0.32, ease: "power3.in" }, 12.68);
+        F("#mc1 .roll span", { yPercent: 0 }, { yPercent: -100, duration: 0.36, ease: "power3.inOut" }, 12.86);
+        F("#mc1", { scale: 1 }, { scale: 1.06, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1, transformOrigin: "50% 50%" }, 12.9);
+        F("#mc2", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 13.02);
+        F("#vs4", { scale: 0 }, { scale: 1, duration: 0.35, ease: "back.out(2.4)" }, 13.16);
+        F(".n5", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.42, ease: "back.out(1.8)" }, 13.36);
+        F("#cut", { scaleX: 0 }, { scaleX: 1, duration: 0.26, ease: "power3.out" }, 13.6);
+        F("#n5a", { x: 0, y: 0 }, { x: 26, y: -24, duration: 0.4, ease: "power3.out" }, 13.72);
+        F("#n5b", { x: 0, y: 0 }, { x: -26, y: 24, duration: 0.4, ease: "power3.out" }, 13.72);
+        F("#badge4 span", { scale: 0 }, { scale: 1, duration: 0.42, ease: "back.out(2.6)" }, 14.3);
+        F("#cap4", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 14.45);
+        // T4 · alternating band sweep + tagline marquee
+        show("#bands", 14.46);
+        $$("#bands .bd").forEach((b, k) => F(b, { x: k % 2 ? 1100 : -1100 }, { x: 0, duration: 0.4, ease: "power4.inOut" }, 14.5 + k * 0.03));
+        F("#mq", { x: 140 }, { x: -620, duration: 0.95, ease: "none" }, 14.5);
+        show("#s5", 14.95); hide("#w4o", 14.99); hide("#bands", 15.01);
+
+        // S5 · 14.95 – 22.70   "Kenalin, MasterPajak AI. Catatan jualan kamu dirapikan jadi pembukuan yang bisa ditelusuri, sampai ke persiapan pajak."
+        T5K.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.45, ease: "power3.out" }, 15.04 + k * 0.03));
+        T5K.forEach((c, k) => F(c, { yPercent: 0 }, { yPercent: -115, duration: 0.35, ease: "power3.in" }, 17.0 + k * 0.02));
+        T5A.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.36, ease: "power3.out" }, 17.38 + k * 0.02));
+        F("#pA", { x: -700, rotation: -14 }, { x: 0, rotation: 0, duration: 0.5, ease: "back.out(1.4)" }, 17.7);
+        F("#pB", { y: -700, rotation: 10 }, { y: -30, rotation: 3, duration: 0.42, ease: "power3.out" }, 19.18);
+        F("#pB", { y: -30, rotation: 3 }, { y: 0, rotation: 0, duration: 0.12, ease: "power4.in" }, 19.6);
+        F("#rg1", { scale: 0.2, opacity: 1 }, { scale: 2.6, opacity: 0, duration: 0.5, ease: "power2.out" }, 19.72);
+        F("#t5b", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, 19.24);
+        F("#t5c", { opacity: 0, y: 40, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.8)" }, 19.9);
+        // "ditelusuri": a trace runs across the pieces
+        F(trp, { opacity: 0 }, { opacity: 1, duration: 0.1 }, 20.3);
+        F("#trd", { opacity: 0 }, { opacity: 1, duration: 0.1 }, 20.3);
+        F(trp, { attr: { d: "M250 555 H250" } }, { attr: { d: "M250 555 H580" }, duration: 0.6, ease: "power2.inOut" }, 20.3);
+        F("#trd", { attr: { cx: 250 } }, { attr: { cx: 580 }, duration: 0.6, ease: "power2.inOut" }, 20.3);
+        F("#pC", { x: 700, rotation: 14 }, { x: 30, rotation: 3, duration: 0.42, ease: "power3.out" }, 21.48);
+        F("#pC", { x: 30, rotation: 3 }, { x: 0, rotation: 0, duration: 0.12, ease: "power4.in" }, 21.96);
+        F("#rg2", { scale: 0.2, opacity: 1 }, { scale: 2.6, opacity: 0, duration: 0.5, ease: "power2.out" }, 22.08);
+        F(trp, { attr: { d: "M250 555 H580" } }, { attr: { d: "M250 555 H830" }, duration: 0.4, ease: "power2.inOut" }, 22.08);
+        F("#trd", { attr: { cx: 580 } }, { attr: { cx: 830 }, duration: 0.4, ease: "power2.inOut" }, 22.08);
+        F(".pz", { y: 0 }, { y: 7, duration: 0.05, ease: "power1.out" }, 22.08);
+        F(".pz", { y: 7 }, { y: 0, duration: 0.3, ease: "elastic.out(1, 0.35)" }, 22.13);
+        // T5 · zoom-through into the PAJAK piece + flash
+        F("#s5 .zw", { scale: 1, filter: "blur(0px)" }, { scale: 9, filter: "blur(10px)", duration: 0.45, ease: "power4.in" }, 22.25);
+        F("#flash", { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "power2.in" }, 22.58);
+        show("#s6", 22.68); hide("#s5", 22.72);
+        F("#flash", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power2.out" }, 22.7);
+        F("#s6 .content", { scale: 1.3 }, { scale: 1, duration: 0.55, ease: "power3.out", transformOrigin: "50% 50%" }, 22.7);
+
+        // S6a · 22.70 – 24.45   "Bingung angka pajaknya dari mana?"
+        F("#chip6 span", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.35, ease: "power3.out" }, 22.82);
+        F(qh, { strokeDashoffset: QL }, { strokeDashoffset: 0, duration: 0.5, ease: "power3.inOut" }, 23.0);
+        F("#qdot", { scale: 0, y: -260 }, { scale: 1, y: 0, duration: 0.55, ease: "bounce.out" }, 23.5);
+        // T5b · dot iris: the "?" dot opens into the chat
+        F("#idot", { opacity: 0, scale: 1 }, { opacity: 1, scale: 1, duration: 0.06 }, 24.02);
+        F("#idot", { scale: 1 }, { scale: 42, duration: 0.42, ease: "power3.in", transformOrigin: "50% 50%" }, 24.04);
+        show("#s6b", 24.45); hide("#s6", 24.5);
+
+        // S6b · 24.45 – 30.30   "Asisten AI-nya bantu jelasin. Kasusnya rumit? Ada tim ahli yang siap bantu, sesuai layanan."
+        F("#chat", { y: 140, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 24.45);
+        const pop = (s, t) => F(s, { opacity: 0, y: 30, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.8)", transformOrigin: "50% 100%" }, t);
+        pop("#u1", 24.6);
+        pop("#typ", 24.95);
+        $$("#typ i").forEach((d, k) => { for (let j = 0; j < 3; j++) F(d, { y: 0 }, { y: -9, duration: 0.12, ease: "sine.out", yoyo: true, repeat: 1 }, 25.0 + j * 0.16 + k * 0.05); });
+        F("#typ", { opacity: 1 }, { opacity: 0, duration: 0.08 }, 25.42);
+        pop("#a1", 25.46);
+        $$(".rw b").forEach((b, k) => F(b, { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, 25.86 + k * 0.12));
+        pop("#u2", 26.64);
+        F("#chScroll", { y: 0 }, { y: -250, duration: 0.5, ease: "power3.inOut" }, 27.3);
+        pop("#xp", 27.44);
+        F("#xp .avs i", { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2.4)", stagger: 0.07 }, 27.8);
+        F("#xpbtn", { scale: 1 }, { scale: 1.07, duration: 0.15, ease: "power2.out", yoyo: true, repeat: 1, transformOrigin: "50% 50%" }, 28.5);
+        F("#xp .hl", { backgroundSize: "0% 100%" }, { backgroundSize: "100% 100%", duration: 0.45, ease: "power2.out" }, 29.3);
+        F("#cap6", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 25.0);
+        // T6 · beam flood + circle iris into the end card
+        show("#beamwrap", 29.78);
+        F("#disc", { scale: 0 }, { scale: 1, duration: 0.25, ease: "back.out(2.2)" }, 29.8);
+        F("#beam", { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power3.in" }, 29.9);
+        F("#beam", { scaleY: 1 }, { scaleY: 16, duration: 0.24, ease: "power3.in" }, 30.1);
+        show("#s7", 30.28);
+        F("#s7", { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(82% at 50% 50%)", duration: 0.5, ease: "power3.inOut" }, 30.3);
+        hide("#s6b", 30.85); hide("#beamwrap", 30.85);
+
+        // S7 · 30.30 – 38.50   "Jualan jalan terus, pajaknya AI yang urus. Coba kalkulator pajak gratisnya sekarang. Link ada di bio."
+        T7A.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: 0.4, ease: "power3.out" }, 30.38 + k * 0.014));
+        F("#t7b", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.45, ease: "power4.out" }, 31.74);
+        F("#cta7 span", { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(2.2)" }, 33.46);
+        F("#cta7 span", { scale: 1 }, { scale: 1.05, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, 34.5);
+        F("#bio7", { opacity: 0 }, { opacity: 1, duration: 0.35 }, 35.46);
+        F("#cta7 span", { scale: 1 }, { scale: 1.05, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, 36.6);
+        F("#s7 .content", { scale: 1 }, { scale: 1.025, duration: 8.2, ease: "none" }, 30.3);
+        tl.set({}, {}, 38.49);
+
+        tl.eventCallback("onUpdate", () => { if (window.ROBOT_APPLY) window.ROBOT_APPLY(tl.time()); });
+        (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+    <script src="robot_perf.js"></script>
+  </body>
+</html>

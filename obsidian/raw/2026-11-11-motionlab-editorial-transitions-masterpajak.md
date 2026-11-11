@@ -62,3 +62,22 @@ project: projects/motionlab_2026
    - S1 muncul + garuk kepala, S2 panik "x x", S3 nunjuk koin + kaget.
    - S4 mikir lalu nunjuk "Perlu dicek", S5 selebrasi, T5 terbang ke kamera.
    - S6 nunjuk "?" + baca teks, S7 melambai lalu nunjuk CTA.
+
+## v4: preview 38,5 detik dengan VO klien + lip-sync (`projects/masterpajak_preview30_2026`)
+- **VO** (ElevenLabs, 36,7 s) → `fw_transcribe.py` (faster-whisper small, id) → `production/vo_words.json`. Tiap beat dikunci ke timestamp kata. Cut di 3,40 · 8,85 · 10,90 · 14,95 · 22,70 · 24,45 · 30,30.
+- **Lip-sync** `tools/lipsync.py` → `lipsync.js` (60 fps):
+  - OPEN = loudness yang dinormalisasi ke min/max bergulir 0,3 s. Audio ElevenLabs terkompres, jadi kalau pakai level absolut mulut nganga terus. Ada gerbang diam, attack 0,7 / release 0,35, dan bibir maju 2 frame dari suara.
+  - WIDE = rasio energi 1,8–4,5 kHz / 0,25–1 kHz (vokal e/i lebar, o/u bulat).
+  - Shader: mulut "bicara" berupa rounded box terisi dengan bagian dalam redup (kesan mulut terbuka). Waktu jeda balik ke mulut ekspresi (senyum dll).
+  - Kepala ikut "beat" suku kata (pitch/roll kecil dari envelope).
+- **Hologram:** wajib di dalam safe zone 120 px dari sisi dan nggak nabrak kepala (lebar ±420 px). Build 1,2 s, tampil ≥ 4 s (permintaan user).
+- **Scene baru:**
+  - Kartu file yang nongol pas kata "Pesanan, pencairan, mutasi bank".
+  - Tag "− Potongan / − Retur" terserap ke kartu, lalu angka roll Rp10 jt → Rp9 jt.
+  - Alur puzzle 3 keping JUALAN → PEMBUKUAN → PAJAK + garis jejak di "ditelusuri".
+  - Transisi iris titik "?" ke chat.
+  - Chat asisten AI (typing dots, bar omzet/biaya/laba) + kartu "Tim ahli Muamalah Pajak, pendampingan sesuai layanan" (label Simulasi alur / Ilustrasi percakapan).
+- **Mix:** VO loudnorm −16, SFX ×0,32, amix tanpa normalize, lalu loudnorm −14 / TP −1,5.
+- **Gotcha:**
+  - Elemen yang belum masuk harus mulai cukup jauh di luar frame (offset ±900–1100 px). Offset 700 masih ngintip di pojok.
+  - Elemen `#id` yang dikasih `top` wajib `position: absolute`.

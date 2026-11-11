@@ -12,6 +12,7 @@
          T1 panel slide-over + parallax push · T2 blinds · T3 diagonal slice wipe (rotated container) · T4 alternating band sweep +
          marquee · T5 zoom-through + flash · T6 beam flood + circle iris. Brand tokens live in :root — swap there. -->
     <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/robot_mp.js"></script>
     <style>
       @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-500-normal.woff2) format("woff2"); font-weight: 500; }
       @font-face { font-family: Rubik; src: url(assets/fonts/rubik-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
@@ -157,6 +158,7 @@
       #cta7 svg { width: 40px; height: 40px; }
       #bio7 { top: 1196px; font: 600 30px/1 PS; letter-spacing: .04em; color: var(--lb); }
 
+      #robot { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; pointer-events: none; }
       #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/grain_256.png); opacity: .05; pointer-events: none; }
     </style>
   </head>
@@ -275,6 +277,7 @@
           <div id="bio7" class="ctr">Link di bio</div>
         </div>
       </div>
+      <canvas id="robot" width="1080" height="1920"></canvas>
       <div id="flash"></div>
       <div id="grain"></div>
     </div>
@@ -310,7 +313,7 @@
           let L = 0; for (let k = 1; k < pts.length; k++) L += Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]);
           pl.style.strokeDasharray = L; pl.style.strokeDashoffset = L; pl.dataset.len = L; return pl;
         });
-        const TOOLS = [["Pesanan", 120, 420, -8], ["Pencairan", 700, 460, 7], ["Nota", 140, 1110, 9], ["Mutasi bank", 640, 1120, -6], ["Retur", 200, 1300, 6], ["Potongan", 650, 1300, -10], ["Spreadsheet", 370, 1450, -3]];
+        const TOOLS = [["Pesanan", 120, 420, -8], ["Pencairan", 700, 460, 7], ["Nota", 140, 1110, 9], ["Mutasi bank", 640, 1120, -6], ["Retur", 200, 1300, 6], ["Potongan", 650, 1300, -10], ["Spreadsheet", 450, 1450, -3]];
         const toolEls = TOOLS.map(([t, x, y, r]) => { const d = document.createElement("div"); d.className = "tool"; d.textContent = t; d.style.left = x + "px"; d.style.top = y + "px"; $("#tools").appendChild(d); return { d, r, x, y }; });
         for (let k = 0; k < 6; k++) { const s = document.createElement("div"); s.className = "st"; s.style.left = (k * 180) + "px"; $("#strips").appendChild(s); }
         for (let k = 0; k < 6; k++) { const b = document.createElement("div"); b.className = "bd"; b.style.top = (k * 320) + "px"; b.style.background = k % 2 ? "#26367A" : "#212C5F"; $("#bands").appendChild(b); }
@@ -495,9 +498,11 @@
         tl.set({}, {}, 14.99);
 
         (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+        tl.eventCallback("onUpdate", () => { if (window.ROBOT_APPLY) window.ROBOT_APPLY(tl.time()); });
         window.__timelines = window.__timelines || {};
         window.__timelines["main"] = tl;
       })();
     </script>
+    <script src="robot_perf.js"></script>
   </body>
 </html>

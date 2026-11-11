@@ -130,6 +130,19 @@ put(11.48, pop(500, 1000, 0.1), 0.18); put(11.55, whoosh(0.5, 200, 2400, 1.0, 0.
 # S7 outro: M pop, slide, wordmark, shimmer
 put(12.35, pop(600, 1200, 0.12), 0.24); put(12.82, whoosh(0.5, 900, 2600, 1.2, 0.5), W * 0.5)
 put(13.1, chime((1046, 1568, 2093, 2637), 1.8), 0.08); put(13.12, boom(1.2, 90, 40), 0.18)
+# robot voice: tiny square-wave chirps on its reactions (cute, low in the mix)
+RB = 0.05
+put(0.32, square_blips([784, 1175, 1568], 0.045), RB)          # wakes up
+put(1.0, square_blips([660, 520, 440], 0.06), RB)              # "huh?" (scratches head)
+put(1.6, whoosh(0.4, 500, 1800, 1.3, 0.5), W * 0.4)            # hop
+put(3.05, square_blips([1200, 900, 1300, 800, 1250], 0.035), RB)   # panic
+put(3.6, square_blips([500, 700], 0.05), RB * 0.8)             # shakes it off
+put(4.88, square_blips([880, 1320], 0.05), RB)                 # surprised
+put(6.85, square_blips([740, 990], 0.05), RB)                  # "oh!"
+put(8.92, square_blips([784, 988, 1175, 1568], 0.045), RB * 1.1)   # yay
+put(10.15, whoosh(0.35, 700, 2600, 1.4, 0.4), W * 0.45)        # slides in
+put(12.4, square_blips([988, 1319, 1760], 0.05), RB)           # hello
+put(13.8, square_blips([1175, 1568], 0.05), RB * 0.9)          # points at the CTA
 x = out[: int(TOTAL * SR)]
 x = x / max(1e-9, np.abs(x).max()) * 0.89
 x16 = (np.clip(x, -1, 1) * 32767).astype(np.int16)

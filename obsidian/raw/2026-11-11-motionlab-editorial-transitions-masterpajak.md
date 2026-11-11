@@ -35,3 +35,30 @@ project: projects/motionlab_2026
 - Playwright `page.evaluate(() => tl.seek(t))` **nge-hang** karena mencoba serialisasi objek timeline. Selalu `return 1`. Begitu juga `waitForFunction` → pakai `!!(...)`.
 - Brand MasterPajak AI (Design System v1.0): navy #212C5F, royal #26367A, kuning #FED111 (maks 1 sorotan/layar, teks gelap di kuning atau kuning di navy), awan #F6F7FB, Rubik + Public Sans tabular. Brief bilang hindari robot/3D/partikel/gradasi. Untuk preview ini robot tetap dipakai atas permintaan user.
 - Angka contoh harus diberi label **ILUSTRASI DATA**. Tagline resmi: "Jualan jalan terus, pajaknya AI yang urus." CTA: "Coba kalkulator gratis" + "Link di bio".
+
+## v2: robot 3D MasterPajak AI (model Tripo dari user, cuma buat preview ini)
+**File:** `assets/robot/robot_mp.glb`, runtime `tools/robot/src/robot_mp.js` → `vendor/robot_mp.js`, koreografi `robot_perf.js`.
+
+1. **Optimasi:** GLB Tripo (971 ribu vertex, Draco, 1 mesh, tanpa rig) → `mascot-bizman/tools/prep.mjs` rasio 0,06 → ±71 ribu vertex, tekstur webp 2K.
+2. **Lengan nyatu sama badan** (khas Tripo), jadi kalau di-skin pasti sobek. Solusinya `tools/robot/cut_arms.py`:
+   - Lengan + tangan dibuang lewat kapsul di sumbu lengan (r 0,047 + margin) dan bola tangan.
+   - Pulau sisa dibuang.
+   - Lubang di badan ditambal: 4 cincin konsentris yang agak menggembung, semua UV ke texel navy, tepinya diduplikasi biar nggak ada interpolasi lintas pulau UV (sebelumnya muncul garis putih).
+3. **Lengan baru prosedural** ("rubber hose"):
+   - Tabung di kurva bezier kuadrat bahu → siku → pergelangan, frame parallel transport, dibangun ulang tiap frame. Tambah bola bahu dan bola tangan putih, ukuran dan warna sama persis dengan aslinya.
+   - Parameter: raise / fwd / bend / bendYaw.
+   - **Jangan ubah bendYaw saat siku masih ketekuk**, nanti lengan bawah muter liar. Ganti bidang tekuk hanya waktu lengan lurus.
+4. **Skin 3 tulang dihitung saat load:** body, head (pivot leher y 0,445, blend 0,43–0,468), antena (y > 0,85).
+5. **Wajah prosedural di shader** (`onBeforeCompile`, SDF di ruang bind pose):
+   - Layar = rounded box (0, 0,6425) ukuran 0,201 × 0,117, r 0,082.
+   - Mata oval bisa blink/look, "^ ^" happy, "x x", mulut senyum/datar/"o", ditambah glow emisif dan roughness 0,16 biar kayak kaca.
+6. **Gerak halus:**
+   - Key per channel → filter pegas orde-2 (konvolusi impulse response, dt 1/90, gain DC 1), jadi tiap frame murni fungsi waktu dan aman di-seek.
+   - Grup pegas: pos 1,5 Hz ζ .74 · body 1,7/.6 · head 2,3/.52 · arm 2,0/.56 · look 5,5/.92.
+   - Di atasnya: hover, napas, kedip terjadwal, squash dari percepatan vertikal, dan antena = pegas lambat (2,4 Hz ζ .2) dikurangi gerak kepala.
+   - **Hard cut** (saat robot hilang/pindah instan): pegas, antena, dan squash **nggak boleh lihat ke belakang melewati cut**. Kalau lihat, antena loncat 39°/frame.
+7. **Audit kehalusan:** `ROBOT_STATE(t)` dicek per frame (step dan percepatan per sendi) sebelum render.
+8. **Robot jadi host di semua scene:**
+   - S1 muncul + garuk kepala, S2 panik "x x", S3 nunjuk koin + kaget.
+   - S4 mikir lalu nunjuk "Perlu dicek", S5 selebrasi, T5 terbang ke kamera.
+   - S6 nunjuk "?" + baca teks, S7 melambai lalu nunjuk CTA.

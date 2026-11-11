@@ -199,9 +199,10 @@
   window.ROBOT_STATE = state;
   const cv = document.getElementById("robot");
   let robot = null, lastT = 0;
-  const ready = window.RobotMP.create(cv, { url: "assets/robot/robot_mp.glb", width: 1080, height: 1920 }).then((r) => { robot = r; robot.render(state(lastT)); return 1; });
+  const ready = window.RobotMP.create(cv, { url: "assets/robot/robot_mp.glb", width: 1080, height: 1920 }).then((r) => { robot = r; robot.render(state(lastT)); lastDrawn = lastT; return 1; });
   window.__robotReady = ready;
   window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {}; window.__hf.buildReady["robot"] = ready;
-  window.ROBOT_APPLY = (t) => { lastT = t; if (robot) robot.render(state(t)); };
+  let lastDrawn = -1;   // render once per frame (the timeline onUpdate and hf-seek both call this)
+  window.ROBOT_APPLY = (t) => { lastT = t; if (robot && Math.abs(t - lastDrawn) > 1e-7) { robot.render(state(t)); lastDrawn = t; } };
   window.addEventListener("hf-seek", (e) => { const t = e.detail.time; if (robot) window.ROBOT_APPLY(t); else if (e.detail.waitUntil) e.detail.waitUntil(ready.then(() => window.ROBOT_APPLY(t))); });
 })();

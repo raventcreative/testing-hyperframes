@@ -163,7 +163,7 @@ function shadowTexture() {
 
 export async function create(canvas, opts = {}) {
   const W = opts.width || 1080, H = opts.height || 1920;
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true, powerPreference: "high-performance" });
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: opts.antialias !== false, preserveDrawingBuffer: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = opts.exposure || 1.0; renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
@@ -241,7 +241,7 @@ export async function create(canvas, opts = {}) {
         const o = (y * w + xx) * 4; id.data[o] = Math.min(255, r); id.data[o + 1] = Math.min(255, g2); id.data[o + 2] = Math.min(255, bb); id.data[o + 3] = 255; }
       x.putImageData(id, 0, 0); return b;
     };
-    const tex = (cv, mip) => { const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); t.generateMipmaps = mip; t.minFilter = mip ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter; return t; };
+    const tex = (cv, mip) => { const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = opts.aniso || renderer.capabilities.getMaxAnisotropy(); t.generateMipmaps = mip; t.minFilter = mip ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter; return t; };
     return { t1: tex(c, true), gA: tex(blurC(0.125, 3.5), false), gB: tex(blurC(0.0625, 6), false), aspect: CH / CW };
   }
   const LOGO = await logoCanvas();
@@ -305,6 +305,20 @@ export async function create(canvas, opts = {}) {
   const prnd = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
   const EMIT = new THREE.Vector3(0, 0.2655, 0.15);
 
+  // render only the screen region the robot (+ hologram/beam) can occupy: canvas is resized/moved to that box and the
+  // camera renders the matching sub-rectangle of the full 1080x1920 view (setViewOffset), so nothing else changes
+  let crop = null;
+  function setCrop(x0, y0, x1, y1) {
+    const q = 64; x0 = Math.max(0, Math.floor(x0 / q) * q); y0 = Math.max(0, Math.floor(y0 / q) * q);
+    x1 = Math.min(W, Math.ceil(x1 / q) * q); y1 = Math.min(H, Math.ceil(y1 / q) * q);
+    const cw = Math.max(q, x1 - x0), ch = Math.max(q, y1 - y0);
+    if (!crop || crop[2] !== cw || crop[3] !== ch) renderer.setSize(cw, ch, false);
+    if (!crop || crop[0] !== x0 || crop[1] !== y0 || crop[2] !== cw || crop[3] !== ch) {
+      cam.setViewOffset(W, H, x0, y0, cw, ch); const st = renderer.domElement.style;
+      st.left = x0 + "px"; st.top = y0 + "px"; st.width = cw + "px"; st.height = ch + "px";
+    }
+    crop = [x0, y0, cw, ch];
+  }
   function render(s) {
     const vis = s.visible !== false && (s.opacity == null || s.opacity > 0.001);
     root.visible = vis; shadow.visible = vis && (s.shadow == null || s.shadow > 0.001);
@@ -341,6 +355,7 @@ export async function create(canvas, opts = {}) {
       const cs = [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]].map(([u, v]) => new THREE.Vector3(u * 0.97, v * 0.9, 0).applyMatrix4(holo.matrixWorld));
       const pa = beamGeo.attributes.position.array;
       for (let f = 0; f < 4; f++) { const A = cs[f], B = cs[(f + 1) % 4]; pa.set([e.x, e.y, e.z, A.x, A.y, A.z, B.x, B.y, B.z], f * 9); }
+      beam.visible = bw > 0.001 && !opts.noBeam; parts.visible = !opts.noParts; pool.visible = !opts.noPool;
       beamGeo.attributes.position.needsUpdate = true; beamGeo.computeBoundingSphere(); BU.uA.value = bw * Math.min(1, (ho.rev == null ? 1 : ho.rev) * 3 + 0.3); BU.uT.value = T;
       const fs = (0.022 + 0.004 * Math.sin(T * 20)) * root.scale.x; flare.position.copy(e).add(new THREE.Vector3(0, 0, 0.05)); flare.scale.set(fs, fs, 1); flare.material.color.setScalar(Math.min(0.55, bw * 0.55));
       pool.position.set(hx, hy - hh * 0.55, 0.39); pool.scale.set(hw * 1.05, hh * 0.42, 1); pool.material.color.setScalar(0.6 * ha);
@@ -352,6 +367,12 @@ export async function create(canvas, opts = {}) {
       }
       pGeo.attributes.position.needsUpdate = true; pGeo.attributes.pa.needsUpdate = true; PU.uA.value = bw; PU.uSize.value = 5 + 3 * (ho.w || 600) / 600;
     }
+    if (vis) {
+      const hh = s.h, ax = s.x, ay = s.y; let x0 = ax - 0.66 * hh - 30, x1 = ax + 0.66 * hh + 30, y0 = ay - 0.6 * hh - 30, y1 = ay + 0.66 * hh + 30;
+      const ho2 = s.holo || {};
+      if ((ho2.a || 0) > 0.002) { const hw2 = ho2.w || 600, hh2 = hw2 * LOGO.aspect; x0 = Math.min(x0, ho2.x - hw2 * 0.62); x1 = Math.max(x1, ho2.x + hw2 * 0.62); y0 = Math.min(y0, ho2.y - hh2 * 0.9 - 20); y1 = Math.max(y1, ho2.y + hh2 * 0.9 + 20); }
+      setCrop(x0, y0, x1, y1); renderer.domElement.style.visibility = "visible";
+    } else { renderer.domElement.style.visibility = "hidden"; return; }
     renderer.render(scene, cam);
   }
   return { render, renderer, scene, camera: cam, k };

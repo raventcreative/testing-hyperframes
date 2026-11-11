@@ -64,6 +64,29 @@ All beats (camera segments, bites, robot choreography, SFX) are derived from the
 - No tax rates, deadlines, penalties, guarantees; no DJP / government / marketplace branding; generic icons only.
 - Features named: pembukuan yang bisa ditelusuri, laporan laba rugi, kalkulator gratis (CTA). Tagline + CTA exact.
 
+## Robot / hologram
+- Robot visible in every section: hook host (bottom-right, presents the card, shrugs), rides along in the corner during the
+  journey (flinches at bites, small celebration at the bank), overview (looks up, then arms up + X eyes on "ribuan"), ducks out
+  under the bands (CUT at l5−0.05), brand half-body bottom-left, checks half-body bottom-right, end card (series choreography).
+- Chest hologram (logo panel): brand 17.5 → 23.05 s (≈5.4 s, centre 720/1520, w 420 → x 510–930, y ≈1465–1575); end card
+  29.2 → 35.6 s (≈6.2 s, centre 360/1500). Both inside the safe zone, never touching frame edges.
+- Light journey scenes use default robot lighting; NAVY lighting (rim 2.0, shadow 0.5) on the brand/end scenes.
+
+## Illustrative numbers (all labelled "Ilustrasi data")
+Rp100.000 − Rp6.500 (biaya layanan) − Rp9.000 (ongkir) − Rp10.000 (retur, kadang) = Rp74.500 (pencairan → rekening bank).
+Counter 1 → 2.847 transaksi. Ledger rows #0417–#0421 (two flagged "perlu dicek").
+
+## QA done (snapshots, no full render)
+- Contact sheets of every scene + transition midpoints (see the lead report for paths); text-edge check over 0–35.5 s.
+- Edge check: no flat-scene hits. Remaining hits are 3D-camera motion (gate labels / bite chips / far report card entering or
+  leaving the frame while the camera moves) and the odometer digit strips (hidden digits clipped by their columns — false positives).
+- Text fits: the card amount auto-shrinks to its card, bite chips and captions are fitted in the build step (`buildReady["jejak"]`).
+
+## Known issues / not done
+- `lipsync.js` not present yet (VO not recorded) — loaded with `onerror`; the 404 in the console is expected.
+- Beat times are planned at ~2.4 words/s; after the ElevenLabs VO exists, re-time `window.TM` (one key per VO line + sub-beats).
+- Heavy page (CSS 3D floor 4000×7400 + backdrop-filter DOF + WebGL robot): expect slower render than Video 1.
+
 ## Files
 - `index.html`, `robot_perf.js`, `tools/sfx.py` → `assets/audio/sfx.wav`, `thumbnail/cover.html` →
   `thumbnail/COVER_MP02_JEJAK_TRANSAKSI.png`.

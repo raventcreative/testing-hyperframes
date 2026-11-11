@@ -164,8 +164,8 @@ put(TM['ketik'] + 0.75, marker(0.34), MK * 1.2); put(TM['ketik'] + 0.78, pop(240
 
 # ---------- S5 · complete ledger, report ----------
 wh(TM['ledger'] - 0.02, 1.0, 1800, 260, 0.9, 0.35, 0.7)
-for k in range(6): put(TM['ledger'] + 0.25 + k * 0.09, paper(0.12, 3000), 0.06)
-put(TM['ledger'] + 0.95, pop(600, 1200, 0.1), P_); put(TM['ledger'] + 1.0, chime((1318.5, 1760, 2637), 1.0), 0.04)
+for k in range(6): put(TM['ledger'] + 0.42 + k * 0.1, paper(0.12, 3000), 0.06)
+put(TM['ledger'] + 1.15, pop(600, 1200, 0.1), P_); put(TM['ledger'] + 1.2, chime((1318.5, 1760, 2637), 1.0), 0.04)
 wh(TM['lap'] - 0.02, 0.8, 250, 2000, 1.0, 0.7, 0.7)
 for k in range(3): put(TM['lap'] + 0.35 + k * 0.15, pop(500 + 140 * k, 800 + 200 * k, 0.06), 0.06)
 put(TM['lap'] + 1.05, pop(700, 1400, 0.1), P_)

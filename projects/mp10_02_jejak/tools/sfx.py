@@ -124,7 +124,7 @@ for i, tb in enumerate(BT):
     put(tb - 0.01, chomp(), 0.2); put(tb + 0.02, zap(0.18), 0.03)
     odo_ticks(tb + 0.04, 0.55, 9, 0.07)
     put(tb + 0.05, pop(600 + 80 * i, 1250 + 80 * i, 0.08), 0.1)            # chip pops out
-    put(tb + 1.36, pop(260, 120, 0.12), 0.1)                               # chip lands flat
+    put(tb + 1.0, pop(260, 120, 0.12), 0.1)                               # chip lands flat
 put(tP + 0.02, chime((988, 1318.5), 0.9), 0.05); put(tP, pop(500, 900, 0.08), 0.08)
 put(tB + 0.02, pop(300, 150, 0.12), 0.12); put(tB + 0.25, pop(800, 1500, 0.09), 0.12)
 put(tB + 0.3, chime((1318.5, 1760, 2349), 1.3), 0.06)

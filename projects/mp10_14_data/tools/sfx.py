@@ -147,7 +147,7 @@ for k in range(4):
     put(tland - 0.02, paper(0.3), 0.16); put(tland - 0.01, knock(140, 0.2), 0.08)
     put(tland + 0.1, tick(0.016, 4400), 0.07)
 # 2 · "termasuk ongkir dan iklan": two tags pop, two stabilo strokes
-for dt in (0.25, 0.75): put(TM['d2b'] + dt, pop(600, 1200, 0.09), 0.12)
+for dt in (0.25, 0.7): put(TM['d2b'] + dt, pop(600, 1200, 0.09), 0.12)
 for dt in (0.3, 0.8): put(TM['d2b'] + dt, marker(0.3), MK * 0.8)
 # S3b · "Udah kekumpul?": files settle, lid closes with a thump, stamp + chime, LENGKAP pop
 wh(TM['kum'] + 0.04, 0.4, 1400, 500, 1.0, 0.4, 0.3)

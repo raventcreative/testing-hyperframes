@@ -54,6 +54,9 @@ Timing is planned for ~2.4 words/s with short pauses; re-time by editing `window
 - Snapshots of every scene and transition midpoint; containment check (every text leaf inside its tag/card/row/face, no auto-shrink needed).
 - `edgecheck.cjs`: only transitional hits remain — the whip pan at `seller − 0.36…+0.06` (motion-blurred, masked split chars) and the
   series marquee in the band sweep (same as Video 1). Falling chunk labels fade before reaching the frame edge; card A fades before it leaves.
+- Series beam + iris kept, but the disc/beam origin is mirrored to the bottom-right in this episode: the brand robot stands bottom-left
+  (series sol pose) and would otherwise hide the beam origin.
+- The laba block turns yellow with a fill that wipes up its faces (a colour tween navy→yellow passed through a muddy olive).
 - Odometer digits are drawn once to a canvas (after fonts load) and rolled as a repeat-y background, so no hidden text strips.
 - Console: only the expected `lipsync.js` 404 (loaded with `onerror`, VO not recorded yet).
 

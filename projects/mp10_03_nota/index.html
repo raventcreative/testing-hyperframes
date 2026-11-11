@@ -535,7 +535,9 @@
 
         // ================= timeline =================
         const tl = gsap.timeline({ paused: true });
-        const F = (t, a, b, at) => tl.fromTo(t, a, Object.assign({ immediateRender: false }, b), at);
+        // GSAP quirk: after a backward seek (the patched render(0) below) a `scale` alias in from-vars loses scaleY -> always tween scaleX/scaleY
+        const XS = (v) => { if (v && v.scale != null) { v = Object.assign({}, v); v.scaleX = v.scaleY = v.scale; delete v.scale; } return v; };
+        const F = (t, a, b, at) => tl.fromTo(t, XS(a), Object.assign({ immediateRender: false }, XS(b)), at);
         const show = (t, at) => tl.set(t, { autoAlpha: 1 }, at), hide = (t, at) => tl.set(t, { autoAlpha: 0 }, at);
         const HL = (sel, at, d) => F(sel, { backgroundSize: "0% 72%" }, { backgroundSize: "100% 72%", duration: d || 0.32, ease: "power1.inOut" }, at);
         const IN = (ws, at, st, d) => ws.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: d || 0.42, ease: "power3.out" }, at + k * (st || 0.07)));

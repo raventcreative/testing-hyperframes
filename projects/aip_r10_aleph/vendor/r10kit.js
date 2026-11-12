@@ -276,7 +276,7 @@
       C(308, 280, 46, "#3f9a58") + C(286, 296, 34, "#4fa765") + C(332, 292, 34, "#4fa765") + C(310, 262, 30, "#67ba70");
     h += LY(p, "gnd", SV(g));
     h += LY(p, "per", SV(person(p, 900, 446, 0.74)));
-    if (withCar) h += LY(p, "car", SV(`<g transform="translate(420 440)">${car(p)}</g>`));
+    if (withCar) h += LY(p, "car", SV(`<g transform="translate(420 430)">${car(p)}</g>`));
     h += LY(p, "fg", SV(`<rect x="1040" y="0" width="22" height="600" fill="#3b4256"/><rect x="1032" y="560" width="38" height="40" fill="#2b3040"/><path d="M1040 70 L 960 70 L 948 82 L 1040 82 Z" fill="#3b4256"/><rect x="940" y="82" width="34" height="10" rx="3" fill="#e7edf6"/>`));
     h += LY(p, "gr", "", "background:radial-gradient(ellipse 70% 70% at 50% 45%, rgba(20,40,90,0) 55%, rgba(20,40,90,.16) 100%)");
     return h + `</div>`;

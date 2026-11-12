@@ -38,7 +38,7 @@ Hand-overs: s01 → s02 keep the two badges (the OpenMausBot badge turns into th
 icon/name/sub/chip roll between topics, one more progress segment per topic); every workspace exits in its scene's last ~0.2 s, so the
 next scene starts from the header alone; s09's rows fold into the "panduan" card that pops in at the start of s10.
 Hosts: mascot bottom-left (welcome, question on "siapa?", present/explain/emphasize per beat, compare on "bayar."/"Minusnya,", cta on
-"Komen"), robot bottom-right (thinks on "numpang", types the chat/skill/login/switch, scans the roster/meter/schedule, startles on
+"Komen"; the kit's glance-at-robot is disabled, see QA), robot bottom-right (thinks on "numpang", types the chat/skill/login/switch, scans the roster/meter/schedule, startles on
 "dikirim" and "default-nya", cheers on "open" and "Komen").
 
 ## Sources (checked 12 Nov 2026) — claim-by-claim table in `production/VO_SCRIPT.md`
@@ -63,6 +63,11 @@ Hosts: mascot bottom-left (welcome, question on "siapa?", present/explain/emphas
   stripping the preview's stamped ids). Contact sheets (JPG): `production/qa/runtime_full_1..4.jpg` (full frames),
   `production/qa/runtime_hero_1..4.jpg` (hero zone + captions, larger), `production/qa/runtime_fix_seam_s09_s10.jpg`,
   `production/qa/runtime_fix_contrast.jpg`. PNG dumps deleted (disk budget).
+- Mascot "glance at the robot" DISABLED (lead's kit-bug notice: in the real render the glance turns the mascot's eyes into blank
+  white discs). `compositions/mascot.html`: `const glance = (t) => 0;` (old function kept as `glance_unused`). In this reel the full
+  pass showed exactly that at the two glance moments (3.4 s on "Duo", 47.3 s on "AGENT"); after the fix the eyes were re-checked with the
+  real runtime at 2.9 / 3.3 / 3.6 / 35.1 / 35.5 / 47.1 / 47.5 / 47.9 s (all three former glance windows) → pupils everywhere:
+  `production/qa/runtime_fix_mascot_eyes.jpg`. Every other frame of the full pass shows normal eyes (closed eyes = blinks).
 - Fixed during QA: row-highlight ids collided with the header chip ids in s02 (chip invisible, all rows outlined); the shared typer selected
   word spans as letters when typing into a `<span>` (last word visible before typing, s03/s05); reply typing too slow to read in s02;
   DITERIMA stamp covered the avatar; header vanished on the s09→s10 cut; unsupported glyphs (✓ → ▸) replaced by SVG/entities

@@ -348,7 +348,7 @@
           ok1: { v: "rs", c: "ok", t: "RESI KIRIM", s: "6 paket · reguler", L: [["Ongkir 6 paket", 96000]] },
           ok2: { v: "rs", c: "ok", t: "RESI KIRIM", s: "3 paket · kilat", L: [["Ongkir 3 paket", 54000]] },
           ok3: { v: "rs", c: "ok", t: "RESI KIRIM", s: "2 paket · reguler", L: [["Ongkir 2 paket", 32000]] },
-          ik1: { v: "iv", c: "ik", t: "TAGIHAN IKLAN", s: "Iklan toko · 7 hari", L: [["Iklan produk", 200000], ["Iklan toko", 150000]] },
+          ik1: { v: "iv", c: "ik", t: "TAGIHAN IKLAN", s: "Iklan toko · 7 hari", d: "4 Nov", L: [["Iklan produk", 200000], ["Iklan toko", 150000]] },
           ik2: { v: "iv", c: "ik", t: "TAGIHAN IKLAN", s: "Promosi · 3 hari", L: [["Iklan produk", 90000]] },
           km1: { v: "nt", c: "km", t: "NOTA", s: "No. 0217", L: [["Kardus 50 pcs", 60000], ["Lakban 3 rol", 25000]] },
           km2: { v: "th", c: "km", t: "STRUK", s: "Toko plastik", d: "7 Nov", L: [["Plastik mailer", 45000]] },
@@ -362,7 +362,7 @@
           let inner = "";
           if (o.v === "th") inner = `<div class="t">${o.t}</div><div class="s">${o.s}</div><div class="dsh"></div>${rows}<div class="dsh"></div><div class="r tt"><span>TOTAL</span><b>${RP(tot)}</b></div>${o.d ? `<div class="dt">${o.d}</div>` : ""}`;
           if (o.v === "nt") inner = `<div class="h"><b>${o.t}</b><span>${o.s}</span></div>` + o.L.map(([n, a]) => `<div class="l"><span>${n.replace("&", "&amp;")}</span><span>${dots(a)}</span></div>`).join("") + `<div class="j"><span>Jumlah</span><b>${RP(tot)}</b></div>`;
-          if (o.v === "iv") inner = `<div class="hb"><b>${o.t}</b><span>${o.s}</span></div><div class="bd">${rows}<div class="tb"><span>TOTAL</span><b>${RP(tot)}</b></div></div>`;
+          if (o.v === "iv") inner = `<div class="hb"><b>${o.t}</b><span>${o.s}${o.d ? " · " + o.d : ""}</span></div><div class="bd">${rows}<div class="tb"><span>TOTAL</span><b>${RP(tot)}</b></div></div>`;
           if (o.v === "rs") inner = `<div class="t">${o.t}</div><div class="s">${o.s}</div><div class="bc"></div>${rows}<div class="dsh"></div><div class="r tt"><span>TOTAL</span><b>${RP(tot)}</b></div>`;
           const clip = o.v === "th" ? (() => { const n = 14, pts = ["0 0", "100% 0"]; for (let i = n; i >= 0; i--) pts.push(`${(i / n) * 100}% ${h - (i % 2 ? 0 : 10)}px`); return `clip-path:polygon(${pts.join(",")});`; })() : "";
           return `<div class="rc ${o.v}" style="width:${w}px; height:${h}px; ${clip}">${inner}${id ? tag : ""}</div>`;
@@ -496,7 +496,7 @@
         // camera path: heap close-up -> rise to the card -> crane to the cabinet
         const KH0 = K(530, 1180, PX + 30, -30, PZ, -52, -74, -240), KH1 = K(530, 1200, PX + 30, -30, PZ, -47, -68, 110);
         const KS0 = K(530, 1010, PX + 60, -300, PZ - 30, -30, -62, -40), KS1 = K(530, 1000, PX + 60, -300, PZ - 30, -28, -66, 0);
-        const KC0 = K(500, 880, CX - 20, -H / 2, CZ + 170, -20, -16, -90), KC1 = K(500, 880, CX - 20, -H / 2, CZ + 170, -19, -11, -50);
+        const KC0 = K(615, 880, CX - 20, -H / 2, CZ + 170, -20, -16, -90), KC1 = K(615, 880, CX - 20, -H / 2, CZ + 170, -19, -11, -50);
         cam(C1, KH0, KH1, 0, TM.ujung - 0.1, "power1.inOut");
         cam(C1, KH1, KS0, TM.ujung - 0.1, 1.1, "power2.inOut");
         cam(C1, KS0, KS1, TM.ujung + 1.0, TM.biar - TM.ujung - 1.0, "none");
@@ -545,6 +545,8 @@
         INIT("#c1", { visibility: "hidden" }); vis("#c1", TM.biar + 0.28, true);
         F("#c1", { y: -1500 }, { y: 0, duration: 0.42, ease: "power3.in" }, TM.biar + 0.3);
         F("#c1", { scaleY: 1 }, { scaleY: 0.95, duration: 0.07, ease: "power2.out" }, TM.biar + 0.72); F("#c1", { scaleY: 0.95 }, { scaleY: 1, duration: 0.35, ease: "back.out(3)" }, TM.biar + 0.79);
+        // focus pull: as the camera cranes to the cabinet, the receipt heap in the foreground goes soft (it is partly out of frame there)
+        F("#heap .pileF, #ovc_ok2, #ovc_bb2, #ovc_op1, #ovc_ik1, #ovc_km2", { filter: "blur(0px)" }, { filter: "blur(2.6px)", duration: 0.9, ease: "power1.inOut" }, TM.biar + 0.4);
         RISE(PA, TM.biar - 0.04, 0.025, 0.4); RISE(PB1, TM.pisah - 0.08, 0.025, 0.42); RISE(PB2, TM.kat - 0.08, 0.025, 0.42); HL("#pBh", TM.kat + 0.36, 0.38);
         const CK = [TM.c1, TM.c2, TM.c3, TM.c4, TM.c5];
         const TAGS = { bb: ["bb3", "bb1", "bb2"], ok: ["ok3", "ok1", "ok2"], ik: ["ik2", "ik1"], km: ["km3", "km1", "km2"], op: ["op2", "op1"] };
@@ -558,7 +560,7 @@
         CK.forEach((t, k) => {
           F(`#c1ph${k}`, { opacity: 1 }, { opacity: 0, duration: 0.12 }, t - 0.06);
           F(`#c1n${k}`, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.32, ease: "back.out(2)" }, t - 0.04);
-          FLASH(`#c1d${k} .dfl`, t - 0.05, 0.85, 0.45); FLASH(`#c1d${k} .dgl`, t - 0.02, 0.35, 0.5);
+          FLASH(`#c1d${k} .dfl`, t - 0.05, 0.85, 0.45);
           pull("c1", k, t - 0.04, 120, 0.2, 0.32, 0.18);
           TAGS[CAT[k].k].forEach((r, j) => POP("#tg_" + r, t + 0.12 + j * 0.07, 0.4));
         });

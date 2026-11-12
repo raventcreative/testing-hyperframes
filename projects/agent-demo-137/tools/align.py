@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-AUDIO = P / "assets/audio/vo.mp3"
+AUDIO = P / "assets/audio/vo.wav"
 
 # (start, end, [phrases]) - a group may hold several phrases when no clear pause separates them
 GROUPS = [
@@ -47,9 +47,11 @@ GROUPS = [
     (65.83, 68.57, ["Apa yang udah dikerjain,", "apa yang nunggu keputusan lu."]),
     (68.98, 69.99, ["AI-nya yang kerja."]),
     (70.36, 72.00, ["Keputusan tetap di tangan lu."]),
-    (72.45, 75.88, ["Ok follow gua", "Freddie Kashawan", "kalo lu mau update", "seputar AI."]),
+    (72.45, 74.95, ["Mau sistem automation", "kayak gini dipasang", "di bisnis lu?"]),
+    (75.52, 76.36, ["Klik link di bio,"]),
+    (76.61, 79.11, ["ngobrol langsung", "sama tim AIpreneur Automation."]),
 ]
-PRON = {"22": "duapuluhdua", "crm": "siarem", "run": "ran", "sequence-nya": "sikuensnya", "approval": "eprufal", "hp": "hape", "ai-nya": "einya", "simulasinya": "simulasinya", "tools": "tuls", "chat": "cet", "137": "seratustigapuluhtujuh", "10": "sepuluh", "2": "dua", "7": "tujuh", "60": "enampuluh", "80": "delapanpuluh",
+PRON = {"aipreneur": "eiprener", "automation": "otomesyen", "bio": "bio", "22": "duapuluhdua", "crm": "siarem", "run": "ran", "sequence-nya": "sikuensnya", "approval": "eprufal", "hp": "hape", "ai-nya": "einya", "simulasinya": "simulasinya", "tools": "tuls", "chat": "cet", "137": "seratustigapuluhtujuh", "10": "sepuluh", "2": "dua", "7": "tujuh", "60": "enampuluh", "80": "delapanpuluh",
         "ai": "ei", "full": "ful", "freddie": "fredi", "kashawan": "kasawan", "marketing": "marketing", "sales": "seils",
         "deals": "dils", "customer": "kastomer", "operations": "operesyens", "intelligence": "intelijens", "back": "bek",
         "office": "ofis", "job": "job", "cold": "kold", "email": "imel", "drafting": "drafting", "sequence": "sikuens",

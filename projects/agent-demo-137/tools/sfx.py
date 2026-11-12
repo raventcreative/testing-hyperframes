@@ -32,7 +32,7 @@ ev += [("click", tb), ("whoosh", tb + 0.25), ("click", wt("divisi sales", "sales
        ("pop", ph("nulis sequence")["start"]), ("pop", ph("bikin subject")["start"]), ("pop", ph("bikin kalimat")["start"]),
        ("click", wt("Klik run", "run")), ("ping", ph("sequence-nya")["start"]), ("whoosh", ph("Masuk dulu")["start"] - 0.15),
        ("click", wt("Lu approve", "approve")), ("ping", wt("Dan tiap", "tujuh")), ("whoosh", ph("lu dapet")["start"] - 0.2),
-       ("whoosh", ph("Ok follow")["start"] - 0.3), ("click", wt("Ok follow", "follow"))]
+       ("whoosh", ph("Mau sistem")["start"] - 0.3), ("click", wt("Klik link", "link"))]
 tags = []
 for i, (k, t) in enumerate(sorted(ev, key=lambda e: e[1])):
     tags.append(f'<audio id="sx{i:02d}" class="clip" src="assets/sfx/{k}.wav" data-start="{t:.2f}" data-duration="{DUR[k]}" '

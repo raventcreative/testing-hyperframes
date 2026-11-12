@@ -64,7 +64,7 @@
   pose(TM.hit - 0.6, { hYaw: -12, hPitch: -18, lookX: -0.4, lookY: 1, yaw: -18 });
   // S3 · "Kita hitung satu barang": points up at the calculation board, nods along each row
   pose(TM.hit + 0.35, { hYaw: -18, hPitch: -16, lookX: -0.7, lookY: 0.8, yaw: -22 });
-  pointR(TM.hit + 0.2, TM.harga + 0.2, 140, 28, 14);
+  armL(TM.hit + 0.15, 15, 0, 10, 0); armL(TM.hit + 0.5, 150, 18, 20, 0, "o"); armL(TM.harga + 0.2, 150, 18, 20, 0); armL(TM.harga + 0.5, 15, 0, 10, 0);   // far arm: never crosses podium B
   for (const t of [TM.harga, TM.disk2, TM.j70, TM.modal, TM.ongkir]) { pose(t + 0.08, { hPitch: -9 }); pose(t + 0.38, { hPitch: -16 }); }
   pose(TM.disk2 - 0.1, { lookX: 0.2, lookY: 1, hYaw: -6 }); pose(TM.disk2 + 0.4, { lookX: -0.7, lookY: 0.8, hYaw: -18 });
   pointR(TM.modal + 0.1, TM.m50 + 0.5, 128, 34, 18);

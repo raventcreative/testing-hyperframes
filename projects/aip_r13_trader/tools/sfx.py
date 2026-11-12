@@ -144,8 +144,8 @@ put(wt_("Namanya") - 0.12, whoosh(0.45, 2400, 600, 1.4, 0.45), W * 0.6); put(wt_
 put(wt_("Day") - 0.18, pop(600, 1000, 0.09), 0.12); put(wt_("Claude") - 0.1, chime((1046, 1318, 1568), 0.9), 0.05)
 for k in range(11): put(wt_("11") + 0.02 + k * 0.055, pop(800 + 50 * k, 1300 + 50 * k, 0.05), 0.07)
 put(wt_("gratis,") - 0.04, pop(800, 1300, 0.08), 0.13)
-for k in range(3): put(wt_("dibagi") + 0.02 + k * 0.16, whoosh(0.35, 500, 1800, 1.4, 0.4), W * 0.35)
-for k in range(11): put(wt_("dibagi") + 0.5 + k * 0.05, tick(0.016, 3000 - 80 * k), 0.06)
+for k in range(3): put(wt_("dibagi") - 0.12 + k * 0.1, whoosh(0.32, 500, 1800, 1.4, 0.4), W * 0.35)
+for k in range(11): put(wt_("dibagi") + 0.34 + k * 0.03, tick(0.016, 3000 - 80 * k), 0.06)
 put(wt_("lapis.") - 0.05, chime((1318.5, 1760, 2637), 0.8), 0.05)
 out_whoosh("t1")
 # --- t1 CARI: flap, scanner panel, tiles deal, beam sweep + counter, setups, news, report

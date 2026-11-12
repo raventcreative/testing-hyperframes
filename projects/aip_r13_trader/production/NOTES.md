@@ -55,4 +55,31 @@ header alone; the header is rebuilt 1:1 at every scene start and rolls to the ne
 - `npx --yes hyperframes@0.8.186 lint .` → 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as R9).
 - `npx --yes hyperframes@0.8.186 validate .` → 0 errors; warnings = "multiple Three.js instances" (robot + mascot bundles, as in the kit),
   SwiftShader ReadPixels notices, contrast notes on hidden text only (the off-screen digits of the header number roll).
-- QA_PLACEHOLDER
+- Snapshots (`snapshot . --at … --no-end --timeout 60000 --describe false`): one full pass of 70 frames — first frame, every scene's
+  beats, both sides of every cut, the end — plus one targeted fix pass (6 frames: the s02 sort after its re-timing, s10's link chip).
+  Contact sheets (JPG only): `production/qa/runtime_full_1.jpg` … `_6.jpg` (whole frames, labelled with the time),
+  `production/qa/runtime_hero_1.jpg` … `_9.jpg` (hero zone + captions, larger), `production/qa/runtime_fix_1.jpg` (fix pass). The PNG
+  dumps were deleted after the sheets were made (disk budget).
+- Fixed after the full pass: s02's shelves/chips now finish sorting by ≈ 9.1 s and hold until the exit at 9.55 s (before: they landed
+  just as the workspace left) — verified in the fix pass; the s02 SFX were re-cued to match.
+- Layout was iterated with a fast DOM-only scene preview that also flags text overflowing its card / the frame / the 945 px line;
+  every held frame was clean (only in-motion frames show transitions).
+
+## Known issues / notes for the lead
+- The hosts pop in over the first 0.5 s (frame 0 shows the chart + BELI button without them) — same kit behaviour as R9.
+- Short "header only" beats at the start of t1/t2/t3/s08/s09/s10 (≈ 0.2–0.5 s, the header rolls while the layer is named) — intentional
+  breathing room, same as R9.
+- Spoken VO is 47.84 s (window 35–50 s); total 49.47 s (≤ 50 s). The client's auto tags added `[sighs]` to line 6 (the honest "beda
+  tipis" line) and `[confident]` to the CTA.
+- Four word times override the ElevenLabs alignment (it placed "dan", "target.", "Machine:" and "sepuluh" late); checked against the
+  energy segments + faster-whisper.
+- All demo numbers are labelled examples: prices 1.000 / 970 / 1.030, ± 5.900 (README universe size), 08:04, the $5.000 / $50 / $5,86 /
+  8 vs 30 lembar tickets (README budget example; 30 × 5,86 = 175,80 is our arithmetic for the blocked order), the s05 fan (46 drawn
+  illustrative paths, not the README's sample paths; labelled "simulasi, bukan prediksi"). The s06 percentages are the README's exact
+  example values (29,4 / 25,5 / 45,1); the waffle rounds them to 29 / 26 / 45 cells. The README example stock (Tesla) is deliberately not
+  named on screen ("1 saham AS"); every ticker is "SAHAM A" (or A/B/C on the SETUP tags).
+- s01's pushy bubble "Lagi naik terus, beli sekarang!" is the negative example (struck through); there is no "pasti cuan"/profit wording
+  anywhere, and the disclaimer pill is visible on every frame.
+- The Claude chat (s10), the order tickets, gates and mode switch are our own generic mocks, not screenshots; "di Claude Code bisa juga
+  lewat /plugin" is from the README's install section.
+- `hyperframes snapshot` writes `.hyperframes/` (video state) into the project folder; harmless.

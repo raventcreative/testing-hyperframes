@@ -47,7 +47,7 @@
   const REST = (t, e) => { armL(t, 15, 0, 10, 0, e); armR(t, 15, 0, 10, 0, e); };
   const R0 = (t) => armR(t, 15, 0, 10, 0), L0 = (t) => armL(t, 15, 0, 10, 0);
   const POINT = (t0, t1) => { R0(t0 - 0.05); armR(t0 + 0.3, 112, 30, 14, 0, "o"); armR(t1, 112, 30, 14, 0); R0(t1 + 0.3); };   // points left/up at the shelf
-  const RX = 905, RY = 1585, RH = 520;   // warehouse: small full-body host, bottom-right, beside the shelf
+  const RX = 920, RY = 1615, RH = 500;   // warehouse: small full-body host, bottom-right, beside the shelf
 
   // S1 · hook: rises in at the bottom-right, looks at the full shelf, then up at the saldo card; shrugs on "tipis"
   pose(0, Object.assign({ x: RX, y: 2480, h: RH, yaw: -20, hYaw: -14, hPitch: -6, hRoll: 0, lookX: -0.6, lookY: 0.3 }, LIGHT)); REST(0);

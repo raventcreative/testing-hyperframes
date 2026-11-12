@@ -12,7 +12,7 @@
     #s01-me { position: absolute; left: 0; top: 0; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; background: #e3edfa; color: #294b77;
       box-shadow: 0 0 0 8px rgba(227,237,250,.14), 0 18px 40px rgba(2,6,26,.5); transform-origin: 50% 50%; }
     #s01-me svg { position: absolute; left: 33px; top: 30px; width: 84px; height: 84px; }
-    #s01-mel { position: absolute; left: 0; top: 0; height: 40px; padding: 0 18px; border-radius: 20px; background: #01ccf7; color: #0b1440; font: 700 22px/40px Poppins;
+    #s01-mel { position: absolute; left: 0; top: 0; height: 40px; transform-origin: 50% 50%; padding: 0 18px; border-radius: 20px; background: #01ccf7; color: #0b1440; font: 700 22px/40px Poppins;
       white-space: nowrap; transform-origin: 50% 50%; }
     .s01-job { position: absolute; left: 0; top: 0; height: 56px; padding: 0 22px 0 14px; border-radius: 28px; background: #ffffff; color: #0a0d2c;
       font: 700 25px/56px Poppins; white-space: nowrap; display: flex; align-items: center; gap: 10px; box-shadow: 0 14px 30px rgba(2,6,26,.45); transform-origin: 50% 50%; }
@@ -53,23 +53,25 @@
       ft(me, { scale: 1 }, { scale: 1.08, duration: 0.16, yoyo: true, repeat: 1, ease: "power2.out" }, tNg - 0.08);
       I(mel, { x: 540, xPercent: -50, y: 676, opacity: 1, scale: 1 });
       JOBS.forEach(([, , x, y], i) => {
-        const j = $("s01-j" + i), t0 = tNg - 0.1 + i * 0.16, r = ((i * 37) % 11) - 5;
-        I(j, { x, y, xPercent: -50, yPercent: -50, scale: 0.3, opacity: 0, rotation: r * 2 });
-        ft(j, { scale: 0.3, opacity: 0, rotation: r * 2 }, { scale: 1, opacity: 1, rotation: r * 0.6, duration: 0.34, ease: "back.out(2.2)" }, t0);
+        // chips 0–1 are already on screen at frame 0 (a readable first frame); the other five pile on with the voice
+        const pre = i < 2, t0 = pre ? 0 : tNg - 0.1 + (i - 1) * 0.16, r = ((i * 37) % 11) - 5, j = $("s01-j" + i);
+        I(j, { x, y, xPercent: -50, yPercent: -50, scale: pre ? 1 : 0.3, opacity: pre ? 1 : 0, rotation: r * (pre ? 0.6 : 2) });
+        if (!pre) ft(j, { scale: 0.3, opacity: 0, rotation: r * 2 }, { scale: 1, opacity: 1, rotation: r * 0.6, duration: 0.34, ease: "back.out(2.2)" }, t0);
         // drift toward the creator (the pile closes in)
-        ft(j, { x, y }, { x: x + (540 - x) * 0.12, y: y + (590 - y) * 0.12, duration: tSb - 0.24 - t0 - 0.3, ease: "sine.inOut" }, t0 + 0.3);
+        ft(j, { x, y }, { x: x + (540 - x) * 0.08, y: y + (590 - y) * 0.08, duration: tSb - 0.24 - t0 - 0.3, ease: "sine.inOut" }, t0 + 0.3);
       });
       // "sendirian?": the creator shakes, the job counter drops in
       const SHK = [[0, 0], [9, 0], [-8, 0], [6, 0], [-4, 0], [0, 0]];
       for (let k = 1; k < SHK.length; k++) ft(me, { rotation: SHK[k - 1][0] * 0.8 }, { rotation: SHK[k][0] * 0.8, duration: 0.06, ease: "sine.inOut" }, tSe + (k - 1) * 0.06);
       I(me, { rotation: 0 });
-      I(cnt, { x: 540, xPercent: -50, y: 708, opacity: 0, scale: 1.6 });
+      // the "kamu" pill gives way to the job counter (same spot, under the avatar)
+      ft(mel, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.7, duration: 0.12, ease: "power2.in" }, tSe - 0.04);
+      I(cnt, { x: 540, xPercent: -50, y: 674, opacity: 0, scale: 1.6 });
       ft(cnt, { opacity: 0, scale: 1.6 }, { opacity: 1, scale: 1, duration: 0.2, ease: "power4.in" }, tSe + 0.05);
       // collapse before "Sebelas"
       const tC = tSb - 0.24;
-      JOBS.forEach(([, , x, y], i) => ft($("s01-j" + i), { x: x + (540 - x) * 0.12, y: y + (590 - y) * 0.12, scale: 1, opacity: 1 }, { x: 540, y: 590, scale: 0.2, opacity: 0, duration: 0.3, ease: "power3.in" }, tC + i * 0.015));
+      JOBS.forEach(([, , x, y], i) => ft($("s01-j" + i), { x: x + (540 - x) * 0.08, y: y + (590 - y) * 0.08, scale: 1, opacity: 1 }, { x: 540, y: 590, scale: 0.2, opacity: 0, duration: 0.3, ease: "power3.in" }, tC + i * 0.015));
       ft(me, { scale: 1, opacity: 1 }, { scale: 0.3, opacity: 0, duration: 0.28, ease: "power3.in" }, tC + 0.06);
-      ft(mel, { opacity: 1 }, { opacity: 0, duration: 0.18 }, tC);
       ft(cnt, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.7, duration: 0.2, ease: "power2.in" }, tC);
       // ---------------------------------------------------------------- "Sebelas skill Claude gratis ini": title group + 11 tiles
       const ttl = $("s01-ttl"), disc = $("s01-disc"), pill = $("s01-pill"), mit = $("s01-mit");

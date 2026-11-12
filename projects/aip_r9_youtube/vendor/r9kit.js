@@ -59,7 +59,7 @@
     { cmd: "/yt-plan", lbl: "rencana seminggu", ic: "calendar" },
     { cmd: "/yt-viral", lbl: "riset video viral", ic: "flame" },
     { cmd: "/yt-retention", lbl: "baca data retensi", ic: "activity" },
-    { cmd: "/yt-shorts", lbl: "Shorts dari video panjang", ic: "phone" },
+    { cmd: "/yt-shorts", lbl: "potong jadi Shorts", ic: "phone" },
     { cmd: "/yt-seo", lbl: "deskripsi + kata kunci", ic: "search" },
     { cmd: "/yt-chapters", lbl: "chapter otomatis", ic: "list" },
     { cmd: "/yt-audit", lbl: "audit channel", ic: "audit" },

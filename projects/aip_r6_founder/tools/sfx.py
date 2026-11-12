@@ -1,6 +1,7 @@
-"""Synthesised SFX bed for the REMOTE reel (tim 3 Claude cari kerja remote) (no samples, no downloads): a STOP stamp + price strikes, 6 prompt blocks snapping in,
-a calendar flip + collapse on "capek", Claude chime, the 5-step rail (tick on each step, check on each done), paste / send / build /
-typing / copy clicks, the s10 tear + crumple, the CTA (MASTER typing, heart, plane, DM chime). Deterministic. Writes assets/audio/sfx.wav.
+"""Synthesised SFX bed for the FOUNDER reel (R6: tes ide bisnis ke 100 pembeli AI) (no samples, no downloads): idea card + scan,
+the 100-avatar panel popping in (a wave of tiny pops + counter ticks), the Rp0 slam, 11 command chips flying out, board seats lighting,
+CFO rows ticking + ring sweep + strike, persona cards, the pitch being sent, the two verdicts (chime / BELUM stamp), objection rows,
+the TAHAN DULU stamp, the SIMULASI stamp, the CTA (FOUNDER typing, heart, plane, DM chime). Deterministic. Writes assets/audio/sfx.wav.
 Run: python3 tools/sfx.py ."""
 import json, sys, wave
 from pathlib import Path
@@ -131,96 +132,106 @@ def bell(dur=0.9):
     return x / np.abs(x).max()
 
 st = lambda i: S[i]["start"]
-# --- s01 hook: seats bump, three flips, Claude chime, job lines, connectors, the "Kerja remote" pill slams
+def pops(t0, n, span, f0=900, f1=1500, g=0.05, dur=0.04):
+    for k in range(n): put(t0 + span * k / max(1, n - 1), pop(f0 + (f1 - f0) * k / max(1, n - 1), f0 * 1.4 + (f1 - f0) * k / max(1, n - 1), dur), g)
+def ticks(t0, n, span, f=2600, g=0.08):
+    for k in range(n): put(t0 + span * k / max(1, n - 1), tick(0.02, f + 140 * (k % 4)), g)
+# --- s01 hook: idea card, "dites" scan, connector, the panel pops in + counter, Rp0 slam, AMAN
 put(0.02, pop(500, 760, 0.08), 0.08)
-for k in range(3): put(wt("tim") - 0.06 + k * 0.05, tick(0.025, 2600 + 200 * k), 0.1)
-tI, tT = wt("isi"), wt("tiga")
-for k in range(3):
-    tf = tI + 0.02 + k * ((tT + 0.12 - tI) / 2); put(tf, flap(), 0.13); put(tf + 0.14, pop(700 + 120 * k, 1100 + 120 * k, 0.07), 0.12)
-put(wt("Claude,") - 0.03, chime((1318.5, 1760, 2637), 1.0), 0.07)
-for k in range(3): put(wt("tugasnya") - 0.04 + k * 0.12, pop(900 + 80 * k, 1300 + 80 * k, 0.05), 0.07)
-put(wt("nyariin") - 0.02, whoosh(0.45, 600, 2400, 1.3, 0.4), W * 0.5)
-put(wt("kerja") - 0.12, pop(500, 900, 0.09), 0.13)
-put(wt("remote.") - 0.05, boom(0.4, 150, 60), 0.22); put(wt("remote.") + 0.02, chime((1568, 2093, 2637), 0.9), 0.06)
+put(wt("dites") - 0.06, pop(800, 1300, 0.07), 0.12); put(wt("dites") - 0.02, whoosh(0.55, 700, 2600, 2.0, 0.5), W * 0.35)
+put(wt("ke") - 0.02, tick(0.03, 2200), 0.12)
+t100 = wt("100"); pops(t100 - 0.08, 14, 0.7, 700, 1700, 0.045); ticks(t100 - 0.04, 10, 0.8, 3000, 0.06)
+put(wt("AI") - 0.02, chime((1318.5, 1760, 2637), 0.9), 0.05)
+put(wt("sebelum") - 0.12, whoosh(0.4, 500, 1800, 1.3, 0.45), W * 0.45)
+put(wt("sepeser") + 0.08, boom(0.45, 150, 60), 0.22); put(wt("sepeser") + 0.1, pop(420, 200, 0.12), 0.12)
+put(wt("pun.") - 0.06, chime((1568, 2093, 2637), 0.9), 0.06); put(wt("pun.") - 0.04, pop(1000, 1600, 0.06), 0.1)
 put(st("s02") - 0.3, whoosh(0.4, 2000, 600, 1.3, 0.35), W * 0.6)
-# --- s02 pain: search typing, battery drains, "capek", tabs pile up, apply hammering, empty inbox
-put(st("s02") + 0.02, whoosh(0.35, 500, 2000, 1.3, 0.4), W * 0.5)
-typing(wt("nyari") - 0.1, wt("remote", st("s02") + 0.9) + 0.25, 0.08, 18)
-tI = wt("itu"); put(tI - 0.35, pop(700, 1100, 0.07), 0.1)
-put(tI - 0.15, square_blips([880, 740, 620, 520, 440, 370], 0.11), 0.05)
-put(wt("capek") - 0.04, buzz(0.3), 0.05); put(wt("capek") - 0.02, boom(0.45, 120, 50), 0.16)
-for k in range(4): put(wt("banget.") + k * 0.09, tick(0.02, 1800), 0.08)
-put(wt("capek") + 0.25, pop(600, 260, 0.12), 0.08)
-tW0 = wt("Buka") - 0.08; dW = (wt("satu-satu,") + 0.3 - tW0) / 8
-for k in range(8): put(tW0 + k * dW, whoosh(0.16, 900, 2400, 1.6, 0.3), W * 0.25); put(tW0 + k * dW + 0.1, pop(650 + 60 * k, 1000 + 60 * k, 0.05), 0.09)
-tA, tB = wt("apply"), wt("berkali-kali,")
-put(tA - 0.35, pop(800, 1300, 0.07), 0.08)
-for t in [tA - 0.02, tA + 0.2, tB + 0.12, tB + 0.34, tB + 0.56]:
-    put(t, tick(0.03, 2100), 0.2); put(t + 0.04, whoosh(0.3, 900, 3000, 1.5, 0.35), W * 0.3); put(t + 0.38, pop(1000, 1500, 0.05), 0.08)
-tY = wt("yang", st("s02") + 6)
-put(tY - 0.1, whoosh(0.45, 2200, 700, 1.2, 0.4), W * 0.6)
-for k in range(5): put(wt("bales") - 0.1 + k * 0.07, tick(0.02, 3000), 0.06)
-put(wt("dikit") - 0.02, pop(420, 180, 0.18), 0.18); put(wt("dikit"), buzz(0.2), 0.03)
-for k in range(5): put(wt("banget.", wt("dikit")) - 0.2 + k * 0.034, tick(0.015, 2200), 0.05)
+# --- s02 the Founder pack: card up, title + glint, "11" slam, 11 chips fly out, Claude chime, badges, 3 featured rings
+put(st("s02") + 0.02, whoosh(0.4, 500, 1800, 1.3, 0.45), W * 0.45)
+put(wt("Founder:") - 0.12, pop(700, 1200, 0.08), 0.13); put(wt("Founder:") + 0.1, rise(0.5, 900, 2400), 0.025)
+put(wt("11") - 0.0, boom(0.4, 160, 65), 0.2)
+for k in range(11): put(wt("11") + 0.02 + k * 0.055, whoosh(0.18, 900, 2600, 1.6, 0.3), W * 0.18); put(wt("11") + 0.3 + k * 0.055, pop(800 + 50 * k, 1200 + 50 * k, 0.04), 0.06)
+put(wt("Claude,") - 0.03, chime((1318.5, 1760, 2637), 0.9), 0.06)
+put(wt("gratis") - 0.06, pop(900, 1400, 0.07), 0.13); put(wt("open") - 0.08, pop(1000, 1500, 0.07), 0.12)
+for q in range(3): put(wt("source.") + 0.05 + q * 0.08, pop(1200 + 120 * q, 1800 + 120 * q, 0.05), 0.08)
 put(st("s03") - 0.27, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.5)
-# --- s03 one command: terminal pops in, /loker-remote typing, Enter, the team launches and lights up
-put(st("s03") + 0.02, pop(500, 900, 0.09), 0.1)
-typing(wt("ketik") - 0.08, wt("perintah,") - 0.12, 0.12, 26)
-put(wt("perintah,") + 0.02, tick(0.04, 1500), 0.3); put(wt("perintah,") + 0.04, pop(400, 200, 0.1), 0.15)
-put(wt("perintah,") + 0.15, chime((1568, 2093), 0.6), 0.04)
-for k in range(3): put(wt("dan", st("s03")) + k * 0.1, rise(0.32, 400 + 100 * k, 1500 + 100 * k), 0.035); put(wt("dan", st("s03")) + k * 0.1 + 0.3, pop(800 + 150 * k, 1300 + 150 * k, 0.06), 0.11)
-put(wt("langsung", st("s03")) - 0.05, chime((1046, 1318, 1568, 2093), 1.1), 0.08)
-put(st("s04") - 0.34, whoosh(0.35, 1600, 500, 1.3, 0.35), W * 0.4)
-# --- s04 Claude 1 crawls the sites and collects listings
-for k in range(8): put(st("s04") + k * 0.035, tick(0.02, 2400 + 120 * k), 0.06)
-put(wt("pertama") - 0.06, tick(0.03, 2000), 0.16); put(wt("pertama"), pop(700, 1100, 0.07), 0.1)
-tH0 = wt("keliling") - 0.08; dH = (wt("loker,") + 0.32 - tH0) / 8
-for k in range(8): put(tH0 + k * dH, tick(0.028, 2200 + 180 * k), 0.15); put(tH0 + k * dH + 0.03, pop(1200 + 60 * k, 1700 + 60 * k, 0.04), 0.06)
-tN = wt("ngumpulin"); dN = (wt("remote", tN) + 0.1 - tN) / 6
-for k in range(6): put(tN - 0.12 + k * dN, whoosh(0.3, 2400, 900, 1.6, 0.3), W * 0.3); put(tN - 0.12 + k * dN + 0.42, pop(500 + 50 * k, 800 + 50 * k, 0.06), 0.11)
-put(wt("ada.") - 0.1, pop(900, 1500, 0.08), 0.12)
-# --- s05 Claude 2 filters: criteria pills, scan sweeps, rejects (buzz), scam stamp, into the bin, survivors check
-put(wt("kedua") - 0.01, pop(1100, 1700, 0.06), 0.12); put(wt("kedua") + 0.02, tick(0.03, 2000), 0.12)
-for k in range(3): put(wt("nyaring:") - 0.3 + k * 0.07, pop(700 + 80 * k, 1100 + 80 * k, 0.06), 0.09)
-for t in [wt("nyaring:") + 0.05, wt("cocok") - 0.1, wt("dikerjain") - 0.1, wt("mencurigakan") - 0.25]: put(t, whoosh(0.55, 700, 2600, 2.2, 0.5), W * 0.25)
-for t in [wt("cocok") - 0.05, wt("Indonesia,") - 0.25, wt("mencurigakan") - 0.05]: put(t + 0.05, pop(1200, 1900, 0.06), 0.12)
-for t in [wt("skill"), wt("Indonesia,"), wt("mencurigakan") + 0.1]: put(t - 0.04, buzz(0.18), 0.045); put(t - 0.02, pop(380, 200, 0.1), 0.12)
-put(wt("mencurigakan") + 0.13, boom(0.35, 160, 70), 0.18)
-for n in range(3): put(wt("dibuang.") - 0.12 + n * 0.08, whoosh(0.32, 2000, 600, 1.4, 0.3), W * 0.35); put(wt("dibuang.") + 0.24 + n * 0.08, pop(300, 150, 0.1), 0.14)
-for q in range(3): put(wt("dibuang.") + 0.42 + q * 0.05, pop(1300 + 100 * q, 2000 + 100 * q, 0.05), 0.1)
-# --- s06 Claude 3 writes: toss into chip 3, tabs, CV + cover letter writing, KHUSUS stamp, per-listing swaps
-for q in range(3): put(wt("lolos") - 0.05 + q * 0.05, pop(900, 1400, 0.05), 0.07)
-for q in range(3): put(wt("dilempar") - 0.08 + q * 0.12, whoosh(0.4, 600, 2600, 1.4, 0.4), W * 0.35); put(wt("dilempar") + 0.36 + q * 0.12, tick(0.03, 2600), 0.1)
-put(wt("ketiga.") - 0.03, pop(1100, 1700, 0.06), 0.12); put(wt("ketiga.") + 0.02, tick(0.03, 2000), 0.12)
-for q in range(3): put(wt("ketiga.") + 0.1 + q * 0.07, tick(0.022, 2800), 0.07)
-put(wt("Dia") - 0.1, whoosh(0.35, 500, 1800, 1.3, 0.4), W * 0.4)
-put(wt("bikinin", st("s06")) - 0.05, scribble(wt("CV") + 0.35 - wt("bikinin", st("s06"))), 0.08)
-put(wt("cover") - 0.2, whoosh(0.35, 700, 2200, 1.4, 0.4), W * 0.35)
-put(wt("cover") + 0.05, scribble(wt("khusus") + 0.05 - wt("cover")), 0.07)
-put(wt("khusus") - 0.12, boom(0.35, 170, 70), 0.2); put(wt("khusus") - 0.1, pop(300, 140, 0.1), 0.12)
-for t in [wt("tiap", st("s06")) - 0.06, wt("lowongan.") + 0.12]: put(t, flap(), 0.1)
-for t in [wt("khusus") - 0.05, wt("tiap", st("s06")) - 0.06, wt("lowongan.") + 0.12]: put(t + 0.18, pop(1300, 2000, 0.05), 0.1)
-put(wt("lowongan.") + 0.45, chime((1318.5, 1760, 2349), 0.8), 0.06)
-# --- s07 the board: chips dive in, page opens, rows slide, "satu halaman", "pribadi" stamp
-for i in range(3): put(wt("semuanya") - 0.12 + i * 0.08, whoosh(0.4, 2400, 800, 1.5, 0.35), W * 0.3); put(wt("semuanya") + 0.28 + i * 0.08, pop(900 + 100 * i, 1400 + 100 * i, 0.05), 0.09)
-put(st("s07") + 0.02, whoosh(0.5, 400, 1600, 1.2, 0.5), W * 0.5)
-for q in range(3): put(wt("semuanya") + 0.12 + q * ((wt("masuk") + 0.1 - wt("semuanya")) / 3), pop(600 + 100 * q, 1000 + 100 * q, 0.07), 0.11)
-for i in range(3): put(wt("masuk") + 0.05 + i * 0.07, tick(0.02, 3000), 0.06)
-put(wt("satu", st("s07")), tick(0.03, 2200), 0.14); put(wt("halaman,"), boom(0.4, 140, 70), 0.1)
-put(wt("pribadi.") - 0.1, boom(0.3, 180, 80), 0.16); put(wt("pribadi.") - 0.08, pop(320, 160, 0.1), 0.1)
-# --- s08 pick + apply: popover, gold "paling cocok", click with sparks, toast
-put(st("s08") + 0.05, whoosh(0.5, 500, 1300, 1.2, 0.5), W * 0.25)
-put(wt("cek,") - 0.02, pop(800, 1300, 0.07), 0.1)
-put(wt("paling") - 0.1, chime((1568, 2093, 2637), 0.8), 0.06); put(wt("cocok,", wt("paling")) - 0.1, pop(1000, 1600, 0.07), 0.1)
-put(wt("apply.") - 0.04, tick(0.035, 1900), 0.26); put(wt("apply.") - 0.02, pop(500, 300, 0.08), 0.12)
-put(wt("apply.") + 0.05, chime((2093, 2637, 3136), 0.7), 0.05); put(wt("apply.") + 0.12, pop(800, 1200, 0.07), 0.08)
-# --- s09 CTA
-put(wt("Mau") - 0.02, whoosh(0.45, 1800, 500, 1.3, 0.4), W * 0.5); put(wt("cobain?") - 0.02, pop(700, 1200, 0.08), 0.12)
-put(wt("Komen") - 0.3, whoosh(0.4, 400, 1800, 1.3, 0.45), W * 0.5)
-tR = wt("REMOTE,")
-for k in range(6): put(tR - 0.36 + k * 0.084, tick(0.022, 4200), 0.14)
-put(tR + 0.12, pop(900, 1600, 0.1), 0.15)
-put(wt("aku", tR) - 0.01, tick(0.03, 2000), 0.2); put(wt("aku", tR) + 0.06, whoosh(0.5, 700, 3600, 1.2, 0.45), W * 0.9)
+# --- s03 the board: pill, title words, seats rise, chips, each seat lights on its name
+put(st("s03") + 0.05, pop(600, 1000, 0.08), 0.1)
+put(wt("dewan") - 0.1, pop(500, 800, 0.08), 0.1); put(wt("direksi,") - 0.1, pop(600, 950, 0.08), 0.1)
+for k in range(3): put(wt("dewan") - 0.05 + k * 0.08, whoosh(0.35, 500, 1700, 1.3, 0.4), W * 0.3)
+for q in range(3): put(wt("kerangka") - 0.06 + q * 0.12, pop(1000 + 100 * q, 1500 + 100 * q, 0.05), 0.08)
+for k, w in enumerate(["Hormozi,", "Thiel,", "Steve"]):
+    put(wt(w) - 0.08, flap(), 0.1); put(wt(w) - 0.02, pop(800 + 200 * k, 1300 + 200 * k, 0.07), 0.12)
+put(st("s04") - 0.26, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.5)
+# --- s04 CFO: card, title slam, rows tick, rule, rest per portion, ring sweep, strike
+put(st("s04") + 0.03, whoosh(0.45, 500, 1700, 1.3, 0.45), W * 0.45)
+put(wt("CFO,") - 0.0, boom(0.35, 160, 70), 0.17)
+typing(wt("ngitung") - 0.3, wt("ngitung") + 0.15, 0.08, 22)
+for k in range(4): put(wt("CFO,") + 0.22 + k * 0.13, tick(0.025, 2400 + 150 * k), 0.12)
+put(wt("margin") - 0.32, whoosh(0.25, 1200, 3000, 1.6, 0.3), W * 0.25); put(wt("margin") - 0.1, pop(700, 1100, 0.08), 0.13)
+put(wt("asli") - 0.1, rise(0.45, 500, 1600), 0.03); put(wt("asli") + 0.12, rip(0.22), 0.06)
+put(wt("asli") + 0.3, buzz(0.16), 0.03); put(wt("asli") + 0.4, chime((1318.5, 1760), 0.6), 0.04)
+put(st("s05") - 0.28, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.5)
+# --- s05 panel: pill, PALING SERU, title slam, the 100 pop in, three persona cards fly out, three fields
+put(st("s05") + 0.05, pop(600, 1000, 0.08), 0.1)
+put(wt("seru:") - 0.1, pop(1100, 1700, 0.07), 0.13); put(wt("seru:"), chime((1568, 2093, 2637), 0.8), 0.05)
+put(wt("panel", st("s05")) - 0.02, boom(0.4, 150, 65), 0.18)
+pops(wt("100", st("s05")) - 0.1, 14, 0.62, 700, 1700, 0.045)
+for k in range(3): put(wt("masing-masing") - 0.12 + k * 0.08, whoosh(0.4, 700, 2400, 1.4, 0.4), W * 0.3)
+put(wt("masing-masing") + 0.3, pop(600, 950, 0.08), 0.1)
+for w in ["penghasilan,", "kebiasaan,", "keraguan"]: put(wt(w) - 0.12, pop(900, 1400, 0.06), 0.11); put(wt(w) - 0.1, tick(0.02, 2600), 0.06)
+put(wt("sendiri.") - 0.1, whoosh(0.3, 1200, 2400, 1.6, 0.3), W * 0.25)
+put(st("s06") - 0.28, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.5)
+# --- s06 pitch: card, CONTOH label, title words, price slam, chips, the send + panel ripple
+put(st("s06") + 0.02, whoosh(0.45, 500, 1700, 1.3, 0.45), W * 0.45)
+put(wt("Contohnya,") + 0.06, pop(900, 1500, 0.07), 0.1)
+for w in ["katering", "makan", "kantor,"]: put(wt(w) - 0.1, tick(0.025, 2600), 0.1)
+put(wt("Rp25.000") - 0.0, boom(0.4, 160, 65), 0.18); put(wt("Rp25.000") + 0.04, chime((2093, 2637, 3136), 0.6), 0.04)
+for q in range(2): put(wt("Rp25.000") + 0.35 + q * 0.12, pop(1000 + 150 * q, 1500 + 150 * q, 0.05), 0.08)
+put(wt("per", st("s06")) - 0.02, pop(800, 1300, 0.07), 0.1)
+put(wt("porsi.") - 0.1, whoosh(0.32, 2400, 700, 1.4, 0.35), W * 0.45); put(wt("porsi.") + 0.2, pop(500, 800, 0.08), 0.12)
+ticks(wt("porsi.") + 0.16, 9, 0.32, 3200, 0.04)
+put(st("s07") - 0.26, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.5)
+# --- s07 verdicts: two cards slide in, CFO rows, "masuk" chime, panel counts to 18, BELUM stamp
+put(st("s07") + 0.0, whoosh(0.4, 500, 1800, 1.3, 0.45), W * 0.4); put(st("s07") + 0.1, whoosh(0.4, 600, 2000, 1.3, 0.45), W * 0.35)
+for w, a in [("CFO-nya", 0.25), ("angkanya", -0.25), ("angkanya", 0.0)]: put(wt(w) + a, tick(0.025, 2500), 0.1)
+put(wt("masuk.") - 0.16, whoosh(0.28, 900, 2600, 1.6, 0.3), W * 0.3); put(wt("masuk.") - 0.02, chime((1046, 1318, 1568, 2093), 1.0), 0.08)
+put(wt("Tapi", st("s07")) - 0.05, whoosh(0.3, 1600, 700, 1.3, 0.3), W * 0.25)
+ticks(wt("panelnya") - 0.05, 9, 0.55, 2800, 0.07)
+put(wt("belum.") - 0.0, boom(0.45, 140, 55), 0.22); put(wt("belum.") + 0.02, buzz(0.25), 0.045); put(wt("belum.") + 0.05, pop(380, 180, 0.12), 0.12)
+put(st("s08") - 0.26, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.5)
+# --- s08 18 / 100: panel in, count + 18 green pops, the 82 dim, three objection rows
+put(st("s08") + 0.02, whoosh(0.4, 500, 1600, 1.3, 0.45), W * 0.35)
+ticks(wt("18") - 0.12, 9, 0.5, 2800, 0.07); pops(wt("18") - 0.1, 18, 0.5, 1100, 1900, 0.04, 0.035)
+put(wt("dari", st("s08")) + 0.1, whoosh(0.5, 1800, 500, 1.2, 0.5), W * 0.3)
+put(wt("beli.", st("s08")) - 0.1, pop(900, 1400, 0.06), 0.08)
+for w, a in [("bawa", -0.1), ("warteg", -0.16), ("murah.", 0.02)]:
+    put(wt(w) + a - 0.08, pop(420, 260, 0.1), 0.1); put(wt(w) + a, whoosh(0.3, 700, 2200, 1.5, 0.35), W * 0.3); put(wt(w) + a + 0.22, pop(800, 1200, 0.05), 0.08)
+put(st("s09") - 0.26, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.5)
+# --- s09 now vs later: green card + chip, "daripada" pill, cart rises, items, pay pulse, TAHAN DULU stamp
+put(st("s09") + 0.02, whoosh(0.4, 500, 1800, 1.3, 0.45), W * 0.4)
+put(wt("sekarang,", st("s09")) + 0.05, chime((1318.5, 1760, 2349), 0.8), 0.06); put(wt("sekarang,", st("s09")) + 0.06, pop(1000, 1600, 0.06), 0.1)
+put(wt("daripada") - 0.1, pop(700, 1100, 0.07), 0.1); put(wt("daripada"), whoosh(0.4, 500, 1700, 1.3, 0.45), W * 0.35)
+for k in range(4): put(wt("beli", st("s09")) - 0.2 + k * 0.1, tick(0.025, 2300 + 150 * k), 0.1)
+put(wt("peralatan") - 0.05, pop(800, 1300, 0.07), 0.1)
+put(wt("dapur.") - 0.0, boom(0.4, 150, 60), 0.2); put(wt("dapur.") + 0.02, pop(320, 160, 0.1), 0.12)
+put(st("s10") - 0.24, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.5)
+# --- s10 simulated → real: panel box, SIMULASI stamp, winner card, real-test card, real buyers pop + checks
+put(st("s10") + 0.02, whoosh(0.45, 500, 1700, 1.3, 0.45), W * 0.4)
+put(wt("simulasi.") - 0.02, boom(0.4, 150, 60), 0.18); put(wt("simulasi.") + 0.0, zap(0.35), 0.03)
+put(wt("ide", st("s10")) - 0.1, tick(0.025, 2200), 0.1)
+put(wt("menang,") - 0.22, pop(800, 1300, 0.08), 0.12); put(wt("menang,") - 0.1, chime((1568, 2093, 2637), 0.9), 0.06)
+put(wt("tes", st("s10")) - 0.2, tick(0.025, 2200), 0.1); put(wt("tes", st("s10")) - 0.12, whoosh(0.4, 500, 1800, 1.3, 0.45), W * 0.35)
+for k in range(4): put(wt("pembeli", st("s10")) - 0.1 + k * 0.07, pop(700 + 100 * k, 1100 + 100 * k, 0.06), 0.1)
+for k in range(4): put(wt("beneran.") + 0.12 + k * 0.06, pop(1300 + 120 * k, 2000 + 120 * k, 0.04), 0.07)
+put(wt("beneran.") + 0.15, chime((1318.5, 1760, 2349), 0.8), 0.05)
+put(st("s11") - 0.24, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.5)
+# --- s11 CTA: package + sheet, FOUNDER typing, heart, send + plane, DM, end chime
+put(st("s11") + 0.0, whoosh(0.4, 400, 1800, 1.3, 0.45), W * 0.5); put(st("s11") + 0.1, pop(700, 1200, 0.08), 0.1)
+tF = wt("FOUNDER,")
+for k in range(7): put(tF - 0.2 + k * 0.46 / 6, tick(0.022, 4200), 0.14)
+put(tF + 0.31, pop(900, 1600, 0.1), 0.15)
+put(wt("aku", tF) - 0.01, tick(0.03, 2000), 0.2); put(wt("aku", tF) + 0.06, whoosh(0.5, 700, 3600, 1.2, 0.45), W * 0.9)
 put(wt("DM.") - 0.12, pop(800, 1300, 0.07), 0.1); put(wt("DM.") + 0.08, chime((1568, 2093), 0.8), 0.07)
 put(T["total_sec"] - 1.15, chime((1046, 1568, 2093, 2637), 1.6), 0.07)
 x = np.clip(out, -1, 1); x = (x * 32767).astype(np.int16)

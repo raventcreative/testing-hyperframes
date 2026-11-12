@@ -1,0 +1,99 @@
+"""VO word timing without network ASR (model hosts are blocked in this environment).
+Speech groups come from ffmpeg silencedetect (-34 dB, >= 70 ms) on assets/audio/vo.mp3 and are mapped by hand to the
+script below. Inside a group, words get syllable-weighted durations; every boundary is snapped to the lowest-energy
+10 ms frame within +-80 ms. Output: vendor/vo_words.js (VO_WORDS = [[word, start, end, phraseIndex]], VO_PHR)
+Run: python3 -I tools/align.py <project>"""
+import json, re, subprocess, sys
+from pathlib import Path
+import numpy as np
+
+P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
+AUDIO = P / "assets/audio/vo.mp3"
+
+# (start, end, [phrases]) - a group may hold several phrases when no clear pause separates them
+GROUPS = [
+    (0.11, 5.13, ["Gimana kalau satu perusahaan full dijalanin", "sama 137 AI agent?"]),
+    (5.75, 7.16, ["Hai gue Freddie Kashawan,"]),
+    (7.34, 11.28, ["udah bisnis 10 tahun", "dan 2 tahun terakhir", "pake AI di bisnis gue sendiri."]),
+    (11.66, 12.44, ["Ini petanya."]),
+    (12.56, 15.28, ["137 AI agent,", "dibagi ke 7 divisi:"]),
+    (15.41, 16.11, ["marketing,"]), (16.44, 17.03, ["sales,"]), (17.14, 17.70, ["deals,"]),
+    (17.82, 18.33, ["customer,"]), (18.48, 19.05, ["operations,"]), (19.17, 19.85, ["intelligence,"]),
+    (19.93, 21.74, ["sampai back office."]),
+    (21.96, 23.41, ["Dan yang bikin gila,"]),
+    (23.50, 24.65, ["ini bukan sekadar konsep."]),
+    (24.88, 27.08, ["Tiap agent punya", "job yang jelas."]),
+    (27.31, 27.70, ["Contoh:"]),
+    (27.95, 29.88, ["Cold Email Drafting", "di divisi sales."]),
+    (30.24, 32.00, ["Kerjaannya dipecah", "jadi tugas kecil:"]),
+    (32.21, 35.16, ["nulis sequence,", "bikin subject line,", "bikin kalimat pembuka."]),
+    (35.63, 36.48, ["Fondasinya dua:"]),
+    (36.85, 38.17, ["target customer yang jelas,"]),
+    (38.28, 39.76, ["plus riset personalisasi."]),
+    (39.97, 46.58, ["Dan dia gantiin", "output inti satu SDR,", "yang di Amerika gajinya", "60 sampai 80 ribu dolar setahun."]),
+    (47.01, 49.39, ["Tapi kuncinya ada", "di tangga ini:"]),
+    (49.80, 50.52, ["human-led,"]), (50.73, 51.64, ["human-assisted,"]), (51.84, 53.40, ["baru fully autonomous."]),
+    (53.70, 56.34, ["Manusia tetap approve", "tiap sequence", "sebelum dikirim."]),
+    (56.63, 57.90, ["Jadi pertanyaannya bukan"]),
+    (58.05, 59.98, ["\"AI bakal gantiin", "tim lu atau nggak\"."]),
+    (60.43, 61.17, ["Pertanyaannya:"]),
+    (61.51, 64.91, ["lu udah petain kerjaan tim lu", "jadi job yang bisa", "dipegang AI belum?"]),
+    (65.25, 68.78, ["Ok follow gua", "Freddie Kashawan", "kalo lu mau update", "seputar AI."]),
+]
+PRON = {"137": "seratustigapuluhtujuh", "10": "sepuluh", "2": "dua", "7": "tujuh", "60": "enampuluh", "80": "delapanpuluh",
+        "ai": "ei", "full": "ful", "freddie": "fredi", "kashawan": "kasawan", "marketing": "marketing", "sales": "seils",
+        "deals": "dils", "customer": "kastomer", "operations": "operesyens", "intelligence": "intelijens", "back": "bek",
+        "office": "ofis", "job": "job", "cold": "kold", "email": "imel", "drafting": "drafting", "sequence": "sikuens",
+        "subject": "sabjek", "line": "lain", "output": "autput", "sdr": "esdiar", "human-led": "hiumenled",
+        "human-assisted": "hiumenasisted", "fully": "fuli", "autonomous": "otonomus", "approve": "eprup",
+        "follow": "folou", "update": "apdet", "ok": "okei", "target": "target", "plus": "plas"}
+
+
+def syl(w):
+    k = re.sub(r"[^\w-]", "", w.lower())
+    k = PRON.get(k, k)
+    return max(1, len(re.findall(r"[aiueo]+", k)))
+
+
+raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(AUDIO), "-ac", "1", "-ar", "16000", "-f", "s16le", "-"],
+                     capture_output=True, check=True).stdout
+x = np.frombuffer(raw, np.int16).astype(np.float32) / 32768
+fr = 160
+env = np.array([np.sqrt(np.mean(x[i:i + fr] ** 2) + 1e-12) for i in range(0, len(x) - fr, fr)])
+
+
+def snap(t, lo, hi):
+    a, b = max(lo, t - 0.08), min(hi, t + 0.08)
+    ia, ib = int(a * 100), int(b * 100)
+    if ib <= ia:
+        return t
+    return (ia + int(np.argmin(env[ia:ib]))) / 100
+
+
+words, phr = [], []
+for g0, g1, phrases in GROUPS:
+    toks = [(w, pi) for pi, p in enumerate(phrases) for w in p.split()]
+    wts = [syl(w) for w, _ in toks]
+    tot = sum(wts)
+    t, bounds = g0, [g0]
+    for wgt in wts[:-1]:
+        t += (g1 - g0) * wgt / tot
+        bounds.append(t)
+    bounds.append(g1)
+    for i in range(1, len(bounds) - 1):
+        bounds[i] = snap(bounds[i], bounds[i - 1] + 0.06, bounds[i + 1] - 0.06)
+    base = len(phr)
+    for pi, p in enumerate(phrases):
+        phr.append({"text": p})
+    for i, (w, pi) in enumerate(toks):
+        words.append([w, round(bounds[i], 3), round(bounds[i + 1], 3), base + pi])
+for k, p in enumerate(phr):
+    ws = [w for w in words if w[3] == k]
+    p["start"], p["end"] = ws[0][1], ws[-1][2]
+
+out = P / "vendor/vo_words.js"
+out.write_text("// generated by tools/align.py\nwindow.VO_WORDS = " + json.dumps(words, ensure_ascii=False) +
+               ";\nwindow.VO_PHR = " + json.dumps(phr, ensure_ascii=False) + ";\n")
+(P / "production/word_timing.json").write_text(json.dumps({"words": words, "phrases": phr}, ensure_ascii=False, indent=1))
+for p in phr:
+    print(f"{p['start']:6.2f}-{p['end']:6.2f}  {p['text']}")

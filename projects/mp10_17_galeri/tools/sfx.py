@@ -1,10 +1,11 @@
-"""Synthesised SFX for MasterPajak AI Video 14 (Siapin 4 Data Ini) — sits under the VO (no samples, no music, per the client's rule).
-Beat times are parsed from window.TM in index.html, so a VO re-time only needs `python3 tools/sfx.py` again. Deterministic.
-Sounds: studio dolly air, stabilo marker, archive-box lid (creak-less hinge swing + cardboard knock), item fly-ins (whoosh per
-direction), tick stamps (pop + bright ding), HUD bar fills + counter clicks, paper drops into the box (soft papery thud),
-checkbox ticks, lid close thump + stamp chime, band sweep, hologram fx, the pour (paper flutters + landing pops), odometer
-ticks + result chime, shine shimmer, beam/iris boom, end pops + chime. Writes assets/audio/sfx.wav (48 kHz mono, TM.total s).
-Run: python3 tools/sfx.py [project dir]"""
+"""Synthesised SFX for MasterPajak AI Video 17 (Bukti Transfer Nyelip di Galeri) — sits under the VO (no samples, no music, per the
+client's rule). Beat times are parsed from window.TM in index.html (real VO word times), so a re-time only needs
+`python3 tools/sfx.py` again. Deterministic.
+Sounds: thumb flicks on glass (swipe + decelerating scroll ticks), "found" ding, tile lift pops + label chips, stabilo marker,
+receipt-ring dings, meme boings, rekap card whoosh + row ticks + a soft "missed" double blip, gallery grey-out, six photo lifts and
+fly-aways, band sweep, hologram fx, upload drops + check pops + done chime, album whoosh + photo flutter + date-pill ticks,
+pembukuan rows, trace callout pop, lens glide + found ding, split whooshes + badge pops, beam/iris boom, end pops + chime.
+Writes assets/audio/sfx.wav (48 kHz mono, TM.total s). Run: python3 tools/sfx.py [project dir]"""
 import sys, wave, re
 from pathlib import Path
 import numpy as np
@@ -14,7 +15,7 @@ _tm = re.search(r'window\.TM = (\{.*?\});', (P / 'index.html').read_text()).grou
 TM = {k: float(v) for k, v in re.findall(r'(\w+):\s*([\d.]+)', _tm)}
 TOTAL = TM['total']; N = int(TOTAL * SR) + SR
 out = np.zeros(N)
-rng = np.random.default_rng(14)
+rng = np.random.default_rng(17)
 def put(t, x, g=1.0):
     i = int(t * SR); j = min(N, i + len(x))
     if i < 0 or i >= N: return
@@ -91,86 +92,93 @@ def marker(dur=0.4):
     e = np.minimum(1, t / 0.025) * np.minimum(1, (dur - t) / 0.06)
     x = x * tex * e; return x / (np.abs(x).max() + 1e-9)
 
-def knock(f=150, dur=0.22):
-    """cardboard box knock: low damped body + a papery click"""
-    n = int(dur * SR); t = np.arange(n) / SR
-    x = np.sin(2 * np.pi * f * t) * np.exp(-t * 26) + 0.5 * np.sin(2 * np.pi * f * 1.9 * t) * np.exp(-t * 40)
-    x += svf_bp(rng.standard_normal(n), np.full(n, 1300.0), 1.0) * np.exp(-t * 70) * 0.5
-    return x / np.abs(x).max()
-
-def paper(dur=0.3):
-    """paper slap / settle: soft noise burst with a fast low-mid body"""
-    n = int(dur * SR); t = np.arange(n) / SR
-    x = svf_bp(rng.standard_normal(n), np.linspace(2200, 900, n), 0.9) * np.exp(-t * 22)
-    x += np.sin(2 * np.pi * 110 * t) * np.exp(-t * 30) * 0.6
-    return x / np.abs(x).max()
-
 def flutter(dur=0.5):
-    """paper flutter: AM-chopped band noise"""
+    """paper / photo flutter: AM-chopped band noise"""
     n = int(dur * SR); t = np.arange(n) / SR
     am = 0.55 + 0.45 * np.sign(np.sin(2 * np.pi * (16 + 8 * t / dur) * t))
     x = svf_bp(rng.standard_normal(n), 2400 + 700 * np.sin(2 * np.pi * 5 * t), 1.3) * am * env(n, 0.25)
     return x / np.abs(x).max()
 
-def shimmer(dur=0.8):
+def boing(f0=330, dur=0.35):
+    """cartoon wobble for the memes: a sine with a decaying vibrato"""
     n = int(dur * SR); t = np.arange(n) / SR
-    x = svf_bp(rng.standard_normal(n), np.linspace(4000, 9000, n), 3.0) * env(n, 0.4)
+    f = f0 * (1 + 0.18 * np.sin(2 * np.pi * 14 * t) * np.exp(-t * 6))
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 8)
     return x / np.abs(x).max()
+
+def swipe(dur=0.32):
+    """a fingertip dragging on glass: short bright noise with a soft attack"""
+    n = int(dur * SR); t = np.arange(n) / SR
+    x = svf_bp(rng.standard_normal(n), np.linspace(3200, 5200, n), 1.4) * env(n, 0.3)
+    return x / (np.abs(x).max() + 1e-9)
 
 W = 0.22; P_ = 0.15; MK = 0.11
 def wh(t, a=0.5, f0=300, f1=2600, q=1.1, at=0.6, g=1.0): put(t, whoosh(a, f0, f1, q, at), W * g)
 def holo_fx(t0, g=1.0):
     put(t0, zap(0.35), 0.05 * g); put(t0 + 0.02, whoosh(1.1, 300, 4200, 1.8, 0.9), W * 0.45 * g)
     put(t0 + 1.15, chime((1046, 1568, 2093, 2637), 1.6), 0.06 * g)
+def flick_fx(t0, d, g=1.0):
+    """thumb flick: glass swipe + a whoosh + scroll ticks that slow down as the list decelerates"""
+    put(t0, swipe(0.24), 0.07 * g); wh(t0, min(0.7, d), 500, 3000, 1.3, 0.25, 0.45 * g)
+    tt, gap = t0 + 0.03, 0.022
+    while tt < t0 + d * 0.9:
+        put(tt, tick(0.012, 3000 + 600 * rng.random()), 0.035 * g); tt += gap; gap *= 1.16
 
-DK = [TM['d1'], TM['d2'], TM['d3'], TM['d4'], TM['kum']]
-TICK = [TM['d1'] + 1.05, TM['d2b'] + 0.8, TM['d3'] + 1.05, TM['d4'] + 1.05]
-# S1 · hook: slow studio dolly (air), text pops, stabilo on "gambaran pajak", the "?" marks wobble
-wh(0.0, 2.6, 200, 900, 0.9, 0.5, 0.35)
-put(TM['hook'] + 0.3, pop(500, 900, 0.08), 0.08); put(TM['hook'] + 0.75, pop(560, 1000, 0.08), 0.08)
-put(TM['hook'] + 1.25, marker(0.45), MK)
-for j in range(3): put(0.5 + j * 0.81, tick(0.02, 3800), 0.03)
-# S2 · siapin: ghost card recedes into depth, the lid swings open and knocks, HUD drops in with four bar ticks
-wh(TM['siap'] + 0.02, 0.55, 2400, 500, 1.2, 0.3, 0.5)
-put(TM['siap'] + 0.1, knock(170, 0.2), 0.16); wh(TM['siap'] + 0.24, 0.45, 300, 1500, 1.0, 0.6, 0.45); put(TM['siap'] + 0.62, knock(120, 0.25), 0.14)
-put(TM['siap'] + 0.45, pop(500, 950, 0.08), 0.08); put(TM['siap'] + 1.05, marker(0.38), MK)
-wh(TM['siap'] + 0.9, 0.35, 900, 2400, 1.2, 0.5, 0.25)
-for k in range(4): put(TM['siap'] + 1.05 + k * 0.1, tick(0.018, 3200 + 300 * k), 0.06)
-# S3 · four items: fly-in, title pop, tick stamp + ding, HUD fill + counter click, drop + paper thud, checkbox tick
-for k in range(4):
-    t0, tdrop = DK[k], DK[k + 1] - 0.88; tland = tdrop + 0.74
-    wh(t0 - 0.05, 0.75, 250 + 60 * k, 2200 + 200 * k, 1.1, 0.55, 0.85)
-    put(t0 + 0.02, pop(420, 840, 0.09), 0.1)
-    put(TICK[k], pop(700, 1400, 0.07), 0.13); put(TICK[k] + 0.04, ding(2093 * (1.0595 ** (2 * k)), 0.55), 0.07)
-    wh(TICK[k] + 0.1, 0.4, 1200, 3200, 1.6, 0.4, 0.18); put(TICK[k] + 0.28, tick(0.02, 2600), 0.08)
-    wh(tdrop + 0.2, 0.55, 2200, 400, 1.0, 0.35, 0.5)
-    put(tland - 0.02, paper(0.3), 0.16); put(tland - 0.01, knock(140, 0.2), 0.08)
-    put(tland + 0.1, tick(0.016, 4400), 0.07)
-# 2 · "termasuk ongkir dan iklan": two tags pop, two stabilo strokes
-for dt in (0.25, 0.7): put(TM['d2b'] + dt, pop(600, 1200, 0.09), 0.12)
-for dt in (0.3, 0.8): put(TM['d2b'] + dt, marker(0.3), MK * 0.8)
-# S3b · "Udah kekumpul?": files settle, lid closes with a thump, stamp + chime, LENGKAP pop
-wh(TM['kum'] + 0.04, 0.4, 1400, 500, 1.0, 0.4, 0.3)
-wh(TM['kum'] + 0.18, 0.42, 400, 1600, 1.0, 0.8, 0.45); put(TM['kum'] + 0.6, knock(95, 0.32), 0.2)
-put(TM['kum'] + 0.66, pop(600, 1300, 0.09), 0.14); put(TM['kum'] + 0.72, chime((1568, 2093, 2637), 1.1), 0.06)
-put(TM['kum'] + 0.7, pop(900, 1500, 0.07), 0.08)
+# S1 · hook: flicks, a found transfer (ding), it slips away, frantic flicks; selfie + food lift out with label chips
+flick_fx(0.0, 0.95)
+put(TM['tf'] + 0.2, ding(2349, 0.5), 0.07); put(TM['tf'] + 0.2, pop(700, 1300, 0.07), 0.08)
+put(TM['tf'] + 0.35, marker(0.4), MK)
+flick_fx(TM['nyelip'], 0.5, 1.1); flick_fx(TM['nyelip'] + 0.58, 0.38, 0.8); flick_fx(TM['nyelip'] + 1.02, 0.55, 0.9)
+put(TM['hook'] - 0.1, pop(500, 900, 0.08), 0.07); put(TM['nyelip'], pop(560, 1000, 0.08), 0.07)
+for t0 in (TM['selfie'], TM['makan']):
+    put(t0, pop(420, 900, 0.1), 0.12); wh(t0, 0.35, 900, 2600, 1.4, 0.3, 0.25); put(t0 + 0.14, pop(900, 1500, 0.06), 0.08)
+# camera pulls back, the robot hops in
+wh(TM['makan'] + 0.6, 0.9, 1800, 400, 0.9, 0.5, 0.35); put(TM['makan'] + 1.2, pop(300, 600, 0.12), 0.08)
+# S2 · scroll atas / scroll bawah; receipts flash; memes boing
+flick_fx(TM['scroll'], 0.95, 1.1); flick_fx(TM['bawah'], 0.55, 1.1); flick_fx(TM['bawah'] + 0.62, 0.42, 0.8)
+for k, dt in enumerate((0.1, 0.28, 0.46)): put(TM['nota'] + dt, ding(1760 * (1.0595 ** (3 * k)), 0.4), 0.05)
+put(TM['numpuk'] + 0.3, marker(0.38), MK)
+for k in range(3): put(TM['meme'] + 0.02 + k * 0.05, boing(300 + 70 * k, 0.32), 0.05)
+# S3 · rekap: card whoosh, row ticks, "kelewat" soft double blip + "?" pop
+wh(TM['rekap'] - 0.02, 0.7, 2400, 500, 1.0, 0.35, 0.5)
+for k in range(3): put(TM['rekap'] + 0.55 + k * 0.32, tick(0.02, 2600), 0.08)
+for k in range(2): put(TM['rekap'] + 0.6 + k * 0.32, pop(800, 1500, 0.06), 0.07)
+put(TM['lewat'] + 0.05, square_blips([660, 440], 0.09), 0.035); put(TM['lewat'], pop(500, 950, 0.09), 0.1)
+put(TM['lewat'] + 0.35, marker(0.36), MK)
+# S4 · grey-out, six photos lift (rising pops), "nginep" marker, they fly up and away
+wh(TM['mulai'] - 0.05, 0.6, 2200, 600, 1.0, 0.4, 0.35)
+wh(TM['nota2'] - 0.1, 0.6, 400, 1200, 0.8, 0.5, 0.25)
+for i in range(6): put(TM['nota2'] + 0.05 + i * 0.09, pop(500 + 70 * i, 1000 + 120 * i, 0.08), 0.09)
+put(TM['nginep'] + 0.3, marker(0.38), MK)
+for i in range(6): put(TM['galeri2'] + 0.05 + i * 0.05, whoosh(0.5, 600, 3400, 1.3, 0.6), W * 0.25)
 # band sweep -> brand
 for k in range(3): wh(TM['sol'] - 0.5 + k * 0.06, 0.45, 300 + 200 * k, 1800 + 400 * k, 1.1, 0.7, 0.5)
-# S4 · brand: box drops in, lid pops off, the pour (flutter + four landing pops), caption marker, box exits
-wh(TM['sol'] + 0.05, 0.5, 2000, 400, 1.0, 0.4, 0.5); put(TM['sol'] + 0.64, knock(130, 0.22), 0.14)
-put(TM['sol'] + 0.6, pop(380, 760, 0.1), 0.1); wh(TM['sol'] + 0.8, 0.45, 600, 2600, 1.2, 0.6, 0.35)
+# S5 · brand: phone swings in, hologram, six photos drop into the upload slots, checks, done chime
+wh(TM['sol'] + 0.02, 0.7, 2000, 400, 1.0, 0.4, 0.45)
 holo_fx(TM['sol'] + 0.55)
-put(TM['sol'] + 0.85, flutter(0.9), 0.07)
-for k in range(4): put(TM['sol'] + 1.0 + k * 0.24, whoosh(0.4, 900, 2600, 1.4, 0.5), W * 0.3); put(TM['sol'] + 1.56 + k * 0.24, pop(520 + 90 * k, 1050 + 120 * k, 0.08), 0.12)
-wh(TM['sol'] + 2.25, 0.5, 500, 1800, 1.0, 0.6, 0.35)
-put(TM['sol'] + 2.85, marker(0.42), MK)
-for g0 in (TM['sol'] + 2.9, TM['est'] + 1.7, TM['cta'] + 1.2, TM['bio'] + 1.4): put(g0, square_blips([1800, 900, 1500], 0.02), 0.02)
-# "estimasi pajak": the ledger recedes, the estimate card lifts out, odometer ticks, result chime, shine
-wh(TM['est'], 0.8, 1600, 300, 0.9, 0.5, 0.35); wh(TM['est'] + 0.2, 0.8, 250, 2400, 1.0, 0.45, 0.6)
-tt = TM['est'] + 0.45
-for j in range(14): put(tt, tick(0.012, 3600 + 120 * (j % 3)), 0.06); tt += 0.05 + 0.006 * j * j * 0.08
-put(TM['est'] + 1.75, chime((1318.5, 1760, 2637), 1.3), 0.07)
-put(TM['est'] + 1.35, marker(0.42), MK); put(TM['est'] + 2.2, shimmer(0.8), 0.03)
+for i in range(6):
+    t = TM['sol'] + 0.85 + i * 0.16
+    put(t, whoosh(0.6, 3000, 700, 1.4, 0.7), W * 0.22); put(t + 0.6, pop(380 + 40 * i, 760 + 60 * i, 0.08), 0.1)
+for i in range(6): put(TM['app'] + 0.25 + i * 0.12, pop(900 + 60 * i, 1600 + 80 * i, 0.06), 0.07)
+put(TM['mpai'] + 0.4, chime((1318.5, 1760, 2637), 1.2), 0.06)
+# album: phone steps back, the album swings in, photos flutter into their date rows, date pills tick
+wh(TM['susun'], 0.75, 1600, 400, 1.0, 0.4, 0.35); wh(TM['susun'] + 0.05, 0.8, 300, 2200, 1.0, 0.45, 0.5)
+put(TM['susun'] + 0.45, flutter(0.8), 0.06)
+for i in range(6): put(TM['susun'] + 1.0 + i * 0.1, tick(0.018, 3400), 0.06)
+for d in range(3): put(TM['tgl'] - 0.05 + d * 0.2, ding(1568 * (1.0595 ** (4 * d)), 0.35), 0.05)
+put(TM['tgl'] + 0.1, marker(0.42), MK)
+# S6 · pembukuan: album leaves, the card lifts in, rows fill, the trace callout, the lens finds the missed transfer
+wh(TM['led'] - 0.05, 0.8, 1800, 300, 0.9, 0.5, 0.35); wh(TM['led'] + 0.05, 0.9, 250, 2400, 1.0, 0.45, 0.55)
+for k in range(6): put(TM['led'] + 0.47 + k * 0.11, tick(0.016, 3600 + 150 * k), 0.07)
+put(TM['telusur'] + 0.05, pop(600, 1200, 0.07), 0.09); put(TM['telusur'] + 0.15, pop(450, 950, 0.1), 0.1); wh(TM['telusur'] + 0.15, 0.35, 900, 2600, 1.4, 0.3, 0.2)
+put(TM['telusur'] + 0.55, marker(0.42), MK)
+put(TM['cari'] + 0.2, pop(700, 1200, 0.07), 0.07); wh(TM['cari'] + 0.35, 0.65, 700, 1800, 1.6, 0.5, 0.2)
+put(TM['dicari'] + 0.05, ding(2093, 0.6), 0.08); put(TM['dicari'] + 0.1, pop(800, 1500, 0.07), 0.09)
+for g0 in (TM['mpai'] + 0.6, TM['telusur'] + 0.4, TM['notab'] + 0.4, TM['cta'] + 1.2, TM['bio'] + 1.4): put(g0, square_blips([1800, 900, 1500], 0.02), 0.02)
+# S7 · split: the card steps right, the calm gallery slides in, two badges
+wh(TM['kenang'] - 0.05, 0.8, 1600, 400, 1.0, 0.4, 0.35); wh(TM['kenang'], 0.8, 300, 2000, 1.0, 0.45, 0.45)
+put(TM['kenang'] + 0.6, pop(520, 1040, 0.09), 0.11); put(TM['kenang'] + 0.62, ding(2637, 0.4), 0.04)
+put(TM['notab'] + 0.55, pop(620, 1240, 0.09), 0.11); put(TM['notab'] + 0.57, ding(2349, 0.4), 0.04)
 # beam + iris -> end
 put(TM['end'] - 0.5, pop(500, 1000, 0.1), 0.12); wh(TM['end'] - 0.45, 0.5, 200, 2400, 1.0, 0.9, 1.0); put(TM['end'] - 0.02, boom(0.7, 140, 50), 0.2)
 holo_fx(TM['end'] + 0.55)

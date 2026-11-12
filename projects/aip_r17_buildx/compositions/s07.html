@@ -1,12 +1,126 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s07" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s07 GAYA LEARNING (32.60–38.43) "Jangan minta kode jadi. Pakai gaya Learning di Claude Code: beberapa baris, kamu yang tulis sendiri."
+       Frame 0 = the header as s06 left it (item 4); it rolls to item 5 "Gaya Learning · Claude Code · /output-style learning".
+       "Jangan minta kode jadi." = a request bubble "Kasih kode lengkapnya dong, biar tinggal copy-paste." over a finished code block
+       with a SALIN button; a red X stamps the button and "KODE JADI" is struck. Then (our own generic mocks, not screenshots) a Claude
+       Code terminal types "/output-style learning" → "✓ Output style: Learning" on "Code:"; an editor "objects.py" (contoh) shows a
+       small Git blob-hash function with a "# TODO(human)" line that lights up on "beberapa baris," + the note "Learn by Doing · tugas
+       kamu: isi TODO(human)"; "kamu yang tulis sendiri." = your line types (return sha1(header + data).hexdigest()) and the chip
+       "kamu yang nulis" lands. Last 0.3 s: workspace + header leave (the CTA starts clean). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s07-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s07-rq { width: 960px; height: 420px; }
+    #s07-ask { position: absolute; left: 24px; top: 24px; height: 60px; padding: 0 22px 0 14px; border-radius: 30px; background: #ffffff; display: flex; align-items: center; gap: 12px;
+      font: 700 22px/60px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s07-ask .av { width: 40px; height: 40px; border-radius: 50%; background: #e3edfa; color: #294b77; position: relative; flex: 0 0 40px; }
+    #s07-ask .av svg { position: absolute; left: 9px; top: 9px; width: 22px; height: 22px; }
+    #s07-blk { position: absolute; left: 24px; top: 104px; width: 912px; height: 292px; border-radius: 20px; background: #070b26; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12); overflow: hidden; }
+    #s07-blk .cl { position: absolute; left: 24px; height: 12px; border-radius: 6px; background: rgba(160,200,235,.28); }
+    #s07-cp { position: absolute; right: 22px; top: 18px; height: 46px; padding: 0 18px 0 12px; border-radius: 14px; background: #01ccf7; display: flex; align-items: center; gap: 8px;
+      font: 700 19px/46px Poppins; color: #0b1440; letter-spacing: 1px; }
+    #s07-cp svg { width: 22px; height: 22px; }
+    #s07-x { position: absolute; left: 0; top: 0; width: 88px; height: 88px; border-radius: 50%; background: #e5484d; color: #fff; box-shadow: 0 12px 28px rgba(120,10,20,.5); transform-origin: 50% 50%; }
+    #s07-x svg { position: absolute; left: 20px; top: 20px; width: 48px; height: 48px; }
+    #s07-stk { position: absolute; left: 0; top: 0; width: 1px; height: 6px; border-radius: 3px; background: #ff6b5e; transform-origin: 0% 50%; }
+    #s07-term { width: 960px; height: 132px; border-radius: 24px; background: #070b26; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12), 0 20px 44px rgba(2,6,26,.5); }
+    #s07-term .bar { position: absolute; left: 0; top: 0; width: 960px; height: 40px; border-bottom: 1.5px solid rgba(255,255,255,.08); }
+    #s07-term .bar i { position: absolute; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,.22); }
+    #s07-term .bar b { position: absolute; left: 76px; top: 0; font: 700 15px/40px Poppins; letter-spacing: 1px; color: #86a9c9; }
+    #s07-cmd { position: absolute; left: 22px; top: 46px; font: 700 27px/40px Poppins; color: #e3edfa; white-space: nowrap; }
+    #s07-cmd .p { color: #6adfff; }
+    #s07-res { position: absolute; left: 22px; top: 86px; font: 400 21px/34px Poppins; color: #5be08a; white-space: nowrap; }
+    #s07-res b { font-weight: 700; color: #ffffff; }
+    #s07-ed { width: 960px; height: 300px; }
+    #s07-ed .tab { position: absolute; left: 18px; top: 14px; height: 36px; padding: 0 14px 0 10px; border-radius: 10px; background: #e6f8fe; display: flex; align-items: center; gap: 6px;
+      font: 700 17px/36px Poppins; color: #08729a; white-space: nowrap; }
+    #s07-ed .tab svg { width: 18px; height: 18px; }
+    #s07-ed .dm { position: absolute; left: 172px; top: 18px; height: 28px; padding: 0 10px; border-radius: 14px; font: 700 13px/28px Poppins; letter-spacing: 1.2px; color: #5d6f8f;
+      box-shadow: inset 0 0 0 1.2px #c5cfe0; white-space: nowrap; }
+    .s07-ln { position: absolute; left: 0; height: 36px; width: 960px; font: 400 21px/36px Poppins; color: #0a0d2c; white-space: pre; }
+    .s07-ln .n { position: absolute; left: 18px; width: 30px; text-align: right; color: #6b7891; }
+    .s07-ln .c { position: absolute; left: 66px; }
+    .s07-ln .k { font-weight: 700; color: #08729a; }
+    .s07-ln .s { color: #a14f30; }
+    .s07-ln .t { font-weight: 700; color: #08729a; }
+    #s07-hl { position: absolute; left: 56px; top: 0; width: 884px; height: 36px; border-radius: 8px; background: rgba(1,204,247,.18); box-shadow: inset 0 0 0 2px rgba(1,204,247,.6); }
+    #s07-car { display: inline-block; width: 3px; height: 26px; margin-left: 2px; vertical-align: -5px; background: #08729a; }
+    #s07-lbd { position: absolute; left: 0; top: 0; height: 40px; padding: 0 16px 0 12px; border-radius: 20px; background: #0b1440; display: flex; align-items: center; gap: 8px;
+      font: 700 17px/40px Poppins; color: #e3edfa; white-space: nowrap; box-shadow: 0 8px 20px rgba(2,6,26,.3); transform-origin: 100% 50%; }
+    #s07-lbd svg { width: 20px; height: 20px; color: #6adfff; }
+    #s07-lbd b { color: #6adfff; }
+    #s07-me { font-size: 20px; height: 46px; }
+  </style>
+  <div id="root" data-composition-id="s07" data-width="1080" data-height="1920">
+    <div id="s07-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.823);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s07"] = tl;
+      const K = window.R17K, D = 5.8333, P = "s07";
+      const S = K.scene(P, D), { tl, ft, I, wt, $, type } = S;
+      const z = $("s07-zone");
+      const CODE = [
+        `<span class="k">from</span> hashlib <span class="k">import</span> sha1`,
+        `<span class="k">def</span> hash_object(data):`,
+        `    header = <span class="s">f"blob {len(data)}\\0"</span>.encode()`,
+        `    <span class="t"># TODO(human): hitung hash-nya</span>`,
+        `    <span id="s07-typ"></span><i id="s07-car"></i>`,
+      ];
+      let h = K.headerHTML(P) + `<div class="k-ab" id="s07-ws" style="width:1080px;height:945px">`;
+      h += `<div class="k-glass" id="s07-rq"><div id="s07-ask"><span class="av">${K.svg("user")}</span>Kasih kode lengkapnya dong, biar tinggal copy-paste.</div>` +
+        `<div id="s07-blk">${[[84, 520], [118, 600], [152, 440], [186, 680], [220, 380], [254, 560]].map(([y, w]) => `<i class="cl" style="top:${y}px;width:${w}px"></i>`).join("")}` +
+        `<div id="s07-cp">${K.svg("copy")}SALIN</div><div id="s07-stk"></div></div><div id="s07-x">${K.svg("x")}</div></div>`;
+      h += `<div class="k-stamp k-no" id="s07-no">${K.svg("x")}KODE JADI</div>`;
+      h += `<div class="k-ab" id="s07-term"><div class="bar"><i style="left:20px"></i><i style="left:38px"></i><i style="left:56px"></i><b>Claude Code</b></div>` +
+        `<div id="s07-cmd"><span class="p">&gt; </span><span id="s07-cmdt"></span></div><div id="s07-res">&#10003; Output style: <b>Learning</b></div></div>`;
+      h += `<div class="k-white" id="s07-ed"><div class="tab">${K.svg("code")}objects.py</div><div class="dm">CONTOH</div><div id="s07-hl"></div>` +
+        CODE.map((c, k) => `<div class="s07-ln" id="s07-l${k}" style="top:${62 + k * 40}px"><span class="n">${k + 1}</span><span class="c">${c}</span></div>`).join("") +
+        `<div id="s07-lbd">${K.svg("pencil")}Learn by Doing &middot; tugas kamu: <b>isi TODO(human)</b></div></div>`;
+      h += `<div class="k-stamp k-ok" id="s07-me">${K.svg("check")}kamu yang nulis</div>`;
+      h += `</div>`;
+      z.innerHTML = h;
+      const tJa = wt("Jangan"), tKo = wt("kode"), tJd = wt("jadi."), tPa = wt("Pakai", 34), tLe = wt("Learning"), tCo = wt("Code:"), tBe = wt("beberapa"), tBa = wt("baris,"), tKa = wt("kamu", 37), tSe = wt("sendiri.", 37.5);
+      // ---------------------------------------------------------------- header: item 4 → 5; leaves at the end
+      K.headerSet(S, P, 4);
+      K.headerSwap(S, P, 4, 5, 0.02);
+      K.headerOut(S, P, D - 0.3, 0.26);
+      // ---------------------------------------------------------------- "Jangan minta kode jadi."
+      const rq = $("s07-rq"); I(rq, { x: 60, y: 504, opacity: 0 });
+      ft(rq, { y: 504, opacity: 0 }, { y: 484, opacity: 1, duration: 0.3, ease: "power3.out" }, 0.06);
+      const x = $("s07-x"); I(x, { x: 960 - 24 - 130, y: 104 + 4, scale: 0, opacity: 0, rotation: -30 });
+      ft(x, { scale: 0, opacity: 0, rotation: -30 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.28, ease: "back.out(2.6)" }, tJa + 0.08);
+      const cp = $("s07-cp"); I(cp, { opacity: 1 });
+      ft(cp, { opacity: 1 }, { opacity: 0.35, duration: 0.2 }, tJa + 0.12);
+      const stk = $("s07-stk"); I(stk, { x: 30, y: 146, width: 852, rotation: -8, scaleX: 0 });
+      ft(stk, { scaleX: 0 }, { scaleX: 1, duration: 0.26, ease: "power2.out" }, tKo - 0.04);
+      const no = $("s07-no"); I(no, { x: 540, xPercent: -50, y: 484 + 104 + 120, scale: 0.4, opacity: 0, rotation: -6 });
+      ft(no, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, tJd - 0.06);
+      // the request leaves before "Pakai"
+      ft(rq, { x: 60, opacity: 1 }, { x: -120, opacity: 0, duration: 0.3, ease: "power2.in" }, tPa - 0.38);
+      ft(no, { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power2.in" }, tPa - 0.38);
+      // ---------------------------------------------------------------- "Pakai gaya Learning di Claude Code:": terminal
+      const tm = $("s07-term"); I(tm, { x: 60, y: 484, opacity: 0 });
+      ft(tm, { y: 500, opacity: 0 }, { y: 484, opacity: 1, duration: 0.3, ease: "power3.out" }, tPa - 0.12);
+      const tEnd = type($("s07-cmdt"), "/output-style learning", tPa + 0.06, 30);
+      const rs = $("s07-res"); I(rs, { opacity: 0, x: -10 });
+      ft(rs, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.24, ease: "power3.out" }, Math.max(tEnd + 0.08, tCo - 0.06));
+      // ---------------------------------------------------------------- editor + TODO(human)
+      const ed = $("s07-ed"); I(ed, { x: 60, y: 646, opacity: 0 });
+      ft(ed, { y: 666, opacity: 0 }, { y: 630, opacity: 1, duration: 0.34, ease: "power3.out" }, tLe - 0.04);
+      const hl = $("s07-hl"); I(hl, { y: 62 + 3 * 40, opacity: 0 });
+      ft(hl, { opacity: 0 }, { opacity: 1, duration: 0.18 }, tBe - 0.06);
+      ft(hl, { opacity: 1 }, { opacity: 0.45, duration: 0.14, yoyo: true, repeat: 1 }, tBa);
+      const lbd = $("s07-lbd"); I(lbd, { x: 960 - 18, xPercent: -100, y: 12, scale: 0.5, opacity: 0 });
+      ft(lbd, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.4)" }, tBe + 0.06);
+      const car = $("s07-car"); I(car, { opacity: 0 });
+      [0, 1, 2].forEach((k) => { tl.set(car, { opacity: 1 }, tBa - 0.1 + k * 0.3); tl.set(car, { opacity: 0 }, tBa + 0.05 + k * 0.3); });
+      const tE2 = type($("s07-typ"), "return sha1(header + data).hexdigest()", tKa - 0.12, 52);
+      tl.set(car, { opacity: 1 }, tKa - 0.12);
+      const me = $("s07-me"); I(me, { x: 60 + 960 - 22, xPercent: -100, y: 630 + 236, scale: 0.4, opacity: 0, rotation: -3 });
+      ft(me, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(2.6)" }, Math.min(tSe, tE2 + 0.04));
+      // ---------------------------------------------------------------- exit (the CTA starts from an empty hero zone)
+      S.exitWs($("s07-ws"));
+      S.finish();
     })();
   </script>
 </template>

@@ -1,12 +1,68 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s03 WINDOWS (8.50–12.33) "Bilang: buka WhatsApp, taruh di kiri. Jendelanya langsung pindah."
+       Header rolls to "Atur jendela · buka aplikasi · geser jendela · TANPA AI". Voice pill types the command (contoh). A "MAC KAMU"
+       panel with a Browser window on the right; "WhatsApp": a chat window (our own mock, name as text only) opens in the middle;
+       "kiri": a dashed cyan target lights the left half; "Jendelanya langsung pindah": the window slides into it, green chip
+       "buka & geser jendela: tanpa AI" (README: opens apps / moves windows with no AI at all). Last 0.22 s: workspace exits. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s03-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s03-desk { position: absolute; left: 110px; top: 594px; width: 860px; height: 330px; border-radius: 28px; background: linear-gradient(180deg, #13245e, #0a1440);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14), 0 24px 50px rgba(2,6,26,.55); }
+    #s03-desk .bar { position: absolute; left: 0; top: 0; width: 860px; height: 36px; border-radius: 28px 28px 0 0; background: rgba(255,255,255,.06); border-bottom: 1.5px solid rgba(255,255,255,.08); }
+    #s03-desk .bar b { position: absolute; left: 22px; top: 0; font: 700 16px/36px Poppins; letter-spacing: 2.5px; color: #6adfff; white-space: nowrap; }
+    #s03-tgt { position: absolute; left: 0; top: 0; width: 404px; height: 262px; border-radius: 18px; border: 3px dashed #6adfff; background: rgba(1,204,247,.12); }
+    #s03-tgt b { position: absolute; left: 0; right: 0; top: 104px; text-align: center; font: 700 22px/40px Poppins; letter-spacing: 2px; color: #6adfff; }
+    .s03-bub { position: absolute; height: 26px; border-radius: 13px; }
+    #s03-ok { position: absolute; left: 0; top: 0; height: 50px; padding: 0 20px 0 14px; border-radius: 25px; display: flex; align-items: center; gap: 10px;
+      font: 700 22px/1 Poppins; color: #fff; background: #238a40; box-shadow: 0 0 0 5px rgba(45,164,78,.25), 0 10px 22px rgba(2,6,26,.45); white-space: nowrap; }
+    #s03-ok svg { width: 26px; height: 26px; }
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div id="s03-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.823);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s03"] = tl;
+      const K = window.R19K, P = "s03", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s03-zone");
+      const L = { x: 128, y: 644 }, R = { x: 548, y: 644 }, M = { x: 338, y: 644 };   // window slots (404 x 262)
+      const bubbles = [[18, 58, 220, "#e6edf8"], [176, 98, 200, "#bfefff"], [18, 138, 250, "#e6edf8"], [150, 178, 226, "#bfefff"]];
+      z.innerHTML = K.headerHTML(P) + K.voiceHTML("s03-v", 800) +
+        `<div id="s03-desk"><div class="bar"><b>MAC KAMU</b></div></div><div id="s03-tgt"><b>KIRI</b></div>` +
+        `<div class="k-win" id="s03-wb" style="width:404px;height:262px"><div class="tb"><b>Browser</b><i></i></div>` +
+        [0.8, 0.62, 0.7, 0.45, 0.58].map((l, j) => `<div class="ln${j === 1 ? " c" : ""}" style="top:${62 + j * 36}px;width:${Math.round(372 * l)}px"></div>`).join("") + `</div>` +
+        `<div class="k-win" id="s03-wa" style="width:404px;height:262px"><div class="tb"><b>WhatsApp</b><i></i></div>` +
+        bubbles.map((b) => `<div class="s03-bub" style="left:${b[0]}px;top:${b[1]}px;width:${b[2]}px;background:${b[3]}"></div>`).join("") + `</div>` +
+        `<div id="s03-ok">${K.svg("zap")}buka &amp; geser jendela: tanpa AI</div>`;
+      const tWA = wt("WhatsApp,"), tKi = wt("kiri."), tJe = wt("Jendelanya"), tPi = wt("pindah.");
+      K.headerScene(S, P, 0, 1);
+      // ---------------------------------------------------------------- voice pill
+      const v = $("s03-v"); I(v, { x: 140, y: 484, scale: 0.6, opacity: 0, transformOrigin: "50% 50%" });
+      ft(v, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.2)" }, 0.08);
+      K.voiceBars(S, "s03-v", 0.12, tKi + 0.3);
+      S.typeIn($("s03-v-tx"), "“buka WhatsApp, taruh di kiri”", 0.5, tKi + 0.1);
+      // ---------------------------------------------------------------- desktop + windows
+      const desk = $("s03-desk"); I(desk, { y: 40, opacity: 0 });
+      ft(desk, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.18);
+      const wb = $("s03-wb"); I(wb, { x: R.x, y: R.y + 40, opacity: 0 });
+      ft(wb, { y: R.y + 40, opacity: 0 }, { y: R.y, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.26);
+      const wa = $("s03-wa"); I(wa, { x: M.x, y: M.y, scale: 0.5, opacity: 0, transformOrigin: "50% 50%" });
+      ft(wa, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.36, ease: "back.out(1.8)" }, tWA - 0.02);
+      ft(wb, { opacity: 1 }, { opacity: 0.55, duration: 0.3 }, tWA);
+      const tg = $("s03-tgt"); I(tg, { x: L.x, y: L.y, opacity: 0, scale: 0.94, transformOrigin: "50% 50%" });
+      ft(tg, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2)" }, tKi - 0.1);
+      ft(tg, { scale: 1 }, { scale: 1.03, duration: 0.18, yoyo: true, repeat: 3, ease: "sine.inOut" }, tKi + 0.16);
+      // "Jendelanya langsung pindah": the chat window slides into the left half
+      ft(wa, { x: M.x }, { x: L.x, duration: 0.42, ease: "power3.inOut" }, tJe - 0.04);
+      ft(tg, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tJe + 0.34);
+      ft(wb, { opacity: 0.55 }, { opacity: 1, duration: 0.3 }, tJe + 0.3);
+      const ok = $("s03-ok"); I(ok, { x: 540, xPercent: -50, y: 880, scale: 0.4, opacity: 0, transformOrigin: "50% 50%" });
+      ft(ok, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tPi - 0.2);
+      // ---------------------------------------------------------------- exit
+      const tX = D - 0.22;
+      [v, desk, wb, wa, ok].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, tX + (i % 3) * 0.02));
+      S.finish();
     })();
   </script>
 </template>

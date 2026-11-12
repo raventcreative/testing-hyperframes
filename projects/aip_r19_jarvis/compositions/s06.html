@@ -1,12 +1,97 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s06 INSTALL (22.00–25.90) "Pasangnya: tempel link repo ke Claude Code, minta dia yang pasangin."
+       Header rolls to "Cara pasang · lewat Claude Code · macOS 26+ · 1 LINK". The repo link pill sits on top with the official
+       one-liner under it (README: curl … install.sh | bash). "tempel link": a copy of the link drops into our own "Claude Code" card
+       (text only, no logo); "Claude Code": the card glows; "minta dia": the ask types; "pasangin": a rail of the installer's real
+       steps lights up (install.sh: checks macOS 26 · downloads to ~/.atticus · builds Atticus.app · opens the setup window).
+       Last 0.22 s: workspace exits. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s06-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    .s06-lk { position: absolute; left: 0; top: 0; width: 900px; height: 76px; border-radius: 38px; background: #ffffff; box-shadow: 0 16px 34px rgba(2,6,26,.5); }
+    .s06-lk .ic { position: absolute; left: 12px; top: 12px; width: 52px; height: 52px; border-radius: 26px; background: #0b1440; color: #6adfff; }
+    .s06-lk .ic svg { position: absolute; left: 14px; top: 14px; width: 24px; height: 24px; }
+    .s06-lk b { position: absolute; left: 80px; top: 0; font: 700 28px/76px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s06-cp { position: absolute; right: 14px; top: 17px; height: 42px; padding: 0 14px 0 10px; border-radius: 21px; display: flex; align-items: center; gap: 6px;
+      font: 700 17px/1 Poppins; letter-spacing: 1px; color: #0b1440; background: #bfefff; white-space: nowrap; }
+    #s06-cp svg { width: 20px; height: 20px; }
+    #s06-off { position: absolute; left: 112px; top: 572px; font: 400 19px/28px Poppins; color: #9fdcf2; white-space: nowrap; }
+    #s06-off b { font-weight: 700; color: #e3edfa; }
+    #s06-cc { left: 90px; top: 612px; width: 900px; height: 172px; }
+    #s06-cc .hd { position: absolute; left: 24px; top: 16px; display: flex; align-items: center; gap: 10px; font: 700 24px/34px Poppins; color: #fff; white-space: nowrap; }
+    #s06-cc .hd svg { width: 28px; height: 28px; color: #6adfff; }
+    #s06-cc .hd i { font-style: normal; font-weight: 400; font-size: 18px; color: #86a9c9; }
+    #s06-in { position: absolute; left: 20px; top: 62px; width: 860px; height: 92px; border-radius: 18px; background: rgba(4,10,40,.75); box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.35); }
+    #s06-l1 { position: absolute; left: 22px; top: 8px; font: 700 23px/36px Poppins; color: #6adfff; white-space: nowrap; }
+    #s06-l2 { position: absolute; left: 22px; top: 46px; font: 400 23px/36px Poppins; color: #ffffff; white-space: nowrap; }
+    #s06-cglow { position: absolute; left: 90px; top: 612px; width: 900px; height: 172px; border-radius: 28px; box-shadow: inset 0 0 0 2.5px rgba(106,223,255,.9), 0 0 40px rgba(1,204,247,.45); }
+    #s06-rail { position: absolute; left: 90px; top: 804px; width: 900px; height: 118px; }
+    #s06-rail .tr { position: absolute; left: 70px; top: 30px; width: 760px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.14); }
+    #s06-fill { position: absolute; left: 70px; top: 30px; width: 760px; height: 6px; border-radius: 3px; background: #01ccf7; box-shadow: 0 0 12px rgba(1,204,247,.8); transform-origin: 0 50%; }
+    .s06-n { position: absolute; top: 8px; width: 50px; height: 50px; margin-left: -25px; border-radius: 25px; background: #16245c; box-shadow: inset 0 0 0 2px rgba(255,255,255,.2); color: #0b1440; }
+    .s06-n .on { position: absolute; inset: 0; border-radius: 25px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); box-shadow: 0 0 18px rgba(1,204,247,.6); }
+    .s06-n svg { position: absolute; left: 13px; top: 13px; width: 24px; height: 24px; }
+    .s06-t { position: absolute; top: 66px; width: 220px; margin-left: -110px; text-align: center; font: 700 19px/26px Poppins; color: #e3edfa; white-space: nowrap; }
+    .s06-t i { display: block; font-style: normal; font-weight: 400; font-size: 16px; color: #86a9c9; }
+  </style>
+  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920">
+    <div id="s06-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.89);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s06"] = tl;
+      const K = window.R19K, P = "s06", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s06-zone");
+      const ST = [{ t: "cek Mac", s: "macOS 26+", x: 70 }, { t: "unduh", s: "ke ~/.atticus", x: 323 }, { t: "build", s: "Atticus.app", x: 577 }, { t: "buka setup", s: "izin satu-satu", x: 830 }];
+      z.innerHTML = K.headerHTML(P) +
+        `<div class="s06-lk" id="s06-lk"><div class="ic">${K.svg("link")}</div><b>${K.REPO}</b><div id="s06-cp">${K.svg("check")}disalin</div></div>` +
+        `<div id="s06-off"><b>Cara resmi di README:</b> curl -fsSL &hellip;/atticus-mac/main/install.sh | bash</div>` +
+        `<div class="k-glass" id="s06-cc"><div class="hd">${K.svg("square-terminal")}Claude Code <i>&middot; di Mac kamu</i></div>` +
+        `<div id="s06-in"><div id="s06-l1"></div><div id="s06-l2"></div></div></div><div id="s06-cglow"></div>` +
+        `<div class="s06-lk" id="s06-gh"><div class="ic">${K.svg("link")}</div><b>${K.REPO}</b></div>` +
+        `<div id="s06-rail"><div class="tr"></div><div id="s06-fill"></div>` +
+        ST.map((s, i) => `<div class="s06-n" id="s06-n${i}" style="left:${s.x}px"><div class="on" id="s06-o${i}"></div>${K.svg(i === 3 ? "rocket" : "check")}</div>` +
+          `<div class="s06-t" id="s06-t${i}" style="left:${s.x}px">${s.t}<i>${s.s}</i></div>`).join("") + `</div>`;
+      const tTe = wt("tempel"), tLi = wt("link"), tCl = wt("Claude"), tMi = wt("minta"), tPa = wt("pasangin.");
+      K.headerScene(S, P, 3, 4);
+      // ---------------------------------------------------------------- link pill + official one-liner
+      const lk = $("s06-lk"); I(lk, { x: 90, y: 480, opacity: 0, scale: 0.9, transformOrigin: "50% 50%" });
+      ft(lk, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(1.8)" }, 0.12);
+      const cp = $("s06-cp"); I(cp, { scale: 0, opacity: 0, transformOrigin: "50% 50%" });
+      ft(cp, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(2.6)" }, tTe - 0.12);
+      const off = $("s06-off"); I(off, { opacity: 0 }); ft(off, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.4);
+      // ---------------------------------------------------------------- Claude Code card
+      const cc = $("s06-cc"); I(cc, { y: 40, opacity: 0 }); ft(cc, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.22);
+      // "tempel link": a copy of the pill drops into the input
+      const gh = $("s06-gh"); I(gh, { x: 90, y: 480, scale: 1, opacity: 0, transformOrigin: "0% 50%" });
+      ft(gh, { opacity: 0 }, { opacity: 0.95, duration: 0.08 }, tTe);
+      ft(gh, { x: 90, y: 480, scale: 1 }, { x: 112, y: 680, scale: 0.62, duration: 0.36, ease: "power3.in" }, tTe + 0.02);
+      ft(gh, { opacity: 0.95 }, { opacity: 0, duration: 0.08 }, tTe + 0.36);
+      const l1 = $("s06-l1"), l2 = $("s06-l2");
+      l1.textContent = "> " + K.REPO;
+      I(l1, { opacity: 0 }); tl.set(l1, { opacity: 1 }, tTe + 0.38);
+      ft(l1, { scale: 1.06 }, { scale: 1, duration: 0.22, ease: "power2.out" }, tTe + 0.38);
+      I(l1, { scale: 1, transformOrigin: "0% 50%" });
+      const cg = $("s06-cglow"); I(cg, { opacity: 0 });
+      ft(cg, { opacity: 0 }, { opacity: 1, duration: 0.16 }, tCl - 0.06);
+      ft(cg, { opacity: 1 }, { opacity: 0.35, duration: 0.5, ease: "power2.inOut" }, tCl + 0.18);
+      // "minta dia": the ask types
+      S.typeIn(l2, "pasangin di Mac aku, ya", tMi - 0.32, tMi + 0.3);
+      // ---------------------------------------------------------------- "pasangin": the installer's real steps light up
+      const rail = $("s06-rail"); I(rail, { opacity: 0, y: 20 }); ft(rail, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tMi - 0.2);
+      const fill = $("s06-fill"); I(fill, { scaleX: 0 });
+      const t0 = tMi + 0.12, dt = (tPa + 0.12 - t0) / 3;
+      ft(fill, { scaleX: 0 }, { scaleX: 1, duration: 3 * dt, ease: "none" }, t0);
+      ST.forEach((s, i) => {
+        const o = $("s06-o" + i), n = $("s06-n" + i);
+        I(o, { opacity: 0 }); I(n, { scale: 1, transformOrigin: "50% 50%" });
+        ft(o, { opacity: 0 }, { opacity: 1, duration: 0.12 }, t0 + i * dt);
+        ft(n, { scale: 1 }, { scale: 1.18, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, t0 + i * dt);
+      });
+      // ---------------------------------------------------------------- exit
+      const tX = D - 0.22;
+      [lk, off, cc, cg, rail].forEach((e, i) => ft(e, { opacity: e === cg ? 0.35 : 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, tX + (i % 3) * 0.02));
+      S.finish();
     })();
   </script>
 </template>

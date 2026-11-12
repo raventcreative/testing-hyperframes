@@ -1,12 +1,95 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s08" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s08 PERMISSIONS (30.87–36.43) "Tapi ingat, dia bisa lihat layarmu. Kamu kasih izin mikrofon, aksesibilitas, rekam layar."
+       Header rolls to "Izin akses · yang kamu kasih ke Atticus · PENTING" (amber chip). "Tapi ingat": amber PERHATIAN tag; a screen
+       frame with two windows and a big eye; "lihat layarmu": focus corners close in and a scan line sweeps the screen.
+       "Kamu kasih izin": the screen gives way to a white settings card "Izin macOS untuk Atticus" (the setup window asks for each,
+       per the README): Mikrofon, Pengenalan ucapan, Aksesibilitas, Rekam layar — switches flip on with the words; Rekam layar row in amber.
+       Footnote: optional agent permissions (Kalender, Otomasi). Last 0.22 s: exit. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s08-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s08-scr { position: absolute; left: 150px; top: 500px; width: 780px; height: 400px; border-radius: 28px; background: linear-gradient(180deg, #13245e, #0a1440);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14), 0 24px 50px rgba(2,6,26,.55); overflow: hidden; }
+    #s08-eye { position: absolute; left: 0; top: 0; width: 170px; height: 170px; margin: -85px 0 0 -85px; border-radius: 85px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6);
+      color: #0b1440; box-shadow: 0 0 0 10px rgba(1,204,247,.18), 0 0 50px rgba(1,204,247,.6); }
+    #s08-eye svg { position: absolute; left: 35px; top: 35px; width: 100px; height: 100px; }
+    .s08-cn { position: absolute; width: 56px; height: 56px; border-color: #ffc761; border-style: solid; border-width: 0; }
+    #s08-scan { position: absolute; left: 160px; top: 0; width: 760px; height: 6px; border-radius: 3px; background: #ffc761; box-shadow: 0 0 20px rgba(255,183,77,.9); }
+    #s08-warn { position: absolute; left: 0; top: 0; }
+    #s08-set { left: 90px; top: 478px; width: 900px; height: 446px; }
+    #s08-set .hd { position: absolute; left: 26px; top: 18px; font: 700 26px/36px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s08-set .k-lab { right: 26px; top: 24px; color: #0aa7d6; }
+    .s08-r { position: absolute; left: 16px; width: 868px; height: 80px; border-radius: 20px; }
+    .s08-r .am { position: absolute; inset: 0; border-radius: 20px; background: #fff3dc; box-shadow: inset 0 0 0 2px #ffc761; }
+    .s08-r .ib { position: absolute; left: 12px; top: 12px; width: 56px; height: 56px; border-radius: 16px; background: #eef3fb; color: #294b77; }
+    .s08-r .ib svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; }
+    .s08-r b { position: absolute; left: 86px; top: 8px; font: 700 26px/36px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s08-r span { position: absolute; left: 86px; top: 44px; font: 400 19px/28px Poppins; color: #5d6f8f; white-space: nowrap; }
+    .s08-sw { position: absolute; right: 18px; top: 18px; width: 84px; height: 44px; border-radius: 22px; background: #cfd8e6; }
+    .s08-sw .on { position: absolute; inset: 0; border-radius: 22px; background: #01ccf7; box-shadow: 0 0 14px rgba(1,204,247,.5); }
+    .s08-sw i { position: absolute; left: 4px; top: 4px; width: 36px; height: 36px; border-radius: 18px; background: #fff; box-shadow: 0 2px 6px rgba(10,13,44,.3); }
+    #s08-ft { position: absolute; left: 30px; top: 404px; font: 400 19px/28px Poppins; color: #5d6f8f; white-space: nowrap; }
+    #s08-ft b { font-weight: 700; color: #294b77; }
+  </style>
+  <div id="root" data-composition-id="s08" data-width="1080" data-height="1920">
+    <div id="s08-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.557);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s08"] = tl;
+      const K = window.R19K, P = "s08", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s08-zone");
+      const R = [
+        { ic: "mic", t: "Mikrofon", s: "dengar saat kamu bicara", w: "mikrofon," },
+        { ic: "audio-lines", t: "Pengenalan ucapan", s: "suara jadi teks, di Mac", w: "mikrofon,", d: 0.3 },
+        { ic: "accessibility", t: "Aksesibilitas", s: "geser jendela, klik tombol, ketik", w: "aksesibilitas," },
+        { ic: "screen-share", t: "Rekam layar", s: "lihat layar saat kamu bilang “ini”", w: "rekam", am: 1 },
+      ];
+      const RY = (i) => 66 + i * 84;
+      const CN = [[150, 500, "5px 0 0 5px", "16px 0 0 0"], [874, 500, "5px 5px 0 0", "0 16px 0 0"], [150, 844, "0 0 5px 5px", "0 0 0 16px"], [874, 844, "0 5px 5px 0", "0 0 16px 0"]];
+      z.innerHTML = K.headerHTML(P) +
+        `<div id="s08-scr">` +
+        `<div class="k-win" style="width:330px;height:220px;transform:translate(40px,60px) rotate(-3deg)"><div class="tb"><b>Email</b><i></i></div><div class="ln" style="top:62px;width:280px"></div><div class="ln c" style="top:96px;width:200px"></div><div class="ln" style="top:130px;width:250px"></div></div>` +
+        `<div class="k-win" style="width:330px;height:220px;transform:translate(410px,110px) rotate(3deg)"><div class="tb"><b>Chat</b><i></i></div><div class="ln" style="top:62px;width:220px"></div><div class="ln" style="top:96px;width:270px"></div><div class="ln c" style="top:130px;width:180px"></div></div>` +
+        `</div>` +
+        CN.map((c, i) => `<div class="s08-cn" id="s08-c${i}" style="left:${c[0]}px;top:${c[1]}px;border-width:${c[2]};border-radius:${c[3]}"></div>`).join("") +
+        `<div id="s08-scan"></div><div id="s08-eye">${K.svg("eye")}</div>` +
+        `<div class="k-amb" id="s08-warn">${K.svg("triangle-alert")}PERHATIAN: dia bisa lihat layarmu</div>` +
+        `<div class="k-white" id="s08-set"><div class="hd">Izin macOS untuk Atticus</div><div class="k-lab">SAAT SETUP</div>` +
+        R.map((r, i) => `<div class="s08-r" id="s08-r${i}" style="top:${RY(i)}px">${r.am ? `<div class="am" id="s08-am"></div>` : ""}<div class="ib">${K.svg(r.ic)}</div><b>${r.t}</b><span>${r.s}</span>` +
+          `<div class="s08-sw"><div class="on" id="s08-on${i}"></div><i id="s08-k${i}"></i></div></div>`).join("") +
+        `<div id="s08-ft"><b>+ opsional</b> buat agen: Kalender, Otomasi &middot; bisa dicabut kapan saja</div></div>`;
+      const tIn = wt("ingat,"), tLi = wt("lihat"), tLa = wt("layarmu."), tKa = wt("Kamu");
+      K.headerScene(S, P, 5, 6);
+      // ---------------------------------------------------------------- "Tapi ingat": warning + the screen with the eye
+      const warn = $("s08-warn"); I(warn, { x: 540, xPercent: -50, y: 474, scale: 0.4, opacity: 0, transformOrigin: "50% 50%" });
+      ft(warn, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tIn - 0.12);
+      const scr = $("s08-scr"); I(scr, { y: 40, opacity: 0 }); ft(scr, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.1);
+      const eye = $("s08-eye"); I(eye, { x: 540, y: 700, scale: 0, opacity: 0, transformOrigin: "50% 50%" });
+      ft(eye, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.36, ease: "back.out(2.2)" }, tIn + 0.1);
+      ft(eye, { scale: 1 }, { scale: 1.12, duration: 0.16, yoyo: true, repeat: 1, ease: "power2.out" }, tLa - 0.06);
+      // "lihat layarmu": focus corners close in, amber scan line sweeps
+      CN.forEach((c, i) => { const e = $("s08-c" + i), dx = i % 2 ? 40 : -40, dy = i < 2 ? -30 : 30;
+        I(e, { x: dx, y: dy, opacity: 0 }); ft(e, { x: dx, y: dy, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.3, ease: "back.out(1.8)" }, tLi - 0.14); });
+      const sc = $("s08-scan"); I(sc, { y: 506, opacity: 0 });
+      ft(sc, { opacity: 0 }, { opacity: 1, duration: 0.1 }, tLi - 0.04);
+      ft(sc, { y: 506 }, { y: 892, duration: 0.7, ease: "sine.inOut" }, tLi - 0.04);
+      ft(sc, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tLi + 0.64);
+      // ---------------------------------------------------------------- "Kamu kasih izin": the settings card takes over
+      const tSw = tKa - 0.26;
+      [scr, eye, warn, $("s08-c0"), $("s08-c1"), $("s08-c2"), $("s08-c3")].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, tSw + (i % 3) * 0.02));
+      const set = $("s08-set"); I(set, { y: 50, opacity: 0 }); ft(set, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, tSw + 0.12);
+      R.forEach((r, i) => {
+        const on = $("s08-on" + i), k = $("s08-k" + i), t = wt(r.w) + (r.d || 0);
+        I(on, { opacity: 0 }); I(k, { x: 0 });
+        ft(on, { opacity: 0 }, { opacity: 1, duration: 0.16 }, t - 0.06);
+        ft(k, { x: 0 }, { x: 40, duration: 0.22, ease: "back.out(2)" }, t - 0.06);
+      });
+      const am = $("s08-am"); I(am, { opacity: 0 }); ft(am, { opacity: 0 }, { opacity: 1, duration: 0.2 }, wt("rekam") - 0.1);
+      const ftx = $("s08-ft"); I(ftx, { opacity: 0 }); ft(ftx, { opacity: 0 }, { opacity: 1, duration: 0.3 }, wt("aksesibilitas,") + 0.3);
+      // ---------------------------------------------------------------- exit
+      ft(set, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, D - 0.22);
+      S.finish();
     })();
   </script>
 </template>

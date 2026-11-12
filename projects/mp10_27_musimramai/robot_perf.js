@@ -1,4 +1,4 @@
-// MasterPajak AI robot host — Video 14 'Siapin 4 Data Ini'. Beat times come from window.TM (re-timed to the VO word stamps).
+// MasterPajak AI robot host — Video 27 'Musim Ramai, Catatan Jangan Ikut Kacau'. Beat times come from window.TM (re-timed to the VO word stamps).
 // Keyframed channels -> hold-then-move -> per-group 2nd-order spring filter (convolution, seek-safe) -> idle layers (hover,
 // breathing, blinks) -> lip-sync from lipsync.js (mouth open/wide per 1/60 s) + speech head beats -> derived secondary
 // motion (squash from vertical acceleration, antenna lag). Hologram panels stay inside the 120 px side safe zone.
@@ -25,7 +25,7 @@
     for (let i = 0; i < n; i++) k[i] /= s; return (KER[id] = k);
   }
   // hard cuts (robot hidden / off-frame when it jumps): springs never look back across them
-  const CUTS = [window.TM.sol - 0.05, window.TM.end - 0.01];
+  const CUTS = [window.TM.sol + 0.15 - 0.05, window.TM.end - 0.01];   // brand switch = TM.sol + 0.15 (index.html CUTB)
   const lastCut = (t) => { let c = -1e9; for (const q of CUTS) if (q <= t) c = q; return c; };
   function filt(ch, t, f, z) { const c = lastCut(t), k = kernel(f, z); let y = 0; for (let i = 0; i < k.length; i++) y += k[i] * raw(ch, Math.max(c, t - i * DT)); return y; }
   const GRP = { pos: [1.5, 0.74], body: [1.7, 0.6], head: [2.3, 0.52], arm: [2.0, 0.56], look: [5.5, 0.92], face: [4.0, 0.95] };
@@ -44,60 +44,80 @@
   const pose = (t, o, e) => { for (const k in o) key(k, t, o[k], e); };
   const armL = (t, r, f, b, y, e) => pose(t, { lR: r, lF: f, lB: b, lY: y }, e), armR = (t, r, f, b, y, e) => pose(t, { rR: r, rF: f, rB: b, rY: y }, e);
   const NAVY = { sh: 0.5, rim: 2.0 }, LIGHT = { sh: 0.34, rim: 1.25 };
-  const REST = (t, e) => { armL(t, 15, 0, 10, 0, e); armR(t, 15, 0, 10, 0, e); };
-  const RX = 905, RY = 1585, RH = 520;   // paper studio: small full-body host, bottom-right, beside the box
-  const DK = [TM.d1, TM.d2, TM.d3, TM.d4, TM.kum], TICK = [TM.d1 + 1.05, TM.d2b + 0.8, TM.d3 + 1.05, TM.d4 + 1.05];
+  const RX = 905, RY = 1585, RH = 520;   // packing room: small full-body host, bottom-right (the room and its pile sit left of it)
+  const CUTB = TM.sol + 0.15;            // brand scene switch (index.html)
+  const DAYT = [0, 1, 2, 3, 4, 5, 6].map((k) => TM.tiap - 0.05 + k * 0.24);
 
-  // S1 · hook: rises in at the bottom-right, looks up at the ghost "Estimasi pajak · Rp ???" card with a curious head tilt
-  pose(0, Object.assign({ x: RX, y: 2480, h: RH, yaw: -20, hYaw: -10, hPitch: -6, hRoll: 0, lookX: -0.5, lookY: 0.4 }, LIGHT)); REST(0);
+  // S1 · hook: rises in at the bottom-right, looks up at the storm; "whoa" on "pesanan datang", ducks under the lightning on "badai"
+  pose(0, Object.assign({ x: RX, y: 2480, h: RH, yaw: -20, hYaw: -10, hPitch: -10, hRoll: 0, lookX: -0.5, lookY: 0.6, smile: 1 }, LIGHT));
+  armL(0, 15, 0, 10, 0); armR(0, 15, 0, 10, 0);
   pose(0.35, { y: 2480 }, "hold"); pose(1.1, { y: RY }, "o");
-  pose(0.95, { hYaw: -18, hPitch: -18, lookX: -0.8, lookY: 0.9, hRoll: 9 });
-  pose(TM.hook + 1.3, { happy: 1 }); pose(TM.hook + 2.0, { happy: 0, hRoll: 0 });
-  // S2 · "siapin 4 data ini dulu": points at the box as the lid swings open, then glances up at the HUD
-  armR(TM.siap + 0.05, 15, 0, 10, 0); armR(TM.siap + 0.4, 112, 30, 14, 0, "o"); armR(TM.siap + 1.45, 112, 30, 14, 0); armR(TM.siap + 1.8, 15, 0, 10, 0);
-  pose(TM.siap + 0.3, { hYaw: -24, hPitch: 4, lookX: -1, lookY: -0.1, yaw: -26 });
-  pose(TM.siap + 1.0, { happy: 1 }); pose(TM.siap + 1.7, { happy: 0 });
-  pose(TM.siap + 1.9, { hYaw: -14, hPitch: -22, lookX: -0.5, lookY: 1 });
-  // S3 · each item: eyes catch it flying in, a "yes" arm pump on the tick, the head follows it down into the box
-  for (let k = 0; k < 4; k++) {
-    const t0 = DK[k], tk = TICK[k], drop = DK[k + 1] - 0.88;
-    pose(t0 + 0.25, { hYaw: k % 2 ? -12 : -22, hPitch: -16, lookX: k % 2 ? -0.4 : -0.9, lookY: 0.85, yaw: -22 });
-    pose(t0 + 0.8, { hYaw: -18, hPitch: -14, lookX: -0.7, lookY: 0.75 });
-    armR(tk - 0.12, 15, 0, 10, 0); armR(tk + 0.16, 92, 18, 82, 0, "o"); armR(tk + 0.55, 92, 18, 82, 0); armR(tk + 0.85, 15, 0, 10, 0);
-    pose(tk + 0.05, { happy: 1, mo: 0.35 }); pose(tk + 0.75, { happy: 0, mo: 0 });
-    pose(drop + 0.55, { hYaw: -20, hPitch: 6, lookX: -0.8, lookY: -0.4 });
-  }
-  // 2 · "termasuk ongkir dan iklan": the other arm points at the two tags
-  armL(TM.d2b + 0.1, 15, 0, 10, 0); armL(TM.d2b + 0.45, 60, 34, 40, 0, "o"); armL(TM.d2b + 1.2, 60, 34, 40, 0); armL(TM.d2b + 1.5, 15, 0, 10, 0);
-  // S3b · "Udah kekumpul?": both arms up, happy — then ducks out before the band sweep
-  pose(TM.kum + 0.1, { hYaw: -6, hPitch: -6, lookX: -0.1, lookY: 0.2, yaw: -14, happy: 1, mo: 0.4 });
-  armL(TM.kum + 0.05, 15, 0, 10, 0); armR(TM.kum + 0.05, 15, 0, 10, 0);
-  armL(TM.kum + 0.4, 150, 14, 34, 0, "o"); armR(TM.kum + 0.4, 150, 14, 34, 0, "o");
-  pose(TM.sol - 0.75, { y: RY }); pose(TM.sol - 0.28, { y: 2560 }, "i");
+  pose(1.0, { hYaw: -16, hPitch: -22, lookX: -0.6, lookY: 1, hRoll: 6 });
+  pose(TM.datang, { mo: 0.5, happy: 0 }); pose(TM.datang + 0.6, { mo: 0 });
+  armL(TM.pes + 0.1, 15, 0, 10, 0); armR(TM.pes + 0.1, 15, 0, 10, 0); armL(TM.datang + 0.1, 70, 30, 70, 0, "o"); armR(TM.datang + 0.1, 70, 30, 70, 0, "o");
+  // lightning: both arms over the head, eyes squeezed, a small duck
+  armL(TM.badai - 0.05, 150, 30, 105, 0, "o"); armR(TM.badai - 0.05, 150, 30, 105, 0, "o");
+  pose(TM.badai - 0.08, { y: RY }); pose(TM.badai + 0.1, { y: RY + 26, squint: 0.85, hPitch: 8, lookY: -0.2, hRoll: 0 }, "o");
+  pose(TM.badai + 0.75, { y: RY + 26, squint: 0.85 }); pose(TM.badai + 1.05, { y: RY, squint: 0, hPitch: -14, lookY: 0.7 });
+  armL(TM.badai + 0.75, 150, 30, 105, 0); armR(TM.badai + 0.75, 150, 30, 105, 0); armL(TM.badai + 1.1, 15, 0, 10, 0); armR(TM.badai + 1.1, 15, 0, 10, 0);
+  // S2 · points at the growing pile, then down at the slipped receipt, then shakes its head at the postponed notebook
+  pose(TM.paket - 0.1, { hYaw: -22, hPitch: -8, lookX: -0.9, lookY: 0.35, yaw: -26 });
+  armR(TM.paket + 0.05, 15, 0, 10, 0); armR(TM.paket + 0.35, 112, 30, 14, 0, "o"); armR(TM.numpuk + 0.7, 112, 30, 14, 0); armR(TM.nota - 0.1, 70, 40, 20, 0);
+  pose(TM.numpuk + 0.7, { mo: 0.45 }); pose(TM.numpuk + 1.2, { mo: 0 });
+  pose(TM.nota + 0.05, { hYaw: -26, hPitch: 10, lookX: -0.9, lookY: -0.35 });
+  armR(TM.nyelip + 0.5, 70, 40, 20, 0); armR(TM.catat - 0.05, 15, 0, 10, 0);
+  pose(TM.catat + 0.05, { hYaw: -28, hPitch: 0, lookX: -1, lookY: 0.15, smile: 0.2 });
+  [0, 1, 2, 3].forEach((j) => pose(TM.tunda + 0.1 + j * 0.2, { hYaw: j % 2 ? -14 : -34 }));
+  pose(TM.terus + 0.4, { hYaw: -24 });
+  // S3 · "begitu sepi": looks up as the cloud leaves; "kepikiran": curious head tilt; "berapa?": shrug
+  pose(TM.sepi + 0.1, { hYaw: -12, hPitch: -20, lookX: -0.3, lookY: 1, smile: 1, hRoll: 0 });
+  pose(TM.pikir, { hYaw: -20, hPitch: -6, lookX: -0.7, lookY: 0.3, hRoll: 14 });
+  armL(TM.berapa - 0.25, 15, 0, 10, 0); armR(TM.berapa - 0.25, 15, 0, 10, 0);
+  armL(TM.berapa + 0.05, 48, 10, 78, 0, "o"); armR(TM.berapa + 0.05, 48, 10, 78, 0, "o"); pose(TM.berapa + 0.05, { mo: 0.3, hRoll: -10 });
+  armL(TM.berapa + 0.55, 48, 10, 78, 0); armR(TM.berapa + 0.55, 48, 10, 78, 0); armL(TM.kunci - 0.05, 15, 0, 10, 0); armR(TM.kunci - 0.05, 15, 0, 10, 0);
+  pose(TM.berapa + 0.6, { mo: 0 });
+  // S4 · "kuncinya": brightens, a finger up; "catat tiap hari": points at the notebook and nods once per written day
+  pose(TM.kunci + 0.05, { happy: 1, hRoll: 0, hYaw: -14, hPitch: -6, lookX: -0.4, lookY: 0.3 }); pose(TM.kunci + 0.8, { happy: 0 });
+  armR(TM.kunci + 0.35, 150, 25, 10, 0, "o"); armR(TM.catat2 - 0.15, 150, 25, 10, 0); armR(TM.catat2 + 0.15, 112, 30, 14, 0, "o");
+  armR(DAYT[6] + 0.3, 112, 30, 14, 0); armR(DAYT[6] + 0.6, 15, 0, 10, 0);
+  pose(TM.catat2 + 0.1, { hYaw: -24, lookX: -0.9, lookY: 0.1 });
+  DAYT.forEach((t) => { pose(t + 0.08, { hPitch: 9 }); pose(t + 0.2, { hPitch: -3 }); });
+  pose(DAYT[6] + 0.4, { happy: 1, hPitch: -6 }); pose(TM.lima - 0.1, { happy: 0 });
+  // "lima menit, sebelum tutup toko": looks up at the clock and points at it; a little wave as the sign flips; then ducks out
+  pose(TM.lima + 0.05, { hYaw: -10, hPitch: -24, lookX: -0.3, lookY: 1 });
+  armR(TM.lima + 0.0, 15, 0, 10, 0); armR(TM.lima + 0.3, 140, 30, 10, 0, "o"); armR(TM.tutup - 0.1, 140, 30, 10, 0); armR(TM.tutup + 0.15, 15, 0, 10, 0);
+  armL(TM.tutup - 0.1, 15, 0, 10, 0); armL(TM.tutup + 0.15, 145, 0, 30, 90, "o"); armL(TM.tutup + 0.33, 145, 0, 62, 90); armL(TM.tutup + 0.51, 145, 0, 30, 90);
+  pose(TM.tutup + 0.1, { happy: 1, hPitch: -4, lookY: 0.2 });
+  pose(CUTB - 0.75, { y: RY }); pose(CUTB - 0.28, { y: 2560 }, "i");
 
-  // S4 · brand: half-body bottom-left, chest hologram to the right (build 1.2 s, on screen ~6 s), points at the pembukuan, then the estimate
-  pose(TM.sol - 0.05, Object.assign({ x: 200, y: 2700, h: 900, yaw: 30, pitch: 0, roll: 0, hRoll: 0, xe: 0, squint: 0, mo: 0, happy: 0 }, NAVY), "hold");
-  REST(TM.sol - 0.05, "hold");
-  pose(TM.sol + 0.55, { x: 200, y: 1660, h: 900 }, "o");
-  pose(TM.sol + 0.3, { hYaw: 6, hPitch: 0, lookX: 0.2, lookY: 0, smile: 1, happy: 0 }, "hold");
-  armR(TM.sol + 0.3, 15, 0, 12, 0); armR(TM.sol + 0.65, 85, 35, 40, 0, "o"); armR(TM.sol + 1.3, 85, 35, 40, 0); armR(TM.sol + 1.55, 18, 0, 12, 0);
-  armL(TM.sol + 0.3, 20, -50, 14, 0);
+  // S5 · brand: half-body bottom-left, chest hologram to the right (build 1.2 s), points at the pembukuan, then at the asisten AI chat
+  pose(CUTB - 0.05, Object.assign({ x: 200, y: 2700, h: 900, yaw: 30, pitch: 0, roll: 0, hRoll: 0, xe: 0, squint: 0, mo: 0, happy: 0, smile: 1 }, NAVY), "hold");
+  armL(CUTB - 0.05, 20, -50, 14, 0, "hold"); armR(CUTB - 0.05, 15, 0, 12, 0, "hold");
+  pose(CUTB + 0.55, { x: 200, y: 1660, h: 900 }, "o");
+  pose(CUTB + 0.3, { hYaw: 6, hPitch: 0, lookX: 0.2, lookY: 0 }, "hold");
+  armR(CUTB + 0.3, 15, 0, 12, 0); armR(CUTB + 0.65, 85, 35, 40, 0, "o"); armR(CUTB + 1.2, 85, 35, 40, 0); armR(CUTB + 1.45, 18, 0, 12, 0);
   key("hx", 0, 720, "hold"); key("hy", 0, 1520, "hold"); key("hw", 0, 420, "hold");
-  pose(TM.sol + 0.35, { chest: 0 }); pose(TM.sol + 0.6, { chest: 1 });
-  key("holoA", 0, 0, "hold"); key("holoA", TM.sol + 0.5, 0, "hold"); key("holoA", TM.sol + 0.72, 1, "o");
-  key("holoRev", 0, 0, "hold"); key("holoRev", TM.sol + 0.56, 0, "hold"); key("holoRev", TM.sol + 1.76, 1.1, "o");
+  pose(CUTB + 0.35, { chest: 0 }); pose(CUTB + 0.6, { chest: 1 });
+  key("holoA", 0, 0, "hold"); key("holoA", CUTB + 0.5, 0, "hold"); key("holoA", CUTB + 0.72, 1, "o");
+  key("holoRev", 0, 0, "hold"); key("holoRev", CUTB + 0.56, 0, "hold"); key("holoRev", CUTB + 1.76, 1.1, "o");
   key("holoGl", 0, 0, "hold");
-  for (const g0 of [TM.sol + 2.9, TM.est + 1.7]) { key("holoGl", g0, 0, "hold"); key("holoGl", g0 + 0.04, 0.7, "lin"); key("holoGl", g0 + 0.12, 0, "lin"); }
-  pose(TM.sol + 1.0, { hYaw: 20, hPitch: -14, lookX: 0.8, lookY: 0.9, happy: 1 }); pose(TM.sol + 1.7, { happy: 0 });
-  // series pattern (Videos 1/5): the far arm points up at the cards; the near arm stays low so it never crosses the hologram
-  armR(TM.sol + 1.6, 18, 0, 12, 0); armR(TM.sol + 1.95, 150, 25, 10, 0, "o"); armR(TM.sol + 2.95, 150, 25, 10, 0); armR(TM.sol + 3.25, 18, 0, 12, 0);   // pembukuan
-  pose(TM.sol + 2.6, { happy: 1, hPitch: -10 }); pose(TM.sol + 3.3, { happy: 0, hYaw: 10, hPitch: -4, lookX: 0.3, lookY: 0.2 });
-  armR(TM.est + 0.3, 18, 0, 12, 0); armR(TM.est + 0.7, 138, 28, 12, 0, "o"); armR(TM.est + 2.3, 138, 28, 12, 0); armR(TM.est + 2.6, 18, 0, 12, 0);    // estimasi pajak
-  pose(TM.est + 0.55, { hYaw: 18, hPitch: -10, lookX: 0.8, lookY: 0.6 }); pose(TM.est + 1.9, { happy: 1 }); pose(TM.est + 2.7, { happy: 0, hYaw: 8, hPitch: 0, lookX: 0.1, lookY: 0 });
+  for (const g0 of [CUTB + 2.9, TM.q + 1.0, TM.dari + 0.4]) { key("holoGl", g0, 0, "hold"); key("holoGl", g0 + 0.04, 0.7, "lin"); key("holoGl", g0 + 0.12, 0, "lin"); }
+  // "bantu ngejar ramainya": the far arm points up at the ledger while the order chips rain in (the near arm stays low, never over the hologram)
+  pose(TM.bantu - 0.2, { hYaw: 18, hPitch: -14, lookX: 0.7, lookY: 0.9, happy: 1 }); pose(TM.ramainya + 0.3, { happy: 0 });
+  armR(TM.bantu - 0.2, 18, 0, 12, 0); armR(TM.bantu + 0.15, 150, 25, 10, 0, "o"); armR(TM.ramainya + 0.4, 150, 25, 10, 0); armR(TM.ramainya + 0.7, 18, 0, 12, 0);
+  // "unggah foto nota": a quick toss as the nota photos fly up from its side
+  armR(TM.foto - 0.35, 18, 0, 12, 0); armR(TM.foto - 0.1, 120, 40, 30, 0, "o"); armR(TM.nota2 + 0.2, 120, 40, 30, 0); armR(TM.nota2 + 0.5, 18, 0, 12, 0);
+  pose(TM.foto - 0.2, { hYaw: 14, hPitch: -6, lookX: 0.5, lookY: 0.4 });
+  pose(TM.rapi - 0.1, { happy: 1, hPitch: -10, hYaw: 16, lookX: 0.6, lookY: 0.8 }); pose(TM.q - 0.1, { happy: 0 });
+  // "untungnya berapa? tanya asisten AI": looks to the chat panel on the right, points at it; happy at the answer
+  pose(TM.q + 0.1, { hYaw: 24, hPitch: -4, lookX: 1, lookY: 0.15 });
+  armR(TM.tanya - 0.1, 18, 0, 12, 0); armR(TM.tanya + 0.25, 112, 32, 16, 0, "o"); armR(TM.jawab + 0.2, 112, 32, 16, 0); armR(TM.jawab + 0.5, 18, 0, 12, 0);
+  pose(TM.asis + 0.45, { happy: 1 }); pose(TM.jawab + 0.4, { happy: 0 });
+  pose(TM.dari - 0.05, { hYaw: 12, hPitch: -12, lookX: 0.3, lookY: 0.8 }); pose(TM.catmu + 0.3, { hPitch: -4, lookY: 0.3 });
   key("holoA", TM.end - 0.55, 1, "hold"); key("holoA", TM.end - 0.3, 0, "i"); pose(TM.end - 0.55, { chest: 1 }); pose(TM.end - 0.3, { chest: 0 });
   // T · ducks out under the beam
   pose(TM.end - 0.5, { x: 200, y: 1660, h: 900 }); pose(TM.end - 0.06, { x: 200, y: 2700, h: 900 }, "i");
-  // S5 · end card: half-body bottom-right, logo hologram left, waves, points at the CTA (series template)
+  // S6 · end card: half-body bottom-right, logo hologram left, waves, points at the CTA (series template)
   pose(TM.end - 0.01, Object.assign({ x: 870, y: 2700, h: 960, roll: 0, yaw: -30, hYaw: 0, hPitch: 0, lookX: 0, lookY: 0, happy: 0, smile: 1, chest: 0 }, NAVY), "hold");
   armL(TM.end - 0.01, 18, 0, 14, 0, "hold"); armR(TM.end - 0.01, 20, -50, 14, 0, "hold");
   pose(TM.end + 0.5, { y: 1660 }, "o");
@@ -105,12 +125,12 @@
   pose(TM.end + 0.4, { chest: 0 }); pose(TM.end + 0.65, { chest: 1 });
   key("holoA", TM.end + 0.52, 0, "hold"); key("holoA", TM.end + 0.75, 1, "o");
   key("holoRev", TM.end + 0.56, 0, "hold"); key("holoRev", TM.end + 1.76, 1.1, "o");
-  for (const g0 of [TM.cta + 1.2, TM.bio + 1.4]) { key("holoGl", g0, 0, "hold"); key("holoGl", g0 + 0.04, 0.7, "lin"); key("holoGl", g0 + 0.12, 0, "lin"); }
+  for (const g0 of [TM.cta + 1.2, TM.bio + 0.9]) { key("holoGl", g0, 0, "hold"); key("holoGl", g0 + 0.04, 0.7, "lin"); key("holoGl", g0 + 0.12, 0, "lin"); }
   armL(TM.end + 0.6, 18, 0, 14, 0); armL(TM.end + 0.85, 145, 0, 30, 90, "o"); armL(TM.end + 1.07, 145, 0, 62, 90); armL(TM.end + 1.29, 145, 0, 30, 90); armL(TM.end + 1.51, 145, 0, 58, 90); armL(TM.end + 1.9, 18, 0, 14, 0);
   pose(TM.end + 1.2, { happy: 1 }); pose(TM.end + 2.0, { hYaw: -24, hPitch: 6, lookX: -1, lookY: -0.4, happy: 0 }); pose(TM.cta - 0.4, { hYaw: -4, hPitch: 0, lookX: 0, lookY: 0 });
-  armL(TM.cta - 0.2, 18, 0, 14, 0); armL(TM.cta + 0.15, 165, 25, 8, 0, "o"); armL(TM.cta + 1.8, 165, 25, 8, 0); armL(TM.cta + 2.1, 18, 0, 14, 0);
-  pose(TM.cta + 0.2, { hPitch: -22, lookY: 1, lookX: -0.4, hYaw: -10 }); pose(TM.cta + 1.9, { hPitch: 0, lookY: 0, lookX: 0, hYaw: -6, happy: 1 });
-  armL(TM.bio + 0.3, 18, 0, 14, 0); armL(TM.bio + 0.55, 145, 0, 30, 90, "o"); armL(TM.bio + 0.77, 145, 0, 62, 90); armL(TM.bio + 0.99, 145, 0, 30, 90); armL(TM.bio + 1.5, 18, 0, 14, 0);
+  armL(TM.cta - 0.2, 18, 0, 14, 0); armL(TM.cta + 0.15, 165, 25, 8, 0, "o"); armL(TM.cta + 1.3, 165, 25, 8, 0); armL(TM.cta + 1.6, 18, 0, 14, 0);
+  pose(TM.cta + 0.2, { hPitch: -22, lookY: 1, lookX: -0.4, hYaw: -10 }); pose(TM.cta + 1.4, { hPitch: 0, lookY: 0, lookX: 0, hYaw: -6, happy: 1 });
+  armL(TM.bio + 0.15, 18, 0, 14, 0); armL(TM.bio + 0.4, 145, 0, 30, 90, "o"); armL(TM.bio + 0.62, 145, 0, 62, 90); armL(TM.bio + 0.84, 145, 0, 30, 90); armL(TM.bio + 1.3, 18, 0, 14, 0);
 
   for (const ch in KEYS) KEYS[ch].sort((a, b) => a[0] - b[0]);
   // hold-then-move: a key is when a pose is REACHED; the move takes at most MAXD[group] s and the previous pose holds until then

@@ -1,12 +1,96 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s05 SCREEN + REPLY (16.60–22.00) "Buka email, bilang: balas, Kamis aku bisa. Drafnya jadi, tapi nggak dikirim sendiri."
+       Header rolls to "Baca layar · nulis draf · kamu yang kirim · AMAN". "Buka email": an email card (contoh) slides in. "bilang":
+       focus corners + a scan line read the card ("BACA LAYAR" tag); the voice pill types the ask. "Drafnya jadi": the pill gives way
+       to a white draft card that types the reply; buttons Sisipkan (cyan) / Kirim (locked, grey). "nggak dikirim sendiri": the Kirim
+       button gets a lock pulse + green chip. README: "Reads the email on screen and writes the reply. Insert puts it at your cursor.
+       It never sends." Last 0.22 s: workspace exits. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s05-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s05-mail { left: 90px; top: 480px; width: 900px; height: 190px; }
+    #s05-mail .av { position: absolute; left: 24px; top: 22px; width: 56px; height: 56px; border-radius: 28px; background: #ffd9b8; color: #8a4a1c; font: 700 26px/56px Poppins; text-align: center; }
+    #s05-mail .fr { position: absolute; left: 96px; top: 20px; font: 700 23px/30px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s05-mail .fr i { font-style: normal; font-weight: 400; color: #5d6f8f; }
+    #s05-mail .sj { position: absolute; left: 96px; top: 52px; font: 400 19px/28px Poppins; color: #5d6f8f; white-space: nowrap; }
+    #s05-mail .bd { position: absolute; left: 24px; top: 98px; width: 852px; font: 700 27px/38px Poppins; color: #0a0d2c; }
+    #s05-mail .bd span { display: block; font: 400 21px/32px Poppins; color: #294b77; }
+    #s05-mail .k-demo { right: 20px; top: 22px; }
+    .s05-cn { position: absolute; width: 40px; height: 40px; border-color: #01ccf7; border-style: solid; border-width: 0; }
+    #s05-scan { position: absolute; left: 96px; top: 0; width: 888px; height: 6px; border-radius: 3px; background: #6adfff; box-shadow: 0 0 20px rgba(1,204,247,.9); }
+    #s05-eye { position: absolute; left: 0; top: 0; height: 40px; padding: 0 14px 0 10px; border-radius: 20px; display: flex; align-items: center; gap: 8px;
+      font: 700 17px/1 Poppins; letter-spacing: 1.5px; color: #0b1440; background: #6adfff; box-shadow: 0 0 18px rgba(1,204,247,.6); white-space: nowrap; }
+    #s05-eye svg { width: 22px; height: 22px; }
+    #s05-dr { left: 90px; top: 690px; width: 900px; height: 232px; }
+    #s05-dr .k-lab { left: 24px; top: 18px; color: #0aa7d6; }
+    #s05-dr .by { position: absolute; right: 22px; top: 16px; font: 400 18px/30px Poppins; color: #5d6f8f; white-space: nowrap; }
+    #s05-dtx { position: absolute; left: 24px; top: 56px; width: 852px; font: 400 27px/40px Poppins; color: #0a0d2c; }
+    #s05-dr .bt { position: absolute; top: 150px; height: 58px; border-radius: 29px; display: flex; align-items: center; gap: 10px; padding: 0 22px 0 16px; font: 700 23px/1 Poppins; white-space: nowrap; }
+    #s05-dr .bt svg { width: 24px; height: 24px; }
+    #s05-ins { left: 534px; background: #01ccf7; color: #0b1440; box-shadow: 0 8px 18px rgba(1,204,247,.35); }
+    #s05-snd { left: 742px; background: #e3e9f2; color: #8a94a6; }
+    #s05-ok { position: absolute; left: 24px; top: 156px; height: 46px; padding: 0 18px 0 12px; border-radius: 23px; display: flex; align-items: center; gap: 10px;
+      font: 700 21px/1 Poppins; color: #1d7a3a; background: #e3f6e9; box-shadow: inset 0 0 0 1.5px #8fd6a5; white-space: nowrap; }
+    #s05-ok svg { width: 24px; height: 24px; color: #2da44e; }
+  </style>
+  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920">
+    <div id="s05-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.39);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s05"] = tl;
+      const K = window.R19K, P = "s05", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s05-zone");
+      // focus corners around the email card (global px)
+      const CN = [[78, 468, "4px 0 0 4px", "12px 0 0 0"], [962, 468, "4px 4px 0 0", "0 12px 0 0"], [78, 642, "0 0 4px 4px", "0 0 0 12px"], [962, 642, "0 4px 4px 0", "0 0 12px 0"]];
+      z.innerHTML = K.headerHTML(P) +
+        `<div class="k-white" id="s05-mail"><div class="av">R</div><div class="fr">Bu Rina <i>&middot; Katering Sehat</i></div>` +
+        `<div class="sj">Re: menu kantor &middot; kemarin</div><div class="k-demo w">CONTOH</div>` +
+        `<div class="bd">Bisa ketemu minggu ini?<span>Mau bahas menu makan siang kantor, Pak.</span></div></div>` +
+        CN.map((c, i) => `<div class="s05-cn" id="s05-c${i}" style="left:${c[0]}px;top:${c[1]}px;border-width:${c[2]};border-radius:${c[3]}"></div>`).join("") +
+        `<div id="s05-scan"></div><div id="s05-eye">${K.svg("scan-eye")}BACA LAYAR</div>` +
+        K.voiceHTML("s05-v", 800) +
+        `<div class="k-white" id="s05-dr"><div class="k-lab">DRAF BALASAN</div><div class="by">ditulis Atticus</div><div id="s05-dtx"></div>` +
+        `<div id="s05-ok">${K.svg("shield-check")}tidak dikirim otomatis</div>` +
+        `<div class="bt" id="s05-ins">${K.svg("pen-line")}Sisipkan</div><div class="bt" id="s05-snd">${K.svg("lock")}Kirim</div></div>`;
+      const tEm = wt("email,"), tBi = wt("bilang:"), tBa = wt("balas,"), tBs = wt("bisa."), tDr = wt("Drafnya"), tJa = wt("jadi,"), tNg = wt("nggak"), tSe = wt("sendiri.");
+      K.headerScene(S, P, 2, 3);
+      // ---------------------------------------------------------------- "Buka email"
+      const mail = $("s05-mail"); I(mail, { x: 60, opacity: 0 });
+      ft(mail, { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.1);
+      // ---------------------------------------------------------------- "bilang": the screen is read (focus corners + scan line)
+      CN.forEach((c, i) => { const e = $("s05-c" + i), dx = i % 2 ? -18 : 18, dy = i < 2 ? 18 : -18;
+        I(e, { x: dx, y: dy, opacity: 0 }); ft(e, { x: dx, y: dy, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.26, ease: "back.out(2)" }, tBi - 0.16); });
+      const sc = $("s05-scan"); I(sc, { y: 486, opacity: 0 });
+      ft(sc, { opacity: 0 }, { opacity: 1, duration: 0.1 }, tBi - 0.06);
+      ft(sc, { y: 486 }, { y: 660, duration: 0.7, ease: "sine.inOut", yoyo: true, repeat: 1 }, tBi - 0.06);
+      ft(sc, { opacity: 1 }, { opacity: 0, duration: 0.14 }, tBi + 1.34);
+      const eye = $("s05-eye"); I(eye, { x: 948, xPercent: -100, y: 650, scale: 0.4, opacity: 0, transformOrigin: "100% 50%" });
+      ft(eye, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, tBi - 0.04);
+      // voice pill types the ask
+      const v = $("s05-v"); I(v, { x: 140, y: 708, scale: 0.6, opacity: 0, transformOrigin: "50% 50%" });
+      ft(v, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.2)" }, tBi - 0.1);
+      K.voiceBars(S, "s05-v", tBi, tBs + 0.3);
+      S.typeIn($("s05-v-tx"), "“balas: Kamis aku bisa”", tBa - 0.1, tBs + 0.05);
+      // ---------------------------------------------------------------- "Drafnya jadi": draft card types the reply
+      ft(v, { scale: 1, opacity: 1 }, { scale: 0.8, opacity: 0, duration: 0.22, ease: "power2.in" }, tDr - 0.2);
+      CN.forEach((c, i) => ft($("s05-c" + i), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tDr - 0.1));
+      ft(eye, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tDr - 0.1);
+      const dr = $("s05-dr"); I(dr, { y: 40, opacity: 0 });
+      ft(dr, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.36, ease: "power3.out" }, tDr - 0.06);
+      S.typeIn($("s05-dtx"), "Halo Bu Rina, Kamis saya bisa. Mau jam berapa?", tDr + 0.14, tJa + 0.2);
+      const ins = $("s05-ins"), snd = $("s05-snd");
+      [ins, snd].forEach((e, i) => { I(e, { scale: 0.6, opacity: 0, transformOrigin: "50% 50%" }); ft(e, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.2)" }, tJa - 0.1 + i * 0.08); });
+      ft(ins, { scale: 1 }, { scale: 1.07, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tJa + 0.2);
+      // "nggak dikirim sendiri": the locked Kirim shakes, green chip
+      [[-7, 0.04], [7, 0.08], [-5, 0.12], [4, 0.16], [0, 0.2]].forEach(([x, d]) => tl.set(snd, { x }, tNg + d));
+      I(snd, { x: 0 });
+      const ok = $("s05-ok"); I(ok, { scale: 0.4, opacity: 0, transformOrigin: "0% 50%" });
+      ft(ok, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tSe - 0.1);
+      // ---------------------------------------------------------------- exit
+      const tX = D - 0.22;
+      [mail, dr].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, tX + i * 0.03));
+      S.finish();
     })();
   </script>
 </template>

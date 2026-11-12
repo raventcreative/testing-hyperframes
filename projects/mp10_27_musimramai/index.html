@@ -152,7 +152,10 @@
       #ring { border-radius: 50%; border: 6px dashed #FED111; }
 
       /* screen-space storm (cloud, rain, bolt, flash) */
-      #storm { position: absolute; inset: 0; pointer-events: none; }
+      #storm, #scards { position: absolute; inset: 0; pointer-events: none; }
+      .sc { position: absolute; left: 0; top: 0; width: 150px; height: 84px; margin: -42px 0 0 -75px; border-radius: 14px; background: #fff; box-shadow: 0 16px 30px rgba(19,27,64,.22); }
+      .sc::before { content: ""; position: absolute; left: 12px; top: 14px; width: 32px; height: 32px; border-radius: 9px; background: #FED111; }
+      .sc::after { content: ""; position: absolute; left: 54px; top: 18px; width: 78px; height: 8px; border-radius: 4px; background: #C9CFE0; box-shadow: 0 16px 0 #E1E5EE, -42px 38px 0 -1px #D5DAE6; }
       #cloud { position: absolute; left: -170px; top: -150px; width: 1420px; height: 820px; overflow: visible; }
       #rain { position: absolute; left: -300px; top: -700px; width: 1700px; height: 2600px; opacity: .5;
               background-image: repeating-linear-gradient(104deg, rgba(38,54,122,0) 0 34px, rgba(38,54,122,.30) 34px 36.5px, rgba(38,54,122,0) 36.5px 93px);
@@ -280,19 +283,20 @@
         <!-- overlay rig: an exact twin of the room camera; falling cards / the flying receipt live here so they are never depth-sorted
              against the room planes (Chrome's software compositor mis-orders thin slabs) -->
         <div class="stage" id="w1b"><div class="cam" id="cam1b"><div class="yaw" id="yaw1b"><div class="pan" id="pan1b"></div></div></div></div>
+        <div id="scards"></div>
         <div id="storm">
           <div id="rain"></div>
           <div id="cglow"></div>
-          <svg id="cloud" viewBox="0 0 1420 820" aria-hidden="true">
+          <svg id="cloud" viewBox="0 0 1420 820" aria-hidden="true" style="filter: drop-shadow(0 24px 30px rgba(19,27,64,.28))">
             <defs>
-              <linearGradient id="cgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34489f"/><stop offset=".55" stop-color="#26367A"/><stop offset="1" stop-color="#1b2658"/></linearGradient>
-              <linearGradient id="cgB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3d8c"/><stop offset="1" stop-color="#151e4a"/></linearGradient>
-              <linearGradient id="cgC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a5fbf"/><stop offset="1" stop-color="#2b3d8c"/></linearGradient>
+              <radialGradient id="lB" cx=".38" cy=".3" r=".78"><stop offset="0" stop-color="#34489f"/><stop offset=".6" stop-color="#22306f"/><stop offset="1" stop-color="#161f4d"/></radialGradient>
+              <radialGradient id="lF" cx=".36" cy=".28" r=".8"><stop offset="0" stop-color="#5468c4"/><stop offset=".45" stop-color="#2f4296"/><stop offset="1" stop-color="#1a2458"/></radialGradient>
+              <radialGradient id="lS" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#6074cc"/><stop offset=".5" stop-color="#34489f"/><stop offset="1" stop-color="#1d2a62"/></radialGradient>
             </defs>
-            <g fill="url(#cgB)"><circle cx="160" cy="420" r="230"/><circle cx="470" cy="470" r="250"/><circle cx="820" cy="470" r="260"/><circle cx="1180" cy="430" r="250"/><rect x="0" y="0" width="1420" height="520"/></g>
-            <g fill="url(#cgA)"><circle cx="290" cy="380" r="210"/><circle cx="640" cy="420" r="230"/><circle cx="990" cy="400" r="220"/><circle cx="1300" cy="360" r="190"/><rect x="0" y="0" width="1420" height="430"/></g>
-            <g fill="url(#cgC)" opacity=".55"><circle cx="420" cy="300" r="170"/><circle cx="860" cy="290" r="180"/><circle cx="1180" cy="270" r="150"/><circle cx="120" cy="290" r="150"/></g>
-            <g fill="#131B40" opacity=".35"><ellipse cx="460" cy="690" rx="220" ry="26"/><ellipse cx="840" cy="700" rx="240" ry="26"/><ellipse cx="1150" cy="660" rx="200" ry="22"/><ellipse cx="170" cy="630" rx="180" ry="22"/></g>
+            <rect x="0" y="0" width="1420" height="420" fill="#161f4d"/>
+            <g fill="url(#lB)"><circle cx="70" cy="360" r="200"/><circle cx="330" cy="380" r="220"/><circle cx="610" cy="360" r="215"/><circle cx="880" cy="390" r="230"/><circle cx="1140" cy="360" r="215"/><circle cx="1380" cy="340" r="190"/></g>
+            <g fill="url(#lF)"><circle cx="150" cy="520" r="150"/><circle cx="390" cy="590" r="165"/><circle cx="640" cy="610" r="170"/><circle cx="890" cy="600" r="165"/><circle cx="1110" cy="580" r="150"/><circle cx="1320" cy="510" r="140"/></g>
+            <g fill="url(#lS)"><circle cx="270" cy="660" r="92"/><circle cx="515" cy="705" r="96"/><circle cx="765" cy="712" r="90"/><circle cx="1005" cy="690" r="88"/><circle cx="1215" cy="640" r="80"/></g>
           </svg>
           <svg id="bolt" viewBox="0 0 180 360" aria-hidden="true"><path d="M102 0 L28 196 L86 196 L52 360 L156 132 L96 132 L136 0 Z" fill="#FED111"/><path d="M106 18 L50 182 L100 182 L76 306 L138 146 L84 146 L118 18 Z" fill="#FFF6C2"/></svg>
         </div>
@@ -373,7 +377,7 @@
     <script>
       (function () {
         const TM = window.TM, $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
-        function split(el) { const txt = el.textContent; el.textContent = ""; return [...txt].map((ch) => { const m = document.createElement("span"); m.className = "m"; const c = document.createElement("span"); c.className = "c"; c.textContent = ch === " " ? " " : ch; m.appendChild(c); el.appendChild(m); return c; }); }
+        function split(el) { const txt = el.textContent; el.textContent = ""; return [...txt].map((ch) => { const m = document.createElement("span"); m.className = "m"; const c = document.createElement("span"); c.className = "c"; c.textContent = ch === " " ? "\u00a0" : ch; m.appendChild(c); el.appendChild(m); return c; }); }
         const mk = (tag, cls, parent, css) => { const e = document.createElement(tag); if (cls) e.className = cls; if (css) e.style.cssText = css; if (parent) parent.appendChild(e); return e; };
         for (let k = 0; k < 6; k++) { const b = document.createElement("div"); b.className = "bd"; b.style.top = (k * 320) + "px"; b.style.background = k % 2 ? "#26367A" : "#212C5F"; $("#bands").appendChild(b); }
         const mq = document.createElement("div"); mq.id = "mq"; mq.innerHTML = "MasterPajak <b>AI</b>&nbsp;—&nbsp;MasterPajak <b>AI</b>&nbsp;—&nbsp;MasterPajak <b>AI</b>"; $$("#bands .bd")[2].appendChild(mq);
@@ -469,7 +473,8 @@
         const NF = mk("div", "g3", P1); NF.id = "notaF"; gsap.set(NF, { x: PX - 140 + 20, y: -1.5, z: PZ + 80 + 75, rotationX: 90, rotationZ: -14 });
         const nfp = mk("div", "pl", NF, "left:-90px; top:0px; width:180px; height:96px; overflow:hidden;");
         nfp.innerHTML = `<div class="nota" style="left:0; top:-164px; position:absolute"><b>NOTA</b><i></i><i></i><i></i><i></i><em>Rp185.000</em></div>`;
-        const RG = PL("", P1, 300, 180, `translate3d(${PX - 120}px, -2px, ${PZ + 80 + 120}px) rotateX(90deg)`); RG.id = "ring";
+        const RGg = mk("div", "g3", P1); RGg.id = "ringG"; gsap.set(RGg, { x: PX - 120, y: -2, z: PZ + 80 + 120, rotationX: 90 });
+        mk("div", "pl", RGg, "left:-150px; top:-90px; width:300px; height:180px;").id = "ring";
 
         // ----- overlay rig: the falling order cards + the flying receipt -----
         const ITEMS = [["Kaos oversize ×2", 178000], ["Hijab voal ×3", 135000], ["Kemeja koko", 159000], ["Tas rajut", 89000], ["Sandal anyam", 75000], ["Mukena travel", 210000],
@@ -539,9 +544,9 @@
         INIT("#sect", { attr: { "stroke-dashoffset": 17.8 } }); INIT("#mnH", { attr: { transform: "rotate(330 100 100)" } });
         INIT(".nr", { opacity: 0 }); INIT("#qmP", { attr: { "stroke-dashoffset": 330 } }); INIT("#qmD", { opacity: 0 }); INIT("#qm", { opacity: 1 });
         INIT("#cvG", { rotationY: 0 }); INIT("#st1, #st2, #st3", { autoAlpha: 0 });
-        INIT("#notaA", { autoAlpha: 0 }); INIT("#notaF, #ring", { autoAlpha: 0 });
+        INIT("#notaA", { autoAlpha: 0 }); INIT("#notaF, #ringG", { autoAlpha: 0 });
         OC.forEach((g) => INIT(g, { autoAlpha: 0 }));
-        INIT("#ledG", { autoAlpha: 0 }); INIT("#chatG", { autoAlpha: 0 }); INIT(".lr .lin", {}); INIT(".lr .fl", { opacity: 0 }); INIT(".lr b.v, .lr .ic", { opacity: 0 }); INIT(".lr .ph", { opacity: 1 });
+        INIT("#ledG", { autoAlpha: 0 }); INIT("#chatG", { autoAlpha: 0 }); INIT(".lr .fl", { opacity: 0 }); INIT(".lr b.v, .lr .ic", { opacity: 0 }); INIT(".lr .ph", { opacity: 1 });
         INIT(".chip, .ntc", { autoAlpha: 0 }); INIT("#ltot", { opacity: 0.35 }); INIT("#qB, #dots, #aB, #srcR", { autoAlpha: 0 }); INIT("#solGlow", { opacity: 0 });
         $$("#bands .bd").forEach((b, k) => INIT(b, { x: k % 2 ? 1100 : -1100 }));
         INIT("#disc", { scale: 0, transformOrigin: "50% 50%" }); INIT("#beam", { rotation: -58, scaleX: 0, scaleY: 1, transformOrigin: "0% 50%" });
@@ -557,28 +562,48 @@
           F(c.pan, { x: -a.fx, y: -a.fy, z: -a.fz }, { x: -b.fx, y: -b.fy, z: -b.fz, duration: d, ease: ease || "sine.inOut" }, t0);
         };
         window.KCAM = { K, camSet, C1 };
-        const KW0 = K(470, 1130, 0, -450, 0, -21, -23, -1000), KW1 = K(470, 1120, 20, -450, 0, -20, -21, -880);
+        const KW0 = K(470, 1150, 0, -450, 0, -21, -23, -900), KW1 = K(470, 1140, 20, -450, 0, -20, -21, -790);
         const KP0 = K(470, 1080, 230, -330, -150, -17, -19, -380), KP1 = K(470, 1080, 220, -330, -150, -16, -16, -330);
-        const KS0 = K(520, 1140, -200, -470, -230, -12, -12, 80), KS1 = K(520, 1140, -210, -470, -230, -11, -10, 130);
-        const KH0 = K(520, 1110, -170, -640, -280, -6, -8, 40), KH1 = K(520, 1110, -150, -650, -280, -6, -6, 80), KH2 = K(560, 1060, -60, -700, -300, -5, -9, 160);
+        const KN0 = K(470, 1150, -120, -430, -230, -14, -14, 160), KN1 = K(470, 1150, -110, -430, -230, -13, -12, 200);
+        const KM0 = K(480, 1140, -20, -420, -150, -17, -18, -420), KM1 = K(480, 1140, -30, -420, -150, -16, -16, -380);
+        const KS0 = K(500, 1140, -200, -470, -230, -12, -12, 80), KS1 = K(500, 1140, -210, -470, -230, -11, -10, 130);
+        const KH0 = K(490, 1110, -170, -640, -280, -6, -8, 40), KH1 = K(490, 1110, -150, -650, -280, -6, -6, 80), KH2 = K(530, 1060, -60, -700, -300, -5, -9, 160);
         camSet(C1, KW0);
         cam(C1, KW0, KW1, 0, TM.paket - 0.35, "power1.inOut");
         cam(C1, KW1, KP0, TM.paket - 0.35, 0.9, "power2.inOut");
-        cam(C1, KP0, KP1, TM.paket + 0.55, TM.sepi - TM.paket - 0.55, "none");
-        cam(C1, KP1, KS0, TM.sepi + 0.35, 1.1, "power2.inOut");
-        cam(C1, KS0, KS1, TM.sepi + 1.45, TM.kunci - TM.sepi - 1.6, "none");
+        cam(C1, KP0, KP1, TM.paket + 0.55, TM.catat - 0.3 - TM.paket - 0.55, "none");
+        cam(C1, KP1, KN0, TM.catat - 0.3, 0.8, "power2.inOut");
+        cam(C1, KN0, KN1, TM.catat + 0.5, TM.sepi - TM.catat - 0.45, "none");
+        cam(C1, KN1, KM0, TM.sepi + 0.05, 0.8, "power2.inOut");
+        cam(C1, KM0, KM1, TM.sepi + 0.85, TM.pikir - 0.3 - TM.sepi - 0.85, "none");
+        cam(C1, KM1, KS0, TM.pikir - 0.3, 0.85, "power2.inOut");
+        cam(C1, KS0, KS1, TM.pikir + 0.55, TM.kunci - TM.pikir - 0.7, "none");
         cam(C1, KS1, KH0, TM.kunci - 0.15, 1.0, "power2.inOut");
         cam(C1, KH0, KH1, TM.kunci + 0.85, TM.lima - TM.kunci - 0.95, "none");
         cam(C1, KH1, KH2, TM.lima - 0.1, 0.9, "power2.inOut");
         const CUTB = TM.sol + 0.15;   // brand scene switch (the band sweep covers it)
-        cam(C1, KH2, K(560, 1060, -50, -705, -300, -5, -10, 190), TM.lima + 0.8, CUTB - TM.lima - 0.8, "none");
+        cam(C1, KH2, K(530, 1060, -50, -705, -300, -5, -10, 190), TM.lima + 0.8, CUTB - TM.lima - 0.8, "none");
 
         // ----- S1 · hook: the storm pours order cards into the room; each card that lands becomes a parcel -----
         // the storm cloud + rain (screen space), slow drift; lightning on "badai"
         F("#cloud", { x: 0, y: 0 }, { x: -40, y: 10, duration: TM.sepi, ease: "sine.inOut" }, 0);
         F("#rain", { backgroundPosition: "0px 0px" }, { backgroundPosition: "-420px 1830px", duration: TM.sepi + 0.8, ease: "none" }, 0);
         F("#wrain", { backgroundPosition: "0px 0px" }, { backgroundPosition: "-240px 1040px", duration: TM.sepi + 0.2, ease: "none" }, 0);
-        WMS.forEach((e, k) => F(e, { y: -60, x: 0 }, { y: 400, x: 40, duration: 1.15, ease: "none", repeat: Math.ceil(TM.sepi / 1.15) + 1 }, (k * 0.37) % 1.15));
+        WMS.forEach((e, k) => { const st = (k * 0.37) % 1.15; F(e, { y: -60, x: 0 }, { y: 400, x: 40, duration: 1.15, ease: "none", repeat: Math.floor((TM.kunci - 0.1 - st) / 1.15) - 1 }, st); });
+        // dense storm: 16 screen-space order cards falling from under the cloud at three depths, until the storm passes
+        const SCN = 16, SCD = Array.from({ length: SCN }, () => mk("div", "sc", $("#scards")));
+        const SEND = TM.sepi - 0.25;
+        SCD.forEach((e, k) => {
+          const dep = [0.55, 0.8, 1.15][k % 3], d = 1.9 / dep * (0.85 + rnd() * 0.3), x0 = 60 + ((k * 389) % 960), drift = (140 + rnd() * 160) * dep;
+          const yA = 470 + rnd() * 80, yB = 2000, r0 = -40 + rnd() * 80, r1 = r0 + (rnd() < 0.5 ? -1 : 1) * (120 + rnd() * 140), ph = (k * 0.618) % 1;
+          const a0 = -40 + rnd() * 40, a1 = a0 + 220;
+          INIT(e, { x: x0 + drift * ph, y: yA + (yB - yA) * ph, rotation: r0 + (r1 - r0) * ph, rotationX: a0 + (a1 - a0) * ph, transformPerspective: 700, scaleX: dep, scaleY: dep, opacity: dep < 0.7 ? 0.75 : 1 });
+          const t1 = d * (1 - ph);
+          F(e, { x: x0 + drift * ph, y: yA + (yB - yA) * ph, rotation: r0 + (r1 - r0) * ph, rotationX: a0 + (a1 - a0) * ph }, { x: x0 + drift, y: yB, rotation: r1, rotationX: a1, duration: t1, ease: "none" }, 0);
+          const n = Math.floor((SEND - t1) / d);
+          if (n > 0) F(e, { x: x0, y: yA, rotation: r0, rotationX: a0 }, { x: x0 + drift, y: yB, rotation: r1, rotationX: a1, duration: d, ease: "none", repeat: n - 1 }, t1);
+          hide(e, t1 + Math.max(0, n) * d);
+        });
         const FL = (t, a) => { F("#flash", { opacity: 0 }, { opacity: a, duration: 0.05, ease: "power2.out" }, t); F("#flash", { opacity: a }, { opacity: 0, duration: 0.32, ease: "power2.in" }, t + 0.06);
           F("#wfl", { opacity: 0 }, { opacity: 0.85, duration: 0.05 }, t); F("#wfl", { opacity: 0.85 }, { opacity: 0, duration: 0.3 }, t + 0.06);
           F("#cglow", { opacity: 0 }, { opacity: 1, duration: 0.05 }, t); F("#cglow", { opacity: 1 }, { opacity: 0, duration: 0.45 }, t + 0.06); };
@@ -636,9 +661,9 @@
         F("#notaA", NB1, Object.assign({}, NB2, { duration: 0.32, ease: "power2.in" }), TM.nota - 0.25);
         F("#notaA", { z: NB2.z }, { z: NB2.z - 54, duration: 0.3, ease: "power2.out" }, TM.nota + 0.08);
         hide("#notaA", TM.nota + 0.39); show("#notaF", TM.nota + 0.39);
-        show("#ring", TM.nyelip); F("#ring", { scaleX: 0.4, scaleY: 0.4, opacity: 0 }, { scaleX: 1, scaleY: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" }, TM.nyelip);
+        show("#ringG", TM.nyelip); F("#ring", { scaleX: 0.4, scaleY: 0.4, opacity: 0 }, { scaleX: 1, scaleY: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" }, TM.nyelip);
         F("#ring", { rotation: 0 }, { rotation: 40, duration: 2.2, ease: "none" }, TM.nyelip);
-        F("#ring", { opacity: 1 }, { opacity: 0, duration: 0.3 }, TM.tunda + 0.2); hide("#ring", TM.tunda + 0.55);
+        F("#ring", { opacity: 1 }, { opacity: 0, duration: 0.3 }, TM.tunda + 0.2); hide("#ringG", TM.tunda + 0.55);
         // "catatannya ditunda terus": sticky notes slap onto the closed notebook
         RISE(CA, TM.catat - 0.1, 0.022, 0.4); RISE(CB1, TM.tunda - 0.12, 0.03, 0.42); RISE(CB2, TM.terus - 0.1, 0.03, 0.42); HL("#cBh", TM.tunda + 0.25, 0.32);
         [["#st1", TM.tunda - 0.05, -9], ["#st2", TM.tunda + 0.33, 7], ["#st3", TM.terus + 0.12, -4]].forEach(([s, t, r]) => {
@@ -647,16 +672,16 @@
 
         // ----- S3 · "begitu sepi, baru kepikiran: untungnya berapa?" -----
         // the storm passes: cloud lifts away, rain stops, the window clears; the parcels ship out to the right
-        F("#storm", { y: 0 }, { y: -900, duration: 1.0, ease: "power2.in" }, TM.sepi - 0.05); hide("#storm", TM.sepi + 1.0);
+        F("#storm", { y: 0 }, { y: -900, duration: 0.75, ease: "power2.in" }, TM.sepi - 0.3); hide("#storm", TM.sepi + 0.5);
         F("#wclr", { opacity: 0 }, { opacity: 1, duration: 0.6 }, TM.sepi + 0.1);
         F("#wms", { opacity: 1 }, { opacity: 0, duration: 0.3 }, TM.sepi + 0.1);
         F("#wrain", { opacity: 0.55 }, { opacity: 0, duration: 0.4 }, TM.sepi + 0.1);
         BOX.forEach(([dx, dz, lv], k) => { const t = TM.sepiW - 0.1 + (3 - lv) * 0.06 + (k % 3) * 0.05;
           F("#bx" + k, { x: dx }, { x: dx + 1500, duration: 0.6, ease: "power2.in" }, t); hide("#bx" + k, t + 0.62); });
         hide("#notaF", TM.sepiW + 0.6);
-        RISE(SA, TM.sepi - 0.05, 0.015, 0.4); RISE(SB, TM.untung - 0.1, 0.025, 0.45); RISE(SC, TM.berapa - 0.12, 0.03, 0.45); HL("#sCh", TM.berapa + 0.3, 0.35);
+        RISE(SA, TM.sepi + 0.15, 0.015, 0.4); RISE(SB, TM.untung - 0.1, 0.025, 0.45); RISE(SC, TM.berapa - 0.12, 0.03, 0.45); HL("#sCh", TM.berapa + 0.3, 0.35);
         // the notebook opens on an empty page; a big "?" is drawn
-        F("#cvG", { rotationY: 0 }, { rotationY: -180, duration: 0.7, ease: "power2.inOut" }, TM.pikir + 0.05);
+        F("#cvG", { rotationY: 0 }, { rotationY: -180, duration: 0.7, ease: "power2.inOut" }, TM.pikir + 0.3);
         F("#qmP", { attr: { "stroke-dashoffset": 330 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.45, ease: "power1.inOut" }, TM.berapa - 0.1);
         F("#qmD", { opacity: 0 }, { opacity: 1, duration: 0.1 }, TM.berapa + 0.35);
         SINK([...SA, ...SB, ...SC], TM.kunci - 0.2, 0.3); F("#sCh", { backgroundSize: "100% 72%" }, { backgroundSize: "0% 72%", duration: 0.2 }, TM.kunci - 0.2); hide("#spT", TM.kunci + 0.15);
@@ -671,7 +696,6 @@
         FL(TM.kunci + 1.4, 0); FL(TM.lima + 0.4, 0);
         CARDS.forEach((c) => { if (c.g) { F(c.g, { opacity: 1 }, { opacity: 0, duration: 0.3 }, TM.kunci - 0.15); hide(c.g, TM.kunci + 0.2); } });
         F("#qm", { opacity: 1 }, { opacity: 0, duration: 0.3 }, TM.kunci + 0.2);
-        F("#il1", { opacity: 1 }, { opacity: 1, duration: 0.01 }, TM.kunci);
         RISE(KA, TM.kunci - 0.05, 0.02, 0.4); RISE(KB1, TM.catat2 - 0.1, 0.025, 0.42); RISE(KB2, TM.tiap - 0.1, 0.025, 0.42); RISE(KC, TM.bentar - 0.1, 0.022, 0.42);
         HL("#kBh", TM.hari + 0.15, 0.35);
         F("#wk", { autoAlpha: 0, y: -30 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }, TM.kunci + 0.3);
@@ -690,7 +714,6 @@
         show("#clkP", TM.menit - 0.05); F("#clkP", { scaleX: 0, scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.4, ease: "back.out(2.4)" }, TM.menit - 0.05);
         F("#sgA", { scaleX: 1 }, { scaleX: 0, duration: 0.14, ease: "power2.in" }, TM.tutup - 0.12); F("#sgB", { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "back.out(2)" }, TM.tutup + 0.02);
         F("#sign", { rotation: 0 }, { rotation: 5, duration: 0.18, ease: "sine.out", yoyo: true, repeat: 3 }, TM.tutup + 0.05);
-        F("#lglow", { opacity: 1 }, { opacity: 1, duration: 0.01 }, TM.toko);
 
         // ----- T · band sweep with the brand marquee (series) -----
         show("#bands", CUTB - 0.48);
@@ -719,7 +742,7 @@
           F(`#lr${k} .pj b, #lr${k} .pj .ic`, { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, t + 0.42);
           F(`#lr${k} .fl`, { opacity: 0 }, { opacity: 0.85, duration: 0.06 }, t + 0.4); F(`#lr${k} .fl`, { opacity: 0.85 }, { opacity: 0, duration: 0.45 }, t + 0.47); });
         // nota photos fly up from the robot's side into the Modal & biaya cells on "unggah foto nota"
-        NT.forEach((c, k) => { const t = TM.foto - 0.25 + k * 0.13, x1 = 840 - 28 - 20 - 300, y1 = cellY(k) - 18;
+        NT.forEach((c, k) => { const t = TM.foto - 0.25 + k * 0.13, x1 = 600, y1 = cellY(k) - 18;
           INIT(c, { x: -160 + k * 18, y: 900 - k * 10, rotation: 18 - k * 4, autoAlpha: 0, scaleX: 0.9, scaleY: 0.9 });
           show(c, t); F(c, { x: -160 + k * 18, y: 900 - k * 10, rotation: 18 - k * 4 }, { x: x1, y: y1, rotation: -4, duration: 0.5, ease: "power2.out" }, t);
           F(c, { opacity: 1, scaleX: 0.9, scaleY: 0.9 }, { opacity: 0, scaleX: 0.5, scaleY: 0.5, duration: 0.14, ease: "power2.in" }, t + 0.48); hide(c, t + 0.64);

@@ -96,7 +96,7 @@
       .bico svg { width: 60px; height: 60px; }
       .bval { position: relative; height: 74px; margin-top: 22px; }
       .bval span { position: absolute; left: 0; right: 0; top: 0; text-align: center; font: 800 62px/74px Rubik; color: var(--navy); white-space: nowrap; }
-      .bval span.z { color: #8E99C2; }
+      .bval span.z { color: #7A8399; }
       .bpan > .ilus { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); }
       .stamp { position: absolute; left: 50%; top: 150px; width: 272px; margin-left: -136px; padding: 12px 10px 10px; border: 6px solid var(--coral); border-radius: 16px; text-align: center;
                font: 800 28px/1.08 Rubik; letter-spacing: .06em; color: var(--coral); background: rgba(255,255,255,.88); white-space: nowrap; transform: rotate(-9deg); }
@@ -404,20 +404,21 @@
         const SWAP = (list, i, at) => list.forEach((s, j) => tl.set(s, { autoAlpha: j === i ? 1 : 0 }, at));   // show value i of a stacked counter
         tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: TM.total, ease: "steps(" + Math.round(TM.total * 15) + ")", immediateRender: false }, 0);
 
-        // ---- initial states, pinned on the timeline at 0 (the renderer can seek before the first frame) ----
+        // ---- initial states: applied now (a fresh paused timeline seeked to 0 renders nothing) AND pinned on the timeline at 0 (backward seeks) ----
+        const PIN = (sel, v) => { gsap.set(sel, v); tl.set(sel, v, 0); };
         const GV = [0, 1, 2, 3, 4].map((i) => "#gv" + i), PC = [0, 1].map((i) => "#pc" + i);
-        tl.set("#c1, #c2, #c4, #c4c, #c5, #c6, #cw1, #cb1, #cb2, #cw3, #cb3", { autoAlpha: 1 }, 0);
-        tl.set("#bd1, #bd2, #bd3", { rotationX: 90, autoAlpha: 0 }, 0); tl.set("#bd0", { rotationX: 0, autoAlpha: 1 }, 0);
-        tl.set("#ln1, #ln2, #ln3", { scaleY: 0, autoAlpha: 0 }, 0); tl.set("#ln0", { scaleY: 1, autoAlpha: 1 }, 0);
-        tl.set("#jm0, #jm1, #jm2, #jm3", { opacity: 0 }, 0); tl.set("#bh0", { yPercent: -100 }, 0);
-        tl.set("#gate", { x: -760, y: -620, autoAlpha: 0 }, 0); tl.set("#gfill, #gglow", { opacity: 0.35 }, 0);
-        tl.set("#st1, #st2, #st3, #naik, #tetap", { autoAlpha: 0, scaleX: 1, scaleY: 1 }, 0); tl.set("#gfl, #c5arr", { opacity: 0 }, 0);
-        tl.set("#bv1, #bv2, #bv3", { autoAlpha: 0 }, 0); tl.set("#bz1, #bz2, #bz3", { autoAlpha: 1 }, 0);
-        SWAP(GV, 0, 0); SWAP(PC, 0, 0);
-        tl.set("#gNd", { rotation: -90 }, 0); tl.set("#gArc", { strokeDashoffset: 502.65 }, 0); tl.set(".ribs", { x: 0 }, 0);
-        tl.set("#led, .mini", { autoAlpha: 0 }, 0); tl.set(".lrow .lin", { opacity: 0, x: -30 }, 0); tl.set(".lrow .kd", { opacity: 0, scaleX: 0.6, scaleY: 0.6, transformOrigin: "0% 50%" }, 0);
-        tl.set("#lfoot", { opacity: 0, y: 30 }, 0); tl.set("#ls27", { opacity: 0 }, 0);
-        $$("#pan1b .tf, #pan1b .tb").forEach((e) => tl.set(e, { opacity: 1 }, 0));
+        PIN("#c1, #c2, #c4, #c4c, #c5, #c6, #cw1, #cb1, #cb2, #cw3, #cb3", { autoAlpha: 1 });
+        PIN("#bd1, #bd2, #bd3", { rotationX: 90, autoAlpha: 0 }); PIN("#bd0", { rotationX: 0, autoAlpha: 1 });
+        PIN("#ln1, #ln2, #ln3", { scaleY: 0, autoAlpha: 0 }); PIN("#ln0", { scaleY: 1, autoAlpha: 1 });
+        PIN("#jm0, #jm1, #jm2, #jm3", { opacity: 0 }); PIN("#bh0", { yPercent: -100 });
+        PIN("#gate", { x: -760, y: -620, autoAlpha: 0 }); PIN("#gfill, #gglow", { opacity: 0.35 });
+        PIN("#st1, #st2, #st3, #naik, #tetap", { autoAlpha: 0, scaleX: 1, scaleY: 1 }); PIN("#gfl, #c5arr", { opacity: 0 });
+        PIN("#bv1, #bv2, #bv3", { autoAlpha: 0 }); PIN("#bz1, #bz2, #bz3", { autoAlpha: 1 });
+        GV.forEach((s, j) => PIN(s, { autoAlpha: j === 0 ? 1 : 0 })); PC.forEach((s, j) => PIN(s, { autoAlpha: j === 0 ? 1 : 0 }));
+        PIN("#gNd", { rotation: -90 }); PIN("#gArc", { strokeDashoffset: 502.65 }); PIN(".ribs", { x: 0 });
+        PIN("#led, .mini", { autoAlpha: 0 }); PIN(".lrow .lin", { opacity: 0, x: -30 }); PIN(".lrow .kd", { opacity: 0, scaleX: 0.6, scaleY: 0.6, transformOrigin: "0% 50%" });
+        PIN("#lfoot", { opacity: 0, y: 30 }); PIN("#ls27", { opacity: 0 });
+        $$("#pan1b .tf, #pan1b .tb").forEach((e) => PIN(e, { opacity: 1 }));
 
         // ---- camera rig: key = anchor on screen (ax, ay), focus point (fx, fy, fz), tilt rx, orbit ry, dolly z ----
         const K = (ax, ay, fx, fy, fz, rx, ry, z) => ({ ax, ay, fx, fy, fz, rx, ry, z });
@@ -464,7 +465,7 @@
         const TY = -BH;
         TOK.forEach((t, i) => {
           const id = "#tk" + i;
-          tl.set(id, { x: t.x + DH, y: TY, z: BZ, rotationY: 0, rotationZ: 0, scaleX: 1, scaleY: 1, autoAlpha: 1 }, 0);
+          PIN(id, { x: t.x + DH, y: TY, z: BZ, rotationY: 0, rotationZ: 0, scaleX: 1, scaleY: 1, autoAlpha: 1 });
           F(id, { x: t.x + DH }, { x: t.x + 70, duration: TM.eh + 0.02, ease: "none" }, 0);
           F(id, { x: t.x + 70 }, { x: t.x, duration: 0.3, ease: "power2.out" }, TM.eh + 0.02);
           F(id, { rotationZ: 0 }, { rotationZ: -11, duration: 0.12, ease: "power2.out" }, TM.eh + 0.04 + i * 0.015);
@@ -478,10 +479,10 @@
         F("#gNd", { rotation: -90 }, { rotation: -62, duration: 0.5, ease: "power2.out" }, TM.omz - 0.05);
         F("#gNd", { rotation: -62 }, { rotation: -90, duration: 0.6, ease: "power2.inOut" }, TM.omz + 0.5);
         F("#bd0", { y: 0 }, { y: -16, duration: 0.18, ease: "power2.out" }, TM.omz - 0.05); F("#bd0", { y: -16 }, { y: 0, duration: 0.4, ease: "bounce.out" }, TM.omz + 0.13);
-        SINK([...HOOK.flat()], TM.eh - 0.05, 0.28); HLOFF("#c1ch", TM.eh - 0.05); hide("#c1", TM.eh + 0.3);
+        SINK([...HOOK.flat()], TM.eh - 0.16, 0.24); HLOFF("#c1ch", TM.eh - 0.16); hide("#c1", TM.eh + 0.3);
 
         // S2 · "Eh, tunggu. Nggak semua uang masuk itu penjualan.": belt stopped, the side lanes draw back toward the wall, junction marks light
-        RISE(C2[0], TM.eh + 0.05, 0.03, 0.4); RISE(C2[1], TM.ngk - 0.05, 0.016, 0.42); RISE(C2[2], TM.jual - 0.25, 0.02, 0.4); RISE(C2[3], TM.jual - 0.1, 0.02, 0.42);
+        RISE(C2[0], TM.eh + 0.1, 0.03, 0.4); RISE(C2[1], TM.ngk - 0.05, 0.016, 0.42); RISE(C2[2], TM.jual - 0.25, 0.02, 0.4); RISE(C2[3], TM.jual - 0.1, 0.02, 0.42);
         HL("#c2ch", TM.jual + 0.55, 0.38);
         [1, 2, 3].forEach((k, j) => { show("#ln" + k, TM.ngk + 0.2 + j * 0.12); F("#ln" + k, { scaleY: 0 }, { scaleY: 1, duration: 0.6, ease: "power2.out" }, TM.ngk + 0.2 + j * 0.12); });
         [0, 1, 2, 3].forEach((k, j) => F("#jm" + k, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, TM.ngk + 0.3 + j * 0.1));
@@ -534,11 +535,11 @@
         // captions: "Pinjaman = utang" / "Tambahan modal = setoran" -> "Bukan hasil jualan." + stamps on the three side boards
         RISE(C4[0], TM.pin2 - 0.05, 0.02, 0.4); RISE(C4[1], TM.utang - 0.05, 0.03, 0.4); HL("#c4ah", TM.utang + 0.3, 0.3);
         RISE(C4[2], TM.tm2 - 0.05, 0.016, 0.4); RISE(C4[3], TM.setor - 0.08, 0.03, 0.4); HL("#c4bh", TM.setor + 0.4, 0.32);
-        SINK([...C4.flat()], TM.bukan - 0.12, 0.28); HLOFF("#c4ah, #c4bh", TM.bukan - 0.12); hide("#c4", TM.bukan + 0.25);
-        RISE(C4C, TM.bukan + 0.0, 0.02, 0.42); HL("#c4ch", TM.hasil + 0.35, 0.42);
+        SINK([...C4.flat()], TM.bukan - 0.16, 0.24); HLOFF("#c4ah, #c4bh", TM.bukan - 0.16); hide("#c4", TM.bukan + 0.25);
+        RISE(C4C, TM.bukan + 0.1, 0.02, 0.42); HL("#c4ch", TM.hasil + 0.35, 0.42);
         [1, 2, 3].forEach((k, j) => { show("#st" + k, TM.bukan + 0.15 + j * 0.13); F("#st" + k, { scaleX: 2.2, scaleY: 2.2, rotation: -24, opacity: 0 }, { scaleX: 1, scaleY: 1, rotation: -9, opacity: 1, duration: 0.3, ease: "power3.in" }, TM.bukan + 0.15 + j * 0.13);
           F("#bd" + k, { y: 0 }, { y: 9, duration: 0.07 }, TM.bukan + 0.45 + j * 0.13); F("#bd" + k, { y: 9 }, { y: 0, duration: 0.3, ease: "back.out(3)" }, TM.bukan + 0.52 + j * 0.13); });
-        SINK(C4C, TM.kalau - 0.1, 0.28); HLOFF("#c4ch", TM.kalau - 0.1); hide("#c4c", TM.kalau + 0.25);
+        SINK(C4C, TM.kalau - 0.16, 0.24); HLOFF("#c4ch", TM.kalau - 0.16); hide("#c4c", TM.kalau + 0.25);
 
         // S5 · the wrong lane: the three non-sales tokens jump out of their boards onto the penjualan board, the gauge leaps 12 -> 27 jt
         const WR = [[1, TM.hit - 0.12], [2, TM.hit + 0.12], [3, TM.hit + 0.36]];
@@ -567,10 +568,10 @@
         for (let j = 0; j < 5; j++) F("#bd0", { rotationZ: j % 2 ? 1.6 : -1.6 }, { rotationZ: j % 2 ? -1.6 : 1.6, duration: 0.06, ease: "none" }, TM.naik + j * 0.06);
         F("#bd0", { rotationZ: 1.6 }, { rotationZ: 0, duration: 0.1 }, TM.naik + 0.3);
         show("#naik", TM.naik + 0.02); POP("#naik", TM.naik + 0.02, 0.38, "back.out(2.6)", 12);
-        RISE(C5[0], TM.kalau - 0.05, 0.016, 0.4); RISE(C5BL, TM.angka - 0.05, 0.022, 0.42);
+        RISE(C5[0], TM.kalau + 0.1, 0.016, 0.4); RISE(C5BL, TM.angka - 0.05, 0.022, 0.42);
         F("#c5arr", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: "back.out(2)" }, TM.naik);
-        SINK([...C5.flat(), ...C5BL], TM.pdh - 0.12, 0.28); F("#c5arr", { opacity: 1 }, { opacity: 0, duration: 0.2 }, TM.pdh - 0.12); hide("#c5", TM.pdh + 0.2);
-        RISE(C6[0], TM.pdh - 0.02, 0.03, 0.4); RISE(C6[1], TM.jmu - 0.05, 0.022, 0.42); RISE(C6[2], TM.ngk2 - 0.08, 0.022, 0.42); HL("#c6bh", TM.ngk2 + 0.25, 0.4);
+        SINK([...C5.flat(), ...C5BL], TM.pdh - 0.16, 0.24); F("#c5arr", { opacity: 1 }, { opacity: 0, duration: 0.18 }, TM.pdh - 0.16); hide("#c5", TM.pdh + 0.2);
+        RISE(C6[0], TM.pdh + 0.1, 0.03, 0.4); RISE(C6[1], TM.jmu - 0.05, 0.022, 0.42); RISE(C6[2], TM.ngk2 - 0.08, 0.022, 0.42); HL("#c6bh", TM.ngk2 + 0.25, 0.4);
         F("#gfl", { opacity: 0 }, { opacity: 0.95, duration: 0.1 }, TM.jmu + 0.1); F("#gfl", { opacity: 0.95 }, { opacity: 0.45, duration: 0.5 }, TM.jmu + 0.2);
         show("#tetap", TM.ngk2 + 0.05); POP("#tetap", TM.ngk2 + 0.05, 0.4, "back.out(2.6)", -16);
 
@@ -601,8 +602,8 @@
         F("#ls27", { opacity: 0 }, { opacity: 1, duration: 0.3 }, TM.omu + 0.25);
         HL("#lfh", TM.asli + 0.05, 0.4);
         RISE(CW1, TM.sol + 0.15, 0.016, 0.4); RISE(CB1, TM.umsk - 0.05, 0.02, 0.42); RISE(CB2, TM.jenis - 0.05, 0.022, 0.42); UL("#ul1", TM.jenis + 0.6, 0.42);
-        SINK([...CW1, ...CB1, ...CB2], TM.biar - 0.12, 0.28); F("#ul1", { backgroundSize: "100% 9px" }, { backgroundSize: "0% 9px", duration: 0.25, ease: "power2.in" }, TM.biar - 0.12); hide("#cw1, #cb1, #cb2", TM.biar + 0.2);
-        RISE(CW3, TM.biar - 0.02, 0.03, 0.4); RISE(CB3, TM.omu - 0.02, 0.022, 0.42); UL("#ul2", TM.asli + 0.1, 0.42);
+        SINK([...CW1, ...CB1, ...CB2], TM.biar - 0.16, 0.24); F("#ul1", { backgroundSize: "100% 9px" }, { backgroundSize: "0% 9px", duration: 0.22, ease: "power2.in" }, TM.biar - 0.16); hide("#cw1, #cb1, #cb2", TM.biar + 0.2);
+        RISE(CW3, TM.biar + 0.1, 0.03, 0.4); RISE(CB3, TM.omu - 0.02, 0.022, 0.42); UL("#ul2", TM.asli + 0.1, 0.42);
 
         // T · beam flood + iris (series)
         show("#beamwrap", TM.end - 0.52);
@@ -639,8 +640,6 @@
         });
         tl.eventCallback("onUpdate", () => { if (window.ROBOT_APPLY) window.ROBOT_APPLY(tl.time()); });
         (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
-        // apply the timeline's own t = 0 state now: a fresh paused timeline seeked to 0 would otherwise skip the time-0 pins (tokens at the origin)
-        tl.render(0.001, true); tl.render(0, true, true);
         window.__timelines = window.__timelines || {}; window.__timelines["main"] = tl;
       })();
     </script>

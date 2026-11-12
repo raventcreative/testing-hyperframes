@@ -223,19 +223,19 @@
   .r16-st svg { width: 19px; height: 19px; display: block; }
   /* employee ID cards (main + two behind, a hint of a team) */
   .r16-id { left: 170px; top: 376px; width: 740px; height: 468px; transform-origin: 50% 100%; font-family: Poppins, sans-serif; }
-  .r16-id .hd { position: absolute; left: 0; top: 0; width: 740px; height: 74px; border-radius: 32px 32px 0 0; background: linear-gradient(135deg, #0a0d2c, #294b77); }
+  .r16-id .hd { position: absolute; left: 0; top: 0; width: 740px; height: 74px; border-radius: 32px 32px 0 0; background-color: #1a2c51; background-image: linear-gradient(135deg, #0a0d2c, #294b77); }
   .r16-id .hd b { position: absolute; left: 34px; top: 0; font: 700 18px/74px Poppins, sans-serif; letter-spacing: .2em; color: #ffffff; white-space: nowrap; }
   .r16-id .hd .hi { position: absolute; left: 34px; top: 23px; width: 28px; height: 28px; color: #8fd8ff; }
   .r16-id .hd .hi svg { width: 28px; height: 28px; display: block; }
   .r16-id .hd b.t { left: 76px; }
-  .r16-id .hd i { position: absolute; right: 26px; top: 21px; height: 32px; padding: 0 14px; border-radius: 16px; background: rgba(255,255,255,.14); font: 700 13px/32px Poppins, sans-serif;
+  .r16-id .hd i { position: absolute; right: 26px; top: 21px; height: 32px; padding: 0 14px; border-radius: 16px; background-color: #3a4a6c; font: 700 13px/32px Poppins, sans-serif;
     letter-spacing: .14em; color: rgba(227,237,250,.9); font-style: normal; white-space: nowrap; }
   .r16-bk { opacity: .9; }
-  .r16-bk .hd { background: linear-gradient(135deg, #3b4f74, #5a7099); }
+  .r16-bk .hd { background-color: #44587e; background-image: linear-gradient(135deg, #3b4f74, #5a7099); }
   .r16-id-nm { left: 274px; top: 104px; font: 700 40px/50px Poppins, sans-serif; white-space: nowrap; letter-spacing: -.01em; }
   .r16-id-sb { left: 276px; top: 154px; font: 400 18px/26px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
   .r16-rw { position: absolute; left: 276px; width: 430px; height: 80px; }
-  .r16-rw .lb { position: absolute; left: 0; top: 0; font: 700 14px/20px Poppins, sans-serif; letter-spacing: .16em; color: #7b8aa6; white-space: nowrap; }
+  .r16-rw .lb { position: absolute; left: 0; top: 0; font: 700 14px/20px Poppins, sans-serif; letter-spacing: .16em; color: #5d6f8f; white-space: nowrap; }
   .r16-rw .sk { position: absolute; left: 0; top: 30px; width: 300px; height: 22px; border-radius: 11px; background: linear-gradient(90deg, #e9eef7, #f3f6fb, #e9eef7); }
   .r16-rw .vl { position: absolute; left: 0; top: 24px; height: 44px; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
   .r16-ch { height: 44px; padding: 0 18px 0 44px; border-radius: 22px; background: #fff1ea; box-shadow: inset 0 0 0 1.5px #ffd2bd; font: 700 19px/44px Poppins, sans-serif; color: #a23e14; position: relative; }

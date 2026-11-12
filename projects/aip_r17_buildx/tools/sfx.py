@@ -1,7 +1,8 @@
-"""Synthesised SFX bed for the R9 YOUTUBE reel (adapted from the R3 DESAINER bed) (no samples, no downloads): job chips piling up,
-Claude flare + 11 tiles dealt, repo header + tiles sucked in + check stamps, header flaps, hook typing + formula reel + score bars,
-title/thumbnail pop + link, strike/cut ticks, comment sort, week board, radar + result sort, terminal paste/typing, the CTA. Deterministic.
-Run: python3 tools/sfx.py ."""
+"""Synthesised SFX bed for the R17 BUILDX reel (adapted from the R13 TRADER / R9 YOUTUBE beds; no samples, no downloads): to-do cards
+cloning + sticker, the kit frame, scissors snipping the gates, parts assembling + typing, repo header + README marker, the GitHub-stars
+bars, counter roll + step nodes + blueprint cards, CV pile + "CV KAMU" + badge, the cutaway lid + internals scan, the tutor chat
+(typing, dots, answer), the KODE JADI stamp, the Learning terminal + TODO(human) typing, the CTA. Deterministic.
+Run: python3 -I tools/sfx.py ."""
 import json, sys, wave
 from pathlib import Path
 import numpy as np
@@ -123,97 +124,106 @@ def typing(t0, t1, gain=0.11, rate=16):
 W = 0.15
 st = lambda i: S[i]["start"]
 
-def wt2(txt, after=0.0):
+def wt_(txt, after=0.0):
     v = wt(txt, after)
     if v is None: raise SystemExit("word not found " + txt)
     return v
-wt_ = wt2
-# --- s01 hook: creator + 7 job chips, shake, collapse, Claude disc, 11 tiles, glow run
-put(0.02, rise(0.6, 300, 1200), 0.05); put(0.05, pop(500, 900, 0.08), 0.1)
-for k in range(7): put(wt_("Ngurus") - 0.1 + k * 0.16, pop(700 + 70 * k, 1100 + 70 * k, 0.07), 0.1)
-put(wt_("sendirian?") + 0.02, buzz(0.3), 0.05); put(wt_("sendirian?") + 0.05, boom(0.35, 150, 70), 0.18)
-put(wt_("Sebelas") - 0.3, whoosh(0.35, 2400, 500, 1.4, 0.4), W * 0.7)
-for k in range(11): put(wt_("Sebelas") + 0.04 + k * 0.07, tick(0.018, 2400 + 90 * k), 0.07)
-put(wt_("Claude") - 0.1, chime((1046, 1318, 1568), 1.1), 0.07); put(wt_("Claude") + 0.02, pop(900, 500, 0.1), 0.1)
-put(wt_("gratis") - 0.04, pop(800, 1300, 0.08), 0.13); put(wt_("gratis") + 0.18, pop(900, 1400, 0.07), 0.1)
-put(wt_("naskah") - 0.06, chime((1568, 2093), 0.5), 0.05)
-for k in range(4): put(wt_("sampai") - 0.1 + k * 0.1, tick(0.016, 3000 + 200 * k), 0.06)
-put(wt_("viral.") - 0.08, chime((1318.5, 1760, 2637), 0.9), 0.06); put(wt_("viral.") - 0.06, pop(600, 1200, 0.09), 0.1)
-# --- s02 the pack: header drop, tiles sucked into the folder, 11 badge, three check stamps, key strike
-put(wt_("Namanya") - 0.1, whoosh(0.45, 2400, 600, 1.4, 0.45), W * 0.6); put(wt_("Namanya") + 0.4, flap(), 0.1)
-put(wt_("YouTube", 6) - 0.1, whoosh(0.7, 600, 3000, 1.3, 0.5), W * 0.5)
-for k in range(11): put(wt_("YouTube", 6) + 0.25 + k * 0.05, tick(0.014, 3600 - 60 * k), 0.05)
-put(wt_("Skill:") + 0.12, pop(500, 1000, 0.09), 0.14)
-for w, a in (("open", 8), ("daftar,", 9), ("key.", 10)): put(wt_(w, a) + (0.32 if w == "open" else (0.1 if w == "daftar," else -0.02)), boom(0.25, 180, 80), 0.16)
-for w, a in (("open", 8), ("tanpa", 9), ("tanpa", 9.5)): put(wt_(w, a) - 0.12, whoosh(0.3, 700, 2000, 1.4, 0.3), W * 0.4)
-put(wt_("API") + 0.02, scribble(0.2), 0.06)
-put(st("t1") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t1 /yt-script: flap, hook card, typing, reel spin + stop, score bars, verdict stamp, REC
+def out_whoosh(sid): put(st(sid) - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
+# --- s01 hook: board, cards clone (2), sticker, board out, kit pops, glow, scissors + snips, parts assemble, typing, result, stamp
+put(0.02, rise(0.6, 300, 1200), 0.05)
+for k, t in enumerate((wt_("to-do") - 0.12, wt_("app") - 0.06)):
+    put(t, whoosh(0.3, 700, 2200, 1.4, 0.4), W * 0.35); put(t + 0.28, pop(800 + 150 * k, 1300 + 150 * k, 0.07), 0.12)
+put(wt_("lagi?") - 0.02, square_blips([520, 520, 520, 520], 0.05), 0.035); put(wt_("lagi?") + 0.06, pop(600, 1000, 0.09), 0.14)
+put(wt_("Coba") - 0.16, whoosh(0.35, 2000, 600, 1.4, 0.35), W * 0.5)
+put(wt_("Coba") + 0.08, chime((1046, 1318, 1568), 0.8), 0.05); put(wt_("Coba") + 0.08, pop(500, 900, 0.09), 0.1)
+put(wt_("rakit"), rise(0.3, 600, 1400), 0.03)
+for k in range(3): put(wt_("Git") - 0.02 + k * 0.15, rip(0.08), 0.07); put(wt_("Git") + 0.0 + k * 0.15, tick(0.02, 3200), 0.12)
+put(wt_("versi") - 0.06, whoosh(0.45, 500, 1800, 1.3, 0.45), W * 0.4)
+for k in range(2): put(wt_("sendiri,") + 0.02 + k * 0.1, tick(0.02, 2600), 0.08)
+for k in range(3): put(wt_("sendiri,") + 0.12 + k * 0.08, pop(1000 + 120 * k, 1600 + 120 * k, 0.05), 0.08)
+typing(wt_("versi") + 0.12, wt_("versi") + 0.12 + 12 / 22, 0.09, 22)
+put(wt_("versi") + 0.12 + 12 / 22 + 0.12, chime((1318.5, 1760), 0.6), 0.045)
+put(wt_("nol.") - 0.08, boom(0.3, 150, 70), 0.16); put(wt_("nol.") - 0.06, pop(700, 1200, 0.09), 0.12)
+out_whoosh("s02")
+# --- s02 repo: header drop + flap, README card, marker, chips, leaderboard, bars, #1, date
+put(st("s02") + 0.02, whoosh(0.45, 2400, 600, 1.4, 0.45), W * 0.6); put(st("s02") + 0.32, flap(), 0.1)
+put(wt_("Panduannya") + 0.0, whoosh(0.35, 500, 1800, 1.4, 0.4), W * 0.4)
+put(wt_("gratis") - 0.04, pop(800, 1300, 0.08), 0.12)
+put(wt_("Build") - 0.06, scribble(0.65), 0.035)
+put(wt_("repo") - 0.12, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.45)
+for k in range(3): put(wt_("repo") + 0.04 + k * 0.08, tick(0.018, 3000 + 200 * k), 0.06)
+put(wt_("bintang") - 0.1, rise(0.7, 400, 1500), 0.035)
+put(wt_("terbanyak") - 0.02, chime((1318.5, 1760, 2637), 1.0), 0.06); put(wt_("terbanyak"), pop(700, 1200, 0.08), 0.12)
+put(wt_("saat") - 0.04, pop(900, 1500, 0.06), 0.08)
+out_whoosh("t1")
+# --- t1 isinya: flap, counter card, digits roll, step nodes, blueprint cards
 put(st("t1") + 0.02, flap(), 0.12)
-put(wt_("naskah", 11) - 0.2, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
-typing(wt_("naskah", 11) + 0.1, wt_("naskah", 11) + 1.75, 0.08, 18)
-for k in range(16): put(wt_("21") - 0.05 + 0.04 * k * (1 + k * 0.06), tick(0.016, 2600), 0.07)
-put(wt_("hook,") + 0.02, pop(700, 1200, 0.08), 0.14); put(wt_("hook,") + 0.12, chime((1568, 2093), 0.5), 0.04)
-for k in range(5): put(wt_("skor") - 0.05 + k * 0.07, rise(0.25, 500 + 80 * k, 1100 + 80 * k), 0.025)
-put(wt_("hook-nya") - 0.02, boom(0.3, 170, 80), 0.18); put(wt_("hook-nya"), pop(300, 140, 0.12), 0.15)
-put(wt_("rekaman.") - 0.08, square_blips([880, 1320]), 0.05)
-put(st("t2") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t2 /yt-package: flap, title pop + typing, thumbnail pop, link, outline, lint ticks
+put(wt_("Isinya") - 0.02, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.45)
+for k in range(14): put(wt_("ratusan") - 0.12 + k * 0.06, tick(0.012, 3400 + 60 * (k % 4)), 0.045)
+put(wt_("ratusan") + 0.8, pop(900, 1500, 0.07), 0.1)
+for k in range(5): put(wt_("step") - 0.08 + k * (wt_("step:") + 0.3 - wt_("step") + 0.08) / 4, square_blips([660 + 110 * k], 0.06), 0.045)
+for k, w in enumerate(("Git,", "Docker,", "database,", "sistem")):
+    put(wt_(w) - 0.14, whoosh(0.25, 600, 2000, 1.4, 0.4), W * 0.3); put(wt_(w) - 0.02, pop(700 + 120 * k, 1200 + 120 * k, 0.08), 0.12)
+put(wt_("operasi."), boom(0.25, 180, 80), 0.1)
+out_whoosh("t2")
+# --- t2 portofolio: flap, pile deals, highlights, sticker, CV KAMU, chips, pulse, badge
 put(st("t2") + 0.02, flap(), 0.12)
-put(wt_("judul") - 0.2, pop(600, 1000, 0.08), 0.12); typing(wt_("judul") - 0.02, wt_("judul") + 0.62, 0.07, 22)
-put(wt_("thumbnail") - 0.16, pop(500, 900, 0.09), 0.14); put(wt_("thumbnail") + 0.06, boom(0.22, 220, 110), 0.1)
-put(wt_("ditulis") - 0.06, chime((1318.5, 1760), 0.6), 0.05); put(wt_("ditulis") + 0.2, tick(0.03, 1800), 0.12)
-for k in range(3): put(wt_("sepasang.") + 0.1 + k * 0.1, pop(900 + 120 * k, 1500 + 120 * k, 0.05), 0.08)
-put(st("t3") - 0.2, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t3 /yt-edit: flap, transcript slide, 3 strikes (scissor snips), cut list, timecode run
+put(wt_("To-do") - 0.12, whoosh(0.35, 500, 1800, 1.4, 0.4), W * 0.4)
+for k in range(6): put(wt_("To-do") - 0.04 + k * 0.05, tick(0.02, 2400 + 120 * k), 0.07)
+for k in range(6): put(wt_("app", 17) - 0.06 + k * 0.06, tick(0.016, 1800), 0.06)
+put(wt_("pasaran.") + 0.02, pop(500, 800, 0.1), 0.13); put(wt_("pasaran.") + 0.04, buzz(0.18), 0.025)
+put(wt_("Git", 18) - 0.2, whoosh(0.45, 600, 2200, 1.3, 0.45), W * 0.5)
+put(wt_("rakitan") - 0.04, chime((1046, 1318.5), 0.6), 0.045)
+for k in range(9): put(wt_("rakitan") + 0.06 + k * 0.05 + (0.3 if k > 4 else 0), pop(1000 + 60 * k, 1600 + 60 * k, 0.04), 0.06)
+put(wt_("CV") - 0.04, pop(600, 900, 0.08), 0.08)
+put(wt_("beda.") - 0.06, chime((1318.5, 1760, 2637), 0.9), 0.06); put(wt_("beda.") - 0.06, pop(800, 1400, 0.08), 0.12)
+out_whoosh("t3")
+# --- t3 interview: flap, question, panel, typing, lid up, boxes, arrows, hashes, scan, note, pills
 put(st("t3") + 0.02, flap(), 0.12)
-put(wt_("transkrip") - 0.24, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
-for k in range(5): put(wt_("transkrip") - 0.06 + k * 0.06, tick(0.014, 3200), 0.05)
-for k in range(3): put(wt_("daftar", 20) + k * 0.22, rip(0.18), 0.05); put(wt_("daftar", 20) + k * 0.22 + 0.04, tick(0.03, 1500), 0.12)
-for k in range(3): put(wt_("edit,") - 0.1 + k * 0.12, pop(700 + 100 * k, 1200 + 100 * k, 0.06), 0.09)
-for k in range(8): put(wt_("timecode.") - 0.14 + k * 0.07, tick(0.014, 4200), 0.06)
-put(st("t4") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t4 /yt-comment: flap, comments cascade, sort whoosh, pin, reply typing
-put(st("t4") + 0.02, flap(), 0.12)
-for k in range(6): put(wt_("komentar") - 0.2 + k * 0.06, pop(800 + 60 * k, 1300 + 60 * k, 0.05), 0.08)
-put(wt_("dipilah,") - 0.06, whoosh(0.5, 600, 2400, 1.3, 0.45), W * 0.6)
-for k in range(4): put(wt_("dipilah,") + k * 0.07, tick(0.02, 2400 + 200 * k), 0.07)
-put(wt_("lalu", 24) + 0.12, pop(500, 900, 0.09), 0.12)
-typing(wt_("dibalas") + 0.06, wt_("dibalas") + 1.4, 0.08, 20); put(wt_("gaya") - 0.04, chime((1568, 2093), 0.5), 0.04)
-put(st("t5") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t5 /yt-plan: flap, board rise, 5 cards drop, hours bar fill, "muat"
-put(st("t5") + 0.02, flap(), 0.12)
-put(wt_("rencana") - 0.2, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
-for k in range(5): put((wt_("upload") - 0.08 if k == 0 else wt_("seminggu") - 0.04 + (k - 1) * 0.09) + 0.2, pop(300 + 40 * k, 160, 0.08), 0.13)
-put(wt_("waktu") - 0.2, rise(0.6, 400, 1300), 0.04); put(wt_("kamu.", 28.5) - 0.1, chime((1318.5, 1760, 2637), 0.8), 0.05)
-put(st("s07") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- s07 /yt-viral: flap, ribbon + sparkles, panel, radar pings, typing, results, bars, re-sort, formula chips
+put(wt_("interview,") - 0.16, pop(600, 1000, 0.09), 0.12)
+put(wt_("interview,") + 0.02, whoosh(0.35, 500, 1800, 1.4, 0.4), W * 0.4)
+typing(wt_("interview,") + 0.24, wt_("interview,") + 0.24 + 26 / 40, 0.08, 24)
+put(wt_("jelasin", 23) - 0.08, whoosh(0.4, 400, 2400, 1.2, 0.3), W * 0.5); put(wt_("jelasin", 23) - 0.06, rip(0.3), 0.04)
+for k in range(3): put(wt_("cara", 23.5) - 0.1 + k * 0.12, pop(800 + 150 * k, 1300 + 150 * k, 0.06), 0.11)
+for k in range(2): put(wt_("kerjanya") + 0.04 + k * 0.1, tick(0.02, 3000), 0.08)
+put(wt_("dari", 24.3) - 0.12, rise(0.6, 500, 2000), 0.035)
+for k in range(3): put(wt_("dari", 24.3) - 0.1 + k * 0.1, tick(0.02, 4200), 0.06)
+put(wt_("dalam,") - 0.04, pop(700, 1200, 0.07), 0.08)
+put(wt_("bukan") - 0.04, pop(600, 900, 0.08), 0.1); put(wt_("cuma") + 0.06, pop(900, 1500, 0.08), 0.12); put(wt_("cuma") + 0.1, chime((1568, 2093), 0.6), 0.04)
+out_whoosh("s06")
+# --- s06 tutor: flap, page, marker + "?", Claude panel, chime, swirl, typing, dots, answer, ID
+put(st("s06") + 0.02, flap(), 0.12)
+put(wt_("Tutorialnya") - 0.1, whoosh(0.35, 500, 1800, 1.4, 0.4), W * 0.4)
+put(wt_("Inggris?") - 0.24, scribble(0.4), 0.035); put(wt_("Inggris?") - 0.02, pop(500, 800, 0.09), 0.12)
+put(wt_("Jadiin") - 0.12, whoosh(0.4, 600, 2200, 1.3, 0.45), W * 0.45)
+put(wt_("Claude", 28) - 0.02, chime((1046, 1318, 1568), 0.9), 0.05)
+put(wt_("tutor:"), rise(0.35, 600, 1600), 0.035); put(wt_("tutor:") + 0.06, pop(800, 1300, 0.07), 0.1)
+typing(wt_("minta", 29) - 0.06, wt_("minta", 29) - 0.06 + 80 / 62, 0.08, 20)
+put(wt_("pakai", 31) - 0.04, pop(700, 1200, 0.08), 0.1)
+for k in range(5): put(wt_("pakai", 31) + 0.02 + k * 0.11, tick(0.016, 2800 + 100 * k), 0.05)
+put(wt_("Indonesia."), chime((1318.5, 1760), 0.6), 0.045)
+out_whoosh("s07")
+# --- s07 Learning: flap, request, X, strike, stamp, out, terminal + typing, result, editor, TODO, badge, typing, chip, header out
 put(st("s07") + 0.02, flap(), 0.12)
-put(wt_("seru,") - 0.12, chime((1318.5, 1760, 2637), 1.0), 0.07)
-for k in range(6): put(wt_("Paling") + 0.1 + k * 0.08, pop(1200 + 80 * k, 1800 + 80 * k, 0.04), 0.06)
-put(wt_("mesin") - 0.18, whoosh(0.5, 400, 1800, 1.2, 0.5), W * 0.6); put(wt_("mesin"), rumble(1.4), 0.03)
-for k in range(3): put(wt_("viral:") + 0.2 + k * 0.42, chime((2093,), 0.4), 0.035)
-typing(wt_("cari") - 0.04, wt_("cari") + 0.62, 0.08, 22)
-for k in range(4): put(wt_("niche") + 0.2 + k * 0.08, pop(600 + 60 * k, 1000 + 60 * k, 0.06), 0.09)
-for k in range(4): put(wt_("ngalahin") - 0.05 + k * 0.09, rise(0.5, 400 + 60 * k, 1500 + 60 * k), 0.03)
-put(wt_("rata-rata") - 0.04, pop(700, 1200, 0.08), 0.1)
-put(wt_("channel-nya") - 0.04, whoosh(0.5, 900, 2600, 1.4, 0.4), W * 0.5); put(wt_("sendiri,"), chime((1568, 2093), 0.6), 0.05)
-for k in range(4): put(wt_("rumus", 35) - 0.08 + k * 0.1, pop(900 + 100 * k, 1500 + 100 * k, 0.05), 0.08)
-put(st("s08") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- s08 setup: flap, terminal open, paste, typing, install blips, command + enter
-put(st("s08") + 0.02, flap(), 0.12)
-put(wt_("buka") - 0.12, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5); put(wt_("Code,") - 0.1, square_blips([660, 990]), 0.04)
-put(wt_("link") - 0.08, tick(0.04, 1600), 0.2); put(wt_("tempel"), pop(800, 1300, 0.07), 0.1)
-typing(wt_("minta") - 0.04, wt_("minta") + 0.72, 0.08, 22)
-put(wt_("install,") + 0.04, square_blips([880, 1100, 1320]), 0.04); put(wt_("terus", 40) - 0.02, chime((1568, 2093), 0.5), 0.05)
-typing(wt_("ketik") + 0.02, wt_("ketik") + 0.47, 0.09, 22); put(wt_("/yt-script.") + 0.12, tick(0.04, 1500), 0.2)
-put(wt_("/yt-script.") + 0.16, chime((1318.5, 1760, 2637), 0.8), 0.06)
-put(st("s09") - 0.42, whoosh(0.4, 2400, 700, 1.4, 0.4), W * 0.5); put(st("s09") - 0.3, pop(600, 1000, 0.08), 0.1)
-# --- s09 CTA
+put(st("s07") + 0.06, whoosh(0.35, 500, 1800, 1.4, 0.4), W * 0.4)
+put(wt_("Jangan") + 0.08, boom(0.3, 160, 70), 0.16); put(wt_("Jangan") + 0.12, buzz(0.22), 0.04)
+put(wt_("kode") - 0.04, rip(0.26), 0.06)
+put(wt_("jadi.") - 0.06, pop(500, 800, 0.09), 0.13)
+put(wt_("Pakai", 34) - 0.38, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
+put(wt_("Pakai", 34) - 0.12, whoosh(0.3, 500, 1800, 1.4, 0.4), W * 0.35)
+typing(wt_("Pakai", 34) + 0.06, wt_("Pakai", 34) + 0.06 + 22 / 30, 0.09, 22)
+put(wt_("Code:") - 0.04, chime((1318.5, 1760, 2637), 0.8), 0.05)
+put(wt_("Learning") - 0.04, whoosh(0.35, 500, 1800, 1.4, 0.4), W * 0.35)
+put(wt_("beberapa") - 0.06, pop(800, 1300, 0.07), 0.1); put(wt_("beberapa") + 0.06, pop(900, 1500, 0.06), 0.08)
+typing(wt_("kamu", 37) - 0.12, wt_("kamu", 37) - 0.12 + 38 / 52, 0.1, 24)
+put(wt_("sendiri.", 37.5) - 0.02, chime((1568, 2093), 0.6), 0.05); put(wt_("sendiri.", 37.5), pop(800, 1400, 0.07), 0.1)
+put(st("s08") - 0.3, whoosh(0.32, 2000, 600, 1.4, 0.35), W * 0.45)
+# --- s08 CTA
+put(st("s08") + 0.04, pop(600, 1000, 0.08), 0.1)
 put(wt_("Komen") - 0.06, whoosh(0.4, 600, 2000, 1.4, 0.5), W * 0.5)
-for k in range(7): put(wt_("YOUTUBE,") - 0.08 + k * 0.055, tick(0.022, 4200), 0.15)
-put(wt_("YOUTUBE,") + 0.44, pop(900, 1600, 0.1), 0.15)
-put(wt_("aku", 43) - 0.08, whoosh(0.7, 700, 3600, 1.2, 0.5), W); put(wt_("kirim") - 0.02, pop(600, 1000, 0.08), 0.1)
+for k in range(5): put(wt_("RAKIT,") - 0.08 + k * 0.06, tick(0.022, 4200), 0.15)
+put(wt_("RAKIT,") + 0.4, pop(900, 1600, 0.1), 0.15)
+put(wt_("aku", 39) - 0.08, whoosh(0.7, 700, 3600, 1.2, 0.5), W); put(wt_("kirim", 39) - 0.02, pop(600, 1000, 0.08), 0.1)
 put(wt_("DM.") - 0.06, chime((1568, 2093), 0.8), 0.07)
 put(T["total_sec"] - 1.4, chime((1046, 1568, 2093, 2637), 1.6), 0.07)
 x = np.clip(out, -1, 1); x = (x * 32767).astype(np.int16)

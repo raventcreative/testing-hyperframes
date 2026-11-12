@@ -1,12 +1,98 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s09" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s09 DATA (36.43–41.43) "Suaramu diolah di Mac, tapi permintaan dan tangkapan layar dikirim ke penyedia model."
+       Header rolls to "Data kamu · yang tinggal & yang terkirim · PRIVASI". Left: a dashed "MAC KAMU" border zone; right, outside it:
+       a dim "Penyedia model" card (contoh: Anthropic kalau pakai Claude). "Suaramu diolah di Mac": mic → bars → "teks" + green lock
+       "suaramu nggak keluar" (README: Apple's on-device speech, audio never leaves your Mac). "permintaan": a text packet;
+       "tangkapan layar": a screenshot packet; "dikirim ke penyedia model": both fly across the border into the provider card, which
+       lights up (amber "ikut terkirim"); "model": cyan tip "pakai model lokal = tetap di Mac". Last 0.3 s: workspace + header lift away
+       (s10 has no header). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s09-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s09-mac { position: absolute; left: 70px; top: 480px; width: 540px; height: 444px; border-radius: 30px; border: 3px dashed rgba(106,223,255,.75); background: rgba(1,204,247,.05); }
+    #s09-mac .k-lab { left: 24px; top: 16px; }
+    #s09-voice { position: absolute; left: 22px; top: 62px; width: 490px; height: 96px; border-radius: 22px; background: rgba(12,22,64,.9); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    #s09-voice .mc { position: absolute; left: 14px; top: 14px; width: 68px; height: 68px; border-radius: 34px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440; }
+    #s09-voice .mc svg { position: absolute; left: 18px; top: 18px; width: 32px; height: 32px; }
+    #s09-voice .ar { position: absolute; left: 184px; top: 30px; width: 36px; height: 36px; color: #6adfff; }
+    #s09-voice .tx { position: absolute; left: 232px; top: 24px; height: 48px; padding: 0 16px; border-radius: 24px; background: #ffffff; font: 700 22px/48px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s09-voice .br { position: absolute; left: 98px; top: 26px; width: 76px; height: 44px; }
+    #s09-voice .br i { position: absolute; top: 0; width: 7px; height: 44px; border-radius: 4px; background: #6adfff; transform-origin: 50% 50%; }
+    #s09-lock { position: absolute; left: 0; top: 0; }
+    .s09-pk { position: absolute; left: 0; top: 0; width: 340px; height: 84px; border-radius: 20px; background: #ffffff; box-shadow: 0 14px 30px rgba(2,6,26,.45); transform-origin: 50% 50%; }
+    .s09-pk .ib { position: absolute; left: 12px; top: 14px; width: 56px; height: 56px; border-radius: 16px; background: #eef3fb; color: #294b77; }
+    .s09-pk .ib svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; }
+    .s09-pk b { position: absolute; left: 82px; top: 12px; font: 700 22px/30px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s09-pk span { position: absolute; left: 82px; top: 44px; font: 400 17px/26px Poppins; color: #5d6f8f; white-space: nowrap; }
+    #s09-pv { left: 692px; top: 560px; width: 300px; height: 330px; }
+    #s09-pv .ib { position: absolute; left: 24px; top: 24px; width: 64px; height: 64px; border-radius: 18px; background: rgba(255,255,255,.08); color: #e3edfa; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.2); }
+    #s09-pv .ib svg { position: absolute; left: 16px; top: 16px; width: 32px; height: 32px; }
+    #s09-pv b { position: absolute; left: 24px; top: 104px; font: 700 26px/34px Poppins; color: #fff; white-space: nowrap; }
+    #s09-pv span { position: absolute; left: 24px; top: 140px; font: 400 18px/26px Poppins; color: #9fdcf2; white-space: nowrap; }
+    #s09-pgl { position: absolute; left: 692px; top: 560px; width: 300px; height: 330px; border-radius: 28px; box-shadow: inset 0 0 0 2.5px rgba(255,199,97,.95), 0 0 40px rgba(255,183,77,.4); }
+    #s09-path { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: visible; }
+    #s09-amb { position: absolute; left: 0; top: 0; }
+    #s09-tip { position: absolute; left: 0; top: 0; height: 46px; padding: 0 18px 0 12px; border-radius: 23px; display: flex; align-items: center; gap: 10px; font: 700 20px/1 Poppins; color: #0b1440;
+      background: #6adfff; box-shadow: 0 0 18px rgba(1,204,247,.5); white-space: nowrap; }
+    #s09-tip svg { width: 22px; height: 22px; }
+  </style>
+  <div id="root" data-composition-id="s09" data-width="1080" data-height="1920">
+    <div id="s09-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.99);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s09"] = tl;
+      const K = window.R19K, P = "s09", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s09-zone");
+      const PK = [{ id: "s09-p0", ic: "message-circle", b: "Permintaan", s: "“balas: Kamis aku bisa”", at: [104, 690], to: [692 + 18, 766], w: "permintaan" },
+                  { id: "s09-p1", ic: "image", b: "Tangkapan layar", s: "saat dia perlu lihat layar", at: [104, 796], to: [692 + 18, 822], w: "tangkapan" }];
+      z.innerHTML = K.headerHTML(P) +
+        `<svg id="s09-path" viewBox="0 0 1080 945"><path id="s09-dash" d="M 404 760 C 520 740, 600 690, 690 680" fill="none" stroke="#ffc761" stroke-width="4" stroke-dasharray="10 12" stroke-linecap="round"/></svg>` +
+        `<div id="s09-mac"><div class="k-lab">MAC KAMU</div><div id="s09-voice"><div class="mc">${K.svg("mic")}</div>` +
+        `<div class="br">${[0, 1, 2, 3, 4, 5, 6].map((i) => `<i id="s09-b${i}" style="left:${i * 11}px"></i>`).join("")}</div>` +
+        `<div class="ar">${K.svg("arrow-right")}</div><div class="tx" id="s09-tx">teks</div></div></div>` +
+        `<div class="k-chk" id="s09-lock">${K.svg("lock")}suaramu nggak keluar dari Mac</div>` +
+        `<div class="k-glass" id="s09-pv"><div class="ib">${K.svg("cloud")}</div><b>Penyedia model</b><span>mis. Anthropic, kalau<br>pakai Claude</span></div><div id="s09-pgl"></div>` +
+        PK.map((p) => `<div class="s09-pk" id="${p.id}"><div class="ib">${K.svg(p.ic)}</div><b>${p.b}</b><span>${p.s}</span></div>`).join("") +
+        `<div class="k-amb" id="s09-amb">${K.svg("send")}ikut terkirim</div>` +
+        `<div id="s09-tip">${K.svg("laptop")}model lokal = tetap di Mac</div>`;
+      const tDi = wt("diolah"), tMac = wt("Mac,"), tPe = wt("permintaan"), tTa = wt("tangkapan"), tDk = wt("dikirim"), tPn = wt("penyedia"), tMo = wt("model.");
+      K.headerScene(S, P, 6, 7);
+      // ---------------------------------------------------------------- zone + provider
+      const mac = $("s09-mac"); I(mac, { opacity: 0, scale: 0.97, transformOrigin: "50% 50%" });
+      ft(mac, { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.36, ease: "power3.out" }, 0.08);
+      const pv = $("s09-pv"); I(pv, { opacity: 0, x: 30 }); ft(pv, { opacity: 0, x: 30 }, { opacity: 0.5, x: 0, duration: 0.36, ease: "power3.out" }, 0.2);
+      // "Suaramu diolah di Mac": bars + teks + green lock
+      for (let i = 0; i < 7; i++) {
+        const b = $("s09-b" + i), per = 0.13 + ((i * 37) % 7) * 0.018, lo = 0.22 + ((i * 13) % 5) * 0.04, hi = 0.62 + ((i * 29) % 4) * 0.1;
+        I(b, { scaleY: lo }); const n = Math.max(1, Math.floor((tMac + 0.4 - 0.1) / (2 * per)));
+        ft(b, { scaleY: lo }, { scaleY: hi, duration: per, yoyo: true, repeat: 2 * n - 1, ease: "sine.inOut" }, 0.1 + i * 0.03);
+      }
+      const tx = $("s09-tx"); I(tx, { scale: 0.5, opacity: 0, transformOrigin: "0% 50%" });
+      ft(tx, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.4)" }, tDi - 0.04);
+      const lock = $("s09-lock"); I(lock, { x: 92, y: 650, scale: 0.4, opacity: 0, transformOrigin: "0% 50%" });
+      ft(lock, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.4)" }, tMac - 0.06);
+      // "tapi permintaan dan tangkapan layar": packets appear inside the zone (the lock chip steps aside)
+      ft(lock, { opacity: 1 }, { opacity: 0.0, duration: 0.2 }, tPe - 0.24);
+      PK.forEach((p) => { const e = $(p.id); I(e, { x: p.at[0], y: p.at[1], scale: 0.5, opacity: 0, rotation: 0, transformOrigin: "0% 0%" });
+        ft(e, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" }, wt(p.w) - 0.1); });
+      // "dikirim ke penyedia model": the packets fly across the border into the provider card
+      const dash = $("s09-dash"); I(dash, { opacity: 0 }); ft(dash, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tDk - 0.2);
+      PK.forEach((p, i) => { const e = $(p.id), t = tDk - 0.06 + i * 0.12;
+        ft(e, { x: p.at[0], y: p.at[1], scale: 1, rotation: 0 }, { x: p.to[0], y: p.to[1], scale: 0.78, rotation: i ? 4 : -4, duration: 0.56, ease: "power2.inOut" }, t); });
+      ft(pv, { opacity: 0.5 }, { opacity: 1, duration: 0.2 }, tPn - 0.1);
+      const pgl = $("s09-pgl"); I(pgl, { opacity: 0 });
+      ft(pgl, { opacity: 0 }, { opacity: 1, duration: 0.18 }, tPn - 0.06);
+      const amb = $("s09-amb"); I(amb, { x: 842, xPercent: -50, y: 498, scale: 0.4, opacity: 0, transformOrigin: "50% 50%" });
+      ft(amb, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.4)" }, tPn);
+      const tip = $("s09-tip"); I(tip, { x: 340, xPercent: -50, y: 862, scale: 0.4, opacity: 0, transformOrigin: "50% 50%" });
+      ft(tip, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tMo + 0.06);
+      // ---------------------------------------------------------------- exit: workspace + header lift away
+      const tX = D - 0.3;
+      [mac, pv, pgl, dash, amb, tip, $("s09-p0"), $("s09-p1"), lock].forEach((e, i) => ft(e, { opacity: e === pv ? 1 : e === lock ? 0 : 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, tX + (i % 3) * 0.02));
+      const hdr = $(`${P}-hdr`); I(hdr, { y: 0, opacity: 1 });
+      ft(hdr, { y: 0, opacity: 1 }, { y: -40, opacity: 0, duration: 0.26, ease: "power2.in" }, tX + 0.02);
+      S.finish();
     })();
   </script>
 </template>

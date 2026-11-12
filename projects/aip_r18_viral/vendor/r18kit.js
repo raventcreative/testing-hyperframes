@@ -46,8 +46,8 @@
   .k-rl .jar { left: 27%; top: 30%; width: 46%; height: 40%; border-radius: 16% 16% 20% 20%; background: linear-gradient(90deg, #b8241a, #e2442f 45%, #a91f17);
     box-shadow: inset 0 -10px 18px rgba(80,0,0,.25); }
   .k-rl .lid { left: 30%; top: 24%; width: 40%; height: 8%; border-radius: 10px 10px 4px 4px; background: linear-gradient(180deg, #3a3f55, #1c2033); }
-  .k-rl .lbl { left: 31%; top: 41%; width: 38%; height: 17%; border-radius: 8px; background: #fff7ea; }
-  .k-rl .lbl b { position: absolute; left: 0; right: 0; top: 18%; text-align: center; font: 700 1em/1.1 Poppins, sans-serif; color: #b8241a; letter-spacing: .04em; }
+  .k-rl .lbl { left: 29%; top: 41%; width: 42%; height: 17%; border-radius: 8px; background: #fff7ea; }
+  .k-rl .lbl b { position: absolute; left: 0; right: 0; top: 16%; text-align: center; font: 700 .74em/1.1 Poppins, sans-serif; color: #b8241a; letter-spacing: .02em; }
   .k-rl .lbl i { position: absolute; left: 0; right: 0; top: 58%; text-align: center; font: 400 .62em/1 Poppins, sans-serif; font-style: normal; color: #7a4a2a; }
   .k-rl .chili { left: 64%; top: 18%; width: 22%; height: 22%; color: #fff3d6; transform: rotate(18deg); }
   .k-rl .chili svg { width: 100%; height: 100%; display: block; }

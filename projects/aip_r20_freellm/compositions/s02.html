@@ -1,12 +1,88 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s02-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s02-glow { left: 40px; top: 300px; width: 1000px; height: 700px; }
+    #s02-path { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    #s02-sign { left: 96px; top: 560px; }
+    #s02-repo { left: 572px; top: 318px; width: 438px; height: 165px; border-radius: 28px; transform-origin: 50% 50%; }
+    #s02-repo > * { position: absolute; }
+    #s02-repo .eb { left: 26px; top: 22px; font: 700 14px/20px Poppins, sans-serif; letter-spacing: .16em; color: #5d6f8f; white-space: nowrap; }
+    #s02-repo .nm { left: 24px; top: 44px; font: 700 50px/62px Poppins, sans-serif; letter-spacing: -.01em; white-space: nowrap; padding-right: 4px; transform-origin: 0% 60%; }
+    #s02-repo .pt { left: 26px; top: 112px; height: 30px; display: flex; align-items: center; gap: 8px; font: 400 17px/30px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; transform-origin: 0% 50%; }
+    #s02-repo .pt svg { width: 20px; height: 20px; display: block; color: #294b77; flex: none; }
+    #s02-repo .pt b { font-weight: 700; color: #294b77; }
+    #s02-ul { left: 60px; top: 140px; width: 340px; height: 4px; border-radius: 2px; background: #3a6fe0; transform-origin: 0 50%; }
+    #s02-c1 { left: 96px; top: 812px; }
+    #s02-c2 { left: 560px; top: 812px; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.123);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s02"] = tl;
+      // s02 "Ada jalan tengahnya: FreeLLMAPI, server kecil gratis di GitHub."
+      // Starts on s01's end state (the Claude Code window at the same place) · "Ada": the window shrinks to the top-left ·
+      // "jalan tengahnya": a dashed "middle road" draws from the window down the middle + a signpost chip · "FreeLLMAPI": the small
+      // server box lands at the end of the road, the repo card (text only, our design) pops top-right · "server kecil": LEDs blink,
+      // chip · "gratis": chip "Gratis · lisensi MIT" · "GitHub": the repo path underlines. END STATE: only the box (390,560) stays.
+      const ID = "s02", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, shake } = S, tl = S.tl;
+      const tAda = L("Ada"), tJal = L("jalan"), tTen = L("tengahnya:"), tFL = L("FreeLLMAPI,"), tSrv = L("server"), tKec = L("kecil"), tGra = L("gratis"), tGH = L("GitHub.");
+      let h = `<div class="k-glow k-a" id="s02-glow"></div>`;
+      h += `<svg class="k-a" id="s02-path" viewBox="0 0 1080 1920" fill="none">` +
+        `<path id="s02-rd" d="M315 492 C 315 540, 540 500, 540 556" stroke="#c9d4e6" stroke-width="22" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/>` +
+        `<path id="s02-rl" d="M315 492 C 315 540, 540 500, 540 556" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-dasharray="14 14"/></svg>`;
+      h += K.term("s02", { x: 90, y: 318, w: 900, h: 330, tag: "TERMINAL", ty: true, lines: [`<em>~/belajar-ngoding</em>`, `<b>$</b> claude`] });
+      h += `<div class="k-chip info" id="s02-sign">${K.svg("signpost", 2.2)}Jalan tengah</div>`;
+      h += K.box("s02", { x: 390, y: 560, w: 300, h: 200 });
+      h += `<div class="k-a k-card" id="s02-repo"><div class="eb">OPEN SOURCE · DI GITHUB</div><div class="nm k-grad" id="s02-nm">FreeLLMAPI</div>` +
+        `<div class="pt" id="s02-pt">${K.svg("folder-git-2", 2.2)}github.com/<b>tashfeenahmed/freellmapi</b></div></div>`;
+      h += `<div class="k-a" id="s02-ul"></div>`;
+      h += `<div class="k-chip" id="s02-c1">${K.svg("server", 2.2)}Server kecil · jalan lokal</div>`;
+      h += `<div class="k-chip ok" id="s02-c2">${K.svg("badge-check", 2.2)}Gratis · lisensi MIT</div>`;
+      $("s02-cam").innerHTML = h;
+      // the typed line from s01 is complete at the hand-over
+      $("s02-ty").innerHTML = `&gt; ajarin aku bikin web portofolio<i class="k-caret"></i>`;
+      const glow = $("s02-glow"), tm = $("s02-tm");
+      I(glow, { opacity: 0.85, scale: 1 });
+      // "Ada": the window shrinks to the top-left (flat scale, top-left origin)
+      I(tm, { opacity: 1, scale: 1, transformOrigin: "0% 0%" });
+      ft(tm, { scale: 1 }, { scale: 0.5, duration: 0.42, ease: "power3.inOut" }, Math.max(0.02, tAda - 0.05));
+      // "jalan tengahnya": the road draws + signpost
+      const rd = $("s02-rd"), rl = $("s02-rl");
+      I(rd, { attr: { "stroke-dashoffset": 1 } }); I(rl, { opacity: 0 });
+      ft(rd, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.55, ease: "power2.inOut" }, tJal - 0.05);
+      ft(rl, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tJal + 0.4);
+      ft(rl, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -56 }, duration: D - tJal - 0.4, ease: "none" }, tJal + 0.4);
+      pop($("s02-sign"), tTen - 0.06, { scale: 0.5, x: -30, y: 0 }, 0.3, "back.out(2.2)");
+      // "FreeLLMAPI": the box lands at the end of the road + the repo card
+      const bx = $("s02-bx");
+      I(bx, { opacity: 0, y: -120, scale: 0.7 });
+      ft(bx, { opacity: 0, y: -120, scale: 0.7 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "bounce.out" }, tFL - 0.3);
+      shake($("s02-cam"), tFL + 0.1, 5);
+      const repo = $("s02-repo"), nm = $("s02-nm");
+      pop(repo, tFL - 0.1, { y: -30, scale: 0.94 }, 0.34, "back.out(1.6)");
+      I(nm, { scale: 1 }); ft(nm, { scale: 1 }, { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tFL + 0.25);
+      // "server kecil": LEDs blink + chip
+      [0, 1].forEach((k) => { const led = $("s02-led" + k); I(led, { opacity: 1 });
+        for (let j = 0; j < 6; j++) tl.set(led, { opacity: (j + k) % 2 ? 0.25 : 1 }, tSrv - 0.05 + j * 0.11);
+        tl.set(led, { opacity: 1 }, tSrv + 0.62); });
+      ft(bx, { scale: 1 }, { scale: 1.05, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tKec);
+      pop($("s02-c1"), tSrv - 0.1, { scale: 0.5, y: 30 }, 0.3, "back.out(2)");
+      // "gratis": licence chip
+      pop($("s02-c2"), tGra - 0.1, { scale: 0.5, y: 30 }, 0.3, "back.out(2.4)");
+      // "GitHub": the repo path underlines + pulses
+      const ul = $("s02-ul"), pt = $("s02-pt");
+      I(ul, { opacity: 0, scaleX: 0, left: 670, top: 460, width: 300 });
+      tl.set(ul, { opacity: 1 }, tGH - 0.12);
+      ft(ul, { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power2.out" }, tGH - 0.12);
+      I(pt, { scale: 1 }); ft(pt, { scale: 1 }, { scale: 1.05, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tGH);
+      // ================================================================ hand-over → s03: everything but the box leaves
+      const tOut = D - 0.3;
+      K.out(S, [tm, $("s02-sign"), repo, $("s02-c1"), $("s02-c2")], tOut);
+      ft(ul, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut);
+      ft($("s02-path"), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut);
+      S.done();
     })();
   </script>
 </template>

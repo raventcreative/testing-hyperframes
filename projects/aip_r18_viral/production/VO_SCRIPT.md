@@ -1,4 +1,4 @@
-# VO — Gladi resik reels sebelum posting (Virality Predictor) · background TERANG · 40,1 dtk VO (video 41,5 dtk)
+# VO — Gladi resik reels sebelum posting (Virality Predictor) · background TERANG · 40,2 dtk VO (video 41,57 dtk)
 Referensi: batch 5 · ref8 (30 dtk, kreator lain, reel bahasa Inggris, gaya gelap/neon): "You can now predict how viral your next reel
 will be using this simple Claude Code plugin, and it's free" → statistik pribadi kreator (views/followers 10 posting terakhir) → nama
 "Virality Predictor" (Higgsfield × Claude) → skor tiap video "berdasarkan reaksi otak manusia", "dilatih ribuan jam data otak manusia dari
@@ -8,20 +8,25 @@ kartu-kartu HP neon di latar hitam, otak 3D, peta dunia bertitik, grafik retensi
 ## Naskah final (tag = AUTO klien, dipilih `tools/el_tts_ts.py` tanpa `--tags`)
 | # | tag | baris | waktu VO (dtk, tanpa offset 0,3) |
 |---|---|---|---|
-| 1 | [playful] [excited] | Sebelum posting, reels kamu bisa gladi resik dulu di depan penonton AI. | 0,08–4,40 |
-| 2 | [playful] [excited] | Namanya Virality Predictor dari Higgsfield, plugin Claude Code-nya gratis. | 4,78–8,92 |
-| 3 | [playful] [excited] | Kasih klip maksimal lima belas detik, AI-nya memprediksi respons otak penonton: visual, suara, bahasa, fokus. | 9,11–16,24 |
-| 4 | [playful] [excited] | Hasilnya skor viral, detik puncak hook, dan hold rate: betah atau kabur. | 16,46–21,04 |
-| 5 | [playful] [excited] | Puncak hook baru di detik kelima? Pembukaan kamu kelamaan. | 21,24–24,64 |
-| 6 | [playful] [excited] | Pindahin kalimat terkuat ke detik pertama, buang yang bertele-tele, tes ulang. | 24,78–28,96 |
-| 7 | [playful] [excited] | Buat UMKM, tes konten jualan dulu sebelum keluar duit buat iklan. | 29,03–33,12 |
-| 8 | [playful] [excited] | Ingat, ini prediksi, bukan jaminan. Penonton asli tetap penentunya. | 33,34–37,84 |
-| 9 | [playful] [excited] [confident] | Komen VIRAL, aku kirim lewat DM. | 37,92–40,16 |
+| 1 | [playful] [excited] | Sebelum posting, reels kamu bisa gladi resik dulu di depan penonton AI. | 0,08–4,64 |
+| 2 | [playful] [excited] | Namanya Virality Predictor dari Higgsfield, plugin Claude Code-nya gratis. | 4,80–9,24 |
+| 3 | [playful] [excited] | Kasih klip maksimal lima belas detik, AI-nya memprediksi respons otak penonton: visual, suara, bahasa, fokus. | 9,36–16,60 |
+| 4 | [playful] [excited] | Hasilnya skor viral, detik puncak hook, dan hold rate: betah atau kabur. | 16,71–21,20 |
+| 5 | [playful] [excited] | Puncak hook baru di detik kelima? Berarti intro kamu kelamaan. | 21,44–25,04 |
+| 6 | [playful] [excited] | Pindahin kalimat terkuat ke detik pertama, buang yang bertele-tele, tes ulang. | 25,28–29,30 |
+| 7 | [playful] [excited] | Buat UMKM, tes konten jualan dulu sebelum keluar duit buat iklan. | 29,51–33,36 |
+| 8 | [playful] [excited] | Ingat, ini prediksi, bukan jaminan. Penonton asli tetap penentunya. | 33,60–37,69 |
+| 9 | [playful] [excited] [confident] | Komen VIRAL, aku kirim lewat DM. | 37,96–40,00 |
 
-94 kata, 40,16 dtk diucapkan (target 35–45). Kata kunci CTA diucapkan dari huruf kecil "viral," (supaya suara tidak mengeja) dan
-ditampilkan **VIRAL** di caption. Teks VO: `production/vo_lines.txt`. Listen-check faster-whisper `small` (id) seluruh VO + `medium` untuk
-3 potongan yang ragu: semua kata terucap; "Virality Predicter / Hicksfield / cloudcode" = ejaan whisper untuk nama Inggris (suaranya benar),
-"Tembukaan" = salah dengar plosif awal oleh whisper ("Pembukaan"), "bertele-tele" dan "tes ulang" jelas di model `medium`.
+95 kata, ±40,2 dtk diucapkan (target 35–45). Kata kunci CTA diucapkan dari huruf kecil "viral," (supaya suara tidak mengeja) dan
+ditampilkan **VIRAL** di caption. Teks VO: `production/vo_lines.txt`. Waktu di tabel = awal/akhir suara terukur (energi > −40 dB).
+**Revisi (permintaan lead):** baris 5 semula "… Pembukaan kamu kelamaan." — faster-whisper `small` mendengar "Tendukaan" dan `medium`
+"Tembukaan" (P lemah) → diganti "Berarti intro kamu kelamaan." dan VO dibuat ulang (tanpa `--tags`). Take 2 (40,88 dtk) ditolak:
+`small` mendengar "Pindahin ke-5 terkuat" di baris 6 (p 0,53; `medium` benar). **Take 3 dipakai (40,24 dtk):**
+- `small` (seluruh VO): semua baris benar; baris 5 "Puncak hook baru di detik ke 5, berarti intro kamu kelamaan."; ejaan whisper untuk
+  nama Inggris ("Virality Predector / Hicksfield / plug-in cloudcode", "Comment viral") dan "bertely-tely" (= bertele-tele).
+- `medium` (baris 5–6): "Puncak hook baru di detik kelima berarti intro kamu kelamaan." · "Pindahin kalimat terkuat ke detik pertama,
+  buang yang bertelet-telet, tes ulang."
 
 ## ATM: what we changed
 **Amati** — ide yang berguna: video bisa dites dulu ke AI yang memprediksi perhatian penonton (skor + titik hook) *sebelum* diposting.
@@ -34,7 +39,7 @@ CTA kata kunci.
 1. **Hook sendiri, sudut beda** — "Sebelum posting, reels kamu bisa gladi resik dulu di depan penonton AI." Sudutnya *gladi resik*
    (latihan sebelum tampil), bukan "prediksi seberapa viral". Tanpa statistik, tanpa janji viral.
 2. **Struktur, urutan, metafora visual sendiri** — hook → nama + cara pasang (2 perintah asli di layar) → batas klip 15 detik + cara
-   prediksinya → **rapor** (3 hasil) → cara *membaca* hasil (puncak hook telat = pembukaan kelamaan) → cara *memperbaiki* (pindah kalimat
+   prediksinya → **rapor** (3 hasil) → cara *membaca* hasil (puncak hook telat = intro kelamaan) → cara *memperbaiki* (pindah kalimat
    terkuat ke detik 1, buang yang bertele-tele, tes ulang) → kasus UMKM (tes A/B sebelum bayar iklan) → peringatan jujur → CTA. Metafora per
    beat milik kita: panggung latihan bertirai navy + penonton AI di kursi; colokan plugin + kartu terminal; strip film + kurung 15 detik;
    satu penonton AI + 4 baris sensor; **rapor sekolah**; 15 batang detik + cap KELAMAAN; jalur editor (blok klip dipindah/digunting);

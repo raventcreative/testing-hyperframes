@@ -20,7 +20,7 @@ Halo! Ini yang aku janjiin. Anggap ini gladi resik: kamu tes dulu reels-nya, bar
 - Hasilnya: skor keseluruhan, **detik puncak hook**, skor bertahan (hold/sustain), wilayah respons terkuat/terlemah, plus link laporan visual.
 
 ## 3. Checklist baca hasil + perbaiki
-- [ ] Puncak hook di detik 1–2? Kalau baru di detik 4–5, pembukaanmu kelamaan.
+- [ ] Puncak hook di detik 1–2? Kalau baru di detik 4–5, intro-mu kelamaan.
 - [ ] Pindahkan kalimat/visual terkuat ke detik pertama (hasil, harga, sebelum–sesudah, pertanyaan yang bikin penasaran).
 - [ ] Buang basa-basi: "halo semuanya, jadi gini…", intro logo, jeda kosong.
 - [ ] Teks di layar terbaca di 1 detik? Suara langsung masuk, bukan musik kosong?

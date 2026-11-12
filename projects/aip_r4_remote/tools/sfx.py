@@ -187,7 +187,7 @@ for t in [wt("cocok") - 0.05, wt("Indonesia,") - 0.25, wt("mencurigakan") - 0.05
 for t in [wt("skill"), wt("Indonesia,"), wt("mencurigakan") + 0.1]: put(t - 0.04, buzz(0.18), 0.045); put(t - 0.02, pop(380, 200, 0.1), 0.12)
 put(wt("mencurigakan") + 0.13, boom(0.35, 160, 70), 0.18)
 for n in range(3): put(wt("dibuang.") - 0.12 + n * 0.08, whoosh(0.32, 2000, 600, 1.4, 0.3), W * 0.35); put(wt("dibuang.") + 0.24 + n * 0.08, pop(300, 150, 0.1), 0.14)
-for q in range(3): put(wt("dibuang.") + 0.56 + q * 0.07, pop(1300 + 100 * q, 2000 + 100 * q, 0.05), 0.1)
+for q in range(3): put(wt("dibuang.") + 0.42 + q * 0.05, pop(1300 + 100 * q, 2000 + 100 * q, 0.05), 0.1)
 # --- s06 Claude 3 writes: toss into chip 3, tabs, CV + cover letter writing, KHUSUS stamp, per-listing swaps
 for q in range(3): put(wt("lolos") - 0.05 + q * 0.05, pop(900, 1400, 0.05), 0.07)
 for q in range(3): put(wt("dilempar") - 0.08 + q * 0.12, whoosh(0.4, 600, 2600, 1.4, 0.4), W * 0.35); put(wt("dilempar") + 0.36 + q * 0.12, tick(0.03, 2600), 0.1)

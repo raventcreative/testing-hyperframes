@@ -95,5 +95,11 @@
   const STAMPS = [[118, 196, -14], [330, 150, 11], [206, 318, -6], [336, 392, -17], [118, 444, 8], [262, 496, -9], [236, 240, 15]];
   const STAMP_ORDER = [4, 2, 6, 1, 5, 3, 7];   // reviewer k of stamp i
   const stamps = (P, id) => STAMPS.map(([x, y, r], i) => `<div class="${P}-stamp" id="${P}-${id}-s${i}" style="transform:translate(${x}px,${y}px) rotate(${r}deg)">TOLAK</div>`).join("");
-  window.CVK = { ICO, isvg, CLAUDE, JUDGES, SEAT_X, CMP_X, NOTES, css, cv, ROWS, STAMPS, STAMP_ORDER, stamps };
+  // pin the v1/v2 visibility of a CV instance on a scene timeline at 0 (never rely on inline CSS alone in the real renderer)
+  const pin = (tl, P, id, ver) => { const X = `${P}-${id}`, v2 = ver === 2, g = (q) => document.getElementById(X + q);
+    for (const [rid, , , , t2] of ROWS) { tl.set(g("-" + rid), { opacity: t2 && v2 ? 0 : 1 }, 0); if (t2) tl.set(g("-" + rid + "2"), { opacity: v2 ? 1 : 0 }, 0); }
+    [1, 2, 3].forEach((i) => tl.set(g("-k" + i), { opacity: v2 && i !== 2 ? 0 : 1 }, 0));
+    [1, 3].forEach((i) => tl.set(g("-k" + i + "b"), { opacity: v2 ? 1 : 0 }, 0));
+    tl.set(g("-v2"), { opacity: v2 ? 1 : 0 }, 0); };
+  window.CVK = { ICO, isvg, CLAUDE, JUDGES, SEAT_X, CMP_X, NOTES, css, cv, ROWS, STAMPS, STAMP_ORDER, stamps, pin };
 })();

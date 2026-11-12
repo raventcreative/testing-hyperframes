@@ -70,7 +70,7 @@
   .k-hbox{position:absolute;overflow:hidden}
   .k-hname{position:absolute;left:0;top:0;white-space:nowrap;font:700 48px/66px Poppins;color:#fff;letter-spacing:-.5px}
   .k-hsub{position:absolute;left:0;top:0;white-space:nowrap;font:400 22px/40px Poppins;color:#9fdcf2}
-  .k-hsub i{font-style:normal;color:#5d86a8}
+  .k-hsub i{font-style:normal;color:#86a9c9}
   .k-hseg{position:absolute;top:342px;width:28px;height:8px;border-radius:4px;background:rgba(255,255,255,.16);overflow:hidden}
   .k-hseg b{position:absolute;left:0;top:0;width:28px;height:8px;background:#01ccf7;border-radius:4px;transform-origin:0 50%;box-shadow:0 0 10px rgba(1,204,247,.8)}
   .k-hlic{position:absolute;right:0;top:0;height:40px;padding:0 16px 0 12px;border-radius:20px;display:flex;align-items:center;gap:8px;

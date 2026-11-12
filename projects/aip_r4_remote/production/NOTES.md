@@ -38,6 +38,7 @@ writes, scans while Claude 1 crawls, presents the board, claps on "apply", cheer
 ## QA (real runtime: `npx --yes hyperframes@0.8.186 snapshot`)
 - Final pass, 55 frames (every scene, each cut ±0.03 s, first + last frame): contact sheets in
   `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r4/qa_final/` (contact-sheet-*.jpg).
+  The s05→s06 seam was tightened after that pass (survivors settle before the cut) and re-checked: `…/scratchpad/r4/qa_cut56/`.
 - `lint`: 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the kit). `validate`: 0 errors; kit warning "multiple
   instances of Three.js" (robot + mascot bundles); remaining WCAG notes are measured on transient states (dimmed rows, mid-scale toast).
 - Every initial state is pinned at 0 on the timelines; the TEAM RAIL (s03→s07) and the board (s07→s08→s09) hand over at identical

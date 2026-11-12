@@ -6,7 +6,7 @@ const ids = process.argv.slice(2);
 (async () => {
   const b = await chromium.launch({ args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] });
   const p = await b.newPage({ viewport: { width: 1400, height: 1000 } });
-  await p.goto("http://localhost:3020/#project/igagent_2026", { waitUntil: "load" });
+  await p.goto("http://localhost:3020/#project/aip_r1_panelcv", { waitUntil: "load" });
   let f = null;
   for (let i = 0; i < 40 && !f; i++) { await p.waitForTimeout(500); f = p.frames().find((x) => x.url().includes("/preview")); }
   await p.waitForTimeout(6000);

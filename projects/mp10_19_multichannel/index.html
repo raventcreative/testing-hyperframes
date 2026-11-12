@@ -134,7 +134,11 @@
       #sol .cb2 { top: 292px; font: 800 96px/1.05 Rubik; letter-spacing: -2px; color: #fff; }
       #w2, #w2m { perspective: 1700px; perspective-origin: 540px 860px; }
       #w2o, #w2mo { left: 540px; top: 860px; }
-      #map2 { position: absolute; left: -540px; top: -760px; width: 1080px; height: 1520px; }
+      #map2 { position: absolute; left: -540px; top: -760px; width: 1080px; height: 1520px; transform-style: preserve-3d; }
+      /* the three places stand up at the heads of the navy rivers (a standing plane, never faded as a 3D group) */
+      .rl { position: absolute; display: flex; align-items: center; gap: 12px; height: 76px; padding: 0 24px 0 11px; border-radius: 38px; background: #fff; font: 700 36px/1 PS; color: #212C5F;
+            white-space: nowrap; box-shadow: 0 14px 30px rgba(3,6,24,.4); transform-origin: 50% 100%; }
+      .rl .src { width: 54px; height: 54px; } .rl .src svg { width: 32px; height: 32px; }
       #map2 svg { position: absolute; left: 0; top: 0; overflow: visible; }
       .card3 { position: absolute; background: #fff; border-radius: 34px; }
       #led { left: -395px; top: -306px; width: 790px; height: 612px; padding: 28px 30px; box-shadow: 0 60px 110px rgba(3,6,24,.55), inset 0 -4px 0 rgba(33,44,95,.06); }
@@ -411,9 +415,9 @@
           r.flow = sv("path", { d: r.d, fill: "none", stroke: "#fff", "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": "20 60", opacity: 0.8 }, svg2);
           r.L = r.path.getTotalLength();
         });
-        ["Toko online A", "Toko online B", "Media sosial"].forEach((t, i) => {
-          const c = mk("div", "", $("#map2"), `position:absolute; left:${[180, 548, 905][i]}px; top:214px; transform:translateX(-50%); display:flex; align-items:center; gap:10px; height:62px; padding:0 20px 0 9px; border-radius:31px; background:#fff; font:700 30px/1 PS; color:#212C5F; white-space:nowrap; box-shadow:0 10px 24px rgba(3,6,24,.35);`);
-          c.innerHTML = `<i class="src ${"abc"[i]}" style="width:44px; height:44px;">${IC[i < 2 ? "store" : "social"]("#fff")}</i>${t}`; });
+        const RL = ["Toko online A", "Toko online B", "Media sosial"].map((t, i) => {
+          const c = mk("div", "rl", $("#map2")); c.innerHTML = `<i class="src ${"abc"[i]}">${IC[i < 2 ? "store" : "social"]("#fff")}</i>${t}`;
+          c.dataset.x = [150, 560, 950][i]; c.dataset.y = [60, 10, 60][i]; return c; });
         const lake = sv("ellipse", { cx: LAKE[0], cy: LAKE[1], rx: LAKE[2], ry: LAKE[3], fill: "url(#lkG)", stroke: "#FED111", "stroke-width": 6 }, svg2);
         const rip = [0, 1, 2].map(() => sv("ellipse", { cx: LAKE[0], cy: LAKE[1], rx: LAKE[2], ry: LAKE[3], fill: "none", stroke: "#FFF0A0", "stroke-width": 5, opacity: 0 }, svg2));
         // small tokens ride the glowing rivers into the lake (same shapes as on the paper map)
@@ -604,7 +608,7 @@
         show("#sol", TM.sol); hide("#s1", TM.sol + 0.05); hide("#bands", TM.sol + 0.08);
 
         // ----- S5 · brand: three glowing rivers flow into one lake; the lake lifts up as ONE pembukuan
-        gsap.set("#map2", { y: -70, z: -260, rotationX: 47 }); TS("#map2", { y: -70, z: -260, rotationX: 47, opacity: 1 }, 0);
+        gsap.set("#map2", { y: -70, z: -260, rotationX: 47 }); TS("#map2", { y: -70, z: -260, rotationX: 47 }, 0);
         F("#map2", { y: -70, z: -260, rotationX: 47 }, { y: -50, z: -200, rotationX: 44, duration: TM.pemb - TM.sol, ease: "sine.inOut" }, TM.sol);
         RIV2.forEach((r) => F(r.flow, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -760 }, duration: TM.end - TM.sol, ease: "none" }, TM.sol));
         TS(lake, { attr: { rx: 0, ry: 0 } }, 0);
@@ -623,7 +627,8 @@
           F(o.g, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.3, duration: 0.22, ease: "power2.in" }, t1 - 0.05);
         });
         // the lake lifts up as the pembukuan card
-        F("#map2", { opacity: 1 }, { opacity: 0.55, duration: 0.6 }, TM.pemb - 0.2);
+        F("#map2 > svg", { opacity: 1 }, { opacity: 0.55, duration: 0.6 }, TM.pemb - 0.2);
+        F("#map2 > .rl", { opacity: 1 }, { opacity: 0, duration: 0.5 }, TM.pemb - 0.3);   // the places have merged: their labels give way to the caption
         F("#led", { autoAlpha: 0, y: 260, z: -60, rotationX: 74, rotationY: -4, scaleX: 0.7, scaleY: 0.7 }, { autoAlpha: 1, y: 30, z: 0, rotationX: 9, rotationY: -8, scaleX: 1, scaleY: 1, duration: 0.95, ease: "power3.out" }, TM.pemb - 0.42);
         F("#led", { y: 30, rotationX: 9, rotationY: -8 }, { y: 24, rotationX: 6, rotationY: -4, duration: TM.rek - TM.pemb - 0.53, ease: "sine.inOut" }, TM.pemb + 0.53);
         F("#solGlow", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 1.2, ease: "power2.out" }, TM.satu);
@@ -639,7 +644,7 @@
 
         // ----- S6 · "terus rekonsiliasi bulanan bantu cek, angka tiap tempat udah cocok sama uang yang masuk"
         F("#led", { y: 24, z: 0, rotationX: 6, rotationY: -4, opacity: 1, filter: "blur(0px)" }, { y: -90, z: -440, rotationX: 14, rotationY: -2, opacity: 0.5, filter: "blur(6px)", duration: 0.9, ease: "power2.inOut" }, TM.rek);
-        F("#map2", { opacity: 0.55 }, { opacity: 0.3, duration: 0.9 }, TM.rek);
+        F("#map2 > svg", { opacity: 0.55 }, { opacity: 0.3, duration: 0.9 }, TM.rek);
         F("#rek", { autoAlpha: 0, y: 240, z: -360, rotationX: 68, rotationY: -10 }, { autoAlpha: 1, y: 70, z: 60, rotationX: 8, rotationY: -7, duration: 0.95, ease: "power3.out" }, TM.rek + 0.18);
         F("#rek", { y: 70, z: 60, rotationX: 8, rotationY: -7 }, { y: 64, z: 80, rotationX: 5, rotationY: -3, duration: TM.end - TM.rek - 1.13, ease: "sine.inOut" }, TM.rek + 1.13);
         const RS = [[TM.cek + 0.1, "ok"], [TM.cek + 0.75, "ok"], [TM.cocok + 0.2, "wn"]];
@@ -675,6 +680,10 @@
 
         window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
         // text fit: screen lines shrink to their box if a font renders wider than planned
+        window.__hf.buildReady["rl"] = document.fonts.ready.then(() => {
+          RL.forEach((c) => { const w = c.offsetWidth, h = c.offsetHeight; gsap.set(c, { left: +c.dataset.x - w / 2, top: +c.dataset.y - h, rotationX: -50, z: 1 }); });
+          return 1;
+        });
         window.__hf.buildReady["fit"] = document.fonts.ready.then(() => {
           const tw = (el) => { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width; };
           $$("#hookT .ctr, #bentT .ctr, #pisT .ctr, #sol .cb2, #sol .cw").forEach((el) => { let fs = parseFloat(getComputedStyle(el).fontSize), k = 0;

@@ -1,10 +1,11 @@
-"""Synthesised SFX for MasterPajak AI Video 14 (Siapin 4 Data Ini) — sits under the VO (no samples, no music, per the client's rule).
-Beat times are parsed from window.TM in index.html, so a VO re-time only needs `python3 tools/sfx.py` again. Deterministic.
-Sounds: studio dolly air, stabilo marker, archive-box lid (creak-less hinge swing + cardboard knock), item fly-ins (whoosh per
-direction), tick stamps (pop + bright ding), HUD bar fills + counter clicks, paper drops into the box (soft papery thud),
-checkbox ticks, lid close thump + stamp chime, band sweep, hologram fx, the pour (paper flutters + landing pops), odometer
-ticks + result chime, shine shimmer, beam/iris boom, end pops + chime. Writes assets/audio/sfx.wav (48 kHz mono, TM.total s).
-Run: python3 tools/sfx.py [project dir]"""
+"""Synthesised SFX for MasterPajak AI Video 18 (Stok Itu Uang yang Lagi Diam) — sits under the VO (no samples, no music, per the
+client's rule). Beat times are parsed from window.TM in index.html (real VO word times), so a re-voice only needs
+`python3 tools/sfx.py` again. Deterministic.
+Sounds: warehouse air, stabilo marker, the saldo card turning edge-on, box hop + flip + cardboard knocks (one hero flip, then a
+domino of eleven), a soft till "ching" on the money reveal, the pause badge, depth-of-field swell, sticker slaps + red-X buzzes +
+falls, the MODAL tag clink and swing, card whooshes, LAKU stamps, money chips (whoosh + landing ticks + counter clicks), the
+"jeblok" drop, the padahal hop + shimmer, band sweep, hologram fx, the pembukuan chips, the laba rugi card, stamp chime, shine,
+beam/iris boom, end pops + chime. Writes assets/audio/sfx.wav (48 kHz mono, TM.total s). Run: python3 tools/sfx.py [project dir]"""
 import sys, wave, re
 from pathlib import Path
 import numpy as np
@@ -14,7 +15,7 @@ _tm = re.search(r'window\.TM = (\{.*?\});', (P / 'index.html').read_text()).grou
 TM = {k: float(v) for k, v in re.findall(r'(\w+):\s*([\d.]+)', _tm)}
 TOTAL = TM['total']; N = int(TOTAL * SR) + SR
 out = np.zeros(N)
-rng = np.random.default_rng(14)
+rng = np.random.default_rng(18)
 def put(t, x, g=1.0):
     i = int(t * SR); j = min(N, i + len(x))
     if i < 0 or i >= N: return
@@ -77,7 +78,6 @@ def chime(freqs=(1318.5, 1760, 2637), dur=1.4):
     return x / np.abs(x).max()
 
 def ding(f=2093, dur=0.5):
-    """bright check-mark ding: a sine + soft inharmonic partial, fast decay"""
     n = int(dur * SR); t = np.arange(n) / SR
     x = np.sin(2 * np.pi * f * t) * np.exp(-t * 7) + 0.35 * np.sin(2 * np.pi * f * 2.76 * t) * np.exp(-t * 14)
     return x / np.abs(x).max()
@@ -99,17 +99,38 @@ def knock(f=150, dur=0.22):
     return x / np.abs(x).max()
 
 def paper(dur=0.3):
-    """paper slap / settle: soft noise burst with a fast low-mid body"""
+    """sticker / paper slap: soft noise burst with a fast low-mid body"""
     n = int(dur * SR); t = np.arange(n) / SR
     x = svf_bp(rng.standard_normal(n), np.linspace(2200, 900, n), 0.9) * np.exp(-t * 22)
     x += np.sin(2 * np.pi * 110 * t) * np.exp(-t * 30) * 0.6
     return x / np.abs(x).max()
 
-def flutter(dur=0.5):
-    """paper flutter: AM-chopped band noise"""
+def buzz(dur=0.24, f=150):
+    """soft "nope" buzzer for the red X: two detuned square tones, low-passed, short"""
     n = int(dur * SR); t = np.arange(n) / SR
-    am = 0.55 + 0.45 * np.sign(np.sin(2 * np.pi * (16 + 8 * t / dur) * t))
-    x = svf_bp(rng.standard_normal(n), 2400 + 700 * np.sin(2 * np.pi * 5 * t), 1.3) * am * env(n, 0.25)
+    x = np.sign(np.sin(2 * np.pi * f * t)) + np.sign(np.sin(2 * np.pi * f * 1.012 * t))
+    x = svf_bp(x * 0.5, np.full(n, 700.0), 0.7) * np.minimum(1, t / 0.01) * np.minimum(1, (dur - t) / 0.05)
+    return x / np.abs(x).max()
+
+def clink(f=2400, dur=0.35):
+    """metal hook clink: inharmonic partials, quick decay"""
+    n = int(dur * SR); t = np.arange(n) / SR
+    x = sum(np.sin(2 * np.pi * f * r * t) * np.exp(-t * d) * g for r, d, g in ((1, 16, 1), (1.47, 22, .6), (2.09, 30, .4), (2.76, 40, .25)))
+    return x / np.abs(x).max()
+
+def till(dur=0.9):
+    """soft cash-till "ching": a bright bell pair over a tiny mechanical click"""
+    n = int(dur * SR); t = np.arange(n) / SR
+    x = np.zeros(n); d = int(0.05 * SR)
+    for f, k in ((2637, 0), (3520, d)):
+        tt = t[: n - k]; x[k:] += np.sin(2 * np.pi * f * tt) * np.exp(-tt * 5) + 0.3 * np.sin(2 * np.pi * f * 2.4 * tt) * np.exp(-tt * 11)
+    x[: len(tick(0.02, 3000))] += tick(0.02, 3000) * 0.8
+    return x / np.abs(x).max()
+
+def drop(dur=0.75, f0=520, f1=70):
+    """the "jeblok" drop: a falling sine glide into a low thud"""
+    n = int(dur * SR); t = np.arange(n) / SR
+    x = np.sin(2 * np.pi * np.cumsum(f0 * (f1 / f0) ** ((t / dur) ** 0.8)) / SR) * env(n, 0.1, 1.0)
     return x / np.abs(x).max()
 
 def shimmer(dur=0.8):
@@ -123,54 +144,70 @@ def holo_fx(t0, g=1.0):
     put(t0, zap(0.35), 0.05 * g); put(t0 + 0.02, whoosh(1.1, 300, 4200, 1.8, 0.9), W * 0.45 * g)
     put(t0 + 1.15, chime((1046, 1568, 2093, 2637), 1.6), 0.06 * g)
 
-DK = [TM['d1'], TM['d2'], TM['d3'], TM['d4'], TM['kum']]
-TICK = [TM['d1'] + 1.05, TM['d2b'] + 0.8, TM['d3'] + 1.05, TM['d4'] + 1.05]
-# S1 · hook: slow studio dolly (air), text pops, stabilo on "gambaran pajak", the "?" marks wobble
-wh(0.0, 2.6, 200, 900, 0.9, 0.5, 0.35)
-put(TM['hook'] + 0.3, pop(500, 900, 0.08), 0.08); put(TM['hook'] + 0.75, pop(560, 1000, 0.08), 0.08)
-put(TM['hook'] + 1.25, marker(0.45), MK)
-for j in range(3): put(0.5 + j * 0.81, tick(0.02, 3800), 0.03)
-# S2 · siapin: ghost card recedes into depth, the lid swings open and knocks, HUD drops in with four bar ticks
-wh(TM['siap'] + 0.02, 0.55, 2400, 500, 1.2, 0.3, 0.5)
-put(TM['siap'] + 0.1, knock(170, 0.2), 0.16); wh(TM['siap'] + 0.24, 0.45, 300, 1500, 1.0, 0.6, 0.45); put(TM['siap'] + 0.62, knock(120, 0.25), 0.14)
-put(TM['siap'] + 0.45, pop(500, 950, 0.08), 0.08); put(TM['siap'] + 1.05, marker(0.38), MK)
-wh(TM['siap'] + 0.9, 0.35, 900, 2400, 1.2, 0.5, 0.25)
-for k in range(4): put(TM['siap'] + 1.05 + k * 0.1, tick(0.018, 3200 + 300 * k), 0.06)
-# S3 · four items: fly-in, title pop, tick stamp + ding, HUD fill + counter click, drop + paper thud, checkbox tick
-for k in range(4):
-    t0, tdrop = DK[k], DK[k + 1] - 0.88; tland = tdrop + 0.74
-    wh(t0 - 0.05, 0.75, 250 + 60 * k, 2200 + 200 * k, 1.1, 0.55, 0.85)
-    put(t0 + 0.02, pop(420, 840, 0.09), 0.1)
-    put(TICK[k], pop(700, 1400, 0.07), 0.13); put(TICK[k] + 0.04, ding(2093 * (1.0595 ** (2 * k)), 0.55), 0.07)
-    wh(TICK[k] + 0.1, 0.4, 1200, 3200, 1.6, 0.4, 0.18); put(TICK[k] + 0.28, tick(0.02, 2600), 0.08)
-    wh(tdrop + 0.2, 0.55, 2200, 400, 1.0, 0.35, 0.5)
-    put(tland - 0.02, paper(0.3), 0.16); put(tland - 0.01, knock(140, 0.2), 0.08)
-    put(tland + 0.1, tick(0.016, 4400), 0.07)
-# 2 · "termasuk ongkir dan iklan": two tags pop, two stabilo strokes
-for dt in (0.25, 0.7): put(TM['d2b'] + dt, pop(600, 1200, 0.09), 0.12)
-for dt in (0.3, 0.8): put(TM['d2b'] + dt, marker(0.3), MK * 0.8)
-# S3b · "Udah kekumpul?": files settle, lid closes with a thump, stamp + chime, LENGKAP pop
-wh(TM['kum'] + 0.04, 0.4, 1400, 500, 1.0, 0.4, 0.3)
-wh(TM['kum'] + 0.18, 0.42, 400, 1600, 1.0, 0.8, 0.45); put(TM['kum'] + 0.6, knock(95, 0.32), 0.2)
-put(TM['kum'] + 0.66, pop(600, 1300, 0.09), 0.14); put(TM['kum'] + 0.72, chime((1568, 2093, 2637), 1.1), 0.06)
-put(TM['kum'] + 0.7, pop(900, 1500, 0.07), 0.08)
+# S1 · hook: warehouse air with a slow dolly, text pops, the saldo card swings in and turns edge-on, stabilo on "tipis?"
+wh(0.0, 3.2, 180, 800, 0.9, 0.5, 0.35)
+put(0.3, pop(500, 900, 0.08), 0.07); put(TM['saldo'] - 0.28, pop(560, 1000, 0.08), 0.08)
+wh(TM['saldo'] - 0.32, 0.55, 2400, 600, 1.2, 0.3, 0.45)
+wh(TM['tipis'] + 0.1, 0.45, 600, 3600, 2.2, 0.5, 0.4); put(TM['tipis'] + 0.55, tick(0.02, 5200), 0.05)
+put(TM['tipis'] + 0.2, marker(0.42), MK)
+wh(TM['balik'] - 0.15, 0.45, 1800, 500, 1.1, 0.4, 0.35)
+# S2 · "balik": the hero hops, flips, lands; "uang": a domino of eleven flips + a soft till ching; "diam": pause badge, stillness
+put(TM['balik'] + 0.22, pop(500, 950, 0.08), 0.08); put(TM['balik'] + 0.55, marker(0.32), MK * 0.9)
+wh(TM['balik'] + 0.42, 0.7, 400, 2200, 1.3, 0.5, 0.55); put(TM['balik'] + 1.1, knock(160, 0.22), 0.16)
+put(TM['isi'] - 0.04, pop(600, 1100, 0.08), 0.08)
+for k in range(11):
+    t0 = TM['uang'] - 0.05 + k * 0.045
+    put(t0, whoosh(0.32, 700, 2400, 1.3, 0.5), W * 0.16); put(t0 + 0.55, knock(150 + 12 * (k % 4), 0.16), 0.07)
+put(TM['uang'] + 0.35, till(0.9), 0.07)
+put(TM['diam'] - 0.05, pop(420, 840, 0.1), 0.13); put(TM['diam'] + 0.05, marker(0.38), MK)
+for k in range(4): put(TM['diam'] + 0.1 + k * 0.07, tick(0.015, 3000 + 400 * k), 0.035)
+# S3 · the box floats out (depth swell), two stickers slap on, get the red X + buzz, and fall away
+wh(TM['bel'] - 0.05, 0.9, 250, 1600, 0.9, 0.6, 0.55)
+for tHit, tX, tFall, dirg in ((TM['hangus'] - 0.32, TM['hangus'] + 0.12, TM['hangus'] + 0.85, 1.0), (TM['untung'] - 0.28, TM['untung'] + 0.14, TM['untung'] + 0.62, 1.0)):
+    wh(tHit - 0.45, 0.45, 600, 2600, 1.3, 0.6, 0.5); put(tHit - 0.02, paper(0.3), 0.15)
+    put(tX, marker(0.22), MK * 0.7); put(tX + 0.06, buzz(0.24, 150), 0.07); put(tX + 0.06, pop(700, 350, 0.09), 0.09)
+    wh(tFall, 0.75, 2000, 300, 1.0, 0.25, 0.4)
+put(TM['hangus'] - 0.55, pop(520, 980, 0.08), 0.06); put(TM['untung'] - 0.8, pop(540, 1000, 0.08), 0.06)
+# S4 · back into its slot, the MODAL tag clinks onto the hook and swings, stabilo on "modal"
+wh(TM['modal'] - 0.08, 0.7, 1800, 300, 1.0, 0.35, 0.5); put(TM['modal'] + 0.52, knock(140, 0.22), 0.15)
+wh(TM['modal'] + 0.2, 0.5, 500, 2200, 1.2, 0.6, 0.4); put(TM['modal'] + 0.68, clink(2400, 0.35), 0.06)
+for k, dt in enumerate((0.9, 1.3, 1.7)): put(TM['modal'] + dt, tick(0.02, 2800 - 300 * k), 0.025)
+put(TM['modal'] + 0.25, marker(0.34), MK); put(TM['nyangkut'] + 0.05, pop(480, 900, 0.08), 0.06)
+# "baru jadi biaya pas barangnya laku": BIAYA card in, two LAKU stamps, chips fly to BIAYA, counter clicks, boxes leave
+wh(TM['biaya'] - 0.05, 0.6, 2200, 500, 1.1, 0.35, 0.45); put(TM['biaya'] + 0.95, marker(0.32), MK)
+for i in range(2):
+    t0 = TM['laku'] + 0.05 + i * 0.22
+    wh(t0 + 0.02, 0.45, 500, 1800, 1.2, 0.5, 0.25)
+    put(t0 + 0.64, knock(120, 0.25), 0.18); put(t0 + 0.66, pop(320, 160, 0.12), 0.1)
+    wh(t0 + 0.07, 0.75, 800, 2600, 1.3, 0.5, 0.25); put(t0 + 0.8, tick(0.02, 3600), 0.08)
+    wh(t0 + 0.88, 0.7, 1800, 300, 1.0, 0.3, 0.4)
+put(TM['laku'] + 0.8, tick(0.016, 2600), 0.08); put(TM['laku'] + 1.02, tick(0.016, 2900), 0.08)
+# S5 · "dianggap biaya": all chips stream into BIAYA (ticks), the MODAL tag drops, BIAYA shakes; LABA card; "jeblok" drop
+for k in range(10):
+    t0 = TM['semua'] + 0.1 + k * 0.06
+    put(t0, whoosh(0.4, 900, 2800, 1.4, 0.5), W * 0.12); put(t0 + 0.68, tick(0.014, 3200 + 150 * (k % 4)), 0.05)
+wh(TM['semua'] + 0.2, 0.7, 1600, 250, 1.0, 0.3, 0.3)
+put(TM['semua'] + 0.75, tick(0.016, 2400), 0.09); put(TM['semua'] + 0.8, buzz(0.3, 110), 0.06)
+wh(TM['jeblok'] - 0.1, 0.6, 2200, 500, 1.1, 0.35, 0.45)
+put(TM['jeblok'] + 0.72, drop(0.75, 520, 70), 0.14); put(TM['jeblok'] + 1.12, knock(90, 0.35), 0.2); put(TM['jeblok'] + 1.14, boom(0.6, 120, 45), 0.08)
+# "padahal barangnya masih ada": cards swish out, the camera swings back, ten soft hops, a shimmer, MASIH DI RAK card
+wh(TM['padahal'] - 0.05, 0.6, 600, 2400, 1.1, 0.5, 0.45); wh(TM['padahal'] + 0.1, 0.9, 300, 1200, 0.9, 0.5, 0.3)
+for k in range(10): put(TM['padahal'] + 0.73 + k * 0.045, knock(170 + 10 * (k % 3), 0.12), 0.05)
+put(TM['padahal'] + 0.6, shimmer(0.9), 0.04)
+wh(TM['padahal'] + 0.75, 0.55, 2200, 500, 1.1, 0.35, 0.35); put(TM['padahal'] + 1.12, marker(0.3), MK)
 # band sweep -> brand
 for k in range(3): wh(TM['sol'] - 0.5 + k * 0.06, 0.45, 300 + 200 * k, 1800 + 400 * k, 1.1, 0.7, 0.5)
-# S4 · brand: box drops in, lid pops off, the pour (flutter + four landing pops), caption marker, box exits
-wh(TM['sol'] + 0.05, 0.5, 2000, 400, 1.0, 0.4, 0.5); put(TM['sol'] + 0.64, knock(130, 0.22), 0.14)
-put(TM['sol'] + 0.6, pop(380, 760, 0.1), 0.1); wh(TM['sol'] + 0.8, 0.45, 600, 2600, 1.2, 0.6, 0.35)
+# S6 · brand: the pembukuan card rises, hologram, three chips arc in, captions, the laba rugi lifts out, stamp + chime, shine
+wh(TM['sol'] + 0.3, 0.8, 250, 2000, 1.0, 0.45, 0.5)
 holo_fx(TM['sol'] + 0.55)
-put(TM['sol'] + 0.85, flutter(0.9), 0.07)
-for k in range(4): put(TM['sol'] + 1.0 + k * 0.24, whoosh(0.4, 900, 2600, 1.4, 0.5), W * 0.3); put(TM['sol'] + 1.56 + k * 0.24, pop(520 + 90 * k, 1050 + 120 * k, 0.08), 0.12)
-wh(TM['sol'] + 2.25, 0.5, 500, 1800, 1.0, 0.6, 0.35)
-put(TM['sol'] + 2.85, marker(0.42), MK)
-for g0 in (TM['sol'] + 2.9, TM['est'] + 1.7, TM['cta'] + 1.2, TM['bio'] + 1.4): put(g0, square_blips([1800, 900, 1500], 0.02), 0.02)
-# "estimasi pajak": the ledger recedes, the estimate card lifts out, odometer ticks, result chime, shine
-wh(TM['est'], 0.8, 1600, 300, 0.9, 0.5, 0.35); wh(TM['est'] + 0.2, 0.8, 250, 2400, 1.0, 0.45, 0.6)
-tt = TM['est'] + 0.45
-for j in range(14): put(tt, tick(0.012, 3600 + 120 * (j % 3)), 0.06); tt += 0.05 + 0.006 * j * j * 0.08
-put(TM['est'] + 1.75, chime((1318.5, 1760, 2637), 1.3), 0.07)
-put(TM['est'] + 1.35, marker(0.42), MK); put(TM['est'] + 2.2, shimmer(0.8), 0.03)
+for k in range(3):
+    t = TM['catat'] - 0.1 + k * 0.28
+    put(t, whoosh(0.45, 900, 2600, 1.4, 0.5), W * 0.35); put(t + 0.58, pop(520 + 90 * k, 1050 + 120 * k, 0.08), 0.12)
+put(TM['pemb'] + 0.5, marker(0.42), MK)
+for g0 in (TM['pemb'] + 0.9, TM['lr'] + 1.7, TM['cta'] + 1.2, TM['bio'] + 1.4): put(g0, square_blips([1800, 900, 1500], 0.02), 0.02)
+wh(TM['lr'], 0.8, 1600, 300, 0.9, 0.5, 0.35); wh(TM['lr'] + 0.18, 0.8, 250, 2400, 1.0, 0.45, 0.6)
+put(TM['bener'] - 0.1, marker(0.42), MK); put(TM['bener'] + 0.36, pop(600, 1300, 0.09), 0.14); put(TM['bener'] + 0.42, chime((1568, 2093, 2637), 1.1), 0.06)
+put(TM['bener'] + 0.5, marker(0.42), MK * 0.8); put(TM['bener'] + 0.6, shimmer(0.8), 0.03)
 # beam + iris -> end
 put(TM['end'] - 0.5, pop(500, 1000, 0.1), 0.12); wh(TM['end'] - 0.45, 0.5, 200, 2400, 1.0, 0.9, 1.0); put(TM['end'] - 0.02, boom(0.7, 140, 50), 0.2)
 holo_fx(TM['end'] + 0.55)

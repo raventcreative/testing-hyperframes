@@ -13,7 +13,7 @@ T = [
 W, H, G, RY = 360, 252, 14, 20
 xs = [(0, 360), (40, 320), (80, 280), (112, 248)]
 FILL = ["url(#g0)", "url(#g1)", "url(#g2)"]
-svg = '<svg class="fn" viewBox="0 -22 360 818"><defs>' \
+svg = '<svg class="fn" viewBox="0 -22 360 818" preserveAspectRatio="none"><defs>' \
       '<linearGradient id="g0" x1="0" x2="1"><stop offset="0" stop-color="#3f7ec4"/><stop offset="1" stop-color="#294b77"/></linearGradient>' \
       '<linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#294b77"/><stop offset="1" stop-color="#1a2d57"/></linearGradient>' \
       '<linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#16244d"/><stop offset="1" stop-color="#0a0d2c"/></linearGradient>' \
@@ -26,16 +26,16 @@ for i in range(3):
     svg += f'<path d="{body}" fill="{FILL[i]}"/><path d="{body}" fill="url(#sh)"/>'
     svg += f'<ellipse cx="{cx0}" cy="{y0}" rx="{rx0}" ry="{RY}" fill="{FILL[i]}"/><ellipse cx="{cx0}" cy="{y0}" rx="{rx0-10}" ry="{RY-6}" fill="#060820" opacity=".85"/>'
 svg += "</svg>"
-labels = "".join(f'<div class="tl t{i}" style="top:{(i*(H+G)+H*0.45+22)*0.9658:.0f}px"><b>{k}</b><span>{n}</span></div>' for i, (k, n, *_ ) in enumerate(T))
+labels = "".join(f'<div class="tl t{i}" style="top:{(i*(H+G)+H*0.45+22)/818*100:.2f}%"><b>{k}</b><span>{n}</span></div>' for i, (k, n, *_ ) in enumerate(T))
 cards = "".join(f'''<div class="cd c{i}"><div class="ch"><b>{k}</b><span>Goal: {short}</span></div><p class="gl">{goal}</p>
   <ul>{"".join(f"<li>{x}</li>" for x in items)}</ul></div>''' for i, (k, n, goal, short, items) in enumerate(T))
 CSS = (D / "style.css").read_text()
 (D / "carousel.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Content Funnel</title><style>{CSS}</style></head><body>
 <section class="slide">
  <div class="tp"><img class="logo" src="assets/logo_navy.png" alt="AIpreneur"><span class="save">Save this</span></div>
+ <div class="hero"><img src="assets/phone.png" alt=""></div>
  <div class="label">For AI and business creators</div>
  <h1>The Instagram<br><span>content funnel.</span></h1>
  <div class="body"><div class="fw">{svg}{labels}</div><div class="cards">{cards}</div></div>
- <div class="cta">Comment <b>“FUNNEL”</b> and I’ll send you the step-by-step plan.</div>
 </section></body></html>''')
 print("ok")

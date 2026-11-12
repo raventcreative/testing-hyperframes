@@ -1,12 +1,84 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s08" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s08-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s08-fc { left: 70px; top: 318px; width: 940px; height: 300px; border-radius: 34px; transform-origin: 50% 50%; }
+    #s08-fc > * { position: absolute; }
+    #s08-wx { left: 34px; top: 40px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #ffffff, #e3ebfa 70%); box-shadow: inset 0 0 0 1.5px #d6e0f2; }
+    #s08-sun { position: absolute; left: 34px; top: 30px; width: 110px; height: 110px; color: #e39a00; }
+    #s08-sun svg, #s08-cl svg { width: 100%; height: 100%; display: block; }
+    #s08-cl { position: absolute; left: 62px; top: 74px; width: 130px; height: 110px; color: #294b77; }
+    #s08-pc { position: absolute; left: 50px; top: 178px; width: 120px; text-align: center; font: 700 20px/26px Poppins, sans-serif; color: #2a55c4; white-space: nowrap; }
+    #s08-fc .eb { left: 290px; top: 40px; }
+    #s08-t1 { left: 288px; top: 66px; font: 700 34px/44px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    #s08-t2 { left: 288px; top: 108px; font: 700 50px/62px Poppins, sans-serif; white-space: nowrap; padding-right: 6px; }
+    #s08-sb { left: 290px; top: 178px; font: 400 22px/30px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s08-st { left: 690px; top: 570px; width: 0; height: 0; }
+    #s08-st .k-stamp { left: -196px; top: -34px; width: 392px; text-align: center; padding: 0; }
+    #s08-pa { left: 70px; top: 646px; width: 940px; height: 262px; border-radius: 34px; transform-origin: 50% 50%; }
+    #s08-pa > * { position: absolute; }
+    #s08-pa .eb { left: 30px; top: 26px; }
+    #s08-pt { left: 28px; top: 48px; font: 700 36px/48px Poppins, sans-serif; white-space: nowrap; padding-right: 4px; }
+    #s08-ps { left: 30px; top: 206px; font: 400 20px/28px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s08-rw { left: 22px; top: 114px; width: 600px; height: 86px; border-radius: 43px; box-shadow: 0 0 0 3px rgba(45,164,78,.0); }
+    #s08-ch { left: 660px; top: 30px; width: 250px; height: 200px; border-radius: 22px; background: #f4f7fc; box-shadow: inset 0 0 0 1.5px #e3e9f4; }
+    #s08-ch > * { position: absolute; }
+    #s08-ch b { left: 18px; top: 14px; font: 700 18px/24px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s08-ch svg { left: 210px; top: 14px; width: 22px; height: 22px; display: block; color: #294b77; }
+    .s08-bar { bottom: 26px; width: 44px; border-radius: 10px 10px 4px 4px; background: linear-gradient(180deg, #6fbf8e, #2da44e); transform-origin: 50% 100%; }
+    #s08-ok { left: 0; top: 0; width: 0; height: 0; }
+    #s08-ok div { position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; border-radius: 50%; background: #2da44e; color: #fff; box-shadow: 0 0 0 5px #ffffff, 0 8px 16px -6px rgba(31,122,58,.8); }
+    #s08-ok svg { position: absolute; left: 11px; top: 11px; width: 26px; height: 26px; display: block; }
+  </style>
+  <div id="root" data-composition-id="s08" data-width="1080" data-height="1920">
+    <div id="s08-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.623);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s08"] = tl;
+      // s08 "Ingat, ini prediksi, bukan jaminan. Penonton asli tetap penentunya."
+      // A forecast card (our metaphor): sun + cloud in a soft disc, "INGAT · Prediksi itu kayak / prakiraan cuaca · bantu siap-siap, bukan
+      // janji" · "jaminan.": the amber BUKAN JAMINAN stamp slams · "Penonton asli": a second card "SETELAH POSTING · Penentunya: penonton
+      // asli" with seven real people (colour discs + user glyph, not the AI viewers) and an "Insight asli" mini chart that grows ·
+      // "penentunya.": a green check + green ring around the people.
+      const S = K.scene("s08"), { tl, I, ft, L, $, pop, shake, out, D } = S;
+      const sv = K.svg;
+      const COL = ["#f2a65a", "#e5748a", "#6fbf8e", "#6f9bff", "#b58df0", "#f5c451", "#4fb5c9"];
+      let h = `<div class="k-a k-card" id="s08-fc"><div id="s08-wx"><div id="s08-sun">${sv("sun", 2)}</div><div id="s08-cl">${sv("cloud", 2)}</div><div id="s08-pc">prakiraan</div></div>` +
+        `<div class="k-eb eb">INGAT</div><div id="s08-t1">Prediksi itu kayak</div><div class="k-grad" id="s08-t2">prakiraan cuaca</div>` +
+        `<div id="s08-sb">bantu kamu siap-siap, bukan janji.</div></div>`;
+      h += `<div class="k-a" id="s08-st"><div class="k-stamp amber" id="s08-stp">BUKAN JAMINAN</div></div>`;
+      h += `<div class="k-a k-card" id="s08-pa"><div class="k-eb eb">SETELAH POSTING</div><div class="k-grad" id="s08-pt">Penentunya: penonton asli</div>` +
+        `<div id="s08-rw"></div>` + COL.map((c, i) => K.viewer("s08-p" + i, { x: 30 + i * 84, y: 120, s: 72, real: true, c })).join("") +
+        `<div id="s08-ps">Bandingkan prediksi dengan insight asli kamu.</div>` +
+        `<div id="s08-ch"><b>Insight asli</b>${sv("chart", 2.2)}` + [0.45, 0.7, 0.55, 0.9].map((v, i) => `<div class="s08-bar" id="s08-b${i}" style="left:${22 + i * 56}px;height:${Math.round(v * 130)}px"></div>`).join("") + `</div>` +
+        `<div id="s08-ok"><div id="s08-okd">${sv("check", 3)}</div></div></div>`;
+      $("s08-cam").innerHTML = h;
+      const cam = $("s08-cam"); I(cam, { opacity: 1, y: 0 });
+      const tIng = L("Ingat,"), tPre = L("prediksi,"), tBuk = L("bukan"), tJam = L("jaminan."), tPen = L("Penonton"), tAsl = L("asli"), tPnt = L("penentunya.");
+
+      const fc = $("s08-fc"); pop(fc, 0.0, { s0: 0.88, y: 24, d: 0.32 });
+      const sun = $("s08-sun"), cl = $("s08-cl"); I(sun, { y: 30, opacity: 0 }); I(cl, { x: -40, opacity: 0 });
+      ft(sun, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "back.out(1.6)" }, 0.12);
+      ft(cl, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 0.3);
+      ft(cl, { x: 0 }, { x: 8, duration: 1.2, yoyo: true, repeat: 1, ease: "sine.inOut" }, 0.75);
+      const t1 = $("s08-t1"), t2 = $("s08-t2"), sb = $("s08-sb"); I([t1, t2, sb], { opacity: 0, y: 12 });
+      ft(t1, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tIng);
+      ft(t2, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, tPre - 0.1);
+      ft(sb, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tBuk - 0.15);
+      const stp = $("s08-stp"); I(stp, { opacity: 0, scale: 1.9, rotation: -6 });
+      ft(stp, { opacity: 0, scale: 1.9 }, { opacity: 1, scale: 1, duration: 0.17, ease: "power4.in" }, tJam - 0.08);
+      shake(fc, tJam + 0.1, 6);
+      // the real audience
+      const pa = $("s08-pa"); pop(pa, tPen - 0.25, { s0: 0.88, y: 30, d: 0.3 });
+      COL.forEach((c, i) => pop($("s08-p" + i), tPen - 0.05 + i * 0.05, { s0: 0.3, y: 16, d: 0.24 }));
+      const ps = $("s08-ps"); I(ps, { opacity: 0 }); ft(ps, { opacity: 0 }, { opacity: 1, duration: 0.25 }, tAsl + 0.1);
+      [0, 1, 2, 3].forEach((i) => { const b = $("s08-b" + i); I(b, { scaleY: 0 }); ft(b, { scaleY: 0 }, { scaleY: 1, duration: 0.35, ease: "power2.out" }, tAsl - 0.05 + i * 0.08); });
+      const rw = $("s08-rw"); I(rw, { boxShadow: "0 0 0 3px rgba(45,164,78,0)" });
+      ft(rw, { boxShadow: "0 0 0 3px rgba(45,164,78,0)" }, { boxShadow: "0 0 0 4px rgba(45,164,78,.85)", duration: 0.25 }, tPnt - 0.1);
+      const ok = $("s08-ok"), okd = $("s08-okd"); I(ok, { x: 610, y: 120 }); I(okd, { opacity: 0, scale: 0.3 });
+      ft(okd, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.6)" }, tPnt);
+      out(cam);
+      S.done();
     })();
   </script>
 </template>

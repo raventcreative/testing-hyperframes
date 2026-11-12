@@ -164,9 +164,16 @@ Series gaps:
   - `mp30/rtA1.jpg`: kira-kira → B → comparison
   - `mp30/rtA2.jpg`: bands → brand → end card
 
-  A targeted pass after the last edits is `mp30/rtB0.jpg`. The real runtime matched the playwright preview in every frame;
-  no renderer-only bugs were found.
-- **`hyperframes validate`**: see the result in the final report (log `mp30/validate.log`).
+  Two targeted passes followed the last edits: `mp30/rtB0.jpg` (13 frames) and `mp30/rtC0.jpg` (5 frames). The real runtime
+  matched the playwright preview in every frame; no renderer-only bugs were found. Fixes made from these passes:
+  - the yellow flash over the navy laba rows (it read olive) became a pulse;
+  - the wall clock behind A's caption was removed;
+  - the brand tablet now starts at `sol + 0.04`, so the first brand frame is not empty;
+  - the number-free brand notes and the "Simulasi alur" chip on B's tablet were added.
+- **`hyperframes validate`**: 0 errors.
+  - The 4 warnings are GL "GPU stall due to ReadPixels" driver messages.
+  - There are 8 contrast notes, all on hidden or edge-on elements: the band marquee, the tent behind the tablet, and the chat
+    header of a paper lying flat. The tiny tablet chips were darkened afterwards.
 - **Lip-sync**: `tools/lipsync.py` writes `lipsync.js` (1982 frames at 60 fps, talking fraction 0.83).
 - **SFX**: `tools/sfx.py` writes `assets/audio/sfx.wav`, 34.6 s, fully synthesised, −27.1 dB RMS (Video 24 is −25.7). It
   contains:

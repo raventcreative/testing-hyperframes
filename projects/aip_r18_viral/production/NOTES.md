@@ -67,6 +67,10 @@ Sheets (JPG only, PNG dumps deleted) in `/tmp/claude-0/-home-user-testing-hyperf
   scene's fully built moment: clean (only hit = s01 valance text while still parked above the clipped stage, invisible).
 - `lint`: 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the kit). `validate`: 0 errors; kit warning "multiple instances
   of Three.js"; the 9 contrast notes of the first run (ruler/second numbers, kabur/betah labels) were fixed → 0 contrast warnings.
+- **Lead's fix (line 5 "Pembukaan" → "Berarti intro", VO take 3, timings re-pinned):** targeted real-runtime pass, 27 frames (first frame,
+  s04–s06 densely incl. both cuts ±0.03 s, two CTA frames, last frame 41.53): `qa2_part_0.jpg` (0–24.4 s) · `qa2_part_1.jpg` (24.9–41.53)
+  + `qa2/contact-sheet-*.jpg` — clean ("intro 4 detik" pill, KELAMAAN stamp, captions in sync, mascot eyes fine). The qa1 sheets above
+  show the first take (scene times have shifted by up to ~0.4 s since; visuals unchanged except the s05 pill text).
 - Cover: `thumbnail/COVER_VIRAL_1080x1920.png` (LIGHT; "PLUGIN CLAUDE CODE GRATIS · Tes reels-mu sebelum posting" + the GLADI RESIK stage,
   mascot + robot), preview `cover_final.jpg` in the scratch dir.
 

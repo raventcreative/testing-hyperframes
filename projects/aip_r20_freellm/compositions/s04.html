@@ -1,12 +1,94 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s04-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s04-glow { left: 40px; top: 300px; width: 1000px; height: 700px; }
+    #s04-app { left: 70px; top: 326px; width: 470px; height: 132px; border-radius: 28px; transform-origin: 50% 50%; font-family: Poppins, sans-serif; }
+    #s04-app > * { position: absolute; }
+    #s04-app .ic { left: 22px; top: 22px; width: 88px; height: 88px; border-radius: 26px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #8fd8ff; }
+    #s04-app .ic svg { position: absolute; left: 22px; top: 22px; width: 44px; height: 44px; display: block; }
+    #s04-app .tt { left: 130px; top: 20px; font: 700 34px/44px Poppins, sans-serif; white-space: nowrap; padding-right: 4px; }
+    #s04-app .ty { left: 131px; top: 70px; height: 40px; padding: 0 14px; border-radius: 12px; background: #0f1740; color: #ffffff; font: 400 19px/40px Poppins, sans-serif; white-space: nowrap; }
+    #s04-app .ty .k-caret { height: 20px; width: 9px; vertical-align: -3px; }
+    #s04-tok { left: 0; top: 0; width: 0; height: 0; }
+    #s04-tok i { position: absolute; left: -76px; top: -24px; width: 152px; height: 48px; border-radius: 24px; background: #3a6fe0; color: #ffffff; box-shadow: 0 12px 20px -10px rgba(10,13,44,.8);
+      font: 700 19px/48px Poppins, sans-serif; font-style: normal; text-align: left; padding-left: 46px; white-space: nowrap; }
+    #s04-tok i svg { position: absolute; left: 16px; top: 13px; width: 22px; height: 22px; display: block; }
+    #s04-arc { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+  </style>
+  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div id="s04-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.123);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s04"] = tl;
+      // s04 "Perintah Claude Code dioper ke jatah gratis model dari Google, Groq, Mistral, dan lainnya."
+      // "Perintah": the Claude Code card with a typed request · "Claude Code": the FreeLLMAPI box pops top-right · "dioper": a
+      // "perintah" token arcs from the app into the box (LEDs blink) · "jatah gratis": the "Sisa jatah gratis" panel slides up
+      // (our metaphor: checking the remaining free quota, like on a phone; bars are ILUSTRASI) · "Google / Groq / Mistral": each row
+      // gets its name + quota bar on its word; the token drops into the Google row → "melayani" · "dan lainnya": the "+ penyedia
+      // lain" row (Cerebras, OpenRouter, … from the README). END STATE: everything leaves.
+      const ID = "s04", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, typeD, shake } = S, tl = S.tl;
+      const tPer = L("Perintah"), tCC = L("Claude Code"), tDio = L("dioper"), tJat = L("jatah"), tGra = L("gratis"), tGo = L("Google,"), tGr = L("Groq,"), tMi = L("Mistral,"), tDan = L("dan"), tLai = L("lainnya.");
+      const ROWS = [{ n: "Google", pct: 0.86 }, { n: "Groq", pct: 0.72 }, { n: "Mistral", pct: 0.64 }, { n: "+ penyedia lain", more: true, sub: "Cerebras, OpenRouter, dll." }];
+      let h = `<div class="k-glow k-a" id="s04-glow"></div>`;
+      h += `<svg class="k-a" id="s04-arc" viewBox="0 0 1080 1920" fill="none"><path id="s04-ap" d="M540 392 C 600 300, 690 300, 736 372" stroke="#9fb3d6" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 12"/></svg>`;
+      h += `<div class="k-a k-card" id="s04-app"><div class="ic">${K.svg("square-terminal", 2)}</div><div class="tt k-grad">Claude Code</div><div class="ty" id="s04-ty"></div></div>`;
+      h += K.box("s04", { x: 752, y: 300, w: 250, h: 180 });
+      h += K.quota("s04", { x: 70, y: 504, w: 940, rows: ROWS, r0: 100, rs: 76, rh: 66, bar: 360 });
+      h += `<div class="k-a" id="s04-tok"><i>${K.svg("send", 2.4)}perintah</i></div>`;
+      $("s04-cam").innerHTML = h;
+      const glow = $("s04-glow"); I(glow, { opacity: 0.85, scale: 1 });
+      // app card + typed request
+      const app = $("s04-app"); pop(app, 0.0, { scale: 0.9, y: 30 }, 0.32, "back.out(1.6)");
+      typeD($("s04-ty"), "> bikinin halaman login", 0.12, tCC + 0.2, true);
+      // "Claude Code": the box
+      const bx = $("s04-bx"); pop(bx, tCC - 0.12, { scale: 0.6, y: -40 }, 0.36, "back.out(1.8)");
+      // "dioper": token arcs app → box
+      const tok = $("s04-tok"), ap = $("s04-ap");
+      I(ap, { opacity: 0 }); ft(ap, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tDio - 0.25);
+      ft(ap, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -42 }, duration: 1.5, ease: "none" }, tDio - 0.25);
+      I(tok, { opacity: 0, x: 470, y: 392, scale: 0.7 });
+      tl.set(tok, { opacity: 1 }, tDio - 0.12);
+      ft(tok, { x: 470 }, { x: 860, duration: 0.5, ease: "power1.inOut" }, tDio - 0.12);
+      ft(tok, { y: 392 }, { y: 300, duration: 0.25, ease: "power2.out" }, tDio - 0.12);
+      ft(tok, { y: 300 }, { y: 368, duration: 0.25, ease: "power2.in" }, tDio + 0.13);
+      ft(tok, { scale: 0.7 }, { scale: 1, duration: 0.5, ease: "power1.out" }, tDio - 0.12);
+      ft(bx, { scale: 1 }, { scale: 1.07, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tDio + 0.36);
+      [0, 1].forEach((k) => { const led = $("s04-led" + k); I(led, { opacity: 1 });
+        for (let j = 0; j < 6; j++) tl.set(led, { opacity: (j + k) % 2 ? 0.3 : 1 }, tDio + 0.36 + j * 0.1); tl.set(led, { opacity: 1 }, tDio + 0.98); });
+      ft(ap, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tDio + 0.5);
+      // token waits on top of the box (hidden), then drops into the Google row
+      tl.set(tok, { opacity: 0 }, tDio + 0.38);
+      // "jatah gratis": the panel slides up; rows are empty tracks until their name is spoken
+      const q = $("s04-q"); pop(q, tJat - 0.16, { y: 80, scale: 0.97 }, 0.4, "power3.out");
+      const ht = q.querySelector(".ht"); I(ht, { scale: 1, transformOrigin: "0% 60%" });
+      ft(ht, { scale: 1 }, { scale: 1.06, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tGra - 0.04);
+      const tN = [tGo, tGr, tMi, tDan];
+      ROWS.forEach((r, i) => {
+        const row = $("s04-qr" + i), pn = row.querySelector(".pn"), t = tN[i] - 0.14;
+        I(pn, { opacity: 0, x: -14 }); ft(pn, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.22, ease: "power2.out" }, t);
+        ft(row, { scale: 1 }, { scale: 1.025, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, t + 0.06);
+        I($("s04-rg" + i), { opacity: 0 });
+        if (r.more) { const mo = row.querySelector(".mo"); I(mo, { opacity: 0 }); ft(mo, { opacity: 0 }, { opacity: 1, duration: 0.25 }, tLai - 0.05); return; }
+        const fl = $("s04-qf" + i); I(fl, { scaleX: 0 }); I($("s04-ql" + i), { opacity: 0 });
+        ft(fl, { scaleX: 0 }, { scaleX: r.pct, duration: 0.45, ease: "power2.out" }, t + 0.05);
+        I($("s04-qs" + i + "-idle"), { opacity: 0 }); I($("s04-qs" + i + "-on"), { opacity: 0 }); I($("s04-qs" + i + "-bad"), { opacity: 0 });
+        ft($("s04-qs" + i + "-idle"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2)" }, t + 0.2);
+      });
+      // the token drops into the Google row → "melayani" + ring
+      const ry0 = 504 + 100 + 33;
+      I(tok, { opacity: 0, x: 860, y: 368, scale: 1 });
+      tl.set(tok, { opacity: 1, x: 877, y: 420 }, tGo - 0.02);
+      ft(tok, { y: 420 }, { y: ry0, duration: 0.3, ease: "power2.in" }, tGo - 0.02);
+      tl.set(tok, { opacity: 0 }, tGo + 0.3);
+      tl.set($("s04-qs0-idle"), { opacity: 0 }, tGo + 0.3);
+      ft($("s04-qs0-on"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.4)" }, tGo + 0.3);
+      ft($("s04-rg0"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tGo + 0.3);
+      shake($("s04-qr0"), tGo + 0.32, 4);
+      // ================================================================ exit → s05
+      const tOut = D - 0.28;
+      K.out(S, [app, bx, q], tOut);
+      S.done();
     })();
   </script>
 </template>

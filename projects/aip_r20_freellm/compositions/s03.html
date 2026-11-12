@@ -1,12 +1,87 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s03-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s03-glow { left: 40px; top: 300px; width: 1000px; height: 700px; }
+    #s03-app { left: 70px; top: 330px; height: 70px; padding: 0 26px 0 74px; border-radius: 35px; font: 700 28px/70px Poppins, sans-serif; }
+    #s03-app svg { left: 22px; top: 18px; width: 34px; height: 34px; }
+    /* the request bubble: Claude Code → box */
+    #s03-bub { left: 452px; top: 318px; width: 558px; height: 96px; border-radius: 26px 26px 26px 8px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #ffffff;
+      box-shadow: 0 20px 34px -20px rgba(10,13,44,.85); transform-origin: 0% 100%; font-family: Poppins, sans-serif; }
+    #s03-bub > * { position: absolute; white-space: nowrap; }
+    #s03-bub .k { left: 26px; top: 14px; font: 700 13px/18px Poppins, sans-serif; letter-spacing: .16em; color: #8fd8ff; }
+    #s03-bub .v { left: 24px; top: 34px; font: 700 34px/48px Poppins, sans-serif; }
+    #s03-bub .v span { font-weight: 400; color: #c9d6f2; }
+    #s03-wire { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    #s03-env { left: 0; top: 0; width: 0; height: 0; }
+    #s03-env i { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 16px; background: #3a6fe0; color: #ffffff; box-shadow: 0 10px 18px -8px rgba(10,13,44,.8); }
+    #s03-env i svg { position: absolute; left: 13px; top: 13px; width: 26px; height: 26px; display: block; }
+    #s03-ok { left: 548px; top: 462px; height: 58px; padding: 0 22px 0 60px; border-radius: 29px; background: #2da44e; color: #ffffff; font: 700 24px/58px Poppins, sans-serif; white-space: nowrap;
+      box-shadow: 0 0 0 5px #ffffff, 0 16px 26px -12px rgba(31,122,58,.8); transform-origin: 20% 50%; }
+    #s03-ok svg { position: absolute; left: 20px; top: 15px; width: 28px; height: 28px; display: block; }
+    #s03-c1 { left: 80px; top: 862px; }
+    #s03-c2 { left: 556px; top: 862px; }
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div id="s03-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.157);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s03"] = tl;
+      // s03 "Dia jalan di laptopmu, ngerti format API Claude."
+      // Starts on s02's box (360,540 · 360×240) · "Dia jalan di laptopmu": a laptop rises, the box settles onto its screen,
+      // chip "berjalan di laptopmu" · "ngerti": a "Claude Code" pill + its request bubble ("POST /v1/messages") · "format API":
+      // an envelope travels along a wire into the box · "Claude.": the box answers with a green "ngerti" badge + chip "juga
+      // paham format OpenAI" (README). END STATE: everything leaves.
+      const ID = "s03", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, shake } = S, tl = S.tl;
+      const tDia = L("Dia"), tLap = L("laptopmu,"), tNge = L("ngerti"), tFor = L("format"), tAPI = L("API"), tCl = L("Claude.");
+      let h = `<div class="k-glow k-a" id="s03-glow"></div>`;
+      h += K.laptop("s03", { x: 180, y: 440, w: 640, h: 380 });
+      h += `<svg class="k-a" id="s03-wire" viewBox="0 0 1080 1920" fill="none"><path id="s03-wp" d="M250 404 C 250 470, 540 420, 540 520" stroke="#9fb3d6" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 12" pathLength="1"/></svg>`;
+      h += K.box("s03", { x: 360, y: 540, w: 360, h: 240 });
+      h += `<div class="k-chip navy" id="s03-app">${K.svg("square-terminal", 2.2)}Claude Code</div>`;
+      h += `<div class="k-a" id="s03-bub"><div class="k">KIRIM PERMINTAAN</div><div class="v">POST <span>/v1/messages</span></div></div>`;
+      h += `<div class="k-a" id="s03-env"><i>${K.svg("send", 2.2)}</i></div>`;
+      h += `<div class="k-a" id="s03-ok">${K.svg("check", 3)}ngerti format API Claude</div>`;
+      h += `<div class="k-chip ok" id="s03-c1">${K.svg("laptop", 2.2)}Berjalan di laptopmu</div>`;
+      h += `<div class="k-chip info" id="s03-c2">${K.svg("languages", 2.2)}Juga paham format OpenAI</div>`;
+      $("s03-cam").innerHTML = h;
+      const glow = $("s03-glow"); I(glow, { opacity: 0.85, scale: 1 });
+      // "Dia jalan di laptopmu": laptop rises, the box shrinks onto its screen (centre of screen ≈ 540,630)
+      const lp = $("s03-lp"), bx = $("s03-bx");
+      pop(lp, Math.max(0.02, tDia - 0.15), { y: 420, scale: 0.9, opacity: 1 }, 0.5, "power3.out");
+      I(bx, { opacity: 1, x: 0, y: 0, scale: 1, transformOrigin: "50% 50%" });
+      ft(bx, { y: 0, scale: 1 }, { y: -30, scale: 0.86, duration: 0.5, ease: "power3.inOut" }, Math.max(0.02, tDia - 0.05));
+      pop($("s03-c1"), tLap - 0.1, { scale: 0.5, y: 30 }, 0.3, "back.out(2.2)");
+      ft(bx, { rotation: 0 }, { rotation: 3, duration: 0.09, yoyo: true, repeat: 3, ease: "sine.inOut" }, tLap + 0.05);
+      [0, 1].forEach((k) => { const led = $("s03-led" + k); I(led, { opacity: 1 });
+        for (let j = 0; j < 8; j++) tl.set(led, { opacity: (j + k) % 2 ? 0.3 : 1 }, tLap + j * 0.1); tl.set(led, { opacity: 1 }, tLap + 0.82); });
+      // "ngerti": the Claude Code pill + its request bubble
+      pop($("s03-app"), tNge - 0.3, { scale: 0.5, x: -40, y: 0 }, 0.3, "back.out(2)");
+      const bub = $("s03-bub");
+      I(bub, { opacity: 0, scale: 0.3 });
+      ft(bub, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(1.9)" }, tNge - 0.05);
+      // "format API": the envelope travels along the wire into the box
+      const wp = $("s03-wp"), env = $("s03-env");
+      I(wp, { opacity: 0 }); ft(wp, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tFor - 0.3);
+      ft(wp, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -2 }, duration: D - tFor + 0.3, ease: "none" }, tFor - 0.3);
+      I(env, { opacity: 0, x: 250, y: 404, scale: 0.6 });
+      tl.set(env, { opacity: 1 }, tFor - 0.1);
+      ft(env, { x: 250 }, { x: 540, duration: 0.5, ease: "power1.inOut" }, tFor - 0.1);
+      ft(env, { y: 404 }, { y: 540, duration: 0.5, ease: "power2.in" }, tFor - 0.1);
+      ft(env, { scale: 0.6 }, { scale: 1, duration: 0.5, ease: "power1.out" }, tFor - 0.1);
+      ft(env, { opacity: 1 }, { opacity: 0, duration: 0.08 }, tFor + 0.4);
+      ft(bx, { scale: 0.86 }, { scale: 0.92, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tFor + 0.38);
+      // "Claude.": the box understands → badge + OpenAI chip
+      const ok = $("s03-ok");
+      I(ok, { opacity: 0, scale: 0.3 });
+      ft(ok, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.6)" }, tAPI + 0.05);
+      pop($("s03-c2"), tCl - 0.05, { scale: 0.5, y: 30 }, 0.3, "back.out(2.2)");
+      // ================================================================ exit → s04
+      const tOut = D - 0.28;
+      K.out(S, [$("s03-app"), bub, ok, lp, $("s03-c1"), $("s03-c2")], tOut);
+      ft(bx, { opacity: 1, y: -30 }, { opacity: 0, y: 16, duration: 0.24, ease: "power2.in" }, tOut + 0.1);
+      I($("s03-wire"), { opacity: 1 }); ft($("s03-wire"), { opacity: 1 }, { opacity: 0, duration: 0.15 }, tOut);
+      S.done();
     })();
   </script>
 </template>

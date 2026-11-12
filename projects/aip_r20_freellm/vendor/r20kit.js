@@ -70,6 +70,9 @@
   .k-qr .tr { left: 210px; top: 32px; width: 380px; height: 14px; border-radius: 7px; background: #e1e8f3; overflow: hidden; }
   .k-qr .fl { position: absolute; left: 0; top: 0; width: 380px; height: 14px; border-radius: 7px; background: linear-gradient(90deg, #2da44e, #5fd07f); transform-origin: 0 50%; }
   .k-qr .fl.lo { background: linear-gradient(90deg, #d9534f, #f08a6a); }
+  .k-qr.more { background: transparent; box-shadow: inset 0 0 0 2px #d5deec; }
+  .k-qr.more .pn { color: #294b77; }
+  .k-qr .mo { right: 26px; top: 0; font: 400 19px/78px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
   .k-qr .st { right: 18px; top: 19px; height: 40px; padding: 0 16px 0 40px; border-radius: 20px; font: 700 17px/40px Poppins, sans-serif; white-space: nowrap; }
   .k-qr .st svg { position: absolute; left: 14px; top: 11px; width: 18px; height: 18px; display: block; }
   .k-qr .st.idle { background: #ffffff; color: #5d6f8f; box-shadow: inset 0 0 0 1.5px #dbe3f0; }
@@ -110,8 +113,9 @@
 
   // Claude Code app window. o: {x, y, w, h, tag, lines: [html...], ty: true}
   const term = (p, o) => {
-    const lines = (o.lines || []).map((l, i) => `<div class="ln" id="${p}-l${i}" style="top:${18 + i * 38}px">${l}</div>`).join("");
-    const ty = o.ty ? `<div class="ty" id="${p}-ty" style="top:${18 + (o.lines || []).length * 38}px"></div>` : "";
+    const fs = o.fs || 23, lh = o.lh || 38, t0 = o.t0 == null ? 18 : o.t0, f = `font-size:${fs}px;line-height:${Math.round(fs * 1.48)}px`;
+    const lines = (o.lines || []).map((l, i) => `<div class="ln" id="${p}-l${i}" style="top:${t0 + i * lh}px;${f}">${l}</div>`).join("");
+    const ty = o.ty ? `<div class="ty" id="${p}-ty" style="top:${t0 + (o.lines || []).length * lh}px;${f}"></div>` : "";
     return `<div class="k-tm k-card" id="${p}-tm" style="left:${o.x}px;top:${o.y}px;width:${o.w}px;height:${o.h}px">` +
       `<div class="bar"></div><div class="dots"><i style="left:0"></i><i style="left:22px"></i><i style="left:44px"></i></div>` +
       `<div class="ti">${svg("square-terminal", 2.2)}Claude Code</div>${o.tag ? `<div class="tg" id="${p}-tg">${o.tag}</div>` : ""}` +
@@ -130,14 +134,17 @@
   // "Sisa jatah gratis" panel. o: {x, y, w, rows: [{n, pct}], sub}
   const quota = (p, o) => {
     const rows = o.rows || P;
-    let h = `<div class="k-q k-card" id="${p}-q" style="left:${o.x}px;top:${o.y}px;width:${o.w}px;height:${116 + rows.length * 92}px">` +
+    const rh = o.rh || 78, rs = o.rs || 92, r0 = o.r0 || 112, sty = (rh - 40) / 2;
+    let h = `<div class="k-q k-card" id="${p}-q" style="left:${o.x}px;top:${o.y}px;width:${o.w}px;height:${r0 + rows.length * rs + 4}px">` +
       `<div class="hi">${svg("gauge", 2.2)}</div><div class="ht k-grad">Sisa jatah gratis</div><div class="hs">${o.sub || "per penyedia · reset harian"}</div><div class="ex">ILUSTRASI</div>`;
     rows.forEach((r, i) => {
-      h += `<div class="k-qr" id="${p}-qr${i}" style="top:${112 + i * 92}px"><div class="rg" id="${p}-rg${i}"></div><div class="pn">${r.n}</div>` +
-        `<div class="tr" style="width:${o.bar || 380}px"><div class="fl${r.lo ? " lo" : ""}" id="${p}-qf${i}" style="width:${o.bar || 380}px"></div></div>` +
-        `<div class="st idle" id="${p}-qs${i}-idle">${svg("clock-3", 2.4)}siap</div>` +
-        `<div class="st on" id="${p}-qs${i}-on">${svg("zap", 2.4)}melayani</div>` +
-        `<div class="st bad" id="${p}-qs${i}-bad">${svg("battery-low", 2.4)}habis</div></div>`;
+      const ss = `style="top:${sty}px"`;
+      h += `<div class="k-qr${r.more ? " more" : ""}" id="${p}-qr${i}" style="top:${r0 + i * rs}px;height:${rh}px"><div class="rg" id="${p}-rg${i}"></div><div class="pn" style="line-height:${rh}px">${r.n}</div>` +
+        (r.more ? `<div class="mo" style="line-height:${rh}px">${r.sub || ""}</div>` :
+        `<div class="tr" style="width:${o.bar || 380}px;top:${rh / 2 - 7}px"><div class="fl" id="${p}-qf${i}" style="width:${o.bar || 380}px"></div><div class="fl lo" id="${p}-ql${i}" style="width:${o.bar || 380}px"></div></div>` +
+        `<div class="st idle" id="${p}-qs${i}-idle" ${ss}>${svg("clock-3", 2.4)}siap</div>` +
+        `<div class="st on" id="${p}-qs${i}-on" ${ss}>${svg("zap", 2.4)}melayani</div>` +
+        `<div class="st bad" id="${p}-qs${i}-bad" ${ss}>${svg("battery-low", 2.4)}habis</div>`) + `</div>`;
     });
     return h + `</div>`;
   };

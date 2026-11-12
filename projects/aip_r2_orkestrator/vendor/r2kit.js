@@ -45,7 +45,7 @@
   .rk-ht { position: relative; font: 700 37px/50px Poppins, sans-serif; letter-spacing: -0.015em; }
   .rk-hr { position: absolute; left: 113px; top: 66px; height: 28px; display: flex; align-items: center; gap: 8px; font: 400 19px/28px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
   .rk-hos { position: absolute; right: 28px; top: 34px; height: 40px; padding: 0 18px 0 42px; border-radius: 20px; background: #e9f7ee; box-shadow: inset 0 0 0 1.5px #bfe5c9;
-    font: 700 16px/40px Poppins, sans-serif; color: #1f8a3e; white-space: nowrap; letter-spacing: .02em; }
+    font: 700 16px/40px Poppins, sans-serif; color: #17733a; white-space: nowrap; letter-spacing: .02em; }
   .rk-hos .rk-ic { position: absolute; left: 14px; top: 10px; }
   .rk-hdv { position: absolute; left: 28px; right: 28px; top: 112px; height: 2px; background: #e9eef7; }
   `;

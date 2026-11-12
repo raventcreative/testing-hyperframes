@@ -50,11 +50,11 @@
   // example listings (illustrative only): t title, m meta, k = fail reason key (null = passes), L initial, c colour
   const JOBS = [
     { t: "Frontend Developer", m: "Startup SaaS · Remote global", L: "F", c: "#3a6fe0", k: null, s: 92 },
-    { t: "Senior Accountant", m: "Wajib lisensi CPA", L: "A", c: "#8a97ad", k: "skill" },
-    { t: "React Developer", m: "Agensi digital · Remote APAC", L: "R", c: "#2da44e", k: null, s: 88 },
+    { t: "Senior Accountant", m: "Wajib lisensi CPA", L: "A", c: "#6b7a93", k: "skill" },
+    { t: "React Developer", m: "Agensi digital · Remote APAC", L: "R", c: "#218a3e", k: null, s: 88 },
     { t: "Data Engineer", m: "Remote · khusus warga AS", L: "D", c: "#7c5cff", k: "id" },
     { t: "Admin Online", m: "Bayar biaya daftar dulu", L: "?", c: "#e5484d", k: "scam" },
-    { t: "UI Engineer", m: "E-commerce · Remote Asia", L: "U", c: "#f4b400", k: null, s: 81 },
+    { t: "UI Engineer", m: "E-commerce · Remote Asia", L: "U", c: "#f4b400", tc: "#0a0d2c", k: null, s: 81 },
   ];
   const chip = (p, i) => {
     const m = M[i], x = RAIL.left[i];
@@ -84,12 +84,12 @@
   .r4-chip .ok svg { position: absolute; left: 6px; top: 6px; width: 18px; height: 18px; }
   .r4-job { position: absolute; width: 420px; height: 76px; transform-origin: 50% 50%; font-family: Poppins, sans-serif; }
   .r4-job .jb { position: absolute; inset: 0; border-radius: 20px; background: linear-gradient(180deg, #ffffff, #f7f9fd); box-shadow: 0 16px 28px -18px rgba(10,13,44,.5), 0 0 0 1.5px rgba(10,13,44,.06); }
-  .r4-job .jl { position: absolute; left: 14px; top: 14px; width: 48px; height: 48px; border-radius: 14px; background: var(--jc); color: #ffffff; font: 700 24px/48px Poppins, sans-serif; text-align: center; }
+  .r4-job .jl { position: absolute; left: 14px; top: 14px; width: 48px; height: 48px; border-radius: 14px; background: var(--jc); color: var(--jt); font: 700 24px/48px Poppins, sans-serif; text-align: center; }
   .r4-job .jt { position: absolute; left: 76px; top: 12px; font: 700 21px/28px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
   .r4-job .jm { position: absolute; left: 76px; top: 40px; font: 400 16px/22px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
   .r4-grad { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
   `;
-  const job = (id, j, x, y) => `<div class="r4-job" id="${id}" style="left:${x}px;top:${y}px;--jc:${j.c}"><div class="jb"></div><div class="jl">${j.L}</div><b class="jt">${j.t}</b><span class="jm">${j.m}</span></div>`;
+  const job = (id, j, x, y) => `<div class="r4-job" id="${id}" style="left:${x}px;top:${y}px;--jc:${j.c};--jt:${j.tc || "#ffffff"}"><div class="jb"></div><div class="jl">${j.L}</div><b class="jt">${j.t}</b><span class="jm">${j.m}</span></div>`;
   // ---------------------------------------------------------------- THE JOB BOARD (s07 · s08 · s09): one local page Claude builds
   // Absolute frame: left 70, top 316, 940 × 614 (bottom 930). ids: p-bd (frame) · p-bt (title) · p-bpv ("Pribadi" chip) · p-bav{0..2}
   // (team avatars) · p-bf{0..2} (filter chips) · p-br{q} (row) · p-brg{q} (row ring arc) · p-bap{q} (Apply button) · p-bhl{q} (row
@@ -126,7 +126,7 @@
   .r4-bd .ad svg { position: absolute; left: 14px; top: 8px; width: 20px; height: 20px; color: #5d6f8f; display: block; }
   .r4-bd .ad span { position: absolute; left: 44px; top: 0; font: 400 17px/36px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
   .r4-bd .ex { position: absolute; right: 24px; top: 14px; height: 30px; padding: 0 14px; border-radius: 15px; background: #ffffff; box-shadow: inset 0 0 0 1.5px #d9e2f0;
-    font: 700 13px/30px Poppins, sans-serif; letter-spacing: .14em; color: #8a97ad; white-space: nowrap; }
+    font: 700 13px/30px Poppins, sans-serif; letter-spacing: .14em; color: #5d6f8f; white-space: nowrap; }
   .r4-bd .hi { position: absolute; left: 24px; top: 78px; width: 56px; height: 56px; border-radius: 17px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #fff; box-shadow: 0 10px 18px -10px rgba(10,13,44,.8); }
   .r4-bd .hi svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; display: block; }
   .r4-bd .tt { position: absolute; left: 96px; top: 72px; font: 700 32px/40px Poppins, sans-serif; white-space: nowrap; letter-spacing: -.01em; }
@@ -136,7 +136,7 @@
   .r4-bd .st { position: absolute; left: 97px; top: 112px; font: 400 17px/24px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
   .r4-bd .av { position: absolute; top: 82px; width: 50px; height: 50px; border-radius: 50%; background: #ffffff; box-shadow: inset 0 0 0 3px var(--c), 0 0 0 3px #ffffff, 0 6px 12px -6px rgba(10,13,44,.5); }
   .r4-bd .av i { position: absolute; left: 12px; top: 12px; width: 26px; height: 26px; background: url(assets/icons/lobe-claude-color.svg) center / contain no-repeat; }
-  .r4-bd .fc { position: absolute; top: 158px; height: 42px; padding: 0 16px 0 44px; border-radius: 21px; background: #eaf7ee; color: #218a3e; font: 700 16px/42px Poppins, sans-serif; white-space: nowrap; }
+  .r4-bd .fc { position: absolute; top: 158px; height: 42px; padding: 0 16px 0 44px; border-radius: 21px; background: #eaf7ee; color: #1a7434; font: 700 16px/42px Poppins, sans-serif; white-space: nowrap; }
   .r4-bd .fc svg { position: absolute; left: 15px; top: 11px; width: 20px; height: 20px; display: block; }
   .r4-bd .rw { position: absolute; left: 24px; width: 892px; height: 100px; border-radius: 22px; background: #ffffff; box-shadow: 0 12px 22px -18px rgba(10,13,44,.5), 0 0 0 1.5px #e3eaf5; transform-origin: 50% 50%; }
   .r4-bd .rw .hl { position: absolute; left: -3px; top: -3px; right: -3px; bottom: -3px; border-radius: 25px; box-shadow: 0 0 0 3px #f4b400, 0 14px 30px -10px rgba(244,180,0,.55); opacity: 0; }
@@ -144,7 +144,7 @@
   .r4-bd .rw .sc { position: absolute; left: 18px; top: 18px; width: 64px; font: 700 17px/64px Poppins, sans-serif; color: #0a0d2c; text-align: center; }
   .r4-bd .rw .t { position: absolute; left: 100px; top: 20px; font: 700 22px/30px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
   .r4-bd .rw .m { position: absolute; left: 100px; top: 52px; font: 400 16px/24px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
-  .r4-bd .rw .dc { position: absolute; top: 30px; height: 40px; padding: 0 14px 0 36px; border-radius: 20px; background: #eaf7ee; color: #218a3e; font: 700 15px/40px Poppins, sans-serif; white-space: nowrap; }
+  .r4-bd .rw .dc { position: absolute; top: 30px; height: 40px; padding: 0 14px 0 36px; border-radius: 20px; background: #eaf7ee; color: #1a7434; font: 700 15px/40px Poppins, sans-serif; white-space: nowrap; }
   .r4-bd .rw .dc svg { position: absolute; left: 13px; top: 11px; width: 17px; height: 17px; display: block; }
   .r4-bd .rw .ap { position: absolute; left: 730px; top: 24px; width: 144px; height: 52px; border-radius: 26px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #ffffff;
     font: 700 19px/52px Poppins, sans-serif; text-align: center; white-space: nowrap; box-shadow: 0 12px 20px -12px rgba(10,13,44,.75); transform-origin: 50% 50%; }

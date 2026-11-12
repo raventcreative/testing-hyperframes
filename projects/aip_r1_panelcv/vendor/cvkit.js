@@ -51,7 +51,7 @@
     .${P}-cv-nm { left: 126px; top: 30px; font: 700 32px/40px Poppins, sans-serif; color: #0a0d2c; letter-spacing: -.015em; white-space: nowrap; }
     .${P}-cv-ps { left: 126px; top: 72px; font: 400 22px/30px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
     .${P}-cv-hr { left: 32px; top: 124px; width: 396px; height: 2px; background: #e1e8f3; }
-    .${P}-cv-h { left: 32px; font: 700 16px/20px Poppins, sans-serif; letter-spacing: .16em; color: #0a9ccc; white-space: nowrap; }
+    .${P}-cv-h { left: 32px; font: 700 16px/20px Poppins, sans-serif; letter-spacing: .16em; color: #0878a3; white-space: nowrap; }
     .${P}-cv-t { left: 32px; width: 396px; font: 400 21px/29px Poppins, sans-serif; color: #0a0d2c; }
     .${P}-cv-t.n { white-space: nowrap; }
     .${P}-cv-t.b { font-weight: 700; }

@@ -1,12 +1,194 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div data-hf-id="hf-70dg" id="root" data-composition-id="t5" data-width="1080" data-height="1920"></div>
+  <style>
+    /* t5 img2threejs (33.80–41.27) "Kelima, img2threejs. Kasih satu foto motor, Claude bangun ulang jadi model 3D interaktif, cuma pakai kode."
+       Frame 0 = t4's end (header 04 only). Header rolls 04 → 05. A dark three.js viewport slides in with a spinning placeholder cube;
+       "Kasih satu foto motor" = a polaroid "motor.jpg" (a flat side-view illustration of the same procedural model) drops in;
+       "Claude bangun ulang" = a code card types Three.js geometry calls; the viewport builds the bike pass by pass (blockout → form →
+       material: passes named in the img2threejs README pipeline); "interaktif" = a drag cursor orbits it; "cuma pakai kode" = "tanpa file 3D · semua kode".
+       The bike is a tiny deterministic software projection drawn into SVG paths on every hf-seek (pure function of time, like the
+       robot/mascot hosts). Last 0.25 s: the workspace drops out (s07 starts with only the header). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #t5-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #t5-vp { position: absolute; left: 0; top: 0; width: 592px; height: 450px; border-radius: 28px; overflow: hidden;
+      background: radial-gradient(120% 90% at 50% 30%, #13225a 0%, #0a1338 55%, #060b26 100%); box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.30), 0 26px 54px rgba(2,6,26,.6); }
+    #t5-vp svg.m { position: absolute; left: 0; top: 0; width: 592px; height: 450px; }
+    #t5-vp .lab { position: absolute; left: 18px; top: 16px; height: 34px; padding: 0 12px 0 8px; border-radius: 17px; background: rgba(1,204,247,.12); display: flex; align-items: center; gap: 8px;
+      box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.45); font: 700 20px/34px Poppins; color: #6adfff; white-space: nowrap; }
+    #t5-vp .lab svg { width: 20px; height: 20px; }
+    .t5-ps { position: absolute; top: 398px; height: 34px; padding: 0 12px; border-radius: 17px; font: 700 20px/34px Poppins; color: #7f9cbf; white-space: nowrap;
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18); }
+    .t5-psf { position: absolute; top: 398px; height: 34px; border-radius: 17px; background: #01ccf7; box-shadow: 0 0 16px rgba(1,204,247,.6); }
+    .t5-psf span { display: block; padding: 0 12px; font: 700 20px/34px Poppins; color: #0b1440; white-space: nowrap; }
+    #t5-code-chip { position: absolute; left: 0; top: 0; height: 44px; padding: 0 18px 0 12px; border-radius: 22px; background: #2da44e; display: flex; align-items: center; gap: 10px;
+      font: 700 22px/44px Poppins; color: #fff; white-space: nowrap; box-shadow: 0 12px 26px rgba(2,6,26,.5); }
+    #t5-code-chip svg { width: 24px; height: 24px; }
+    #t5-photo { position: absolute; left: 0; top: 0; width: 340px; height: 262px; border-radius: 16px; background: #ffffff; box-shadow: 0 24px 50px rgba(2,6,26,.55); transform-origin: 50% 50%; }
+    #t5-photo .im { position: absolute; left: 12px; top: 12px; width: 316px; height: 196px; border-radius: 8px; overflow: hidden; background: linear-gradient(180deg, #eef1f5 0%, #dde3ea 62%, #c9d1db 100%); }
+    #t5-photo .cap { position: absolute; left: 16px; top: 214px; display: flex; align-items: center; gap: 8px; font: 700 22px/40px Poppins; color: #0a0d2c; }
+    #t5-photo .cap svg { width: 24px; height: 24px; color: #0aa7d6; }
+    #t5-code { position: absolute; left: 0; top: 0; width: 340px; height: 172px; border-radius: 22px; background: rgba(5,9,32,.96); overflow: hidden;
+      box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.3), 0 20px 44px rgba(2,6,26,.55); }
+    .t5-cl { position: absolute; left: 18px; height: 28px; font: 400 20px/28px Poppins; color: #e3edfa; white-space: nowrap; }
+    .t5-cl .k { color: #c7a6ff; } .t5-cl .f { color: #6adfff; } .t5-cl .c { color: #6f86a8; }
+    .t5-cur { position: absolute; left: 0; top: 0; width: 40px; height: 40px; color: #fff; filter: drop-shadow(0 4px 6px rgba(0,0,0,.55)); }
+    .t5-cur svg { width: 40px; height: 40px; fill: #0b1440; }
+    #t5-rot { position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; background: #01ccf7; color: #0b1440; }
+    #t5-rot svg { position: absolute; left: 6px; top: 6px; width: 22px; height: 22px; }
+    #t5-flash { position: absolute; left: 0; top: 0; width: 592px; height: 450px; background: radial-gradient(circle at 50% 50%, rgba(160,240,255,.55), rgba(160,240,255,0) 60%); }
+  </style>
+  <div id="root" data-composition-id="t5" data-width="1080" data-height="1920">
+    <div id="t5-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 7.457);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["t5"] = tl;
+      const K = window.R3K, D = 7.4667, P = "t5";
+      const S = K.scene(P, D), { tl, ft, I, wt, $, T0 } = S;
+      const z = $("t5-zone");
+      const NS = "http://www.w3.org/2000/svg";
+      // ================================================================ the procedural bike (units; x forward, y up, z width)
+      const RW = [-1.0, 0.42], FW = [1.05, 0.42], R = 0.42, RI = 0.28, TW = 0.09;
+      const BODY = [[-0.55, 0.88], [-0.15, 1.02], [0.35, 1.08], [0.78, 0.98], [0.98, 0.78], [0.82, 0.58], [0.3, 0.52], [-0.25, 0.56], [-0.6, 0.66]], BZ = 0.17;
+      const SEAT = [[-1.25, 1.02], [-0.55, 0.98], [-0.5, 0.86], [-1.15, 0.9]], SZ = 0.12;
+      const circ = (c, r, zz, n = 26) => Array.from({ length: n }, (_, i) => { const a = (i / n) * Math.PI * 2; return [c[0] + r * Math.cos(a), c[1] + r * Math.sin(a), zz]; });
+      const ext = (poly, zz) => poly.map(([x, y]) => [x, y, zz]);
+      const box = (x0, x1, y0, y1, z0, z1) => { const v = [[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0], [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]];
+        return [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]].map(([a, b]) => [v[a], v[b]]); };
+      // camera: orbit yaw (deg) around (0,.6,0), pitch 12deg, perspective
+      const CAM = { cx: 296, cy: 236, dist: 6, f: 172 * 6, pitch: (12 * Math.PI) / 180 };
+      const proj = (yawDeg, ortho) => { const ya = (yawDeg * Math.PI) / 180, cy = Math.cos(ya), sy = Math.sin(ya), cp = Math.cos(CAM.pitch), sp = Math.sin(CAM.pitch);
+        return ([x, y, zz]) => { const vx = x, vy = y - 0.6, vz = zz; const x1 = vx * cy + vz * sy, z1 = -vx * sy + vz * cy;
+          if (ortho) return [ortho.cx + ortho.s * x1, ortho.cy - ortho.s * vy];
+          const y2 = vy * cp - z1 * sp, z2 = vy * sp + z1 * cp, d = CAM.dist - z2; return [CAM.cx + (CAM.f * x1) / d, CAM.cy - (CAM.f * y2) / d]; }; };
+      const f1 = (n) => n.toFixed(1);
+      const poly = (pr, pts) => "M" + pts.map((p) => { const q = pr(p); return f1(q[0]) + " " + f1(q[1]); }).join("L") + "Z";
+      const seg = (pr, a, b) => { const p = pr(a), q = pr(b); return `M${f1(p[0])} ${f1(p[1])}L${f1(q[0])} ${f1(q[1])}`; };
+      const edgesOf = (pts) => pts.map((p, i) => [p, pts[(i + 1) % pts.length]]);
+      // geometry per group
+      function bike(pr) {
+        const o = {};
+        const tf = [circ(RW, R, -TW), circ(FW, R, -TW)], tn = [circ(RW, R, TW), circ(FW, R, TW)];
+        const bf = ext(BODY, -BZ), bn = ext(BODY, BZ), sf = ext(SEAT, -SZ), sn = ext(SEAT, SZ);
+        o.tireFar = tf.map((c) => poly(pr, c)).join("");
+        o.bodyFar = poly(pr, bf) + poly(pr, sf);
+        o.edges = bf.map((p, i) => poly(pr, [p, bf[(i + 1) % bf.length], bn[(i + 1) % bn.length], bn[i]])).join("") + sf.map((p, i) => poly(pr, [p, sf[(i + 1) % sf.length], sn[(i + 1) % sn.length], sn[i]])).join("");
+        o.bodyNear = poly(pr, bn); o.seatNear = poly(pr, sn);
+        const EN = [[-0.36, 0.3], [0.42, 0.3], [0.46, 0.6], [-0.38, 0.62]], ef = ext(EN, -0.15), en = ext(EN, 0.15);
+        o.engFar = poly(pr, ef); o.engNear = poly(pr, en);
+        o.engEdges = ef.map((p, i) => poly(pr, [p, ef[(i + 1) % 4], en[(i + 1) % 4], en[i]])).join("");
+        o.light = poly(pr, [[0.9, 0.88, 0.1], [0.97, 0.81, 0.1], [0.955, 0.72, 0.1], [0.88, 0.77, 0.1]]) + poly(pr, [[0.9, 0.88, -0.1], [0.97, 0.81, -0.1], [0.955, 0.72, -0.1], [0.88, 0.77, -0.1]]);
+        o.tireNear = tn.map((c) => poly(pr, c)).join("");
+        o.rim = [RW, FW].map((c) => poly(pr, circ(c, RI, TW + 0.005))).join("");
+        o.hub = [RW, FW].map((c) => poly(pr, circ(c, 0.07, TW + 0.01, 12))).join("");
+        o.metal = seg(pr, [FW[0], FW[1], 0.07], [0.86, 1.02, 0.07]) + seg(pr, [FW[0], FW[1], -0.07], [0.86, 1.02, -0.07]) +
+          seg(pr, [RW[0], RW[1], 0.1], [-0.25, 0.56, 0.1]) + seg(pr, [RW[0], RW[1], -0.1], [-0.25, 0.56, -0.1]) +
+          seg(pr, [0.86, 1.02, 0], [0.8, 1.13, 0]) + seg(pr, [0.8, 1.13, -0.32], [0.8, 1.13, 0.32]);
+        o.exhaust = seg(pr, [-0.3, 0.44, 0.21], [-1.12, 0.64, 0.21]);
+        o.spokes = [RW, FW].map((c) => Array.from({ length: 6 }, (_, i) => { const a = (i / 6) * Math.PI * 2; return seg(pr, [c[0], c[1], TW + 0.006], [c[0] + RI * Math.cos(a), c[1] + RI * Math.sin(a), TW + 0.006]); }).join("")).join("");
+        // wireframe = every outline + connecting edges
+        let w = "";
+        [...tf, ...tn].forEach((c) => (w += poly(pr, c)));
+        [RW, FW].forEach((c) => { w += poly(pr, circ(c, RI, 0, 20)); });
+        [bf, bn, sf, sn].forEach((pp) => (w += poly(pr, pp)));
+        bf.forEach((p, i) => (w += seg(pr, p, bn[i]))); sf.forEach((p, i) => (w += seg(pr, p, sn[i])));
+        o.wire = w + o.metal + o.exhaust;
+        o.block = [box(-1.42, -0.58, 0, 0.84, -TW, TW), box(0.63, 1.47, 0, 0.84, -TW, TW), box(-0.6, 0.98, 0.52, 1.08, -BZ, BZ), box(-1.25, -0.5, 0.86, 1.02, -SZ, SZ)]
+          .map((b) => b.map(([a, c]) => seg(pr, a, c)).join("")).join("");
+        return o;
+      }
+      const GRID = (pr) => { let g = ""; for (let x = -2.4; x <= 2.41; x += 0.4) g += seg(pr, [x, 0, -1.4], [x, 0, 1.4]); for (let zz = -1.4; zz <= 1.41; zz += 0.4) g += seg(pr, [-2.4, 0, zz], [2.4, 0, zz]); return g; };
+      const SHADOW = (pr) => poly(pr, Array.from({ length: 28 }, (_, i) => { const a = (i / 28) * Math.PI * 2; return [0.03 + 1.55 * Math.cos(a), 0, 0.36 * Math.sin(a)]; }));
+      const CUBE = (pr) => box(-0.45, 0.45, 0.15, 1.05, -0.45, 0.45).map(([a, c]) => seg(pr, a, c)).join("");
+      // ================================================================ DOM
+      const LAYERS = [["grid", 'fill="none" stroke="rgba(106,223,255,.16)" stroke-width="1.4"'], ["shadow", 'fill="rgba(0,0,0,.38)"'],
+        ["tireFar", 'fill="#101219"'], ["engFar", 'fill="#1b1e27"'], ["engEdges", 'fill="#2b303c" stroke="#3a404e" stroke-width="1"'], ["engNear", 'fill="#3a404d" stroke="#596173" stroke-width="1.5"'], ["bodyFar", 'fill="#6e1220"'], ["edges", 'fill="#a51d2c" stroke="#8c1726" stroke-width="1" stroke-linejoin="round"'],
+        ["metal", 'fill="none" stroke="#e0a83a" stroke-width="9" stroke-linecap="round"'], ["exhaust", 'fill="none" stroke="#a9b2bf" stroke-width="13" stroke-linecap="round"'],
+        ["bodyNear", 'fill="#e2323f" stroke="#ff8a8f" stroke-width="1.5" stroke-linejoin="round"'], ["seatNear", 'fill="#1c1f29"'], ["light", 'fill="#fff4cf"'],
+        ["tireNear", 'fill="#16181f" stroke="#2c303b" stroke-width="2"'], ["rim", 'fill="#c3cad5"'], ["spokes", 'fill="none" stroke="#5a6170" stroke-width="3"'], ["hub", 'fill="#3a3f4b"'],
+        ["wire", 'fill="none" stroke="#6adfff" stroke-width="1.8" stroke-linejoin="round"'], ["block", 'fill="none" stroke="#01ccf7" stroke-width="2.4" stroke-dasharray="7 6"'],
+        ["cube", 'fill="none" stroke="#6adfff" stroke-width="2.6" stroke-dasharray="8 7"']];
+      const MAT = ["tireFar", "engFar", "engEdges", "engNear", "bodyFar", "edges", "metal", "exhaust", "bodyNear", "seatNear", "light", "tireNear", "rim", "spokes", "hub"];
+      z.innerHTML = K.headerHTML(P) +
+        `<div id="t5-vp"><svg class="m" viewBox="0 0 592 450">` + LAYERS.map(([id, a]) => (MAT.includes(id) ? "" : `<path id="t5-${id}" ${a}/>`)).join("") +
+        `<g id="t5-mat">` + LAYERS.filter(([id]) => MAT.includes(id)).map(([id, a]) => `<path id="t5-${id}" ${a}/>`).join("") + `</g>` + `</svg>` +
+        `<div class="lab">${K.svg("box")}viewport · three.js</div>` +
+        [["blockout", 18], ["form", 146], ["material", 230]].map(([t, x], i) => `<div class="t5-ps" style="left:${x}px">${t}</div><div class="t5-psf" id="t5-psf${i}" style="left:${x}px"><span>${t}</span></div>`).join("") +
+        `<i id="t5-flash"></i></div>` +
+        `<div id="t5-photo"><div class="im"><svg viewBox="0 0 316 196" width="316" height="196" id="t5-phsvg"></svg></div><div class="cap">${K.svg("image")}motor.jpg</div></div>` +
+        `<div id="t5-code"></div><div id="t5-code-chip">${K.svg("code")}tanpa file 3D · semua kode</div>` +
+        `<div class="t5-cur" id="t5-cur">${K.svg("pointer")}</div><div id="t5-rot">${K.svg("rotate")}</div>`;
+      // ---------------------------------------------------------------- the reference "photo": the same model, side view, studio light
+      { const pr = proj(0, { cx: 158, cy: 92, s: 92 }), o = bike(pr), ph = $("t5-phsvg");
+        const sh = poly(pr, Array.from({ length: 28 }, (_, i) => { const a = (i / 28) * Math.PI * 2; return [0.03 + 1.5 * Math.cos(a), 0.6 - 0.6 + 0.0 + 0.04 * Math.sin(a), 0]; }));
+        ph.innerHTML = `<ellipse cx="160" cy="${(92 + 0.6 * 92).toFixed(1)}" rx="150" ry="9" fill="rgba(20,24,34,.28)"/>` +
+          LAYERS.filter(([id]) => MAT.includes(id)).map(([id, a]) => `<path d="${o[id]}" ${a.replace(/stroke-width="(\d+(\.\d+)?)"/, (m, v) => `stroke-width="${(parseFloat(v) * 0.55).toFixed(1)}"`)}/>`).join("") +
+          `<rect x="0" y="0" width="316" height="196" fill="url(#t5-vig)"/><defs><radialGradient id="t5-vig" cx="50%" cy="45%" r="70%"><stop offset="60%" stop-color="rgba(0,0,0,0)"/><stop offset="100%" stop-color="rgba(0,0,0,.18)"/></radialGradient></defs>`;
+        void sh; }
+      // ---------------------------------------------------------------- per-seek renderer (pure function of global time)
+      const one = (x) => Math.max(0, Math.min(1, x)), io3 = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+      const tg = (w, a) => T0 + wt(w, a);
+      const G0 = tg("img2threejs."), GB = tg("bangun"), GI = tg("interaktif,");
+      const yawAt = (t) => { const d0 = GI - 0.02; if (t < d0) return -20 - 4 * Math.max(0, t - GB); const y0 = -20 - 4 * (d0 - GB);
+        if (t < d0 + 0.9) return y0 + (48 - y0) * io3((t - d0) / 0.9); if (t < d0 + 1.4) return 48 + (22 - 48) * io3((t - d0 - 0.9) / 0.5); return 22; };
+      const EL = {}; LAYERS.forEach(([id]) => (EL[id] = $("t5-" + id)));
+      let last = "";
+      function draw(t) {
+        const key = t.toFixed(3); if (key === last) return; last = key;
+        const pr = proj(yawAt(t)), o = bike(pr);
+        for (const k of [...MAT, "wire", "block"]) EL[k].setAttribute("d", o[k]);
+        EL.grid.setAttribute("d", GRID(pr)); EL.shadow.setAttribute("d", SHADOW(pr));
+        EL.cube.setAttribute("d", CUBE(proj(-30 + 70 * (t - G0))));
+      }
+      draw(T0);
+      window.addEventListener("hf-seek", (e) => draw(e.detail.time + (window.__T0 || 0)));
+      // ================================================================ timeline
+      I(z, { opacity: 1 });
+      K.headerSet(S, P, 4);
+      const tKel = wt("Kelima,"), tImg = wt("img2threejs."), tKas = wt("Kasih"), tFot = wt("foto"), tMot = wt("motor,"), tCla = wt("Claude", 37), tBan = wt("bangun");
+      const tJad = wt("jadi", 38), tMod = wt("model"), t3D = wt("3D"), tInt = wt("interaktif,"), tCum = wt("cuma"), tKod = wt("kode.");
+      K.headerSwap(S, P, 4, 5, tKel - 0.1);
+      const vp = $("t5-vp"), ph = $("t5-photo"), code = $("t5-code"), chip = $("t5-code-chip");
+      // the viewport slides in with a spinning placeholder cube
+      I(vp, { x: 1100, y: 478, opacity: 1 }); ft(vp, { x: 1100 }, { x: 424, duration: 0.55, ease: "power3.out" }, tImg - 0.3);
+      const L = (id) => EL[id];
+      I(L("cube"), { opacity: 1 }); I(L("block"), { opacity: 0 }); I(L("wire"), { opacity: 0 }); I($("t5-mat"), { opacity: 0 }); I(L("shadow"), { opacity: 0 });
+      // the photo drops in (polaroid)
+      I(ph, { x: 64, y: 300, rotation: -12, opacity: 0 });
+      ft(ph, { y: 300, rotation: -12, opacity: 0 }, { y: 478, rotation: -2, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, tKas - 0.12);
+      ft(ph, { scale: 1 }, { scale: 1.05, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tMot);
+      I(ph, { scale: 1, transformOrigin: "50% 50%" });
+      // a scan line reads the photo, then the code card types
+      I(code, { x: 64, y: 1000, opacity: 0 }); ft(code, { y: 1000, opacity: 0 }, { y: 756, opacity: 1, duration: 0.42, ease: "power3.out" }, tCla - 0.3);
+      const CODE = [['<span class="c">// createMotor.ts</span>', 0], ['<span class="k">new</span> <span class="f">TorusGeometry</span>(…)', 1], ['<span class="k">new</span> <span class="f">TubeGeometry</span>(…)', 2],
+                    ['<span class="k">new</span> <span class="f">ExtrudeGeometry</span>(…)', 3], ['motor.<span class="f">add</span>(roda, rangka)', 4]];
+      CODE.forEach(([h, i]) => { const ln = document.createElement("div"); ln.className = "t5-cl"; ln.style.top = 14 + i * 28 + "px"; ln.innerHTML = h; code.appendChild(ln);
+        I(ln, { opacity: 0, x: -10 }); ft(ln, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.18, ease: "power2.out" }, tCla - 0.05 + i * 0.2); });
+      // passes: cube → blockout → wireframe → material
+      const PS = [0, 1, 2].map((i) => $("t5-psf" + i)); PS.forEach((p) => I(p, { opacity: 0, scale: 1, transformOrigin: "50% 50%" }));
+      const lit = (i, t) => ft(PS[i], { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2.5)" }, t);
+      ft(L("cube"), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tBan - 0.05);
+      ft(L("block"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tBan - 0.05); lit(0, tBan - 0.05);
+      ft(L("shadow"), { opacity: 0 }, { opacity: 1, duration: 0.3 }, tBan);
+      ft(L("block"), { opacity: 1 }, { opacity: 0, duration: 0.25 }, tMod - 0.2);
+      ft(L("wire"), { opacity: 0 }, { opacity: 1, duration: 0.25 }, tJad - 0.02); lit(1, tJad - 0.02);
+      ft($("t5-mat"), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, t3D - 0.08); lit(2, t3D - 0.08);
+      ft(L("wire"), { opacity: 1 }, { opacity: 0.25, duration: 0.4 }, t3D + 0.1);
+      const fl = $("t5-flash"); I(fl, { opacity: 0 }); ft(fl, { opacity: 0 }, { opacity: 1, duration: 0.08 }, t3D - 0.06); ft(fl, { opacity: 1 }, { opacity: 0, duration: 0.45 }, t3D + 0.02);
+      // "interaktif": the drag cursor orbits the model
+      const cur = $("t5-cur"), rot = $("t5-rot");
+      I(cur, { x: 640, y: 760, opacity: 0 }); I(rot, { x: 668, y: 790, opacity: 0, scale: 0.5, transformOrigin: "50% 50%" });
+      ft(cur, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tInt - 0.25); ft(rot, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2.5)" }, tInt - 0.2);
+      ft(cur, { x: 640 }, { x: 900, duration: 0.9, ease: "power3.inOut" }, tInt - 0.02); ft(rot, { x: 668 }, { x: 928, duration: 0.9, ease: "power3.inOut" }, tInt - 0.02);
+      ft(cur, { opacity: 1 }, { opacity: 0, duration: 0.25 }, tInt + 1.0); ft(rot, { opacity: 1 }, { opacity: 0, duration: 0.25 }, tInt + 1.0);
+      // "cuma pakai kode": the pass chips give way to the code chip
+      PS.forEach((p, i) => ft(p, { opacity: 1 }, { opacity: 0, duration: 0.18 }, tCum - 0.1 + i * 0.03));
+      vp.querySelectorAll(".t5-ps").forEach((p, i) => { I(p, { opacity: 1 }); ft(p, { opacity: 1 }, { opacity: 0, duration: 0.18 }, tCum - 0.1 + i * 0.03); });
+      I(chip, { x: 444, y: 870, opacity: 0, scale: 0.6, transformOrigin: "0% 50%" });
+      ft(chip, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, tCum + 0.02);
+      ft(code, { scale: 1 }, { scale: 1.04, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tKod - 0.04); I(code, { scale: 1, transformOrigin: "50% 50%" });
+      // exit
+      const tX = D - 0.23;
+      [[vp, 478], [ph, 478], [code, 756], [chip, 870]].forEach(([e, y], i) => ft(e, { y, opacity: 1 }, { y: y + 60, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + i * 0.012));
+      S.finish();
     })();
   </script>
 </template>

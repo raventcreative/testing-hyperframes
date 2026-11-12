@@ -69,7 +69,7 @@
   .k-hroll b{display:block;height:112px;text-align:center;font:700 54px/112px Poppins;color:#0b1440;letter-spacing:-1px}
   .k-hbox{position:absolute;overflow:hidden}
   .k-hname{position:absolute;left:0;top:0;white-space:nowrap;font:700 48px/66px Poppins;color:#fff;letter-spacing:-.5px}
-  .k-hsub{position:absolute;left:0;top:0;white-space:nowrap;font:400 24px/40px Poppins;color:#9fdcf2}
+  .k-hsub{position:absolute;left:0;top:0;white-space:nowrap;font:400 22px/40px Poppins;color:#9fdcf2}
   .k-hsub i{font-style:normal;color:#5d86a8}
   .k-hseg{position:absolute;top:342px;width:28px;height:8px;border-radius:4px;background:rgba(255,255,255,.16);overflow:hidden}
   .k-hseg b{position:absolute;left:0;top:0;width:28px;height:8px;background:#01ccf7;border-radius:4px;transform-origin:0 50%;box-shadow:0 0 10px rgba(1,204,247,.8)}
@@ -192,7 +192,7 @@
     let h = `<div class="k-hplate" id="${P}-hplate"></div><div class="k-hglow" id="${P}-hglow"></div>`;
     h += `<div class="k-hnum" id="${P}-hnum"><div class="k-hroll" id="${P}-hroll">` + [1, 2, 3, 4, 5].map((k) => `<b>${K.TOOLS[k].n}</b>`).join("") + `</div></div>`;
     h += `<div class="k-hbox" id="${P}-hnb" style="left:214px;top:328px;width:590px;height:66px">` + [1, 2, 3, 4, 5].map((k) => `<div class="k-hname" id="${P}-hn${k}">${K.TOOLS[k].name}</div>`).join("") + `</div>`;
-    h += `<div class="k-hbox" id="${P}-hsb" style="left:214px;top:396px;width:530px;height:40px">` + [1, 2, 3, 4, 5].map((k) => `<div class="k-hsub" id="${P}-hs${k}"><i>github.com/</i>${K.TOOLS[k].repo}</div>`).join("") + `</div>`;
+    h += `<div class="k-hbox" id="${P}-hsb" style="left:214px;top:396px;width:556px;height:40px">` + [1, 2, 3, 4, 5].map((k) => `<div class="k-hsub" id="${P}-hs${k}"><i>github.com/</i>${K.TOOLS[k].repo}</div>`).join("") + `</div>`;
     h += `<div class="k-hbox" id="${P}-hlb" style="left:770px;top:384px;width:228px;height:40px">` + [1, 2, 3, 4, 5].map((k) => `<div class="k-hlic" id="${P}-hl${k}">${K.svg("unlock")}${K.TOOLS[k].lic}</div>`).join("") + `</div>`;
     h += [1, 2, 3, 4, 5].map((k) => `<div class="k-hseg" id="${P}-ht${k}" style="left:${K.SEG(k).x}px"><b id="${P}-hg${k}"></b></div>`).join("");
     return `<div class="k-ab" id="${P}-hdr" style="width:1080px;height:1920px">${h}</div>`;

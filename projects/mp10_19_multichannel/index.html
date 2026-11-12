@@ -412,7 +412,7 @@
           r.L = r.path.getTotalLength();
         });
         ["Toko online A", "Toko online B", "Media sosial"].forEach((t, i) => {
-          const c = mk("div", "", $("#map2"), `position:absolute; left:${[130, 560, 960][i]}px; top:-150px; transform:translateX(-50%); display:flex; align-items:center; gap:10px; height:60px; padding:0 20px 0 10px; border-radius:30px; background:#fff; font:700 26px/1 PS; color:#212C5F; white-space:nowrap; box-shadow:0 10px 24px rgba(3,6,24,.35);`);
+          const c = mk("div", "", $("#map2"), `position:absolute; left:${[180, 548, 905][i]}px; top:214px; transform:translateX(-50%); display:flex; align-items:center; gap:10px; height:62px; padding:0 20px 0 9px; border-radius:31px; background:#fff; font:700 30px/1 PS; color:#212C5F; white-space:nowrap; box-shadow:0 10px 24px rgba(3,6,24,.35);`);
           c.innerHTML = `<i class="src ${"abc"[i]}" style="width:44px; height:44px;">${IC[i < 2 ? "store" : "social"]("#fff")}</i>${t}`; });
         const lake = sv("ellipse", { cx: LAKE[0], cy: LAKE[1], rx: LAKE[2], ry: LAKE[3], fill: "url(#lkG)", stroke: "#FED111", "stroke-width": 6 }, svg2);
         const rip = [0, 1, 2].map(() => sv("ellipse", { cx: LAKE[0], cy: LAKE[1], rx: LAKE[2], ry: LAKE[3], fill: "none", stroke: "#FFF0A0", "stroke-width": 5, opacity: 0 }, svg2));
@@ -441,6 +441,9 @@
 
         // ---------- timeline ----------
         const tl = gsap.timeline({ paused: true });
+        // initial states live in a nested timeline that is the FIRST child at 0: on any render pass it applies before every tween
+        // that starts at 0, so a pin can never overwrite a running tween (filled at the end of the build by pinAll)
+        const tl0 = gsap.timeline(); tl.add(tl0, 0);
         const XS = (v) => { if (v && v.scale != null) { v = Object.assign({}, v); v.scaleX = v.scaleY = v.scale; delete v.scale; } return v; };
         // every fromTo also records its from-state; at the end the EARLIEST from-value of each (element, property) is pinned on the
         // timeline at 0, so nothing animated ever shows its CSS / build-time state before its first tween (batch-1 lesson 3)
@@ -455,8 +458,9 @@
         const INIT = (t, v) => gsap.utils.toArray(t).forEach((el) => { let m = PIN.get(el); if (!m) PIN.set(el, (m = {}));
           for (const k in v) { if (k === "attr") { for (const q in v.attr) m["attr." + q] = [-1, v.attr[q]]; } else m[k] = [-1, v[k]]; } });
         const pinAll = () => PIN.forEach((m, el) => { const v = {}, at = {}; for (const k in m) { if (k.startsWith("attr.")) at[k.slice(5)] = m[k][1]; else v[k] = m[k][1]; }
-          if (Object.keys(at).length) v.attr = at; tl.set(el, v, 0); });
-        const show = (t, at) => tl.set(t, { autoAlpha: 1 }, at), hide = (t, at) => tl.set(t, { autoAlpha: 0 }, at);
+          if (Object.keys(at).length) v.attr = at; tl0.set(el, v, 0); });
+        const TS = (t, v, at) => (at === 0 ? tl0 : tl).set(t, v, at);
+        const show = (t, at) => TS(t, { autoAlpha: 1 }, at), hide = (t, at) => TS(t, { autoAlpha: 0 }, at);
         const HL = (sel, at, d) => F(sel, { backgroundSize: "0% 72%" }, { backgroundSize: "100% 72%", duration: d || 0.32, ease: "power1.inOut" }, at);
         const UL = (sel, at, d) => F(sel, { backgroundSize: "0% 9px" }, { backgroundSize: "100% 9px", duration: d || 0.4, ease: "power2.inOut" }, at);
         const RISE = (arr, at, st, d) => arr.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: d || 0.42, ease: "power3.out" }, at + k * (st || 0.022)));
@@ -464,9 +468,9 @@
         const POPC = (el, at, d, e) => F(el, { scaleX: 0, scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: d || 0.5, ease: e || "back.out(2)" }, at);
         tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: TM.total, ease: "steps(" + Math.round(TM.total * 15) + ")", immediateRender: false }, 0);
         // pin every initial state on the timeline at 0 (the real renderer can seek before the first frame; build-time state must not leak)
-        tl.set("#hookT, #bentT, #pisT, #cw1, #cb1, #cw2, #cb2", { autoAlpha: 1 }, 0);
-        tl.set("#il1, #led, #rek, #trace", { autoAlpha: 0 }, 0);
-        tl.set(".chip", { autoAlpha: 0, y: 26, scaleX: 0.8, scaleY: 0.8 }, 0);
+        TS("#hookT, #bentT, #pisT, #cw1, #cb1, #cw2, #cb2", { autoAlpha: 1 }, 0);
+        TS("#il1, #led, #rek, #trace", { autoAlpha: 0 }, 0);
+        TS(".chip", { autoAlpha: 0, y: 26, scaleX: 0.8, scaleY: 0.8 }, 0);
 
         // ----- camera rig (both light rigs share every key): anchor on screen (ax, ay), focus (fx, fy, fz), tilt rx, orbit ry, dolly z
         const K = (ax, ay, fx, fy, fz, rx, ry, z) => ({ ax, ay, fx, fy, fz, rx, ry, z });
@@ -503,7 +507,7 @@
           F(r.poolH, { attr: { rx: 0, ry: 0 } }, { attr: { rx: r.pool[2] * 0.55, ry: r.pool[3] * 0.38 }, duration: 0.55, ease: "back.out(1.6)" }, tp + 0.05);
           // notes pop up and drift apart ("kepencar ke mana-mana")
           const n = r.note, nc = n.firstChild, x0 = NX[i], dx = NDX[i];
-          tl.set(n, { autoAlpha: 0 }, 0); show(n, TM.kep - 0.02 + i * 0.12);
+          TS(n, { autoAlpha: 0 }, 0); show(n, TM.kep - 0.02 + i * 0.12);
           F(nc, { scaleX: 0.2, scaleY: 0, rotation: [-14, 8, 14][i] }, { scaleX: 1, scaleY: 1, rotation: [-6, 3, 6][i], duration: 0.5, ease: "back.out(1.8)" }, TM.kep - 0.02 + i * 0.12);
           F(n, { x: x0 }, { x: x0 + dx, duration: TM.chA - TM.kep + 0.4, ease: "sine.out" }, TM.kep + 0.1 + i * 0.12);
           F(nc, { scaleX: 1, scaleY: 1 }, { scaleX: 0.5, scaleY: 0, duration: 0.3, ease: "power2.in" }, TM.chA - 0.14 + i * 0.04);
@@ -519,7 +523,7 @@
         // ----- S2 · the three places: each sign rises out of its spring as it is named; its river starts carrying its tokens
         const CH = [TM.chA, TM.chB, TM.chC];
         RIV.forEach((r, i) => {
-          tl.set(r.sign, { autoAlpha: 0 }, 0); show(r.sign, CH[i] - 0.02);
+          TS(r.sign, { autoAlpha: 0 }, 0); show(r.sign, CH[i] - 0.02);
           F(r.sign.firstChild, { scaleX: 0.3, scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.55, ease: "back.out(1.7)" }, CH[i] - 0.02);
           F(r.spring, { attr: { "stroke-width": 8 } }, { attr: { "stroke-width": 26 }, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }, CH[i] + 0.05);
         });
@@ -528,10 +532,10 @@
         TOK.forEach((o, j) => {
           const r = RIV[o.r], ts = CH[o.r] + 0.2 + o.k * 0.14, tFly = TM.pisah - 0.02 + o.r * 0.1 + (2 - o.k) * 0.12, tEnd = tFly, f0 = F0[o.k] + [0, 0.07, 0][o.r];
           const at = (t) => f0 + V * (t - ts);
-          tl.set(o.g, { autoAlpha: 0 }, 0); show(o.g, ts);
+          TS(o.g, { autoAlpha: 0 }, 0); show(o.g, ts);
           let [x, z] = pt(r, at(ts));
           gsap.set(o.g, { x, y: -18, z, rotationX: 24, rotationY: [8, 0, -8][o.r] });
-          tl.set(o.g, { x, z }, 0); tl.set(o.sh, { attr: { cx: x, cy: z + 6 } }, 0);
+          TS(o.g, { x, z }, 0); TS(o.sh, { attr: { cx: x, cy: z + 6 } }, 0);
           F(o.c, { scaleX: 0, scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.45, ease: "back.out(2)" }, ts);
           F(o.sh, { opacity: 0 }, { opacity: 1, duration: 0.3 }, ts);
           for (let t = ts; t < tEnd - 1e-6; t += SEG) {
@@ -574,7 +578,7 @@
         // ----- S4 · "kalau dicatat terpisah-pisah, ngitung untungnya jadi ribet": tangled lines from the three notes to the "untung?" card
         RISE(PA, TM.pisah - 0.12, 0.016, 0.4); RISE(PB, TM.untung - 0.15, 0.022, 0.45); RISE(PC1, TM.ribet - 0.3, 0.025, 0.45); RISE(PC2, TM.ribet - 0.15, 0.025, 0.45);
         HL("#pCh", TM.ribet + 0.3, 0.38);
-        tl.set(unt, { autoAlpha: 0 }, 0); show(unt, TM.untung - 0.36);
+        TS(unt, { autoAlpha: 0 }, 0); show(unt, TM.untung - 0.36);
         F(unt.firstChild, { scaleX: 0.3, scaleY: 0, rotation: -6 }, { scaleX: 1, scaleY: 1, rotation: 0, duration: 0.55, ease: "back.out(1.7)" }, TM.untung - 0.36);
         const TNG = ["M 227 1000 C 235 1075 430 1020 455 1066 S 360 1104 330 1114", "M 550 1050 C 552 1100 470 1095 470 1068 S 540 1040 540 1075 S 480 1106 455 1114",
                      "M 859 1003 C 845 1085 560 1020 510 1060 S 600 1098 600 1114"];
@@ -587,9 +591,9 @@
           const L = mp.getTotalLength(); mp.setAttribute("stroke-dasharray", L + " " + L);
           F(mp, { attr: { "stroke-dashoffset": L } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.75, ease: "power1.inOut" }, TM.untung - 0.38 + i * 0.12);
         });
-        tl.set("#tng", { autoAlpha: 0 }, 0); show("#tng", TM.untung - 0.4); hide("#tng", TM.sol + 0.05);
+        TS("#tng", { autoAlpha: 0 }, 0); show("#tng", TM.untung - 0.4); hide("#tng", TM.sol + 0.05);
         F(".tdot", { scaleX: 0, scaleY: 0, transformOrigin: "50% 50%" }, { scaleX: 1, scaleY: 1, duration: 0.25, ease: "back.out(3)" }, TM.untung - 0.4);
-        for (let j = 0; j < 9; j++) ["#q1", "#q2", "#q3"].forEach((q, k) => tl.set(q, { y: Math.sin(j * 2.1 + k * 1.7) * 7, rotation: Math.cos(j * 1.6 + k) * 9 }, TM.untung + 0.3 + j * 0.2));
+        for (let j = 0; j < 9; j++) ["#q1", "#q2", "#q3"].forEach((q, k) => TS(q, { y: Math.sin(j * 2.1 + k * 1.7) * 7, rotation: Math.cos(j * 1.6 + k) * 9 }, TM.untung + 0.3 + j * 0.2));
         // "ribet": the notes jitter
         RIV.forEach((r, i) => F(r.note.firstChild, { rotation: [-6, 3, 6][i] }, { rotation: [-6, 3, 6][i] + (i % 2 ? -5 : 5), duration: 0.09, ease: "sine.inOut", yoyo: true, repeat: 5 }, TM.ribet + 0.05 + i * 0.05));
 
@@ -600,10 +604,10 @@
         show("#sol", TM.sol); hide("#s1", TM.sol + 0.05); hide("#bands", TM.sol + 0.08);
 
         // ----- S5 · brand: three glowing rivers flow into one lake; the lake lifts up as ONE pembukuan
-        gsap.set("#map2", { y: -70, z: -260, rotationX: 47 }); tl.set("#map2", { y: -70, z: -260, rotationX: 47, opacity: 1 }, 0);
+        gsap.set("#map2", { y: -70, z: -260, rotationX: 47 }); TS("#map2", { y: -70, z: -260, rotationX: 47, opacity: 1 }, 0);
         F("#map2", { y: -70, z: -260, rotationX: 47 }, { y: -50, z: -200, rotationX: 44, duration: TM.pemb - TM.sol, ease: "sine.inOut" }, TM.sol);
         RIV2.forEach((r) => F(r.flow, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -760 }, duration: TM.end - TM.sol, ease: "none" }, TM.sol));
-        tl.set(lake, { attr: { rx: 0, ry: 0 } }, 0);
+        TS(lake, { attr: { rx: 0, ry: 0 } }, 0);
         F(lake, { attr: { rx: 0, ry: 0 } }, { attr: { rx: LAKE[2], ry: LAKE[3] }, duration: 0.9, ease: "back.out(1.4)" }, TM.satu - 0.1);
         F(lakeGlow, { opacity: 0 }, { opacity: 1, duration: 0.8 }, TM.satu);
         INIT(rip, { opacity: 0 });
@@ -613,7 +617,7 @@
           const t0 = TM.sol + 0.05 + o.j * 0.42 + o.i * 0.1, t1 = TM.satu + 0.25 + o.j * 0.22 + o.i * 0.08, f0 = 0.18 + o.j * 0.06;
           const steps = Math.max(2, Math.ceil((t1 - t0) / 0.3));
           let [x, y] = pt2(o.r, f0);
-          tl.set(o.g, { x, y, opacity: 0, scaleX: 1, scaleY: 1 }, 0); F(o.g, { opacity: 0 }, { opacity: 1, duration: 0.25 }, t0);
+          TS(o.g, { x, y, opacity: 0, scaleX: 1, scaleY: 1 }, 0); F(o.g, { opacity: 0 }, { opacity: 1, duration: 0.25 }, t0);
           for (let s = 0; s < steps; s++) { const a = s / steps, b = (s + 1) / steps, fe = (u) => f0 + (1.02 - f0) * (u * u * (3 - 2 * u)) ;
             const [x1, y1] = pt2(o.r, fe(b)); F(o.g, { x, y }, { x: x1, y: y1, duration: (t1 - t0) / steps, ease: "none" }, t0 + a * (t1 - t0)); x = x1; y = y1; }
           F(o.g, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.3, duration: 0.22, ease: "power2.in" }, t1 - 0.05);
@@ -643,7 +647,7 @@
           const st = mk("div", "st " + kind, $(row)); st.id = "rs" + (k + 1);
           st.innerHTML = kind === "ok" ? CHECK() + "Cocok" : `<svg viewBox="0 0 24 24" fill="none" stroke="#212C5F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg>Perlu dicek`;
           st.style.cssText = "position:absolute; right:18px; top:24px;";
-          tl.set(st, { autoAlpha: 0 }, 0);
+          TS(st, { autoAlpha: 0 }, 0);
           F(row + " .fl", { opacity: 0 }, { opacity: kind === "ok" ? 0.6 : 0.9, duration: 0.1 }, t - 0.05); F(row + " .fl", { opacity: kind === "ok" ? 0.6 : 0.9 }, { opacity: kind === "ok" ? 0 : 0.28, duration: 0.55, ease: "power1.out" }, t + 0.05);
           F(pd, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.12 }, t);
           F(st, { autoAlpha: 0, scaleX: 0.4, scaleY: 0.4 }, { autoAlpha: 1, scaleX: 1, scaleY: 1, duration: 0.42, ease: "back.out(2.4)" }, t + 0.02);
@@ -677,6 +681,7 @@
             while (tw(el) > 940.5 && k < 40) { fs *= 0.97; el.style.fontSize = fs + "px"; k++; } });
           return 1;
         });
+        tl.render(0, true, true);   // frame 0 shows the pinned state even if the first seek is to 0 (a seek to the current time renders nothing)
         tl.eventCallback("onUpdate", () => { if (window.ROBOT_APPLY) window.ROBOT_APPLY(tl.time()); });
         (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
         window.__timelines = window.__timelines || {}; window.__timelines["main"] = tl;

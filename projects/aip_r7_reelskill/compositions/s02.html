@@ -1,0 +1,135 @@
+<template>
+  <style>
+    /* s02 IDE → KODE (5.17–9.53) "Kamu kasih Claude satu ide, terus Claude nulis seluruh reels-nya jadi kode."
+       Claude's prompt bar drops in (Claude mark), the idea is typed ("reels kolam koi, airnya gerak, 15 detik"), a bulb pops on "ide";
+       send on "terus"; the editor writes index.html line by line while the phone preview on the right builds the koi reel layer by
+       layer from those lines (air → koi → teratai → riak); "seluruh reels-nya" = more file tabs pop; "jadi kode." = "</> semua kode". */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s02-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s02-bar { position: absolute; left: 60px; top: 318px; width: 960px; height: 116px; }
+    #s02-disc { position: absolute; left: 80px; top: 336px; width: 80px; height: 80px; border-radius: 50%; background: #fbf4ec; transform-origin: 50% 50%;
+      box-shadow: 0 0 0 5px rgba(217,119,87,.22), 0 0 30px rgba(217,119,87,.5); }
+    #s02-disc svg { position: absolute; left: 14px; top: 14px; width: 52px; height: 52px; }
+    #s02-bulb { position: absolute; left: 136px; top: 322px; width: 44px; height: 44px; border-radius: 50%; background: #ffd23f; color: #5a3d00; transform-origin: 50% 50%;
+      box-shadow: 0 0 22px rgba(255,210,63,.75); }
+    #s02-bulb svg { position: absolute; left: 10px; top: 9px; width: 24px; height: 24px; }
+    #s02-in { position: absolute; left: 184px; top: 338px; width: 720px; height: 80px; border-radius: 40px; background: #ffffff; overflow: hidden; }
+    #s02-ph { position: absolute; left: 30px; top: 0; font: 400 27px/80px Poppins; color: #8a94a6; white-space: nowrap; }
+    #s02-tx { position: absolute; left: 30px; top: 0; font: 700 28px/80px Poppins; color: #0b1440; white-space: nowrap; }
+    #s02-car { position: absolute; left: 30px; top: 20px; width: 3px; height: 40px; background: #01a9d6; }
+    #s02-send { position: absolute; left: 922px; top: 338px; width: 80px; height: 80px; border-radius: 50%; background: #01ccf7; color: #0b1440; transform-origin: 50% 50%;
+      box-shadow: 0 0 20px rgba(1,204,247,.55); }
+    #s02-send svg { position: absolute; left: 21px; top: 23px; width: 36px; height: 36px; }
+    #s02-ed { position: absolute; left: 60px; top: 452px; width: 960px; height: 440px; border-radius: 28px; overflow: hidden;
+      background: linear-gradient(180deg, #0b1236, #070c28); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), 0 24px 50px rgba(2,6,26,.55); }
+    #s02-ed .hd { position: absolute; left: 0; top: 0; width: 960px; height: 56px; background: rgba(255,255,255,.04); border-bottom: 1.5px solid rgba(255,255,255,.06); }
+    #s02-ed .hd i { position: absolute; top: 22px; width: 12px; height: 12px; border-radius: 50%; }
+    .s02-tab { position: absolute; top: 10px; height: 36px; padding: 0 14px; border-radius: 10px; font: 700 17px/36px Poppins; color: #9fb3d6; white-space: nowrap;
+      background: rgba(255,255,255,.05); transform-origin: 50% 100%; }
+    .s02-tab.on { color: #e3edfa; background: rgba(1,204,247,.16); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.5); }
+    .s02-ln { position: absolute; left: 112px; font: 400 21px/32px Poppins; color: #e3edfa; white-space: pre; }
+    .s02-ln u { position: absolute; left: -46px; width: 30px; text-align: right; text-decoration: none; color: #4b5a86; font: 400 17px/32px Poppins; }
+    #s02-cur { position: absolute; left: 112px; top: 524px; width: 3px; height: 26px; background: #01ccf7; }
+    #s02-ring { position: absolute; left: 60px; top: 452px; width: 960px; height: 440px; border-radius: 28px; box-shadow: inset 0 0 0 2.5px rgba(106,223,255,.95), 0 0 40px rgba(1,204,247,.45); }
+    #s02-badge { position: absolute; left: 0; top: 0; height: 44px; padding: 0 18px 0 14px; border-radius: 22px; background: #01ccf7; color: #0b1440; display: flex; align-items: center; gap: 8px;
+      font: 700 21px/44px Poppins; white-space: nowrap; box-shadow: 0 0 24px rgba(1,204,247,.55); transform-origin: 50% 50%; }
+    #s02-badge svg { width: 22px; height: 22px; }
+    #s02-phone { position: absolute; left: 790px; top: 512px; width: 206px; height: 366px; border-radius: 30px; background: #02040f;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.18), 0 18px 36px rgba(0,0,0,.5); }
+    #s02-scr { position: absolute; left: 7px; top: 7px; width: 192px; height: 352px; border-radius: 24px; overflow: hidden; background: #050a20; }
+    #s02-host { position: absolute; left: 0; top: 0; width: 192px; height: 352px; overflow: hidden; }
+    #s02-empty { position: absolute; left: 0; top: 0; width: 192px; height: 352px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      font: 400 17px/1 Poppins; color: #6f7fa6; }
+    #s02-empty svg { width: 34px; height: 34px; color: #3f4f7a; }
+    #s02-plab { position: absolute; left: 790px; top: 482px; width: 206px; text-align: center; font: 700 15px/24px Poppins; letter-spacing: 2px; color: #6adfff; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R7K, D = 4.3666, P = "s02";
+      const S = K.scene(P, D), { tl, ft, I, wt, $, type } = S;
+      const z = $("s02-zone");
+      const CODE = [
+        '<' + '!-- reels: kolam koi · 15 detik --' + '>',
+        '<div id="kolam" data-duration="15">',
+        '  <div class="air"></div>',
+        '  <svg class="koi" id="koi-1">…</svg>',
+        '  <div class="teratai"></div>',
+        '</div>',
+        '<' + 'script>',
+        '  const tl = gsap.timeline();',
+        '  tl.to("#koi-1", { x: 420, duration: 6 })',
+        '  tl.to(".riak", { scale: 1.6, opacity: 0 })',
+        '</' + 'script>'];
+      const TABS = [["index.html", 22], ["scene-koi.html", 152], ["caption.js", 322], ["sfx.py", 452]];
+      let h = `<div id="s02-bar" class="k-glass"></div><div id="s02-disc">${K.claude()}</div><div id="s02-in"><div id="s02-ph">Kasih Claude satu ide…</div><div id="s02-tx"></div><i id="s02-car"></i></div>` +
+        `<div id="s02-send">${K.svg("send")}</div><div id="s02-bulb">${K.svg("bulb")}</div>`;
+      h += `<div id="s02-ed"><div class="hd"><i style="left:24px;background:#ff6b6b"></i><i style="left:44px;background:#ffd166"></i><i style="left:64px;background:#4ade80"></i>` +
+        TABS.map(([n, x], i) => `<div class="s02-tab${i ? "" : " on"}" id="s02-tab${i}" style="left:${70 + x}px">${n}</div>`).join("") + `</div>` +
+        CODE.map((l, i) => `<div class="s02-ln" id="s02-l${i}" style="top:${70 + i * 32}px"><u>${i + 1}</u>${K.hl(l)}</div>`).join("") + `</div>`;
+      h += `<i id="s02-cur"></i><div id="s02-ring"></div><div id="s02-phone"><div id="s02-scr"><div id="s02-empty">${K.svg("play")}belum ada apa-apa</div><div id="s02-host"></div></div></div>`;
+      h += `<div id="s02-badge">${K.svg("code")}semua kode</div>`;
+      z.innerHTML = h;
+      const tKam = wt("Kamu"), tKas = wt("kasih"), tCla = wt("Claude"), tSat = wt("satu"), tIde = wt("ide,"), tTer = wt("terus");
+      const tCl2 = wt("Claude", 7), tNul = wt("nulis"), tSel = wt("seluruh"), tRee = wt("reels-nya"), tJad = wt("jadi", 8), tKod = wt("kode.");
+      // ---------------------------------------------------------------- prompt bar
+      const bar = [$("s02-bar"), $("s02-in"), $("s02-send")];
+      bar.forEach((e) => { I(e, { y: -60, opacity: 0 }); ft(e, { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.34, ease: "power3.out" }, 0.0); });
+      const disc = $("s02-disc"); I(disc, { scale: 0, rotation: -50 });
+      ft(disc, { scale: 0, rotation: -50 }, { scale: 1, rotation: 0, duration: 0.4, ease: "back.out(2.2)" }, tCla - 0.14);
+      const mk = disc.querySelector("svg"); I(mk, { rotation: 0, transformOrigin: "50% 50%" }); ft(mk, { rotation: 0 }, { rotation: 90, duration: D - tCla, ease: "none" }, tCla);
+      const ph = $("s02-ph"), tx = $("s02-tx"), car = $("s02-car");
+      I(ph, { opacity: 1 }); tl.set(ph, { opacity: 0 }, tSat - 0.06);
+      const IDEA = "reels kolam koi, airnya gerak, 15 detik";
+      const tTyEnd = type(tx, IDEA, tSat - 0.04, 44);
+      I(car, { x: 0, opacity: 1 });
+      ft(car, { x: 0 }, { x: 588, duration: tTyEnd - tSat + 0.04, ease: "none" }, tSat - 0.04);
+      tl.set(car, { opacity: 0 }, tTer);
+      const bulb = $("s02-bulb"); I(bulb, { scale: 0, opacity: 0, rotation: -30 });
+      ft(bulb, { scale: 0, opacity: 0, rotation: -30 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.32, ease: "back.out(3)" }, tIde - 0.06);
+      ft(bulb, { scale: 1 }, { scale: 1.18, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tIde + 0.3);
+      const send = $("s02-send"); I(send, { scale: 1, transformOrigin: "50% 50%" });
+      ft(send, { scale: 1 }, { scale: 0.82, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, tTer - 0.12);
+      ft(tx, { opacity: 1 }, { opacity: 0.35, duration: 0.2 }, tTer);
+      // ---------------------------------------------------------------- editor + phone (slides up empty, waits with a blinking cursor)
+      const ed = $("s02-ed"), phn = $("s02-phone");
+      [ed, phn].forEach((e, i) => { I(e, { y: 80, opacity: 0 }); ft(e, { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, 0.08 + i * 0.05); });
+      const cur = $("s02-cur"); I(cur, { opacity: 0, x: 0, y: 0 });
+      for (let k = 0; k < 4; k++) { tl.set(cur, { opacity: 1 }, 0.5 + k * 0.4); tl.set(cur, { opacity: 0 }, 0.7 + k * 0.4); }
+      // code lines from "terus Claude nulis" to "kode."
+      const t0c = tTer - 0.05, dt = (tKod - 0.15 - t0c) / CODE.length, LT = [];
+      CODE.forEach((_, i) => { const l = $("s02-l" + i), t = t0c + i * dt; LT.push(t); I(l, { opacity: 0, x: -14 });
+        ft(l, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.12, ease: "power2.out" }, t);
+        tl.set(cur, { opacity: 1, x: 8 + (CODE[i].length * 11.2), y: i * 32 }, t + 0.06); });
+      tl.set(cur, { opacity: 0 }, tKod + 0.1);
+      // phone preview: the koi reel builds layer by layer from the lines
+      const host = $("s02-host");
+      const R = K.MINI.koi(S, host, "s02k", { w: 192, h: 352, t0: 0, t1: D });
+      const empty = $("s02-empty"); I(empty, { opacity: 1 });
+      const water = R.water, cau = R.cau;
+      I(water, { opacity: 0 }); I(cau, { opacity: 0 });
+      ft(water, { opacity: 0 }, { opacity: 1, duration: 0.2 }, LT[2]); ft(cau, { opacity: 0 }, { opacity: 1, duration: 0.3 }, LT[2] + 0.05);
+      ft(empty, { opacity: 1 }, { opacity: 0, duration: 0.15 }, LT[2]);
+      host.querySelectorAll("i.m-abs").forEach((e) => { if (!e.id) { I(e, { opacity: 0 }); ft(e, { opacity: 0 }, { opacity: 1, duration: 0.2 }, LT[2]); } });
+      R.fish.forEach((f, i) => { const inner = f; I(inner, { opacity: 0 }); ft(inner, { opacity: 0 }, { opacity: 1, duration: 0.18 }, LT[3] + i * 0.05); });
+      R.pads.forEach((p, i) => { I(p, { opacity: 0 }); ft(p, { opacity: 0 }, { opacity: 1, duration: 0.18 }, LT[4] + i * 0.04); });
+      R.ripples.forEach((r) => { const w = document.createElement("div"); r.parentNode.insertBefore(w, r); w.appendChild(r); w.className = "m-abs"; I(w, { opacity: 0 }); ft(w, { opacity: 0 }, { opacity: 1, duration: 0.2 }, LT[9]); });
+      for (let i = 0; i < 10; i++) { const g = $("s02k-g" + i); const w = document.createElement("div"); g.parentNode.insertBefore(w, g); w.appendChild(g); w.className = "m-abs"; I(w, { opacity: 0 }); ft(w, { opacity: 0 }, { opacity: 1, duration: 0.2 }, LT[8]); }
+      // "seluruh reels-nya": more files appear as tabs
+      for (let i = 1; i < 4; i++) { const tb = $("s02-tab" + i); I(tb, { scale: 0, opacity: 0 }); ft(tb, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, tSel - 0.05 + (i - 1) * 0.16); }
+      // "jadi kode.": the editor ring flashes + "</> semua kode" badge
+      const ring = $("s02-ring"); I(ring, { opacity: 0 });
+      ft(ring, { opacity: 0 }, { opacity: 1, duration: 0.14 }, tKod - 0.1); ft(ring, { opacity: 1 }, { opacity: 0.35, duration: 0.5, ease: "power2.inOut" }, tKod + 0.06);
+      const bd = $("s02-badge"); I(bd, { x: 690, y: 461, scale: 0, opacity: 0, rotation: -8 });
+      ft(bd, { scale: 0, opacity: 0, rotation: -8 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.34, ease: "back.out(2.6)" }, tJad - 0.04);
+      // exit (last 0.24 s): everything lifts away; s03 opens on its two cards
+      const tX = D - 0.24;
+      [$("s02-bar"), $("s02-in"), $("s02-send"), disc, bulb].forEach((e) => ft(e, { y: 0, opacity: 1 }, { y: -40, opacity: 0, duration: 0.22, ease: "power2.in" }, tX));
+      [ed, phn, bd, ring].forEach((e) => ft(e, { opacity: e === ring ? 0.35 : 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, tX));
+      ft(ed, { y: 0 }, { y: 40, duration: 0.22, ease: "power2.in" }, tX); ft(phn, { y: 0 }, { y: 40, duration: 0.22, ease: "power2.in" }, tX);
+      S.finish();
+    })();
+  </script>
+</template>

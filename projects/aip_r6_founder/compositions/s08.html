@@ -1,0 +1,98 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s08-a { position: absolute; }
+    #s08-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s08-glow { left: 40px; top: 300px; width: 1000px; height: 700px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    #s08-nb { left: 190px; top: 312px; width: 250px; text-align: right; font: 700 128px/140px Poppins, sans-serif; letter-spacing: -.04em; color: #1f8f45; white-space: nowrap; transform-origin: 100% 60%; }
+    #s08-t0 { left: 462px; top: 334px; font: 700 34px/44px Poppins, sans-serif; white-space: nowrap; }
+    #s08-t1 { left: 463px; top: 378px; font: 400 24px/32px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    #s08-ex { left: 463px; top: 420px; }
+    .s08-x { position: absolute; width: 50px; height: 50px; margin: -25px 0 0 -25px; border-radius: 50%; box-shadow: 0 0 0 4px #e5484d, 0 0 18px rgba(229,72,77,.5); }
+    .s08-rw { position: absolute; left: 100px; width: 880px; height: 62px; border-radius: 22px; transform-origin: 50% 50%;
+      background: linear-gradient(180deg, #ffffff, #f8fafd); box-shadow: 0 14px 26px -18px rgba(10,13,44,.55), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s08-rw .av { position: absolute; left: 10px; top: 9px; }
+    .s08-rw .q { position: absolute; left: 70px; top: 0; font: 700 21px/62px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s08-rw .n { position: absolute; right: 12px; top: 11px; height: 40px; padding: 0 16px; border-radius: 20px; background: #fdecec; color: #c2410c; font: 700 18px/40px Poppins, sans-serif; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="s08" data-width="1080" data-height="1920">
+    <div id="s08-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s08 "Cuma 18 dari 100 yang mau beli. Ada yang bawa bekal, ada yang bilang warteg lebih murah."
+      // START: empty stage · the PANEL (100 avatars) fades in · "18": the green 18 counts up, the 18 buyers ring green · "dari 100 …
+      // mau beli": headline + CONTOH SIMULASI, the 82 others dim · "bawa bekal": Rina's avatar rings coral, objection row 1 (34 orang) ·
+      // "warteg": Dimas rings, row 2 (29 orang) · "murah": row 3 (19 orang). 34 + 29 + 19 = 82 = 100 − 18 (R6.EX, illustrative).
+      // TRANSITION → s09: all out. END STATE: all invisible.
+      const D = 5.3, ST = 33.3667, VW = window.VO_WORDS, R6 = window.R6, EX = R6.EX;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const t18 = L("18"), tDari = L("dari"), tBeli = L("beli."), tBawa = L("bawa"), tWar = L("warteg"), tMur = L("murah.");
+      const CY = 476, CR = R6.CROWD, BUY = new Set(R6.BUY);
+      const avXY = (i) => [100 + (i % 20) * CR.pitch + CR.size / 2, CY + Math.floor(i / 20) * CR.pitch + CR.size / 2];
+      const OBJ = [{ i: 27, q: "“Aku bawa bekal dari rumah.”", n: EX.why[0][1], t: tBawa - 0.1 },
+        { i: 62, q: "“Warteg dekat kantor lebih murah.”", n: EX.why[1][1], t: tWar - 0.16 },
+        { i: 5, q: "“Takut telat sampai pas jam makan.”", n: EX.why[2][1], t: tMur + 0.02 }];
+
+      // ================================================================ DOM
+      let h = `<div class="s08-a" id="s08-glow"></div>`;
+      h += `<div class="s08-a" id="s08-nb">0</div><div class="s08-a r6-grad" id="s08-t0">dari 100 pembeli AI</div><div class="s08-a" id="s08-t1">yang mau beli</div>` +
+        `<div class="r6-ex" id="s08-ex">${R6.svg("flask", 2.2)}CONTOH SIMULASI</div>`;
+      h += R6.crowd("s08", 100, CY);
+      OBJ.forEach((o, k) => { const [x, y] = avXY(o.i); h += `<div class="s08-x" id="s08-x${k}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px"></div>`; });
+      OBJ.forEach((o, k) => {
+        h += `<div class="s08-rw" id="s08-r${k}" style="top:${714 + k * 72}px"><div class="av">${R6.avatar("s08-ra" + k, o.i, 0, 0, 44)}</div><b class="q">${o.q}</b><span class="n">${o.n} orang</span></div>`;
+      });
+      $("s08-cam").innerHTML = h;
+      const cam = $("s08-cam"), glow = $("s08-glow"), nb = $("s08-nb"), t0 = $("s08-t0"), t1 = $("s08-t1"), ex = $("s08-ex"), cr = $("s08-cr");
+
+      // ================================================================ the panel · "18": count + green rings
+      I(cam, { x: 0, y: 0 });
+      I(glow, { opacity: 0 }); ft(glow, { opacity: 0 }, { opacity: 0.9, duration: 0.3 }, 0);
+      I(cr, { opacity: 0, y: 24 }); ft(cr, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, 0.0);
+      I(nb, { opacity: 0, scale: 0.6, innerText: 0 });
+      ft(nb, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2)" }, Math.max(0.02, t18 - 0.22));
+      ft(nb, { innerText: 0 }, { innerText: EX.buy, duration: 0.5, ease: "power2.out", snap: { innerText: 1 } }, t18 - 0.12);
+      let q = 0;
+      for (let i = 0; i < 100; i++) {
+        const a = $("s08-a" + i);
+        if (BUY.has(i)) {
+          const ok = a.querySelector(".ok"), t = t18 - 0.1 + q * 0.028; q++;
+          I(ok, { opacity: 0 }); ft(ok, { opacity: 0 }, { opacity: 1, duration: 0.12 }, t);
+          I(a, { scale: 1 }); ft(a, { scale: 1 }, { scale: 1.3, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+        } else {
+          I(a, { opacity: 1 }); ft(a, { opacity: 1 }, { opacity: 0.28, duration: 0.3 }, tDari + 0.1 + R6.hash(i) * 0.25);
+        }
+      }
+      [t0, t1].forEach((e, k) => { I(e, { opacity: 0, x: -20 }); ft(e, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.26, ease: "power3.out" }, tDari - 0.12 + k * 0.5); });
+      I(ex, { opacity: 0, scale: 0.6 }); ft(ex, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2)" }, tBeli - 0.1);
+
+      // ================================================================ the objections
+      OBJ.forEach((o, k) => {
+        const x = $("s08-x" + k), r = $("s08-r" + k), a = $("s08-a" + o.i);
+        I(x, { opacity: 0, scale: 1.8 }); ft(x, { opacity: 0, scale: 1.8 }, { opacity: 1, scale: 1, duration: 0.22, ease: "power3.out" }, o.t - 0.08);
+        ft(a, { opacity: 0.28 }, { opacity: 1, duration: 0.15 }, o.t - 0.08);
+        I(r, { opacity: 0, y: 24, scale: 0.96 }); ft(r, { opacity: 0, y: 24, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "back.out(1.6)" }, o.t);
+      });
+
+      // ================================================================ TRANSITION → s09
+      const tOut = D - 0.26;
+      ft(cr, { opacity: 1, y: 0 }, { opacity: 0, y: -20, duration: 0.2, ease: "power2.in" }, tOut);
+      [0, 1, 2].forEach((k) => { ft($("s08-x" + k), { opacity: 1 }, { opacity: 0, duration: 0.15 }, tOut);
+        ft($("s08-r" + k), { opacity: 1, y: 0 }, { opacity: 0, y: 30, duration: 0.2, ease: "power2.in" }, tOut + k * 0.02); });
+      ft([nb, t0, t1, ex], { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.2, ease: "power2.in" }, tOut);
+      ft(glow, { opacity: 0.9 }, { opacity: 0, duration: 0.22 }, tOut);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s08"] = tl;
+    })();
+  </script>
+</template>

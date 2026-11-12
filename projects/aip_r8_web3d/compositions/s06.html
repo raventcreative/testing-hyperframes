@@ -1,0 +1,117 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s06-a { position: absolute; }
+    #s06-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s06-glow { left: 20px; top: 280px; width: 1040px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    #s06-sel { left: 0; top: 0; width: 280px; height: 280px; border-radius: 18px; border: 3px dashed #8fd8ff; box-shadow: 0 0 0 1.5px rgba(10,13,44,.25); }
+    #s06-sel i { position: absolute; width: 16px; height: 16px; border-radius: 4px; background: #ffffff; box-shadow: 0 0 0 3px #3a6fe0; }
+    #s06-tb { left: 0; top: 0; height: 50px; padding: 0 18px 0 50px; border-radius: 25px; background: #ffffff; color: #0a0d2c; white-space: nowrap; font: 700 18px/50px Poppins, sans-serif;
+      box-shadow: 0 14px 26px -12px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.08); transform-origin: 20% 100%; }
+    #s06-tb svg { position: absolute; left: 16px; top: 13px; width: 24px; height: 24px; display: block; color: #3a6fe0; }
+    #s06-tb span { position: absolute; left: 50px; top: 0; }
+    #s06-ph { left: 0; top: 0; width: 0; height: 0; }
+    #s06-ph .c { position: absolute; left: -84px; top: -100px; width: 168px; height: 200px; border-radius: 22px; background: #ffffff; box-shadow: 0 26px 40px -18px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.06); }
+    #s06-ph .im { position: absolute; left: 12px; top: 12px; width: 144px; height: 144px; border-radius: 14px; overflow: hidden; background: radial-gradient(circle at 50% 40%, #f6ead9, #d7b993); }
+    #s06-ph .im svg { position: absolute; left: 34px; top: 4px; width: 76px; height: 126px; }
+    #s06-ph b { position: absolute; left: 0; right: 0; top: 162px; text-align: center; font: 700 14px/26px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    #s06-flash { left: 0; top: 0; width: 0; height: 0; }
+    #s06-flash i { position: absolute; left: -150px; top: -150px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    #s06-sweep { left: 100px; top: 386px; width: 200px; height: 524px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0)); mix-blend-mode: screen; }
+  </style>
+  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920">
+    <div id="s06-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s06 "Terus ganti foto sama teksnya pakai punya klien kamu."
+      // START = s05's end (template card at the hero spot). · "ganti": a selection box + "Ganti foto" toolbar lock onto the product
+      // slot · "foto": the client's photo card flies in and lands, the placeholder pops out and the client's product (coffee cup)
+      // pops in, beans start orbiting · "sama teksnya": the selection jumps to the headline ("Ganti teks"), every text swaps to the
+      // client's copy (Kopi Senja) · "punya klien kamu.": the client's colours wipe across, the URL becomes kopi-senja.html.
+      // END STATE (t = D) = s07's START: Kopi Senja card at rest at the hero spot.
+      const ID = "s06", ST = window.SCN[ID][0], D = window.SCN[ID][1], VW = window.VO_WORDS, R8 = window.R8;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tGan = L("ganti"), tFoto = L("foto"), tSama = L("sama"), tTeks = L("teksnya"), tPak = L("pakai"), tPun = L("punya"), tKli = L("klien"), tKam = L("kamu.");
+
+      // ================================================================ DOM
+      const cupMini = R8.PROD.cup("s06-ph-")[0].replace('width="236" height="390"', 'width="76" height="126"');
+      let h = `<div class="s06-a" id="s06-glow"></div>` + R8.site("s06", ["tpl", "kopi"]);
+      h += `<div class="s06-a" id="s06-sweep"></div><div class="s06-a" id="s06-flash"><i></i></div>`;
+      h += `<div class="s06-a" id="s06-sel"><i style="left:-10px;top:-10px"></i><i style="right:-10px;top:-10px"></i><i style="left:-10px;bottom:-10px"></i><i style="right:-10px;bottom:-10px"></i></div>`;
+      h += `<div class="s06-a" id="s06-tb"><svg id="s06-tbi0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${R8.ICO.image}</svg>` +
+        `<svg id="s06-tbi1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${R8.ICO.type}</svg>` +
+        `<span id="s06-tbt0">Ganti foto</span><span id="s06-tbt1">Ganti teks</span><span style="visibility:hidden;position:static">Ganti foto</span></div>`;
+      h += `<div class="s06-a" id="s06-ph"><div class="c"><div class="im">${cupMini}</div><b>foto-klien.png</b></div></div>`;
+      $("s06-cam").innerHTML = h;
+      const glow = $("s06-glow"), sel = $("s06-sel"), tb = $("s06-tb"), ph = $("s06-ph"), flash = $("s06-flash"), sweep = $("s06-sweep");
+      I($("s06-cam"), { x: 0, y: 0 });
+      I(glow, { opacity: 0.85, scale: 1 });
+      I($("s06-card"), { opacity: 1, scale: 1, x: 0, y: 0 });
+
+      // ================================================================ s05's end state: template (g0) visible, client (g1) hidden
+      const T = (k) => $("s06-g0-" + k), K = (k) => $("s06-g1-" + k);
+      const TXT = ["mark", "name", "menu", "nb", "eb", "h1", "sub", "ctas", "feat"];
+      TXT.forEach((k) => { I(T(k), { opacity: 1, y: 0 }); I(K(k), { opacity: 0, y: 14 }); });
+      ["ring", "ring2"].forEach((k) => { I(T(k), { opacity: 1, scale: 1 }); I(K(k), { opacity: 0, scale: 0.8 }); });
+      I($("s06-bg0"), { clipPath: "inset(0% 0% 0% 0%)" }); I($("s06-bg1"), { clipPath: "inset(0% 100% 0% 0%)" });
+      I($("s06-u0"), { opacity: 1 }); I($("s06-u1"), { opacity: 0 });
+      R8.float(tl, "s06", 0, "tpl", ST, D);
+      R8.float(tl, "s06", 1, "kopi", ST, D);
+      I(T("pw"), { opacity: 1, scale: 1, rotation: 0 }); I(K("pw"), { opacity: 0, scale: 0.3 });
+      I(T("sh"), { autoAlpha: 1 }); I(K("sh"), { autoAlpha: 0 });
+      [0, 1, 2].forEach((j) => { I(T("o" + j), { autoAlpha: 1 }); I(K("o" + j), { autoAlpha: 0 }); });
+
+      // product slot centre on screen, headline box
+      const PX = 100 + R8.PC.x, PY = 386 + R8.PC.y;
+      // "ganti": selection + toolbar lock onto the product slot
+      I(sel, { opacity: 0, x: PX - 140, y: PY - 150, width: 280, height: 290, scale: 1.2 });
+      ft(sel, { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.24, ease: "power3.out" }, tGan - 0.1);
+      I(tb, { opacity: 0, x: PX - 130, y: PY - 216, scale: 0.6 });
+      ft(tb, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2.2)" }, tGan - 0.02);
+      I($("s06-tbi0"), { opacity: 1 }); I($("s06-tbt0"), { opacity: 1 }); I($("s06-tbi1"), { opacity: 0 }); I($("s06-tbt1"), { opacity: 0 });
+      // "foto": the client's photo flies in from the right and lands on the slot → swap
+      I(ph, { opacity: 0, x: 1180, y: PY - 40, rotation: 14, scale: 0.9 });
+      ft(ph, { opacity: 0, x: 1180, y: PY - 40, rotation: 14 }, { opacity: 1, x: PX, y: PY, rotation: -4, duration: 0.34, ease: "power3.out" }, tFoto - 0.36);
+      ft(ph, { opacity: 1, scale: 0.9 }, { opacity: 0, scale: 0.4, duration: 0.16, ease: "power2.in" }, tFoto + 0.0);
+      ft(T("pw"), { opacity: 1, scale: 1, rotation: 0 }, { opacity: 0, scale: 0.2, rotation: 40, duration: 0.16, ease: "power2.in" }, tFoto - 0.02);
+      ft(K("pw"), { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.38, ease: "back.out(2)" }, tFoto + 0.1);
+      ft(T("sh"), { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.15 }, tFoto); ft(K("sh"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, tFoto + 0.12);
+      [0, 1, 2].forEach((j) => { ft(T("o" + j), { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.12 }, tFoto); ft(K("o" + j), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, tFoto + 0.2 + j * 0.05); });
+      I(flash, { opacity: 0, x: PX, y: PY, scale: 0.5 });
+      ft(flash, { opacity: 1, scale: 0.5 }, { opacity: 0, scale: 1.3, duration: 0.4, ease: "power2.out" }, tFoto + 0.08);
+      // "sama teksnya": selection jumps to the headline, texts swap to the client's copy
+      const HX = 100 + 22, HY = 386 + 140;
+      ft(sel, { x: PX - 140, y: PY - 150, width: 280, height: 290 }, { x: HX, y: HY, width: 470, height: 132, duration: 0.3, ease: "power3.inOut" }, tSama - 0.08);
+      ft(tb, { x: PX - 130, y: PY - 216 }, { x: HX + 6, y: HY - 64, duration: 0.3, ease: "power3.inOut" }, tSama - 0.08);
+      tl.set($("s06-tbi0"), { opacity: 0 }, tSama + 0.07); tl.set($("s06-tbt0"), { opacity: 0 }, tSama + 0.07);
+      tl.set($("s06-tbi1"), { opacity: 1 }, tSama + 0.07); tl.set($("s06-tbt1"), { opacity: 1 }, tSama + 0.07);
+      TXT.forEach((k, i) => {
+        const t = tTeks - 0.08 + i * 0.045;
+        ft(T(k), { opacity: 1, y: 0 }, { opacity: 0, y: -12, duration: 0.14, ease: "power2.in" }, t);
+        ft(K(k), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, t + 0.1);
+      });
+      // "punya klien kamu.": the client's colours wipe across, URL swaps, selection leaves
+      ft(sel, { opacity: 1 }, { opacity: 0, duration: 0.18 }, tPak);
+      ft(tb, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.8, duration: 0.18 }, tPak);
+      ft($("s06-bg1"), { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: "power2.inOut" }, tPun - 0.1);
+      I(sweep, { opacity: 0, x: 0 }); tl.set(sweep, { opacity: 1 }, tPun - 0.1);
+      ft(sweep, { x: 0 }, { x: 780, duration: 0.5, ease: "power2.inOut" }, tPun - 0.1); tl.set(sweep, { opacity: 0 }, tPun + 0.42);
+      ["ring", "ring2"].forEach((k, i) => { ft(T(k), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPun); ft(K(k), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, tPun + 0.15 + i * 0.06); });
+      ft($("s06-u0"), { opacity: 1 }, { opacity: 0, duration: 0.15 }, tKli - 0.05); ft($("s06-u1"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tKli + 0.05);
+      ft($("s06-card"), { scale: 1 }, { scale: 1.025, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tKam - 0.05);
+      ft(K("cta"), { scale: 1 }, { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tKam + 0.05);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines[ID] = tl;
+    })();
+  </script>
+</template>

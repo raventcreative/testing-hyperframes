@@ -1,0 +1,72 @@
+<template>
+  <style>
+    /* s04 GAYA BEBAS — the showcase (15.53–26.43)
+       "Gayanya bebas. Cerita anak sebelum tidur, lengkap sama bulan dan bintangnya. Kartun lucu yang lompat-lompat.
+        Kolam koi yang airnya beneran gerak. Sampai film pendek yang ada ceritanya."
+       Style chips row (y 316) + one player stage (960×520 at y 392). Every style first appears as its CODE (the compile flash:
+       3 lines of HTML/GSAP), a cyan scan bar sweeps, and the code is cut away to the running mini-reel (R7K.MINI.*):
+       cerita anak (moon rises on "bulan", stars + constellation on "bintangnya", story line types) → kartun (Bolo hops; big hops +
+       BOING on "lompat-lompat") → kolam koi (caustics, 4 koi, ripples; splash burst on "beneran") → film pendek (clapperboard snaps on
+       "film", rainy street, subtitle on "ceritanya"). Last 0.25 s: chips and stage drop away. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s04-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s04-badge { position: absolute; left: auto; right: 22px; bottom: 30px; }
+  </style>
+  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div id="s04-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R7K, D = 10.9, P = "s04";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s04-zone");
+      let h = K.chipsHTML(P) + `<div class="k-stage" id="s04-stage">`;
+      K.STYLES.forEach((st, k) => { h += `<div class="host" id="s04-h${k}"></div>`; });
+      K.STYLES.forEach((st, k) => { h += K.codeHTML(P, k, st.id === "bed" ? "cerita-anak.html" : st.id === "toon" ? "kartun.html" : st.id === "koi" ? "kolam-koi.html" : "film-pendek.html"); });
+      h += `<div class="k-badge" id="s04-badge">${K.svg("code")}HTML + GSAP</div><div class="k-bar"><b id="s04-bar"></b></div></div><div class="k-stage-ring" id="s04-ring"></div>`;
+      z.innerHTML = h;
+      const tGa = wt("Gayanya"), tBe = wt("bebas."), tCe = wt("Cerita"), tTi = wt("tidur,"), tBu = wt("bulan"), tBi = wt("bintangnya.");
+      const tKa = wt("Kartun"), tLo = wt("lompat-lompat."), tKo = wt("Kolam"), tAi = wt("airnya"), tBn = wt("beneran"), tGe = wt("gerak.");
+      const tSa = wt("Sampai"), tFi = wt("film"), tPe = wt("pendek"), tCr = wt("ceritanya.");
+      // ---------------------------------------------------------------- chips + stage in
+      K.chipSet(S, P, -1);
+      for (let k = 0; k < 4; k++) { const c = $(`${P}-chip${k}`); I(c, { y: K.CHIPS.y - 50, opacity: 0 });
+        ft(c, { y: K.CHIPS.y - 50, opacity: 0 }, { y: K.CHIPS.y, opacity: 1, duration: 0.36, ease: "back.out(1.8)" }, 0.02 + k * 0.06); }
+      const stg = $("s04-stage"); I(stg, { scale: 0.9, opacity: 0, transformOrigin: "50% 50%" });
+      ft(stg, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.42, ease: "power3.out" }, 0.04);
+      // "bebas.": the highlight runs over all four chips, then lands on "cerita anak"
+      const run = [tBe - 0.05, tBe + 0.1, tBe + 0.25, tBe + 0.4];
+      run.forEach((t, k) => K.chipGo(S, P, k - 1, k, t));
+      K.chipGo(S, P, 3, 0, tCe - 0.3);
+      // ---------------------------------------------------------------- the four styles: [compile flash on, wipe, mini t0, t1, chip switch]
+      const SEG = [
+        { on: 0.22, wipe: tCe + 0.02, t0: 0.2, t1: tKa + 0.2 },
+        { on: tKa - 0.3, wipe: tKa + 0.04, t0: tKa - 0.32, t1: tKo + 0.2, chip: tKa - 0.3 },
+        { on: tKo - 0.3, wipe: tKo + 0.04, t0: tKo - 0.32, t1: tSa + 0.2, chip: tKo - 0.3 },
+        { on: tSa - 0.15, wipe: tSa + 0.2, t0: tSa - 0.17, t1: D, chip: tSa - 0.15 },
+      ];
+      const bar = $("s04-bar"); I(bar, { scaleX: 0 });
+      const ring = $("s04-ring"); I(ring, { opacity: 0 });
+      SEG.forEach((g, k) => {
+        const host = $(`${P}-h${k}`), st = K.STYLES[k];
+        I(host, { opacity: 0 });
+        tl.set(host, { opacity: 1 }, g.wipe - 0.02);
+        if (k < 3) tl.set(host, { opacity: 0 }, SEG[k + 1].wipe + 0.3);
+        if (g.chip != null) K.chipGo(S, P, k - 1, k, g.chip);
+        K.codeFlash(S, P, k, g.on, g.wipe);
+        ft(ring, { opacity: 0 }, { opacity: 1, duration: 0.1 }, g.wipe - 0.06); ft(ring, { opacity: 1 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, g.wipe + 0.06);
+        ft(bar, { scaleX: 0 }, { scaleX: 1, duration: (k < 3 ? SEG[k + 1].wipe : D) - g.wipe, ease: "none" }, g.wipe);
+        const ev = k === 0 ? { moon: tBu - 0.15, stars: tBi - 0.05, story: tCe + 0.25, shoot: tTi + 0.1 }
+          : k === 1 ? { jump: tLo - 0.04 }
+          : k === 2 ? { burst: tBn - 0.05 }
+          : { clap: tFi, sub: tCr - 0.05 };
+        K.MINI[st.id](S, host, `${P}m${k}`, { w: 960, h: 520, t0: g.t0, t1: g.t1, ev, walk: 1.5 });
+      });
+      // exit (last 0.25 s)
+      const tX = D - 0.25;
+      for (let k = 0; k < 4; k++) ft($(`${P}-chip${k}`), { y: K.CHIPS.y, opacity: 1 }, { y: K.CHIPS.y - 40, opacity: 0, duration: 0.22, ease: "power2.in" }, tX + k * 0.02);
+      ft(stg, { scale: 1, opacity: 1 }, { scale: 0.94, opacity: 0, duration: 0.24, ease: "power2.in" }, tX);
+      S.finish();
+    })();
+  </script>
+</template>

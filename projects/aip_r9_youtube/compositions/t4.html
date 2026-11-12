@@ -1,0 +1,91 @@
+<template>
+  <style>
+    /* t4 /yt-comment (22.70–26.47) "Empat, komentar dipilah, lalu dibalas pakai gaya bahasa kamu."
+       Frame 0 = t3's end (header 03 only). Header rolls to 04. "komentar": six example comments (generic handles) cascade in as a
+       pile. "dipilah": they fly into the skill's four piles — Pertanyaan · Koreksi · Pujian · Pancingan (Questions, Corrections,
+       Praise, Bait) — with counts; the bait gets "tidak dibalas", the top question gets the pin. "dibalas pakai gaya bahasa kamu":
+       a reply to that question types itself, tagged "gaya kamu · voice.md". Last 0.22 s: workspace drops out. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #t4-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    .t4-hd { position: absolute; left: 0; top: 0; width: 225px; height: 46px; border-radius: 23px; font: 700 19px/46px Poppins; text-align: center; white-space: nowrap; transform-origin: 50% 50%; }
+    .t4-hd b { display: inline-block; min-width: 30px; height: 30px; margin-left: 8px; border-radius: 15px; font: 700 17px/30px Poppins; vertical-align: 1px; }
+    .t4-cm { position: absolute; left: 0; top: 0; width: 225px; height: 108px; border-radius: 20px; background: rgba(12,22,64,.9);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12), 0 14px 30px rgba(2,6,26,.45); transform-origin: 50% 50%; }
+    .t4-cm .av { position: absolute; left: 14px; top: 14px; width: 26px; height: 26px; border-radius: 50%; }
+    .t4-cm .h { position: absolute; left: 48px; top: 12px; font: 400 15px/30px Poppins; color: #86a9c9; white-space: nowrap; }
+    .t4-cm .t { position: absolute; left: 14px; top: 46px; width: 200px; font: 700 18px/25px Poppins; color: #fff; }
+    #t4-pin { position: absolute; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: #ffffff; color: #0a7ea4;
+      box-shadow: 0 6px 16px rgba(2,6,26,.5); transform-origin: 50% 50%; }
+    #t4-pin svg { position: absolute; left: 11px; top: 11px; width: 22px; height: 22px; }
+    #t4-no { position: absolute; left: 0; top: 0; height: 40px; padding: 0 14px 0 10px; border-radius: 20px; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.25);
+      font: 700 17px/40px Poppins; color: #c6d2e4; white-space: nowrap; display: flex; align-items: center; gap: 8px; transform-origin: 50% 50%; }
+    #t4-no svg { width: 20px; height: 20px; }
+    #t4-rp { position: absolute; left: 0; top: 0; width: 960px; height: 132px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #f4f7fc); box-shadow: 0 26px 56px rgba(2,6,26,.55); }
+    #t4-rp .av { position: absolute; left: 22px; top: 24px; width: 84px; height: 84px; border-radius: 50%; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440; }
+    #t4-rp .av svg { position: absolute; left: 20px; top: 18px; width: 44px; height: 44px; }
+    #t4-rp .lb { position: absolute; left: 128px; top: 20px; display: flex; align-items: center; gap: 8px; font: 700 17px/26px Poppins; color: #5d6f8f; white-space: nowrap; }
+    #t4-rp .lb svg { width: 20px; height: 20px; color: #0a7ea4; }
+    #t4-rt { position: absolute; left: 128px; top: 56px; width: 800px; font: 700 27px/40px Poppins; color: #0a0d2c; letter-spacing: -.2px; white-space: nowrap; }
+    #t4-vc { position: absolute; left: 0; top: 0; height: 36px; padding: 0 14px 0 10px; border-radius: 18px; background: #01ccf7; color: #0b1440; font: 700 17px/36px Poppins;
+      white-space: nowrap; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 18px rgba(1,204,247,.5); transform-origin: 50% 50%; }
+    #t4-vc svg { width: 18px; height: 18px; }
+  </style>
+  <div id="root" data-composition-id="t4" data-width="1080" data-height="1920">
+    <div id="t4-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R9K, D = 3.7667, P = "t4";
+      const S = K.scene(P, D), { tl, ft, I, wt, $, type } = S;
+      const z = $("t4-zone");
+      const COLX = [60, 305, 550, 795];
+      const HD = [["Pertanyaan", 2, "#01ccf7", "#0b1440", "rgba(1,204,247,.16)"], ["Koreksi", 1, "#f5b84a", "#3a2600", "rgba(245,184,74,.16)"],
+        ["Pujian", 2, "#5be08a", "#06351a", "rgba(91,224,138,.16)"], ["Pancingan", 1, "#c6d2e4", "#1d2640", "rgba(198,210,228,.12)"]];
+      // [handle, text, column, slot, avatar colour]   (handles are generic placeholders)
+      const CM = [["@penonton_01", "Ini bisa direkam pakai HP aja?", 0, 0, "#7cc4ff"], ["@penonton_02", "Mic-nya pakai apa?", 0, 1, "#ffb37c"],
+        ["@penonton_03", "Di menit 2 tadi urutannya kebalik", 1, 0, "#c9a7ff"], ["@penonton_04", "Penjelasannya enak diikuti!", 2, 0, "#7ce0a5"],
+        ["@penonton_05", "Makasih, langsung kupraktekin", 2, 1, "#ffd27c"], ["@penonton_06", "Pasti clickbait nih", 3, 0, "#ff8f8f"]];
+      const SLOTY = [538, 656];
+      z.innerHTML = K.headerHTML(P) +
+        HD.map(([t, n, c, ink, bg], i) => `<div class="t4-hd" id="t4-h${i}" style="color:${c};background:${bg};box-shadow:inset 0 0 0 1.5px ${c}">${t}<b style="background:${c};color:${ink}">${n}</b></div>`).join("") +
+        CM.map(([h, t, , , c], i) => `<div class="t4-cm" id="t4-c${i}"><i class="av" style="background:${c}"></i><div class="h">${h}</div><div class="t">${t}</div></div>`).join("") +
+        `<div id="t4-pin">${K.svg("pin")}</div><div id="t4-no">${K.svg("eyeoff")}tidak dibalas</div>` +
+        `<div id="t4-rp"><div class="av">${K.svg("user")}</div><div class="lb">${K.svg("reply")}membalas @penonton_01</div><div id="t4-rt"></div></div>` +
+        `<div id="t4-vc">${K.svg("mic")}gaya kamu &middot; voice.md</div>`;
+      K.headerSet(S, P, 3);
+      const tEm = wt("Empat,"), tKo = wt("komentar"), tDi = wt("dipilah,"), tLa = wt("lalu", 24), tDb = wt("dibalas"), tGa = wt("gaya"), tBa = wt("bahasa"), tKa = wt("kamu.", 25);
+      K.headerSwap(S, P, 3, 4, Math.max(0.01, tEm - 0.02));
+      // ---------------------------------------------------------------- "komentar": the pile
+      CM.forEach(([, , col, slot], i) => {
+        const c = $("t4-c" + i), px = 427 + ((i * 29) % 5 - 2) * 14, py = 520 + i * 24, r = ((i * 23) % 9) - 4;
+        I(c, { x: px, y: py + 80, rotation: r, opacity: 0, scale: 0.9 });
+        ft(c, { y: py + 80, opacity: 0, scale: 0.9 }, { y: py, opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.6)" }, tKo - 0.2 + i * 0.06);
+        // "dipilah": into the four piles
+        ft(c, { x: px, y: py, rotation: r }, { x: COLX[col], y: SLOTY[slot], rotation: 0, duration: 0.46, ease: "power3.inOut" }, tDi - 0.06 + i * 0.045);
+      });
+      HD.forEach((_, i) => { const h = $("t4-h" + i); I(h, { x: COLX[i], y: 480, scale: 0.5, opacity: 0 });
+        ft(h, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.4)" }, tDi + i * 0.07); });
+      const bait = $("t4-c5"); I(bait, { opacity: 1 }); ft(bait, { opacity: 1 }, { opacity: 0.45, duration: 0.3 }, tLa - 0.05);
+      const no = $("t4-no"); I(no, { x: 795, y: 664, scale: 0.5, opacity: 0 });
+      ft(no, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.4)" }, tLa);
+      const pin = $("t4-pin"); I(pin, { x: 272, y: 540, scale: 0, rotation: -40 });
+      ft(pin, { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.3, ease: "back.out(2.6)" }, tLa + 0.12);
+      const q1 = $("t4-c0"); I(q1, { boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,.12), 0 14px 30px rgba(2,6,26,.45)" });
+      ft(q1, { boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,.12), 0 14px 30px rgba(2,6,26,.45)" }, { boxShadow: "inset 0 0 0 2.5px rgba(106,223,255,1), 0 0 26px rgba(1,204,247,.55)", duration: 0.2 }, tLa + 0.12);
+      // ---------------------------------------------------------------- "dibalas pakai gaya bahasa kamu": the reply
+      const rp = $("t4-rp"); I(rp, { x: 60, y: 840, opacity: 0 });
+      ft(rp, { y: 840, opacity: 0 }, { y: 784, opacity: 1, duration: 0.34, ease: "power3.out" }, tDb - 0.2);
+      type($("t4-rt"), "Bisa banget, aku sendiri ngerekam pakai HP kok.", tDb + 0.06, 34);
+      const vc = $("t4-vc"); I(vc, { x: 1000, xPercent: -100, y: 772, scale: 0.4, opacity: 0 });
+      ft(vc, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.6)" }, tGa - 0.04);
+      // ---------------------------------------------------------------- exit
+      const tX = D - 0.22;
+      CM.forEach(([, , col, slot], i) => ft($("t4-c" + i), { y: SLOTY[slot], opacity: i === 5 ? 0.45 : 1 }, { y: SLOTY[slot] + 60, opacity: 0, duration: 0.18, ease: "power2.in" }, tX));
+      HD.forEach((_, i) => ft($("t4-h" + i), { y: 480, opacity: 1 }, { y: 540, opacity: 0, duration: 0.18, ease: "power2.in" }, tX));
+      [no, pin].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.15 }, tX));
+      ft(rp, { y: 784, opacity: 1 }, { y: 844, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + 0.02);
+      ft(vc, { y: 772, opacity: 1 }, { y: 832, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + 0.02);
+      S.finish();
+    })();
+  </script>
+</template>

@@ -1,0 +1,82 @@
+<template>
+  <style>
+    /* t3 /yt-edit (18.87–22.70) "Tiga, transkrip jadi daftar potongan edit, lengkap dengan timecode."
+       Frame 0 = t2's end (header 02 only). Header rolls to 03. "transkrip": a white TRANSCRIPT card (5 timed lines of an example
+       recording) slides in. "daftar potongan edit": the three cue types deadair.py finds get tagged and struck — REPEAT (a restarted
+       sentence), DEAD (silence, trimmed from the middle so both sides keep a breath), FILLER — and the EDIT LIST card below deals the
+       three cuts. "timecode": every timecode lights cyan in sequence. Last 0.22 s: workspace drops out. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #t3-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #t3-tr { position: absolute; left: 0; top: 0; width: 960px; height: 290px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #f4f7fc); box-shadow: 0 26px 56px rgba(2,6,26,.55); }
+    #t3-tr .lb { position: absolute; left: 26px; top: 18px; font: 700 17px/24px Poppins; letter-spacing: 2.5px; color: #5d6f8f; white-space: nowrap; }
+    .t3-row { position: absolute; left: 14px; width: 932px; height: 44px; border-radius: 12px; }
+    .t3-row .tc { position: absolute; left: 12px; top: 6px; height: 32px; width: 110px; border-radius: 9px; background: #eef3fb; font: 700 18px/32px Poppins; color: #294b77; text-align: center; }
+    .t3-row .tx { position: absolute; left: 138px; top: 0; font: 400 23px/44px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .t3-row .tx.mu { color: #8a94a6; font-style: italic; }
+    .t3-row .st { position: absolute; left: 134px; top: 21px; height: 3px; border-radius: 2px; background: #e5484d; }
+    .t3-row .tg { position: absolute; right: 12px; top: 7px; height: 30px; padding: 0 12px; border-radius: 15px; background: #e5484d; color: #fff; font: 700 15px/30px Poppins; letter-spacing: 1.5px; }
+    .t3-hi { position: absolute; left: 0; top: 0; width: 110px; height: 32px; border-radius: 9px; box-shadow: inset 0 0 0 2px #01ccf7, 0 0 14px rgba(1,204,247,.6); background: rgba(1,204,247,.16); }
+    #t3-edl { position: absolute; left: 0; top: 0; width: 960px; height: 132px; border-radius: 28px; background: rgba(12,22,64,.86);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), 0 22px 46px rgba(2,6,26,.5); }
+    #t3-edl .cnt { position: absolute; right: 22px; top: 12px; height: 34px; padding: 0 14px; border-radius: 17px; background: rgba(229,72,77,.18); box-shadow: inset 0 0 0 1.5px rgba(255,120,120,.6);
+      font: 700 17px/34px Poppins; color: #ffb3b3; white-space: nowrap; }
+    .t3-cut { position: absolute; top: 60px; height: 52px; width: 296px; border-radius: 16px; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14); }
+    .t3-cut svg { position: absolute; left: 12px; top: 14px; width: 24px; height: 24px; color: #ff8a80; }
+    .t3-cut .tc { position: absolute; left: 44px; top: 0; font: 700 17px/52px Poppins; color: #e3edfa; white-space: nowrap; }
+    .t3-cut .k { position: absolute; right: 10px; top: 13px; height: 26px; padding: 0 8px; border-radius: 13px; background: #e5484d; font: 700 13px/26px Poppins; letter-spacing: 1px; color: #fff; }
+  </style>
+  <div id="root" data-composition-id="t3" data-width="1080" data-height="1920">
+    <div id="t3-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R9K, D = 3.8333, P = "t3";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("t3-zone");
+      // example recording (invented): [timecode, text, muted, tag, strike width]
+      const R = [["00:00.0", "Oke, hari ini aku mau bahas&mdash;", 0, "REPEAT", 318], ["00:02.4", "(hening 2,6 detik)", 1, "DEAD", 196],
+        ["00:05.0", "Eh&hellip; gimana ya, ehm&hellip;", 0, "FILLER", 232], ["00:06.8", "Hari ini aku mau bahas cara ngedit cepat.", 0, null, 0],
+        ["00:10.1", "Pertama, siapin transkrip videonya.", 0, null, 0]];
+      const CUTS = [["00:00.0&ndash;00:02.4", "REPEAT"], ["00:02.8&ndash;00:04.6", "DEAD"], ["00:05.0&ndash;00:06.8", "FILLER"]];
+      z.innerHTML = K.headerHTML(P) +
+        `<div id="t3-tr"><div class="lb">TRANSKRIP &middot; rekaman.srt &middot; contoh</div>` +
+        R.map(([tc, tx, mu, tg, sw], i) => `<div class="t3-row" id="t3-r${i}" style="top:${52 + i * 46}px"><div class="tc">${tc}</div><div class="tx${mu ? " mu" : ""}">${tx}</div>` +
+          (tg ? `<i class="st" id="t3-s${i}" style="width:${sw}px"></i><div class="tg" id="t3-g${i}">${tg}</div>` : "") + `<i class="t3-hi" id="t3-h${i}" style="left:12px;top:6px"></i></div>`).join("") + `</div>` +
+        `<div id="t3-edl"><div class="k-lab" style="left:26px;top:16px">DAFTAR POTONGAN EDIT</div><div class="cnt" id="t3-cnt">3 potongan</div>` +
+        CUTS.map(([tc, k], i) => `<div class="t3-cut" id="t3-c${i}" style="left:${18 + i * 310}px">${K.svg("scissors")}<div class="tc">${tc}</div><div class="k">${k}</div><i class="t3-hi" id="t3-ch${i}" style="left:40px;top:10px;width:178px"></i></div>`).join("") + `</div>`;
+      K.headerSet(S, P, 2);
+      const tTi = wt("Tiga,"), tTr = wt("transkrip"), tDa = wt("daftar", 20), tPo = wt("potongan"), tEd = wt("edit,"), tLe = wt("lengkap"), tTc = wt("timecode.");
+      K.headerSwap(S, P, 2, 3, Math.max(0.01, tTi - 0.04));
+      // ---------------------------------------------------------------- "transkrip"
+      const tr = $("t3-tr");
+      I(tr, { x: 60, y: 548, opacity: 0 });
+      ft(tr, { y: 548, opacity: 0 }, { y: 484, opacity: 1, duration: 0.4, ease: "power3.out" }, tTr - 0.24);
+      R.forEach((_, i) => { const r = $("t3-r" + i); I(r, { x: -20, opacity: 0 }); ft(r, { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.24, ease: "power2.out" }, tTr - 0.06 + i * 0.06);
+        I($("t3-h" + i), { opacity: 0 }); I(r, { backgroundColor: "rgba(229,72,77,0)" }); });
+      // ---------------------------------------------------------------- "daftar potongan edit": tag + strike the three cut cues
+      [0, 1, 2].forEach((i) => {
+        const tt = tDa + i * 0.22, r = $("t3-r" + i), s = $("t3-s" + i), g = $("t3-g" + i);
+        I(s, { scaleX: 0, transformOrigin: "0% 50%" }); ft(s, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power2.out" }, tt);
+        I(g, { scale: 0.4, opacity: 0, transformOrigin: "50% 50%" }); ft(g, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(2.6)" }, tt + 0.04);
+        ft(r, { backgroundColor: "rgba(229,72,77,0)" }, { backgroundColor: "rgba(229,72,77,0.08)", duration: 0.2 }, tt);
+        const tx = r.querySelector(".tx"); I(tx, { opacity: 1 }); ft(tx, { opacity: 1 }, { opacity: 0.45, duration: 0.3 }, tt + 0.1);
+      });
+      const edl = $("t3-edl");
+      I(edl, { x: 60, y: 850, opacity: 0 });
+      ft(edl, { y: 850, opacity: 0 }, { y: 792, opacity: 1, duration: 0.36, ease: "power3.out" }, tPo - 0.12);
+      CUTS.forEach((_, i) => { const c = $("t3-c" + i); I(c, { y: 24, opacity: 0, scale: 0.9, transformOrigin: "50% 50%" });
+        ft(c, { y: 24, opacity: 0, scale: 0.9 }, { y: 0, opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.8)" }, tEd - 0.1 + i * 0.12);
+        I($("t3-ch" + i), { opacity: 0 }); });
+      const cn = $("t3-cnt"); I(cn, { scale: 0.4, opacity: 0, transformOrigin: "50% 50%" });
+      ft(cn, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, tLe);
+      // ---------------------------------------------------------------- "timecode": every timecode lights in sequence
+      const H = [0, 1, 2, 3, 4].map((i) => $("t3-h" + i)).concat([0, 1, 2].map((i) => $("t3-ch" + i)));
+      H.forEach((h, k) => { const tt = tTc - 0.14 + k * 0.07; ft(h, { opacity: 0 }, { opacity: 1, duration: 0.1 }, tt); ft(h, { opacity: 1 }, { opacity: 0.35, duration: 0.4 }, tt + 0.2); });
+      // ---------------------------------------------------------------- exit
+      const tX = D - 0.22;
+      ft(tr, { y: 484, opacity: 1 }, { y: 544, opacity: 0, duration: 0.18, ease: "power2.in" }, tX);
+      ft(edl, { y: 792, opacity: 1 }, { y: 852, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + 0.02);
+      S.finish();
+    })();
+  </script>
+</template>

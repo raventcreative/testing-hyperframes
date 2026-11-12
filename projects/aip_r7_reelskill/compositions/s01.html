@@ -1,0 +1,92 @@
+<template>
+  <style>
+    /* s01 HOOK (0–5.17) "Reels animasi kayak gini, aku bikin tanpa kredit video AI sama sekali."
+       Frame 0: a 2×2 wall of four RUNNING mini-reels (the same HTML/GSAP builds as the showcase: cerita anak, kartun, kolam koi,
+       film pendek), opened mid-story. "kayak gini" = a cyan selection ring hops over the four; "tanpa kredit video AI" = the
+       credit panel lands on top (big cyan 0); "sama sekali" = the 0 stamps + check. Last 0.25 s: the wall folds away. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    .s01-tile { position: absolute; left: 0; top: 0; width: 451px; height: 244px; border-radius: 22px; overflow: hidden; background: #060b26;
+      box-shadow: 0 0 0 1.5px rgba(255,255,255,.16), 0 20px 44px rgba(2,6,26,.55); transform-origin: 50% 50%; }
+    .s01-host { position: absolute; left: 0; top: 0; width: 960px; height: 520px; overflow: hidden; transform-origin: 0 0; }
+    .s01-lab { position: absolute; left: 12px; top: 12px; }
+    #s01-ring { position: absolute; left: 0; top: 0; width: 463px; height: 256px; border-radius: 28px; box-shadow: inset 0 0 0 4px #01ccf7, 0 0 30px rgba(1,204,247,.6); }
+    #s01-panel { position: absolute; left: 0; top: 0; width: 720px; height: 196px; border-radius: 34px; background: rgba(12,22,64,.94);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14), 0 30px 70px rgba(2,6,26,.7); transform-origin: 50% 50%; }
+    #s01-panel .co { position: absolute; left: 30px; top: 38px; width: 120px; height: 120px; border-radius: 30px; background: linear-gradient(160deg, #ffe08a, #ffb703 60%, #e08e00);
+      color: #5a3500; box-shadow: 0 0 26px rgba(255,183,3,.4), inset 0 1px 0 rgba(255,255,255,.5); }
+    #s01-panel .co svg { position: absolute; left: 26px; top: 26px; width: 68px; height: 68px; }
+    #s01-panel .t1 { position: absolute; left: 176px; top: 42px; font: 700 44px/58px Poppins; color: #fff; white-space: nowrap; letter-spacing: -.5px; }
+    #s01-panel .t2 { position: absolute; left: 178px; top: 104px; font: 400 26px/40px Poppins; color: #9fdcf2; white-space: nowrap; }
+    #s01-zero { position: absolute; left: 556px; top: 18px; width: 140px; height: 160px; text-align: center; font: 700 140px/160px Poppins; color: #01ccf7;
+      text-shadow: 0 0 34px rgba(1,204,247,.55); transform-origin: 50% 55%; }
+    #s01-strike { position: absolute; left: 30px; top: 96px; width: 120px; height: 8px; border-radius: 4px; background: #ff5a6a; transform-origin: 0 50%; box-shadow: 0 0 12px rgba(255,90,106,.6); }
+    #s01-ok { position: absolute; left: 0; top: 0; width: 64px; height: 64px; border-radius: 50%; background: #2da44e; color: #fff; box-shadow: 0 10px 24px rgba(0,40,10,.45); transform-origin: 50% 50%; }
+    #s01-ok svg { position: absolute; left: 14px; top: 14px; width: 36px; height: 36px; }
+    #s01-burst { position: absolute; left: 0; top: 0; width: 200px; height: 200px; margin: -100px 0 0 -100px; border-radius: 50%; box-shadow: 0 0 0 5px rgba(106,223,255,.9); transform-origin: 50% 50%; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R7K, D = 5.1667, P = "s01";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s01-zone");
+      const TX = [80, 549], TY = [330, 592], SCL = 451 / 960;
+      let h = "";
+      K.STYLES.forEach((st, k) => {
+        h += `<div class="s01-tile" id="s01-t${k}"><div class="s01-host" id="s01-h${k}"></div><div class="k-badge s01-lab" id="s01-l${k}">${K.svg(st.ic)}${st.label}</div></div>`;
+      });
+      h += `<div id="s01-ring"></div>`;
+      h += `<div id="s01-panel"><div class="co">${K.svg("coins")}</div><div id="s01-strike"></div><div class="t1">Kredit video AI</div><div class="t2">yang kepakai buat reels ini</div><div id="s01-zero">0</div></div>`;
+      h += `<div id="s01-burst"></div><div id="s01-ok">${K.svg("check")}</div>`;
+      z.innerHTML = h;
+      // ---------------------------------------------------------------- the four mini-reels, opened mid-story (still = beats done)
+      const tEnd = D;
+      K.STYLES.forEach((st, k) => {
+        const host = $("s01-h" + k);
+        I(host, { scale: SCL });
+        K.MINI[st.id](S, host, "s01m" + k, { w: 960, h: 520, t0: 0, t1: tEnd, still: true, ev: st.id === "film" ? { sub: null } : {} });
+        const t = $("s01-t" + k);
+        I(t, { x: TX[k % 2], y: TY[k >> 1], scale: 0.94, opacity: 1, rotation: (k % 2 ? 1.5 : -1.5) });
+        ft(t, { scale: 0.94, rotation: (k % 2 ? 1.5 : -1.5) }, { scale: 1, rotation: 0, duration: 0.55, ease: "back.out(1.6)" }, 0.02 + k * 0.05);
+      });
+      const tRe = wt("Reels"), tAn = wt("animasi"), tKa = wt("kayak"), tGi = wt("gini,"), tAku = wt("aku"), tBi = wt("bikin");
+      const tTa = wt("tanpa"), tKr = wt("kredit"), tVi = wt("video"), tAI = wt("AI"), tSa = wt("sama"), tSe = wt("sekali.");
+      // labels pop on "animasi"
+      K.STYLES.forEach((_, k) => { const l = $("s01-l" + k); I(l, { scale: 0.4, opacity: 0, transformOrigin: "0% 50%" });
+        ft(l, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tAn - 0.08 + k * 0.08); });
+      // "kayak gini": the selection ring hops over the four tiles
+      const ring = $("s01-ring"); I(ring, { x: TX[0] - 6, y: TY[0] - 6, opacity: 0, scale: 1.04 });
+      ft(ring, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.16, ease: "power2.out" }, tKa - 0.06);
+      const hopT = [tKa - 0.06, tKa + 0.2, tGi + 0.05, tGi + 0.3];
+      for (let k = 1; k < 4; k++) ft(ring, { x: TX[(k - 1) % 2] - 6, y: TY[(k - 1) >> 1] - 6 }, { x: TX[k % 2] - 6, y: TY[k >> 1] - 6, duration: 0.16, ease: "power3.inOut" }, hopT[k]);
+      ft(ring, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tAku);
+      // "aku bikin": a playful bump wave over the wall
+      K.STYLES.forEach((_, k) => ft($("s01-t" + k), { scale: 1 }, { scale: 1.035, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tBi - 0.06 + k * 0.06));
+      // "tanpa kredit video AI": the wall dims (flat tiles), the credit panel lands
+      K.STYLES.forEach((_, k) => ft($("s01-t" + k), { opacity: 1 }, { opacity: 0.42, duration: 0.3, ease: "power2.inOut" }, tTa - 0.1));
+      const pn = $("s01-panel"); I(pn, { x: 180, y: 486, scale: 0.6, opacity: 0, rotation: -3 });
+      ft(pn, { scale: 0.6, opacity: 0, rotation: -3 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.42, ease: "back.out(1.7)" }, tTa - 0.12);
+      const co = pn.querySelector(".co"); I(co, { rotation: 0, transformOrigin: "50% 50%" });
+      ft(co, { rotation: 0 }, { rotation: 14, duration: 0.09, yoyo: true, repeat: 3, ease: "sine.inOut" }, tKr - 0.02);
+      const zr = $("s01-zero"); I(zr, { scale: 0, opacity: 0, rotation: -30 });
+      ft(zr, { scale: 0, opacity: 0, rotation: -30 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.36, ease: "back.out(2.6)" }, tAI - 0.12);
+      const sk = $("s01-strike"); I(sk, { scaleX: 0, rotation: -40, x: 4, y: 0 });
+      ft(sk, { scaleX: 0 }, { scaleX: 1.15, duration: 0.18, ease: "power2.out" }, tVi - 0.04);
+      // "sama sekali.": the 0 stamps, a burst ring, a green check
+      ft(zr, { scale: 1 }, { scale: 1.22, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tSe - 0.05);
+      const bu = $("s01-burst"); I(bu, { x: 806, y: 584, scale: 0.4, opacity: 0 });
+      ft(bu, { scale: 0.4, opacity: 1 }, { scale: 1.5, opacity: 0, duration: 0.55, ease: "power2.out" }, tSe - 0.04);
+      const ok = $("s01-ok"); I(ok, { x: 846, y: 470, scale: 0, opacity: 0 });
+      ft(ok, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(3)" }, tSa + 0.02);
+      // exit: the wall folds into the centre (next scene opens on Claude's prompt bar)
+      const tX = D - 0.28;
+      K.STYLES.forEach((_, k) => ft($("s01-t" + k), { x: TX[k % 2], y: TY[k >> 1], scale: 1, opacity: 0.42 }, { x: 315, y: 461, scale: 0.5, opacity: 0, duration: 0.26, ease: "power2.in" }, tX));
+      ft(pn, { y: 486, opacity: 1, scale: 1 }, { y: 420, opacity: 0, scale: 0.9, duration: 0.24, ease: "power2.in" }, tX);
+      ft(ok, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tX);
+      S.finish();
+    })();
+  </script>
+</template>

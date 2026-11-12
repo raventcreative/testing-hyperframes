@@ -1,7 +1,8 @@
-"""Builds index.html for the R12 reel (5 alat gratis di GitHub jadi 5 menu jasa; adapted from the R8 WEB3D builder) from production/timing.json: the client's light
+"""Builds index.html for the R20 reel (Claude Code pakai model AI gratis — FreeLLMAPI; adapted from the R12 builder) from production/timing.json: the client's light
 background (white -> soft blue; its baked grid removed and re-created as an ANIMATED CSS grid in the top-right that drifts and
 breathes), word-synced Poppins captions in the navy text gradient (#0a0d2c -> #294b77), the dark AI PRENEUR logo (top-left),
-scene slots (s01–s10), the robot (co-host) and the mascot (host). Shared visual system: vendor/r12kit.js (window.K).
+scene slots (s01–s11), the robot (co-host) and the mascot (host). Shared visual system: vendor/r20kit.js (window.K).
+Every initial state is pinned at 0 in a NESTED timeline (P0, first child at 0); tl.render(0, true, true) at the end of the build.
 Caption styles: b = 700, r = 400, c = 700 + drawn underline, m = navy gradient pill + white 700.   Run: python3 -I tools/build_index.py ."""
 import json, sys
 from pathlib import Path
@@ -22,13 +23,14 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>5 alat gratis jadi 5 menu jasa — AI PRENEUR</title>
+    <title>Claude Code pakai model AI gratis — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/scenes.js"></script>
-    <script src="vendor/r12kit.js"></script>
+    <script src="vendor/r20icons.js"></script>
+    <script src="vendor/r20kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -81,6 +83,8 @@ html = f"""<!doctype html>
         // expand the "scale" shorthand (seek-order-safe scaleY in the HF runtime)
         const _sc = (v) => {{ if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({{}}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; }};
         {{ const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }}
+        const P0 = gsap.timeline(); tl.add(P0, 0);   // initial states: nested timeline, first child at 0
+        const pin = (el, v) => {{ gsap.set(el, _sc(v)); P0.set(el, _sc(v), 0); }};
         const mk = (tag, cls, parent, html) => {{ const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }};
         // VERIFIED word timings (VO offset included): [text, start, style]
         const W = [
@@ -93,7 +97,7 @@ html = f"""<!doctype html>
         const root = document.getElementById("caps");
         CAPS.forEach(([s, e, a, b, pos], ci) => {{
           const c = mk("div", "cap " + pos, root); c.id = "cap" + ci;
-          tl.set(c, {{ opacity: 0 }}, 0);
+          pin(c, {{ opacity: 0 }});
           tl.set(c, {{ opacity: 1 }}, s);
           tl.set(c, {{ opacity: 0 }}, e);
           for (let i = a; i <= b; i++) {{
@@ -102,7 +106,7 @@ html = f"""<!doctype html>
             const w = mk("span", "w " + (st === "m" ? "k" : st), m, W[i][0]);
             if (i < b) c.appendChild(document.createTextNode(" "));
             const t = Math.max(s + 0.02, W[i][1] - 0.08);
-            tl.set(w, {{ yPercent: 118, opacity: 0 }}, 0);
+            pin(w, {{ yPercent: 118, opacity: 0 }});
             tl.set(w, {{ opacity: 1 }}, t);
             tl.fromTo(w, {{ yPercent: 118 }}, {{ yPercent: 0, duration: 0.34, ease: "power4.out", immediateRender: false }}, t);
             if (st === "m") tl.fromTo(w, {{ scale: 1 }}, {{ scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }}, t + 0.3);
@@ -112,10 +116,13 @@ html = f"""<!doctype html>
         tl.fromTo("#grid", {{ x: 0, y: 0 }}, {{ x: 430, y: 430, duration: {total}, ease: "none", immediateRender: false }}, 0);
         tl.fromTo("#gridhl", {{ x: 600, y: 180 }}, {{ x: 180, y: 640, duration: {total}, ease: "none", immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
-        tl.set("#brandlogo", {{ opacity: 0.95 }}, 0);   // visible from frame 0
+        pin("#brandlogo", {{ opacity: 0.95 }});   // visible from frame 0
+        pin("#grid", {{ x: 0, y: 0 }}); pin("#gridhl", {{ x: 600, y: 180 }}); pin("#grain", {{ x: 0, y: 0 }});
         // the CTA end beat shows its own big logo: the small corner mark steps away
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s10"]["start"] + S["s10"]["dur"] - 1.2, 3)});
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s11"]["start"] + S["s11"]["dur"] - 1.2, 3)});
+        tl.set({{}}, {{}}, {round(total - 0.01, 4)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
+        tl.render(0, true, true);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;
       }})();

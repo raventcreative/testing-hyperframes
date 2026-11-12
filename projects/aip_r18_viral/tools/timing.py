@@ -17,7 +17,7 @@ for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 # merges: (first index, last index, display text, spoken spelling for lip sync)
 MERGE = {5: (6, "gladi resik", "gladiresik"), 24: (25, "15", "limabelas")}
 FIX = {}
-FIXI = {89: "VIRAL,"}   # the CTA keyword is spoken from lowercase "viral," (so the voice never spells it) and shown in caps
+FIXI = {90: "VIRAL,"}   # the CTA keyword is spoken from lowercase "viral," (so the voice never spells it) and shown in caps
 PRON = {"dm": "diem", "ai": "eiai", "ainya": "eiainya", "umkm": "uemkaem", "virality": "virality", "predictor": "prediktor",
         "higgsfield": "higsfild", "plugin": "plagin", "claude": "klod", "codenya": "kodnya", "hook": "huk", "rate": "reit",
         "reels": "riils", "viral": "viral"}
@@ -77,7 +77,7 @@ SC = [
     ("s02", "Namanya", [3, 5], ["Virality", "Predictor", "gratis."], []),
     ("s03", "Kasih", [5, 8, 10], ["otak", "fokus."], ["15"]),
     ("s04", "Hasilnya", [3, 6, 9], ["skor", "hook,", "rate:"], []),
-    ("s05", "Puncak", [3, 6], ["kelamaan."], ["kelima?"]),
+    ("s05", "Puncak", [3, 6], ["intro", "kelamaan."], ["kelima?"]),
     ("s06", "Pindahin", [3, 6, 9], ["terkuat", "bertele-tele,"], ["pertama,"]),
     ("s07", "Buat", [2, 6], ["UMKM,", "iklan."], ["dulu"]),
     ("s08", "Ingat,", [3, 5], ["prediksi,", "asli"], ["jaminan."]),

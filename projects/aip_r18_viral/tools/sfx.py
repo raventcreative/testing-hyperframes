@@ -187,7 +187,7 @@ out_("s05")
 s5 = st("s05"); card_in(s5, 0.8)
 for i in range(15): put(wt("Puncak", s5 - 0.1) - 0.1 + i * 0.045, tick(0.015, 1800 + 100 * i), 0.04)
 tK = wt("kelima?"); put(tK - 0.14, pop(900, 1500, 0.08), 0.12); put(tK + 0.06, pop(500, 1200, 0.1), 0.13)
-put(wt("Pembukaan") - 0.12, whoosh(0.35, 600, 1800, 1.3, 0.4), W * 0.35); put(wt("Pembukaan") + 0.05, pop(600, 1000, 0.07), 0.09)
+put(wt("intro") - 0.12, whoosh(0.35, 600, 1800, 1.3, 0.4), W * 0.35); put(wt("intro") + 0.05, pop(600, 1000, 0.07), 0.09)
 tL = wt("kelamaan."); put(tL - 0.2, whoosh(0.4, 500, 2200, 1.4, 0.4), W * 0.3); stamp(tL + 0.11)
 out_("s06")
 # --- s06 editor: grab, move, tag, scissors snip, intro falls, gap closes, Tes ulang click + refresh, result chime

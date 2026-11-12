@@ -183,7 +183,7 @@ wh(TM['bidik'] - 0.12, 0.42, 2600, 400, 1.0, 0.35, 0.65); wh(TM['bidik'] + 0.12,
 cpop(TM['bidik'] - 0.02); cpop(TM['data2'] - 0.15)
 tUp = TM['bidik'] + 0.42
 wh(tUp, 0.6, 400, 1600, 1.0, 0.5, 0.3); put(tUp + 0.62, tick(0.02, 2400), 0.09); put(tUp + 0.64, knock(300, 0.1), 0.05)
-put(TM['blnl'] + 0.25, marker(0.4), MK)
+put(TM['blnl'] + 0.1, marker(0.36), MK)
 wh(TM['lihat'] - 0.1, 0.7, 300, 1800, 1.0, 0.45, 0.45); cpop(TM['lihat'] + 0.5, 0.06)
 cpop(TM['apa'] - 0.14); cpop(TM['brp'] - 0.06); cpop(TM['dbrp'] - 0.06)
 PEEL = [(TM['apa'] + 0.05, TM['benar'] - 0.02), (TM['modal'] - 0.05, TM['modal'] + 0.08), (TM['biaya'] - 0.05, TM['biaya'] + 0.1), (TM['laba'] - 0.05, TM['laba'] + 0.08)]
@@ -191,7 +191,7 @@ for k, (tf, t0) in enumerate(PEEL):
     put(tf, tick(0.02, 3000 + 200 * k), 0.06)
     wh(t0, 0.62, 700, 2600, 1.3, 0.4, 0.32)
     put(t0 + 0.62, pop(900 + 60 * k, 1700, 0.06), 0.1); put(t0 + 0.63, knock(420 + 30 * k, 0.09), 0.06)
-put(TM['laku'] + 0.3, marker(0.3), MK); put(TM['biaya'] + 0.4, marker(0.4), MK); put(TM['laba'] + 0.45, marker(0.35), MK)
+put(TM['laku'] + 0.1, marker(0.26), MK); put(TM['biaya'] + 0.05, marker(0.3), MK); put(TM['laba'] + 0.2, marker(0.3), MK)
 # S4 · a steady, clean draw; the aim line; twang; a clean whistle (no flutter); THWACK in the inner rings; tag pops; "masuk akal" ding
 cpop(TM['dari'] - 0.04); cpop(TM['target'] - 0.14); cpop(TM['jadi'] - 0.12); cpop(TM['masuk'] - 0.12)
 put(TM['dari'] + 0.12, creak(0.5, 34, 40, 1000), 0.06)

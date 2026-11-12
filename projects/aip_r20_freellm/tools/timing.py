@@ -79,7 +79,7 @@ SC = [
     ("s04", "Perintah", [3, 7, 10], ["dioper", "gratis"], []),
     ("s05", "Jadi", [3, 5], ["aplikasinya", "otaknya"], ["bukan"]),
     ("s06", "Jatah", [3, 5], ["habis,", "pindah"], []),
-    ("s07", "Pasang", [2, 5, 8], ["servernya,", "key", "setup."], []),
+    ("s07", "Pasang", [2, 6, 9], ["servernya,", "gratis", "setup."], []),
     ("s08", "Jujur", [2, 6, 8], ["beda", "berubah."], []),
     ("s09", "Kodemu", [3, 6, 9, 12], ["dikirim", "aturannya"], ["sensitif."]),
     ("s10", "Pakai", [4], ["belajar", "klien."], []),

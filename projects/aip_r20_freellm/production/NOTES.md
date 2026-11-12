@@ -50,5 +50,36 @@ something is set up (ngerti, Perintah, Pasang, key, satu perintah setup), scans 
 "jangan", small shock on "habis" and "berubah", cheers the CTA, waves at the end. Mascot (host, left): an intent on every beat
 (present / explain / question on "langganan?" / emphasize / compare / cta); **glances disabled** (`const glance = (t) => 0;`).
 
-## QA
-(see below — filled in after the real-runtime pass)
+## QA (real runtime: `npx --yes hyperframes@0.8.186 snapshot` + `validate`)
+Sheets (JPG only, PNG dumps deleted) in `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r20/`:
+- Full pass, 78 frames (first frame, every scene 4–6×, every cut ±0.03 s, last frame 44.3): labelled sheets `qa1_sheet_a.jpg` (0–8.63 s) ·
+  `qa1_sheet_b.jpg` (9.1–17.4) · `qa1_sheet_c.jpg` (18.2–31.95) · `qa1_sheet_d.jpg` (32.07–44.3) + the tool's own `qa1/contact-sheet-1…9.jpg`;
+  mascot/robot eyes close-up `qa1_eyes.jpg` (0, 2.9, 8.3, 19.6, 31.5, 36.8, 41.8, 44.3 s: pupils/irises present everywhere; frame 0 = the
+  mascot's settle, eyes below the crop).
+- Fix pass: `qa2_sheet.jpg` (8.6–8.95 s, s02 → s03 hand-over after the fix).
+- Dev-preview sheets used while building (not the real runtime): `dev_s01.jpg` … `dev_s11.jpg`; text-overflow checker `tools/overflow.cjs` (in the scratch dir, with `tools/dev_shot.cjs` and `www/dev.html`)
+  (every text element inside its card and inside the hero zone at each scene's fully-built moment: all clean).
+- `lint`: 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the kit). `validate` (final state): 0 errors; warnings = kit
+  "multiple instances of Three.js" + software-GL "GPU stall due to ReadPixels" performance messages. No contrast notes.
+- Found in the real runtime and fixed: at 8.63 s the s03 laptop rose from 420 px below and crossed the caption zone → now a 90 px rise with
+  a fade-in (never below y 945); re-checked in `qa2_sheet.jpg`.
+- Every initial state is pinned at 0 in the nested P0 timeline; hand-overs s01 → s02 (Claude Code window, identical position) and s02 → s03
+  (server box, identical position) are seamless at 3.437/3.497 and 8.57/8.63.
+
+## Known issues / notes for the lead
+- Duration 44.33 s (VO 42.72 s spoken, within 35–45 s). VO is take 2.
+- faster-whisper writes "penyebiah/penyebia" for "penyedia" in line 7 (line 9 is heard as "penyedia"); the captions show "penyedia,". A re-take
+  means regenerating the whole VO (one TTS call) and re-running pipeline steps 2–5.
+- Captions: during the 0.34 s word rise a chunk can show only part of a word for a frame (same caption system as the kit). The last caption
+  chunk ("aku kirim lewat DM.") stays up over the end card (same as R8/R12).
+- Facts are from the official README/LICENSE/docs (12 Nov 2026). The Gemini free-tier data-use line comes from Google's archived Gemini API
+  Additional Terms read via WebSearch (ai.google.dev is DNS-blocked in this sandbox); it is shown as an *example* on screen (footnote).
+- FreeLLMAPI's README headline claims "7.4 billion tokens per month / 34 providers / 635 endpoints" (catalog capacity) — deliberately not
+  used anywhere (brief: no token numbers). Its paid "Premium" live catalog is mentioned only in the DM hand-out.
+- The robot types on its holo keyboard at several beats (by design: requests sent / setup typed). No music (lead adds it).
+- `.hyperframes/` in this folder is created by the CLI (lint/validate/snapshot) and is git-ignored.
+
+## Assets
+Poppins 400/700 (OFL, `assets/fonts/OFL-Poppins.txt`) · lucide-static 0.460.0 icons (ISC, `assets/icons/LICENSE-lucide.txt`, inlined in
+`vendor/r20icons.js`) · AI PRENEUR logo, background, robot and mascot = the client's own kit assets (copied from `aip_r12_cuanrepo`) ·
+SFX synthesised by `tools/sfx.py` (no samples) · VO: ElevenLabs, the client's saved voice. No third-party logos or screenshots.

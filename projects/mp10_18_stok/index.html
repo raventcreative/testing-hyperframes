@@ -413,7 +413,7 @@
         const RISE = (arr, at, st, d) => arr.forEach((c, k) => F(c, { yPercent: 115 }, { yPercent: 0, duration: d || 0.42, ease: "power3.out" }, at + k * (st || 0.022)));
         const SINK = (arr, at, d) => arr.forEach((c) => F(c, { yPercent: 0 }, { yPercent: -115, duration: d || 0.3, ease: "power2.in" }, at));
         const POP = (sel, at, d, e) => F(sel, { scaleX: 0, scaleY: 0, rotation: -25 }, { scaleX: 1, scaleY: 1, rotation: 0, duration: d || 0.42, ease: e || "back.out(2.4)" }, at);
-        const OUT = (block, at) => SINK(block.flat(), at, 0.28);
+        const OUT = (block, at, sel) => { SINK(block.flat(), at, 0.28); F(sel, { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, at + 0.03); };   // the block fades too, so a stabilo never lingers
         tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: TM.total, ease: "steps(" + Math.round(TM.total * 15) + ")", immediateRender: false }, 0);
         // pin every initial state on the timeline at 0 (the real renderer can seek before the first frame; build-time state must not leak)
         tl.set("#led, #lrc, .mini, #sd, #by, #lb, #ms, #ilusW, #stA, #stB, #pzA, #tagA, #oH, #oS0, #oS1", { autoAlpha: 0 }, 0);
@@ -466,11 +466,11 @@
         F("#sd", { rotationX: 70 }, { rotationX: 64, duration: 0.5, ease: "sine.inOut", yoyo: true, repeat: 1 }, TM.tipis + 0.62);
         F("#sd", { x: 0, y: 0, z: 0, rotationX: 70, rotationY: -22 }, { x: 420, y: -60, z: -300, rotationX: 70, rotationY: -60, duration: 0.45, ease: "power2.in" }, TM.balik - 0.15);
         hide("#sd", TM.balik + 0.3);
-        OUT(T1, TM.balik - 0.08); hide("#t1", TM.balik + 0.3); tl.set("#t1", { autoAlpha: 1 }, 0);
+        OUT(T1, TM.balik - 0.08, "#t1"); hide("#t1", TM.balik + 0.3); tl.set("#t1", { autoAlpha: 1 }, 0);
 
         // S2 · "Coba balik kardusnya. Isinya? Uang kamu yang lagi diam."
         RISE(T2[0], TM.balik - 0.02, 0.03, 0.4); RISE(T2[1], TM.balik + 0.22, 0.022, 0.42); HL("#t2h", TM.balik + 0.55, 0.3);
-        OUT(T2, TM.isi - 0.1); tl.set("#t2", { autoAlpha: 1 }, 0); hide("#t2", TM.isi + 0.25);
+        OUT(T2, TM.isi - 0.1, "#t2"); tl.set("#t2", { autoAlpha: 1 }, 0); hide("#t2", TM.isi + 0.25);
         // the hero hops and flips on "balik", the rest flip in a wave on "uang"
         const flip = (b, t0, d) => {
           F(b.g, { y: b.y }, { y: b.y - 34, duration: d * 0.42, ease: "power2.out" }, t0);
@@ -487,7 +487,7 @@
         show("#pzA", TM.diam - 0.05); POP("#pzA .pz", TM.diam - 0.05, 0.45);
         BOX.forEach((b, i) => { if (b.k === HERO) return; F(b.g, { rotationZ: 0 }, { rotationZ: (i % 2 ? 1.2 : -1.2), duration: 0.07, ease: "none", yoyo: true, repeat: 3 }, TM.diam + 0.1 + (i % 4) * 0.02); });
         F("#pzA .pz", { scaleX: 1, scaleY: 1 }, { scaleX: 0, scaleY: 0, duration: 0.25, ease: "power2.in" }, TM.bel - 0.05); hide("#pzA", TM.bel + 0.25);
-        OUT(T3, TM.bel - 0.1); tl.set("#t3", { autoAlpha: 1 }, 0); hide("#t3", TM.bel + 0.25);
+        OUT(T3, TM.bel - 0.1, "#t3"); tl.set("#t3", { autoAlpha: 1 }, 0); hide("#t3", TM.bel + 0.25);
 
         // S3 · "Belanja stok itu bukan uang hangus, tapi juga bukan untung." — the hero box floats out, two stickers bounce off it
         // the camera moves in close on the pulled-out box (focus = its face centre); the shelf behind goes out of focus (#dofM)
@@ -513,7 +513,7 @@
         sticker("#stA", SA({ rotationX: 10, rotationY: -20, rotationZ: 24, scaleX: 0.5, scaleY: 0.5 }, 560, -260, 160), SA({ rotationX: 6, rotationY: 20, rotationZ: -7, scaleX: 0.46, scaleY: 0.46 }, 6, -62, 60), TM.hangus - 0.32, TM.hangus + 0.12, TM.hangus + 0.85);
         sticker("#stB", SA({ rotationX: 10, rotationY: 50, rotationZ: -20, scaleX: 0.5, scaleY: 0.5 }, -560, -240, 160), SA({ rotationX: 4, rotationY: 16, rotationZ: 6, scaleX: 0.46, scaleY: 0.46 }, 10, -58, 66), TM.untung - 0.28, TM.untung + 0.14, TM.untung + 0.62);
         RISE(T4[0], TM.bel - 0.04, 0.022, 0.4); RISE(T4[1], TM.hangus - 0.55, 0.02, 0.42); RISE(T4[2], TM.untung - 0.8, 0.02, 0.42);
-        OUT(T4, TM.modal - 0.1); tl.set("#t4", { autoAlpha: 1 }, 0); hide("#t4", TM.modal + 0.25);
+        OUT(T4, TM.modal - 0.1, "#t4"); tl.set("#t4", { autoAlpha: 1 }, 0); hide("#t4", TM.modal + 0.25);
 
         // S4 · "Itu modal yang nyangkut" — the box goes back to its slot, a yellow MODAL tag hooks onto the shelf lip under it
         F("#oH", H2, Object.assign({}, H0, { duration: 0.6, ease: "power3.inOut" }), TM.modal - 0.05);
@@ -528,13 +528,13 @@
         F("#tagA", { rotationZ: -3 }, { rotationZ: 0, duration: 0.4, ease: "sine.out" }, TM.modal + 1.9);
         tl.set("#tagSub", { opacity: 0, y: 10 }, 0); F("#tagSub", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, TM.nyangkut + 0.05);
         RISE(T5[0], TM.modal - 0.04, 0.025, 0.42); HL("#t5h", TM.modal + 0.25, 0.32); RISE(T5[1], TM.nyangkut - 0.08, 0.02, 0.4);
-        OUT(T5, TM.biaya - 0.1); tl.set("#t5", { autoAlpha: 1 }, 0); hide("#t5", TM.biaya + 0.25);
+        OUT(T5, TM.biaya - 0.1, "#t5"); tl.set("#t5", { autoAlpha: 1 }, 0); hide("#t5", TM.biaya + 0.25);
 
         // "dan baru jadi biaya pas barangnya laku": the BIAYA card arrives; two boxes sell — their money goes to BIAYA, they leave
         const CARD = (sel, at) => { show(sel, at); F(sel, { autoAlpha: 0, x: 320, z: -260, rotationY: -60, rotationX: 8 }, { autoAlpha: 1, x: 0, z: 0, rotationY: -14, rotationX: 3, duration: 0.6, ease: "power3.out" }, at); };
         CARD("#by", TM.biaya - 0.05);
         RISE(T6[0], TM.biaya - 0.04, 0.022, 0.4); RISE(T6[1], TM.biaya + 0.62, 0.03, 0.42); HL("#t6h", TM.biaya + 0.95, 0.3); RISE(T6[2], TM.laku - 0.06, 0.02, 0.4);
-        OUT(T6, TM.kalau - 0.1); tl.set("#t6", { autoAlpha: 1 }, 0); hide("#t6", TM.kalau + 0.25);
+        OUT(T6, TM.kalau - 0.1, "#t6"); tl.set("#t6", { autoAlpha: 1 }, 0); hide("#t6", TM.kalau + 0.25);
         const SB = SOLD.map((k) => BOX[k]);
         SB.forEach((b, i) => {
           const o = "#oS" + i, t0 = TM.laku + 0.05 + i * 0.22;
@@ -569,7 +569,7 @@
 
         // S5 · "Kalau semuanya langsung dianggap biaya, labamu kelihatan jeblok."
         RISE(T7[0], TM.kalau - 0.04, 0.018, 0.4); RISE(T7[1], TM.semua - 0.04, 0.022, 0.42);
-        OUT(T7, TM.jeblok - 0.1); tl.set("#t7", { autoAlpha: 1 }, 0); hide("#t7", TM.jeblok + 0.25);
+        OUT(T7, TM.jeblok - 0.1, "#t7"); tl.set("#t7", { autoAlpha: 1 }, 0); hide("#t7", TM.jeblok + 0.25);
         const REST = BOX.filter((b) => !SOLD.includes(b.k));
         REST.forEach((b, i) => {
           const t0 = TM.semua + 0.1 + i * 0.06;
@@ -588,7 +588,7 @@
         F("#lb", { y: 0 }, { y: 90, duration: 0.42, ease: "power3.in" }, TM.jeblok + 0.72);
         F("#lb", { y: 90, rotationZ: 0 }, { y: 70, rotationZ: 3, duration: 0.3, ease: "back.out(3)" }, TM.jeblok + 1.14);
         F("#t8b", { x: 0 }, { x: 14, duration: 0.05, yoyo: true, repeat: 5, ease: "none" }, TM.jeblok + 1.12);
-        OUT(T8, TM.padahal - 0.1); tl.set("#t8", { autoAlpha: 1 }, 0); hide("#t8", TM.padahal + 0.25);
+        OUT(T8, TM.padahal - 0.1, "#t8"); tl.set("#t8", { autoAlpha: 1 }, 0); hide("#t8", TM.padahal + 0.25);
 
         // "Padahal barangnya masih ada." — the cards clear, the camera goes back to the shelf, the goods glow, MASIH DI RAK card
         F("#by", { x: 0, z: 0, rotationY: -14 }, { x: 520, z: -200, rotationY: -50, duration: 0.5, ease: "power2.in" }, TM.padahal - 0.05);

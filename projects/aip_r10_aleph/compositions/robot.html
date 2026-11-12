@@ -15,11 +15,10 @@
   </div>
   <script>
     (function () {
-      // AI PRENEUR ROBOT = the CO-HOST / operator (screen right): flies in on "isi tiga Claude", waves at the team, shakes its head on
-      // "capek banget" and "dikit banget", TYPES the one command on a holo keyboard ("ketik satu perintah"), cheers "langsung kerja",
-      // scans while Claude 1 crawls the job sites, shakes its head on "mencurigakan dibuang", types again while Claude 3 writes the CV,
-      // presents the job board, claps on "klik apply", cheers the CTA. Pure function of global time (hf-seek, __T0 for chunked renders).
-      const VW = window.VO_WORDS, SC = window.VO_SCENES, D = window.TOTAL, M3 = window.Mascot3D, R = window.ROUNDS;
+      // AI PRENEUR ROBOT = the CO-HOST / operator (screen right): flies in on "rekam", waves, TYPES every prompt on its holo keyboard
+      // (s01 winter, s02 night, s03 sakura/salju, s04 car, s05 product, s06 step 2), cheers each reveal, presents "Runway Aleph",
+      // shakes its head on "tanpa syuting ulang", thinks on "Catatan", cheers the CTA. Pure function of global time (hf-seek, __T0).
+      const VW = window.VO_WORDS, SC = window.VO_SCENES, D = window.TOTAL, M3 = window.Mascot3D;
       const one = (x) => Math.max(0, Math.min(1, x));
       const sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
       const io3 = (u) => { u = one(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
@@ -29,7 +28,7 @@
       const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : -99; };
       const HEAD_FIX = [-0.0775, -0.227, -0.1287];
       const STAND = { fx: 832, fy: 1668, h: 330, ry: -0.38 };
-      const T_IN = wt("tiga") - 0.3;                                 // flies in on "isi tiga Claude"
+      const T_IN = wt("rekam,") - 0.3;                               // flies in on "rekam"
       function frame(t) {
         if (t < T_IN) return null;
         const u = io3((t - T_IN) / 0.75), arc = Math.sin(Math.PI * u) * 160;
@@ -41,25 +40,23 @@
       // ---------------------------------------------------------------- gestures
       const G = [];
       const add = (t, k, d = 0.9, x) => { if (t > 0) G.push(Object.assign({ t, k, d }, x || {})); };
-      add(wt("Claude,") + 0.25, "wave", 0.9);
-      add(wt("remote.") - 0.08, "point", 0.6, { up: 1 });
-      add(wt("capek") - 0.1, "no", 0.7);
-      add(wt("Buka") - 0.05, "scan", wt("satu-satu,") - wt("Buka") + 0.5);
-      add(wt("dikit") - 0.1, "no", 0.8);
-      add(wt("ketik") - 0.18, "type", wt("perintah,") - wt("ketik") + 0.55);
-      add(wt("langsung", 15) - 0.1, "cheer", 0.9);
-      // the three Claude members: scans while Claude 1 crawls, nods at the filters, shakes on "mencurigakan", types the CV
-      add(wt("keliling") - 0.05, "scan", wt("loker,") - wt("keliling") + 0.3);
-      add(wt("lowongan", 19) - 0.05, "happy", 0.8);
-      add(wt("kedua") - 0.05, "point", 0.6, { up: 1 });
-      add(wt("cocok") - 0.05, "nod", 0.5); add(wt("Indonesia,") - 0.05, "nod", 0.5);
-      add(wt("mencurigakan") - 0.05, "no", 0.8);
-      add(wt("lolos") - 0.05, "happy", 0.7);
-      add(wt("bikinin", 30) - 0.12, "type", wt("lowongan.") - wt("bikinin", 30) + 0.3);
-      add(wt("papan") - 0.1, "present", 1.0, { side: "L" });
-      add(wt("cek,") - 0.08, "nod", 0.5);
-      add(wt("apply.") - 0.06, "clap", 0.75);
-      add(wt("Komen") - 0.08, "cheer", 0.9); add(wt("DM.") - 0.1, "point", 0.7, { up: 1 }); add(D - 1.1, "wave", 1.0);
+      const ty = (a, b) => add(a - 0.12, "type", Math.max(0.35, b - a + 0.2));
+      add(wt("sekarang") - 0.25, "wave", 0.55);
+      ty(wt("sekarang") + 0.18, wt("ubah") - 0.14);
+      add(wt("ubah") + 0.3, "happy", 0.6); add(wt("satu") - 0.06, "point", 0.6, { up: 1 });
+      // s02 night · s03 seasons · s04 car · s05 product (each prompt is typed by the robot)
+      ty(wt("Mau") + 0.0, wt("Mau") + 0.4); add(wt("malam?") + 0.05, "shock", 0.45); add(wt("ketik.") - 0.1, "nod", 0.5);
+      ty(wt("musim", 8.5) - 0.2, wt("jadi", 9.5) + 0.25); add(wt("sakura,") + 0.05, "cheer", 0.6);
+      ty(wt("atau") - 0.12, wt("atau") + 0.2); add(wt("salju.") + 0.05, "happy", 0.6);
+      add(wt("kosong,") - 0.1, "scan", 0.6); ty(wt("bisa", 12.8) - 0.15, wt("ditambahin") + 0.25); add(wt("mobil.") - 0.02, "clap", 0.6);
+      add(wt("polos,") - 0.1, "no", 0.5); ty(wt("bisa", 15.4) - 0.2, wt("diisi") + 0.15); add(wt("produk") - 0.05, "cheer", 0.6);
+      // s06 how it works · s07 use cases · s08 note · s09 CTA
+      add(wt("Aleph.") - 0.15, "present", 0.9, { side: "L" }); add(wt("videonya,") - 0.05, "nod", 0.5);
+      ty(wt("tulis") - 0.05, wt("apa,") - 0.1); add(wt("aslinya.") - 0.1, "nod", 0.6);
+      add(wt("konten") - 0.05, "happy", 0.6); add(wt("marketing:") - 0.05, "point", 0.6, { up: 1 }); add(wt("banyak") - 0.06, "clap", 0.7);
+      add(wt("tanpa") - 0.05, "no", 0.8);
+      add(wt("Catatan:") - 0.1, "think", 1.1); add(wt("berbayar") - 0.05, "nod", 0.6);
+      add(wt("Komen", 32) - 0.08, "cheer", 0.8); add(wt("pakainya.") - 0.1, "point", 0.7, { up: 1 }); add(D - 1.1, "wave", 1.0);
       const envG = (t, g) => sm((t - g.t + 0.16) / 0.2) * (1 - sm((t - (g.t + g.d)) / 0.26));
       const BL = []; { let x = T_IN + 1.2, h = 13; while (x < D) { BL.push(x); h = (h * 9301 + 49297) % 233280; x += 2.1 + (h / 233280) * 2.3; } }
       const blinkAt = (t) => { let v = 0; for (const b of BL) { const d = t - b; if (d > -0.06 && d < 0.18) v = Math.max(v, d < 0 ? 1 + d / 0.06 : 1 - sm((d - 0.04) / 0.14)); } return Math.max(0, v); };

@@ -1,0 +1,98 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s04-a { position: absolute; }
+    #s04-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s04-glow { left: 20px; top: 260px; width: 1040px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    #s04-spk { left: 600px; top: 740px; width: 0; height: 0; }
+    #s04-spk svg { position: absolute; left: -60px; top: -60px; width: 120px; height: 120px; overflow: visible; }
+  </style>
+  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div id="s04-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s04 EMPTY KERB → PARKED CAR "Pinggir jalan yang kosong, bisa ditambahin mobil."
+      // START = s03's end (player + empty prompt): an illustrated shophouse street (ruko) whips in, a person walks along the pavement ·
+      // "kosong": a dashed marquee "area kosong" on the empty kerb (it rides the footage) · "bisa ditambahin": the prompt types
+      // "Add a car parked by the curb", send · "mobil.": the divider sweeps → the SAME clip with a parked car (the walker passes behind
+      // it), a small settle bounce + sparkle. TRANSITION → s05: whip out left inside the player.
+      const D = 2.7666, ST = 11.6667, VW = window.VO_WORDS, R10 = window.R10;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const api = { tl, ft, I };
+      const tKos = L("kosong,"), tBisa = L("bisa"), tMob = L("mobil.");
+      const P = "s04", LINES = ["Add a car parked by the curb"];
+
+      // ================================================================ DOM
+      let h = `<div class="s04-a" id="s04-glow"></div>` + R10.player(P) + R10.prompt(P, LINES);
+      h += `<div class="s04-a" id="s04-spk"><svg viewBox="-60 -60 120 120">` + [0, 1, 2, 3, 4, 5, 6, 7].map((k) => { const a = k * Math.PI / 4, r0 = 18, r1 = k % 2 ? 40 : 54;
+        return `<path d="M${(Math.cos(a) * r0).toFixed(1)} ${(Math.sin(a) * r0).toFixed(1)} L ${(Math.cos(a) * r1).toFixed(1)} ${(Math.sin(a) * r1).toFixed(1)}" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>`; }).join("") +
+        `<path d="M0 -16 L 4 -4 L 16 0 L 4 4 L 0 16 L -4 4 L -16 0 L -4 -4 Z" fill="#ffffff"/></svg></div>`;
+      $("s04-cam").innerHTML = h;
+      const MK = `<rect id="s04m-r" x="404" y="446" width="392" height="122" rx="16" fill="rgba(255,255,255,.14)" stroke="#ffffff" stroke-width="4" stroke-dasharray="16 10" stroke-dashoffset="0"/>` +
+        `<rect x="404" y="402" width="172" height="36" rx="18" fill="rgba(10,13,44,.74)"/><text x="490" y="426" text-anchor="middle" font-family="Poppins, sans-serif" font-weight="700" font-size="17" fill="#ffffff">area kosong</text>`;
+      $(P + "-stg").innerHTML = R10.copy("s04a", R10.street("s04a", false)) + R10.copy("s04b", R10.street("s04b", true)) + R10.overlay("s04m", MK, "mk");
+      $(P + "-vp").insertAdjacentHTML("beforeend", R10.sub("s04-sA", "A", "image", "Pinggir jalan kosong") + R10.sub("s04-sB", "B", "car", "+ mobil parkir"));
+      I($("s04-cam"), { x: 0, y: 0 }); I($("s04-glow"), { opacity: 0.6 });
+      const fr = $(P + "-fr"), vp = $(P + "-vp"), stg = $(P + "-stg"), dv = $(P + "-dv"), lbA = $(P + "-lbA"), lbB = $(P + "-lbB"), il = $(P + "-il"), stk = $(P + "-stk");
+      const sA = $("s04-sA"), sB = $("s04-sB"), pp = $(P + "-pp"), sd = $(P + "-psd"), ca = $(P + "-pca");
+      [fr, vp, pp].forEach((e) => I(e, { opacity: 1, scale: 1, x: 0, y: 0 }));
+      I(il, { opacity: 1 }); I(dv, { opacity: 0, x: 940 });
+      I(lbA, { opacity: 0, scale: 0.8 }); I(lbB, { opacity: 0, scale: 0.7 }); I(sA, { opacity: 0, y: -6 }); I(sB, { opacity: 0, y: -6 });
+
+      // ================================================================ the clip (street, walker) + marquee overlay, identical motion
+      R10.footage(api, ["s04a", "s04b", "s04m"], 0, D, { pan: 26, push: 0.03, s0: 1.0, ox: 50, oy: 62, walk: -190 });
+      I($("s04b-w"), { clipPath: R10.clip(940) });
+      I(stg, { x: 760 }); ft(stg, { x: 760 }, { x: 0, duration: 0.28, ease: "power3.out" }, 0);
+      I(stk, { opacity: 0.7 }); ft(stk, { opacity: 0.7 }, { opacity: 0, duration: 0.24, ease: "power2.out" }, 0);
+      ft(lbA, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 0.12);
+      // "kosong": marquee on the kerb (marching ants) + sub-label
+      const mk = $("s04m-w"), mr = $("s04m-r");
+      I(mk, { opacity: 0, scale: 1 }); I(mr, { attr: { "stroke-dashoffset": 0 } });
+      ft(mk, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, tKos - 0.12);
+      ft(mr, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -104 }, duration: D, ease: "none" }, 0);
+      ft(sA, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, tKos - 0.05);
+      ft(mk, { opacity: 1 }, { opacity: 0, duration: 0.16 }, tMob - 0.5);
+
+      // ================================================================ "bisa ditambahin": type + send · "mobil.": wipe → car
+      R10.pinPrompt(api, P, LINES);
+      R10.type(api, P, LINES, 0, tKos + 0.12, tBisa + 0.16);
+      for (let t = 0.45; t < D; t += 0.45) tl.set(ca, { opacity: Math.round(t / 0.45) % 2 ? 0 : 1 }, t);
+      tl.set(ca, { opacity: 1 }, tKos + 0.1);
+      ft(sd, { opacity: 0 }, { opacity: 1, duration: 0.08 }, tMob - 0.56);
+      ft(pp.querySelector(".sd"), { scale: 1 }, { scale: 0.86, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tMob - 0.54);
+      ft(sd, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tMob);
+      tl.set(dv, { opacity: 1 }, tMob - 0.48);
+      R10.wipe(api, P, "s04b", tMob - 0.48, 940, 0, 0.44, "power2.inOut");
+      ft(lbB, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tMob - 0.3);
+      ft(sB, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, tMob - 0.2);
+      [lbA, sA].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.14 }, tMob - 0.26));
+      tl.set(dv, { opacity: 0 }, tMob - 0.02);
+      // the car settles + sparkle
+      const car = $("s04b-car"); I(car, { attr: { transform: "translate(0 0)" } });
+      ft(car, { attr: { transform: "translate(0 0)" } }, { attr: { transform: "translate(0 -9)" }, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tMob);
+      const spk = $("s04-spk"); I(spk, { opacity: 0, scale: 0.4, rotation: 0 });
+      ft(spk, { opacity: 0, scale: 0.4, rotation: 0 }, { opacity: 1, scale: 1, rotation: 20, duration: 0.2, ease: "back.out(2)" }, tMob + 0.02);
+      ft(spk, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.25, duration: 0.24, ease: "power2.in" }, tMob + 0.24);
+
+      // ================================================================ TRANSITION → s05 (whip inside the player)
+      const tOut = D - 0.22;
+      ft(stg, { x: 0 }, { x: -760, duration: 0.22, ease: "power2.in" }, tOut);
+      ft(stk, { opacity: 0 }, { opacity: 0.7, duration: 0.22, ease: "power2.in" }, tOut);
+      [lbB, sB].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tOut));
+      R10.untype(api, P, LINES, 0, tOut + 0.02, 0.1);
+      tl.set($(P + "-pph"), { display: "inline" }, tOut + 0.14);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s04"] = tl;
+    })();
+  </script>
+</template>

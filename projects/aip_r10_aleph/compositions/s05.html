@@ -1,0 +1,92 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s05-a { position: absolute; }
+    #s05-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s05-glow { left: 20px; top: 260px; width: 1040px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    #s05-spk { left: 590px; top: 520px; width: 0; height: 0; }
+    #s05-spk svg { position: absolute; left: -90px; top: -90px; width: 180px; height: 180px; overflow: visible; }
+  </style>
+  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920">
+    <div id="s05-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s05 PLAIN SHELF → PRODUCT "Rak yang polos, bisa diisi produk kamu."
+      // START = s04's end (player + empty prompt): an illustrated room with a plain wall shelf whips in (slow push-in, dust in the lamp
+      // light) · "polos": dashed marquees "rak kosong" on the empty shelf space · "bisa diisi": the prompt types "Put my product on this
+      // shelf", send, the divider sweeps → the SAME shot with a product line "PRODUKMU" (fictitious brand) — plant, books and vase stay ·
+      // "produk": sparkle burst. TRANSITION → s06: the whole player (frame, viewport, prompt) sinks and fades.
+      const D = 2.7667, ST = 14.4333, VW = window.VO_WORDS, R10 = window.R10;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const api = { tl, ft, I };
+      const tPol = L("polos,"), tBisa = L("bisa"), tDii = L("diisi"), tPro = L("produk");
+      const P = "s05", LINES = ["Put my product on this shelf"];
+
+      // ================================================================ DOM
+      let h = `<div class="s05-a" id="s05-glow"></div>` + R10.player(P) + R10.prompt(P, LINES);
+      h += `<div class="s05-a" id="s05-spk"><svg viewBox="-90 -90 180 180">` + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((k) => { const a = k * Math.PI / 5 + 0.3, r0 = 30, r1 = k % 2 ? 62 : 82;
+        return `<path d="M${(Math.cos(a) * r0).toFixed(1)} ${(Math.sin(a) * r0).toFixed(1)} L ${(Math.cos(a) * r1).toFixed(1)} ${(Math.sin(a) * r1).toFixed(1)}" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>`; }).join("") + `</svg></div>`;
+      $("s05-cam").innerHTML = h;
+      const MK = `<rect class="s05-mr" x="440" y="86" width="300" height="172" rx="16" fill="rgba(41,75,119,.06)" stroke="#294b77" stroke-width="3.5" stroke-dasharray="14 9"/>` +
+        `<rect class="s05-mr" x="420" y="300" width="324" height="120" rx="16" fill="rgba(41,75,119,.06)" stroke="#294b77" stroke-width="3.5" stroke-dasharray="14 9"/>` +
+        `<rect x="452" y="98" width="150" height="34" rx="17" fill="rgba(10,13,44,.78)"/><text x="527" y="121" text-anchor="middle" font-family="Poppins, sans-serif" font-weight="700" font-size="16" fill="#ffffff">rak kosong</text>`;
+      $(P + "-stg").innerHTML = R10.copy("s05a", R10.shelf("s05a", false)) + R10.copy("s05b", R10.shelf("s05b", true)) + R10.overlay("s05m", MK, "back");
+      $(P + "-vp").insertAdjacentHTML("beforeend", R10.sub("s05-sA", "A", "image", "Rak polos") + R10.sub("s05-sB", "B", "package", "+ produk kamu"));
+      I($("s05-cam"), { x: 0, y: 0 });
+      const glow = $("s05-glow"); I(glow, { opacity: 0.6, scale: 1, y: 0 });
+      const fr = $(P + "-fr"), vp = $(P + "-vp"), stg = $(P + "-stg"), dv = $(P + "-dv"), lbA = $(P + "-lbA"), lbB = $(P + "-lbB"), il = $(P + "-il"), stk = $(P + "-stk");
+      const sA = $("s05-sA"), sB = $("s05-sB"), pp = $(P + "-pp"), sd = $(P + "-psd"), ca = $(P + "-pca");
+      [fr, vp, pp].forEach((e) => I(e, { opacity: 1, scale: 1, x: 0, y: 0 }));
+      I(il, { opacity: 1 }); I(dv, { opacity: 0, x: 940 });
+      I(lbA, { opacity: 0, scale: 0.8 }); I(lbB, { opacity: 0, scale: 0.7 }); I(sA, { opacity: 0, y: -6 }); I(sB, { opacity: 0, y: -6 });
+
+      // ================================================================ the clip (slow push-in) + marquee overlay
+      R10.footage(api, ["s05a", "s05b", "s05m"], 0, D, { pan: 18, push: 0.06, s0: 1.0, ox: 58, oy: 45 });
+      I($("s05b-w"), { clipPath: R10.clip(940) });
+      I(stg, { x: 760 }); ft(stg, { x: 760 }, { x: 0, duration: 0.28, ease: "power3.out" }, 0);
+      I(stk, { opacity: 0.7 }); ft(stk, { opacity: 0.7 }, { opacity: 0, duration: 0.24, ease: "power2.out" }, 0);
+      ft(lbA, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 0.12);
+      const mk = $("s05m-w"); I(mk, { opacity: 0 });
+      ft(mk, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, tPol - 0.1);
+      document.querySelectorAll(".s05-mr").forEach((r) => { I(r, { attr: { "stroke-dashoffset": 0 } }); ft(r, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -92 }, duration: D, ease: "none" }, 0); });
+      ft(sA, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, tPol - 0.04);
+      ft(mk, { opacity: 1 }, { opacity: 0, duration: 0.16 }, tDii - 0.16);
+
+      // ================================================================ "bisa diisi": type + send + wipe → products · "produk": sparkle
+      R10.pinPrompt(api, P, LINES);
+      R10.type(api, P, LINES, 0, tPol + 0.12, tBisa + 0.04);
+      for (let t = 0.45; t < D; t += 0.45) tl.set(ca, { opacity: Math.round(t / 0.45) % 2 ? 0 : 1 }, t);
+      tl.set(ca, { opacity: 1 }, tPol + 0.1);
+      ft(sd, { opacity: 0 }, { opacity: 1, duration: 0.08 }, tBisa + 0.08);
+      ft(pp.querySelector(".sd"), { scale: 1 }, { scale: 0.86, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tBisa + 0.1);
+      ft(sd, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPro);
+      tl.set(dv, { opacity: 1 }, tBisa + 0.14);
+      R10.wipe(api, P, "s05b", tBisa + 0.14, 940, 0, 0.44, "power2.inOut");
+      ft(lbB, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tDii + 0.06);
+      ft(sB, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, tDii + 0.14);
+      [lbA, sA].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.14 }, tDii + 0.1));
+      tl.set(dv, { opacity: 0 }, tBisa + 0.6);
+      const spk = $("s05-spk"); I(spk, { opacity: 0, scale: 0.5, rotation: 0 });
+      ft(spk, { opacity: 0, scale: 0.5, rotation: 0 }, { opacity: 1, scale: 1, rotation: 15, duration: 0.22, ease: "back.out(2)" }, tPro - 0.04);
+      ft(spk, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.25, duration: 0.26, ease: "power2.in" }, tPro + 0.2);
+      ft(sB, { scale: 1 }, { scale: 1.1, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tPro);
+
+      // ================================================================ TRANSITION → s06: the player sinks away
+      const tOut = D - 0.3;
+      [fr, vp, pp].forEach((e, k) => ft(e, { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.92, y: 50, duration: 0.28, ease: "power2.in" }, tOut + k * 0.02));
+      ft(glow, { opacity: 0.6 }, { opacity: 0, duration: 0.28 }, tOut);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s05"] = tl;
+    })();
+  </script>
+</template>

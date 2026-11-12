@@ -1,0 +1,115 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s01-a { position: absolute; }
+    #s01-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s01-glow { left: 20px; top: 260px; width: 1040px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    /* REC timecode (the "video" is playing) */
+    #s01-rec { left: 452px; top: 346px; width: 176px; height: 46px; border-radius: 23px; background: rgba(10,13,44,.55); color: #ffffff; transform-origin: 50% 50%;
+      font: 700 18px/46px Poppins, sans-serif; letter-spacing: .06em; white-space: nowrap; }
+    #s01-rec i { position: absolute; left: 16px; top: 15px; width: 16px; height: 16px; border-radius: 50%; background: #ff4d55; box-shadow: 0 0 10px rgba(255,77,85,.9); }
+    #s01-rec b { position: absolute; left: 42px; top: 0; font-weight: 700; }
+    #s01-rec span { position: absolute; left: 92px; top: 0; font-weight: 400; }
+    /* "1 kalimat" badge above the prompt */
+    #s01-one { left: 730px; top: 784px; height: 44px; padding: 0 18px 0 46px; border-radius: 22px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #ffffff; transform-origin: 30% 100%;
+      font: 700 19px/44px Poppins, sans-serif; white-space: nowrap; box-shadow: 0 12px 24px -10px rgba(10,13,44,.75); }
+    #s01-one svg { position: absolute; left: 15px; top: 11px; width: 22px; height: 22px; display: block; }
+    #s01-ring { left: 150px; top: 842px; width: 780px; height: 76px; border-radius: 38px; box-shadow: 0 0 0 4px #3a6fe0, 0 0 30px 6px rgba(58,111,224,.35); transform-origin: 50% 50%; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s01 HOOK "Video yang udah kamu rekam, sekarang bisa kamu ubah cuma pakai satu kalimat."
+      // Frame 0: the before/after player already on screen, playing an illustrated park clip ("VIDEO ASLI", "ILUSTRASI", REC timecode,
+      // the person waves on "rekam") · "sekarang": the prompt pill rises and types "Change the season to winter", send · "ubah": the divider
+      // sweeps across → the SAME clip in snow ("HASIL EDIT AI") · "cuma pakai": the divider settles in the middle (asli | hasil) ·
+      // "satu kalimat": the prompt gets a ring + "1 kalimat" badge. TRANSITION → s02: the clip whips out left inside the player
+      // (player frame + prompt pill stay: s02 draws them at the same spot), prompt text clears.
+      const D = 4.8, ST = 0, VW = window.VO_WORDS, R10 = window.R10;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const api = { tl, ft, I };
+      const tRek = L("rekam,"), tSek = L("sekarang"), tUbah = L("ubah"), tCuma = L("cuma"), tSatu = L("satu"), tKal = L("kalimat.");
+      const P = "s01", LINES = ["Change the season to winter"];
+
+      // ================================================================ DOM
+      let h = `<div class="s01-a" id="s01-glow"></div>` + R10.player(P);
+      h += `<div class="s01-a" id="s01-rec"><i></i><b>REC</b>${[0, 1, 2, 3, 4].map((k) => `<span id="s01-tc${k}">00:0${k}</span>`).join("")}</div>`;
+      h += `<div class="s01-a" id="s01-ring"></div>` + R10.prompt(P, LINES);
+      h += `<div class="s01-a" id="s01-one">${R10.svg("check", 3)}1 kalimat</div>`;
+      $("s01-cam").innerHTML = h;
+      $(P + "-stg").innerHTML = R10.copy("s01a", R10.park("s01a", "day")) + R10.copy("s01d", R10.park("s01d", "snow"));
+      const cam = $("s01-cam"); I(cam, { x: 0, y: 0 });
+      I($("s01-glow"), { opacity: 0.9 });
+
+      // ================================================================ the clip (both copies get identical footage motion)
+      R10.footage(api, ["s01a", "s01d"], 0, D, { pan: 44, push: 0.05, s0: 1.02, wave: [tRek - 0.12] });
+      I($("s01d-w"), { clipPath: R10.clip(940) });
+      const fr = $(P + "-fr"), vp = $(P + "-vp"), stg = $(P + "-stg"), dv = $(P + "-dv"), lbA = $(P + "-lbA"), lbB = $(P + "-lbB"), il = $(P + "-il"), stk = $(P + "-stk");
+      I(fr, { opacity: 1, scale: 0.97, y: 10 }); ft(fr, { scale: 0.97, y: 10 }, { scale: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0);
+      I(vp, { opacity: 1, scale: 0.97, y: 10 }); ft(vp, { scale: 0.97, y: 10 }, { scale: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0);
+      I(stg, { x: 0 }); I(stk, { opacity: 0, x: 0 });
+      I(dv, { opacity: 0, x: 940 });
+      I(lbA, { opacity: 1, scale: 1 }); I(lbB, { opacity: 0, scale: 0.7 }); I(il, { opacity: 1 });
+      // REC timecode
+      const rec = $("s01-rec"); I(rec, { opacity: 1, scale: 1 });
+      for (let k = 0; k < 5; k++) { const e = $("s01-tc" + k); I(e, { opacity: k === 0 ? 1 : 0 }); if (k) { tl.set($("s01-tc" + (k - 1)), { opacity: 0 }, k); tl.set(e, { opacity: 1 }, k); } }
+      const dot = rec.querySelector("i"); I(dot, { opacity: 1 });
+      for (let t = 0.5; t < D; t += 0.5) tl.set(dot, { opacity: Math.round(t * 2) % 2 ? 0.25 : 1 }, t);
+      ft(rec, { scale: 1 }, { scale: 1.12, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tRek - 0.05);
+
+      // ================================================================ "sekarang": prompt rises + types · send
+      const pp = $(P + "-pp"), sd = $(P + "-psd"), ca = $(P + "-pca");
+      R10.pinPrompt(api, P, LINES);
+      I(pp, { opacity: 0, y: 70, scale: 0.92 });
+      ft(pp, { opacity: 0, y: 70, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.6)" }, tSek - 0.22);
+      R10.type(api, P, LINES, 0, tSek + 0.18, tUbah - 0.14);
+      for (let t = 0.45; t < D; t += 0.45) if (t < tSek + 0.1 || t > tUbah) tl.set(ca, { opacity: Math.round(t / 0.45) % 2 ? 0 : 1 }, t);
+      tl.set(ca, { opacity: 1 }, tSek + 0.1);
+      ft(sd, { opacity: 0 }, { opacity: 1, duration: 0.08 }, tUbah - 0.1);
+      ft($(P + "-pp").querySelector(".sd"), { scale: 1 }, { scale: 0.86, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tUbah - 0.08);
+      tl.set(rec, { opacity: 0 }, tUbah - 0.05);
+
+      // ================================================================ "ubah": wipe → snow · "cuma pakai": split in the middle
+      tl.set(dv, { opacity: 1 }, tUbah - 0.04);
+      R10.wipe(api, P, "s01d", tUbah - 0.04, 940, 0, 0.42, "power2.inOut");
+      ft(lbB, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tUbah + 0.08);
+      ft(lbA, { opacity: 1 }, { opacity: 0, duration: 0.15 }, tUbah + 0.12);
+      R10.wipe(api, P, "s01d", tCuma + 0.02, 0, 470, 0.45, "power3.out");
+      ft(lbA, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, tCuma + 0.2);
+
+      // ================================================================ "satu kalimat": ring + badge
+      const ring = $("s01-ring"), one = $("s01-one");
+      I(ring, { opacity: 0, scale: 1 });
+      ft(ring, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.22, ease: "power2.out" }, tSatu - 0.06);
+      ft(pp, { scale: 1 }, { scale: 1.04, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tSatu - 0.04);
+      I(one, { opacity: 0, scale: 0.5, y: 10 });
+      ft(one, { opacity: 0, scale: 0.5, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "back.out(2.2)" }, tKal - 0.06);
+
+      // ================================================================ TRANSITION → s02 (whip inside the player)
+      const tOut = D - 0.22;
+      ft(stg, { x: 0 }, { x: -760, duration: 0.22, ease: "power2.in" }, tOut);
+      ft(stk, { opacity: 0 }, { opacity: 0.7, duration: 0.22, ease: "power2.in" }, tOut);
+      ft(dv, { opacity: 1 }, { opacity: 0, duration: 0.1 }, tOut);
+      [lbA, lbB].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tOut));
+      ft(ring, { opacity: 1 }, { opacity: 0, duration: 0.15 }, tOut);
+      ft(one, { opacity: 1, y: 0 }, { opacity: 0, y: 10, duration: 0.15 }, tOut);
+      R10.untype(api, P, LINES, 0, tOut + 0.02, 0.12);
+      tl.set($(P + "-pph"), { display: "inline" }, tOut + 0.15);
+      ft(sd, { opacity: 1 }, { opacity: 0, duration: 0.1 }, tOut);
+      ft($("s01-glow"), { opacity: 0.9 }, { opacity: 0.6, duration: 0.2 }, tOut);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s01"] = tl;
+    })();
+  </script>
+</template>

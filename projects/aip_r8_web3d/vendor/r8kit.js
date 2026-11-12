@@ -188,24 +188,27 @@
     const step = 1 / 15, n = Math.ceil(D / step);
     const f0 = fAt(ST, seed);
     tl.set(pi, Object.assign({ transformPerspective: 720 }, f0), 0);
-    tl.set(sh, { scaleX: 1 + f0.y / 90, scaleY: 1 + f0.y / 90, opacity: 0.9 + f0.y / 60 }, 0);
+    const shv = (f) => ({ scaleX: 1 + f.y / 70, scaleY: 1 + f.y / 70 });      // shadow breathes by scale only (scenes own its opacity)
+    tl.set(sh, shv(f0), 0);
     const orbs = o.noOrb ? [] : [0, 1, 2].map((j) => document.getElementById(`${q}-o${j}`));
     const PH = ORBIT[key] || [0, 2.1, 4.2];
     orbs.forEach((e, j) => { const v = oAt(ST, PH[j], j); tl.set(e, { x: v.x, y: v.y, scale: v.scale, zIndex: v.z }, 0); });
+    // every segment is a self-contained fromTo (explicit start values, no lazy init): renders identically whatever the seek order
+    const seg = (el, a, b, t0, d) => tl.fromTo(el, a, Object.assign({ duration: d, ease: "none", immediateRender: false, lazy: false }, b), t0);
     for (let k = 0; k < n; k++) {
-      const t0 = k * step, d = Math.min(step, D - t0), g1 = ST + t0 + d, f = fAt(g1, seed);
-      tl.to(pi, Object.assign({ duration: d, ease: "none" }, f), t0);
-      tl.to(sh, { scaleX: 1 + f.y / 90, scaleY: 1 + f.y / 90, opacity: 0.9 + f.y / 60, duration: d, ease: "none" }, t0);
+      const t0 = k * step, d = Math.min(step, D - t0), g0 = ST + t0, g1 = ST + t0 + d, fa = fAt(g0, seed), f = fAt(g1, seed);
+      seg(pi, fa, f, t0, d);
+      seg(sh, shv(fa), shv(f), t0, d);
       orbs.forEach((e, j) => {
-        const a = oAt(ST + t0, PH[j], j), b = oAt(g1, PH[j], j);
-        tl.to(e, { x: b.x, y: b.y, scale: b.scale, duration: d, ease: "none" }, t0);
+        const a = oAt(g0, PH[j], j), b = oAt(g1, PH[j], j);
+        seg(e, { x: a.x, y: a.y, scale: a.scale }, { x: b.x, y: b.y, scale: b.scale }, t0, d);
         if (a.z !== b.z) tl.set(e, { zIndex: b.z }, t0 + d / 2);
       });
     }
     // steam (cup only): dash offset linear in global time
     if (key === "kopi") document.querySelectorAll(`#${q}-steam .st`).forEach((e, j) => {
       const off = (g) => -((g * 0.45 + j * 0.31) % 1000);
-      tl.fromTo(e, { attr: { "stroke-dashoffset": off(ST) } }, { attr: { "stroke-dashoffset": off(ST + D) }, duration: D, ease: "none", immediateRender: false }, 0);
+      tl.fromTo(e, { attr: { "stroke-dashoffset": off(ST) } }, { attr: { "stroke-dashoffset": off(ST + D) }, duration: D, ease: "none", immediateRender: false, lazy: false }, 0);
       tl.set(e, { attr: { "stroke-dashoffset": off(ST) } }, 0);
     });
   };
@@ -214,7 +217,8 @@
   const wave = (tl, el, ST, D, fn, rate) => {
     const step = 1 / (rate || 15), n = Math.ceil(D / step);
     tl.set(el, fn(ST), 0);
-    for (let k = 0; k < n; k++) { const t0 = k * step, d = Math.min(step, D - t0); tl.to(el, Object.assign({ duration: d, ease: "none" }, fn(ST + t0 + d)), t0); }
+    for (let k = 0; k < n; k++) { const t0 = k * step, d = Math.min(step, D - t0);
+      tl.fromTo(el, fn(ST + t0), Object.assign({ duration: d, ease: "none", immediateRender: false, lazy: false }, fn(ST + t0 + d)), t0); }
   };
   // the library tiles' art: each moves by a function of global time (same in s03 / s04 / s10, so the window hands over cleanly)
   const tileArt = (tl, p, ST, D) => {
@@ -236,7 +240,7 @@
     { bg: "linear-gradient(150deg,#5b3df5,#2a1a8f)", art: `<i class="sph" style="left:150px;top:30px;width:104px;height:104px;background:radial-gradient(circle at 34% 30%,#ffffff,#b9a8ff 30%,#6a4cf0 62%,#2b1a8a)"></i>` },
     { bg: "linear-gradient(150deg,#0f9b8e,#0b4f63)", art: `<i class="tor" style="left:146px;top:26px;width:110px;height:110px"></i>` },
     { bg: "linear-gradient(150deg,#ff8a1f,#d1460f)", art: `<svg class="cube" style="left:150px;top:22px" width="110" height="118" viewBox="0 0 110 118"><path d="M55 4 L104 30 L55 56 L6 30 Z" fill="#ffd7a6"/><path d="M6 30 L55 56 L55 114 L6 88 Z" fill="#ff9d4d"/><path d="M104 30 L55 56 L55 114 L104 88 Z" fill="#c2410c"/></svg>` },
-    { bg: "linear-gradient(150deg,#1d6cf2,#0b2f86)", art: `<i class="cap" style="left:142px;top:34px"></i><i class="cap c2" style="left:182px;top:52px"></i>` },
+    { bg: "linear-gradient(150deg,#1d6cf2,#0b2f86)", art: `<i class="capsl" style="left:142px;top:34px"></i><i class="capsl c2" style="left:182px;top:52px"></i>` },
     { bg: "linear-gradient(150deg,#22a35a,#0d5a33)", art: `<i class="blob" style="left:150px;top:28px;width:110px;height:104px"></i>` },
     { bg: "linear-gradient(160deg,#151a3f,#2a3470)", art: `<svg class="wav" style="left:120px;top:40px" width="150" height="96" viewBox="0 0 150 96" fill="none" stroke="#7fd0ff" stroke-width="2.4" stroke-linecap="round">${[0, 1, 2, 3, 4, 5].map((r) => `<path opacity="${(0.35 + r * 0.12).toFixed(2)}" d="M0 ${18 + r * 13} C30 ${4 + r * 13} 50 ${32 + r * 13} 75 ${18 + r * 13} S120 ${4 + r * 13} 150 ${18 + r * 13}"/>`).join("")}</svg>` },
   ];
@@ -401,8 +405,8 @@
   .r8-tile .art > * { position: absolute; }
   .r8-tile .sph, .r8-tile .tor, .r8-tile .blob { display: block; border-radius: 50%; }
   .r8-tile .tor { background: conic-gradient(from 30deg, #b8fff2, #19c2ae, #0b6e72, #6ff0dc, #b8fff2); -webkit-mask: radial-gradient(closest-side, transparent 52%, #000 54%); mask: radial-gradient(closest-side, transparent 52%, #000 54%); }
-  .r8-tile .cap { display: block; width: 46px; height: 100px; border-radius: 23px; background: linear-gradient(90deg, #7fb2ff, #ffffff 40%, #4d8bff 80%, #1f4fcf); transform: rotate(-24deg); }
-  .r8-tile .cap.c2 { height: 84px; background: linear-gradient(90deg, #ffd36b, #fff6d6 40%, #ffbf2e 80%, #c98a00); transform: rotate(18deg); }
+  .r8-tile .capsl { display: block; width: 46px; height: 100px; border-radius: 23px; background: linear-gradient(90deg, #7fb2ff, #ffffff 40%, #4d8bff 80%, #1f4fcf); transform: rotate(-24deg); }
+  .r8-tile .capsl.c2 { height: 84px; background: linear-gradient(90deg, #ffd36b, #fff6d6 40%, #ffbf2e 80%, #c98a00); transform: rotate(18deg); }
   .r8-tile .blob { border-radius: 46% 54% 58% 42% / 52% 40% 60% 48%; background: radial-gradient(circle at 34% 30%, #eaffef, #6fe39a 40%, #1d9c55 75%, #0d5a33); }
   .r8-tile .pc { position: absolute; right: 12px; bottom: 12px; height: 34px; padding: 0 14px 0 36px; border-radius: 17px; background: #ffffff; color: #0a0d2c; font: 700 14px/34px Poppins, sans-serif; white-space: nowrap; box-shadow: 0 8px 14px -8px rgba(0,0,0,.6); transform-origin: 70% 50%; }
   .r8-tile .pc svg { position: absolute; left: 12px; top: 9px; width: 16px; height: 16px; display: block; color: #294b77; }

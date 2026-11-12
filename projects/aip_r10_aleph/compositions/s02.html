@@ -1,0 +1,86 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s02-a { position: absolute; }
+    #s02-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s02-glow { left: 20px; top: 260px; width: 1040px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    #s02-ring { left: 150px; top: 842px; width: 780px; height: 76px; border-radius: 38px; box-shadow: 0 0 0 4px #3a6fe0, 0 0 30px 6px rgba(58,111,224,.35); transform-origin: 50% 50%; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s02 DAY → NIGHT "Mau siang jadi malam? Tinggal ketik."
+      // START = s01's end (player frame + prompt pill with its placeholder at the same spot): a new illustrated park clip whips in
+      // (closer on the person + lamp post) · "Mau siang": the prompt types "Make it night", send · "malam?": the divider sweeps → the
+      // SAME clip at night (moon, stars, lit windows, fireflies); the lamp post flickers on · "Tinggal": the divider settles in the middle
+      // (siang | malam) · "ketik.": the prompt pill pulses. TRANSITION → s03: whip out left inside the player.
+      const D = 2.5333, ST = 4.8, VW = window.VO_WORDS, R10 = window.R10;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const api = { tl, ft, I };
+      const tMau = L("Mau"), tMal = L("malam?"), tTin = L("Tinggal"), tKet = L("ketik.");
+      const P = "s02", LINES = ["Make it night"];
+
+      // ================================================================ DOM
+      let h = `<div class="s02-a" id="s02-glow"></div>` + R10.player(P) + `<div class="s02-a" id="s02-ring"></div>` + R10.prompt(P, LINES);
+      $("s02-cam").innerHTML = h;
+      $(P + "-stg").innerHTML = R10.copy("s02a", R10.park("s02a", "day")) + R10.copy("s02b", R10.park("s02b", "night"));
+      $(P + "-vp").insertAdjacentHTML("beforeend", R10.sub("s02-sA", "A", "sun", "Siang") + R10.sub("s02-sB", "B", "moon", "Malam"));
+      I($("s02-cam"), { x: 0, y: 0 }); I($("s02-glow"), { opacity: 0.6 });
+      const fr = $(P + "-fr"), vp = $(P + "-vp"), stg = $(P + "-stg"), dv = $(P + "-dv"), lbA = $(P + "-lbA"), lbB = $(P + "-lbB"), il = $(P + "-il"), stk = $(P + "-stk");
+      const sA = $("s02-sA"), sB = $("s02-sB"), pp = $(P + "-pp"), sd = $(P + "-psd"), ca = $(P + "-pca"), ring = $("s02-ring");
+      [fr, vp, pp].forEach((e) => I(e, { opacity: 1, scale: 1, x: 0, y: 0 }));
+      I(il, { opacity: 1 }); I(dv, { opacity: 0, x: 940 });
+      I(lbA, { opacity: 0, scale: 0.8 }); I(lbB, { opacity: 0, scale: 0.7 }); I(sA, { opacity: 0, y: -6 }); I(sB, { opacity: 0, y: -6 }); I(ring, { opacity: 0, scale: 1 });
+
+      // ================================================================ the clip: closer on the person + lamp (both copies identical)
+      R10.footage(api, ["s02a", "s02b"], 0, D, { pan: 30, push: 0.04, s0: 1.12, ox: 72, oy: 60, lampOn: tMal + 0.42 });
+      I($("s02b-w"), { clipPath: R10.clip(940) });
+      // whip in
+      I(stg, { x: 760 }); ft(stg, { x: 760 }, { x: 0, duration: 0.28, ease: "power3.out" }, 0);
+      I(stk, { opacity: 0.7 }); ft(stk, { opacity: 0.7 }, { opacity: 0, duration: 0.24, ease: "power2.out" }, 0);
+      ft(lbA, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 0.12);
+      ft(sA, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, 0.22);
+
+      // ================================================================ "Mau siang": type + send · "malam?": wipe → night
+      R10.pinPrompt(api, P, LINES);
+      R10.type(api, P, LINES, 0, tMau - 0.06, tMal - 0.32);
+      for (let t = 0.45; t < D; t += 0.45) tl.set(ca, { opacity: Math.round(t / 0.45) % 2 ? 0 : 1 }, t);
+      tl.set(ca, { opacity: 1 }, tMau - 0.08);
+      ft(sd, { opacity: 0 }, { opacity: 1, duration: 0.08 }, tMal - 0.28);
+      ft(pp.querySelector(".sd"), { scale: 1 }, { scale: 0.86, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tMal - 0.26);
+      tl.set(dv, { opacity: 1 }, tMal - 0.24);
+      R10.wipe(api, P, "s02b", tMal - 0.24, 940, 0, 0.42, "power2.inOut");
+      ft(lbB, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tMal - 0.06);
+      ft(sB, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, tMal + 0.02);
+      [lbA, sA].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.14 }, tMal - 0.02));
+      // "Tinggal": back to the middle (siang | malam)
+      R10.wipe(api, P, "s02b", tTin - 0.06, 0, 470, 0.45, "power3.out");
+      [lbA, sA].forEach((e) => ft(e, { opacity: 0 }, { opacity: 1, duration: 0.22 }, tTin + 0.12));
+      // "ketik.": the prompt pulses
+      ft(ring, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.2, ease: "power2.out" }, tKet - 0.08);
+      ft(pp, { scale: 1 }, { scale: 1.04, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tKet - 0.06);
+      ft(sd, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tMal + 0.2);
+
+      // ================================================================ TRANSITION → s03 (whip inside the player)
+      const tOut = D - 0.22;
+      ft(stg, { x: 0 }, { x: -760, duration: 0.22, ease: "power2.in" }, tOut);
+      ft(stk, { opacity: 0 }, { opacity: 0.7, duration: 0.22, ease: "power2.in" }, tOut);
+      [dv, lbA, lbB, sA, sB, ring].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tOut));
+      R10.untype(api, P, LINES, 0, tOut + 0.02, 0.1);
+      tl.set($(P + "-pph"), { display: "inline" }, tOut + 0.14);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s02"] = tl;
+    })();
+  </script>
+</template>

@@ -1,7 +1,7 @@
-"""Builds index.html for the REMOTE reel (a team of 3 Claude that hunts remote jobs; adapted from the PROMPTBUILDER builder) from production/timing.json: the client's light
+"""Builds index.html for the R10 ALEPH reel (edit an existing video with AI: Runway Aleph; adapted from the R4 REMOTE builder) from production/timing.json: the client's light
 background (white -> soft blue; its baked grid removed and re-created as an ANIMATED CSS grid in the top-right that drifts and
 breathes), word-synced Poppins captions in the navy text gradient (#0a0d2c -> #294b77), the dark AI PRENEUR logo (top-left),
-scene slots (s01–s08), the robot (co-host) and the mascot (host). Micro-animation kit: vendor/microanim.js (window.MicroAnim).
+scene slots (s01–s09), the robot (co-host) and the mascot (host). Shared illustration + player kit: vendor/r10kit.js (window.R10).
 Caption styles: b = 700, r = 400, c = 700 + drawn underline, m = navy gradient pill + white 700.   Run: python3 -I tools/build_index.py ."""
 import json, sys
 from pathlib import Path
@@ -22,13 +22,13 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>Tim 3 Claude cari kerja remote — AI PRENEUR</title>
+    <title>Edit video yang sudah ada pakai AI (Runway Aleph) — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/rounds.js"></script>
-    <script src="vendor/r4kit.js"></script>
+    <script src="vendor/r10kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}

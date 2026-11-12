@@ -1,0 +1,93 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s03-a { position: absolute; }
+    #s03-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s03-glow { left: 20px; top: 260px; width: 1040px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div id="s03-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s03 SEASONS "Mau ganti musim? Dari musim panas, jadi sakura, atau salju."
+      // START = s02's end (player + empty prompt): a new clip whips in, framed on the big tree + the person (summer) · "musim?": the
+      // sub-label "Musim panas" · "Dari musim panas": the prompt types "Make it cherry blossom season", send · "sakura": the divider
+      // sweeps → the SAME clip in spring (pink crown, falling petals) · "atau": the prompt is replaced by "Change the season to winter",
+      // send · "salju": a second sweep → snow (white crown, snowfall). TRANSITION → s04: whip out left inside the player.
+      const D = 4.3334, ST = 7.3333, VW = window.VO_WORDS, R10 = window.R10;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const api = { tl, ft, I };
+      const tMus = L("musim?"), tDari = L("Dari"), tPan = L("panas,"), tSak = L("sakura,"), tAtau = L("atau"), tSal = L("salju.");
+      const P = "s03", LINES = ["Make it cherry blossom season", "Change the season to winter"];
+
+      // ================================================================ DOM
+      let h = `<div class="s03-a" id="s03-glow"></div>` + R10.player(P) + R10.prompt(P, LINES);
+      $("s03-cam").innerHTML = h;
+      $(P + "-stg").innerHTML = R10.copy("s03a", R10.park("s03a", "day")) + R10.copy("s03b", R10.park("s03b", "sakura")) + R10.copy("s03c", R10.park("s03c", "snow"));
+      $(P + "-vp").insertAdjacentHTML("beforeend", R10.sub("s03-sA", "A", "sun", "Musim panas") + R10.sub("s03-sB1", "B", "flower", "Musim sakura") + R10.sub("s03-sB2", "B", "snow", "Musim salju"));
+      I($("s03-cam"), { x: 0, y: 0 }); I($("s03-glow"), { opacity: 0.6 });
+      const fr = $(P + "-fr"), vp = $(P + "-vp"), stg = $(P + "-stg"), dv = $(P + "-dv"), lbA = $(P + "-lbA"), lbB = $(P + "-lbB"), il = $(P + "-il"), stk = $(P + "-stk");
+      const sA = $("s03-sA"), sB1 = $("s03-sB1"), sB2 = $("s03-sB2"), pp = $(P + "-pp"), sd = $(P + "-psd"), ca = $(P + "-pca");
+      [fr, vp, pp].forEach((e) => I(e, { opacity: 1, scale: 1, x: 0, y: 0 }));
+      I(il, { opacity: 1 }); I(dv, { opacity: 0, x: 940 });
+      I(lbA, { opacity: 0, scale: 0.8 }); I(lbB, { opacity: 0, scale: 0.7 });
+      [sA, sB1, sB2].forEach((e) => I(e, { opacity: 0, y: -6, scale: 1 }));
+
+      // ================================================================ the clip: framed on the tree + person (three identical copies)
+      R10.footage(api, ["s03a", "s03b", "s03c"], 0, D, { pan: 26, push: 0.045, s0: 1.16, ox: 32, oy: 52 });
+      I($("s03b-w"), { clipPath: R10.clip(940) }); I($("s03c-w"), { clipPath: R10.clip(940) });
+      I(stg, { x: 760 }); ft(stg, { x: 760 }, { x: 0, duration: 0.28, ease: "power3.out" }, 0);
+      I(stk, { opacity: 0.7 }); ft(stk, { opacity: 0.7 }, { opacity: 0, duration: 0.24, ease: "power2.out" }, 0);
+      ft(lbA, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 0.12);
+      // "musim?": "Musim panas" · "panas": it bumps
+      ft(sA, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.24, ease: "power3.out" }, tMus - 0.1);
+      ft(sA, { scale: 1 }, { scale: 1.1, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tPan - 0.06);
+
+      // ================================================================ prompt 1 → sakura
+      R10.pinPrompt(api, P, LINES);
+      R10.type(api, P, LINES, 0, tDari - 0.02, tSak - 0.42);
+      for (let t = 0.45; t < D; t += 0.45) tl.set(ca, { opacity: Math.round(t / 0.45) % 2 ? 0 : 1 }, t);
+      tl.set(ca, { opacity: 1 }, tDari - 0.04);
+      const send = (t) => { ft(sd, { opacity: 0 }, { opacity: 1, duration: 0.08 }, t); ft(pp.querySelector(".sd"), { scale: 1 }, { scale: 0.86, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, t + 0.02);
+        ft(sd, { opacity: 1 }, { opacity: 0, duration: 0.2 }, t + 0.45); };
+      send(tSak - 0.36);
+      tl.set(dv, { opacity: 1 }, tSak - 0.26);
+      R10.wipe(api, P, "s03b", tSak - 0.26, 940, 0, 0.44, "power2.inOut");
+      ft(lbB, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tSak - 0.08);
+      ft(sB1, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, tSak);
+      [lbA, sA].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.14 }, tSak - 0.04));
+      tl.set(dv, { opacity: 0 }, tSak + 0.2);
+
+      // ================================================================ "atau": prompt 2 → snow
+      R10.untype(api, P, LINES, 0, tAtau - 0.2, 0.08);
+      R10.type(api, P, LINES, 1, tAtau - 0.08, tSal - 0.3);
+      send(tSal - 0.26);
+      tl.set(dv, { opacity: 1, x: 940 }, tSal - 0.2);
+      R10.wipe(api, P, "s03c", tSal - 0.2, 940, 0, 0.44, "power2.inOut");
+      ft(sB1, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tSal - 0.02);
+      ft(sB2, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, tSal + 0.06);
+      ft(lbB, { scale: 1 }, { scale: 1.08, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tSal + 0.04);
+      tl.set(dv, { opacity: 0 }, tSal + 0.26);
+
+      // ================================================================ TRANSITION → s04 (whip inside the player)
+      const tOut = D - 0.22;
+      ft(stg, { x: 0 }, { x: -760, duration: 0.22, ease: "power2.in" }, tOut);
+      ft(stk, { opacity: 0 }, { opacity: 0.7, duration: 0.22, ease: "power2.in" }, tOut);
+      [lbB, sB2].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tOut));
+      R10.untype(api, P, LINES, 1, tOut + 0.02, 0.1);
+      tl.set($(P + "-pph"), { display: "inline" }, tOut + 0.14);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s03"] = tl;
+    })();
+  </script>
+</template>

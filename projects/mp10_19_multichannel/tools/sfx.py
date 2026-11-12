@@ -184,7 +184,7 @@ for r in range(3):
 for i in range(3): put(TM['untung'] - 0.38 + i * 0.12, marker(0.7), MK * 0.6)
 put(TM['untung'] - 0.36, knock(110, 0.3), 0.14); put(TM['untung'] - 0.3, pop(380, 760, 0.12), 0.1)
 for j in range(9): put(TM['untung'] + 0.3 + j * 0.2, tick(0.02, 3000 + 400 * (j % 3)), 0.03)
-put(TM['ribet'] + 0.05, rattle(0.55), 0.09); put(TM['ribet'] + 0.3, marker(0.4), MK)
+put(TM['ribet'] + 0.05, rattle(0.55), 0.09); put(TM['ribet'] + 0.05, marker(0.36), MK)
 # band sweep -> brand
 for k in range(3): wh(TM['sol'] - 0.5 + k * 0.06, 0.45, 300 + 200 * k, 1800 + 400 * k, 1.1, 0.7, 0.5)
 # S5 · brand: glowing rivers (soft brook), hologram, the merge (lake fill bloop + ripple chimes + token plops), card lift, rows, trace

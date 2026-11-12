@@ -166,11 +166,12 @@ put(TM['nanya'] - 0.15, tick(0.02, 3000), 0.05)
 put(TM['usaha'] - 0.3, pop(380, 820, 0.12), 0.13); wh(TM['usaha'] - 0.32, 0.35, 700, 2200, 1.2, 0.4, 0.25)
 for k in ('usaha', 'untung', 'berapa', 'sebulan'): put(TM[k] - 0.08, pop(560, 1050, 0.07), 0.07)
 put(TM['berapa'] - 0.05, marker(0.3), MK * 0.9); put(TM['sebulan'] + 0.05, marker(0.3), MK * 0.9)
-# split: two panels slide in (left + right whoosh), they meet with a soft clack, the divider draws
-wh(3.66, 0.5, 300, 2400, 1.1, 0.6, 0.55); wh(3.70, 0.5, 350, 2600, 1.1, 0.6, 0.5)
-put(4.1, knock(170, 0.18), 0.12); put(4.02, tick(0.02, 3600), 0.06)
+# split: two panels slide in (left + right whoosh), they meet with a soft clack, the divider draws (same cut times as index.html)
+tS = max(TM['sebulan'] + 0.45, TM['a'] - 0.98); tS4 = TM['beda'] - 0.3
+wh(tS - 0.04, 0.5, 300, 2400, 1.1, 0.6, 0.55); wh(tS, 0.5, 350, 2600, 1.1, 0.6, 0.5)
+put(tS + 0.4, knock(170, 0.18), 0.12); put(tS + 0.32, tick(0.02, 3600), 0.06)
 # divider slides (A focus / B focus / both)
-for t in (4.55, TM['b'] - 0.2, 16.5): wh(t, 0.6, 500, 1800, 1.0, 0.5, 0.35)
+for t in (TM['a'] - 0.13, TM['b'] - 0.2, tS4): wh(t, 0.6, 500, 1800, 1.0, 0.5, 0.35)
 # S2 · Penjual A
 put(TM['a'] - 0.12, pop(460, 880, 0.08), 0.07); put(TM['bingung'] - 0.1, pop(520, 980, 0.08), 0.08)
 for k in range(3): put(TM['bingung'] + 0.06 + k * 0.13, boing(520 + 90 * k, 980 + 120 * k, 0.22), 0.09)

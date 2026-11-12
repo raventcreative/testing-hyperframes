@@ -53,16 +53,17 @@
   const shake = (t, base) => { pose(t, { hYaw: base - 13 }); pose(t + 0.18, { hYaw: base + 13 }); pose(t + 0.36, { hYaw: base - 10 }); pose(t + 0.56, { hYaw: base }); };
   // the host stands at the bottom of the split divider (small full body); x follows the divider: 540 -> 760 -> 320 -> 540
   const RY = 1650, RH = 460;
+  const tS = Math.max(TM.sebulan + 0.45, TM.a - 0.98), tS4 = TM.beda - 0.3;   // same cut times as index.html (split doors, divider back to the middle)
 
-  // S1 · hook: rises in between the two sellers, looks up at the calon mitra, curious head tilt on the question
+  // S1 · hook: rises in between the two sellers, looks up at the mitra bisnis, curious head tilt on the question
   pose(0, Object.assign({ x: 540, y: 2420, h: RH, yaw: 0, pitch: 0, roll: 0, hYaw: 0, hPitch: -10, hRoll: 0, lookX: 0, lookY: 0.6, happy: 0, xe: 0, mo: 0, squint: 0, smile: 1, chest: 0 }, LIGHT)); REST(0);
   pose(0.15, { y: 2420 }, "hold"); pose(0.85, { y: RY }, "o");
   pose(0.95, { hPitch: -22, lookY: 1, lookX: 0.1 });
   pose(TM.untung, { hRoll: 10, hYaw: 8, lookX: 0.3 }); pose(TM.sebulan + 0.35, { hRoll: 0, hYaw: 0, lookX: 0 });
   armL(TM.usaha - 0.1, 15, 0, 10, 0); armL(TM.usaha + 0.25, 70, 30, 120, 0, "o"); armL(TM.sebulan + 0.2, 70, 30, 120, 0); armL(TM.sebulan + 0.5, 15, 0, 10, 0);   // hand to chin: "hmm?"
   // split: turns to Penjual A as the divider slides right
-  pose(4.25, { yaw: -22, hYaw: -16, hPitch: -8, lookX: -0.9, lookY: 0.2 });
-  pose(4.55, { x: 540 }); pose(5.15, { x: 760 });
+  pose(tS + 0.55, { yaw: -22, hYaw: -16, hPitch: -8, lookX: -0.9, lookY: 0.2 });
+  pose(TM.a - 0.13, { x: 540 }); pose(TM.a + 0.47, { x: 760 });
   // "bingung": a puzzled tilt and squint
   pose(TM.bingung + 0.05, { hRoll: -12, squint: 0.35, lookX: -1, lookY: 0.4 }); pose(TM.bongkar - 0.1, { hRoll: 0, squint: 0 });
   // "bongkar": papers burst up — surprised, little flinch with both arms
@@ -77,8 +78,8 @@
   armL(TM.kira - 0.1, 15, 0, 10, 0); armR(TM.kira - 0.1, 15, 0, 10, 0); armL(TM.kira + 0.2, 62, 16, 98, 0, "o"); armR(TM.kira + 0.2, 62, 16, 98, 0, "o");
   pose(TM.kira + 0.15, { hRoll: 10, hYaw: -10, lookX: -0.5 }); armL(TM.kira + 0.85, 62, 16, 98, 0); armR(TM.kira + 0.85, 62, 16, 98, 0); REST(TM.b - 0.05); pose(TM.b - 0.1, { hRoll: 0 });
   // divider slides left: turns to Penjual B
-  pose(10.98, { x: 760 }); pose(11.58, { x: 320 });
-  pose(11.4, { yaw: 22, hYaw: 16, hPitch: -8, lookX: 0.9, lookY: 0.2 });
+  pose(TM.b - 0.2, { x: 760 }); pose(TM.b + 0.4, { x: 320 });
+  pose(TM.b + 0.22, { yaw: 22, hYaw: 16, hPitch: -8, lookX: 0.9, lookY: 0.2 });
   // "tenang": happy, a calm nod
   pose(TM.tenang, { happy: 1 }); nod(TM.tenang + 0.1, -8, 6); pose(TM.tenang + 0.9, { happy: 0 });
   // "buka laporan laba rugi": points at the tablet; nods on penjualan, biaya, laba
@@ -87,9 +88,9 @@
   nod(TM.pj, -14); nod(TM.by, -14); nod(TM.laba, -14);
   // "jelas": both arms up, happy
   pose(TM.jelas, { happy: 1, mo: 0.35 }); armL(TM.jelas - 0.05, 15, 0, 10, 0); armR(TM.jelas - 0.05, 15, 0, 10, 0); armL(TM.jelas + 0.3, 140, 14, 34, 0, "o"); armR(TM.jelas + 0.3, 140, 14, 34, 0, "o");
-  REST(16.6); pose(16.6, { happy: 0, mo: 0 });
+  REST(tS4 + 0.1); pose(tS4 + 0.1, { happy: 0, mo: 0 });
   // S4 · back to the middle; "gede kecilnya": looks left, then right; "ada datanya": points at B; "nggak": looks at A, shakes the head
-  pose(16.5, { x: 320 }); pose(17.1, { x: 540 });
+  pose(tS4, { x: 320 }); pose(tS4 + 0.6, { x: 540 });
   pose(TM.beda, { yaw: 0, hYaw: 0, hPitch: -6, lookX: 0, lookY: 0.2 });
   pose(TM.gede + 0.05, { hYaw: -18, lookX: -0.9 }); pose(TM.usaha2, { hYaw: 18, lookX: 0.9 }); pose(TM.tapi, { hYaw: 0, lookX: 0 });
   pose(TM.ada, { yaw: 18, hYaw: 16, lookX: 1, lookY: 0.3, happy: 1 }); pointL(TM.ada - 0.05, TM.atau, 98, 24, 14);

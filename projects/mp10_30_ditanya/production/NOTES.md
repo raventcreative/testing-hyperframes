@@ -7,17 +7,17 @@ Not rendered here, not committed. The lead renders, mixes the music and commits.
 One **light CSS-3D meeting room**. The people are illustrated cut-outs (flat SVG planes) sitting behind a real 3D table:
 - a **wood table** (top, apron, legs) with a name tent on it;
 - an office chair behind each person;
-- a back wall with a window and a plant (hook), or a clock and a bookshelf (sellers);
+- a back wall with a window and a plant (hook), or a bookshelf and a plant (sellers);
 - a grid floor, a coffee cup, and the partner's notebook.
 
 Each world uses three camera-twin rigs (room + person | table | items), so the table always covers the person's lower half and
 the papers / tablet always ride on top. This avoids depth-sorting trouble in the software compositor.
 
-The people are fictional and generic: the **calon mitra** (glasses, bun, slate blazer, pen at the chin), **Penjual A** (coral
+The people are fictional and generic: the **mitra bisnis** (a generic business partner: glasses, bun, slate blazer, pen at the chin), **Penjual A** (coral
 tee, messy hair) and **Penjual B** (teal hijab). No bank, no lender, no real people, no brands.
 
 The film runs in five parts:
-1. **Hook.** Across the table, the calon mitra asks "Usahamu untung berapa sebulan?" in a big speech bubble. The two sellers
+1. **Hook.** Across the table, the mitra bisnis asks "Usahamu untung berapa sebulan?" in a big speech bubble. The two sellers
    sit in the foreground with their backs to us, and the robot peeks up between them.
 2. **Split screen.** Two panels slide in over the room like sliding doors: the reverse shot of each seller. A white divider
    slides to give the speaking side the focus (760 / 320 px), and the other side dims. The robot host stands on the divider
@@ -38,78 +38,97 @@ storm, archery or day-timeline sky. The papers burst up and fall; they do not or
 
 ## VO (ElevenLabs, client voice, default AUTO tags)
 `python3 /home/user/testing-hyperframes/tools/el_tts_ts.py production/vo/lines.txt production/vo/VO_MP30.mp3` (no `--tags`).
-- **Take 2 is used.** Take 1 had line 1 as "Calon mitra nanya ke dua penjual: …" and L2 ending "…catatan yang kececer. Jawabnya
-  cuma, kira-kira." It ran 33.6 s, over the 33 s limit, so the script was trimmed.
-- **Length.** `VO_MP30.mp3` is 32.80 s. Speech runs 0.32 → 32.80 on the timeline (energy envelope), so it is **32.5 s
-  spoken** (≤ 33 s), 69 words.
+- **Take 5 is used.** Takes 1–4 are kept in the scratch dir (`mp30/VO_MP30_take*.mp3`):
+  - **Take 1** ran 33.6 s spoken, over the limit; the script was trimmed.
+  - **Take 2** (first delivery) had "Calon mitra nanya: …". Both whisper models misheard the hook as "Calon Nitra / Ngitra", and
+    `small` heard "untuk". The lead asked for a clean, generic hook.
+  - **Take 3**, "Ada mitra bisnis nanya: usahamu untung berapa sebulan?": "mitra" was fine, but `small` dropped "untung" and
+    `medium` heard "untuk".
+  - **Take 4** added a comma, "…usahamu, untung berapa sebulan?". Both models heard "mitra" and "untung", but it ran
+    33.00 s spoken, with no margin.
+  - **Take 5** keeps the comma and drops "kamu" from the brand line ("biar bisa jawab pakai data"). It passes both checks.
+- **Length.** `VO_MP30.mp3` is 32.96 s. Speech runs 0.32 → 33.00 on the timeline (energy envelope), so it is **32.7 s
+  spoken** (≤ 33 s), 70 words.
 - **Audio.** `assets/audio/vo.wav` = `ffmpeg -i production/vo/VO_MP30.mp3 -af "adelay=300|300,aformat=sample_rates=48000:channel_layouts=mono"`.
   Film times below include the +0.30 s.
 
 | # | film time | tags the tool used | line |
 |---|---|---|---|
-| L1 | 0.32 – 3.66 | [playful] [excited] [curious] | Calon mitra nanya: usahamu untung berapa sebulan? |
-| L2 | 4.68 – 10.94 | [playful] [excited] [sighs] | Yang satu bingung, bongkar nota, chat, catatan kececer. Jawabnya: kira-kira. |
-| L3 | 11.18 – 16.64 | [playful] [excited] | Yang satu lagi tenang, buka laporan laba rugi: penjualan, biaya, labanya jelas. |
-| L4 | 16.80 – 20.96 | [playful] [excited] | Bedanya bukan gede kecilnya usaha, tapi ada datanya atau nggak. |
-| L5 | 20.95 – 27.91 | [playful] [excited] | MasterPajak AI bantu nyusun catatan jualan dan biayamu jadi laporan laba rugi, biar kamu bisa jawab pakai data. |
-| L6 | 27.85 – 30.86 | [playful] [excited] | Jualan jalan terus, pajaknya AI yang urus. |
-| L7 | 30.86 – 32.80 | [playful] [excited] [confident] | Coba kalkulator gratis. Link di bio. |
+| L1 | 0.32 – 4.30 | [playful] [excited] [curious] | Ada mitra bisnis nanya: usahamu, untung berapa sebulan? |
+| L2 | 5.06 – 11.58 | [playful] [excited] [sighs] | Yang satu bingung, bongkar nota, chat, catatan kececer. Jawabnya: kira-kira. |
+| L3 | 11.74 – 17.14 | [playful] [excited] | Yang satu lagi tenang, buka laporan laba rugi: penjualan, biaya, labanya jelas. |
+| L4 | 17.22 – 21.37 | [playful] [excited] | Bedanya bukan gede kecilnya usaha, tapi ada datanya atau nggak. |
+| L5 | 21.32 – 27.75 | [playful] [excited] | MasterPajak AI bantu nyusun catatan jualan dan biayamu jadi laporan laba rugi, biar bisa jawab pakai data. |
+| L6 | 27.74 – 30.94 | [playful] [excited] | Jualan jalan terus, pajaknya AI yang urus. |
+| L7 | 30.94 – 33.00 | [playful] [excited] [confident] | Coba kalkulator gratis. Link di bio. |
 
-- **The sigh.** The `[sighs]` tag on L2 produces an audible sigh at 3.86–4.5, before "Yang satu". The film uses it: Penjual A's
+- **The sigh.** The `[sighs]` tag on L2 produces an audible sigh at 4.40–5.0, before "Yang satu". The film uses it: Penjual A's
   shoulders drop as the split panels arrive.
-- **Listen check.** faster-whisper `small` (numpy input, `tools/fw_transcribe.py`, language id) heard every line. No tag was read
-  aloud:
-  > Calon Nitra nanya, usahamu untuk berapa sebulan? / Yang satu bingung, bongkarnota, chat, catatan kececer / Jawabnya kira-kira /
-  > Yang satu lagi tenang, buka laporan labarugi / Penjualan biaya labanya jelas / Bedanya bukan gede kecilnya usaha, tapi ada
-  > datanya atau nggak? / Master pajak AI bantu nyusun catatan jualan dan biayamu jadi laporan labarugi / biar kamu bisa jawab
-  > pakai data / Jualan jalan terus, pajaknya AI yang urus. / Coba kalkulator gratis, link di bio.
-- **Line 1 re-check with `medium`.** It gives "Calon Ngitra nanya, usahamu **untung** (p 0.73) berapa sebulan?", so "untung" is
-  spoken. The "N/Ngitra" is the n–m join in "calon mitra" (both models hear a nasal onset); the word is said.
+- **Line 1 check.** faster-whisper on the first 4.3 s (numpy input, `tools/fw_transcribe.py`, language id):
+  - `small`: "Ada mitra bisnis nanya, usahamu? Untung berapa sebulan?" — mitra p 0.62, Untung p 0.89.
+  - `medium`: "Ada mitra bisnis nanya, usahamu untung berapa sebulan?" — mitra p 0.78, untung p 0.83.
+
+  Both models hear "mitra" and "untung" correctly.
+- **Full listen check** (`small`). Every line is heard, and no tag is read aloud:
+  > Ada mitra bisnis nanya, usahamu? Untung berapa sebulan? / Yang satu bingung, bongkarnota, cat, catatan kececer. / Jawabnya
+  > kira-kira. / Yang satu lagi tenang, buka laporan labarugi. / Penjualan biaya labanya jelas. / Bedanya bukan gede kecilnya usaha,
+  > tapi ada datanya atau nggak. / Master Pajak AI bantu nyusun catatan jualan dan biayamu jadi laporan labarugi / biar bisa jawab
+  > pakai data. / Jualan jalan terus. Pajaknya AI yang urus. / Coba kalkulator gratis. Link di bio.
+
+  `small` writes "chat" as "cat". Re-checked with `medium` on L2: "Yang satu bingung, bongkar nota, **chat**, catatan
+  kececer." "labarugi" and "bongkarnota" are only whisper's spelling.
 
 ## TM (every key is a real word time: JSON character alignment + 0.30)
 The alignment puts the first word of each line 0.1–0.3 s **late**, because the tag characters compress it. Line-start keys
 (`hook`, `a`, `b`, `beda`, `sol`, `end`, `cta`) therefore use the audio onset of that word, measured from the 20 ms energy
-envelope of `vo.wav`. All other keys are alignment + 0.30.
+envelope of `vo.wav`; `sigh` is the onset of the breath. All other keys are alignment + 0.30.
 
 | key | t | word | key | t | word | key | t | word |
 |---|---|---|---|---|---|---|---|---|
-| hook | 0.32 | Calon | b | 11.18 | Yang (satu lagi) | sol | 20.95 | MasterPajak |
-| mitra | 0.74 | mitra | tenang | 11.98 | tenang | ai | 21.74 | AI |
-| nanya | 1.02 | nanya | buka | 12.70 | buka | nyusun | 22.46 | nyusun |
-| usaha | 1.90 | usahamu | lap | 13.02 | laporan | cat | 22.78 | catatan |
-| untung | 2.46 | untung | rugi | 13.58 | rugi | jual | 23.34 | jualan |
-| berapa | 2.82 | berapa | pj | 14.22 | penjualan | biaya | 23.82 | biayamu |
-| sebulan | 3.10 | sebulan | by | 15.02 | biaya | lr | 24.54 | laporan (laba rugi) |
-| sigh | 3.86 | (sigh, audio) | laba | 15.66 | labanya | biar | 25.85 | biar |
-| a | 4.68 | Yang (satu) | jelas | 16.06 | jelas | jwb | 26.74 | jawab |
-| bingung | 5.26 | bingung | beda | 16.80 | Bedanya | pakai | 27.02 | pakai |
-| bongkar | 6.14 | bongkar | bukan | 17.34 | bukan | dat | 27.54 | data |
-| nota | 6.74 | nota | gede | 17.58 | gede | end | 27.85 | Jualan |
-| chat | 7.26 | chat | usaha2 | 18.22 | usaha | urus | 29.18 | pajaknya |
-| catatan | 7.74 | catatan | tapi | 19.02 | tapi | cta | 30.86 | Coba |
-| kececer | 8.14 | kececer | ada | 19.34 | ada | bio | 32.22 | Link |
-| jawab | 9.26 | Jawabnya | data | 19.66 | datanya | total | 34.60 | last word end (33.10 alignment) + 1.5 |
-| kira | 10.14 | kira-kira | atau / nggak | 20.14 / 20.30 | atau / nggak | | | |
+| hook | 0.32 | Ada | b | 11.74 | Yang (satu lagi) | sol | 21.32 | MasterPajak |
+| mitra / bisnis | 0.66 / 0.86 | mitra bisnis | tenang | 12.46 | tenang | ai | 21.98 | AI |
+| nanya | 1.26 | nanya | buka | 13.18 | buka | nyusun | 22.74 | nyusun |
+| usaha | 2.14 | usahamu | lap | 13.50 | laporan | cat | 23.02 | catatan |
+| untung | 3.02 | untung | rugi | 14.06 | rugi | jual | 23.62 | jualan |
+| berapa | 3.46 | berapa | pj | 14.70 | penjualan | biaya | 24.14 | biayamu |
+| sebulan | 3.74 | sebulan | by | 15.50 | biaya | lr | 24.86 | laporan (laba rugi) |
+| sigh | 4.40 | (sigh, audio) | laba | 16.14 | labanya | biar | 26.06 | biar |
+| a | 5.06 | Yang (satu) | jelas | 16.54 | jelas | jwb | 26.54 | jawab |
+| bingung | 5.66 | bingung | beda | 17.22 | Bedanya | pakai | 26.94 | pakai |
+| bongkar | 6.54 | bongkar | bukan | 17.82 | bukan | dat | 27.10 | data |
+| nota | 7.14 | nota | gede | 18.06 | gede | end | 27.74 | Jualan |
+| chat | 7.66 | chat | usaha2 | 18.62 | usaha | urus | 29.26 | pajaknya |
+| catatan | 8.14 | catatan | tapi | 19.42 | tapi | cta | 30.94 | Coba |
+| kececer | 8.62 | kececer | ada | 19.74 | ada | bio | 32.49 | Link |
+| jawab | 9.82 | Jawabnya | data | 20.06 | datanya | total | 34.60 | last speech 33.00 + 1.6 |
+| kira | 10.70 | kira-kira | atau / nggak | 20.54 / 20.78 | atau / nggak | | | |
 
-Series gaps:
-- `end − sol` = 6.9 s. The brand chest hologram is on screen from 21.45 to 27.55 (6.1 s), with full alpha from 21.67 to
-  27.30 (5.6 s ≥ 4 s).
-- `total − end` = 6.75 s. The end-card hologram runs from 28.6 to the end.
+**Cuts derived from TM keys.** The cuts are now computed from TM keys (identical in `index.html`, `robot_perf.js` and
+`tools/sfx.py`), so a re-time moves them too:
+- split doors `tS = max(sebulan + 0.45, a − 0.98)` = 4.19;
+- divider → A at `a − 0.13`;
+- divider → B at `b − 0.2`;
+- divider → middle `tS4 = beda − 0.3` = 16.92.
+
+**Series gaps.**
+- `end − sol` = 6.42 s. The brand chest hologram is on screen from 21.82 to 27.44 (5.6 s), with full alpha from 22.04 to
+  27.19 (5.15 s ≥ 4 s).
+- `total − end` = 6.86 s. The end-card hologram runs from 28.5 to the end.
 
 ## Scenes (timeline seconds)
 | # | time | scene | what happens |
 |---|---|---|---|
-| S1 | 0 – 4.12 | Hook: meeting room | The camera pushes in over the two sellers' shoulders toward the calon mitra (name tent "CALON MITRA"). "Ilustrasi cerita" fades in at 0.6. The italic line "calon mitra nanya:" rises at 0.14. The speech bubble pops at 1.60: "Usahamu" 1.80, "untung" 2.36, "berapa" 2.72, "sebulan?" 3.00, with stabilo on untung (2.77) and berapa (3.15). The partner raises the pen to the chin on "nanya" (0.82), tilts the head on "berapa" and blinks. The robot rises between the sellers (0.15–0.85), looks up, lifts a hand and tilts its head ("hmm?"). |
-| T | 3.70 – 4.30 | Split doors | Panel A slides in from the left and panel B from the right (3.70–4.12), and the divider draws (4.0–4.3). The room is hidden at 4.2. The sigh (3.86) drops A's shoulders. |
-| S2 | 4.12 – 10.98 | Penjual A (focus) | The divider moves 540 → 760 (4.55–5.15) and B dims. Caption "yang satu" 4.58, "bingung." 5.14. On "bingung" A puts a hand on the head, three "?" pop (5.32–5.58), and a sweat drop runs (5.61). On "bongkar" (6.16) both arms go up and nine papers burst up from the pile. Heroes: the **nota** at 6.56 (left), the **chat** screenshot at 7.08 (right), the **catatan** page at 7.56 (centre). Caption "nota, chat," / "catatan kececer." word by word. On "kececer" (8.14) everything falls scattered onto the table, two papers fly out of frame, and stabilo lands at 8.49. "jawabnya:" at 9.21, the bubble at 9.61, "Kira-kira…" at 10.02, and the wobbling "Rp ???" pill at 10.44. A shrugs at 10.09 and sweats again. The robot squints, flinches, shakes its head and shrugs with A. |
-| T | 10.98 – 11.58 | Divider → B | 760 → 320. A's captions fade first; A dims. The robot walks with the divider. |
-| S3 | 11.58 – 16.50 | Penjual B (focus) | Caption "yang satu lagi" 11.13, "tenang." 11.88 (stabilo 12.28). B closes the eyes happily, with sparkles (11.98). "buka laporan laba rugi:" 12.65. The tablet lifts from the table into B's hands (12.58–13.08) and pushes toward us (12.97–13.57). Rows fill on their words: Penjualan 14.17, Modal barang 14.94, Biaya 15.14, Laba bersih 15.61 (pulse). The "✓ jelas" chip lands at 16.01. The robot points at the tablet, nods on each row and raises both arms on "jelas". |
-| T | 16.50 – 17.10 | Divider → middle | 320 → 540. A's panel undims, and the tablet steps back so both faces show. |
-| S4 | 16.5 – 20.95 | Both | Caption "bedanya bukan" 16.70 / "gede kecilnya usaha," 17.46, then "tapi" 18.97 / "ada datanya" 19.24 / "atau nggak." 20.02, with stabilo on "ada datanya" at 19.96. Badges: B "✓ Ada datanya" at 19.34, A "✕ Nggak ada data" at 20.25. "Ilustrasi cerita" shows at 16.8. The robot looks left and right on "gede kecilnya", points at B on "ada datanya", shakes its head at A on "nggak", then ducks out. |
-| T | 20.47 – 21.03 | Band sweep | Series bands with the MasterPajak AI marquee. |
-| S5 | 20.95 – 27.85 | Brand (navy) | The robot rises half-body bottom-left with the chest hologram (x 510–930, y ≈ 1450–1600). The MasterPajak AI tablet swings up (20.99–21.94) showing skeleton rows. Captions: "MasterPajak AI bantu nyusun" 21.05, "catatan jualan & biayamu" 22.66 (underline 24.17). Notes fly in: CATATAN JUALAN 22.53, a chat bubble 23.19, NOTA BIAYA 23.57 and a sticky "modal ± ?" 23.87. They dive into the tablet at 23.99–24.67. The report rows build at 24.59–24.98, the laba value pops and a chime plays. "biar kamu bisa jawab" 25.77, the question bubble "Untung berapa sebulan?" 25.80, the laba row glows on "jawab" (26.74), the "✓ jawab pakai data" chip lands at 26.97, and "pakai data." at 26.92 (underline 27.59). The far arm points at the notes, the report and the answer. |
-| T | 27.33 – 28.35 | Beam + iris | Series. |
-| S6 | 27.85 – 34.6 | End card | Series template: "Jualan jalan terus," 27.95, "pajaknya AI yang urus." 29.15, CTA "Coba kalkulator gratis" 30.76 (pulse 31.76), "Link di bio" 32.17. The robot waves, points at the CTA and waves again, with the logo hologram on the left (x 150–570). |
+| S1 | 0 – 4.61 | Hook: meeting room | The camera pushes in over the two sellers' shoulders toward the mitra bisnis (name tent "MITRA BISNIS"). "Ilustrasi cerita" fades in at 0.6. The italic line "ada mitra bisnis nanya:" rises at 0.14. The speech bubble pops at 1.84: "Usahamu" 2.04, "untung" 2.92, "berapa" 3.36, "sebulan?" 3.64, with stabilo on untung (3.41) and berapa (3.79). The partner raises the pen to the chin on "nanya" (1.06), tilts the head on "berapa" and blinks. The robot rises between the sellers (0.15–0.85), looks up, lifts a hand and tilts its head ("hmm?"). |
+| T | 4.19 – 4.79 | Split doors | Panel A slides in from the left and panel B from the right (4.19–4.61), and the divider draws (4.49–4.79). The room is hidden at 4.69. The sigh (4.40) drops A's shoulders. |
+| S2 | 4.61 – 11.54 | Penjual A (focus) | The divider moves 540 → 760 (4.93–5.53) and B dims. Caption "yang satu" 4.96, "bingung." 5.54. On "bingung" A puts a hand on the head, three "?" pop (5.72–5.98), and a sweat drop runs (6.01). On "bongkar" (6.56) both arms go up and nine papers burst up from the pile. Heroes: the **nota** at 6.96 (left), the **chat** screenshot at 7.48 (right), the **catatan** page at 7.96 (centre). Caption "nota, chat," / "catatan kececer." word by word. On "kececer" (8.62) everything falls scattered onto the table, two papers fly out of frame, and stabilo lands at 8.97. "jawabnya:" at 9.77, the bubble at 10.17, "Kira-kira…" at 10.58, and the wobbling "Rp ???" pill at 11.0. A shrugs at 10.65 and sweats again. The robot squints, flinches, shakes its head and shrugs with A. |
+| T | 11.54 – 12.14 | Divider → B | 760 → 320. A's captions fade first; A dims. The robot walks with the divider. |
+| S3 | 12.14 – 16.92 | Penjual B (focus) | Caption "yang satu lagi" 11.69, "tenang." 12.36 (stabilo 12.76). B closes the eyes happily, with sparkles (12.46). "buka laporan laba rugi:" 13.13. The tablet lifts from the table into B's hands (13.06–13.56) and pushes toward us (13.45–14.05). Rows fill on their words: Penjualan 14.65, Modal barang 15.42, Biaya 15.62, Laba bersih 16.09 (pulse). The "✓ jelas" chip lands at 16.49. The robot points at the tablet, nods on each row and raises both arms on "jelas". |
+| T | 16.92 – 17.52 | Divider → middle | 320 → 540. A's panel undims, and the tablet steps back so both faces show. |
+| S4 | 16.92 – 21.32 | Both | Caption "bedanya bukan" 17.12 / "gede kecilnya usaha," 17.94, then "tapi" 19.37 / "ada datanya" 19.64 / "atau nggak." 20.42, with stabilo on "ada datanya" at 20.36. Badges: B "✓ Ada datanya" at 19.74, A "✕ Nggak ada data" at 20.73. "Ilustrasi cerita" shows at 17.22. The robot looks left and right on "gede kecilnya", points at B on "ada datanya", shakes its head at A on "nggak", then ducks out. |
+| T | 20.84 – 21.40 | Band sweep | Series bands with the MasterPajak AI marquee. |
+| S5 | 21.32 – 27.74 | Brand (navy) | The robot rises half-body bottom-left with the chest hologram (x 510–930, y ≈ 1450–1600). The MasterPajak AI tablet swings up (21.36–22.31) showing skeleton rows. Captions: "MasterPajak AI bantu nyusun" 21.42, "catatan jualan & biayamu" 22.90 (underline 24.49). Notes fly in: CATATAN JUALAN 22.77, a chat bubble 23.47, NOTA BIAYA 23.89 and a sticky "modal ± ?" 24.19. They dive into the tablet at 24.31–24.99. The report rows build at 24.91–25.30, the laba value pops and a chime plays. "biar bisa jawab" 25.98, the question bubble "Untung berapa sebulan?" 26.01, the laba row pulses on "jawab" (26.54), the "✓ jawab pakai data" chip lands at 26.89, and "pakai data." at 26.84 (underline 27.15). The far arm points at the notes, the report and the answer. |
+| T | 27.22 – 28.24 | Beam + iris | Series. |
+| S6 | 27.74 – 34.6 | End card | Series template: "Jualan jalan terus," 27.84, "pajaknya AI yang urus." 29.04, CTA "Coba kalkulator gratis" 30.84 (pulse 31.84), "Link di bio" 32.44. The robot waves, points at the CTA and waves again, with the logo hologram on the left (x 150–570). |
 
 ## Numbers (all "Ilustrasi data"; arithmetic exact)
 **Laporan laba rugi** (Penjual B's tablet and the MasterPajak AI brand tablet show the same rows):
@@ -137,7 +156,7 @@ Series gaps:
 - **Labels.**
   - **"Ilustrasi data"**: on the nota, the chat screenshot, the catatan page, Penjual B's tablet and the MasterPajak AI tablet.
   - **"Simulasi alur"**: on both tablets (the only app-like UI).
-  - **"Ilustrasi cerita"**: in the hook (0.6–4.2) and the comparison (16.8–20.95), because the people and the story are
+  - **"Ilustrasi cerita"**: in the hook (0.6–4.7) and the comparison (17.2–21.3), because the people and the story are
     fictional.
 - **No forbidden content.**
   - No tax rate, deadline, penalty, guarantee or invented statistic.
@@ -164,7 +183,7 @@ Series gaps:
   - `mp30/rtA1.jpg`: kira-kira → B → comparison
   - `mp30/rtA2.jpg`: bands → brand → end card
 
-  Two targeted passes followed the last edits: `mp30/rtB0.jpg` (13 frames) and `mp30/rtC0.jpg` (5 frames). The real runtime
+  Two targeted passes followed the polish edits: `mp30/rtB0.jpg` (13 frames) and `mp30/rtC0.jpg` (5 frames). The real runtime
   matched the playwright preview in every frame; no renderer-only bugs were found. Fixes made from these passes:
   - the yellow flash over the navy laba rows (it read olive) became a pulse;
   - the wall clock behind A's caption was removed;
@@ -174,7 +193,9 @@ Series gaps:
   - The 4 warnings are GL "GPU stall due to ReadPixels" driver messages.
   - There are 8 contrast notes, all on hidden or edge-on elements: the band marquee, the tent behind the tablet, and the chat
     header of a paper lying flat. The tiny tablet chips were darkened afterwards.
-- **Lip-sync**: `tools/lipsync.py` writes `lipsync.js` (1982 frames at 60 fps, talking fraction 0.83).
+- **After the VO change** (take 5, new TM): one targeted real-runtime pass of 22 frames covered the hook, every moved cut
+  (doors, all three divider slides, bands, iris) and the first and last frames: `mp30/rtD0.jpg` and `mp30/rtD1.jpg`.
+- **Lip-sync**: `tools/lipsync.py` writes `lipsync.js` (1991 frames at 60 fps, talking fraction 0.82).
 - **SFX**: `tools/sfx.py` writes `assets/audio/sfx.wav`, 34.6 s, fully synthesised, −27.1 dB RMS (Video 24 is −25.7). It
   contains:
   - room air, caption pops, the bubble, stabilo strokes
@@ -202,7 +223,7 @@ Series gaps:
 - **Paper chaos.** During the burst (6.2–6.6) and the fall (8.1–8.9), papers spin edge-on across A's face for a few frames.
   This is intentional chaos.
 - **Divider robot.** The robot follows the divider with its spring filter, so it lands about 0.1 s after the divider stops.
-- **Spoken length.** 32.5 s spoken, just under the 33 s limit. The film is 34.6 s with the end-card hold.
+- **Spoken length.** 32.7 s spoken, just under the 33 s limit. The film is 34.6 s with the end-card hold.
 
 ## Files
 - `index.html`: the composition, with `TM` at the top.
@@ -212,7 +233,7 @@ Series gaps:
 - `production/vo/`: `lines.txt`, `VO_MP30.mp3`, `VO_MP30.json`.
 - `tools/sfx.py`, `tools/lipsync.py`, `tools/fw_transcribe.py`.
 - `thumbnail/cover.html` renders to `thumbnail/COVER_MP30_UNTUNG_BERAPA.png`:
-  - The headline reads "USAHAMU / UNTUNG BERAPA?" (stabilo) with "kalau ditanya calon mitra…".
+  - The headline reads "USAHAMU / UNTUNG BERAPA?" (stabilo) with "kalau ditanya mitra bisnis…", renamed with the film.
   - Two tilted split panels show Penjual A (papers, "?", "✕ Kira-kira…") and Penjual B (tablet with the laporan laba rugi row
     names ✓, "✓ Pakai data"). They use the same SVG people as the film.
   - The live robot points at B.

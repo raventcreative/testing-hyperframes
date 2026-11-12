@@ -158,3 +158,7 @@ Gaps that hold:
 - **Token text size.** The token texts are small on the map (about 15–20 px on screen at the mid-river camera). They read as
   "different formats" texture. The chips at the top carry the spoken words.
 - **Pointing gesture.** As in Videos 1, 5 and 14, the navy pointing uses the far arm, so the gesture is subtle.
+- **Antenna.** In S6 the robot's antenna tip reaches the rekonsiliasi card's empty bottom-left corner, which has no text. The card
+  was raised 34 px to keep it clear of the rows.
+- **Lead's ElevenLabs notice.** The key outage did not affect this video. The single `el_tts_ts.py` call succeeded, and the take
+  was Whisper-checked.

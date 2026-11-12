@@ -64,11 +64,11 @@
 
       /* conveyor belt */
       .beltTop { overflow: hidden; background: #232c5f; box-shadow: inset 0 14px 0 #33468f, inset 0 -14px 0 #FED111; }
-      .ribs { position: absolute; left: 0; top: 14px; bottom: 14px; width: 6000px;
+      .ribs { position: absolute; left: 0; top: 14px; bottom: 14px; width: 1500px;
               background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.10) 0 7px, rgba(255,255,255,0) 7px 60px), linear-gradient(180deg, rgba(0,0,0,.28), rgba(255,255,255,.05) 50%, rgba(0,0,0,.22)); }
       .beltFr { background-image: radial-gradient(circle at 50% 54%, #c9cfe0 0 9px, #8E99C2 10px 14px, #2b3c86 15px 19px, rgba(0,0,0,0) 20px), linear-gradient(180deg, #3a4fab 0 9px, #2e418f 9px, #1f2d6a 100%);
                 background-size: 96px 100%, 100% 100%; background-repeat: repeat-x, no-repeat; background-position: 20px 0, 0 0; box-shadow: inset 0 6px 0 #FED111; }
-      .beltFr span { position: absolute; top: 34px; padding: 6px 16px; border-radius: 10px; background: #1a2558; font: 700 22px/1 PS; letter-spacing: .14em; color: #DDE1EE; white-space: nowrap; }
+      .beltFr span { position: absolute; top: 34px; padding: 6px 16px; border-radius: 10px; background: #1a2558; font: 700 19px/1 PS; letter-spacing: .1em; color: #DDE1EE; white-space: nowrap; }
       .beltEnd { background: linear-gradient(180deg, #2b3c86, #1a2558); box-shadow: inset 0 6px 0 #FED111; }
       .jmark { border-radius: 14px; background: rgba(254,209,17,.0); border: 4px solid rgba(254,209,17,.9); box-shadow: 0 0 22px rgba(254,209,17,.5); }
       /* scan gate */
@@ -209,6 +209,9 @@
         <div class="stage" id="w1"><div class="cam" id="cam1"><div class="yaw" id="yaw1"><div class="pan" id="pan1">
           <div class="floor"></div>
         </div></div></div></div>
+        <!-- belt rig: a camera twin holding the conveyor + scan gate. The belt is always nearer the camera than the lanes, boards and floor, so
+             drawing it after them is correct; it also keeps HyperFrames' software compositor from sorting belt planes behind the floor -->
+        <div class="stage" id="w1c"><div class="cam" id="cam1c"><div class="yaw" id="yaw1c"><div class="pan" id="pan1c"></div></div></div></div>
         <!-- overlay rig: an exact twin of the studio camera; the tokens live here so they are never depth-sorted against the world planes -->
         <div class="stage" id="w1b"><div class="cam" id="cam1b"><div class="yaw" id="yaw1b"><div class="pan" id="pan1b"></div></div></div></div>
         <div class="vig"></div>
@@ -289,7 +292,7 @@
         $$("[data-ico]").forEach((e) => { const s = e.closest(".mini.n") ? "#212C5F" : e.closest(".mini.s") ? "#FED111" : "#212C5F"; e.innerHTML = svg(e.dataset.ico, s); });
 
         // ================= S1-S5 WORLD (units = px; floor y = 0, y up is negative, +z toward the camera) =================
-        const P1 = $("#pan1"), P1b = $("#pan1b");
+        const P1 = $("#pan1"), P1b = $("#pan1b"), P1c = $("#pan1c");
         const PL = (par, cls, w, h, tr, css) => mk("div", "pl " + cls, par, `left:${-w / 2}px; top:${-h / 2}px; width:${w}px; height:${h}px; transform:${tr};` + (css || ""));
         [[-1300, -900, -2300, 300, "rgba(38,54,122,.14)"], [1250, -1300, -2500, 380, "rgba(254,209,17,.30)"], [-800, -1600, -2900, 460, "rgba(38,54,122,.11)"],
          [1500, -500, -1700, 240, "rgba(38,54,122,.13)"], [-1500, -300, -1300, 220, "rgba(254,209,17,.24)"], [500, -2000, -3200, 520, "rgba(38,54,122,.09)"]].forEach(([x, y, z, r, c]) => {
@@ -340,16 +343,20 @@
         });
 
         // conveyor belt: runs along x in front of the lanes; tokens ride right -> left
-        const XL = -860, XR = 1700, BZ = 300, BD = 240, BH = 100, BL = XR - XL, BXC = (XL + XR) / 2;
-        const belt = mk("div", "g3", P1); belt.id = "belt"; gsap.set(belt, { x: BXC, y: 0, z: BZ });
-        PL(belt, "fshadow", BL + 260, BD + 260, `translate3d(30px, -1px, 30px) rotateX(90deg)`);
-        const btop = PL(belt, "beltTop", BL, BD, `translate3d(0px, ${-BH}px, 0px) rotateX(90deg)`); mk("div", "ribs", btop).id = "ribs";
+        // built from 480 px segments (one 2,880 px plane gets clipped by Chrome's compositor in close shots); 480 = 8 ribs x 60 = 5 rollers x 96
+        const SEG = 480, NSEG = 6, XL = -860, XR = XL + SEG * NSEG, BZ = 300, BD = 240, BH = 100, BL = XR - XL, BXC = (XL + XR) / 2;
+        const belt = mk("div", "g3", P1c); belt.id = "belt"; gsap.set(belt, { x: BXC, y: 0, z: BZ });
+        PL(P1, "fshadow", BL + 260, BD + 260, `translate3d(${BXC + 30}px, -1px, ${BZ + 30}px) rotateX(90deg)`);   // the belt shadow stays on the floor (world rig)
+        for (let s = 0; s < NSEG; s++) {
+          const cx = -BL / 2 + SEG * (s + 0.5);
+          const top = PL(belt, "beltTop", SEG + 1, BD, `translate3d(${cx}px, ${-BH}px, 0px) rotateX(90deg)`); mk("div", "ribs", top);
+          const fr = PL(belt, "beltFr", SEG + 1, BH, `translate3d(${cx}px, ${-BH / 2}px, ${BD / 2}px)`);
+          if (s === 1) { const sp = mk("span", "", fr, "left:4px"); sp.textContent = "UANG MASUK · REKENING USAHA"; }   // one label, centred near world x -150
+        }
         LX.forEach((x, k) => { const j = PL(belt, "jmark", 190, BD - 60, `translate3d(${x - BXC}px, ${-BH - 1}px, 0px) rotateX(90deg)`); j.id = "jm" + k; });
-        const bfr = PL(belt, "beltFr", BL, BH, `translate3d(0px, ${-BH / 2}px, ${BD / 2}px)`);
-        [500].forEach((x) => { const s = mk("span", "", bfr, `left:${x}px`); s.textContent = "UANG MASUK · REKENING USAHA"; });
         PL(belt, "beltEnd", BD, BH, `translate3d(${-BL / 2}px, ${-BH / 2}px, 0px) rotateY(-90deg)`);
         // scan gate (slides along the belt in S3): two yellow front posts, two back posts, a roof and a "SCAN" bar, a glow on the belt
-        const gate = mk("div", "g3", P1); gate.id = "gate"; gsap.set(gate, { x: -760, y: 0, z: BZ });
+        const gate = mk("div", "g3", P1c); gate.id = "gate"; gsap.set(gate, { x: -760, y: 0, z: BZ });
         const GW = 360, GH = 300;
         PL(gate, "gglow", 300, BD + 40, `translate3d(0px, ${-BH - 2}px, 0px) rotateX(90deg)`).id = "gglow";
         [-1, 1].forEach((s) => { PL(gate, "gpost", 22, GH - BH, `translate3d(${s * GW / 2}px, ${-(GH + BH) / 2}px, ${-BD / 2 - 12}px)`); });
@@ -407,14 +414,14 @@
         tl.set("#st1, #st2, #st3, #naik, #tetap", { autoAlpha: 0, scaleX: 1, scaleY: 1 }, 0); tl.set("#gfl, #c5arr", { opacity: 0 }, 0);
         tl.set("#bv1, #bv2, #bv3", { autoAlpha: 0 }, 0); tl.set("#bz1, #bz2, #bz3", { autoAlpha: 1 }, 0);
         SWAP(GV, 0, 0); SWAP(PC, 0, 0);
-        tl.set("#gNd", { rotation: -90 }, 0); tl.set("#gArc", { strokeDashoffset: 502.65 }, 0); tl.set("#ribs", { x: 0 }, 0);
+        tl.set("#gNd", { rotation: -90 }, 0); tl.set("#gArc", { strokeDashoffset: 502.65 }, 0); tl.set(".ribs", { x: 0 }, 0);
         tl.set("#led, .mini", { autoAlpha: 0 }, 0); tl.set(".lrow .lin", { opacity: 0, x: -30 }, 0); tl.set(".lrow .kd", { opacity: 0, scaleX: 0.6, scaleY: 0.6, transformOrigin: "0% 50%" }, 0);
         tl.set("#lfoot", { opacity: 0, y: 30 }, 0); tl.set("#ls27", { opacity: 0 }, 0);
         $$("#pan1b .tf, #pan1b .tb").forEach((e) => tl.set(e, { opacity: 1 }, 0));
 
         // ---- camera rig: key = anchor on screen (ax, ay), focus point (fx, fy, fz), tilt rx, orbit ry, dolly z ----
         const K = (ax, ay, fx, fy, fz, rx, ry, z) => ({ ax, ay, fx, fy, fz, rx, ry, z });
-        const C1 = { cam: "#cam1, #cam1b", yaw: "#yaw1, #yaw1b", pan: "#pan1, #pan1b" };
+        const C1 = { cam: "#cam1, #cam1b, #cam1c", yaw: "#yaw1, #yaw1b, #yaw1c", pan: "#pan1, #pan1b, #pan1c" };
         const camSet = (c, k) => { gsap.set(c.cam, { x: k.ax, y: k.ay, z: k.z, rotationX: k.rx }); gsap.set(c.yaw, { rotationY: k.ry }); gsap.set(c.pan, { x: -k.fx, y: -k.fy, z: -k.fz }); };
         const cam = (c, a, b, t0, d, ease) => {
           F(c.cam, { x: a.ax, y: a.ay, z: a.z, rotationX: a.rx }, { x: b.ax, y: b.ay, z: b.z, rotationX: b.rx, duration: d, ease: ease || "sine.inOut" }, t0);
@@ -451,8 +458,8 @@
 
         // ---- belt drive (hook): tokens ride in from the right and stop exactly at their own lane junctions on "Eh, tunggu" ----
         const DH = 900;
-        F("#ribs", { x: 0 }, { x: -(DH - 70), duration: TM.eh + 0.02, ease: "none" }, 0);
-        F("#ribs", { x: -(DH - 70) }, { x: -DH, duration: 0.3, ease: "power2.out" }, TM.eh + 0.02);
+        F(".ribs", { x: 0 }, { x: -(DH - 70), duration: TM.eh + 0.02, ease: "none" }, 0);
+        F(".ribs", { x: -(DH - 70) }, { x: -DH, duration: 0.3, ease: "power2.out" }, TM.eh + 0.02);
         // tokens: hook ride + stop jolt
         const TY = -BH;
         TOK.forEach((t, i) => {
@@ -632,6 +639,8 @@
         });
         tl.eventCallback("onUpdate", () => { if (window.ROBOT_APPLY) window.ROBOT_APPLY(tl.time()); });
         (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+        // apply the timeline's own t = 0 state now: a fresh paused timeline seeked to 0 would otherwise skip the time-0 pins (tokens at the origin)
+        tl.render(0.001, true); tl.render(0, true, true);
         window.__timelines = window.__timelines || {}; window.__timelines["main"] = tl;
       })();
     </script>

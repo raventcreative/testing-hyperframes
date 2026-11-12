@@ -1,0 +1,99 @@
+<template>
+  <style>
+    /* s01 HOOK (0.00–4.83) "Tahan tiga tombol, ngomong, lepas. Mac kamu yang beresin sisanya."
+       Frame 0: headline "3 tombol, 1 kalimat." + three big white keycaps (control · option · space = Atticus's real default shortcut).
+       "Tahan": the keys press down one after another and glow. "ngomong": a voice pill rises under them, bars dance, the command
+       types (“rapikan jendelaku, dong”, contoh). "lepas": the keys spring back, the pill flies off. "Mac kamu": keys + headline
+       lift away, a desktop panel with four messy, tilted windows appears. "beresin": the windows snap into a tidy 2x2 grid;
+       "sisanya": a green "beres" badge. Last 0.28 s: the panel drops out (s02 starts from the header alone). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s01-h { position: absolute; left: 90px; top: 316px; font: 700 70px/86px Poppins; color: #fff; white-space: nowrap; letter-spacing: -1px; }
+    #s01-h em { font-style: normal; color: #01ccf7; }
+    .s01-key { position: absolute; top: 500px; height: 162px; }
+    .s01-key .bs { position: absolute; left: 0; top: 14px; width: 100%; height: 148px; border-radius: 26px; background: #7f93b6; box-shadow: 0 22px 40px rgba(2,6,26,.55); }
+    .s01-key .tp { position: absolute; left: 0; top: 0; width: 100%; height: 148px; border-radius: 26px; background: linear-gradient(180deg, #ffffff, #e6edf8);
+      box-shadow: inset 0 -3px 0 rgba(41,75,119,.12); }
+    .s01-key .tp svg { position: absolute; left: 26px; top: 22px; width: 46px; height: 46px; color: #294b77; }
+    .s01-key .tp b { position: absolute; left: 28px; top: 84px; font: 700 34px/44px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s01-key .gl { position: absolute; left: -6px; top: -6px; right: -6px; height: 160px; border-radius: 30px; box-shadow: 0 0 0 4px rgba(106,223,255,.95), 0 0 34px rgba(1,204,247,.7); }
+    #s01-plus1, #s01-plus2 { position: absolute; top: 558px; font: 700 40px/40px Poppins; color: #6adfff; }
+    #s01-desk { position: absolute; left: 110px; top: 452px; width: 860px; height: 458px; border-radius: 30px; background: linear-gradient(180deg, #13245e, #0a1440);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14), 0 28px 60px rgba(2,6,26,.6); overflow: hidden; }
+    #s01-desk .bar { position: absolute; left: 0; top: 0; width: 860px; height: 40px; background: rgba(255,255,255,.06); border-bottom: 1.5px solid rgba(255,255,255,.08); }
+    #s01-desk .bar b { position: absolute; left: 22px; top: 0; font: 700 17px/40px Poppins; letter-spacing: 2.5px; color: #6adfff; white-space: nowrap; }
+    #s01-desk .bar i { position: absolute; top: 15px; width: 10px; height: 10px; border-radius: 5px; background: rgba(255,255,255,.28); }
+    #s01-ok { position: absolute; left: 0; top: 0; height: 52px; padding: 0 22px 0 14px; border-radius: 26px; display: flex; align-items: center; gap: 10px;
+      font: 700 24px/1 Poppins; color: #fff; background: #238a40; box-shadow: 0 0 0 5px rgba(45,164,78,.25), 0 10px 22px rgba(2,6,26,.45); white-space: nowrap; }
+    #s01-ok svg { width: 28px; height: 28px; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R19K, P = "s01", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s01-zone");
+      const KEYS = [{ x: 80, w: 228, ic: "chevron-up", t: "control" }, { x: 370, w: 228, ic: "option", t: "option" }, { x: 660, w: 340, ic: "space", t: "space" }];
+      // desktop windows: messy (x, y, rotation) -> tidy 2x2 grid cells (global px; every window is 400 x 184)
+      const WIN = [
+        { t: "Chat", m: [168, 536, -8], g: [130, 502], ln: [[0.7, 0], [0.5, 1], [0.62, 0]] },
+        { t: "Browser", m: [452, 508, 6], g: [550, 502], ln: [[0.8, 0], [0.55, 0], [0.4, 1]] },
+        { t: "Catatan", m: [236, 668, 5], g: [130, 702], ln: [[0.66, 0], [0.74, 0], [0.48, 0]] },
+        { t: "Laporan", m: [520, 650, -6], g: [550, 702], ln: [[0.5, 1], [0.78, 0], [0.6, 0]] },
+      ];
+      z.innerHTML =
+        `<div id="s01-h">3 tombol, <em>1 kalimat.</em></div>` +
+        KEYS.map((k, i) => `<div class="s01-key" id="s01-k${i}" style="left:${k.x}px;width:${k.w}px"><div class="bs"></div>` +
+          `<div class="tp" id="s01-kt${i}">${K.svg(k.ic)}<b>${k.t}</b></div><div class="gl" id="s01-kg${i}"></div></div>`).join("") +
+        `<div id="s01-plus1" style="left:327px">+</div><div id="s01-plus2" style="left:617px">+</div>` +
+        K.voiceHTML("s01-v", 800) +
+        `<div id="s01-desk"><div class="bar"><b>MAC KAMU</b><i style="left:790px"></i><i style="left:810px"></i><i style="left:830px"></i></div></div>` +
+        WIN.map((w, i) => `<div class="k-win" id="s01-w${i}" style="width:400px;height:184px"><div class="tb"><b>${w.t}</b><i></i></div>` +
+          w.ln.map((l, j) => `<div class="ln${l[1] ? " c" : ""}" style="top:${62 + j * 34}px;width:${Math.round(368 * l[0])}px"></div>`).join("") + `</div>`).join("") +
+        `<div id="s01-ok">${K.svg("check")}beres, tanpa klik</div>`;
+      const tTa = wt("Tahan"), tNg = wt("ngomong,"), tLe = wt("lepas."), tMac = wt("Mac"), tBe = wt("beresin"), tSi = wt("sisanya.");
+      // ---------------------------------------------------------------- frame 0: headline + keys up
+      const h = $("s01-h"); I(h, { y: 0, opacity: 1 });
+      const pl1 = $("s01-plus1"), pl2 = $("s01-plus2"); I(pl1, { opacity: 1, y: 0 }); I(pl2, { opacity: 1, y: 0 });
+      KEYS.forEach((k, i) => {
+        const key = $("s01-k" + i), tp = $("s01-kt" + i), gl = $("s01-kg" + i);
+        I(key, { y: 0, opacity: 1 }); I(tp, { y: 0 }); I(gl, { opacity: 0, y: 0 });
+        // "Tahan": press (stagger) and glow; held until "lepas"
+        const tp0 = Math.max(0.06, tTa - 0.1) + i * 0.09;
+        ft(tp, { y: 0 }, { y: 12, duration: 0.12, ease: "power2.in" }, tp0);
+        ft(gl, { opacity: 0, y: 0 }, { opacity: 1, y: 12, duration: 0.16, ease: "power2.out" }, tp0 + 0.04);
+        ft(tp, { y: 12 }, { y: 0, duration: 0.34, ease: "back.out(3)" }, tLe - 0.06 + i * 0.04);
+        ft(gl, { opacity: 1, y: 12 }, { opacity: 0, y: 0, duration: 0.24, ease: "power2.out" }, tLe - 0.04 + i * 0.04);
+      });
+      // ---------------------------------------------------------------- "ngomong": voice pill + typed command
+      const v = $("s01-v"); I(v, { x: 140, y: 724, scale: 0.6, opacity: 0, transformOrigin: "50% 50%" });
+      ft(v, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.2)" }, tNg - 0.16);
+      K.voiceBars(S, "s01-v", tNg - 0.1, tLe + 0.1);
+      S.typeIn($("s01-v-tx"), "“rapikan jendelaku, dong”", tNg - 0.02, tLe - 0.08);
+      // "lepas": the command is sent (the pill shrinks off toward the screen)
+      ft(v, { y: 724, scale: 1, opacity: 1 }, { y: 640, scale: 0.7, opacity: 0, duration: 0.34, ease: "power2.in" }, tLe + 0.26);
+      // ---------------------------------------------------------------- "Mac kamu": keys + headline lift away, the messy desktop appears
+      const tOut = tMac - 0.42;
+      [h, pl1, pl2, $("s01-k0"), $("s01-k1"), $("s01-k2")].forEach((e, i) => ft(e, { y: 0, opacity: 1 }, { y: -50, opacity: 0, duration: 0.3, ease: "power2.in" }, tOut + (i % 3) * 0.04));
+      const desk = $("s01-desk"); I(desk, { opacity: 0, scale: 0.96, transformOrigin: "50% 50%" });
+      ft(desk, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.36, ease: "power3.out" }, tOut + 0.16);
+      WIN.forEach((w, i) => {
+        const e = $("s01-w" + i);
+        I(e, { x: w.m[0], y: w.m[1], rotation: w.m[2], scale: 0.7, opacity: 0, transformOrigin: "50% 50%" });
+        ft(e, { scale: 0.7, opacity: 0 }, { scale: 0.94, opacity: 1, duration: 0.3, ease: "back.out(1.8)" }, tOut + 0.24 + i * 0.06);
+        // a small "mess" wobble on "Mac kamu"
+        ft(e, { rotation: w.m[2] }, { rotation: w.m[2] * 1.5, duration: 0.14, yoyo: true, repeat: 1, ease: "sine.inOut" }, tMac + 0.1 + i * 0.05);
+        // "beresin": snap into the grid
+        ft(e, { x: w.m[0], y: w.m[1], rotation: w.m[2], scale: 0.94 }, { x: w.g[0], y: w.g[1], rotation: 0, scale: 1, duration: 0.46, ease: "power3.inOut" }, tBe - 0.12 + i * 0.06);
+      });
+      const ok = $("s01-ok"); I(ok, { x: 540, xPercent: -50, y: 862, scale: 0.4, opacity: 0, transformOrigin: "50% 50%" });
+      ft(ok, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tSi + 0.02);
+      // ---------------------------------------------------------------- exit
+      const tX = D - 0.28;
+      [desk, ok, $("s01-w0"), $("s01-w1"), $("s01-w2"), $("s01-w3")].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, tX + (i % 3) * 0.02));
+      S.finish();
+    })();
+  </script>
+</template>

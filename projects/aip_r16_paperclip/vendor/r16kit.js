@@ -42,26 +42,30 @@
     TASK: { web: "Bikin toko online", konten: "Caption 7 hari", riset: "Cek harga pesaing" },
   };
   // o.layout: 3 | 4 (team x positions); o.desain: include the 4th node; everything visible (scenes pin what they hide)
+  const GOALTXT = "Tembus 100 pesanan online / minggu";
+  const goalIn = (p, txt) => `<div class="gi">${svg("target", 2.2)}</div><span class="gl">TUJUAN · Keripik Renyah<i class="r16-tag">CONTOH</i></span>` +
+    `<b class="gt r16-grad" id="${p}-gt">${txt === undefined ? GOALTXT : txt}</b>`;
   const org = (p, o) => {
     o = o || {}; const X = o.layout === 4 ? ORG.x4 : ORG.x3, G = ORG.goal, C = ORG.ceo, K = ORG.kamu;
     const keys = ["web", "konten", "riset"].concat(o.desain ? ["desain"] : []);
     let h = `<div class="r16-goal r16-card2" id="${p}-goal" style="left:${G.x}px;top:${G.y}px;width:${G.w}px;height:${G.h}px">` +
-      `<div class="gi">${svg("target", 2.2)}</div><span class="gl">TUJUAN · Keripik Renyah</span><b class="gt r16-grad">Tembus 100 pesanan online / minggu</b><i class="r16-tag">CONTOH</i></div>`;
+      `${goalIn(p)}</div>`;
     // connectors (flat bars; scenes scale them in)
     h += `<div class="r16-ln" id="${p}-lg" style="left:${C.x - 1.5}px;top:${G.y + G.h}px;width:3px;height:${C.y - C.s / 2 - G.y - G.h}px"></div>`;
-    const xs = keys.map((k) => X[k]), xl = Math.min(...xs), xr = Math.max(...xs);
+    const XX = (k) => (k === "desain" ? ORG.x4.desain : X[k]);
+    const xs = keys.filter((k) => o.layout === 4 || k !== "desain").map(XX), xl = Math.min(...xs), xr = Math.max(...xs);
     h += `<div class="r16-ln" id="${p}-lc" style="left:${C.x - 1.5}px;top:${C.y + 118}px;width:3px;height:${ORG.bus - C.y - 118}px"></div>`;
-    h += `<div class="r16-ln" id="${p}-lb" style="left:${xl}px;top:${ORG.bus - 1.5}px;width:${xr - xl}px;height:3px"></div>`;
-    keys.forEach((k) => { h += `<div class="r16-ln" id="${p}-ls-${k}" style="left:${X[k] - 1.5}px;top:${ORG.bus}px;width:3px;height:${ORG.ty - ORG.ts / 2 - ORG.bus}px"></div>`; });
+    h += `<div class="r16-ln" id="${p}-lb" style="left:${xl}px;top:${ORG.bus - 1.5}px;width:${xr - xl}px;height:3px;transform-origin:50% 50%"></div>`;
+    keys.forEach((k) => { h += `<div class="r16-ln" id="${p}-ls-${k}" style="left:${XX(k) - 1.5}px;top:${ORG.bus}px;width:3px;height:${ORG.ty - ORG.ts / 2 - ORG.bus}px"></div>`; });
     // you (the board)
     h += `<div class="r16-kamu r16-card2" id="${p}-kamu" style="left:${K.x}px;top:${K.y}px;width:${K.w}px;height:${K.h}px"><div class="ka">${svg("user", 2.2)}</div><b>Kamu</b><span>pemilik · pengawas</span></div>`;
     // nodes
     const node = (k, x, y, s, nid) => `<div class="r16-node" id="${nid}" style="left:${x}px;top:${y}px">${av(nid + "-av", k, s)}` +
       `<div class="nl" style="top:${s / 2 + 8}px"><b>${ROLE[k].n}</b><span>${ROLE[k].s}</span></div></div>`;
     h += node("ceo", C.x, C.y, C.s, `${p}-ceo`);
-    keys.forEach((k) => { h += node(k, X[k], ORG.ty, ORG.ts, `${p}-n-${k}`); });
+    keys.forEach((k) => { h += node(k, XX(k), ORG.ty, ORG.ts, `${p}-n-${k}`); });
     if (o.tickets) ["web", "konten", "riset"].forEach((k) => {
-      h += `<div class="r16-tk" id="${p}-tk-${k}" style="left:${X[k]}px;top:${ORG.ty + 128}px"><i>${svg("clipboard-list", 2.2)}</i>${ORG.TASK[k]}</div>`;
+      h += `<div class="r16-tka" id="${p}-tk-${k}" style="left:${X[k]}px;top:${ORG.ty + 120}px"><div class="r16-tk"><i>${svg("clipboard-list", 2.2)}</i>${ORG.TASK[k]}</div></div>`;
     });
     return h;
   };
@@ -109,6 +113,34 @@
   };
   const clipGlyph = (id) => `<div class="r16-clip" id="${id}"><i>${svg("paperclip", 2.1)}</i></div>`;
 
+
+  // ---------------------------------------------------------------- MONITOR scaffolding shared by s06 + s07 (identical geometry)
+  MON.p0 = 1.0; MON.p1 = 5.3;                                   // s06-local times of the playhead sweep (tx0 → tx1)
+  const monX = (t) => MON.tx0 + Math.max(0, Math.min(1, (t - MON.p0) / (MON.p1 - MON.p0))) * (MON.tx1 - MON.tx0);
+  const s06w = (w) => { const st = window.SCN.s06[0], x = window.VO_WORDS.find((v) => v[0] === w && v[1] >= st - 0.05); return x[1] - st; };
+  // working windows per row (s06-local times → x): Web wakes on "tugas", Konten on "jadwal", both report on "lapor" → CEO wakes
+  const monT = () => { const tT = s06w("tugas"), tJ = s06w("jadwal,"), tL = s06w("lapor,"), tTi = s06w("tidur");
+    return { web: [[tT + 0.05, tL + 0.02]], konten: [[tJ + 0.08, tL + 0.08]], ceo: [[tL + 0.14, tTi + 0.12]], riset: [], desain: [] }; };
+  const monSegs = () => { const T = monT(), o = {}; for (const k in T) o[k] = T[k].map(([a, b]) => [monX(a), monX(b)]); return o; };
+  const monHead = (p, alt) => {
+    const lay = (id, ic, t, sub, vis) => `<div class="r16-mh" id="${id}"><div class="mi">${svg(ic, 2.2)}</div><b class="r16-grad">${t}</b><span>${sub}</span></div>`;
+    return lay(`${p}-hA`, "activity", "Heartbeat agent", "bangun → kerja → lapor → tidur") + (alt ? lay(`${p}-hB`, "coins", "Token &amp; budget", "jatah bulanan per agent · angka ilustrasi") : "");
+  };
+  const monTraces = (p) => {
+    const S = monSegs(); let h = "";
+    MON.rows.forEach((k, i) => {
+      const y = MON.ry[i], top = y - 62;
+      h += `<div class="r16-base" id="${p}-bs-${k}" style="left:${MON.tx0}px;top:${y - 1}px;width:${MON.tx1 - MON.tx0}px"></div>`;
+      h += `<div class="r16-tw" id="${p}-tw-${k}" style="left:${MON.tx0 - 12}px;top:${top}px;width:${MON.tx1 - MON.tx0 + 24}px;height:100px">` +
+        `<svg width="1080" height="100" viewBox="0 ${top} 1080 100" style="position:absolute;left:${-(MON.tx0 - 12)}px;top:0" fill="none">` +
+        `<path d="${trace(S[k], y)}" stroke="${ROLE[k].c2}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+    });
+    return h;
+  };
+  const PST = [["moon", "tidur", "#eef2f9", "#5d6f8f"], ["zap", "bangun", "#fff4d6", "#8a5a00"], ["activity", "kerja", "#e8f0ff", "#2f5fd6"], ["message-circle", "lapor", "#e8f7ee", "#1d7a3c"]];
+  const monPills = (p) => MON.rows.map((k, i) => `<div class="r16-st" id="${p}-st-${k}" style="left:${MON.px}px;top:${MON.ry[i] - 22}px;width:${MON.pw}px">` +
+    PST.map(([ic, t, bg, c], j) => `<div id="${p}-st-${k}-${j}" style="background:${bg};color:${c}">${svg(ic, 2.4)}${t}</div>`).join("") + `</div>`).join("");
+
   // ---------------------------------------------------------------- timeline boilerplate
   const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
   const scene = (ID) => {
@@ -135,8 +167,15 @@
       sp.forEach((s, i) => { I(s, { opacity: 0 }); tl.set(s, { opacity: 1 }, t0 + (t1 - t0) * (i / Math.max(1, n - 1))); });
       return sp;
     };
+    // typed text that pushes an inline caret: letters are display:none until their time (Poppins, no measuring needed)
+    const typeD = (el, text, t0, t1, caret) => {
+      el.innerHTML = text.split("").map((c) => `<span>${c === " " ? "&nbsp;" : c}</span>`).join("") + (caret || "");
+      const sp = Array.from(el.querySelectorAll("span")), n = sp.length;
+      sp.forEach((s, i) => { I(s, { display: "none" }); tl.set(s, { display: "inline" }, t0 + (t1 - t0) * (i / Math.max(1, n - 1))); });
+      return sp;
+    };
     const shake = (el, t, a) => { a = a || 5; [[a, -a * 0.6], [-a * 0.8, a * 0.4], [a * 0.4, -a * 0.2], [0, 0]].forEach(([x, y], k) => tl.set(el, { x, y }, t + k * 0.034)); };
-    return { ID, ST, D, tl, P0, I, ft, L, $, done, type, shake };
+    return { ID, ST, D, tl, P0, I, ft, L, $, done, type, typeD, shake };
   };
 
   const css = `
@@ -162,14 +201,15 @@
     box-shadow: 0 10px 18px -10px rgba(227,154,0,.9); }
   .r16-goal .gi svg { position: absolute; left: 13px; top: 13px; width: 30px; height: 30px; display: block; }
   .r16-goal .gl { position: absolute; left: 92px; top: 13px; font: 700 14px/22px Poppins, sans-serif; letter-spacing: .12em; color: #5d6f8f; white-space: nowrap; }
-  .r16-goal .gt { position: absolute; left: 92px; top: 36px; font: 700 29px/38px Poppins, sans-serif; white-space: nowrap; letter-spacing: -.01em; }
-  .r16-goal .r16-tag { right: 18px; top: 13px; }
+  .r16-goal .gt { position: absolute; left: 92px; top: 37px; font: 700 28px/38px Poppins, sans-serif; white-space: nowrap; letter-spacing: -.01em; }
+  .r16-goal .r16-tag { position: relative; display: inline-block; margin-left: 10px; top: -1px; height: 22px; padding: 0 9px; border-radius: 11px; font-size: 10.5px; line-height: 22px; vertical-align: top; }
   .r16-kamu { border-radius: 32px; transform-origin: 50% 50%; }
   .r16-kamu .ka { position: absolute; left: 10px; top: 10px; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff; }
   .r16-kamu .ka svg { position: absolute; left: 11px; top: 11px; width: 22px; height: 22px; display: block; }
   .r16-kamu b { position: absolute; left: 66px; top: 7px; font: 700 21px/28px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
   .r16-kamu span { position: absolute; left: 66px; top: 33px; font: 400 14px/20px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
-  .r16-tk { position: absolute; height: 40px; padding: 0 16px 0 44px; border-radius: 20px; background: #ffffff; box-shadow: 0 12px 22px -14px rgba(10,13,44,.6), 0 0 0 1.5px #dfe6f2;
+  .r16-tka { position: absolute; width: 0; height: 0; }
+  .r16-tk { position: absolute; left: 0; top: 0; height: 40px; padding: 0 16px 0 44px; border-radius: 20px; background: #ffffff; box-shadow: 0 12px 22px -14px rgba(10,13,44,.6), 0 0 0 1.5px #dfe6f2;
     font: 700 16px/40px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; transform: translateX(-50%); }
   .r16-tk i { position: absolute; left: 14px; top: 10px; width: 20px; height: 20px; color: #294b77; }
   .r16-tk svg { width: 20px; height: 20px; display: block; }
@@ -209,13 +249,20 @@
   .r16-gj b { font: 700 19px/24px Poppins, sans-serif; color: #0a0d2c; }
   .r16-gj .mt { position: relative; width: 130px; height: 14px; border-radius: 7px; background: #e6ecf6; overflow: hidden; flex: none; }
   .r16-gj .mf { position: absolute; left: 0; top: 0; width: 130px; height: 14px; border-radius: 7px; background: linear-gradient(90deg, #ffcf4d, #e39a00); transform-origin: 0 50%; }
-  .r16-id-stp { left: 40px; top: 352px; height: 66px; padding: 0 22px; border-radius: 14px; box-shadow: inset 0 0 0 4px #2da44e; color: #2da44e; font: 700 25px/66px Poppins, sans-serif;
-    letter-spacing: .12em; white-space: nowrap; transform-origin: 50% 50%; background: rgba(255,255,255,.88); }
+  .r16-id-stp { left: 22px; top: 346px; height: 58px; padding: 0 16px; border-radius: 14px; box-shadow: inset 0 0 0 4px #2da44e; color: #2da44e; font: 700 22px/58px Poppins, sans-serif;
+    letter-spacing: .1em; white-space: nowrap; transform-origin: 50% 50%; background: rgba(255,255,255,.9); }
   .r16-id, .r16-id-nm, .r16-id-sb, .r16-id-stp { position: absolute; }
   .r16-clip { position: absolute; left: 0; top: 0; width: 0; height: 0; }
   .r16-clip i { position: absolute; left: -64px; top: -64px; width: 128px; height: 128px; color: #6f83a8; filter: drop-shadow(0 8px 8px rgba(10,13,44,.28)); }
   .r16-clip svg { width: 128px; height: 128px; display: block; }
+  .r16-mh { position: absolute; left: 116px; top: 338px; width: 560px; height: 70px; }
+  .r16-mh .mi { position: absolute; left: 0; top: 4px; width: 58px; height: 58px; border-radius: 18px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #8fd8ff; }
+  .r16-mh .mi svg { position: absolute; left: 15px; top: 15px; width: 28px; height: 28px; display: block; }
+  .r16-mh b { position: absolute; left: 74px; top: -2px; font: 700 31px/42px Poppins, sans-serif; white-space: nowrap; letter-spacing: -.01em; }
+  .r16-mh span { position: absolute; left: 75px; top: 38px; font: 400 16px/24px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+  .r16-base { position: absolute; height: 2px; background-image: linear-gradient(90deg, #d7e0ee 55%, transparent 55%); background-size: 10px 2px; }
+  .r16-tw { position: absolute; overflow: hidden; }
   `;
   const st = document.createElement("style"); st.textContent = css; (document.head || document.documentElement).appendChild(st);
-  window.R16 = { ICO, svg, ROLE, av, ORG, org, MON, mon, trace, scene, _sc, idCards, clipGlyph };
+  window.R16 = { ICO, svg, ROLE, av, ORG, org, goalIn, GOALTXT, MON, mon, trace, monX, monT, monSegs, monHead, monTraces, monPills, PST, scene, _sc, idCards, clipGlyph };
 })();

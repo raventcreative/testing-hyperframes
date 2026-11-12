@@ -1,12 +1,116 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s05-a { position: absolute; }
+    #s05-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s05-glow { left: 20px; top: 280px; width: 1040px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    #s05-slot { left: 900px; top: 742px; width: 0; height: 0; }
+    #s05-slot .c { position: absolute; left: -50px; top: -50px; width: 100px; height: 100px; border-radius: 50%; border: 3px dashed #9fb2cf; background: rgba(255,255,255,.7); color: #7b8aa6; }
+    #s05-slot .c svg { position: absolute; left: 30px; top: 30px; width: 34px; height: 34px; display: block; }
+    #s05-slot b { position: absolute; left: -110px; top: 58px; width: 220px; text-align: center; font: 700 20px/28px Poppins, sans-serif; color: #7b8aa6; white-space: nowrap; }
+    /* hire request */
+    #s05-rq { left: 650px; top: 414px; width: 350px; height: 226px; border-radius: 26px; transform-origin: 0% 50%; }
+    #s05-rq .hi { position: absolute; left: 18px; top: 16px; width: 42px; height: 42px; border-radius: 13px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #fff; }
+    #s05-rq .hi svg { position: absolute; left: 10px; top: 10px; width: 22px; height: 22px; display: block; }
+    #s05-rq .ht { position: absolute; left: 72px; top: 12px; font: 700 20px/28px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s05-rq .hs { position: absolute; left: 72px; top: 38px; font: 400 14px/20px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s05-rq .dv { position: absolute; left: 18px; right: 18px; top: 70px; height: 1.5px; background: #e6ecf6; }
+    #s05-rq .nm { position: absolute; left: 92px; top: 82px; font: 700 20px/28px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s05-rq .ns { position: absolute; left: 92px; top: 108px; font: 400 14px/20px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s05-rq .rw { position: absolute; left: 18px; top: 138px; font: 400 14px/20px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    #s05-rq .rw b { font-weight: 700; }
+    #s05-rq .ft { position: absolute; left: 18px; top: 172px; font: 700 18px/40px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s05-sw { position: absolute; left: 254px; top: 172px; width: 76px; height: 40px; border-radius: 20px; background: #c9d4e6; }
+    #s05-swon { position: absolute; left: 0; top: 0; width: 76px; height: 40px; border-radius: 20px; background: #2da44e; }
+    #s05-kn { position: absolute; left: 4px; top: 4px; width: 32px; height: 32px; border-radius: 50%; background: #ffffff; box-shadow: 0 3px 6px rgba(10,13,44,.35); }
+    #s05-kn i { position: absolute; left: 7px; top: 7px; width: 18px; height: 18px; color: #2da44e; }
+    #s05-kn svg { width: 18px; height: 18px; display: block; }
+    #s05-dash { left: 600px; top: 520px; width: 52px; height: 3px; background-image: linear-gradient(90deg, #9fb2cf 60%, transparent 60%); background-size: 12px 3px; transform-origin: 0% 50%; }
+    #s05-ptr { left: 0; top: 0; width: 0; height: 0; }
+    #s05-ptr i { position: absolute; left: -6px; top: -4px; width: 46px; height: 46px; color: #0a0d2c; filter: drop-shadow(0 6px 6px rgba(10,13,44,.35)); }
+    #s05-ptr svg { width: 46px; height: 46px; display: block; fill: #ffffff; }
+  </style>
+  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920">
+    <div id="s05-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.757);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s05"] = tl;
+      // s05 "Butuh anggota baru? CEO-nya ngajuin rekrut, kamu yang approve."
+      // START = s04's end (org chart, 3 teams + tickets, Kamu chip). "Butuh": the tickets tuck into their teams, the 3 teams slide left,
+      // "anggota baru?": a dashed empty seat "Kursi kosong" appears at the right end of the bus · "CEO-nya ngajuin rekrut": a hire
+      // request card slides out of the CEO (Agent Desain · lapor ke CEO · budget kecil, contoh) with an "Izinkan?" switch (off) · "kamu
+      // yang approve": your cursor (from the Kamu chip) flips the switch → green ✓, the card flies into the empty seat and the new
+      // agent pops in. END STATE (hand-over to s06): org chart with 4 teams, Kamu chip.
+      const R16 = window.R16, O = R16.ORG, K = R16.scene("s05"), { tl, I, ft, L, $, D } = K;
+      const tBut = L("Butuh"), tAng = L("anggota"), tBaru = L("baru?"), tCEO = L("CEO-nya"), tNga = L("ngajuin"), tRek = L("rekrut,"), tKam = L("kamu"), tApp = L("approve.");
+
+      // ================================================================ DOM
+      let h = `<div class="s05-a" id="s05-glow"></div>`;
+      h += `<div class="s05-a" id="s05-slot"><div class="c">${R16.svg("plus", 2.4)}</div><b>Kursi kosong</b></div>`;
+      h += R16.org("s05", { layout: 3, tickets: true, desain: true });
+      h += `<div class="s05-a" id="s05-dash"></div>`;
+      h += `<div class="s05-a r16-card2" id="s05-rq"><div class="hi">${R16.svg("users", 2.2)}</div><b class="ht">Pengajuan rekrut</b><span class="hs">dari CEO · butuh izin kamu</span><div class="dv"></div>` +
+        `<div style="position:absolute;left:50px;top:110px">${R16.av("s05-rav", "desain", 56)}</div><b class="nm">Agent Desain</b><span class="ns">desain feed &amp; promo</span>` +
+        `<span class="rw">Lapor ke <b>CEO</b> · budget <b>kecil</b> (contoh)</span>` +
+        `<b class="ft">Izinkan rekrut?</b><div id="s05-sw"><div id="s05-swon"></div><div id="s05-kn"><i>${R16.svg("check", 3.2)}</i></div></div></div>`;
+      h += `<div class="s05-a" id="s05-ptr"><i>${R16.svg("mouse-pointer-2", 1.6)}</i></div>`;
+      $("s05-cam").innerHTML = h;
+      const cam = $("s05-cam"), glow = $("s05-glow"); I(cam, { x: 0, y: 0 }); I(glow, { opacity: 0.85, scale: 1 });
+      const nl = (id) => $(id).querySelector(".nl");
+
+      // ================================================================ s04's end state, then the tickets tuck in and the teams slide left
+      const KEYS = ["web", "konten", "riset"];
+      KEYS.forEach((k, i) => {
+        const tk = $("s05-tk-" + k), n = $("s05-n-" + k), st = $("s05-ls-" + k), dx = O.x4[k] - O.x3[k], t = Math.max(0.04, tBut - 0.02) + i * 0.04;
+        I(tk, { opacity: 1, scale: 1, x: 0, y: 0 });
+        ft(tk, { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.4, y: -96, duration: 0.3, ease: "power2.in" }, t);
+        I(n, { x: 0 }); ft(n, { x: 0 }, { x: dx, duration: 0.42, ease: "power3.inOut" }, tAng - 0.08 + i * 0.03);
+        I(st, { x: 0 }); ft(st, { x: 0 }, { x: dx, duration: 0.42, ease: "power3.inOut" }, tAng - 0.08 + i * 0.03);
+      });
+      // the bus stretches from the 3-team span (230–850) to the 4-team span (180–900)
+      const lb = $("s05-lb");
+      I(lb, { left: O.x3.web, width: O.x3.riset - O.x3.web, scaleX: 1 });
+      ft(lb, { left: O.x3.web, width: O.x3.riset - O.x3.web }, { left: O.x4.web, width: O.x4.desain - O.x4.web, duration: 0.45, ease: "power3.inOut" }, tAng - 0.06);
+      // the empty seat
+      const slot = $("s05-slot"); I(slot, { opacity: 0, scale: 0.4 });
+      ft(slot, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.34, ease: "back.out(2.4)" }, tBaru - 0.25);
+      ft(slot, { rotation: 0 }, { rotation: 8, duration: 0.09, yoyo: true, repeat: 3, ease: "sine.inOut" }, tBaru + 0.12);
+      // the 4th node + its stem, hidden until approved
+      const st4 = $("s05-ls-desain"), a4 = $("s05-n-desain-av"), l4 = nl("s05-n-desain");
+      I(st4, { scaleY: 0 }); I(a4, { scale: 0 }); I(l4, { opacity: 0, y: 12 });
+
+      // ================================================================ "CEO-nya ngajuin rekrut": the request slides out of the CEO
+      const rq = $("s05-rq"), dash = $("s05-dash"), ceo = $("s05-ceo-av");
+      ft(ceo, { scale: 1 }, { scale: 1.1, duration: 0.12, yoyo: true, repeat: 1 }, tCEO - 0.05);
+      I(dash, { scaleX: 0 }); ft(dash, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power2.out" }, tCEO + 0.05);
+      I(rq, { opacity: 0, scale: 0.3, x: -80 });
+      ft(rq, { opacity: 0, scale: 0.3, x: -80 }, { opacity: 1, scale: 1, x: 0, duration: 0.4, ease: "back.out(1.6)" }, tCEO + 0.08);
+      const rav = $("s05-rav"); I(rav, { scale: 0.4 }); ft(rav, { scale: 0.4 }, { scale: 1, duration: 0.3, ease: "back.out(3)" }, tRek - 0.1);
+
+      // ================================================================ "kamu yang approve": the cursor flips the switch
+      const kamu = $("s05-kamu"), ptr = $("s05-ptr"), swon = $("s05-swon"), kn = $("s05-kn");
+      I(kamu, { opacity: 1, scale: 1 });
+      ft(kamu, { scale: 1 }, { scale: 1.08, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tKam - 0.08);
+      const SWX = 650 + 254 + 56, SWY = 414 + 172 + 22;
+      I(ptr, { opacity: 0, x: O.kamu.x + 200, y: O.kamu.y + 40 });
+      tl.set(ptr, { opacity: 1 }, tKam - 0.02);
+      ft(ptr, { x: O.kamu.x + 200, y: O.kamu.y + 40 }, { x: SWX, y: SWY, duration: Math.max(0.3, tApp - tKam - 0.12), ease: "power2.inOut" }, tKam - 0.02);
+      const tFlip = tApp - 0.08;
+      ft(ptr, { scale: 1 }, { scale: 0.85, duration: 0.06, yoyo: true, repeat: 1 }, tFlip - 0.04);
+      I(swon, { opacity: 0 }); ft(swon, { opacity: 0 }, { opacity: 1, duration: 0.12 }, tFlip);
+      I(kn, { x: 0 }); ft(kn, { x: 0 }, { x: 36, duration: 0.14, ease: "power2.out" }, tFlip);
+      tl.set(ptr, { opacity: 0 }, tFlip + 0.16);
+      // the card flies into the empty seat, the new agent pops in
+      const tGo = Math.min(D - 0.36, tFlip + 0.12);
+      const rcx = 650 + 175, rcy = 414 + 113;
+      ft(rq, { x: 0, y: 0, scale: 1, opacity: 1 }, { x: 900 - rcx, y: 742 - rcy, scale: 0.2, opacity: 0, duration: 0.2, ease: "power3.in" }, tGo - 0.04);
+      ft(dash, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tGo);
+      ft(slot, { opacity: 1 }, { opacity: 0, duration: 0.1 }, tGo + 0.22);
+      ft(st4, { scaleY: 0 }, { scaleY: 1, duration: 0.1, ease: "power2.out" }, tGo + 0.06);
+      ft(a4, { scale: 0 }, { scale: 1, duration: 0.22, ease: "back.out(2.6)" }, tGo + 0.1);
+      ft(l4, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.16, ease: "power2.out" }, Math.min(tGo + 0.14, D - 0.18));
+
+      K.done();
     })();
   </script>
 </template>

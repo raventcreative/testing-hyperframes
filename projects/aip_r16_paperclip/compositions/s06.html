@@ -1,12 +1,137 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s06-a { position: absolute; }
+    #s06-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s06-glow { left: 20px; top: 280px; width: 1040px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    #s06-trg { left: 690px; top: 345px; width: 290px; height: 56px; display: flex; justify-content: flex-end; gap: 10px; }
+    .s06-tg { position: relative; height: 44px; padding: 0 16px 0 44px; border-radius: 22px; background: #ffffff; box-shadow: 0 10px 20px -12px rgba(10,13,44,.5), 0 0 0 1.5px #dfe6f2;
+      font: 700 16px/44px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; transform-origin: 50% 50%; }
+    .s06-tg i { position: absolute; left: 14px; top: 11px; width: 22px; height: 22px; color: #294b77; }
+    .s06-tg svg { width: 22px; height: 22px; display: block; }
+    #s06-ph { left: 0; top: 410px; width: 3px; height: 466px; border-radius: 2px; background: linear-gradient(180deg, rgba(58,111,224,0), #3a6fe0 12%, #3a6fe0 88%, rgba(58,111,224,0)); box-shadow: 0 0 14px rgba(58,111,224,.55); }
+    .s06-fly { left: 0; top: 0; width: 0; height: 0; }
+    .s06-fly i { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%; color: #fff; box-shadow: 0 10px 18px -8px rgba(10,13,44,.6); }
+    .s06-fly svg { position: absolute; left: 11px; top: 11px; width: 22px; height: 22px; display: block; }
+    .s06-z { left: 0; top: 0; font: 700 22px/22px Poppins, sans-serif; color: #7b8aa6; }
+  </style>
+  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920">
+    <div id="s06-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.59);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s06"] = tl;
+      // s06 "Agent-nya nggak nyala terus: bangun kalau ada tugas atau jadwal, kerja, lapor, terus tidur lagi."
+      // START = s05's end (org chart, 4 teams). The chart folds into a monitor: banner, Kamu chip, connectors and labels fade, the five
+      // agents fly into the rows of a "Heartbeat agent" panel · "nggak nyala terus": every agent dims, status "tidur", z's float · a
+      // playhead sweeps the rows like a heart monitor · "bangun kalau ada": the two triggers (Tugas baru · Jadwal 09.00) light up ·
+      // "tugas": a task flies onto Tim Web → spike, status bangun → kerja · "jadwal": a clock flies onto Tim Konten → spike · "kerja":
+      // both work (plateau) · "lapor": two reports fly up to the CEO → it wakes · "tidur lagi": everyone back to "tidur", lines flat.
+      // Riset and Desain never wake (no work, no heartbeat). END STATE (hand-over to s07): the panel with full traces, all asleep.
+      const R16 = window.R16, O = R16.ORG, M = R16.MON, K = R16.scene("s06"), { tl, I, ft, L, $, D } = K;
+      const tAge = L("Agent-nya"), tNgg = L("nggak"), tTer = L("terus:"), tBan = L("bangun"), tTug = L("tugas"), tJad = L("jadwal,"), tKer = L("kerja,"), tLap = L("lapor,"), tTid = L("tidur");
+      const T = R16.monT();
+
+      // ================================================================ DOM
+      let h = `<div class="s06-a" id="s06-glow"></div>` + R16.mon("s06") + R16.monHead("s06", false);
+      h += `<div class="s06-a" id="s06-trg"><div class="s06-tg" id="s06-g0"><i>${R16.svg("clipboard-list", 2.2)}</i>Tugas baru</div><div class="s06-tg" id="s06-g1"><i>${R16.svg("alarm-clock", 2.2)}</i>Jadwal 09.00</div></div>`;
+      h += R16.monTraces("s06") + R16.monPills("s06");
+      h += R16.org("s06", { layout: 4, desain: true });
+      h += `<div class="s06-a" id="s06-ph"></div>`;
+      [["s06-f0", "clipboard-list", "#294b77"], ["s06-f1", "alarm-clock", "#294b77"], ["s06-f2", "message-circle", "#2da44e"], ["s06-f3", "message-circle", "#2da44e"]]
+        .forEach(([id, ic, c]) => { h += `<div class="s06-a s06-fly" id="${id}"><i style="background:${c}">${R16.svg(ic, 2.2)}</i></div>`; });
+      M.rows.forEach((k, i) => { for (let j = 0; j < 2; j++) h += `<div class="s06-a s06-z" id="s06-z-${k}-${j}">z</div>`; });
+      $("s06-cam").innerHTML = h;
+      const cam = $("s06-cam"), glow = $("s06-glow"); I(cam, { x: 0, y: 0 }); I(glow, { opacity: 0.85, scale: 1 });
+
+      // ================================================================ s05's end state → the chart folds into the monitor
+      const tF = Math.max(0.12, tAge + 0.12), DUR = 0.55;
+      ["s06-goal", "s06-kamu", "s06-lg", "s06-lc", "s06-lb", "s06-ls-web", "s06-ls-konten", "s06-ls-riset", "s06-ls-desain"].forEach((id, j) => {
+        const e = $(id); I(e, { opacity: 1 }); ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, tF + (j < 2 ? 0 : 0.02));
+      });
+      const panel = $("s06-panel"); I(panel, { opacity: 0, scale: 0.92 });
+      ft(panel, { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.42, ease: "power3.out" }, tF + 0.1);
+      const SRC = { ceo: [O.ceo.x, O.ceo.y, O.ceo.s], web: [O.x4.web, O.ty, O.ts], konten: [O.x4.konten, O.ty, O.ts], riset: [O.x4.riset, O.ty, O.ts], desain: [O.x4.desain, O.ty, O.ts] };
+      M.rows.forEach((k, i) => {
+        const id = k === "ceo" ? "s06-ceo" : "s06-n-" + k, n = $(id), lab = n.querySelector(".nl"), [sx, sy, ss] = SRC[k], t = tF + 0.04 * i;
+        I(n, { x: 0, y: 0, scale: 1 }); I(lab, { opacity: 1 });
+        ft(lab, { opacity: 1 }, { opacity: 0, duration: 0.14 }, t);
+        ft(n, { x: 0, y: 0, scale: 1 }, { x: M.ax - sx, y: M.ry[i] - sy, scale: M.as / ss, duration: DUR, ease: "power3.inOut" }, t);
+        const rn = $("s06-rn-" + k); I(rn, { opacity: 0, x: -16 }); ft(rn, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.25, ease: "power2.out" }, t + DUR - 0.12);
+        if (i) { const sp = $("s06-sep" + i); I(sp, { opacity: 0 }); ft(sp, { opacity: 0 }, { opacity: 1, duration: 0.3 }, tF + 0.35); }
+        const bs = $("s06-bs-" + k); I(bs, { opacity: 0, scaleX: 0, transformOrigin: "0% 50%" }); ft(bs, { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.35, ease: "power2.out" }, t + DUR - 0.1);
+      });
+      const hA = $("s06-hA"), trg = $("s06-trg");
+      I(hA, { opacity: 0, y: 14 }); ft(hA, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, tF + 0.25);
+      I(trg, { opacity: 0, x: 20 }); ft(trg, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, tF + 0.35);
+
+      // ================================================================ status pills (4 layers: tidur · bangun · kerja · lapor) + dim avatars
+      const avOf = (k) => $(k === "ceo" ? "s06-ceo-av" : "s06-n-" + k + "-av");
+      const state = (k, j, t) => { for (let q = 0; q < 4; q++) tl.set($(`s06-st-${k}-${q}`), { opacity: q === j ? 1 : 0, scale: 1 }, t); ft($(`s06-st-${k}-${j}`), { scale: 0.8 }, { scale: 1, duration: 0.2, ease: "back.out(3)" }, t); };
+      M.rows.forEach((k, i) => {
+        const st = $("s06-st-" + k); I(st, { opacity: 0, scale: 0.6 });
+        ft(st, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2)" }, tF + DUR - 0.05 + 0.03 * i);
+        for (let q = 0; q < 4; q++) I($(`s06-st-${k}-${q}`), { opacity: q === 0 ? 1 : 0, scale: 1 });
+      });
+      const AWAKE = {};          // k -> [[t0, t1]] awake windows (status != tidur)
+      const tw = (k, a, b) => (AWAKE[k] = AWAKE[k] || []).push([a, b]);
+      // Web: task → bangun → kerja → lapor → tidur
+      state("web", 1, tTug + 0.05); state("web", 2, tTug + 0.42); state("web", 3, tLap - 0.02); state("web", 0, tTid - 0.02); tw("web", tTug + 0.05, tTid - 0.02);
+      // Konten: schedule → bangun → kerja ("kerja") → lapor → tidur
+      state("konten", 1, tJad + 0.08); state("konten", 2, tKer - 0.05); state("konten", 3, tLap + 0.06); state("konten", 0, tTid + 0.04); tw("konten", tJad + 0.08, tTid + 0.04);
+      // CEO: woken by the reports → kerja → tidur
+      const tCw = T.ceo[0][0], tCs = T.ceo[0][1];
+      state("ceo", 1, tCw); state("ceo", 2, tCw + 0.22); state("ceo", 0, tCs + 0.05); tw("ceo", tCw, tCs + 0.05);
+      // dim / wake avatars (asleep = .5 opacity) + z's while asleep
+      M.rows.forEach((k, i) => {
+        const a = avOf(k), win = AWAKE[k] || [];
+        I(a, { opacity: 1 });
+        ft(a, { opacity: 1 }, { opacity: 0.5, duration: 0.25 }, Math.max(tNgg, tF + DUR));
+        win.forEach(([w0, w1]) => {
+          ft(a, { opacity: 0.5, scale: 1 }, { opacity: 1, scale: 1.18, duration: 0.16, ease: "power2.out" }, w0);
+          ft(a, { scale: 1.18 }, { scale: 1, duration: 0.25, ease: "back.out(3)" }, w0 + 0.16);
+          ft(a, { opacity: 1 }, { opacity: 0.5, duration: 0.25 }, w1);
+        });
+        // z's: float up-right from the avatar while asleep (hidden while awake)
+        for (let j = 0; j < 2; j++) {
+          const z = $(`s06-z-${k}-${j}`), x0 = M.ax + 30, y0 = M.ry[i] - 30, per = 1.1, off = j * 0.55;
+          I(z, { opacity: 0, x: x0, y: y0, scale: 0.7 });
+          const t0 = Math.max(tNgg, tF + DUR) + off;
+          for (let t = t0; t < D - 0.2; t += per) {
+            const awake = win.some(([w0, w1]) => t + per > w0 - 0.1 && t < w1 + 0.1);
+            if (awake) continue;
+            ft(z, { opacity: 0, x: x0, y: y0, scale: 0.7 }, { opacity: 0.9, x: x0 + 10, y: y0 - 14, scale: 0.9, duration: per * 0.4, ease: "power1.out" }, t);
+            ft(z, { opacity: 0.9, x: x0 + 10, y: y0 - 14, scale: 0.9 }, { opacity: 0, x: x0 + 22, y: y0 - 34, scale: 1.1, duration: per * 0.5, ease: "power1.in" }, t + per * 0.4);
+          }
+        }
+      });
+
+      // ================================================================ the playhead sweeps; traces reveal behind it
+      const ph = $("s06-ph");
+      I(ph, { opacity: 0, x: M.tx0 });
+      ft(ph, { opacity: 0 }, { opacity: 1, duration: 0.2 }, M.p0 - 0.15);
+      ft(ph, { x: M.tx0 }, { x: M.tx1, duration: M.p1 - M.p0, ease: "none" }, M.p0);
+      ft(ph, { opacity: 1 }, { opacity: 0, duration: 0.2 }, M.p1 - 0.05);
+      M.rows.forEach((k) => {
+        const w = $("s06-tw-" + k);
+        I(w, { width: 12 });
+        ft(w, { width: 12 }, { width: M.tx1 - M.tx0 + 24, duration: M.p1 - M.p0, ease: "none" }, M.p0);
+      });
+
+      // ================================================================ triggers: light up, then fly onto their rows
+      const g0 = $("s06-g0"), g1 = $("s06-g1");
+      [g0, g1].forEach((g, i) => { I(g, { scale: 1, boxShadow: "0 10px 20px -12px rgba(10,13,44,.5), 0 0 0 1.5px #dfe6f2" });
+        ft(g, { scale: 1 }, { scale: 1.1, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tBan - 0.05 + i * 0.12);
+        ft(g, { boxShadow: "0 10px 20px -12px rgba(10,13,44,.5), 0 0 0 1.5px #dfe6f2" }, { boxShadow: "0 10px 20px -12px rgba(10,13,44,.5), 0 0 0 3px #3a6fe0", duration: 0.2 }, tBan - 0.05 + i * 0.12); });
+      const fly = (id, x0, y0, x1, y1, t, d) => { const f = $(id); I(f, { opacity: 0, x: x0, y: y0, scale: 0.6 });
+        tl.set(f, { opacity: 1 }, t); ft(f, { x: x0, scale: 0.6 }, { x: x1, scale: 1, duration: d, ease: "power2.inOut" }, t);
+        ft(f, { y: y0 }, { y: Math.min(y0, y1) - 40, duration: d * 0.45, ease: "power2.out" }, t); ft(f, { y: Math.min(y0, y1) - 40 }, { y: y1, duration: d * 0.55, ease: "power2.in" }, t + d * 0.45);
+        tl.set(f, { opacity: 0 }, t + d + 0.02); };
+      fly("s06-f0", 760, 368, R16.monX(T.web[0][0]), M.ry[1], tTug - 0.35, 0.4);
+      fly("s06-f1", 900, 368, R16.monX(T.konten[0][0]), M.ry[2], tJad - 0.3, 0.4);
+      fly("s06-f2", R16.monX(T.web[0][1]), M.ry[1], R16.monX(tCw), M.ry[0], tLap - 0.02, 0.32);
+      fly("s06-f3", R16.monX(T.konten[0][1]), M.ry[2], R16.monX(tCw), M.ry[0], tLap + 0.04, 0.34);
+
+      K.done();
     })();
   </script>
 </template>

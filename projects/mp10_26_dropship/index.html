@@ -94,7 +94,8 @@
       .rP .near, .rP .near div, .rP .to, .rP .hd { background: #9AA4CB; } .rP .far, .rP .far div { background: #7B87B2; }
       .rK .near, .rK .near div, .rK .to, .rK .hd { background: #26367A; } .rK .far, .rK .far div { background: #161f4d; }
       .rS .near, .rS .near div, .rS .to, .rS .hd { background: #677087; } .rS .far, .rS .far div { background: #4b5367; }
-      .tq .bh, .tq .bl, .tq .bh div, .tq .bl div { background: none !important; }
+      .tq .bh, .tq .bl, .tq .btw { background: none !important; }
+      .tq .btw { left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
       .rK .band { left: -2px; top: 12px; width: 58px; height: 12px; border-radius: 6px; background: #FED111 !important; transform: rotate(-8deg); }
       .rK .bib { left: 10px; top: 26px; width: 32px; height: 34px; border-radius: 9px; background: #FED111 !important; }
       .rK .bib::after { content: "R"; position: absolute; left: 0; top: 7px; width: 32px; text-align: center; font: 800 21px/1 Rubik; color: #212C5F; }
@@ -330,7 +331,7 @@
         mk("div", "fin", TR, `left:2620px; top:${Z1}px; width:40px; height:${Z4 - Z1}px;`);                           // finish (checkered)
         for (let k = 0; k < 4; k++) mk("div", "lnum", TR, `left:${-150}px; top:${Z1 + k * LW + 28}px;`).textContent = k + 1;
         // relay changeover zones in lane 2 (z -60..60) + chevrons
-        const ZONE1 = 925, ZONE2 = 2060;
+        const ZONE1 = 937, ZONE2 = 2265;   // the hand points of the two changeovers (from the race plan below)
         [ZONE1, ZONE2].forEach((x) => { mk("div", "zone", TR, `left:${x - 105}px; top:-56px; width:210px; height:112px;`);
           for (let j = 0; j < 3; j++) mk("div", "chev", TR, `left:${x - 54 + j * 38}px; top:-22px;`); });
 
@@ -358,11 +359,12 @@
         const RK = runner("rK", "rK", 0, "Kamu <small>reseller / dropship</small>", "k");
         const RS = runner("rS", "rS", -22, "Supplier");
         // batons (each runner owns one; the swap at a changeover is a visibility switch at one shared world point)
-        const baton = (R, kind) => { const b = mk("div", "bt" + (kind === "nvo" ? " nvo" : ""), R.aN.bl); b.id = R.id + "bt";
+        const baton = (R, kind) => { const w = mk("div", "btw", R.aN.bl); w.id = R.id + "bt"; R.btw = w;
+          const b = mk("div", "bt" + (kind === "nvo" ? " nvo" : ""), w); b.id = R.id + "bc";
           if (kind !== "nvo") { const nv = mk("div", "nv", b); nv.id = R.id + "nv"; mk("div", "rg", b).id = R.id + "rg"; }
-          mk("div", "sx", b); mk("div", "gl", b).id = R.id + "gl"; return b; };
+          mk("div", "sx", b); mk("div", "gl", b).id = R.id + "gl"; return w; };
         baton(RP, "full"); baton(RK, "full"); baton(RS, "nvo");
-        const tagIn = (R, id, cls, html, x, y) => { const w = TF(cls, html); w.id = id; w.style.left = x + "px"; w.style.top = y + "px"; R.aN.bl.appendChild(w); return w; };
+        const tagIn = (R, id, cls, html, x, y) => { const w = TF(cls, html); w.id = id; w.style.left = x + "px"; w.style.top = y + "px"; R.btw.appendChild(w); return w; };
         tagIn(RP, "tP100", "", "Rp100.000", 72, -30);
         tagIn(RK, "tK100", "", "Rp100.000", 72, -30); tagIn(RK, "tKom", "bdg", "OMZET", 72, -88);
         tagIn(RK, "tK80", "nv", "Rp80.000 <small>ke supplier</small>", 96, -30);
@@ -391,7 +393,7 @@
             for (const k in a) { if (!m[k] || at < m[k][0]) m[k] = [at, a[k]]; } });
           return tl.fromTo(t, a, Object.assign({ immediateRender: false }, b), at);
         };
-        const INIT = (t, v) => gsap.utils.toArray(t).forEach((el) => { let m = PIN.get(el); if (!m) PIN.set(el, (m = {})); for (const k in v) m[k] = [-1, v[k]]; gsap.set(el, { [Object.keys(v)[0]]: v[Object.keys(v)[0]] }); gsap.set(el, v); });
+        const INIT = (t, v) => gsap.utils.toArray(t).forEach((el) => { let m = PIN.get(el); if (!m) PIN.set(el, (m = {})); for (const k in v) m[k] = [-1, v[k]]; gsap.set(el, v); });
         const pinAll = () => PIN.forEach((m, el) => { const v = {}; for (const k in m) v[k] = m[k][1]; tl0.set(el, v, 0); });
         const show = (t, at) => tl.set(t, { autoAlpha: 1 }, at), hide = (t, at) => tl.set(t, { autoAlpha: 0 }, at);
         const HL = (sel, at, d) => F(sel, { backgroundSize: "0% 72%" }, { backgroundSize: "100% 72%", duration: d || 0.32, ease: "power1.inOut" }, at);
@@ -409,7 +411,7 @@
         INIT("#ilu1, #pillU, #sbKl, #sbQ, #sbAsl, #sbOk, #sbNo, #led, .mini, #bands", { autoAlpha: 0 });
         INIT("#sbStr", { scaleX: 0 }); INIT("#sbLed", { opacity: 0.12 }); INIT(".lampOn", { opacity: 0 }); INIT("#sbr1, #sbr2", { opacity: 0.25 });
         INIT(".tgw", { scaleX: 0, scaleY: 0 }); INIT("#rKnv, #rKrg, #rPnv, #rPrg", { scaleX: 0 });
-        INIT("#rPbt, #rKbt, #rSbt", { autoAlpha: 0 }); INIT(".bt .gl", { x: 0 });
+        INIT("#rPbt, #rKbt, #rSbt", { autoAlpha: 0 }); INIT(".bt .gl", { x: 0 }); INIT("#rKnv, #rKrg", { autoAlpha: 1 });
         INIT(".lrow .lin", { opacity: 0, x: -30 });
         $$("#bands .bd").forEach((b, k) => INIT(b, { x: k % 2 ? 1100 : -1100 }));
         INIT("#disc", { scale: 0, transformOrigin: "50% 50%" }); INIT("#beam", { rotation: -58, scaleX: 0, scaleY: 1, transformOrigin: "0% 50%" });
@@ -453,7 +455,7 @@
         function run(R, t0, t1, holdNear) {
           const n = Math.max(1, Math.round((t1 - t0) / STEP)), d = (t1 - t0) / n, f = R.ph;
           const A = f ? NF : NB, B = f ? NB : NF;
-          const start = { lean: LEANR, thN: A.th, shN: A.sh, thF: B.th, shF: B.sh, uF: f ? AFW : ABK, fF: FORE };
+          const start = { lean: LEANR, thN: A.th, shN: A.sh, thF: B.th, shF: B.sh, uF: f ? AFW : ABK, fF: FORE, y: 0 };
           if (!holdNear) Object.assign(start, { uN: f ? ABK : AFW, fN: FORE });
           if (R.runEnd !== t0) poseTo(R, start, t0 - 0.16, 0.16, "power1.out");
           const cyc = (k, a, b) => { F(R.el[k], { rotation: a }, { rotation: b, duration: d, ease: "sine.inOut", repeat: n - 1, yoyo: true }, t0); R.st[k] = n % 2 ? b : a; };
@@ -466,7 +468,7 @@
         const moveX = (R, x0, x1, t, d, ease) => { F(R.g, { x: x0 }, { x: x1, duration: d, ease: ease || "none" }, t); F(R.sh, { x: x0 }, { x: x1, duration: d, ease: ease || "none" }, t); };
 
         // ---------- the race plan (all from TM; the changeovers are on "omzetmu" and "oper") ----------
-        const H1 = TM.omz, H2 = TM.oper, VP = 440, VK = 380, VS = 470, TA = 0.72;
+        const H1 = TM.omz, H2 = TM.oper, VP = 440, VK = 440, VS = 470, TA = 0.72;
         const xP0 = 140, tP0 = TM.pmb, xP1 = xP0 + (VP * TA) / 2 + VP * (H1 - tP0 - TA);     // Pembeli: accelerate TA s, then constant VP
         const xK1 = xP1 + hPass[0] - hRecv[0];                                                   // Kamu's position at the first changeover
         const TKa = 0.75, xK0 = xK1 - (VK * TKa) / 2, xK2 = xK1 + VK * (H2 - H1);
@@ -475,22 +477,25 @@
         [RP, RK, RS].forEach((R) => INIT(R.sh, { x: gsap.getProperty(R.g, "x"), y: R.z }));
         window.__race = { xP0, xP1, xK0, xK1, xK2, xS0, xS2, hPass, hRecv, RECV };
 
-        // camera path
-        const KA = K(560, 1080, xK0 + 10, -150, 0, -6, 20, 330), KA2 = K(560, 1090, xK0 + 10, -150, 0, -7, 24, 250);
-        const KB = K(540, 1110, 820, -120, -60, -21, 30, -420), KB2 = K(540, 1110, 860, -120, -60, -20, 33, -380);
-        const KD = K(500, 1110, xP0 + 330, -150, 0, -12, -8, 150), KE = K(500, 1110, xK2 + hPass[0] - 120, -150, 0, -12, -10, 150);
-        const KF = K(470, 1040, xK2 + 280, -250, 0, -10, -16, 420), KG = K(470, 1050, xK2 + 290, -260, 0, -9, -12, 470);
-        const KS = K(540, 920, 2250, -740, -820, -5, -6, -140), KS2 = K(540, 925, 2250, -735, -820, -5, -3, -110);
-        INIT(C1.cam, { x: KA.ax, y: KA.ay, z: KA.z, rotationX: KA.rx }); INIT(C1.yaw, { rotationY: KA.ry }); INIT(C1.pan, { x: -KA.fx, y: -KA.fy, z: -KA.fz });
-        cam(KA, KA2, 0, TM.est - 0.1, "sine.inOut");
-        cam(KA2, KB, TM.est - 0.1, 1.5, "power2.inOut");
-        cam(KB, KB2, TM.est + 1.4, TM.pmb - TM.est - 1.6, "none");
-        cam(KB2, KD, TM.pmb - 0.2, 1.3, "power2.inOut");
-        cam(KD, KE, TM.pmb + 1.1, H2 - TM.pmb - 1.1, "none");
-        cam(KE, KF, H2, TM.ting + 0.6 - H2, "power2.inOut");
-        cam(KF, KG, TM.ting + 0.6, TM.kal - TM.ting - 0.6, "none");
-        cam(KG, KS, TM.kal, 1.15, "power2.inOut");
-        cam(KS, KS2, TM.kal + 1.15, TM.sol - TM.kal - 1.15, "none");
+        // camera path: every channel has its own keys [t, value, ease-into-this-key] so the tracking pan can match the runners'
+        // speed exactly (the pan follows Pembeli's acceleration curve, then runs linear, then eases out with Kamu's stop)
+        const SB = { x: 2350, z: -820 };
+        INIT("#sb", { x: SB.x, y: 170, z: SB.z }); INIT("#sbB, #sb .post", { opacity: 0 });
+        const camKeys = (sel, prop, keys, neg) => { const s = neg ? -1 : 1; INIT(sel, { [prop]: s * keys[0][1] });
+          for (let i = 1; i < keys.length; i++) { const a = keys[i - 1], b = keys[i]; if (b[0] - a[0] < 1e-3) continue;
+            F(sel, { [prop]: s * a[1] }, { [prop]: s * b[1], duration: b[0] - a[0], ease: b[2] || "sine.inOut" }, a[0]); } };
+        const tPa = tP0 + TA, CAM0 = xP0 + 150, CAM1 = CAM0 + (VP * TA) / 2, CAMH2 = xK2 + 60, CAMST = CAMH2 + ((CAMH2 - CAM1) / (H2 - tPa)) * 0.45;
+        const tSw0 = TM.pmb - 0.45, tSw1 = TM.pmb + 0.85, tCl = TM.ting + 0.6, tSb0 = TM.kal + 0.05, tSb1 = TM.kal + 1.25;
+        camKeys(C1.pan, "x", [[0, xK0 + 10], [TM.est - 0.1, xK0 + 25, "none"], [TM.est + 1.4, 660, "power2.inOut"], [tSw0, 640, "none"], [tP0, CAM0, "power2.inOut"],
+          [tPa, CAM1, "power2.in"], [H2, CAMH2, "none"], [H2 + 0.9, CAMST, "power2.out"], [tSb0, CAMST + 20, "none"], [tSb1, SB.x, "power2.inOut"], [TM.sol, SB.x, "none"]], true);
+        camKeys(C1.pan, "y", [[0, -160], [TM.est - 0.1, -160, "none"], [TM.est + 1.4, -120], [tSw0, -120, "none"], [tSw1, -150], [H2, -150, "none"], [tCl, -300],
+          [tSb0, -305, "none"], [tSb1, -740, "power2.inOut"], [TM.sol, -735, "none"]], true);
+        camKeys(C1.pan, "z", [[0, 0], [TM.est - 0.1, 0, "none"], [TM.est + 1.4, -60], [tSw0, -60, "none"], [tSw1, 0], [tSb0, 0, "none"], [tSb1, SB.z, "power2.inOut"], [TM.sol, SB.z, "none"]], true);
+        camKeys(C1.cam, "x", [[0, 560], [TM.est - 0.1, 560, "none"], [TM.est + 1.4, 440], [tSw0, 440, "none"], [tSw1, 540], [H2, 540, "none"], [tCl, 600], [tSb0, 600, "none"], [tSb1, 540], [TM.sol, 540, "none"]]);
+        camKeys(C1.cam, "y", [[0, 1060], [TM.est - 0.1, 1070, "none"], [TM.est + 1.4, 1100], [tSw0, 1100, "none"], [tSw1, 1110], [H2, 1110, "none"], [tCl, 900], [tSb0, 905, "none"], [tSb1, 920], [TM.sol, 925, "none"]]);
+        camKeys(C1.cam, "z", [[0, 560], [TM.est - 0.1, 470, "none"], [TM.est + 1.4, -600], [tSw0, -560, "none"], [tSw1, 300], [H2, 300, "none"], [tCl, 700], [tSb0, 730, "none"], [tSb1, -140], [TM.sol, -110, "none"]]);
+        camKeys(C1.cam, "rotationX", [[0, -5], [TM.est - 0.1, -6, "none"], [TM.est + 1.4, -18], [tSw0, -17, "none"], [tSw1, -12], [H2, -12, "none"], [tCl, -8], [tSb0, -8, "none"], [tSb1, -5], [TM.sol, -5, "none"]]);
+        camKeys(C1.yaw, "rotationY", [[0, 20], [TM.est - 0.1, 24, "none"], [TM.est + 1.4, 40], [tSw0, 42, "none"], [tSw1, -8], [H2, -10, "none"], [tCl, -14], [tSb0, -12, "none"], [tSb1, -6], [TM.sol, -3, "none"]]);
 
         // S1 · hook: Kamu (reseller) close, then the relay line-up; "kebanyakan uangnya cuma numpang lewat": coins stream down the lane
         POP("#rKnm", TM.hook + 0.1, 0.45);
@@ -514,7 +519,7 @@
         moveX(RP, xP1, xP1 + VP * 0.4, H1, 0.8, "power2.out");
         run(RP, tP0, H1, true);
         poseTo(RP, armPose(PASS), H1 - 0.5, 0.3, "power2.out");
-        POP("#tP100", TM.r100, 0.45);
+        POP("#tP100", TM.r100, 0.45); UNPOP("#rPnm", H1 - 0.55, 0.25);
         // Kamu sets off and reaches back
         moveX(RK, xK0, xK1, H1 - TKa, TKa, "power2.in");
         poseTo(RK, armPose(RECV), H1 - TKa - 0.3, 0.35, "power2.out");
@@ -523,7 +528,7 @@
         hide("#rPbt", H1); show("#rKbt", H1); INIT("#tK100", { scaleX: 1, scaleY: 1 });
         F("#rKgl", { x: 0 }, { x: 300, duration: 0.45, ease: "power2.inOut" }, H1 + 0.05);
         POP("#tKom", H1 + 0.12, 0.4);
-        run(RP, H1, H1 + 0.55, false);
+        run(RP, H1, H1 + 0.55, true); poseTo(RP, armPose([12, -48]), H1 + 0.05, 0.35);
         poseTo(RP, STAND, H1 + 0.55, 0.4, "power2.out");
         RISE(S2a, TM.pmb + 0.05, 0.02, 0.42); RISE(S2b1, TM.itu1 - 0.1, 0.03, 0.42); RISE(S2b2, TM.omz - 0.1, 0.03, 0.42); HL("#s2bh", TM.omz + 0.3, 0.4);
         show("#ilu1", TM.r100); F("#ilu1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, TM.r100);
@@ -551,7 +556,7 @@
         SINK([...S3a, ...S3b], TM.ting - 0.12, 0.3); F("#s3T", { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "power1.in" }, TM.ting - 0.06); hide("#s3T", TM.ting + 0.3);
 
         // S4 · "Yang tinggal di tanganmu cuma dua puluh ribu. Itu untungnya." — Kamu raises the stub, the camera pushes in
-        poseTo(RK, armPose(RAISE), TM.ting + 0.15, 0.55, "power3.inOut");
+        poseTo(RK, armPose(RAISE), TM.ting + 0.15, 0.55, "power3.inOut"); UNPOP("#rKnm", TM.ting, 0.25);
         F("#rKbt", { scaleX: 1, scaleY: 1 }, { scaleX: 1.12, scaleY: 1.12, duration: 0.3, ease: "back.out(3)" }, TM.r20);
         POP("#tK20", TM.r20 - 0.05, 0.45); F("#rKgl", { x: 0 }, { x: 300, duration: 0.5, ease: "power2.inOut" }, TM.r20 + 0.2);
         POP("#tKun", TM.unt - 0.05, 0.42);
@@ -560,6 +565,7 @@
         SINK([...S4a, ...S4b1, ...S4b2], TM.kal - 0.12, 0.3); F("#s4T", { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "power1.in" }, TM.kal - 0.06); hide("#s4T", TM.kal + 0.3);
 
         // S5 · "Kalau cuma uang masuk yang dicatat, omzet kelihatan kayak untung." — the scoreboard
+        F("#sb", { y: 170 }, { y: 0, duration: 0.9, ease: "power3.out" }, TM.kal - 0.35); F("#sbB, #sb .post", { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power1.out" }, TM.kal - 0.35);
         $$(".lampOn").forEach((e, k) => F(e, { opacity: 0 }, { opacity: 1, duration: 0.12 }, TM.kal + 0.3 + k * 0.08));
         F("#sbLed", { opacity: 0.12 }, { opacity: 0.25, duration: 0.2 }, TM.kal + 0.4);
         F("#sbr1", { opacity: 0.25 }, { opacity: 1, duration: 0.3 }, TM.msk - 0.05); F("#sbr1", { scaleX: 0.96, scaleY: 0.96 }, { scaleX: 1, scaleY: 1, duration: 0.35, ease: "back.out(2.5)" }, TM.msk - 0.05);

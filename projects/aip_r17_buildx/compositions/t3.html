@@ -1,12 +1,122 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="t3" data-width="1080" data-height="1920"></div>
+  <style>
+    /* t3 INTERVIEW (22.07–26.87) "Pas interview, kamu bisa jelasin cara kerjanya dari dalam, bukan cuma cara pakainya."
+       Frame 0 = the header as t2 left it (item 2); it rolls to item 3 "Interview · jelasin dari dalam, bukan hafalan". A white question
+       card "PERTANYAAN INTERVIEW · Apa yang terjadi di balik git commit?" (our example question). Below, a glass cutaway panel: the
+       top strip is CARA PAKAI ($ git commit -m "fitur baru"), the rest is a striped lid "di baliknya?". On "jelasin" the lid rolls up
+       (shutter) and shows CARA KERJA: commit → tree → blob boxes with one-line jobs and short hash chips (Git's object model, git
+       glossary); "dari dalam," = a scan line sweeps the diagram and the note "nama tiap objek = hash dari isinya · isi berubah, nama
+       ikut berubah" lands; "bukan cuma cara pakainya." = pills "hafal cara pakai" + "paham cara kerja" (the second one glows) while
+       the CARA PAKAI strip blinks. Last 0.22 s: workspace exit. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #t3-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #t3-q { width: 960px; height: 100px; }
+    #t3-q .av { position: absolute; left: 20px; top: 20px; width: 60px; height: 60px; border-radius: 50%; background: #0b1440; color: #6adfff; }
+    #t3-q .av svg { position: absolute; left: 15px; top: 15px; width: 30px; height: 30px; }
+    #t3-q .lb { position: absolute; left: 98px; top: 14px; font: 700 14px/20px Poppins; letter-spacing: 2px; color: #0a7ea4; white-space: nowrap; }
+    #t3-q .qq { position: absolute; left: 98px; top: 36px; font: 700 29px/44px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #t3-q .qq code { font: 700 27px/40px Poppins; color: #0a7ea4; background: #e6f8fe; border-radius: 10px; padding: 0 10px; }
+    #t3-pn { width: 960px; height: 330px; overflow: hidden; }
+    #t3-term { position: absolute; left: 24px; top: 18px; width: 912px; height: 78px; border-radius: 18px; background: #070b26; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    #t3-term .lb { position: absolute; left: 20px; top: 10px; font: 700 13px/18px Poppins; letter-spacing: 2px; color: #86a9c9; }
+    #t3-cmd { position: absolute; left: 20px; top: 30px; font: 700 26px/40px Poppins; color: #e3edfa; white-space: nowrap; }
+    #t3-cmd .p { color: #6adfff; }
+    #t3-tgl { position: absolute; left: 24px; top: 18px; width: 912px; height: 78px; border-radius: 18px; box-shadow: inset 0 0 0 2.5px #6adfff, 0 0 20px rgba(1,204,247,.5); }
+    #t3-lid { position: absolute; left: 24px; top: 108px; width: 912px; height: 206px; border-radius: 18px; transform-origin: 50% 0%;
+      background: repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 18px, rgba(255,255,255,.02) 18px 36px), #111c4e; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14); }
+    #t3-lid .q { position: absolute; left: 0; width: 912px; top: 74px; text-align: center; font: 700 34px/56px Poppins; color: #b8c7dd; white-space: nowrap; }
+    #t3-lid .q b { color: #6adfff; }
+    #t3-kl { position: absolute; left: 24px; top: 110px; font: 700 13px/18px Poppins; letter-spacing: 2px; color: #6adfff; }
+    .t3-bx { position: absolute; left: 0; top: 0; width: 280px; height: 112px; border-radius: 18px; background: linear-gradient(180deg, #ffffff, #f2f6fc); box-shadow: 0 12px 26px rgba(2,6,26,.45); }
+    .t3-bx .ti { position: absolute; left: 12px; top: 12px; width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440; }
+    .t3-bx .ti svg { position: absolute; left: 10px; top: 10px; width: 22px; height: 22px; }
+    .t3-bx .nm { position: absolute; left: 64px; top: 10px; font: 700 26px/40px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .t3-bx .ds { position: absolute; left: 14px; top: 56px; font: 400 17px/24px Poppins; color: #294b77; white-space: nowrap; }
+    .t3-bx .hs { position: absolute; right: 12px; top: 16px; height: 30px; padding: 0 9px; border-radius: 10px; background: #e6f8fe; font: 700 15px/30px Poppins; color: #0a7ea4; white-space: nowrap; }
+    .t3-bx .lk { position: absolute; left: 14px; top: 82px; font: 400 14px/20px Poppins; color: #8a97ad; white-space: nowrap; }
+    .t3-ar { position: absolute; left: 0; top: 0; width: 30px; height: 4px; border-radius: 2px; background: #6adfff; transform-origin: 0% 50%; box-shadow: 0 0 10px rgba(1,204,247,.7); }
+    .t3-ar:after { content: ""; position: absolute; right: -6px; top: -7px; border-left: 12px solid #6adfff; border-top: 9px solid transparent; border-bottom: 9px solid transparent; }
+    #t3-scan { position: absolute; left: 0; top: 130px; width: 6px; height: 120px; border-radius: 3px; background: #6adfff; box-shadow: 0 0 22px 6px rgba(1,204,247,.6); }
+    #t3-note { position: absolute; left: 24px; top: 254px; display: flex; align-items: center; gap: 8px; font: 400 19px/28px Poppins; color: #e3edfa; white-space: nowrap; }
+    #t3-note svg { width: 22px; height: 22px; color: #6adfff; }
+    #t3-note b { font-weight: 700; color: #6adfff; }
+    .t3-pl { position: absolute; left: 0; top: 0; height: 44px; padding: 0 18px 0 12px; border-radius: 22px; display: flex; align-items: center; gap: 8px; font: 700 20px/44px Poppins; white-space: nowrap; }
+    .t3-pl svg { width: 22px; height: 22px; }
+    #t3-p0 { color: #cfd8ea; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.2); }
+    #t3-p1 { color: #0b1440; background: #01ccf7; box-shadow: 0 0 22px rgba(1,204,247,.6); }
+    #t3-plus { position: absolute; left: 0; top: 0; font: 700 30px/44px Poppins; color: #6adfff; }
+  </style>
+  <div id="root" data-composition-id="t3" data-width="1080" data-height="1920">
+    <div id="t3-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.79);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["t3"] = tl;
+      const K = window.R17K, D = 4.8, P = "t3";
+      const S = K.scene(P, D), { tl, ft, I, wt, $, type } = S;
+      const z = $("t3-zone");
+      const BX = [["commit", "commit", "siapa &middot; kapan &middot; pesan", "a1f3c9e", "&rarr; tree + commit induk"], ["tree", "tree", "daftar file + folder", "7b2e04d", "&rarr; blob tiap file"],
+        ["blob", "file", "isi file-nya", "e41c16a", "isi mentah, tanpa nama"]];
+      let h = K.headerHTML(P) + `<div class="k-ab" id="t3-ws" style="width:1080px;height:945px">`;
+      h += `<div class="k-white" id="t3-q"><div class="av">${K.svg("user")}</div><div class="lb">PERTANYAAN INTERVIEW &middot; CONTOH</div>` +
+        `<div class="qq">&ldquo;Apa yang terjadi di balik <code>git commit</code>?&rdquo;</div></div>`;
+      h += `<div class="k-glass" id="t3-pn"><div id="t3-term"><div class="lb">CARA PAKAI</div><div id="t3-cmd"><span class="p">$ </span><span id="t3-cmdt"></span></div></div><div id="t3-tgl"></div>` +
+        `<div class="k-lab" id="t3-kl">CARA KERJA</div>` +
+        BX.map(([n, ic, ds, hs, lk], k) => `<div class="t3-bx" id="t3-b${k}"><div class="ti">${K.svg(ic)}</div><div class="nm">${n}</div><div class="hs" id="t3-h${k}"># ${hs}</div>` +
+          `<div class="ds">${ds}</div><div class="lk">${lk}</div></div>`).join("") +
+        `<i class="t3-ar" id="t3-a0"></i><i class="t3-ar" id="t3-a1"></i><div id="t3-scan"></div>` +
+        `<div id="t3-note">${K.svg("hash")}nama tiap objek = <b>hash dari isinya</b> &middot; isi berubah, nama ikut berubah</div>` +
+        `<div id="t3-lid"><div class="q">di baliknya <b>?</b></div></div></div>`;
+      h += `<div class="t3-pl" id="t3-p0">${K.svg("check")}hafal cara pakai</div><div id="t3-plus">+</div><div class="t3-pl" id="t3-p1">${K.svg("check")}paham cara kerja</div>`;
+      h += `</div>`;
+      z.innerHTML = h;
+      const tIn = wt("interview,"), tKa = wt("kamu", 22.5), tJe = wt("jelasin", 23), tCa = wt("cara", 23.5), tKe = wt("kerjanya"), tDa = wt("dari", 24.3), tDl = wt("dalam,"),
+        tBu = wt("bukan"), tCu = wt("cuma"), tCa2 = wt("cara", 25.7), tPk = wt("pakainya.");
+      // ---------------------------------------------------------------- header: item 2 → 3
+      K.headerSet(S, P, 2);
+      K.headerSwap(S, P, 2, 3, 0.02);
+      // ---------------------------------------------------------------- question card + cutaway panel
+      const q = $("t3-q"); I(q, { x: 60, y: 484, opacity: 0, scale: 0.94, transformOrigin: "50% 50%" });
+      ft(q, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.8)" }, tIn - 0.16);
+      const pn = $("t3-pn"); I(pn, { x: 60, y: 620, opacity: 0 });
+      ft(pn, { y: 620, opacity: 0 }, { y: 600, opacity: 1, duration: 0.32, ease: "power3.out" }, tIn + 0.02);
+      const tEnd = type($("t3-cmdt"), 'git commit -m "fitur baru"', tIn + 0.24, 40);
+      const tg = $("t3-tgl"); I(tg, { opacity: 0 });
+      // "jelasin": the lid rolls up
+      const lid = $("t3-lid"); I(lid, { scaleY: 1, opacity: 1 });
+      ft(lid, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0.6, duration: 0.36, ease: "power3.inOut" }, tJe - 0.06);
+      // CARA KERJA: boxes, arrows, hash chips (panel-local coords: boxes at y 136)
+      I($("t3-kl"), { opacity: 0 }); ft($("t3-kl"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tJe + 0.16);
+      const XX = [24, 340, 656];
+      BX.forEach((_, k) => {
+        const b = $("t3-b" + k); I(b, { x: XX[k], y: 150, opacity: 0, scale: 0.9, transformOrigin: "50% 50%" });
+        ft(b, { y: 150, opacity: 0, scale: 0.9 }, { y: 136, opacity: 1, scale: 1, duration: 0.28, ease: "back.out(1.8)" }, tCa - 0.1 + k * 0.12);
+        const hs = $("t3-h" + k); I(hs, { opacity: 0, scale: 0.5, transformOrigin: "100% 50%" });
+        ft(hs, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2.4)" }, tDa - 0.1 + k * 0.1);
+      });
+      [0, 1].forEach((k) => { const a = $("t3-a" + k); I(a, { x: XX[k] + 280 + 2, y: 136 + 54, scaleX: 0 });
+        ft(a, { scaleX: 0 }, { scaleX: 1, duration: 0.18, ease: "power2.out" }, tKe + 0.04 + k * 0.1); });
+      // "dari dalam,": scan line sweeps, the note lands
+      const sc = $("t3-scan"); I(sc, { x: 20, opacity: 0 });
+      ft(sc, { opacity: 0 }, { opacity: 1, duration: 0.08 }, tDa - 0.12);
+      ft(sc, { x: 20 }, { x: 936, duration: 0.6, ease: "power1.inOut" }, tDa - 0.12);
+      ft(sc, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tDa + 0.42);
+      const nt = $("t3-note"); I(nt, { opacity: 0, y: 8 });
+      ft(nt, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tDl - 0.04);
+      // ---------------------------------------------------------------- "bukan cuma cara pakainya.": the two pills (below the panel, centred)
+      const p0 = $("t3-p0"), pl = $("t3-plus"), p1 = $("t3-p1");
+      // the pills take the note's place at the panel foot (the note fades out first), centred
+      I(p0, { x: 250, y: 850, opacity: 0, scale: 0.6, transformOrigin: "50% 50%" });
+      I(pl, { x: 514, y: 850, opacity: 0 });
+      I(p1, { x: 550, y: 850, opacity: 0, scale: 0.6, transformOrigin: "50% 50%" });
+      ft(p0, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.4)" }, tBu - 0.04);
+      ft(pl, { opacity: 0 }, { opacity: 1, duration: 0.16 }, tCu - 0.04);
+      ft(p1, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2.6)" }, tCu + 0.06);
+      ft(tg, { opacity: 0 }, { opacity: 1, duration: 0.12, yoyo: true, repeat: 1 }, tCa2 - 0.04);
+      // the note steps aside for the pills
+      ft(nt, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tBu - 0.16);
+      // ---------------------------------------------------------------- exit
+      S.exitWs($("t3-ws"));
+      S.finish();
     })();
   </script>
 </template>

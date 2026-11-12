@@ -1,12 +1,173 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s01 HOOK (0–5.73) "Portofolio kamu isinya to-do app lagi? Coba rakit Git versi kamu sendiri, dari nol."
+       Frame 0 = a readable picture: the "PORTOFOLIO KAMU" board with two identical to-do app cards (todo-app, todo-app-2) and two empty
+       dashed slots. "to-do app lagi?" = the second card copies itself into slot 3 (todo-app-final) and slot 4 (todo-app-beneran), the
+       counter rolls 2 → 4 and a "4× to-do app" sticker lands. "Coba rakit Git" = the board slides away, a model-kit frame (KIT RAKIT)
+       pops in with three white parts still on their runners (blob, commit, tree); on "Git" scissors run along the runner, the gates
+       snap, the frame fades and the parts re-order into a chain commit → tree → blob with arrows and short hash chips; a terminal bar
+       types "$ mygit commit" → "✓ commit a1f3c9e tersimpan"; "dari nol." = stamp "BUATAN KAMU · DARI NOL". Last 0.22 s: exit. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    .s01-card { position: absolute; left: 0; top: 0; width: 432px; height: 236px; border-radius: 26px; background: linear-gradient(180deg, #ffffff, #f3f6fc);
+      box-shadow: 0 18px 38px rgba(2,6,26,.5); }
+    .s01-card .ti { position: absolute; left: 22px; top: 22px; width: 56px; height: 56px; border-radius: 16px; background: #e6f8fe; color: #0a7ea4; }
+    .s01-card .ti svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; }
+    .s01-card .fn { position: absolute; left: 94px; top: 20px; font: 700 25px/34px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s01-card .sb { position: absolute; left: 94px; top: 54px; font: 400 17px/24px Poppins; color: #5d6f8f; white-space: nowrap; }
+    .s01-card .rw { position: absolute; left: 24px; width: 384px; height: 26px; }
+    .s01-card .rw i { position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 8px; box-shadow: inset 0 0 0 2.5px #b9c6da; }
+    .s01-card .rw i.on { background: #01ccf7; box-shadow: none; }
+    .s01-card .rw i.on svg { position: absolute; left: 4px; top: 4px; width: 18px; height: 18px; color: #fff; }
+    .s01-card .rw b { position: absolute; left: 42px; top: 9px; height: 9px; border-radius: 5px; background: #d9e1ee; }
+    .s01-card .ol { position: absolute; inset: 0; border-radius: 26px; box-shadow: inset 0 0 0 3px #01ccf7, 0 0 24px rgba(1,204,247,.55); opacity: 0; }
+    .s01-slot { position: absolute; left: 0; top: 0; width: 432px; height: 236px; border-radius: 26px; border: 2.5px dashed rgba(255,255,255,.22); }
+    #s01-cnt { position: absolute; left: 0; top: 0; height: 44px; width: 164px; border-radius: 22px; overflow: hidden; background: rgba(1,204,247,.12); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.5); }
+    #s01-cnt .rl { position: absolute; left: 0; top: 0; width: 164px; }
+    #s01-cnt .rl b { display: block; height: 44px; text-align: center; font: 700 20px/44px Poppins; color: #6adfff; letter-spacing: 1px; white-space: nowrap; }
+    #s01-stk { position: absolute; left: 0; top: 0; height: 84px; padding: 0 30px 0 18px; border-radius: 22px; background: #ffffff; display: flex; align-items: center; gap: 14px;
+      font: 700 40px/84px Poppins; color: #0a0d2c; white-space: nowrap; box-shadow: 0 22px 44px rgba(2,6,26,.6), 0 0 0 6px rgba(1,204,247,.35); transform-origin: 50% 50%; }
+    #s01-stk svg { width: 42px; height: 42px; color: #0a7ea4; }
+    #s01-stk em { font-style: normal; color: #0a7ea4; }
+    /* kit */
+    #s01-kit { width: 960px; height: 600px; }
+    #s01-kch { position: absolute; left: 0; top: 0; height: 40px; padding: 0 16px 0 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font: 700 18px/1 Poppins; letter-spacing: 1.5px;
+      color: #6adfff; background: rgba(1,204,247,.10); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.5); white-space: nowrap; }
+    #s01-kch svg { width: 20px; height: 20px; }
+    #s01-spr { position: absolute; left: 0; top: 0; overflow: visible; }
+    .s01-part { position: absolute; left: 0; top: 0; width: 270px; height: 204px; border-radius: 24px; background: linear-gradient(180deg, #ffffff, #f2f6fc); box-shadow: 0 14px 30px rgba(2,6,26,.45); }
+    .s01-part .ti { position: absolute; left: 18px; top: 18px; width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440; }
+    .s01-part .ti svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; }
+    .s01-part .nm { position: absolute; left: 88px; top: 24px; font: 700 32px/44px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s01-part .no { position: absolute; right: 18px; top: 16px; font: 700 15px/20px Poppins; color: #9aa9c2; letter-spacing: 1px; }
+    .s01-part .sb { position: absolute; left: 20px; top: 90px; font: 400 20px/28px Poppins; color: #5d6f8f; white-space: nowrap; }
+    .s01-part .hs { position: absolute; left: 18px; top: 146px; height: 36px; padding: 0 12px; border-radius: 12px; background: #e6f8fe; display: flex; align-items: center; gap: 6px;
+      font: 700 18px/36px Poppins; color: #0a7ea4; white-space: nowrap; }
+    .s01-part .hs svg { width: 18px; height: 18px; }
+    .s01-arr { position: absolute; left: 0; top: 0; width: 40px; height: 4px; border-radius: 2px; background: #6adfff; transform-origin: 0% 50%; box-shadow: 0 0 10px rgba(1,204,247,.7); }
+    .s01-arr:after { content: ""; position: absolute; right: -6px; top: -7px; border-left: 12px solid #6adfff; border-top: 9px solid transparent; border-bottom: 9px solid transparent; }
+    #s01-sc { position: absolute; left: 0; top: 0; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: #ffffff; color: #0b1440; box-shadow: 0 0 20px rgba(1,204,247,.8); }
+    #s01-sc svg { position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; }
+    #s01-term { position: absolute; left: 0; top: 0; width: 896px; height: 128px; border-radius: 22px; background: #070b26; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    #s01-cmd { position: absolute; left: 26px; top: 16px; font: 700 28px/44px Poppins; color: #e3edfa; white-space: nowrap; }
+    #s01-cmd .p { color: #6adfff; }
+    #s01-res { position: absolute; left: 26px; top: 66px; font: 400 24px/40px Poppins; color: #5be08a; white-space: nowrap; }
+    #s01-res b { font-weight: 700; color: #ffffff; }
+    #s01-stamp { font-size: 22px; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.723);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s01"] = tl;
+      const K = window.R17K, D = 5.7333, P = "s01";
+      const S = K.scene(P, D), { tl, ft, I, wt, $, type } = S;
+      const z = $("s01-zone");
+      // ---------------------------------------------------------------- markup
+      const NAMES = ["todo-app", "todo-app-2", "todo-app-final", "todo-app-beneran"];
+      const BX = 60, BY = 318, SL = [[32, 80], [496, 80], [32, 336], [496, 336]];
+      const card = (k) => `<div class="s01-card" id="s01-c${k}"><div class="ti">${K.svg("todo")}</div><div class="fn">${NAMES[k]}</div><div class="sb">React &middot; 3 fitur</div>` +
+        [0, 1, 2].map((r) => `<div class="rw" style="top:${110 + r * 38}px"><i class="${r < 2 ? "on" : ""}">${r < 2 ? K.svg("check") : ""}</i><b style="width:${[230, 180, 260][r]}px"></b></div>`).join("") +
+        `<i class="ol" id="s01-o${k}"></i></div>`;
+      let h = `<div class="k-ab" id="s01-ws" style="width:1080px;height:945px">`;
+      h += `<div class="k-ab" id="s01-board" style="width:1080px;height:945px"><div class="k-glass" id="s01-bbg" style="width:960px;height:600px"></div>` +
+        `<div class="k-lab" id="s01-blab" style="left:${BX + 32}px;top:${BY + 28}px">PORTOFOLIO KAMU</div>` +
+        `<div id="s01-cnt"><div class="rl" id="s01-cr"><b>2 proyek</b><b>3 proyek</b><b>4 proyek</b></div></div>` +
+        SL.slice(2).map((s, k) => `<div class="s01-slot" id="s01-sl${k + 2}"></div>`).join("") + NAMES.map((_, k) => card(k)).join("") +
+        `<div id="s01-stk">${K.svg("copy")}<span>4&times; <em>to-do app</em></span></div></div>`;
+      h += `<div class="k-ab" id="s01-kitw" style="width:1080px;height:945px"><div class="k-glass" id="s01-kit"></div>` +
+        `<div class="k-lab" id="s01-klab" style="left:${BX + 32}px;top:${BY + 28}px">KIT RAKIT &middot; GIT VERSI KAMU</div>` +
+        `<div id="s01-kch">${K.svg("wrench")}dari nol</div>` +
+        `<svg id="s01-spr" width="1080" height="945" viewBox="0 0 1080 945"></svg>` +
+        [["blob", "file", "isi file", "A1", "e41c16a"], ["commit", "commit", "siapa &middot; kapan &middot; pesan", "A2", "a1f3c9e"], ["tree", "tree", "daftar file", "A3", "7b2e04d"]]
+          .map(([n, ic, sb, no, hs], k) => `<div class="s01-part" id="s01-p${k}"><div class="ti">${K.svg(ic)}</div><div class="nm">${n}</div><div class="no">${no}</div>` +
+            `<div class="sb">${sb}</div><div class="hs" id="s01-h${k}">${K.svg("hash")}${hs}</div></div>`).join("") +
+        `<i class="s01-arr" id="s01-a0"></i><i class="s01-arr" id="s01-a1"></i><div id="s01-sc">${K.svg("scissors")}</div>` +
+        `<div id="s01-term"><div id="s01-cmd"></div><div id="s01-res">&#10003; commit <b>a1f3c9e</b> tersimpan</div></div>` +
+        `<div class="k-stamp k-cy" id="s01-stamp">${K.svg("check")}BUATAN KAMU &middot; DARI NOL</div></div>`;
+      h += `</div>`;
+      z.innerHTML = h;
+      const tTo = wt("to-do"), tApp = wt("app"), tLa = wt("lagi?"), tCo = wt("Coba"), tRa = wt("rakit"), tGit = wt("Git"), tVe = wt("versi"), tSe = wt("sendiri,"), tNol = wt("nol.");
+      // ---------------------------------------------------------------- frame 0: board + two cards + two empty slots
+      I($("s01-board"), { x: 0, opacity: 1 });
+      I($("s01-bbg"), { x: BX, y: BY });
+      I($("s01-cnt"), { x: BX + 960 - 32 - 164, y: BY + 20 });
+      I($("s01-cr"), { y: 0 });
+      SL.forEach(([x, y], k) => {
+        const c = $("s01-c" + k); I(c, { x: BX + x, y: BY + y, opacity: k < 2 ? 1 : 0, scale: 1, transformOrigin: "50% 50%" });
+        I($("s01-o" + k), { opacity: 0 });
+        if (k >= 2) I($("s01-sl" + k), { x: BX + x, y: BY + y, opacity: 1 });
+      });
+      // "to-do app lagi?": card 2 copies itself into slot 3, then slot 4; the counter rolls
+      [[1, 2, tTo - 0.12], [2, 3, tApp - 0.06]].forEach(([a, b, t]) => {
+        const c = $("s01-c" + b), [ax, ay] = SL[a], [bx, by] = SL[b];
+        ft(c, { x: BX + ax, y: BY + ay, opacity: 0.2, scale: 0.94 }, { x: BX + bx, y: BY + by, opacity: 1, scale: 1, duration: 0.34, ease: "power3.out" }, t);
+        tl.set($("s01-sl" + b), { opacity: 0 }, t + 0.3);
+        ft($("s01-cr"), { y: -(b - 2) * 44 }, { y: -(b - 1) * 44, duration: 0.3, ease: "power3.inOut" }, t + 0.06);
+      });
+      // "lagi?": all four outline-pulse in sync, the sticker lands
+      [0, 1, 2, 3].forEach((k) => { ft($("s01-o" + k), { opacity: 0 }, { opacity: 1, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tLa - 0.02); });
+      const stk = $("s01-stk"); I(stk, { x: 540, xPercent: -50, y: BY + 260, rotation: -5, scale: 0.4, opacity: 0 });
+      ft(stk, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tLa + 0.04);
+      // "Coba": the board slides away left
+      ft($("s01-board"), { x: 0, opacity: 1 }, { x: -260, opacity: 0, duration: 0.32, ease: "power2.in" }, tCo - 0.16);
+      // ---------------------------------------------------------------- the kit: frame + 3 parts on runners (blob, commit, tree)
+      const kw = $("s01-kitw"); I(kw, { opacity: 0, scale: 0.94, transformOrigin: "540px 618px" });
+      ft(kw, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.34, ease: "back.out(1.6)" }, tCo + 0.06);
+      I($("s01-kit"), { x: BX, y: BY });
+      I($("s01-kch"), { x: BX + 960 - 32 - 140, y: BY + 22 });
+      // sprue geometry (global): frame rect around three part slots
+      const PX = [BX + 40, BX + 345, BX + 650], PY = BY + 104, PW = 270, PH = 204;
+      const fr = { x: BX + 22, y: BY + 84, w: 916, h: 244 };
+      let sv = `<g id="s01-fr" fill="none" stroke="#6adfff" stroke-width="5" stroke-linecap="round" opacity=".75">` +
+        `<rect x="${fr.x}" y="${fr.y}" width="${fr.w}" height="${fr.h}" rx="22"/>` +
+        PX.slice(1).map((x) => `<line x1="${x - 17.5}" y1="${fr.y}" x2="${x - 17.5}" y2="${fr.y + fr.h}"/>`).join("") + `</g>`;
+      // gates: short stubs from the frame to each part (top + bottom)
+      PX.forEach((x, k) => {
+        sv += `<rect id="s01-g${k}a" x="${x + PW / 2 - 9}" y="${fr.y}" width="18" height="${PY - fr.y}" rx="4" fill="#6adfff"/>` +
+          `<rect id="s01-g${k}b" x="${x + PW / 2 - 9}" y="${PY + PH}" width="18" height="${fr.y + fr.h - PY - PH}" rx="4" fill="#6adfff"/>`;
+      });
+      $("s01-spr").innerHTML = sv;
+      I($("s01-fr"), { opacity: 0.75 });
+      [0, 1, 2].forEach((k) => { I($(`s01-g${k}a`), { opacity: 1 }); I($(`s01-g${k}b`), { opacity: 1 }); });
+      // parts sit in the frame in the order blob, commit, tree
+      [0, 1, 2].forEach((k) => { I($("s01-p" + k), { x: PX[k], y: PY, rotation: 0 }); I($("s01-h" + k), { opacity: 0, scale: 0.5, transformOrigin: "0% 50%" }); });
+      // "rakit": the frame glows
+      ft($("s01-fr"), { opacity: 0.75 }, { opacity: 1, duration: 0.14, yoyo: true, repeat: 1 }, tRa);
+      // "Git": scissors run along the top runner, the gates snap
+      const sc = $("s01-sc"); I(sc, { x: fr.x, y: fr.y + 18, opacity: 0, rotation: 0 });
+      ft(sc, { opacity: 0 }, { opacity: 1, duration: 0.1 }, tGit - 0.12);
+      ft(sc, { x: fr.x, rotation: 0 }, { x: fr.x + fr.w, rotation: 360, duration: 0.5, ease: "power1.inOut" }, tGit - 0.1);
+      ft(sc, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tGit + 0.42);
+      PX.forEach((x, k) => {
+        const tc = tGit - 0.1 + 0.5 * ((x + PW / 2 - fr.x) / fr.w);
+        tl.set($(`s01-g${k}a`), { opacity: 0 }, tc); tl.set($(`s01-g${k}b`), { opacity: 0 }, tc);
+        ft($("s01-p" + k), { y: PY, rotation: 0 }, { y: PY - 12, rotation: k === 1 ? -3 : 3, duration: 0.16, ease: "power2.out" }, tc);
+      });
+      ft($("s01-fr"), { opacity: 1 }, { opacity: 0, duration: 0.25 }, tGit + 0.4);
+      // "versi kamu sendiri": the parts re-order into the chain commit → tree → blob, arrows draw, hash chips pop
+      const ORD = [2, 0, 1];   // part k goes to chain slot ORD[k]: blob → 3rd, commit → 1st, tree → 2nd
+      [0, 1, 2].forEach((k) => {
+        ft($("s01-p" + k), { x: PX[k], y: PY - 12, rotation: k === 1 ? -3 : 3 }, { x: PX[ORD[k]], y: PY - 8, rotation: 0, duration: 0.42, ease: "power3.inOut" }, tVe - 0.06 + k * 0.04);
+        ft($("s01-h" + k), { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.4)" }, tSe + 0.12 + ORD[k] * 0.08);
+      });
+      [0, 1].forEach((k) => {
+        const a = $("s01-a" + k); I(a, { x: PX[k] + PW - 2, y: PY - 8 + PH / 2 - 2, scaleX: 0, width: 31 });
+        ft(a, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power2.out" }, tSe + 0.02 + k * 0.1);
+      });
+      // terminal bar: "$ mygit commit" → result
+      const term = $("s01-term"); I(term, { x: BX + 32, y: BY + 350, opacity: 0 });
+      ft(term, { opacity: 0, y: BY + 370 }, { opacity: 1, y: BY + 350, duration: 0.3, ease: "power3.out" }, tVe - 0.1);
+      $("s01-cmd").innerHTML = `<span class="p">$ </span><span id="s01-cmdt"></span>`;
+      const tEnd = type($("s01-cmdt"), "mygit commit", tVe + 0.12, 22);
+      const res = $("s01-res"); I(res, { opacity: 0, x: -10 });
+      ft(res, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.25, ease: "power3.out" }, tEnd + 0.12);
+      // "dari nol.": the stamp
+      const st = $("s01-stamp"); I(st, { x: BX + 960 - 32, xPercent: -100, y: BY + 506, scale: 0.4, opacity: 0, rotation: -4 });
+      ft(st, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.6)" }, tNol - 0.08);
+      // ---------------------------------------------------------------- exit
+      S.exitWs($("s01-ws"));
+      S.finish();
     })();
   </script>
 </template>

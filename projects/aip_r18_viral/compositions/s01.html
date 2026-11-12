@@ -1,0 +1,107 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s01-stg { left: 70px; top: 318px; width: 940px; height: 600px; border-radius: 34px; overflow: hidden; transform-origin: 50% 50%;
+      background: linear-gradient(180deg, #fbfcff 0%, #eef3fb 70%, #e3eaf6 100%); box-shadow: 0 40px 70px -40px rgba(10,13,44,.55), 0 0 0 1.5px rgba(10,13,44,.07); }
+    #s01-stg > * { position: absolute; }
+    #s01-floor { left: 120px; top: 410px; width: 700px; height: 90px; border-radius: 50%; background: radial-gradient(closest-side, rgba(41,75,119,.16), rgba(41,75,119,0)); }
+    #s01-spot { left: 230px; top: 0; width: 480px; height: 520px; clip-path: polygon(40% 0, 60% 0, 92% 100%, 8% 100%);
+      background: radial-gradient(ellipse 60% 90% at 50% 0%, rgba(255,255,255,.98), rgba(206,224,255,.55) 55%, rgba(206,224,255,0) 100%); }
+    #s01-eb { left: 30px; top: 22px; }
+    #s01-ex { right: 26px; top: 18px; }
+    .s01-cu { top: 0; width: 196px; height: 600px; background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 9px, rgba(0,0,0,.14) 9px 21px, rgba(255,255,255,0) 21px 32px),
+        linear-gradient(90deg, #0a0d2c, #294b77 45%, #1b2f55 70%, #0a0d2c); }
+    #s01-cl { left: 0; border-bottom-right-radius: 100% 26%; box-shadow: 10px 0 24px -12px rgba(10,13,44,.6); }
+    #s01-cr { right: 0; border-bottom-left-radius: 100% 26%; box-shadow: -10px 0 24px -12px rgba(10,13,44,.6); }
+    #s01-val { left: 0; top: 0; width: 940px; height: 64px; }
+    #s01-val .b { position: absolute; left: 0; top: 0; width: 940px; height: 46px; background: linear-gradient(180deg, #0a0d2c, #294b77); }
+    #s01-val .s { position: absolute; left: 0; top: 40px; width: 940px; height: 26px; background: radial-gradient(circle at 23.5px 0, #294b77 23px, rgba(41,75,119,0) 24px) repeat-x; background-size: 47px 26px; }
+    #s01-val .t { position: absolute; left: 0; right: 0; top: 10px; text-align: center; font: 700 15px/26px Poppins, sans-serif; letter-spacing: .3em; color: rgba(255,255,255,.85); }
+    #s01-btn { left: 352px; top: 470px; }
+    #s01-hold { left: 352px; top: 470px; background: linear-gradient(150deg, #9aa7c0, #6f7d98); box-shadow: 0 14px 24px -16px rgba(10,13,44,.6); }
+    #s01-cur { left: 0; top: 0; }
+    #s01-stamp { left: 470px; top: 288px; width: 0; height: 0; }
+    #s01-stamp .k-stamp { left: -184px; top: -32px; width: 368px; padding: 0 0 0 64px; text-align: center; }
+    #s01-stamp .k-stamp svg { position: absolute; left: 20px; top: 12px; width: 32px; height: 32px; display: block; }
+    .s01-seat { top: 506px; width: 124px; height: 120px; border-radius: 30px 30px 0 0; background: linear-gradient(180deg, #d5e0f2, #bccbe4); box-shadow: inset 0 3px 0 rgba(255,255,255,.7); transform-origin: 50% 100%; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s01 HOOK "Sebelum posting, reels kamu bisa gladi resik dulu di depan penonton AI."
+      // From frame 0: a white stage card with YOUR draft reel (fictional UMKM sambal, CONTOH) and a blue "Posting" button; the cursor
+      // goes for it · "Sebelum": click · "posting,": the button turns grey "Tahan dulu" with a lock and shakes · "reels kamu": the
+      // button drops away, navy curtains slide in, the valance drops, a spotlight opens on the reel · "gladi resik": the navy GLADI
+      // RESIK stamp slams on the reel · "dulu": the reel starts playing (progress bar) · "depan penonton": six seats rise, AI viewers
+      // pop in · "AI.": sparkle badges pop, every viewer looks up at the reel.
+      const S = K.scene("s01"), { tl, I, ft, L, $, pop, shake, out, D } = S;
+      const sv = K.svg;
+      const SEATS = [92, 232, 372, 512, 652, 792];
+      let h = `<div class="k-a" id="s01-stg"><div id="s01-floor"></div><div id="s01-spot"></div>` +
+        `<div class="k-eb" id="s01-eb">REELS KAMU · BELUM DIPOSTING</div><div class="k-ex" id="s01-ex">CONTOH</div>` +
+        K.reel("s01-rl", { x: 365, y: 70, w: 210, fs: 22 }) +
+        SEATS.map((x, i) => `<div class="s01-seat" id="s01-st${i}" style="left:${x - 16}px"></div>`).join("") +
+        SEATS.map((x, i) => K.viewer("s01-v" + i, { x: x + 4, y: 468, s: 84 })).join("") +
+        `<div class="k-btn" id="s01-btn">${sv("send", 2.4)}Posting</div><div class="k-btn" id="s01-hold">${sv("lock", 2.4)}Tahan dulu</div>` +
+        `<div class="s01-cu" id="s01-cl"></div><div class="s01-cu" id="s01-cr"></div>` +
+        `<div id="s01-val"><div class="b"></div><div class="s"></div><div class="t">PANGGUNG LATIHAN</div></div>` +
+        `<div id="s01-stamp"><div class="k-stamp navy" id="s01-stp">${sv("clapper", 2.4)}GLADI RESIK</div></div>` +
+        `<div class="k-cur" id="s01-cur"><svg viewBox="0 0 24 24"><path d="${'M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z'}" fill="#ffffff" stroke="#0a0d2c" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>`;
+      $("s01-cam").innerHTML = h;
+      const cam = $("s01-cam"), stg = $("s01-stg");
+      I(cam, { opacity: 1, y: 0 });
+      const tSeb = L("Sebelum"), tPos = L("posting,"), tRee = L("reels"), tGla = L("gladi resik"), tDul = L("dulu"), tDep = L("depan"), tAI = L("AI.");
+
+      // ---------------- frame 0: stage + draft reel + Posting button, a small settle (visible from the first frame)
+      I(stg, { scale: 1.03 }); ft(stg, { scale: 1.03 }, { scale: 1, duration: 0.6, ease: "power2.out" }, 0);
+      const rl = $("s01-rl"); I(rl, { y: 0, scale: 1 });
+      // cursor goes for "Posting" → click on "Sebelum"
+      const cur = $("s01-cur"); I(cur, { x: 760, y: 640, opacity: 1, scale: 1 });
+      ft(cur, { x: 760, y: 640 }, { x: 488, y: 512, duration: Math.max(0.3, tSeb), ease: "power2.inOut" }, 0.02);
+      const btn = $("s01-btn"), hold = $("s01-hold");
+      I(btn, { opacity: 1, scale: 1, y: 0 }); I(hold, { opacity: 0, scale: 1, y: 0 });
+      ft(cur, { scale: 1 }, { scale: 0.82, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, tSeb + 0.06);
+      ft(btn, { scale: 1 }, { scale: 0.94, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, tSeb + 0.06);
+      // "posting,": the button is held back (grey + lock), shakes; the cursor backs off
+      ft(hold, { opacity: 0 }, { opacity: 1, duration: 0.14 }, tPos - 0.14);
+      shake(hold, tPos, 7); shake(btn, tPos, 7);
+      ft(cur, { x: 488, y: 512 }, { x: 560, y: 580, duration: 0.3, ease: "power2.out" }, tPos);
+      // "reels kamu": button + cursor drop away; curtains, valance and spotlight build the stage
+      const tB = tRee - 0.1;
+      ft([btn, hold], { opacity: 1, y: 0 }, { opacity: 0, y: 60, duration: 0.24, ease: "power2.in" }, tB);
+      ft(cur, { opacity: 1 }, { opacity: 0, duration: 0.18 }, tB);
+      const cl = $("s01-cl"), cr = $("s01-cr"), val = $("s01-val"), spot = $("s01-spot"), eb = $("s01-eb"), ex = $("s01-ex");
+      I(cl, { x: -210 }); I(cr, { x: 210 }); I(val, { y: -72 }); I(spot, { opacity: 0 });
+      ft(cl, { x: -210 }, { x: 0, duration: 0.42, ease: "power3.out" }, tB + 0.05);
+      ft(cr, { x: 210 }, { x: 0, duration: 0.42, ease: "power3.out" }, tB + 0.05);
+      ft(val, { y: -72 }, { y: 0, duration: 0.36, ease: "back.out(1.6)" }, tB + 0.12);
+      ft(spot, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, tB + 0.25);
+      ft([eb, ex], { opacity: 1 }, { opacity: 0, duration: 0.15 }, tB + 0.05);
+      ft(rl, { scale: 1 }, { scale: 1.04, duration: 0.4, ease: "power2.out" }, tB + 0.25);
+      // "gladi resik": the stamp slams on the reel
+      const stp = $("s01-stp");
+      I(stp, { opacity: 0, scale: 1.9, rotation: -8 });
+      ft(stp, { opacity: 0, scale: 1.9 }, { opacity: 1, scale: 1, duration: 0.17, ease: "power4.in" }, tGla - 0.12);
+      shake(stg, tGla + 0.06, 6);
+      // "dulu": the rehearsal starts — the reel plays
+      const pg = $("s01-rl-pg"); I(pg, { width: "8%" });
+      ft(pg, { width: "8%" }, { width: "100%", duration: D - tDul, ease: "none" }, tDul);
+      // "depan penonton": seats rise, AI viewers pop in · "AI.": sparkles + everybody looks up at the reel
+      SEATS.forEach((x, i) => {
+        const st = $("s01-st" + i), v = $("s01-v" + i), sp = $("s01-v" + i + "-sp");
+        I(st, { y: 140 }); ft(st, { y: 140 }, { y: 0, duration: 0.3, ease: "power3.out" }, tDep - 0.2 + i * 0.04);
+        pop(v, tDep - 0.06 + i * 0.06, { s0: 0.3, y: 30 });
+        pop(sp, tAI - 0.08 + i * 0.045, { s0: 0.2, d: 0.24 });
+        const dx = (470 - (x + 46)) / 470 * 3;
+        ["l", "r"].forEach((s) => { const p = $("s01-v" + i + "-p" + s); I(p, { x: 0, y: 1 });
+          ft(p, { x: 0, y: 1 }, { x: dx, y: -3, duration: 0.25, ease: "power2.out" }, tAI + 0.02 + i * 0.03); });
+      });
+      out(cam);
+      S.done();
+    })();
+  </script>
+</template>

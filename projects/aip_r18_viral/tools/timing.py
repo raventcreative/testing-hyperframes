@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-OFFSET, FPS, TAIL = 9 / 30, 30, 1.3
+OFFSET, FPS, TAIL = 9 / 30, 30, 1.4
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 # alignment fixes (raw seconds), checked against the energy envelope + faster-whisper small (none needed so far)
@@ -15,13 +15,12 @@ TFIX = {}
 for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {}
+MERGE = {5: (6, "gladi resik", "gladiresik"), 24: (25, "15", "limabelas")}
 FIX = {}
-FIXI = {106: "JASA,"}   # the CTA keyword is spoken from lowercase "jasa," (so the voice never spells it) and shown in caps
-PRON = {"dm": "diem", "website": "websait", "ai": "eiai", "github": "githab", "postiz": "postis", "autoclip": "otoklip",
-        "chatwoot": "cetwut", "whatsapp": "wotsep", "openhands": "openhens", "remotion": "rimosyen", "umkm": "uemkaem",
-        "inbox": "inboks", "podcaster": "podkaster", "seller": "seler", "live": "laif", "template": "templet", "reel": "ril",
-        "chat": "cet", "jasa": "jasa"}
+FIXI = {89: "VIRAL,"}   # the CTA keyword is spoken from lowercase "viral," (so the voice never spells it) and shown in caps
+PRON = {"dm": "diem", "ai": "eiai", "ainya": "eiainya", "umkm": "uemkaem", "virality": "virality", "predictor": "prediktor",
+        "higgsfield": "higsfild", "plugin": "plagin", "claude": "klod", "codenya": "kodnya", "hook": "huk", "rate": "reit",
+        "reels": "riils", "viral": "viral"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -74,16 +73,15 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Resep", [4, 8], ["beli", "warung,"], ["gratis,"]),
-    ("s02", "Lima", [3, 6, 9], ["GitHub", "gratis,", "bayar"], ["ngerjain."]),
-    ("s03", "Satu,", [2, 4, 7], ["jadwalin", "sekaligus,", "sosmed."], ["Postiz:"]),
-    ("s04", "Dua,", [2, 4, 7, 9], ["panjang", "bersubtitle,", "live."], ["AutoClip:"]),
-    ("s05", "Tiga,", [2, 4, 6, 9], ["inbox,", "admin"], ["Chatwoot:"]),
-    ("s06", "Empat,", [2, 6, 8], ["ngoding", "website", "UMKM."], ["OpenHands:"]),
-    ("s07", "Lima,", [2, 5, 8, 10], ["kode,", "template,", "produk."], ["Remotion:"]),
-    ("s08", "Tapi", [2, 5, 8, 10], ["gratis", "bebas:", "tiga."], ["lisensi"]),
-    ("s09", "Cek", [2, 5], ["lisensinya,", "satu", "teman."], []),
-    ("s10", "Komen", [2], ["DM."], ["JASA,"]),
+    ("s01", "Sebelum", [2, 6], ["posting,", "AI."], ["gladi resik"]),
+    ("s02", "Namanya", [3, 5], ["Virality", "Predictor", "gratis."], []),
+    ("s03", "Kasih", [5, 8, 10], ["otak", "fokus."], ["15"]),
+    ("s04", "Hasilnya", [3, 6, 9], ["skor", "hook,", "rate:"], []),
+    ("s05", "Puncak", [3, 6], ["kelamaan."], ["kelima?"]),
+    ("s06", "Pindahin", [3, 6, 9], ["terkuat", "bertele-tele,"], ["pertama,"]),
+    ("s07", "Buat", [2, 6], ["UMKM,", "iklan."], ["dulu"]),
+    ("s08", "Ingat,", [3, 5], ["prediksi,", "asli"], ["jaminan."]),
+    ("s09", "Komen", [2], ["DM."], ["VIRAL,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",
          "punya", "tetap", "bisa", "langsung", "semua", "masuk", "tiap", "pakai", "kalian", "mau", "isi", "sama", "mana", "buat",

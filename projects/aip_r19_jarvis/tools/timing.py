@@ -1,5 +1,5 @@
 """Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
-- no merges needed (R15 HERMES: the ElevenLabs alignment is the script text itself)
+- no merges needed (R19 ASISTEN (Atticus): the ElevenLabs alignment is the script text itself)
 - word starts that whisper put inside a silence are snapped to the real voice onset (energy > -40 dB)
 - VO starts at OFFSET s (9 frames).   Run: python3 -I tools/timing.py ."""
 import json, re, subprocess, sys
@@ -15,9 +15,9 @@ raw = [w for s in R["segments"] for w in s["words"]]
 MERGE = {}
 FIX = {}
 FIXI = {}   # by raw word index (the ElevenLabs alignment is the script text itself: no fixes needed)
-PRON = {"ai": "eiai", "open": "opn", "source": "sors", "openmausbot": "openmausbot", "chat": "cet", "email": "imeil", "nous": "nus",
-        "research": "riset", "skill": "skil", "chatgpt": "cetjipiti", "api": "eipiai", "key": "ki", "deepseek": "dipsik",
-        "defaultnya": "difoltnya", "ask": "esk", "settingnya": "setingnya", "agent": "eijen", "dm": "diem", "login": "login"}
+PRON = {"atticus": "etikus", "whatsapp": "wotsep", "claude": "klod", "code": "kod", "email": "imeil", "open": "opn", "source": "sors",
+        "file": "fail", "filenya": "failnya", "pro": "pro", "max": "mex", "mac": "mek", "dm": "diem", "drafnya": "draftnya",
+        "ingat": "inget", "asisten": "asisten"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -75,16 +75,16 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Tim", [3, 7, 11, 13], ["server", "siapa?", "open", "source", "laptopmu."], []),
-    ("s02", "OpenMausBot", [3, 5, 8, 10, 12], ["OpenMausBot", "kantornya:", "satu", "tugas,"], []),
-    ("s03", "Hermes", [2, 4, 6, 9, 11, 14], ["Hermes", "karyawannya:", "skill", "lancar."], []),
-    ("s04", "Kantor", [3, 4], ["gratis,", "bayar."], []),
-    ("s05", "Login", [3, 4, 8, 10], ["ChatGPT,", "DeepSeek,", "pemakaian."], []),
-    ("s06", "Skill,", [2, 5, 8, 10, 12], ["laptopmu,", "dikirim", "model."], []),
-    ("s07", "Yang", [3, 4, 6, 9, 12], ["default-nya", "penuh.", "Ask,", "izinmu."], []),
-    ("s08", "Minusnya,", [1, 5, 8, 10], ["Minusnya,", "nyala", "jaga."], []),
-    ("s09", "Mau", [3], ["resmi", "setting-nya?"], []),
-    ("s10", "Komen", [2], ["DM."], ["AGENT,"]),
+    ("s01", "Tahan", [3, 5, 7], ["tombol,", "ngomong,", "lepas.", "beresin"], []),
+    ("s02", "Namanya", [2, 4, 6], ["Atticus,", "open", "source", "Mac."], []),
+    ("s03", "Bilang:", [3, 6], ["WhatsApp,", "kiri.", "pindah."], []),
+    ("s04", "Cari", [2, 4, 6, 9], ["klien?", "isi", "filenya,"], []),
+    ("s05", "Buka", [2, 4, 7, 9], ["email,", "balas,", "jadi,", "sendiri."], []),
+    ("s06", "Pasangnya:", [1, 4, 7], ["link", "Claude", "Code,", "pasangin."], []),
+    ("s07", "Aplikasinya", [2, 4, 8], ["gratis,", "Pro", "Max,", "lokal."], []),
+    ("s08", "Tapi", [2, 6, 9, 10, 11], ["ingat,", "layarmu.", "mikrofon,", "aksesibilitas,", "rekam", "layar."], []),
+    ("s09", "Suaramu", [4, 6, 9, 11], ["Mac,", "dikirim", "model."], []),
+    ("s10", "Komen", [2], ["DM."], ["ASISTEN,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "sama", "kayak", "lewat", "jadi", "biar", "dalam", "ada", "dari", "lalu",
          "atau", "baru", "sampai", "lagi", "isinya", "cuma", "tapi", "plus", "per", "ke", "dia"}

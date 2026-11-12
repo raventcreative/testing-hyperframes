@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — 137 AI Agent Demo</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --c: #01ccf7; --line: rgba(255,255,255,0.12); --card: rgba(255,255,255,0.045); --mute: rgba(255,255,255,0.62); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0b1a45; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: #fff; -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #0b1a45; }
+      .ic { display: inline-block; flex: none; }
+      .ic svg { width: 100%; height: 100%; display: block; }
+      .cy { color: var(--c); }
+      b { font-weight: 700; }
+
+      #bg { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #0b1a45; }
+      #grid { position: absolute; inset: 0; opacity: 0.45; background-image: radial-gradient(rgba(255,255,255,0.10) 1.2px, transparent 1.6px); background-size: 36px 36px; }
+      #glow { position: absolute; left: -300px; top: 260px; width: 1100px; height: 1100px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,0.15) 0%, rgba(1,204,247,0) 62%); }
+
+      #stage { position: absolute; inset: 0; transform-origin: 540px 865px;
+        -webkit-mask-image: linear-gradient(180deg, transparent 0px, transparent 205px, #000 250px, #000 1462px, transparent 1498px); mask-image: linear-gradient(180deg, transparent 0px, transparent 205px, #000 250px, #000 1462px, transparent 1498px); }
+      #cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; }
+
+      /* app window */
+      #win { position: absolute; left: 80px; top: 270px; width: 920px; height: 1190px; border-radius: 26px; overflow: hidden;
+        background: rgba(6, 14, 40, 0.86); border: 1.5px solid rgba(255,255,255,0.14); box-shadow: 0 40px 100px rgba(0,0,0,0.45); }
+      #tbar { position: absolute; left: 0; top: 0; right: 0; height: 62px; display: flex; align-items: center; gap: 14px; padding: 0 22px;
+        border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.03); }
+      #tbar .dots { display: flex; gap: 8px; margin-right: 6px; }
+      #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.22); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; }
+      #tbar .sim { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--c); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 20px; padding: 2px 10px; }
+      #tbar .tr { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 18px; color: var(--mute); }
+      #tbar .tr .ic { width: 18px; height: 18px; }
+      #clockBox { position: relative; width: 56px; height: 26px; }
+      #clockBox span { position: absolute; left: 0; top: 0; font-weight: 400; }
+      #tbar .av { width: 36px; height: 36px; border-radius: 50%; background: rgba(1,204,247,0.18); color: var(--c); font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; margin-left: 6px; }
+      #side { position: absolute; left: 0; top: 62px; bottom: 0; width: 80px; border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; padding-top: 22px; gap: 14px; }
+      .si { position: relative; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); }
+      .si .ic { width: 24px; height: 24px; }
+      #sideAct { position: absolute; left: 15px; top: 22px; width: 50px; height: 50px; border-radius: 14px; background: rgba(1,204,247,0.16); border: 1.5px solid rgba(1,204,247,0.55); }
+      #content { position: absolute; left: 80px; top: 62px; width: 840px; height: 1128px; overflow: hidden; }
+      .scr { position: absolute; inset: 0; padding: 40px; opacity: 0; }
+      .eyebrow { font-size: 16px; font-weight: 700; letter-spacing: 3px; color: var(--c); }
+      .h2 { font-size: 40px; font-weight: 700; line-height: 1.15; margin-top: 6px; }
+      .sub { font-size: 20px; font-weight: 400; color: var(--mute); margin-top: 6px; }
+      .card { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; }
+      .lbl { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); }
+      .btn { display: inline-flex; align-items: center; gap: 10px; height: 54px; padding: 0 24px; border-radius: 14px; font-size: 20px; font-weight: 700; }
+      .btn .ic { width: 22px; height: 22px; }
+      .btn.pri { background: var(--c); color: #04122f; }
+      .btn.ghost { border: 1.5px solid rgba(255,255,255,0.3); color: #fff; }
+
+      /* splash */
+      #sSplash { left: -80px; padding: 0; display: flex; align-items: center; justify-content: center; text-align: center; }
+      #boot, #prof { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      #boot .num { font-size: 200px; font-weight: 700; line-height: 0.95; color: var(--c); letter-spacing: -6px; }
+      #boot .t1 { font-size: 60px; font-weight: 700; line-height: 1.1; }
+      #boot .t2 { font-size: 32px; font-weight: 400; color: rgba(255,255,255,0.85); margin-top: 4px; }
+      #bootBar { width: 520px; height: 10px; border-radius: 6px; background: rgba(255,255,255,0.1); margin-top: 46px; overflow: hidden; }
+      #bootBar i { display: block; height: 100%; width: 100%; background: var(--c); border-radius: 6px; transform-origin: 0 50%; transform: scaleX(0); }
+      #bootTxt { font-size: 19px; color: var(--mute); margin-top: 14px; }
+      #simPill { margin-top: 30px; font-size: 16px; font-weight: 700; letter-spacing: 3px; color: var(--c); border: 1.5px solid var(--c); border-radius: 30px; padding: 6px 18px; opacity: 0; }
+      #prof { opacity: 0; }
+      #prof .hi { font-size: 30px; color: rgba(255,255,255,0.75); }
+      #prof .nm { font-size: 70px; font-weight: 700; line-height: 1.1; }
+      #prof .role { font-size: 28px; color: var(--c); margin-top: 4px; }
+      #prof .tiles { display: flex; gap: 22px; margin-top: 40px; }
+      .tile { width: 330px; text-align: left; padding: 24px 28px; }
+      .tile .big { font-size: 88px; font-weight: 700; line-height: 1; color: var(--c); }
+      .tile .big small { font-size: 32px; color: #fff; margin-left: 8px; }
+      .tile .s { font-size: 22px; color: rgba(255,255,255,0.85); margin-top: 10px; line-height: 1.3; }
+
+      /* connect */
+      #connAll { position: absolute; right: 40px; top: 52px; }
+      #ints { display: grid; grid-template-columns: 370px 370px; gap: 20px; margin-top: 34px; }
+      .int { height: 116px; display: flex; align-items: center; gap: 16px; padding: 0 18px; }
+      .int .lg { width: 56px; height: 56px; border-radius: 14px; background: rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; }
+      .int .lg .ic { width: 28px; height: 28px; color: #fff; }
+      .int .nm b { display: block; font-size: 21px; line-height: 1.2; }
+      .int .nm em { display: block; font-style: normal; font-size: 16px; color: var(--mute); }
+      .int .st { position: relative; margin-left: auto; width: 128px; height: 38px; }
+      .int .st span { position: absolute; inset: 0; border-radius: 19px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 15px; font-weight: 700; }
+      .int .st .off { border: 1.5px solid rgba(255,255,255,0.28); color: rgba(255,255,255,0.8); }
+      .int .st .on { background: rgba(1,204,247,0.16); color: var(--c); opacity: 0; }
+      .int .st .on .ic { width: 16px; height: 16px; }
+      #connRow { display: flex; align-items: center; gap: 18px; margin-top: 34px; font-size: 20px; color: var(--mute); }
+      #connBar { flex: 1; height: 10px; border-radius: 6px; background: rgba(255,255,255,0.1); overflow: hidden; }
+      #connBar i { display: block; height: 100%; background: var(--c); transform-origin: 0 50%; transform: scaleX(0); }
+      #connRow b { color: #fff; }
+      #buildBtn { margin-top: 40px; }
+
+      /* map */
+      #agentPill { position: absolute; right: 40px; top: 50px; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 20px; border-radius: 26px; background: rgba(1,204,247,0.12); border: 1.5px solid rgba(1,204,247,0.5); font-size: 19px; }
+      #agentPill b { color: var(--c); font-size: 24px; }
+      #agentPill i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); display: block; }
+      #mapSvg { position: absolute; left: 0; top: 0; width: 840px; height: 1128px; overflow: visible; }
+      .dl { position: absolute; font-size: 19px; font-weight: 700; letter-spacing: 1.5px; white-space: nowrap; opacity: 0; }
+      #building { position: absolute; left: 0; right: 0; top: 520px; text-align: center; opacity: 0; }
+      #building .t { font-size: 24px; font-weight: 700; }
+      #building .bar { width: 380px; height: 8px; border-radius: 5px; background: rgba(255,255,255,0.1); margin: 16px auto 0; overflow: hidden; }
+      #building .bar i { display: block; height: 100%; background: var(--c); transform-origin: 0 50%; transform: scaleX(0); }
+      #chips { position: absolute; left: 40px; right: 40px; top: 960px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+      .chip { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 22px; border: 1.5px solid var(--line); background: var(--card); font-size: 17px; opacity: 0; }
+      .chip b { font-weight: 700; }
+      .chip span { color: var(--c); }
+      #salesPanel { position: absolute; top: 0; right: 0; bottom: 0; width: 470px; padding: 36px 30px; background: rgba(7, 17, 47, 0.98); border-left: 1.5px solid rgba(1,204,247,0.35); box-shadow: -30px 0 60px rgba(0,0,0,0.35); transform: translateX(480px); }
+      #salesPanel .hd { display: flex; align-items: baseline; justify-content: space-between; }
+      #salesPanel .hd b { font-size: 34px; }
+      #salesPanel .hd span { font-size: 20px; color: var(--c); }
+      .ag { display: flex; align-items: center; gap: 14px; height: 64px; padding: 0 16px; margin-top: 10px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); font-size: 19px; }
+      .ag .ic { width: 22px; height: 22px; color: rgba(255,255,255,0.8); }
+      .ag em { margin-left: auto; font-style: normal; font-size: 14px; color: var(--mute); display: flex; align-items: center; gap: 6px; }
+      .ag em i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: block; }
+      #moreAg { font-size: 17px; color: var(--mute); margin-top: 14px; padding-left: 4px; }
+
+      /* agent page */
+      #crumb { font-size: 17px; color: var(--mute); display: flex; align-items: center; gap: 6px; }
+      #crumb .ic { width: 16px; height: 16px; }
+      #agTitle { font-size: 42px; font-weight: 700; line-height: 1.15; margin-top: 6px; }
+      #agDesc { font-size: 20px; color: var(--mute); margin-top: 4px; }
+      #agStatus { position: absolute; left: 40px; top: 168px; width: 260px; height: 36px; }
+      #agStatus span { position: absolute; left: 0; top: 0; height: 36px; padding: 0 14px; border-radius: 18px; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #agStatus span .ic { width: 16px; height: 16px; }
+      #agStatus .s0 { border: 1.5px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.85); opacity: 1; }
+      #agStatus .s1, #agStatus .s3 { border: 1.5px solid var(--c); color: var(--c); }
+      #agStatus .s2, #agStatus .s4 { background: var(--c); color: #04122f; }
+      #runBtn { position: absolute; right: 40px; top: 50px; }
+      #cols { position: absolute; left: 40px; right: 40px; top: 228px; display: flex; gap: 20px; }
+      #cols .card { flex: 1; padding: 20px 20px 18px; height: 252px; }
+      .trow { display: flex; align-items: center; gap: 12px; height: 54px; padding: 0 14px; margin-top: 12px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.08); font-size: 19px; opacity: 0; }
+      .trow .ic { width: 22px; height: 22px; color: var(--c); }
+      .trow .ck { margin-left: auto; width: 22px; height: 22px; color: var(--c); opacity: 0; }
+      #runCard { position: absolute; left: 40px; right: 40px; top: 500px; height: 236px; padding: 20px 22px; }
+      #runCard .top { display: flex; align-items: center; gap: 16px; }
+      #runBar { flex: 1; height: 10px; border-radius: 6px; background: rgba(255,255,255,0.1); overflow: hidden; }
+      #runBar i { display: block; height: 100%; background: var(--c); transform-origin: 0 50%; transform: scaleX(0); }
+      #runPct { font-size: 17px; font-weight: 700; width: 52px; text-align: right; }
+      .log { display: flex; align-items: center; gap: 12px; height: 30px; margin-top: 4px; font-size: 17px; color: rgba(255,255,255,0.85); opacity: 0; }
+      .log:first-of-type { margin-top: 12px; }
+      .log .ic { width: 18px; height: 18px; color: var(--c); }
+      .log em { font-style: normal; color: var(--mute); width: 58px; }
+      #draft { position: absolute; left: 40px; right: 40px; top: 756px; height: 330px; padding: 22px 24px; opacity: 0; }
+      #draft .subj { font-size: 21px; font-weight: 700; margin-top: 12px; }
+      #draft .subj span { font-weight: 400; color: var(--mute); }
+      .tln { font-size: 19px; line-height: 1.5; color: rgba(255,255,255,0.88); clip-path: inset(0 100% 0 0); }
+      .tln:first-of-type { margin-top: 10px; }
+      #draftFoot { position: absolute; left: 24px; right: 24px; bottom: 20px; display: flex; align-items: center; gap: 12px; }
+      #sdr { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 20px; background: rgba(1,204,247,0.14); color: var(--c); font-size: 16px; font-weight: 700; opacity: 0; }
+      #sdr .ic { width: 18px; height: 18px; }
+      #sendBox { margin-left: auto; position: relative; width: 250px; height: 46px; }
+      #sendBox span { position: absolute; right: 0; top: 0; height: 46px; padding: 0 18px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #sendBox span .ic { width: 18px; height: 18px; }
+      #sendBox .lock { border: 1.5px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); }
+      #sendBox .sent { background: var(--c); color: #04122f; }
+      #winDim { position: absolute; inset: 0; background: #030918; opacity: 0; pointer-events: none; }
+
+      /* phone */
+      #phone { position: absolute; left: 600px; top: 690px; width: 360px; height: 730px; border-radius: 54px; padding: 12px; background: #02060f;
+        border: 2px solid rgba(255,255,255,0.28); box-shadow: 0 40px 90px rgba(0,0,0,0.6); opacity: 0; }
+      #phone .scrn { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; background: linear-gradient(170deg, #1d3d72 0%, #0b1a45 55%, #060f2c 100%); }
+      #phone .island { position: absolute; left: 50%; top: 14px; width: 104px; height: 30px; margin-left: -52px; border-radius: 16px; background: #000; }
+      #phone .ptime { position: absolute; left: 0; right: 0; top: 74px; text-align: center; font-size: 74px; font-weight: 400; letter-spacing: -1px; }
+      #phone .pdate { position: absolute; left: 0; right: 0; top: 162px; text-align: center; font-size: 16px; color: rgba(255,255,255,0.75); }
+      #notif { position: absolute; left: 14px; right: 14px; top: 250px; padding: 16px; border-radius: 22px; background: rgba(255,255,255,0.14); opacity: 0; }
+      #notif .nh { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.75); }
+      #notif .nh i { width: 22px; height: 22px; border-radius: 6px; background: var(--c); display: block; }
+      #notif .nh span { margin-left: auto; }
+      #notif .nt { font-size: 17px; font-weight: 700; margin-top: 8px; line-height: 1.25; }
+      #notif .nd { font-size: 14px; color: rgba(255,255,255,0.78); margin-top: 2px; }
+      #nbtns { display: flex; gap: 8px; margin-top: 12px; }
+      #nbtns div { flex: 1; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; }
+      #nbtns .r { background: rgba(255,255,255,0.12); }
+      #nbtns .a { background: var(--c); color: #04122f; }
+      #nok { position: absolute; left: 16px; right: 16px; bottom: 16px; height: 42px; border-radius: 12px; background: rgba(1,204,247,0.2); color: var(--c); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 700; opacity: 0; }
+      #nok .ic { width: 18px; height: 18px; }
+
+      /* report */
+      #tagIl { display: inline-block; margin-left: 12px; font-size: 13px; color: var(--mute); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 1px 10px; vertical-align: middle; }
+      #tiles { position: absolute; left: 40px; right: 40px; top: 214px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      #tiles .card { height: 128px; padding: 18px 22px; opacity: 0; }
+      #tiles .n { font-size: 50px; font-weight: 700; line-height: 1.05; color: var(--c); }
+      #tiles .l { font-size: 18px; color: rgba(255,255,255,0.85); margin-top: 4px; }
+      #lists { position: absolute; left: 40px; right: 40px; top: 520px; display: flex; gap: 18px; }
+      #lists .card { flex: 1; height: 560px; padding: 22px 18px; opacity: 0; }
+      .lr { display: flex; align-items: flex-start; gap: 10px; padding: 14px 12px; margin-top: 10px; border-radius: 12px; background: rgba(255,255,255,0.045); font-size: 18px; line-height: 1.3; opacity: 0; }
+      .lr .ic { width: 22px; height: 22px; color: var(--c); margin-top: 1px; }
+      .lr .ap { margin-left: auto; flex: none; height: 32px; padding: 0 12px; border-radius: 10px; background: var(--c); color: #04122f; font-size: 14px; font-weight: 700; display: flex; align-items: center; }
+
+      /* cursor */
+      #cursor { position: absolute; left: 0; top: 0; width: 42px; height: 42px; margin: -7px 0 0 -7px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; border: 3px solid var(--c); background: rgba(1,204,247,0.18); opacity: 0; z-index: 29; }
+
+      /* CTA + UI */
+      #cta { position: absolute; left: 110px; width: 860px; top: 700px; padding: 56px 48px; text-align: center; border-radius: 30px; background: rgba(6, 15, 42, 0.95); border: 1.5px solid rgba(1,204,247,0.4); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 26px; color: rgba(255,255,255,0.75); }
+      #cta .name { font-size: 78px; font-weight: 700; line-height: 1.05; margin-top: 8px; }
+      #cta .sb { font-size: 28px; margin-top: 10px; }
+      #cta .sb b { color: var(--c); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--c); color: #04122f; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
+      #caps { position: absolute; left: 80px; top: 1500px; width: 920px; height: 140px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 140px; display: flex; align-items: center; justify-content: center; text-align: center;
+        font-weight: 700; font-size: 52px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 4px 18px rgba(0,0,0,0.5); opacity: 0; }
+      .cap .in { display: block; }
+      .cap s { text-decoration: none; display: inline; }
+      .cap s.k { color: var(--c); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="76.6" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="76.6" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="grid"></div><div id="glow"></div>
+        <div id="stage">
+          <div id="cam">
+            <div id="win">
+              <div id="tbar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="app">Agent OS</span><span class="sim">SIMULASI</span>
+                <div class="tr"><span class="ic" data-i="clock"></span><div id="clockBox"><span id="ck1">06:59</span><span id="ck2" style="opacity:0">07:00</span></div><span class="av">FK</span></div>
+              </div>
+              <div id="side">
+                <div id="sideAct"></div>
+                <div class="si" data-i2="layout-grid"></div><div class="si" data-i2="plug"></div><div class="si" data-i2="network"></div>
+                <div class="si" data-i2="bot"></div><div class="si" data-i2="bell"></div><div class="si" data-i2="file-text"></div>
+              </div>
+              <div id="content">
+                <!-- splash -->
+                <div class="scr" id="sSplash">
+                  <div id="boot">
+                    <div class="num" id="n137">0</div>
+                    <div class="t1">AI agent</div>
+                    <div class="t2">jalanin <b>1 perusahaan</b></div>
+                    <div id="bootBar"><i></i></div>
+                    <div id="bootTxt">Menyiapkan agent… <b id="bootN">0</b>/137</div>
+                    <div id="simPill">MODE SIMULASI</div>
+                  </div>
+                  <div id="prof">
+                    <div class="hi">Hai, gue</div>
+                    <div class="nm">Freddie Kashawan</div>
+                    <div class="role">Founder AIpreneur</div>
+                    <div class="tiles">
+                      <div class="tile card" id="t10"><div class="big">10<small>tahun</small></div><div class="s">bangun bisnis</div></div>
+                      <div class="tile card" id="t2"><div class="big">2<small>tahun</small></div><div class="s">pakai AI di bisnis sendiri</div></div>
+                    </div>
+                  </div>
+                </div>
+                <!-- connect -->
+                <div class="scr" id="sConnect">
+                  <div class="eyebrow">LANGKAH 1</div>
+                  <div class="h2">Sambungkan tools</div>
+                  <div class="sub">Agent baca data dari tools yang udah lu pakai.</div>
+                  <div class="btn ghost" id="connAll"><span class="ic" data-i="plug"></span><span id="connLbl">Hubungkan semua</span></div>
+                  <div id="ints"></div>
+                  <div id="connRow"><span><b id="connN">0</b>/8 tersambung</span><div id="connBar"><i></i></div></div>
+                  <div class="btn pri" id="buildBtn">Bangun tim agent <span class="ic" data-i="arrow-right"></span></div>
+                </div>
+                <!-- map -->
+                <div class="scr" id="sMap">
+                  <div class="eyebrow">LANGKAH 2</div>
+                  <div class="h2">Tim agent lu</div>
+                  <div id="agentPill"><i></i><b id="agN">0</b> agent aktif</div>
+                  <svg id="mapSvg"></svg>
+                  <div id="labels"></div>
+                  <div id="building"><div class="t">Membangun tim agent…</div><div class="bar"><i></i></div></div>
+                  <div id="chips"></div>
+                  <div id="salesPanel">
+                    <div class="hd"><b>Sales</b><span><b id="sN">22</b> agent</span></div>
+                    <div id="agList"></div>
+                    <div id="moreAg">+ 14 agent lainnya</div>
+                  </div>
+                </div>
+                <!-- agent -->
+                <div class="scr" id="sAgent">
+                  <div id="crumb">Sales <span class="ic" data-i="chevron-right"></span> Agent</div>
+                  <div id="agTitle">Cold Email Drafting</div>
+                  <div id="agDesc">Nulis email outreach yang personal.</div>
+                  <div id="agStatus">
+                    <span class="s0"><span class="ic" data-i="circle-dot"></span>Siap</span>
+                    <span class="s1"><span class="ic" id="spin" data-i="loader-circle"></span>Running…</span>
+                    <span class="s2"><span class="ic" data-i="check"></span>Selesai</span>
+                    <span class="s3"><span class="ic" data-i="lock"></span>Nunggu approval</span>
+                    <span class="s4"><span class="ic" data-i="send"></span>Terkirim</span>
+                  </div>
+                  <div class="btn pri" id="runBtn"><span class="ic" data-i="play"></span>Run</div>
+                  <div id="cols">
+                    <div class="card" id="tasksCard"><div class="lbl">TUGAS</div><div id="tasks"></div></div>
+                    <div class="card" id="dataCard"><div class="lbl">SUMBER DATA</div><div id="datas"></div></div>
+                  </div>
+                  <div class="card" id="runCard">
+                    <div class="top"><span class="lbl">PROSES</span><div id="runBar"><i></i></div><span id="runPct">0%</span></div>
+                    <div id="logs"></div>
+                  </div>
+                  <div class="card" id="draft">
+                    <div class="lbl">OUTPUT · EMAIL 1 DARI 3</div>
+                    <div class="subj"><span>Subjek:</span> Ide cepat buat tim sales kamu</div>
+                    <div class="tln">Hai Rina, aku lihat tim kamu lagi buka 3 posisi sales.</div>
+                    <div class="tln">Biasanya itu tanda follow-up mulai keteteran.</div>
+                    <div class="tln">Boleh aku kirim 2 ide singkat buat bantu?</div>
+                    <div id="draftFoot">
+                      <div id="sdr"><span class="ic" data-i="user"></span>≈ output inti 1 SDR</div>
+                      <div id="sendBox"><span class="lock"><span class="ic" data-i="lock"></span>Nunggu approval</span><span class="sent"><span class="ic" data-i="send"></span>Terkirim</span></div>
+                    </div>
+                  </div>
+                </div>
+                <!-- report -->
+                <div class="scr" id="sReport">
+                  <div class="eyebrow">LAPORAN PAGI · 07:00</div>
+                  <div class="h2">Selamat pagi, Freddie</div>
+                  <div class="sub">Ringkasan kerja tim agent semalam <span id="tagIl">angka ilustrasi</span></div>
+                  <div id="tiles"></div>
+                  <div id="lists">
+                    <div class="card" id="doneCard"><div class="lbl">UDAH DIKERJAIN</div><div id="doneL"></div></div>
+                    <div class="card" id="waitCard"><div class="lbl">NUNGGU KEPUTUSAN LU</div><div id="waitL"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div id="winDim"></div>
+            </div>
+            <div id="phone"><div class="scrn"><div class="island"></div><div class="ptime">06:59</div><div class="pdate">Kamis, sebelum mulai kerja</div>
+              <div id="notif"><div class="nh"><i></i>Agent OS<span>sekarang</span></div><div class="nt">Sequence baru siap dikirim</div><div class="nd">Cold Email Drafting · 3 email</div>
+                <div id="nbtns"><div class="r">Revisi</div><div class="a" id="napp">Approve</div></div></div>
+              <div id="nok"><span class="ic" data-i="check"></span>Disetujui · dikirim</div>
+            </div></div>
+            <div id="ripple"></div>
+            <div id="cursor"></div>
+          </div>
+        </div>
+        <div id="cta"><div class="k">Mau update seputar AI?</div><div class="name">Freddie Kashawan</div><div class="sb">Praktisi AI di <b>bisnis beneran</b></div>
+          <div id="fbtn"><span class="ic" data-i="user"></span>Follow</div></div>
+        <div id="ui"><img id="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><div id="caps"></div></div>
+      </div>
+
+      <audio id="vo" class="clip" src="assets/audio/vo.mp3" data-start="0" data-duration="76.04" data-track-index="8" data-volume="1"></audio>
+      <!--SFX-->
+      <audio id="sx00" class="clip" src="assets/sfx/whoosh.wav" data-start="0.05" data-duration="0.574" data-track-index="10" data-volume="0.07"></audio>
+      <audio id="sx01" class="clip" src="assets/sfx/pop.wav" data-start="5.76" data-duration="0.72" data-track-index="11" data-volume="0.05"></audio>
+      <audio id="sx02" class="clip" src="assets/sfx/whoosh.wav" data-start="7.20" data-duration="0.574" data-track-index="12" data-volume="0.07"></audio>
+      <audio id="sx03" class="clip" src="assets/sfx/whoosh.wav" data-start="13.30" data-duration="0.574" data-track-index="13" data-volume="0.07"></audio>
+      <audio id="sx04" class="clip" src="assets/sfx/click.wav" data-start="14.32" data-duration="0.366" data-track-index="10" data-volume="0.09"></audio>
+      <audio id="sx05" class="clip" src="assets/sfx/pop.wav" data-start="17.09" data-duration="0.72" data-track-index="11" data-volume="0.05"></audio>
+      <audio id="sx06" class="clip" src="assets/sfx/pop.wav" data-start="17.64" data-duration="0.72" data-track-index="12" data-volume="0.05"></audio>
+      <audio id="sx07" class="clip" src="assets/sfx/pop.wav" data-start="18.32" data-duration="0.72" data-track-index="13" data-volume="0.05"></audio>
+      <audio id="sx08" class="clip" src="assets/sfx/pop.wav" data-start="19.26" data-duration="0.72" data-track-index="10" data-volume="0.05"></audio>
+      <audio id="sx09" class="clip" src="assets/sfx/pop.wav" data-start="19.97" data-duration="0.72" data-track-index="11" data-volume="0.05"></audio>
+      <audio id="sx10" class="clip" src="assets/sfx/click.wav" data-start="21.03" data-duration="0.366" data-track-index="12" data-volume="0.09"></audio>
+      <audio id="sx11" class="clip" src="assets/sfx/whoosh.wav" data-start="21.28" data-duration="0.574" data-track-index="13" data-volume="0.07"></audio>
+      <audio id="sx12" class="clip" src="assets/sfx/click.wav" data-start="32.99" data-duration="0.366" data-track-index="10" data-volume="0.09"></audio>
+      <audio id="sx13" class="clip" src="assets/sfx/whoosh.wav" data-start="33.19" data-duration="0.574" data-track-index="11" data-volume="0.07"></audio>
+      <audio id="sx14" class="clip" src="assets/sfx/click.wav" data-start="36.76" data-duration="0.366" data-track-index="12" data-volume="0.09"></audio>
+      <audio id="sx15" class="clip" src="assets/sfx/whoosh.wav" data-start="37.06" data-duration="0.574" data-track-index="13" data-volume="0.07"></audio>
+      <audio id="sx16" class="clip" src="assets/sfx/pop.wav" data-start="41.99" data-duration="0.72" data-track-index="10" data-volume="0.05"></audio>
+      <audio id="sx17" class="clip" src="assets/sfx/pop.wav" data-start="42.93" data-duration="0.72" data-track-index="11" data-volume="0.05"></audio>
+      <audio id="sx18" class="clip" src="assets/sfx/pop.wav" data-start="44.02" data-duration="0.72" data-track-index="12" data-volume="0.05"></audio>
+      <audio id="sx19" class="clip" src="assets/sfx/click.wav" data-start="50.35" data-duration="0.366" data-track-index="13" data-volume="0.09"></audio>
+      <audio id="sx20" class="clip" src="assets/sfx/ping.wav" data-start="52.40" data-duration="1.32" data-track-index="10" data-volume="0.05"></audio>
+      <audio id="sx21" class="clip" src="assets/sfx/whoosh.wav" data-start="57.88" data-duration="0.574" data-track-index="11" data-volume="0.07"></audio>
+      <audio id="sx22" class="clip" src="assets/sfx/click.wav" data-start="60.88" data-duration="0.366" data-track-index="12" data-volume="0.09"></audio>
+      <audio id="sx23" class="clip" src="assets/sfx/ping.wav" data-start="63.38" data-duration="1.32" data-track-index="13" data-volume="0.05"></audio>
+      <audio id="sx24" class="clip" src="assets/sfx/whoosh.wav" data-start="63.57" data-duration="0.574" data-track-index="10" data-volume="0.07"></audio>
+      <audio id="sx25" class="clip" src="assets/sfx/whoosh.wav" data-start="72.15" data-duration="0.574" data-track-index="11" data-volume="0.07"></audio>
+      <audio id="sx26" class="clip" src="assets/sfx/click.wav" data-start="72.79" data-duration="0.366" data-track-index="12" data-volume="0.09"></audio>
+      <!--/SFX-->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const NS = "http://www.w3.org/2000/svg", C = "#01ccf7";
+        let seed = 137;
+        const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n) => `<span class="ic">${icon(n)}</span>`;
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $$("[data-i2]").forEach((el) => (el.innerHTML = ic(el.dataset.i2)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#0b1a45" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+        const svg = (tag, a, p) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+        /* ---------- build UI ---------- */
+        const INTS = [["si-gmail", "Gmail", "Email"], ["si-hubspot", "HubSpot", "CRM"], ["si-googlecalendar", "Google Calendar", "Kalender"], ["si-whatsapp", "WhatsApp", "Chat"],
+          ["si-stripe", "Stripe", "Payment"], ["si-quickbooks", "QuickBooks", "Pembukuan"], ["si-googledrive", "Google Drive", "File"], ["si-zoom", "Zoom", "Meeting"]];
+        $("#ints").innerHTML = INTS.map(([i, n, d]) => `<div class="int card"><div class="lg">${ic(i)}</div><div class="nm"><b>${d}</b><em>${n}</em></div>
+          <div class="st"><span class="off">Connect</span><span class="on">${ic("check")}Connected</span></div></div>`).join("");
+
+        const CX = 420, CY = 600, HR = 160;
+        const DIV = [["sales", "SALES", 22], ["deals", "DEALS", 24], ["marketing", "MARKETING", 23], ["customer", "CUSTOMER", 14], ["operations", "OPERATIONS", 19], ["intelligence", "INTELLIGENCE", 17], ["backoffice", "BACK OFFICE", 18]];
+        const map = $("#mapSvg"), labels = $("#labels"), HUB = {};
+        const core = svg("g", {}, map);
+        for (let i = 0; i < 120; i++) { const a = rnd() * 6.283, r = Math.pow(rnd(), 0.7) * 74;
+          svg("circle", { cx: CX + Math.cos(a) * r, cy: CY + Math.sin(a) * r, r: 1 + rnd() * 1.6, fill: "#fff", opacity: (0.25 + rnd() * 0.5).toFixed(2), class: "cdot" }, core); }
+        DIV.forEach(([k, name, n], j) => {
+          const a = (-90 + j * (360 / 7)) * Math.PI / 180, hx = CX + Math.cos(a) * HR, hy = CY + Math.sin(a) * HR;
+          const g = svg("g", {}, map);
+          const spoke = svg("line", { x1: CX, y1: CY, x2: hx, y2: hy, stroke: "rgba(255,255,255,0.16)", "stroke-width": 1.5 }, g);
+          const leaves = [], links = [];
+          for (let i = 0; i < n; i++) {
+            const ring = i % 2, cnt = ring ? Math.floor(n / 2) : Math.ceil(n / 2), idx = Math.floor(i / 2), spread = ring ? 1.0 : 0.78;
+            const la = a + (cnt > 1 ? (idx / (cnt - 1) - 0.5) * spread : 0) + (rnd() - 0.5) * 0.07, dist = (ring ? 66 : 40) + rnd() * 8;
+            const lx = hx + Math.cos(la) * dist, ly = hy + Math.sin(la) * dist;
+            links.push(svg("line", { x1: hx, y1: hy, x2: lx, y2: ly, stroke: "rgba(255,255,255,0.3)", "stroke-width": 1.1 }, g));
+            leaves.push(svg("circle", { cx: lx, cy: ly, r: 3.6, fill: "#fff" }, g));
+          }
+          const ring = svg("circle", { cx: hx, cy: hy, r: 19, fill: "#0a1a47", stroke: "rgba(255,255,255,0.75)", "stroke-width": 2.2 }, g);
+          const num = svg("text", { x: hx, y: hy + 5, "text-anchor": "middle", "font-size": 14, "font-weight": 700, fill: "#fff", "font-family": "Poppins" }, g);
+          num.textContent = String(j + 1).padStart(2, "0");
+          const lr = HR + 118, lx = CX + Math.cos(a) * lr, ly = CY + Math.sin(a) * lr;
+          const lab = document.createElement("div"); lab.className = "dl"; lab.textContent = name; labels.appendChild(lab);
+          const w = name.length * 13.5;
+          lab.style.left = Math.max(0, Math.min(760 - w, lx - w / 2 + Math.cos(a) * w * 0.5)) + "px"; lab.style.top = ly - 14 + "px";
+          HUB[k] = { x: hx, y: hy, g, ring, num, leaves, links, spoke, lab, n };
+        });
+        $("#chips").innerHTML = DIV.map(([k, name, n]) => `<div class="chip" id="ch-${k}"><b>${name[0] + name.slice(1).toLowerCase()}</b><span>${n}</span></div>`).join("");
+        const AG = [["map", "Market Mapping"], ["list", "List Building"], ["target", "Fit Scoring"], ["mail", "Cold Email Drafting"], ["reply", "Follow-up Writer"],
+          ["user-search", "Lead Enrichment"], ["circle-check", "Deliverability Check"], ["calendar-check", "Meeting Handoff"]];
+        $("#agList").innerHTML = AG.map(([i, n]) => `<div class="ag">${ic(i)}<span>${n}</span><em><i></i>Siap</em></div>`).join("");
+        $("#tasks").innerHTML = [["list", "Nulis sequence"], ["mail", "Bikin subject line"], ["pen-line", "Bikin kalimat pembuka"]]
+          .map(([i, t]) => `<div class="trow">${ic(i)}<span>${t}</span><span class="ck">${icon("circle-check")}</span></div>`).join("");
+        $("#datas").innerHTML = [["target", "Target customer (ICP)"], ["user-search", "Riset tiap prospek"], ["si-hubspot", "Data dari CRM"]]
+          .map(([i, t]) => `<div class="trow">${ic(i)}<span>${t}</span></div>`).join("");
+        const LOGS = ["Ambil daftar prospek dari CRM", "Riset tiap prospek", "Tulis sequence 3 email", "Bikin subject line", "Bikin kalimat pembuka"];
+        $("#logs").innerHTML = LOGS.map((t, i) => `<div class="log"><em>06:59</em>${ic("circle-check")}<span>${t}</span></div>`).join("");
+        $("#tiles").innerHTML = [[128, "Tugas selesai"], [36, "Email terkirim"], [5, "Meeting ke-booking"], [3, "Nunggu keputusan lu"]]
+          .map(([n, l]) => `<div class="card"><div class="n" data-n="${n}">0</div><div class="l">${l}</div></div>`).join("");
+        $("#doneL").innerHTML = ["Sequence cold email terkirim", "Invoice bulan ini dikirim", "Tiket customer dijawab", "Caption 5 konten dijadwalin"]
+          .map((t) => `<div class="lr">${ic("circle-check")}<span>${t}</span></div>`).join("");
+        $("#waitL").innerHTML = ["Proposal klien baru", "Diskon buat renewal", "Budget iklan minggu depan"]
+          .map((t) => `<div class="lr">${ic("bell")}<span>${t}</span><div class="ap">Approve</div></div>`).join("");
+
+        /* captions */
+        const KEY = new Set(["137", "simulasinya.", "freddie", "kashawan,", "kashawan", "10", "2", "sambungin", "tools", "email,", "crm,", "kalender,", "chat,", "pembukuan.",
+          "tersambung,", "7", "divisi.", "sales,", "deals,", "marketing,", "customer,", "operations,", "intelligence,", "back", "office.", "klik", "sales.", "22", "cold", "email",
+          "drafting.", "asal-asalan.", "tiga:", "sequence,", "subject", "line,", "pembuka.", "target", "customer", "riset", "run.", "detik,", "jadi.", "sdr.", "dikirim.", "hp",
+          "approval.", "approve,", "jalan.", "tujuh,", "laporan.", "dikerjain,", "keputusan", "kerja.", "follow"]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap";
+          const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase()) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`;
+          caps.appendChild(el); return { el, ws, p }; });
+
+        /* geometry helpers (layout positions relative to #cam) */
+        const camEl = $("#cam");
+        const pos = (el) => { let x = 0, y = 0, e = el; while (e && e !== camEl) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight, cx: x + el.offsetWidth / 2, cy: y + el.offsetHeight / 2 }; };
+        const content = pos($("#content"));
+        const salesPanelX = 470; // panel slides in from translateX(480) to 0; layout position includes it
+        const sideIcons = $$(".si");
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR;
+        const ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 76.6;
+
+        // camera
+        const camState = (x, y, s) => ({ x: 540 - x * s, y: 865 - y * s, scale: s });
+        let cam = camState(540, 865, 1);
+        st("#cam", cam, 0);
+        const camTo = (x, y, s, at, dur) => { const nx = camState(x, y, s); ft("#cam", cam, Object.assign({}, nx, { duration: dur || 0.9, ease: "power3.inOut" }), at); cam = nx; };
+        // cursor
+        let cur = { x: 900, y: 1500 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { const nx = { x, y }; ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = nx; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = pos(el); moveTo(p.cx + (dx || 0), p.cy + (dy || 0), at, dur); };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const press = (el, at) => ft(el, { scale: 1 }, { keyframes: [{ scale: 0.93 }, { scale: 1 }], duration: 0.25 }, at);
+        const scrIn = (el, at, fromX) => ft(el, { opacity: 0, x: fromX || 40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, at);
+        const scrOut = (el, at, toX) => ft(el, { opacity: 1, x: 0 }, { opacity: 0, x: toX || -40, duration: 0.35, ease: "power2.in" }, at);
+        const side = (i, at) => { const top = 22 + i * 64; ft("#sideAct", { y: side.y || 0 }, { y: top - 22, duration: 0.35, ease: "power2.inOut" }, at); side.y = top - 22; };
+        const swap = (els, from, to, at) => { ft(els[from], { opacity: 1 }, { opacity: 0, duration: 0.2 }, at); ft(els[to], { opacity: 0 }, { opacity: 1, duration: 0.25 }, at + 0.05); };
+        const count = (el, to, at, dur, fmt) => { const o = { v: 0 }; ft(o, { v: 0 }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+
+        // ambient
+        ft("#glow", { x: 0, y: 0 }, { x: 520, y: 600, duration: D, ease: "sine.inOut" }, 0);
+
+        /* initial states */
+        st(["#side", "#tbar .sim"], { opacity: 0 }, 0);
+        st("#sideAct", { opacity: 0 }, 0);
+        st(".dl, .chip, .trow, .log, #tiles .card, #lists .card, .lr", { opacity: 0 }, 0);
+        st("#t10, #t2", { opacity: 0 }, 0);
+        DIV.forEach(([k]) => { const h = HUB[k]; st([h.ring, ...h.leaves], { scale: 0, transformOrigin: "50% 50%" }, 0); st([h.num, h.spoke, ...h.links], { opacity: 0 }, 0); });
+        st(".cdot", { opacity: 0 }, 0);
+
+        /* S0 hook + boot 0-7.3 */
+        ft("#stage", { opacity: 0, scale: 0.92, y: 40 }, { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out" }, 0.0);
+        st("#sSplash", { opacity: 1 }, 0);
+        ft("#bootBar i", { scaleX: 0 }, { scaleX: 1, duration: 4.6, ease: "power1.inOut" }, 0.4);
+        count($("#bootN"), 137, 0.4, 4.6);
+        const t137 = wt("dijalanin", "137");
+        count($("#n137"), 137, t137 - 0.7, 1.2);
+        ft("#n137", { scale: 1 }, { keyframes: [{ scale: 1.08 }, { scale: 1 }], duration: 0.4 }, t137 + 0.4);
+        ft("#simPill", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(2)" }, ph("Gue tunjukin").start);
+        ft("#tbar .sim", { opacity: 0 }, { opacity: 1, duration: 0.4 }, ph("Gue tunjukin").start + 0.3);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 6.0);
+        moveTo(700, 1180, 6.0, 0.8);
+        ft("#boot", { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 7.2);
+        ft("#prof", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 7.45);
+        ft("#t10", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "back.out(1.6)" }, wt("udah bisnis", "10") - 0.1);
+        ft("#t2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "back.out(1.6)" }, wt("dan 2", "2") - 0.1);
+
+        /* S1 connect 13.4-21 */
+        scrOut("#sSplash", 13.3);
+        ft("#side", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 13.45);
+        ft("#sideAct", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 13.6);
+        st("#sideAct", { y: 64 }, 13.59); side.y = 64;
+        scrIn("#sConnect", 13.55);
+        ft(".int", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.05 }, 13.75);
+        moveEl($("#connAll"), 13.9, 0.7, 20, 4);
+        const tConn = wt("sambungin", "sambungin");
+        click(tConn + 0.05); press("#connAll", tConn + 0.05);
+        const connLbl = $("#connLbl");
+        ft({ v: 0 }, { v: 0 }, { v: 1, duration: 0.01, onUpdate() { connLbl.textContent = this.progress() > 0.5 ? "Menghubungkan…" : "Hubungkan semua"; } }, tConn + 0.15);
+        camTo(540, 760, 1.1, 16.75, 0.9);
+        const tC = [wt("Email,", "Email"), wt("Email,", "CRM"), wt("Email,", "kalender"), wt("chat,", "chat"), wt("chat,", "sampai") + 0.1, wt("chat,", "pembukuan"), 20.3, 20.55];
+        const ints = $$(".int"), connN = $("#connN");
+        ints.forEach((el, i) => {
+          ft($(".off", el), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tC[i]);
+          ft($(".on", el), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tC[i]);
+          ft(el, { borderColor: "rgba(1,204,247,0.9)" }, { borderColor: "rgba(255,255,255,0.12)", duration: 0.8 }, tC[i] + 0.1);
+          ft({ v: 0 }, { v: 0 }, { v: 1, duration: 0.01, onUpdate() { connN.textContent = this.progress() > 0.5 ? i + 1 : i; } }, tC[i]);
+          ft("#connBar i", { scaleX: i / 8 }, { scaleX: (i + 1) / 8, duration: 0.25 }, tC[i]);
+        });
+        ft({ v: 0 }, { v: 0 }, { v: 1, duration: 0.01, onUpdate() { connLbl.textContent = this.progress() > 0.5 ? "Semua tersambung" : "Menghubungkan…"; } }, 20.6);
+        camTo(540, 865, 1, 20.45, 0.6);
+        moveEl($("#buildBtn"), 20.2, 0.6);
+        const tBuild = ph("Begitu").start + 0.05;
+        click(tBuild); press("#buildBtn", tBuild);
+
+        /* S2 map 21.2-31.3 */
+        scrOut("#sConnect", tBuild + 0.25);
+        side(2, tBuild + 0.25);
+        scrIn("#sMap", tBuild + 0.45);
+        ft("#building", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tBuild + 0.5);
+        ft("#building .bar i", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power1.inOut" }, tBuild + 0.55);
+        ft("#building", { opacity: 1 }, { opacity: 0, duration: 0.25 }, 22.0);
+        moveTo(900, 1150, 21.4, 0.8);
+        const tM = 22.05;
+        ft(".cdot", { opacity: 0 }, { opacity: (i, el) => el.getAttribute("opacity"), duration: 0.5, stagger: 0.003 }, tM);
+        DIV.forEach(([k], j) => { const h = HUB[k], t = tM + 0.15 + j * 0.13;
+          ft(h.spoke, { opacity: 0 }, { opacity: 1, duration: 0.3 }, t);
+          ft(h.ring, { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.4, ease: "back.out(2)" }, t);
+          ft(h.num, { opacity: 0 }, { opacity: 1, duration: 0.25 }, t + 0.15);
+          ft(h.links, { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.012 }, t + 0.1);
+          ft(h.leaves, { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.3, ease: "back.out(2.5)", stagger: 0.012 }, t + 0.2);
+        });
+        count($("#agN"), 137, tM, 1.6);
+        const t7 = wt("137 agent", "7");
+        ft(".dl", { opacity: 0, y: 8 }, { opacity: 0.55, y: 0, duration: 0.35, stagger: 0.08 }, t7 - 0.1);
+        ft(".chip", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.07 }, t7);
+        const hubOn = (k, at, on) => { const h = HUB[k], A = on ? [0, 1] : [1, 0];
+          ft(h.ring, { attr: { stroke: [ "rgba(255,255,255,0.75)", C][A[0]], fill: ["#0a1a47", "#063a5c"][A[0]] } }, { attr: { stroke: ["rgba(255,255,255,0.75)", C][A[1]], fill: ["#0a1a47", "#063a5c"][A[1]] }, duration: 0.25 }, at);
+          ft(h.leaves, { attr: { fill: ["#ffffff", C][A[0]] } }, { attr: { fill: ["#ffffff", C][A[1]] }, duration: 0.25, stagger: on ? 0.01 : 0 }, at);
+          ft(h.lab, { opacity: on ? 0.55 : 1, color: on ? "#ffffff" : C }, { opacity: on ? 1 : 0.55, color: on ? C : "#ffffff", duration: 0.25 }, at);
+          const ch = $("#ch-" + k);
+          ft(ch, { borderColor: on ? "rgba(255,255,255,0.12)" : C, backgroundColor: on ? "rgba(255,255,255,0.045)" : "rgba(1,204,247,0.16)" },
+            { borderColor: on ? C : "rgba(255,255,255,0.12)", backgroundColor: on ? "rgba(1,204,247,0.16)" : "rgba(255,255,255,0.045)", duration: 0.25 }, at);
+        };
+        const ORDER = [["sales", ph("Sales,").start], ["deals", ph("deals,").start], ["marketing", ph("marketing,").start], ["customer", ph("customer,").start],
+          ["operations", ph("operations,").start], ["intelligence", ph("intelligence,").start], ["backoffice", wt("dan back", "back")]];
+        ORDER.forEach(([k, t], i) => { if (i) hubOn(ORDER[i - 1][0], t - 0.05, false); hubOn(k, t - 0.05, true); });
+        hubOn("backoffice", 31.3, false);
+        // click sales hub
+        const salesHub = { x: content.x + HUB.sales.x, y: content.y + HUB.sales.y };
+        moveTo(salesHub.x + 6, salesHub.y + 6, 31.55, 0.8);
+        const tKlik = wt("divisi sales", "sales") - 0.15;
+        click(tKlik); hubOn("sales", tKlik, true);
+        ft("#salesPanel", { x: 480 }, { x: 0, duration: 0.55, ease: "power3.out" }, tKlik + 0.2);
+        ft(".ag", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.06 }, tKlik + 0.45);
+        ft("#moreAg", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tKlik + 1.0);
+        const t22 = wt("Ada 22", "22");
+        ft("#salesPanel .hd span", { scale: 1, transformOrigin: "100% 50%" }, { keyframes: [{ scale: 1.25 }, { scale: 1 }], duration: 0.45 }, t22 - 0.05);
+        camTo(content.x + 840 - 235 - 30, 860, 1.08, 33.6, 0.9);
+        // open Cold Email Drafting (row 4); panel layout x is offset by +480 (pre-slide)
+        const row = $$(".ag")[3], rp = pos(row);
+        moveTo(rp.cx - 40, rp.cy, ph("Gue buka").start - 0.05, 0.7);
+        ft(row, { borderColor: "rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.045)" }, { borderColor: C, backgroundColor: "rgba(1,204,247,0.14)", duration: 0.25 }, ph("Gue buka").start + 0.6);
+        const tCold = ph("Cold Email").start;
+        click(tCold); press(row, tCold);
+
+        /* S3 agent page 36.9-62.4 */
+        camTo(540, 865, 1, tCold + 0.2, 0.7);
+        scrOut("#sMap", tCold + 0.3);
+        side(3, tCold + 0.3);
+        scrIn("#sAgent", tCold + 0.45, 60);
+        st(["#runCard", "#draft"], { opacity: 0 }, 0);
+        ft("#runCard", { opacity: 0 }, { opacity: 0.5, duration: 0.4 }, tCold + 0.6);
+        moveTo(content.x + 640, content.y + 330, tCold + 0.8, 0.7);
+        camTo(content.x + 420, content.y + 330, 1.12, ph("Dia nggak").start, 0.9);
+        ft("#tasksCard", { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: C, duration: 0.3 }, ph("Tugasnya").start);
+        const tT = [ph("nulis sequence").start, ph("bikin subject").start, ph("bikin kalimat").start];
+        $$("#tasks .trow").forEach((r, i) => { ft(r, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, tT[i] - 0.05); });
+        ft("#tasksCard", { borderColor: C }, { borderColor: "rgba(255,255,255,0.12)", duration: 0.4 }, ph("Datanya").start);
+        ft("#dataCard", { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: C, duration: 0.3 }, ph("Datanya").start);
+        const tD = [wt("target", "target"), wt("dan riset", "riset"), wt("dan riset", "prospek") + 0.2];
+        $$("#datas .trow").forEach((r, i) => ft(r, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.3 }, tD[i] - 0.05));
+        ft("#dataCard", { borderColor: C }, { borderColor: "rgba(255,255,255,0.12)", duration: 0.4 }, 49.6);
+        // run
+        camTo(540, 865, 1, 49.3, 0.7);
+        moveEl($("#runBtn"), 49.35, 0.6, 0, 0);
+        const tRun = wt("Klik run", "run");
+        click(tRun); press("#runBtn", tRun);
+        const stS = $$("#agStatus > span");
+        swap(stS, 0, 1, tRun + 0.1);
+        ft("#spin", { rotation: 0 }, { rotation: 900, duration: 2.2, ease: "none" }, tRun + 0.1);
+        ft("#runCard", { opacity: 0.5 }, { opacity: 1, duration: 0.3 }, tRun + 0.1);
+        camTo(content.x + 420, content.y + 618, 1.14, tRun + 0.1, 0.7);
+        const tDone = ph("sequence-nya").start;
+        ft("#runBar i", { scaleX: 0 }, { scaleX: 1, duration: tDone - tRun - 0.15, ease: "power1.inOut" }, tRun + 0.15);
+        count($("#runPct"), 100, tRun + 0.15, tDone - tRun - 0.15, (v) => Math.round(v) + "%");
+        $$(".log").forEach((l, i) => ft(l, { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.2 }, tRun + 0.3 + i * (tDone - tRun - 0.5) / 5));
+        $$("#tasks .ck").forEach((c, i) => ft(c, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, tRun + 0.9 + i * 0.35));
+        swap(stS, 1, 2, tDone);
+        // draft output
+        ft("#draft", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tDone + 0.05);
+        camTo(content.x + 420, content.y + 900, 1.12, tDone + 0.05, 0.8);
+        $$(".tln").forEach((l, i) => ft(l, { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.75, ease: "none" }, tDone + 0.4 + i * 0.8));
+        const tSDR = wt("udah gantiin", "SDR");
+        ft("#sdr", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, ph("Satu agent").start + 0.1);
+        ft("#sdr", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 16px rgba(1,204,247,0)", duration: 0.6 }, tSDR);
+        const tNot = ph("Tapi nggak").start;
+        ft("#sendBox .lock", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.35 }, tNot + 0.1);
+        swap(stS, 2, 3, tNot + 0.2);
+        moveEl($("#sendBox .lock"), tNot - 0.1, 0.6, 20, 0);
+        ft("#sendBox .lock", { scale: 1 }, { keyframes: [{ x: -6 }, { x: 6 }, { x: -4 }, { x: 0 }], duration: 0.35 }, wt("Tapi nggak", "dikirim"));
+
+        /* S4 phone approval 58-62.2 */
+        const tHP = ph("Masuk dulu").start;
+        camTo(540, 865, 1, tHP - 0.25, 0.6);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.55, duration: 0.4 }, tHP - 0.1);
+        ft("#phone", { opacity: 0, y: 700 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, tHP - 0.15);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tHP);
+        ft("#notif", { opacity: 0, y: -40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }, wt("Masuk dulu", "HP") + 0.05);
+        ft("#napp", { boxShadow: "0 0 0 0 rgba(1,204,247,0.7)" }, { boxShadow: "0 0 0 12px rgba(1,204,247,0)", duration: 0.7 }, wt("nunggu approval", "approval"));
+        const nap = pos($("#napp"));
+        const tAp = wt("Lu approve", "approve");
+        ft("#ripple", { x: nap.cx, y: nap.cy, scale: 0.2, opacity: 0.95 }, { scale: 1, opacity: 0, duration: 0.55, ease: "power2.out" }, tAp);
+        press("#napp", tAp);
+        ft("#nbtns", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tAp + 0.3);
+        ft("#nok", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, tAp + 0.35);
+        const tJalan = wt("baru jalan", "jalan");
+        ft("#phone", { opacity: 1, y: 0 }, { opacity: 0, y: 700, duration: 0.55, ease: "power3.in" }, tJalan + 0.05);
+        ft("#winDim", { opacity: 0.55 }, { opacity: 0, duration: 0.4 }, tJalan + 0.2);
+        ft("#sendBox .lock", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tJalan - 0.05);
+        ft("#sendBox .sent", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, tJalan);
+        swap(stS, 3, 4, tJalan);
+
+        /* S5 morning report 62.4-72.2 */
+        const tJam = wt("Dan tiap", "tujuh");
+        const ckb = $("#clockBox");
+        camTo(pos(ckb).cx - 120, pos(ckb).cy + 260, 1.35, ph("Dan tiap").start - 0.1, 0.7);
+        ft("#ck1", { opacity: 1, y: 0 }, { opacity: 0, y: -14, duration: 0.25 }, tJam);
+        ft("#ck2", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.25 }, tJam + 0.05);
+        ft("#clockBox", { scale: 1, color: "rgba(255,255,255,0.62)" }, { keyframes: [{ scale: 1.35, color: C }, { scale: 1, color: C }], duration: 0.6 }, tJam);
+        const tLap = ph("lu dapet").start;
+        camTo(540, 865, 1, tLap - 0.25, 0.7);
+        scrOut("#sAgent", tLap - 0.2);
+        side(5, tLap - 0.2);
+        scrIn("#sReport", tLap);
+        $$("#tiles .card").forEach((c, i) => { ft(c, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35 }, tLap + 0.35 + i * 0.1);
+          const n = $(".n", c); count(n, +n.dataset.n, tLap + 0.4 + i * 0.1, 1.1); });
+        const tDone2 = ph("Apa yang udah").start, tWait = ph("apa yang nunggu").start;
+        ft("#doneCard", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35 }, tDone2 - 0.1);
+        $$("#doneL .lr").forEach((r, i) => ft(r, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.25 }, tDone2 + i * 0.22));
+        ft("#waitCard", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35 }, tWait - 0.1);
+        $$("#waitL .lr").forEach((r, i) => ft(r, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.25 }, tWait + i * 0.25));
+        camTo(540, content.y + 800, 1.08, tDone2, 0.8);
+        const tAI = ph("AI-nya").start, tKep = ph("Keputusan").start;
+        ft("#doneCard", { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: C, duration: 0.3 }, tAI);
+        ft("#doneCard", { borderColor: C }, { borderColor: "rgba(255,255,255,0.12)", duration: 0.3 }, tKep);
+        ft("#waitCard", { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: C, duration: 0.3 }, tKep);
+        camTo(content.x + 640, content.y + 790, 1.22, tKep - 0.1, 0.8);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tKep);
+        const apb = $$("#waitL .ap")[0];
+        st("#cursor", { x: content.x + 760, y: content.y + 1000 }, tKep - 0.01); cur = { x: content.x + 760, y: content.y + 1000 };
+        moveEl(apb, tKep + 0.05, 0.7, 6, 4);
+        ft(apb, { scale: 1 }, { keyframes: [{ scale: 1.12 }, { scale: 1 }], duration: 0.4 }, tKep + 0.8);
+
+        /* S6 CTA 72.3-76.6 */
+        const tCta = ph("Ok follow").start;
+        camTo(540, 865, 1, tCta - 0.3, 0.6);
+        ft("#stage", { opacity: 1, scale: 1 }, { opacity: 0.25, scale: 0.9, duration: 0.6, ease: "power2.inOut" }, tCta - 0.3);
+        ft("#cta", { opacity: 0, y: 60, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta - 0.15);
+        const tF = wt("Ok follow", "follow");
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 22px rgba(1,204,247,0)", duration: 0.7 }, tF + 0.05);
+
+        /* captions: smooth phrase fade, words brighten in sync */
+        capEls.forEach(({ el, ws, p }, k) => {
+          if (p.start >= tCta - 0.1) return;
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.4;
+          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.38 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        window.__SFX = []; // filled by tools/sfx.py (static tags in HTML)
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

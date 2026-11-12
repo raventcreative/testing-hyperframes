@@ -150,7 +150,7 @@
       /* UI */
       #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
       #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
-      #caps { position: absolute; left: 80px; top: 1392px; width: 920px; height: 150px; display: flex; align-items: center; justify-content: center; }
+      #caps { position: absolute; left: 80px; top: 1440px; width: 920px; height: 150px; display: flex; align-items: center; justify-content: center; }
       .cap { position: absolute; left: 0; width: 920px; text-align: center; font-weight: 700; font-size: 54px; line-height: 1.16; text-transform: uppercase;
         letter-spacing: 0.5px; text-shadow: 0 4px 18px rgba(0, 0, 0, 0.5); opacity: 0; }
       .cap s { text-decoration: none; display: inline-block; }
@@ -165,7 +165,7 @@
         <div id="glow"></div>
 
         <div id="drift">
-          <div id="world">
+          <div id="world" data-layout-allow-overlap data-layout-allow-occlusion>
             <div id="title">
               <div class="t1"><span id="n137" class="cy">137</span> AI Agent</div>
               <div class="t2">Jalanin <b>1 perusahaan</b> penuh</div>
@@ -386,7 +386,7 @@
         const D = 69.6;
 
         // camera: world point (x,y) -> screen (540,840) at scale s
-        const camState = (x, y, s) => ({ x: 540 - x * s, y: 840 - y * s, scale: s });
+        const camState = (x, y, s) => ({ x: 540 - x * s, y: 900 - y * s, scale: s });
         let cam = camState(540, 872, 2.5);
         st("#world", cam, 0);
         const camTo = (x, y, s, at, dur, ease) => { const nx = camState(x, y, s); ft("#world", cam, Object.assign({}, nx, { duration: dur || 1.1, ease: ease || "power3.inOut" }), at); cam = nx; };
@@ -442,7 +442,7 @@
         hide("#intro", 11.25); dim(0.6, 0, 11.3);
 
         /* S2 the map 11.66-21.7: divisions light up one by one */
-        camTo(540, 900, 1.06, 11.5, 10, "sine.inOut");
+        camTo(540, 872, 1, 11.5, 0.8, "power2.inOut");
         DIV.forEach((d) => ft(HUB[d.k].leaves, { opacity: 1 }, { keyframes: [{ opacity: 0.35 }, { opacity: 1 }], duration: 0.6, stagger: 0.004 }, wt("137 AI agent,", "137")));
         ft(DIV.map((d) => HUB[d.k].num), { scale: 1, transformOrigin: "50% 50%" }, { keyframes: [{ scale: 1.5 }, { scale: 1 }], duration: 0.4, stagger: 0.08 }, wt("dibagi", "7"));
         const ORDER = [["marketing", "marketing,"], ["sales", "sales,"], ["deals", "deals,"], ["customer", "customer,"], ["operations", "operations,"], ["intelligence", "intelligence,"], ["backoffice", "sampai back"]];
@@ -458,7 +458,7 @@
         camTo(250, 880, 1.6, 21.9, 1.1);
         ft(["#title", "#inputs"], { opacity: 1 }, { opacity: 0, duration: 0.5 }, 21.9);
         ft(["#title", "#inputs"], { opacity: 0 }, { opacity: 1, duration: 0.6 }, 56.6);
-        cardsFade(["customer", "backoffice"], 0.2, 24.8, 1);
+        cardsFade(["customer", "backoffice"], 0.06, 24.8, 1);
         cardsFade(["deals", "marketing", "operations"], 0.35, 21.9, 1); cardsFade(["intelligence"], 0.1, 21.9, 1);
         const leftRows = ["sales", "customer", "backoffice"].flatMap((k) => $$(".row", HUB[k].card));
         leftRows.forEach((r, i) => rowOn(r, 23.5 + i * 0.1, true));
@@ -516,7 +516,7 @@
 
         /* S9 the real question 56.6-64.9 */
         hide("#approve", 56.4); ft("#ladder", { opacity: 0.12 }, { opacity: 0, duration: 0.4 }, 56.45);
-        ALL.forEach((k) => ft(HUB[k].card, { opacity: k === "sales" ? 1 : ["customer", "backoffice"].includes(k) ? 0.2 : k === "intelligence" ? 0.1 : 0.35 }, { opacity: 1, duration: 0.6 }, 56.5));
+        ALL.forEach((k) => ft(HUB[k].card, { opacity: k === "sales" ? 1 : ["customer", "backoffice"].includes(k) ? 0.06 : k === "intelligence" ? 0.1 : 0.35 }, { opacity: 1, duration: 0.6 }, 56.5));
         cardOn("sales", 56.5, false); rowOn(salesRows[2], 56.5, false);
         camTo(540, 872, 1, 56.4, 1.2);
         dim(0.8, 0.55, 56.6, 0.6);
@@ -543,9 +543,10 @@
           if (p.start >= 56.6) return;
           const next = capEls[k + 1];
           const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.4;
-          ft(el, { opacity: 0 }, { opacity: 1, duration: 0.08 }, p.start - 0.04);
-          $$("s", el).forEach((s, i) => ft(s, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.16, ease: "power2.out" }, ws[i][1] - 0.04));
-          st(el, { opacity: 0 }, end);
+          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.38 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
         });
 
         tl.set({}, {}, D - 0.01);

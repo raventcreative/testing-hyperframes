@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — Kerja Manual vs AI</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/robot_rig2.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --n1: #0a0d2c; --n2: #294b77; --grad: linear-gradient(100deg, #0a0d2c 0%, #294b77 100%); --line: rgba(10,13,44,0.10);
+        --auto: #2f6fe4; --autoBg: #e7f0ff; --hum: #f08c1a; --humBg: #fff1e0; --mute: rgba(10,13,44,0.55); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fd; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: var(--n1); -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #f4f7fd; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+
+      /* window: x 80-1000, y 290-1240 */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.84);
+        border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); transform-origin: 50% 50%; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.92); }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 2px 10px; }
+      #mode { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; }
+      #mode .lm { color: var(--hum); } #mode .la { color: var(--mute); }
+      #sw { position: relative; width: 62px; height: 34px; border-radius: 17px; background: rgba(240,140,26,0.25); }
+      #knob { position: absolute; left: 4px; top: 4px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(10,13,44,0.25); }
+      #rail { position: absolute; left: 0; top: 60px; bottom: 0; width: 72px; border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 18px; }
+      .ri { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; color: rgba(10,13,44,0.45); }
+      .ri .ic { width: 22px; height: 22px; } .ri.on { background: rgba(41,75,119,0.10); color: var(--n2); }
+      #area { position: absolute; left: 72px; top: 60px; width: 848px; height: 890px; overflow: hidden; background: rgba(244,247,253,0.6); }
+      #areaGrid { position: absolute; inset: 0; background-image: radial-gradient(rgba(41,75,119,0.13) 1px, transparent 1.4px); background-size: 22px 22px; }
+      #cam { position: absolute; left: 0; top: 0; width: 848px; height: 890px; transform-origin: 0 0; }
+      .card { position: absolute; background: #fff; border: 1.5px solid var(--line); border-radius: 18px; box-shadow: 0 6px 20px rgba(41,75,119,0.08); }
+      .card .hd { display: flex; align-items: center; gap: 10px; padding: 16px 18px 6px; font-size: 17px; font-weight: 700; }
+      .card .hd .ic { width: 20px; height: 20px; color: var(--n2); }
+      .badge { margin-left: auto; font-size: 13px; font-weight: 700; color: #fff; background: #e5484d; border-radius: 12px; padding: 2px 10px; }
+
+      /* manual: chats */
+      #chats { left: 20px; top: 20px; width: 380px; height: 470px; overflow: hidden; }
+      #chatList { position: absolute; left: 14px; right: 14px; top: 60px; bottom: 14px; overflow: hidden; }
+      .msg { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 14px; background: rgba(10,13,44,0.04); margin-bottom: 8px; opacity: 0; }
+      .msg .av { width: 34px; height: 34px; border-radius: 50%; background: rgba(41,75,119,0.12); flex: none; display: flex; align-items: center; justify-content: center; color: var(--n2); }
+      .msg .av .ic { width: 18px; height: 18px; }
+      .msg b { display: block; font-size: 14px; } .msg span { display: block; font-size: 14px; color: rgba(10,13,44,0.72); line-height: 1.3; }
+      .msg em { margin-left: auto; font-style: normal; font-size: 11px; color: var(--mute); flex: none; }
+      /* manual: spreadsheet */
+      #sheet { left: 420px; top: 20px; width: 408px; height: 300px; overflow: hidden; }
+      #grid { position: absolute; left: 14px; right: 14px; top: 58px; display: grid; grid-template-columns: 1.1fr 1fr 0.9fr 0.9fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+      #grid div { height: 36px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 13px; padding: 0 8px; display: flex; align-items: center; white-space: nowrap; overflow: hidden; }
+      #grid div.h { background: rgba(41,75,119,0.07); font-weight: 700; color: var(--n2); }
+      #grid div.fill span { opacity: 0; } #grid div.sel { box-shadow: inset 0 0 0 2px var(--auto); }
+      /* manual: timer */
+      #timer { left: 420px; top: 340px; width: 408px; height: 150px; }
+      #timer .big { position: absolute; left: 20px; top: 58px; font-size: 48px; font-weight: 700; line-height: 1; color: var(--hum); }
+      #timer .big small { font-size: 20px; font-weight: 400; color: var(--mute); margin-left: 6px; }
+      #timer .sub { position: absolute; left: 20px; bottom: 16px; font-size: 14px; color: var(--mute); }
+      #timer .hg { position: absolute; right: 22px; top: 54px; width: 54px; height: 54px; color: var(--hum); }
+      .toast { position: absolute; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 14px; background: var(--n1); color: #fff; font-size: 15px; font-weight: 700;
+        box-shadow: 0 10px 30px rgba(10,13,44,0.3); opacity: 0; white-space: nowrap; }
+      .toast .ic { width: 18px; height: 18px; color: #8fb6ff; }
+      /* tasks */
+      #tasks { left: 20px; top: 510px; width: 808px; height: 360px; }
+      #save { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--auto); background: var(--autoBg); border-radius: 12px; padding: 4px 12px; opacity: 0; }
+      .trw { position: absolute; left: 18px; right: 18px; height: 52px; border-radius: 13px; border: 1.5px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 0 14px; font-size: 16px; background: #fff; }
+      .trw .ic { width: 20px; height: 20px; color: var(--n2); }
+      .trw .rep { font-size: 13px; color: var(--mute); margin-left: auto; margin-right: 10px; }
+      .trw .stb { position: relative; width: 132px; height: 32px; }
+      .trw .stb > span { position: absolute; inset: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 700; }
+      .trw .stb .m { background: var(--humBg); color: var(--hum); } .trw .stb .a { background: var(--autoBg); color: var(--auto); opacity: 0; }
+      .trw .stb .a .ic { width: 15px; height: 15px; color: var(--auto); }
+      /* automation canvas */
+      #flow { left: 20px; top: 20px; width: 808px; height: 470px; opacity: 0; overflow: hidden; }
+      #flowSvg { position: absolute; left: 0; top: 0; width: 808px; height: 470px; overflow: visible; }
+      .fn { position: absolute; width: 190px; height: 82px; margin: -41px 0 0 -95px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 8px 22px rgba(41,75,119,0.12);
+        display: flex; align-items: center; gap: 12px; padding: 0 16px; font-size: 17px; font-weight: 700; opacity: 0; }
+      .fn .lg { width: 44px; height: 44px; border-radius: 12px; background: rgba(41,75,119,0.08); display: flex; align-items: center; justify-content: center; color: var(--n1); flex: none; }
+      .fn .lg .ic { width: 24px; height: 24px; }
+      #ai { position: absolute; left: 404px; top: 245px; width: 170px; height: 170px; margin: -85px 0 0 -85px; border-radius: 50%; background: var(--grad); color: #fff;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 16px 40px rgba(10,13,44,0.35); opacity: 0; }
+      #ai .ic { width: 46px; height: 46px; } #ai b { font-size: 18px; }
+      #aiRing { position: absolute; left: 404px; top: 245px; width: 170px; height: 170px; margin: -85px 0 0 -85px; border-radius: 50%; border: 3px solid rgba(47,111,228,0.6); opacity: 0; }
+      .pk { position: absolute; left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--auto); box-shadow: 0 0 10px rgba(47,111,228,0.8); opacity: 0; }
+
+      /* cursor + misc */
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(10,13,44,0.35)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--n2); background: rgba(41,75,119,0.12); opacity: 0; z-index: 29; }
+      #winDim { position: absolute; inset: 0; background: rgba(244,247,253,0.78); opacity: 0; }
+      #cta { position: absolute; left: 110px; width: 860px; top: 560px; padding: 56px 48px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 66px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; color: rgba(10,13,44,0.75); } #cta .sb b { color: var(--n2); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--grad); color: #fff; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
+      #robot { position: absolute; left: 18px; top: 1408px; width: 600px; height: 582px; transform-origin: 50% 100%; opacity: 0; }
+      #robot .sway, #robot .bob, #robot .talk { position: absolute; inset: 0; }
+      #robot .sway { transform-origin: 50% 90%; }
+      #robot .talk { transform-origin: 50% 100%; }
+      #robot .part { position: absolute; }
+      #robot .part img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+      #robot .headIn { position: absolute; inset: 0; }
+      #robot .lid { position: absolute; display: block; border-radius: 50%; background: #030407; transform-origin: 50% 0%; transform: scaleY(0); }
+      #robot .glow { position: absolute; border-radius: 50%; background: radial-gradient(ellipse, rgba(1,204,247,0.6) 0%, rgba(1,204,247,0) 70%); }
+      #robot .chest { position: absolute; border-radius: 50%; mix-blend-mode: screen; opacity: 0;
+        background: radial-gradient(ellipse, rgba(80,200,255,0.9) 0%, rgba(1,140,255,0.3) 45%, rgba(1,204,247,0) 72%); }
+      #robot .base { position: absolute; border-radius: 50%; mix-blend-mode: screen; opacity: 0; background: radial-gradient(ellipse, rgba(120,220,255,1) 0%, rgba(1,204,247,0) 70%); }
+      #robot { filter: drop-shadow(0 18px 30px rgba(41,75,119,0.25)); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="27.6" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="27.6" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="dots"></div>
+        <div id="win">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Workspace Tim</span><span id="sim">SIMULASI</span>
+            <div id="mode"><span class="lm">Manual</span><div id="sw"><i id="knob"></i></div><span class="la">Otomasi AI</span></div></div>
+          <div id="rail"><div class="ri on"><span class="ic" data-i="layout-grid"></span></div><div class="ri"><span class="ic" data-i="message-square-text"></span></div>
+            <div class="ri"><span class="ic" data-i="table"></span></div><div class="ri"><span class="ic" data-i="workflow"></span></div><div class="ri"><span class="ic" data-i="settings"></span></div></div>
+          <div id="area"><div id="areaGrid"></div>
+            <div id="cam">
+              <div class="card" id="chats"><div class="hd"><span class="ic" data-i="si-whatsapp"></span>Chat pelanggan<span class="badge"><span id="unread">0</span> belum dibalas</span></div><div id="chatList"></div></div>
+              <div class="card" id="sheet"><div class="hd"><span class="ic" data-i="si-googlesheets"></span>Rekap order.xlsx</div><div id="grid"></div></div>
+              <div class="card" id="timer"><div class="hd"><span class="ic" data-i="timer"></span>Kerja manual hari ini</div>
+                <div class="big"><span id="hrs">0</span>j <span id="mins">00</span>m<small>/ hari</small></div><span class="ic hg" data-i="hourglass"></span><div class="sub">angka ilustrasi</div></div>
+              <div class="card" id="flow"><svg id="flowSvg"></svg>
+                <div id="aiRing"></div><div id="ai"><span class="ic" data-i="bot"></span><b>AI Agent</b></div></div>
+              <div class="card" id="tasks"><div class="hd"><span class="ic" data-i="list-checks"></span>Tugas berulang minggu ini<span id="save">Hemat ±<span id="saveN">0</span> jam / minggu</span></div><div id="taskRows"></div></div>
+              <div id="toasts"></div>
+            </div>
+          </div>
+          <div id="winDim"></div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div>
+        <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name gt">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><div id="caps"></div>
+          <div id="robot"><div class="glow"></div><div class="sway"><div class="bob"><div class="talk"><div class="part head"><div class="headIn"><img src="assets/robot/r2_head.png" alt="" /><i class="lid"></i><i class="lid"></i></div></div><div class="part body"><img src="assets/robot/r2_body.png" alt="" /></div><div class="chest"></div><div class="base"></div><div class="part lhand"><img src="assets/robot/r2_lhand.png" alt="" /></div><div class="part rhand"><img src="assets/robot/r2_rhand.png" alt="" /></div></div></div></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="26.88" data-track-index="8" data-volume="1"></audio>
+      <audio id="sx00" class="clip" src="assets/sfx/whoosh.wav" data-start="0.05" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx01" class="clip" src="assets/sfx/pop.wav" data-start="0.80" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx02" class="clip" src="assets/sfx/pop.wav" data-start="1.15" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx03" class="clip" src="assets/sfx/pop.wav" data-start="2.67" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx04" class="clip" src="assets/sfx/pop.wav" data-start="3.12" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx05" class="clip" src="assets/sfx/pop.wav" data-start="3.52" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx06" class="clip" src="assets/sfx/click.wav" data-start="4.12" data-duration="0.366" data-track-index="12" data-volume="0.08"></audio>
+      <audio id="sx07" class="clip" src="assets/sfx/click.wav" data-start="4.44" data-duration="0.366" data-track-index="13" data-volume="0.08"></audio>
+      <audio id="sx08" class="clip" src="assets/sfx/click.wav" data-start="4.76" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+      <audio id="sx09" class="clip" src="assets/sfx/click.wav" data-start="5.08" data-duration="0.366" data-track-index="11" data-volume="0.08"></audio>
+      <audio id="sx10" class="clip" src="assets/sfx/ping.wav" data-start="9.18" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx11" class="clip" src="assets/sfx/whoosh.wav" data-start="10.66" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx12" class="clip" src="assets/sfx/click.wav" data-start="11.22" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+      <audio id="sx13" class="clip" src="assets/sfx/whoosh.wav" data-start="11.62" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx14" class="clip" src="assets/sfx/pop.wav" data-start="12.48" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx15" class="clip" src="assets/sfx/pop.wav" data-start="13.29" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx16" class="clip" src="assets/sfx/pop.wav" data-start="13.80" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx17" class="clip" src="assets/sfx/pop.wav" data-start="14.82" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx18" class="clip" src="assets/sfx/ping.wav" data-start="16.00" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx19" class="clip" src="assets/sfx/pop.wav" data-start="17.79" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx20" class="clip" src="assets/sfx/pop.wav" data-start="18.23" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx21" class="clip" src="assets/sfx/pop.wav" data-start="18.67" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx22" class="clip" src="assets/sfx/ping.wav" data-start="19.98" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx23" class="clip" src="assets/sfx/whoosh.wav" data-start="20.96" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx24" class="clip" src="assets/sfx/click.wav" data-start="23.46" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const NS = "http://www.w3.org/2000/svg";
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n) => `<span class="ic">${icon(n)}</span>`;
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#0a0d2c" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+        const svg = (tag, a, p) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+        /* ---------- build UI ---------- */
+        const MSGS = [["Rina", "Kak, stoknya masih ada?", "09.12"], ["Budi", "Invoice bulan ini mana ya?", "09.14"], ["Sari", "Bisa kirim hari ini?", "09.15"],
+          ["Andi", "Pesanan #1042 udah dikirim?", "09.17"], ["Maya", "Mau order 3, total berapa?", "09.18"], ["Dimas", "Halo kak, ada promo?", "09.20"]];
+        $("#chatList").innerHTML = MSGS.map(([n, t, h]) => `<div class="msg"><div class="av">${ic("user")}</div><div><b>${n}</b><span>${t}</span></div><em>${h}</em></div>`).join("");
+        const COLS = ["Nama", "No. HP", "Order", "Status"];
+        const ROWS = [["Rina", "0812…31", "2 pcs", "Proses"], ["Budi", "0813…07", "Invoice", "Belum"], ["Sari", "0857…22", "1 pcs", "Kirim"], ["Andi", "0821…90", "#1042", "Cek"], ["Maya", "0815…44", "3 pcs", "Hitung"]];
+        $("#grid").innerHTML = COLS.map((c) => `<div class="h">${c}</div>`).join("") + ROWS.map((r) => r.map((c) => `<div class="fill"><span>${c}</span></div>`).join("")).join("");
+        const TASKS = [["message-square-text", "Balas chat pelanggan", "±320× / minggu"], ["table", "Input order ke spreadsheet", "±140× / minggu"], ["si-hubspot", "Update status di CRM", "±140× / minggu"],
+          ["receipt", "Kirim invoice & reminder", "±60× / minggu"], ["file-text", "Rekap laporan harian", "7× / minggu"]];
+        $("#taskRows").innerHTML = TASKS.map(([i, t, r], k) => `<div class="trw" style="top:${58 + k * 58}px">${ic(i)}<span>${t}</span><span class="rep">${r}</span>
+          <div class="stb"><span class="m">Manual</span><span class="a">${ic("circle-check")}Otomatis</span></div></div>`).join("");
+        const TOASTS = [["copy", "Copy dari WhatsApp…", 250, 150], ["clipboard-paste", "Paste ke spreadsheet…", 470, 250], ["copy", "Copy lagi ke CRM…", 120, 400], ["clipboard-paste", "Paste ke invoice…", 430, 470]];
+        $("#toasts").innerHTML = TOASTS.map(([i, t, x, y]) => `<div class="toast" style="left:${x}px;top:${y}px">${ic(i)}${t}</div>`).join("");
+        // automation flow nodes
+        const FN = [["fnWa", "si-whatsapp", "WhatsApp", 130, 110], ["fnMail", "si-gmail", "Email", 130, 380], ["fnSheet", "si-googlesheets", "Spreadsheet", 678, 110], ["fnCrm", "si-hubspot", "CRM", 678, 380]];
+        const flow = $("#flow"), fsvg = $("#flowSvg");
+        const LINES = FN.map(([id, i, t, x, y]) => {
+          const n = document.createElement("div"); n.className = "fn"; n.id = id; n.style.left = x + "px"; n.style.top = y + "px";
+          n.innerHTML = `<div class="lg">${ic(i)}</div>${t}`; flow.appendChild(n);
+          const x2 = 404 + (x < 404 ? -85 : 85) * 0.8, y2 = 245 + (y < 245 ? -1 : 1) * 50, x1 = x + (x < 404 ? 95 : -95), mx = (x1 + x2) / 2;
+          const d = `M${x1},${y} C${mx},${y} ${mx},${y2} ${x2},${y2}`;
+          const p = svg("path", { d, fill: "none", stroke: "#294b77", "stroke-width": 3, "stroke-linecap": "round" }, fsvg);
+          const len = p.getTotalLength(); p.setAttribute("stroke-dasharray", `${len} ${len}`); p.setAttribute("stroke-dashoffset", len);
+          const pk = document.createElement("i"); pk.className = "pk"; flow.appendChild(pk);
+          return { p, len, pk, x1, y, x2, y2 };
+        });
+
+        /* captions */
+        const KEY = new Set(["gini.", "numpuk,", "copy", "paste", "manual,", "spreadsheet", "satu-satu.", "berjam-jam", "sama.", "klik", "otomasi.", "whatsapp,", "email,", "spreadsheet,",
+          "crm,", "nyambung", "ai.", "beres", "sendiri,", "fokus", "penting.", "sistem", "dipasang", "link", "bio,", "aipreneur", "automation."]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase()) || w[0].toLowerCase().startsWith("di-copy") ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 27.6;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        // area camera: area point (x,y) -> area centre (424,445)
+        const cState = (x, y, s) => ({ x: 424 - x * s, y: 445 - y * s, scale: s });
+        let cc = cState(424, 445, 1);
+        st("#cam", cc, 0);
+        const camTo = (x, y, s, at, dur) => { const nx = cState(x, y, s); ft("#cam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: "power3.inOut" }), at); cc = nx; };
+        let cur = { x: 760, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const count = (el, to, at, dur, fmt) => { const o = { v: 0 }; ft(o, { v: 0 }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+
+        /* initial */
+        st(["#tbar", "#rail", ".card:not(#flow)"], { opacity: 0 }, 0);
+
+        /* S0 hook 0-2.5: workspace appears, already busy */
+        ft(win, { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 0.0);
+        ft(["#tbar", "#rail"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.25);
+        ft(["#chats", "#sheet", "#timer", "#tasks"], { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.1, ease: "power3.out" }, 0.3);
+        const msgs = $$(".msg");
+        msgs.slice(0, 2).forEach((m, i) => ft(m, { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.3 }, 0.8 + i * 0.35));
+        const unread = $("#unread");
+        count(unread, 9, 0.6, 1.2);
+        /* S1 chaos 2.6-10.4 */
+        const tChat = ph("Chat numpuk").start;
+        camTo(210, 255, 1.45, tChat - 0.15, 0.7);
+        msgs.slice(2).forEach((m, i) => ft(m, { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.25 }, tChat + 0.05 + i * 0.22));
+        count(unread, 48, tChat, 1.1, (v) => Math.round(9 + v * 39 / 48));
+        ft("#chats .badge", { scale: 1 }, { keyframes: [{ scale: 1.25 }, { scale: 1 }], duration: 0.35 }, wt("Chat numpuk", "numpuk"));
+        const tCopy = ph("data di-copy").start;
+        camTo(424, 445, 1, tCopy - 0.2, 0.6);
+        $$(".toast").forEach((t, i) => { const at = tCopy + 0.1 + i * 0.32;
+          ft(t, { opacity: 0, y: 14, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.22, ease: "back.out(2)" }, at);
+          ft(t, { opacity: 1 }, { opacity: 0, duration: 0.25 }, at + 1.0); });
+        const tSheet = ph("spreadsheet diisi").start;
+        camTo(624, 175, 1.55, tSheet - 0.2, 0.6);
+        const cells = $$("#grid div.fill");
+        cells.forEach((c, i) => { const at = tSheet + 0.05 + i * 0.085;
+          ft($("span", c), { opacity: 0 }, { opacity: 1, duration: 0.08 }, at);
+          ft(c, { boxShadow: "inset 0 0 0 0px rgba(47,111,228,0)" }, { keyframes: [{ boxShadow: "inset 0 0 0 2px rgba(47,111,228,1)", duration: 0.04 }, { boxShadow: "inset 0 0 0 0px rgba(47,111,228,0)", duration: 0.12 }] }, at); });
+        const tJam = ph("Berjam-jam").start;
+        camTo(624, 415, 1.5, tJam - 0.2, 0.6);
+        const hrs = $("#hrs"), mins = $("#mins");
+        ft({ v: 0 }, { v: 0 }, { v: 348, duration: 1.4, ease: "power1.in", onUpdate() { const v = Math.round(this.targets()[0].v); hrs.textContent = Math.floor(v / 60); mins.textContent = String(v % 60).padStart(2, "0"); } }, tJam);
+        ft("#timer .hg", { rotation: 0 }, { rotation: 360, duration: 1.4, ease: "power2.inOut" }, tJam);
+        const tSama = ph("buat kerjaan").start;
+        camTo(424, 690, 1.12, tSama - 0.15, 0.6);
+        ft(".trw .rep", { color: "rgba(10,13,44,0.55)", scale: 1 }, { keyframes: [{ color: "#e5484d", scale: 1.12 }, { scale: 1 }], duration: 0.5, stagger: 0.08 }, tSama);
+
+        /* S2 toggle to AI 10.4-12.4 */
+        const tKlik = wt("Sekarang klik", "klik");
+        camTo(424, 445, 1, tKlik - 0.7, 0.6);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, ph("Sekarang klik").start - 0.1);
+        moveEl($("#sw"), ph("Sekarang klik").start, 0.6, 4, 2);
+        click(tKlik);
+        const tOn = tKlik + 0.05;
+        ft("#knob", { x: 0 }, { x: 28, duration: 0.3, ease: "power2.inOut" }, tOn);
+        ft("#sw", { backgroundColor: "rgba(240,140,26,0.25)" }, { backgroundColor: "#2f6fe4", duration: 0.3 }, tOn);
+        ft("#mode .lm", { color: "#f08c1a" }, { color: "rgba(10,13,44,0.55)", duration: 0.3 }, tOn);
+        ft("#mode .la", { color: "rgba(10,13,44,0.55)" }, { color: "#2f6fe4", duration: 0.3 }, tOn);
+        ft(["#chats", "#sheet", "#timer"], { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.94, duration: 0.35, stagger: 0.05, ease: "power2.in" }, tOn + 0.15);
+        ft("#flow", { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.45, ease: "power3.out" }, tOn + 0.45);
+        ft("#ai", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }, tOn + 0.6);
+        moveTo(760, 300, tOn + 0.5, 0.6);
+        /* S3 nodes connect 12.5-17.2 */
+        const tNode = [wt("WhatsApp", "WhatsApp"), wt("WhatsApp", "email"), wt("WhatsApp", "spreadsheet"), wt("sampai CRM", "CRM")];
+        FN.forEach(([id], i) => { ft("#" + id, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, tNode[i] - 0.08);
+          ft(LINES[i].p, { attr: { "stroke-dashoffset": LINES[i].len } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.45, ease: "power2.out" }, tNode[i] + 0.1); });
+        const tNy = wt("semua nyambung", "nyambung");
+        ft("#ai", { boxShadow: "0 16px 40px rgba(10,13,44,0.35)" }, { keyframes: [{ boxShadow: "0 0 0 16px rgba(47,111,228,0.25)" }, { boxShadow: "0 16px 40px rgba(10,13,44,0.35)" }], duration: 0.8 }, wt("semua nyambung", "AI"));
+        ft("#aiRing", { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.6, duration: 1.0, ease: "power2.out", repeat: 3 }, tNy);
+        LINES.forEach((L, i) => { const p = L.p; const o = { t: 0 };
+          ft(o, { t: 0 }, { t: 1, duration: 0.9, ease: "power1.inOut", repeat: 4, delay: 0, onUpdate: () => { const pt = p.getPointAtLength(o.t * L.len); L.pk.style.transform = `translate(${pt.x}px,${pt.y}px)`; } }, tNy + i * 0.15);
+          ft(L.pk, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tNy + i * 0.15); ft(L.pk, { opacity: 1 }, { opacity: 0, duration: 0.3 }, ph("Mau sistem").start - 0.4); });
+        /* S4 tasks complete themselves 17.6-21 */
+        const tBer = ph("Tugasnya beres").start;
+        $$(".trw").forEach((r, i) => { const at = tBer + 0.15 + i * 0.22;
+          ft($(".m", r), { opacity: 1 }, { opacity: 0, duration: 0.15 }, at); ft($(".a", r), { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, at);
+          ft(r, { borderColor: "rgba(10,13,44,0.10)" }, { borderColor: "rgba(47,111,228,0.55)", duration: 0.2 }, at); });
+        const tFok = ph("tim lu fokus").start;
+        ft("#save", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.35 }, tFok - 0.1);
+        count($("#saveN"), 32, tFok, 1.2);
+        moveTo(700, 560, tBer, 0.8);
+
+        /* S5 CTA 21.2-27.6 */
+        const tCta = ph("Mau sistem").start;
+        ft("#winDim", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tCta - 0.2);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tCta - 0.2);
+        ft(win, { scale: 1 }, { scale: 0.94, duration: 0.6, ease: "power2.inOut" }, tCta - 0.2);
+        ft("#cta", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
+        const tF = wt("Klik link", "link");
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.5;
+          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /* robot presenter rig v2 (front-facing AIpreneur robot): head, body, two hands, eyelids */
+        const RG = window.ROBOT_RIG2, rob = $("#robot");
+        const box = (el, b, pad) => { pad = pad || 0; Object.assign(el.style, { left: b[0] - pad + "px", top: b[1] - pad + "px", width: b[2] + 2 * pad + "px", height: b[3] + 2 * pad + "px" }); };
+        const head = $(".head", rob), headIn = $(".headIn", rob), lh = $(".lhand", rob), rh = $(".rhand", rob), lids = $$(".lid", rob);
+        const chest = $(".chest", rob), baseL = $(".base", rob), talk = $(".talk", rob);
+        box(head, RG.head); box($(".body", rob), RG.body); box(lh, RG.lhand); box(rh, RG.rhand);
+        lids.forEach((l, i) => box(l, [RG.eyes[i][0] - RG.head[0], RG.eyes[i][1] - RG.head[1], RG.eyes[i][2], RG.eyes[i][3]], 4));
+        head.style.transformOrigin = (RG.neck[0] - RG.head[0]) + "px " + (RG.neck[1] - RG.head[1]) + "px";
+        lh.style.transformOrigin = "80% 30%"; rh.style.transformOrigin = "20% 30%";
+        box(chest, [RG.chest[0] - 20, RG.chest[1] - 10, RG.chest[2] + 40, RG.chest[3] + 20]);
+        box(baseL, [RG.base[0] - 10, RG.base[1] - 8, RG.base[2] + 20, RG.base[3] + 16]);
+        box($(".glow", rob), [RG.base[0] - 80, RG.base[1] + 4, RG.base[2] + 160, 50]);
+        // entrance
+        ft(rob, { opacity: 0, x: -320 }, { opacity: 1, x: 0, duration: 0.8, ease: "power3.out" }, 0.4);
+        // idle life: float, sway, hands hover out of phase, head drifts
+        const rep = (p) => Math.floor((D - 1.2) / p) - 1;
+        ft($(".bob", rob), { y: 0 }, { y: -9, duration: 1.4, ease: "sine.inOut", repeat: rep(1.4), yoyo: true }, 1.2);
+        ft($(".sway", rob), { rotation: -1.2 }, { rotation: 1.2, duration: 3.1, ease: "sine.inOut", repeat: rep(3.1), yoyo: true }, 1.2);
+        ft($(".glow", rob), { opacity: 1, scaleX: 1 }, { opacity: 0.55, scaleX: 0.82, duration: 1.4, ease: "sine.inOut", repeat: rep(1.4), yoyo: true }, 1.2);
+        ft($("img", lh), { y: 0 }, { y: -7, duration: 1.1, ease: "sine.inOut", repeat: rep(1.1), yoyo: true }, 1.0);
+        ft($("img", rh), { y: -6 }, { y: 2, duration: 1.25, ease: "sine.inOut", repeat: rep(1.25), yoyo: true }, 1.3);
+        // speaking: head micro-bob + chest/base light follow the VO loudness
+        const env = window.VO_ENV || [];
+        ft({ v: 0 }, { v: 0 }, { v: 1, duration: D, ease: "none", onUpdate: () => { const f = Math.min(env.length - 1, Math.max(0, Math.round(tl.time() * 30))); const e = env[f] || 0;
+          const e2 = env[Math.max(0, f - 3)] || 0;
+          chest.style.opacity = (0.12 + 0.75 * e).toFixed(3); baseL.style.opacity = (0.2 + 0.8 * e).toFixed(3); chest.style.transform = "scale(" + (0.9 + 0.2 * e).toFixed(3) + ")";
+          talk.style.transform = "translateY(" + (-3 * e).toFixed(2) + "px)"; } }, 0);
+        // blinking (occasionally a double blink)
+        for (let t = 2.0, k = 0; t < D - 1; t += [3.2, 2.6, 4.1, 3.4][k++ % 4]) {
+          ft(lids, { scaleY: 0 }, { keyframes: [{ scaleY: 1, duration: 0.07 }, { scaleY: 0, duration: 0.09 }] }, t);
+          if (k % 3 === 0) ft(lids, { scaleY: 0 }, { keyframes: [{ scaleY: 1, duration: 0.06 }, { scaleY: 0, duration: 0.08 }] }, t + 0.24);
+        }
+        // head: tilts and looks while presenting (head layer sits behind the collar, so it can move freely)
+        const headTo = () => {}; // head stays still (client request)
+        const headToOld = (t, r, x, y, hold) => ft(head, { rotation: 0, x: 0, y: 0 }, { keyframes: [{ rotation: r, x, y, duration: 0.35, ease: "power2.out" }, { rotation: r, x, y, duration: hold },
+          { rotation: 0, x: 0, y: 0, duration: 0.45, ease: "power2.inOut" }] }, t);
+        // presenter gestures for this script
+        const G = [];
+        [0.2, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
+        [tKlik, tF].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
+        [wt("Chat numpuk", "numpuk"), wt("data di-copy", "manual"), wt("spreadsheet diisi", "satu"), tJam, tNode[0], tNode[1], tNode[2], tNode[3], tNy, wt("Tugasnya beres", "beres"), wt("tim lu fokus", "fokus")]
+          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
+        G.sort((x, y) => x.t - y.t);
+        let busy = -1, beatN = 0;
+        G.forEach((g) => {
+          if (g.t < busy + 0.05) return;
+          busy = g.t + g.d;
+          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
+            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
+            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
+          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
+            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
+        });
+
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

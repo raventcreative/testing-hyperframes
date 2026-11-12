@@ -21,7 +21,8 @@ for c in range(3):
 dist = np.sqrt(((a - bg) ** 2).sum(-1))
 luma = 0.299 * a[..., 0] + 0.587 * a[..., 1] + 0.114 * a[..., 2]
 sat = a.max(-1) - a.min(-1); tint = a[..., 2] - a[..., 0]
-shadow = ((yy > 600) | ((xx > 1000) & (yy > 250))) & (luma > 110) & (luma < 232) & (sat < 40) & (tint >= 8)
+GLOBAL = "--global-shadow" in sys.argv
+shadow = (GLOBAL | (yy > 600) | ((xx > 1000) & (yy > 250))) & (luma > 110) & (luma < 232) & (sat < 40) & (tint >= 8)
 cand = (dist < 32) | shadow
 seen = np.zeros((H, W), bool); q = deque()
 for x in range(W):

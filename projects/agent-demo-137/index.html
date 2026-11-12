@@ -8,7 +8,7 @@
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/icons.js"></script>
     <script src="vendor/vo_env.js"></script>
-    <script src="vendor/robot_rig.js"></script>
+    <script src="vendor/robot_rig2.js"></script>
     <style>
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
@@ -211,16 +211,17 @@
       #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--c); color: #04122f; font-size: 32px; font-weight: 700; }
       #fbtn .ic { width: 32px; height: 32px; }
       #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
-      #robot { position: absolute; left: 24px; top: 1414px; width: 560px; height: 539px; transform-origin: 45% 100%; opacity: 0; }
+      #robot { position: absolute; left: 18px; top: 1408px; width: 600px; height: 582px; transform-origin: 50% 100%; opacity: 0; }
       #robot .sway, #robot .bob, #robot .talk { position: absolute; inset: 0; }
-      #robot .sway { transform-origin: 50% 92%; }
+      #robot .sway { transform-origin: 50% 90%; }
       #robot .talk { transform-origin: 50% 100%; }
-      #robot .body { position: absolute; left: 0; top: 0; width: 560px; height: auto; }
-      #robot .hand { position: absolute; transform-origin: 25% 85%; }
-      #robot .lid { position: absolute; display: block; border-radius: 50%; background: #05060a; transform-origin: 50% 0%; transform: scaleY(0); }
+      #robot .part { position: absolute; }
+      #robot .part img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+      #robot .headIn { position: absolute; inset: 0; }
+      #robot .lid { position: absolute; display: block; border-radius: 50%; background: #030407; transform-origin: 50% 0%; transform: scaleY(0); }
       #robot .glow { position: absolute; border-radius: 50%; background: radial-gradient(ellipse, rgba(1,204,247,0.6) 0%, rgba(1,204,247,0) 70%); }
       #robot .chest { position: absolute; border-radius: 50%; mix-blend-mode: screen; opacity: 0;
-        background: radial-gradient(ellipse, rgba(80,200,255,0.95) 0%, rgba(1,140,255,0.35) 45%, rgba(1,204,247,0) 72%); }
+        background: radial-gradient(ellipse, rgba(80,200,255,0.9) 0%, rgba(1,140,255,0.3) 45%, rgba(1,204,247,0) 72%); }
       #robot .base { position: absolute; border-radius: 50%; mix-blend-mode: screen; opacity: 0; background: radial-gradient(ellipse, rgba(120,220,255,1) 0%, rgba(1,204,247,0) 70%); }
       #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
       #caps { position: absolute; left: 80px; top: 1282px; width: 920px; height: 118px; }
@@ -353,7 +354,7 @@
         <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
           <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
         <div id="ui"><img id="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><div id="caps"></div>
-          <div id="robot"><div class="glow"></div><div class="sway"><div class="bob"><div class="talk"><img class="body" src="assets/robot/body.png" alt="" /><div class="chest"></div><div class="base"></div><i class="lid"></i><i class="lid"></i><img class="hand" src="assets/robot/hand.png" alt="" /></div></div></div></div></div>
+          <div id="robot"><div class="glow"></div><div class="sway"><div class="bob"><div class="talk"><div class="part head"><div class="headIn"><img src="assets/robot/r2_head.png" alt="" /><i class="lid"></i><i class="lid"></i></div></div><div class="part body"><img src="assets/robot/r2_body.png" alt="" /></div><div class="chest"></div><div class="base"></div><div class="part lhand"><img src="assets/robot/r2_lhand.png" alt="" /></div><div class="part rhand"><img src="assets/robot/r2_rhand.png" alt="" /></div></div></div></div></div></div>
       </div>
 
       <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="79.29" data-track-index="8" data-volume="1"></audio>
@@ -725,46 +726,71 @@
           ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
         });
 
-        /* robot presenter rig: body + free right hand + eyelids, all deterministic */
-        const RG = window.ROBOT_RIG, rob = $("#robot");
+        /* robot presenter rig v2 (front-facing AIpreneur robot): head, body, two hands, eyelids */
+        const RG = window.ROBOT_RIG2, rob = $("#robot");
         const box = (el, b, pad) => { pad = pad || 0; Object.assign(el.style, { left: b[0] - pad + "px", top: b[1] - pad + "px", width: b[2] + 2 * pad + "px", height: b[3] + 2 * pad + "px" }); };
-        const handEl = $(".hand", rob), lids = $$(".lid", rob), chest = $(".chest", rob), baseL = $(".base", rob), talk = $(".talk", rob);
-        box(handEl, RG.hand); lids.forEach((l, i) => box(l, RG.eyes[i], 3));
-        box(chest, [RG.chest[0] - 24, RG.chest[1] - 16, RG.chest[2] + 48, RG.chest[3] + 32]);
-        box(baseL, [RG.base[0] - 10, RG.base[1] - 10, RG.base[2] + 20, RG.base[3] + 20]);
-        box($(".glow", rob), [RG.base[0] - 70, RG.base[1] - 4, RG.base[2] + 140, 54]);
-        // entrance from the left edge
-        ft(rob, { opacity: 0, x: -300 }, { opacity: 1, x: 0, duration: 0.8, ease: "power3.out" }, 0.4);
-        // idle: float + gentle body sway + floor glow breathing
+        const head = $(".head", rob), headIn = $(".headIn", rob), lh = $(".lhand", rob), rh = $(".rhand", rob), lids = $$(".lid", rob);
+        const chest = $(".chest", rob), baseL = $(".base", rob), talk = $(".talk", rob);
+        box(head, RG.head); box($(".body", rob), RG.body); box(lh, RG.lhand); box(rh, RG.rhand);
+        lids.forEach((l, i) => box(l, [RG.eyes[i][0] - RG.head[0], RG.eyes[i][1] - RG.head[1], RG.eyes[i][2], RG.eyes[i][3]], 4));
+        head.style.transformOrigin = (RG.neck[0] - RG.head[0]) + "px " + (RG.neck[1] - RG.head[1]) + "px";
+        lh.style.transformOrigin = "80% 30%"; rh.style.transformOrigin = "20% 30%";
+        box(chest, [RG.chest[0] - 20, RG.chest[1] - 10, RG.chest[2] + 40, RG.chest[3] + 20]);
+        box(baseL, [RG.base[0] - 10, RG.base[1] - 8, RG.base[2] + 20, RG.base[3] + 16]);
+        box($(".glow", rob), [RG.base[0] - 80, RG.base[1] + 4, RG.base[2] + 160, 50]);
+        // entrance
+        ft(rob, { opacity: 0, x: -320 }, { opacity: 1, x: 0, duration: 0.8, ease: "power3.out" }, 0.4);
+        // idle life: float, sway, hands hover out of phase, head drifts
         const rep = (p) => Math.floor((D - 1.2) / p) - 1;
         ft($(".bob", rob), { y: 0 }, { y: -9, duration: 1.4, ease: "sine.inOut", repeat: rep(1.4), yoyo: true }, 1.2);
-        ft($(".sway", rob), { rotation: -1.5 }, { rotation: 1.5, duration: 3.1, ease: "sine.inOut", repeat: rep(3.1), yoyo: true }, 1.2);
+        ft($(".sway", rob), { rotation: -1.2 }, { rotation: 1.2, duration: 3.1, ease: "sine.inOut", repeat: rep(3.1), yoyo: true }, 1.2);
         ft($(".glow", rob), { opacity: 1, scaleX: 1 }, { opacity: 0.55, scaleX: 0.82, duration: 1.4, ease: "sine.inOut", repeat: rep(1.4), yoyo: true }, 1.2);
-        // speaking: chest + base light and a tiny lift follow the VO loudness
+        ft($("img", lh), { y: 0 }, { y: -7, duration: 1.1, ease: "sine.inOut", repeat: rep(1.1), yoyo: true }, 1.0);
+        ft($("img", rh), { y: -6 }, { y: 2, duration: 1.25, ease: "sine.inOut", repeat: rep(1.25), yoyo: true }, 1.3);
+        // speaking: head micro-bob + chest/base light follow the VO loudness
         const env = window.VO_ENV || [];
         ft({ v: 0 }, { v: 0 }, { v: 1, duration: D, ease: "none", onUpdate: () => { const f = Math.min(env.length - 1, Math.max(0, Math.round(tl.time() * 30))); const e = env[f] || 0;
-          chest.style.opacity = (0.15 + 0.85 * e).toFixed(3); baseL.style.opacity = (0.2 + 0.8 * e).toFixed(3); chest.style.transform = "scale(" + (0.9 + 0.25 * e).toFixed(3) + ")";
-          talk.style.transform = "translateY(" + (-5 * e).toFixed(2) + "px) scale(" + (1 + 0.012 * e).toFixed(4) + ")"; } }, 0);
-        // blinking
-        for (let t = 2.2, k = 0; t < D - 1; t += k++ % 2 ? 3.9 : 3.1) ft(lids, { scaleY: 0 }, { keyframes: [{ scaleY: 1, duration: 0.07 }, { scaleY: 0, duration: 0.09 }] }, t);
-        // presenter gestures with the free hand (never overlapping): wave, point at the demo, beat on key words
+          const e2 = env[Math.max(0, f - 3)] || 0;
+          chest.style.opacity = (0.12 + 0.75 * e).toFixed(3); baseL.style.opacity = (0.2 + 0.8 * e).toFixed(3); chest.style.transform = "scale(" + (0.9 + 0.2 * e).toFixed(3) + ")";
+          headIn.style.transform = "translateY(" + (-3.5 * e).toFixed(2) + "px) rotate(" + ((e - e2) * 3).toFixed(2) + "deg)";
+          talk.style.transform = "translateY(" + (-3 * e).toFixed(2) + "px)"; } }, 0);
+        // blinking (occasionally a double blink)
+        for (let t = 2.0, k = 0; t < D - 1; t += [3.2, 2.6, 4.1, 3.4][k++ % 4]) {
+          ft(lids, { scaleY: 0 }, { keyframes: [{ scaleY: 1, duration: 0.07 }, { scaleY: 0, duration: 0.09 }] }, t);
+          if (k % 3 === 0) ft(lids, { scaleY: 0 }, { keyframes: [{ scaleY: 1, duration: 0.06 }, { scaleY: 0, duration: 0.08 }] }, t + 0.24);
+        }
+        // head: tilts and looks while presenting (head layer sits behind the collar, so it can move freely)
+        const headTo = (t, r, x, y, hold) => ft(head, { rotation: 0, x: 0, y: 0 }, { keyframes: [{ rotation: r, x, y, duration: 0.35, ease: "power2.out" }, { rotation: r, x, y, duration: hold },
+          { rotation: 0, x: 0, y: 0, duration: 0.45, ease: "power2.inOut" }] }, t);
+        // gestures: wave (left hand), point at the demo (right hand + head turns to it), beats (alternating hands + nod)
         const G = [];
-        [ph("Hai gue").start - 0.1, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.25 }));
-        [tConn, tBuild, tKlik, tCold, tRun, tAp, tLap, tKep].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.45 }));
+        [ph("Hai gue").start - 0.1, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
+        [tConn, tBuild, tKlik, tCold, tRun, tAp, tLap, tKep].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
         [wt("dijalanin", "137"), ph("Gue tunjukin").start, wt("udah bisnis", "10"), wt("dan 2", "2"), wt("137 agent", "7"), wt("Ada 22", "22"), ph("Tugasnya").start,
-          wt("udah gantiin", "SDR"), ph("Tapi nggak").start, wt("Dan tiap", "tujuh"), ph("AI-nya").start, ph("Datanya").start, ph("Dalam hitungan").start]
-          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.5 }));
+          wt("udah gantiin", "SDR"), ph("Tapi nggak").start, wt("Dan tiap", "tujuh"), ph("AI-nya").start, ph("Datanya").start, ph("Dalam hitungan").start,
+          ph("Pertama").start, wt("Email,", "CRM"), ph("Sales,").start, ph("operations,").start, wt("Masuk dulu", "HP"), ph("Apa yang udah").start, ph("Mau sistem").start]
+          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
         G.sort((x, y) => x.t - y.t);
-        let busy = -1;
+        let busy = -1, beatN = 0;
         G.forEach((g) => {
           if (g.t < busy + 0.05) return;
           busy = g.t + g.d;
-          if (g.k === "wave") ft(handEl, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: -10, y: -80, rotation: -22, duration: 0.25, ease: "power2.out" }, { rotation: 22, duration: 0.2 },
-            { rotation: -22, duration: 0.2 }, { rotation: 18, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.4, ease: "power2.inOut" }] }, g.t);
-          if (g.k === "point") { ft(handEl, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 46, y: -128, rotation: -42, duration: 0.32, ease: "power2.out" }, { x: 46, y: -128, rotation: -42, duration: 0.7 },
-            { x: 0, y: 0, rotation: 0, duration: 0.43, ease: "power2.inOut" }] }, g.t);
-            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 4, duration: 0.32, ease: "power2.out" }, { rotation: 4, duration: 0.7 }, { rotation: 0, duration: 0.43, ease: "power2.inOut" }] }, g.t); }
-          if (g.k === "beat") ft(handEl, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -34, rotation: -12, duration: 0.18, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.3, ease: "power2.in" }] }, g.t);
+          if (g.k === "wave") {
+            ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
+              { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+            headTo(g.t, -5, -2, 0, 0.7);
+          }
+          if (g.k === "point") {
+            ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
+              { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+            headTo(g.t, 6, 6, -3, 0.7);
+            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+          }
+          if (g.k === "beat") {
+            const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
+            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t);
+            headTo(g.t, -3 * dir, 0, 3, 0.05);
+          }
         });
         window.__SFX = []; // filled by tools/sfx.py (static tags in HTML)
         tl.set({}, {}, D - 0.01);

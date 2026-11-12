@@ -1,58 +1,89 @@
-# VO — Jualan website 3D, 1 prompt jadi · background TERANG · 47,0 dtk VO (video 48,37 dtk)
-Referensi: ref3 (≈47 dtk bicara, video 49,7 dtk) — "semua website 3D ini dari satu prompt": library "Motion Sites" berisi 100+ situs 3D,
-tiap situs = prompt siap pakai; copy → tempel ke AI (Kimi / Claude) → situs jadi → ganti gambar klien → "jadi dalam satu sore", "bisa
-dijual $500", bikin beberapa → portofolio; library berbayar → paket prompt gratis; CTA "comment 3D". Visual referensi: latar krem/peach,
-maskot kepiting piksel, cuplikan situs-situs dari library.
+# VO — 5 alat gratis di GitHub jadi 5 menu jasa · background TERANG · 46,2 dtk VO (video 47,47 dtk)
+Referensi: batch 5 · ref2 (59 dtk, kreator lain, brand merah/hitam dengan maskot rambut merah): "5 repo GitHub gratis tapi bisa jadi
+sumber duit tambahan" → kodenya gratis, yang dijual jasanya → AutoClip (video panjang → klip + subtitle, jasa klip), Remotion (video dari
+kode, "satu template jadi ratusan video", jual ke brand), OpenHands (AI programmer → website UMKM), Postiz (jadwal posting banyak akun →
+jasa admin sosmed), MuMuAINovel (AI bantu nulis novel) → "cek lisensinya dulu, misalnya Remotion" → "bukan modalnya dari mana, tapi jasa
+apa yang mau dijual duluan" → CTA komen kata kunci, link lewat DM + ajakan follow. Visual referensi: kartu gelap/terang bergantian, bar
+"01 Nama ★ bintang", pill "5 Repo Gratis" dengan titik progres, kartu "kode Rp0 / jasa", maskot rambut merah.
 
-## Yang diubah dari referensi
-- Visual sepenuhnya milik kita: sistem LIGHT AI PRENEUR (grid animasi, kartu putih, maskot + robot). Contoh website 3D di layar adalah
-  desain kita sendiri — tiga UMKM fiktif (Kopi Senja · Langkah sneakers · Roti Bunda), produk melayang digambar sebagai SVG dan
-  digerakkan GSAP (goyang 3D dangkal, bayangan, partikel mengorbit) — semua berlabel **CONTOH**. Tidak ada screenshot situs orang lain.
-- Jendela library hanya **ilustrasi** (label ILUSTRASI): nama "MotionSites" + alamat teks motionsites.ai, isi grid = ubin abstrak buatan
-  kita, bukan desain mereka. Isi prompt yang terlihat ("Buat landing page 3D untuk [nama brand]…") juga contoh tulisan kita.
-- Tanpa angka yang tidak bisa dicek: "100+ situs 3D" dihapus (situs resminya sendiri menyebut angka lain, ±500 prompt, dan itu klaim
-  sepihak); "jadi dalam satu sore" dihapus (tidak ada janji waktu).
-- "$500" diganti: **"Harganya? Tergantung klien dan seberapa besar kerjaannya. Kamu yang tentuin."** — kartu penawaran di layar tanpa
-  angka (Rp ??? → coretan pena), daftar scope: jumlah halaman, foto & teks klien, animasi 3D, revisi & domain.
-- "cara paling gampang yang pernah kulihat" → ditandai sebagai pendapat: "**Menurutku**, ini cara paling gampang…" (chip "Menurutku…").
-- "Kimi atau Claude" → "Claude atau AI lain" (chip model "Claude" + "AI lain", tanpa logo pihak lain).
-- Ditambah langkah yang jujur: AI membuat **template** dulu ("Nama Brand", slot "Foto produk"), lalu foto + teks + warna diganti punya
-  klien; sudut Indonesia = UMKM (kedai kopi, toko sepatu, toko roti, salon, katering, "usaha kamu?").
-- Karena library-nya berbayar, CTA menawarkan paket prompt starter gratis dari Freddie: `production/STARTER_PROMPTS_3D.md`.
-  CTA: **"Komen 3D, aku kirim lewat DM."**
+## ATM: what we changed
+**Amati** — ide yang berguna: alat open source gratis bisa jadi modal *jasa* (yang dibayar klien adalah kerjaannya). Mekanisme hook:
+angka + "gratis" + janji uang ("sumber duit tambahan"). Struktur: listicle 5 repo, tiap repo = nama → fungsi → jasa yang dijual; lalu
+peringatan lisensi; pertanyaan penutup; CTA kata kunci → link lewat DM + follow.
+**Tiru** — hanya mekanismenya: listicle 5 alat gratis dari GitHub, tiap alat dipasangkan dengan satu ide jasa, plus peringatan lisensi.
+**Modifikasi** (wajib):
+1. **Hook sendiri, sudut beda** — "Resep nasi goreng gratis, tapi kamu tetap beli di warung, kan?": analogi resep gratis vs masakan yang
+   tetap dibeli (open source = resep; jasa = masakannya). Tanpa janji uang; referensi memakai "sumber duit tambahan".
+2. **Struktur, urutan, dan metafora visual sendiri** — urutan kita dari jasa paling gampang dimulai ke yang paling teknis: Postiz →
+   AutoClip → Chatwoot → OpenHands → Remotion (Remotion terakhir supaya lisensinya langsung menyambung ke peringatan). Metafora resep → menu
+   dipakai sepanjang reel: kartu resep "Nasi Goreng" dibalik jadi "5 resep gratis di GitHub"; warung berubah jadi papan **Menu Jasa**; tiap
+   alat punya header "RESEP #n" + tiket "MENU #n". Visual per beat milik kita: jadwal hub-and-spoke (bukan grid kalender), strip film yang
+   digunting jadi 3 klip vertikal bersubtitle, tiga kanal chat terbang masuk ke satu inbox, perintah → agen → editor → halaman jadi + cap
+   "DICEK KAMU" (bukan terminal), kode + template → grid video produk (bukan potongan JSX + penghitung "94 video"), cek **label lisensi**
+   pakai kaca pembesar + meteran jumlah orang (bukan tabel 2 baris), papan menu + lingkaran "pilih satu" + jalur 3 langkah. Gaya LIGHT
+   AI PRENEUR, maskot + robot kita. Tidak ada warna, layout, kartu, ikon, bintang, atau maskot referensi.
+3. **Sudut praktisi yang benar** — "video dari kode, kayak reel ini": reel ini memang ditulis sebagai kode (HTML/GSAP, HyperFrames,
+   `npx hyperframes@0.8.186`); di layar: "Reel ini juga dari kode · HyperFrames" (jujur: alatnya HyperFrames, bukan Remotion). Tidak ada
+   klaim hasil/penghasilan pribadi.
+4. **Nilai untuk penonton Indonesia** — kasus lokal: kelola sosmed toko & UMKM, klip buat podcaster dan **seller yang live jualan**, admin
+   chat WhatsApp/Instagram/website buat toko online, website UMKM (contoh: klinik gigi), video produk UMKM (kopi susu, keripik, sambal…);
+   langkah yang dilewati referensi: **latihan dulu di usaha teman → jadi contoh hasil → baru tawarin ke klien**; kejujuran: website buatan AI
+   tetap kamu cek; detail lisensi yang referensi tidak sebut (Chatwoot: folder enterprise beda lisensi; Postiz AGPL; Remotion: kolaborasi
+   dengan tim klien bisa dihitung gabungan).
+5. **CTA dan penutup sendiri** — "Cek lisensinya, pilih satu jasa, latihan di usaha teman." + "Komen JASA, aku kirim lewat DM." Tanpa
+   "follow kita untuk update". Isi DM: `production/DM_JASA.md` (5 link + catatan lisensi).
+- **Ditukar:** MuMuAINovel → **Chatwoot**. MuMuAINovel lolos cek (github.com/xiamuceer-j/MuMuAINovel, GPL-3.0, ±3,3 rb bintang, asisten
+  nulis novel berbasis AI), tapi README, fitur, dan tangkapan layarnya berbahasa Mandarin (bahasa antarmuka lain tidak disebut) dan "jasa
+  nulis novel pakai AI" paling lemah/abu-abu untuk audiens kita. Chatwoot (terverifikasi) menjawab kebutuhan nyata toko online Indonesia:
+  chat WhatsApp, Instagram, dan website di satu inbox.
+- **Dibuang:** semua angka bintang (berubah tiap hari; referensi: 10,1rb / 71,8rb / 93rb / 41,2rb / 3,3rb), "satu template jadi ratusan
+  video" (tanpa angka), "sumber duit tambahan" (janji penghasilan), "jual ke brand yang butuh konten massal" (diganti video produk UMKM).
+- **Aturan 3 kata:** dicek otomatis (n-gram, setelah normalisasi angka/ejaan) — tidak ada 3 kata berurutan yang sama dengan naskah
+  referensi. Satu-satunya kemiripan: "lewat DM" (2 kata) di CTA wajib.
 
-## Fakta yang dicek (2026-11-12)
-- **MotionSites** (motionsites.ai) = library prompt untuk website animasi / "cinematic 3D"; cara pakainya: pilih desain → copy
-  prompt-nya → tempel ke AI builder seperti Lovable, Cursor, Bolt, **Claude**, v0, Replit → sesuaikan → luncurkan. Ada Academy (tutorial,
-  termasuk "Build a 3D Scroll-Animated Website with AI": gambar → model 3D → Claude + Three.js).
-  Sumber: halaman resmi yang terindeks WebSearch (domain motionsites.ai): https://motionsites.ai/templates ("Official Premium AI
-  Website Prompts"), https://motionsites.ai/academy ("Learn Cinematic 3D AI Websites"),
-  https://motionsites.ai/lesson/build-3d-scroll-animated-website-with-ai, https://motionsites.ai/unlimited ("Go Unlimited").
-- **Berbayar**: akses penuh lewat paket "Go Unlimited" (tingkat tahunan / lifetime) atau paket prompt; hanya sedikit prompt gratis.
-  Sumber: https://motionsites.ai/unlimited (via WebSearch) + ulasan pihak ketiga https://www.stork.ai/blog/motionsites-review-2026
-  (1 Nov 2026: akun gratis dapat 3 prompt, sisanya perlu plan/pack) dan
-  https://www.toolcenter.ai/en/articles/motionsites-review-2026 (Okt 2026). Pembuatnya menurut beberapa sumber: Viktor Oddy (tidak
-  disebut di reel). Harga antar-sumber berbeda-beda (promo berubah), jadi **harga tidak
-  disebut** di VO maupun layar.
-- Catatan: motionsites.ai dan situs ulasannya tidak bisa dibuka langsung dari sandbox ini (DNS diblok); fakta di atas dari cuplikan
-  halaman resmi di hasil WebSearch + dua ulasan pihak ketiga yang saling cocok. VO hanya memakai yang konsisten di semua sumber:
-  nama, isi (desain website animasi & 3D + prompt-nya), cara pakai (copy → tempel ke Claude / AI lain), dan bahwa library-nya berbayar.
+## Fakta yang dicek (2026-11-12, langsung di halaman GitHub resmi)
+- **Postiz** — https://github.com/gitroomhq/postiz-app · "a social media management platform for scheduling, automating, and analyzing
+  your content"; platform yang disebut README antara lain Instagram, YouTube, LinkedIn, TikTok, Facebook, Pinterest, Threads, X, Reddit,
+  Bluesky, Mastodon, Discord, Slack, Dribbble; edisi open source bisa di-host sendiri (Docker / Coolify / Railway / VPS); **lisensi
+  AGPL-3.0**. Fitur AI di versi self-host pakai API key sendiri (bayar ke penyedia). Di layar: 5 platform + "lainnya" (tanpa logo).
+- **AutoClip** — https://github.com/zhouxiaoka/autoclip (README-EN.md) · "Open-source AI video clipping & content repurposing": tempel
+  link (CLI juga terima file lokal) → sampai 10 klip terbaik per platform, dengan subtitle, cover, judul, deskripsi, hashtag; potong &
+  render di komputer sendiri; analisis lewat API cloud (berbayar per pemakaian) atau lokal (Ollama / LM Studio); transkripsi Whisper /
+  SenseVoice lokal atau cloud; "The app is free and MIT-licensed" → **MIT**. Bahasa antarmuka tidak disebut di README.
+- **Chatwoot** — https://github.com/chatwoot/chatwoot · "Open-source live-chat, email support, omni-channel desk"; kanal: live chat
+  website, email, Facebook, Instagram, Twitter, WhatsApp, Telegram, Line, SMS; self-hosted. LICENSE: MIT (Expat) **kecuali isi folder
+  `enterprise/`** yang punya lisensi sendiri → di layar "MIT*" + catatan. WhatsApp disambungkan lewat WhatsApp Cloud API (Meta, perlu
+  verifikasi bisnis) atau Twilio — dokumentasi resmi https://www.chatwoot.com/hc/user-guide/articles/1752129193-how-to-use-whatsapp-embedded-signup
+  dan https://www.chatwoot.com/hc/user-guide/articles/1742910590-how-to-set-up-a-whats_app-channel-with-twilio (dicatat di DM, tidak di VO).
+- **OpenHands** — https://github.com/OpenHands/OpenHands · About: "OpenHands: AI-Driven Development"; README: "The self-hosted developer
+  control center for coding agents and automations", menjalankan agen open source OpenHands, "bring your own model"; OpenHands Cloud =
+  layanan komersial (opsional); peringatan instalasi: agen punya akses penuh ke file system. **Lisensi MIT.**
+- **Remotion** — https://github.com/remotion-dev/remotion · "Make videos programmatically with React"; README: "Remotion has a special
+  license and requires obtaining a company license in some cases". LICENSE.md: gratis untuk **perorangan**, **usaha for-profit sampai
+  3 karyawan**, organisasi nirlaba, dan evaluasi; selain itu wajib **Company License**; "In Remotion 5.0, the license will slightly
+  change." FAQ lisensi (remotion.dev/docs/license/faq, terbaca lewat WebSearch; situsnya tidak bisa dibuka langsung dari sandbox ini):
+  pada kolaborasi antar tim/perusahaan, jumlah orang dihitung gabungan → catatan kecil di layar + di DM.
+- **MuMuAINovel** (tidak dipakai) — https://github.com/xiamuceer-j/MuMuAINovel · GPL-3.0 (README: boleh komersial, turunan wajib GPL),
+  asisten novel AI (outline, karakter, bab), Docker; README/UI Mandarin.
+- **HyperFrames** (sudut praktisi) — reel ini dibuat dengan HyperFrames (HTML/GSAP → video), alat yang dipakai repo ini.
+- Tidak ada angka bintang, harga, atau janji penghasilan di VO maupun layar. Semua toko, klien, chat, dan produk di layar adalah CONTOH.
 
-## Naskah (dikirim ke ElevenLabs, voice tersimpan; SETIAP baris diawali tag `[playful] [excited]`)
-[playful] [excited] Website 3D kayak gini bisa jadi cuma dari satu prompt.
-[playful] [excited] Menurutku, ini cara paling gampang buat mulai jualan jasa website.
-[playful] [excited] Ada library namanya MotionSites. Isinya desain website animasi dan 3D, dan tiap desain udah ada prompt-nya.
-[playful] [excited] Kamu pilih yang kamu suka, copy prompt-nya, terus tempel ke Claude atau AI lain.
-[playful] [excited] Dan AI-nya langsung bikinin websitenya.
-[playful] [excited] Terus ganti foto sama teksnya pakai punya klien kamu.
-[playful] [excited] Kedai kopi, toko sepatu, toko roti, apa pun usahanya, tampilannya langsung naik kelas.
-[playful] [excited] Harganya? Tergantung klien dan seberapa besar kerjaannya. Kamu yang tentuin.
-[playful] [excited] Cara mulainya: bikin dua tiga contoh dulu, pamerin, dan itu jadi portofolio kamu.
-[playful] [excited] Library-nya berbayar, jadi aku bikinin paket prompt starter gratis buat kamu.
-[playful] [excited] Komen 3D, aku kirim lewat DM.
+## Naskah (dikirim ke ElevenLabs, voice tersimpan "Dakocan", **tanpa --tags** → auto tag klien)
+Tag yang benar-benar dipakai (dari `assets/audio/vo.json`):
+[playful] [excited] [curious] Resep nasi goreng gratis, tapi kamu tetap beli di warung, kan?
+[playful] [excited] Lima alat GitHub ini juga gratis, tapi klien bayar yang ngerjain.
+[playful] [excited] Satu, Postiz: jadwalin postingan banyak akun sekaligus, buat jasa kelola sosmed.
+[playful] [excited] Dua, AutoClip: video panjang jadi klip bersubtitle, buat podcaster atau seller live.
+[playful] [excited] Tiga, Chatwoot: chat WhatsApp sampai Instagram masuk satu inbox, buat jasa admin chat.
+[playful] [excited] Empat, OpenHands: agen AI yang ngoding sesuai perintahmu, buat jasa website UMKM.
+[playful] [excited] Lima, Remotion: video dari kode, kayak reel ini. Satu template, banyak video produk.
+[playful] [excited] Tapi gratis belum tentu bebas: Remotion wajib lisensi kalau karyawanmu lebih dari tiga.
+[playful] [excited] Cek lisensinya, pilih satu jasa, latihan di usaha teman.
+[playful] [excited] [confident] Komen jasa, aku kirim lewat DM.
 
-Teks tanpa tag: `production/vo_lines.txt`. Audio: `assets/audio/vo.mp3` (+ `assets/audio/vo.json` = waktu per baris + alignment
-karakter). Dibuat dengan `python3 /home/user/testing-hyperframes/tools/el_tts_ts.py production/vo_lines.txt assets/audio/vo.mp3
---tags "[playful] [excited]"` → 47,12 dtk, 11 baris. Cek ulang dengan faster-whisper `small`: semua kata terucap ("3D" terdengar
-dan tertranskrip sebagai "3D"), tag tidak ikut terbaca. Dua kata yang alignment-nya meleset dikoreksi di `tools/timing.py` (TFIX:
-"naik kelas." dan "Komen" — dicek terhadap envelope energi + whisper).
+Teks tanpa tag: `production/vo_lines.txt` (111 kata). Kata kunci CTA diketik huruf kecil ("jasa") supaya suara tidak mengejanya per
+huruf; caption menampilkan **JASA** (FIXI di `tools/timing.py`). Dibuat dengan
+`python3 /home/user/testing-hyperframes/tools/el_tts_ts.py production/vo_lines.txt assets/audio/vo.mp3` → 46,24 dtk, 10 baris (take
+ke-3: take 1 = 48,8 dtk dan take 2 = 49,3 dtk terlalu panjang untuk reel ≤ 50 dtk → tiga baris dipadatkan). Cek ulang dengan
+faster-whisper `small`: semua kata terucap (whisper menulis "Postis / Chatwood / klik / real", pengucapannya benar), tag tidak ikut
+terbaca, "jasa" diucapkan sebagai kata.

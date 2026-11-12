@@ -234,8 +234,8 @@
       `<path d="M0 ${h * .78} Q ${w * .3} ${h * .62} ${w * .62} ${h * .7} T ${w} ${h * .72} V ${h} H 0Z" fill="#191a50"/></svg>`;
     // house + tree on the front hill
     const hx = 0.58 * w, hy = 0.55 * h, hs = 0.25 * h;
-    H += `<svg class="m-abs" style="left:${px(hx)};top:${px(hy)}" width="${hs * 1.2}" height="${hs * 1.1}" viewBox="0 0 120 110"><path d="M10 50 L60 10 L110 50Z" fill="#3d2a6b"/><rect x="22" y="48" width="76" height="62" fill="#2a2058"/>` +
-      `<rect x="70" y="16" width="12" height="22" fill="#3d2a6b"/><rect x="34" y="62" width="26" height="24" rx="3" fill="#ffd27a"/><path d="M47 62v24M34 74h26" stroke="#2a2058" stroke-width="3"/><rect x="70" y="78" width="16" height="32" fill="#1a143c"/></svg>`;
+    H += `<svg class="m-abs" style="left:${px(hx)};top:${px(hy)}" width="${hs * 1.2}" height="${hs * 1.1}" viewBox="0 0 120 110"><path d="M10 50 L60 10 L110 50Z" fill="#6a4fb0"/><rect x="22" y="48" width="76" height="62" fill="#4a3a8e"/>` +
+      `<rect x="70" y="16" width="12" height="22" fill="#6a4fb0"/><rect x="34" y="62" width="26" height="24" rx="3" fill="#ffd27a"/><path d="M47 62v24M34 74h26" stroke="#4a3a8e" stroke-width="3"/><rect x="70" y="78" width="16" height="32" fill="#2a2058"/></svg>`;
     H += `<div class="m-abs" id="${P}-win" style="left:${px(hx + 0.28 * hs * 1.2 - 0.25 * hs)};top:${px(hy + 0.56 * hs * 1.1 - 0.25 * hs)};width:${px(hs * .75)};height:${px(hs * .75)};border-radius:50%;background:radial-gradient(circle,rgba(255,210,122,.55),rgba(255,210,122,0) 68%)"></div>`;
     H += `<svg class="m-abs" style="left:${px(0.3 * w)};top:${px(0.5 * h)}" width="${0.16 * h}" height="${0.26 * h}" viewBox="0 0 60 100"><rect x="26" y="60" width="8" height="40" fill="#120f33"/><ellipse cx="30" cy="40" rx="24" ry="34" fill="#1f2a5e"/><ellipse cx="24" cy="32" rx="10" ry="14" fill="#2a3a74" opacity=".7"/></svg>`;
     // Zzz from the window

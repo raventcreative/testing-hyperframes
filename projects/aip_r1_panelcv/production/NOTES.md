@@ -31,9 +31,10 @@ Duration 44.2 s (1326 frames @30) · VO 42.88 s at +0.3 s · CTA keyword **CV**.
 
 ## QA (real runtime, hyperframes 0.8.186)
 - `npx --yes hyperframes@0.8.186 lint .` → 0 errors (2 kit warnings: nested #bg / #fx layers in index.html).
-- `npx --yes hyperframes@0.8.186 validate .` → 0 errors; contrast warnings only for dimmed seats, fading exits and the CV's 16 px
+- `npx --yes hyperframes@0.8.186 validate .` → 0 errors, 22 contrast warnings, only for dimmed seats, fading exits and the CV's 16 px
   section labels; Three.js/WebGL driver notices from the robot/mascot runtimes.
-- Snapshots (scratchpad `r1/final_a`, `r1/final_b`): first frame, every beat, both sides of every cut, end frame.
+- 60 real-runtime snapshots (first frame, every beat, both sides of every cut, end frame) → contact sheets in
+  `out/qa_runtime/` (A1, A2, A3, C, B1–B4; full frames in the session scratchpad `r1/final_a`, `r1/final_b`).
 
 ## Known issues / notes for the lead
 - The CTA promises "workflow-nya" by DM: the actual workflow/prompt (7 reviewer roles + rewrite step) must exist before posting.

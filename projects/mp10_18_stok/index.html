@@ -211,6 +211,7 @@
           <div class="floor"></div>
         </div></div></div></div>
         <div id="dofM" style="position:absolute; inset:0; pointer-events:none; visibility:hidden"></div>
+        <div id="veil" style="position:absolute; left:0; top:0; width:1080px; height:760px; pointer-events:none; visibility:hidden; background:linear-gradient(180deg, rgba(246,247,251,.55) 0, rgba(246,247,251,.82) 220px, rgba(246,247,251,.82) 520px, rgba(246,247,251,0) 760px)"></div>
         <!-- overlay rig: an exact twin of the studio camera for everything that sits in front of the shelf (the floating box, the
              stickers, the MODAL tag, the sold boxes). It is drawn after the studio, so nothing here is depth-sorted against the shelf. -->
         <div class="stage" id="w1b"><div class="cam" id="cam1b"><div class="yaw" id="yaw1b"><div class="pan" id="pan1b">
@@ -433,13 +434,13 @@
         const HB = BOX[HERO];
         // S3: the hero box floats out in front of the shelf (overlay twin); HF = its money-face centre (the S3 camera focus)
         const H0 = { x: HB.x, y: HB.y, z: 0, rotationX: 0, rotationY: 0, rotationZ: 0 };
-        const H1 = { x: HB.x - 10, y: HB.y + 20, z: 600, rotationX: 4, rotationY: 14, rotationZ: -3 }, H2 = { x: HB.x - 6, y: HB.y + 8, z: 612, rotationX: 2, rotationY: 8, rotationZ: 2 };
+        const H1 = { x: HB.x - 10, y: HB.y + 20, z: 600, rotationX: 10, rotationY: 34, rotationZ: -4 }, H2 = { x: HB.x - 6, y: HB.y + 8, z: 612, rotationX: 8, rotationY: 25, rotationZ: 2 };
         const HF = { x: HB.x - 8, y: HB.y + 14 - KH / 2, z: 606 + KD / 2 };
         // camera path through the warehouse
         const KA0 = K(420, 1180, 0, -430, 0, -14, -42, -430), KA1 = K(410, 1170, 0, -430, 0, -15, -33, -300);          // hook: wide, slow push
         const KB0 = K(400, 1150, HB.x, HB.y - 80, 40, -11, -24, 150), KB1 = K(400, 1155, HB.x, HB.y - 80, 40, -10, -20, 190);   // balik: close on the hero box
         const KU0 = K(410, 1150, 0, -430, 0, -16, -31, -420), KU1 = K(410, 1150, 0, -430, 0, -15, -27, -390);        // uang: the whole shelf flips
-        const KS0 = K(520, 990, HF.x, HF.y, HF.z, -8, -16, 640), KS1 = K(520, 995, HF.x, HF.y, HF.z, -7, -11, 680);   // S3: close on the pulled-out box
+        const KS0 = K(520, 900, HF.x, HF.y, HF.z, -8, -16, 720), KS1 = K(520, 905, HF.x, HF.y, HF.z, -7, -11, 750);   // S3: close on the pulled-out box
         const KM0 = K(300, 1200, 0, -430, 0, -13, -27, -980), KM1 = K(295, 1205, 0, -430, 0, -12, -24, -1020);       // S4/S5: shelf left, cards right
         const KP0 = K(360, 1170, 0, -430, 0, -15, -32, -520), KP1 = K(365, 1170, 0, -430, 0, -14, -28, -480);        // padahal: back to the full shelf
         camSet(C1, KA0);
@@ -491,6 +492,7 @@
         // S3 · "Belanja stok itu bukan uang hangus, tapi juga bukan untung." — the hero box floats out, two stickers bounce off it
         // the camera moves in close on the pulled-out box (focus = its face centre); the shelf behind goes out of focus (#dofM)
         tl.set("#dofM", { autoAlpha: 0, backdropFilter: "blur(0px)" }, 0);
+        tl.set("#veil", { autoAlpha: 0 }, 0); F("#veil", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, ease: "power2.inOut" }, TM.bel); F("#veil", { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.5, ease: "power2.inOut" }, TM.modal);
         show("#dofM", TM.bel - 0.05); F("#dofM", { backdropFilter: "blur(0px)" }, { backdropFilter: "blur(9px)", duration: 0.7, ease: "power2.inOut" }, TM.bel - 0.05);
         F("#dofM", { backdropFilter: "blur(9px)" }, { backdropFilter: "blur(0px)", duration: 0.6, ease: "power2.inOut" }, TM.modal - 0.05); hide("#dofM", TM.modal + 0.6);
         tl.set("#oH", H0, 0); tl.set("#oHf", { x: 0, y: -KH / 2, z: 0, rotationY: 180 }, 0);
@@ -508,8 +510,8 @@
         };
         tl.set("#stA .sl, #stB .sl", { scaleX: 0 }, 0); tl.set("#stA .sx, #stB .sx", { scaleX: 0, scaleY: 0 }, 0);
         const SA = (o, dx, dy, dz) => Object.assign({ x: HF.x + dx, y: HF.y + dy, z: HF.z + dz }, o);
-        sticker("#stA", SA({ rotationX: 10, rotationY: -20, rotationZ: 24, scaleX: 0.5, scaleY: 0.5 }, 560, -260, 160), SA({ rotationX: 6, rotationY: 16, rotationZ: -7, scaleX: 0.5, scaleY: 0.5 }, 6, -14, 46), TM.hangus - 0.32, TM.hangus + 0.12, TM.hangus + 0.85);
-        sticker("#stB", SA({ rotationX: 10, rotationY: 50, rotationZ: -20, scaleX: 0.5, scaleY: 0.5 }, -560, -240, 160), SA({ rotationX: 4, rotationY: 12, rotationZ: 6, scaleX: 0.5, scaleY: 0.5 }, 10, -8, 52), TM.untung - 0.28, TM.untung + 0.14, TM.untung + 0.62);
+        sticker("#stA", SA({ rotationX: 10, rotationY: -20, rotationZ: 24, scaleX: 0.5, scaleY: 0.5 }, 560, -260, 160), SA({ rotationX: 6, rotationY: 20, rotationZ: -7, scaleX: 0.46, scaleY: 0.46 }, 6, -62, 60), TM.hangus - 0.32, TM.hangus + 0.12, TM.hangus + 0.85);
+        sticker("#stB", SA({ rotationX: 10, rotationY: 50, rotationZ: -20, scaleX: 0.5, scaleY: 0.5 }, -560, -240, 160), SA({ rotationX: 4, rotationY: 16, rotationZ: 6, scaleX: 0.46, scaleY: 0.46 }, 10, -58, 66), TM.untung - 0.28, TM.untung + 0.14, TM.untung + 0.62);
         RISE(T4[0], TM.bel - 0.04, 0.022, 0.4); RISE(T4[1], TM.hangus - 0.55, 0.02, 0.42); RISE(T4[2], TM.untung - 0.8, 0.02, 0.42);
         OUT(T4, TM.modal - 0.1); tl.set("#t4", { autoAlpha: 1 }, 0); hide("#t4", TM.modal + 0.25);
 

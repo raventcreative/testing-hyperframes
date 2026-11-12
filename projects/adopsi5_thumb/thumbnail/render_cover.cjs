@@ -4,7 +4,7 @@ const path = require("path");
 (async () => {
   const [out, query] = process.argv.slice(2);
   const b = await chromium.launch();
-  const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
+  const p = await b.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: Number(process.env.DSF || 1) });  // DSF=2 -> 2160x3840
   p.on("pageerror", (e) => console.error("pageerror", e.message));
   const page = process.env.COVER || "cover.html";
   // HTTP=<port>: load over a local static server (CSS mask-image needs a real origin); else file://

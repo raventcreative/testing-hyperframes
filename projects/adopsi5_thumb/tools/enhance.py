@@ -3,7 +3,9 @@
 (subject matte) -> shifted down SHIFT px (top filled from the dark ceiling) so the head clears the headline.
 Also writes the grid mask (grid only behind the subject, fading out toward the bottom).
 Usage: python3 -I tools/enhance.py <clean.png> <matte.png> <models_dir> <out.jpg> <gridmask.png> [face_weight] [shift] [landmarks]
-landmarks: "x,y;x,y;x,y;x,y;x,y" (eyes L/R, nose tip, mouth corners L/R on the 1080 frame); default = frame 115.83"""
+landmarks: "x,y;x,y;x,y;x,y;x,y" (eyes L/R, nose tip, mouth corners L/R on the 1080 frame); default = frame 115.83
+env OUT_SCALE=2 keeps the 2x (2160x3840) result instead of supersampling back to 1080, and sharpens the subject a little;
+the grid mask is always written at 1080x1920 (CSS scales it)."""
 import sys
 import cv2
 import numpy as np
@@ -47,26 +49,33 @@ rest_b = cv2.warpAffine(rest, Mi, (W * 2, H * 2), flags=cv2.INTER_CUBIC)
 mask_b = cv2.warpAffine(fmask, Mi, (W * 2, H * 2))[..., None] * FACE_W
 up = (up * (1 - mask_b) + rest_b * mask_b).astype(np.uint8)
 
-f = cv2.resize(up, (W, H), interpolation=cv2.INTER_LANCZOS4).astype(np.float32) / 255
+import os
+OS = int(os.environ.get("OUT_SCALE", "1"))
+f = (up if OS == 2 else cv2.resize(up, (W, H), interpolation=cv2.INTER_LANCZOS4)).astype(np.float32) / 255
 Lm = f.mean(axis=2, keepdims=True); sh = np.clip(1 - Lm * 1.6, 0, 1) ** 1.5
 navy = np.array([0.29, 0.12, 0.04], np.float32)[None, None, :]
 f = f * (1 - 0.35 * sh) + navy * 0.35 * sh
 f = np.clip((f - 0.5) * 1.05 + 0.5, 0, 1) * 255
-a = cv2.imread(matte_p, cv2.IMREAD_UNCHANGED)[..., 3].astype(np.float32) / 255
-a = cv2.GaussianBlur(a, (0, 0), 2.0)[..., None]
-img = np.clip((f - 128) * 1.04 + 132, 0, 255) * a + cv2.GaussianBlur(f, (0, 0), 2.4) * 0.88 * (1 - a)
+a1 = cv2.imread(matte_p, cv2.IMREAD_UNCHANGED)[..., 3].astype(np.float32) / 255
+a = cv2.resize(a1, (W * OS, H * OS), interpolation=cv2.INTER_CUBIC) if OS == 2 else a1
+a = cv2.GaussianBlur(a, (0, 0), 2.0 * OS)[..., None]
+subj = np.clip((f - 128) * 1.04 + 132, 0, 255)
+if OS == 2:                                                       # gentle unsharp mask on the subject only
+    subj = np.clip(subj + 0.45 * (subj - cv2.GaussianBlur(subj, (0, 0), 2.2)), 0, 255)
+img = subj * a + cv2.GaussianBlur(f, (0, 0), 2.4 * OS) * 0.88 * (1 - a)
 
-def shift(arr):
-    o = np.empty_like(arr)
-    o[SHIFT:] = arr[:H - SHIFT]
-    top = arr[:24].mean(axis=0, keepdims=True)                     # dark ceiling, extended upward
-    o[:SHIFT] = np.repeat(top, SHIFT, axis=0)
+def shift(arr, k=1):
+    o = np.empty_like(arr); S_, H_ = SHIFT * k, arr.shape[0]
+    o[S_:] = arr[:H_ - S_]
+    top = arr[:24 * k].mean(axis=0, keepdims=True)                 # dark ceiling, extended upward
+    o[:S_] = np.repeat(top, S_, axis=0)
     return o
-img = shift(img)
-img[:SHIFT + 30] = cv2.GaussianBlur(img[:SHIFT + 30], (0, 0), 6) * (np.linspace(0, 1, SHIFT + 30)[:, None, None] ** 0) 
+img = shift(img, OS)
+img[:(SHIFT + 30) * OS] = cv2.GaussianBlur(img[:(SHIFT + 30) * OS], (0, 0), 6 * OS)
 cv2.imwrite(out_p, np.clip(img, 0, 255).astype(np.uint8), [cv2.IMWRITE_JPEG_QUALITY, 96])
 # grid mask: transparent where the subject is, fading out from y=1150 to y=1650 (after the shift)
-am = shift(cv2.dilate(a[..., 0], np.ones((7, 7), np.uint8))[..., None])[..., 0]
+a1b = cv2.GaussianBlur(a1, (0, 0), 2.0)
+am = shift(cv2.dilate(a1b, np.ones((7, 7), np.uint8))[..., None])[..., 0]
 fade = np.clip((1650 - np.arange(H)) / 500, 0, 1)[:, None]
 g = (1 - am) * fade
 cv2.imwrite(grid_p, np.dstack([np.full((H, W, 3), 255, np.uint8), (g * 255).astype(np.uint8)]))

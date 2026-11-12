@@ -2,6 +2,8 @@
 
 Client workflow: the client sends a reference video and goes to sleep. Claude does everything end to end without
 asking in between, then sends the finished MP4. Quality bar is high: check frames before delivering.
+**Do not send the script or intermediate drafts for approval — deliver only the finished video** (plus a short note).
+The ElevenLabs API is already connected (key saved on the testing-hyperframes environment); the client does nothing.
 
 ## Fixed format
 - 1080×1920, 30 fps, IG Reels. Safe zone: ≥80 px side margins; logo top-left at (84, 150), 300 px wide.

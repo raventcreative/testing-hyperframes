@@ -1,12 +1,83 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s06-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s06-glow { left: 40px; top: 300px; width: 1000px; height: 700px; }
+    #s06-a1 { left: 70px; top: 330px; }
+    #s06-ar { left: 352px; top: 343px; width: 30px; height: 30px; color: #9fb3d6; }
+    #s06-ar svg { width: 30px; height: 30px; display: block; }
+    #s06-a2 { left: 396px; top: 330px; }
+    #s06-auto { left: 694px; top: 324px; height: 66px; padding: 0 26px 0 70px; border-radius: 33px; background: linear-gradient(135deg, #3a6fe0, #294b77); color: #ffffff;
+      font: 700 25px/66px Poppins, sans-serif; white-space: nowrap; box-shadow: 0 18px 30px -16px rgba(58,111,224,.9); transform-origin: 50% 50%; }
+    #s06-auto i { position: absolute; left: 22px; top: 17px; width: 32px; height: 32px; }
+    #s06-auto i svg { width: 32px; height: 32px; display: block; }
+    #s06-move { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    #s06-ck { left: 452px; top: 610px; }
+    #s06-bt { left: 128px; top: 852px; }
+  </style>
+  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920">
+    <div id="s06-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 2.723);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s06"] = tl;
+      // s06 "Jatah satu habis, otomatis pindah ke yang lain."
+      // The "Sisa jatah gratis" panel is back with Google serving · "Jatah satu habis": Google's bar drains to zero, turns red,
+      // status "habis" + shake · "otomatis": a blue "Otomatis pindah" pill (spinning refresh icon) · "pindah": the blue ring slides
+      // from Google down to Groq along a curved arrow, Groq → "melayani" · "lain.": green tick on Groq. Bottom chip: no settings
+      // change needed (README: "falls over to the next provider when one is rate-limited"). END STATE: everything leaves.
+      const ID = "s06", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, shake } = S, tl = S.tl;
+      const tJat = L("Jatah"), tSat = L("satu"), tHab = L("habis,"), tOto = L("otomatis"), tPin = L("pindah"), tLai = L("lain.");
+      const ROWS = [{ n: "Google", pct: 0.86 }, { n: "Groq", pct: 0.72 }, { n: "Mistral", pct: 0.64 }, { n: "+ penyedia lain", more: true, sub: "Cerebras, OpenRouter, dll." }];
+      const QY = 420, R0 = 100, RS = 76, RH = 66;
+      let h = `<div class="k-glow k-a" id="s06-glow"></div>`;
+      h += `<div class="k-chip navy" id="s06-a1">${K.svg("square-terminal", 2.2)}Claude Code</div><div class="k-a" id="s06-ar">${K.svg("arrow-right", 2.6)}</div>`;
+      h += `<div class="k-chip" id="s06-a2">${K.svg("server", 2.2)}FreeLLMAPI</div>`;
+      h += `<div class="k-a" id="s06-auto"><i id="s06-ai">${K.svg("refresh-cw", 2.4)}</i>Otomatis pindah</div>`;
+      h += K.quota("s06", { x: 70, y: QY, w: 940, rows: ROWS, r0: R0, rs: RS, rh: RH, bar: 360 });
+      h += `<svg class="k-a" id="s06-move" viewBox="0 0 1080 1920" fill="none"><path id="s06-mp" d="M86 ${QY + R0 + 33} C 40 ${QY + R0 + 50}, 40 ${QY + R0 + RS + 16}, 86 ${QY + R0 + RS + 33}" stroke="#3a6fe0" stroke-width="6" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/></svg>`;
+      h += `<div class="k-ok" id="s06-ck" style="left:${70 + 940 - 22 - 236}px;top:${QY + R0 + RS + 13}px">${K.svg("check", 3.2)}</div>`;
+      h += `<div class="k-chip ok" id="s06-bt">${K.svg("circle-check", 2.2)}Claude Code tetap jalan, tanpa ganti setting</div>`;
+      $("s06-cam").innerHTML = h;
+      const glow = $("s06-glow"); I(glow, { opacity: 0.85, scale: 1 });
+      // panel + header chips in at once (Google already serving)
+      const q = $("s06-q"); pop(q, 0.0, { y: 60, scale: 0.97 }, 0.3, "power3.out");
+      pop($("s06-a1"), 0.04, { scale: 0.6, y: 0, x: -20 }, 0.26, "back.out(2)");
+      pop($("s06-ar"), 0.1, { scale: 0.4, y: 0 }, 0.2, "back.out(2)");
+      pop($("s06-a2"), 0.14, { scale: 0.6, y: 0, x: -20 }, 0.26, "back.out(2)");
+      ROWS.forEach((r, i) => {
+        I($("s06-rg" + i), { opacity: i === 0 ? 1 : 0, y: 0 });
+        if (r.more) return;
+        I($("s06-qf" + i), { scaleX: r.pct }); I($("s06-ql" + i), { opacity: 0, scaleX: r.pct });
+        I($("s06-qs" + i + "-idle"), { opacity: i === 0 ? 0 : 1 }); I($("s06-qs" + i + "-on"), { opacity: i === 0 ? 1 : 0 }); I($("s06-qs" + i + "-bad"), { opacity: 0 });
+      });
+      // "Jatah satu habis": Google drains to zero, red, "habis"
+      const f0 = $("s06-qf0"), l0 = $("s06-ql0");
+      ft(f0, { scaleX: 0.86 }, { scaleX: 0.0, duration: Math.max(0.3, tHab - tSat + 0.05), ease: "power1.in" }, tSat - 0.05);
+      ft(l0, { opacity: 0, scaleX: 0.86 }, { opacity: 1, scaleX: 0.0, duration: Math.max(0.3, tHab - tSat + 0.05), ease: "power1.in" }, tSat - 0.05);
+      tl.set($("s06-qs0-on"), { opacity: 0 }, tHab);
+      ft($("s06-qs0-bad"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2.6)" }, tHab);
+      shake($("s06-qr0"), tHab + 0.04, 7);
+      // "otomatis": the pill, its icon spins
+      const auto = $("s06-auto"), ai = $("s06-ai");
+      pop(auto, tOto - 0.1, { scale: 0.5, y: 0 }, 0.3, "back.out(2.4)");
+      I(ai, { rotation: 0 }); ft(ai, { rotation: 0 }, { rotation: 540, duration: 1.0, ease: "power2.inOut" }, tOto);
+      // "pindah": the ring moves Google → Groq along the curved arrow; Groq starts serving
+      const mp = $("s06-mp"), rg0 = $("s06-rg0");
+      I(mp, { attr: { "stroke-dashoffset": 1 }, opacity: 1 });
+      ft(mp, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.3, ease: "power2.out" }, tPin - 0.22);
+      ft(rg0, { y: 0 }, { y: RS, duration: 0.32, ease: "power3.inOut" }, tPin - 0.12);
+      tl.set($("s06-qs1-idle"), { opacity: 0 }, tPin + 0.18);
+      ft($("s06-qs1-on"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.4)" }, tPin + 0.18);
+      ft($("s06-qr1"), { scale: 1 }, { scale: 1.03, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tPin + 0.2);
+      ft(mp, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPin + 0.4);
+      // "lain.": tick + bottom chip
+      const ck = $("s06-ck"); I(ck, { opacity: 0, scale: 0.3 });
+      ft(ck, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(3)" }, tLai - 0.08);
+      pop($("s06-bt"), tOto + 0.15, { scale: 0.7, y: 24 }, 0.3, "back.out(2)");
+      // ================================================================ exit → s07
+      const tOut = D - 0.24;
+      K.out(S, [$("s06-a1"), $("s06-ar"), $("s06-a2"), auto, q, ck, $("s06-bt")], tOut);
+      S.done();
     })();
   </script>
 </template>

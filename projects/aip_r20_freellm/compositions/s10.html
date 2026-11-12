@@ -1,12 +1,64 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s10" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s10-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s10-glow { left: 40px; top: 300px; width: 1000px; height: 700px; }
+    .s10-cd { position: absolute; top: 330px; width: 455px; height: 560px; border-radius: 34px; font-family: Poppins, sans-serif; transform-origin: 50% 50%; }
+    .s10-cd > * { position: absolute; }
+    .s10-cd .ic { left: 30px; top: 30px; width: 96px; height: 96px; border-radius: 28px; }
+    .s10-cd .ic svg { position: absolute; left: 24px; top: 24px; width: 48px; height: 48px; display: block; }
+    .s10-cd .eb { left: 32px; top: 148px; font: 700 15px/22px Poppins, sans-serif; letter-spacing: .16em; white-space: nowrap; }
+    .s10-cd .tt { left: 30px; top: 172px; font: 700 40px/52px Poppins, sans-serif; white-space: nowrap; padding-right: 4px; }
+    .s10-rw { left: 30px; width: 395px; height: 52px; border-radius: 16px; background: #f4f7fc; box-shadow: inset 0 0 0 1.5px #e3e9f4; }
+    .s10-rw i { position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; border-radius: 50%; color: #ffffff; }
+    .s10-rw i svg { position: absolute; left: 6px; top: 6px; width: 16px; height: 16px; display: block; }
+    .s10-rw span { position: absolute; left: 54px; top: 0; font: 400 21px/52px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s10-L { left: 70px; } #s10-R { left: 555px; }
+    #s10-L .ic { background: #e8f6ed; color: #1f7a3a; } #s10-L .eb { color: #1f7a3a; } #s10-L .s10-rw i { background: #2da44e; }
+    #s10-R .ic { background: #fdeaea; color: #b4322f; } #s10-R .eb { color: #b4322f; } #s10-R .s10-rw i { background: #d9534f; }
+    #s10-sL { left: 116px; top: 798px; }
+    #s10-sR { left: 588px; top: 798px; }
+    #s10-nt { left: 30px; top: 400px; width: 395px; height: 52px; border-radius: 16px; background: #eaf0fe; box-shadow: inset 0 0 0 1.5px rgba(42,85,196,.22); color: #2a55c4;
+      font: 700 19px/52px Poppins, sans-serif; padding-left: 52px; white-space: nowrap; }
+    #s10-nt svg { position: absolute; left: 16px; top: 13px; width: 26px; height: 26px; display: block; }
+  </style>
+  <div id="root" data-composition-id="s10" data-width="1080" data-height="1920">
+    <div id="s10-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.09);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s10"] = tl;
+      // s10 "Pakai buat belajar dulu, bukan buat kerjaan klien."
+      // Two cards: "Buat belajar" (green: latihan ngoding, proyek portofolio, coba fitur Claude Code) gets the stamp COCOK on "dulu" ·
+      // "bukan buat kerjaan klien": "Kerjaan klien" (red: kode & data klien, butuh hasil stabil) + note "pakai API berbayar resmi"
+      // (README disclaimer: personal experimentation and learning, not production; swap in a paid API before you ship) + stamp NANTI DULU.
+      const ID = "s10", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, shake } = S, tl = S.tl;
+      const tPak = L("Pakai"), tBel = L("belajar"), tDul = L("dulu,"), tBuk = L("bukan"), tKer = L("kerjaan"), tKli = L("klien.");
+      const row = (k, ic, t) => `<div class="s10-rw" style="top:${246 + k * 64}px"><i>${K.svg(ic, 3.4)}</i><span>${t}</span></div>`;
+      let h = `<div class="k-glow k-a" id="s10-glow"></div>`;
+      h += `<div class="s10-cd k-card" id="s10-L"><div class="ic">${K.svg("graduation-cap", 2)}</div><div class="eb">COCOK BUAT</div><div class="tt k-grad">Belajar</div>` +
+        row(0, "check", "latihan ngoding") + row(1, "check", "proyek portofolio") + row(2, "check", "coba fitur Claude Code") + `</div>`;
+      h += `<div class="s10-cd k-card" id="s10-R"><div class="ic">${K.svg("briefcase", 2)}</div><div class="eb">BELUM BUAT</div><div class="tt k-grad">Kerjaan klien</div>` +
+        row(0, "x", "kode & data klien") + row(1, "x", "butuh hasil stabil") +
+        `<div id="s10-nt">${K.svg("info", 2.2)}pakai API berbayar resmi</div></div>`;
+      h += `<div class="k-stamp" id="s10-sL">COCOK</div><div class="k-stamp bad" id="s10-sR">NANTI DULU</div>`;
+      $("s10-cam").innerHTML = h;
+      const glow = $("s10-glow"); I(glow, { opacity: 0.85, scale: 1 });
+      const cL = $("s10-L"), cR = $("s10-R");
+      pop(cL, Math.max(0, tPak - 0.1), { x: -60, y: 0, scale: 0.94 }, 0.36, "back.out(1.5)");
+      cL.querySelectorAll(".s10-rw").forEach((r, k) => pop(r, tBel - 0.1 + k * 0.12, { x: -24, y: 0, scale: 1 }, 0.22, "power2.out"));
+      const sL = $("s10-sL"); I(sL, { opacity: 0, scale: 2.2, rotation: -14 });
+      ft(sL, { opacity: 0, scale: 2.2, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.2, ease: "power4.in" }, tDul - 0.05);
+      shake(cL, tDul + 0.15, 4);
+      pop(cR, tBuk - 0.15, { x: 60, y: 0, scale: 0.94 }, 0.36, "back.out(1.5)");
+      cR.querySelectorAll(".s10-rw").forEach((r, k) => pop(r, tBuk + 0.15 + k * 0.12, { x: 24, y: 0, scale: 1 }, 0.22, "power2.out"));
+      pop($("s10-nt"), tKer + 0.05, { scale: 0.7, y: 10 }, 0.26, "back.out(2)");
+      const sR = $("s10-sR"); I(sR, { opacity: 0, scale: 2.2, rotation: 14 });
+      ft(sR, { opacity: 0, scale: 2.2, rotation: 14 }, { opacity: 1, scale: 1, rotation: 6, duration: 0.2, ease: "power4.in" }, tKli - 0.05);
+      shake(cR, tKli + 0.15, 5);
+      // ================================================================ exit → s11
+      const tOut = D - 0.2;
+      K.out(S, [cL, cR, sL, sR], tOut);
+      S.done();
     })();
   </script>
 </template>

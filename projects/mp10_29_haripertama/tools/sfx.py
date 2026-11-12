@@ -1,9 +1,10 @@
-"""Synthesised SFX for MasterPajak AI Video 14 (Siapin 4 Data Ini) — sits under the VO (no samples, no music, per the client's rule).
-Beat times are parsed from window.TM in index.html, so a VO re-time only needs `python3 tools/sfx.py` again. Deterministic.
-Sounds: studio dolly air, stabilo marker, archive-box lid (creak-less hinge swing + cardboard knock), item fly-ins (whoosh per
-direction), tick stamps (pop + bright ding), HUD bar fills + counter clicks, paper drops into the box (soft papery thud),
-checkbox ticks, lid close thump + stamp chime, band sweep, hologram fx, the pour (paper flutters + landing pops), odometer
-ticks + result chime, shine shimmer, beam/iris boom, end pops + chime. Writes assets/audio/sfx.wav (48 kHz mono, TM.total s).
+"""Synthesised SFX for MasterPajak AI Video 29 (Hari Pertama Pakai MasterPajak AI) — sits under the VO (no samples, no music, per
+the client's rule). Beat times are parsed from window.TM in index.html, so a VO re-time only needs `python3 tools/sfx.py` again.
+Deterministic. Sounds: dawn air + little bird chirps (pagi), the TUTUP/BUKA sign flip, four time-lapses (soft swell + the wall
+clock ratcheting) with HUD stop pops/dings, the card flying out of the phone, a camera shutter, upload ticks, field pops and a
+"Tersimpan" ding, order notification blips + parcels landing, rows snapping into the table, the "Rapi" stamp chime, report rows
+and bars, the LABA ding, the lamp click, night crickets, message send / typing / reply blips, band sweep, hologram fx, the
+pembukuan rows and the trace-line shimmer, beam/iris boom, end pops + chime. Writes assets/audio/sfx.wav (48 kHz mono, TM.total s).
 Run: python3 tools/sfx.py [project dir]"""
 import sys, wave, re
 from pathlib import Path
@@ -123,62 +124,103 @@ def holo_fx(t0, g=1.0):
     put(t0, zap(0.35), 0.05 * g); put(t0 + 0.02, whoosh(1.1, 300, 4200, 1.8, 0.9), W * 0.45 * g)
     put(t0 + 1.15, chime((1046, 1568, 2093, 2637), 1.6), 0.06 * g)
 
-DK = [TM['d1'], TM['d2'], TM['d3'], TM['d4'], TM['kum']]
-TICK = [TM['d1'] + 1.05, TM['d2b'] + 0.8, TM['d3'] + 1.05, TM['d4'] + 1.05]
-# S1 · hook: slow studio dolly (air), text pops, stabilo on "gambaran pajak", the "?" marks wobble
-wh(0.0, 2.6, 200, 900, 0.9, 0.5, 0.35)
-put(TM['hook'] + 0.3, pop(500, 900, 0.08), 0.08); put(TM['hook'] + 0.75, pop(560, 1000, 0.08), 0.08)
-put(TM['hook'] + 1.25, marker(0.45), MK)
-for j in range(3): put(0.5 + j * 0.81, tick(0.02, 3800), 0.03)
-# S2 · siapin: ghost card recedes into depth, the lid swings open and knocks, HUD drops in with four bar ticks
-wh(TM['siap'] + 0.02, 0.55, 2400, 500, 1.2, 0.3, 0.5)
-put(TM['siap'] + 0.1, knock(170, 0.2), 0.16); wh(TM['siap'] + 0.24, 0.45, 300, 1500, 1.0, 0.6, 0.45); put(TM['siap'] + 0.62, knock(120, 0.25), 0.14)
-put(TM['siap'] + 0.45, pop(500, 950, 0.08), 0.08); put(TM['siap'] + 1.05, marker(0.38), MK)
-wh(TM['siap'] + 0.9, 0.35, 900, 2400, 1.2, 0.5, 0.25)
-for k in range(4): put(TM['siap'] + 1.05 + k * 0.1, tick(0.018, 3200 + 300 * k), 0.06)
-# S3 · four items: fly-in, title pop, tick stamp + ding, HUD fill + counter click, drop + paper thud, checkbox tick
-for k in range(4):
-    t0, tdrop = DK[k], DK[k + 1] - 0.88; tland = tdrop + 0.74
-    wh(t0 - 0.05, 0.75, 250 + 60 * k, 2200 + 200 * k, 1.1, 0.55, 0.85)
-    put(t0 + 0.02, pop(420, 840, 0.09), 0.1)
-    put(TICK[k], pop(700, 1400, 0.07), 0.13); put(TICK[k] + 0.04, ding(2093 * (1.0595 ** (2 * k)), 0.55), 0.07)
-    wh(TICK[k] + 0.1, 0.4, 1200, 3200, 1.6, 0.4, 0.18); put(TICK[k] + 0.28, tick(0.02, 2600), 0.08)
-    wh(tdrop + 0.2, 0.55, 2200, 400, 1.0, 0.35, 0.5)
-    put(tland - 0.02, paper(0.3), 0.16); put(tland - 0.01, knock(140, 0.2), 0.08)
-    put(tland + 0.1, tick(0.016, 4400), 0.07)
-# 2 · "termasuk ongkir dan iklan": two tags pop, two stabilo strokes
-for dt in (0.25, 0.7): put(TM['d2b'] + dt, pop(600, 1200, 0.09), 0.12)
-for dt in (0.3, 0.8): put(TM['d2b'] + dt, marker(0.3), MK * 0.8)
-# S3b · "Udah kekumpul?": files settle, lid closes with a thump, stamp + chime, LENGKAP pop
-wh(TM['kum'] + 0.04, 0.4, 1400, 500, 1.0, 0.4, 0.3)
-wh(TM['kum'] + 0.18, 0.42, 400, 1600, 1.0, 0.8, 0.45); put(TM['kum'] + 0.6, knock(95, 0.32), 0.2)
-put(TM['kum'] + 0.66, pop(600, 1300, 0.09), 0.14); put(TM['kum'] + 0.72, chime((1568, 2093, 2637), 1.1), 0.06)
-put(TM['kum'] + 0.7, pop(900, 1500, 0.07), 0.08)
+def bird(f0=3200, dur=0.16, up=True):
+    """tiny morning bird chirp: a fast FM sweep with a warble"""
+    n = int(dur * SR); t = np.arange(n) / SR
+    f = f0 * (1 + (0.45 if up else -0.3) * np.sin(np.pi * t / dur)) + 260 * np.sin(2 * np.pi * 38 * t)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.sin(np.pi * t / dur) ** 1.5
+    return x / np.abs(x).max()
+
+def shutter():
+    """camera shutter: two short mechanical clicks with a noisy body"""
+    a = svf_bp(rng.standard_normal(int(0.03 * SR)), np.full(int(0.03 * SR), 3000.0), 1.4) * np.exp(-np.arange(int(0.03 * SR)) / SR * 160)
+    b = svf_bp(rng.standard_normal(int(0.05 * SR)), np.full(int(0.05 * SR), 1900.0), 1.1) * np.exp(-np.arange(int(0.05 * SR)) / SR * 90)
+    x = np.zeros(int(0.12 * SR)); x[: len(a)] += a; i = int(0.055 * SR); x[i: i + len(b)] += b
+    return x / np.abs(x).max()
+
+def notif(f1=1318.5, f2=1975.5):
+    """friendly two-note notification blip"""
+    n = int(0.09 * SR); t = np.arange(n) / SR
+    a = np.sin(2 * np.pi * f1 * t) * np.exp(-t * 30); b = np.sin(2 * np.pi * f2 * t) * np.exp(-t * 22)
+    x = np.concatenate([a, b * 0.9]); return x / np.abs(x).max()
+
+def crickets(dur=4.0):
+    """night crickets: pulsed narrow tones in chirp groups, very soft"""
+    n = int(dur * SR); t = np.arange(n) / SR
+    car = np.sin(2 * np.pi * 4300 * t) + 0.5 * np.sin(2 * np.pi * 4720 * t + 1.3)
+    puls = (np.sin(2 * np.pi * 28 * t) > 0.2).astype(float)
+    grp = (np.sin(2 * np.pi * 1.6 * t + 0.7) > 0.35).astype(float)
+    e = np.minimum(1, t / 0.6) * np.minimum(1, (dur - t) / 0.5)
+    x = car * puls * grp * e; return x / (np.abs(x).max() + 1e-9)
+
+def timelapse(t0, d=0.95, g=1.0):
+    """time-lapse: a soft swell + the wall clock ratcheting fast"""
+    wh(t0, d, 250, 1400, 0.9, 0.55, 0.38 * g)
+    tt = t0 + 0.04
+    for j in range(16): put(tt, tick(0.012, 3400 + 200 * (j % 2)), 0.05 * g); tt += 0.055
+
+PH = [TM['pagi'], TM['siang'], TM['sore'], TM['malam']]
+TL0 = [p - 0.3 for p in PH]
+# S1 · hook (dawn): air, birds waking, the HUD drops in, the shop sign flips TUTUP -> BUKA, stabilo
+wh(0.0, 3.4, 180, 700, 0.9, 0.5, 0.3)
+for t, f, up in ((0.7, 3300, True), (0.95, 3600, True), (1.9, 3100, False), (2.15, 3500, True), (3.4, 3800, True)): put(t, bird(f, 0.15, up), 0.045)
+put(TM['hook'] - 0.1, pop(500, 900, 0.08), 0.07); put(TM['mpai'] - 0.15, pop(560, 1000, 0.08), 0.08)
+for k in range(5): put(0.9 + k * 0.08, tick(0.016, 3000 + 250 * k), 0.05)
+put(TM['ngap'] - 0.2, knock(320, 0.12), 0.1); put(TM['ngap'] - 0.05, pop(700, 1300, 0.07), 0.11)
+put(TM['ngap'] + 0.55, marker(0.4), MK)
+# time-lapses (dawn -> pagi, pagi -> siang, siang -> sore, sore -> malam) + HUD stop pops
+timelapse(TM['pagi'] - 0.75, 1.2)
+for k in (1, 2, 3): timelapse(TL0[k])
+for k, t in enumerate(PH):
+    put(t, pop(600 + 80 * k, 1150 + 80 * k, 0.08), 0.1)
+    if k: put(t + 0.05, ding(2093 * (1.0595 ** (2 * k)), 0.45), 0.05)
+for t in (4.3, 4.65, 5.9): put(t, bird(3400, 0.14, True), 0.035)
+# pagi: the card flies out of the phone, shutter + flash, upload scan, three fields, Tersimpan
+wh(TM['pagi'] - 0.12, 0.7, 2600, 500, 1.1, 0.25, 0.6); put(TM['pagi'] + 0.6, pop(420, 840, 0.09), 0.1)
+put(TM['foto'] - 0.02, shutter(), 0.22); put(TM['foto'], shimmer(0.3), 0.03)
+put(TM['blj'] + 0.1, marker(0.36), MK)
+tt = TM['ungg'] - 0.05
+for j in range(8): put(tt, tick(0.014, 2600 + 220 * j), 0.05); tt += 0.075
+for k, dt in enumerate((-0.02, 0.14, 0.3)): put(TM['apl'] + dt, pop(620 + 120 * k, 1250 + 160 * k, 0.07), 0.11)
+put(TM['apl'] + 0.45, ding(2349, 0.55), 0.07)
+# siang: flip, orders pop in (notification blips) + parcels drop, rows line up, Rapi stamp
+wh(PH[1] - 0.2, 0.5, 600, 2600, 1.2, 0.5, 0.4)
+for k in range(4): put(TM['pes'] - 0.06 + k * 0.19, notif(1318.5 * (1.0595 ** k), 1975.5 * (1.0595 ** k)), 0.07)
+for k in range(3): put(TM['pes'] + 0.05 + k * 0.2 + 0.36, knock(150 + 30 * k, 0.2), 0.12)
+for k in range(4): put(TM['cat'] + 0.06 + k * 0.13, whoosh(0.3, 1400, 500, 1.2, 0.4), W * 0.25); put(TM['cat'] + 0.42 + k * 0.13, tick(0.016, 3600), 0.08)
+put(TM['rapi'] - 0.1, paper(0.25), 0.1); put(TM['rapi'] + 0.1, pop(700, 1400, 0.08), 0.13); put(TM['rapi'] + 0.16, chime((1568, 2093, 2637), 1.0), 0.05)
+put(TM['rapi'] + 0.1, marker(0.36), MK)
+# sore: flip, report rows + bars, LABA pops
+wh(PH[2] - 0.2, 0.5, 600, 2600, 1.2, 0.5, 0.4)
+put(TM['lap'] + 0.3, marker(0.36), MK)
+for t in (TM['pj'] - 0.04, TM['by'] - 0.06, TM['by'] + 0.2): put(t, pop(520, 1040, 0.08), 0.1); put(t + 0.12, whoosh(0.5, 400, 1800, 1.3, 0.3), W * 0.25)
+put(TM['laba'] - 0.06, pop(600, 1300, 0.1), 0.14); put(TM['laba'], ding(2637, 0.6), 0.07); put(TM['laba'] + 0.25, marker(0.32), MK)
+# malam: flip, the lamp clicks on, crickets, the question is sent, typing, the answer arrives
+wh(PH[3] - 0.2, 0.5, 600, 2600, 1.2, 0.5, 0.4)
+put(TM['malam'] + 0.32, knock(900, 0.06), 0.12); put(TM['malam'] + 0.35, tick(0.02, 2400), 0.1)
+put(TM['malam'] + 0.2, crickets(TM['sol'] - TM['malam'] - 0.6), 0.018)
+put(TM['masih'] + 0.05, whoosh(0.25, 800, 3200, 1.4, 0.3), W * 0.3); put(TM['masih'] + 0.22, notif(1568, 2093), 0.06)
+for j in range(9): put(TM['tanya'] + j * 0.12, tick(0.01, 1800 + 300 * (j % 3)), 0.04)
+put(TM['jwb'] - 0.05, notif(1175, 1760), 0.07)
+put(TM['asis'] + 0.35, marker(0.4), MK); put(TM['data'] - 0.02, marker(0.34), MK)
 # band sweep -> brand
 for k in range(3): wh(TM['sol'] - 0.5 + k * 0.06, 0.45, 300 + 200 * k, 1800 + 400 * k, 1.1, 0.7, 0.5)
-# S4 · brand: box drops in, lid pops off, the pour (flutter + four landing pops), caption marker, box exits
-wh(TM['sol'] + 0.05, 0.5, 2000, 400, 1.0, 0.4, 0.5); put(TM['sol'] + 0.64, knock(130, 0.22), 0.14)
-put(TM['sol'] + 0.6, pop(380, 760, 0.1), 0.1); wh(TM['sol'] + 0.8, 0.45, 600, 2600, 1.2, 0.6, 0.35)
+# brand: the pembukuan card swings up, four day rows pop, the trace line draws through the four icons, underlines
+wh(TM['sol'] + 0.15, 0.8, 250, 2200, 1.0, 0.45, 0.5)
 holo_fx(TM['sol'] + 0.55)
-put(TM['sol'] + 0.85, flutter(0.9), 0.07)
-for k in range(4): put(TM['sol'] + 1.0 + k * 0.24, whoosh(0.4, 900, 2600, 1.4, 0.5), W * 0.3); put(TM['sol'] + 1.56 + k * 0.24, pop(520 + 90 * k, 1050 + 120 * k, 0.08), 0.12)
-wh(TM['sol'] + 2.25, 0.5, 500, 1800, 1.0, 0.6, 0.35)
-put(TM['sol'] + 2.85, marker(0.42), MK)
-for g0 in (TM['sol'] + 2.9, TM['est'] + 1.7, TM['cta'] + 1.2, TM['bio'] + 1.4): put(g0, square_blips([1800, 900, 1500], 0.02), 0.02)
-# "estimasi pajak": the ledger recedes, the estimate card lifts out, odometer ticks, result chime, shine
-wh(TM['est'], 0.8, 1600, 300, 0.9, 0.5, 0.35); wh(TM['est'] + 0.2, 0.8, 250, 2400, 1.0, 0.45, 0.6)
-tt = TM['est'] + 0.45
-for j in range(14): put(tt, tick(0.012, 3600 + 120 * (j % 3)), 0.06); tt += 0.05 + 0.006 * j * j * 0.08
-put(TM['est'] + 1.75, chime((1318.5, 1760, 2637), 1.3), 0.07)
-put(TM['est'] + 1.35, marker(0.42), MK); put(TM['est'] + 2.2, shimmer(0.8), 0.03)
+for k, t in enumerate((TM['fn'] - 0.05, TM['fn'] + 0.42, TM['lr'] - 0.05, TM['lr'] + 0.5)): put(t, pop(520 + 90 * k, 1050 + 120 * k, 0.08), 0.12)
+put(TM['nyb'] - 0.1, shimmer(0.8), 0.04)
+for k in range(4): put(TM['nyb'] - 0.1 + k * 0.24, ding(1568 * (1.0595 ** (2 * k)), 0.35), 0.045)
+put(TM['lr'] + 0.55, marker(0.45), MK); put(TM['mpai2'] + 0.3, marker(0.45), MK)
+for g0 in (TM['lr'] + 0.3, TM['nyb'] + 0.7, TM['cta'] + 1.2, TM['bio'] + 1.4): put(g0, square_blips([1800, 900, 1500], 0.02), 0.02)
 # beam + iris -> end
 put(TM['end'] - 0.5, pop(500, 1000, 0.1), 0.12); wh(TM['end'] - 0.45, 0.5, 200, 2400, 1.0, 0.9, 1.0); put(TM['end'] - 0.02, boom(0.7, 140, 50), 0.2)
 holo_fx(TM['end'] + 0.55)
-put(TM['cta'], pop(500, 1000, 0.12), P_); put(TM['bio'], pop(900, 1500, 0.08), 0.1)
+put(TM['cta'] - 0.1, pop(500, 1000, 0.12), P_); put(TM['bio'] - 0.05, pop(900, 1500, 0.08), 0.1)
 put(TM['bio'] + 1.2, chime((784, 1046, 1568), 1.4), 0.05)
 x = out[: int(TOTAL * SR)]
 x = x / max(1e-9, np.abs(x).max()) * 0.89
 x16 = (np.clip(x, -1, 1) * 32767).astype(np.int16)
 (P / "assets/audio").mkdir(parents=True, exist_ok=True)
 f = wave.open(str(P / "assets/audio/sfx.wav"), "wb"); f.setnchannels(1); f.setsampwidth(2); f.setframerate(SR); f.writeframes(x16.tobytes()); f.close()
-print("sfx.wav", round(len(x16) / SR, 2), "s")
+print("sfx.wav", round(len(x16) / SR, 2), "s", "rms dB", round(20 * np.log10(np.sqrt(np.mean(x ** 2)) + 1e-9), 1))

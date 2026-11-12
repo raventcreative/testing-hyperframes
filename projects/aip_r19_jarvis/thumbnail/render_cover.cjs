@@ -1,4 +1,4 @@
-// Renders thumbnail/cover.html to PNG. Usage (from project root, static server on :8935 (or any port given as PORT)): node thumbnail/render_cover.cjs <out.png> [query]
+// Renders thumbnail/cover.html to PNG. Usage (from project root, static server on :8939 (or any port given as PORT)): node thumbnail/render_cover.cjs <out.png> [query]
 // Also prints the rects of the key layers (and any text that overflows its box) so overlaps can be checked numerically.
 const { chromium } = require("playwright");
 (async () => {
@@ -9,7 +9,7 @@ const { chromium } = require("playwright");
   p.on("pageerror", (e) => console.error("pageerror", e.message));
   p.on("requestfailed", (r) => console.error("requestfailed", r.url()));
   p.on("response", (r) => { if (r.status() >= 400) console.error("http", r.status(), r.url()); });
-  await p.goto("http://127.0.0.1:" + (process.env.PORT || 8935) + "/thumbnail/cover.html" + (process.argv[3] ? "?" + process.argv[3] : ""), { timeout: 600000 });
+  await p.goto("http://127.0.0.1:" + (process.env.PORT || 8939) + "/thumbnail/cover.html" + (process.argv[3] ? "?" + process.argv[3] : ""), { timeout: 600000 });
   await p.evaluate(() => window.COVER_READY);
   await p.waitForTimeout(300);
   const info = await p.evaluate(() => {
@@ -17,7 +17,7 @@ const { chromium } = require("playwright");
     const r = (s) => { const e = document.querySelector(s); return e ? `${s} ${R(e).join(" ")}` : `${s} MISSING`; };
     const rows = ["#logo", "#chip > span", "#l1", "#h1", "#l3"].map(r);
     for (const sel of ["#l1", "#h1", "#l3"]) { const e = document.querySelector(sel), g = document.createRange(); g.selectNodeContents(e); const b = g.getBoundingClientRect(); rows.push(`${sel} text x ${Math.round(b.left)}-${Math.round(b.right)} y ${Math.round(b.top)}-${Math.round(b.bottom)}`); }
-    ["#lap", "#base", "#ok", ".side", ".bot"].forEach((sel) => document.querySelectorAll(sel).forEach((e) => rows.push(`${sel} ${R(e).join(" ")}`)));
+    [".key", "#v", "#v-tx"].forEach((sel) => document.querySelectorAll(sel).forEach((e) => rows.push(`${sel} ${R(e).join(" ")}`)));
     return rows.join("\n");
   });
   console.log(info);

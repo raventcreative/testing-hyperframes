@@ -312,6 +312,19 @@
     box-shadow: 0 14px 24px -12px rgba(58,111,224,.95); }
   .r8-chat .snd svg { position: absolute; left: 26px; top: 28px; width: 40px; height: 40px; display: block; }
   `;
+  // the package card content (s10 end · s11): what gets sent by DM
+  const pkg = () => `<div class="r8-pk"><div class="gi">${svg("gift", 2)}</div><b class="r8-grad">Starter Prompt 3D</b><span>prompt website 3D buat pemula</span>` +
+    `<em>Kedai kopi · Toko sepatu · Toko roti</em><i class="fr">GRATIS</i></div>`;
+  const pcss = `
+  .r8-pk { position: absolute; inset: 0; font-family: Poppins, sans-serif; }
+  .r8-pk .gi { position: absolute; left: 26px; top: 30px; width: 90px; height: 90px; border-radius: 26px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #6adfff; box-shadow: 0 12px 22px -12px rgba(10,13,44,.8); }
+  .r8-pk .gi svg { position: absolute; left: 23px; top: 23px; width: 44px; height: 44px; display: block; }
+  .r8-pk b { position: absolute; left: 138px; top: 24px; font: 700 30px/40px Poppins, sans-serif; white-space: nowrap; }
+  .r8-pk span { position: absolute; left: 139px; top: 64px; font: 400 17px/24px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+  .r8-pk em { position: absolute; left: 139px; top: 98px; height: 30px; padding: 0 12px; border-radius: 15px; background: #eef2f9; font: 700 14px/30px Poppins, sans-serif; font-style: normal; color: #294b77; white-space: nowrap; }
+  .r8-pk .fr { position: absolute; right: -14px; top: -16px; height: 38px; padding: 0 14px; border-radius: 12px; background: #f4b400; color: #0a0d2c; font: 700 17px/38px Poppins, sans-serif; font-style: normal; letter-spacing: .08em;
+    transform: rotate(6deg); box-shadow: 0 10px 18px -8px rgba(217,154,0,.85); }
+  `;
   const css = `
   .r8-grad { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .r8-card { position: absolute; left: 90px; top: 330px; width: 900px; height: 590px; transform-origin: 50% 50%; font-family: Poppins, sans-serif; }
@@ -394,6 +407,6 @@
   .r8-tile .pc { position: absolute; right: 12px; bottom: 12px; height: 34px; padding: 0 14px 0 36px; border-radius: 17px; background: #ffffff; color: #0a0d2c; font: 700 14px/34px Poppins, sans-serif; white-space: nowrap; box-shadow: 0 8px 14px -8px rgba(0,0,0,.6); transform-origin: 70% 50%; }
   .r8-tile .pc svg { position: absolute; left: 12px; top: 9px; width: 16px; height: 16px; display: block; color: #294b77; }
   `;
-  const st = document.createElement("style"); st.textContent = css + ccss; (document.head || document.documentElement).appendChild(st);
-  window.R8 = { ICO, svg, TH, PROD, site, float, fAt, lib, LIB, miniTile, PC: PCN, wave, tileArt, chat, PROMPT1 };
+  const st = document.createElement("style"); st.textContent = css + ccss + pcss; (document.head || document.documentElement).appendChild(st);
+  window.R8 = { ICO, svg, TH, PROD, site, float, fAt, lib, LIB, miniTile, PC: PCN, wave, tileArt, chat, PROMPT1, pkg };
 })();

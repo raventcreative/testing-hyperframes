@@ -33,6 +33,7 @@
     link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
     unlock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
     file: '<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/>',
+    type: '<path d="M12 4v16"/><path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2"/><path d="M9 20h6"/>',
     pointer: '<path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"/>',
   };
   K.svg = (n, cls = "", extra = "") =>
@@ -160,11 +161,12 @@
 
   // ------------------------------------------------------------------ STYLE CHIPS ROW (s04)
   K.chipsHTML = (P) => K.STYLES.map((s, k) => `<div class="k-chip" id="${P}-chip${k}" style="width:${s.w}px"><div class="f" id="${P}-chipf${k}"></div>` +
-    `<div class="l">${K.svg(s.ic)}${s.label}</div><div class="l n" id="${P}-chipn${k}">${K.svg(s.ic)}${s.label}</div></div>`).join("");
-  K.chipSet = (S, P, act) => { for (let k = 0; k < 4; k++) { S.I(S.$(`${P}-chip${k}`), { x: K.chipX(k), y: K.CHIPS.y, scale: 1, opacity: 1 }); S.I(S.$(`${P}-chipf${k}`), { opacity: k === act ? 1 : 0 }); S.I(S.$(`${P}-chipn${k}`), { opacity: k === act ? 1 : 0 }); } };
+    `<div class="l" id="${P}-chipw${k}">${K.svg(s.ic)}${s.label}</div><div class="l n" id="${P}-chipn${k}">${K.svg(s.ic)}${s.label}</div></div>`).join("");
+  K.chipSet = (S, P, act) => { for (let k = 0; k < 4; k++) { S.I(S.$(`${P}-chip${k}`), { x: K.chipX(k), y: K.CHIPS.y, scale: 1, opacity: 1 }); S.I(S.$(`${P}-chipf${k}`), { opacity: k === act ? 1 : 0 }); S.I(S.$(`${P}-chipn${k}`), { opacity: k === act ? 1 : 0 }); S.I(S.$(`${P}-chipw${k}`), { opacity: k === act ? 0 : 1 }); } };
   K.chipGo = (S, P, a, b, t) => {
     const { ft, $ } = S;
-    if (a >= 0) { ft($(`${P}-chipf${a}`), { opacity: 1 }, { opacity: 0, duration: 0.18 }, t); ft($(`${P}-chipn${a}`), { opacity: 1 }, { opacity: 0, duration: 0.18 }, t); }
+    if (a >= 0) { ft($(`${P}-chipf${a}`), { opacity: 1 }, { opacity: 0, duration: 0.18 }, t); ft($(`${P}-chipn${a}`), { opacity: 1 }, { opacity: 0, duration: 0.18 }, t); ft($(`${P}-chipw${a}`), { opacity: 0 }, { opacity: 1, duration: 0.18 }, t); }
+    ft($(`${P}-chipw${b}`), { opacity: 1 }, { opacity: 0, duration: 0.18 }, t + 0.04);
     ft($(`${P}-chipf${b}`), { opacity: 0 }, { opacity: 1, duration: 0.18 }, t + 0.04); ft($(`${P}-chipn${b}`), { opacity: 0 }, { opacity: 1, duration: 0.18 }, t + 0.04);
     ft($(`${P}-chip${b}`), { scale: 1 }, { scale: 1.1, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, t + 0.04);
   };

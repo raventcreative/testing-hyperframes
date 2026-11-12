@@ -1,12 +1,141 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s06 META (33.10–40.80) "Dan reels yang lagi kamu tonton ini? Dibikin persis begitu. Tiap animasi, tiap teks, sampai efek suaranya, semuanya kode."
+       The camera pulls out of a phone that shows THIS reel (a recursive replica of this very frame: logo, phone, panel, caption,
+       hosts) → "lagi diputar" pill + pulse on "ini?". "Dibikin persis begitu" = the HyperFrames-style timeline of this reel opens
+       (real scene lengths s01–s07, one caption chip per spoken word, the synthesised SFX track) with a playhead at the REAL
+       current time. "Tiap animasi / tiap teks / sampai efek suaranya" = each track lights up with its code; "semuanya kode" = stamp. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s06-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s06-phone { position: absolute; left: 70px; top: 340px; width: 300px; height: 533px; border-radius: 40px; background: #02040f; transform-origin: 50% 50%;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.2), 0 24px 50px rgba(0,0,0,.55); }
+    .s06-scr { position: absolute; left: 10px; top: 10px; width: 280px; height: 513px; border-radius: 32px; overflow: hidden; background: #0a1033; }
+    .s06-rep { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; overflow: hidden;
+      background: url(assets/brand/bg_1080x1920.png) center / 1080px 1920px no-repeat; }
+    .s06-rep .lg { position: absolute; left: 84px; top: 262px; width: 236px; }
+    .s06-rep .ph { position: absolute; left: 70px; top: 340px; width: 300px; height: 533px; border-radius: 40px; background: #02040f; box-shadow: 0 0 0 4px rgba(255,255,255,.2); }
+    .s06-rep .ph .in { position: absolute; left: 10px; top: 10px; width: 280px; height: 513px; border-radius: 32px; overflow: hidden; background: #0a1033; }
+    .s06-rep .pn { position: absolute; left: 400px; top: 340px; width: 620px; height: 533px; border-radius: 30px; background: rgba(12,22,64,.86); box-shadow: inset 0 0 0 3px rgba(255,255,255,.12); }
+    .s06-rep .pn i { position: absolute; left: 150px; height: 44px; border-radius: 10px; }
+    .s06-rep .rcap { position: absolute; left: 0; top: 960px; width: 1080px; text-align: center; }
+    .s06-rep .rcap b { display: inline-block; margin: 0 6px; padding: 2px 14px 6px; border-radius: 10px; background: rgba(8,14,46,.78); font: 700 44px/1.4 Poppins; color: #fff; }
+    .s06-rep .rcap b.c { color: #01ccf7; }
+    .s06-rep .ms { position: absolute; left: 182px; top: 1290px; width: 420px; height: 630px; }
+    .s06-rep .rb { position: absolute; left: 700px; top: 1300px; width: 260px; height: 380px; }
+    #s06-live { position: absolute; left: 0; top: 0; height: 40px; padding: 0 16px 0 12px; border-radius: 20px; background: #e5484d; color: #fff; display: flex; align-items: center; gap: 8px;
+      font: 700 18px/40px Poppins; letter-spacing: 1px; white-space: nowrap; box-shadow: 0 10px 22px rgba(90,0,10,.45); transform-origin: 50% 50%; }
+    #s06-live i { width: 10px; height: 10px; border-radius: 50%; background: #fff; }
+    #s06-pulse { position: absolute; left: 70px; top: 340px; width: 300px; height: 533px; border-radius: 40px; box-shadow: 0 0 0 4px #01ccf7, 0 0 40px rgba(1,204,247,.6); transform-origin: 50% 50%; }
+    #s06-pn { position: absolute; left: 400px; top: 340px; width: 620px; height: 533px; border-radius: 30px; overflow: hidden; background: rgba(12,22,64,.9);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12), 0 22px 46px rgba(3,6,24,.5); transform-origin: 0% 50%; }
+    #s06-pn .hd { position: absolute; left: 0; top: 0; width: 620px; height: 54px; background: rgba(255,255,255,.04); border-bottom: 1.5px solid rgba(255,255,255,.06); }
+    #s06-pn .hd i { position: absolute; top: 21px; width: 12px; height: 12px; border-radius: 50%; }
+    #s06-pn .hd b { position: absolute; left: 90px; top: 0; font: 700 18px/54px Poppins; color: #e3edfa; white-space: nowrap; }
+    #s06-pn .hd span { position: absolute; right: 20px; top: 0; font: 400 16px/54px Poppins; color: #7f8db0; white-space: nowrap; }
+    .s06-tick { position: absolute; top: 62px; font: 400 14px/20px Poppins; color: #7f8db0; white-space: nowrap; }
+    .s06-tick:before { content: ""; position: absolute; left: 0; top: 22px; width: 1.5px; height: 8px; background: #4b5a86; }
+    .s06-row { position: absolute; left: 10px; width: 600px; height: 118px; border-radius: 18px; }
+    .s06-hl { position: absolute; left: 0; top: 0; width: 600px; height: 118px; border-radius: 18px; background: rgba(1,204,247,.10); box-shadow: inset 0 0 0 2px rgba(106,223,255,.75); }
+    .s06-lab { position: absolute; left: 10px; top: 16px; width: 128px; display: flex; align-items: center; gap: 7px; font: 700 17px/36px Poppins; color: #e3edfa; white-space: nowrap; }
+    .s06-lab svg { width: 20px; height: 20px; color: #6adfff; flex: 0 0 20px; }
+    .s06-lane { position: absolute; left: 140px; top: 12px; width: 450px; height: 44px; border-radius: 10px; background: rgba(255,255,255,.05); overflow: hidden; }
+    .s06-blk { position: absolute; top: 4px; height: 36px; border-radius: 8px; font: 700 13px/36px Poppins; color: #0b1440; text-align: center; overflow: hidden; }
+    .s06-wd { position: absolute; top: 12px; height: 20px; border-radius: 5px; background: rgba(227,237,250,.85); }
+    .s06-bar { position: absolute; width: 3px; border-radius: 2px; background: #6adfff; }
+    .s06-code { position: absolute; left: 140px; top: 66px; height: 40px; padding: 0 14px; border-radius: 12px; background: #070c28; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.08);
+      font: 400 18px/40px Poppins; color: #e3edfa; white-space: nowrap; transform-origin: 0% 50%; }
+    .s06-code em { font-style: normal; color: #7f8db0; margin-right: 10px; }
+    #s06-head { position: absolute; left: 0; top: 84px; width: 3px; height: 384px; background: #ff5a6a; box-shadow: 0 0 10px rgba(255,90,106,.8); }
+    #s06-head:before { content: ""; position: absolute; left: -7px; top: -8px; width: 17px; height: 12px; border-radius: 3px; background: #ff5a6a; }
+    #s06-stamp { position: absolute; left: 0; top: 0; height: 52px; padding: 0 22px 0 16px; border-radius: 26px; background: #01ccf7; color: #0b1440; display: flex; align-items: center; gap: 10px;
+      font: 700 25px/52px Poppins; white-space: nowrap; box-shadow: 0 0 30px rgba(1,204,247,.6); transform-origin: 50% 50%; }
+    #s06-stamp svg { width: 26px; height: 26px; }
+  </style>
+  <div id="root" data-composition-id="s06" data-width="1080" data-height="1920">
+    <div id="s06-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 7.69);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s06"] = tl;
+      const K = window.R7K, D = 7.7, P = "s06";
+      const S = K.scene(P, D), { tl, ft, I, wt, $, T0 } = S;
+      const z = $("s06-zone");
+      const TOTAL = 45.4667, LANE = { x: 400 + 10 + 140, w: 450 };
+      // ---------------------------------------------------------------- recursive replica of THIS frame (native 1080×1920, scaled)
+      const f = 280 / 1080;
+      const hosts = `<svg class="ms" viewBox="0 0 420 630"><path d="M40 630 Q60 430 210 410 Q360 430 380 630Z" fill="#2b2b33"/><path d="M170 420 L210 500 L250 420Z" fill="#1a1a1f"/>` +
+        `<circle cx="210" cy="260" r="170" fill="#f6c9a0"/><path d="M40 250 Q50 70 210 70 Q370 70 380 250 Q330 150 210 150 Q90 150 40 250Z" fill="#2c2a2e"/>` +
+        `<ellipse cx="150" cy="280" rx="26" ry="32" fill="#3a2418"/><ellipse cx="270" cy="280" rx="26" ry="32" fill="#3a2418"/><path d="M180 350 Q210 372 240 350" stroke="#a0573a" stroke-width="8" fill="none" stroke-linecap="round"/></svg>` +
+        `<svg class="rb" viewBox="0 0 260 380"><ellipse cx="130" cy="330" rx="70" ry="40" fill="#22262f"/><ellipse cx="130" cy="290" rx="80" ry="22" fill="#4fd2ff" opacity=".7"/>` +
+        `<rect x="40" y="70" width="180" height="200" rx="90" fill="#eef2f7"/><rect x="62" y="110" width="136" height="100" rx="50" fill="#0b0d16"/><circle cx="105" cy="160" r="15" fill="#fff"/><circle cx="155" cy="160" r="15" fill="#fff"/></svg>`;
+      const rep = (depth) => {
+        let h = `<div class="s06-rep" style="transform:scale(${f})"><img class="lg" src="assets/brand/logo_white_trim.png" alt="">`;
+        h += `<div class="ph"><div class="in">${depth > 0 ? rep(depth - 1) : ""}</div></div>`;
+        h += `<div class="pn">` + ["#01ccf7", "#e3edfa", "#6adfff"].map((c, i) => `<i style="top:${110 + i * 120}px;width:${300 + 60 * i}px;background:${c};opacity:.75"></i>`).join("") + `</div>`;
+        h += `<div class="rcap"><b>kamu</b><b>tonton</b><b class="c">ini?</b></div>${hosts}</div>`;
+        return h;
+      };
+      let h = `<div id="s06-phone"><div class="s06-scr">${rep(1)}</div></div><div id="s06-pulse"></div><div id="s06-live"><i></i>lagi kamu tonton</div>`;
+      // ---------------------------------------------------------------- timeline panel of this reel (real numbers from VO_SCENES / VO_WORDS)
+      h += `<div id="s06-pn"><div class="hd"><i style="left:22px;background:#ff6b6b"></i><i style="left:42px;background:#ffd166"></i><i style="left:62px;background:#4ade80"></i>` +
+        `<b>reels-ini · index.html</b><span>1080×1920 · 30 fps</span></div>`;
+      for (let s = 0; s <= 40; s += 10) h += `<div class="s06-tick" style="left:${150 + (s / TOTAL) * LANE.w}px">${s}s</div>`;
+      const ROWS = [["sparkles", "animasi"], ["type", "teks"], ["wave", "efek suara"]];
+      const CODE = [[`index.html`, 'gsap.to("#koi", { x: 420 })'], [`caption`, '<span class="w">teks</span>'], [`sfx.py`, "whoosh() · pop() · chime()"]];
+      ROWS.forEach(([ic, lab], r) => {
+        const top = 92 + r * 124;
+        let lane = "";
+        if (r === 0) (window.VO_SCENES || []).forEach((sc, i) => { const x = (sc.start / TOTAL) * LANE.w, w = (sc.dur / TOTAL) * LANE.w - 3;
+          lane += `<div class="s06-blk" style="left:${x.toFixed(1)}px;width:${w.toFixed(1)}px;background:${i % 2 ? "#6adfff" : "#01ccf7"}">${w > 36 ? sc.id : ""}</div>`; });
+        if (r === 1) (window.VO_WORDS || []).forEach((wd) => { const x = (wd[1] / TOTAL) * LANE.w, w = Math.max(2, ((wd[2] - wd[1]) / TOTAL) * LANE.w - 1);
+          lane += `<i class="s06-wd" style="left:${x.toFixed(1)}px;width:${w.toFixed(1)}px"></i>`; });
+        if (r === 2) for (let i = 0; i < 112; i++) { const v = 0.15 + 0.85 * Math.pow(K.hash(i * 1.7 + 3), 2.2), hh = 4 + 34 * v;
+          lane += `<i class="s06-bar" style="left:${(i * 4).toFixed(1)}px;top:${(22 - hh / 2).toFixed(1)}px;height:${hh.toFixed(1)}px;opacity:${(0.45 + 0.55 * v).toFixed(2)}"></i>`; }
+        h += `<div class="s06-row" id="s06-r${r}" style="top:${top}px"><div class="s06-hl" id="s06-hl${r}"></div><div class="s06-lab">${K.svg(ic)}${lab}</div>` +
+          `<div class="s06-lane">${lane}</div><div class="s06-code" id="s06-c${r}"><em>${CODE[r][0]}</em>${K.hl(CODE[r][1])}</div></div>`;
+      });
+      h += `<div id="s06-head"></div></div><div id="s06-stamp">${K.svg("code")}semuanya kode</div>`;
+      z.innerHTML = h;
+      const tDan = wt("Dan"), tRe = wt("reels", 33), tTo = wt("tonton"), tIni = wt("ini?"), tDi = wt("Dibikin"), tPe = wt("persis"), tBe = wt("begitu.");
+      const tTi = wt("Tiap"), tAn = wt("animasi,"), tTi2 = wt("tiap", 37), tTe = wt("teks,"), tSa = wt("sampai", 38), tEf = wt("efek"), tSu = wt("suaranya,"), tSe = wt("semuanya"), tKo = wt("kode.", 40);
+      // ---------------------------------------------------------------- camera pulls out of the phone
+      const ph = $("s06-phone");
+      I(ph, { x: 300, y: 80, scale: 2.1, opacity: 0 });
+      ft(ph, { opacity: 0 }, { opacity: 1, duration: 0.12 }, 0.0);
+      ft(ph, { x: 300, y: 80, scale: 2.1 }, { x: 0, y: 0, scale: 1, duration: 1.0, ease: "power3.inOut" }, 0.02);
+      const pulse = $("s06-pulse"); I(pulse, { opacity: 0, scale: 1 });
+      ft(pulse, { opacity: 0, scale: 1 }, { opacity: 1, scale: 1, duration: 0.12 }, tIni - 0.06);
+      ft(pulse, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.12, duration: 0.6, ease: "power2.out" }, tIni + 0.08);
+      const live = $("s06-live"); I(live, { x: 220, xPercent: -50, y: 318, scale: 0, opacity: 0 });
+      ft(live, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.32, ease: "back.out(2.6)" }, tIni - 0.04);
+      S.loop(live.querySelector("i"), { opacity: 1 }, { opacity: 0.25 }, 0.4, tIni + 0.3, D, "steps(1)");
+      // ---------------------------------------------------------------- panel opens on "Dibikin persis begitu"
+      const pn = $("s06-pn"); I(pn, { scaleX: 0.3, opacity: 0 });
+      ft(pn, { scaleX: 0.3, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.45, ease: "power3.out" }, tDi - 0.12);
+      for (let r = 0; r < 3; r++) { const row = $("s06-r" + r); I(row, { opacity: 0, x: 30 }); ft(row, { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, tPe - 0.05 + r * 0.1); }
+      // playhead at the REAL global time (this scene starts at T0)
+      const head = $("s06-head"), hx = (t) => 150 + ((T0 + t) / TOTAL) * LANE.w;
+      I(head, { x: hx(0) }); ft(head, { x: hx(0) }, { x: hx(D), duration: D, ease: "none" }, 0.005);
+      // tracks light up with their code
+      const HL = [tAn - 0.12, tTe - 0.12, tSu - 0.4];
+      for (let r = 0; r < 3; r++) {
+        const hl = $("s06-hl" + r), c = $("s06-c" + r);
+        I(hl, { opacity: 0 }); I(c, { opacity: 0, scale: 0.6 });
+        ft(hl, { opacity: 0 }, { opacity: 1, duration: 0.18 }, HL[r]);
+        if (r < 2) ft(hl, { opacity: 1 }, { opacity: 0.25, duration: 0.3 }, HL[r + 1] - 0.05);
+        ft(c, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.2)" }, HL[r] + 0.05);
+      }
+      // sfx bars pulse on "efek suaranya"
+      $("s06-r2").querySelectorAll(".s06-bar").forEach((b, i) => { I(b, { scaleY: 1 }); if (i % 3 === 0) ft(b, { scaleY: 1 }, { scaleY: 1.5, duration: 0.12, yoyo: true, repeat: 3, ease: "sine.inOut" }, tSu - 0.3 + (i % 9) * 0.02); });
+      // "semuanya kode.": all tracks light, stamp lands
+      for (let r = 0; r < 3; r++) ft($("s06-hl" + r), { opacity: r === 2 ? 1 : 0.25 }, { opacity: 1, duration: 0.2 }, tSe - 0.05 + r * 0.06);
+      const st = $("s06-stamp"); I(st, { x: 710, xPercent: -50, y: 822, scale: 2.2, opacity: 0, rotation: -6 });
+      ft(st, { scale: 2.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "power4.in" }, tKo - 0.22);
+      ft(st, { scale: 1 }, { scale: 1.06, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tKo - 0.02);
+      // exit (last 0.25 s): the panel folds, the phone stays to hand over to the CTA
+      const tX = D - 0.25;
+      [pn, st, live].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, tX));
+      ft(ph, { opacity: 1, y: 0 }, { opacity: 0, y: 40, duration: 0.22, ease: "power2.in" }, tX);
+      S.finish();
     })();
   </script>
 </template>

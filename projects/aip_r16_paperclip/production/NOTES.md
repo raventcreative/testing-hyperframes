@@ -39,7 +39,7 @@ Kit: copied from `projects/aip_r8_web3d` (newest LIGHT; without `out/`, audio, c
 | s05 | 22.97–26.73 | Butuh anggota baru? CEO-nya ngajuin rekrut, kamu yang approve. | tickets tuck into their teams, teams slide left, bus stretches, a dashed "Kursi kosong" appears; request card from the CEO "Pengajuan rekrut · dari CEO · butuh izin kamu": Agent Desain, desain feed & promo, lapor ke CEO · budget kecil (contoh), switch "Izinkan rekrut?"; "kamu yang approve" → the cursor from the Kamu chip flips the switch green, the card flies into the seat, Agent Desain pops in |
 | s06 | 26.73–32.33 | Agent-nya nggak nyala terus: bangun kalau ada tugas atau jadwal, kerja, lapor, terus tidur lagi. | the chart folds into the "Heartbeat agent" monitor (the five avatars fly into rows); "nggak nyala terus" → all dim, status "tidur", z's float; a playhead sweeps the rows like a heart monitor; triggers "Tugas baru" / "Jadwal 09.00" light on "bangun"; a task flies onto Tim Web (spike, bangun → kerja), a clock onto Tim Konten (spike); "kerja" → working plateaus; "lapor" → two reports fly to the CEO, it wakes; "tidur lagi" → everyone back to tidur; Riset and Desain never wake |
 | s07 | 32.33–36.73 | Token tiap agent kelihatan, dan kalau budget-nya habis, dia otomatis dijeda. | header flips to "Token & budget · jatah bulanan per agent · angka ilustrasi", legend 80% peringatan · 100% dijeda; traces fade into budget bars + % + token counters that roll up; "budget-nya" → Tim Web 64% → 80% (amber, "80% · awas"); "habis" → 100% red + shake; "otomatis dijeda" → red DIJEDA pill, pause badge on the avatar, row tinted, note "otomatis dijeda di 100% budget"; panel drops away at the end |
-| s08 | 36.73–45.23 | Catatannya: agent-nya tetap pakai API atau langganan AI kamu, jadi ada biayanya. Mulai kecil dulu, dan kamu tetap yang ngawasin. | pill "Catatan jujur"; cost card: Paperclip · Rp 0 · gratis · open source MIT + Model AI agent-nya (otak tiap agent, dari akun kamu): chips API key / Langganan AI on their words, "ada biaya · dihitung dari pemakaian token" + coin drop; card "Mulai kecil dulu": slider slides down, chips 2–3 agent · budget kecil per agent; card "Kamu pengawasnya": ticks cek hasil kerjanya · setujui strategi & rekrut · jeda kapan aja; all drops away at the end |
+| s08 | 36.73–45.23 | Catatannya: agent-nya tetap pakai API atau langganan AI kamu, jadi ada biayanya. Mulai kecil dulu, dan kamu tetap yang ngawasin. | pill "Catatan jujur"; cost card: Paperclip · Rp 0 · gratis · open source MIT + Model AI agent-nya (otak tiap agent, dari akun kamu): chips API key / Langganan AI on their words, "ada biaya · sesuai pemakaian token" + coin drop; card "Mulai kecil dulu": slider slides down, chips 2–3 agent · budget kecil; card "Kamu pengawasnya": ticks cek hasil kerjanya · setujui strategi & rekrut · jeda kapan aja; all drops away at the end |
 | s09 | 45.23–48.20 | Komen TIM, aku kirim lewat DM. | package card "Paket TIM · link Paperclip + cara pasang · contoh struktur tim UMKM" + comment sheet; TIM types big, heart, send → paper plane into the package; DM card, bubble "Paket TIM · link + contoh tim / repo Paperclip, cara pasang, struktur tim UMKM", "terkirim" ✓✓; end logo + glint (corner logo fades at 47.0) |
 
 Hosts: robot (co-host, right) flies in on "agent", points at the card fields, cheers "beneran", TYPES the install command and the goal on
@@ -62,3 +62,35 @@ waves at the end. Mascot (host, left): intents on every beat (present / point / 
 
 ## DM text for the TIM keyword
 `production/DM_TIM.md` (repo link, install, example UMKM team, cost + safety notes incl. telemetry opt-out).
+
+## QA (real runtime, hyperframes 0.8.186)
+- `lint .` → 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the R8 kit).
+- `validate .` (final run, after every fix) → **0 errors, 0 contrast warnings**; remaining warnings = kit notices ("multiple instances of
+  Three.js" from the robot + mascot bundles, SwiftShader "GPU stall due to ReadPixels"). Earlier contrast notes were fixed: light-grey
+  small labels → #5d6f8f, solid fallback colours under gradient headers, placeholder #627495, and the two cards behind the ID card no
+  longer carry header text (it sat hidden under the front card and was measured against white).
+- Snapshots (`snapshot . --at … --no-end --timeout 60000`): ONE full pass of 81 frames (first frame, every scene's beats, both sides of
+  every cut, the end) + two targeted fix passes (7.0/7.3 s card drop, 36.45–37.2 s s07→s08 cut, 41.6/44.6 s s08 text; 0 s + 3.0 s after
+  the back-card change). JPG contact sheets in
+  `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r16/`:
+  `rt1_full_1.jpg`, `rt1_full_2.jpg` (full frames), `rt1_hero_1.jpg` … `rt1_hero_3.jpg` (hero + captions, larger), `rt2_fix.jpg`,
+  `rt3_s01.jpg`; the runtime's own `rt1/contact-sheet-*.jpg`. All PNG dumps deleted.
+- Mascot eyes checked on every captured frame: pupils everywhere, no white-disc eyes (glance disabled).
+- Dev layout check (own harness, GSAP seek of every scene every 0.2 s, 241 frames): no text outside its pill/card, no text outside
+  x 72–1008, nothing in the caption zone (hero content ends ≤ 914 px), nothing in the logo corner, every caption chunk on ONE line
+  inside x 60–1020; every word lookup (`L()` / `wt()`) verified against `vendor/vo_words.js`.
+- Initial states: every scene + index.html pins them in a nested timeline that is the first child at 0, then `tl.render(0, true, true)`.
+  Hand-overs at identical geometry: s01→s02 (ID cards + clip), s02→s03 (empty terminal card → browser window), s03→s04 (goal banner),
+  s04→s05→s06 (org chart), s06→s07 (monitor rows); s07, s08 exit in their last 0.2–0.27 s and the next scene's content arrives at once.
+
+## Known issues / notes for the lead
+- Frame 0 shows the ID card + the mascot rising into place; the robot flies in at ≈0.7 s (kit behaviour, same as R8/R11). The cover PNG
+  is the intended thumbnail.
+- Captions: during the 0.34 s word rise a navy keyword pill can show as a thin bar under the line for a frame or two (same caption system
+  as the kit; e.g. 17.2 s "Agent" before "CEO-nya" rises).
+- At the s07→s08 cut (≈36.73–36.8 s) the hero zone is nearly empty for ~3 frames (panel gone, "Catatan jujur" pill popping in).
+- All company data is illustrative and labelled: Keripik Renyah, the goal, tasks, "Agent Desain", budget/token numbers ("angka
+  ilustrasi"), the localhost window ("CONTOH"), the ID card ("ILUSTRASI"). Adapter labels per agent are examples of supported adapters.
+- "★ 113 rb+ bintang · cek 12 Nov 2026" is the GitHub repo page count on 12 Nov 2026 (113.3k); not spoken. The reference's "112,000
+  developers" is NOT used.
+- `.hyperframes/` (written by snapshot/validate) is git-ignored in this folder, together with `out/`.

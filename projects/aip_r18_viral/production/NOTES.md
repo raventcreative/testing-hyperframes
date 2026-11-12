@@ -44,3 +44,39 @@ Robot (co-host, right): flies in on the GLADI RESIK stamp, scans the AI audience
 "bertele-tele", types the re-edit, cheers the re-test, waves at the UMKM, thinks on "duit", shakes its head on "bukan jaminan", claps on
 "penentunya", cheers the CTA, waves at the end. Mascot (host, left): an intent on every beat (present / point / reveal / question on
 "kelima?" / emphasize / compare / cta); glances disabled (`glance = () => 0`, brief's R12/R13 lesson).
+
+## Sources (checked 2026-11-12) — details + quotes in production/VO_SCRIPT.md
+github.com/higgsfield-ai/skills (README, INSTALL.md, .claude-plugin/marketplace.json + plugin.json, LICENSE = MIT, higgsfield-generate/SKILL.md
++ references/media-inputs.md, v0.14.0; read directly via raw.githubusercontent.com) · github.com/higgsfield-ai (org page: cli = MIT) · Higgsfield's
+official MCP tool description of `virality_predictor` · higgsfield.ai/apps/virality-predictor (text via the WebSearch index only: 15-second
+clip limit, "modeled audience … maps the brain response across vision, sound, memory, attention, and language", outputs) · Higgsfield's
+X post "experimental preview version - does not consume credits" (search-result title only) · github.com/facebookresearch/tribev2 (README:
+fMRI brain-encoding model, CC BY-NC 4.0, paper arXiv:2605.04326). Blocked from this sandbox (DNS/proxy): higgsfield.ai, arxiv.org,
+x.com, pasqualepillitteri.it, ai.meta.com — nothing in the VO depends on a page I could not read or that the official repo does not confirm.
+
+## QA (real runtime: `npx --yes hyperframes@0.8.186 snapshot`)
+Sheets (JPG only, PNG dumps deleted) in `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r18/`:
+- Full pass, 64 frames (first frame, every scene 5–7×, every cut ±0.03 s, last frame 41.47): labelled sheets `qa1_part_0.jpg` (0–7.8 s) ·
+  `qa1_part_1.jpg` (8.5–16.53) · `qa1_part_2.jpg` (17.4–24.8) · `qa1_part_3.jpg` (24.86–32.4) · `qa1_part_4.jpg` (33.2–39.4) ·
+  `qa1_part_5.jpg` (40–41.47) + the tool's own `qa1/contact-sheet-1…8.jpg`; full-resolution crops of the densest frames `zoom_dense.jpg`
+  (s04 20.5 · s07 32.4 · s08 37.5 · s03 15.0).
+- Result: no clipped/overflowing text, captions never covered (nothing in y > 945 but captions / mascot / robot), mascot eyes never blank
+  (glances disabled; blinks only), every scene builds from its pinned state at its first frame, no fix pass needed.
+- Dev preview (not the real runtime) used while building: `dev_s01.jpg` … `dev_s09.jpg`; text-overflow checker `tools/overflow.cjs` at each
+  scene's fully built moment: clean (only hit = s01 valance text while still parked above the clipped stage, invisible).
+- `lint`: 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the kit). `validate`: 0 errors; kit warning "multiple instances
+  of Three.js"; the 9 contrast notes of the first run (ruler/second numbers, kabur/betah labels) were fixed → 0 contrast warnings.
+- Cover: `thumbnail/COVER_VIRAL_1080x1920.png` (LIGHT; "PLUGIN CLAUDE CODE GRATIS · Tes reels-mu sebelum posting" + the GLADI RESIK stage,
+  mascot + robot), preview `cover_final.jpg` in the scratch dir.
+
+## Known issues / notes for the lead
+- Duration 41.5 s (VO 40.1 s, inside the 35–45 s target). VO is take 1.
+- faster-whisper hears "Tembukaan" for "Pembukaan" (21.3 s, initial plosive; `small` and `medium` both) — every other word is clean. Worth
+  one listen; if it sounds wrong, regenerate (the pipeline above re-times everything automatically).
+- The reference's "second-by-second predicted retention graph" is not stated in any official text I could open; the reel shows the
+  verified outputs (skor viral, detik puncak hook, hold rate) and labels the per-second bars ILUSTRASI. The "brain data" claim was checked
+  and dropped (VO_SCRIPT.md). Pricing: plugin free (MIT); analysis needs a Higgsfield account; launch post said no credits — DM says check.
+- CTA keyword VIRAL (client's choice) is also the reference's keyword; our closing line and DM content are our own.
+- House-style transitions: each scene exits in its last ~0.2 s, so the hero zone is empty for a few frames at each cut (as in R12). The
+  last caption chunk stays up to the end card (as R8/R12). The mascot starts slightly low at frame 0 and settles (kit behaviour).
+- `.hyperframes/` in this folder was created by the CLI (lint/validate/snapshot), like in the kit. `out/` is git-ignored (`.gitignore`).

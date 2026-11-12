@@ -102,7 +102,8 @@
 
   // ---------------------------------------------------------------- EMPLOYEE ID CARD (s01 · s02 · cover): main card "Agent Konten" + two behind
   const idCards = (p) => {
-    const card = (id, k, nm, cls) => `<div class="r16-id r16-card ${cls || ""}" id="${id}"><div class="hd"><div class="hi">${svg("bot", 2)}</div><b class="t">KARTU KARYAWAN AI</b><i>ILUSTRASI</i></div>` +
+    // the two cards behind carry no header text (it would sit hidden under the front card)
+    const card = (id, k, nm, cls) => `<div class="r16-id r16-card ${cls || ""}" id="${id}"><div class="hd"><div class="hi">${svg("bot", 2)}</div>${nm ? '<b class="t">KARTU KARYAWAN AI</b><i>ILUSTRASI</i>' : ""}</div>` +
       `<div style="position:absolute;left:150px;top:252px">${av(id + "-av", k, 176)}</div>` + (nm || "") + `</div>`;
     return card(`${p}-b1`, "web", "", "r16-bk") + card(`${p}-b2`, "riset", "", "r16-bk") + card(`${p}-c`, "konten",
       `<b class="r16-id-nm r16-grad">Agent Konten</b><span class="r16-id-sb">AI agent · Claude Code</span>` +

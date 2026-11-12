@@ -1,0 +1,129 @@
+<template>
+  <style>
+    /* t3 PLAYWRIGHT CLI (19.23–26.17) "Ketiga, Playwright CLI. Claude buka browser sendiri, ngetes websitenya, terus screenshot buat ngecek hasilnya."
+       Frame 0 = t2's end (header 02, page at (540,700) .84 with hero variant C). Header rolls 02 → 03. A terminal slides up and types real
+       playwright-cli commands (open, -s=hp open --device, click, screenshot — README of microsoft/playwright-cli). The page shrinks into
+       the desktop browser, a tablet and a phone session open; cursors click, scan lines pass; camera flashes, "*.png" chips; checks:
+       desktop/tablet ok, the phone headline is cut → flagged → re-wrapped → ok. Last 0.25 s: the workspace slides out (t4 starts with
+       only the header). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #t3-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    .t3-dev { position: absolute; left: 0; top: 0; border-radius: 20px; background: #0d1638; box-shadow: inset 0 0 0 2px rgba(255,255,255,.16), 0 24px 50px rgba(2,6,26,.55); }
+    .t3-scr { position: absolute; left: 8px; top: 8px; right: 8px; bottom: 8px; border-radius: 13px; overflow: hidden; background: #f3efe7; }
+    .t3-scr .cb { position: absolute; left: 0; top: 0; right: 0; height: 22px; background: #eceff5; }
+    .t3-scr .cb i { position: absolute; left: 10px; right: 10px; top: 5px; height: 12px; border-radius: 6px; background: #fff; }
+    .t3-scr .wm { position: absolute; left: 10px; top: 28px; font: 700 12px/16px Poppins; color: #1d1a16; white-space: nowrap; }
+    .t3-scr .mn { position: absolute; right: 10px; top: 31px; width: 14px; height: 2px; background: #1d1a16; box-shadow: 0 4px 0 #1d1a16, 0 8px 0 #1d1a16; }
+    .t3-scr .eb { position: absolute; left: 10px; font: 700 8px/10px Poppins; letter-spacing: 1.5px; color: #b4532a; white-space: nowrap; }
+    .t3-scr .hl { position: absolute; left: 10px; font: 700 20px/21px Poppins; letter-spacing: -.6px; color: #1d1a16; white-space: nowrap; }
+    .t3-scr .bt { position: absolute; left: 10px; height: 26px; padding: 0 12px; border-radius: 4px; background: #1d1a16; font: 700 11px/26px Poppins; color: #f3efe7; white-space: nowrap; }
+    .t3-scan { position: absolute; left: 0; top: 0; width: 100%; height: 4px; background: #e8fbff; box-shadow: 0 0 14px 4px rgba(1,204,247,.85); }
+    .t3-flash { position: absolute; inset: 0; background: #ffffff; }
+    .t3-chip { position: absolute; left: 0; top: 0; height: 38px; padding: 0 14px 0 10px; border-radius: 19px; background: rgba(8,14,46,.95); display: flex; align-items: center; gap: 8px;
+      font: 700 20px/38px Poppins; color: #e3edfa; white-space: nowrap; box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.45), 0 10px 22px rgba(2,6,26,.5); transform-origin: 50% 50%; }
+    .t3-chip svg { width: 20px; height: 20px; color: #6adfff; }
+    .t3-ok { position: absolute; left: 0; top: 0; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: #2da44e; color: #fff; box-shadow: 0 6px 14px rgba(0,0,0,.4); }
+    .t3-ok svg { position: absolute; left: 7px; top: 7px; width: 20px; height: 20px; }
+    #t3-warn { position: absolute; left: 0; top: 0; height: 38px; padding: 0 14px 0 10px; border-radius: 19px; background: #e5484d; display: flex; align-items: center; gap: 8px;
+      font: 700 20px/38px Poppins; color: #fff; white-space: nowrap; box-shadow: 0 10px 22px rgba(80,0,10,.45); transform-origin: 50% 50%; }
+    #t3-warn svg { width: 20px; height: 20px; }
+    .t3-cur { position: absolute; left: 0; top: 0; width: 34px; height: 34px; color: #fff; filter: drop-shadow(0 3px 5px rgba(0,0,0,.55)); }
+    .t3-cur svg { width: 34px; height: 34px; fill: #0b1440; }
+    .t3-rip { position: absolute; left: 0; top: 0; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; box-shadow: 0 0 0 3px #01ccf7; }
+    .t3-brk { position: absolute; width: 22px; height: 22px; border-color: #ffffff; border-style: solid; border-width: 0; }
+    #t3-term { position: absolute; left: 0; top: 0; width: 952px; height: 130px; border-radius: 24px; background: rgba(5,9,32,.96); overflow: hidden;
+      box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.3), 0 24px 50px rgba(2,6,26,.6); }
+    #t3-lines { position: absolute; left: 0; top: 0; width: 952px; }
+    .t3-ln { position: absolute; left: 24px; height: 34px; font: 400 22px/34px Poppins; color: #e3edfa; white-space: nowrap; }
+    .t3-ln .d { color: #01ccf7; font-weight: 700; margin-right: 10px; }
+    .t3-ln .g { color: #3ddc97; font-weight: 700; }
+  </style>
+  <div id="root" data-composition-id="t3" data-width="1080" data-height="1920">
+    <div id="t3-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R3K, D = 6.9334, P = "t3";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("t3-zone");
+      const DEV = { tab: { x: 613, y: 479, w: 200, h: 291 }, hp: { x: 833, y: 479, w: 146, h: 291 } };
+      const mini = (id, o) => `<div class="t3-dev" id="t3-${id}" style="width:${o.w}px;height:${o.h}px"><div class="t3-scr" id="t3-${id}s"><div class="cb"><i></i></div>` +
+        `<div class="wm">Kedai Sangrai</div><i class="mn"></i>` + K.photoHTML(`t3-${id}ph`, o.w - 16, 92, { left: 0, top: 48, r: 30, cx: (o.w - 16) * 0.62, cy: 46, beans: [[0.15, 0.3, 20], [0.2, 0.75, -30], [0.9, 0.25, 50]] }) +
+        `<div class="eb" style="top:150px">SANGRAI MINGGU INI</div>` + o.hl + `</div><i class="t3-scan" id="t3-${id}scan"></i><i class="t3-flash" id="t3-${id}fl"></i></div>`;
+      z.innerHTML = `<div class="k-hk-wrap" id="t3-wrap">${K.pageTasteHTML(P)}</div>` + K.headerHTML(P) +
+        mini("tab", Object.assign({ hl: `<div class="hl" style="top:164px">Disangrai Senin.<br>Habis Jumat.</div><div class="bt" style="top:216px">Lihat menu &rarr;</div>` }, DEV.tab)) +
+        mini("hp", Object.assign({ hl: `<div class="k-ab" id="t3-hpA"><div class="hl" style="top:164px;font-size:22px">Disangrai Senin.</div><div class="bt" style="top:196px">Lihat menu &rarr;</div></div>` +
+          `<div class="k-ab" id="t3-hpB"><div class="hl" style="top:164px;font-size:17px;line-height:18px">Disangrai<br>Senin. Habis<br>Jumat.</div><div class="bt" style="top:222px">Lihat menu &rarr;</div></div>` }, DEV.hp)) +
+        [["dt", "desktop.png"], ["tb", "tablet.png"], ["hc", "hp.png"]].map(([k, t]) => `<div class="t3-chip" id="t3-ch${k}">${K.svg("camera")}${t}</div><i class="t3-ok" id="t3-ok${k}">${K.svg("check")}</i>`).join("") +
+        `<div id="t3-warn">${K.svg("alert")}teks kepotong</div>` +
+        [0, 1, 2].map((i) => `<i class="t3-rip" id="t3-rip${i}"></i><div class="t3-cur" id="t3-cur${i}">${K.svg("pointer")}</div>`).join("") +
+        `<div id="t3-term"><div id="t3-lines"></div></div>`;
+      const tp = $("t3-tpage"); tp.insertAdjacentHTML("beforeend", K.heroVariantsHTML(P) + `<i class="t3-scan" id="t3-dtscan"></i><i class="t3-flash" id="t3-dtfl"></i>`);
+      // ---------------------------------------------------------------- frame 0 = t2 end
+      const wrap = $("t3-wrap"), W1 = K.pageAt(540, 700, 0.84), WD = K.pageAt(346, 625, 0.56);
+      I(wrap, W1); K.headerSet(S, P, 2);
+      I($("t3-tA"), { opacity: 0 }); I($("t3-tB"), { opacity: 0 }); I($("t3-tC"), { opacity: 1, y: 0 });
+      const tKet = wt("Ketiga,"), tPla = wt("Playwright"), tCla = wt("Claude", 21), tBuk = wt("buka"), tBro = wt("browser", 22), tSen = wt("sendiri,");
+      const tNge = wt("ngetes"), tWeb = wt("websitenya,"), tScr = wt("screenshot"), tCek = wt("ngecek"), tHas = wt("hasilnya.");
+      K.headerSwap(S, P, 2, 3, tKet - 0.1);
+      // ---------------------------------------------------------------- terminal
+      const term = $("t3-term"), lines = $("t3-lines");
+      const L = [["playwright-cli open kedaisangrai.id", tBuk - 0.3], ['playwright-cli -s=hp open --device="iPhone 15"', tBro + 0.02], ["playwright-cli click e15", tNge - 0.1],
+                 ["playwright-cli screenshot", tScr - 0.3]];
+      L.forEach(([txt, t], i) => {
+        const ln = document.createElement("div"); ln.className = "t3-ln"; ln.style.top = 14 + i * 34 + "px"; lines.appendChild(ln);
+        ln.innerHTML = `<span class="d">$</span><span id="t3-l${i}"></span>`; I(ln, { opacity: 0 }); tl.set(ln, { opacity: 1 }, t);
+        S.type($("t3-l" + i), txt, t + 0.02, 80);
+      });
+      I(lines, { y: 0 }); ft(lines, { y: 0 }, { y: -34, duration: 0.25, ease: "power2.inOut" }, L[3][1] - 0.25);
+      ft(lines.children[0], { opacity: 1 }, { opacity: 0, duration: 0.18, ease: "power2.in" }, L[3][1] - 0.25);
+      I(term, { x: 64, y: 1000, opacity: 0 });
+      ft(term, { y: 1000, opacity: 0 }, { y: 798, opacity: 1, duration: 0.4, ease: "power3.out" }, tBuk - 0.6);
+      ft(wrap, { x: W1.x, y: W1.y, scale: 0.84 }, { x: W1.x, y: K.pageAt(540, 660, 0.78).y, scale: 0.78, duration: 0.4, ease: "power3.out" }, tBuk - 0.6);
+      // ---------------------------------------------------------------- "buka browser sendiri": desktop + tablet + phone sessions
+      ft(wrap, { x: W1.x, y: K.pageAt(540, 660, 0.78).y, scale: 0.78 }, { x: WD.x, y: WD.y, scale: 0.56, duration: 0.5, ease: "power3.inOut" }, tBuk - 0.05);
+      const tab = $("t3-tab"), hp = $("t3-hp");
+      I(tab, { x: DEV.tab.x, y: DEV.tab.y + 40, scale: 0.6, opacity: 0, transformOrigin: "50% 50%" });
+      I(hp, { x: DEV.hp.x, y: DEV.hp.y + 40, scale: 0.6, opacity: 0, transformOrigin: "50% 50%" });
+      ft(tab, { y: DEV.tab.y + 40, scale: 0.6, opacity: 0 }, { y: DEV.tab.y, scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.7)" }, tBro + 0.05);
+      ft(hp, { y: DEV.hp.y + 40, scale: 0.6, opacity: 0 }, { y: DEV.hp.y, scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.7)" }, tSen - 0.05);
+      I($("t3-hpA"), { opacity: 1 }); I($("t3-hpB"), { opacity: 0 });
+      // ---------------------------------------------------------------- "ngetes websitenya": cursors click, scan lines
+      const CL = [[166, 672], [678, 722], [891, 695]];
+      CL.forEach(([x, y], i) => { const c = $("t3-cur" + i), r = $("t3-rip" + i), t0 = tNge - 0.15 + i * 0.12;
+        I(c, { x: x + 60, y: y + 70, opacity: 0, scale: 1 }); I(r, { x, y, scale: 0.4, opacity: 0 });
+        ft(c, { x: x + 60, y: y + 70, opacity: 0 }, { x: x - 4, y: y - 4, opacity: 1, duration: 0.3, ease: "power3.out" }, t0);
+        ft(c, { scale: 1 }, { scale: 0.82, duration: 0.07, yoyo: true, repeat: 1 }, t0 + 0.32);
+        ft(r, { scale: 0.4, opacity: 1 }, { scale: 1.5, opacity: 0, duration: 0.4, ease: "power2.out" }, t0 + 0.34);
+        ft(c, { opacity: 1 }, { opacity: 0, duration: 0.2 }, t0 + 0.75); });
+      [["dt", 520], ["tab", 275], ["hp", 275]].forEach(([k, h], i) => { const s = $(`t3-${k}scan`), t0 = tWeb - 0.05 + i * 0.08;
+        I(s, { y: 0, opacity: 0 }); ft(s, { y: 0, opacity: 1 }, { y: h, opacity: 1, duration: 0.6, ease: "power1.inOut" }, t0); tl.set(s, { opacity: 0 }, t0 + 0.6); });
+      // ---------------------------------------------------------------- "screenshot": flashes, brackets, .png chips
+      const CH = [["dt", 346, 751], ["tb", 713, 751], ["hc", 906, 751]];
+      [["dt", 0], ["tab", 1], ["hp", 2]].forEach(([k, i]) => { const f = $(`t3-${k}fl`), t0 = tScr - 0.04 + i * 0.1;
+        I(f, { opacity: 0 }); ft(f, { opacity: 0 }, { opacity: 0.9, duration: 0.05 }, t0); ft(f, { opacity: 0.9 }, { opacity: 0, duration: 0.3, ease: "power2.out" }, t0 + 0.05); });
+      CH.forEach(([k, x, y], i) => { const c = $("t3-ch" + k), o = $("t3-ok" + k), t0 = tScr + 0.08 + i * 0.1;
+        I(c, { x, xPercent: -50, y: y - 19, scale: 0.5, opacity: 0 });
+        ft(c, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.4)" }, t0);
+        const ox = x + (k === "dt" ? 88 : k === "tb" ? 82 : 62);
+        I(o, { x: ox, y: y - 22, scale: 0, opacity: 0, transformOrigin: "50% 50%" }); });
+      // ---------------------------------------------------------------- "ngecek hasilnya": checks; the phone headline is cut → fixed
+      const pop = (el, t) => ft(el, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(3)" }, t);
+      pop($("t3-okdt"), tCek - 0.04); pop($("t3-oktb"), tCek + 0.12);
+      const warn = $("t3-warn"); I(warn, { x: 906, xPercent: -50, y: 560, scale: 0.5, opacity: 0 });
+      ft(warn, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(2.6)" }, tCek + 0.14);
+      ft(hp, { x: DEV.hp.x }, { x: DEV.hp.x + 6, duration: 0.05, yoyo: true, repeat: 3, ease: "sine.inOut" }, tCek + 0.16);
+      ft(warn, { scale: 1, opacity: 1 }, { scale: 0.7, opacity: 0, duration: 0.18, ease: "power2.in" }, tCek + 0.5);
+      ft($("t3-hpA"), { opacity: 1 }, { opacity: 0, duration: 0.15 }, tCek + 0.52); ft($("t3-hpB"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tCek + 0.6);
+      pop($("t3-okhc"), tCek + 0.72);
+      // ---------------------------------------------------------------- exit: the workspace slides out to the left
+      const tX = D - 0.21, OUT = [wrap, tab, hp, term, ...CH.map(([k]) => $("t3-ch" + k)), ...CH.map(([k]) => $("t3-ok" + k))];
+      OUT.forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.16, ease: "power2.in" }, tX + (i % 4) * 0.012));
+      ft(wrap, { x: WD.x }, { x: WD.x - 160, duration: 0.17, ease: "power2.in" }, tX);
+      ft(tab, { x: DEV.tab.x }, { x: DEV.tab.x - 160, duration: 0.17, ease: "power2.in" }, tX + 0.01);
+      ft(hp, { x: DEV.hp.x }, { x: DEV.hp.x - 160, duration: 0.17, ease: "power2.in" }, tX + 0.02);
+      ft(term, { x: 64 }, { x: -96, duration: 0.17, ease: "power2.in" }, tX);
+      S.finish();
+    })();
+  </script>
+</template>

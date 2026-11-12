@@ -1,0 +1,109 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s08-a { position: absolute; }
+    #s08-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s08-glow { left: 60px; top: 380px; width: 960px; height: 640px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    #s08-pop { left: 540px; top: 372px; width: 330px; height: 184px; border-radius: 24px; transform-origin: 30% 100%;
+      background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 30px 60px -24px rgba(10,13,44,.55), 0 0 0 1.5px rgba(10,13,44,.08); }
+    #s08-pop::after { content: ""; position: absolute; left: 50px; bottom: -10px; width: 20px; height: 20px; background: #f6f8fd; transform: rotate(45deg); box-shadow: 1.5px 1.5px 0 rgba(10,13,44,.08); }
+    #s08-ph { left: 18px; top: 14px; height: 30px; display: flex; align-items: center; gap: 8px; font: 700 14px/30px Poppins, sans-serif; letter-spacing: .14em; color: #8a97ad; white-space: nowrap; }
+    #s08-ph svg { width: 20px; height: 20px; display: block; color: #294b77; }
+    #s08-pd { left: 18px; top: 52px; width: 120px; height: 116px; border-radius: 12px; background: #ffffff; box-shadow: 0 0 0 1.5px #e1e8f3; overflow: hidden; }
+    #s08-pd b { position: absolute; left: 0; top: 0; width: 120px; height: 28px; background: linear-gradient(135deg, #0a0d2c, #294b77); }
+    #s08-pd i { position: absolute; left: 10px; height: 6px; border-radius: 3px; background: #d9e1ee; }
+    #s08-pt { left: 154px; top: 54px; font: 700 19px/26px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s08-ps { left: 154px; top: 82px; font: 400 15px/22px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s08-pk { left: 154px; top: 120px; height: 34px; padding: 0 12px 0 34px; border-radius: 17px; background: #eaf7ee; color: #218a3e; font: 700 14px/34px Poppins, sans-serif; white-space: nowrap; }
+    #s08-pk svg { position: absolute; left: 12px; top: 9px; width: 16px; height: 16px; display: block; }
+    #s08-cur { left: 0; top: 0; width: 56px; height: 56px; transform-origin: 8px 8px; filter: drop-shadow(0 6px 8px rgba(10,13,44,.35)); }
+    #s08-cur svg { width: 56px; height: 56px; display: block; }
+    #s08-clk { left: 0; top: 0; width: 0; height: 0; }
+    #s08-clk i { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%; box-shadow: 0 0 0 4px rgba(58,111,224,.55); }
+    .s08-sp { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+    .s08-sp i { position: absolute; left: -3px; top: -3px; width: 6px; height: 22px; border-radius: 3px; background: #f4b400; transform-origin: 3px 3px; }
+    #s08-toast { left: 330px; top: 868px; width: 420px; height: 50px; border-radius: 25px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #fff;
+      box-shadow: 0 16px 28px -14px rgba(10,13,44,.8); font: 700 18px/50px Poppins, sans-serif; text-align: center; white-space: nowrap; transform-origin: 50% 50%; }
+    #s08-toast svg { display: inline-block; width: 18px; height: 18px; margin-left: 6px; vertical-align: -3px; }
+  </style>
+  <div id="root" data-composition-id="s08" data-width="1080" data-height="1920">
+    <div id="s08-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s08 "Aku tinggal cek, pilih yang paling cocok, terus klik apply."
+      // START = s07's end: the board at rest. · "cek,": a cursor glides in to row 1's CV chip, a CV preview popover opens (still example
+      // data) · "pilih yang paling cocok,": the popover closes, row 1 gets a gold ring + "Paling cocok" badge, rows 2–3 dim · "klik apply.":
+      // the cursor clicks row 1's Apply — press, ripple, gold sparks — and a toast "Buka halaman lamaran aslinya ↗" (you apply on the
+      // original listing yourself).
+      // END STATE (t = D): board as s07 + row 1 highlighted (ring 1, badge 1, scale 1.02), rows 2–3 opacity .5, toast on, cursor faded out.
+      const D = 3.4, ST = 37.5, VW = window.VO_WORDS, R4 = window.R4;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tCek = L("cek,"), tPil = L("pilih"), tPal = L("paling"), tCoc = L("cocok,"), tTer = L("terus"), tKlik = L("klik"), tApp = L("apply.");
+      const B = R4.BOARD;
+
+      // ================================================================ DOM
+      let h = `<div class="s08-a" id="s08-glow"></div>`;
+      h += R4.board("s08");
+      h += `<div class="s08-a" id="s08-pop"><div class="s08-a" id="s08-ph">${R4.svg("eye", 2.2)}PRATINJAU CV</div>` +
+        `<div class="s08-a" id="s08-pd"><b></b>${[40, 56, 70, 84, 98].map((y, i) => `<i style="top:${y}px;width:${[96, 80, 92, 70, 86][i]}px"></i>`).join("")}</div>` +
+        `<div class="s08-a" id="s08-pt">Frontend Developer</div><div class="s08-a" id="s08-ps">disesuaikan · 1 halaman</div>` +
+        `<div class="s08-a" id="s08-pk">${R4.svg("check", 3)}siap dikirim</div></div>`;
+      h += `<div class="s08-a" id="s08-toast">Buka halaman lamaran aslinya${R4.svg("out", 2.6)}</div>`;
+      h += Array.from({ length: 10 }, (_, i) => `<div class="s08-sp" id="s08-sp${i}"><i></i></div>`).join("");
+      h += `<div class="s08-a" id="s08-clk"><i id="s08-clr"></i></div>`;
+      h += `<div class="s08-a" id="s08-cur"><svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#ffffff" stroke="#0a0d2c" stroke-width="1.6" stroke-linejoin="round"/></svg></div>`;
+      $("s08-cam").innerHTML = h;
+      const cam = $("s08-cam"); I(cam, { x: 0, y: 0 }); I($("s08-glow"), { opacity: 1 });
+
+      // ================================================================ board: s07's end state
+      const bd = $("s08-bd"); I(bd, { opacity: 1, scale: 1, x: 0, y: 0 });
+      [0, 1, 2].forEach((q) => { I($("s08-br" + q), { opacity: 1, scale: 1, y: 0 }); I($("s08-bhl" + q), { opacity: 0 }); I($("s08-bap" + q), { scale: 1 }); });
+      const best = $("s08-bbest"); I(best, { opacity: 0, scale: 0.4, rotation: -8 });
+
+      // ================================================================ "cek,": cursor → row 1's CV chip, preview popover
+      const R0Y = B.y + B.rowY(0), cvX = B.x + 24 + 470 + 40, cvY = R0Y + 50, apX = B.x + 24 + 730 + 72, apY = R0Y + 50, tX = B.x + 24 + 100 + 120, tY = R0Y + 34;
+      const cur = $("s08-cur"), clk = $("s08-clk"), clr = $("s08-clr"), pop = $("s08-pop");
+      I(cur, { opacity: 0, x: 820, y: 940, scale: 1 }); I(clk, { x: apX, y: apY }); I(clr, { opacity: 0, scale: 0.5 });
+      ft(cur, { opacity: 0 }, { opacity: 1, duration: 0.15 }, 0.02);
+      ft(cur, { x: 820, y: 940 }, { x: cvX - 8, y: cvY - 6, duration: tCek - 0.02, ease: "power3.inOut" }, 0.02);
+      I(pop, { opacity: 0, scale: 0.6, y: 14 });
+      ft(pop, { opacity: 0, scale: 0.6, y: 14 }, { opacity: 1, scale: 1, y: 0, duration: 0.26, ease: "back.out(2)" }, tCek - 0.02);
+      ft(pop, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.85, duration: 0.16, ease: "power2.in" }, tPil - 0.12);
+
+      // ================================================================ "pilih yang paling cocok,": row 1 wins
+      ft(cur, { x: cvX - 8, y: cvY - 6 }, { x: tX, y: tY, duration: 0.32, ease: "power3.inOut" }, tPil - 0.1);
+      ft($("s08-bhl0"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tPal - 0.1);
+      ft($("s08-br0"), { scale: 1 }, { scale: 1.02, duration: 0.3, ease: "back.out(2)" }, tPal - 0.1);
+      ft(best, { opacity: 0, scale: 0.4, rotation: -8 }, { opacity: 1, scale: 1, rotation: -3, duration: 0.3, ease: "back.out(2.6)" }, tCoc - 0.1);
+      [1, 2].forEach((q, k) => ft($("s08-br" + q), { opacity: 1 }, { opacity: 0.5, duration: 0.3, ease: "power1.out" }, tPal + k * 0.05));
+
+      // ================================================================ "klik apply.": click, ripple, sparks, toast
+      ft(cur, { x: tX, y: tY }, { x: apX - 8, y: apY - 6, duration: tKlik - tTer + 0.05, ease: "power3.inOut" }, tTer - 0.05);
+      const tc = tApp - 0.04, ap = $("s08-bap0");
+      ft(cur, { scale: 1 }, { scale: 0.8, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tc);
+      ft(ap, { scale: 1 }, { scale: 0.88, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tc);
+      ft(clr, { opacity: 0.9, scale: 0.5 }, { opacity: 0, scale: 1.5, duration: 0.4, ease: "power2.out" }, tc + 0.03);
+      for (let i = 0; i < 10; i++) {
+        const s = $("s08-sp" + i), a = i * 36 + 10, ux = -Math.sin(a * Math.PI / 180), uy = Math.cos(a * Math.PI / 180);
+        I(s, { opacity: 0, x: apX + ux * 70, y: apY + uy * 50, rotation: a, scaleY: 0.5 });
+        ft(s, { opacity: 1, x: apX + ux * 70, y: apY + uy * 50, scaleY: 1.2 }, { opacity: 0, x: apX + ux * 120, y: apY + uy * 92, scaleY: 0.4, duration: 0.42, ease: "power3.out" }, tc + 0.05);
+      }
+      const toast = $("s08-toast");
+      I(toast, { opacity: 0, y: 24, scale: 0.8 });
+      ft(toast, { opacity: 0, y: 24, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.32, ease: "back.out(2)" }, tc + 0.12);
+      ft(cur, { opacity: 1 }, { opacity: 0, duration: 0.2 }, D - 0.25);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s08"] = tl;
+    })();
+  </script>
+</template>

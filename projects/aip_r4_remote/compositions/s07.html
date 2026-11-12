@@ -1,0 +1,96 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s07-a { position: absolute; }
+    #s07-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s07-glow { left: 60px; top: 380px; width: 960px; height: 640px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+    #s07-ring { left: 170px; top: 327px; width: 400px; height: 36px; border-radius: 18px; box-shadow: 0 0 0 4px rgba(58,111,224,.55); transform-origin: 50% 50%; }
+    #s07-flash { left: 70px; top: 316px; width: 940px; height: 614px; border-radius: 32px; box-shadow: 0 0 0 4px #294b77; transform-origin: 50% 50%; }
+  </style>
+  <div id="root" data-composition-id="s07" data-width="1080" data-height="1920">
+    <div id="s07-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s07 THE BOARD "Terus semuanya masuk ke satu halaman, kayak papan loker pribadi."
+      // START = s06's end: the TEAM RAIL with all three chips done. · "Terus semuanya": the board page (R4.board) springs open, the three
+      // chips dive into the board header and become its team avatars · "masuk": the 3 listings slide in (score rings draw), the filter
+      // chips pop · "satu halaman,": the address pill ("papan-loker.html") rings, the whole page frame flashes once · "papan loker":
+      // the title throbs · "pribadi.": the navy "Pribadi" chip stamps on.
+      // END STATE (t = D): the board at rest (left 70, top 316, 940 × 614, scale 1), everything on except the "Paling cocok" badge and
+      // the row highlights; rail gone; glow 1. s08 continues from exactly this board.
+      const D = 3.7, ST = 33.8, VW = window.VO_WORDS, R4 = window.R4;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tSem = L("semuanya"), tMas = L("masuk"), tSatu = L("satu"), tHal = L("halaman,"), tPap = L("papan"), tPri = L("pribadi.");
+      const M = R4.M, RL = R4.RAIL, J = R4.JOBS, B = R4.BOARD;
+
+      // ================================================================ DOM
+      let h = `<div class="s07-a" id="s07-glow"></div>`;
+      h += R4.board("s07");
+      h += `<div class="s07-a" id="s07-flash"></div><div class="s07-a" id="s07-ring"></div>`;
+      h += R4.rail("s07");
+      $("s07-cam").innerHTML = h;
+      const cam = $("s07-cam"); I(cam, { x: 0, y: 0 });
+      const glow = $("s07-glow"); I(glow, { opacity: 0.6 }); ft(glow, { opacity: 0.6 }, { opacity: 1, duration: 0.5 }, 0.1);
+
+      // ================================================================ rail (s06's end: all done) → the chips dive into the board avatars
+      M.forEach((m, i) => {
+        const c = $("s07-c" + i);
+        I(c, { opacity: 1, scale: 1, x: 0, y: 0 }); I($("s07-c" + i + "g"), { opacity: 0 }); I($("s07-c" + i + "d"), { opacity: 0 });
+        I($("s07-c" + i + "s"), { opacity: 0 }); I($("s07-c" + i + "k"), { opacity: 1, scale: 1 });
+        const ax = B.x + 776 + i * 40 + 25, ay = B.y + 82 + 25, cx = RL.left[i] + RL.w / 2, cy = RL.top + RL.h / 2, t = tSem - 0.12 + i * 0.08;
+        ft(c, { x: 0 }, { x: ax - cx, duration: 0.42, ease: "power2.inOut" }, t);
+        ft(c, { y: 0 }, { y: -50, duration: 0.18, ease: "power2.out" }, t);
+        ft(c, { y: -50 }, { y: ay - cy, duration: 0.24, ease: "power2.in" }, t + 0.18);
+        ft(c, { scale: 1 }, { scale: 0.2, duration: 0.42, ease: "power2.in" }, t);
+        tl.set(c, { opacity: 0 }, t + 0.42);
+        const av = $("s07-bav" + i);
+        I(av, { opacity: 0, scale: 0.4 });
+        ft(av, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(3)" }, t + 0.38);
+      });
+
+      // ================================================================ the board springs open, the listings slide in
+      const bd = $("s07-bd");
+      I(bd, { opacity: 0, scale: 0.84, y: 40 });
+      ft(bd, { opacity: 0, scale: 0.84, y: 40 }, { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.3)" }, 0.02);
+      [0, 1, 2].forEach((q) => {
+        const r = $("s07-br" + q), rg = $("s07-brg" + q), C = 2 * Math.PI * 26, s = J[R4.ROWS[q].k].s, t = tSem + 0.12 + q * ((tMas + 0.1 - tSem) / 3);
+        I(r, { opacity: 0, y: 40, scale: 0.96 });
+        ft(r, { opacity: 0, y: 40, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.6)" }, t);
+        I(rg, { attr: { "stroke-dashoffset": C } });
+        ft(rg, { attr: { "stroke-dashoffset": C } }, { attr: { "stroke-dashoffset": C * (1 - s / 100) }, duration: 0.6, ease: "power2.out" }, t + 0.12);
+        I($("s07-bhl" + q), { opacity: 0 });
+        I($("s07-bap" + q), { scale: 1 });
+      });
+      I($("s07-bbest"), { opacity: 0, scale: 0.4 });
+      [0, 1, 2].forEach((i) => { const f = $("s07-bf" + i); I(f, { opacity: 0, scale: 0.6 }); ft(f, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.5)" }, tMas + 0.05 + i * 0.07); });
+
+      // ================================================================ "satu halaman,": address ring + frame flash
+      const ring = $("s07-ring"), flash = $("s07-flash"), ad = $("s07-baddr");
+      I(ring, { opacity: 0, scale: 1 }); I(flash, { opacity: 0, scale: 1 }); I(ad, { scale: 1 });
+      ft(ad, { scale: 1 }, { scale: 1.06, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tSatu);
+      ft(ring, { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.12, duration: 0.5, ease: "power2.out" }, tSatu + 0.02);
+      ft(flash, { opacity: 0.55, scale: 1 }, { opacity: 0, scale: 1.035, duration: 0.5, ease: "power2.out" }, tHal);
+      ft(bd, { scale: 1 }, { scale: 1.012, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tHal);
+
+      // ================================================================ "papan loker pribadi.": title throbs, Pribadi chip stamps
+      const tt = $("s07-bt"), pv = $("s07-bpv");
+      I(tt, { scale: 1, transformOrigin: "0% 50%" });
+      ft(tt, { scale: 1 }, { scale: 1.06, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tPap - 0.04);
+      I(pv, { opacity: 0, scale: 2, rotation: -12 });
+      ft(pv, { opacity: 0, scale: 2, rotation: -12 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.2, ease: "power4.in" }, tPri - 0.1);
+      [[4, -2], [-3, 2], [2, -1], [0, 0]].forEach(([x, y], q) => tl.set(cam, { x, y }, tPri + 0.1 + q * 0.034));
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s07"] = tl;
+    })();
+  </script>
+</template>

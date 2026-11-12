@@ -1,0 +1,154 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .st2-a { position: absolute; }
+    #st2-body { overflow: hidden; }
+    /* ---- the 4 tool cards (2×2: x 60–530 / 550–1020, y 404–660 / 676–932) */
+    .st2-cd { position: absolute; width: 470px; height: 256px; transform-origin: 50% 50%; }
+    .st2-fl { position: absolute; inset: 0; transform-origin: 50% 50%; }
+    .st2-bk, .st2-fr { position: absolute; inset: 0; border-radius: 30px; overflow: hidden; }
+    .st2-bk { background: linear-gradient(180deg, #1c2b6a, #0f1a4c); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12), 0 24px 44px -24px rgba(2,6,28,.9); }
+    .st2-bk b { position: absolute; left: 0; top: 50px; width: 470px; text-align: center; font: 700 96px/110px Poppins, sans-serif; color: rgba(255,255,255,.92); letter-spacing: -.02em; }
+    .st2-bk span { position: absolute; left: 0; top: 166px; width: 470px; text-align: center; font: 700 24px/34px Poppins, sans-serif; color: #6adfff; letter-spacing: .14em; }
+    .st2-fr { background: linear-gradient(180deg, #ffffff, #eef3fb); box-shadow: inset 0 0 0 1px rgba(255,255,255,.7), 0 24px 44px -24px rgba(2,6,28,.9); }
+    .st2-tile { position: absolute; left: 26px; top: 26px; width: 72px; height: 72px; border-radius: 20px; color: #0b1440; box-shadow: 0 8px 16px -8px rgba(10,13,44,.5); }
+    .st2-tile svg { position: absolute; left: 17px; top: 17px; width: 38px; height: 38px; stroke-width: 2.2; }
+    .st2-nm { position: absolute; left: 116px; top: 26px; font: 700 40px/72px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; letter-spacing: -.015em; }
+    .st2-fn { position: absolute; left: 28px; top: 116px; font: 400 27px/38px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .st2-ch { position: absolute; left: 28px; top: 180px; display: flex; gap: 10px; }
+    .st2-ch .g { background: #2da44e; color: #ffffff; box-shadow: 0 6px 14px -6px rgba(45,164,78,.8); padding: 0 16px 0 12px; }
+    .st2-ch .l { box-shadow: inset 0 0 0 1.5px rgba(41,75,119,.4); color: #294b77; }
+    .st2-rg { position: absolute; inset: -4px; border-radius: 34px; box-shadow: 0 0 0 3px #01ccf7, 0 0 34px rgba(1,204,247,.55); }
+    .st2-stk { position: absolute; left: 300px; top: 176px; height: 48px; padding: 0 18px 0 12px; border-radius: 24px; display: flex; align-items: center; gap: 8px; white-space: nowrap;
+      background: linear-gradient(180deg, #4fe0ff, #01ccf7); color: #0b1440; font: 700 23px/48px Poppins, sans-serif; box-shadow: 0 10px 22px -8px rgba(1,204,247,.9), 0 0 0 3px #0b1440; transform-origin: 50% 50%; }
+    .st2-stk svg { width: 26px; height: 26px; stroke-width: 2.4; }
+    /* ribbon */
+    #st2-rb { left: -40px; top: 620px; width: 1160px; height: 96px; background: linear-gradient(180deg, #4fe0ff, #01ccf7); box-shadow: 0 18px 40px -16px rgba(1,204,247,.8), 0 0 0 4px rgba(11,20,64,.9);
+      font: 700 50px/96px Poppins, sans-serif; color: #0b1440; letter-spacing: .08em; text-align: center; white-space: nowrap; transform-origin: 50% 50%; }
+    /* ---- B: chat (window body coords) */
+    #st2-ub { left: 150px; top: 10px; width: 786px; height: 282px; border-radius: 30px 30px 8px 30px; background: linear-gradient(180deg, rgba(1,204,247,.22), rgba(1,204,247,.12));
+      box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.42); transform-origin: 100% 100%; }
+    #st2-ub .tx { position: absolute; left: 26px; top: 14px; font: 400 27px/42px Poppins, sans-serif; color: #ffffff; white-space: nowrap; }
+    .st2-lk { position: absolute; left: 26px; height: 44px; padding: 0 18px 0 12px; border-radius: 14px; display: flex; align-items: center; gap: 10px; white-space: nowrap;
+      background: rgba(8,14,46,.45); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.45); font: 400 23px/44px Poppins, sans-serif; color: #e3edfa; }
+    .st2-lk svg { width: 24px; height: 24px; color: #01ccf7; flex: none; }
+    .st2-lk u { position: absolute; left: 46px; right: 18px; bottom: 8px; height: 2px; background: #6adfff; text-decoration: none; transform-origin: 0 50%; }
+    #st2-rp { left: 40px; top: 156px; width: 880px; height: 180px; }
+    #st2-av { left: 0; top: 0; width: 44px; height: 44px; }
+    #st2-av svg { width: 44px; height: 44px; display: block; }
+    #st2-rh { left: 62px; top: 0; font: 700 28px/44px Poppins, sans-serif; color: #ffffff; white-space: nowrap; }
+    .st2-ok { position: absolute; width: 400px; height: 52px; border-radius: 16px; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10);
+      display: flex; align-items: center; gap: 14px; padding-left: 12px; font: 700 26px/52px Poppins, sans-serif; color: #e3edfa; white-space: nowrap; }
+    .st2-ok i { position: relative; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.12); flex: none; }
+    .st2-ok i b { position: absolute; inset: 0; border-radius: 50%; background: #2da44e; color: #ffffff; box-shadow: 0 0 14px rgba(45,164,78,.7); }
+    .st2-ok i svg { position: absolute; left: 7px; top: 7px; width: 18px; height: 18px; stroke-width: 3.4; }
+  </style>
+  <div id="root" data-composition-id="st2" data-width="1080" data-height="1920">
+    <div class="st2-a" id="st2-W" style="left:0;top:0;width:1080px;height:945px"></div>
+    <div class="st2-a" id="st2-cards" style="left:0;top:0;width:1080px;height:945px"></div>
+    <div class="st2-a" id="st2-rb">GRATIS · OPEN SOURCE</div>
+  </div>
+  <script>
+    (function () {
+      // st2 LANGKAH 2 · TOOLS "Dua: pasang empat tool gratis. HyperFrames buat motion graphic, ini yang aku pakai. FFmpeg buat motong video,
+      // Whisper buat caption, yt-dlp buat ambil video referensi. Tempel link GitHub-nya, Claude yang pasang."
+      // FRAME 0 = st1's end state (Claude window + folder tree). "Dua:": the window dives away and 4 numbered card backs are dealt
+      // into a 2×2 grid · "gratis.": a "GRATIS · OPEN SOURCE" ribbon slams across · each card flips to its front on its name
+      // (HyperFrames / FFmpeg / Whisper / yt-dlp: what it does + "gratis" + licence chip — verified on the official repos) · "aku pakai.":
+      // a "yang aku pakai" sticker lands on HyperFrames · "Tempel link GitHub-nya,": the window comes back, the cards shrink into the 4
+      // repo links inside a message · "Claude yang pasang.": the message scrolls up, Claude answers with 4 green ticks.
+      // OUT (D-0.05 → D+0.35): the window sinks away under st3.
+      const K = window.R5, S = K.scene("st2"), { tl, ft, I, $, L, D } = S;
+      const t = { dua: L("Dua:"), empat: L("empat"), gratis: L("gratis."), hf: L("HyperFrames"), motion: L("motion"), aku: L("aku"), ff: L("FFmpeg"),
+        motong: L("motong"), wh: L("Whisper"), cap: L("caption,"), yt: L("yt-dlp"), ambil: L("ambil"), tempel: L("Tempel"), link: L("link"),
+        gh: L("GitHub-nya,"), cl: L("Claude"), pasang: L("pasang.") };
+      // ---------------------------------------------------------------- the window (st1's end state)
+      $("st2-W").innerHTML = K.win("st2");
+      $("st2-body").innerHTML = K.tree("st2") +
+        `<div class="st2-a" id="st2-ub"><div class="tx">Pasang 4 tool ini di folder ini ya:</div></div>` +
+        `<div class="st2-a" id="st2-rp"><div class="st2-a" id="st2-av">${K.CLAUDE}</div><div class="st2-a" id="st2-rh">Siap, terpasang:</div></div>`;
+      I("#st2-slot", { opacity: 0 }); I("#st2-fd", { opacity: 1 }); I("#st2-tree", { opacity: 1 });
+      I("#st2-win", { opacity: 1, y: 0, scale: 1 });
+      ft("#st2-win", { opacity: 1, y: 0, scale: 1 }, { opacity: 0, y: 90, scale: 0.9, duration: 0.42, ease: "power3.in" }, t.dua - 0.05);
+      tl.set("#st2-tree", { opacity: 0 }, t.dua + 0.5);
+      // ---------------------------------------------------------------- the cards
+      const TOOLS = [
+        ["HyperFrames", "motion graphic dari HTML", "Apache-2.0", "layers", "#01ccf7", t.hf, t.motion],
+        ["FFmpeg", "potong & convert video", "LGPL/GPL", "scissors", "#3ddc97", t.ff, t.motong],
+        ["Whisper", "suara jadi caption", "MIT", "captions", "#9d8cff", t.wh, t.cap],
+        ["yt-dlp", "unduh video referensi", "Unlicense", "download", "#ffb35c", t.yt, t.ambil]];
+      const LINKS = ["github.com/heygen-com/hyperframes", "github.com/FFmpeg/FFmpeg", "github.com/openai/whisper", "github.com/yt-dlp/yt-dlp"];
+      const POS = [[60, 404], [550, 404], [60, 676], [550, 676]];
+      TOOLS.forEach(([nm, fn, lic, ic, col], i) => {
+        const [x, y] = POS[i];
+        $("st2-cards").insertAdjacentHTML("beforeend",
+          `<div class="st2-cd" id="st2-c${i}" style="left:${x}px;top:${y}px"><div class="st2-rg" id="st2-rg${i}"></div><div class="st2-fl" id="st2-f${i}">` +
+          `<div class="st2-bk" id="st2-bk${i}"><b>0${i + 1}</b><span>TOOL</span></div>` +
+          `<div class="st2-fr" id="st2-fr${i}"><div class="st2-tile" id="st2-ti${i}" style="background:${col}">${K.svg(ic, 2.2)}</div><div class="st2-nm">${nm}</div>` +
+          `<div class="st2-fn">${fn}</div><div class="st2-ch"><span class="r5-chip g">${K.svg("check", 3)}gratis</span><span class="r5-chip l">${lic}</span></div></div></div>` +
+          (i === 0 ? `<div class="st2-stk" id="st2-stk">${K.svg("badge-check", 2.4)}<span>aku pakai</span></div>` : "") + `</div>`);
+        $("st2-ub").insertAdjacentHTML("beforeend", `<div class="st2-lk" id="st2-lk${i}" style="top:${66 + i * 52}px">${K.svg("link", 2.4)}<span>${LINKS[i]}</span><u id="st2-u${i}"></u></div>`);
+      });
+      // deal (from the window's centre), flip on the spoken name, highlight while it is talked about
+      TOOLS.forEach(([nm, fn, lic, ic, col, tn, tf], i) => {
+        const [x, y] = POS[i], cx = x + 235, cy = y + 128, c = "#st2-c" + i, f = "#st2-f" + i;
+        const td = t.dua + 0.12 + i * 0.1;
+        I(c, { x: 540 - cx, y: 668 - cy, scale: 0.3, rotation: i % 2 ? 10 : -10, opacity: 0 });
+        ft(c, { x: 540 - cx, y: 668 - cy, scale: 0.3, rotation: i % 2 ? 10 : -10, opacity: 0 }, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, td);
+        I("#st2-bk" + i, { opacity: 1 }); I("#st2-fr" + i, { opacity: 0 }); I(f, { scaleX: 1 });
+        ft(f, { scaleX: 1 }, { scaleX: 0, duration: 0.13, ease: "power2.in" }, tn - 0.16);
+        tl.set("#st2-bk" + i, { opacity: 0 }, tn - 0.03); tl.set("#st2-fr" + i, { opacity: 1 }, tn - 0.03);
+        ft(f, { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "back.out(1.6)" }, tn - 0.03);
+        ft(c, { y: 0 }, { y: -10, duration: 0.16, yoyo: true, repeat: 1, ease: "power2.out" }, tn - 0.03);
+        I("#st2-rg" + i, { opacity: 0 });
+        ft("#st2-rg" + i, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, tn);
+        const tOff = i < 3 ? TOOLS[i + 1][5] - 0.1 : t.tempel - 0.5;
+        ft("#st2-rg" + i, { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "power2.out" }, tOff);
+        // the function word: the icon tile bumps
+        I("#st2-ti" + i, { scale: 1, rotation: 0 });
+        ft("#st2-ti" + i, { scale: 1 }, { scale: 1.16, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tf - 0.05);
+      });
+      ft("#st2-ti1", { rotation: 0 }, { rotation: -24, duration: 0.09, yoyo: true, repeat: 3, ease: "power2.inOut" }, t.motong - 0.05);
+      // the sticker
+      I("#st2-stk", { opacity: 0, scale: 1.8, rotation: -16 });
+      ft("#st2-stk", { opacity: 0, scale: 1.8, rotation: -16 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.32, ease: "back.out(2.6)" }, t.aku - 0.06);
+      // ribbon
+      I("#st2-rb", { opacity: 0, scale: 1.6, rotation: -5, x: 0 });
+      ft("#st2-rb", { opacity: 0, scale: 1.6 }, { opacity: 1, scale: 1, duration: 0.26, ease: "power4.out" }, t.gratis - 0.1);
+      ft("#st2-cards", { x: 0 }, { x: 8, duration: 0.05, yoyo: true, repeat: 3, ease: "power1.inOut" }, t.gratis + 0.12);
+      I("#st2-cards", { x: 0 });
+      ft("#st2-rb", { x: 0, opacity: 1 }, { x: 1250, opacity: 1, duration: 0.36, ease: "power3.in" }, t.hf - 0.42);
+      // ---------------------------------------------------------------- B: paste the links, Claude installs
+      I("#st2-ub", { opacity: 0, y: 0 }); I("#st2-rp", { opacity: 0, y: 20 });
+      ft("#st2-win", { opacity: 0, y: 90, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, t.tempel - 0.4);
+      ft("#st2-ub", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, t.tempel - 0.05);
+      TOOLS.forEach((x_, i) => {
+        const [x, y] = POS[i], cx = x + 235, cy = y + 128;
+        const lx = 60 + 150 + 26 + 200, ly = 404 + 86 + 10 + 66 + i * 52 + 22;    // ≈ centre of link chip i (global)
+        const tt = t.tempel - 0.12 + i * 0.1;
+        ft("#st2-c" + i, { x: 0, y: 0, scale: 1, opacity: 1 }, { x: lx - cx, y: ly - cy, scale: 0.22, opacity: 0, duration: 0.42, ease: "power3.in" }, tt);
+        I("#st2-lk" + i, { opacity: 0, scale: 0.7, x: 0 });
+        ft("#st2-lk" + i, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, tt + 0.34);
+        I("#st2-u" + i, { scaleX: 0 });
+        ft("#st2-u" + i, { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power2.inOut" }, t.link + i * 0.1);
+      });
+      // send → scroll up → the reply with 4 ticks
+      I("#st2-sd .on", { opacity: 0 });
+      ft("#st2-sd .on", { opacity: 0 }, { opacity: 1, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, t.gh + 0.25);
+      ft("#st2-ub", { y: 0 }, { y: -300, duration: 0.5, ease: "power3.inOut" }, t.cl - 0.36);
+      ft("#st2-rp", { y: 20 }, { y: -116, duration: 0.5, ease: "power3.inOut" }, t.cl - 0.3);
+      ft("#st2-rp", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, t.cl - 0.12);
+      ["hyperframes", "ffmpeg", "whisper", "yt-dlp"].forEach((n, i) => {
+        $("st2-rp").insertAdjacentHTML("beforeend", `<div class="st2-ok" id="st2-ok${i}" style="left:${i % 2 ? 452 : 0}px;top:${62 + (i >> 1) * 62}px"><i>${K.svg("check", 3.4)}<b id="st2-okb${i}">${K.svg("check", 3.4)}</b></i><span>${n}</span></div>`);
+        I("#st2-ok" + i, { opacity: 0, x: -16 }); I("#st2-okb" + i, { opacity: 0, scale: 0.3 });
+        ft("#st2-ok" + i, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.24, ease: "power2.out" }, t.cl + i * 0.08);
+        ft("#st2-okb" + i, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(3)" }, t.yang_ = (t.pasang - 0.25 + i * 0.13));
+      });
+      I("#st2-mk", { rotation: 0 });
+      ft("#st2-mk", { rotation: 0 }, { rotation: 360, duration: 0.8, ease: "power3.inOut" }, t.cl - 0.15);
+      // OUT under st3
+      ft("#st2-win", { opacity: 1, y: 0, scale: 1 }, { opacity: 0, y: 70, scale: 0.94, duration: 0.4, ease: "power2.in" }, D - 0.05);
+      S.done();
+    })();
+  </script>
+</template>

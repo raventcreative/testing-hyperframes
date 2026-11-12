@@ -12,16 +12,16 @@ R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {18: (19, "masing-masing", "masingmasing")}
-FIX = {}
-FIXI = {0: "Claude", 24: "pertama", 26: "kaget:", 27: "dia", 29: "reel", 48: "reel.", 68: "lemah", 69: "dibenerin", 74: "disusun.",
-        80: "berapa,", 81: "plus", 87: "interaksi.", 94: "DM,", 95: "sampai", 101: "AI.", 103: "gampang.", 106: "repo-nya", 108: "Claude,",
-        109: "suruh", 110: "install.", 111: "Selesai.", 113: "nggak", 117: "sendiri.", 119: "draf,", 120: "kamu", 122: "posting.",
-        124: "link-nya?", 126: "TIM,", 127: "aku", 130: "DM."}   # by raw word index
-PRON = {"13": "tigabelas", "26": "duapuluhenam", "100": "seratus", "reel": "ril", "skill": "skil", "agent": "ejen", "instagram": "instagram", "carousel": "kerosel", "story": "stori", "install": "instol", "repo": "repo", "reponya": "reponya", "tim": "tim", "open": "opn", "source": "sors", "draf": "draf", "claude": "klod", "manus": "manus", "7": "tujuh", "20": "duapuluh", "2": "dua", "1": "satu", "3": "tiga", "10": "sepuluh", "12": "duabelas",
-        "5": "lima", "ai": "eiai", "brand": "brend", "voice": "vois", "niche": "nis", "web": "web", "hook": "huk", "caption": "kepsyen",
-        "hashtag": "hestek", "review": "rifiu", "link": "link", "template": "templet", "prompt": "prom", "promptnya": "promnya", "dm": "diem",
-        "project": "projek", "setting": "seting"}
+MERGE = {}
+FIX = {"YT-DLP": "yt-dlp"}
+SNAP_OFF = True   # word times come from the ElevenLabs character alignment (exact): no whisper onset snapping
+FIXI = {}   # by raw word index
+PRON = {"claude": "klod", "reel": "ril", "setupnya": "setapnya", "step": "step", "by": "bai", "download": "daunlod", "desktop": "desktop",
+        "ai": "eiai", "video": "video", "editor": "editor", "raw": "ro", "footage": "futej", "export": "ekspor", "tool": "tul",
+        "hyperframes": "haiperfrems", "motion": "mosyen", "graphic": "grafik", "ffmpeg": "efefempeg", "whisper": "wisper",
+        "caption": "kepsyen", "ytdlp": "yetedeelpe", "githubnya": "githabnya", "frame": "frem", "font": "fon", "fontnya": "fonnya",
+        "sound": "saund", "style": "stail", "sheet": "syit", "storyboard": "storibord", "prompt": "prom", "final": "fainal",
+        "edit": "edit", "dm": "diem", "oke": "oke", "render": "render"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -58,7 +58,7 @@ while i < len(raw):
         j, txt, spk = MERGE[i]; e = raw[j]["e"]; i2 = j + 1
     else:
         txt = FIXI.get(i, FIX.get(w["w"], w["w"])); spk = spoken(txt); e = w["e"]; i2 = i + 1
-    s = snap(w["s"], e)
+    s = w["s"] if SNAP_OFF else snap(w["s"], e)
     words.append({"w": txt, "s": round(s + OFFSET, 3), "s0": round(w["s"] + OFFSET, 3), "e": round(e + OFFSET, 3), "sp": spk})
     i = i2
 # a snapped start compresses the rest of its phrase: re-spread the phrase between the new onset and the phrase end
@@ -74,16 +74,12 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Claude", [4, 8], ["tim", "konten", "Gratis,"], []),
-    ("s02", "Namanya", [4, 7, 9], ["Instagram", "Agent", "Skill.", "13"], []),
-    ("r1", "Yang", [4, 7, 13, 15], ["bedah", "melonjak."], []),
-    ("r2", "Lalu,", [4, 7, 12], ["Tiga", "hook", "26", "skor."], []),
-    ("r3", "Profil", [3, 6, 9, 12], ["12", "100."], []),
-    ("r4", "Jadwal", [4, 8, 10, 13], ["seminggu", "10"], []),
-    ("s07", "Sisanya?", [1, 4, 7, 10], ["Caption,", "carousel,", "story,", "AI."], []),
-    ("s08", "Pasangnya", [2, 7, 9], ["gampang.", "Selesai."], []),
-    ("s09", "Tenang,", [1, 6, 8], ["draf,", "posting."], []),
-    ("s10", "Mau", [2], ["DM."], ["TIM,"]),
+    ("s01", "Reel", [4, 6, 8], ["Claude.", "step", "by", "step."], []),
+    ("st1", "Satu:", [2, 4, 6, 9, 11, 13, 15, 18], ["Satu:", "AI", "Video", "Editor,"], []),
+    ("st2", "Dua:", [2, 5, 7, 9, 13, 17, 20, 23, 25, 28], ["Dua:", "gratis.", "HyperFrames", "FFmpeg", "Whisper", "yt-dlp"], []),
+    ("st3", "Tiga,", [3, 7, 11, 15, 18, 20, 22, 24, 26], ["Tiga,", "kuncinya:", "style", "sheet."], []),
+    ("st4", "Empat:", [2, 4, 6, 9, 12, 14, 16, 18, 21], ["Empat:", "storyboard", "gedein.", "final."], []),
+    ("s06", "Mau", [3], ["DM."], ["EDIT,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "sama", "kayak", "lewat", "jadi", "biar", "dalam", "ada", "dari", "lalu",
          "atau", "baru", "sampai", "lagi", "isinya", "cuma"}

@@ -1,4 +1,4 @@
-"""Builds index.html for the PROMPTBUILDER reel (free prompt builder made with Claude; adapted from the BANKANIM builder) from production/timing.json: the client's light
+"""Builds index.html for the AIP R2 ORKESTRATOR reel (4 open-source multi-agent managers; adapted from the PROMPTBUILDER builder) from production/timing.json: the client's light
 background (white -> soft blue; its baked grid removed and re-created as an ANIMATED CSS grid in the top-right that drifts and
 breathes), word-synced Poppins captions in the navy text gradient (#0a0d2c -> #294b77), the dark AI PRENEUR logo (top-left),
 scene slots (s01–s08), the robot (co-host) and the mascot (host). Micro-animation kit: vendor/microanim.js (window.MicroAnim).
@@ -22,12 +22,13 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>Alat penyusun prompt gratis — AI PRENEUR</title>
+    <title>4 open source buat ngatur banyak AI agent — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/rounds.js"></script>
+    <script src="vendor/r2kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -113,7 +114,7 @@ html = f"""<!doctype html>
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
         tl.set("#brandlogo", {{ opacity: 0.95 }}, 0);   // visible from frame 0
         // the CTA end beat shows its own big logo: the small corner mark steps away
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s11"]["start"] + S["s11"]["dur"] - 1.2, 3)});
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s07"]["start"] + S["s07"]["dur"] - 1.2, 3)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;

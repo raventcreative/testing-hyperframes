@@ -7,21 +7,19 @@ from pathlib import Path
 import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-OFFSET, FPS, TAIL = 9 / 30, 30, 1.3
+OFFSET, FPS, TAIL = 9 / 30, 30, 1.6
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {18: (19, "masing-masing", "masingmasing")}
+MERGE = {73: (76, "img2threejs.", "imejtutrijeies")}
 FIX = {}
-FIXI = {0: "Claude", 24: "pertama", 26: "kaget:", 27: "dia", 29: "reel", 48: "reel.", 68: "lemah", 69: "dibenerin", 74: "disusun.",
-        80: "berapa,", 81: "plus", 87: "interaksi.", 94: "DM,", 95: "sampai", 101: "AI.", 103: "gampang.", 106: "repo-nya", 108: "Claude,",
-        109: "suruh", 110: "install.", 111: "Selesai.", 113: "nggak", 117: "sendiri.", 119: "draf,", 120: "kamu", 122: "posting.",
-        124: "link-nya?", 126: "TIM,", 127: "aku", 130: "DM."}   # by raw word index
-PRON = {"13": "tigabelas", "26": "duapuluhenam", "100": "seratus", "reel": "ril", "skill": "skil", "agent": "ejen", "instagram": "instagram", "carousel": "kerosel", "story": "stori", "install": "instol", "repo": "repo", "reponya": "reponya", "tim": "tim", "open": "opn", "source": "sors", "draf": "draf", "claude": "klod", "manus": "manus", "7": "tujuh", "20": "duapuluh", "2": "dua", "1": "satu", "3": "tiga", "10": "sepuluh", "12": "duabelas",
-        "5": "lima", "ai": "eiai", "brand": "brend", "voice": "vois", "niche": "nis", "web": "web", "hook": "huk", "caption": "kepsyen",
-        "hashtag": "hestek", "review": "rifiu", "link": "link", "template": "templet", "prompt": "prom", "promptnya": "promnya", "dm": "diem",
-        "project": "projek", "setting": "seting"}
+FIXI = {}   # by raw word index (the ElevenLabs alignment is the script text itself: no fixes needed)
+PRON = {"claude": "klod", "ai": "eiai", "website": "websait", "websitenya": "websaitnya", "tool": "tul", "taste": "teis", "skill": "skil",
+        "template": "templet", "impeccable": "impekabel", "polish": "polis", "bolder": "bolder", "browser": "brauser",
+        "playwright": "plerait", "cli": "sielai", "screenshot": "skrinsyot", "awesome": "osem", "designmd": "desaindotemdi",
+        "file": "fail", "font": "fon", "layout": "leiaut", "3d": "tridi", "open": "opn", "source": "sors", "link": "link",
+        "linknya": "linknya", "dm": "diem", "desain": "desain", "desainer": "desainer"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -74,16 +72,14 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Claude", [4, 8], ["tim", "konten", "Gratis,"], []),
-    ("s02", "Namanya", [4, 7, 9], ["Instagram", "Agent", "Skill.", "13"], []),
-    ("r1", "Yang", [4, 7, 13, 15], ["bedah", "melonjak."], []),
-    ("r2", "Lalu,", [4, 7, 12], ["Tiga", "hook", "26", "skor."], []),
-    ("r3", "Profil", [3, 6, 9, 12], ["12", "100."], []),
-    ("r4", "Jadwal", [4, 8, 10, 13], ["seminggu", "10"], []),
-    ("s07", "Sisanya?", [1, 4, 7, 10], ["Caption,", "carousel,", "story,", "AI."], []),
-    ("s08", "Pasangnya", [2, 7, 9], ["gampang.", "Selesai."], []),
-    ("s09", "Tenang,", [1, 6, 8], ["draf,", "posting."], []),
-    ("s10", "Mau", [2], ["DM."], ["TIM,"]),
+    ("s01", "Website", [4, 6, 10], ["generik?", "Lima", "desainer."], []),
+    ("t1", "Pertama,", [3, 7, 9, 12], ["Taste", "Skill.", "aturan", "desain"], []),
+    ("t2", "Kedua,", [2, 5, 8, 11], ["Impeccable.", "polish", "bolder,"], []),
+    ("t3", "Ketiga,", [3, 7, 9, 11], ["Playwright", "CLI.", "screenshot"], []),
+    ("t4", "Keempat,", [3, 6, 9, 11], ["Awesome", "DESIGN.md.", "warna,", "font,", "tombol,", "layout."], []),
+    ("t5", "Kelima,", [2, 6, 9, 13], ["img2threejs.", "3D", "kode."], []),
+    ("s07", "Semuanya", [2, 5], ["gratis", "open", "source."], []),
+    ("s08", "Komen", [2], ["DM."], ["DESAIN,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "sama", "kayak", "lewat", "jadi", "biar", "dalam", "ada", "dari", "lalu",
          "atau", "baru", "sampai", "lagi", "isinya", "cuma"}

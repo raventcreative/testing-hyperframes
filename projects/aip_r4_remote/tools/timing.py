@@ -1,5 +1,5 @@
 """Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
-- display fixes (Claude, Claude Code, After Effects, Copy, EDIT)
+- word times come from the ElevenLabs character alignment (tools/align_words.py); display fixes below
 - word starts that whisper put inside a silence are snapped to the real voice onset (energy > -40 dB)
 - VO starts at OFFSET s (9 frames).   Run: python3 -I tools/timing.py ."""
 import json, re, subprocess, sys
@@ -12,10 +12,11 @@ R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {3: (4, "mahal-mahal.", "mahalmahal")}
-FIX = {"Cloud": "Claude", "Cloud.": "Claude.", "prom": "prompt", "prom.": "prompt.", "master,": "MASTER,", "gratis!": "gratis."}
-FIXI = {41: "Satu,", 42: "buka", 44: "Dua,", 45: "tempel", 52: "Tiga,", 61: "Empat,", 62: "ketik"}
-PRON = {"claude": "klod", "prompt": "prompt", "master": "master", "dm": "diem", "6": "enam", "5": "lima", "chat": "cet"}
+MERGE = {}
+FIX = {"Cloud": "Claude", "Cloud,": "Claude,", "Remote,": "REMOTE,"}
+FIXI = {}
+PRON = {"claude": "klod", "cv": "sifi", "dm": "diem", "apply": "eplai", "remote": "rimot", "skill": "skil", "cover": "kafer",
+        "letter": "leter", "satusatu": "satusatu", "berkalikali": "berkalikali"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -68,20 +69,19 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Stop", [4, 8], ["gratis."], []),
-    ("s02", "Prompt", [6, 9], ["Peran,", "konteks,", "tugas,", "format,", "contoh,", "batasan."], []),
-    ("s03", "Masalahnya,", [4], ["capek."], []),
-    ("s04", "Jadi,", [3, 6], ["Claude", "5"], []),
-    ("r1", "Satu,", [], ["Claude."], ["Satu,"]),
-    ("r2", "Dua,", [2, 5], ["prompt", "pembuat", "alat"], ["Dua,"]),
-    ("r3", "Tiga,", [4], ["aplikasi", "chat."], ["Tiga,"]),
-    ("r4", "Empat,", [4, 7], ["ide", "singkat."], ["Empat,"]),
-    ("r5", "Lima,", [3, 7], ["master", "prompt", "salin."], ["Lima,"]),
-    ("s10", "Nggak", [4], ["mahal,", "prompt."], []),
-    ("s11", "Mau", [4, 6], ["DM."], ["MASTER,"]),
+    ("s01", "Aku", [3, 6, 10], ["Claude,"], ["remote."]),
+    ("s02", "Soalnya", [4, 7, 11, 12, 14], ["capek", "puluhan", "dikit"], []),
+    ("s03", "Sekarang", [3, 6], ["satu", "perintah,", "kerja."], []),
+    ("s04", "Claude", [2, 5, 7, 9], ["banyak", "lowongan"], ["pertama"]),
+    ("s05", "Claude", [3, 6, 9, 11, 13, 16], ["cocok", "skill", "Indonesia,", "dibuang."], ["kedua"]),
+    ("s06", "Yang", [3, 6, 9, 12], ["lolos", "CV", "cover", "letter", "khusus"], ["ketiga."]),
+    ("s07", "Terus", [3, 6], ["satu", "halaman,", "papan", "loker"], []),
+    ("s08", "Aku", [3, 7], ["cek,", "pilih", "apply."], []),
+    ("s09", "Mau", [2, 4], ["DM."], ["REMOTE,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",
-         "punya", "tetap", "bisa", "langsung", "satu", "semua", "masuk", "tiap", "pakai", "kalian", "mau"}
+         "punya", "tetap", "bisa", "langsung", "satu", "semua", "masuk", "tiap", "pakai", "kalian", "mau", "isi", "sama", "mana", "buat",
+         "terus", "dia", "soalnya", "sekarang", "cukup"}
 starts = []; k = 0
 for sid, first, *_ in SC:
     while words[k]["w"] != first: k += 1

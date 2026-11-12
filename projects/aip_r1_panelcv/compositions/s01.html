@@ -1,262 +1,96 @@
 <template>
   <style>
-    /* s01 HOOK (0–4.50) · END STATE (t = 4.50, rebuilt 1:1 as s02's frame 0 from the HOOK block):
-       the dimmed "Instagram" profile card (scale .96, opacity .92) · the Claude mark group shrunk to .6 at (540, 500), mark spinning
-       6°/s (27° at 4.5) · 6 ID badges (k 4,2,1,3,5,8) hanging at rest on 220 px lanyards in a V · the navy scrim · the cyan "GRATIS"
-       stamp at (510, 712) rot -8 · the green "OPEN SOURCE · MIT" seal (scale 1) at (812, 588), spinning 30°/s (-22° at 4.5). */
     #root { position: absolute; inset: 0; overflow: hidden; }
     .s01-a { position: absolute; }
-    /* everything lives in the hero zone: soft top edge (the badges drop in from above it), hard stop above the captions */
-    #s01-zone { left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden;
-      -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 278px, #000 332px, #000 930px, transparent 945px);
-      mask-image: linear-gradient(180deg, transparent 0, transparent 278px, #000 332px, #000 930px, transparent 945px); }
-    /* ======================================================================================================================
-       BADGE COMPONENT — copy exactly (from s02.html; prefix renamed s02- → s01-)
-       ====================================================================================================================== */
-    .s01-bdg { position: absolute; left: 0; top: 0; width: 150px; height: 204px; margin: -102px 0 0 -75px; transform-origin: 50% 50%; }
-    .s01-bdg-strap { position: absolute; left: 72px; bottom: 188px; width: 6px; height: var(--strap, 120px); border-radius: 3px 3px 0 0; transform-origin: 50% 100%;
-      background: linear-gradient(90deg, rgba(0,0,0,.24), rgba(255,255,255,.22) 45%, rgba(0,0,0,.24)), var(--c);
-      -webkit-mask-image: linear-gradient(0deg, #000 0, #000 calc(100% - 36px), transparent 100%); mask-image: linear-gradient(0deg, #000 0, #000 calc(100% - 36px), transparent 100%); }
-    .s01-bdg-card, .s01-bdg-back { position: absolute; left: 0; top: 0; width: 150px; height: 204px; border-radius: 20px; overflow: hidden; }
-    .s01-bdg-card { background: linear-gradient(180deg, #ffffff, #eef3fb); box-shadow: 0 18px 34px -16px rgba(2,6,28,.78), inset 0 0 0 1px rgba(255,255,255,.7); }
-    .s01-bdg-band { position: absolute; left: 0; top: 0; width: 150px; height: 54px; background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 75%), var(--c); }
-    .s01-bdg-slot { position: absolute; left: 58px; top: 12px; width: 34px; height: 8px; border-radius: 4px; background: #0b1440;
-      box-shadow: inset 0 2px 2px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.35); }
-    .s01-bdg-ic { position: absolute; left: 47px; top: 26px; width: 56px; height: 56px; border-radius: 50%; background: var(--c); color: #ffffff;
-      box-shadow: 0 0 0 4px #ffffff, 0 7px 12px -5px rgba(10,13,44,.5); }
-    .s01-bdg-ic svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; stroke-width: 2.25; }
-    .s01-bdg-role { position: absolute; left: 6px; top: 90px; width: 138px; height: 48px; display: flex; align-items: center; justify-content: center; text-align: center;
-      font: 700 19px/23px Poppins, sans-serif; color: #0a0d2c; letter-spacing: -.01em; }
-    .s01-bdg-cmd { position: absolute; left: 0; top: 144px; width: 150px; text-align: center; font: 400 17px/22px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
-    .s01-bdg-bar { position: absolute; left: 40px; top: 178px; width: 70px; height: 10px; opacity: .26;
-      background: repeating-linear-gradient(90deg, #294b77 0 2px, transparent 2px 4px, #294b77 4px 7px, transparent 7px 9px, #294b77 9px 10px, transparent 10px 13px); }
-    .s01-bdg-back { opacity: 0; background: linear-gradient(180deg, #1c2b6a, #0f1a4c); box-shadow: 0 18px 34px -16px rgba(2,6,28,.78), inset 0 0 0 1.5px rgba(255,255,255,.12); }
-    .s01-bdg-back .s01-bdg-slot { background: #060a24; box-shadow: inset 0 2px 2px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.12); }
-    .s01-bdg-no { position: absolute; left: 0; top: 60px; width: 150px; text-align: center; font: 700 66px/76px Poppins, sans-serif; color: #ffffff; letter-spacing: -.02em; }
-    .s01-bdg-cbar { position: absolute; left: 51px; top: 148px; width: 48px; height: 6px; border-radius: 3px; background: var(--c); box-shadow: 0 0 12px var(--c); }
-    .s01-bdg-clip { position: absolute; left: 68px; top: -7px; width: 14px; height: 24px; border-radius: 4px;
-      background: linear-gradient(90deg, #8a9ab6, #f4f7fc 45%, #7d8daa); box-shadow: 0 2px 3px rgba(0,0,0,.4); }
-    /* ============================================== END BADGE COMPONENT ============================================== */
-    /* ===================================== HOOK CSS (shared 1:1 with s02, prefix s01-hk- → s02-hk-) ===================================== */
-    .s01-hk-l { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; }
-    .s01-hk-glow { position: absolute; left: 120px; top: 250px; width: 840px; height: 720px; border-radius: 50%; background: radial-gradient(closest-side, rgba(1,204,247,.20), rgba(1,204,247,0)); }
-    .s01-hk-card { position: absolute; left: 260px; top: 332px; width: 560px; height: 490px; border-radius: 32px; transform-origin: 50% 50%;
-      background: linear-gradient(180deg, rgba(20,34,90,.94), rgba(10,18,58,.92)); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.11), 0 34px 70px -34px rgba(0,0,0,.8); }
-    .s01-hk-card .hd { position: absolute; left: 0; top: 20px; width: 560px; text-align: center; font: 700 30px/40px Poppins, sans-serif; color: #ffffff; letter-spacing: -.01em; }
-    .s01-hk-card .dt { position: absolute; top: 37px; width: 7px; height: 7px; border-radius: 50%; background: #c9d6ee; }
-    .s01-hk-card .hr { position: absolute; left: 24px; top: 76px; width: 512px; height: 1.5px; background: rgba(255,255,255,.09); }
-    .s01-hk-card .av { position: absolute; left: 32px; top: 94px; width: 108px; height: 108px; border-radius: 50%; background: linear-gradient(135deg, #ff5c8a, #ffb35c 50%, #9d8cff); }
-    .s01-hk-card .av i { position: absolute; left: 5px; top: 5px; width: 98px; height: 98px; border-radius: 50%; background: #0e1a4c; }
-    .s01-hk-card .av svg { position: absolute; left: 26px; top: 24px; width: 56px; height: 56px; color: #e3edfa; }
-    .s01-hk-card .sn { position: absolute; top: 108px; width: 124px; text-align: center; font: 700 28px/34px Poppins, sans-serif; color: #ffffff; }
-    .s01-hk-card .sl { position: absolute; top: 144px; width: 124px; text-align: center; font: 400 20px/26px Poppins, sans-serif; color: #c9d6ee; }
-    .s01-hk-card .nm { position: absolute; left: 32px; top: 214px; font: 700 24px/30px Poppins, sans-serif; color: #ffffff; }
-    .s01-hk-card .bl { position: absolute; left: 32px; height: 12px; border-radius: 6px; background: rgba(227,237,250,.2); }
-    .s01-hk-card .tl { position: absolute; width: 164px; height: 86px; border-radius: 12px; overflow: hidden; }
-    .s01-hk-card .tl svg { position: absolute; right: 10px; top: 10px; width: 22px; height: 22px; color: #ffffff; fill: #ffffff; opacity: .9; }
-    .s01-hk-halo { position: absolute; left: 260px; top: 295px; width: 560px; height: 560px; border-radius: 50%;
-      background: radial-gradient(closest-side, rgba(255,184,150,.62), rgba(217,119,87,.30) 42%, rgba(217,119,87,.08) 70%, rgba(217,119,87,0)); }
-    .s01-hk-ring { position: absolute; border-radius: 50%; }
-    .s01-hk-rays { position: absolute; left: 160px; top: 195px; width: 760px; height: 760px; border-radius: 50%; opacity: .9;
-      background: repeating-conic-gradient(from 0deg, rgba(255,206,180,.20) 0deg 3deg, rgba(255,206,180,0) 3deg 12deg);
-      -webkit-mask-image: radial-gradient(closest-side, transparent 40%, #000 52%, transparent 100%); mask-image: radial-gradient(closest-side, transparent 40%, #000 52%, transparent 100%); }
-    .s01-hk-disc { position: absolute; left: 375px; top: 410px; width: 330px; height: 330px; border-radius: 50%;
-      background: radial-gradient(circle at 50% 38%, #22327a, #0c1540 72%); box-shadow: 0 0 0 2px rgba(255,196,170,.45), 0 0 70px rgba(217,119,87,.55), inset 0 0 46px rgba(1,204,247,.20), 0 30px 60px -20px rgba(0,0,0,.7); }
-    #s01-hk-r1 { left: 345px; top: 380px; width: 390px; height: 390px; box-shadow: inset 0 0 0 2px rgba(255,214,196,.30), 0 0 30px rgba(217,119,87,.25); }
-    #s01-hk-r2 { left: 300px; top: 335px; width: 480px; height: 480px; border: 2px dashed rgba(255,200,176,.30); }
-    #s01-hk-rip { left: 375px; top: 410px; width: 330px; height: 330px; box-shadow: inset 0 0 0 3px rgba(255,196,170,.9), 0 0 22px rgba(217,119,87,.7); }
-    .s01-hk-mark { position: absolute; left: 420px; top: 455px; width: 240px; height: 240px; filter: drop-shadow(0 0 22px rgba(217,119,87,.8)) drop-shadow(0 0 4px rgba(255,220,200,.6)); }
-    .s01-hk-mark svg { width: 240px; height: 240px; display: block; }
-    .s01-hk-sp { position: absolute; left: 0; top: 0; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #fff3ec; box-shadow: 0 0 12px 3px rgba(255,190,160,.9); }
-    .s01-hk-hang { position: absolute; left: 0; top: 0; width: 0; height: 0; }
-    .s01-hk-scrim { position: absolute; left: 60px; top: 380px; width: 960px; height: 640px; border-radius: 50%; background: radial-gradient(closest-side, rgba(6,10,38,.68), rgba(6,10,38,.34) 60%, rgba(6,10,38,0)); }
-    .s01-hk-stamp { position: absolute; left: 260px; top: 637px; width: 500px; height: 150px; border-radius: 24px; overflow: hidden; transform-origin: 50% 50%;
-      background: rgba(8,14,46,.9); box-shadow: inset 0 0 0 6px #01ccf7, inset 0 0 0 12px rgba(8,14,46,.95), inset 0 0 0 14px rgba(1,204,247,.75), 0 0 46px rgba(1,204,247,.38), 0 24px 40px -20px rgba(0,0,0,.8);
-      font: 700 104px/150px Poppins, sans-serif; color: #01ccf7; text-align: center; letter-spacing: .07em; text-indent: .07em; text-shadow: 0 0 20px rgba(1,204,247,.55); }
-    .s01-hk-glint { position: absolute; left: -120px; top: -30px; width: 70px; height: 220px; transform: skewX(-20deg); background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.75), rgba(255,255,255,0)); }
-    .s01-hk-shock { position: absolute; left: 410px; top: 612px; width: 200px; height: 200px; border-radius: 50%; box-shadow: inset 0 0 0 4px #6adfff, 0 0 24px rgba(1,204,247,.8); }
-    .s01-hk-seal { position: absolute; left: 707px; top: 483px; width: 210px; height: 210px; transform-origin: 50% 50%; filter: drop-shadow(0 16px 20px rgba(0,0,0,.45)); }
-    .s01-hk-seal svg { width: 210px; height: 210px; display: block; overflow: visible; }
-    .s01-hk-pc { position: absolute; left: 0; top: 0; width: 16px; height: 6px; margin: -3px 0 0 -8px; border-radius: 3px; }
-    /* ================================================= END HOOK CSS ================================================= */
+    #s01-zone { left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, #000 0, #000 930px, transparent 945px); mask-image: linear-gradient(180deg, #000 0, #000 930px, transparent 945px); }
+    #s01-spot { left: 140px; top: 470px; width: 800px; height: 520px; border-radius: 50%; background: radial-gradient(closest-side, rgba(106,223,255,.30), rgba(1,204,247,.08) 55%, rgba(1,204,247,0)); }
+    #s01-beams { left: 0; top: 0; width: 1080px; height: 945px; overflow: visible; }
+    #s01-beams line { stroke-width: 3; stroke-linecap: round; }
+    #s01-pill { left: 744px; top: 548px; height: 68px; padding: 0 24px 0 12px; border-radius: 34px; display: flex; align-items: center; gap: 12px; white-space: nowrap;
+      background: #ffffff; color: #e5484d; font: 700 32px/68px Poppins, sans-serif; box-shadow: 0 18px 34px -14px rgba(0,0,0,.7), 0 0 0 3px rgba(229,72,77,.35); transform-origin: 0 50%; }
+    #s01-pill i { position: relative; width: 46px; height: 46px; border-radius: 50%; background: #e5484d; color: #fff; }
+    #s01-pill i svg { position: absolute; left: 11px; top: 11px; width: 24px; height: 24px; }
+    .s01-ink { left: 0; top: 0; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 6px solid rgba(229,72,77,.75); }
   </style>
-  <div data-hf-id="hf-4z0v" id="root" data-composition-id="s01" data-width="1080" data-height="1920">
-    <div class="s01-a" id="s01-zone"></div>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div class="s01-a" id="s01-zone">
+      <div class="s01-a" id="s01-spot"></div>
+      <svg class="s01-a" id="s01-beams" viewBox="0 0 1080 945"><defs><linearGradient id="s01-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6adfff" stop-opacity=".9"/><stop offset="1" stop-color="#01ccf7" stop-opacity=".15"/></linearGradient></defs><g id="s01-bl"></g></svg>
+      <div class="s01-a" id="s01-cvw"></div>
+      <div class="s01-a" id="s01-inks"></div>
+      <div class="s01-a" id="s01-pill"><i></i>7× ditolak</div>
+    </div>
   </div>
   <script>
     (function () {
-      // s01 HOOK "Claude sekarang bisa jadi tim konten Instagram kamu. Gratis, open source."
-      // Frame 0: the Claude mark glowing big over a generic "Instagram" profile card (halo, rings, sparks) · "Claude": flare + ripple ·
-      // "jadi tim": the mark steps back and up · "tim konten": six ID badges drop in on long lanyards (stagger, deterministic damped
-      // swing) into a V around it · "Instagram kamu.": the card header lights cyan, the avatar ring pulses · "Gratis,": a navy scrim,
-      // the "GRATIS" stamp slams (shock ring, chips, the whole team shakes + swings) · "open source.": the MIT seal pops on its corner.
-      const D = 4.5, VW = window.VO_WORDS;
+      // s01 HOOK "Aku bikin panel rekrutmen isinya 7 Claude. Tugasnya cuma satu: nolak CV kamu."
+      // FRAME 0: the judges' table + 7 empty seats (panel.html) and YOUR CV under a spotlight (striking, readable). "7": the 7 Claude
+      // reviewers drop into their seats (panel.html) · "Tugasnya cuma satu:": 7 cyan sight-lines from the seats lock onto the CV ·
+      // "nolak": 7 TOLAK stamps slam onto the CV, one per reviewer (order CVK.STAMP_ORDER), the CV shudders · "kamu.": "7× ditolak" pill.
+      // END STATE (t = D): CV centre (540,722) scale .75 rotationX 10 (perspective 1400) with all 7 stamps · pill x744 y548 · spot.
+      const SC = window.VO_SCENES.find((s) => s.id === "s01");
+      const D = SC.dur, ST = SC.start, VW = window.VO_WORDS, K = window.CVK;
       const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const L = (txt) => wt(txt, ST - 0.05) - ST;
       const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
       const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
       { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
       const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
       const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const KF = (el, init, steps) => { I(el, init); const cur = Object.assign({}, init);
+        steps.sort((a, b) => a[0] - b[0]).forEach(([t, d, to, ease]) => { const fr = {}; for (const k in to) fr[k] = cur[k];
+          if (d <= 0) tl.set(el, to, t); else ft(el, fr, Object.assign({ duration: d, ease: ease || "power3.out" }, to), t); Object.assign(cur, to); }); };
 
-      // ====================================================================================================================
-      // BADGE COMPONENT — copy exactly (JS half, from s02.html)
-      // ====================================================================================================================
-      const BDG = [null,
-        ["/ig-viral", "Pemburu Tren", "trending-up", "#ff5c8a"], ["/ig-reel", "Penulis Naskah", "clapperboard", "#01ccf7"],
-        ["/ig-profile", "Auditor Profil", "scan-face", "#9d8cff"], ["/ig-plan", "Perencana Jadwal", "calendar-days", "#ffb35c"],
-        ["/ig-caption", "Caption", "type", "#3ddc97"], ["/ig-carousel", "Carousel", "gallery-horizontal", "#6adfff"],
-        ["/ig-story", "Story", "circle-dashed", "#ff8f6b"], ["/ig-human", "Penghalus Tulisan", "eraser", "#c7a6ff"],
-        ["/ig-comment", "Komentar", "message-circle", "#5ec8ff"], ["/ig-reply", "Balas Komentar", "reply", "#7ee2b8"],
-        ["/ig-dm", "DM", "send", "#ffd66b"], ["/ig-repurpose", "Daur Ulang", "repeat", "#ff9ec0"], ["/ig-audit", "Audit Postingan", "chart-column", "#8fb6ff"]];
-      const BDG_IC = {   // lucide-static 1.70 (ISC), assets/icons/lucide-*.svg
-        "trending-up": '<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
-        "clapperboard": '<path d="m12.296 3.464 3.02 3.956"/><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m6.18 5.276 3.1 3.899"/>',
-        "scan-face": '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
-        "calendar-days": '<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/>',
-        "type": '<path d="M12 4v16"/><path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2"/><path d="M9 20h6"/>',
-        "gallery-horizontal": '<path d="M2 3v18"/><rect width="12" height="18" x="6" y="3" rx="2"/><path d="M22 3v18"/>',
-        "circle-dashed": '<path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/>',
-        "eraser": '<path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/><path d="m5.082 11.09 8.828 8.828"/>',
-        "message-circle": '<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>',
-        "reply": '<path d="M20 18v-2a4 4 0 0 0-4-4H4"/><path d="m9 17-5-5 5-5"/>',
-        "send": '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
-        "repeat": '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
-        "chart-column": '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>' };
-      const bdgSVG = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${BDG_IC[name]}</svg>`;
-      const bdgHTML = (P, k, o = {}) => {
-        const [cmd, role, ic, c] = BDG[k], id = `${P}-bdg${k}${o.id || ""}`, st = o.strap == null ? 120 : o.strap;
-        return `<div class="${P}-bdg" id="${id}" style="--c:${c};--strap:${st}px">` + (st ? `<div class="${P}-bdg-strap" id="${id}-strap"></div>` : "") +
-          `<div class="${P}-bdg-card" id="${id}-card"><div class="${P}-bdg-band"><i class="${P}-bdg-slot"></i></div>` +
-          `<div class="${P}-bdg-ic" id="${id}-ic">${bdgSVG(ic)}</div><div class="${P}-bdg-role">${role}</div><div class="${P}-bdg-cmd">${cmd}</div><i class="${P}-bdg-bar"></i></div>` +
-          `<div class="${P}-bdg-back" id="${id}-back"><i class="${P}-bdg-slot"></i><div class="${P}-bdg-no">${String(k).padStart(2, "0")}</div><i class="${P}-bdg-cbar"></i></div>` +
-          `<i class="${P}-bdg-clip"></i></div>`;
-      };
-      // ============================================== END BADGE COMPONENT ==============================================
+      const root = $("s01-zone");
+      root.insertAdjacentHTML("afterbegin", `<style>${K.css("s01")}</style>`);
+      $("s01-cvw").innerHTML = K.cv("s01", "cv", 1);
+      $("s01-cv-st").innerHTML = K.stamps("s01", "cv");
+      $("s01-pill").querySelector("i").innerHTML = K.isvg("x", 3);
 
-      // ===================================== HOOK LAYOUT (shared 1:1 with s02's frame 0) =====================================
-      const CLAUDE_D = "M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z";
-      // the team V: [k, x, y, scale, land time]
-      const HK_B = [[4, 120, 560, 0.78, 1.66], [2, 258, 690, 0.9, 1.52], [1, 400, 805, 1, 1.36], [3, 680, 805, 1, 1.42], [5, 822, 690, 0.9, 1.58], [8, 960, 560, 0.78, 1.72]];
-      const HK_STRAP = 220, HK_PIV = `75px ${16 - HK_STRAP}px`;
-      const HK_TILES = [["#ff5c8a", "#ffb35c", 1], ["#01ccf7", "#9d8cff", 0], ["#3ddc97", "#01ccf7", 1], ["#ffd66b", "#ff8f6b", 0], ["#9d8cff", "#ff9ec0", 1], ["#6adfff", "#3ddc97", 0]];
-      const HK_SEAL = (P) => {   // rosette (24 lobes) + ring text + "MIT"
-        let d = ""; for (let i = 0; i <= 96; i++) { const a = (i / 96) * Math.PI * 2 - Math.PI / 2, r = 100 + 6 * Math.cos(a * 24); d += (i ? "L" : "M") + (105 + r * Math.cos(a)).toFixed(2) + " " + (105 + r * Math.sin(a)).toFixed(2); }
-        return `<svg viewBox="0 0 210 210"><defs><path id="${P}-hk-sp" d="M105 105 m-70 0 a70 70 0 1 1 140 0 a70 70 0 1 1 -140 0"/></defs>` +
-          `<path d="${d}Z" fill="#2da44e"/><circle cx="105" cy="105" r="88" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-dasharray="3 5"/>` +
-          `<circle cx="105" cy="105" r="48" fill="#238a40"/><text font-family="Poppins" font-weight="700" font-size="20" fill="#ffffff" letter-spacing="1">` +
-          `<textPath href="#${P}-hk-sp" textLength="432" lengthAdjust="spacing">OPEN SOURCE • OPEN SOURCE •</textPath></text>` +
-          `<text x="105" y="122" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="46" fill="#ffffff">MIT</text></svg>`;
-      };
-      const HK_UR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>';
-      const HK_PLAY = '<svg viewBox="0 0 24 24" stroke="none"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>';
-      const hookHTML = (P, sfx = "") => {
-        const q = P + "-hk";
-        let card = `<div class="hd" id="${q}-hd">Instagram</div><i class="dt" style="left:496px"></i><i class="dt" style="left:508px"></i><i class="dt" style="left:520px"></i><i class="hr"></i>` +
-          `<div class="av" id="${q}-av"><i></i>${HK_UR}</div>` +
-          [["128", "postingan"], ["4.210", "pengikut"], ["312", "mengikuti"]].map(([n, l], i) => `<div class="sn" style="left:${160 + i * 124}px">${n}</div><div class="sl" style="left:${160 + i * 124}px">${l}</div>`).join("") +
-          `<div class="nm">akun kamu</div><i class="bl" style="top:252px;width:300px"></i><i class="bl" style="top:274px;width:214px"></i>` +
-          HK_TILES.map(([a, b, p], i) => `<div class="tl" style="left:${24 + (i % 3) * 172}px;top:${300 + Math.floor(i / 3) * 94}px;background:linear-gradient(${135 + i * 20}deg, ${a}, ${b})">${p ? HK_PLAY : ""}</div>`).join("");
-        let team = HK_B.map(([k], i) => `<div class="${q}-hang" id="${q}-h${i}">${bdgHTML(P, k, { strap: HK_STRAP, id: sfx })}</div>`).join("");
-        let sp = [0, 1, 2, 3, 4, 5].map((i) => `<i class="${q}-sp" id="${q}-sp${i}"></i>`).join("");
-        return `<div class="${q}-l" id="${q}-world"><div class="${q}-glow"></div><div class="${q}-card" id="${q}-card">${card}</div>` +
-          `<div class="${q}-l" id="${q}-mg"><div class="${q}-rays" id="${q}-rays"></div><div class="${q}-halo" id="${q}-halo"></div><div class="${q}-ring" id="${q}-r2"></div><div class="${q}-ring" id="${q}-r1"></div>` +
-          `<div class="${q}-disc"></div><div class="${q}-ring" id="${q}-rip"></div><div class="${q}-mark" id="${q}-mark"><svg viewBox="0 0 24 24"><path d="${CLAUDE_D}" fill="#D97757"/></svg></div>${sp}</div>` +
-          `<div class="${q}-l" id="${q}-team">${team}</div></div>` +
-          `<div class="${q}-scrim" id="${q}-scrim"></div><div class="${q}-shock" id="${q}-shock"></div><div class="${q}-l" id="${q}-pcs"></div>` +
-          `<div class="${q}-stamp" id="${q}-stamp">GRATIS<i class="${q}-glint" id="${q}-glint"></i></div><div class="${q}-seal" id="${q}-seal">${HK_SEAL(P)}</div>`;
-      };
-      // end-of-s01 values (s02 rebuilds them at its frame 0)
-      const HK_END = { cardS: 0.96, cardO: 0.92, mgY: -75, mgS: 0.6, markRot: (t) => 6 * t, r2Rot: (t) => -10 * t, raysRot: (t) => 4 * t, sealRot: (t) => -40 + 30 * (t - 3.9), sealS: 1, stampRot: -8 };
-      // ===================================================== END HOOK LAYOUT =====================================================
+      const t7 = L("7"), tTug = L("Tugasnya"), tSat = L("satu:"), tNol = L("nolak"), tKam = L("kamu.");
+      // ---------------------------------------------------------------- the CV: slow push-in from frame 0, small lift on "7"
+      const cv = $("s01-cv");
+      KF(cv, { x: 540, y: 734, scale: 0.72, rotationX: 12, transformPerspective: 1400, rotation: 0 }, [
+        [0, t7 - 0.1, { y: 726, scale: 0.74 }, "sine.out"],
+        [t7 - 0.1, tNol - t7, { y: 722, scale: 0.75, rotationX: 10 }, "sine.inOut"]]);
+      const spot = $("s01-spot");
+      KF(spot, { opacity: 0.75, scale: 0.94 }, [[0, 2.2, { opacity: 1, scale: 1 }, "sine.out"], [tTug - 0.1, 0.5, { opacity: 0.85 }, "power1.out"]]);
 
-      const zone = $("s01-zone"); zone.innerHTML = hookHTML("s01");
-      const q = (id) => $("s01-hk-" + id);
-      const tCl = wt("Claude"), tSek = wt("sekarang"), tBis = wt("bisa"), tJad = wt("jadi"), tTim = wt("tim"), tKon = wt("konten");
-      const tIG = wt("Instagram"), tKam = wt("kamu."), tGra = wt("Gratis,"), tOpe = wt("open"), tSou = wt("source.");
-      const E = D - 0.01;
-      // ---------------------------------------------------------------- frame 0: the mark glowing over the profile card
-      const card = q("card"), mg = q("mg"), mark = q("mark"), halo = q("halo"), r1 = q("r1"), r2 = q("r2"), rip = q("rip"), world = q("world");
-      I(card, { y: 14, rotation: -3, rotationY: -18, rotationX: 9, transformPerspective: 1100, scale: 1, opacity: 1 });
-      ft(card, { y: 14, rotation: -3, rotationY: -18, rotationX: 9 }, { y: 0, rotation: 0, rotationY: 0, rotationX: 0, duration: 1.45, ease: "sine.inOut", transformPerspective: 1100 }, 0);
-      const rays = q("rays"); I(rays, { rotation: 0, transformOrigin: "50% 50%" }); ft(rays, { rotation: 0 }, { rotation: HK_END.raysRot(E), duration: E, ease: "none" }, 0);
-      I(mg, { y: 0, scale: 1, transformOrigin: "540px 575px" });
-      I(mark, { rotation: 0, scale: 1, transformOrigin: "50% 50%" }); ft(mark, { rotation: 0 }, { rotation: HK_END.markRot(E), duration: E, ease: "none" }, 0);
-      I(r2, { rotation: 0, transformOrigin: "50% 50%" }); ft(r2, { rotation: 0 }, { rotation: HK_END.r2Rot(E), duration: E, ease: "none" }, 0);
-      I(halo, { scale: 1, opacity: 0.9, transformOrigin: "50% 50%" }); I(r1, { scale: 1, opacity: 1, transformOrigin: "50% 50%" });
-      // gentle halo breathing until "Claude", then a flare + ripple on the name
-      ft(halo, { scale: 1, opacity: 0.9 }, { scale: 1.06, opacity: 1, duration: tCl - 0.06, ease: "sine.inOut" }, 0);
-      ft(halo, { scale: 1.06, opacity: 1 }, { scale: 1.22, opacity: 1, duration: 0.12, ease: "power2.out" }, tCl - 0.06);
-      ft(halo, { scale: 1.22 }, { scale: 1, duration: 0.6, ease: "power2.inOut" }, tCl + 0.06);
-      ft(mark, { scale: 1 }, { scale: 1.1, duration: 0.12, ease: "power2.out" }, tCl - 0.06);
-      ft(mark, { scale: 1.1 }, { scale: 1, duration: 0.5, ease: "back.out(2.2)" }, tCl + 0.06);
-      I(rip, { scale: 1, opacity: 0, transformOrigin: "50% 50%" });
-      ft(rip, { scale: 1, opacity: 0.95 }, { scale: 2.1, opacity: 0, duration: 0.7, ease: "power2.out" }, tCl - 0.04);
-      ft(r1, { scale: 1 }, { scale: 1.06, duration: 0.16, yoyo: true, repeat: 1, ease: "sine.inOut" }, tCl);
-      // sparks twinkle around the mark on "sekarang" / "bisa"
-      const SP = [[392, 470], [700, 440], [728, 690], [360, 700], [540, 372], [640, 760]];
-      SP.forEach(([x, y], i) => { const s = q("sp" + i); I(s, { x, y, scale: 0, opacity: 0 });
-        const t0 = (i % 2 ? tBis : tSek) - 0.06 + Math.floor(i / 2) * 0.07;
-        ft(s, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.14, ease: "power2.out" }, t0);
-        ft(s, { scale: 1, opacity: 1 }, { scale: 0, opacity: 0, duration: 0.36, ease: "power1.in" }, t0 + 0.14); });
-      // ---------------------------------------------------------------- "jadi tim": the mark steps back, the card dims
-      ft(mg, { y: 0, scale: 1 }, { y: HK_END.mgY, scale: HK_END.mgS, duration: 0.42, ease: "power3.inOut" }, tJad + 0.04);
-      ft(card, { scale: 1, opacity: 1 }, { scale: HK_END.cardS, opacity: 0.74, duration: 0.45, ease: "power2.inOut" }, tJad + 0.08);
-      // ---------------------------------------------------------------- "tim konten": the badges drop in on their lanyards
-      const swing = (el, t0, A, n) => {   // damped pendulum from rest: 0 → A → -A/2 → A/4 … → 0 (half period .35 s)
-        const P = 0.35; let v = 0, t = t0;
-        for (let j = 0; j <= n; j++) { const nv = j === n ? 0 : A * Math.pow(-0.5, j), d = j === 0 ? P / 2 : P;
-          ft(el, { rotation: v }, { rotation: nv, duration: d, ease: j === 0 ? "sine.out" : "sine.inOut" }, t); v = nv; t += d; }
-        return t;
-      };
-      HK_B.forEach(([k, x, y, s, tl0], i) => {
-        const h = q("h" + i), b = $("s01-bdg" + k), sg = i < 3 ? -1 : 1;
-        I(h, { x, y: y - 780, scale: s, opacity: 0, transformOrigin: "0px 0px" }); I(b, { rotation: 0, transformOrigin: HK_PIV });
-        tl.set(h, { opacity: 1 }, tl0 - 0.32);
-        ft(h, { y: y - 780 }, { y: y + 16, duration: 0.32, ease: "power2.in" }, tl0 - 0.32);
-        ft(h, { y: y + 16 }, { y: y - 5, duration: 0.16, ease: "power2.out" }, tl0);
-        ft(h, { y: y - 5 }, { y, duration: 0.2, ease: "sine.inOut" }, tl0 + 0.16);
-        ft(b, { rotation: 0 }, { rotation: sg * 4, duration: 0.32, ease: "sine.in" }, tl0 - 0.32);
-        swing(b, tl0, sg * -7, 3);   // ends ≈ tl0 + 1.23 (< "Gratis,")
+      // ---------------------------------------------------------------- "Tugasnya cuma satu:": sight-lines from each seat onto the CV
+      const bl = $("s01-bl"); let lines = "";
+      const AIM = [[0, 0], [430, 640], [470, 610], [510, 590], [540, 580], [570, 590], [610, 610], [650, 640]];
+      for (let k = 1; k <= 7; k++) { const x1 = K.SEAT_X(k), y1 = 500, [x2, y2] = AIM[k];
+        lines += `<line id="s01-ln${k}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="url(#s01-bg)"/>`; }
+      bl.innerHTML = lines;
+      for (let k = 1; k <= 7; k++) { const ln = $("s01-ln" + k), [x2, y2] = AIM[k], len = Math.hypot(x2 - K.SEAT_X(k), y2 - 500), q = Math.abs(k - 4);
+        I(ln, { strokeDasharray: len, strokeDashoffset: len, opacity: 1 });
+        ft(ln, { strokeDashoffset: len }, { strokeDashoffset: 0, duration: 0.38, ease: "power2.out" }, tTug - 0.04 + q * 0.05);
+        ft(ln, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tNol - 0.16 + q * 0.02); }
+
+      // ---------------------------------------------------------------- "nolak": the 7 stamps (one per reviewer, from its seat)
+      const CX = 540 - 230 * 0.75, CY = 722 - 280 * 0.75;   // CV-local origin in frame coords (approx., ignoring the tilt)
+      const inks = $("s01-inks");
+      K.STAMPS.forEach(([x, y, r], i) => {
+        const k = K.STAMP_ORDER[i], s = $("s01-cv-s" + i), t = tNol - 0.06 + i * 0.075;
+        const sx = (K.SEAT_X(k) - CX) / 0.75, sy = (480 - CY) / 0.75;
+        KF(s, { x: sx, y: sy, rotation: r * 3, scale: 0.4, opacity: 0 }, [
+          [t - 0.16, 0.05, { opacity: 1 }, "none"],
+          [t - 0.16, 0.16, { x, y, rotation: r, scale: 1.7 }, "power2.out"],
+          [t, 0.09, { scale: 1 }, "power4.in"]]);
+        // ink ring at the impact (frame coords)
+        const e = document.createElement("div"); e.className = "s01-a s01-ink"; e.id = "s01-ink" + i; inks.appendChild(e);
+        KF(e, { x: CX + x * 0.75, y: CY + y * 0.75 + 4, scale: 0.3, opacity: 0 }, [[t + 0.08, 0.02, { opacity: 0.9 }, "none"],
+          [t + 0.08, 0.36, { scale: 1.5, opacity: 0 }, "power2.out"]]);
       });
-      // ---------------------------------------------------------------- "Instagram kamu.": the card lights back up
-      const hd = q("hd"), av = q("av");
-      I(hd, { color: "#ffffff", textShadow: "0 0 0px rgba(1,204,247,0)" });
-      ft(hd, { color: "#ffffff", textShadow: "0 0 0px rgba(1,204,247,0)" }, { color: "#6adfff", textShadow: "0 0 18px rgba(1,204,247,.8)", duration: 0.22, ease: "power2.out" }, tIG - 0.06);
-      ft(card, { opacity: 0.74 }, { opacity: HK_END.cardO, duration: 0.3, ease: "power2.out" }, tIG - 0.06);
-      I(av, { scale: 1, transformOrigin: "50% 50%" });
-      ft(av, { scale: 1 }, { scale: 1.12, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tKam - 0.04);
-      // ---------------------------------------------------------------- "Gratis,": scrim, the stamp slams, the team shakes
-      const scrim = q("scrim"), stamp = q("stamp"), shock = q("shock"), glint = q("glint"), seal = q("seal"), tImp = tGra + 0.04;
-      I(scrim, { opacity: 0 }); ft(scrim, { opacity: 0 }, { opacity: 1, duration: 0.24, ease: "power2.out" }, tGra - 0.12);
-      I(stamp, { scale: 2.5, rotation: -18, opacity: 0 });
-      ft(stamp, { scale: 2.5, rotation: -18, opacity: 0 }, { scale: 1, rotation: HK_END.stampRot, opacity: 1, duration: 0.17, ease: "power4.in" }, tImp - 0.17);
-      ft(stamp, { scale: 1 }, { scale: 1.045, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tImp);
-      I(shock, { scale: 0.6, opacity: 0, transformOrigin: "50% 50%" });
-      ft(shock, { scale: 0.9, opacity: 1 }, { scale: 3.2, opacity: 0, duration: 0.55, ease: "power2.out" }, tImp);
-      I(world, { x: 0, y: 0 });
-      const SHK = [[0, 0], [7, 5], [-6, -3], [4, 2], [-2, -1], [0, 0]];
-      for (let j = 1; j < SHK.length; j++) ft(world, { x: SHK[j - 1][0], y: SHK[j - 1][1] }, { x: SHK[j][0], y: SHK[j][1], duration: 0.05, ease: "sine.inOut" }, tImp + (j - 1) * 0.05);
-      HK_B.forEach(([k], i) => swing($("s01-bdg" + k), tImp + 0.02, (i % 2 ? 1 : -1) * 3.2, 2));
-      // stamp chips fly out on impact
-      let seed = 11; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-      const pcs = q("pcs"), PCC = ["#01ccf7", "#6adfff", "#ffffff", "#ffd66b"];
-      for (let i = 0; i < 14; i++) {
-        const e = document.createElement("i"); e.className = "s01-hk-pc"; e.id = "s01-hk-pc" + i; e.style.background = PCC[i % 4]; pcs.appendChild(e);
-        const a = (i / 14) * Math.PI * 2 + rnd() * 0.3, r0 = 150 + rnd() * 40, r1x = r0 + 120 + rnd() * 110, x0 = 510 + Math.cos(a) * r0 * 1.5, y0 = 712 + Math.sin(a) * r0 * 0.55;
-        const rot = (a * 180) / Math.PI;
-        I(e, { x: x0, y: y0, rotation: rot, opacity: 0, scale: 1 });
-        tl.set(e, { opacity: 1 }, tImp);
-        ft(e, { x: x0, y: y0, scale: 1 }, { x: 510 + Math.cos(a) * r1x * 1.5, y: 712 + Math.sin(a) * r1x * 0.55 + 30, scale: 0.4, duration: 0.5, ease: "power3.out" }, tImp);
-        ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, tImp + 0.3);
-      }
-      // ---------------------------------------------------------------- "open source.": the MIT seal pops on the stamp's corner
-      I(seal, { scale: 0, rotation: HK_END.sealRot(tOpe - 0.06) });
-      ft(seal, { rotation: HK_END.sealRot(tOpe - 0.06) }, { rotation: HK_END.sealRot(E), duration: E - (tOpe - 0.06), ease: "none" }, tOpe - 0.06);
-      ft(seal, { scale: 0 }, { scale: 1.08, duration: 0.2, ease: "back.out(2.4)" }, tOpe - 0.06);
-      ft(seal, { scale: 1.08 }, { scale: HK_END.sealS, duration: 0.18, ease: "sine.inOut" }, tOpe + 0.14);
-      ft(stamp, { rotation: HK_END.stampRot }, { rotation: HK_END.stampRot - 1.5, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, tOpe + 0.06);
-      I(glint, { x: 0 }); ft(glint, { x: 0 }, { x: 760, duration: 0.42, ease: "power2.inOut" }, tSou - 0.1);
+      // the CV shudders under the stamps
+      const shake = [];
+      for (let i = 0; i < 7; i++) { const t = tNol - 0.06 + i * 0.075 + 0.085; shake.push([t, 0.03, { rotation: (i % 2 ? 1.4 : -1.4) }, "power2.out"], [t + 0.03, 0.04, { rotation: 0 }, "power2.in"]); }
+      KF(cv, { rotation: 0 }, shake);
+      // ---------------------------------------------------------------- "kamu.": the tally pill
+      const pill = $("s01-pill");
+      KF(pill, { opacity: 0, scale: 0.4, x: -30 }, [[tKam - 0.12, 0.1, { opacity: 1 }, "none"], [tKam - 0.12, 0.38, { scale: 1, x: 0 }, "back.out(2.4)"]]);
+
       tl.set({}, {}, D - 0.01);
       (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};

@@ -1,0 +1,141 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #t3-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    .t3-a { position: absolute; }
+    #t3-glow { left: 40px; top: 330px; width: 1000px; height: 660px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    #t3-lines { left: 0; top: 0; width: 940px; height: 538px; overflow: visible; }
+    #t3-lines path { fill: none; stroke: #9db3d6; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 1; }
+    /* coordinator (card coords) */
+    #t3-co { left: 290px; top: 124px; width: 360px; height: 70px; transform-origin: 50% 50%; }
+    #t3-cob { left: 0; top: 0; width: 360px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, #0a0d2c, #294b77); box-shadow: 0 0 0 6px rgba(41,75,119,.13), 0 18px 28px -14px rgba(10,13,44,.65); }
+    #t3-coi { left: 12px; top: 12px; width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,.16); }
+    #t3-coi .rk-ic { position: absolute; left: 11px; top: 11px; }
+    #t3-cot { left: 72px; top: 9px; font: 700 21px/28px Poppins, sans-serif; color: #fff; white-space: nowrap; }
+    #t3-cos { left: 72px; top: 37px; font: 400 15px/20px Poppins, sans-serif; color: rgba(255,255,255,.78); white-space: nowrap; }
+    #t3-crown { left: 330px; top: -16px; width: 42px; height: 42px; border-radius: 50%; background: #f4b400; box-shadow: 0 0 0 4px #fff, 0 8px 14px -6px rgba(138,100,0,.7); }
+    #t3-crown .rk-ic { position: absolute; left: 10px; top: 10px; }
+    #t3-done { left: 676px; top: 138px; height: 42px; padding: 0 18px 0 46px; border-radius: 21px; background: #e9f7ee; box-shadow: inset 0 0 0 1.5px #bfe5c9;
+      font: 700 18px/42px Poppins, sans-serif; color: #1f8a3e; white-space: nowrap; }
+    #t3-done svg { position: absolute; left: 16px; top: 10px; }
+    /* the big task + its pieces */
+    #t3-task { left: 260px; top: 212px; width: 420px; height: 44px; border-radius: 14px; background: #fff3d3; box-shadow: inset 0 0 0 1.5px #f6dc8f;
+      font: 400 18px/44px Poppins, sans-serif; color: #6b4e00; text-align: center; white-space: nowrap; }
+    #t3-task b { font-weight: 700; }
+    .t3-pc { position: absolute; left: 0; top: 0; width: 236px; height: 40px; border-radius: 13px; background: #fff3d3; box-shadow: inset 0 0 0 1.5px #f6dc8f, 0 10px 16px -12px rgba(138,100,0,.55);
+      font: 700 16px/40px Poppins, sans-serif; color: #6b4e00; white-space: nowrap; padding-left: 40px; }
+    .t3-pc .rk-ic { position: absolute; left: 13px; top: 11px; }
+    /* lanes */
+    .t3-ln { position: absolute; top: 276px; width: 284px; height: 244px; transform-origin: 50% 0%; }
+    .t3-lb { position: absolute; inset: 0; border-radius: 22px; background: #ffffff; box-shadow: inset 0 0 0 1.5px #e0e8f4, 0 16px 28px -22px rgba(10,13,44,.5); }
+    .t3-lr { position: absolute; inset: 0; border-radius: 22px; box-shadow: inset 0 0 0 2.5px #2da44e, 0 0 0 6px rgba(45,164,78,.12); }
+    .t3-li { position: absolute; left: 14px; top: 14px; width: 42px; height: 42px; border-radius: 13px; background: #eef3fb; }
+    .t3-li .rk-ic { position: absolute; left: 10px; top: 10px; }
+    .t3-lt { position: absolute; left: 68px; top: 12px; font: 700 20px/26px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .t3-ls { position: absolute; left: 68px; top: 38px; font: 400 15px/20px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    .t3-wt { position: absolute; left: 14px; top: 122px; height: 34px; padding: 0 14px 0 38px; border-radius: 17px; background: #eef3fb; box-shadow: inset 0 0 0 1.5px #d5e0f0;
+      font: 700 15px/34px Poppins, sans-serif; color: #294b77; white-space: nowrap; transform-origin: 0% 50%; }
+    .t3-wt .rk-ic { position: absolute; left: 12px; top: 8px; }
+    .t3-tr { position: absolute; left: 14px; top: 172px; width: 256px; height: 12px; border-radius: 6px; background: #e6ecf6; overflow: hidden; }
+    .t3-tf { position: absolute; left: 0; top: 0; width: 256px; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #294b77, #3a6fe0); transform-origin: 0% 50%; }
+    .t3-ok { position: absolute; left: 14px; top: 196px; height: 32px; padding: 0 12px 0 36px; border-radius: 16px; background: #e9f7ee; font: 700 15px/32px Poppins, sans-serif; color: #1f8a3e; white-space: nowrap; }
+    .t3-ok svg { position: absolute; left: 11px; top: 7px; }
+  </style>
+  <div id="root" data-composition-id="t3" data-width="1080" data-height="1920">
+    <div id="t3-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // t3 "Tiga, Orca. Satu agent jadi koordinator, bagi tugas ke agent lain, masing-masing kerja paralel di worktree sendiri."
+      // (README: "Run Claude Code, Codex, and any other coding agent in parallel, each in its own worktree." · "Orchestrate Agents: hand a big
+      //  task to one agent. It splits the work, starts worker agents in their own workspaces, and brings their results back to you.")
+      // START: rail = pills 1–2 done; the card slides in from the right (t2 left to the left); pill 3 active on "Tiga,".
+      // "Orca.": title · "Satu agent": coordinator node + the big task · "koordinator,": crown · "bagi tugas": the task splits into 3 pieces ·
+      // "ke agent lain,": 3 worker lanes drop in, the pieces land in them · "paralel": 3 progress bars run at once · "worktree": a worktree tag per
+      // lane · "sendiri.": lanes finish (✓), "3/3 beres" next to the coordinator. END: pill 3 done; the card sinks + fades → t4 irises open.
+      const ID = "t3", K = 2;
+      const SC = window.VO_SCENES.find((s) => s.id === ID), ST = SC.start, D = SC.dur, VW = window.VO_WORDS, R2 = window.R2, RD = window.ROUNDS[K];
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 1e-3); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tNum = RD.tNum - ST, tName = RD.tName - ST;
+      const tSatu = wt("Satu"), tKo = wt("koordinator,"), tBagi = wt("bagi"), tAg2 = wt("agent", wt("bagi") + ST - ST + 0.01), tLain = wt("lain,"), tKer = wt("kerja"), tPar = wt("paralel"),
+        tWt = wt("worktree"), tSen = wt("sendiri.");
+      // ---------------------------------------------------------------- DOM
+      const LN = [["Agent A", "Claude Code", "UI tombol bayar", "worktree/ui", 28, 1.05], ["Agent B", "Codex", "API pembayaran", "worktree/api", 328, 1.25], ["Agent C", "Gemini CLI", "Tes otomatis", "worktree/tes", 628, 0.95]];
+      let h = `<div class="t3-a" id="t3-glow"></div>` + R2.railHTML("t3") + `<div class="rk-card" id="t3-card">` + R2.cardHeadHTML("t3", K, "");
+      h += `<svg class="t3-a" id="t3-lines" viewBox="0 0 940 538">` + LN.map((l, i) => `<path id="t3-l${i}" pathLength="1" d="M470 256 L470 266 L${l[4] + 142} 266 L${l[4] + 142} 276"/>`).join("") + `</svg>`;
+      h += `<div class="t3-a" id="t3-co"><div class="t3-a" id="t3-cob"></div><div class="t3-a" id="t3-coi">${R2.ic("bot", 24, "#ffffff")}</div>` +
+        `<div class="t3-a" id="t3-cot">Agent koordinator</div><div class="t3-a" id="t3-cos">pegang tugas besar</div><div class="t3-a" id="t3-crown">${R2.ic("crown", 22, "#ffffff")}</div></div>`;
+      h += `<div class="t3-a" id="t3-done">${R2.CHECK(22, "#2da44e")}3/3 beres</div>`;
+      h += `<div class="t3-a" id="t3-task"><b>Tugas besar:</b> fitur checkout</div>`;
+      h += LN.map((l, i) => `<div class="t3-ln" id="t3-n${i}" style="left:${l[4]}px"><div class="t3-lb"></div><div class="t3-lr" id="t3-nr${i}"></div><div class="t3-li">${R2.ic("bot", 22, "#294b77")}</div>` +
+        `<div class="t3-lt">${l[0]}</div><div class="t3-ls">${l[1]}</div><div class="t3-wt" id="t3-w${i}">${R2.ic("git-branch", 17, "#294b77")}${l[3]}</div>` +
+        `<div class="t3-tr"><div class="t3-tf" id="t3-f${i}"></div></div><div class="t3-ok" id="t3-ok${i}">${R2.CHECK(18, "#2da44e")}selesai</div></div>`).join("");
+      // the pieces live in card coords (they travel from the task into the lanes)
+      h += LN.map((l, i) => `<div class="t3-pc" id="t3-pc${i}">${R2.ic("list-checks", 18, "#8a6400")}${l[2]}</div>`).join("");
+      h += `</div>`;
+      $("t3-cam").innerHTML = h;
+
+      // ---------------------------------------------------------------- rail + card slide-in
+      R2.railInit(tl, "t3", [2, 2, 0, 0]);
+      R2.railActivate(tl, "t3", K, tNum, tName);
+      const card = $("t3-card"), glow = $("t3-glow");
+      I(glow, { opacity: 0.7 });
+      I(card, { x: 1100, y: 0, opacity: 1, scale: 1 });
+      ft(card, { x: 1100 }, { x: 0, duration: 0.46, ease: "power3.out" }, 0);
+      const hic = $("t3-hic"), ht = $("t3-ht"), hr = $("t3-hr"), hos = $("t3-hos");
+      I(ht, { yPercent: 110 }); ft(ht, { yPercent: 110 }, { yPercent: 0, duration: 0.42, ease: "power4.out" }, tName - 0.12);
+      I(hr, { opacity: 0, x: -14 }); ft(hr, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.34, ease: "power3.out" }, tName + 0.2);
+      I(hos, { opacity: 0, scale: 0.6 }); ft(hos, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(2.6)" }, tName + 0.35);
+      I(hic, { scale: 1, rotation: 0 }); ft(hic, { scale: 0.6, rotation: -25 }, { scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2.2)" }, tName - 0.12);
+      // ---------------------------------------------------------------- coordinator + the big task
+      const co = $("t3-co"), crown = $("t3-crown"), task = $("t3-task");
+      I(co, { opacity: 0, scale: 0.6, y: 14 }); ft(co, { opacity: 0, scale: 0.6, y: 14 }, { opacity: 1, scale: 1, y: 0, duration: 0.42, ease: "back.out(2.2)" }, tSatu - 0.1);
+      I(task, { opacity: 0, y: -12, scaleX: 0.7 }); ft(task, { opacity: 0, y: -12, scaleX: 0.7 }, { opacity: 1, y: 0, scaleX: 1, duration: 0.36, ease: "back.out(2)" }, tSatu + 0.3);
+      I(crown, { opacity: 0, scale: 0, rotation: -40 }); ft(crown, { opacity: 0, scale: 0, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.36, ease: "back.out(3)" }, tKo - 0.05);
+      ft(co, { scale: 1 }, { scale: 1.05, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tKo - 0.02);
+      // "bagi tugas": the task splits into 3 pieces that hover over the three lanes
+      const PX = (i) => LN[i][4] + 24, PY0 = 214, PYH = 280, PYL = 276 + 70;
+      ft(task, { opacity: 1, scaleX: 1 }, { opacity: 0, scaleX: 1.15, duration: 0.18, ease: "power2.in" }, tBagi + 0.02);
+      LN.forEach((l, i) => {
+        const p = $("t3-pc" + i), t = tBagi + 0.04 + i * 0.05;
+        I(p, { opacity: 0, x: 352, y: PY0, scale: 0.8, rotation: 0 });
+        tl.set(p, { opacity: 1 }, t);
+        ft(p, { x: 352, y: PY0, scale: 0.8, rotation: 0 }, { x: PX(i), y: PYH, scale: 1, rotation: (i - 1) * 5, duration: 0.42, ease: "back.out(1.6)" }, t);
+        // "ke agent lain,": they land inside their lane
+        ft(p, { y: PYH, rotation: (i - 1) * 5 }, { y: PYL, rotation: 0, duration: 0.32, ease: "power3.in" }, tAg2 + 0.12 + i * 0.06);
+      });
+      LN.forEach((l, i) => {
+        const n = $("t3-n" + i), pth = $("t3-l" + i), t = tAg2 - 0.12 + i * 0.07;
+        I(n, { opacity: 0, y: 40, scaleY: 0.9 }); ft(n, { opacity: 0, y: 40, scaleY: 0.9 }, { opacity: 1, y: 0, scaleY: 1, duration: 0.4, ease: "power3.out" }, t);
+        I(pth, { strokeDashoffset: 1 }); ft(pth, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.36, ease: "power2.inOut" }, t);
+        ft(n, { y: 0 }, { y: 5, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, tAg2 + 0.44 + i * 0.06);
+        I($("t3-nr" + i), { opacity: 0 }); I($("t3-ok" + i), { opacity: 0, scale: 0.6 });
+        // "worktree": its own worktree tag
+        const w = $("t3-w" + i); I(w, { opacity: 0, scaleX: 0.4 }); ft(w, { opacity: 0, scaleX: 0.4 }, { opacity: 1, scaleX: 1, duration: 0.3, ease: "back.out(2)" }, tWt - 0.12 + i * 0.07);
+        // "kerja paralel": all three bars run at once (different speeds), finish around "sendiri."
+        const f = $("t3-f" + i), tEnd = tSen + 0.05 + i * 0.12;
+        I(f, { scaleX: 0 }); ft(f, { scaleX: 0 }, { scaleX: 1, duration: tEnd - tKer, ease: "none" }, tKer);
+        ft($("t3-nr" + i), { opacity: 0 }, { opacity: 1, duration: 0.18 }, tEnd);
+        ft($("t3-ok" + i), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(2.6)" }, tEnd);
+      });
+      // the bars pulse on "paralel"
+      LN.forEach((l, i) => ft($("t3-n" + i), { scale: 1 }, { scale: 1.03, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tPar + i * 0.03));
+      const done = $("t3-done"); I(done, { opacity: 0, x: -20, scale: 0.8 });
+      ft(done, { opacity: 0, x: -20, scale: 0.8 }, { opacity: 1, x: 0, scale: 1, duration: 0.34, ease: "back.out(2.4)" }, tSen + 0.4);
+      // ---------------------------------------------------------------- TRANSITION → t4: pill done, the card sinks away
+      R2.railDone(tl, "t3", K, D - 0.42);
+      ft(card, { y: 0, scale: 1, opacity: 1 }, { y: 70, scale: 0.93, opacity: 0, duration: 0.3, ease: "power2.in" }, D - 0.31);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines[ID] = tl;
+    })();
+  </script>
+</template>

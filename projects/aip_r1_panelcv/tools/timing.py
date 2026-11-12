@@ -1,4 +1,4 @@
-"""Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
+"""(AI PRENEUR R1 · panel rekrutmen 7 Claude) Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
 - display fixes (Higgsfield, Wan 2.2, ElevenLabs, GPT-SoVITS, Midjourney, ComfyUI, FLUX, ChatGPT, Ollama, ...)
 - word starts that whisper put inside a silence are snapped to the real voice onset (energy > -40 dB)
 - VO starts at OFFSET s (9 frames).   Run: python3 -I tools/timing.py ."""
@@ -11,17 +11,14 @@ OFFSET, FPS, TAIL = 9 / 30, 30, 1.3
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 
-# merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {18: (19, "masing-masing", "masingmasing")}
+# merges: (first index, last index, display text, spoken spelling for lip sync) — none needed: the words come from the
+# ElevenLabs character alignment of our own script (tools/el_to_words.py), display fixes are applied there
+MERGE = {}
 FIX = {}
-FIXI = {0: "Claude", 24: "pertama", 26: "kaget:", 27: "dia", 29: "reel", 48: "reel.", 68: "lemah", 69: "dibenerin", 74: "disusun.",
-        80: "berapa,", 81: "plus", 87: "interaksi.", 94: "DM,", 95: "sampai", 101: "AI.", 103: "gampang.", 106: "repo-nya", 108: "Claude,",
-        109: "suruh", 110: "install.", 111: "Selesai.", 113: "nggak", 117: "sendiri.", 119: "draf,", 120: "kamu", 122: "posting.",
-        124: "link-nya?", 126: "TIM,", 127: "aku", 130: "DM."}   # by raw word index
-PRON = {"13": "tigabelas", "26": "duapuluhenam", "100": "seratus", "reel": "ril", "skill": "skil", "agent": "ejen", "instagram": "instagram", "carousel": "kerosel", "story": "stori", "install": "instol", "repo": "repo", "reponya": "reponya", "tim": "tim", "open": "opn", "source": "sors", "draf": "draf", "claude": "klod", "manus": "manus", "7": "tujuh", "20": "duapuluh", "2": "dua", "1": "satu", "3": "tiga", "10": "sepuluh", "12": "duabelas",
-        "5": "lima", "ai": "eiai", "brand": "brend", "voice": "vois", "niche": "nis", "web": "web", "hook": "huk", "caption": "kepsyen",
-        "hashtag": "hestek", "review": "rifiu", "link": "link", "template": "templet", "prompt": "prom", "promptnya": "promnya", "dm": "diem",
-        "project": "projek", "setting": "seting"}
+FIXI = {}
+PRON = {"7": "tujuh", "5": "lima", "claude": "klod", "cv": "sifi", "ats": "eitiyes", "hrd": "haerde", "ceo": "siio",
+        "workflownya": "werkflonya", "hiring": "hairing", "manager": "menejer", "interview": "interviu", "dm": "diem",
+        "sendirisendiri": "sendirisendiri", "nggak": "ngak"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -74,16 +71,14 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Claude", [4, 8], ["tim", "konten", "Gratis,"], []),
-    ("s02", "Namanya", [4, 7, 9], ["Instagram", "Agent", "Skill.", "13"], []),
-    ("r1", "Yang", [4, 7, 13, 15], ["bedah", "melonjak."], []),
-    ("r2", "Lalu,", [4, 7, 12], ["Tiga", "hook", "26", "skor."], []),
-    ("r3", "Profil", [3, 6, 9, 12], ["12", "100."], []),
-    ("r4", "Jadwal", [4, 8, 10, 13], ["seminggu", "10"], []),
-    ("s07", "Sisanya?", [1, 4, 7, 10], ["Caption,", "carousel,", "story,", "AI."], []),
-    ("s08", "Pasangnya", [2, 7, 9], ["gampang.", "Selesai."], []),
-    ("s09", "Tenang,", [1, 6, 8], ["draf,", "posting."], []),
-    ("s10", "Mau", [2], ["DM."], ["TIM,"]),
+    ("s01", "Aku", [4, 7, 10], ["7", "Claude.", "nolak"], []),
+    ("s02", "Soalnya,", [1, 4, 7, 10], ["puluhan", "ditolak."], []),
+    ("s03", "Claude", [2, 5, 7, 10], ["pertama", "ATS,", "manusia."], []),
+    ("s04", "Claude", [2, 5, 8], ["kedua", "hiring", "manager.", "interview,"], []),
+    ("s05", "5", [3, 5, 9, 11, 13], ["5", "atasan,", "pelamar,", "CEO."], []),
+    ("s06", "Semua", [3, 4, 8, 10, 13], ["dikumpulin.", "ulang", "dibenerin."], []),
+    ("s07", "Ini", [3, 5, 9, 11], ["tahu", "HRD"], []),
+    ("s08", "Mau", [2], ["DM."], ["CV,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "sama", "kayak", "lewat", "jadi", "biar", "dalam", "ada", "dari", "lalu",
          "atau", "baru", "sampai", "lagi", "isinya", "cuma"}

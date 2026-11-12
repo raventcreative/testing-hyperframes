@@ -1,4 +1,4 @@
-"""Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
+"""(AIP R2 orkestrator) Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
 - display fixes (Claude, Claude Code, After Effects, Copy, EDIT)
 - word starts that whisper put inside a silence are snapped to the real voice onset (energy > -40 dB)
 - VO starts at OFFSET s (9 frames).   Run: python3 -I tools/timing.py ."""
@@ -7,15 +7,17 @@ from pathlib import Path
 import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-OFFSET, FPS, TAIL = 9 / 30, 30, 1.3
+OFFSET, FPS, TAIL = 9 / 30, 30, 1.6
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {3: (4, "mahal-mahal.", "mahalmahal")}
-FIX = {"Cloud": "Claude", "Cloud.": "Claude.", "prom": "prompt", "prom.": "prompt.", "master,": "MASTER,", "gratis!": "gratis."}
-FIXI = {41: "Satu,", 42: "buka", 44: "Dua,", 45: "tempel", 52: "Tiga,", 61: "Empat,", 62: "ketik"}
-PRON = {"claude": "klod", "prompt": "prompt", "master": "master", "dm": "diem", "6": "enam", "5": "lima", "chat": "cet"}
+MERGE = {69: (70, "TeamAI", "timeiai")}
+FIX = {}
+FIXI = {109: "AGENT,"}
+PRON = {"claude": "klod", "dm": "diem", "ai": "eiai", "mcp": "emsipi", "api": "apiai", "codex": "kodeks", "gemini": "jemini", "tencent": "tensen",
+        "worktree": "woktri", "sync": "sing", "cloud": "klaud", "approval": "aprufal", "budget": "bajet", "source": "sors", "openhands": "openhens",
+        "aianya": "eiainya", "installnya": "instolnya", "agent": "ejen", "agents": "ejen", "canvas": "kenfes", "paperclip": "peiperklip", "team": "tim"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -38,6 +40,7 @@ while i < n:
     else: i += 1
 
 def snap(s, e):
+    if R.get("source") == "elevenlabs-alignment": return s   # character alignment is exact: no snapping
     """move a start that whisper placed in a silence (or that is mostly unvoiced) to the next voice onset"""
     nxt = [a0 for a0, a1 in segs if s < a0 < e]
     for a0, a1 in segs:
@@ -68,20 +71,17 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Stop", [4, 8], ["gratis."], []),
-    ("s02", "Prompt", [6, 9], ["Peran,", "konteks,", "tugas,", "format,", "contoh,", "batasan."], []),
-    ("s03", "Masalahnya,", [4], ["capek."], []),
-    ("s04", "Jadi,", [3, 6], ["Claude", "5"], []),
-    ("r1", "Satu,", [], ["Claude."], ["Satu,"]),
-    ("r2", "Dua,", [2, 5], ["prompt", "pembuat", "alat"], ["Dua,"]),
-    ("r3", "Tiga,", [4], ["aplikasi", "chat."], ["Tiga,"]),
-    ("r4", "Empat,", [4, 7], ["ide", "singkat."], ["Empat,"]),
-    ("r5", "Lima,", [3, 7], ["master", "prompt", "salin."], ["Lima,"]),
-    ("s10", "Nggak", [4], ["mahal,", "prompt."], []),
-    ("s11", "Mau", [4, 6], ["DM."], ["MASTER,"]),
+    ("s01", "AI", [5, 8, 12], ["berantakan?", "empat", "gratis"], []),
+    ("t1", "Satu,", [2, 4, 8, 11, 14], ["OpenHands", "Canvas.", "laptop,", "server,", "cloud."], ["Satu,"]),
+    ("t2", "Dua,", [2, 5, 8, 11, 14], ["Paperclip.", "perusahaan", "approval"], ["Dua,"]),
+    ("t3", "Tiga,", [2, 6, 11, 14], ["Orca.", "koordinator,", "paralel", "worktree"], ["Tiga,"]),
+    ("t4", "Empat,", [4, 8, 12, 17], ["TeamAI", "Git,", "otomatis."], ["Empat,"]),
+    ("s06", "Keempatnya", [3, 4, 7, 10], ["gratis.", "API"], []),
+    ("s07", "Mau", [3, 5, 7], ["DM."], ["AGENT,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",
-         "punya", "tetap", "bisa", "langsung", "satu", "semua", "masuk", "tiap", "pakai", "kalian", "mau"}
+         "punya", "tetap", "bisa", "langsung", "semua", "masuk", "tiap", "pakai", "kalian", "mau", "isi", "jadi", "sama", "terus", "atau",
+         "plus", "buat", "tapi", "makin"}
 starts = []; k = 0
 for sid, first, *_ in SC:
     while words[k]["w"] != first: k += 1

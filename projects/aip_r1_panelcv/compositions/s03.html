@@ -1,0 +1,141 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s03-a { position: absolute; }
+    #s03-zone { left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, #000 0, #000 930px, transparent 945px); mask-image: linear-gradient(180deg, #000 0, #000 930px, transparent 945px); }
+    #s03-spot { left: -120px; top: 540px; width: 680px; height: 460px; border-radius: 50%; background: radial-gradient(closest-side, rgba(106,223,255,.26), rgba(1,204,247,.06) 60%, rgba(1,204,247,0)); }
+    /* the reviewer chip under seat #1 */
+    #s03-wire { left: 137px; top: 498px; width: 3px; height: 24px; background: linear-gradient(180deg, rgba(1,204,247,0), #01ccf7); transform-origin: 50% 0; }
+    #s03-chip { left: 60px; top: 520px; height: 56px; padding: 0 22px 0 8px; border-radius: 28px; display: flex; align-items: center; gap: 12px; white-space: nowrap;
+      background: #01ccf7; color: #0b1440; font: 700 26px/56px Poppins, sans-serif; box-shadow: 0 0 26px rgba(1,204,247,.45), inset 0 1px 0 rgba(255,255,255,.45); transform-origin: 0 50%; }
+    #s03-chip i { position: relative; width: 42px; height: 42px; border-radius: 50%; background: #0b1440; color: #6adfff; }
+    #s03-chip i svg { position: absolute; left: 10px; top: 10px; width: 22px; height: 22px; }
+    #s03-sub { left: 384px; top: 520px; font: 400 26px/56px Poppins, sans-serif; color: #e3edfa; white-space: nowrap; }
+    /* CV overlays (CV-local) */
+    .s03-hl { left: 0; top: 0; border-radius: 10px; border: 3px solid #e5484d; background: rgba(229,72,77,.09); transform-origin: 0 50%; }
+    #s03-scan { left: -10px; top: 0; width: 480px; height: 8px; border-radius: 4px; background: #6adfff; box-shadow: 0 0 18px 4px rgba(1,204,247,.85); }
+    #s03-trail { left: 0; top: -90px; width: 460px; height: 90px; background: linear-gradient(180deg, rgba(1,204,247,0), rgba(1,204,247,.22)); }
+    /* keyword panel */
+    #s03-kp { left: 392px; top: 594px; width: 628px; height: 222px; border-radius: 28px; background: rgba(12,22,64,.84); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), 0 30px 50px -30px rgba(0,0,0,.8); transform-origin: 314px 111px; }
+    #s03-kl { left: 26px; top: 18px; font: 700 18px/24px Poppins, sans-serif; letter-spacing: .16em; color: #6adfff; white-space: nowrap; }
+    .s03-kw { left: 0; top: 0; width: 284px; height: 52px; border-radius: 16px; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.16);
+      display: flex; align-items: center; gap: 10px; padding: 0 12px; font: 700 23px/52px Poppins, sans-serif; color: #ffffff; white-space: nowrap; transform-origin: 50% 50%; }
+    .s03-kw b { position: relative; flex: 0 0 30px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.18); }
+    .s03-kw b i { position: absolute; inset: 0; border-radius: 50%; opacity: 0; color: #fff; }
+    .s03-kw b i svg { position: absolute; left: 6px; top: 6px; width: 18px; height: 18px; }
+    .s03-kw b i.ok { background: #2da44e; } .s03-kw b i.no { background: #e5484d; }
+    #s03-mt { left: 26px; top: 176px; width: 576px; height: 30px; }
+    #s03-ml { left: 0; top: 0; font: 400 22px/30px Poppins, sans-serif; color: #e3edfa; white-space: nowrap; }
+    #s03-ml b { font-weight: 700; color: #ff6b70; }
+    #s03-mb { left: 250px; top: 9px; width: 326px; height: 12px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; }
+    #s03-mf { left: 0; top: 0; width: 326px; height: 12px; border-radius: 6px; background: #e5484d; transform-origin: 0 50%; }
+    /* the door to the humans */
+    #s03-dr { left: 392px; top: 834px; width: 628px; height: 96px; border-radius: 26px; background: rgba(12,22,64,.84); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10); transform-origin: 314px 48px; }
+    #s03-dt { left: 16px; top: 14px; width: 68px; height: 68px; border-radius: 18px; background: linear-gradient(180deg, #e3ecfb, #c9d8f0); color: #294b77; }
+    #s03-dt svg { position: absolute; left: 16px; top: 16px; width: 36px; height: 36px; }
+    #s03-dh { left: 100px; top: 12px; font: 700 27px/36px Poppins, sans-serif; color: #ffffff; white-space: nowrap; }
+    #s03-ds { left: 100px; top: 48px; font: 400 22px/32px Poppins, sans-serif; color: #ff8a8e; white-space: nowrap; }
+    #s03-lk { left: 548px; top: 18px; width: 60px; height: 60px; border-radius: 50%; background: #e5484d; color: #fff; box-shadow: 0 0 22px rgba(229,72,77,.6); }
+    #s03-lk svg { position: absolute; left: 15px; top: 14px; width: 30px; height: 30px; }
+    #s03-bar { left: 362px; top: 844px; width: 12px; height: 76px; border-radius: 6px; background: repeating-linear-gradient(180deg, #e5484d 0 14px, #ffffff 14px 24px); box-shadow: 0 0 14px rgba(229,72,77,.6); transform-origin: 50% 100%; }
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div class="s03-a" id="s03-zone">
+      <div class="s03-a" id="s03-spot"></div>
+      <div class="s03-a" id="s03-wire"></div>
+      <div class="s03-a" id="s03-chip"><i></i>#1 · Sistem ATS</div>
+      <div class="s03-a" id="s03-sub">penyaring otomatis</div>
+      <div class="s03-a" id="s03-cvw"></div>
+      <div class="s03-a" id="s03-kp"><div class="s03-a" id="s03-kl">KATA KUNCI DI LOWONGAN</div><div class="s03-a" id="s03-kws"></div>
+        <div class="s03-a" id="s03-mt"><div class="s03-a" id="s03-ml">Cocok: <b>1 dari 4</b></div><div class="s03-a" id="s03-mb"><div class="s03-a" id="s03-mf"></div></div></div></div>
+      <div class="s03-a" id="s03-bar"></div>
+      <div class="s03-a" id="s03-dr"><div class="s03-a" id="s03-dt"></div><div class="s03-a" id="s03-dh">Meja HRD (manusia)</div><div class="s03-a" id="s03-ds">CV kamu belum sampai sini</div><div class="s03-a" id="s03-lk"></div></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      // s03 "Claude pertama jadi sistem ATS, penyaring otomatis sebelum CV kamu dibaca manusia."
+      // IN: the CV rises in at the left (push from s02) while the panel drops back (panel.html: seat #1 lights up on "pertama").
+      // "Claude pertama": a wire + the chip "#1 · Sistem ATS" under seat #1 · "jadi sistem ATS,": the keyword panel ("KATA KUNCI DI
+      // LOWONGAN": Digital Marketing, Meta Ads, Copywriting, Canva) · "penyaring otomatis": a scan line sweeps the CV, each keyword
+      // resolves ✓/✗ as it passes, the job title and the skills get coral boxes, the match bar fills to 1/4 · "sebelum CV kamu
+      // dibaca manusia.": the door row "Meja HRD (manusia)" — a striped barrier drops between the CV and the door, a lock pops.
+      // END STATE (t = D): CV centre (215,760) scale .6 with its 2 coral boxes · chip + sub · keyword panel · barrier · door row.
+      const SC = window.VO_SCENES.find((s) => s.id === "s03");
+      const D = SC.dur, ST = SC.start, VW = window.VO_WORDS, K = window.CVK;
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const L = (txt) => wt(txt, ST - 0.05) - ST;
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const KF = (el, init, steps) => { I(el, init); const cur = Object.assign({}, init);
+        steps.sort((a, b) => a[0] - b[0]).forEach(([t, d, to, ease]) => { const fr = {}; for (const k in to) fr[k] = cur[k];
+          if (d <= 0) tl.set(el, to, t); else ft(el, fr, Object.assign({ duration: d, ease: ease || "power3.out" }, to), t); Object.assign(cur, to); }); };
+
+      $("s03-zone").insertAdjacentHTML("afterbegin", `<style>${K.css("s03")}</style>`);
+      $("s03-cvw").innerHTML = K.cv("s03", "cv", 1);
+      $("s03-chip").querySelector("i").innerHTML = K.isvg("scan-text", 2.4);
+      $("s03-dt").innerHTML = K.isvg("door-closed", 2.2);
+      $("s03-lk").innerHTML = K.isvg("lock", 2.4);
+      // CV-local overlays: 2 coral boxes + the scan line
+      $("s03-cv-st").innerHTML = `<div class="s03-a s03-hl" id="s03-h1" style="left:118px;top:68px;width:188px;height:40px"></div>` +
+        `<div class="s03-a s03-hl" id="s03-h2" style="left:24px;top:470px;width:370px;height:54px"></div>` +
+        `<div class="s03-a" id="s03-scan"><div class="s03-a" id="s03-trail"></div></div>`;
+
+      const tPer = L("pertama"), tSis = L("sistem"), tATS = L("ATS,"), tPen = L("penyaring"), tOto = L("otomatis"), tSeb = L("sebelum"), tDib = L("dibaca"), tMan = L("manusia.");
+
+      // ---------------------------------------------------------------- IN: the CV rises at the left
+      const cv = $("s03-cv"), spot = $("s03-spot");
+      KF(cv, { x: 215, y: 1000, scale: 0.6, rotation: 5, opacity: 0 }, [[0.02, 0.15, { opacity: 1 }, "none"], [0.02, 0.6, { y: 760, rotation: 0 }, "power3.out"]]);
+      KF(spot, { opacity: 0 }, [[0.1, 0.6, { opacity: 1 }, "power1.out"]]);
+      // the reviewer chip
+      const wire = $("s03-wire"), chip = $("s03-chip"), sub = $("s03-sub");
+      KF(wire, { scaleY: 0 }, [[tPer - 0.05, 0.2, { scaleY: 1 }, "power2.out"]]);
+      KF(chip, { opacity: 0, scale: 0.5 }, [[tPer + 0.05, 0.08, { opacity: 1 }, "none"], [tPer + 0.05, 0.36, { scale: 1 }, "back.out(2.2)"]]);
+      KF(sub, { opacity: 0, x: -20 }, [[tPen - 0.1, 0.35, { opacity: 1, x: 0 }]]);
+
+      // ---------------------------------------------------------------- "jadi sistem ATS,": the keyword panel
+      const kp = $("s03-kp");
+      KF(kp, { opacity: 0, x: 60, scale: 0.96 }, [[tSis - 0.15, 0.45, { opacity: 1, x: 0, scale: 1 }]]);
+      KF($("s03-kl"), { opacity: 0 }, [[tSis, 0.3, { opacity: 1 }, "power1.out"]]);
+      const KW = [["Digital Marketing", 0], ["Meta Ads", 0], ["Copywriting", 0], ["Canva", 1]];
+      $("s03-kws").innerHTML = KW.map(([t, ok], i) => `<div class="s03-a s03-kw" id="s03-k${i}"><b><i class="ok" id="s03-ko${i}">${K.isvg("check", 3.2)}</i><i class="no" id="s03-kn${i}">${K.isvg("x", 3.2)}</i></b>${t}</div>`).join("");
+      // the scan passes the CV between tS0 and tS1; each keyword resolves when the line reaches its evidence
+      const tS0 = tPen - 0.12, tS1 = tOto + 0.5;
+      const RES = [tS0 + 0.18, tS1 - 0.18, tS1 - 0.1, tS1 - 0.02];   // title row (top), then the skills row (bottom)
+      KW.forEach(([t, ok], i) => { const e = $("s03-k" + i), x = 26 + (i % 2) * 302, y = 52 + Math.floor(i / 2) * 60, tin = tATS - 0.05 + i * 0.08;
+        KF(e, { x, y, opacity: 0, scale: 0.7 }, [[tin, 0.06, { opacity: 1 }, "none"], [tin, 0.32, { scale: 1 }, "back.out(2.4)"],
+          [RES[i], 0.1, { scale: 1.07 }, "power2.out"], [RES[i] + 0.1, 0.18, { scale: 1 }, "power2.out"]]);
+        KF($(ok ? "s03-ko" + i : "s03-kn" + i), { opacity: 0, scale: 0.3 }, [[RES[i], 0.05, { opacity: 1 }, "none"], [RES[i], 0.26, { scale: 1 }, "back.out(3)"]]);
+        KF(e, { boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,.16)" }, [[RES[i], 0.2, { boxShadow: ok ? "inset 0 0 0 2.5px rgba(61,220,151,.85)" : "inset 0 0 0 2.5px rgba(229,72,77,.85)" }, "power1.out"]]); });
+      // scan line over the CV
+      const scan = $("s03-scan");
+      KF(scan, { y: 0, opacity: 0 }, [[tS0, 0.06, { opacity: 1 }, "none"], [tS0, tS1 - tS0, { y: 556 }, "power1.inOut"], [tS1, 0.15, { opacity: 0 }, "power1.out"]]);
+      KF($("s03-h1"), { opacity: 0, scaleX: 0 }, [[RES[0] - 0.02, 0.05, { opacity: 1 }, "none"], [RES[0] - 0.02, 0.26, { scaleX: 1 }, "power3.out"]]);
+      KF($("s03-h2"), { opacity: 0, scaleX: 0 }, [[RES[1] - 0.02, 0.05, { opacity: 1 }, "none"], [RES[1] - 0.02, 0.3, { scaleX: 1 }, "power3.out"]]);
+      // match bar
+      const mt = $("s03-mt"), mf = $("s03-mf");
+      KF(mt, { opacity: 0 }, [[tS1 - 0.05, 0.25, { opacity: 1 }, "power1.out"]]);
+      KF(mf, { scaleX: 0 }, [[tS1, 0.4, { scaleX: 0.25 }, "power3.out"]]);
+
+      // ---------------------------------------------------------------- "sebelum CV kamu dibaca manusia.": barrier + the human desk
+      const dr = $("s03-dr"), bar = $("s03-bar"), lk = $("s03-lk"), dt = $("s03-dt");
+      KF(dr, { opacity: 0, y: 40 }, [[tSeb - 0.12, 0.42, { opacity: 1, y: 0 }]]);
+      KF($("s03-ds"), { opacity: 0 }, [[tDib - 0.1, 0.3, { opacity: 1 }, "power1.out"]]);
+      KF(bar, { scaleY: 0, rotation: -60 }, [[tSeb + 0.2, 0.36, { scaleY: 1, rotation: 0 }, "back.out(2)"]]);
+      KF(lk, { scale: 0, rotation: 30 }, [[tDib - 0.05, 0.36, { scale: 1, rotation: 0 }, "back.out(3)"]]);
+      KF(dt, { boxShadow: "0 0 0 0 rgba(106,223,255,0)" }, [[tMan - 0.08, 0.3, { boxShadow: "0 0 0 4px rgba(106,223,255,.9), 0 0 26px rgba(1,204,247,.7)" }, "power2.out"]]);
+      KF(lk, { x: 0 }, [[tMan, 0.05, { x: -6 }, "none"], [tMan + 0.05, 0.05, { x: 6 }, "none"], [tMan + 0.1, 0.05, { x: -4 }, "none"], [tMan + 0.15, 0.08, { x: 0 }, "power1.out"]]);
+      // the CV gives a small push against the barrier on "manusia."
+      KF(cv, { x: 215 }, [[tMan - 0.05, 0.14, { x: 232 }, "power2.out"], [tMan + 0.09, 0.3, { x: 215 }, "back.out(2)"]]);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s03"] = tl;
+    })();
+  </script>
+</template>

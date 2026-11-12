@@ -1,4 +1,5 @@
-"""Synthesised SFX bed for the PROMPTBUILDER reel (no samples, no downloads): a STOP stamp + price strikes, 6 prompt blocks snapping in,
+"""Synthesised SFX bed for the AIP R2 ORKESTRATOR reel (agent chaos → 4 pills, the 4 tool cards, the honest note, CTA); kit text below:
+Synthesised SFX bed for the PROMPTBUILDER reel (no samples, no downloads): a STOP stamp + price strikes, 6 prompt blocks snapping in,
 a calendar flip + collapse on "capek", Claude chime, the 5-step rail (tick on each step, check on each done), paste / send / build /
 typing / copy clicks, the s10 tear + crumple, the CTA (MASTER typing, heart, plane, DM chime). Deterministic. Writes assets/audio/sfx.wav.
 Run: python3 tools/sfx.py ."""
@@ -131,65 +132,81 @@ def bell(dur=0.9):
     return x / np.abs(x).max()
 
 st = lambda i: S[i]["start"]
-# --- s01 hook: STOP stamp, prices struck, blocks build the tool, GRATIS stamp
+en = lambda i: S[i]["start"] + S[i]["dur"]
+def rail_on(w, after):   # a rail pill becomes active
+    t = wt(w, after); put(t - 0.02, tick(0.03, 2200), 0.2); put(t + 0.02, pop(600, 950, 0.07), 0.1)
+def pops(t0, n, step=0.07, f0=700, g=0.1):
+    for k in range(n): put(t0 + k * step, pop(f0 + 80 * k, f0 + 400 + 80 * k, 0.06), g)
+# --- s01 hook: agent windows pile up, tangle, chaos swept, 4 pills + title, GRATIS seal, tidy grid
 put(0.02, pop(500, 760, 0.08), 0.08)
-put(wt("Stop") - 0.04, boom(0.45, 160, 60), 0.3); put(wt("Stop") - 0.02, pop(300, 140, 0.12), 0.22)
-put(wt("mahal-mahal.") - 0.02, scribble(0.4), 0.1); put(wt("mahal-mahal.") + 0.25, scribble(0.35), 0.08)
-for k in range(6): put(wt("Bikin") + 0.05 + k * 0.09, whoosh(0.2, 900, 2600, 1.6, 0.3), W * 0.35); put(wt("Bikin") + 0.2 + k * 0.09, pop(700 + 60 * k, 1100 + 60 * k, 0.06), 0.1)
-put(wt("gratis.") - 0.04, boom(0.35, 200, 90), 0.18); put(wt("gratis.") + 0.02, chime((1318.5, 1760, 2637), 1.0), 0.07)
-# --- s02: the 6 parts drop into the prompt
-put(st("s02") - 0.2, whoosh(0.4, 500, 2200), W * 0.6)
-put(wt("6") - 0.02, pop(600, 1000, 0.09), 0.14)
-for w in ["Peran,", "konteks,", "tugas,", "format,", "contoh,", "batasan."]: put(wt(w) - 0.03, whoosh(0.18, 2400, 900, 2.0, 0.2), W * 0.3); put(wt(w) + 0.05, pop(800, 1300, 0.07), 0.13)
-put(wt("batasan.") + 0.35, chime((1568, 2093), 0.7), 0.05)
-# --- s03: every day again, then the pile collapses on "capek."
-put(st("s03") - 0.2, whoosh(0.4, 2000, 600, 1.3, 0.35), W * 0.6)
-for k in range(5): put(wt("tiap") - 0.3 + k * 0.22, flap(), 0.12)
-put(wt("capek.") - 0.05, rumble(0.6), 0.12); put(wt("capek.") + 0.05, boom(0.5, 110, 45), 0.26); put(wt("capek.") + 0.1, buzz(0.25), 0.04)
-# --- s04: Claude arrives, the pile becomes the tool, the 5-step rail
-put(wt("Claude", st("s04")) - 0.04, chime((1046, 1318, 1568), 1.1), 0.08)
-put(wt("alatnya.") - 0.05, whoosh(0.5, 400, 2400, 1.2, 0.5), W * 0.7)
-for k in range(5): put(wt("5", st("s04")) + k * 0.07, tick(0.025, 2600 + 300 * k), 0.12)
-# --- the 5 steps: a tick when a step becomes active, a check pop when it is done
-for w, after in [("Satu,", 19), ("Dua,", 21), ("Tiga,", 24), ("Empat,", 28), ("Lima,", 33)]:
-    put(wt(w, after) - 0.02, tick(0.03, 2200), 0.2); put(wt(w, after) + 0.02, pop(600, 950, 0.07), 0.1)
-for t in (20.82, 23.82, 27.69, 32.94, 36.85): put(t, pop(1100, 1700, 0.06), 0.12)
-# r1: open Claude
-put(wt("buka") - 0.02, tick(0.03, 1800), 0.22); put(wt("buka") + 0.02, whoosh(0.45, 400, 2000, 1.3, 0.45), W * 0.7)
-for k in range(3): put(wt("Claude.", 20) + k * 0.08, pop(800 + 120 * k, 1200 + 120 * k, 0.05), 0.08)
-# r2: Ctrl+V, paste, send
-put(wt("tempel") - 0.25, tick(0.03, 1600), 0.18); put(wt("tempel") - 0.12, tick(0.03, 1700), 0.18)
-put(wt("tempel") + 0.02, whoosh(0.35, 2400, 700, 1.6, 0.3), W * 0.6)
-for k in range(10): put(wt("tempel") + 0.1 + k * 0.05, tick(0.015, 5000), 0.04)
-put(23.2, tick(0.03, 2000), 0.22); put(23.24, whoosh(0.4, 700, 2600, 1.4, 0.4), W * 0.6); put(wt("aku", 23) + 0.02, pop(900, 1500, 0.07), 0.1)
-# r3: Claude builds the app
-put(24.63, rise(0.9, 300, 1200), 0.05); put(wt("Claude", 25) - 0.02, whoosh(0.6, 2000, 6000, 2.0, 0.3), W * 0.4)
-put(wt("aplikasi") - 0.02, pop(700, 1100, 0.08), 0.12); put(wt("kecilnya") - 0.02, pop(800, 1300, 0.08), 0.12)
-put(wt("chat.") - 0.02, chime((1568, 2093, 2637), 0.9), 0.07)
-# r4: type the idea, press the button
-put(wt("ketik") - 0.02, tick(0.03, 1900), 0.22)
-typing(30.94, 32.88, 0.1, 20)
-put(32.92, tick(0.03, 1800), 0.24); put(32.96, rise(0.5, 400, 1100), 0.05)
-# r5: the master prompt fills, copy
-put(wt("alatnya", 33) - 0.02, whoosh(0.4, 500, 2400, 1.2, 0.5), W * 0.6)
-for k in range(6): put(wt("nyusun") + k * 0.2, pop(700 + 90 * k, 1100 + 90 * k, 0.06), 0.12)
-put(wt("lengkap.") - 0.02, chime((1318.5, 1760), 0.7), 0.05)
-put(wt("salin.") - 0.02, tick(0.03, 2000), 0.24); put(wt("salin.") + 0.08, chime((1760, 2349, 2637), 0.9), 0.07)
-# --- s10: no paid class, no paid prompts
-for k in range(6): put(37.2 + k * 0.09, pop(900 + 50 * k, 1300 + 50 * k, 0.05), 0.08)
-put(37.37, whoosh(0.35, 600, 2000, 1.4, 0.35), W * 0.5); put(37.47, whoosh(0.35, 700, 2200, 1.4, 0.35), W * 0.5)
-put(wt("mahal,") - 0.02, scribble(0.3), 0.1); put(38.35, rip(0.45), 0.14)
-put(wt("beli", 39) - 0.02, scribble(0.3), 0.1); put(wt("prompt.", 39) - 0.02, scribble(0.35), 0.1); put(39.68, rip(0.35), 0.1); put(39.72, boom(0.3, 150, 70), 0.12)
-put(39.85, pop(700, 1200, 0.09), 0.16); put(39.9, chime((1568, 2093), 0.7), 0.05)
-# --- s11 CTA
-put(wt("Mau", 40) - 0.02, whoosh(0.5, 400, 1800, 1.3, 0.4), W * 0.6)
-for k in range(6): put(wt("alatnya?") + k * 0.06, pop(900 + 60 * k, 1400 + 60 * k, 0.05), 0.08)
-put(wt("Komen") - 0.05, whoosh(0.35, 600, 2000, 1.4, 0.5), W * 0.6)
-for k in range(6): put(42.13 + k * 0.06, tick(0.022, 4200), 0.14)
-put(42.55, pop(900, 1600, 0.1), 0.15)
-put(wt("aku", 42) - 0.02, tick(0.03, 2000), 0.2); put(wt("kirim", 42) - 0.02, whoosh(0.7, 700, 3600, 1.2, 0.5), W)
+pops(wt("agent") - 0.06, 2, 0.14, 800, 0.1); pops(wt("banyak,") - 0.14, 3, 0.12, 900, 0.1)
+put(wt("tapi") - 0.05, scribble(0.5), 0.07)
+for k in range(5): put(wt("berantakan?") - 0.12 + k * 0.05, pop(1500 + 100 * k, 2100 + 100 * k, 0.05), 0.07)
+put(wt("berantakan?") + 0.02, buzz(0.28), 0.05); put(wt("berantakan?") + 0.04, boom(0.4, 140, 60), 0.16)
+put(wt("Ini") - 0.16, whoosh(0.5, 2200, 500, 1.2, 0.4), W * 0.7)
+for k in range(4): put(wt("empat") - 0.16 + k * 0.07, tick(0.03, 2400 + 200 * k), 0.16)
+put(wt("empat") - 0.14, whoosh(0.45, 500, 2400, 1.3, 0.5), W * 0.6)
+put(wt("open") + 0.02, whoosh(0.35, 1200, 3000, 1.8, 0.4), W * 0.3)
+put(wt("gratis") - 0.04, boom(0.35, 200, 90), 0.2); put(wt("gratis") + 0.02, chime((1318.5, 1760, 2637), 1.0), 0.07)
+pops(wt("ngaturnya.") - 0.2, 9, 0.045, 900, 0.07); put(wt("ngaturnya.") + 0.35, chime((1568, 2093), 0.7), 0.05)
+put(en("s01") - 0.36, whoosh(0.35, 800, 2600, 1.4, 0.4), W * 0.4)
+# --- t1 OpenHands Agent Canvas
+put(st("t1") - 0.02, whoosh(0.5, 400, 2000, 1.2, 0.5), W * 0.6); rail_on("Satu,", 6)
+put(wt("OpenHands") - 0.1, whoosh(0.35, 900, 2600, 1.6, 0.4), W * 0.4); put(wt("Canvas.") - 0.02, pop(900, 1500, 0.08), 0.12)
+for k in range(4): put(wt("Canvas.") - 0.08 + k * 0.07, tick(0.02, 3000 + 200 * k), 0.07)
+put(wt("pusat") + 0.05, chime((1046, 1318, 1568), 0.9), 0.06)
+for w, after in [("jalanin", 9), ("Claude", 10), ("Codex,", 11), ("Gemini,", 12)]:
+    t = wt(w, after); put(t - 0.02, rise(0.25, 500, 1100), 0.05); put(t + 0.04, pop(1000, 1500, 0.06), 0.1)
+typing(wt("jalanin") + 0.1, wt("Gemini,") + 0.3, 0.06, 18)
+for w in ["laptop,", "server,", "cloud."]: put(wt(w) - 0.04, tick(0.03, 2000), 0.18); put(wt(w) + 0.06, pop(800, 1300, 0.07), 0.12)
+put(en("t1") - 0.42, pop(1100, 1700, 0.06), 0.12); put(en("t1") - 0.3, whoosh(0.4, 600, 2800, 1.4, 0.4), W * 0.6)
+# --- t2 Paperclip
+rail_on("Dua,", 15); put(wt("Paperclip.") - 0.12, whoosh(0.35, 900, 2600, 1.6, 0.4), W * 0.4)
+put(wt("Kamu", 16) - 0.1, pop(700, 1100, 0.08), 0.13); put(wt("perusahaan") - 0.08, pop(800, 1200, 0.08), 0.12)
+pops(wt("AI", 17) - 0.12, 4, 0.09, 800, 0.11)
+put(wt("struktur") - 0.06, whoosh(0.4, 1500, 3500, 2.0, 0.4), W * 0.3)
+for k in range(3): put(wt("tugas,") - 0.08 + k * 0.07, tick(0.025, 3200 + 250 * k), 0.14)
+put(wt("budget,") - 0.1, pop(700, 1000, 0.08), 0.1); put(wt("budget,") + 0.1, rise(0.55, 400, 900), 0.04)
+put(wt("approval") - 0.3, whoosh(0.4, 500, 2000, 1.3, 0.5), W * 0.5)
+put(wt("kamu.", 21) - 0.06, tick(0.03, 1800), 0.24); put(wt("kamu.", 21) + 0.02, chime((1568, 2093, 2637), 0.9), 0.07)
+put(en("t2") - 0.42, pop(1100, 1700, 0.06), 0.12); put(en("t2") - 0.33, whoosh(0.45, 2600, 500, 1.2, 0.4), W * 0.7)
+# --- t3 Orca
+put(st("t3"), whoosh(0.45, 500, 2600, 1.2, 0.4), W * 0.6); rail_on("Tiga,", 22)
+put(wt("Orca.") - 0.12, whoosh(0.35, 900, 2600, 1.6, 0.4), W * 0.4)
+put(wt("Satu", 23) - 0.1, pop(700, 1100, 0.08), 0.13); put(wt("koordinator,") - 0.05, chime((1318.5, 1760), 0.6), 0.06)
+put(wt("bagi") + 0.02, zap(0.35), 0.04); pops(wt("bagi") + 0.04, 3, 0.05, 1000, 0.1)
+pops(wt("agent", 26) + 0.4, 3, 0.06, 600, 0.12)
+put(wt("kerja", 27), rise(wt("sendiri.", 28) - wt("kerja", 27) + 0.2, 300, 900), 0.035)
+for k in range(3): put(wt("worktree") - 0.12 + k * 0.07, tick(0.025, 2800 + 250 * k), 0.14)
+pops(wt("sendiri.", 28) + 0.05, 3, 0.12, 1100, 0.12); put(wt("sendiri.", 28) + 0.42, chime((1568, 2093, 2637), 0.8), 0.06)
+put(en("t3") - 0.42, pop(1100, 1700, 0.06), 0.12); put(en("t3") - 0.31, whoosh(0.4, 1800, 400, 1.2, 0.4), W * 0.5)
+# --- t4 TeamAI
+put(st("t4"), whoosh(0.5, 300, 2200, 1.0, 0.6), W * 0.6); rail_on("Empat,", 29)
+put(wt("TeamAI") - 0.12, whoosh(0.35, 900, 2600, 1.6, 0.4), W * 0.4); put(wt("Tencent.") - 0.05, pop(900, 1400, 0.07), 0.11)
+for w in ["Skill,", "rules,", "MCP"]: put(wt(w) - 0.08, pop(800, 1200, 0.07), 0.12)
+pops(wt("semua") - 0.06, 4, 0.1, 700, 0.11)
+typing(wt("disimpan") + 0.05, wt("Git,") - 0.05, 0.07, 20); put(wt("Git,") - 0.1, pop(900, 1500, 0.08), 0.13)
+put(wt("sync") - 0.15, whoosh(0.5, 600, 3000, 1.4, 0.4), W * 0.5); pops(wt("sync") + 0.32, 4, 0.07, 1200, 0.1)
+put(wt("otomatis.") + 0.1, chime((1046, 1568, 2093), 1.0), 0.07)
+put(en("t4") - 0.45, pop(1100, 1700, 0.06), 0.12); put(en("t4") - 0.31, whoosh(0.4, 2000, 600, 1.4, 0.4), W * 0.5)
+# --- s06 the honest note
+for k in range(4): put(wt("Keempatnya") + k * 0.07, whoosh(0.25, 2400, 900, 2.0, 0.3), W * 0.3); put(wt("Keempatnya") + 0.25 + k * 0.07, pop(700, 1100, 0.07), 0.1)
+for k in range(4): put(wt("open", 38) - 0.12 + k * 0.08 + 0.2, pop(500, 300, 0.07), 0.12)
+put(wt("gratis.") - 0.04, boom(0.4, 180, 80), 0.2); put(wt("gratis.") + 0.03, chime((1318.5, 1760, 2637), 1.0), 0.07)
+put(wt("Cuma,") - 0.15, whoosh(0.5, 2000, 500, 1.2, 0.5), W * 0.5); put(wt("Cuma,") + 0.05, pop(400, 260, 0.1), 0.1)
+for w in ["model", "akun", "API"]: put(wt(w, 40) - 0.08, pop(800, 1250, 0.07), 0.12)
+put(wt("sendiri.", 43) - 0.1, tick(0.03, 2200), 0.1)
+put(en("s06") - 0.34, whoosh(0.35, 800, 2600, 1.4, 0.4), W * 0.4)
+# --- s07 CTA
+put(st("s07"), whoosh(0.5, 400, 1800, 1.3, 0.4), W * 0.6)
+for k in range(4): put(wt("link", 44) - 0.12 + k * 0.07, tick(0.025, 2600 + 200 * k), 0.12)
+put(wt("cara", 44) - 0.05, boom(0.3, 220, 110), 0.12); put(wt("cara", 44) + 0.12, pop(900, 1400, 0.07), 0.1)
+put(wt("Komen") - 0.32, whoosh(0.4, 600, 2000, 1.4, 0.5), W * 0.6)
+for k in range(5): put(wt("AGENT,") - 0.1 + k * 0.075, tick(0.022, 4200), 0.15)
+put(wt("AGENT,") + 0.32, pop(900, 1600, 0.1), 0.15)
+put(wt("aku", 46) - 0.08, tick(0.03, 2000), 0.2); put(wt("aku", 46) + 0.15, whoosh(0.6, 700, 3600, 1.2, 0.5), W)
 put(wt("DM.") - 0.02, chime((1568, 2093), 0.8), 0.07)
-put(T["total_sec"] - 1.5, chime((1046, 1568, 2093, 2637), 1.6), 0.07)
+put(T["total_sec"] - 0.9, chime((1046, 1568, 2093, 2637), 1.6), 0.06)
 x = np.clip(out, -1, 1); x = (x * 32767).astype(np.int16)
 f = wave.open(str(P / "assets/audio/sfx.wav"), "wb"); f.setnchannels(1); f.setsampwidth(2); f.setframerate(SR); f.writeframes(x.tobytes()); f.close()
 print("sfx.wav", round(len(x) / SR, 2), "s, peak", round(float(np.abs(out).max()), 3))

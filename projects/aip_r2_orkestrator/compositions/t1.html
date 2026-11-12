@@ -1,0 +1,152 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #t1-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    .t1-a { position: absolute; }
+    #t1-glow { left: 40px; top: 330px; width: 1000px; height: 660px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    .t1-lab { position: absolute; font: 700 14px/18px Poppins, sans-serif; letter-spacing: .16em; color: #8293b0; white-space: nowrap; }
+    /* agent rows (card coords) */
+    .t1-row { position: absolute; left: 28px; width: 430px; height: 68px; transform-origin: 0% 50%; }
+    .t1-rb { position: absolute; inset: 0; border-radius: 18px; background: #ffffff; box-shadow: inset 0 0 0 1.5px #e3e9f4, 0 10px 20px -16px rgba(10,13,44,.4); }
+    .t1-rr { position: absolute; inset: 0; border-radius: 18px; box-shadow: inset 0 0 0 2px #2da44e, 0 0 0 5px rgba(45,164,78,.12); }
+    .t1-ti { position: absolute; left: 12px; top: 12px; width: 44px; height: 44px; border-radius: 14px; background: #eef3fb; }
+    .t1-tn { position: absolute; left: 12px; top: 12px; width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, #0a0d2c, #294b77); }
+    .t1-ti .rk-ic, .t1-tn .rk-ic { position: absolute; left: 10px; top: 10px; }
+    .t1-nm { position: absolute; left: 70px; top: 0; font: 700 22px/68px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .t1-s0, .t1-s1 { position: absolute; right: 14px; top: 19px; height: 30px; border-radius: 15px; font: 700 14px/30px Poppins, sans-serif; white-space: nowrap; }
+    .t1-s0 { width: 74px; background: #eef2f8; color: #8293b0; text-align: center; }
+    .t1-s1 { width: 94px; background: #e9f7ee; color: #1f8a3e; padding-left: 30px; }
+    .t1-s1 i.d { position: absolute; left: 13px; top: 10px; width: 10px; height: 10px; border-radius: 50%; background: #2da44e; }
+    .t1-s1 i.p { position: absolute; left: 8px; top: 5px; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #2da44e; box-sizing: border-box; }
+    #t1-more { left: 28px; top: 470px; width: 430px; height: 48px; border-radius: 16px; border: 2px dashed #c9d6ea; box-sizing: border-box;
+      font: 400 17px/44px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; padding-left: 46px; }
+    #t1-more b { font-weight: 700; color: #294b77; }
+    #t1-more .rk-ic { position: absolute; left: 16px; top: 11px; }
+    /* backends */
+    .t1-be { position: absolute; top: 156px; width: 136px; height: 150px; transform-origin: 50% 60%; }
+    .t1-bw, .t1-bn { position: absolute; inset: 0; border-radius: 22px; }
+    .t1-bw { background: #ffffff; box-shadow: inset 0 0 0 1.5px #e3e9f4, 0 12px 22px -18px rgba(10,13,44,.4); }
+    .t1-bn { background: linear-gradient(150deg, #0a0d2c, #294b77); box-shadow: 0 0 0 6px rgba(41,75,119,.14), 0 18px 28px -14px rgba(10,13,44,.6); }
+    .t1-bw .rk-ic, .t1-bn .rk-ic { position: absolute; left: 44px; top: 30px; }
+    .t1-bl { position: absolute; left: 0; right: 0; top: 92px; text-align: center; font: 700 19px/24px Poppins, sans-serif; white-space: nowrap; }
+    .t1-bw .t1-bl { color: #294b77; } .t1-bn .t1-bl { color: #ffffff; }
+    .t1-bk { position: absolute; left: 100px; top: -10px; width: 32px; height: 32px; border-radius: 50%; background: #2da44e; box-shadow: 0 0 0 3px #fff; }
+    .t1-bk svg { position: absolute; left: 6px; top: 6px; }
+    /* control centre panel */
+    #t1-cc { left: 488px; top: 322px; width: 424px; height: 196px; }
+    #t1-ccb { left: 0; top: 0; width: 424px; height: 196px; border-radius: 22px; background: linear-gradient(160deg, #f2f6fd, #e8effa); box-shadow: inset 0 0 0 1.5px #dbe5f4; }
+    #t1-ccr { left: 0; top: 0; width: 424px; height: 196px; border-radius: 22px; box-shadow: inset 0 0 0 2.5px #294b77, 0 0 0 7px rgba(41,75,119,.12); }
+    #t1-cci { left: 20px; top: 18px; width: 40px; height: 40px; border-radius: 12px; }
+    #t1-cci .rk-ic { position: absolute; left: 9px; top: 9px; }
+    #t1-cct { left: 74px; top: 16px; font: 700 21px/26px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #t1-ccs { left: 74px; top: 42px; font: 400 16px/20px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #t1-ccn { left: 20px; top: 76px; width: 96px; height: 96px; border-radius: 24px; background: #ffffff; box-shadow: 0 10px 20px -14px rgba(10,13,44,.5);
+      text-align: center; font: 700 58px/96px Poppins, sans-serif; }
+    #t1-ccl { left: 134px; top: 92px; font: 700 24px/30px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #t1-ccm { left: 134px; top: 126px; font: 400 16px/22px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="t1" data-width="1080" data-height="1920">
+    <div id="t1-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // t1 "Satu, OpenHands Agent Canvas. Satu pusat kontrol buat jalanin Claude Code, Codex, sampai Gemini, di laptop, server, atau cloud."
+      // (README: "The self-hosted developer control center for coding agents… Run OpenHands, Claude Code, Codex, Gemini, Pi, OpenCode, or
+      //  any ACP-compatible agent across local, remote, and cloud backends.")
+      // START: rail as s01's end (4 upcoming); pill 1 goes active on "Satu,". The app card rises in at once (frame 0 already shows it moving).
+      // "OpenHands … Canvas.": title wipes up, repo line, "open source" chip · "pusat kontrol": the control-centre panel lights ·
+      // "jalanin": OpenHands starts; "Claude Code" / "Codex," / "Gemini," each row starts on its word (counter 1→4); "sampai": "+ agent lain (ACP)"
+      // · "laptop, / server, / cloud.": the 3 backend tiles switch on. END: pill 1 done; the card flips edge-on (rotationY 90) → t2 flips in from −90.
+      const ID = "t1", K = 0;
+      const SC = window.VO_SCENES.find((s) => s.id === ID), ST = SC.start, D = SC.dur, VW = window.VO_WORDS, R2 = window.R2, RD = window.ROUNDS[K];
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 1e-3); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tNum = RD.tNum - ST, tName = RD.tName - ST;
+      const tCan = wt("Canvas."), tPus = wt("pusat"), tJal = wt("jalanin"), tCl = wt("Claude"), tCx = wt("Codex,"), tSam = wt("sampai"), tGe = wt("Gemini,"),
+        tLap = wt("laptop,"), tSrv = wt("server,"), tClo = wt("cloud.");
+      // ---------------------------------------------------------------- DOM
+      const AG = [["OpenHands", "bot"], ["Claude Code", "terminal"], ["Codex", "terminal"], ["Gemini CLI", "terminal"]];
+      const BE = [["Laptop", "laptop"], ["Server", "server"], ["Cloud", "cloud"]];
+      let h = `<div class="t1-a" id="t1-glow"></div>` + R2.railHTML("t1") + `<div class="rk-card" id="t1-card">` + R2.cardHeadHTML("t1", K, "") +
+        `<div class="t1-lab" style="left:28px;top:128px">AGENT</div><div class="t1-lab" style="left:488px;top:128px">JALAN DI</div>`;
+      h += AG.map(([n, icn], i) => `<div class="t1-row" id="t1-r${i}" style="top:${156 + i * 78}px"><div class="t1-rb"></div><div class="t1-rr" id="t1-rr${i}"></div>` +
+        `<div class="t1-ti">${R2.ic(icn, 24, "#294b77")}</div><div class="t1-tn" id="t1-tn${i}">${R2.ic(icn, 24, "#ffffff")}</div><b class="t1-nm">${n}</b>` +
+        `<div class="t1-s0" id="t1-s0${i}">siap</div><div class="t1-s1" id="t1-s1${i}"><i class="p" id="t1-sp${i}"></i><i class="d"></i>jalan</div></div>`).join("");
+      h += `<div class="t1-a" id="t1-more">${R2.ic("plus", 20, "#5d6f8f")}<b>agent lain</b> yang support ACP</div>`;
+      h += BE.map(([n, icn], i) => `<div class="t1-be" id="t1-b${i}" style="left:${488 + i * 144}px"><div class="t1-bw">${R2.ic(icn, 48, "#294b77")}<div class="t1-bl">${n}</div></div>` +
+        `<div class="t1-bn" id="t1-bn${i}">${R2.ic(icn, 48, "#ffffff")}<div class="t1-bl">${n}</div></div><div class="t1-bk" id="t1-bk${i}">${R2.CHECK(20)}</div></div>`).join("");
+      h += `<div class="t1-a" id="t1-cc"><div class="t1-a" id="t1-ccb"></div><div class="t1-a" id="t1-ccr"></div><div class="t1-a rk-nav" id="t1-cci">${R2.ic("layout-dashboard", 22, "#ffffff")}</div>` +
+        `<div class="t1-a" id="t1-cct">Pusat kontrol</div><div class="t1-a" id="t1-ccs">self-hosted · 1 layar</div>` +
+        `<div class="t1-a" id="t1-ccn"><span class="rk-g" id="t1-ccv">0</span></div><div class="t1-a" id="t1-ccl">agent jalan</div><div class="t1-a" id="t1-ccm">dari satu dashboard</div></div>`;
+      h += `</div>`;
+      $("t1-cam").innerHTML = h;
+
+      // ---------------------------------------------------------------- rail + card entrance
+      R2.railInit(tl, "t1", [0, 0, 0, 0]);
+      R2.railActivate(tl, "t1", K, tNum, tName);
+      const card = $("t1-card"), glow = $("t1-glow");
+      I(glow, { opacity: 0.7 });
+      I(card, { opacity: 0, y: 90, scale: 0.94, rotationY: 0, transformPerspective: 3200 });
+      ft(card, { opacity: 0, y: 90, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }, 0);
+      const hic = $("t1-hic"), ht = $("t1-ht"), hr = $("t1-hr"), hos = $("t1-hos");
+      I(hic, { scale: 0.4, opacity: 0, rotation: -30 }); ft(hic, { scale: 0.4, opacity: 0, rotation: -30 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.42, ease: "back.out(2.2)" }, 0.18);
+      I(ht, { yPercent: 110 }); ft(ht, { yPercent: 110 }, { yPercent: 0, duration: 0.42, ease: "power4.out" }, tName - 0.1);
+      I(hr, { opacity: 0, x: -14 }); ft(hr, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.34, ease: "power3.out" }, tName + 0.3);
+      I(hos, { opacity: 0, scale: 0.6 }); ft(hos, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(2.6)" }, tCan - 0.05);
+      // labels + rows + backends enter (neutral) on "Satu pusat …"
+      document.querySelectorAll("#t1-card .t1-lab").forEach((e, k) => { I(e, { opacity: 0 }); ft(e, { opacity: 0 }, { opacity: 1, duration: 0.3 }, tCan - 0.1 + k * 0.05); });
+      AG.forEach((_, i) => {
+        const r = $("t1-r" + i); I(r, { opacity: 0, x: -40 });
+        ft(r, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, tCan - 0.1 + i * 0.07);
+        I($("t1-rr" + i), { opacity: 0 }); I($("t1-tn" + i), { opacity: 0 }); I($("t1-s1" + i), { opacity: 0 }); I($("t1-s0" + i), { opacity: 1 });
+        I($("t1-sp" + i), { scale: 0.5, opacity: 0 });
+      });
+      BE.forEach((_, i) => {
+        const b = $("t1-b" + i); I(b, { opacity: 0, y: 30, scale: 0.9 });
+        ft(b, { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.8)" }, tCan + 0.05 + i * 0.07);
+        I($("t1-bn" + i), { opacity: 0 }); I($("t1-bk" + i), { opacity: 0, scale: 0 });
+      });
+      // "pusat kontrol": the control centre lights up
+      const cc = $("t1-cc"), ccr = $("t1-ccr"), ccn = $("t1-ccn"), ccv = $("t1-ccv");
+      I(cc, { opacity: 0, y: 30 }); ft(cc, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, tPus);
+      I(ccr, { opacity: 0 }); ft(ccr, { opacity: 0 }, { opacity: 1, duration: 0.18, yoyo: true, repeat: 3, ease: "sine.inOut" }, tPus + 0.32);
+      I(ccv, { textContent: "0" });
+      // "jalanin … Claude Code, Codex, … Gemini,": each agent starts on its word
+      const tRun = [tJal + 0.1, tCl - 0.04, tCx - 0.04, tGe - 0.04];
+      tRun.forEach((t, i) => {
+        const r = $("t1-r" + i);
+        ft($("t1-rr" + i), { opacity: 0 }, { opacity: 1, duration: 0.18 }, t);
+        ft($("t1-tn" + i), { opacity: 0 }, { opacity: 1, duration: 0.18 }, t);
+        ft($("t1-s1" + i), { opacity: 0 }, { opacity: 1, duration: 0.14 }, t + 0.04);
+        ft($("t1-s0" + i), { opacity: 1 }, { opacity: 0, duration: 0.14 }, t + 0.04);
+        ft(r, { scale: 1 }, { scale: 1.035, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+        const sp = $("t1-sp" + i);   // status ping, repeating
+        for (let k = 0; t + 0.1 + k * 0.7 < D - 0.3; k++) ft(sp, { scale: 0.5, opacity: 0.9 }, { scale: 1.5, opacity: 0, duration: 0.6, ease: "power2.out" }, t + 0.1 + k * 0.7);
+        tl.set(ccv, { textContent: String(i + 1) }, t + 0.04);
+        ft(ccn, { scale: 1 }, { scale: 1.18, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, t + 0.04);
+      });
+      const more = $("t1-more"); I(more, { opacity: 0, y: 16 });
+      ft(more, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, tSam);
+      // "laptop, server, cloud.": the backends switch on
+      [tLap, tSrv, tClo].forEach((t, i) => {
+        const b = $("t1-b" + i);
+        ft($("t1-bn" + i), { opacity: 0 }, { opacity: 1, duration: 0.16 }, t - 0.04);
+        ft(b, { scale: 1, y: 0 }, { scale: 1.08, y: -6, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, t - 0.04);
+        ft($("t1-bk" + i), { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(3)" }, t + 0.06);
+      });
+      // ---------------------------------------------------------------- TRANSITION → t2: pill done, the card flips edge-on
+      R2.railDone(tl, "t1", K, D - 0.42);
+      ft(card, { rotationY: 0, scale: 1 }, { rotationY: 90, scale: 0.9, duration: 0.3, ease: "power2.in" }, D - 0.31);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines[ID] = tl;
+    })();
+  </script>
+</template>

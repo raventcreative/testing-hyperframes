@@ -1,130 +1,224 @@
 <template>
   <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
     .s02-a { position: absolute; }
-    .s02-g { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .s02-ic { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-    /* ---- the prompt document (shared geometry with s03/s04: 860×600 at 110,330) */
-    #s02-doc { left: 110px; top: 330px; width: 860px; height: 600px; border-radius: 32px; background: linear-gradient(180deg, #fff, #f5f8fd);
-      box-shadow: 0 46px 80px -40px rgba(10,13,44,.45), 0 0 0 1.5px rgba(10,13,44,.06); transform-origin: 50% 50%; }
-    #s02-ib { left: 40px; top: 24px; width: 64px; height: 64px; border-radius: 20px; background: #eef3fb; }
-    #s02-ib svg { position: absolute; left: 15px; top: 15px; width: 34px; height: 34px; stroke: #294b77; stroke-width: 2; }
-    #s02-tt { left: 124px; top: 24px; height: 64px; font: 700 40px/64px Poppins, sans-serif; white-space: nowrap; }
-    #s02-tt .m { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .06em; margin: 0 -.06em; }
-    #s02-tt .w { display: inline-block; }
-    #s02-pill { left: 612px; top: 22px; width: 208px; height: 68px; border-radius: 34px; background: linear-gradient(180deg, #fff, #f2f6fc); box-shadow: 0 0 0 1.5px #e0e8f5, 0 10px 20px -14px rgba(10,13,44,.4); transform-origin: 34px 34px; }
-    #s02-six { left: 4px; top: 4px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0a0d2c, #294b77); font: 700 34px/60px Poppins, sans-serif; color: #fff; text-align: center; }
-    #s02-pill span { position: absolute; left: 78px; top: 0; font: 700 25px/68px Poppins, sans-serif; color: #294b77; }
-    #s02-r6 { left: 616px; top: 26px; width: 60px; height: 60px; border-radius: 50%; border: 3px solid #294b77; }
-    #s02-ck { left: 656px; top: 14px; width: 30px; height: 30px; border-radius: 50%; background: #2da44e; box-shadow: 0 0 0 3px #fff, 0 6px 12px -4px rgba(45,164,78,.8); }
-    #s02-ck svg { position: absolute; left: 6px; top: 6px; width: 18px; height: 18px; stroke: #fff; stroke-width: 3.4; }
-    .s02-dv { position: absolute; left: 40px; right: 40px; top: 104px; height: 2px; background: #e9eef7; }
-    .s02-sl { position: absolute; left: 40px; width: 300px; height: 66px; border-radius: 18px; border: 2px dashed #cbd7ea; background: #f6f8fc; transform-origin: 0 50%; }
-    .s02-sl b { position: absolute; left: 22px; top: 0; font: 700 22px/62px Poppins, sans-serif; color: #b4c3da; }
-    .s02-sk { position: absolute; left: 370px; height: 10px; border-radius: 5px; background: #e9eef6; overflow: hidden; transform-origin: 0 50%; }
-    .s02-sk i { position: absolute; left: 0; top: 0; width: 100%; height: 10px; border-radius: 5px; background: var(--c); opacity: .3; transform-origin: 0 50%; }
-    .s02-hn { position: absolute; left: 370px; font: 400 26px/36px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
-    .s02-rg { position: absolute; left: 0; top: 0; width: 300px; height: 66px; border-radius: 20px; border: 3px solid var(--c); transform-origin: 50% 50%; }
-    /* ---- the 6 prompt blocks (shared CSS: s01 · s02 · s03 · s04) */
-    .s02-blk { position: absolute; left: 0; top: 0; width: 300px; height: 66px; transform-origin: 50% 50%; filter: drop-shadow(0 10px 12px rgba(10,13,44,.18)); }
-    .s02-blk .bg { position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(180deg, var(--c), var(--d));
-      -webkit-mask-image: radial-gradient(circle 12px at 254px 0, transparent 95%, #000 100%); mask-image: radial-gradient(circle 12px at 254px 0, transparent 95%, #000 100%); }
-    .s02-blk .bg::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 52%; border-radius: 18px 18px 0 0; background: linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,0)); }
-    .s02-blk .tab { position: absolute; left: 244px; top: 56px; width: 20px; height: 20px; border-radius: 50%; background: var(--d); }
-    .s02-blk svg { position: absolute; left: 20px; top: 16px; width: 34px; height: 34px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-    .s02-blk b { position: absolute; left: 66px; top: 0; font: 700 26px/66px Poppins, sans-serif; color: #fff; letter-spacing: .06em; text-shadow: 0 1px 2px rgba(10,13,44,.2); white-space: nowrap; }
+    #s02-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    .s02-card { background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 40px 70px -34px rgba(10,13,44,.5), 0 0 0 1.5px rgba(10,13,44,.07); }
+    /* ---- phase A: the search window + energy battery */
+    #s02-w { left: 120px; top: 336px; width: 840px; height: 440px; border-radius: 30px; transform-origin: 50% 60%; }
+    #s02-wb { left: 0; top: 0; width: 840px; height: 68px; border-radius: 30px 30px 0 0; background: #eef2f9; }
+    .s02-dots { position: absolute; left: 26px; top: 28px; display: flex; gap: 9px; }
+    .s02-dots i { display: block; width: 13px; height: 13px; border-radius: 50%; background: #c9d4e6; }
+    #s02-sf { left: 104px; top: 13px; width: 560px; height: 42px; border-radius: 21px; background: #ffffff; box-shadow: inset 0 0 0 1.5px #d9e2f0; }
+    #s02-sf svg { position: absolute; left: 16px; top: 11px; width: 20px; height: 20px; color: #5d6f8f; display: block; }
+    #s02-st { left: 48px; top: 0; font: 400 19px/42px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s02-car { left: 0; top: 10px; width: 2.5px; height: 22px; border-radius: 2px; background: #3a6fe0; }
+    #s02-bat { left: 690px; top: 296px; width: 290px; height: 104px; border-radius: 30px; transform-origin: 50% 50%; }
+    #s02-bat .lb { position: absolute; left: 24px; top: 12px; font: 700 15px/22px Poppins, sans-serif; letter-spacing: .16em; color: #5d6f8f; }
+    #s02-bo { left: 24px; top: 44px; width: 116px; height: 44px; border-radius: 11px; box-shadow: inset 0 0 0 4px #294b77; }
+    #s02-bo::after { content: ""; position: absolute; right: -9px; top: 13px; width: 6px; height: 18px; border-radius: 0 4px 4px 0; background: #294b77; }
+    #s02-bf { left: 8px; top: 8px; width: 100px; height: 28px; border-radius: 6px; background: #2da44e; transform-origin: 0 50%; }
+    #s02-bp { left: 158px; top: 36px; font: 700 40px/56px Poppins, sans-serif; color: #294b77; white-space: nowrap; letter-spacing: -.01em; }
+    .s02-rw { position: absolute; left: 24px; width: 792px; height: 58px; border-radius: 16px; background: #ffffff; box-shadow: 0 0 0 1.5px #e6ecf6; }
+    .s02-rw i { position: absolute; left: 14px; top: 11px; width: 36px; height: 36px; border-radius: 10px; background: #e6ecf6; }
+    .s02-rw b { position: absolute; left: 64px; top: 14px; height: 12px; border-radius: 6px; background: #d5deec; }
+    .s02-rw u { position: absolute; left: 64px; top: 34px; height: 10px; border-radius: 5px; background: #e8edf5; }
+    .s02-rw s { position: absolute; right: 14px; top: 13px; width: 96px; height: 32px; border-radius: 16px; box-shadow: inset 0 0 0 1.5px #c9d6ea; }
+    #s02-drop { left: 646px; top: 300px; width: 34px; height: 46px; }
+    #s02-drop svg { width: 34px; height: 46px; display: block; }
+    /* ---- phase B: cascade of job-site windows (site names as plain text) */
+    .s02-sw { position: absolute; width: 560px; height: 300px; border-radius: 22px; transform-origin: 50% 50%; }
+    .s02-sw .ts { position: absolute; left: 0; top: 0; width: 560px; height: 44px; border-radius: 22px 22px 0 0; background: #eef2f9; }
+    .s02-sw .tb { position: absolute; left: 14px; top: 5px; height: 39px; padding: 0 20px 0 42px; border-radius: 12px 12px 0 0; background: #ffffff;
+      font: 700 19px/35px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s02-sw .tb svg { position: absolute; left: 14px; top: 8px; width: 19px; height: 19px; color: #5d6f8f; display: block; }
+    .s02-sw .tx { position: absolute; right: 22px; top: 13px; width: 18px; height: 18px; color: #9aabc6; }
+    .s02-sw .tx svg { width: 18px; height: 18px; display: block; }
+    .s02-sw .h { position: absolute; left: 46px; top: 64px; font: 700 23px/30px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s02-sw .l { position: absolute; left: 46px; height: 12px; border-radius: 6px; background: #e3e9f3; }
+    .s02-sw .ap { position: absolute; left: 46px; top: 230px; width: 156px; height: 50px; border-radius: 25px; background: linear-gradient(135deg, #0a0d2c, #294b77);
+      font: 700 21px/50px Poppins, sans-serif; color: #ffffff; text-align: center; box-shadow: 0 12px 20px -12px rgba(10,13,44,.7); transform-origin: 50% 50%; }
+    .s02-sw .ap2 { position: absolute; left: 218px; top: 230px; width: 150px; height: 50px; border-radius: 25px; box-shadow: inset 0 0 0 2px #d5dfee; }
+    #s02-cnt { left: 586px; top: 316px; width: 398px; height: 70px; border-radius: 35px; transform-origin: 50% 50%; }
+    #s02-cnt i { position: absolute; left: 12px; top: 11px; width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #fff; }
+    #s02-cnt i svg { position: absolute; left: 12px; top: 12px; width: 24px; height: 24px; display: block; }
+    #s02-cnt span { position: absolute; left: 74px; top: 0; font: 400 20px/70px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s02-cnt b { position: absolute; right: 26px; top: 0; font: 700 34px/70px Poppins, sans-serif; white-space: nowrap; }
+    .s02-ty { position: absolute; left: 0; top: 0; width: 64px; height: 40px; margin: -20px 0 0 -32px; border-radius: 20px; background: linear-gradient(135deg, #0a0d2c, #294b77);
+      color: #fff; box-shadow: 0 10px 18px -10px rgba(10,13,44,.8); }
+    .s02-ty svg { position: absolute; left: 21px; top: 9px; width: 22px; height: 22px; display: block; }
+    #s02-cur { left: 0; top: 0; width: 52px; height: 52px; transform-origin: 8px 8px; filter: drop-shadow(0 6px 8px rgba(10,13,44,.35)); }
+    #s02-cur svg { width: 52px; height: 52px; display: block; }
+    #s02-clk { left: 0; top: 0; width: 0; height: 0; }
+    #s02-clk i { position: absolute; left: -36px; top: -36px; width: 72px; height: 72px; border-radius: 50%; box-shadow: 0 0 0 4px rgba(58,111,224,.55); }
+    /* ---- phase C: the inbox */
+    #s02-ib { left: 150px; top: 336px; width: 780px; height: 540px; border-radius: 32px; transform-origin: 50% 50%; }
+    #s02-ihi { left: 28px; top: 26px; width: 58px; height: 58px; border-radius: 18px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #fff; }
+    #s02-ihi svg { position: absolute; left: 15px; top: 15px; width: 28px; height: 28px; display: block; }
+    #s02-iht { left: 104px; top: 22px; font: 700 32px/40px Poppins, sans-serif; white-space: nowrap; }
+    #s02-ihs { left: 105px; top: 62px; font: 400 18px/24px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s02-rep { left: 530px; top: 30px; width: 222px; height: 50px; border-radius: 25px; background: #f1f4fa; box-shadow: inset 0 0 0 1.5px #dfe6f2;
+      font: 400 19px/50px Poppins, sans-serif; color: #5d6f8f; text-align: center; white-space: nowrap; transform-origin: 50% 50%; }
+    #s02-rep b { color: #0a0d2c; font-weight: 700; }
+    #s02-rep1 { left: 530px; top: 30px; width: 222px; height: 50px; border-radius: 25px; background: #fff4f4; box-shadow: inset 0 0 0 2px rgba(229,72,77,.55);
+      font: 400 19px/50px Poppins, sans-serif; color: #c7343a; text-align: center; white-space: nowrap; transform-origin: 50% 50%; }
+    #s02-rep1 b { font-weight: 700; }
+    #s02-idv { left: 28px; top: 104px; width: 724px; height: 2px; background: #e9eef7; }
+    .s02-ir { position: absolute; left: 28px; width: 724px; height: 70px; border-radius: 18px; background: #ffffff; box-shadow: 0 0 0 1.5px #e6ecf6; }
+    .s02-ir .av { position: absolute; left: 14px; top: 13px; width: 44px; height: 44px; border-radius: 50%; background: #e6ecf6; color: #8a97ad; }
+    .s02-ir .av svg { position: absolute; left: 11px; top: 11px; width: 22px; height: 22px; display: block; }
+    .s02-ir .t { position: absolute; left: 72px; top: 8px; font: 700 21px/28px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s02-ir .m { position: absolute; left: 72px; top: 37px; font: 400 16px/22px Poppins, sans-serif; color: #8a97ad; white-space: nowrap; }
+    .s02-ir .st { position: absolute; right: 14px; top: 16px; height: 38px; padding: 0 16px 0 40px; border-radius: 19px; background: #f1f4fa; color: #5d6f8f;
+      font: 400 17px/38px Poppins, sans-serif; white-space: nowrap; }
+    .s02-ir .st svg { position: absolute; left: 14px; top: 10px; width: 18px; height: 18px; display: block; }
+    .s02-ir .ok { position: absolute; right: 14px; top: 16px; height: 38px; padding: 0 16px 0 40px; border-radius: 19px; background: #eaf7ee; color: #218a3e;
+      font: 700 17px/38px Poppins, sans-serif; white-space: nowrap; }
+    .s02-ir .ok svg { position: absolute; left: 14px; top: 10px; width: 18px; height: 18px; display: block; }
   </style>
-  <div data-hf-id="hf-53e6" id="root" data-composition-id="s02" data-width="1080" data-height="1920">
-    <div id="s02-st"></div>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-cam"></div>
   </div>
   <script>
     (function () {
-      // s02 "Prompt yang bagus punya 6 bagian. Peran, konteks, tugas, format, contoh, dan batasan."
-      // TRANSITION in (card flip, 2nd half): the empty prompt document flips in from edge-on where s01's machine flipped away.
-      // "Prompt yang bagus": the title rises word by word · "6": a "6 bagian" badge pops (ring) · "bagian.": 6 numbered dashed slots +
-      // skeleton lines draw in · each spoken name: its block drops "from the camera" into its slot (impact ripple, doc kicks), its hint
-      // writes in · after "batasan.": a green check on the badge, a ripple runs down the finished stack.
-      // END STATE (t = D) — s03 starts from exactly this:
-      //   doc 860×600 at (110,330), no transform · header: file icon box, title "Prompt yang bagus", pill "6 bagian" + green check badge
-      //   · divider · 6 slots (40, 120+76i doc-relative) under the blocks · 6 hints + skeleton lines (tinted bar fully drawn)
-      //   · blocks i = 0..5 (PERAN…BATASAN) at x 150, y 450 + 76·i, scale 1, rotation 0, opacity 1.
-      const D = 6.7667, ST = 5.0333, VW = window.VO_WORDS;
-      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
-      const L = (txt) => wt(txt, ST - 0.05) - ST;   // local time of a word
+      // s02 PAIN "Soalnya nyari kerja remote itu capek banget. Buka puluhan situs loker satu-satu, apply berkali-kali, yang bales dikit banget."
+      // START: s01 ends empty → a search window springs in · "nyari kerja remote": the query types · "itu capek banget": an ENERGI battery
+      // drains green → gold → coral, the window slumps, a sweat drop falls · "Buka puluhan situs loker satu-satu": 8 job-site windows
+      // (plain-text names, no logos) stack in one by one · "apply berkali-kali": a cursor hammers the Apply button, each click sends a
+      // little plane into a "Lamaran terkirim" counter · "yang bales dikit banget": an inbox swings in — rows "Belum dibalas", only one
+      // "Dibalas"; the reply chip turns coral "Balasan: 1".
+      // END STATE (t = D): everything invisible (s03 builds its terminal card from empty).
+      const D = 8.1, ST = 4.8667, VW = window.VO_WORDS, R4 = window.R4;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
       const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
       const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
       { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
       const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
       const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
-      const ICO = {
-        user: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
-        pin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
-        list: '<path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/>',
-        layout: '<rect width="18" height="7" x="3" y="3" rx="1"/><rect width="9" height="7" x="3" y="14" rx="1"/><rect width="5" height="7" x="16" y="14" rx="1"/>',
-        bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
-        shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
-        check: '<path d="M20 6 9 17l-5-5"/>',
-        file: '<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
-      };
-      const svg = (k) => `<svg class="s02-ic" viewBox="0 0 24 24">${ICO[k]}</svg>`;
-      const BK = [["PERAN", "#294b77", "#1c3658", "user"], ["KONTEKS", "#3a6fe0", "#2a57c2", "pin"], ["TUGAS", "#2da44e", "#218a3e", "list"],
-        ["FORMAT", "#7c5cff", "#6141e8", "layout"], ["CONTOH", "#f4b400", "#d99a00", "bulb"], ["BATASAN", "#e5484d", "#c7343a", "shield"]];
-      const blk = (id, k) => `<div class="s02-blk" id="${id}" style="--c:${BK[k][1]};--d:${BK[k][2]}"><div class="bg"></div><i class="tab"></i><svg viewBox="0 0 24 24">${ICO[BK[k][3]]}</svg><b>${BK[k][0]}</b></div>`;
-      const HINT = ["AI berperan jadi siapa", "Latar & situasi kamu", "Apa yang harus dikerjakan", "Bentuk hasil yang diminta", "Contoh hasil yang kamu mau", "Yang tidak boleh dilakukan"];
-      const SKW = [330, 300, 410, 360, 430, 380];
-      const rowY = (i) => 120 + 76 * i;                 // doc-relative row top
-      const BX = 150, BY = (i) => 330 + rowY(i);         // block home (scene coords)
-      // ================================================================ DOM
-      let h = `<div class="s02-a" id="s02-doc"><div class="s02-a" id="s02-ib">${svg("file")}</div>` +
-        `<div class="s02-a" id="s02-tt">${["Prompt", "yang", "bagus"].map((w, k) => `<span class="m"><span class="w s02-g" id="s02-w${k}">${w}</span></span>`).join(" ")}</div>` +
-        `<div class="s02-a" id="s02-r6"></div><div class="s02-a" id="s02-pill"><div class="s02-a" id="s02-six">6</div><span>bagian</span></div>` +
-        `<div class="s02-a" id="s02-ck">${svg("check")}</div><div class="s02-dv"></div>` +
-        BK.map((b, i) => `<div class="s02-sl" id="s02-sl${i}" style="top:${rowY(i)}px"><b>${i + 1}</b></div>` +
-          `<div class="s02-hn" id="s02-hn${i}" style="top:${rowY(i) + 2}px">${HINT[i]}</div>` +
-          `<div class="s02-sk" id="s02-sk${i}" style="top:${rowY(i) + 46}px;width:${SKW[i]}px;--c:${b[1]}"><i id="s02-sc${i}"></i></div>`).join("") + `</div>`;
-      h += BK.map((b, i) => `<div class="s02-rg" id="s02-rg${i}" style="--c:${b[1]}"></div>`).join("");
-      h += BK.map((_, k) => blk("s02-b" + k, k)).join("");
-      $("s02-st").innerHTML = h;
+      const tNy = L("nyari"), tItu = L("itu"), tCap = L("capek"), tBan = L("banget."), tBuka = L("Buka"), tSat = L("satu-satu,"), tApp = L("apply"),
+        tBer = L("berkali-kali,"), tYang = L("yang", 6), tBal = L("bales"), tDik = L("dikit"), tBan2 = L("banget.", 7);
 
-      // ================================================================ flip in (continues s01's flip)
-      const doc = $("s02-doc");
-      I(doc, { rotationX: -80, scale: 0.97, y: 0, transformPerspective: 2000, transformOrigin: "50% 50%" });
-      ft(doc, { rotationX: -80, scale: 0.97 }, { rotationX: 0, scale: 1, duration: 0.5, ease: "back.out(1.15)" }, 0);
-      // "Prompt yang bagus": the title rises word by word
-      ["Prompt", "yang", "bagus"].forEach((w, k) => {
-        const e = $("s02-w" + k), t = Math.max(0.12, L(w) - 0.06);
-        I(e, { yPercent: 110 }); ft(e, { yPercent: 110 }, { yPercent: 0, duration: 0.36, ease: "power4.out" }, t);
+      // ================================================================ DOM
+      let h = "";
+      // phase A — search window
+      h += `<div class="s02-a s02-card" id="s02-w"><div class="s02-a" id="s02-wb"></div><div class="s02-dots"><i></i><i></i><i></i></div>` +
+        `<div class="s02-a" id="s02-sf">${R4.svg("search", 2.2)}<div class="s02-a" id="s02-st"></div></div>` +
+        [0, 1, 2, 3, 4].map((i) => `<div class="s02-rw" id="s02-rw${i}" style="top:${92 + i * 68}px"><i></i><b style="width:${[300, 240, 330, 270, 210][i]}px"></b><u style="width:${[180, 220, 150, 200, 170][i]}px"></u><s></s></div>`).join("") +
+        `</div>`;
+      h += `<div class="s02-a s02-card" id="s02-bat"><span class="lb">ENERGI</span><div class="s02-a" id="s02-bo"><div class="s02-a" id="s02-bf"></div></div><span class="s02-a r4-grad" id="s02-bp">100%</span></div>`;
+      h += `<div class="s02-a" id="s02-drop"><svg viewBox="0 0 34 46"><path d="M17 2 C 22 12, 31 20, 31 30 a 14 14 0 0 1 -28 0 C 3 20, 12 12, 17 2 Z" fill="#7fb2ff" stroke="#3a6fe0" stroke-width="2.5"/><path d="M10 30 a 7 7 0 0 0 5 7" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/></svg></div>`;
+      // phase B — job-site windows (text names only)
+      const SITES = ["LinkedIn", "Upwork", "Glints", "Remote OK", "We Work Remotely", "Himalayas", "Remotive", "Jobicy"];
+      const WX = (i) => 110 + i * 34, WY = (i) => 330 + i * 40;
+      SITES.forEach((s, i) => {
+        h += `<div class="s02-sw s02-card" id="s02-sw${i}" style="left:${WX(i)}px;top:${WY(i)}px"><div class="ts"></div><div class="tb">${R4.svg("globe", 2)}${s}</div><div class="tx">${R4.svg("x", 2.4)}</div>` +
+          `<div class="h">Lowongan remote</div><div class="l" style="top:128px;width:${380 - (i % 3) * 40}px"></div><div class="l" style="top:154px;width:${300 + (i % 2) * 60}px"></div>` +
+          `<div class="l" style="top:180px;width:${400 - (i % 4) * 30}px"></div><div class="l" style="top:206px;width:${240 + (i % 3) * 30}px"></div>` +
+          `<div class="ap" id="s02-ap${i}">Apply</div><div class="ap2"></div></div>`;
       });
-      // "6": the badge pops with a ring
-      const t6 = L("6"), pill = $("s02-pill"), r6 = $("s02-r6"), six = $("s02-six");
-      I(pill, { opacity: 0, scale: 0.5 }); ft(pill, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.42, ease: "back.out(2.2)" }, t6 - 0.08);
-      I(six, { rotation: -120 }); ft(six, { rotation: -120 }, { rotation: 0, duration: 0.5, ease: "back.out(1.6)" }, t6 - 0.08);
-      I(r6, { opacity: 0, scale: 1 }); ft(r6, { opacity: 0.6, scale: 1 }, { opacity: 0, scale: 2.1, duration: 0.5, ease: "power2.out" }, t6 + 0.04);
-      // "bagian.": the 6 empty slots + skeleton lines draw in
-      const tBg = L("bagian.");
-      BK.forEach((_, i) => {
-        const sl = $("s02-sl" + i), sk = $("s02-sk" + i);
-        I(sl, { opacity: 0, scaleX: 0.3 }); ft(sl, { opacity: 0, scaleX: 0.3 }, { opacity: 1, scaleX: 1, duration: 0.34, ease: "power3.out" }, tBg - 0.06 + i * 0.05);
-        I(sk, { scaleX: 0 }); ft(sk, { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.out" }, tBg + i * 0.05);
-        I($("s02-hn" + i), { opacity: 0, x: -14 }); I($("s02-sc" + i), { scaleX: 0 });
+      h += `<div class="s02-a s02-card" id="s02-cnt"><i>${R4.svg("send", 2.2)}</i><span>Lamaran terkirim</span><b class="r4-grad" id="s02-cv">0</b></div>`;
+      for (let k = 0; k < 5; k++) h += `<div class="s02-ty" id="s02-ty${k}">${R4.svg("send", 2.2)}</div>`;
+      h += `<div class="s02-a" id="s02-clk"><i id="s02-clr"></i></div>`;
+      h += `<div class="s02-a" id="s02-cur"><svg viewBox="0 0 24 24"><path d="${'M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z'}" fill="#ffffff" stroke="#0a0d2c" stroke-width="1.6" stroke-linejoin="round"/></svg></div>`;
+      // phase C — inbox
+      const IR = [["Frontend Developer", "terkirim 3 minggu lalu"], ["Customer Support", "terkirim 2 minggu lalu"], ["Content Writer", "terkirim 2 minggu lalu"],
+        ["Virtual Assistant", "terkirim 10 hari lalu"], ["UI Designer", "terkirim 1 minggu lalu"]];
+      h += `<div class="s02-a s02-card" id="s02-ib"><div class="s02-a" id="s02-ihi">${R4.svg("inbox", 2)}</div><div class="s02-a r4-grad" id="s02-iht">Kotak masuk</div>` +
+        `<div class="s02-a" id="s02-ihs">balasan lamaran kerja</div><div class="s02-a" id="s02-rep">Balasan: <b>0</b></div><div class="s02-a" id="s02-rep1">Balasan: <b>cuma 1</b></div><div class="s02-a" id="s02-idv"></div>` +
+        IR.map((r, i) => `<div class="s02-ir" id="s02-ir${i}" style="top:${124 + i * 80}px"><div class="av">${R4.svg("brief", 2)}</div><div class="t">Lamaran · ${r[0]}</div><div class="m">${r[1]}</div>` +
+          (i === 2 ? `<div class="st" id="s02-is${i}">${R4.svg("clock", 2.2)}Belum dibalas</div><div class="ok" id="s02-ok">${R4.svg("check", 2.8)}Dibalas</div>` : `<div class="st" id="s02-is${i}">${R4.svg("clock", 2.2)}Belum dibalas</div>`) + `</div>`).join("") +
+        `</div>`;
+      $("s02-cam").innerHTML = h;
+      const cam = $("s02-cam"), W = $("s02-w");
+      I(cam, { x: 0, y: 0 });
+
+      // ================================================================ A: search window, the query, the battery drains on "capek banget"
+      I(W, { opacity: 0.4, scale: 0.9, y: 30, rotation: 0 });
+      ft(W, { opacity: 0.4, scale: 0.9, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.42, ease: "back.out(1.5)" }, 0);
+      [0, 1, 2, 3, 4].forEach((i) => { const r = $("s02-rw" + i); I(r, { opacity: 0, y: 14 }); ft(r, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 0.12 + i * 0.06); });
+      const Q = "lowongan kerja remote", st = $("s02-st");
+      I(st, { textContent: "" });
+      const qa = tNy - 0.1, qb = L("remote", 0.9) + 0.25;
+      for (let c = 1; c <= Q.length; c++) tl.set(st, { textContent: Q.slice(0, c) }, qa + (qb - qa) * (c / Q.length));
+      const bf = $("s02-bf"), bp = $("s02-bp");
+      I(bf, { scaleX: 1, backgroundColor: "#2da44e" }); I(bp, { textContent: "100%" });
+      ft(bf, { scaleX: 1 }, { scaleX: 0.12, duration: tCap + 0.05 - (tItu - 0.15), ease: "power2.in" }, tItu - 0.15);
+      tl.set(bf, { backgroundColor: "#f4b400" }, tItu + 0.2); tl.set(bf, { backgroundColor: "#e5484d" }, tCap - 0.05);
+      const pct = [100, 82, 61, 43, 27, 12];
+      pct.forEach((v, k) => tl.set(bp, { textContent: v + "%" }, tItu - 0.15 + k * ((tCap + 0.05 - (tItu - 0.15)) / (pct.length - 1))));
+      const bat = $("s02-bat");
+      I(bat, { opacity: 0, scale: 0.7, rotation: 8, y: -10 });
+      ft(bat, { opacity: 0, scale: 0.7, rotation: 8, y: -10 }, { opacity: 1, scale: 1, rotation: 3, y: 0, duration: 0.36, ease: "back.out(2)" }, tItu - 0.35);
+      [[-7, -2], [7, 2], [-5, -1], [5, 1], [-2, 0], [0, 0]].forEach(([x, r], k) => tl.set(bat, { x, rotation: 3 + r }, tBan + k * 0.04));
+      ft(bat, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.85, duration: 0.25, ease: "power2.in" }, tBuka - 0.2);
+      // "capek": the window slumps · "banget.": the battery blinks
+      ft(W, { rotation: 0, y: 0 }, { rotation: -2.5, y: 16, duration: 0.35, ease: "back.out(2)" }, tCap - 0.05);
+      [0, 1, 2, 3].forEach((k) => tl.set(bf, { opacity: k % 2 ? 1 : 0.25 }, tBan + k * 0.09)); tl.set(bf, { opacity: 1 }, tBan + 0.36);
+      const drop = $("s02-drop");
+      I(drop, { opacity: 0, y: 0, scale: 0.6 });
+      ft(drop, { opacity: 0, y: 0, scale: 0.6 }, { opacity: 1, y: 22, scale: 1, duration: 0.25, ease: "power2.out" }, tCap);
+      ft(drop, { opacity: 1, y: 22 }, { opacity: 0, y: 80, duration: 0.4, ease: "power2.in" }, tCap + 0.4);
+
+      // ================================================================ B: "Buka puluhan situs loker satu-satu": windows stack in
+      ft(W, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.92, duration: 0.3, ease: "power2.in" }, tBuka - 0.2);
+      const tW0 = tBuka - 0.08, dW = (tSat + 0.3 - tW0) / SITES.length;
+      SITES.forEach((s, i) => {
+        const w = $("s02-sw" + i), t = tW0 + i * dW;
+        I(w, { opacity: 0, scale: 0.7, x: -60, y: 40, rotation: -6 });
+        ft(w, { opacity: 0, scale: 0.7, x: -60, y: 40, rotation: -6 }, { opacity: 1, scale: 1, x: 0, y: 0, rotation: 0, duration: 0.3, ease: "back.out(1.6)" }, t);
+        I($("s02-ap" + i), { scale: 1 });
       });
-      // ================================================================ each name: its block drops into its slot
-      ["Peran,", "konteks,", "tugas,", "format,", "contoh,", "batasan."].forEach((w, i) => {
-        const tw = L(w), t0 = tw - 0.2, land = tw + 0.06, b = $("s02-b" + i), rg = $("s02-rg" + i), s = i % 2 ? 1 : -1;
-        I(b, { x: BX + s * 46, y: BY(i) - 44, scale: 1.55, rotation: s * 9, opacity: 0 });
-        ft(b, { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, t0);
-        ft(b, { x: BX + s * 46, y: BY(i) - 44, scale: 1.55, rotation: s * 9 }, { x: BX, y: BY(i), scale: 1, rotation: 0, duration: 0.26, ease: "power3.in" }, t0);
-        ft(b, { scale: 1 }, { scale: 1.035, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, land);
-        I(rg, { x: BX, y: BY(i), opacity: 0, scale: 1 });
-        ft(rg, { opacity: 0.75, scale: 1 }, { opacity: 0, scale: 1.13, duration: 0.42, ease: "power2.out" }, land);
-        ft(doc, { y: 0 }, { y: 4, duration: 0.05, yoyo: true, repeat: 1, ease: "power2.out" }, land);
-        ft($("s02-hn" + i), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, land + 0.03);
-        ft($("s02-sc" + i), { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.out" }, land + 0.06);
+      // the counter pill
+      const cnt = $("s02-cnt"), cv = $("s02-cv");
+      I(cnt, { opacity: 0, y: -16, scale: 0.9 }); I(cv, { textContent: "0" });
+      ft(cnt, { opacity: 0, y: -16, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "back.out(1.8)" }, tApp - 0.35);
+
+      // ================================================================ "apply berkali-kali": the cursor hammers Apply, planes fly into the counter
+      const AP = $("s02-ap7"), BX = WX(7) + 46 + 78, BY = WY(7) + 230 + 25;   // centre of the front window's Apply button
+      const cur = $("s02-cur"), clk = $("s02-clk"), clr = $("s02-clr");
+      I(cur, { opacity: 0, x: BX + 140, y: BY + 120, scale: 1 }); I(clk, { x: BX, y: BY }); I(clr, { opacity: 0, scale: 0.5 });
+      ft(cur, { opacity: 0, x: BX + 140, y: BY + 120 }, { opacity: 1, x: BX - 6, y: BY - 6, duration: 0.3, ease: "power3.out" }, tApp - 0.32);
+      const CL = [tApp - 0.02, tApp + 0.2, tBer + 0.12, tBer + 0.34, tBer + 0.56], CNT = [3, 7, 12, 18, 25];
+      CL.forEach((t, k) => {
+        ft(cur, { scale: 1 }, { scale: 0.82, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+        ft(AP, { scale: 1 }, { scale: 0.9, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+        ft(clr, { opacity: 0.9, scale: 0.5 }, { opacity: 0, scale: 1.4, duration: 0.3, ease: "power2.out" }, t + 0.02);
+        const ty = $("s02-ty" + k), x1 = 640, y1 = 351;
+        I(ty, { opacity: 0, x: BX, y: BY, scale: 0.6, rotation: 0 });
+        tl.set(ty, { opacity: 1 }, t + 0.04);
+        ft(ty, { x: BX }, { x: x1, duration: 0.34, ease: "power2.in" }, t + 0.04);
+        ft(ty, { y: BY }, { y: y1, duration: 0.34, ease: "power3.out" }, t + 0.04);
+        ft(ty, { scale: 0.6, rotation: 0 }, { scale: 0.9, rotation: -12, duration: 0.34, ease: "power1.out" }, t + 0.04);
+        tl.set(ty, { opacity: 0 }, t + 0.38);
+        tl.set(cv, { textContent: String(CNT[k]) }, t + 0.38);
+        ft(cnt, { scale: 1 }, { scale: 1.06, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, t + 0.38);
       });
-      // after "batasan.": a green check on the badge, a ripple runs down the finished stack
-      const tDone = L("batasan.") + 0.2, ck = $("s02-ck");
-      I(ck, { scale: 0, opacity: 0 }); ft(ck, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.34, ease: "back.out(3)" }, tDone);
-      BK.forEach((_, i) => ft($("s02-b" + i), { y: BY(i) }, { y: BY(i) - 7, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, tDone + 0.06 + i * 0.045));
+
+      // ================================================================ C: "yang bales dikit banget.": the inbox
+      const tC = tYang - 0.22;
+      SITES.forEach((s, i) => ft($("s02-sw" + i), { opacity: 1, x: 0 }, { opacity: 0, x: -140, duration: 0.26, ease: "power2.in" }, tC + (SITES.length - 1 - i) * 0.025));
+      ft(cnt, { opacity: 1, y: 0 }, { opacity: 0, y: -20, duration: 0.22, ease: "power2.in" }, tC + 0.05);
+      ft(cur, { opacity: 1 }, { opacity: 0, duration: 0.15 }, tC);
+      const ib = $("s02-ib");
+      I(ib, { opacity: 0, x: 160, rotation: 4, scale: 0.94 });
+      ft(ib, { opacity: 0, x: 160, rotation: 4, scale: 0.94 }, { opacity: 1, x: 0, rotation: 0, scale: 1, duration: 0.42, ease: "back.out(1.4)" }, tC + 0.12);
+      IR.forEach((r, i) => {
+        const row = $("s02-ir" + i), s = $("s02-is" + i);
+        I(row, { opacity: 0, y: 16 }); ft(row, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, tC + 0.25 + i * 0.06);
+        I(s, { opacity: 0, scale: 0.7 }); ft(s, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2)" }, tBal - 0.1 + i * 0.07);
+      });
+      const ok = $("s02-ok"), rep = $("s02-rep"), rep1 = $("s02-rep1");
+      I(ok, { opacity: 0, scale: 0.6 }); I(rep, { opacity: 1, scale: 1 }); I(rep1, { opacity: 0, scale: 1.3 });
+      tl.set($("s02-is2"), { opacity: 0 }, tDik - 0.04);
+      ft(ok, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.4)" }, tDik - 0.04);
+      ft(rep, { opacity: 1 }, { opacity: 0, duration: 0.1 }, tDik);
+      ft(rep1, { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: 0.24, ease: "power4.out" }, tDik);
+      [0, 1, 3, 4].forEach((i, k) => ft($("s02-ir" + i), { opacity: 1 }, { opacity: 0.5, duration: 0.3, ease: "power1.out" }, tDik + 0.25 + k * 0.05));
+      [[-6], [6], [-4], [4], [-2], [0]].forEach(([x], k) => tl.set(rep1, { x }, tBan2 - 0.2 + k * 0.034));
+
+      // ================================================================ TRANSITION → s03: the inbox drops away
+      ft(ib, { opacity: 1, y: 0, scale: 1 }, { opacity: 0, y: 60, scale: 0.94, duration: 0.25, ease: "power2.in" }, D - 0.27);
 
       tl.set({}, {}, D - 0.01);
       (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);

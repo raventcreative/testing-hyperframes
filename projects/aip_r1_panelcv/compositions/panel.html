@@ -1,0 +1,182 @@
+<template>
+  <style>
+    #pn-root { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .pn-a { position: absolute; }
+    /* the judges' table (nameplate) — in front of the seats */
+    #pn-table { left: 40px; top: 448px; width: 1000px; height: 50px; border-radius: 18px; transform-origin: 500px 25px;
+      background: linear-gradient(180deg, rgba(36,62,138,.96), rgba(12,22,64,.96)); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), inset 0 2px 0 rgba(106,223,255,.55), 0 26px 40px -22px rgba(0,0,0,.85); }
+    #pn-tl { left: 0; top: 0; width: 1000px; height: 50px; display: flex; align-items: center; justify-content: center; gap: 16px; font: 700 18px/50px Poppins, sans-serif;
+      letter-spacing: .32em; color: #6adfff; white-space: nowrap; }
+    #pn-tl i { width: 6px; height: 6px; border-radius: 50%; background: #01ccf7; box-shadow: 0 0 8px #01ccf7; }
+    #pn-tg { left: 0; top: 0; width: 140px; height: 50px; background: linear-gradient(90deg, rgba(106,223,255,0), rgba(200,245,255,.35), rgba(106,223,255,0)); transform: skewX(-22deg); }
+    #pn-tclip { left: 0; top: 0; width: 1000px; height: 50px; border-radius: 18px; overflow: hidden; }
+    /* a seat = an empty dashed outline + the judge card (124×156) */
+    .pn-seat { left: 0; top: 314px; width: 124px; height: 156px; transform-origin: 62px 0; }
+    .pn-out { left: 0; top: 0; width: 124px; height: 156px; border-radius: 22px; border: 2px dashed rgba(106,223,255,.32); background: rgba(12,22,64,.35); }
+    .pn-out b { position: absolute; left: 0; top: 46px; width: 120px; text-align: center; font: 700 22px/30px Poppins, sans-serif; color: rgba(106,223,255,.5); }
+    .pn-card { left: 0; top: 0; width: 124px; height: 156px; transform-origin: 62px 120px; }
+    .pn-ring { left: -8px; top: -8px; width: 140px; height: 172px; border-radius: 28px; box-shadow: 0 0 0 3px var(--c), 0 0 34px 4px var(--c); opacity: 0; }
+    .pn-face { left: 0; top: 0; width: 124px; height: 156px; border-radius: 22px; background: linear-gradient(180deg, #ffffff, #eef3fb);
+      box-shadow: 0 20px 34px -16px rgba(2,6,28,.85), inset 0 0 0 1px rgba(255,255,255,.7); overflow: hidden; }
+    .pn-no { left: 12px; top: 9px; font: 700 15px/20px Poppins, sans-serif; color: #5d6f8f; }
+    .pn-dot { left: 98px; top: 13px; width: 13px; height: 13px; border-radius: 50%; background: #c3cee0; }
+    .pn-mk { left: 33px; top: 20px; width: 58px; height: 58px; border-radius: 50%; background: #fbf4ec; box-shadow: 0 0 0 3px rgba(217,119,87,.20), 0 6px 12px -6px rgba(10,13,44,.45); }
+    .pn-mk svg { position: absolute; left: 12px; top: 12px; width: 34px; height: 34px; }
+    .pn-pc { left: 72px; top: 52px; width: 32px; height: 32px; border-radius: 50%; background: var(--c); color: #fff; box-shadow: 0 0 0 3px #ffffff; }
+    .pn-pc svg { position: absolute; left: 7px; top: 7px; width: 18px; height: 18px; stroke-width: 2.4; }
+    .pn-role { left: 4px; top: 84px; width: 116px; height: 46px; display: flex; align-items: center; justify-content: center; text-align: center;
+      font: 700 17px/21px Poppins, sans-serif; color: #0a0d2c; letter-spacing: -.01em; }
+    .pn-big { left: 0; top: 84px; width: 124px; height: 46px; text-align: center; font: 700 34px/46px Poppins, sans-serif; color: #0a0d2c; opacity: 0; }
+    .pn-gl { left: 30px; top: 18px; width: 64px; height: 56px; color: #0b1440; filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+    .pn-gl svg { position: absolute; left: 0; top: 0; width: 64px; height: 56px; stroke-width: 2.4; }
+    .pn-wall { left: 0; top: 306px; width: 8px; height: 172px; margin-left: -4px; border-radius: 4px;
+      background: linear-gradient(180deg, rgba(106,223,255,.9), rgba(1,204,247,.35)); box-shadow: 0 0 16px rgba(1,204,247,.7); transform-origin: 50% 0; }
+  </style>
+  <div id="pn-root" data-composition-id="panel" data-width="1080" data-height="1920">
+    <div class="pn-a" id="pn-walls"></div>
+    <div class="pn-a" id="pn-seats"></div>
+    <div class="pn-a" id="pn-table"><div class="pn-a" id="pn-tclip"><div class="pn-a" id="pn-tl"><i></i>PANEL REKRUTMEN<i></i></div><div class="pn-a" id="pn-tg"></div></div></div>
+  </div>
+  <script>
+    (function () {
+      // PANEL = the jury rail of the 7 Claude reviewers (persistent across scenes; scenes paint under it).
+      // Seats: card 124×156, top y 314, centres x 540 + (k-4)*134 (x 76–1004); the table nameplate y 448–498 in front.
+      // COMPACT (s06–s07): each seat scales .55 about its top-centre, centres x 540 + (k-4)*76, top 314 (cards y 314–400); table bar y 394–416.
+      // Status dot: grey idle · cyan reading · coral flagged · green fixed.
+      const VW = window.VO_WORDS, SC = window.VO_SCENES, D = SC[SC.length - 1].start + SC[SC.length - 1].dur;
+      const S = (id) => SC.find((s) => s.id === id);
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      // KF: chained keyframes per element (each tween starts from the state the previous one left) — seek-safe
+      const KF = (el, init, steps) => { I(el, init); const cur = Object.assign({}, init);
+        steps.sort((a, b) => a[0] - b[0]).forEach(([t, d, to, ease]) => { const fr = {}; for (const k in to) fr[k] = cur[k];
+          if (d <= 0) tl.set(el, to, t); else ft(el, fr, Object.assign({ duration: d, ease: ease || "power3.out" }, to), t); Object.assign(cur, to); }); };
+
+      // ================================================================ COMPONENT: the 7 reviewers (copy into scenes that need them)
+      const JUDGES = [null,
+        ["Sistem ATS", "scan-text", "#01ccf7"], ["Hiring Manager", "briefcase-business", "#ffb35c"], ["Calon Atasan", "user-round-check", "#9d8cff"],
+        ["Sesama Pelamar", "users-round", "#ff8f6b"], ["CEO", "crown", "#ffd66b"], ["Rekan Setim", "handshake", "#3ddc97"], ["Rekruter Sibuk", "timer", "#ff5c8a"]];
+      const ICO = {   // lucide-static 1.70 (ISC)
+        "scan-text": '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8h8"/><path d="M7 12h10"/><path d="M7 16h6"/>',
+        "briefcase-business": '<path d="M12 12h.01"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M22 13a18.15 18.15 0 0 1-20 0"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+        "user-round-check": '<path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="m16 19 2 2 4-4"/>',
+        "users-round": '<path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/>',
+        "crown": '<path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/>',
+        "handshake": '<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>',
+        "timer": '<line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/>',
+        "glasses": '<circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/>' };
+      const isvg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICO[n]}</svg>`;
+      const CLAUDE = '<svg viewBox="0 0 24 24"><path fill="#D97757" d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z"/></svg>';
+      const SEAT_X = (k) => 540 + (k - 4) * 134, CMP_X = (k) => 540 + (k - 4) * 76, CMP_S = 0.55;
+      // ============================================== END COMPONENT
+
+      const C = { idle: "#c3cee0", read: "#01ccf7", flag: "#e5484d", ok: "#2da44e" };
+      const seats = $("pn-seats");
+      seats.innerHTML = JUDGES.slice(1).map(([role, ic, c], i) => { const k = i + 1;
+        return `<div class="pn-a pn-seat" id="pn-s${k}" style="--c:${c}"><div class="pn-a pn-out" id="pn-o${k}"><b>#${k}</b></div>` +
+          `<div class="pn-a pn-card" id="pn-c${k}"><div class="pn-a pn-ring" id="pn-r${k}"></div><div class="pn-a pn-face">` +
+          `<div class="pn-a pn-no">#${k}</div><i class="pn-a pn-dot" id="pn-d${k}"></i><div class="pn-a pn-mk" id="pn-m${k}">${CLAUDE}</div>` +
+          `<div class="pn-a pn-pc">${isvg(ic)}</div><div class="pn-a pn-role" id="pn-ro${k}">${role}</div><div class="pn-a pn-big" id="pn-bg${k}">#${k}</div></div>` +
+          (k >= 3 ? `<div class="pn-a pn-gl" id="pn-g${k}">${isvg("glasses")}</div>` : "") + `</div></div>`; }).join("");
+      $("pn-walls").innerHTML = [1, 2, 3, 4].map((i) => `<i class="pn-a pn-wall" id="pn-w${i}"></i>`).join("");
+
+      // ---------------------------------------------------------------- times
+      const t7 = wt("7"), tCl = wt("Claude.", 2), tTug = wt("Tugasnya"), tNol = wt("nolak");
+      const s02 = S("s02").start, s03 = S("s03").start, s04 = S("s04").start, s05 = S("s05").start, s06 = S("s06").start, s07 = S("s07").start, s08 = S("s08").start;
+      const tPer = wt("pertama"), tSeb = wt("sebelum", s03), tKed = wt("kedua"), tNgg = wt("nggak?"), t5 = wt("5"), tBac = wt("baca"), tSen = wt("sendiri-sendiri,");
+      const tKac = wt("kacamata"), tCal = wt("calon"), tSes = wt("sesama"), tCEO = wt("CEO."), tTah = wt("tahu", s07), tDM = wt("DM.");
+      // the stamp order of s01 (must match s01.html STAMP_ORDER) and the fix times of s06 (must match s06.html FIX)
+      const STAMP_ORDER = [4, 2, 6, 1, 5, 3, 7], STAMP_T0 = tNol - 0.06, STAMP_DT = 0.075;
+      const FIX = { 4: 30.95, 7: 31.4, 6: 31.45, 2: 31.85, 3: 32.3, 5: 32.35, 1: 32.75 };
+
+      // ---------------------------------------------------------------- the table
+      const tab = $("pn-table"), tlab = $("pn-tl"), tg = $("pn-tg");
+      KF(tab, { opacity: 1, y: 0, scaleX: 1, scaleY: 1 }, [
+        [s02 + 0.05, 0.4, { opacity: 0, y: 30 }, "power2.in"],
+        [s03, 0.42, { opacity: 1, y: 0 }],
+        [s06 + 0.05, 0.55, { y: -43, scaleX: 0.66, scaleY: 0.44 }, "power3.inOut"],
+        [s08, 0.3, { opacity: 0 }, "power2.in"]]);
+      KF(tlab, { opacity: 1 }, [[s06 + 0.05, 0.25, { opacity: 0 }, "power1.out"]]);
+      I(tg, { x: -200 }); ft(tg, { x: -200 }, { x: 1100, duration: 0.7, ease: "power2.inOut" }, wt("panel") - 0.05);
+      ft(tg, { x: -200 }, { x: 1100, duration: 0.7, ease: "power2.inOut" }, s03 + 0.25);
+
+      // ---------------------------------------------------------------- seats + cards
+      const order = [4, 3, 5, 2, 6, 1, 7];
+      for (let k = 1; k <= 7; k++) {
+        const seat = $("pn-s" + k), card = $("pn-c" + k), out = $("pn-o" + k), ring = $("pn-r" + k), dot = $("pn-d" + k), mk = $("pn-m" + k), q = order.indexOf(k);
+        // seat wrapper: position, compaction, exits
+        KF(seat, { x: SEAT_X(k) - 62, y: 0, scale: 1, opacity: 1 }, [
+          [s02 + 0.03 + q * 0.035, 0.34, { y: -46, opacity: 0 }, "power2.in"],
+          [s03 + 0.02 + q * 0.035, 0.01, { y: -110 }],
+          [s03 + 0.03 + q * 0.035, 0.44, { y: 0, opacity: 1 }, "back.out(1.5)"],
+          [s06 + 0.05 + q * 0.02, 0.55, { x: CMP_X(k) - 62, scale: CMP_S }, "power3.inOut"],
+          [s08 + 0.02 + q * 0.03, 0.32, { y: -60, opacity: 0 }, "power2.in"],
+          // END signature (CTA): compact row under the centred logo
+          [tDM + 0.6, 0.01, { x: CMP_X(k) - 62, y: 186, scale: CMP_S }],
+          [tDM + 0.62 + q * 0.03, 0.4, { y: 166, opacity: 1 }, "power3.out"]]);
+        // compact mode: the role label gives way to a big "#k" (legible at .55)
+        KF($("pn-ro" + k), { opacity: 1 }, [[s06 + 0.1, 0.3, { opacity: 0 }, "power1.out"], [tDM + 0.55, 0.01, { opacity: 0 }]]);
+        KF($("pn-bg" + k), { opacity: 0 }, [[s06 + 0.2, 0.3, { opacity: 1 }, "power1.out"]]);
+        // the empty outline (s01 only)
+        KF(out, { opacity: 1 }, [[t7 - 0.05 + q * 0.055, 0.16, { opacity: 0 }, "power1.out"]]);
+        // the card drops into its seat on "7"
+        const td = t7 - 0.1 + q * 0.055;
+        // dim / lit (opacity + scale + ring) per scene
+        const steps = [];
+        const lit = (t) => { steps.push([t, 0.32, { scale: 1.08, opacity: 1 }, "back.out(2.2)"]); };
+        const unlit = (t, o) => { steps.push([t, 0.28, { scale: 1, opacity: o }, "power2.out"]); };
+        // recoil on its stamp (s01)
+        const ts = STAMP_T0 + STAMP_ORDER.indexOf(k) * STAMP_DT;
+        steps.push([ts - 0.02, 0.07, { scale: 1.06 }, "power2.out"]); steps.push([ts + 0.06, 0.18, { scale: 1 }, "power2.out"]);
+        if (k !== 1) steps.push([s03 + 0.45, 0.25, { opacity: 0.42 }, "power1.out"]);
+        if (k === 1) { lit(tPer - 0.12); unlit(tKed - 0.12, 0.42); }
+        if (k === 2) { steps.push([tKed - 0.1, 0.32, { scale: 1.08, opacity: 1 }, "back.out(2.2)"]); unlit(t5 - 0.12, 0.42); }
+        if (k >= 3) { steps.push([t5 - 0.04 + (k - 3) * 0.05, 0.3, { opacity: 1, scale: 1.05 }, "back.out(2)"]); steps.push([t5 + 0.3 + (k - 3) * 0.05, 0.25, { scale: 1 }, "power2.out"]); }
+        if (k === 3) { lit(tCal - 0.1); unlit(tSes - 0.14, 1); }
+        if (k === 4) { lit(tSes - 0.1); unlit(tCEO - 0.18, 1); }
+        if (k === 5) { lit(tCEO - 0.1); unlit(s06 - 0.2, 1); }
+        if (k <= 2) steps.push([s06 + 0.05, 0.3, { opacity: 1 }, "power1.out"]);
+        KF(card, { y: -150, opacity: 0, rotation: (q % 2 ? 7 : -7), scale: 1 }, [
+          [td, 0.2, { opacity: 1 }, "power1.out"], [td, 0.46, { y: 0, rotation: 0 }, "back.out(1.7)"]].concat(steps));
+        // ring = the "speaking" glow (on while lit)
+        const rs = [];
+        if (k === 1) rs.push([tPer - 0.12, 0.25, { opacity: 1 }], [tKed - 0.12, 0.25, { opacity: 0 }]);
+        if (k === 2) rs.push([tKed - 0.1, 0.25, { opacity: 1 }], [t5 - 0.12, 0.25, { opacity: 0 }]);
+        if (k === 3) rs.push([tCal - 0.1, 0.25, { opacity: 1 }], [tSes - 0.14, 0.25, { opacity: 0 }]);
+        if (k === 4) rs.push([tSes - 0.1, 0.25, { opacity: 1 }], [tCEO - 0.18, 0.25, { opacity: 0 }]);
+        if (k === 5) rs.push([tCEO - 0.1, 0.25, { opacity: 1 }], [s06 - 0.2, 0.25, { opacity: 0 }]);
+        rs.push([tTah - 0.05 + q * 0.04, 0.2, { opacity: 0.9 }], [tTah + 0.35 + q * 0.04, 0.4, { opacity: 0 }]);   // s07 "tahu": the whole panel glows once
+        KF(ring, { opacity: 0 }, rs);
+        // Claude mark pulse on "Claude."
+        KF(mk, { scale: 1 }, [[tCl - 0.05 + q * 0.03, 0.14, { scale: 1.16 }, "power2.out"], [tCl + 0.1 + q * 0.03, 0.3, { scale: 1 }, "power2.out"]]);
+        // status dot
+        const ds = [[tTug - 0.05 + q * 0.03, 0.15, { backgroundColor: C.read, scale: 1.3 }], [tTug + 0.12 + q * 0.03, 0.15, { scale: 1 }],
+                    [ts, 0.12, { backgroundColor: C.flag }]];
+        if (k === 1) ds.push([s03 + 0.4, 0.2, { backgroundColor: C.idle }], [tPer, 0.15, { backgroundColor: C.read }], [tSeb, 0.15, { backgroundColor: C.flag }]);
+        if (k === 2) ds.push([s03 + 0.4, 0.2, { backgroundColor: C.idle }], [tKed + 0.05, 0.15, { backgroundColor: C.read }], [tNgg, 0.15, { backgroundColor: C.flag }]);
+        if (k >= 3) { const tf = [0, 0, 0, tCal + 0.2, tSes + 0.2, tCEO + 0.15, tCEO + 0.3, tCEO + 0.45][k];
+          ds.push([s03 + 0.4, 0.2, { backgroundColor: C.idle }], [tBac + (k - 3) * 0.04, 0.15, { backgroundColor: C.read }], [tf, 0.15, { backgroundColor: C.flag }]); }
+        ds.push([FIX[k], 0.18, { backgroundColor: C.ok, scale: 1.35 }, "back.out(3)"], [FIX[k] + 0.2, 0.2, { scale: 1 }]);
+        KF(dot, { backgroundColor: C.idle, scale: 1 }, ds);
+        // the glasses (s05 "kacamata"): one each for the 5 independent readers
+        if (k >= 3) { const g = $("pn-g" + k), tg0 = tKac - 0.05 + (k - 3) * 0.06;
+          KF(g, { y: -70, opacity: 0, rotation: -12, scale: 1 }, [[tg0, 0.36, { y: 0, opacity: 1, rotation: 0 }, "back.out(2)"],
+            [s06 - 0.25, 0.22, { y: -20, opacity: 0 }, "power2.in"]]); }
+      }
+      // ---------------------------------------------------------------- the walls between the 5 readers ("baca sendiri-sendiri")
+      for (let i = 1; i <= 4; i++) { const w = $("pn-w" + i), x = (SEAT_X(i + 2) + SEAT_X(i + 3)) / 2, t = tSen - 0.08 + i * 0.05;
+        KF(w, { x, scaleY: 0, opacity: 0 }, [[t, 0.05, { opacity: 1 }, "none"], [t, 0.34, { scaleY: 1 }, "power3.out"],
+          [s06 - 0.3, 0.25, { scaleY: 0, opacity: 0 }, "power2.in"]]); }
+
+      tl.set({}, {}, D - 0.02);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["panel"] = tl;
+    })();
+  </script>
+</template>

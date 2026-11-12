@@ -1,4 +1,4 @@
-"""Builds index.html for the IGAGENT reel (Instagram Agent Skill; adapted from the KONTEN 7 HARI builder) from production/timing.json: the client's navy background, word-synced Poppins
+"""Builds index.html for the R1 PANEL CV reel ("panel rekrutmen 7 Claude"; adapted from the IGAGENT builder) from production/timing.json: the client's navy background, word-synced Poppins
 captions (white + cyan #01CCF7) on navy chips (legible over every world), the white AI PRENEUR logo (top-left, safe zone), scene
 slots (s01–s14), the persistent step header (split-flap "LANGKAH n", hf-seek driven), the robot (operator) and the mascot (host).
 All caption chunks sit mid (y≈968, above the mascot's head).
@@ -22,11 +22,12 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>Claude jadi tim konten Instagram — AI PRENEUR</title>
+    <title>Panel rekrutmen 7 Claude — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
+    <script src="vendor/cvkit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -61,7 +62,8 @@ html = f"""<!doctype html>
       <div id="bg" class="clip layer" data-start="0" data-duration="{total}" data-track-index="0">
         <div class="plate"></div><div id="glow-a" class="glow"></div><div id="glow-b" class="glow"></div>
       </div>
-{slots}      <div id="robot" class="clip" data-composition-id="robot" data-composition-src="compositions/robot.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
+{slots}      <div id="panel" class="clip" data-composition-id="panel" data-composition-src="compositions/panel.html" data-start="0" data-duration="{total}" data-track-index="5" data-width="1080" data-height="1920"></div>
+      <div id="robot" class="clip" data-composition-id="robot" data-composition-src="compositions/robot.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
       <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{total}" data-track-index="7" data-width="1080" data-height="1920"></div>
       <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_white_trim.png" alt="AI PRENEUR"></div>
       <div id="caps" class="clip layer" data-start="0" data-duration="{total}" data-track-index="9"></div>
@@ -106,7 +108,7 @@ html = f"""<!doctype html>
         tl.fromTo("#glow-b", {{ x: 0, y: 0 }}, {{ x: -110, y: -60, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
         tl.set("#brandlogo", {{ opacity: 0.95 }}, 0);   // visible from frame 0
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s10"]["start"] + S["s10"]["dur"] - 1.4, 3)});
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s08"]["start"] + S["s08"]["dur"] - 1.4, 3)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;
@@ -132,7 +134,7 @@ PLACE = """<template>
 for s in T["scenes"]:
     f = P / f"compositions/{s['id']}.html"
     if not f.exists(): f.write_text(PLACE.format(id=s["id"], dur=round(s["dur"] + ovl(s["id"]) - 0.01, 3)))
-for cid in ("robot", "mascot"):
+for cid in ("robot", "mascot", "panel"):
     f = P / f"compositions/{cid}.html"
     if not f.exists(): f.write_text(PLACE.format(id=cid, dur=round(total - 0.02, 3)))
 print("index.html ok:", len(T["scenes"]), "scenes,", len(T["words"]), "words,", len(T["caps"]), "caption chunks, total", total)

@@ -1,7 +1,7 @@
-// MasterPajak AI robot host — Video 14 'Siapin 4 Data Ini'. Beat times come from window.TM (re-timed to the VO word stamps).
-// Keyframed channels -> hold-then-move -> per-group 2nd-order spring filter (convolution, seek-safe) -> idle layers (hover,
-// breathing, blinks) -> lip-sync from lipsync.js (mouth open/wide per 1/60 s) + speech head beats -> derived secondary
-// motion (squash from vertical acceleration, antenna lag). Hologram panels stay inside the 120 px side safe zone.
+// MasterPajak AI robot host — Video 24 'Laporan Laba Rugi dalam 30 Detik' (the cooking-show host). Beat times come from window.TM
+// (real VO word times + 0.30 s). Keyframed channels -> hold-then-move -> per-group 2nd-order spring filter (convolution, seek-safe)
+// -> idle layers (hover, breathing, blinks) -> lip-sync from lipsync.js (mouth open/wide per 1/60 s) + speech head beats -> derived
+// secondary motion (squash from vertical acceleration, antenna lag). Hologram panels stay inside the 120 px side safe zone.
 // Placement note: x = horizontal centre, y = body centre (top of the antenna ~ y - h/2, feet ~ y + h/2), h = height in px.
 (function () {
   const KEYS = {};
@@ -39,43 +39,56 @@
   const LS = window.LIPSYNC || { fps: 60, open: [], wide: [] };
   const lip = (arr, t) => { const f = t * LS.fps, i = Math.floor(f), u = f - i; const a = arr[i] || 0, b = arr[i + 1] || 0; return a + (b - a) * u; };
 
-  // ---------------- choreography (all times from window.TM, so a VO re-time moves everything) ----------------
+  // ---------------- choreography (all times from window.TM = real VO word times + 0.30 s) ----------------
   const TM = window.TM;
   const pose = (t, o, e) => { for (const k in o) key(k, t, o[k], e); };
   const armL = (t, r, f, b, y, e) => pose(t, { lR: r, lF: f, lB: b, lY: y }, e), armR = (t, r, f, b, y, e) => pose(t, { rR: r, rF: f, rB: b, rY: y }, e);
   const NAVY = { sh: 0.5, rim: 2.0 }, LIGHT = { sh: 0.34, rim: 1.25 };
   const REST = (t, e) => { armL(t, 15, 0, 10, 0, e); armR(t, 15, 0, 10, 0, e); };
-  const RX = 905, RY = 1585, RH = 520;   // paper studio: small full-body host, bottom-right, beside the box
-  const DK = [TM.d1, TM.d2, TM.d3, TM.d4, TM.kum], TICK = [TM.d1 + 1.05, TM.d2b + 0.8, TM.d3 + 1.05, TM.d4 + 1.05];
+  const RX = 925, RY = 1595, RH = 520;   // kitchen host: small full-body figure bottom-right of the counter (armR = the screen-left arm)
+  const pointR = (t0, t1, r, f, b) => { armR(t0 - 0.05, 15, 0, 10, 0); armR(t0 + 0.3, r, f, b, 0, "o"); armR(t1, r, f, b, 0); armR(t1 + 0.3, 15, 0, 10, 0); };
+  const nod = (t, base, d) => { pose(t + 0.06, { hPitch: base + (d || 7) }); pose(t + 0.34, { hPitch: base }); };
 
-  // S1 · hook: rises in at the bottom-right, looks up at the ghost "Estimasi pajak · Rp ???" card with a curious head tilt
-  pose(0, Object.assign({ x: RX, y: 2480, h: RH, yaw: -20, hYaw: -10, hPitch: -6, hRoll: 0, lookX: -0.5, lookY: 0.4 }, LIGHT)); REST(0);
-  pose(0.35, { y: 2480 }, "hold"); pose(1.1, { y: RY }, "o");
-  pose(0.95, { hYaw: -18, hPitch: -18, lookX: -0.8, lookY: 0.9, hRoll: 9 });
-  pose(TM.hook + 1.3, { happy: 1 }); pose(TM.hook + 2.0, { happy: 0, hRoll: 0 });
-  // S2 · "siapin 4 data ini dulu": points at the box as the lid swings open, then glances up at the HUD
-  armR(TM.siap + 0.05, 15, 0, 10, 0); armR(TM.siap + 0.4, 112, 30, 14, 0, "o"); armR(TM.siap + 1.45, 112, 30, 14, 0); armR(TM.siap + 1.8, 15, 0, 10, 0);
-  pose(TM.siap + 0.3, { hYaw: -24, hPitch: 4, lookX: -1, lookY: -0.1, yaw: -26 });
-  pose(TM.siap + 1.0, { happy: 1 }); pose(TM.siap + 1.7, { happy: 0 });
-  pose(TM.siap + 1.9, { hYaw: -14, hPitch: -22, lookX: -0.5, lookY: 1 });
-  // S3 · each item: eyes catch it flying in, a "yes" arm pump on the tick, the head follows it down into the box
-  for (let k = 0; k < 4; k++) {
-    const t0 = DK[k], tk = TICK[k], drop = DK[k + 1] - 0.88;
-    pose(t0 + 0.25, { hYaw: k % 2 ? -12 : -22, hPitch: -16, lookX: k % 2 ? -0.4 : -0.9, lookY: 0.85, yaw: -22 });
-    pose(t0 + 0.8, { hYaw: -18, hPitch: -14, lookX: -0.7, lookY: 0.75 });
-    armR(tk - 0.12, 15, 0, 10, 0); armR(tk + 0.16, 92, 18, 82, 0, "o"); armR(tk + 0.55, 92, 18, 82, 0); armR(tk + 0.85, 15, 0, 10, 0);
-    pose(tk + 0.05, { happy: 1, mo: 0.35 }); pose(tk + 0.75, { happy: 0, mo: 0 });
-    pose(drop + 0.55, { hYaw: -20, hPitch: 6, lookX: -0.8, lookY: -0.4 });
-  }
-  // 2 · "termasuk ongkir dan iklan": the other arm points at the two tags
-  armL(TM.d2b + 0.1, 15, 0, 10, 0); armL(TM.d2b + 0.45, 60, 34, 40, 0, "o"); armL(TM.d2b + 1.2, 60, 34, 40, 0); armL(TM.d2b + 1.5, 15, 0, 10, 0);
-  // S3b · "Udah kekumpul?": both arms up, happy — then ducks out before the band sweep
-  pose(TM.kum + 0.1, { hYaw: -6, hPitch: -6, lookX: -0.1, lookY: 0.2, yaw: -14, happy: 1, mo: 0.4 });
-  armL(TM.kum + 0.05, 15, 0, 10, 0); armR(TM.kum + 0.05, 15, 0, 10, 0);
-  armL(TM.kum + 0.4, 150, 14, 34, 0, "o"); armR(TM.kum + 0.4, 150, 14, 34, 0, "o");
+  // S1 · hook "Resep laporan laba rugi": rises in with a host flourish; "tiga puluh detik": points up at the timer; "Yuk, masak!": hop + both arms up
+  pose(0, Object.assign({ x: RX, y: 2480, h: RH, yaw: -18, hYaw: -10, hPitch: -6, hRoll: 0, lookX: -0.3, lookY: 0.3, happy: 0, xe: 0, mo: 0, squint: 0, smile: 1, chest: 0 }, LIGHT)); REST(0);
+  pose(0.15, { y: 2480 }, "hold"); pose(0.85, { y: RY }, "o");
+  armL(0.45, 15, 0, 10, 0); armR(0.45, 15, 0, 10, 0); armL(0.9, 128, 22, 30, 0, "o"); armR(0.9, 128, 22, 30, 0, "o");
+  pose(0.85, { happy: 1, mo: 0.2 }); pose(TM.lap + 0.6, { happy: 0, mo: 0 });
+  armL(TM.lap + 0.5, 128, 22, 30, 0); armL(TM.lap + 0.85, 15, 0, 10, 0);
+  pointR(TM.dtk - 0.1, TM.yuk - 0.35, 160, 22, 12);
+  pose(TM.dtk, { hYaw: -14, hPitch: -24, lookX: -0.4, lookY: 1 });
+  pose(TM.yuk - 0.12, { y: RY }); pose(TM.yuk + 0.12, { y: RY - 50 }, "o"); pose(TM.yuk + 0.42, { y: RY }, "i");
+  armL(TM.yuk - 0.1, 15, 0, 10, 0); armL(TM.yuk + 0.2, 150, 14, 34, 0, "o"); armR(TM.yuk + 0.2, 150, 14, 34, 0, "o");
+  pose(TM.yuk + 0.05, { happy: 1, mo: 0.35, hPitch: -6, hYaw: -6, lookX: 0, lookY: 0 });
+  REST(TM.bahan + 0.1); pose(TM.bahan, { happy: 0, mo: 0 });
+  // S2 · bahan: looks over at the recipe card (left), points at each row as it is named
+  pose(TM.bahan + 0.2, { hYaw: -30, hPitch: -6, lookX: -1, lookY: 0.2, yaw: -26 });
+  pointR(TM.pj - 0.1, TM.by + 0.3, 104, 34, 18);
+  nod(TM.pj, -6); nod(TM.mb, -6); nod(TM.by, -6);
+  pose(TM.by + 0.3, { happy: 1 }); pose(TM.l1, { happy: 0 });
+  // S3 · Langkah 1: the jar pours (watches it), the modal portion flies to its cup (head follows it up), "laba kotor": a pleased nod
+  pose(TM.l1 + 0.3, { hYaw: -24, hPitch: -14, lookX: -0.8, lookY: 0.6, yaw: -22 });
+  pointR(TM.pj2 - 0.3, TM.krg, 132, 30, 16);
+  pose(TM.krg + 0.2, { hYaw: -20, hPitch: -24, lookX: -0.6, lookY: 1 });
+  pose(TM.mb2 + 0.3, { hYaw: -30, hPitch: -22, lookX: -1, lookY: 1 });
+  pose(TM.lk - 0.05, { hYaw: -16, hPitch: -8, lookX: -0.4, lookY: 0.2, happy: 1 }); nod(TM.lk, -8, 9);
+  armL(TM.lk - 0.1, 15, 0, 10, 0); armL(TM.lk + 0.25, 120, 30, 60, 0, "o"); armL(TM.l2 - 0.2, 120, 30, 60, 0); armL(TM.l2 + 0.15, 15, 0, 10, 0);
+  pose(TM.l2 - 0.1, { happy: 0 });
+  // S4 · Langkah 2: "satu-satu" head bobs; each cost portion: points and follows it to its cup
+  pose(TM.l2 + 0.2, { hYaw: -20, hPitch: -12, lookX: -0.6, lookY: 0.5, yaw: -20 });
+  for (let k = 0; k < 3; k++) { pose(TM.satu + k * 0.24, { hRoll: k % 2 ? -7 : 7 }); } pose(TM.satu + 0.8, { hRoll: 0 });
+  pointR(TM.ong - 0.25, TM.kem + 0.4, 140, 26, 14);
+  [[TM.ong, -0.9], [TM.ikl, -0.5], [TM.kem, -0.15]].forEach(([t, lx]) => { pose(t + 0.15, { lookX: lx, lookY: 1, hYaw: -16 + lx * 14, hPitch: -22 }); });
+  // S5 · Hasil: the timer dings -> hop; "laba": both arms up, happy; "untung kamu yang sebenarnya": points at the scale
+  pose(TM.has + 0.05, { hYaw: -10, hPitch: -6, lookX: -0.2, lookY: -0.3 });
+  pose(TM.has - 0.1, { y: RY }); pose(TM.has + 0.15, { y: RY - 44 }, "o"); pose(TM.has + 0.45, { y: RY }, "i");
+  REST(TM.laba - 0.15); armL(TM.laba + 0.15, 150, 14, 34, 0, "o"); armR(TM.laba + 0.15, 150, 14, 34, 0, "o"); armL(TM.unt - 0.2, 150, 14, 34, 0); armR(TM.unt - 0.2, 150, 14, 34, 0);
+  pose(TM.laba, { happy: 1, mo: 0.35, hPitch: -4 }); pose(TM.unt - 0.1, { mo: 0 });
+  armL(TM.unt + 0.15, 15, 0, 10, 0); pointR(TM.unt + 0.05, TM.sol - 1.0, 118, 36, 20);
+  pose(TM.unt + 0.2, { hYaw: -22, hPitch: -14, lookX: -0.8, lookY: 0.6 }); pose(TM.sbn + 0.3, { hYaw: -8, hPitch: -4, lookX: 0, lookY: 0 });
   pose(TM.sol - 0.75, { y: RY }); pose(TM.sol - 0.28, { y: 2560 }, "i");
 
-  // S4 · brand: half-body bottom-left, chest hologram to the right (build 1.2 s, on screen ~6 s), points at the pembukuan, then the estimate
+  // S6 · brand: half-body bottom-left, chest hologram to the right (build 1.2 s, full alpha > 4 s), points at the laporan card
   pose(TM.sol - 0.05, Object.assign({ x: 200, y: 2700, h: 900, yaw: 30, pitch: 0, roll: 0, hRoll: 0, xe: 0, squint: 0, mo: 0, happy: 0 }, NAVY), "hold");
   REST(TM.sol - 0.05, "hold");
   pose(TM.sol + 0.55, { x: 200, y: 1660, h: 900 }, "o");
@@ -87,17 +100,17 @@
   key("holoA", 0, 0, "hold"); key("holoA", TM.sol + 0.5, 0, "hold"); key("holoA", TM.sol + 0.72, 1, "o");
   key("holoRev", 0, 0, "hold"); key("holoRev", TM.sol + 0.56, 0, "hold"); key("holoRev", TM.sol + 1.76, 1.1, "o");
   key("holoGl", 0, 0, "hold");
-  for (const g0 of [TM.sol + 2.9, TM.est + 1.7]) { key("holoGl", g0, 0, "hold"); key("holoGl", g0 + 0.04, 0.7, "lin"); key("holoGl", g0 + 0.12, 0, "lin"); }
+  for (const g0 of [TM.lr + 0.3, TM.bia + 0.6]) { key("holoGl", g0, 0, "hold"); key("holoGl", g0 + 0.04, 0.7, "lin"); key("holoGl", g0 + 0.12, 0, "lin"); }
   pose(TM.sol + 1.0, { hYaw: 20, hPitch: -14, lookX: 0.8, lookY: 0.9, happy: 1 }); pose(TM.sol + 1.7, { happy: 0 });
-  // series pattern (Videos 1/5): the far arm points up at the cards; the near arm stays low so it never crosses the hologram
-  armR(TM.sol + 1.6, 18, 0, 12, 0); armR(TM.sol + 1.95, 150, 25, 10, 0, "o"); armR(TM.sol + 2.95, 150, 25, 10, 0); armR(TM.sol + 3.25, 18, 0, 12, 0);   // pembukuan
-  pose(TM.sol + 2.6, { happy: 1, hPitch: -10 }); pose(TM.sol + 3.3, { happy: 0, hYaw: 10, hPitch: -4, lookX: 0.3, lookY: 0.2 });
-  armR(TM.est + 0.3, 18, 0, 12, 0); armR(TM.est + 0.7, 138, 28, 12, 0, "o"); armR(TM.est + 2.3, 138, 28, 12, 0); armR(TM.est + 2.6, 18, 0, 12, 0);    // estimasi pajak
-  pose(TM.est + 0.55, { hYaw: 18, hPitch: -10, lookX: 0.8, lookY: 0.6 }); pose(TM.est + 1.9, { happy: 1 }); pose(TM.est + 2.7, { happy: 0, hYaw: 8, hPitch: 0, lookX: 0.1, lookY: 0 });
+  // series pattern (Videos 1/5/14/20): the far arm points up at the card; the near arm stays low so it never crosses the hologram
+  armR(TM.lr - 0.2, 18, 0, 12, 0); armR(TM.lr + 0.15, 150, 25, 10, 0, "o"); armR(TM.cat - 0.1, 150, 25, 10, 0); armR(TM.cat + 0.2, 18, 0, 12, 0);   // the flip
+  pose(TM.lr + 0.3, { happy: 1, hPitch: -10 }); pose(TM.cat, { happy: 0, hYaw: 10, hPitch: -4, lookX: 0.3, lookY: 0.2 });
+  armR(TM.bia - 0.1, 18, 0, 12, 0); armR(TM.bia + 0.25, 138, 28, 12, 0, "o"); armR(TM.bln + 0.3, 138, 28, 12, 0); armR(TM.bln + 0.6, 18, 0, 12, 0);    // the rows / tiap bulan
+  pose(TM.bia + 0.1, { hYaw: 18, hPitch: -10, lookX: 0.8, lookY: 0.6 }); pose(TM.bln + 0.1, { hYaw: 24, hPitch: -18, lookX: 1, lookY: 1 }); pose(TM.bln + 0.4, { happy: 1 });
   key("holoA", TM.end - 0.55, 1, "hold"); key("holoA", TM.end - 0.3, 0, "i"); pose(TM.end - 0.55, { chest: 1 }); pose(TM.end - 0.3, { chest: 0 });
   // T · ducks out under the beam
-  pose(TM.end - 0.5, { x: 200, y: 1660, h: 900 }); pose(TM.end - 0.06, { x: 200, y: 2700, h: 900 }, "i");
-  // S5 · end card: half-body bottom-right, logo hologram left, waves, points at the CTA (series template)
+  pose(TM.end - 0.5, { x: 200, y: 1660, h: 900, happy: 0 }); pose(TM.end - 0.06, { x: 200, y: 2700, h: 900 }, "i");
+  // S7 · end card: half-body bottom-right, logo hologram left, waves, points at the CTA (series template)
   pose(TM.end - 0.01, Object.assign({ x: 870, y: 2700, h: 960, roll: 0, yaw: -30, hYaw: 0, hPitch: 0, lookX: 0, lookY: 0, happy: 0, smile: 1, chest: 0 }, NAVY), "hold");
   armL(TM.end - 0.01, 18, 0, 14, 0, "hold"); armR(TM.end - 0.01, 20, -50, 14, 0, "hold");
   pose(TM.end + 0.5, { y: 1660 }, "o");
@@ -108,9 +121,9 @@
   for (const g0 of [TM.cta + 1.2, TM.bio + 1.4]) { key("holoGl", g0, 0, "hold"); key("holoGl", g0 + 0.04, 0.7, "lin"); key("holoGl", g0 + 0.12, 0, "lin"); }
   armL(TM.end + 0.6, 18, 0, 14, 0); armL(TM.end + 0.85, 145, 0, 30, 90, "o"); armL(TM.end + 1.07, 145, 0, 62, 90); armL(TM.end + 1.29, 145, 0, 30, 90); armL(TM.end + 1.51, 145, 0, 58, 90); armL(TM.end + 1.9, 18, 0, 14, 0);
   pose(TM.end + 1.2, { happy: 1 }); pose(TM.end + 2.0, { hYaw: -24, hPitch: 6, lookX: -1, lookY: -0.4, happy: 0 }); pose(TM.cta - 0.4, { hYaw: -4, hPitch: 0, lookX: 0, lookY: 0 });
-  armL(TM.cta - 0.2, 18, 0, 14, 0); armL(TM.cta + 0.15, 165, 25, 8, 0, "o"); armL(TM.cta + 1.8, 165, 25, 8, 0); armL(TM.cta + 2.1, 18, 0, 14, 0);
-  pose(TM.cta + 0.2, { hPitch: -22, lookY: 1, lookX: -0.4, hYaw: -10 }); pose(TM.cta + 1.9, { hPitch: 0, lookY: 0, lookX: 0, hYaw: -6, happy: 1 });
-  armL(TM.bio + 0.3, 18, 0, 14, 0); armL(TM.bio + 0.55, 145, 0, 30, 90, "o"); armL(TM.bio + 0.77, 145, 0, 62, 90); armL(TM.bio + 0.99, 145, 0, 30, 90); armL(TM.bio + 1.5, 18, 0, 14, 0);
+  armL(TM.cta - 0.2, 18, 0, 14, 0); armL(TM.cta + 0.15, 165, 25, 8, 0, "o"); armL(TM.cta + 1.1, 165, 25, 8, 0); armL(TM.cta + 1.4, 18, 0, 14, 0);
+  pose(TM.cta + 0.2, { hPitch: -22, lookY: 1, lookX: -0.4, hYaw: -10 }); pose(TM.cta + 1.2, { hPitch: 0, lookY: 0, lookX: 0, hYaw: -6, happy: 1 });
+  armL(TM.bio + 0.25, 18, 0, 14, 0); armL(TM.bio + 0.5, 145, 0, 30, 90, "o"); armL(TM.bio + 0.72, 145, 0, 62, 90); armL(TM.bio + 0.94, 145, 0, 30, 90); armL(TM.bio + 1.35, 18, 0, 14, 0);
 
   for (const ch in KEYS) KEYS[ch].sort((a, b) => a[0] - b[0]);
   // hold-then-move: a key is when a pose is REACHED; the move takes at most MAXD[group] s and the previous pose holds until then

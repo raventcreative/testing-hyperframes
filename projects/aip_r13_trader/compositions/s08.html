@@ -1,0 +1,116 @@
+<template>
+  <style>
+    /* s08 SETUP (36.43–42.27) "Cara pasang: buka Claude Code, tempel link GitHub-nya, minta install, terus ketik /yt-script."
+       Frame 0 = s07's end (header /yt-viral only). Header rolls to "Cara pasang". "buka Claude Code": a terminal window opens.
+       "tempel link GitHub-nya": the repo URL is pasted at the prompt (TEMPEL flash). "minta install": the install request types
+       (the README's "Install this skill, then confirm /yt-script works", said in Indonesian) and the skills are copied into
+       ~/.claude/skills/. "ketik /yt-script": the command types with the /yt-* autocomplete, Enter → "jalan". Step badges 1–4 tick on
+       the right. Last 0.45 s: header + terminal give way to the link card that s09 starts from (560x112 at x 260, y 504). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s08-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s08-term { position: absolute; left: 0; top: 0; width: 960px; height: 454px; border-radius: 26px; background: #070b22; overflow: hidden;
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14), 0 26px 56px rgba(2,6,26,.6); transform-origin: 50% 0%; }
+    #s08-term .bar { position: absolute; left: 0; top: 0; width: 960px; height: 52px; background: rgba(255,255,255,.06); border-bottom: 1.5px solid rgba(255,255,255,.08); }
+    #s08-term .bar i { position: absolute; top: 20px; width: 12px; height: 12px; border-radius: 50%; }
+    #s08-term .bar svg { position: absolute; left: 82px; top: 13px; width: 26px; height: 26px; }
+    #s08-term .bar b { position: absolute; left: 118px; top: 0; font: 700 20px/52px Poppins; color: #e3edfa; white-space: nowrap; }
+    #s08-term .bar span { position: absolute; right: 20px; top: 0; font: 400 17px/52px Poppins; color: #7f9cbf; white-space: nowrap; }
+    .s08-ln { position: absolute; left: 28px; font: 400 22px/34px Poppins; color: #e3edfa; white-space: nowrap; }
+    .s08-ln .pr { color: #01ccf7; font-weight: 700; margin-right: 12px; }
+    .s08-ln.dim { color: #7f9cbf; }
+    .s08-ln.ok { color: #5be08a; font-weight: 700; }
+    #s08-url { color: #6adfff; text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1.5px; }
+    #s08-paste { position: absolute; left: 0; top: 0; height: 36px; padding: 0 14px 0 10px; border-radius: 18px; background: #01ccf7; color: #0b1440; font: 700 16px/36px Poppins;
+      letter-spacing: 2px; white-space: nowrap; display: flex; align-items: center; gap: 6px; transform-origin: 50% 50%; }
+    #s08-paste svg { width: 18px; height: 18px; }
+    #s08-ac { position: absolute; left: 0; top: 0; width: 330px; height: 124px; border-radius: 14px; background: #121a3d; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14), 0 14px 30px rgba(0,0,0,.5); transform-origin: 0% 0%; overflow: hidden; }
+    #s08-ac div { height: 38px; padding-left: 16px; font: 400 19px/38px Poppins; color: #c6d2e4; white-space: nowrap; }
+    #s08-ac div.on { background: rgba(1,204,247,.22); color: #fff; font-weight: 700; box-shadow: inset 3px 0 0 #01ccf7; }
+    #s08-ac { padding-top: 5px; }
+    #s08-run { position: absolute; left: 0; top: 0; height: 34px; padding: 0 14px 0 10px; border-radius: 17px; background: #2da44e; color: #fff; font: 700 17px/34px Poppins;
+      white-space: nowrap; display: flex; align-items: center; gap: 6px; transform-origin: 0% 50%; }
+    #s08-run svg { width: 18px; height: 18px; }
+    .s08-st { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; background: rgba(1,204,247,.14);
+      box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.6); color: #6adfff; font: 700 19px/40px Poppins; text-align: center; transform-origin: 50% 50%; }
+    .s08-st.done { background: #01ccf7; color: #0b1440; box-shadow: 0 0 14px rgba(1,204,247,.6); }
+    #s08-link { position: absolute; left: 0; top: 0; width: 560px; height: 112px; border-radius: 28px; background: #ffffff; box-shadow: 0 24px 50px rgba(2,6,26,.55); transform-origin: 50% 50%; }
+    #s08-link .ic { position: absolute; left: 18px; top: 18px; width: 76px; height: 76px; border-radius: 20px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440; }
+    #s08-link .ic svg { position: absolute; left: 20px; top: 20px; width: 36px; height: 36px; }
+    #s08-link b { position: absolute; left: 114px; top: 16px; font: 700 31px/44px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s08-link span { position: absolute; left: 114px; top: 60px; font: 400 22px/32px Poppins; color: #5d6f8f; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="s08" data-width="1080" data-height="1920">
+    <div id="s08-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R9K, D = 5.8333, P = "s08";
+      const S = K.scene(P, D), { tl, ft, I, wt, $, type } = S;
+      const z = $("s08-zone");
+      const TX = 60, TY = 476;
+      const LY = [70, 112, 150, 196, 232, 284];          // terminal-local line tops
+      const STY = [70, 112, 196, 284];                   // step badge rows (buka · tempel · install · /yt-script)
+      z.innerHTML = K.headerHTML(P) +
+        `<div id="s08-term"><div class="bar"><i style="left:20px;background:#ff6159"></i><i style="left:40px;background:#ffbd2e"></i><i style="left:60px;background:#28c941"></i>` +
+        `${K.claude()}<b>Claude Code</b><span>~/channel-kamu</span></div>` +
+        `<div class="s08-ln dim" id="s08-l0" style="top:${LY[0]}px">&#10043; Claude Code siap. Ketik permintaanmu.</div>` +
+        `<div class="s08-ln" id="s08-l1" style="top:${LY[1]}px"><span class="pr">&rsaquo;</span><span id="s08-url">https://github.com/Jakeschincariol/youtube-agent-skill</span></div>` +
+        `<div class="s08-ln" id="s08-l2" style="top:${LY[2]}px;left:52px"><span id="s08-ask"></span></div>` +
+        `<div class="s08-ln dim" id="s08-l3" style="top:${LY[3]}px">&#9679; menyalin skills/yt-* ke ~/.claude/skills/</div>` +
+        `<div class="s08-ln ok" id="s08-l4" style="top:${LY[4]}px">&#10003; 11 skill terpasang</div>` +
+        `<div class="s08-ln" id="s08-l5" style="top:${LY[5]}px"><span class="pr">&rsaquo;</span><span id="s08-cmd"></span></div>` +
+        `<div id="s08-ac"><div class="on">/yt-script</div><div>/yt-shorts</div><div>/yt-seo</div></div>` +
+        `<div id="s08-run">${K.svg("check")}jalan</div>` +
+        [1, 2, 3, 4].map((n, i) => `<div class="s08-st" id="s08-s${i}">${n}</div><div class="s08-st done" id="s08-sd${i}">${K.svg("check", "", 'style="width:20px;height:20px;margin-top:10px"')}</div>`).join("") +
+        `</div><div id="s08-paste">${K.svg("clipboard")}TEMPEL</div>` +
+        `<div id="s08-link"><div class="ic">${K.svg("link")}</div><b>youtube-agent-skill</b><span>link + cara pasang</span></div>`;
+      K.headerSet(S, P, 6);
+      const tCa = wt("Cara"), tBu = wt("buka"), tCl = wt("Claude", 37), tCo = wt("Code,"), tTe = wt("tempel"), tLi = wt("link"), tGH = wt("GitHub-nya,"),
+        tMi = wt("minta"), tIn = wt("install,"), tTr = wt("terus", 40), tKe = wt("ketik"), tYS = wt("/yt-script.");
+      K.headerSwap(S, P, 6, 7, Math.max(0.01, tCa - 0.04));
+      // ---------------------------------------------------------------- "buka Claude Code"
+      const term = $("s08-term");
+      I(term, { x: TX, y: TY, scaleY: 0.3, opacity: 0 });
+      ft(term, { scaleY: 0.3, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.4, ease: "back.out(1.4)" }, tBu - 0.12);
+      const L = [0, 1, 2, 3, 4, 5].map((i) => $("s08-l" + i));
+      L.forEach((l) => I(l, { opacity: 0 }));
+      tl.set(L[0], { opacity: 1 }, tCo - 0.1);
+      // step badges (terminal-local, right edge)
+      [0, 1, 2, 3].forEach((i) => { const s = $("s08-s" + i), d = $("s08-sd" + i); I(s, { x: 916, y: STY[i] + 17, scale: 0, opacity: 0 }); I(d, { x: 916, y: STY[i] + 17, scale: 0, opacity: 0 }); });
+      const stepOn = (i, t) => ft($("s08-s" + i), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(2.6)" }, t);
+      const stepDone = (i, t) => ft($("s08-sd" + i), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.22, ease: "back.out(2.6)" }, t);
+      stepOn(0, tBu); stepDone(0, tCo + 0.1);
+      // ---------------------------------------------------------------- "tempel link GitHub-nya": paste
+      tl.set(L[1], { opacity: 1 }, tLi - 0.08);
+      const url = $("s08-url"); I(url, { backgroundColor: "rgba(1,204,247,0)" });
+      ft(url, { backgroundColor: "rgba(1,204,247,0.35)" }, { backgroundColor: "rgba(1,204,247,0)", duration: 0.5, ease: "power2.out" }, tLi - 0.08);
+      const ps = $("s08-paste"); I(ps, { x: TX + 660, y: TY + 60, scale: 0.4, opacity: 0 });
+      ft(ps, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(2.6)" }, tTe);
+      ft(ps, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tGH + 0.3);
+      stepOn(1, tTe); stepDone(1, tGH + 0.1);
+      // ---------------------------------------------------------------- "minta install"
+      tl.set(L[2], { opacity: 1 }, tMi - 0.06);
+      type($("s08-ask"), "Install skill ini, lalu cek /yt-script.", tMi - 0.04, 52);
+      tl.set(L[3], { opacity: 1 }, tIn + 0.04);
+      tl.set(L[4], { opacity: 1 }, tTr - 0.02);
+      stepOn(2, tMi - 0.04); stepDone(2, tTr);
+      // ---------------------------------------------------------------- "terus ketik /yt-script"
+      tl.set(L[5], { opacity: 1 }, tKe - 0.12);
+      type($("s08-cmd"), "/yt-script", tKe + 0.02, 22);
+      const ac = $("s08-ac"); I(ac, { x: 52, y: LY[5] + 36, scaleY: 0, opacity: 0 });
+      ft(ac, { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.2, ease: "power3.out" }, tKe + 0.1);
+      ft(ac, { scaleY: 1, opacity: 1 }, { scaleY: 0, opacity: 0, duration: 0.16, ease: "power2.in" }, tYS + 0.12);
+      const run = $("s08-run"); I(run, { x: 210, y: LY[5], scale: 0.4, opacity: 0 });
+      ft(run, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, tYS + 0.16);
+      stepOn(3, tKe); stepDone(3, tYS + 0.16);
+      // ---------------------------------------------------------------- exit → the link card (s09 frame 0)
+      const tX = D - 0.45;
+      ft(term, { opacity: 1, scaleY: 1, y: TY }, { opacity: 0, scaleY: 0.6, y: TY + 40, duration: 0.24, ease: "power2.in" }, tX);
+      I($("s08-hdr"), { opacity: 1, y: 0 });
+      ft($("s08-hdr"), { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.24, ease: "power2.in" }, tX);
+      const lk = $("s08-link"); I(lk, { x: 260, y: 504, scale: 0.5, opacity: 0 });
+      ft(lk, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.32, ease: "back.out(2)" }, tX + 0.1);
+      S.finish();
+    })();
+  </script>
+</template>

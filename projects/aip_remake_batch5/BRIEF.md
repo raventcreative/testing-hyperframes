@@ -54,3 +54,29 @@ contact sheets only, delete PNG dumps.
   instead of an API key or use a cheap DeepSeek model, skills and data stay on your computer, every command asks permission; minus: the
   computer must stay on and security is your responsibility. Verify every claim (names, login method, pricing comparisons — drop the
   "10× cheaper"/benchmark claims unless verified). Angle: data ownership + honest trade-offs. CTA **AGENT**.
+
+## The second five (R16–R20) — references 6–10 are English reels; our versions are Indonesian
+Order continues: **R16 LIGHT · R17 NAVY · R18 LIGHT · R19 NAVY · R20 LIGHT**.
+- **R16 · Bikin "perusahaan AI" sendiri pakai Paperclip** (LIGHT · `aip_r16_paperclip` · 8936 · ref6, 37 s): an open-source tool that
+  runs a team of AI "employees" on your computer — you state the goal, it sets up a CEO agent, dev/marketing teams, they coordinate, you
+  watch each agent's work and token use. NOTE: our R2 (`projects/aip_r2_orkestrator/`) already named Paperclip in a list of 4 — read its
+  VO_SCRIPT.md and make R16 a deep dive with different visuals (org chart that builds itself, budgets/token meters, heartbeat), with an
+  Indonesian UMKM example goal. Verify repo, licence, features and the "112k developers" claim (drop if unverified). CTA **TIM**.
+- **R17 · Repo GitHub buat belajar bikin teknologi dari nol** (NAVY · `aip_r17_buildx` · 8937 · ref7, 33 s): the "build your own X"
+  collection — step-by-step guides to build your own Git, Docker, database, etc. from scratch; why it beats another to-do-app portfolio
+  and helps in interviews. Verify the repo (owner, star count/rank — do NOT claim "most starred of all time" unless it checks out today).
+  Angle for Indonesian students / junior devs, plus how to use Claude as a tutor while building (practical, honest). CTA **RAKIT**.
+- **R18 · Prediksi potensi viral reels sebelum posting** (LIGHT · `aip_r18_viral` · 8938 · ref8, 30 s → 35–45 s): a free Claude Code
+  plugin that scores a video and shows a second-by-second predicted retention graph before you post. Verify exactly what it is, what
+  model/data it uses ("brain data" claim — check the source paper/model, describe it accurately or drop it), install. Do NOT copy the
+  creator's personal stats (700k views / 5k followers). Honest caveat: a prediction is a guide, not a guarantee. CTA **VIRAL**.
+- **R19 · Asisten suara ala Jarvis di laptop sendiri** (NAVY · `aip_r19_jarvis` · 8939 · ref9, 27 s → 35–45 s): an open-source desktop
+  voice assistant (name in the reference sounds like "Atticus" — verify the real name/repo): install by pasting the repo link into Claude
+  Code ("set this up on my machine"), hold a shortcut and talk, it opens apps, moves windows, finds files, reads the screen and drafts
+  replies. Verify OS support and permissions; add the privacy caution (it can see your screen). No "Jarvis"/Marvel imagery — use the
+  word only as a generic comparison. CTA **ASISTEN**.
+- **R20 · Claude Code pakai model AI gratis (FreeLLMAPI)** (LIGHT · `aip_r20_freellm` · 8940 · ref10, 28 s → 35–45 s): a small local
+  server that speaks the Claude-API format and routes Claude Code's requests to a pool of free model tiers from other providers. Be
+  ACCURATE: it is the Claude Code app running on OTHER (free) models, not free Claude. Verify the repo name, how it works, which
+  providers, and drop the "7 billion free tokens / unlimited" claims unless verified; add the caution about each provider's terms, rate
+  limits and sending code to third-party servers. CTA **LLM**.

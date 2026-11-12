@@ -1,7 +1,7 @@
-"""Builds index.html for the R9 YOUTUBE reel (11 free Claude skills for a YouTube channel; adapted from the R3 DESAINER builder) from production/timing.json: the client's navy background, word-synced Poppins
-captions (white + cyan #01CCF7) on navy chips (legible over every world), the white AI PRENEUR logo (top-left, safe zone), scene
-slots (s01–s14), the persistent step header (split-flap "LANGKAH n", hf-seek driven), the robot (operator) and the mascot (host).
-All caption chunks sit mid (y≈968, above the mascot's head).
+"""Builds index.html for the R17 BUILDX reel (build-your-own-x: rakit teknologi dari nol; adapted from the R13 TRADER / R9 YOUTUBE builder)
+from production/timing.json: the client's navy background, word-synced Poppins captions (white + cyan #01CCF7) on navy chips (legible
+over every world), the white AI PRENEUR logo (top-left, safe zone), scene slots, the robot (operator) and the mascot (host).
+All caption chunks sit mid (y≈960, above the mascot's head).
 Missing scene files are created as empty placeholders.   Run: python3 -I tools/build_index.py ."""
 import json, sys
 from pathlib import Path
@@ -22,12 +22,12 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>YouTube agent: 11 skill Claude buat channel kamu — AI PRENEUR</title>
+    <title>Rakit teknologi dari nol: build-your-own-x — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
-    <script src="vendor/r9kit.js"></script>
+    <script src="vendor/r17kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -72,6 +72,8 @@ html = f"""<!doctype html>
     <script>
       (function () {{
         const tl = gsap.timeline({{ paused: true }});
+        // frame-0 states live in a nested timeline that is the FIRST child of the main timeline, at 0
+        const pin = gsap.timeline(); tl.add(pin, 0);
         // expand the "scale" shorthand (seek-order-safe scaleY in the HF runtime)
         const _sc = (v) => {{ if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({{}}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; }};
         {{ const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }}
@@ -87,7 +89,7 @@ html = f"""<!doctype html>
         const root = document.getElementById("caps");
         CAPS.forEach(([s, e, a, b, pos], ci) => {{
           const c = mk("div", "cap " + pos, root); c.id = "cap" + ci;
-          tl.set(c, {{ opacity: 0 }}, 0);
+          pin.set(c, {{ opacity: 0 }}, 0);
           tl.set(c, {{ opacity: 1 }}, s);
           tl.set(c, {{ opacity: 0 }}, e);
           for (let i = a; i <= b; i++) {{
@@ -96,7 +98,7 @@ html = f"""<!doctype html>
             const w = mk("span", "w " + (st === "m" ? "k" : st), m, W[i][0]);
             if (i < b) c.appendChild(document.createTextNode(" "));
             const t = Math.max(s + 0.02, W[i][1] - 0.08);
-            tl.set(w, {{ yPercent: 118, opacity: 0 }}, 0);
+            pin.set(w, {{ yPercent: 118, opacity: 0 }}, 0);
             tl.set(w, {{ opacity: 1 }}, t);
             tl.fromTo(w, {{ yPercent: 118 }}, {{ yPercent: 0, duration: 0.34, ease: "power4.out", immediateRender: false }}, t);
             if (st === "m") tl.fromTo(w, {{ scale: 1 }}, {{ scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }}, t + 0.3);
@@ -106,9 +108,10 @@ html = f"""<!doctype html>
         tl.fromTo("#glow-a", {{ x: 0, y: 0 }}, {{ x: 90, y: 70, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#glow-b", {{ x: 0, y: 0 }}, {{ x: -110, y: -60, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
-        tl.set("#brandlogo", {{ opacity: 0.95 }}, 0);   // visible from frame 0
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s09"]["start"] + S["s09"]["dur"] - 1.4, 3)});
+        pin.set("#brandlogo", {{ opacity: 0.95 }}, 0);   // visible from frame 0
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s08"]["start"] + S["s08"]["dur"] - 1.4, 3)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
+        tl.render(0, true, true);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;
       }})();

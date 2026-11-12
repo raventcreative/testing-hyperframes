@@ -10,8 +10,10 @@ P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 OFFSET, FPS, TAIL = 9 / 30, 30, 1.6
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
-# R17: raw index -> (start, end) overrides for words the ElevenLabs alignment placed badly (none needed so far)
-OVR = {}
+# R17: raw index -> (start, end) in raw VO seconds, for words the onset snap pushed into the NEXT voiced run (checked against the
+# energy segments + a faster-whisper small pass): "Git," / "Docker," in line 3 (whisper 13.22 / 13.86 raw), "Code:" in line 7
+# (whisper 35.30 raw; its voiced run ends at 35.69 raw).
+OVR = {36: (13.30, 13.78), 37: (13.86, 14.36), 91: (35.35, 35.68)}
 for _i, (_s, _e) in OVR.items(): raw[_i] = dict(raw[_i], s=_s, e=_e)
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
@@ -84,7 +86,7 @@ SC = [
     ("t2", "To-do", [4, 7], ["pasaran.", "rakitan", "beda."], []),
     ("t3", "Pas", [5, 9], ["interview,", "kerjanya", "dalam,"], []),
     ("s06", "Tutorialnya", [3, 6, 11], ["Inggris?", "Claude", "tutor:", "Indonesia."], []),
-    ("s07", "Jangan", [4, 7, 10], ["Learning", "Claude", "Code:", "tulis."], []),
+    ("s07", "Jangan", [4, 7, 10, 12], ["Learning", "Claude", "Code:", "sendiri."], []),
     ("s08", "Komen", [2], ["DM."], ["RAKIT,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "sama", "kayak", "lewat", "jadi", "biar", "dalam", "ada", "dari", "lalu",

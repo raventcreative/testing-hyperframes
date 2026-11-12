@@ -346,7 +346,7 @@
         const btop = PL(belt, "beltTop", BL, BD, `translate3d(0px, ${-BH}px, 0px) rotateX(90deg)`); mk("div", "ribs", btop).id = "ribs";
         LX.forEach((x, k) => { const j = PL(belt, "jmark", 190, BD - 60, `translate3d(${x - BXC}px, ${-BH - 1}px, 0px) rotateX(90deg)`); j.id = "jm" + k; });
         const bfr = PL(belt, "beltFr", BL, BH, `translate3d(0px, ${-BH / 2}px, ${BD / 2}px)`);
-        [380, 1300, 2220].forEach((x) => { const s = mk("span", "", bfr, `left:${x}px`); s.textContent = "UANG MASUK · REKENING USAHA"; });
+        [500].forEach((x) => { const s = mk("span", "", bfr, `left:${x}px`); s.textContent = "UANG MASUK · REKENING USAHA"; });
         PL(belt, "beltEnd", BD, BH, `translate3d(${-BL / 2}px, ${-BH / 2}px, 0px) rotateY(-90deg)`);
         // scan gate (slides along the belt in S3): two yellow front posts, two back posts, a roof and a "SCAN" bar, a glow on the belt
         const gate = mk("div", "g3", P1); gate.id = "gate"; gsap.set(gate, { x: -760, y: 0, z: BZ });
@@ -426,10 +426,11 @@
         // hook: low, tracking the tokens as they ride toward the omzet board -> "Eh, tunggu": swings out to the frontal wide ->
         // S3: tracks right with the scan gate -> S4: wide while the belt sorts -> S5: pushes into the omzet gauge
         const KH0 = K(540, 880, 360, -170, 300, -30, 16, 520), KHa = K(540, 960, 40, -200, 200, -25, 18, 120), KH1 = K(540, 1030, -360, -260, -120, -21, 12, -330);
-        const KW0 = K(540, 1050, -10, -220, -200, -25, -4, -700), KW1 = K(540, 1050, 10, -220, -200, -25, -6, -680);
+        const KW0 = K(540, 1070, 10, -180, -100, -27, -3, -920), KW1 = K(540, 1070, 0, -185, -110, -27, -4, -900);   // wide enough for all four tokens
         const KT0 = K(540, 1090, -380, -200, 150, -20, -6, -280), KT1 = K(540, 1090, 420, -200, 150, -20, -12, -280);
-        const KS0 = K(540, 1050, 0, -220, -200, -25, -4, -700), KS1 = K(540, 1000, -30, -330, -450, -20, -2, -480);
-        const KF0 = K(540, 1000, -380, -450, -600, -16, 6, -250), KF1 = K(520, 1000, -450, -420, -650, -14, 9, -150);
+        const KS0 = K(540, 1050, 0, -220, -200, -25, -4, -730), KS1 = K(540, 1000, -30, -330, -450, -20, -2, -480);
+        const KF0 = K(540, 1000, -30, -330, -450, -19, -2, -470), KF0b = K(540, 1000, -40, -335, -460, -18.6, -1.6, -455);
+        const KF1 = K(540, 990, -609, -440, -650, -14, 8, -120), KF1b = K(540, 984, -609, -440, -650, -14.3, 8, -120);
         camSet(C1, KH0);
         cam(C1, KH0, KHa, 0, 1.9, "power1.in");
         cam(C1, KHa, KH1, 1.9, TM.eh - 1.9, "power2.out");
@@ -438,11 +439,15 @@
         cam(C1, KW1, KT0, TM.ada2 - 0.5, 0.75, "power2.inOut");
         cam(C1, KT0, KT1, TM.ada2 + 0.25, TM.prib + 0.2 - TM.ada2 - 0.25, "sine.inOut");
         cam(C1, KT1, KS0, TM.prib + 0.2, T4 + 0.4 - TM.prib - 0.2, "power2.inOut");
-        const KS0b = K(540, 1045, 0, -230, -230, -24.5, -3, -680);   // stays wide until the last token (uang pribadi) has jumped
+        const KS0b = K(540, 1045, 0, -230, -230, -24.5, -3, -750);   // stays wide until the last token (uang pribadi) has jumped
         cam(C1, KS0, KS0b, T4 + 0.4, 13.6 - T4 - 0.4, "none");
         cam(C1, KS0b, KS1, 13.6, TM.kalau - 13.6, "sine.inOut");
-        cam(C1, KS1, KF0, TM.kalau, 1.1, "power2.inOut");
-        cam(C1, KF0, KF1, TM.kalau + 1.1, TM.sol - TM.kalau - 1.1, "power1.inOut");
+        // S5: all four boards stay in frame while the tokens jump across; on "padahal" the camera pushes onto the omzet board and
+        // settles with the frame's right edge inside the gap between the pinjaman and tambahan modal boards (no half-cut board)
+        cam(C1, KS1, KF0, TM.kalau, 1.0, "power2.inOut");
+        cam(C1, KF0, KF0b, TM.kalau + 1.0, TM.pdh - 0.1 - TM.kalau - 1.0, "none");
+        cam(C1, KF0b, KF1, TM.pdh - 0.1, 1.0, "power2.inOut");
+        cam(C1, KF1, KF1b, TM.pdh + 0.9, TM.sol - TM.pdh - 0.9, "none");
 
         // ---- belt drive (hook): tokens ride in from the right and stop exactly at their own lane junctions on "Eh, tunggu" ----
         const DH = 900;

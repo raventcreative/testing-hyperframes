@@ -53,3 +53,11 @@ Final reply: duration, VO script, scene list, sources checked, real-runtime cont
   formula. Setup: open Claude Code, paste the GitHub link, type `/ytscript` (verify the exact repo, skill count, command names). Don't
   repeat the reference's clickbait opener ("Claude just killed YouTube"). No YouTube logo art copied — a neutral play-button glyph is fine.
   CTA keyword **YOUTUBE**.
+- **R10 · Edit video yang sudah ada pakai AI (Runway Aleph)** (LIGHT · `aip_r10_aleph` · 8830 · ref5, 22 s → make it 30–40 s): the
+  reference shows real footage (top "AI Video", bottom "Raw") where Runway Aleph turns day into night, changes the season, adds a car /
+  a product. We have NO raw footage of Freddie, so the client chose an ANIMATED version in the house style: build the before/after demos
+  as our own illustrated, animated scenes in HTML/CSS/GSAP (e.g. a simple street/park scene with a person silhouette that goes day → night,
+  summer → sakura/snow, an empty kerb → a parked car, a plain shelf → a branded product), each with a clear "ilustrasi" label and a
+  split or wipe between "video asli" and "hasil edit AI". Verify Runway Aleph facts (what it is, what edits it supports, availability /
+  paid plan) on official Runway pages; no affiliate or discount claims (the reference's "50% off" is not Freddie's). Angle: useful for
+  content and marketing (ganti suasana, musim, produk tanpa reshoot). CTA keyword **AI** — "Komen AI, aku kirim cara pakainya."

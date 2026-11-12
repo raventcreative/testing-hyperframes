@@ -1,117 +1,12 @@
 <template>
-  <style>
-    #root { position: absolute; inset: 0; overflow: hidden; }
-    .s01-a { position: absolute; }
-    #s01-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
-    #s01-glow { left: 40px; top: 260px; width: 1000px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
-    #s01-lines { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
-    #s01-pill { left: 300px; top: 818px; width: 480px; height: 92px; border-radius: 46px; background: linear-gradient(135deg, #0a0d2c, #294b77); transform-origin: 50% 50%;
-      box-shadow: 0 26px 40px -22px rgba(10,13,44,.75), inset 0 0 0 1.5px rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; gap: 14px; color: #ffffff; }
-    #s01-pill .di { position: relative; width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,.14); flex: none; }
-    #s01-pill .di svg { position: absolute; left: 13px; top: 13px; width: 28px; height: 28px; display: block; color: #8fd8ff; }
-    #s01-pill b { font: 700 36px/92px Poppins, sans-serif; white-space: nowrap; letter-spacing: -.01em; }
-    #s01-pill span { font: 400 30px/92px Poppins, sans-serif; white-space: nowrap; color: rgba(227,237,250,.85); }
-    #s01-rip { left: 300px; top: 818px; width: 480px; height: 92px; border-radius: 46px; box-shadow: 0 0 0 4px #294b77; transform-origin: 50% 50%; }
-    .s01-spk { position: absolute; width: 0; height: 0; }
-    .s01-spk svg { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; display: block; color: #ffd77a; }
-    #s01-tag3d { left: 760px; top: 312px; height: 60px; padding: 0 22px 0 58px; border-radius: 30px; background: #ffffff; color: #0a0d2c; transform-origin: 30% 50%;
-      box-shadow: 0 18px 30px -16px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.06); white-space: nowrap; }
-    #s01-tag3d svg { position: absolute; left: 20px; top: 16px; width: 28px; height: 28px; display: block; color: #294b77; }
-    #s01-tag3d b { font: 700 26px/60px Poppins, sans-serif; }
-  </style>
-  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
-    <div id="s01-cam"></div>
-  </div>
+  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920"></div>
   <script>
     (function () {
-      // s01 HOOK "Website 3D kayak gini bisa jadi cuma dari satu prompt."
-      // Frame 0: the example site "Kopi Senja" (CONTOH) already on screen, its cup floating + wobbling in 3D, beans orbiting.
-      // "3D": the card tilts (flat plane, own perspective), the cup pops, a "3D" tag + sparkles · "kayak gini": the card shrinks to
-      // the middle of a fan and two more example sites slide in behind it (Langkah sneakers · Roti Bunda) · "satu prompt": a navy
-      // pill "1 prompt → 1 website" rises under the fan, connectors draw up to each card, slam + ripple on "prompt."
-      // TRANSITION → s02: the fan drops and fades, the pill lifts away. END STATE (t = D): everything invisible.
-      const ID = "s01", ST = window.SCN[ID][0], D = window.SCN[ID][1], VW = window.VO_WORDS, R8 = window.R8;
-      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
-      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
-      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
-      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
-      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
-      const t3D = L("3D"), tKay = L("kayak"), tGini = L("gini"), tBisa = L("bisa"), tSatu = L("satu"), tPr = L("prompt.");
-
-      // ================================================================ DOM (side cards first = behind the hero card)
-      let h = `<div class="s01-a" id="s01-glow"></div>`;
-      h += R8.site("s01b", ["sepatu"], { mirror: true }) + R8.site("s01c", ["roti"]) + R8.site("s01a", ["kopi"]);
-      h += `<svg class="s01-a" id="s01-lines" viewBox="0 0 1080 1920" fill="none">` +
-        [[242, 712, 430, 818], [540, 789, 540, 818], [838, 712, 650, 818]].map(([x0, y0, x1, y1], k) =>
-          `<path id="s01-ln${k}" d="M${x0} ${y0} C ${x0} ${y0 + 40}, ${x1} ${y1 - 40}, ${x1} ${y1}" stroke="#294b77" stroke-width="5" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/>`).join("") + `</svg>`;
-      h += `<div class="s01-a" id="s01-rip"></div><div class="s01-a" id="s01-pill"><div class="di" id="s01-di">${R8.svg("file", 2)}</div><b>1 prompt</b><span>→ 1 website</span></div>`;
-      h += `<div class="s01-a" id="s01-tag3d">${R8.svg("box", 2.2)}<b>3D</b></div>`;
-      [[700, 360], [930, 520], [620, 700], [960, 760]].forEach(([x, y], k) => { h += `<div class="s01-spk" id="s01-sp${k}" style="left:${x}px;top:${y}px">${R8.svg("sparkles", 2)}</div>`; });
-      $("s01-cam").innerHTML = h;
-      const glow = $("s01-glow"), A = $("s01a-card"), B = $("s01b-card"), C = $("s01c-card"), pill = $("s01-pill"), rip = $("s01-rip"), tag = $("s01-tag3d");
-
-      // ================================================================ frame 0: the hero example site already there
-      I($("s01-cam"), { x: 0, y: 0 });
-      I(glow, { opacity: 0.85, scale: 0.94 }); ft(glow, { scale: 0.94 }, { scale: 1.03, duration: 3.6, ease: "sine.inOut" }, 0);
-      I(A, { opacity: 1, x: 0, y: 14, scale: 0.95, rotationY: 0, rotationX: 0, transformPerspective: 1400 });
-      ft(A, { y: 14, scale: 0.95 }, { y: 0, scale: 0.97, duration: 0.7, ease: "power3.out" }, 0);
-      R8.float(tl, "s01a", 0, "kopi", ST, D);
-      R8.float(tl, "s01b", 0, "sepatu", ST, D);
-      R8.float(tl, "s01c", 0, "roti", ST, D);
-
-      // "3D": the card tilts in 3D (one flat plane), the cup pops, tag + sparkles
-      ft(A, { rotationY: 0, rotationX: 0 }, { rotationY: -12, rotationX: 5, duration: 0.3, ease: "power2.out" }, t3D - 0.12);
-      ft(A, { rotationY: -12, rotationX: 5 }, { rotationY: 0, rotationX: 0, duration: 0.45, ease: "power2.inOut" }, t3D + 0.3);
-      const pw = $("s01a-g0-pw");
-      I(pw, { scale: 1 });
-      ft(pw, { scale: 1 }, { scale: 1.2, duration: 0.16, ease: "back.out(3)" }, t3D - 0.06);
-      ft(pw, { scale: 1.2 }, { scale: 1, duration: 0.4, ease: "power2.inOut" }, t3D + 0.12);
-      I(tag, { opacity: 0, scale: 0.4, rotation: -8 });
-      ft(tag, { opacity: 0, scale: 0.4, rotation: -8 }, { opacity: 1, scale: 1, rotation: 4, duration: 0.3, ease: "back.out(2.4)" }, t3D - 0.04);
-      [0, 1, 2, 3].forEach((k) => {
-        const e = $("s01-sp" + k); I(e, { opacity: 0, scale: 0.2, rotation: 0 });
-        ft(e, { opacity: 0, scale: 0.2, rotation: 0 }, { opacity: 1, scale: 1, rotation: 90, duration: 0.25, ease: "back.out(2)" }, t3D + k * 0.05);
-        ft(e, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.5, duration: 0.25, ease: "power2.in" }, t3D + 0.42 + k * 0.04);
-      });
-
-      // "kayak gini": the hero card shrinks into the middle of a fan, two more example sites slide in behind it
-      ft(tag, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6, duration: 0.2, ease: "power2.in" }, tKay - 0.1);
-      ft(A, { x: 0, y: 0, scale: 0.97 }, { x: 0, y: -25, scale: 0.64, duration: 0.5, ease: "power3.inOut" }, tKay - 0.08);
-      I(B, { opacity: 0, x: -520, y: -55, scale: 0.48, rotationY: -26, transformPerspective: 1400 });
-      I(C, { opacity: 0, x: 520, y: -55, scale: 0.48, rotationY: 26, transformPerspective: 1400 });
-      ft(B, { opacity: 0, x: -520 }, { opacity: 1, x: -298, duration: 0.5, ease: "power3.out" }, tKay + 0.04);
-      ft(C, { opacity: 0, x: 520 }, { opacity: 1, x: 298, duration: 0.5, ease: "power3.out" }, tGini - 0.1);
-      // gentle sway of the fan
-      ft(B, { rotationY: -26 }, { rotationY: -20, duration: 1.6, ease: "sine.inOut" }, tKay + 0.5);
-      ft(C, { rotationY: 26 }, { rotationY: 20, duration: 1.6, ease: "sine.inOut" }, tGini + 0.3);
-
-      // "satu prompt": pill rises, connectors draw up into each card, slam on "prompt."
-      I(pill, { opacity: 0, y: 40, scale: 0.7 });
-      ft(pill, { opacity: 0, y: 40, scale: 0.7 }, { opacity: 1, y: 0, scale: 1, duration: 0.38, ease: "back.out(1.8)" }, tSatu - 0.16);
-      [0, 1, 2].forEach((k) => { const p = $("s01-ln" + k); I(p, { opacity: 1, attr: { "stroke-dashoffset": 1 } });
-        ft(p, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.32, ease: "power2.out" }, tSatu + 0.05 + k * 0.06); });
-      I($("s01-di"), { rotation: 0 }); ft($("s01-di"), { rotation: 0 }, { rotation: 360, duration: 0.6, ease: "power3.out" }, tPr - 0.1);
-      ft(pill, { scale: 1 }, { scale: 1.1, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, tPr - 0.04);
-      I(rip, { opacity: 0, scale: 1 }); ft(rip, { opacity: 0.6, scale: 1 }, { opacity: 0, scale: 1.3, duration: 0.45, ease: "power2.out" }, tPr);
-      [[B, 0.48], [A, 0.64], [C, 0.48]].forEach(([c, s], k) => ft(c, { scale: s }, { scale: s * 1.05, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tPr + 0.02 + k * 0.05));
-      [[6, -4], [-5, 3], [3, -2], [-1, 1], [0, 0]].forEach(([x, y], k) => tl.set($("s01-cam"), { x, y }, tPr + k * 0.034));
-
-      // ================================================================ TRANSITION → s02
-      const tOut = D - 0.3;
-      [B, A, C].forEach((c) => ft(c, { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, tOut));
-      ft(A, { y: -25 }, { y: 50, duration: 0.24, ease: "power2.in" }, tOut);
-      ft(B, { y: -55 }, { y: 20, duration: 0.24, ease: "power2.in" }, tOut);
-      ft(C, { y: -55 }, { y: 20, duration: 0.24, ease: "power2.in" }, tOut);
-      [0, 1, 2].forEach((k) => ft($("s01-ln" + k), { opacity: 1 }, { opacity: 0, duration: 0.15 }, tOut));
-      ft(pill, { opacity: 1, y: 0 }, { opacity: 0, y: 30, duration: 0.24, ease: "power2.in" }, tOut + 0.04);
-      ft(glow, { opacity: 0.85 }, { opacity: 0, duration: 0.25 }, tOut + 0.03);
-
-      tl.set({}, {}, D - 0.01);
-      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      tl.set({}, {}, 3.957);
       window.__timelines = window.__timelines || {};
-      window.__timelines[ID] = tl;
+      window.__timelines["s01"] = tl;
     })();
   </script>
 </template>

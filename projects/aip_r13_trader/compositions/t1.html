@@ -1,122 +1,12 @@
 <template>
-  <style>
-    /* t1 /yt-script (11.30–16.10) "Satu, naskah dari 21 rumus hook, plus skor hook-nya sebelum rekaman."
-       Frame 0 = s02's end (header = repo + "11" badge). Header rolls to 01 /yt-script. "naskah": a white HOOK card slides in and an
-       example hook types itself. "21 rumus hook": a reel of the pack's 21 formula names (real names from skills/yt-script/hooks.json)
-       spins and stops on "The Question" (the formula chip lands on the hook card). "skor hook-nya": the 5-property panel of
-       hookscore.py fills (labels in Indonesian; example values, verdict = 0.6·mean + 0.4·weakest = 76 → STRONG). "sebelum rekaman":
-       the REC button unlocks. Last 0.22 s: workspace drops out (t2 starts with the header). */
-    #root { position: absolute; inset: 0; overflow: hidden; }
-    #t1-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
-    #t1-badge { position: absolute; left: 160px; top: 306px; width: 50px; height: 50px; border-radius: 25px; background: #ffffff; color: #0b1440;
-      font: 700 24px/50px Poppins; text-align: center; box-shadow: 0 6px 16px rgba(2,6,26,.5), 0 0 0 3px #01ccf7; transform-origin: 50% 50%; }
-    #t1-reel { position: absolute; left: 0; top: 0; width: 330px; height: 438px; border-radius: 28px; background: rgba(12,22,64,.86);
-      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), 0 22px 46px rgba(2,6,26,.5); }
-    #t1-reel .n { position: absolute; right: 22px; top: 8px; font: 700 54px/70px Poppins; color: #01ccf7; letter-spacing: -1px; }
-    #t1-win { position: absolute; left: 14px; top: 80px; width: 302px; height: 340px; overflow: hidden; border-radius: 16px; background: rgba(0,0,0,.18); }
-    #t1-list { position: absolute; left: 0; top: 0; width: 302px; }
-    #t1-list div { height: 48px; padding-left: 16px; font: 700 21px/48px Poppins; color: rgba(227,237,250,.55); white-space: nowrap; }
-    #t1-band { position: absolute; left: 14px; top: 226px; width: 302px; height: 48px; border-radius: 12px; background: rgba(1,204,247,.18); box-shadow: inset 0 0 0 2px #01ccf7; }
-    #t1-fade { position: absolute; left: 14px; top: 80px; width: 302px; height: 340px; border-radius: 16px; pointer-events: none;
-      background: linear-gradient(180deg, rgba(12,22,64,.95) 0%, rgba(12,22,64,0) 28%, rgba(12,22,64,0) 72%, rgba(12,22,64,.95) 100%); }
-    #t1-hook { position: absolute; left: 0; top: 0; width: 610px; height: 236px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #f4f7fc); box-shadow: 0 26px 56px rgba(2,6,26,.55); }
-    #t1-hook .lb { position: absolute; left: 26px; top: 20px; font: 700 18px/26px Poppins; letter-spacing: 2.5px; color: #5d6f8f; white-space: nowrap; }
-    #t1-txt { position: absolute; left: 26px; top: 56px; width: 560px; font: 700 31px/42px Poppins; color: #0a0d2c; letter-spacing: -.3px; }
-    #t1-fchip { position: absolute; left: 26px; top: 176px; height: 40px; padding: 0 16px 0 12px; border-radius: 20px; background: #e6f6fc; color: #07698a; font: 700 19px/40px Poppins;
-      white-space: nowrap; display: flex; align-items: center; gap: 8px; transform-origin: 0% 50%; }
-    #t1-fchip svg { width: 20px; height: 20px; }
-    #t1-rec { position: absolute; left: 398px; top: 176px; height: 40px; padding: 0 16px 0 12px; border-radius: 20px; background: #e9edf4; color: #8a94a6; font: 700 19px/40px Poppins;
-      white-space: nowrap; display: flex; align-items: center; gap: 8px; }
-    #t1-rec i { display: inline-block; width: 16px; height: 16px; border-radius: 50%; background: #b9c2d0; }
-    #t1-recon { position: absolute; left: 398px; top: 176px; height: 40px; padding: 0 16px 0 12px; border-radius: 20px; background: #e5484d; color: #fff; font: 700 19px/40px Poppins;
-      white-space: nowrap; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 22px rgba(229,72,77,.55); transform-origin: 50% 50%; }
-    #t1-recon i { display: inline-block; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
-    #t1-score { position: absolute; left: 0; top: 0; width: 610px; height: 188px; border-radius: 28px; background: rgba(12,22,64,.86);
-      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), 0 22px 46px rgba(2,6,26,.5); }
-    .t1-r { position: absolute; left: 24px; width: 562px; height: 28px; }
-    .t1-r .l { position: absolute; left: 0; top: 0; font: 400 19px/28px Poppins; color: #e3edfa; white-space: nowrap; }
-    .t1-r .tr { position: absolute; left: 196px; top: 9px; width: 300px; height: 10px; border-radius: 5px; background: rgba(255,255,255,.12); overflow: hidden; }
-    .t1-r .tr b { position: absolute; left: 0; top: 0; width: 300px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #0aa7d6, #6adfff); transform-origin: 0% 50%; }
-    .t1-r .v { position: absolute; right: 0; top: 0; font: 700 21px/28px Poppins; color: #fff; }
-    #t1-verd { position: absolute; left: 0; top: 0; height: 40px; padding: 0 16px; border-radius: 20px; background: #2da44e; color: #fff; font: 700 20px/40px Poppins;
-      white-space: nowrap; box-shadow: 0 10px 24px rgba(2,6,26,.4), 0 0 0 4px rgba(45,164,78,.25); transform-origin: 50% 50%; }
-    #t1-verd em { font-style: normal; font-size: 24px; margin-right: 8px; }
-  </style>
-  <div id="root" data-composition-id="t1" data-width="1080" data-height="1920">
-    <div id="t1-zone"></div>
-  </div>
+  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
+  <div id="root" data-composition-id="t1" data-width="1080" data-height="1920"></div>
   <script>
     (function () {
-      const K = window.R9K, D = 4.8, P = "t1";
-      const S = K.scene(P, D), { tl, ft, I, wt, $, type } = S;
-      const z = $("t1-zone");
-      // the 21 formula names, in the order of skills/yt-script/hooks.json
-      const F = ["The Statistic", "Someone Else's Result", "The Mistake", "Contrarian Flip", "The Reveal", "The Superlative", "The Clock", "I Tried It",
-        "The Question", "Before and After", "The Teardown", "The Stack", "The Warning", "The List", "The Receipt", "The Insider", "The Impossible Claim",
-        "The Comparison", "The Origin", "The Deadline", "The Direct Address"];
-      const LIST = F.concat(F);              // 42 rows; the reel stops on row 29 (= "The Question", 2nd lap)
-      const STOP = 21 + 8, ROW = 48;
-      const SC = [["Spesifik", 82], ["Menyapa kamu", 90], ["Taruhan", 70], ["Bikin penasaran", 86], ["Ringkas", 74]];
-      z.innerHTML = K.headerHTML(P) + `<div id="t1-badge">11</div>` +
-        `<div id="t1-reel"><div class="k-lab" style="left:24px;top:30px">RUMUS HOOK</div><div class="n">21</div>` +
-        `<div id="t1-win"><div id="t1-list">${LIST.map((n, i) => `<div id="t1-f${i}">${n.replace("'", "&rsquo;")}</div>`).join("")}</div></div></div>` +
-        `<i id="t1-band"></i><i id="t1-fade"></i>` +
-        `<div id="t1-hook"><div class="lb">HOOK &middot; CONTOH</div><div id="t1-txt"></div>` +
-        `<div id="t1-fchip">${K.svg("sparkles")}rumus: The Question</div><div id="t1-rec"><i></i>REC</div><div id="t1-recon"><i></i>siap rekam</div></div>` +
-        `<div id="t1-score"><div class="k-lab" style="left:24px;top:14px">SKOR HOOK</div>` +
-        SC.map(([l, v], i) => `<div class="t1-r" style="top:${50 + i * 26}px"><div class="l">${l}</div><div class="tr"><b id="t1-b${i}"></b></div><div class="v" id="t1-v${i}">${v}</div></div>`).join("") +
-        `</div><div id="t1-verd"><em>76</em>STRONG</div>`;
-      // ---------------------------------------------------------------- frame 0 = s02 end (repo header + badge)
-      K.headerSet(S, P, 0);
-      const bd = $("t1-badge"); I(bd, { scale: 1, opacity: 1 });
-      const tSa = wt("Satu,"), tNa = wt("naskah", 11), t21 = wt("21"), tRu = wt("rumus"), tHo = wt("hook,"), tSk = wt("skor"), tHn = wt("hook-nya"), tSe = wt("sebelum"), tRe = wt("rekaman.");
-      K.headerSwap(S, P, 0, 1, tSa - 0.04);
-      ft(bd, { scale: 1, opacity: 1 }, { scale: 0, opacity: 0, duration: 0.22, ease: "power2.in" }, tSa - 0.04);
-      // ---------------------------------------------------------------- "naskah": the hook card, typing
-      const hook = $("t1-hook");
-      I(hook, { x: 410, y: 560, opacity: 0 });
-      ft(hook, { y: 560, opacity: 0 }, { y: 484, opacity: 1, duration: 0.42, ease: "power3.out" }, tNa - 0.2);
-      const txt = $("t1-txt");
-      type(txt, "Kenapa video kamu sepi, padahal upload tiap minggu?", tNa + 0.1, 30);
-      const fch = $("t1-fchip"); I(fch, { scale: 0.4, opacity: 0 });
-      ft(fch, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tHo + 0.12);
-      // ---------------------------------------------------------------- "21 rumus hook": the reel
-      const reel = $("t1-reel"), band = $("t1-band"), fade = $("t1-fade"), list = $("t1-list");
-      I(reel, { x: 60, y: 484, opacity: 0, scale: 0.94, transformOrigin: "50% 50%" });
-      ft(reel, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.34, ease: "back.out(1.6)" }, t21 - 0.3);
-      // band + fade are pinned in global px (they sit over the window)
-      I(band, { x: 60, y: 484, opacity: 0 }); I(fade, { x: 60, y: 484, opacity: 0 });
-      ft(fade, { opacity: 0 }, { opacity: 1, duration: 0.2 }, t21 - 0.2);
-      I(list, { y: 0 });
-      const yStop = -(STOP - 3) * ROW;      // row STOP lands in the band (window row 3: 3*48 = 144 → band top 226 - 80 = 146)
-      ft(list, { y: 0 }, { y: yStop, duration: tHo + 0.05 - (t21 - 0.05), ease: "power3.out" }, t21 - 0.05);
-      ft(band, { opacity: 0 }, { opacity: 1, duration: 0.16 }, tHo - 0.05);
-      const hit = $("t1-f" + STOP); I(hit, { color: "rgba(227,237,250,0.55)" });
-      ft(hit, { color: "rgba(227,237,250,0.55)" }, { color: "#6adfff", duration: 0.12 }, tHo + 0.02);
-      ft(band, { scale: 1 }, { scale: 1.04, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "50% 50%" }, tHo + 0.02);
-      // ---------------------------------------------------------------- "skor hook-nya": the panel fills
-      const sc = $("t1-score");
-      I(sc, { x: 410, y: 790, opacity: 0 });
-      ft(sc, { y: 790, opacity: 0 }, { y: 734, opacity: 1, duration: 0.36, ease: "power3.out" }, tSk - 0.32);
-      SC.forEach(([, v], i) => {
-        const b = $("t1-b" + i), vv = $("t1-v" + i);
-        I(b, { scaleX: 0 }); ft(b, { scaleX: 0 }, { scaleX: v / 100, duration: 0.42, ease: "power3.out" }, tSk - 0.05 + i * 0.07);
-        I(vv, { opacity: 0 }); ft(vv, { opacity: 0 }, { opacity: 1, duration: 0.15 }, tSk + 0.12 + i * 0.07);
-      });
-      const vd = $("t1-verd"); I(vd, { x: 1004, xPercent: -100, y: 742, scale: 2, opacity: 0, transformOrigin: "50% 50%" });   // top-right of the score panel
-      ft(vd, { scale: 2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "power4.in" }, tHn - 0.02);
-      // ---------------------------------------------------------------- "sebelum rekaman": REC unlocks
-      const ron = $("t1-recon"); I(ron, { opacity: 0, scale: 0.8 });
-      ft(ron, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.6)" }, tRe - 0.08);
-      const dot = ron.querySelector("i"); I(dot, { opacity: 1 });
-      [0.32, 0.64].forEach((d) => { tl.set(dot, { opacity: 0.25 }, tRe + d); tl.set(dot, { opacity: 1 }, tRe + d + 0.16); });
-      // ---------------------------------------------------------------- exit
-      const tX = D - 0.22;
-      [reel, band, fade].forEach((e) => ft(e, { y: 484, opacity: 1 }, { y: 544, opacity: 0, duration: 0.18, ease: "power2.in" }, tX));
-      ft(hook, { y: 484, opacity: 1 }, { y: 544, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + 0.02);
-      ft(sc, { y: 734, opacity: 1 }, { y: 794, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + 0.03);
-      ft(vd, { y: 742, opacity: 1 }, { y: 802, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + 0.02);
-      S.finish();
+      const tl = gsap.timeline({ paused: true });
+      tl.set({}, {}, 4.423);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["t1"] = tl;
     })();
   </script>
 </template>

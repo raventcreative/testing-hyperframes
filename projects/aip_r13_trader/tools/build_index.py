@@ -1,6 +1,7 @@
-"""Builds index.html for the R9 YOUTUBE reel (11 free Claude skills for a YouTube channel; adapted from the R3 DESAINER builder) from production/timing.json: the client's navy background, word-synced Poppins
-captions (white + cyan #01CCF7) on navy chips (legible over every world), the white AI PRENEUR logo (top-left, safe zone), scene
-slots (s01–s14), the persistent step header (split-flap "LANGKAH n", hf-seek driven), the robot (operator) and the mascot (host).
+"""Builds index.html for the R13 TRADER reel (Day Trader Skill: 11 free Claude skills in 3 layers; adapted from the R9 YOUTUBE builder) from production/timing.json: the client's navy background, word-synced Poppins
+captions (white + cyan #01CCF7) on navy chips (legible over every world), the white AI PRENEUR logo (top-left, safe zone), the
+persistent finance disclaimer pill "Bukan ajakan beli/jual · edukasi" (top-right, frame 0 to the end), scene slots, the robot
+(operator) and the mascot (host).
 All caption chunks sit mid (y≈968, above the mascot's head).
 Missing scene files are created as empty placeholders.   Run: python3 -I tools/build_index.py ."""
 import json, sys
@@ -22,12 +23,12 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>YouTube agent: 11 skill Claude buat channel kamu — AI PRENEUR</title>
+    <title>Claude bantu analisa saham: Day Trader Skill — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
-    <script src="vendor/r9kit.js"></script>
+    <script src="vendor/r13kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -55,6 +56,11 @@ html = f"""<!doctype html>
       .cap .k {{ font-weight: 700; color: var(--cy); background: #ffffff; box-shadow: 0 8px 22px rgba(1,204,247,.35); }}
       /* persistent brand mark (client logo, white) — top-left inside the safe zone */
       #brandlogo {{ opacity: 0; position: absolute; left: 84px; top: 262px; width: 236px; height: auto; filter: drop-shadow(0 2px 8px rgba(4,8,30,.55)); }}
+      /* finance disclaimer (persistent, frame 0 → end): right-aligned with the logo row */
+      #disc {{ opacity: 0; position: absolute; right: 60px; top: 254px; height: 40px; padding: 0 16px 0 11px; border-radius: 20px; display: flex; align-items: center; gap: 8px;
+               background: rgba(8,14,46,.82); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.45), 0 6px 16px rgba(4,8,30,.4); font: 700 17px/1 Poppins; color: #e3edfa; white-space: nowrap; }}
+      #disc svg {{ width: 22px; height: 22px; color: #6adfff; flex: 0 0 22px; }}
+      #disc em {{ font-style: normal; color: #6adfff; }}
     </style>
   </head>
   <body>
@@ -64,7 +70,7 @@ html = f"""<!doctype html>
       </div>
 {slots}      <div id="robot" class="clip" data-composition-id="robot" data-composition-src="compositions/robot.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
       <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{total}" data-track-index="7" data-width="1080" data-height="1920"></div>
-      <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_white_trim.png" alt="AI PRENEUR"></div>
+      <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_white_trim.png" alt="AI PRENEUR"><div id="disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Bukan ajakan beli/jual &middot; <em>edukasi</em></div></div>
       <div id="caps" class="clip layer" data-start="0" data-duration="{total}" data-track-index="9"></div>
       <audio id="vo" src="assets/audio/vo.mp3" data-start="{off}" data-duration="{T['vo_sec']}" data-track-index="10" data-volume="1"></audio>
       <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="{total}" data-track-index="11" data-volume="0.9"></audio>
@@ -107,7 +113,8 @@ html = f"""<!doctype html>
         tl.fromTo("#glow-b", {{ x: 0, y: 0 }}, {{ x: -110, y: -60, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
         tl.set("#brandlogo", {{ opacity: 0.95 }}, 0);   // visible from frame 0
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s09"]["start"] + S["s09"]["dur"] - 1.4, 3)});
+        tl.set("#disc", {{ opacity: 1 }}, 0);           // finance disclaimer: visible from frame 0 to the last frame
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s11"]["start"] + S["s11"]["dur"] - 1.4, 3)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;

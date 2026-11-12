@@ -10,18 +10,18 @@ P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 OFFSET, FPS, TAIL = 9 / 30, 30, 1.3
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
-# alignment fixes (raw seconds, checked against the energy envelope + faster-whisper small): the ElevenLabs alignment runs late on
-# "kelas." (ends in the silence before line 8) and squeezes "Komen" into the audio-tag span of the last line
-TFIX = {75: (30.16, 30.40), 76: (30.46, 30.72), 111: (44.86, 45.10)}
+# alignment fixes (raw seconds), checked against the energy envelope + faster-whisper small (none needed so far)
+TFIX = {}
 for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
 MERGE = {}
-FIX = {"Cloud": "Claude"}
-FIXI = {}
-PRON = {"claude": "klod", "dm": "diem", "website": "websait", "websitenya": "websaitnya", "3d": "tridi", "motionsites": "mosyensaits",
-        "ai": "eiai", "ainya": "eiainya", "copy": "kopi", "prompt": "promt", "promptnya": "promtnya", "library": "laibreri",
-        "librarynya": "laibrerinya", "starter": "starter"}
+FIX = {}
+FIXI = {106: "JASA,"}   # the CTA keyword is spoken from lowercase "jasa," (so the voice never spells it) and shown in caps
+PRON = {"dm": "diem", "website": "websait", "ai": "eiai", "github": "githab", "postiz": "postis", "autoclip": "otoklip",
+        "chatwoot": "cetwut", "whatsapp": "wotsep", "openhands": "openhens", "remotion": "rimosyen", "umkm": "uemkaem",
+        "inbox": "inboks", "podcaster": "podkaster", "seller": "seler", "live": "laif", "template": "templet", "reel": "ril",
+        "chat": "cet", "jasa": "jasa"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -74,22 +74,21 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Website", [4, 7], ["satu", "prompt."], ["3D"]),
-    ("s02", "Menurutku,", [3, 5, 7], ["gampang", "jualan", "website."], []),
-    ("s03", "Ada", [2, 4, 7, 10, 13], ["animasi", "3D,", "prompt-nya."], ["MotionSites."]),
-    ("s04", "Kamu", [2, 5, 7, 9, 11], ["pilih", "copy", "tempel", "Claude"], []),
-    ("s05", "Dan", [3], ["langsung", "websitenya."], []),
-    ("s06", "Terus", [3, 5], ["foto", "teksnya", "klien"], []),
-    ("s07", "Kedai", [2, 4, 6, 9, 11], ["kopi,", "sepatu,", "roti,", "naik", "kelas."], []),
-    ("s08", "Harganya?", [1, 3, 6, 7], ["klien", "besar", "tentuin."], ["Harganya?"]),
-    ("s09", "Cara", [2, 5, 7, 8, 11], ["contoh", "pamerin,", "portofolio"], []),
-    ("s10", "Library-nya", [2, 5, 8], ["berbayar,", "starter"], ["gratis"]),
-    ("s11", "Komen", [2], ["DM."], ["3D,"]),
+    ("s01", "Resep", [4, 8], ["beli", "warung,"], ["gratis,"]),
+    ("s02", "Lima", [3, 6, 9], ["GitHub", "gratis,", "bayar"], ["ngerjain."]),
+    ("s03", "Satu,", [2, 4, 7], ["jadwalin", "sekaligus,", "sosmed."], ["Postiz:"]),
+    ("s04", "Dua,", [2, 4, 7, 9], ["panjang", "bersubtitle,", "live."], ["AutoClip:"]),
+    ("s05", "Tiga,", [2, 4, 6, 9], ["inbox,", "admin"], ["Chatwoot:"]),
+    ("s06", "Empat,", [2, 6, 8], ["ngoding", "website", "UMKM."], ["OpenHands:"]),
+    ("s07", "Lima,", [2, 5, 8, 10], ["kode,", "template,", "produk."], ["Remotion:"]),
+    ("s08", "Tapi", [2, 5, 8, 10], ["gratis", "bebas:", "tiga."], ["lisensi"]),
+    ("s09", "Cek", [2, 5], ["lisensinya,", "satu", "teman."], []),
+    ("s10", "Komen", [2], ["DM."], ["JASA,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",
          "punya", "tetap", "bisa", "langsung", "semua", "masuk", "tiap", "pakai", "kalian", "mau", "isi", "sama", "mana", "buat",
          "terus", "dia", "soalnya", "sekarang", "cukup", "gini", "udah", "apa", "pun", "jadi", "dulu", "atau", "namanya", "isinya",
-         "menurutku", "seberapa", "ini", "cara"}
+         "menurutku", "seberapa", "ini", "cara", "tapi", "juga", "atau", "sesuai", "kalau", "lebih", "belum", "tentu", "kan"}
 starts = []; k = 0
 for sid, first, *_ in SC:
     while words[k]["w"] != first: k += 1

@@ -1,105 +1,125 @@
 <template>
   <style>
-    /* s01 HOOK (0–6.37) "Ngurus channel YouTube sendirian? Sebelas skill Claude gratis ini bantu dari naskah sampai ide viral."
-       "Ngurus channel YouTube sendirian?" = one creator ("kamu") buried under 7 job chips (naskah, judul, thumbnail, edit, komentar,
-       jadwal, riset ide) + "7 kerjaan · 1 orang". "Sebelas skill Claude gratis ini" = the chips collapse, the Claude disc + "11 skill
-       Claude" + GRATIS pill land on top and the 11 skill tiles are dealt into a 3-column grid. "dari naskah sampai ide viral" = a glow
-       runs from /yt-script to /yt-viral.
-       END STATE (rebuilt 1:1 at s02 frame 0): title group (disc 150..282 x 350..482, text x 312 y 352, pill x 312 y 440), 11 tiles at
-       K.tileXY(i, 556), tile 0 + tile 5 glowing. */
+    /* s01 HOOK (0–4.93) "Mau pakai AI buat trading saham? Pilih yang berani bilang: jangan dulu."
+       Frame 0 = a readable picture: a rising candle chart "SAHAM A" (generic, labelled "contoh · ilustrasi") over a big green BELI button.
+       "Mau pakai AI buat trading saham?" = more candles climb, a pushy AI bubble ("Lagi naik terus, beli sekarang!") pops and a cursor
+       drifts toward BELI (FOMO). "Pilih yang berani bilang:" = the pushy bubble is struck and dimmed, a Claude bubble slides in with a
+       typing indicator. "jangan dulu." = "Jangan dulu." lands in the bubble, the BELI button locks (grey, lock icon), the cursor is pushed
+       back. Last 0.22 s: everything drops out (s02 starts on an empty hero zone). */
     #root { position: absolute; inset: 0; overflow: hidden; }
     #s01-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
-    #s01-me { position: absolute; left: 0; top: 0; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; background: #e3edfa; color: #294b77;
-      box-shadow: 0 0 0 8px rgba(227,237,250,.14), 0 18px 40px rgba(2,6,26,.5); transform-origin: 50% 50%; }
-    #s01-me svg { position: absolute; left: 33px; top: 30px; width: 84px; height: 84px; }
-    #s01-mel { position: absolute; left: 0; top: 0; height: 40px; transform-origin: 50% 50%; padding: 0 18px; border-radius: 20px; background: #01ccf7; color: #0b1440; font: 700 22px/40px Poppins;
-      white-space: nowrap; transform-origin: 50% 50%; }
-    .s01-job { position: absolute; left: 0; top: 0; height: 56px; padding: 0 22px 0 14px; border-radius: 28px; background: #ffffff; color: #0a0d2c;
-      font: 700 25px/56px Poppins; white-space: nowrap; display: flex; align-items: center; gap: 10px; box-shadow: 0 14px 30px rgba(2,6,26,.45); transform-origin: 50% 50%; }
-    .s01-job svg { width: 28px; height: 28px; color: #0aa7d6; }
-    #s01-cnt { position: absolute; left: 0; top: 0; height: 46px; padding: 0 20px 0 14px; border-radius: 23px; background: #ff6b5e; color: #fff; font: 700 22px/46px Poppins;
-      white-space: nowrap; display: flex; align-items: center; gap: 8px; box-shadow: 0 12px 26px rgba(120,10,20,.4); transform-origin: 50% 50%; }
-    #s01-cnt svg { width: 24px; height: 24px; }
-    #s01-disc { position: absolute; left: 150px; top: 350px; width: 132px; height: 132px; border-radius: 50%; background: #fbf4ec; transform-origin: 50% 50%;
-      box-shadow: 0 0 0 7px rgba(217,119,87,.22), 0 0 44px rgba(217,119,87,.55), 0 16px 36px rgba(0,0,0,.4); }
-    #s01-disc svg { position: absolute; left: 24px; top: 24px; width: 84px; height: 84px; }
-    #s01-ttl { position: absolute; left: 312px; top: 346px; font: 700 66px/76px Poppins; color: #fff; letter-spacing: -1px; white-space: nowrap; transform-origin: 0% 50%; }
-    #s01-ttl em { font-style: normal; color: #01ccf7; }
-    #s01-pill { position: absolute; left: 312px; top: 436px; height: 48px; padding: 0 22px; border-radius: 24px; background: #01ccf7; color: #0b1440;
-      font: 700 22px/48px Poppins; letter-spacing: 3px; white-space: nowrap; box-shadow: 0 0 24px rgba(1,204,247,.5); transform-origin: 0% 50%; }
-    #s01-mit { position: absolute; left: 474px; top: 436px; height: 48px; padding: 0 18px; border-radius: 24px; color: #6adfff; font: 700 20px/48px Poppins;
-      letter-spacing: 2px; white-space: nowrap; box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.55); background: rgba(1,204,247,.08); transform-origin: 0% 50%; }
+    #s01-card { width: 960px; height: 384px; }
+    #s01-tk { position: absolute; left: 0; top: 0; height: 52px; padding: 0 20px 0 12px; border-radius: 26px; background: #ffffff; color: #0a0d2c; display: flex; align-items: center; gap: 10px;
+      font: 700 24px/52px Poppins; white-space: nowrap; box-shadow: 0 10px 24px rgba(2,6,26,.4); }
+    #s01-tk svg { width: 28px; height: 28px; color: #0a7ea4; }
+    #s01-svg { position: absolute; left: 0; top: 0; overflow: visible; }
+    #s01-push { position: absolute; left: 0; top: 0; height: 64px; padding: 0 24px 0 12px; border-radius: 32px; background: rgba(255,255,255,.10); display: flex; align-items: center; gap: 12px;
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.22); font: 700 25px/64px Poppins; color: #e3edfa; white-space: nowrap; transform-origin: 0% 50%; }
+    #s01-push .tx { position: relative; }
+    #s01-push .ic { width: 44px; height: 44px; border-radius: 50%; background: #3a4670; color: #cfd8ea; position: relative; flex: 0 0 44px; }
+    #s01-push .ic svg { position: absolute; left: 10px; top: 10px; width: 24px; height: 24px; }
+    #s01-strike { position: absolute; left: -4px; right: -4px; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: #ff6b5e; transform-origin: 0% 50%; }
+    #s01-px { position: absolute; right: -18px; top: -16px; width: 46px; height: 46px; border-radius: 50%; background: #e5484d; color: #fff; box-shadow: 0 8px 18px rgba(120,10,20,.45); }
+    #s01-px svg { position: absolute; left: 11px; top: 11px; width: 24px; height: 24px; }
+    #s01-cl { position: absolute; left: 0; top: 0; width: 640px; height: 164px; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f2f6fd);
+      box-shadow: 0 26px 56px rgba(2,6,26,.6); transform-origin: 100% 50%; }
+    #s01-cl .dk { position: absolute; left: 26px; top: 30px; width: 104px; height: 104px; border-radius: 50%; background: #fbf4ec;
+      box-shadow: 0 0 0 6px rgba(217,119,87,.18), 0 0 28px rgba(217,119,87,.45); }
+    #s01-cl .dk svg { position: absolute; left: 18px; top: 18px; width: 68px; height: 68px; }
+    #s01-cl .nm { position: absolute; left: 156px; top: 22px; font: 700 18px/24px Poppins; letter-spacing: 2px; color: #b5603f; white-space: nowrap; }
+    #s01-say { position: absolute; left: 156px; top: 48px; font: 700 50px/64px Poppins; color: #0a0d2c; white-space: nowrap; letter-spacing: -.5px; }
+    #s01-sub { position: absolute; left: 158px; top: 112px; font: 400 22px/30px Poppins; color: #5d6f8f; white-space: nowrap; }
+    #s01-dots { position: absolute; left: 160px; top: 68px; display: flex; gap: 10px; }
+    #s01-dots i { display: block; width: 16px; height: 16px; border-radius: 50%; background: #9aa9c2; }
+    #s01-buy { position: absolute; left: 0; top: 0; width: 500px; height: 108px; border-radius: 54px; background: #2da44e; transform-origin: 50% 50%;
+      box-shadow: 0 0 0 8px rgba(45,164,78,.22), 0 20px 40px rgba(10,60,25,.5); }
+    #s01-buyg { position: absolute; inset: 0; border-radius: 54px; background: #3a4670; box-shadow: 0 0 0 8px rgba(106,223,255,.25); opacity: 0; }
+    #s01-buyt { position: absolute; left: 0; top: 0; width: 500px; text-align: center; font: 700 48px/108px Poppins; letter-spacing: 6px; color: #fff; white-space: nowrap; }
+    #s01-lock { position: absolute; left: 0; top: 0; width: 76px; height: 76px; border-radius: 50%; background: #01ccf7; color: #0b1440; box-shadow: 0 0 24px rgba(1,204,247,.7); }
+    #s01-lock svg { position: absolute; left: 18px; top: 17px; width: 40px; height: 40px; }
+    #s01-cur { position: absolute; left: 0; top: 0; width: 58px; height: 58px; color: #0b1440; filter: drop-shadow(0 6px 10px rgba(2,6,26,.55)); }
+    #s01-cur svg { width: 58px; height: 58px; fill: #ffffff; stroke: #0b1440; stroke-width: 1.6; }
   </style>
   <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
     <div id="s01-zone"></div>
   </div>
   <script>
     (function () {
-      const K = window.R9K, D = 6.3667, P = "s01";
-      const S = K.scene(P, D), { tl, ft, I, wt, $, popIn } = S;
+      const K = window.R13K, D = 4.9333, P = "s01";
+      const S = K.scene(P, D), { tl, ft, I, wt, $, type } = S;
       const z = $("s01-zone");
-      const JOBS = [["filepen", "Naskah", 296, 420], ["type", "Judul", 790, 410], ["image", "Thumbnail", 214, 572], ["scissors", "Edit video", 862, 572],
-        ["message", "Balas komentar", 300, 772], ["calendar", "Jadwal upload", 792, 772], ["search", "Riset ide", 540, 330]];
-      z.innerHTML = JOBS.map(([ic, t], i) => `<div class="s01-job" id="s01-j${i}">${K.svg(ic)}${t}</div>`).join("") +
-        `<div id="s01-me">${K.svg("user")}</div><div id="s01-mel">kamu</div><div id="s01-cnt">${K.svg("alert")}7 kerjaan &middot; 1 orang</div>` +
-        `<div id="s01-disc">${K.claude()}</div><div id="s01-ttl"><em>11</em> skill Claude</div><div id="s01-pill">GRATIS</div><div id="s01-mit">open source</div>` +
-        K.tilesHTML(P);
-      const tNg = wt("Ngurus"), tCh = wt("channel"), tYT = wt("YouTube"), tSe = wt("sendirian?"), tSb = wt("Sebelas"), tCl = wt("Claude"), tGr = wt("gratis");
-      const tBa = wt("bantu"), tNa = wt("naskah"), tSa = wt("sampai"), tVi = wt("viral.");
-      // ---------------------------------------------------------------- "Ngurus channel YouTube sendirian?": one creator, seven jobs
-      const me = $("s01-me"), mel = $("s01-mel"), cnt = $("s01-cnt");
-      // frame 0 already shows the creator (first frame = a readable picture), a small breath-in pulse on "Ngurus"
-      I(me, { x: 540, y: 590, scale: 1, opacity: 1 });
-      ft(me, { scale: 1 }, { scale: 1.08, duration: 0.16, yoyo: true, repeat: 1, ease: "power2.out" }, tNg - 0.08);
-      I(mel, { x: 540, xPercent: -50, y: 676, opacity: 1, scale: 1 });
-      JOBS.forEach(([, , x, y], i) => {
-        // chips 0–1 are already on screen at frame 0 (a readable first frame); the other five pile on with the voice
-        const pre = i < 2, t0 = pre ? 0 : tNg - 0.1 + (i - 1) * 0.16, r = ((i * 37) % 11) - 5, j = $("s01-j" + i);
-        I(j, { x, y, xPercent: -50, yPercent: -50, scale: pre ? 1 : 0.3, opacity: pre ? 1 : 0, rotation: r * (pre ? 0.6 : 2) });
-        if (!pre) ft(j, { scale: 0.3, opacity: 0, rotation: r * 2 }, { scale: 1, opacity: 1, rotation: r * 0.6, duration: 0.34, ease: "back.out(2.2)" }, t0);
-        // drift toward the creator (the pile closes in)
-        ft(j, { x, y }, { x: x + (540 - x) * 0.08, y: y + (590 - y) * 0.08, duration: tSb - 0.24 - t0 - 0.3, ease: "sine.inOut" }, t0 + 0.3);
-      });
-      // "sendirian?": the creator shakes, the job counter drops in
-      const SHK = [[0, 0], [9, 0], [-8, 0], [6, 0], [-4, 0], [0, 0]];
-      for (let k = 1; k < SHK.length; k++) ft(me, { rotation: SHK[k - 1][0] * 0.8 }, { rotation: SHK[k][0] * 0.8, duration: 0.06, ease: "sine.inOut" }, tSe + (k - 1) * 0.06);
-      I(me, { rotation: 0 });
-      // the "kamu" pill gives way to the job counter (same spot, under the avatar)
-      ft(mel, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.7, duration: 0.12, ease: "power2.in" }, tSe - 0.04);
-      I(cnt, { x: 540, xPercent: -50, y: 674, opacity: 0, scale: 1.6 });
-      ft(cnt, { opacity: 0, scale: 1.6 }, { opacity: 1, scale: 1, duration: 0.2, ease: "power4.in" }, tSe + 0.05);
-      // collapse before "Sebelas"
-      const tC = tSb - 0.24;
-      JOBS.forEach(([, , x, y], i) => ft($("s01-j" + i), { x: x + (540 - x) * 0.08, y: y + (590 - y) * 0.08, scale: 1, opacity: 1 }, { x: 540, y: 590, scale: 0.2, opacity: 0, duration: 0.3, ease: "power3.in" }, tC + i * 0.015));
-      ft(me, { scale: 1, opacity: 1 }, { scale: 0.3, opacity: 0, duration: 0.28, ease: "power3.in" }, tC + 0.06);
-      ft(cnt, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.7, duration: 0.2, ease: "power2.in" }, tC);
-      // ---------------------------------------------------------------- "Sebelas skill Claude gratis ini": title group + 11 tiles
-      const ttl = $("s01-ttl"), disc = $("s01-disc"), pill = $("s01-pill"), mit = $("s01-mit");
-      I(ttl, { opacity: 0, x: -30, scale: 1 });
-      ft(ttl, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.36, ease: "power3.out" }, tSb - 0.06);
-      I(disc, { scale: 0, rotation: -60 });
-      ft(disc, { scale: 0, rotation: -60 }, { scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2)" }, tCl - 0.12);
-      const mk = disc.querySelector("svg"); I(mk, { rotation: 0, transformOrigin: "50% 50%" }); ft(mk, { rotation: 0 }, { rotation: 40, duration: D - tCl, ease: "none" }, tCl);
-      I(pill, { scale: 0.4, opacity: 0 });
-      ft(pill, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.6)" }, tGr - 0.06);
-      I(mit, { scale: 0.4, opacity: 0 });
-      ft(mit, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.6)" }, tGr + 0.16);
-      for (let i = 0; i < 11; i++) {
-        const e = $("s01-tile" + i), p = K.tileXY(i, K.S01_Y0), t0 = tSb + 0.02 + i * 0.07;
-        I(e, { x: p.x, y: p.y + 70, opacity: 0, scale: 0.9, transformOrigin: "50% 50%" });
-        ft(e, { y: p.y + 70, opacity: 0, scale: 0.9 }, { y: p.y, opacity: 1, scale: 1, duration: 0.36, ease: "back.out(1.7)" }, t0);
-        I($("s01-tf" + i), { opacity: 0 });
+      // ---------------------------------------------------------------- candles (deterministic walk, rising)
+      const N = 18, CW = 30, SP = 49, GX = 22, CH = 232;
+      const hsh = (n) => { const s = Math.sin(n * 91.7 + 13.3) * 43758.5453; return s - Math.floor(s); };
+      let p = 40; const C = [];
+      for (let i = 0; i < N; i++) {
+        const o = p, d = (hsh(i) - 0.34) * 26 + (i > 10 ? 7 : 0), c = Math.max(8, o + d);
+        const hi = Math.max(o, c) + 3 + hsh(i + 50) * 7, lo = Math.min(o, c) - 3 - hsh(i + 90) * 7;
+        C.push({ o, c, hi, lo }); p = c;
       }
-      // ---------------------------------------------------------------- "bantu dari naskah sampai ide viral": glow run /yt-script → /yt-viral
-      const f0 = $("s01-tf0"), f5 = $("s01-tf5"), t0 = $("s01-tile0"), t5 = $("s01-tile5");
-      ft(f0, { opacity: 0 }, { opacity: 1, duration: 0.16, ease: "power2.out" }, tNa - 0.08);
-      ft(t0, { scale: 1 }, { scale: 1.06, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tNa - 0.08);
-      [1, 2, 3, 4].forEach((i, k) => { const f = $("s01-tf" + i), tt = tSa - 0.1 + k * 0.1;
-        ft(f, { opacity: 0 }, { opacity: 0.8, duration: 0.08 }, tt); ft(f, { opacity: 0.8 }, { opacity: 0, duration: 0.3, ease: "power2.in" }, tt + 0.1); });
-      ft(f5, { opacity: 0 }, { opacity: 1, duration: 0.16, ease: "power2.out" }, tVi - 0.1);
-      ft(t5, { scale: 1 }, { scale: 1.08, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tVi - 0.1);
-      const fl = t5.querySelector(".ib"); I(fl, { backgroundColor: "rgba(1,204,247,0.14)" });
-      ft(fl, { backgroundColor: "rgba(1,204,247,0.14)" }, { backgroundColor: "rgba(1,204,247,0.42)", duration: 0.2 }, tVi - 0.05);
+      const mn = Math.min(...C.map((k) => k.lo)), mx = Math.max(...C.map((k) => k.hi));
+      const Y = (v) => CH - ((v - mn) / (mx - mn)) * CH;
+      let svg = `<svg id="s01-svg" width="900" height="${CH}" viewBox="0 0 900 ${CH}">`;
+      for (let g = 0; g < 4; g++) svg += `<line x1="0" x2="900" y1="${(g * CH) / 3}" y2="${(g * CH) / 3}" stroke="rgba(255,255,255,.07)" stroke-width="1.5"/>`;
+      C.forEach((k, i) => {
+        const up = k.c >= k.o, x = GX + i * SP, col = up ? "#3fd07a" : "#ff6b5e";
+        svg += `<g id="s01-k${i}"><line x1="${x + CW / 2}" x2="${x + CW / 2}" y1="${Y(k.hi).toFixed(1)}" y2="${Y(k.lo).toFixed(1)}" stroke="${col}" stroke-width="3"/>` +
+          `<rect x="${x}" y="${Y(Math.max(k.o, k.c)).toFixed(1)}" width="${CW}" height="${Math.max(4, Math.abs(Y(k.o) - Y(k.c))).toFixed(1)}" rx="4" fill="${col}"/></g>`;
+      });
+      svg += `</svg>`;
+      z.innerHTML = `<div class="k-ab" id="s01-ws" style="width:1080px;height:945px"><div class="k-glass" id="s01-card">${svg}<div id="s01-tk">${K.svg("candle")}SAHAM A</div>` +
+        `<div class="k-demo" id="s01-demo">contoh &middot; ilustrasi</div></div>` +
+        `<div id="s01-push"><span class="ic">${K.svg("bot")}</span><span class="tx">Lagi naik terus, beli sekarang!<i id="s01-strike"></i></span><div id="s01-px">${K.svg("x")}</div></div>` +
+        `<div id="s01-cl"><div class="dk">${K.claude()}</div><div class="nm">CLAUDE</div><div id="s01-dots"><i></i><i></i><i></i></div>` +
+        `<div id="s01-say"></div><div id="s01-sub">cek peluang &amp; batas rugi kamu dulu</div></div>` +
+        `<div id="s01-buy"><div id="s01-buyg"></div><div id="s01-buyt">BELI</div></div><div id="s01-lock">${K.svg("lock")}</div><div id="s01-cur">${K.svg("pointer")}</div></div>`;
+      const tMau = wt("Mau"), tAI = wt("AI"), tTr = wt("trading"), tSa = wt("saham?"), tPi = wt("Pilih"), tBe = wt("berani"), tBi = wt("bilang:"), tJa = wt("jangan"), tDu = wt("dulu.");
+      // ---------------------------------------------------------------- frame 0: chart card + BELI button
+      const card = $("s01-card"); I(card, { x: 60, y: 326, opacity: 1 });
+      I($("s01-svg"), { x: 30, y: 104 });
+      I($("s01-tk"), { x: 30, y: 28 });
+      I($("s01-demo"), { x: 742, y: 334 });
+      // first 14 candles on screen at frame 0, the rest climb in with "Mau pakai AI buat trading saham?"
+      for (let i = 0; i < N; i++) {
+        const k = $("s01-k" + i), pre = i < 11;
+        I(k, { opacity: pre ? 1 : 0, y: pre ? 0 : 18 });
+        if (!pre) ft(k, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, tMau - 0.1 + (i - 11) * 0.2);
+      }
+      const buy = $("s01-buy"); I(buy, { x: 290, y: 752, scale: 1 });
+      // BELI pulses (FOMO) until the brake
+      for (let k = 0; k < 3; k++) ft(buy, { scale: 1 }, { scale: 1.05, duration: 0.2, yoyo: true, repeat: 1, ease: "sine.inOut" }, 0.15 + k * 0.85);
+      // ---------------------------------------------------------------- "AI ... trading saham?": the pushy bubble + the cursor drift
+      const push = $("s01-push"); I(push, { x: 340, y: 352, scale: 0.5, opacity: 0 });
+      ft(push, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.2)" }, tAI - 0.1);
+      const cur = $("s01-cur"); I(cur, { x: 900, y: 905, opacity: 0, rotation: 0 });
+      ft(cur, { opacity: 0 }, { opacity: 1, duration: 0.15 }, tTr - 0.1);
+      ft(cur, { x: 900, y: 905 }, { x: 640, y: 812, duration: 1.1, ease: "power2.inOut" }, tTr - 0.05);
+      // ---------------------------------------------------------------- "Pilih yang berani bilang:": strike the pushy one, Claude slides in
+      const strike = $("s01-strike"); I(strike, { scaleX: 0 });
+      ft(strike, { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power2.out" }, tPi - 0.05);
+      ft(push, { opacity: 1 }, { opacity: 0.4, duration: 0.25 }, tPi + 0.1);
+      const px = $("s01-px"); I(px, { scale: 0, opacity: 0 });
+      ft(px, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, tPi + 0.05);
+      const cl = $("s01-cl"); I(cl, { x: 380, y: 520, scale: 0.6, opacity: 0 });
+      ft(cl, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.36, ease: "back.out(1.8)" }, tBe - 0.2);
+      const dots = $("s01-dots").children;
+      I($("s01-dots"), { opacity: 1 });
+      Array.from(dots).forEach((d, i) => { I(d, { y: 0 }); for (let k = 0; k < 3; k++) ft(d, { y: 0 }, { y: -8, duration: 0.12, yoyo: true, repeat: 1, ease: "sine.inOut" }, tBe + i * 0.08 + k * 0.32); });
+      tl.set($("s01-dots"), { opacity: 0 }, tJa - 0.12);
+      const sub = $("s01-sub"); I(sub, { opacity: 0, y: 8 });
+      // ---------------------------------------------------------------- "jangan dulu.": the words land, BELI locks, cursor pushed back
+      type($("s01-say"), "Jangan dulu.", tJa - 0.1, 22);
+      ft(sub, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tDu + 0.05);
+      ft(cl, { scale: 1 }, { scale: 1.04, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tJa);
+      const g = $("s01-buyg"), bt = $("s01-buyt"); I(g, { opacity: 0 }); I(bt, { opacity: 1 });
+      ft(g, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tDu - 0.06);
+      ft(bt, { opacity: 1 }, { opacity: 0.45, duration: 0.2 }, tDu - 0.06);
+      ft(buy, { scale: 1 }, { scale: 0.94, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tDu - 0.06);
+      const lock = $("s01-lock"); I(lock, { x: 752, y: 768, scale: 0, opacity: 0, rotation: -30 });
+      ft(lock, { scale: 0, opacity: 0, rotation: -30 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.3, ease: "back.out(2.6)" }, tDu - 0.04);
+      ft(cur, { x: 640, y: 812 }, { x: 760, y: 902, duration: 0.3, ease: "power3.out" }, tDu - 0.02);
+      // ---------------------------------------------------------------- exit
+      S.exitWs($("s01-ws"));
       S.finish();
     })();
   </script>

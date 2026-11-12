@@ -1,83 +1,12 @@
 <template>
-  <style>
-    /* t2 /yt-package (16.10–18.87) "Dua, judul dan thumbnail ditulis sepasang."
-       Frame 0 = t1's end (header 01 only). Header rolls to 02. "judul": the TITLE card (right) pops and the example title types.
-       "thumbnail": the THUMBNAIL card (left) pops — 2 words that do not repeat the title. "ditulis sepasang": a link joins the two,
-       a cyan outline wraps them as "1 PASANGAN" and the three linter checks of title.py land (≤ 60 karakter, beda dari judul, ≤ 3 kata).
-       Example channel / title are invented. Last 0.2 s: workspace drops out. */
-    #root { position: absolute; inset: 0; overflow: hidden; }
-    #t2-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
-    #t2-th { position: absolute; left: 0; top: 0; width: 470px; height: 264px; border-radius: 24px; overflow: hidden;
-      background: radial-gradient(120% 120% at 85% 20%, #ffb347 0%, #ff6a3d 45%, #c2264b 100%); box-shadow: 0 26px 56px rgba(2,6,26,.55); transform-origin: 50% 50%; }
-    #t2-th .big { position: absolute; left: 26px; top: 40px; font: 700 64px/66px Poppins; color: #fff; letter-spacing: -1px; text-shadow: 0 4px 0 rgba(80,10,20,.45), 0 10px 24px rgba(80,10,20,.4); white-space: nowrap; }
-    #t2-th .ic { position: absolute; right: 48px; top: 34px; width: 128px; height: 128px; border-radius: 30px; background: rgba(255,255,255,.18); color: #fff; }
-    #t2-th .ic svg { position: absolute; left: 24px; top: 24px; width: 80px; height: 80px; }
-    #t2-th .du { position: absolute; right: 14px; bottom: 14px; height: 30px; padding: 0 10px; border-radius: 8px; background: rgba(10,8,20,.78); font: 700 17px/30px Poppins; color: #fff; }
-    #t2-th .tg { position: absolute; left: 14px; bottom: 14px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(10,8,20,.55); font: 700 15px/30px Poppins;
-      letter-spacing: 2px; color: #ffd9c2; white-space: nowrap; }
-    #t2-ti { position: absolute; left: 0; top: 0; width: 470px; height: 264px; border-radius: 24px; background: linear-gradient(180deg, #ffffff, #f4f7fc); box-shadow: 0 26px 56px rgba(2,6,26,.55); transform-origin: 50% 50%; }
-    #t2-ti .lb { position: absolute; left: 52px; top: 18px; font: 700 17px/24px Poppins; letter-spacing: 2.5px; color: #5d6f8f; }
-    #t2-tt { position: absolute; left: 52px; top: 52px; width: 400px; font: 700 34px/44px Poppins; color: #0a0d2c; letter-spacing: -.4px; }
-    #t2-ti .ch { position: absolute; left: 52px; top: 206px; display: flex; align-items: center; gap: 10px; font: 400 19px/34px Poppins; color: #5d6f8f; white-space: nowrap; }
-    #t2-ti .ch i { display: inline-block; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(160deg, #ffb347, #ff6a3d); }
-    #t2-out { position: absolute; left: 48px; top: 476px; width: 984px; height: 296px; border-radius: 34px; box-shadow: inset 0 0 0 3px #01ccf7, 0 0 30px rgba(1,204,247,.35); }
-    #t2-pair { position: absolute; left: 0; top: 0; height: 40px; padding: 0 18px; border-radius: 20px; background: #01ccf7; color: #0b1440; font: 700 19px/40px Poppins;
-      letter-spacing: 2.5px; white-space: nowrap; box-shadow: 0 0 20px rgba(1,204,247,.5); transform-origin: 50% 50%; }
-    #t2-link { position: absolute; left: 0; top: 0; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6);
-      color: #0b1440; box-shadow: 0 0 0 6px rgba(10,16,51,.9), 0 0 26px rgba(1,204,247,.6); transform-origin: 50% 50%; }
-    #t2-link svg { position: absolute; left: 18px; top: 18px; width: 36px; height: 36px; }
-    .t2-lint { position: absolute; left: 0; top: 0; height: 48px; padding: 0 18px 0 12px; border-radius: 24px; display: flex; align-items: center; gap: 8px;
-      font: 700 20px/1 Poppins; color: #fff; background: rgba(45,164,78,.22); box-shadow: inset 0 0 0 1.5px rgba(80,210,120,.7); white-space: nowrap; transform-origin: 50% 50%; }
-    .t2-lint svg { width: 22px; height: 22px; color: #5be08a; }
-  </style>
-  <div id="root" data-composition-id="t2" data-width="1080" data-height="1920">
-    <div id="t2-zone"></div>
-  </div>
+  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
+  <div id="root" data-composition-id="t2" data-width="1080" data-height="1920"></div>
   <script>
     (function () {
-      const K = window.R9K, D = 2.7667, P = "t2";
-      const S = K.scene(P, D), { tl, ft, I, wt, $, type } = S;
-      const z = $("t2-zone");
-      const TITLE = "Konten Seminggu, Direkam Sehari";       // 31 characters
-      const LINT = [["31 karakter (&le; 60)", 60], ["teks beda dari judul", 382], ["2 kata (&le; 3)", 732]];
-      z.innerHTML = K.headerHTML(P) +
-        `<div id="t2-out"></div><div id="t2-pair">1 PASANGAN</div>` +
-        `<div id="t2-th"><div class="big">SEKALI<br>REKAM</div><div class="ic">${K.svg("video")}</div><div class="tg">THUMBNAIL</div><div class="du">12:40</div></div>` +
-        `<div id="t2-ti"><div class="lb">JUDUL</div><div id="t2-tt"></div><div class="ch"><i></i>Kanal Kreator Hemat &middot; contoh</div></div>` +
-        `<div id="t2-link">${K.svg("link")}</div>` +
-        LINT.map(([t], i) => `<div class="t2-lint" id="t2-l${i}">${K.svg("check")}${t}</div>`).join("");
-      K.headerSet(S, P, 1);
-      const tDu = wt("Dua,"), tJu = wt("judul"), tTh = wt("thumbnail"), tDi = wt("ditulis"), tSp = wt("sepasang.");
-      K.headerSwap(S, P, 1, 2, Math.max(0.01, tDu));
-      // ---------------------------------------------------------------- "judul"
-      const ti = $("t2-ti");
-      I(ti, { x: 550, y: 492, opacity: 0, scale: 0.9, rotation: 3 });
-      ft(ti, { opacity: 0, scale: 0.9, rotation: 3 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.34, ease: "back.out(1.8)" }, tJu - 0.2);
-      type($("t2-tt"), TITLE, tJu - 0.02, 48);
-      // ---------------------------------------------------------------- "thumbnail"
-      const th = $("t2-th");
-      I(th, { x: 60, y: 492, opacity: 0, scale: 0.9, rotation: -3 });
-      ft(th, { opacity: 0, scale: 0.9, rotation: -3 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.34, ease: "back.out(1.8)" }, tTh - 0.16);
-      const big = th.querySelector(".big"); I(big, { scale: 0.6, opacity: 0, transformOrigin: "0% 50%" });
-      ft(big, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, tTh + 0.06);
-      // ---------------------------------------------------------------- "ditulis sepasang"
-      const lk = $("t2-link"); I(lk, { x: 545, y: 624, scale: 0, rotation: -90 });
-      ft(lk, { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.3, ease: "back.out(2.4)" }, tDi - 0.06);
-      ft(th, { x: 60 }, { x: 52, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tDi + 0.2);
-      ft(ti, { x: 550 }, { x: 558, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tDi + 0.2);
-      const out = $("t2-out"); I(out, { opacity: 0, scale: 1.04, transformOrigin: "50% 50%" });
-      ft(out, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.26, ease: "power3.out" }, tSp - 0.12);
-      const pr = $("t2-pair"); I(pr, { x: 540, xPercent: -50, y: 456, scale: 0.4, opacity: 0 });
-      ft(pr, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, tSp - 0.04);
-      LINT.forEach(([, x], i) => { const l = $("t2-l" + i); I(l, { x, y: 800, scale: 0.5, opacity: 0 });
-        ft(l, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.4)" }, tSp + 0.1 + i * 0.1); });
-      // ---------------------------------------------------------------- exit
-      const tX = D - 0.2;
-      [th, ti].forEach((e, i) => ft(e, { y: 492, opacity: 1 }, { y: 552, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + i * 0.02));
-      ft(out, { opacity: 1 }, { opacity: 0, duration: 0.16 }, tX); ft(pr, { opacity: 1 }, { opacity: 0, duration: 0.16 }, tX);
-      ft(lk, { scale: 1 }, { scale: 0, duration: 0.16, ease: "power2.in" }, tX);
-      LINT.forEach((_, i) => ft($("t2-l" + i), { y: 800, opacity: 1 }, { y: 850, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + 0.02));
-      S.finish();
+      const tl = gsap.timeline({ paused: true });
+      tl.set({}, {}, 3.69);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["t2"] = tl;
     })();
   </script>
 </template>

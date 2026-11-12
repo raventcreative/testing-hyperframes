@@ -113,10 +113,13 @@
       .bowl svg, .cupp svg, .jarp svg { position: absolute; left: 0; top: 0; overflow: visible; }
 
       /* measuring cups */
-      .cupp .cl { position: absolute; left: 10px; right: 10px; top: 150px; height: 112px; border-radius: 18px; background: #fff; box-shadow: 0 14px 26px rgba(19,27,64,.16), inset 0 0 0 2px rgba(33,44,95,.06); padding: 14px 0 0; text-align: center; white-space: nowrap; }
+      .cupp .cl { position: absolute; left: 10px; right: 10px; top: 148px; height: 118px; border-radius: 18px; background: #fff; box-shadow: 0 14px 26px rgba(19,27,64,.16), inset 0 0 0 2px rgba(33,44,95,.06); padding: 14px 0 0; text-align: center; white-space: nowrap; }
       .cupp .cl small { display: block; font: 700 14px/1 PS; letter-spacing: .22em; color: #6b7590; }
-      .cupp .cl span { display: block; margin-top: 9px; font: 700 25px/1 PS; color: var(--text); }
-      .cupp .cl b { display: block; margin-top: 9px; font: 800 24px/1 Rubik; color: var(--navy); }
+      .cupp .cl span { display: block; margin-top: 9px; font: 700 27px/1 PS; color: var(--text); }
+      .cupp .cl b { display: block; margin-top: 9px; font: 800 27px/1 Rubik; color: var(--navy); }
+      .sht { background: linear-gradient(180deg, #3a4fab, #2b3d8c); }
+      .shf { background: linear-gradient(180deg, #26367A, #1d2a63); border-radius: 0 0 8px 8px; }
+      .shb { background: #1d2a63; border-radius: 0 0 10px 10px; }
       .cupp .ck { position: absolute; right: 2px; top: 132px; width: 46px; height: 46px; border-radius: 50%; background: #FED111; box-shadow: 0 6px 14px rgba(19,27,64,.25), inset 0 0 0 4px rgba(255,255,255,.4); display: flex; align-items: center; justify-content: center; }
       .cupp .ck svg { position: static; width: 28px; height: 28px; }
       /* jar of sales coins */
@@ -323,19 +326,29 @@
 
         // ---------- kitchen world (units = px at the focus plane; y up is negative, the counter is y = 0) ----------
         const P1 = $("#pan1"), P1b = $("#pan1b"), FL = $("#floor");
-        const RCX = -600, RCZ = 80;                               // recipe card (leans back 11 deg)
-        const SX = 470, SZ = -40, SW = 580, SH = 180, SD = 390;   // scale
+        // layout solved with a projection model of this rig (scratchpad mp24/proj.py): the scale station sits left, the recipe card
+        // back-right (above the robot in the hook), the cups on a wall shelf behind the scale (above the bowl on screen)
+        const RCX = 1050, RCZ = -320;                             // recipe card (leans back 11 deg, turned 16 deg toward the station)
+        const SX = 0, SZ = 60, SW = 580, SH = 180, SD = 390;      // scale
         const BWW = 480, BWH = 240, BWZ = -40;                    // bowl billboard on top of the scale (local z)
-        const JX = 20, JZ = 210, JW = 220, JH = 290;              // jar (overlay rig)
-        const CUPZ = -560, CUPX = [SX - 420, SX - 140, SX + 140, SX + 420], CUPW = 240, CUPH = 270;
-        const shadow = (x, z, w, d, o) => mk("div", "fsh", FL, `left:${2600 + x - w / 2}px; top:${2600 + z - d / 2}px; width:${w}px; height:${d}px; opacity:${o || 1}`);
+        const JW = 220, JH = 290;                                 // jar (overlay rig; flies in from off-frame for the pour)
+        const CUPY = -470, CUPZ = -600, CUPX = [-383, -128, 128, 383].map((d) => SX + d), CUPW = 250, CUPH = 270;   // cups stand on the shelf
+        const WALLZ = -700, SHW = 1060, SHD = 170;
+        const shadow = (x, z, w, d, o, par, ox, oz) => mk("div", "fsh", par || FL, `left:${(ox == null ? 2600 : ox) + x - w / 2}px; top:${(oz == null ? 2600 : oz) + z - d / 2}px; width:${w}px; height:${d}px; opacity:${o || 1}`);
         // backsplash wall + bokeh
-        { const w = mk("div", "pl wall", P1, `left:-2600px; top:-1500px; width:5200px; height:1500px;`); gsap.set(w, { z: -1250 }); }
-        [[-1300, -1100, -1150, 260, "rgba(38,54,122,.10)"], [1300, -1050, -1150, 300, "rgba(254,209,17,.22)"], [-200, -1300, -1180, 200, "rgba(254,209,17,.16)"], [800, -1350, -1180, 240, "rgba(38,54,122,.09)"]].forEach(([x, y, z, r, c]) => {
+        const wall = mk("div", "pl wall", P1, `left:-2600px; top:-1500px; width:5200px; height:1500px;`); gsap.set(wall, { z: WALLZ });
+        [[-1300, -1100, WALLZ - 300, 260, "rgba(38,54,122,.10)"], [1500, -1050, WALLZ - 300, 300, "rgba(254,209,17,.22)"], [-300, -1350, WALLZ - 330, 200, "rgba(254,209,17,.16)"], [900, -1400, WALLZ - 330, 240, "rgba(38,54,122,.09)"]].forEach(([x, y, z, r, c]) => {
           const e = mk("div", "bokeh", P1, `left:${x - r}px; top:${y - r}px; width:${2 * r}px; height:${2 * r}px; background:radial-gradient(closest-side, ${c}, rgba(255,255,255,0));`); gsap.set(e, { z }); });
-        shadow(RCX + 10, RCZ - 40, 760, 240, 0.9); shadow(SX + 20, SZ + 10, SW + 200, SD + 160, 1); shadow(JX + 10, JZ + 10, 300, 140, 0.8);
-        CUPX.forEach((x) => shadow(x + 8, CUPZ + 6, 280, 120, 0.65));
-        gsap.set("#rcard", { x: RCX, y: 0, z: RCZ, rotationX: 11, rotationY: 8 });
+        // wall shelf: top plank (cup shadows are its own children) + front edge + two brackets
+        const shelf = mk("div", "g3", P1); shelf.id = "shelf"; gsap.set(shelf, { x: SX, y: CUPY, z: CUPZ });
+        const SHP = (cls, w, h, tr) => mk("div", "pl " + cls, shelf, `left:${-w / 2}px; top:${-h / 2}px; width:${w}px; height:${h}px; transform:${tr};`);
+        const shTop = SHP("sht", SHW, SHD, `translate3d(0px, 0px, ${WALLZ - CUPZ + SHD / 2}px) rotateX(90deg)`);
+        CUPX.forEach((x) => shadow(x - SX + 6, 0, 270, 110, 0.75, shTop, SHW / 2, SHD / 2 + (CUPZ - (WALLZ + SHD / 2))));
+        SHP("shf", SHW, 28, `translate3d(0px, 14px, ${WALLZ - CUPZ + SHD}px)`);
+        [-1, 1].forEach((s) => SHP("shb", 22, 110, `translate3d(${s * (SHW / 2 - 90)}px, 82px, ${WALLZ - CUPZ + 2}px)`));
+        shadow(SX + 20, SZ + 10, SW + 200, SD + 160, 1);
+        { const c = RCX - 30, z = RCZ - 60; shadow(c, z, 780, 260, 0.85); }
+        gsap.set("#rcard", { x: RCX, y: 0, z: RCZ, rotationX: 11, rotationY: -16 });
 
         // scale: top plate, two sides, front with the LCD; origin = floor centre
         const scale = mk("div", "g3", P1); scale.id = "scale";
@@ -372,14 +385,14 @@
           const g = mk("div", "it", P1); g.id = "cup" + (k + 1);
           const c = mk("div", "pl cupp", g, `left:${-CUPW / 2}px; top:${-CUPH}px; width:${CUPW}px; height:${CUPH}px;`);
           const body = k === 0 ? ["#4a60c0", "#26367A"] : ["#FFE98A", "#F2C200"];
-          c.innerHTML = `<svg width="240" height="150" viewBox="0 0 240 150"><defs><linearGradient id="cg${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${body[0]}"/><stop offset="1" stop-color="${body[1]}"/></linearGradient></defs>
+          c.innerHTML = `<svg width="240" height="150" viewBox="0 0 240 150" style="left:5px"><defs><linearGradient id="cg${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${body[0]}"/><stop offset="1" stop-color="${body[1]}"/></linearGradient></defs>
               <ellipse cx="120" cy="40" rx="98" ry="22" fill="${k === 0 ? "#121a45" : "#C99A00"}"/>
               <g id="cm${k + 1}"><path d="M30 48 C 50 14, 90 2, 120 2 C 150 2, 190 14, 210 48 Z" fill="url(#cnG)"/><ellipse cx="96" cy="22" rx="18" ry="6" fill="#FFE98A" stroke="#D9A600" stroke-width="2.5"/><ellipse cx="146" cy="28" rx="18" ry="6" fill="#FFE98A" stroke="#D9A600" stroke-width="2.5"/></g>
               <path d="M22 40 A98 22 0 0 0 218 40 C 214 100 176 138 120 140 C 64 138 26 100 22 40 Z" fill="url(#cg${k})"/>
               <path d="M22 40 A98 22 0 0 0 218 40" fill="none" stroke="${k === 0 ? "#9fb0f5" : "#FFF3A8"}" stroke-width="5"/>
               <path d="M22 40 A98 22 0 0 1 218 40" fill="none" stroke="${k === 0 ? "#5c70cf" : "#E2AF00"}" stroke-width="4"/></svg>
             <div class="cl"><small>${tag}</small><span>${name}</span><b>${v}</b></div><i class="ck" id="ck${k + 1}">${CHECK()}</i>`;
-          gsap.set(g, { x: CUPX[k], y: 0, z: CUPZ });
+          gsap.set(g, { x: CUPX[k], y: CUPY, z: CUPZ });
         });
         // jar of PENJUALAN coins (overlay rig, origin = jar centre so it can tip over the bowl)
         const jar = mk("div", "it", P1b); jar.id = "jar";
@@ -391,7 +404,7 @@
               <g fill="#FFE98A" stroke="#D9A600" stroke-width="2.5"><ellipse cx="70" cy="132" rx="22" ry="7"/><ellipse cx="128" cy="128" rx="22" ry="7"/><ellipse cx="170" cy="138" rx="18" ry="6"/></g></g>
             <path d="M48 76 v 150" stroke="rgba(255,255,255,.75)" stroke-width="9" stroke-linecap="round"/></svg>
           <div class="jl"><span>PENJUALAN</span><b>Rp10.000.000</b></div>`;
-        const JAR0 = { x: JX, y: -JH / 2, z: JZ, rotationZ: 0, rotationY: 0 };
+        const JAR0 = { x: SX - 1150, y: -SH - 760, z: 200, rotationZ: -28, rotationY: 0 };   // waits off-frame (top-left) until the pour
         gsap.set(jar, JAR0);
         // coins + portion chips + sparkles (overlay rig)
         const coin = () => { const g = mk("div", "it", P1b); mk("div", "coin", g); return g; };
@@ -462,11 +475,11 @@
           F(c.pan, { x: -a.fx, y: -a.fy, z: -a.fz }, { x: -b.fx, y: -b.fy, z: -b.fz, duration: d, ease: ease || "sine.inOut" }, t0);
         };
         window.KCAM = { K, camSet, C1 };   // debug: probe camera keys from the console
-        const KH0 = K(540, 1130, -120, -330, -60, -24, -24, -900), KH1 = K(540, 1130, -160, -340, -40, -23, -18, -760);
-        const KB0 = K(470, 1010, RCX + 20, -430, RCZ, -13, 4, -40), KB1 = K(470, 1010, RCX + 25, -430, RCZ, -12, 7, -10);
-        const KS0 = K(470, 1080, SX - 60, -260, -120, -27, -10, -330), KS1 = K(470, 1080, SX - 50, -260, -120, -26, -6, -300);
-        const KC0 = K(480, 1060, SX - 10, -250, -220, -30, -2, -420), KC1 = K(480, 1060, SX - 5, -250, -220, -29, 3, -400);
-        const KR0 = K(470, 1130, SX - 20, -150, 60, -16, -6, -40), KR1 = K(470, 1130, SX - 20, -150, 60, -15, -3, 10);
+        const KH0 = K(550, 1090, 400, -380, -160, -25, 10, -960), KH1 = K(550, 1090, 400, -380, -160, -24, 6, -880);
+        const KB0 = K(450, 900, RCX, -430, RCZ, -12, 12, -60), KB1 = K(450, 900, RCX + 2, -430, RCZ, -11, 9, -40);
+        const KS0 = K(470, 990, SX - 10, -330, -120, -26, -12, -200), KS1 = K(470, 990, SX - 10, -330, -120, -25, -8, -180);
+        const KC0 = K(470, 990, SX, -340, -160, -27, -5, -220), KC1 = K(470, 990, SX, -340, -160, -26, -9, -200);
+        const KR0 = K(470, 1060, SX - 5, -200, 60, -14, -12, 40), KR1 = K(470, 1060, SX - 5, -200, 60, -13, -9, 70);
         camSet(C1, KH0);
         cam(C1, KH0, KH1, 0, TM.bahan - 0.25, "power1.inOut");
         cam(C1, KH1, KB0, TM.bahan - 0.25, 1.0, "power2.inOut");
@@ -513,7 +526,7 @@
         // ----- S3 · Langkah 1: "penjualan dikurangi modal barang, jadi laba kotor."
         // the jar lifts, tips over the bowl and pours (coins arc into the bowl), the mound rises, the LCD rolls 0 -> 10.000.000
         const BTOP = { x: SX, y: -SH - 184, z: SZ + BWZ };          // world centre of the bowl rim
-        const JUP = { x: SX - 250, y: -SH - 400, z: JZ - 70, rotationZ: 0, rotationY: 0 }, JTIP = { x: SX - 200, y: -SH - 380, z: JZ - 80, rotationZ: 118, rotationY: 0 };
+        const JUP = { x: SX - 300, y: -SH - 430, z: 150, rotationZ: 0, rotationY: 0 }, JTIP = { x: SX - 190, y: -SH - 380, z: 140, rotationZ: 118, rotationY: 0 };
         const tJ = TM.pj2 - 0.62;
         F(jar, JAR0, Object.assign({}, JUP, { duration: 0.5, ease: "power2.inOut" }), tJ);
         F(jar, JUP, Object.assign({}, JTIP, { duration: 0.34, ease: "power2.inOut" }), tJ + 0.48);
@@ -556,7 +569,7 @@
         };
         lab(0, 1, tJ + 0.85); roll(1, tJ + 0.95, 0.8); flash(tJ + 1.8, 0.8);
         // "dikurangi modal barang": a portion rises out of the bowl and lands in the Modal barang cup
-        const CUPT = (k) => ({ x: CUPX[k], y: -150, z: CUPZ + 10 });
+        const CUPT = (k) => ({ x: CUPX[k], y: CUPY - 150, z: CUPZ + 10 });
         const portion = (k, t0) => {
           const g = CHIPS[k], c = g.firstChild, to = CUPT(k), mid = { x: (BTOP.x + to.x) / 2, y: -SH - 560, z: (BTOP.z + to.z) / 2 };
           TS(g, { autoAlpha: 0 }, 0); show(g, t0); hide(g, t0 + 1.05);
@@ -605,6 +618,8 @@
           F(g.firstChild, { scaleX: 0, scaleY: 0, rotation: 0 }, { scaleX: 1, scaleY: 1, rotation: 90, duration: 0.35, ease: "back.out(2)" }, t);
           F(g.firstChild, { opacity: 1 }, { opacity: 0, duration: 0.4 }, t + 0.5); });
         F("#bowl", { y: -SH }, { y: -SH - 18, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1 }, TM.laba);
+        // focus pull: the shelf and wall go soft behind the result captions while the camera pushes in on the scale
+        F(".cupp, #shelf .pl, .wall", { filter: "blur(0px)" }, { filter: "blur(7px)", duration: 0.8, ease: "power1.inOut" }, TM.has + 0.05);
 
         // ----- T · band sweep with the brand marquee (series)
         show("#bands", TM.sol - 0.48);

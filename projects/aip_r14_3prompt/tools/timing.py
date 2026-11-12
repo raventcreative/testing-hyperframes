@@ -10,18 +10,19 @@ P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 OFFSET, FPS, TAIL = 9 / 30, 30, 1.3
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
-# alignment fixes (raw seconds, checked against the energy envelope + faster-whisper small): the ElevenLabs alignment runs late on
-# "kelas." (ends in the silence before line 8) and squeezes "Komen" into the audio-tag span of the last line
-TFIX = {75: (30.16, 30.40), 76: (30.46, 30.72), 111: (44.86, 45.10)}
+# alignment fixes (raw seconds, checked against the energy envelope + faster-whisper small): the ElevenLabs alignment squeezes the
+# first word after the audio tags ("Prompt" of lines 5, 7, 9 and "Mau") into the tag span; real onsets from the energy envelope
+# + "alat." (end of line 3) runs into the pause before "YT-DLP" (energy: voice ends 10.34, next onset 10.70)
+TFIX = {26: (10.10, 10.34), 27: (10.70, 11.68), 43: (18.90, 19.12), 67: (30.88, 31.10), 91: (41.86, 42.08), 102: (46.08, 46.24)}
 for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
 MERGE = {}
-FIX = {"Cloud": "Claude"}
-FIXI = {}
-PRON = {"claude": "klod", "dm": "diem", "website": "websait", "websitenya": "websaitnya", "3d": "tridi", "motionsites": "mosyensaits",
-        "ai": "eiai", "ainya": "eiainya", "copy": "kopi", "prompt": "promt", "promptnya": "promtnya", "library": "laibreri",
-        "librarynya": "laibrerinya", "starter": "starter"}
+FIX = {"Cloud": "Claude", "YT-DLP": "yt-dlp"}
+FIXI = {106: "PROMPT,"}   # spoken lower-case (so the voice reads the word, not the letters), shown as the CTA keyword
+PRON = {"claude": "klod", "code": "kod", "dm": "diem", "prompt": "promt", "reels": "rils", "ytdlp": "waitidielpi", "ffmpeg": "efefempeg",
+        "hyperframes": "haiperfrems", "remotion": "rimosyen", "whisper": "wisper", "caption": "kepsyen", "captionnya": "kepsyennya",
+        "upload": "aplod", "favoritmu": "favoritmu"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -74,22 +75,17 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Website", [4, 7], ["satu", "prompt."], ["3D"]),
-    ("s02", "Menurutku,", [3, 5, 7], ["gampang", "jualan", "website."], []),
-    ("s03", "Ada", [2, 4, 7, 10, 13], ["animasi", "3D,", "prompt-nya."], ["MotionSites."]),
-    ("s04", "Kamu", [2, 5, 7, 9, 11], ["pilih", "copy", "tempel", "Claude"], []),
-    ("s05", "Dan", [3], ["langsung", "websitenya."], []),
-    ("s06", "Terus", [3, 5], ["foto", "teksnya", "klien"], []),
-    ("s07", "Kedai", [2, 4, 6, 9, 11], ["kopi,", "sepatu,", "roti,", "naik", "kelas."], []),
-    ("s08", "Harganya?", [1, 3, 6, 7], ["klien", "besar", "tentuin."], ["Harganya?"]),
-    ("s09", "Cara", [2, 5, 7, 8, 11], ["contoh", "pamerin,", "portofolio"], []),
-    ("s10", "Library-nya", [2, 5, 8], ["berbayar,", "starter"], ["gratis"]),
-    ("s11", "Komen", [2], ["DM."], ["3D,"]),
+    ("s01", "Simpan", [2, 4, 7, 10, 12], ["dulu:", "Claude", "Code.", "sendiri."], ["prompt"]),
+    ("s02", "Prompt", [2, 4, 7, 9, 11, 13, 15, 18, 20, 22, 25], ["alat.", "folder,", "lima", "yt-dlp", "Whisper", "FFmpeg", "HyperFrames", "Remotion"], ["satu:"]),
+    ("s03", "Prompt", [2, 4, 7, 10, 12, 14, 16, 18, 21], ["selera.", "polanya:", "polanya,", "jangan"], ["dua:"]),
+    ("s04", "Prompt", [2, 3, 6, 9, 11, 14, 16, 18, 21], ["edit.", "jeda,", "caption,", "naikin"], ["tiga:"]),
+    ("s05", "Prompt", [4, 6, 8], ["satu", "dua", "tiga."], ["sekali."]),
+    ("s06", "Mau", [3, 5], ["lengkapnya?", "DM."], ["PROMPT,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",
          "punya", "tetap", "bisa", "langsung", "semua", "masuk", "tiap", "pakai", "kalian", "mau", "isi", "sama", "mana", "buat",
          "terus", "dia", "soalnya", "sekarang", "cukup", "gini", "udah", "apa", "pun", "jadi", "dulu", "atau", "namanya", "isinya",
-         "menurutku", "seberapa", "ini", "cara"}
+         "menurutku", "seberapa", "ini", "cara", "sama", "kayak", "tinggal", "terus"}
 starts = []; k = 0
 for sid, first, *_ in SC:
     while words[k]["w"] != first: k += 1

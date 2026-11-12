@@ -1,0 +1,137 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s01-a { position: absolute; }
+    #s01-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s01-glow { left: 20px; top: 330px; width: 1040px; height: 640px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    /* the three prompt cards (deck at frame 0, then spread into a list) */
+    .s01-c { position: absolute; left: 90px; top: 0; width: 900px; height: 150px; transform-origin: 50% 50%; font-family: Poppins, sans-serif; }
+    .s01-c .cb { position: absolute; inset: 0; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 36px 60px -34px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s01-c .num { position: absolute; left: 24px; top: 27px; width: 96px; height: 96px; border-radius: 28px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff;
+      font: 700 54px/96px Poppins, sans-serif; text-align: center; box-shadow: 0 14px 24px -12px rgba(10,13,44,.8); transform-origin: 50% 50%; }
+    .s01-c .lab { position: absolute; left: 146px; top: 24px; font: 700 16px/22px Poppins, sans-serif; letter-spacing: .18em; color: #5d6f8f; white-space: nowrap; }
+    .s01-c .tt { position: absolute; left: 144px; top: 44px; font: 700 44px/56px Poppins, sans-serif; letter-spacing: -.01em; white-space: nowrap; }
+    .s01-c .sb { position: absolute; left: 146px; top: 100px; font: 400 19px/28px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    .s01-c .cp { position: absolute; right: 24px; top: 43px; width: 150px; height: 64px; border-radius: 32px; background: #ffffff; box-shadow: inset 0 0 0 2px #cfdbee; color: #294b77;
+      display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .s01-c .cp svg { width: 22px; height: 22px; display: block; }
+    .s01-c .cp b { font: 700 20px/64px Poppins, sans-serif; }
+    /* header: Edit reels · pakai · Claude Code */
+    #s01-hd { left: 90px; top: 318px; height: 78px; display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+    #s01-h1, #s01-h3 { position: relative; height: 66px; border-radius: 33px; display: flex; align-items: center; gap: 12px; transform-origin: 50% 50%; }
+    #s01-h1 { padding: 0 24px 0 20px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff; box-shadow: 0 16px 26px -14px rgba(10,13,44,.8); }
+    #s01-h1 svg { width: 28px; height: 28px; display: block; color: #8fd8ff; }
+    #s01-h1 b { font: 700 27px/66px Poppins, sans-serif; }
+    #s01-h2 { font: 400 26px/66px Poppins, sans-serif; color: #294b77; }
+    #s01-h3 { padding: 0 24px 0 16px; background: #fff4ee; box-shadow: inset 0 0 0 2px #f3d9cc, 0 14px 24px -16px rgba(122,61,31,.55); }
+    #s01-h3 .r14-cl { width: 34px; height: 34px; }
+    #s01-h3 b { font: 700 27px/66px Poppins, sans-serif; color: #7a3d1f; }
+    /* save (bookmark) button + toast */
+    #s01-bm { left: 906px; top: 316px; width: 84px; height: 84px; border-radius: 50%; background: #ffffff; box-shadow: 0 18px 30px -16px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.07); transform-origin: 50% 50%; }
+    #s01-bm svg { position: absolute; left: 21px; top: 21px; width: 42px; height: 42px; display: block; }
+    #s01-bm0 { color: #294b77; } #s01-bm1 { color: #0a0d2c; }
+    #s01-bm1 svg path:first-child { fill: #0a0d2c; }
+    #s01-toast { left: 676px; top: 330px; height: 56px; padding: 0 22px 0 52px; border-radius: 28px; background: #0a0d2c; color: #fff; white-space: nowrap; transform-origin: 100% 50%;
+      box-shadow: 0 16px 26px -14px rgba(10,13,44,.8); }
+    #s01-toast svg { position: absolute; left: 18px; top: 15px; width: 24px; height: 24px; display: block; color: #6adfff; }
+    #s01-toast b { font: 700 21px/56px Poppins, sans-serif; }
+    /* "alur": dashed flow line through the number badges + arrow heads */
+    #s01-flow { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    /* practitioner stamp */
+    #s01-stamp { left: 640px; top: 572px; height: 64px; padding: 0 22px 0 54px; border-radius: 18px; background: linear-gradient(150deg, #2fb35a, #1a7434); color: #fff; white-space: nowrap;
+      transform-origin: 50% 50%; box-shadow: 0 18px 28px -14px rgba(26,116,52,.8); }
+    #s01-stamp svg { position: absolute; left: 18px; top: 18px; width: 28px; height: 28px; display: block; }
+    #s01-stamp b { font: 700 24px/64px Poppins, sans-serif; letter-spacing: .02em; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s01 "Simpan dulu: tiga prompt buat ngedit reels pakai Claude Code. Ini alur yang aku pakai sendiri."
+      // frame 0: a deck of three prompt cards + a save (bookmark) button · "Simpan": the bookmark is pressed (fills) + toast "Disimpan"
+      // · "tiga": the deck spreads into three cards 1/2/3 (Siapin alat · Bikin selera · Edit), numbers pop · "prompt": PROMPT labels ·
+      // "ngedit reels" / "Claude Code": header pills "Edit reels" + "Claude Code" · "alur": a dashed flow line 1 → 2 → 3 draws through
+      // the badges · "aku pakai sendiri": green stamp "Alur kerjaku" · OUT: cards slide right, everything fades (s02 deals card 1 big).
+      const R14 = window.R14, S = R14.scene("s01"), { D, L, tl, ft, I, $ } = S;
+      const tSim = L("Simpan"), tDul = L("dulu:"), tTig = L("tiga"), tPr = L("prompt"), tNg = L("ngedit"), tRe = L("reels"), tCl = L("Claude"), tCo = L("Code."),
+            tIni = L("Ini"), tAl = L("alur"), tAku = L("aku"), tSen = L("sendiri.");
+
+      // ================================================================ DOM
+      const P = R14.P;
+      let h = `<div class="s01-a" id="s01-glow"></div>`;
+      h += `<svg class="s01-a" id="s01-flow" viewBox="0 0 1080 1920"><path id="s01-fl" d="M162 548 L162 618 M162 718 L162 788" fill="none" stroke="#294b77" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 13"/>` +
+        `<path id="s01-a1" d="M150 606 L162 620 L174 606" fill="none" stroke="#294b77" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>` +
+        `<path id="s01-a2" d="M150 776 L162 790 L174 776" fill="none" stroke="#294b77" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      for (let i = 2; i >= 0; i--) {
+        h += `<div class="s01-c" id="s01-c${i}"><div class="cb"></div><div class="num" id="s01-n${i}">${P[i].n}</div><span class="lab" id="s01-l${i}">PROMPT ${P[i].n}</span>` +
+          `<b class="tt r14-grad">${P[i].title}</b><span class="sb">${P[i].sub}</span><div class="cp" id="s01-cp${i}">${R14.svg("copy", 2.2)}<b>Salin</b></div></div>`;
+      }
+      h += `<div class="s01-a" id="s01-hd"><div id="s01-h1">${R14.svg("film", 2.2)}<b>Edit reels</b></div><span id="s01-h2">pakai</span><div id="s01-h3">${R14.CL}<b>Claude Code</b></div></div>`;
+      h += `<div class="s01-a" id="s01-toast">${R14.svg("bookmarkCheck", 2.2)}<b>Disimpan</b></div>`;
+      h += `<div class="s01-a" id="s01-bm"><div class="s01-a" id="s01-bm0" style="inset:0">${R14.svg("bookmark", 2.4)}</div><div class="s01-a" id="s01-bm1" style="inset:0">${R14.svg("bookmark", 2.4)}</div></div>`;
+      h += `<div class="s01-a" id="s01-stamp">${R14.svg("circleCheck", 2.6)}<b>Alur kerjaku</b></div>`;
+      $("s01-cam").innerHTML = h;
+      const cam = $("s01-cam"), glow = $("s01-glow"), bm = $("s01-bm"), bm0 = $("s01-bm0"), bm1 = $("s01-bm1"), toast = $("s01-toast"), stamp = $("s01-stamp");
+      I(cam, { x: 0, y: 0 });
+      I(glow, { opacity: 0.9 });
+
+      // the deck (frame 0) → spread (on "tiga")
+      const DECK = [[0, 0], [14, 3], [28, -2.5]], LIST = [425, 595, 765];
+      for (let i = 0; i < 3; i++) {
+        const c = $("s01-c" + i), dy = DECK[i][0], rot = DECK[i][1];
+        I(c, { y: 595 + dy, rotation: rot, opacity: 1, x: 0 });
+        tl.fromTo(c, { y: 595 + dy, rotation: rot }, { y: LIST[i], rotation: 0, duration: 0.5, ease: "back.out(1.25)", immediateRender: false }, tTig - 0.12 + i * 0.05);
+        I($("s01-n" + i), { scale: 1 });
+        ft($("s01-n" + i), { scale: 1 }, { scale: 1.18, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tTig + 0.3 + i * 0.12);
+        // "prompt": the PROMPT labels light up
+        ft($("s01-l" + i), { color: "#5d6f8f" }, { color: "#294b77", duration: 0.15 }, tPr - 0.05 + i * 0.06);
+      }
+
+      // "Simpan": bookmark pressed → filled + toast
+      I(bm, { scale: 1, opacity: 1 }); I(bm0, { opacity: 1 }); I(bm1, { opacity: 0, scale: 0.6 });
+      ft(bm, { scale: 1 }, { scale: 0.84, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, tSim - 0.06);
+      ft(bm0, { opacity: 1 }, { opacity: 0, duration: 0.1 }, tSim + 0.04);
+      ft(bm1, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(3)" }, tSim + 0.04);
+      I(toast, { opacity: 0, x: 30, scaleX: 0.7 });
+      ft(toast, { opacity: 0, x: 30, scaleX: 0.7 }, { opacity: 1, x: 0, scaleX: 1, duration: 0.3, ease: "back.out(2)" }, tDul - 0.06);
+      ft(toast, { opacity: 1, x: 0 }, { opacity: 0, x: 20, duration: 0.25, ease: "power2.in" }, tNg - 0.45);
+
+      // header pills: "Edit reels" on "ngedit reels", "pakai" + "Claude Code" on "Claude Code"
+      const h1 = $("s01-h1"), h2 = $("s01-h2"), h3 = $("s01-h3");
+      I(h1, { opacity: 0, scale: 0.6, y: 10 }); I(h2, { opacity: 0 }); I(h3, { opacity: 0, scale: 0.6, y: 10 });
+      ft(h1, { opacity: 0, scale: 0.6, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.34, ease: "back.out(2.2)" }, tNg - 0.1);
+      ft(h2, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tCl - 0.3);
+      ft(h3, { opacity: 0, scale: 0.6, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.36, ease: "back.out(2.2)" }, tCl - 0.12);
+      ft(h3, { scale: 1 }, { scale: 1.07, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tCo);
+      // the bookmark steps aside once the header is complete (it would crowd the Claude Code pill)
+      ft(bm, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6, duration: 0.25, ease: "power2.in" }, tCl - 0.32);
+
+      // "alur": the flow line 1 → 2 → 3 (dashes grow along the path)
+      const fl = $("s01-fl"), a1 = $("s01-a1"), a2 = $("s01-a2");
+      I(fl, { opacity: 0, attr: { "stroke-dashoffset": 60 } }); I(a1, { opacity: 0, y: -8 }); I(a2, { opacity: 0, y: -8 });
+      ft(fl, { opacity: 0 }, { opacity: 1, duration: 0.15 }, tIni - 0.05);
+      ft(fl, { attr: { "stroke-dashoffset": 60 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.2, ease: "none" }, tIni - 0.05);
+      ft(a1, { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, tAl - 0.05);
+      ft(a2, { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, tAl + 0.15);
+      [0, 1, 2].forEach((i) => ft($("s01-n" + i), { scale: 1 }, { scale: 1.12, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tIni + i * 0.16));
+
+      // "aku pakai sendiri": the stamp lands on card 2's right side (over its Salin button area, rotated)
+      I(stamp, { opacity: 0, scale: 1.8, rotation: -14 });
+      ft(stamp, { opacity: 0, scale: 1.8, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.3, ease: "power3.in" }, tAku - 0.12);
+      [[4, -3], [-3, 2], [2, -1], [0, 0]].forEach(([x, y], k) => tl.set(cam, { x, y }, tAku + 0.18 + k * 0.034));
+      ft(stamp, { scale: 1 }, { scale: 1.06, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tSen + 0.1);
+
+      // ================================================================ OUT → s02 (card 1 is dealt big there)
+      const tOut = D - 0.34;
+      for (let i = 0; i < 3; i++) ft($("s01-c" + i), { x: 0, opacity: 1 }, { x: 420, opacity: 0, duration: 0.3, ease: "power2.in" }, tOut + (2 - i) * 0.04);
+      ft(stamp, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut);
+      ft(fl, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut); ft(a1, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut); ft(a2, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut);
+      ft($("s01-hd"), { opacity: 1, y: 0 }, { opacity: 0, y: -16, duration: 0.24, ease: "power2.in" }, tOut + 0.04);
+      ft(glow, { opacity: 0.9 }, { opacity: 0.5, duration: 0.3 }, tOut);
+      I($("s01-hd"), { opacity: 1, y: 0 });
+
+      S.done();
+    })();
+  </script>
+</template>

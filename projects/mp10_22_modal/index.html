@@ -73,7 +73,7 @@
       .jmark { border-radius: 14px; background: rgba(254,209,17,.0); border: 4px solid rgba(254,209,17,.9); box-shadow: 0 0 22px rgba(254,209,17,.5); }
       /* scan gate */
       .gpost { background: linear-gradient(90deg, #FFE440, #FED111 60%, #d9b000); border-radius: 6px; }
-      .groof { background: linear-gradient(180deg, #FFE440, #FED111); border-radius: 10px; box-shadow: inset 0 0 0 6px rgba(255,255,255,.35); }
+      .groof { border: 18px solid #FED111; border-radius: 12px; background: rgba(255,228,64,.10); box-shadow: inset 0 0 0 4px rgba(255,255,255,.45); }
       .gbar { background: #FED111; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font: 800 26px/1 Rubik; letter-spacing: .18em; color: var(--navy); white-space: nowrap; box-shadow: 0 6px 0 #c9a300; }
       .gbar i { width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px #fff, 0 0 22px #FFE440; }
       .gglow { background: radial-gradient(closest-side, rgba(255,228,64,.75), rgba(255,228,64,0)); }
@@ -418,22 +418,28 @@
           F(c.pan, { x: -a.fx, y: -a.fy, z: -a.fz }, { x: -b.fx, y: -b.fy, z: -b.fz, duration: d, ease: ease || "sine.inOut" }, t0);
         };
         window.__CAMK = { K, camSet, C1 };
-        const KH0 = K(540, 1240, -60, -150, 160, -20, -26, -260), KH1 = K(540, 1250, -160, -170, 80, -21, -18, -420);
-        const KW0 = K(540, 1150, 0, -260, -260, -24, -6, -900), KW1 = K(540, 1150, 40, -260, -260, -24, -2, -880);
-        const KS0 = K(540, 1140, 120, -260, -250, -24, 2, -860), KS1 = K(540, 1150, 60, -260, -280, -25, -4, -830);
-        const KF0 = K(540, 1120, -120, -330, -520, -18, 6, -560), KF1 = K(520, 1080, -330, -400, -760, -14, 9, -260);
+        const T4 = 11.0;   // the belt restarts (S4)
+        // hook: low, tracking the tokens as they ride toward the omzet board -> "Eh, tunggu": swings out to the frontal wide ->
+        // S3: tracks right with the scan gate -> S4: wide while the belt sorts -> S5: pushes into the omzet gauge
+        const KH0 = K(540, 1050, 350, -220, 100, -16, 26, -260), KH1 = K(540, 1030, -320, -250, -100, -20, 16, -400);
+        const KW0 = K(540, 1050, -60, -220, -200, -25, -4, -600), KW1 = K(540, 1050, -20, -220, -200, -25, -6, -580);
+        const KT0 = K(540, 1070, -320, -220, -60, -23, -8, -460), KT1 = K(540, 1070, 700, -220, -60, -23, -14, -460);
+        const KS0 = K(540, 1050, -40, -220, -200, -25, -4, -620), KS1 = K(540, 1050, -80, -230, -220, -25, -2, -600);
+        const KF0 = K(540, 1000, -380, -450, -600, -16, 6, -250), KF1 = K(520, 1000, -450, -420, -650, -14, 9, -150);
         camSet(C1, KH0);
-        cam(C1, KH0, KH1, 0, TM.eh, "power1.inOut");
-        cam(C1, KH1, KW0, TM.eh + 0.15, 1.6, "power2.inOut");
-        cam(C1, KW0, KW1, TM.eh + 1.75, TM.ada2 - TM.eh - 1.75, "none");
-        cam(C1, KW1, KS0, TM.ada2, TM.prib + 0.6 - TM.ada2, "sine.inOut");
-        cam(C1, KS0, KS1, TM.prib + 0.6, TM.kalau - TM.prib - 0.6, "sine.inOut");
-        cam(C1, KS1, KF0, TM.kalau, 1.3, "power2.inOut");
-        cam(C1, KF0, KF1, TM.kalau + 1.3, TM.sol - TM.kalau - 1.3, "power1.inOut");
+        cam(C1, KH0, KH1, 0, TM.eh, "sine.inOut");
+        cam(C1, KH1, KW0, TM.eh + 0.1, 1.5, "power2.inOut");
+        cam(C1, KW0, KW1, TM.eh + 1.6, TM.ada2 - 0.5 - TM.eh - 1.6, "none");
+        cam(C1, KW1, KT0, TM.ada2 - 0.5, 0.75, "power2.inOut");
+        cam(C1, KT0, KT1, TM.ada2 + 0.25, TM.prib + 0.2 - TM.ada2 - 0.25, "sine.inOut");
+        cam(C1, KT1, KS0, TM.prib + 0.2, T4 + 0.4 - TM.prib - 0.2, "power2.inOut");
+        cam(C1, KS0, KS1, T4 + 0.4, TM.kalau - T4 - 0.4, "none");
+        cam(C1, KS1, KF0, TM.kalau, 1.1, "power2.inOut");
+        cam(C1, KF0, KF1, TM.kalau + 1.1, TM.sol - TM.kalau - 1.1, "power1.inOut");
 
         // ---- belt drive: one virtual displacement D (px the belt has moved to the left), sampled into every rider ----
         // hook: tokens ride in from the right and stop at TOK.x on "Eh, tunggu"; S4: v = 360 px/s from 11.0 s until the last leap
-        const DH = 1100, V4 = 450, T4 = 11.0;
+        const DH = 1100, V4 = 450;
         const lapD = (x0) => TOK.findIndex((t) => t.x === x0);
         // ribs
         F("#ribs", { x: 0 }, { x: -(DH - 70), duration: TM.eh + 0.02, ease: "none" }, 0);
@@ -532,8 +538,8 @@
           F(id, { x: b.x, y: -LEG - b.h * 0.42, z: BZW + 40, scaleX: 0.42, scaleY: 0.42 }, { x: b.x, y: -LEG - b.h - 120, z: BZW + 120, scaleX: 0.8, scaleY: 0.8, duration: 0.2, ease: "back.out(2)" }, t0);
           tl.set("#bv" + t.k, { autoAlpha: 0 }, t0 + 0.02); tl.set("#bz" + t.k, { autoAlpha: 1 }, t0 + 0.02);
           F(id, { x: b.x }, { x: B0.x + 40, duration: tLand - t0 - 0.2, ease: "power1.inOut" }, t0 + 0.2);
-          F(id, { y: -LEG - b.h - 120 }, { y: -LEG - B0.h - 330 - j * 30, duration: (tLand - t0 - 0.2) * 0.45, ease: "power2.out" }, t0 + 0.2);
-          F(id, { y: -LEG - B0.h - 330 - j * 30 }, { y: -LEG - B0.h * 0.45, duration: (tLand - t0 - 0.2) * 0.55, ease: "power2.in" }, t0 + 0.2 + (tLand - t0 - 0.2) * 0.45);
+          F(id, { y: -LEG - b.h - 120 }, { y: -LEG - B0.h - 150 - j * 20, duration: (tLand - t0 - 0.2) * 0.45, ease: "power2.out" }, t0 + 0.2);
+          F(id, { y: -LEG - B0.h - 150 - j * 20 }, { y: -LEG - B0.h * 0.45, duration: (tLand - t0 - 0.2) * 0.55, ease: "power2.in" }, t0 + 0.2 + (tLand - t0 - 0.2) * 0.45);
           F(id, { z: BZW + 120, scaleX: 0.8, scaleY: 0.8 }, { z: BZW + 40, scaleX: 0.45, scaleY: 0.45, duration: tLand - t0 - 0.2, ease: "power1.in" }, t0 + 0.2);
           F(id + " .tb", { opacity: 1 }, { opacity: 0, duration: 0.1 }, tLand - 0.06); hide(id, tLand + 0.06);
           const v0 = [12, 20, 25][j], v1 = [20, 25, 27][j];

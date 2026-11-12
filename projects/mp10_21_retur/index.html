@@ -393,7 +393,7 @@
         // ---------- the yard (world px; floor y = 0, up is negative; +z towards the camera) ----------
         const P1 = $("#pan1"), FF = $("#ff");
         const LX = 190, Z0 = 250, Z1 = -460, R = 190, SX = -190, SZ = 380, ZH = -800, HX = [-270, 0, 270];
-        const PW = 76, PH = 58, PD = 76, PY = -PH / 2 - 3;
+        const PW = 66, PH = 50, PD = 66, PY = -PH / 2 - 3;
         [[-1100, -700, -1500, 260, "rgba(38,54,122,.14)"], [1050, -1100, -1800, 340, "rgba(254,209,17,.30)"], [-800, -1400, -2300, 420, "rgba(38,54,122,.11)"],
          [1200, -380, -1100, 200, "rgba(38,54,122,.13)"], [-1250, -250, -900, 180, "rgba(254,209,17,.24)"], [500, -1700, -2600, 480, "rgba(38,54,122,.09)"]].forEach(([x, y, z, r, c]) => {
           const e = mk("div", "bokeh", P1, `left:${x - r}px; top:${y - r}px; width:${2 * r}px; height:${2 * r}px; background:radial-gradient(closest-side, ${c}, rgba(255,255,255,0));`); gsap.set(e, { z }); });
@@ -416,8 +416,8 @@
           gsap.set(g, { x: 0, y: -236, z: ZH + 70, rotationX: 30 }); }
         // pallet: 10 parcels (bottom 3x2, top 2x2) — shipped top layer first, back row first
         const STK = [];
-        [[-41, -42], [41, -42], [-41, 42], [41, 42]].forEach(([dx, dz]) => STK.push({ x: SX + dx, y: PY - PH - 1, z: SZ + dz }));
-        [[-82, -42], [0, -42], [82, -42], [-82, 42], [0, 42], [82, 42]].forEach(([dx, dz]) => STK.push({ x: SX + dx, y: PY, z: SZ + dz }));
+        [[-37, -37], [37, -37], [-37, 37], [37, 37]].forEach(([dx, dz]) => STK.push({ x: SX + dx, y: PY - PH - 1, z: SZ + dz }));
+        [[-74, -37], [0, -37], [74, -37], [-74, 37], [0, 37], [74, 37]].forEach(([dx, dz]) => STK.push({ x: SX + dx, y: PY, z: SZ + dz }));
         const PK = STK.map((s, k) => { const g = parcel("pk" + k, k >= 4, false); gsap.set(g, { x: s.x, y: s.y, z: s.z }); return g; });
         const P0 = parcel("p0", false, true), R1 = parcel("r1", false, true), R2 = parcel("r2", false, true);
         const N1 = mk("div", "g3", P1), N2 = mk("div", "g3", P1); N1.id = "n1"; N2.id = "n2";
@@ -456,17 +456,18 @@
         const FLASH = (sel, at, o) => { F(sel, { opacity: 0 }, { opacity: o || 0.9, duration: 0.08 }, at); F(sel, { opacity: o || 0.9 }, { opacity: 0, duration: 0.5, ease: "power1.out" }, at + 0.1); };
         tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: TM.total, ease: "steps(" + Math.round(TM.total * 15) + ")", immediateRender: false }, 0);
 
+        const S0 = (t, v) => { gsap.set(t, v); tl.set(t, v, 0); };
         // pin every initial state on the timeline at 0 (the real renderer can seek before the first frame; build-time state must not leak)
-        tl.set("#hookT, #s2T, #s3T, #s3U, #s4T, #s5T, #cw1, #cb1, #cw2, #cb2", { autoAlpha: 1 }, 0);
-        tl.set("#hc, #hq, #lg, #rk, #neq, #lgSt, #kel, " + PK.map((p) => "#" + p.id).join(", ") + ", #p0, #r1, #r2, #n1, #n2, #rc, #sh0, #shR1, #shR2, #shN1, #shN2", { autoAlpha: 0 }, 0);
-        tl.set("#p0s1, #p0s2, #r1s1, #r1s2, #r2s1, #r2s2", { scaleX: 0, scaleY: 0 }, 0);
-        tl.set(".pip b", { scaleX: 0, scaleY: 0, opacity: 1 }, 0); tl.set(".pip i", { autoAlpha: 0 }, 0);
-        tl.set("#cntS", { y: 0 }, 0); tl.set("#valS", { y: 0 }, 0); tl.set("#valM", { scaleX: 1, scaleY: 1 }, 0);
-        tl.set("#ghW, #brW", { height: 0 }, 0); tl.set("#bar1, #bar2", { scaleX: 0 }, 0);
-        tl.set("#pK, #pR, #pR0", { strokeDashoffset: 1 }, 0); tl.set("#pR2", { strokeDashoffset: 0, opacity: 0 }, 0); tl.set("#hK, #hR", { opacity: 0 }, 0);
-        tl.set("#world", { filter: "blur(0px)" }, 0); tl.set("#veil", { opacity: 0 }, 0);
-        tl.set("#vsB, #selC", { autoAlpha: 0 }, 0); tl.set("#cvA, #cvB", { yPercent: 110 }, 0); tl.set("#selR", { autoAlpha: 0, x: -40 }, 0);
-        PK.forEach((p, k) => tl.set(p, { x: STK[k].x, y: STK[k].y - 520, z: STK[k].z, scaleX: 1, scaleY: 1, scaleZ: 1, rotationY: 0 }, 0));
+        S0("#hookT, #s2T, #s3T, #s3U, #s4T, #s5T, #cw1, #cb1, #cw2, #cb2", { autoAlpha: 1 });
+        S0("#hc, #hq, #lg, #rk, #neq, #lgSt, #kel, " + PK.map((p) => "#" + p.id).join(", ") + ", #r1, #r2, #n1, #n2, #rc, #shR1, #shR2, #shN1, #shN2", { autoAlpha: 0 });
+        S0("#p0s1, #p0s2, #r1s1, #r1s2, #r2s1, #r2s2", { scaleX: 0, scaleY: 0 });
+        S0(".pip b", { scaleX: 0, scaleY: 0, opacity: 1 }); S0(".pip i", { autoAlpha: 0 });
+        S0("#cntS", { y: 0 }); S0("#valS", { y: 0 }); S0("#valM", { scaleX: 1, scaleY: 1 });
+        S0("#ghW, #brW", { height: 0 }); S0("#bar1, #bar2", { scaleX: 0 });
+        S0("#pK, #pR, #pR0", { strokeDashoffset: 1 }); S0("#pR2", { strokeDashoffset: 0, opacity: 0 }); S0("#hK, #hR", { opacity: 0 });
+        S0("#world", { filter: "blur(0px)" }); S0("#veil", { opacity: 0 });
+        S0("#vsB, #selC", { autoAlpha: 0 }); S0("#cvA, #cvB", { yPercent: 110 }); S0("#selR", { autoAlpha: 0, x: -40 });
+        PK.forEach((p, k) => S0(p, { x: STK[k].x, y: STK[k].y - 360, z: STK[k].z, scaleX: 1, scaleY: 1, scaleZ: 1, rotationY: 0 }));
 
         // camera rig helpers: key = anchor on screen (ax, ay), focus point (fx, fy, fz), tilt rx, orbit ry, dolly z
         const K = (ax, ay, fx, fy, fz, rx, ry, z) => ({ ax, ay, fx, fy, fz, rx, ry, z });
@@ -496,24 +497,25 @@
 
         // S1 · hook: one parcel boomerangs out along KIRIM and back along RETUR; the sale chip stays "tercatat" -> "?"
         const H0 = { x: SX, y: PY, z: Z0 + 40 };
-        tl.set("#p0", { x: H0.x, y: H0.y, z: H0.z, rotationY: 0, rotationZ: 0, scaleX: 1, scaleY: 1, scaleZ: 1 }, 0); show("#p0", 0); show("#sh0", 0);
-        tl.set("#sh0", { x: H0.x, y: H0.z, scaleX: 0.75, scaleY: 0.75, opacity: 1 }, 0);
+        const HS = 1.45, HY = -PH * HS / 2 - 3;
+        S0("#p0", { autoAlpha: 1, x: H0.x, y: HY, z: H0.z, rotationY: 0, rotationZ: 0, scaleX: HS, scaleY: HS, scaleZ: HS });
+        S0("#sh0", { autoAlpha: 1, x: H0.x, y: H0.z, scaleX: 1.05, scaleY: 1.05 });
         F("#pK", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.65, ease: "power2.inOut" }, 0.05); F("#hK", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 0.6);
         const tL = 0.3, T1 = 0.62, T2 = 0.4, T3 = 0.7, tT = tL + T1, tB = tT + T2, tLand = tB + T3;
         F("#p0", { z: H0.z }, { z: Z1, duration: T1, ease: "power1.in" }, tL);
-        F("#p0", { y: H0.y }, { y: -170, duration: T1 + T2 / 2, ease: "sine.out" }, tL);
+        F("#p0", { y: HY }, { y: -190, duration: T1 + T2 / 2, ease: "sine.out" }, tL);
         F("#p0", { x: -R }, { x: R, duration: T2, ease: "sine.inOut" }, tT);
         F("#p0", { z: Z1 }, { z: Z1 - R, duration: T2 / 2, ease: "sine.out" }, tT); F("#p0", { z: Z1 - R }, { z: Z1, duration: T2 / 2, ease: "sine.in" }, tT + T2 / 2);
         F("#p0", { z: Z1 }, { z: SZ - 10, duration: T3, ease: "power1.out" }, tB);
-        F("#p0", { y: -170 }, { y: PY, duration: T3 + T2 / 2, ease: "sine.in" }, tT + T2 / 2);
+        F("#p0", { y: -190 }, { y: HY, duration: T3 + T2 / 2, ease: "sine.in" }, tT + T2 / 2);
         F("#p0", { rotationY: 0 }, { rotationY: 720, duration: tLand - tL, ease: "power1.inOut" }, tL);
         F("#p0", { rotationZ: 0 }, { rotationZ: -14, duration: 0.5, ease: "sine.out" }, tL); F("#p0", { rotationZ: -14 }, { rotationZ: 10, duration: 0.8, ease: "sine.inOut" }, tL + 0.5); F("#p0", { rotationZ: 10 }, { rotationZ: 0, duration: 0.4, ease: "sine.in" }, tL + 1.3);
-        F("#p0", { scaleY: 1, scaleX: 1 }, { scaleY: 0.82, scaleX: 1.1, duration: 0.07, ease: "power2.out" }, tLand); F("#p0", { scaleY: 0.82, scaleX: 1.1 }, { scaleY: 1, scaleX: 1, duration: 0.35, ease: "back.out(3)" }, tLand + 0.07);
+        F("#p0", { scaleY: HS, scaleX: HS }, { scaleY: HS * 0.82, scaleX: HS * 1.1, duration: 0.07, ease: "power2.out" }, tLand); F("#p0", { scaleY: HS * 0.82, scaleX: HS * 1.1 }, { scaleY: HS, scaleX: HS, duration: 0.35, ease: "back.out(3)" }, tLand + 0.07);
         shadowFollow("#sh0", { x: H0.x, z: H0.z }, { x: -R, z: Z1 }, tL, T1, "power1.in");
         F("#sh0", { x: -R }, { x: R, duration: T2, ease: "sine.inOut" }, tT); F("#sh0", { y: Z1 }, { y: Z1 - R, duration: T2 / 2, ease: "sine.out" }, tT); F("#sh0", { y: Z1 - R }, { y: Z1, duration: T2 / 2, ease: "sine.in" }, tT + T2 / 2);
         F("#sh0", { y: Z1 }, { y: SZ - 10, duration: T3, ease: "power1.out" }, tB);
-        F("#sh0", { opacity: 1, scaleX: 0.75, scaleY: 0.75 }, { opacity: 0.35, scaleX: 1.2, scaleY: 1.2, duration: T1 + T2 / 2, ease: "sine.out" }, tL);
-        F("#sh0", { opacity: 0.35, scaleX: 1.2, scaleY: 1.2 }, { opacity: 1, scaleX: 0.75, scaleY: 0.75, duration: T3 + T2 / 2, ease: "sine.in" }, tT + T2 / 2);
+        F("#sh0", { opacity: 1, scaleX: 1.05, scaleY: 1.05 }, { opacity: 0.35, scaleX: 1.6, scaleY: 1.6, duration: T1 + T2 / 2, ease: "sine.out" }, tL);
+        F("#sh0", { opacity: 0.35, scaleX: 1.6, scaleY: 1.6 }, { opacity: 1, scaleX: 1.05, scaleY: 1.05, duration: T3 + T2 / 2, ease: "sine.in" }, tT + T2 / 2);
         F("#pR0, #pR", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: T2 + T3, ease: "none" }, tT); F("#hR", { opacity: 0 }, { opacity: 1, duration: 0.15 }, tLand - 0.1);
         POP("#p0s1", tLand + 0.05, 0.4); POP("#p0s2", tLand + 0.1, 0.4);
         // chip: the sale is counted the moment the parcel leaves — and stays counted after it comes back
@@ -523,33 +525,33 @@
         for (let j = 0; j < 4; j++) F("#hq", { rotation: j % 2 ? -10 : 8 }, { rotation: j % 2 ? 8 : -10, duration: 0.2, ease: "sine.inOut" }, TM.hit0 + 0.47 + j * 0.2);
         RISE(HA1, TM.hook - 0.2, 0.025, 0.42); RISE(HA2, TM.ret0 - 0.12, 0.025, 0.42); HL("#hAh", TM.ret0 + 0.3, 0.4);
         RISE(HB, TM.hook + 1.45, 0.02, 0.42); RISE(HC1, TM.masih - 0.1, 0.022, 0.42); RISE(HC2, TM.hit0 - 0.1, 0.03, 0.42); UL("#hCu", TM.hit0 + 0.3, 0.4);
-        SINK([HA1, HA2, HB, HC1, HC2].flat(), TM.mis - 0.12, 0.3); hide("#hookT", TM.mis + 0.3);
+        SINK([HA1, HA2, HB, HC1, HC2].flat(), TM.mis - 0.12, 0.3); F("#hookT", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, TM.mis - 0.06); hide("#hookT", TM.mis + 0.3);
         F("#hc", { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: 40, duration: 0.3, ease: "power2.in" }, TM.mis - 0.15);
         F("#hq", { autoAlpha: 1, scaleX: 1, scaleY: 1 }, { autoAlpha: 0, scaleX: 0.4, scaleY: 0.4, duration: 0.25, ease: "power2.in" }, TM.mis - 0.15);
         // the hook parcel steps out (it's the next example now)
-        F("#p0", { scaleX: 1, scaleY: 1, scaleZ: 1 }, { scaleX: 0, scaleY: 0, scaleZ: 0, duration: 0.3, ease: "back.in(2)" }, TM.mis - 0.1); hide("#p0", TM.mis + 0.22);
+        F("#p0", { scaleX: HS, scaleY: HS, scaleZ: HS }, { scaleX: 0, scaleY: 0, scaleZ: 0, duration: 0.3, ease: "back.in(2)" }, TM.mis - 0.1); hide("#p0", TM.mis + 0.22);
         F("#sh0", { opacity: 1 }, { opacity: 0, duration: 0.25 }, TM.mis - 0.1);
         F("#hR, #pR, #pR0", { opacity: 1 }, { opacity: 0.45, duration: 0.4 }, TM.mis);
 
         // S2 · "Misalnya kamu jual sepuluh paket. Semuanya tercatat jadi penjualan."
-        RISE(SA, TM.mis - 0.05, 0.025, 0.42); RISE(SB1, TM.jual - 0.1, 0.03, 0.42); RISE(SB2, TM.p10 - 0.05, 0.03, 0.42); HL("#sBh", TM.p10 + 0.35, 0.4);
+        RISE(SA, TM.mis + 0.08, 0.025, 0.42); RISE(SB1, TM.jual - 0.1, 0.03, 0.42); RISE(SB2, TM.p10 - 0.05, 0.03, 0.42); HL("#sBh", TM.p10 + 0.35, 0.4);
         RISE(SC1, TM.semua - 0.08, 0.03, 0.42); RISE(SC2, TM.tc - 0.08, 0.025, 0.42); UL("#sCu", TM.tc + 0.35, 0.42);
-        SINK([SA, SB1, SB2, SC1, SC2].flat(), TM.trs - 0.12, 0.3); hide("#s2T", TM.trs + 0.3);
+        SINK([SA, SB1, SB2, SC1, SC2].flat(), TM.trs - 0.12, 0.3); F("#s2T", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, TM.trs - 0.06); hide("#s2T", TM.trs + 0.3);
         // the pallet fills (parcels drop in), the ledger card swings in at the bottom-left
-        PK.forEach((p, k) => { const s = STK[k], t = TM.mis + 0.05 + (9 - k) * 0.045; show(p, t); F(p, { y: s.y - 520 }, { y: s.y, duration: 0.42, ease: "bounce.out" }, t); });
+        PK.forEach((p, k) => { const s = STK[k], t = TM.mis + 0.05 + (9 - k) * 0.045; show(p, t); F(p, { y: s.y - 360 }, { y: s.y, duration: 0.42, ease: "bounce.out" }, t); });
         const LGa = { x: -330, y: 1262, scaleX: 0.7, scaleY: 0.7, rotationY: 8, rotationX: 4 };
         F("#lg", { autoAlpha: 0, x: -760, y: 1290, scaleX: 0.7, scaleY: 0.7, rotationY: -40, rotationX: 4, transformPerspective: 1600 }, Object.assign({ autoAlpha: 1, duration: 0.7, ease: "power3.out" }, LGa), TM.mis + 0.05);
-        const ORD = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], DT = 0.19, TS0 = TM.p10 - 0.12;
+        const ORD = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], DT = 0.215, TS0 = TM.p10 - 0.12;
         ORD.forEach((k, j) => {
           const p = "#pk" + k, s = STK[k], ts = TS0 + j * DT, hx = HX[j % 3], hz = ZH + (j % 3 === 1 ? 10 : 50);
           F(p, { x: s.x, z: s.z }, { x: SX, z: Z0, duration: 0.28, ease: "power1.inOut" }, ts);
           F(p, { y: s.y }, { y: Math.min(s.y, PY) - 70, duration: 0.14, ease: "sine.out" }, ts); F(p, { y: Math.min(s.y, PY) - 70 }, { y: PY, duration: 0.14, ease: "sine.in" }, ts + 0.14);
-          F(p, { z: Z0 }, { z: Z1 + 30, duration: 0.7, ease: "none" }, ts + 0.28);
-          F(p, { x: SX, z: Z1 + 30 }, { x: hx, z: hz, duration: 0.34, ease: "power1.out" }, ts + 0.98);
-          F(p, { y: PY }, { y: -190, duration: 0.17, ease: "sine.out" }, ts + 0.98); F(p, { y: -190 }, { y: -90, duration: 0.17, ease: "sine.in" }, ts + 1.15);
-          F(p, { scaleX: 1, scaleY: 1, scaleZ: 1 }, { scaleX: 0.2, scaleY: 0.2, scaleZ: 0.2, duration: 0.34, ease: "power2.in" }, ts + 0.98);
-          hide(p, ts + 1.32);
-          F("#hs" + (j % 3), { scaleY: 1 }, { scaleY: 0.93, duration: 0.06, ease: "power2.out" }, ts + 1.3); F("#hs" + (j % 3), { scaleY: 0.93 }, { scaleY: 1, duration: 0.3, ease: "back.out(3)" }, ts + 1.36);
+          F(p, { z: Z0 }, { z: Z1 + 30, duration: 0.56, ease: "none" }, ts + 0.28);
+          F(p, { x: SX, z: Z1 + 30 }, { x: hx, z: hz, duration: 0.34, ease: "power1.out" }, ts + 0.84);
+          F(p, { y: PY }, { y: -190, duration: 0.17, ease: "sine.out" }, ts + 0.84); F(p, { y: -190 }, { y: -90, duration: 0.17, ease: "sine.in" }, ts + 1.01);
+          F(p, { scaleX: 1, scaleY: 1, scaleZ: 1 }, { scaleX: 0.2, scaleY: 0.2, scaleZ: 0.2, duration: 0.34, ease: "power2.in" }, ts + 0.84);
+          hide(p, ts + 1.18);
+          F("#hs" + (j % 3), { scaleY: 1 }, { scaleY: 0.93, duration: 0.06, ease: "power2.out" }, ts + 1.16); F("#hs" + (j % 3), { scaleY: 0.93 }, { scaleY: 1, duration: 0.3, ease: "back.out(3)" }, ts + 1.22);
           // the ledger counts the sale as the parcel leaves the pallet
           const tc = ts + 0.3;
           F(PIPS[j].querySelector("b"), { scaleX: 0, scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.3, ease: "back.out(2.6)" }, tc);
@@ -561,17 +563,17 @@
         FLASH("#lgvf", TM.pjl + 0.05, 0.85);
 
         // S3 · "Terus dua paket diretur. Barangnya balik, uangnya juga balik ke pembeli."
-        RISE(TA, TM.trs - 0.05, 0.03, 0.42); RISE(TB1, TM.dua - 0.08, 0.03, 0.42); RISE(TB2, TM.dir - 0.1, 0.03, 0.42); HL("#tBh", TM.dir + 0.3, 0.4);
-        SINK([TA, TB1, TB2].flat(), TM.brg - 0.12, 0.3); hide("#s3T", TM.brg + 0.3);
-        RISE(UA, TM.brg - 0.05, 0.022, 0.42); RISE(UB1, TM.uang - 0.08, 0.025, 0.42); RISE(UB2, TM.uang + 0.45, 0.03, 0.42); HL("#uBh", TM.uang + 0.75, 0.35);
+        RISE(TA, TM.trs + 0.08, 0.03, 0.42); RISE(TB1, TM.dua - 0.08, 0.03, 0.42); RISE(TB2, TM.dir - 0.1, 0.03, 0.42); HL("#tBh", TM.dir + 0.3, 0.4);
+        SINK([TA, TB1, TB2].flat(), TM.brg - 0.12, 0.3); F("#s3T", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, TM.brg - 0.06); hide("#s3T", TM.brg + 0.3);
+        RISE(UA, TM.brg + 0.08, 0.022, 0.42); RISE(UB1, TM.uang - 0.08, 0.025, 0.42); RISE(UB2, TM.uang + 0.45, 0.03, 0.42); HL("#uBh", TM.uang + 0.75, 0.35);
         RISE(UC, TM.pmb - 0.15, 0.025, 0.42);
-        SINK([UA, UB1, UB2, UC].flat(), TM.kal - 0.12, 0.3); hide("#s3U", TM.kal + 0.3);
+        SINK([UA, UB1, UB2, UC].flat(), TM.kal - 0.12, 0.3); F("#s3U", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, TM.kal - 0.06); hide("#s3U", TM.kal + 0.3);
         F("#hR, #pR, #pR0", { opacity: 0.45 }, { opacity: 1, duration: 0.3 }, TM.dua);
         F("#pR2", { opacity: 0 }, { opacity: 0.9, duration: 0.3 }, TM.dir - 0.1); F("#pR2", { strokeDashoffset: 0 }, { strokeDashoffset: -0.6, duration: 2.0, ease: "none" }, TM.dir - 0.1); F("#pR2", { opacity: 0.9 }, { opacity: 0, duration: 0.4 }, TM.brg + 0.8);
         [["#r1", "#shR1", 0, TM.dua + 0.2, TM.dir - 0.02, LX - 46, SZ - 30], ["#r2", "#shR2", 2, TM.dua + 0.38, TM.dir + 0.2, LX + 46, SZ + 26]].forEach(([id, sh, h, tApp, t0, lx, lz]) => {
           const a = { x: HX[h], z: ZH + 70 }, top = { x: 0, z: Z1 - R }, q = { x: R, z: Z1 }, end = { x: lx, z: lz };
           const t1 = t0 + 0.3, t2 = t1 + 0.24, t3 = t2 + 0.62;
-          tl.set(id, { x: a.x, y: PY, z: a.z, rotationY: 0, rotationZ: 0 }, 0);
+          S0(id, { x: a.x, y: PY, z: a.z, rotationY: 0, rotationZ: 0 });
           show(id, tApp); F(id, { scaleX: 0, scaleY: 0, scaleZ: 0 }, { scaleX: 1, scaleY: 1, scaleZ: 1, duration: 0.35, ease: "back.out(2.2)" }, tApp);
           show(sh, tApp); F(sh, { x: a.x, y: a.z, opacity: 0, scaleX: 0.7, scaleY: 0.7 }, { opacity: 1, duration: 0.3 }, tApp);
           POP(id + "s1", tApp + 0.25, 0.35); POP(id + "s2", tApp + 0.3, 0.35);
@@ -603,10 +605,10 @@
         // S4 · "Kalau returnya nggak dicatat, penjualanmu kelihatan lebih gede dari aslinya." — the yard blurs, the ledger comes forward
         F("#world", { filter: "blur(0px)" }, { filter: "blur(8px)", duration: 0.6, ease: "power1.inOut" }, TM.kal - 0.05);
         F("#veil", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.inOut" }, TM.kal - 0.05);
-        const LGb = { x: -20, y: 590, scaleX: 1, scaleY: 1, rotationY: -7, rotationX: 5 };
+        const LGb = { x: -52, y: 584, scaleX: 1.18, scaleY: 1.18, rotationY: -7, rotationX: 5 };
         F("#lg", LGa, Object.assign({ duration: 0.8, ease: "power3.inOut" }, LGb), TM.kal - 0.05);
         F("#lgSt", { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.25 }, TM.kal - 0.05);
-        RISE(VA1, TM.kal - 0.05, 0.02, 0.42); RISE(VA2, TM.ndc - 0.08, 0.02, 0.42);
+        RISE(VA1, TM.kal + 0.08, 0.02, 0.42); RISE(VA2, TM.ndc - 0.08, 0.02, 0.42);
         F("#ghW", { height: 0 }, { height: 94, duration: 0.45, ease: "power3.inOut" }, TM.ndc);
         $$(".pip i").forEach((e, k) => F(e, { autoAlpha: 0, scaleX: 0.6, scaleY: 0.6 }, { autoAlpha: 1, scaleX: 1, scaleY: 1, duration: 0.35, ease: "back.out(2.4)" }, TM.ndc + 0.3 + k * 0.12));
         RISE(VB, TM.pjm - 0.08, 0.02, 0.42); RISE(VC, TM.gede - 0.12, 0.03, 0.42); HL("#vCh", TM.gede + 0.25, 0.38);
@@ -615,20 +617,20 @@
         F("#brW", { height: 0 }, { height: 150, duration: 0.45, ease: "power3.inOut" }, TM.klh - 0.1);
         F("#bar1", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, TM.klh + 0.2);
         F("#bar2", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, TM.asli);
-        SINK([VA1, VA2, VB, VC].flat(), TM.pad - 0.12, 0.3); hide("#s4T", TM.pad + 0.3);
+        SINK([VA1, VA2, VB, VC].flat(), TM.pad - 0.12, 0.3); F("#s4T", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, TM.pad - 0.06); hide("#s4T", TM.pad + 0.3);
 
         // S5 · "Padahal uang yang beneran masuk nggak segitu." — the rekening card lands next to the ledger: ≠
-        const LGc = { x: -250, y: 640, scaleX: 0.9, scaleY: 0.9, rotationY: 10, rotationX: 4 };
+        const LGc = { x: -262, y: 628, scaleX: 1, scaleY: 1, rotationY: 10, rotationX: 4 };
         F("#brW", { height: 150 }, { height: 0, duration: 0.4, ease: "power2.inOut" }, TM.pad);
         F("#valM", { scaleX: 1.14, scaleY: 1.14 }, { scaleX: 1, scaleY: 1, duration: 0.4, ease: "power2.inOut" }, TM.pad);
         F("#kel", { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.2 }, TM.pad);
         F("#lg", LGb, Object.assign({ duration: 0.6, ease: "power3.inOut" }, LGc), TM.pad);
-        F("#rk", { autoAlpha: 0, x: 900, y: 600, rotationY: 50, rotationX: 4, transformPerspective: 1600 }, { autoAlpha: 1, x: 250, y: 640, rotationY: -10, rotationX: 4, duration: 0.7, ease: "power3.out" }, TM.pad + 0.2);
+        F("#rk", { autoAlpha: 0, x: 900, y: 600, rotationY: 50, rotationX: 4, transformPerspective: 1600 }, { autoAlpha: 1, x: 282, y: 628, rotationY: -10, rotationX: 4, duration: 0.7, ease: "power3.out" }, TM.pad + 0.2);
         FLASH("#umf", TM.umsk + 0.02, 0.85);
         F("#umv", { scaleX: 1, scaleY: 1 }, { scaleX: 1.08, scaleY: 1.08, transformOrigin: "0% 50%", duration: 0.15, ease: "power2.out" }, TM.umsk); F("#umv", { scaleX: 1.08, scaleY: 1.08 }, { scaleX: 1, scaleY: 1, duration: 0.35, ease: "back.out(3)" }, TM.umsk + 0.15);
-        F("#neq", { autoAlpha: 0, scaleX: 0, scaleY: 0, rotation: -90, y: 880 }, { autoAlpha: 1, scaleX: 1, scaleY: 1, rotation: 0, y: 880, duration: 0.45, ease: "back.out(2.6)" }, TM.ngk + 0.05);
+        F("#neq", { autoAlpha: 0, scaleX: 0, scaleY: 0, rotation: -90, y: 905 }, { autoAlpha: 1, scaleX: 1, scaleY: 1, rotation: 0, y: 905, duration: 0.45, ease: "back.out(2.6)" }, TM.ngk + 0.05);
         FLASH("#lgvf", TM.ngk + 0.1, 0.6);
-        RISE(WA1, TM.pad - 0.05, 0.025, 0.42); RISE(WA2, TM.uyb - 0.08, 0.018, 0.42); RISE(WB, TM.ngk - 0.08, 0.03, 0.42); HL("#wBh", TM.ngk + 0.3, 0.38);
+        RISE(WA1, TM.pad + 0.08, 0.025, 0.42); RISE(WA2, TM.uyb - 0.08, 0.018, 0.42); RISE(WB, TM.ngk - 0.08, 0.03, 0.42); HL("#wBh", TM.ngk + 0.3, 0.38);
 
         // T · band sweep with the brand marquee (series)
         show("#bands", TM.sol - 0.48);

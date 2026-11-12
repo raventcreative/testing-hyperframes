@@ -1,4 +1,4 @@
-"""Builds index.html for the R9 YOUTUBE reel (11 free Claude skills for a YouTube channel; adapted from the R3 DESAINER builder) from production/timing.json: the client's navy background, word-synced Poppins
+"""Builds index.html for the R11 HARNESS reel (DeepSeek Harness, an open-source coding agent; adapted from the R9 YOUTUBE builder) from production/timing.json: the client's navy background, word-synced Poppins
 captions (white + cyan #01CCF7) on navy chips (legible over every world), the white AI PRENEUR logo (top-left, safe zone), scene
 slots (s01–s14), the persistent step header (split-flap "LANGKAH n", hf-seek driven), the robot (operator) and the mascot (host).
 All caption chunks sit mid (y≈968, above the mascot's head).
@@ -22,12 +22,12 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>YouTube agent: 11 skill Claude buat channel kamu — AI PRENEUR</title>
+    <title>Agen ngoding open source dari DeepSeek — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
-    <script src="vendor/r9kit.js"></script>
+    <script src="vendor/r11kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -107,7 +107,7 @@ html = f"""<!doctype html>
         tl.fromTo("#glow-b", {{ x: 0, y: 0 }}, {{ x: -110, y: -60, duration: {total}, ease: "sine.inOut", immediateRender: false }}, 0);
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
         tl.set("#brandlogo", {{ opacity: 0.95 }}, 0);   // visible from frame 0
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s09"]["start"] + S["s09"]["dur"] - 1.4, 3)});
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s07"]["start"] + S["s07"]["dur"] - 1.4, 3)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         window.__timelines = window.__timelines || {{}};
         window.__timelines["main"] = tl;

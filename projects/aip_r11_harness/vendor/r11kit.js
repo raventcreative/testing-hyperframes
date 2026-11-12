@@ -1,9 +1,9 @@
-// R9 YOUTUBE — shared scene kit (loaded in index.html <head> after vo_words.js; every scene uses window.R9K).
-// Components (identical in every scene that shows them): the SKILL HEADER (icon/number roll, command name, one-line job, category
-// chip, 5 progress segments), the 11 SKILL TILES (s01 → s02), lucide icons (ISC), the Claude mark, the timeline boilerplate
-// (scale patch, ft, I, wt, seek patch, per-letter typing). Deterministic: no Math.random, no Date, no rAF.
+// R11 HARNESS — shared scene kit (adapted from the R9 kit; loaded in index.html <head> after vo_words.js; every scene uses window.R11K).
+// Components (identical in every scene that shows them): the STEP HEADER (icon/number roll, title, one-line job, category chip,
+// 4 progress segments), lucide icons (ISC), the timeline boilerplate (scale patch, ft, I, wt, seek patch, per-letter typing).
+// Deterministic: no Math.random, no Date, no rAF.
 (function () {
-  const K = (window.R9K = {});
+  const K = (window.R11K = {});
   // ------------------------------------------------------------------ icons (lucide, ISC)
   K.IC = {
     filepen: '<path d="M12.659 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v9.34"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10.378 12.622a1 1 0 0 1 3 3.003L8.36 20.637a2 2 0 0 1-.854.506l-2.867.837a.5.5 0 0 1-.62-.62l.836-2.869a2 2 0 0 1 .506-.853z"/>',
@@ -43,6 +43,28 @@
     alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
     ccheck: '<circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/>',
     eyeoff: '<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>',
+    plug: '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+    cpu: '<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>',
+    laptop: '<path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z"/><path d="M20.054 15.987H3.946"/>',
+    shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    box: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+    archive: '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+    globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+    code: '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+    filecode: '<path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/>',
+    filetext: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    repeat: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+    wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+    coins: '<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
+    puzzle: '<path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/>',
+    history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    loop: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+    appwin: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/><path d="M6 4v4"/>',
+    cake: '<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3"/><path d="M12 8v3"/><path d="M17 8v3"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/>',
+    ban: '<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>',
+    mouse: '<path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"/>',
+    gitbranch: '<line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>',
     star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
   };
   K.svg = (n, cls = "", extra = "") =>
@@ -50,36 +72,19 @@
   K.CLAUDE_D = "M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z";
   K.claude = (cls = "") => `<svg class="${cls}" viewBox="0 0 24 24"><path d="${K.CLAUDE_D}" fill="#D97757"/></svg>`;
 
-  // ------------------------------------------------------------------ the eleven skills (README of Jakeschincariol/youtube-agent-skill, checked 12 Nov 2026)
-  K.SK = [
-    { cmd: "/yt-script", lbl: "naskah + skor hook", ic: "filepen" },
-    { cmd: "/yt-package", lbl: "judul + thumbnail", ic: "image" },
-    { cmd: "/yt-edit", lbl: "daftar potongan edit", ic: "scissors" },
-    { cmd: "/yt-comment", lbl: "pilah + balas komentar", ic: "message" },
-    { cmd: "/yt-plan", lbl: "rencana seminggu", ic: "calendar" },
-    { cmd: "/yt-viral", lbl: "riset video viral", ic: "flame" },
-    { cmd: "/yt-retention", lbl: "baca data retensi", ic: "activity" },
-    { cmd: "/yt-shorts", lbl: "potong jadi Shorts", ic: "phone" },
-    { cmd: "/yt-seo", lbl: "deskripsi + kata kunci", ic: "search" },
-    { cmd: "/yt-chapters", lbl: "chapter otomatis", ic: "list" },
-    { cmd: "/yt-audit", lbl: "audit channel", ic: "audit" },
-  ];
-  // header items: 0 repo · 1–5 featured skills · 6 viral · 7 setup
+  // header items: 0 repo · 1 how it works · 2 pick the brain · 3 start · 4 safety (README / docs / SAFETY.md of deepseek-ai/deepseek-harness, checked 12 Nov 2026)
   K.HD = [
-    { tile: "folder", name: "youtube-agent-skill", sub: "<i>github.com/</i>Jakeschincariol", chip: "MIT", chipIc: "unlock" },
-    { tile: "01", name: "/yt-script", sub: "naskah dari 21 rumus hook + skor hook", chip: "NASKAH", chipIc: "filepen" },
-    { tile: "02", name: "/yt-package", sub: "judul + thumbnail sebagai satu pasangan", chip: "KEMASAN", chipIc: "image" },
-    { tile: "03", name: "/yt-edit", sub: "transkrip &rarr; daftar potongan edit", chip: "EDIT", chipIc: "scissors" },
-    { tile: "04", name: "/yt-comment", sub: "komentar dipilah, dibalas gaya kamu", chip: "KOMENTAR", chipIc: "message" },
-    { tile: "05", name: "/yt-plan", sub: "rencana upload sesuai waktu kamu", chip: "JADWAL", chipIc: "calendar" },
-    { tile: "flame", name: "/yt-viral", sub: "video yang ngalahin channel-nya sendiri", chip: "MESIN VIRAL", chipIc: "trend" },
-    { tile: "terminal", name: "Cara pasang", sub: "di Claude Code &middot; 1 link GitHub", chip: "GRATIS", chipIc: "unlock" },
+    { tile: "plug", name: "DeepSeek Harness", sub: "<i>github.com/</i>deepseek-ai/deepseek-harness", chip: "MIT", chipIc: "unlock" },
+    { tile: "01", name: "Cara kerjanya", sub: "kamu kasih tugas, agennya yang ngerjain", chip: "AGEN", chipIc: "terminal" },
+    { tile: "02", name: "Pilih otaknya", sub: "biaya ikut model yang kamu pasang", chip: "BIAYA", chipIc: "wallet" },
+    { tile: "03", name: "Cara mulai", sub: "Node.js + satu perintah di terminal", chip: "SETUP", chipIc: "terminal" },
+    { tile: "04", name: "Cek aman dulu", sub: "developer preview &middot; belum diaudit", chip: "PENTING", chipIc: "alert" },
   ];
+  K.NSEG = 4;
 
   // ------------------------------------------------------------------ geometry (global px)
   K.HDR = { x: 60, y: 312, w: 960, h: 140 };
   K.SEG = (k) => ({ x: 822 + (k - 1) * 35, y: 342 });
-  K.TILE = { w: 306, h: 84, xs: [60, 387, 714] };
 
   // ------------------------------------------------------------------ shared CSS (injected once)
   const CSS = `
@@ -104,21 +109,14 @@
   .k-hchip{position:absolute;right:0;top:0;height:40px;padding:0 16px 0 12px;border-radius:20px;display:flex;align-items:center;gap:8px;
     font:700 18px/1 Poppins;letter-spacing:1.5px;color:#6adfff;background:rgba(1,204,247,.10);box-shadow:inset 0 0 0 1.5px rgba(1,204,247,.5);white-space:nowrap}
   .k-hchip svg{width:20px;height:20px}
-  .k-tile{position:absolute;left:0;top:0;width:306px;height:84px;border-radius:22px;background:rgba(12,22,64,.88);
-    box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.12),0 12px 26px rgba(3,6,24,.4)}
-  .k-tile .ib{position:absolute;left:14px;top:14px;width:56px;height:56px;border-radius:16px;background:rgba(1,204,247,.14);box-shadow:inset 0 0 0 1.5px rgba(1,204,247,.45);color:#6adfff}
-  .k-tile .ib svg{position:absolute;left:14px;top:14px;width:28px;height:28px}
-  .k-tile .c{position:absolute;left:84px;top:12px;font:700 24px/32px Poppins;color:#fff;white-space:nowrap}
-  .k-tile .l{position:absolute;left:84px;top:44px;font:400 17px/24px Poppins;color:#9fdcf2;white-space:nowrap}
-  .k-tile .f{position:absolute;inset:0;border-radius:22px;box-shadow:inset 0 0 0 2.5px #6adfff,0 0 26px rgba(1,204,247,.55);opacity:0}
   .k-chk{position:absolute;height:46px;padding:0 18px 0 12px;border-radius:23px;display:flex;align-items:center;gap:10px;font:700 21px/1 Poppins;color:#fff;
     background:rgba(45,164,78,.22);box-shadow:inset 0 0 0 1.5px rgba(80,210,120,.7);white-space:nowrap}
   .k-chk svg{width:24px;height:24px;color:#5be08a}
   .k-demo{position:absolute;height:30px;padding:0 12px;border-radius:15px;font:700 15px/30px Poppins;letter-spacing:1.5px;color:#b8c7dd;
     background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1.2px rgba(255,255,255,.22);white-space:nowrap}
   `;
-  if (!document.getElementById("r9kit-css")) {
-    const st = document.createElement("style"); st.id = "r9kit-css"; st.textContent = CSS; document.head.appendChild(st);
+  if (!document.getElementById("r11kit-css")) {
+    const st = document.createElement("style"); st.id = "r11kit-css"; st.textContent = CSS; document.head.appendChild(st);
   }
 
   // ------------------------------------------------------------------ timeline boilerplate
@@ -163,7 +161,7 @@
     h += `<div class="k-hbox" id="${P}-hnb" style="left:214px;top:328px;width:596px;height:66px">` + K.HD.map((d, k) => `<div class="k-hname" id="${P}-hn${k}">${d.name}</div>`).join("") + `</div>`;
     h += `<div class="k-hbox" id="${P}-hsb" style="left:214px;top:396px;width:540px;height:40px">` + K.HD.map((d, k) => `<div class="k-hsub" id="${P}-hs${k}">${d.sub}</div>`).join("") + `</div>`;
     h += `<div class="k-hbox" id="${P}-hlb" style="left:754px;top:384px;width:248px;height:40px">` + K.HD.map((d, k) => `<div class="k-hchip" id="${P}-hl${k}">${K.svg(d.chipIc)}${d.chip}</div>`).join("") + `</div>`;
-    h += [1, 2, 3, 4, 5].map((k) => `<div class="k-hseg" id="${P}-ht${k}" style="left:${K.SEG(k).x}px"><b id="${P}-hg${k}"></b></div>`).join("");
+    h += [1, 2, 3, 4].map((k) => `<div class="k-hseg" id="${P}-ht${k}" style="left:${K.SEG(k).x}px"><b id="${P}-hg${k}"></b></div>`).join("");
     return `<div class="k-ab" id="${P}-hdr" style="width:1080px;height:1920px">${h}</div>`;
   };
   // state at frame 0: item k shown
@@ -175,7 +173,7 @@
       I($(`${P}-hs${j}`), { y: j === k ? 0 : 40, opacity: j === k ? 1 : 0 });
       I($(`${P}-hl${j}`), { y: j === k ? 0 : 40, opacity: j === k ? 1 : 0 });
     }
-    for (let j = 1; j <= 5; j++) I($(`${P}-hg${j}`), { scaleX: j <= k ? 1 : 0 });
+    for (let j = 1; j <= K.NSEG; j++) I($(`${P}-hg${j}`), { scaleX: j <= k ? 1 : 0 });
     I($(`${P}-hglow`), { opacity: 0 });
   };
   // animated switch a → b starting at local time t
@@ -187,7 +185,7 @@
     out($(`${P}-hn${a}`), 66); inn($(`${P}-hn${b}`), 66, 0.16);
     out($(`${P}-hs${a}`), 40); inn($(`${P}-hs${b}`), 40, 0.24);
     out($(`${P}-hl${a}`), 40); inn($(`${P}-hl${b}`), 40, 0.3);
-    for (let j = 1; j <= 5; j++) {
+    for (let j = 1; j <= K.NSEG; j++) {
       const was = j <= a, now = j <= b;
       if (!was && now) ft($(`${P}-hg${j}`), { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.out" }, t + 0.22 + (j - Math.max(1, a + 1)) * 0.05);
     }
@@ -195,13 +193,4 @@
     ft($(`${P}-hglow`), { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, t + 0.19);
   };
 
-  // ------------------------------------------------------------------ 11 SKILL TILES
-  K.tilesHTML = (P) => K.SK.map((s, i) => `<div class="k-tile" id="${P}-tile${i}"><div class="ib">${K.svg(s.ic)}</div><div class="c">${s.cmd}</div><div class="l">${s.lbl}</div><i class="f" id="${P}-tf${i}"></i></div>`).join("");
-  // grid slot of tile i (3 columns, last row of 2 centred), top-left px, rows starting at y0 with pitch py
-  K.tileXY = (i, y0, py = 98) => {
-    const r = Math.floor(i / 3), c = i % 3;
-    if (r === 3) return { x: [223, 551][c], y: y0 + r * py };
-    return { x: K.TILE.xs[c], y: y0 + r * py };
-  };
-  K.S01_Y0 = 556;   // s01 end state: tile grid rows at 556 / 654 / 752 / 850 (bottom 934)
 })();

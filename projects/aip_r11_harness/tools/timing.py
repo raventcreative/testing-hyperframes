@@ -1,5 +1,5 @@
 """Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
-- merges: "dua puluh satu" -> 21, "slash Y T script." -> /yt-script.
+- merges: "M I T." -> MIT., "Node JS" -> Node.js (R11 HARNESS)
 - word starts that whisper put inside a silence are snapped to the real voice onset (energy > -40 dB)
 - VO starts at OFFSET s (9 frames).   Run: python3 -I tools/timing.py ."""
 import json, re, subprocess, sys
@@ -12,13 +12,14 @@ R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {29: (31, "21", "duapuluhsatu"), 101: (104, "/yt-script.", "slesyeteskrip")}
+MERGE = {23: (25, "MIT.", "emaiti"), 73: (74, "Node.js", "noudjeies")}
 FIX = {}
+NOSNAP = {69}   # raw indices whose start must not be snapped ("kuat." ends line 4: its tail is quiet, the next onset is line 5)
 FIXI = {}   # by raw word index (the ElevenLabs alignment is the script text itself: no fixes needed)
-PRON = {"claude": "klod", "youtube": "yutub", "channel": "cenel", "channelnya": "cenelnya", "skill": "skil", "agent": "eijen",
-        "open": "opn", "source": "sors", "api": "eipiai", "key": "ki", "hook": "huk", "hooknya": "huknya", "thumbnail": "tambneil",
-        "timecode": "taimkod", "upload": "aplod", "niche": "nis", "code": "kod", "githubnya": "githabnya", "install": "instol",
-        "dm": "diem", "link": "link", "21": "duapuluhsatu"}
+PRON = {"claude": "klod", "deepseek": "dipsik", "harness": "harnes", "harnessnya": "harnesnya", "reel": "ril", "ai": "eiai",
+        "open": "opn", "source": "sors", "api": "eipiai", "key": "ki", "gpt": "jipiti", "ollama": "olama", "file": "fail",
+        "browser": "brauser", "developer": "divelopr", "preview": "priviu", "vm": "viem", "backup": "bekap", "dm": "diem",
+        "laptopnya": "leptopnya", "nodejs": "noudjeies", "mit": "emaiti"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -57,10 +58,11 @@ while i < len(raw):
         j, txt, spk = MERGE[i]; e = raw[j]["e"]; i2 = j + 1
     else:
         txt = FIXI.get(i, FIX.get(w["w"], w["w"])); spk = spoken(txt); e = w["e"]; i2 = i + 1
-    s = snap(w["s"], e)
+    s = w["s"] if i in NOSNAP else snap(w["s"], e)
     if i in FIRST:   # ElevenLabs places a line's first word late (the audio-tag characters eat its start): use the real voice onset
         on = [a0 for a0, a1 in segs if s - 0.45 < a0 < s - 0.03]
         if on: s = on[-1]
+    if abs(s - w["s"]) > 0.08: print("snapped", i, txt, round(w["s"], 3), "->", round(s, 3))
     words.append({"w": txt, "s": round(s + OFFSET, 3), "s0": round(w["s"] + OFFSET, 3), "e": round(e + OFFSET, 3), "sp": spk})
     i = i2
 # a snapped start compresses the rest of its phrase: re-spread the phrase between the new onset and the phrase end
@@ -76,16 +78,13 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Ngurus", [4, 9, 12], ["Sebelas", "gratis", "viral."], []),
-    ("s02", "Namanya", [4, 6, 8], ["YouTube", "Agent", "Skill:", "open", "source,"], []),
-    ("t1", "Satu,", [2, 6, 9], ["naskah", "21", "skor"], []),
-    ("t2", "Dua,", [2, 4], ["judul", "thumbnail", "sepasang."], []),
-    ("t3", "Tiga,", [2, 4, 6], ["transkrip", "edit,", "timecode."], []),
-    ("t4", "Empat,", [2, 3, 5], ["dipilah,", "gaya", "bahasa"], []),
-    ("t5", "Lima,", [2, 4], ["seminggu", "waktu"], []),
-    ("s07", "Paling", [2, 4, 7, 10, 12, 15, 17], ["mesin", "viral:", "ngalahin", "rumus"], []),
-    ("s08", "Cara", [2, 5, 8, 10, 12], ["Claude", "Code,", "GitHub-nya,", "/yt-script."], []),
-    ("s09", "Komen", [2], ["DM."], ["YOUTUBE,"]),
+    ("s01", "Reel", [5, 10, 13, 15], ["kode.", "langganan,", "open", "source."], []),
+    ("s02", "Kenalin,", [3, 5, 7], ["DeepSeek", "Harness,", "gratis,", "pilih."], []),
+    ("s03", "Suruh", [3, 5, 8, 10, 12, 15], ["katalog", "file,", "kode,", "perintah,", "izin"], []),
+    ("s04", "Pilihannya:", [1, 5, 8, 11, 16], ["DeepSeek", "pemakaian,", "Claude", "GPT", "API", "key,", "Ollama,", "gratis"], []),
+    ("s05", "Cara", [2, 5, 8, 10, 13], ["Node.js", "satu", "browser", "API", "key,", "beres."], []),
+    ("s06", "Catatannya:", [1, 4, 7, 10, 12, 15], ["developer", "preview,", "diaudit", "VM", "backup", "cek"], []),
+    ("s07", "Komen", [2], ["DM."], ["NGODING,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "sama", "kayak", "lewat", "jadi", "biar", "dalam", "ada", "dari", "lalu",
          "atau", "baru", "sampai", "lagi", "isinya", "cuma"}

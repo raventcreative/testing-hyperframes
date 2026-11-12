@@ -1,5 +1,5 @@
 """Builds production/timing.json + vendor/vo_words.js from the faster-whisper word timestamps (production/vo_words_raw.json).
-- merges: "dua puluh satu" -> 21, "slash Y T script." -> /yt-script.
+- merges: "sebelas" -> 11, "sepuluh ribu" -> 10.000 (R13 TRADER)
 - word starts that whisper put inside a silence are snapped to the real voice onset (energy > -40 dB)
 - VO starts at OFFSET s (9 frames).   Run: python3 -I tools/timing.py ."""
 import json, re, subprocess, sys
@@ -10,15 +10,19 @@ P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 OFFSET, FPS, TAIL = 9 / 30, 30, 1.6
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
+# R13: line-final words the ElevenLabs alignment placed late (checked against the energy segments + faster-whisper small):
+# raw index -> (start, end) in raw VO seconds. "target." is spoken inside the voiced run that ends at 17.41 raw; "Machine:" ends the
+# "Plus Time Machine" run (17.77-18.78 raw); "sepuluh" starts the next run at 18.96 raw.
+OVR = {39: (16.76, 17.0), 40: (17.02, 17.41), 43: (18.32, 18.76), 44: (18.96, 19.32)}
+for _i, (_s, _e) in OVR.items(): raw[_i] = dict(raw[_i], s=_s, e=_e)
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {29: (31, "21", "duapuluhsatu"), 101: (104, "/yt-script.", "slesyeteskrip")}
+MERGE = {16: (16, "11", "sebelas"), 44: (45, "10.000", "sepuluhribu")}
 FIX = {}
 FIXI = {}   # by raw word index (the ElevenLabs alignment is the script text itself: no fixes needed)
-PRON = {"claude": "klod", "youtube": "yutub", "channel": "cenel", "channelnya": "cenelnya", "skill": "skil", "agent": "eijen",
-        "open": "opn", "source": "sors", "api": "eipiai", "key": "ki", "hook": "huk", "hooknya": "huknya", "thumbnail": "tambneil",
-        "timecode": "taimkod", "upload": "aplod", "niche": "nis", "code": "kod", "githubnya": "githabnya", "install": "instol",
-        "dm": "diem", "link": "link", "21": "duapuluhsatu"}
+PRON = {"claude": "klod", "skill": "skil", "trading": "treding", "day": "dei", "trader": "treder", "time": "taim", "machine": "mesin",
+        "loss": "los", "plus": "plas", "trade": "treid", "githubnya": "githabnya", "install": "instol", "dm": "diem", "ai": "eiai",
+        "11": "sebelas", "10000": "sepuluhribu", "nggak": "ngak"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -57,7 +61,7 @@ while i < len(raw):
         j, txt, spk = MERGE[i]; e = raw[j]["e"]; i2 = j + 1
     else:
         txt = FIXI.get(i, FIX.get(w["w"], w["w"])); spk = spoken(txt); e = w["e"]; i2 = i + 1
-    s = snap(w["s"], e)
+    s = w["s"] + OFFSET - OFFSET if i in OVR else snap(w["s"], e)
     if i in FIRST:   # ElevenLabs places a line's first word late (the audio-tag characters eat its start): use the real voice onset
         on = [a0 for a0, a1 in segs if s - 0.45 < a0 < s - 0.03]
         if on: s = on[-1]
@@ -76,19 +80,20 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Ngurus", [4, 9, 12], ["Sebelas", "gratis", "viral."], []),
-    ("s02", "Namanya", [4, 6, 8], ["YouTube", "Agent", "Skill:", "open", "source,"], []),
-    ("t1", "Satu,", [2, 6, 9], ["naskah", "21", "skor"], []),
-    ("t2", "Dua,", [2, 4], ["judul", "thumbnail", "sepasang."], []),
-    ("t3", "Tiga,", [2, 4, 6], ["transkrip", "edit,", "timecode."], []),
-    ("t4", "Empat,", [2, 3, 5], ["dipilah,", "gaya", "bahasa"], []),
-    ("t5", "Lima,", [2, 4], ["seminggu", "waktu"], []),
-    ("s07", "Paling", [2, 4, 7, 10, 12, 15, 17], ["mesin", "viral:", "ngalahin", "rumus"], []),
-    ("s08", "Cara", [2, 5, 8, 10, 12], ["Claude", "Code,", "GitHub-nya,", "/yt-script."], []),
-    ("s09", "Komen", [2], ["DM."], ["YOUTUBE,"]),
+    ("s01", "Mau", [4, 6, 10], ["AI", "saham?", "jangan", "dulu."], []),
+    ("s02", "Namanya", [4, 8], ["Day", "Trader", "Skill:", "gratis,", "tiga"], []),
+    ("t1", "Lapis", [3, 6], ["nyari:", "grafik,", "berita,", "keuangan."], []),
+    ("t2", "Lapis", [3, 5], ["ngerencanain:", "masuk,", "target."], []),
+    ("s05", "Plus", [3, 5, 8], ["Time", "Machine:", "10.000"], []),
+    ("s06", "Di", [2, 5, 9, 11], ["beda", "tipis:", "koin."], []),
+    ("t3", "Lapis", [3, 6, 10], ["ngerem:", "dijaga,", "diblokir."], []),
+    ("s08", "Nggak", [3, 6], ["persetujuan", "latihan."], []),
+    ("s09", "Datanya", [3, 8], ["Amerika,", "belajar,", "jaminan."], []),
+    ("s10", "Pasangnya:", [1, 4, 6], ["GitHub-nya", "Claude,", "install", "skill."], []),
+    ("s11", "Komen", [2], ["DM."], ["SAHAM,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "sama", "kayak", "lewat", "jadi", "biar", "dalam", "ada", "dari", "lalu",
-         "atau", "baru", "sampai", "lagi", "isinya", "cuma"}
+         "atau", "baru", "sampai", "lagi", "isinya", "cuma", "buat", "pun", "terus", "sama", "plus"}
 starts = []; k = 0
 for sid, first, *_ in SC:
     while words[k]["w"] != first: k += 1

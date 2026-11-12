@@ -1,84 +1,12 @@
 <template>
-  <style>
-    #root { position: absolute; inset: 0; overflow: hidden; }
-    .s05-a { position: absolute; }
-    #s05-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
-    #s05-glow { left: 20px; top: 280px; width: 1040px; height: 760px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
-    #s05-scan { left: 100px; top: 386px; width: 880px; height: 120px; background: linear-gradient(180deg, rgba(143,216,255,0), rgba(143,216,255,.55) 50%, rgba(143,216,255,0)); mix-blend-mode: screen; }
-    #s05-bld { left: 600px; top: 294px; height: 44px; padding: 0 18px 0 48px; border-radius: 22px; background: #0a0d2c; color: #ffffff; font: 700 17px/44px Poppins, sans-serif; white-space: nowrap; transform-origin: 50% 50%;
-      box-shadow: 0 12px 22px -12px rgba(10,13,44,.8); }
-    #s05-bld svg { position: absolute; left: 16px; top: 12px; width: 20px; height: 20px; display: block; color: #8fd8ff; }
-  </style>
-  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920">
-    <div id="s05-cam"></div>
-  </div>
+  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
+  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920"></div>
   <script>
     (function () {
-      // s05 "Dan AI-nya langsung bikinin websitenya."
-      // START = s04's end (chat, user bubble, typing dots). · "AI-nya": the dots become Claude's reply; code bars stream in,
-      // "index.html siap" · "langsung": the chat folds away and a browser card opens at the hero spot · "bikinin": the page builds
-      // itself top-down under a scan line (background, nav, eyebrow, headline, text, buttons, chips) · "websitenya.": the product slot
-      // (placeholder "Foto produk") drops in and starts floating.
-      // END STATE (t = D) = s06's START: template site card (group tpl) at rest at the hero spot (90,330), floating placeholder.
-      const ID = "s05", ST = window.SCN[ID][0], D = window.SCN[ID][1], VW = window.VO_WORDS, R8 = window.R8;
-      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
-      const $ = (id) => document.getElementById(id);
       const tl = gsap.timeline({ paused: true });
-      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
-      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
-      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
-      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
-      const tAI = L("AI-nya"), tLang = L("langsung"), tBik = L("bikinin"), tWeb = L("websitenya.");
-
-      // ================================================================ DOM
-      let h = `<div class="s05-a" id="s05-glow"></div>` + R8.chat("s05") + R8.site("s05", ["tpl"]);
-      h += `<div class="s05-a" id="s05-scan"></div><div class="s05-a" id="s05-bld">${R8.svg("wand", 2)}Claude lagi bikin…</div>`;
-      $("s05-cam").innerHTML = h;
-      const glow = $("s05-glow"), chat = $("s05-chat"), card = $("s05-card"), scan = $("s05-scan"), bld = $("s05-bld");
-      I($("s05-cam"), { x: 0, y: 0 });
-      I(glow, { opacity: 0.85, scale: 1 });
-
-      // ================================================================ s04's end state: chat with the user bubble + typing dots
-      I(chat, { opacity: 1, x: 0, scale: 1 });
-      ["greet", "pst", "ab", "ok"].forEach((k) => I($("s05-" + k), { opacity: 0 }));
-      I($("s05-ub"), { opacity: 1, y: 0, scale: 1 }); I($("s05-dots"), { opacity: 1 }); I($("s05-ph"), { opacity: 1 }); I($("s05-mc1"), { opacity: 1, scale: 1 });
-      // "AI-nya": the reply + streaming code bars
-      tl.set($("s05-dots"), { opacity: 0 }, tAI - 0.05);
-      ft($("s05-ab"), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(1.7)" }, tAI - 0.05);
-      I($("s05-ab"), { opacity: 0, scale: 0.8 });
-      for (let i = 0; i < 6; i++) { const b = $("s05-cl" + i); I(b, { scaleX: 0 }); ft(b, { scaleX: 0 }, { scaleX: 1, duration: 0.14, ease: "power2.out" }, tAI + 0.12 + i * 0.065); }
-      ft($("s05-ok"), { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.18 }, tLang - 0.06);
-      // "langsung": chat folds away, the browser card opens at the hero spot
-      ft(chat, { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.86, y: 30, duration: 0.26, ease: "power2.in" }, tLang + 0.12);
-      I(card, { opacity: 0, scale: 0.86, y: 30 });
-      ft(card, { opacity: 0, scale: 0.86, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.34, ease: "back.out(1.4)" }, tLang + 0.24);
-      I(bld, { opacity: 0, scale: 0.6 });
-      ft(bld, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2)" }, tLang + 0.3);
-      ft(bld, { opacity: 1 }, { opacity: 0, duration: 0.2 }, D - 0.35);
-      // "bikinin": the page builds top-down under a scan line
-      const bg = $("s05-bg0"), q = "s05-g0";
-      I(bg, { clipPath: "inset(0% 0% 100% 0%)" });
-      ft(bg, { clipPath: "inset(0% 0% 100% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: "power2.inOut" }, tLang + 0.34);
-      I(scan, { opacity: 0, y: 0 });
-      tl.set(scan, { opacity: 1 }, tLang + 0.34);
-      ft(scan, { y: 0 }, { y: 470, duration: 0.6, ease: "power1.inOut" }, tLang + 0.34);
-      tl.set(scan, { opacity: 0 }, tLang + 0.96);
-      const parts = ["nav", "eb", "h1", "sub", "ctas", "feat"];
-      parts.forEach((k, i) => { const e = $(`${q}-${k}`); I(e, { opacity: 0, y: 18 });
-        ft(e, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, tLang + 0.4 + i * ((tWeb - tLang - 0.45) / parts.length)); });
-      [`${q}-ring`, `${q}-ring2`].forEach((k, i) => { I($(k), { opacity: 0, scale: 0.6 }); ft($(k), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, tBik + 0.1 + i * 0.06); });
-      // "websitenya.": the product slot drops in and floats
-      R8.float(tl, "s05", 0, "tpl", ST, D);
-      const pw = $(`${q}-pw`), sh = $(`${q}-sh`);
-      I(pw, { opacity: 0, y: -160, scale: 0.7 });
-      ft(pw, { opacity: 0, y: -160, scale: 0.7 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "bounce.out" }, tWeb - 0.16);
-      I(sh, { autoAlpha: 0 }); ft(sh, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, tWeb - 0.05);
-      [0, 1, 2].forEach((j) => { const o = $(`${q}-o${j}`); I(o, { autoAlpha: 0 }); ft(o, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, tWeb + 0.2 + j * 0.05); });
-
-      tl.set({}, {}, D - 0.01);
-      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      tl.set({}, {}, 5.223);
       window.__timelines = window.__timelines || {};
-      window.__timelines[ID] = tl;
+      window.__timelines["s05"] = tl;
     })();
   </script>
 </template>

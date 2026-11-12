@@ -1,0 +1,128 @@
+<template>
+  <style>
+    /* s01 HOOK (0.00–5.83) "Tim AI kamu numpang di server siapa? Duo open source ini jalanin agennya di laptopmu."
+       Frame 0: headline "Tim AI kamu / numpang di server siapa?" + a server rack ("server orang lain") whose three slots fill with
+       three example bots on "Tim AI kamu". "siapa?": a cyan question disc pings next to the rack. "Duo open source ini": the headline
+       lifts away, two badges drop in (OpenMausBot · Apache-2.0, Hermes Agent · MIT) and their "open source" chips light up.
+       "jalanin agennya di laptopmu": the rack dissolves, a laptop forms around the same three bots (they glide one row up),
+       "laptopmu": a green "jalan di laptopmu · 127.0.0.1" chip. Last 0.25 s: the laptop drops out (badges stay for s02). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s01-h1 { position: absolute; left: 90px; top: 318px; font: 700 50px/62px Poppins; color: #e3edfa; white-space: nowrap; letter-spacing: -0.5px; }
+    #s01-h2 { position: absolute; left: 90px; top: 378px; font: 700 66px/78px Poppins; color: #fff; white-space: nowrap; letter-spacing: -1px; }
+    #s01-h2 em { font-style: normal; color: #01ccf7; }
+    #s01-rack { position: absolute; left: 250px; top: 490px; width: 580px; height: 410px; border-radius: 30px; background: rgba(12,22,64,.86);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), 0 24px 50px rgba(2,6,26,.5); transform-origin: 50% 50%; }
+    #s01-rlab { position: absolute; left: 32px; top: 22px; height: 44px; padding: 0 18px 0 12px; border-radius: 22px; display: flex; align-items: center; gap: 10px;
+      font: 700 20px/1 Poppins; letter-spacing: 1.5px; color: #b8c7dd; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18); white-space: nowrap; }
+    #s01-rlab svg { width: 24px; height: 24px; color: #9fdcf2; }
+    .s01-unit { position: absolute; left: 32px; width: 516px; height: 92px; border-radius: 18px; background: rgba(4,10,40,.72); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.08); }
+    .s01-unit i { position: absolute; left: 22px; width: 12px; height: 12px; border-radius: 6px; background: #2f4a78; }
+    .s01-unit i.on { background: #6adfff; box-shadow: 0 0 10px rgba(1,204,247,.9); }
+    .s01-bot { position: absolute; left: 0; top: 0; width: 380px; height: 68px; border-radius: 34px; background: #ffffff; box-shadow: 0 12px 26px rgba(2,6,26,.45); transform-origin: 50% 50%; }
+    .s01-bot .k-av { left: 8px; top: 8px; width: 52px; height: 52px; border-radius: 26px; }
+    .s01-bot .k-av svg { left: 13px; top: 13px; width: 26px; height: 26px; }
+    .s01-bot b { position: absolute; left: 76px; top: 0; font: 700 25px/68px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s01-q { position: absolute; left: 856px; top: 588px; width: 132px; height: 132px; border-radius: 50%; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6);
+      color: #0b1440; font: 700 84px/132px Poppins; text-align: center; box-shadow: 0 0 34px rgba(1,204,247,.55); transform-origin: 50% 50%; }
+    #s01-qr { position: absolute; left: 856px; top: 588px; width: 132px; height: 132px; border-radius: 50%; box-shadow: 0 0 0 4px rgba(106,223,255,.8); transform-origin: 50% 50%; }
+    .s01-bd { position: absolute; top: 318px; width: 470px; height: 128px; border-radius: 30px; background: rgba(12,22,64,.88);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12), 0 20px 40px rgba(2,6,26,.45); transform-origin: 50% 50%; }
+    .s01-bd .ib { position: absolute; left: 18px; top: 18px; width: 92px; height: 92px; border-radius: 24px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440;
+      box-shadow: 0 0 22px rgba(1,204,247,.4); }
+    .s01-bd .ib svg { position: absolute; left: 22px; top: 22px; width: 48px; height: 48px; }
+    .s01-bd b { position: absolute; left: 130px; top: 16px; font: 700 38px/50px Poppins; color: #fff; white-space: nowrap; letter-spacing: -0.5px; }
+    .s01-bd span { position: absolute; left: 130px; top: 74px; height: 36px; padding: 0 14px; border-radius: 18px; font: 700 17px/36px Poppins; letter-spacing: 1.2px;
+      color: #9fdcf2; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18); white-space: nowrap; }
+    .s01-bd span.lit { color: #0b1440; background: #6adfff; box-shadow: 0 0 16px rgba(1,204,247,.6); }
+    #s01-lap { position: absolute; left: 200px; top: 486px; width: 680px; height: 378px; border-radius: 28px; background: linear-gradient(180deg, #13245e, #0a1440);
+      box-shadow: inset 0 0 0 12px #0b1235, inset 0 0 0 13.5px rgba(255,255,255,.14), 0 28px 60px rgba(2,6,26,.6); transform-origin: 50% 100%; }
+    #s01-lap .tb { position: absolute; left: 34px; top: 30px; font: 700 20px/30px Poppins; letter-spacing: 2px; color: #6adfff; white-space: nowrap; }
+    #s01-base { position: absolute; left: 130px; top: 862px; width: 820px; height: 36px; border-radius: 4px 4px 22px 22px; background: linear-gradient(180deg, #c9d6ea, #8ea3c4);
+      box-shadow: 0 16px 30px rgba(2,6,26,.5); transform-origin: 50% 0%; }
+    #s01-base i { position: absolute; left: 350px; top: 0; width: 120px; height: 10px; border-radius: 0 0 8px 8px; background: #6f84a8; }
+    #s01-ok { position: absolute; left: 0; top: 0; height: 50px; padding: 0 20px 0 14px; border-radius: 25px; display: flex; align-items: center; gap: 10px;
+      font: 700 22px/1 Poppins; color: #fff; background: #2da44e; box-shadow: 0 0 0 5px rgba(45,164,78,.25), 0 10px 22px rgba(2,6,26,.45); white-space: nowrap; transform-origin: 50% 50%; }
+    #s01-ok svg { width: 26px; height: 26px; }
+    #s01-ok em { font-style: normal; font-weight: 400; color: #dff7e7; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R15K, D = 5.8333, P = "s01";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s01-zone");
+      const UY = [86, 190, 294];                       // rack unit tops (inside the rack)
+      const RACK = { x: 250, y: 490 };
+      const botRack = (i) => ({ x: RACK.x + 32 + 108, y: RACK.y + UY[i] + 12 });   // chip inside its rack unit
+      const botLap = (i) => ({ x: 350, y: 548 + i * 84 });                           // chip as a row on the laptop screen
+      z.innerHTML =
+        `<div id="s01-h1">Tim AI kamu numpang di&hellip;</div><div id="s01-h2"><em>server</em> siapa?</div>` +
+        `<div id="s01-lap"><div class="tb">LAPTOP KAMU</div></div><div id="s01-base"><i></i></div>` +
+        `<div id="s01-rack"><div id="s01-rlab">${K.svg("cloud")}SERVER ORANG LAIN</div>` +
+        UY.map((y, i) => `<div class="s01-unit" style="top:${y}px">${[0, 1, 2].map((k) => `<i id="s01-led${i}${k}" style="top:${22 + k * 20}px"></i>`).join("")}</div>`).join("") + `</div>` +
+        `<div id="s01-qr"></div><div id="s01-q">?</div>` +
+        K.BOTS.slice(0, 3).map((b, i) => `<div class="s01-bot" id="s01-b${i}"><div class="k-av">${K.svg(b.ic)}</div><b>${b.name}</b></div>`).join("") +
+        `<div class="s01-bd" id="s01-d0" style="left:60px"><div class="ib">${K.svg("building")}</div><b>OpenMausBot</b><span id="s01-c0">OPEN SOURCE &middot; APACHE-2.0</span></div>` +
+        `<div class="s01-bd" id="s01-d1" style="left:550px"><div class="ib">${K.svg("feather")}</div><b>Hermes Agent</b><span id="s01-c1">OPEN SOURCE &middot; MIT</span></div>` +
+        `<div id="s01-ok">${K.svg("check")}jalan di laptopmu <em>&middot; 127.0.0.1</em></div>`;
+      const tTim = wt("Tim"), tSv = wt("server"), tSi = wt("siapa?"), tDuo = wt("Duo"), tOp = wt("open"), tJl = wt("jalanin"), tAg = wt("agennya"), tLp = wt("laptopmu.");
+      // ---------------------------------------------------------------- frame 0: headline + empty rack
+      const h1 = $("s01-h1"), h2 = $("s01-h2"), rack = $("s01-rack");
+      I(h1, { y: 0, opacity: 1 }); I(h2, { y: 0, opacity: 1 });
+      I(rack, { scale: 1, opacity: 1 });
+      // LEDs blink (deterministic sets)
+      for (let i = 0; i < 3; i++) for (let k = 0; k < 3; k++) {
+        const e = $(`s01-led${i}${k}`); I(e, { className: "" });
+        for (let n = 0; n < 9; n++) { const t = 0.12 + n * 0.41 + (i * 0.13 + k * 0.07); tl.set(e, { className: (n + i + k) % 3 === 0 ? "" : "on" }, t); }
+      }
+      // the three bots fill the slots on "Tim AI kamu"
+      for (let i = 0; i < 3; i++) {
+        const b = $("s01-b" + i), r = botRack(i);
+        I(b, { x: r.x + 60, y: r.y, opacity: 0, scale: 0.9 });
+        ft(b, { x: r.x + 60, opacity: 0, scale: 0.9 }, { x: r.x, opacity: 1, scale: 1, duration: 0.36, ease: "back.out(1.7)" }, Math.max(0.06, tTim - 0.18) + i * 0.12);
+      }
+      // "server": the label flashes; "siapa?": the question disc pings
+      const lab = $("s01-rlab");
+      I(lab, { scale: 1, transformOrigin: "0% 50%" });
+      ft(lab, { scale: 1 }, { scale: 1.08, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tSv - 0.04);
+      const q = $("s01-q"), qr = $("s01-qr");
+      I(q, { scale: 0, opacity: 0, rotation: -30 }); I(qr, { scale: 1, opacity: 0 });
+      ft(q, { scale: 0, opacity: 0, rotation: -30 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.34, ease: "back.out(2.6)" }, tSi - 0.1);
+      ft(qr, { scale: 1, opacity: 0.9 }, { scale: 1.7, opacity: 0, duration: 0.7, ease: "power2.out" }, tSi + 0.12);
+      ft(q, { rotation: 0 }, { rotation: 10, duration: 0.18, yoyo: true, repeat: 3, ease: "sine.inOut" }, tSi + 0.4);
+      // ---------------------------------------------------------------- "Duo open source ini": headline lifts away, two badges drop in
+      ft(h1, { y: 0, opacity: 1 }, { y: -40, opacity: 0, duration: 0.28, ease: "power2.in" }, tDuo - 0.2);
+      ft(h2, { y: 0, opacity: 1 }, { y: -40, opacity: 0, duration: 0.28, ease: "power2.in" }, tDuo - 0.16);
+      [0, 1].forEach((k) => {
+        const d = $("s01-d" + k);
+        I(d, { y: -60, opacity: 0, scale: 0.94 });
+        ft(d, { y: -60, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.42, ease: "back.out(1.6)" }, tDuo + 0.02 + k * 0.14);
+        const c = $("s01-c" + k); I(c, { className: "" });
+        tl.set(c, { className: "lit" }, tOp + 0.08 + k * 0.12);
+      });
+      // ---------------------------------------------------------------- "jalanin agennya di laptopmu": rack dissolves, laptop forms
+      ft(q, { scale: 1, opacity: 1 }, { scale: 0.3, opacity: 0, duration: 0.24, ease: "power2.in" }, tJl - 0.16);
+      ft(rack, { scale: 1, opacity: 1 }, { scale: 0.92, opacity: 0, duration: 0.36, ease: "power2.in" }, tJl - 0.08);
+      const lap = $("s01-lap"), base = $("s01-base");
+      I(lap, { opacity: 0, scale: 1.05 }); I(base, { opacity: 0, scaleX: 0.7 });
+      ft(lap, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: 0.42, ease: "power3.out" }, tJl + 0.08);
+      ft(base, { opacity: 0, scaleX: 0.7 }, { opacity: 1, scaleX: 1, duration: 0.42, ease: "power3.out" }, tJl + 0.14);
+      for (let i = 0; i < 3; i++) {
+        const b = $("s01-b" + i), r = botRack(i), l = botLap(i);
+        ft(b, { x: r.x, y: r.y }, { x: l.x, y: l.y, duration: 0.5, ease: "power3.inOut" }, tJl + 0.04 + i * 0.06);
+      }
+      const ok = $("s01-ok");
+      I(ok, { x: 540, xPercent: -50, y: 800, scale: 0.4, opacity: 0 });
+      ft(ok, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.32, ease: "back.out(2.4)" }, tLp - 0.04);
+      ft(lap, { boxShadow: "inset 0 0 0 12px #0b1235, inset 0 0 0 13.5px rgba(255,255,255,.14), 0 28px 60px rgba(2,6,26,.6)" },
+        { boxShadow: "inset 0 0 0 12px #0b1235, inset 0 0 0 13.5px rgba(106,223,255,.9), 0 0 50px rgba(1,204,247,.45)", duration: 0.3, ease: "power2.out" }, tLp);
+      // ---------------------------------------------------------------- exit: the laptop group drops out (the badges stay for s02)
+      const tX = D - 0.25;
+      [lap, base, ok, $("s01-b0"), $("s01-b1"), $("s01-b2")].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, tX + (i % 3) * 0.02));
+      S.finish();
+    })();
+  </script>
+</template>

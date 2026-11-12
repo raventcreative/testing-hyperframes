@@ -1,0 +1,141 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s02-a { position: absolute; }
+    #s02-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s02-glow { left: 20px; top: 330px; width: 1040px; height: 640px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    #s02-lines { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    /* hub = the work folder Claude creates */
+    #s02-hub { left: 400px; top: 552px; width: 280px; height: 196px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #f4f7fc); transform-origin: 50% 50%;
+      box-shadow: 0 40px 70px -34px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.08); font-family: Poppins, sans-serif; }
+    #s02-hub .fi { position: absolute; left: 18px; top: 18px; width: 50px; height: 50px; border-radius: 16px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #8fd8ff; }
+    #s02-hub .fi svg { position: absolute; left: 12px; top: 12px; width: 26px; height: 26px; display: block; }
+    #s02-hub .nm { position: absolute; left: 80px; top: 18px; font: 700 22px/50px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s02-hub .sf { position: absolute; left: 22px; height: 34px; padding: 0 12px 0 36px; border-radius: 12px; background: #eef2f9; color: #294b77; white-space: nowrap; transform-origin: 0% 50%; }
+    #s02-hub .sf svg { position: absolute; left: 11px; top: 8px; width: 18px; height: 18px; display: block; }
+    #s02-hub .sf b { font: 700 16px/34px Poppins, sans-serif; }
+    #s02-hcl { left: 642px; top: 532px; width: 48px; height: 48px; border-radius: 50%; background: #fff4ee; box-shadow: inset 0 0 0 2px #f3d9cc, 0 10px 18px -10px rgba(122,61,31,.6); transform-origin: 50% 50%; }
+    #s02-hcl .r14-cl { position: absolute; left: 11px; top: 11px; width: 26px; height: 26px; }
+    /* tool nodes */
+    .s02-n { position: absolute; width: 280px; height: 112px; margin: -56px 0 0 -140px; transform-origin: 50% 50%; font-family: Poppins, sans-serif; }
+    .s02-n .bx { position: absolute; inset: 0; border-radius: 26px; background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 30px 50px -30px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s02-n .ic { position: absolute; left: 14px; top: 14px; width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #ffffff; }
+    .s02-n .ic svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; display: block; }
+    .s02-n b { position: absolute; left: 82px; top: 10px; font: 700 26px/36px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s02-n span { position: absolute; left: 83px; top: 46px; font: 400 17px/24px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    .s02-n em { position: absolute; left: 82px; top: 76px; height: 24px; padding: 0 10px; border-radius: 12px; background: #eef2f9; font: 700 13px/24px Poppins, sans-serif; font-style: normal; color: #294b77; white-space: nowrap; letter-spacing: .02em; }
+    .s02-n .tk { position: absolute; right: -10px; top: -10px; width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(150deg, #2fb35a, #1a7434); color: #fff; box-shadow: 0 8px 14px -6px rgba(26,116,52,.8); transform-origin: 50% 50%; }
+    .s02-n .tk svg { position: absolute; left: 9px; top: 9px; width: 20px; height: 20px; display: block; }
+    .s02-g { position: absolute; width: 280px; height: 112px; margin: -56px 0 0 -140px; border-radius: 26px; border: 3px dashed rgba(41,75,119,.28); background: rgba(255,255,255,.35); transform-origin: 50% 50%; }
+    .s02-g i { position: absolute; left: 118px; top: 34px; width: 44px; height: 44px; color: rgba(41,75,119,.35); }
+    .s02-g i svg { width: 44px; height: 44px; display: block; }
+    /* side notes: permission (right) · Remotion licence (left) */
+    .s02-note { position: absolute; top: 404px; width: 280px; height: 100px; border-radius: 22px; background: #ffffff; transform-origin: 50% 100%; font-family: Poppins, sans-serif;
+      box-shadow: 0 22px 40px -26px rgba(10,13,44,.55), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s02-note .ni { position: absolute; left: 14px; top: 14px; width: 40px; height: 40px; border-radius: 13px; }
+    .s02-note .ni svg { position: absolute; left: 9px; top: 9px; width: 22px; height: 22px; display: block; }
+    .s02-note b { position: absolute; left: 66px; top: 12px; font: 700 18px/26px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s02-note span { position: absolute; left: 66px; top: 40px; font: 400 15px/21px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s02-perm { left: 715px; } #s02-perm .ni { background: #eaf7ee; color: #1a7434; }
+    #s02-lic { left: 85px; box-shadow: 0 22px 40px -26px rgba(10,13,44,.55), 0 0 0 2px #f4c64a; } #s02-lic .ni { background: #fff6dc; color: #9a6b00; }
+    #s02-ready { left: 440px; top: 758px; width: 200px; height: 46px; border-radius: 23px; background: linear-gradient(150deg, #2fb35a, #1a7434); color: #fff; transform-origin: 50% 0%;
+      box-shadow: 0 12px 20px -10px rgba(26,116,52,.8); white-space: nowrap; text-align: center; }
+    #s02-ready b { font: 700 18px/46px Poppins, sans-serif; }
+    #s02-ready svg { display: inline-block; vertical-align: -4px; width: 20px; height: 20px; margin-right: 6px; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s02 "Prompt satu: siapin alat. Claude bikin folder, terus pasang lima alat. yt-dlp ambil video contoh, Whisper ubah suara jadi
+      // teks, FFmpeg motong, HyperFrames sama Remotion bikin animasi."
+      // PROMPT 1 is dealt as a big copyable card (the real prompt text) · "alat.": cursor clicks Salin → Tersalin · then the card folds
+      // into the strip at the top · "folder,": the work folder (hub) pops with its 3 sub-folders + Claude mark · "pasang lima alat":
+      // five dashed slots around the hub + "Izin dulu" note (Claude asks before running a command) · each tool on its word: node pops,
+      // connector draws from the hub, green tick · "Remotion": licence note · "bikin animasi": HyperFrames + Remotion pulse, "5 alat siap".
+      const R14 = window.R14, S = R14.scene("s02"), { D, L, tl, ft, I, $ } = S;
+      const tPr = L("Prompt"), tAlat = L("alat."), tCl = L("Claude"), tFo = L("folder,"), tPa = L("pasang"), tLi = L("lima"),
+            tYt = L("yt-dlp"), tWh = L("Whisper"), tFf = L("FFmpeg"), tHy = L("HyperFrames"), tRe = L("Remotion"), tBi = L("bikin", 11), tAn = L("animasi.");
+
+      // ================================================================ DOM
+      const HUB = [540, 650];
+      const N = [
+        { k: "yt-dlp", x: 540, y: 450, ic: "download", job: "ambil video contoh", lic: "Unlicense", t: tYt },
+        { k: "Whisper", x: 855, y: 585, ic: "audio", job: "suara → teks", lic: "MIT", t: tWh },
+        { k: "FFmpeg", x: 790, y: 835, ic: "scissors", job: "potong & gabung", lic: "LGPL / GPL", t: tFf },
+        { k: "HyperFrames", x: 290, y: 835, ic: "sparkles", job: "animasi dari HTML", lic: "Apache-2.0", t: tHy },
+        { k: "Remotion", x: 225, y: 585, ic: "clap", job: "animasi dari React", lic: "lisensi khusus*", t: tRe },
+      ];
+      let h = `<div class="s02-a" id="s02-glow"></div>`;
+      h += `<svg class="s02-a" id="s02-lines" viewBox="0 0 1080 1920">` + N.map((n, i) => {
+        const len = Math.hypot(n.x - HUB[0], n.y - HUB[1]);
+        return `<line id="s02-ln${i}" x1="${HUB[0]}" y1="${HUB[1]}" x2="${n.x}" y2="${n.y}" stroke="#294b77" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" stroke-dasharray="${len.toFixed(1)} ${len.toFixed(1)}" stroke-dashoffset="${len.toFixed(1)}"/>`;
+      }).join("") + `</svg>`;
+      N.forEach((n, i) => { h += `<div class="s02-g" id="s02-g${i}" style="left:${n.x}px;top:${n.y}px"><i>${R14.svg("plus", 2)}</i></div>`; });
+      h += `<div class="s02-a" id="s02-hub"><div class="fi">${R14.svg("folderOpen", 2.2)}</div><b class="nm">studio-reels/</b>` +
+        ["rekaman/", "inspirasi/", "final/"].map((f, k) => `<div class="sf" id="s02-sf${k}" style="top:${82 + k * 38}px">${R14.svg("folder", 2.2)}<b>${f}</b></div>`).join("") + `</div>`;
+      h += `<div class="s02-a" id="s02-hcl">${R14.CL}</div>`;
+      N.forEach((n, i) => { h += `<div class="s02-n" id="s02-n${i}" style="left:${n.x}px;top:${n.y}px"><div class="bx"></div><div class="ic">${R14.svg(n.ic, 2.2)}</div><b>${n.k}</b><span>${n.job}</span><em>${n.lic}</em>` +
+        `<div class="tk" id="s02-tk${i}">${R14.svg("check", 3)}</div></div>`; });
+      h += `<div class="s02-note" id="s02-perm"><div class="ni">${R14.svg("shield", 2.2)}</div><b>Izin dulu</b><span>Claude nanya sebelum</span><span style="top:61px">jalanin tiap perintah</span></div>`;
+      h += `<div class="s02-note" id="s02-lic"><div class="ni">${R14.svg("file", 2.2)}</div><b>*Lisensi Remotion</b><span>gratis buat individu &amp;</span><span style="top:61px">tim sampai 3 orang</span></div>`;
+      h += `<div class="s02-a" id="s02-ready">${R14.svg("circleCheck", 2.6)}<b>5 alat siap</b></div>`;
+      h += R14.card("s02", 0) + R14.strip("s02", 0) + R14.cursor("s02");
+      $("s02-cam").innerHTML = h;
+      const glow = $("s02-glow"), hub = $("s02-hub"), hcl = $("s02-hcl"), perm = $("s02-perm"), lic = $("s02-lic"), ready = $("s02-ready");
+      I($("s02-cam"), { x: 0, y: 0 });
+      I(glow, { opacity: 0.5 }); ft(glow, { opacity: 0.5 }, { opacity: 0.9, duration: 0.4 }, 0);
+
+      // ================================================================ PROMPT CARD
+      R14.cardIn(S, "s02", Math.max(0.0, tPr - 0.1));
+      R14.cardCopy(S, "s02", tAlat + 0.12);
+      const tFold = tFo - 0.42;
+      R14.cardOut(S, "s02", tFold);
+
+      // ================================================================ HUB (work folder)
+      I(hub, { opacity: 0, scale: 0.5, y: 30 });
+      ft(hub, { opacity: 0, scale: 0.5, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.42, ease: "back.out(1.8)" }, tFo - 0.1);
+      for (let k = 0; k < 3; k++) { const f = $("s02-sf" + k); I(f, { opacity: 0, scaleX: 0.4 }); ft(f, { opacity: 0, scaleX: 0.4 }, { opacity: 1, scaleX: 1, duration: 0.26, ease: "back.out(2)" }, tFo + 0.22 + k * 0.1); }
+      I(hcl, { opacity: 0, scale: 0.3, rotation: -40 });
+      ft(hcl, { opacity: 0, scale: 0.3, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.36, ease: "back.out(2.6)" }, tCl + 0.25 > tFo ? tFo + 0.1 : tCl + 0.25);
+
+      // "pasang lima alat": five dashed slots + permission note
+      N.forEach((n, i) => {
+        const g = $("s02-g" + i);
+        I(g, { opacity: 0, scale: 0.6 });
+        ft(g, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tPa - 0.1 + i * 0.08);
+        ft(g, { opacity: 1 }, { opacity: 0, duration: 0.14 }, n.t - 0.14);
+      });
+      I(perm, { opacity: 0, y: 20, scale: 0.85 });
+      ft(perm, { opacity: 0, y: 20, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(2)" }, tLi - 0.05);
+
+      // each tool on its word: node pops, connector draws, tick
+      N.forEach((n, i) => {
+        const e = $("s02-n" + i), ln = $("s02-ln" + i), tk = $("s02-tk" + i), len = Math.hypot(n.x - HUB[0], n.y - HUB[1]);
+        I(e, { opacity: 0, scale: 0.55 }); I(tk, { opacity: 0, scale: 0.3 });
+        ft(e, { opacity: 0, scale: 0.55 }, { opacity: 1, scale: 1, duration: 0.36, ease: "back.out(2.2)" }, n.t - 0.14);
+        I(ln, { attr: { "stroke-dashoffset": len } });
+        ft(ln, { attr: { "stroke-dashoffset": len } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.34, ease: "power2.out" }, n.t - 0.1);
+        ft(tk, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(3)" }, n.t + 0.42);
+        ft(hub, { scale: 1 }, { scale: 1.04, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, n.t + 0.2);
+      });
+      I(lic, { opacity: 0, y: 20, scale: 0.85 });
+      ft(lic, { opacity: 0, y: 20, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(2)" }, tRe + 0.3);
+
+      // "bikin animasi": the two animation tools pulse, "5 alat siap"
+      [3, 4].forEach((i, k) => ft($("s02-n" + i), { scale: 1 }, { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tBi + k * 0.1));
+      I(ready, { opacity: 0, scale: 0.5, y: -8 });
+      ft(ready, { opacity: 0, scale: 0.5, y: -8 }, { opacity: 1, scale: 1, y: 0, duration: 0.32, ease: "back.out(2.4)" }, tAn + 0.1);
+
+      // ================================================================ OUT → s03
+      const tOut = D - 0.32;
+      N.forEach((n, i) => ft($("s02-n" + i), { opacity: 1, y: 0 }, { opacity: 0, y: 30, duration: 0.24, ease: "power2.in" }, tOut + i * 0.02));
+      N.forEach((n, i) => ft($("s02-ln" + i), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut));
+      [hub, hcl, perm, lic, ready, $("s02-strip")].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power2.in" }, tOut + 0.03));
+      ft(glow, { opacity: 0.9 }, { opacity: 0.5, duration: 0.3 }, tOut);
+
+      S.done();
+    })();
+  </script>
+</template>

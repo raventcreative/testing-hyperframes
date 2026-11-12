@@ -10,8 +10,8 @@ T = json.loads((P / "production/timing.json").read_text()); TOTAL = T["total_sec
 S = {s["id"]: s for s in T["scenes"]}
 # (render start, keep from, end): scenes do not overlap in this reel, so no pre-roll is needed
 CH = [(0.0, 0.0, S["s04"]["start"]),
-      (S["s04"]["start"], S["s04"]["start"], S["r4"]["start"]),
-      (S["r4"]["start"], S["r4"]["start"], TOTAL)]
+      (S["s04"]["start"], S["s04"]["start"], S["s07"]["start"]),
+      (S["s07"]["start"], S["s07"]["start"], TOTAL)]
 WORK = OUT.parent / (OUT.stem + "_chunks"); WORK.mkdir(parents=True, exist_ok=True)
 src = (P / "index.html").read_text()
 ease_sine = lambda u: -(__import__("math").cos(__import__("math").pi * u) - 1) / 2

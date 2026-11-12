@@ -2,7 +2,8 @@
 1080 frame, blended back at FACE_W so identity stays) -> Lanczos back to 1080x1920 -> navy split-tone + subtle portrait depth
 (subject matte) -> shifted down SHIFT px (top filled from the dark ceiling) so the head clears the headline.
 Also writes the grid mask (grid only behind the subject, fading out toward the bottom).
-Usage: python3 -I tools/enhance.py <clean.png> <matte.png> <models_dir> <out.jpg> <gridmask.png> [face_weight] [shift]"""
+Usage: python3 -I tools/enhance.py <clean.png> <matte.png> <models_dir> <out.jpg> <gridmask.png> [face_weight] [shift] [landmarks]
+landmarks: "x,y;x,y;x,y;x,y;x,y" (eyes L/R, nose tip, mouth corners L/R on the 1080 frame); default = frame 115.83"""
 import sys
 import cv2
 import numpy as np
@@ -12,6 +13,8 @@ FACE_W = float(sys.argv[6]) if len(sys.argv) > 6 else 0.6
 SHIFT = int(sys.argv[7]) if len(sys.argv) > 7 else 150
 cl = cv2.imread(src); H, W = cl.shape[:2]
 LM = [[405.0, 781.7], [490.0, 770.0], [441.7, 826.7], [424.3, 875.7], [486.0, 869.3]]
+if len(sys.argv) > 8:
+    LM = [[float(v) for v in pt.split(",")] for pt in sys.argv[8].split(";")]
 
 sr = ort.InferenceSession(MD + "/real_esrgan_x2.onnx", providers=["CPUExecutionProvider"])
 T, P = 240, 16

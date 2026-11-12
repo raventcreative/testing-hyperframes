@@ -5,13 +5,19 @@
   - subtitle "bahas tentang business": LaMa (ONNX, CPU) in native-resolution 512x512 crops, generous stroke mask (outline +
     drop shadow included, else the shadow bleeds back in)
   - clideo.com watermark: LaMa
-Usage: python3 -I tools/clean_frame.py <frame.png> <lama_fp32.onnx> <out.png>"""
+  - (f11823) the two keyword chips "BUSINESS KNOWLEDGE" / "FUNDAMENTAL THINKING" over the TV and the hair top: LaMa
+Usage: python3 -I tools/clean_frame.py <frame.png> <lama_fp32.onnx> <out.png> [cfg]   cfg: f11583 (default) | f11560 | f11823"""
 import sys
 import cv2
 import numpy as np
 import onnxruntime as ort
 
 src, model, out = sys.argv[1:4]
+CFG = sys.argv[4] if len(sys.argv) > 4 else "f11583"
+C = {"f11583": dict(line=(-0.1702, 403.7), sub_band=(1150, 1232, 180, 905), sub_crops=(150, 420), chips=[]),
+     "f11560": dict(line=(-0.1691, 404.4), sub_band=(1115, 1265, 340, 740), sub_crops=(300,), chips=[]),
+     "f11823": dict(line=(-0.2082, 446.2), sub_band=(1150, 1235, 380, 720), sub_crops=(300,),
+                    chips=[(418, 545, 910, 620), (378, 653, 910, 728)])}[CFG]
 im = cv2.imread(src)
 H, W = im.shape[:2]
 mn = im.min(axis=2)
@@ -19,7 +25,7 @@ K = lambda r: cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1, 2 * r + 1
 
 # ---------------------------------------------------------------- hook box (geometric)
 f = im.astype(np.float32)
-LA, LB = -0.1702, 403.7                                   # LED strip centre line: y = LA*x + LB
+LA, LB = C["line"]                                        # LED strip centre line: y = LA*x + LB (fitted per frame)
 line_y = lambda x: LA * x + LB
 X0, X1, Y0, Y1 = 166, 918, 230, 368
 BAND = 9
@@ -44,9 +50,10 @@ cbot = np.array([f[Y1 + 2, x] - hfill(x, Y1 + 2) for x in range(X0, X1)])
 ctop = cv2.GaussianBlur(ctop[None], (0, 0), sigmaX=5, sigmaY=0.1)[0]
 for i, x in enumerate(range(X0, X1)):
     yc = line_y(x)
+    bot_above = (Y1 + 2) < yc - BAND - 2                  # strip passes below the box in this column
     for y in range(Y0, Y1):
         if y < yc - BAND - 2:
-            o[y, x] = hfill(x, y) + ctop[i] * np.exp(-(y - Y0) / 16)
+            o[y, x] = hfill(x, y) + ctop[i] * np.exp(-(y - Y0) / 16) + (cbot[i] * np.exp(-(Y1 - y) / 16) if bot_above else 0)
         elif y > yc + BAND + 2:
             o[y, x] = hfill(x, y) + cbot[i] * np.exp(-(Y1 - y) / 45)
     for k, off in enumerate(offs):
@@ -83,11 +90,20 @@ def lama(img, mask, x0, y0):
     r[y0:y0 + 512, x0:x0 + 512] = (c * (1 - a) + y * a).astype(np.uint8)
     return r
 
+for (cx0, cy0, cx1, cy1) in C["chips"]:                    # rounded pills (+ glow), filled in two overlapping crops
+    cm = np.zeros((H, W), np.uint8)
+    r = (cy1 - cy0) // 2
+    cv2.rectangle(cm, (cx0 + r, cy0), (cx1 - r, cy1), 255, -1)
+    cv2.circle(cm, (cx0 + r, cy0 + r), r, 255, -1); cv2.circle(cm, (cx1 - r, cy0 + r), r, 255, -1)
+    cm = cv2.dilate(cm, K(8))
+    for x0 in (cx0 - 60, W - 512):
+        res = lama(res, cm, max(0, min(x0, W - 512)), max(0, cy0 - 240))
 sub = np.zeros((H, W), np.uint8)
-band = (slice(1150, 1232), slice(180, 905))
+y0_, y1_, x0_, x1_ = C["sub_band"]
+band = (slice(y0_, y1_), slice(x0_, x1_))
 sub[band][mn[band] > 185] = 255
 sub = cv2.dilate(sub, K(16))
-for x0 in (150, 420):
+for x0 in C["sub_crops"]:
     res = lama(res, sub, x0, 940)
 wm = np.zeros((H, W), np.uint8)
 reg = (slice(1840, 1915), slice(760, 1075))

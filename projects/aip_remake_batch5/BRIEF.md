@@ -80,3 +80,7 @@ Order continues: **R16 LIGHT · R17 NAVY · R18 LIGHT · R19 NAVY · R20 LIGHT**
   ACCURATE: it is the Claude Code app running on OTHER (free) models, not free Claude. Verify the repo name, how it works, which
   providers, and drop the "7 billion free tokens / unlimited" claims unless verified; add the caution about each provider's terms, rate
   limits and sending code to third-party servers. CTA **LLM**.
+
+## Lesson from R12/R13 QA (apply from the start)
+- The kit's mascot "glance at the robot" (`glance` in compositions/mascot.html) makes the mascot's eyes read BLANK (big white
+  discs, no pupils) in the real render. Disable it: `const glance = (t) => 0;`. Check the mascot's eyes in every QA frame.

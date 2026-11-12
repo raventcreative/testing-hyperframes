@@ -45,7 +45,7 @@ Metaphor: open-source code = a free RECIPE; what clients pay for = the dish = th
 Robot (co-host, right): flies in on the GRATIS stamp, points at the warung, thinks on "kan?", scans the five tools, TYPES on its holo
 keyboard whenever the work is done (ngerjain, jadwalin, potong klip, admin chat, ngoding, kode), cheers results, shakes its head on
 "Tapi gratis belum tentu bebas", small shock on "lebih", cheers the CTA, waves at the end. Mascot (host, left): an intent on every beat
-(present / reveal / point / question on "kan?" / emphasize / cta), glances at the robot when it flies in, on "kan?" and on "JASA".
+(present / reveal / point / question on "kan?" / emphasize / cta); no glances (see QA).
 
 ## Sources (checked 2026-11-12) — details + URLs in production/VO_SCRIPT.md
 github.com/gitroomhq/postiz-app (AGPL-3.0) · github.com/zhouxiaoka/autoclip + README-EN.md (MIT) · github.com/chatwoot/chatwoot + LICENSE
@@ -55,4 +55,34 @@ WebSearch (combined headcount for collaborations; remotion.dev itself is DNS-blo
 swapped out: GPL-3.0, Chinese-only README/UI). GitHub API is not enabled for this session → pages read with WebFetch.
 
 ## QA (real runtime: `npx --yes hyperframes@0.8.186 snapshot`)
-(filled in below after the passes)
+Sheets (JPG only, PNG dumps deleted) in `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r12/`:
+- Full pass, 78 frames (first frame, every scene 6–9×, every cut ±0.03 s, last frame 47.43): `qa1/contact-sheet-1…9.jpg` (tool sheets)
+  + labelled sheets `qa1_sheet_a.jpg` (0–8.2 s) · `qa1_sheet_b.jpg` (8.7–18.7) · `qa1_sheet_c.jpg` (18.76–25.8) · `qa1_sheet_d.jpg`
+  (26.6–37) · `qa1_sheet_e.jpg` (37.7–47.43).
+- Fix passes: `qa2_sheet.jpg` (s02 pill, s08 stamp timing, CTA) + zoom crops `zoom1.jpg` … `zoom4.jpg` (mascot eyes, s08 panel).
+- Dev-preview sheets used while building (not the real runtime): `dev_s01.jpg` … `dev_s10.jpg`; text-overflow checker
+  `tools/overflow.cjs` (every text element inside its card and inside the hero zone at each scene's fully-built moment: all clean).
+- `lint`: 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the kit). `validate` (final state): 0 errors; kit warning
+  "multiple instances of Three.js"; 6 contrast notes that are intentional (dashed {foto}/{nama} placeholders before they turn blue at
+  33.4 s; the dimmed, not-chosen menu rows 2–5 in s09).
+- Found in the real runtime and fixed: (1) the mascot's "glance at the robot" (kit behaviour) made the eyes read blank (big white disc)
+  at 1.6–2.9 s, 3.4–4.4 s and on the CTA — reducing the turn did not help, glances are now disabled (`glance = () => 0`); worth checking
+  R8, whose QA sheet shows the same look at ~12.3 s · (2) the s08 "WAJIB LISENSI" stamp only held ~0.2 s before the cut → GRATIS now
+  lands on "karyawanmu", the amber people + stamp on "lebih", stamp readable ~0.6 s; SFX re-synced · (3) s02 "Kamu yang ngerjain" pill
+  crowded the card bottoms → moved 12 px down, arrows visible.
+- Found in dev and fixed before the pass: s08 heading invisible (background-clip text on a parent of transformed spans → gradient moved
+  to each word); s04 strip unroll squished its label (scaleX → clip-path); s07 tokens clipped by the code card (flight → pulses);
+  contrast of the n/5 counter, footnote and chat avatars.
+- Every initial state is pinned at 0 (`K.boot` → `I()`); the only hand-over is s01 → s02 (recipe + warung at identical positions,
+  steam dash offset from global time) — seamless at 3.93 / 3.99.
+
+## Known issues / notes for the lead
+- Duration 47.47 s (≤ 50 s). VO is take 3; takes 1–2 were too long.
+- Captions: during the 0.34 s word rise a chunk can show only i-dots / descenders for a frame (same caption system as the kit). The last
+  caption chunk ("aku kirim lewat DM.") stays up to the end card (same as R8).
+- MuMuAINovel (reference pick #5) was swapped for Chatwoot — reasons in VO_SCRIPT.md ("ATM: what we changed").
+- Licence facts are from GitHub (12 Nov 2026). The Remotion "combined headcount for collaborations" point comes from its official
+  license FAQ as surfaced by WebSearch (remotion.dev is DNS-blocked in this sandbox); it is only a small on-screen footnote + DM note.
+- The DM hand-out `production/DM_JASA.md` (5 links + licence notes + start steps) is written by us; no earnings promises.
+- The robot types on its holo keyboard at several beats (by design: "kamu yang ngerjain"). No music (lead adds it).
+- `.hyperframes/` in this folder was created by the CLI (lint/validate/snapshot), like in the kit.

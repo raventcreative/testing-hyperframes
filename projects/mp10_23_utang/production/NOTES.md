@@ -132,17 +132,22 @@ hologram runs from 27.44 s to the end (6.2 s). Both stay inside x 120–960, y �
 ## QA done (final build)
 - **Real runtime** (`npx hyperframes@0.8.186 snapshot`). It covered every scene, the whip midpoints (10.75 / 10.86 s), the
   band-sweep and beam/iris midpoints, and the end card. Contact sheets are in the scratchpad `mp23/`:
-  - `QA_final_1/` (0–11.0 s)
-  - `QA_final_2/` (11.5–18.2 s)
-  - `QA_final_3/` (18.6–26.8 s)
-  - `QA_final_4/` (27.4–33.6 s)
+  - `QA_final_1/QA1_sheet.jpg` (0–11.0 s)
+  - `QA_final_2/QA2_sheet.jpg` (11.5–18.2 s)
+  - `QA_final_3b/QA3b_sheet.jpg` (18.6–26.8 s; re-shot after the fit-pass fix below)
+  - `QA_final_4/QA4_sheet.jpg` (27.4–33.6 s)
+  - `QA_final_3c/` (the trace start at 25.9 / 26.2 s)
 
-  Earlier rounds are `rtA`–`rtC`. Frame 0 is clean: only the head and its orbit show, the robot rises later, and nothing
+  Earlier rounds are `rtA`–`rtC` and `QA_final_3` (superseded). Frame 0 is clean: only the head and its orbit show, the robot rises later, and nothing
   leaks. Every initial state is pinned on the timeline at 0 through `init()` (`gsap.set` + `tl.set(…, 0)`).
 - **`hyperframes validate`:** 0 errors and 0 contrast warnings. The 4 warnings are the software-GL "GPU stall" driver messages.
   `lipsync.js` exists, so there are no 404s.
-- **Text containment** (`scratchpad/mp23/contain.cjs`, transforms disabled): no text sticks out of its box. The fit pass
-  uses layout widths (scrollWidth / offsetWidth), because the notes and cards sit inside scaled 3D transforms.
+- **Text containment** (`scratchpad/mp23/contain.cjs`, transforms disabled): no text sticks out of its box.
+  - The fit pass uses layout widths (scrollWidth / offsetWidth), because the notes and cards sit inside scaled 3D transforms.
+  - `fonts.cjs` lists what the fit pass shrank. Only real overflows were shrunk: the "baru bayar separuh" note line (86 %), the
+    hatched "−Rp2.000.000" (86 %), "masih kamu simpan" (94 %) and the two Rp1.200.000 cells (94 %).
+  - A first version over-shrank the ledger title and amounts. The real-runtime pass caught it (`QA_final_3`) and it is fixed
+    (`QA_final_3b`).
 - **Frame-edge sweep** every 0.2 s (`edgecheck.cjs`). The only hits are single motion frames:
   - the whip at 10.8 s
   - the bill flying in at 11.0 s

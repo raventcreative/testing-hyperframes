@@ -105,7 +105,51 @@ Derived time: the brand scene switches at `CUTB = TM.sol + 0.15` (17.55; the ban
 - Robot in every scene: light scenes small full-body bottom-right (x 905, foot line ≈1845), keeping left of / above it free;
   brand half-body bottom-left with the far arm pointing (near arm low, never over the hologram); end card series template.
 
-## QA (see the "QA done" section at the end)
+## QA done (final build)
+Scratch dir: `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/mp27/`
+- **Real runtime** (`npx hyperframes@0.8.186 snapshot`), JPG sheets only (PNG dumps deleted):
+  - `rtA/RT_A1.jpg`, `rtA/RT_A2.jpg`: one full pass over the light part (0–16.85 s, 18 frames: hook, flash, pile, receipt,
+    stickies, storm exit, cover opening, "?", habit, clock, TUTUP).
+  - `rtB/RT_B1.jpg`, `rtB/RT_B2.jpg`: band sweep, brand, chat, beam/iris and the end card (17.3–33.3 s, 17 frames).
+  - Fix passes: `rtC/RT_C.jpg` (camera dip for "nota nyelip"), `rtD/RT_D.jpg` (receipt + flat floor cards after the
+    rotation-order fix), `rtE/RT_E.jpg` (final check: frame 0, receipt, stickies, dusk HUD label).
+  - Frame 0 is clean (storm, room, parcels A/B/D, cards mid-air; no caption, robot below frame). All initial states are pinned in
+    the nested `tl0` (first child of `tl`) by `pinAll()`, and `tl.render(0, true, true)` runs at the end of the build.
+- **`hyperframes validate`**: 0 errors. 4 warnings = the software-GL "GPU stall due to ReadPixels" messages (same as Videos 23/24).
+  `lipsync.js` exists, so no 404s. Contrast warnings sit at 4 sample instants only: the lightning flash (3.34 s, 0.1 s white
+  flash), a camera move over white order cards (10.0 s), the dusk habit shot (16.7 s; the HUD label and notebook labels were
+  darkened after this), and the receded ledger partly covered by the chat panel (23.4 s, by design).
+- **Text containment** (`scratchpad/mp27/contain.cjs`, transforms disabled): "no text sticks out of its box". It caught and I
+  fixed two cases (the "abis ramai…" sticky and the enlarged receipt total). A `buildReady["fit"]` step shrinks screen captions,
+  order-card names, the ledger title, the answer value and the question bubble if a font renders wider than planned.
+- **Frame-edge sweep** (`edgecheck.cjs`, every 0.25 s): no screen caption is ever cut. The hits are 3D props only: order cards
+  falling or lying on the floor at the frame edges during S1–S3 camera moves (and falling cards behind the cloud at the top),
+  the window edge during the floor dip (6.5–7.0 s), the band marquee (17.25–17.5 s) and the chat panel flying in (22.5 s).
+- **Audio**: `tools/sfx.py` → `assets/audio/sfx.wav` (33.42 s, −25.2 dB RMS, peak 0.89); `tools/lipsync.py` → `lipsync.js`
+  (1919 frames at 60 fps, talking fraction 0.81).
+
+## Real-renderer / build findings (fixed; worth knowing)
+1. **GSAP applies `rotationZ` after `rotationX`** (CSS order `rotateZ() rotateY() rotateX()`), so a plane laid flat with
+   `rotationX: 90` and spun with `rotationZ` tilts sideways and half of it sinks under the floor. The floor receipt and the
+   scattered order cards now spin with `rotationY` (around the vertical axis). Before the fix only "000" of the receipt showed.
+2. **Duplicate ids**: an SVG gradient `id="lB"` shadowed the caption `#lB`, so the caption was never split and showed from frame 0.
+   The gradients are now `cgL*`; a static-id duplicate check is clean.
+3. **Captions above the stage in the brand scene** (batch-3 lesson): the `#sol` captions come after `#w2` in the DOM, and the
+   order chips start just above the card (never in the caption band).
+4. The page is heavier than earlier videos (16 screen-space storm cards + a 3D room). A `drop-shadow` filter on the big cloud SVG
+   made `snap.cjs` time out under load and was removed; the scratch copies of `snap.cjs`/`cover.cjs` use 150–240 s timeouts.
+
+## Known issues / notes for the lead
+- **Props at the frame edges.** Scattered order cards on the floor are cut by the frame edge in some S1–S3 shots (foreground
+  clutter during camera moves); the window is cut by the left edge for ~0.5 s in the floor dip. No caption is affected.
+- **Parcels shipping out (9.4–10.4 s)** happens while the camera moves to the mid shot, so only the last boxes are seen leaving;
+  "begitu sepi" is carried by the cloud lifting away, the clear window, the quiet and the empty floor.
+- **Hand-over pop.** At 6.53 s the flying receipt hands over to the floor piece; the part that goes under the parcel disappears
+  in one frame (the flying twin lives in the overlay rig and is never depth-sorted against the box).
+- **Third sticky note** ("abis ramai…") slaps on at 8.42 s, just before the storm lifts; it is on screen for ~0.6 s in the close-up.
+- The bands start at `CUTB − 0.48` (17.07 s), so "sebelum tutup toko." is readable for ~0.85 s before the sweep.
+- **Commits.** I made no commits. The lead's batch commits (`c06559a`, `1dc38c7`) already picked up this folder in progress;
+  `production/NOTES.md` changed after them. `.hyperframes/` is the CLI's snapshot state folder (as in the other projects).
 
 ## Files
 - `index.html` (TM at the top), `robot_perf.js` (kit engine + Video 27 choreography), `lipsync.js` (from `vo.wav`).

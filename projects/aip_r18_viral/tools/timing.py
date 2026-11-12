@@ -11,7 +11,10 @@ OFFSET, FPS, TAIL = 9 / 30, 30, 1.4
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 # alignment fixes (raw seconds), checked against the energy envelope + faster-whisper small (none needed so far)
-TFIX = {}
+TFIX = {12: (4.8, 5.28), 21: (9.36, 9.6), 36: (16.71, 17.2), 47: (20.76, 21.2), 48: (21.44, 21.76), 57: (24.4, 25.04), 58: (25.28, 25.68), 68: (29.04, 29.3), 69: (29.51, 29.84), 79: (32.96, 33.36), 80: (33.6, 34.08), 88: (37.2, 37.69), 89: (37.96, 38.24)}
+# ^ R18 take 3: ElevenLabs puts the FIRST word of several lines 0.1–0.26 s late (the audio tags absorb the time) and stretches each
+#   line's LAST word into the following silence; these pin them to the measured voice onset/end (energy > -40 dB, 10 ms hops,
+#   checked by eye on a 20 ms dB print). Mid-line words agree with the envelope and stay as aligned.
 for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)

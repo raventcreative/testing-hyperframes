@@ -1,12 +1,52 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="t2" data-width="1080" data-height="1920"></div>
+  <style>
+    /* t2 LAPIS 2 · RENCANA (14.20–17.90) "Lapis dua ngerencanain: titik masuk, stop loss, dan target."
+       Frame 0 = t1's end (header item 1 only). Header rolls to 02 "Lapis rencana" (segment 2 lights). "ngerencanain:" = the plan chart
+       rises (SAHAM A, 12 candles climbing into a breakout, labelled "contoh"). "titik masuk," = the dashed entry line draws, the breakout
+       dot + MASUK 1.000 tag pop. "stop loss," = the red risk zone opens below, STOP LOSS 970. "dan target." = the green zone opens above,
+       TARGET 1.030; notes "dipasang sebelum beli" + "rasio risiko : potensi = 1 : 1" (README: exit sets stop + target before the entry,
+       target one times the risk). END STATE = K.planSetFinal (s05 rebuilds it 1:1 at frame 0, no exit here). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #t2-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+  </style>
+  <div id="root" data-composition-id="t2" data-width="1080" data-height="1920">
+    <div id="t2-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.69);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["t2"] = tl;
+      const K = window.R13K, D = 3.7, P = "t2";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("t2-zone");
+      z.innerHTML = K.headerHTML(P) + K.planHTML(P);
+      K.headerSet(S, P, 1);
+      const tLa = wt("Lapis", 14.1), tNg = wt("ngerencanain:"), tTi = wt("titik"), tMa = wt("masuk,"), tSt = wt("stop", 16), tLo = wt("loss,"), tTa = wt("target.");
+      K.headerSwap(S, P, 1, 2, Math.max(0.01, tLa - 0.04));
+      // ---------------------------------------------------------------- "ngerencanain:": the chart rises, candles climb in
+      const pc = $("t2-pc"); I(pc, { x: K.PL.x, y: K.PL.y + 56, opacity: 0 });
+      ft(pc, { y: K.PL.y + 56, opacity: 0 }, { y: K.PL.y, opacity: 1, duration: 0.36, ease: "power3.out" }, tNg - 0.26);
+      K.PCND.forEach((_, i) => { const k = $("t2-pk" + i); I(k, { opacity: 0, x: 0 }); ft(k, { opacity: 0 }, { opacity: 1, duration: 0.16 }, tNg - 0.1 + i * 0.05); });
+      // ---------------------------------------------------------------- "titik masuk,": entry line + dot + tag
+      const ple = $("t2-ple"); I(ple, { scaleX: 0, opacity: 1 });
+      ft(ple, { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.out" }, tTi - 0.12);
+      const dot = $("t2-pdot"); I(dot, { scale: 0, opacity: 0, x: 0, transformOrigin: "50% 50%" });
+      ft(dot, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(3)" }, tTi - 0.06);
+      const tag = (k, t) => { const e = $("t2-" + k); I(e, { opacity: 0, x: 24 }); ft(e, { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.26, ease: "back.out(2)" }, t); };
+      tag("pte", tMa - 0.12);
+      // ---------------------------------------------------------------- "stop loss,": red zone below
+      const zr = $("t2-pzr"), pls = $("t2-pls"); I(zr, { scaleY: 0, scaleX: 1, opacity: 1 }); I(pls, { scaleX: 0, opacity: 1 });
+      ft(zr, { scaleY: 0 }, { scaleY: 1, duration: 0.3, ease: "power3.out" }, tSt - 0.12);
+      ft(pls, { scaleX: 0 }, { scaleX: 1, duration: 0.26, ease: "power2.out" }, tSt);
+      tag("pts", tSt + 0.06);
+      // ---------------------------------------------------------------- "dan target.": green zone above + the notes
+      const zg = $("t2-pzg"), plt = $("t2-plt"); I(zg, { scaleY: 0, scaleX: 1, opacity: 1 }); I(plt, { scaleX: 0, opacity: 1 });
+      ft(zg, { scaleY: 0 }, { scaleY: 1, duration: 0.3, ease: "power3.out" }, tTa - 0.2);
+      ft(plt, { scaleX: 0 }, { scaleX: 1, duration: 0.26, ease: "power2.out" }, tTa - 0.1);
+      tag("ptt", tTa - 0.06);
+      const n1 = $("t2-pn1"), n2 = $("t2-pn2");
+      I(n1, { opacity: 0, y: 14 }); I(n2, { opacity: 0, y: 14 });
+      ft(n1, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, tLo - 0.05);
+      ft(n2, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, tTa + 0.12);
+      S.finish();
     })();
   </script>
 </template>

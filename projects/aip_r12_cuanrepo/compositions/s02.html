@@ -1,12 +1,100 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s02-a { position: absolute; }
+    #s02-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s02-glow { left: 20px; top: 260px; width: 1040px; height: 780px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    #s02-lines { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    #s02-kp { left: 330px; top: 852px; width: 420px; height: 76px; border-radius: 38px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #ffffff; transform-origin: 50% 50%;
+      box-shadow: 0 22px 34px -18px rgba(10,13,44,.85), inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    #s02-kp i { position: absolute; left: 12px; top: 12px; width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,.14); }
+    #s02-kp i svg { position: absolute; left: 13px; top: 13px; width: 26px; height: 26px; display: block; color: #8fd8ff; }
+    #s02-kp b { position: absolute; left: 80px; top: 0; font: 700 29px/76px Poppins, sans-serif; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.19);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s02"] = tl;
+      // s02 "Lima alat GitHub ini juga gratis, tapi klien bayar yang ngerjain."
+      // START = s01's end (recipe left with the GRATIS stamp, warung right with "Tetap dibeli"). · "Lima alat GitHub": the recipe card
+      // flips (flat scaleX flip) to its back: "5 resep gratis · di GitHub" with the five tools · "gratis,": a green "gratis" tick on
+      // every row · "tapi klien bayar": the warung's plate clears and its board becomes the MENU JASA (5 numbered, still empty
+      // lines), a "Klien bayar jasanya" pill pops · "yang ngerjain.": a navy pill "Kamu yang ngerjain" lands between them, curved
+      // arrows draw recipe → kamu → menu. TRANSITION → s03: everything drops away. END STATE: invisible.
+      const ID = "s02", K = window.K, S = K.boot(ID), { ST, D, L, ft, I, $ } = S, tl = S.tl;
+      const tLim = L("Lima"), tGit = L("GitHub"), tGra = L("gratis,"), tTap = L("tapi"), tKli = L("klien"), tBay = L("bayar"), tYan = L("yang"), tNge = L("ngerjain.");
+
+      let h = `<div class="s02-a" id="s02-glow"></div>` + K.recipe("s02") + K.warung("s02");
+      h += `<svg class="s02-a" id="s02-lines" viewBox="0 0 1080 1920" fill="none">` +
+        [["M300 834 C 300 880, 318 890, 334 890"], ["M746 890 C 770 890, 786 870, 786 842"]].map(([d], k) =>
+          `<path id="s02-ln${k}" d="${d}" stroke="#294b77" stroke-width="5" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/>`).join("") + `</svg>`;
+      h += `<div class="s02-a" id="s02-kp"><i>${K.svg("wrench", 2.2)}</i><b>Kamu yang ngerjain</b></div>`;
+      $("s02-cam").innerHTML = h;
+      $("s02-rc").insertAdjacentHTML("beforeend", `<div class="k-stamp" id="s02-st" style="left:190px;top:330px">GRATIS</div>`);
+      const cam = $("s02-cam"), glow = $("s02-glow"), rc = $("s02-rc"), wr = $("s02-wr"), st = $("s02-st"), rf = $("s02-rf"), rb = $("s02-rb");
+      I(cam, { x: 0, y: 0 });
+      I(glow, { opacity: 0.85, scale: 1 });
+
+      // ================================================================ s01's end state
+      I(rc, { opacity: 1, x: 0, y: 0, scale: 1, scaleX: 1, rotation: -4 });
+      I(rf, { opacity: 1 }); I(rb, { opacity: 0 }); I(st, { opacity: 1, scale: 1, rotation: -12 });
+      for (let i = 0; i < 5; i++) I($("s02-k" + i), { opacity: 1, scale: 1 });
+      I(wr, { opacity: 1, x: 0, y: 0, rotation: 3, scale: 1 });
+      const sg = $("s02-sg"), ss = $("s02-ss"), pl = $("s02-pl"), by = $("s02-by"), mt = $("s02-mt"), ms = $("s02-ms"), kl = $("s02-kl");
+      I(sg, { opacity: 1, scale: 1 }); I(ss, { opacity: 1 }); I(pl, { opacity: 1, scale: 1, y: 0 }); I(by, { opacity: 1, scale: 1, y: 0 });
+      I(wr.querySelector(".aw"), { scaleY: 1, transformOrigin: "50% 0%" });
+      document.querySelectorAll("#s02-steam .stm").forEach((p, k) => {
+        I(p, { attr: { "stroke-dashoffset": -(ST * 0.55 + k * 0.3) } });
+        ft(p, { attr: { "stroke-dashoffset": -(ST * 0.55 + k * 0.3) } }, { attr: { "stroke-dashoffset": -((ST + 2.4) * 0.55 + k * 0.3) }, duration: 2.4, ease: "none" }, 0);
+      });
+
+      // ================================================================ "Lima alat GitHub": the recipe flips to the five tools
+      const t0 = Math.max(0.06, tLim - 0.16);
+      ft(rc, { scaleX: 1, rotation: -4 }, { scaleX: 0, rotation: -3, duration: 0.15, ease: "power2.in" }, t0);
+      tl.set(rf, { opacity: 0 }, t0 + 0.15); tl.set(st, { opacity: 0 }, t0 + 0.15); tl.set(rb, { opacity: 1 }, t0 + 0.15);
+      ft(rc, { scaleX: 0, rotation: -3 }, { scaleX: 1, rotation: -2, duration: 0.2, ease: "power2.out" }, t0 + 0.15);
+      for (let i = 0; i < 5; i++) {
+        const p = $("s02-p" + i), o = $("s02-o" + i), t = t0 + 0.32 + i * ((tGit + 0.3 - t0 - 0.32) / 5);
+        I(p, { opacity: 0, x: -24 }); I(o, { opacity: 0, scale: 0.3 });
+        ft(p, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.22, ease: "power3.out" }, t);
+        ft(o, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(3)" }, tGra - 0.22 + i * 0.07);
+      }
+      ft(rc, { scale: 1 }, { scale: 1.04, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, tGra + 0.12);
+
+      // ================================================================ "tapi klien bayar": the warung becomes the MENU JASA board
+      const tW = tTap - 0.16;
+      ft(pl, { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.6, y: 30, duration: 0.24, ease: "power2.in" }, tW);
+      ft(by, { opacity: 1, y: 0 }, { opacity: 0, y: 16, duration: 0.18, ease: "power2.in" }, tW);
+      ft(sg, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.8, duration: 0.16, ease: "power2.in" }, tW);
+      ft(ss, { opacity: 1 }, { opacity: 0, duration: 0.14 }, tW);
+      I(mt, { opacity: 0, y: 14 }); I(ms, { opacity: 0 });
+      ft(mt, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.24, ease: "power3.out" }, tW + 0.16);
+      ft(ms, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tW + 0.26);
+      for (let i = 0; i < 5; i++) { const m = $("s02-m" + i); I(m, { opacity: 0, x: 26 });
+        ft(m, { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.22, ease: "power3.out" }, tW + 0.26 + i * 0.06); }
+      I(kl, { opacity: 0, scale: 0.4, y: 10 });
+      ft(kl, { opacity: 0, scale: 0.4, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.26, ease: "back.out(2.4)" }, tKli - 0.1);
+      ft(kl, { scale: 1 }, { scale: 1.08, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tBay);
+
+      // ================================================================ "yang ngerjain.": Kamu pill + arrows recipe → kamu → menu
+      const kp = $("s02-kp");
+      I(kp, { opacity: 0, y: 40, scale: 0.7 });
+      ft(kp, { opacity: 0, y: 40, scale: 0.7 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.8)" }, tYan - 0.14);
+      ft(kp, { scale: 1 }, { scale: 1.08, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, tNge + 0.1);
+      [0, 1].forEach((k) => { const p = $("s02-ln" + k); I(p, { opacity: 1, attr: { "stroke-dashoffset": 1 } });
+        ft(p, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.26, ease: "power2.out" }, tNge - 0.06 + k * 0.16); });
+      S.shake(cam, tNge + 0.12, 4);
+
+      // ================================================================ TRANSITION → s03
+      const tOut = D - 0.3;
+      ft(rc, { opacity: 1, y: 0 }, { opacity: 0, y: 50, duration: 0.24, ease: "power2.in" }, tOut);
+      ft(wr, { opacity: 1, y: 0 }, { opacity: 0, y: 50, duration: 0.24, ease: "power2.in" }, tOut + 0.03);
+      ft(kp, { opacity: 1, y: 0 }, { opacity: 0, y: 30, duration: 0.22, ease: "power2.in" }, tOut + 0.05);
+      [0, 1].forEach((k) => ft($("s02-ln" + k), { opacity: 1 }, { opacity: 0, duration: 0.15 }, tOut));
+      ft(glow, { opacity: 0.85 }, { opacity: 0.5, duration: 0.25 }, tOut);
+
+      S.done();
     })();
   </script>
 </template>

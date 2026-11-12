@@ -37,6 +37,11 @@
     #s01-toast b { font: 700 21px/56px Poppins, sans-serif; }
     /* "alur": dashed flow line through the number badges + arrow heads */
     #s01-flow { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+    /* frame-0 title: [3] prompt */
+    #s01-ti { left: 0; top: 400px; width: 1080px; height: 160px; display: flex; justify-content: center; align-items: center; gap: 30px; transform-origin: 50% 50%; }
+    #s01-ti .n3 { position: relative; width: 150px; height: 150px; border-radius: 44px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff; font: 700 104px/150px Poppins, sans-serif;
+      text-align: center; box-shadow: 0 26px 44px -20px rgba(10,13,44,.75); }
+    #s01-ti b { font: 700 128px/160px Poppins, sans-serif; letter-spacing: -.03em; padding-bottom: 8px; }
     /* practitioner stamp */
     #s01-stamp { left: 640px; top: 572px; height: 64px; padding: 0 22px 0 54px; border-radius: 18px; background: linear-gradient(150deg, #2fb35a, #1a7434); color: #fff; white-space: nowrap;
       transform-origin: 50% 50%; box-shadow: 0 18px 28px -14px rgba(26,116,52,.8); }
@@ -70,6 +75,7 @@
       h += `<div class="s01-a" id="s01-hd"><div id="s01-h1">${R14.svg("film", 2.2)}<b>Edit reels</b></div><span id="s01-h2">pakai</span><div id="s01-h3">${R14.CL}<b>Claude Code</b></div></div>`;
       h += `<div class="s01-a" id="s01-toast">${R14.svg("bookmarkCheck", 2.2)}<b>Disimpan</b></div>`;
       h += `<div class="s01-a" id="s01-bm"><div class="s01-a" id="s01-bm0" style="inset:0">${R14.svg("bookmark", 2.4)}</div><div class="s01-a" id="s01-bm1" style="inset:0">${R14.svg("bookmark", 2.4)}</div></div>`;
+      h += `<div class="s01-a" id="s01-ti"><div class="n3">3</div><b class="r14-grad">prompt</b></div>`;
       h += `<div class="s01-a" id="s01-stamp">${R14.svg("circleCheck", 2.6)}<b>Alur kerjaku</b></div>`;
       $("s01-cam").innerHTML = h;
       const cam = $("s01-cam"), glow = $("s01-glow"), bm = $("s01-bm"), bm0 = $("s01-bm0"), bm1 = $("s01-bm1"), toast = $("s01-toast"), stamp = $("s01-stamp");
@@ -77,11 +83,16 @@
       I(glow, { opacity: 0.9 });
 
       // the deck (frame 0) → spread (on "tiga")
-      const DECK = [[0, 0], [14, 3], [28, -2.5]], LIST = [425, 595, 765];
+      const DECK = [[0, 0], [14, 3], [28, -2.5]], LIST = [425, 595, 765], Y0 = 650;
+      // frame 0: the title "[3] prompt" sits above the deck; it settles, then steps away when the deck spreads on "tiga"
+      const ti = $("s01-ti");
+      I(ti, { opacity: 1, scale: 1.05, y: 0 });
+      ft(ti, { scale: 1.05 }, { scale: 1, duration: 0.6, ease: "power2.out" }, 0);
+      ft(ti, { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.8, y: -70, duration: 0.3, ease: "power2.in" }, tTig - 0.3);
       for (let i = 0; i < 3; i++) {
         const c = $("s01-c" + i), dy = DECK[i][0], rot = DECK[i][1];
-        I(c, { y: 595 + dy, rotation: rot, opacity: 1, x: 0 });
-        tl.fromTo(c, { y: 595 + dy, rotation: rot }, { y: LIST[i], rotation: 0, duration: 0.5, ease: "back.out(1.25)", immediateRender: false }, tTig - 0.12 + i * 0.05);
+        I(c, { y: Y0 + dy, rotation: rot, opacity: 1, x: 0 });
+        tl.fromTo(c, { y: Y0 + dy, rotation: rot }, { y: LIST[i], rotation: 0, duration: 0.5, ease: "back.out(1.25)", immediateRender: false }, tTig - 0.12 + i * 0.05);
         I($("s01-n" + i), { scale: 1 });
         ft($("s01-n" + i), { scale: 1 }, { scale: 1.18, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tTig + 0.3 + i * 0.12);
         // "prompt": the PROMPT labels light up

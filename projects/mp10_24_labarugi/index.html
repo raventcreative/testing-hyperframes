@@ -215,8 +215,11 @@
   <body>
     <div id="main-root" data-composition-id="main" data-start="0" data-duration="32.4" data-width="1080" data-height="1920">
 
+      <!-- whip-pan motion blur (directional gaussian on the moving kitchen, Video 9/20 pattern) -->
+      <svg width="0" height="0" style="position:absolute"><filter id="mb" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB"><feGaussianBlur id="mbB" stdDeviation="0 0" /></filter></svg>
       <!-- S1-S5 · the kitchen (3D world built in the script) -->
       <div id="s1" class="full scene lightbg" style="visibility:visible;opacity:1">
+        <div class="full" id="kit">
         <div class="stage" id="w1"><div class="cam" id="cam1"><div class="yaw" id="yaw1"><div class="pan" id="pan1">
           <div class="floor" id="floor"></div>
           <!-- recipe card -->
@@ -225,6 +228,7 @@
         <!-- overlay rig: an exact twin of the kitchen camera; the jar, coins and portion chips live here so they are never depth-sorted against
              the scale / bowl planes (Chrome's software compositor mis-orders near-parallel planes) -->
         <div class="stage" id="w1b"><div class="cam" id="cam1b"><div class="yaw" id="yaw1b"><div class="pan" id="pan1b"></div></div></div></div>
+        </div>
         <div class="vig"></div>
         <div id="dofT"></div><div id="dofB"></div>
 
@@ -336,7 +340,7 @@
         const WALLZ = -700, SHW = 1060, SHD = 170;
         const shadow = (x, z, w, d, o, par, ox, oz) => mk("div", "fsh", par || FL, `left:${(ox == null ? 2600 : ox) + x - w / 2}px; top:${(oz == null ? 2600 : oz) + z - d / 2}px; width:${w}px; height:${d}px; opacity:${o || 1}`);
         // backsplash wall + bokeh
-        const wall = mk("div", "pl wall", P1, `left:-2600px; top:-1500px; width:5200px; height:1500px;`); gsap.set(wall, { z: WALLZ });
+        const wall = mk("div", "pl wall", P1, `left:-1700px; top:-1500px; width:4000px; height:1500px;`); gsap.set(wall, { z: WALLZ });
         [[-1300, -1100, WALLZ - 300, 260, "rgba(38,54,122,.10)"], [1500, -1050, WALLZ - 300, 300, "rgba(254,209,17,.22)"], [-300, -1350, WALLZ - 330, 200, "rgba(254,209,17,.16)"], [900, -1400, WALLZ - 330, 240, "rgba(38,54,122,.09)"]].forEach(([x, y, z, r, c]) => {
           const e = mk("div", "bokeh", P1, `left:${x - r}px; top:${y - r}px; width:${2 * r}px; height:${2 * r}px; background:radial-gradient(closest-side, ${c}, rgba(255,255,255,0));`); gsap.set(e, { z }); });
         // wall shelf: top plank (cup shadows are its own children) + front edge + two brackets
@@ -484,8 +488,12 @@
         cam(C1, KH0, KH1, 0, TM.bahan - 0.25, "power1.inOut");
         cam(C1, KH1, KB0, TM.bahan - 0.25, 1.0, "power2.inOut");
         cam(C1, KB0, KB1, TM.bahan + 0.75, TM.l1 - TM.bahan - 0.95, "none");
-        cam(C1, KB1, KS0, TM.l1 - 0.2, 1.05, "power2.inOut");
-        cam(C1, KS0, KS1, TM.l1 + 0.85, TM.l2 - TM.l1 - 0.95, "none");
+        cam(C1, KB1, KS0, TM.l1 - 0.15, 0.85, "power3.inOut");   // whip pan from the card to the scale station
+        cam(C1, KS0, KS1, TM.l1 + 0.7, TM.l2 - TM.l1 - 0.8, "none");
+        TS("#kit", { filter: "none" }, 0); tl.set("#kit", { filter: "url(#mb)" }, TM.l1 - 0.1);
+        F("#mbB", { attr: { stdDeviation: "0 0" } }, { attr: { stdDeviation: "28 3" }, duration: 0.36, ease: "power2.in" }, TM.l1 - 0.1);
+        F("#mbB", { attr: { stdDeviation: "28 3" } }, { attr: { stdDeviation: "0 0" }, duration: 0.36, ease: "power2.out" }, TM.l1 + 0.26);
+        tl.set("#kit", { filter: "none" }, TM.l1 + 0.64);
         cam(C1, KS1, KC0, TM.l2 - 0.1, 0.95, "power2.inOut");
         cam(C1, KC0, KC1, TM.l2 + 0.85, TM.has - TM.l2 - 0.95, "none");
         cam(C1, KC1, KR0, TM.has - 0.1, 0.9, "power2.inOut");
@@ -494,7 +502,10 @@
         // ----- S1 · hook: "Resep / laporan laba rugi, / 30 detik." + the timer winds; "Yuk, masak!"
         RISE(HA, TM.hook - 0.22, 0.03, 0.4); RISE(HB, TM.lap - 0.15, 0.02, 0.45); RISE(HC, TM.dtk - 0.12, 0.025, 0.45);
         POP("#tmrI", TM.dtk + 0.05, 0.5, "back.out(2.6)"); HL("#hCh", TM.dtk + 0.5, 0.4);
-        F("#tmrH", { rotation: -320, svgOrigin: "50 56" }, { rotation: 0, svgOrigin: "50 56", duration: 0.7, ease: "power2.out" }, TM.dtk + 0.3);
+        // SVG parts animate their transform ATTRIBUTE as a plain string (no GSAP transform cache / svgOrigin: the runtime's seek
+        // pattern made multi-tween svgOrigin scales drift off in the real renderer)
+        const ROT = (a, cx, cy) => `rotate(${a} ${cx} ${cy})`, SCY = (s, oy) => `matrix(1 0 0 ${s} 0 ${(oy * (1 - s)).toFixed(3)})`;
+        F("#tmrH", { attr: { transform: ROT(-320, 50, 56) } }, { attr: { transform: ROT(0, 50, 56) }, duration: 0.7, ease: "power2.out" }, TM.dtk + 0.3);
         F("#tmrA", { attr: { "stroke-dashoffset": 169.6 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.7, ease: "power2.out" }, TM.dtk + 0.3);
         show("#yuk", TM.yuk - 0.08);
         F("#yuk span", { scaleX: 0, scaleY: 0, rotation: -18 }, { scaleX: 1, scaleY: 1, rotation: -4, duration: 0.45, ease: "back.out(2.4)" }, TM.yuk - 0.08);
@@ -507,10 +518,13 @@
         const PILLS = ["#pl1", "#pl2", "#pl3", "#pl4"];
         F("#hud", { autoAlpha: 0, y: -30 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }, TM.bahan - 0.02);
         const pillOn = (k, t) => F(PILLS[k] + " .p1", { opacity: 0, scaleX: 0.86, scaleY: 0.86 }, { opacity: 1, scaleX: 1, scaleY: 1, duration: 0.35, ease: "back.out(2.2)" }, t);
-        const pillOk = (k, t) => { F(PILLS[k] + " .p2", { opacity: 0, scaleX: 0.86, scaleY: 0.86 }, { opacity: 1, scaleX: 1, scaleY: 1, duration: 0.35, ease: "back.out(2.2)" }, t); F(PILLS[k] + " .p1", { opacity: 1 }, { opacity: 0, duration: 0.2 }, t + 0.15); };
+        const pillOk = (k, t) => {   // the yellow "done" face pops in opaque at once (a slow crossfade over navy reads olive)
+          F(PILLS[k] + " .p2", { opacity: 0 }, { opacity: 1, duration: 0.08 }, t);
+          F(PILLS[k] + " .p2", { scaleX: 0.78, scaleY: 0.78 }, { scaleX: 1, scaleY: 1, duration: 0.4, ease: "back.out(2.6)" }, t);
+          F(PILLS[k] + " .p1", { opacity: 1 }, { opacity: 0, duration: 0.05 }, t + 0.09); };
         pillOn(0, TM.bahan + 0.25); pillOk(0, TM.l1); pillOn(1, TM.l1 + 0.1); pillOk(1, TM.l2); pillOn(2, TM.l2 + 0.1); pillOk(2, TM.has); pillOn(3, TM.has + 0.1); pillOk(3, TM.laba + 0.15);
         F("#hudA", { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": 169.6 }, duration: TM.has - TM.bahan - 0.1, ease: "none" }, TM.bahan + 0.1);
-        F("#hudH", { rotation: 0, svgOrigin: "50 56" }, { rotation: 360, svgOrigin: "50 56", duration: TM.has - TM.bahan - 0.1, ease: "none" }, TM.bahan + 0.1);
+        F("#hudH", { attr: { transform: ROT(0, 50, 56) } }, { attr: { transform: ROT(360, 50, 56) }, duration: TM.has - TM.bahan - 0.1, ease: "none" }, TM.bahan + 0.1);
         F("#hudR", { rotation: 0 }, { rotation: 9, duration: 0.06, ease: "sine.inOut", yoyo: true, repeat: 7 }, TM.has);   // ding
         F("#hud", { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.3 }, TM.sol - 0.5);
         show("#il1", TM.bahan + 0.3); F("#il1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, TM.bahan + 0.3);
@@ -542,9 +556,9 @@
           F(g.firstChild, { rotation: 0, scaleY: 1 }, { rotation: 200 + k * 40, scaleY: 0.45, duration: d, ease: "none" }, t0);
           F(g.firstChild, { opacity: 1 }, { opacity: 0, duration: 0.08 }, t0 + d - 0.06);
         });
-        INIT(mound, { scaleY: 0, svgOrigin: "240 74" });
+        INIT(mound, { attr: { transform: SCY(0, 74) } });
         const MOUND = [0, 1, 0.5, 0.43, 0.3, 0.27];
-        F(mound, { scaleY: 0, svgOrigin: "240 74" }, { scaleY: 1, svgOrigin: "240 74", duration: 0.7, ease: "power2.out" }, tJ + 0.9);
+        F(mound, { attr: { transform: SCY(0, 74) } }, { attr: { transform: SCY(1, 74) }, duration: 0.7, ease: "power2.out" }, tJ + 0.9);
         F("#bowl", { y: -SH }, { y: -SH + 7, duration: 0.08, ease: "power2.out", yoyo: true, repeat: 1 }, tJ + 0.95);
         // LCD labels (crossfade) and odometer stages
         const LB = ["#lb0", "#lb1", "#lb2", "#lb3", "#lb4", "#lb5", "#lb6", "#lb7"];
@@ -581,13 +595,13 @@
           F(c, { scaleX: 1, scaleY: 1 }, { scaleX: 0.55, scaleY: 0.55, duration: 0.62, ease: "power1.in" }, t0 + 0.38);
           F(c, { opacity: 1 }, { opacity: 0, duration: 0.12 }, t0 + 0.9);
           // the cup fills, ticks and hops
-          INIT("#cm" + (k + 1), { scaleY: 0, svgOrigin: "120 48" });
-          F("#cm" + (k + 1), { scaleY: 0, svgOrigin: "120 48" }, { scaleY: 1, svgOrigin: "120 48", duration: 0.4, ease: "back.out(2)" }, t0 + 0.92);
+          INIT("#cm" + (k + 1), { attr: { transform: SCY(0, 48) } });
+          F("#cm" + (k + 1), { attr: { transform: SCY(0, 48) } }, { attr: { transform: SCY(1, 48) }, duration: 0.4, ease: "back.out(2)" }, t0 + 0.92);
           F("#cup" + (k + 1), { y: 0 }, { y: -26, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1 }, t0 + 0.92);
           POP("#ck" + (k + 1), t0 + 1.0, 0.4, "back.out(2.6)");
         };
         portion(0, TM.krg + 0.05);
-        F(mound, { scaleY: MOUND[1], svgOrigin: "240 74" }, { scaleY: MOUND[2], svgOrigin: "240 74", duration: 0.5, ease: "power2.inOut" }, TM.krg + 0.1);
+        F(mound, { attr: { transform: SCY(MOUND[1], 74) } }, { attr: { transform: SCY(MOUND[2], 74) }, duration: 0.5, ease: "power2.inOut" }, TM.krg + 0.1);
         lab(1, 2, TM.krg + 0.05); roll(2, TM.mb2 - 0.1, 0.7);
         lab(2, 3, TM.lk - 0.05); flash(TM.lk - 0.05, 1);
         RISE(L1A, TM.pj2 - 0.12, 0.018, 0.4); RISE(L1B, TM.krg - 0.02, 0.018, 0.4); RISE(L1C, TM.lk - 0.32, 0.02, 0.42); RISE(L1D, TM.lk - 0.2, 0.024, 0.42);
@@ -600,7 +614,7 @@
         [[TM.ong, 3, "#c1"], [TM.ikl, 4, "#c2"], [TM.kem, 5, "#c3"]].forEach(([t, s, c], q) => {
           F(c, { autoAlpha: 0, y: 26, scaleX: 0.7, scaleY: 0.7 }, { autoAlpha: 1, y: 0, scaleX: 1, scaleY: 1, duration: 0.4, ease: "back.out(2.2)" }, t - 0.1);
           portion(q + 1, t - 0.12);
-          F(mound, { scaleY: MOUND[s - 1], svgOrigin: "240 74" }, { scaleY: MOUND[s], svgOrigin: "240 74", duration: 0.4, ease: "power2.inOut" }, t - 0.05);
+          F(mound, { attr: { transform: SCY(MOUND[s - 1], 74) } }, { attr: { transform: SCY(MOUND[s], 74) }, duration: 0.4, ease: "power2.inOut" }, t - 0.05);
           lab(s, s + 1, t - 0.12); roll(s, t - 0.02, 0.5);
         });
         F("#rl2 .tk", { scaleX: 0, scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.3 }, TM.kem + 0.4);
@@ -619,7 +633,9 @@
           F(g.firstChild, { opacity: 1 }, { opacity: 0, duration: 0.4 }, t + 0.5); });
         F("#bowl", { y: -SH }, { y: -SH - 18, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1 }, TM.laba);
         // focus pull: the shelf and wall go soft behind the result captions while the camera pushes in on the scale
-        F(".cupp, #shelf .pl, .wall", { filter: "blur(0px)" }, { filter: "blur(7px)", duration: 0.8, ease: "power1.inOut" }, TM.has + 0.05);
+        // (the wall is not filtered: a filter forces one surface over the whole 4000 px plane, which the software compositor drops)
+        TS(".cupp, #shelf .pl", { filter: "none" }, 0); tl.set(".cupp, #shelf .pl", { filter: "blur(0px)" }, TM.has + 0.04);
+        tl.fromTo(".cupp, #shelf .pl", { filter: "blur(0px)" }, { filter: "blur(7px)", duration: 0.8, ease: "power1.inOut", immediateRender: false }, TM.has + 0.05);   // not pinned: no filter before the pull
 
         // ----- T · band sweep with the brand marquee (series)
         show("#bands", TM.sol - 0.48);
@@ -639,10 +655,10 @@
         F("#led", { y: 14, z: -60, rotationX: 4, rotationY: -90 }, { y: 10, z: 30, rotationX: 7, rotationY: -8, duration: 0.5, ease: "back.out(1.4)" }, tF + 0.3);
         F("#led", { y: 10, z: 30, rotationX: 7, rotationY: -8 }, { y: 4, z: 40, rotationX: 5, rotationY: -4, duration: TM.end - tF - 0.8, ease: "sine.inOut" }, tF + 0.8);
         F("#solGlow", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 1.2, ease: "power2.out" }, TM.sol + 0.6);
-        INIT("#led .lrow .lin", { opacity: 0, x: -30 });
+        INIT("#led .lrow", { opacity: 0, x: -30 });   // whole rows (their own backgrounds too) slide in
         for (let n = 1; n <= 7; n++) { const t = tF + 0.55 + (n - 1) * 0.11;
-          F(`#lr${n} .lin`, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, t);
-          if (n === 7) { F("#lr7 .fl", { opacity: 0 }, { opacity: 0.45, duration: 0.08 }, t); F("#lr7 .fl", { opacity: 0.45 }, { opacity: 0, duration: 0.5 }, t + 0.1); } }
+          F(`#lr${n}`, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, t); }
+        F("#lr7 em", { scaleX: 0.6, scaleY: 0.6 }, { scaleX: 1, scaleY: 1, duration: 0.45, ease: "back.out(2.6)" }, tF + 0.55 + 6 * 0.11 + 0.1);
         // "dari catatan jualan dan biayamu": the rows that came from each kind of record light up
         const glow = (n, t) => { F(`#lr${n} .fl`, { opacity: 0 }, { opacity: 0.75, duration: 0.1 }, t); F(`#lr${n} .fl`, { opacity: 0.75 }, { opacity: 0, duration: 0.7, ease: "power1.out" }, t + 0.15); };
         glow(1, TM.cat + 0.45); [4, 5, 6].forEach((n, k) => glow(n, TM.bia + 0.05 + k * 0.1)); glow(2, TM.bia + 0.35);

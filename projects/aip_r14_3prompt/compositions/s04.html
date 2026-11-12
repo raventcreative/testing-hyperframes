@@ -1,12 +1,226 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s04-a { position: absolute; }
+    #s04-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s04-glow { left: 20px; top: 330px; width: 1040px; height: 640px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    /* left: the transcript of the raw recording (Whisper) */
+    .s04-pn { position: absolute; left: 90px; top: 404px; width: 540px; height: 522px; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f6f8fd); transform-origin: 50% 50%;
+      box-shadow: 0 40px 70px -34px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.08); font-family: Poppins, sans-serif; overflow: hidden; }
+    .s04-pn .fc { position: absolute; left: 18px; top: 16px; height: 46px; padding: 0 16px 0 48px; border-radius: 15px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff; white-space: nowrap; }
+    .s04-pn .fc svg { position: absolute; left: 14px; top: 12px; width: 22px; height: 22px; display: block; color: #8fd8ff; }
+    .s04-pn .fc b { font: 700 19px/46px Poppins, sans-serif; }
+    .s04-pn .wt { position: absolute; right: 18px; top: 20px; height: 38px; padding: 0 14px 0 40px; border-radius: 19px; background: #eef2f9; color: #294b77; white-space: nowrap; }
+    .s04-pn .wt svg { position: absolute; left: 13px; top: 9px; width: 20px; height: 20px; display: block; }
+    .s04-pn .wt b { font: 700 16px/38px Poppins, sans-serif; }
+    .s04-row { position: absolute; left: 18px; top: 0; width: 504px; height: 56px; border-radius: 16px; transform-origin: 50% 0%; }
+    .s04-row .ts { position: absolute; left: 14px; top: 0; font: 700 15px/56px Poppins, sans-serif; color: #8a9ab8; letter-spacing: .04em; }
+    .s04-row .tx { position: absolute; left: 86px; top: 0; font: 400 22px/56px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s04-row.sp { background: #eef3fb; }
+    .s04-row.si { background: repeating-linear-gradient(135deg, #f1f3f7 0 10px, #e6eaf1 10px 20px); }
+    .s04-row.si .tx, .s04-row.rp .tx { color: #8a9ab8; font-style: italic; }
+    .s04-row.rp { background: #fdf1e8; }
+    .s04-row .sc { position: absolute; right: 12px; top: 10px; width: 36px; height: 36px; border-radius: 50%; background: #0a0d2c; color: #fff; transform-origin: 50% 50%; }
+    .s04-row .sc svg { position: absolute; left: 9px; top: 9px; width: 18px; height: 18px; display: block; }
+    .s04-row .st { position: absolute; left: 84px; top: 27px; height: 3px; border-radius: 2px; background: #d64545; transform-origin: 0% 50%; }
+    #s04-done { left: 18px; top: 278px; height: 52px; padding: 0 18px 0 50px; border-radius: 26px; background: linear-gradient(150deg, #2fb35a, #1a7434); color: #fff; white-space: nowrap; transform-origin: 0% 50%;
+      box-shadow: 0 10px 18px -8px rgba(26,116,52,.8); }
+    #s04-done svg { position: absolute; left: 16px; top: 14px; width: 24px; height: 24px; display: block; }
+    #s04-done b { font: 700 19px/52px Poppins, sans-serif; }
+    /* before / after length bars (no numbers) */
+    .s04-bl { position: absolute; left: 18px; font: 700 16px/24px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    .s04-bt { position: absolute; left: 112px; width: 392px; height: 22px; border-radius: 11px; transform-origin: 0% 50%; }
+    #s04-b0 { top: 384px; background: repeating-linear-gradient(135deg, #d7deea 0 10px, #c6cfdf 10px 20px); }
+    #s04-b1 { top: 430px; background: linear-gradient(90deg, #294b77, #4a7ff0); }
+    #s04-bh { left: 18px; top: 350px; font: 700 14px/20px Poppins, sans-serif; letter-spacing: .14em; color: #8a9ab8; white-space: nowrap; }
+    /* left (later): Claude Code chat, the revision by voice */
+    #s04-chat .hdc { position: absolute; left: 18px; top: 16px; height: 46px; padding: 0 16px 0 50px; border-radius: 23px; background: #fff4ee; box-shadow: inset 0 0 0 1.5px #f3d9cc; white-space: nowrap; }
+    #s04-chat .hdc .r14-cl { position: absolute; left: 13px; top: 11px; width: 24px; height: 24px; }
+    #s04-chat .hdc b { font: 700 18px/46px Poppins, sans-serif; color: #7a3d1f; }
+    #s04-ub { position: absolute; right: 18px; top: 92px; width: 420px; height: 136px; border-radius: 28px 28px 8px 28px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff; transform-origin: 100% 100%;
+      box-shadow: 0 18px 30px -18px rgba(10,13,44,.85); }
+    #s04-ub .mi { position: absolute; left: 20px; top: 18px; height: 34px; padding: 0 14px 0 38px; border-radius: 17px; background: rgba(255,255,255,.14); white-space: nowrap; }
+    #s04-ub .mi svg { position: absolute; left: 12px; top: 8px; width: 18px; height: 18px; display: block; color: #8fd8ff; }
+    #s04-ub .mi b { font: 700 15px/34px Poppins, sans-serif; }
+    #s04-ub .wv { position: absolute; right: 22px; top: 22px; display: flex; gap: 4px; align-items: center; height: 26px; }
+    #s04-ub .wv i { display: block; width: 5px; border-radius: 3px; background: #8fd8ff; }
+    #s04-ub .tx { position: absolute; left: 22px; top: 66px; font: 700 27px/48px Poppins, sans-serif; white-space: nowrap; }
+    #s04-ub .tx span { display: inline-block; margin-right: 9px; }
+    #s04-ab { position: absolute; left: 18px; top: 252px; width: 380px; height: 70px; border-radius: 26px 26px 26px 8px; background: #ffffff; transform-origin: 0% 100%;
+      box-shadow: 0 16px 30px -18px rgba(10,13,44,.5), 0 0 0 1.5px #e3eaf5; white-space: nowrap; }
+    #s04-ab .r14-cl { position: absolute; left: 18px; top: 21px; width: 28px; height: 28px; }
+    #s04-ab b { position: absolute; left: 58px; top: 0; font: 700 20px/70px Poppins, sans-serif; color: #0a0d2c; }
+    /* right: 9:16 preview */
+    #s04-pv { left: 660px; top: 410px; width: 290px; height: 516px; border-radius: 30px; overflow: hidden; transform-origin: 50% 50%;
+      box-shadow: 0 40px 70px -30px rgba(10,13,44,.7), 0 0 0 6px #ffffff, 0 0 0 7.5px rgba(10,13,44,.08); }
+    #s04-pv .bg { position: absolute; inset: 0; background: linear-gradient(170deg, #dde6f4, #b9c9e4); }
+    #s04-pv .bg2 { position: absolute; inset: 0; background: linear-gradient(170deg, #e9f1ff, #c3d6f6); }
+    #s04-pv .hd { position: absolute; left: 100px; top: 128px; width: 90px; height: 90px; border-radius: 50%; background: #6f86ad; }
+    #s04-pv .bd { position: absolute; left: 50px; top: 232px; width: 190px; height: 300px; border-radius: 90px 90px 0 0; background: #4f668f; }
+    #s04-pv .tg { position: absolute; left: 14px; top: 14px; height: 32px; padding: 0 12px 0 30px; border-radius: 16px; background: rgba(10,13,44,.72); color: #fff; font: 700 13px/32px Poppins, sans-serif; letter-spacing: .1em; white-space: nowrap; }
+    #s04-pv .tg i { position: absolute; left: 12px; top: 11px; width: 10px; height: 10px; border-radius: 50%; background: #ff5a5a; }
+    #s04-pv .tg2 { background: linear-gradient(150deg, #2fb35a, #1a7434); }
+    #s04-pv .tg2 i { background: #ffffff; }
+    #s04-cap { position: absolute; left: 0; top: 352px; width: 290px; text-align: center; white-space: nowrap; }
+    #s04-cap span { display: inline-block; margin: 0 3px; padding: 4px 10px; border-radius: 10px; background: #ffffff; color: #0a0d2c; font: 700 24px/32px Poppins, sans-serif; box-shadow: 0 6px 14px -6px rgba(10,13,44,.6); }
+    #s04-cap span.k { background: linear-gradient(150deg, #294b77, #0a0d2c); color: #ffffff; }
+    #s04-sel { position: absolute; left: 22px; top: 342px; width: 246px; height: 60px; border-radius: 14px; border: 3px dashed #0a0d2c; }
+    #s04-q { position: absolute; left: 236px; top: 318px; width: 44px; height: 44px; border-radius: 50%; background: #0a0d2c; color: #fff; font: 700 26px/44px Poppins, sans-serif; text-align: center; transform-origin: 50% 50%; }
+    #s04-upa { position: absolute; left: 246px; top: 410px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(150deg, #2fb35a, #1a7434); color: #fff; }
+    #s04-upa svg { position: absolute; left: 8px; top: 8px; width: 20px; height: 20px; display: block; }
+    #s04-stk { position: absolute; left: 30px; top: 60px; height: 44px; padding: 0 14px 0 40px; border-radius: 14px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff; white-space: nowrap; transform-origin: 0% 50%;
+      box-shadow: 0 10px 18px -8px rgba(10,13,44,.8); }
+    #s04-stk svg { position: absolute; left: 12px; top: 11px; width: 22px; height: 22px; display: block; color: #8fd8ff; }
+    #s04-stk b { font: 700 19px/44px Poppins, sans-serif; letter-spacing: .04em; }
+    #s04-selc { left: 404px; top: 642px; height: 50px; padding: 0 16px 0 46px; border-radius: 16px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff; white-space: nowrap;
+      box-shadow: 0 14px 24px -12px rgba(10,13,44,.85); }
+    #s04-selc svg { position: absolute; left: 14px; top: 13px; width: 22px; height: 22px; display: block; color: #8fd8ff; }
+    #s04-selc b { font: 700 18px/50px Poppins, sans-serif; }
+  </style>
+  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div id="s04-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 11.023);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s04"] = tl;
+      // s04 "Prompt tiga: edit. Masukin video mentahmu, Claude buang jeda, pasang caption, sesuai selera tadi. Kurang pas? Tinggal
+      // bilang, kayak ke editor: caption-nya naikin dikit."
+      // PROMPT 3 card (real text) · "edit.": Salin → Tersalin · fold into the strip · "mentahmu": the raw recording arrives: transcript
+      // rows (Whisper, CONTOH) on the left + 9:16 preview (MENTAH) on the right · "buang jeda": scissors on the pauses and the repeated
+      // take, they collapse, the kept lines close up · "pasang caption": word captions in the preview · "sesuai selera tadi": selera.md
+      // flies into the preview → styled caption + "3 PROMPT" sticker, tag EDIT v1 · "Kurang pas?": dashed selection + "?" · "Tinggal
+      // bilang, kayak ke editor": the transcript turns into the Claude Code chat, a voice bubble · "caption-nya naikin dikit": the words
+      // appear as spoken; on "naikin" the caption moves up, tag EDIT v2, Claude answers. OUT: quick fade (s05 = the three cards).
+      const R14 = window.R14, S = R14.scene("s04"), { D, L, tl, ft, I, $ } = S;
+      const tPr = L("Prompt"), tEd = L("edit."), tMa = L("Masukin"), tMe = L("mentahmu,"), tCl = L("Claude"), tBu = L("buang"), tJe = L("jeda,"), tPa = L("pasang"),
+            tCa = L("caption,"), tSe = L("sesuai"), tSl = L("selera"), tTa = L("tadi."), tKu = L("Kurang"), tPas = L("pas?"), tTi = L("Tinggal"), tKa = L("kayak"), tEdr = L("editor:"),
+            tCn = L("caption-nya"), tNa = L("naikin"), tDi = L("dikit.");
+
+      // ================================================================ DOM
+      const ROWS = [
+        { ts: "00:00", tx: "Oke, jadi gini…", c: "sp" },
+        { ts: "00:02", tx: "(jeda 2 detik)", c: "si", cut: 1 },
+        { ts: "00:04", tx: "aku mau share", c: "sp" },
+        { ts: "00:06", tx: "eh… aku mau share", c: "rp", cut: 1 },
+        { ts: "00:09", tx: "(jeda)", c: "si", cut: 1 },
+        { ts: "00:11", tx: "tiga prompt ini.", c: "sp" },
+      ];
+      const Y0 = (k) => 80 + k * 60, KEEP = { 0: 80, 2: 140, 5: 200 };
+      let h = `<div class="s04-a" id="s04-glow"></div>`;
+      h += `<div class="s04-pn" id="s04-tr"><div class="fc">${R14.svg("film", 2.2)}<b>rekaman.mp4</b></div><div class="wt">${R14.svg("audio", 2.2)}<b>transkrip</b></div>` +
+        ROWS.map((r, k) => `<div class="s04-row ${r.c}" id="s04-r${k}"><span class="ts">${r.ts}</span><span class="tx">${r.tx}</span>` +
+          (r.cut ? `<i class="st" id="s04-st${k}" style="width:${r.tx.length * 11 + 10}px"></i><div class="sc" id="s04-sc${k}">${R14.svg("scissors", 2.4)}</div>` : "") + `</div>`).join("") +
+        `<div class="s04-a" id="s04-done">${R14.svg("check", 3)}<b>Jeda &amp; take ulang dibuang</b></div>` +
+        `<span class="s04-a" id="s04-bh">DURASI VIDEO</span><span class="s04-bl" style="top:383px" id="s04-bl0">mentah</span><div class="s04-bt" id="s04-b0"></div>` +
+        `<span class="s04-bl" style="top:429px" id="s04-bl1">hasil</span><div class="s04-bt" id="s04-b1"></div></div>`;
+      h += `<div class="s04-pn" id="s04-chat"><div class="hdc">${R14.CL}<b>Claude Code</b></div>` +
+        `<div id="s04-ub"><div class="mi">${R14.svg("mic", 2.2)}<b>kamu bilang</b></div><div class="wv">${[10, 18, 26, 14, 22, 12, 20].map((v, i) => `<i id="s04-wv${i}" style="height:${v}px"></i>`).join("")}</div>` +
+        `<div class="tx"><span id="s04-w0">caption-nya</span><span id="s04-w1">naikin</span><span id="s04-w2">dikit</span></div></div>` +
+        `<div id="s04-ab">${R14.CL}<b>Siap, caption dinaikin.</b></div></div>`;
+      h += `<div class="s04-a" id="s04-pv"><div class="bg"></div><div class="bg2" id="s04-bg2"></div><div class="hd"></div><div class="bd"></div>` +
+        `<div class="s04-a" id="s04-stk">${R14.svg("sparkles", 2.2)}<b>3 PROMPT</b></div>` +
+        `<div id="s04-cap"><span id="s04-c0">AKU MAU</span><span id="s04-c1">SHARE</span></div>` +
+        `<div id="s04-sel"></div><div id="s04-q">?</div><div id="s04-upa">${R14.svg("up", 2.6)}</div>` +
+        `<div class="tg" id="s04-tg0"><i></i>MENTAH</div><div class="tg tg2" id="s04-tg1"><i></i>EDIT v1</div><div class="tg tg2" id="s04-tg2"><i></i>EDIT v2</div></div>`;
+      h += `<div class="s04-a" id="s04-selc">${R14.svg("file", 2.2)}<b>selera.md</b></div>`;
+      h += R14.card("s04", 2) + R14.strip("s04", 2) + R14.cursor("s04");
+      $("s04-cam").innerHTML = h;
+      const glow = $("s04-glow"), tr = $("s04-tr"), chat = $("s04-chat"), pv = $("s04-pv"), done = $("s04-done"), selc = $("s04-selc"), cap = $("s04-cap");
+      I($("s04-cam"), { x: 0, y: 0 });
+      I(glow, { opacity: 0.5 }); ft(glow, { opacity: 0.5 }, { opacity: 0.9, duration: 0.4 }, 0);
+
+      // ================================================================ PROMPT CARD
+      R14.cardIn(S, "s04", Math.max(0.0, tPr - 0.18));
+      R14.cardCopy(S, "s04", tEd + 0.12);
+      R14.cardOut(S, "s04", tMa + 0.25);
+
+      // ================================================================ raw recording arrives
+      const tIn = tMe - 0.05;
+      I(tr, { opacity: 0, x: -60, scale: 0.92 });
+      ft(tr, { opacity: 0, x: -60, scale: 0.92 }, { opacity: 1, x: 0, scale: 1, duration: 0.4, ease: "back.out(1.4)" }, tIn);
+      I(pv, { opacity: 0, x: 60, scale: 0.92 });
+      ft(pv, { opacity: 0, x: 60, scale: 0.92 }, { opacity: 1, x: 0, scale: 1, duration: 0.4, ease: "back.out(1.4)" }, tIn + 0.06);
+      ROWS.forEach((r, k) => {
+        const e = $("s04-r" + k);
+        I(e, { opacity: 0, y: Y0(k) + 16, scaleY: 1 });
+        ft(e, { opacity: 0, y: Y0(k) + 16 }, { opacity: 1, y: Y0(k), duration: 0.24, ease: "power2.out" }, tIn + 0.25 + k * 0.07);
+        if (r.cut) { I($("s04-st" + k), { scaleX: 0 }); I($("s04-sc" + k), { opacity: 0, scale: 0.3 }); }
+      });
+      // "Claude buang jeda": scissors + strike on the pauses and the repeated take, they collapse, kept lines close up
+      ROWS.forEach((r, k) => {
+        if (!r.cut) return;
+        const j = [1, 3, 4].indexOf(k), t = tBu - 0.15 + j * 0.12;
+        ft($("s04-sc" + k), { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(3)" }, t);
+        ft($("s04-st" + k), { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power2.out" }, t + 0.08);
+        ft($("s04-r" + k), { opacity: 1, scaleY: 1 }, { opacity: 0, scaleY: 0.2, duration: 0.24, ease: "power2.in" }, tJe + 0.1 + j * 0.05);
+      });
+      [2, 5].forEach((k) => ft($("s04-r" + k), { y: Y0(k) }, { y: KEEP[k], duration: 0.34, ease: "power3.inOut" }, tJe + 0.3));
+      I(done, { opacity: 0, scaleX: 0.5 });
+      ft(done, { opacity: 0, scaleX: 0.5 }, { opacity: 1, scaleX: 1, duration: 0.3, ease: "back.out(2)" }, tJe + 0.66);
+      // length bars: raw vs result (the result bar shrinks as the pauses go)
+      const bh = $("s04-bh"), b0 = $("s04-b0"), b1 = $("s04-b1"), bl0 = $("s04-bl0"), bl1 = $("s04-bl1");
+      [bh, bl0, bl1].forEach((e) => I(e, { opacity: 0 })); I(b0, { opacity: 0, scaleX: 0.2 }); I(b1, { opacity: 0, scaleX: 1 });
+      const tB = tJe + 0.74;  // after the cut rows have collapsed (the rows used to sit where the bars go)
+      ft(bh, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tB);
+      ft(bl0, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tB + 0.05);
+      ft(b0, { opacity: 0, scaleX: 0.2 }, { opacity: 1, scaleX: 1, duration: 0.35, ease: "power2.out" }, tB + 0.05);
+      ft(bl1, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tB + 0.15);
+      ft(b1, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tB + 0.15);
+      ft(b1, { scaleX: 1 }, { scaleX: 0.6, duration: 0.5, ease: "power3.inOut" }, tB + 0.4);
+
+      // preview: tags, caption, selera, sticker
+      const tg0 = $("s04-tg0"), tg1 = $("s04-tg1"), tg2 = $("s04-tg2"), bg2 = $("s04-bg2"), stk = $("s04-stk");
+      I(tg0, { opacity: 1 }); I(tg1, { opacity: 0 }); I(tg2, { opacity: 0 }); I(bg2, { opacity: 0 });
+      I(cap, { y: 0 }); I($("s04-c0"), { opacity: 0, y: 14, scale: 0.7 }); I($("s04-c1"), { opacity: 0, y: 14, scale: 0.7 });
+      ft($("s04-c0"), { opacity: 0, y: 14, scale: 0.7 }, { opacity: 1, y: 0, scale: 1, duration: 0.24, ease: "back.out(2.5)" }, tPa + 0.02);
+      ft($("s04-c1"), { opacity: 0, y: 14, scale: 0.7 }, { opacity: 1, y: 0, scale: 1, duration: 0.24, ease: "back.out(2.5)" }, tCa + 0.02);
+      // "sesuai selera tadi": the selera.md chip flies into the preview
+      I(selc, { opacity: 0, x: -260, y: -120, scale: 0.8 });
+      ft(selc, { opacity: 0, x: -260, y: -120, scale: 0.8 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.36, ease: "power2.out" }, tSe - 0.1);
+      ft(selc, { x: 0, y: 0, scale: 1, opacity: 1 }, { x: 330, y: 0, scale: 0.4, opacity: 0, duration: 0.3, ease: "power2.in" }, tSl + 0.05);
+      ft(pv, { scale: 1 }, { scale: 1.04, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tSl + 0.32);
+      ft(bg2, { opacity: 0 }, { opacity: 1, duration: 0.3 }, tSl + 0.3);
+      I($("s04-c1"), { backgroundColor: "#ffffff", color: "#0a0d2c" });
+      ft($("s04-c1"), { backgroundColor: "#ffffff", color: "#0a0d2c" }, { backgroundColor: "#0a0d2c", color: "#ffffff", duration: 0.2 }, tSl + 0.34);
+      ft($("s04-c1"), { scale: 1 }, { scale: 1.12, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tSl + 0.36);
+      I(stk, { opacity: 0, scale: 0.4, rotation: -10 });
+      ft(stk, { opacity: 0, scale: 0.4, rotation: -10 }, { opacity: 1, scale: 1, rotation: -4, duration: 0.32, ease: "back.out(2.6)" }, tTa - 0.1);
+      ft(tg0, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tSl + 0.3);
+      ft(tg1, { opacity: 0 }, { opacity: 1, duration: 0.15 }, tSl + 0.34);
+
+      // "Kurang pas?": dashed selection on the caption + "?"
+      const sel = $("s04-sel"), q = $("s04-q"), upa = $("s04-upa");
+      I(sel, { opacity: 0, scale: 1.2 }); I(q, { opacity: 0, scale: 0.3 }); I(upa, { opacity: 0, y: 20 });
+      ft(sel, { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2)" }, tKu - 0.08);
+      ft(q, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(3)" }, tPas - 0.08);
+
+      // "Tinggal bilang, kayak ke editor": transcript → Claude Code chat, voice bubble
+      ft(tr, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.94, duration: 0.24, ease: "power2.in" }, tTi - 0.1);
+      I(chat, { opacity: 0, scale: 0.94 });
+      ft(chat, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.6)" }, tTi + 0.08);
+      const ub = $("s04-ub"), ab = $("s04-ab");
+      I(ub, { opacity: 0, scale: 0.6 }); I(ab, { opacity: 0, scale: 0.6 });
+      ft(ub, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.2)" }, tKa - 0.05);
+      for (let i = 0; i < 7; i++) {   // voice meter bars bounce while it listens (deterministic)
+        const e = $("s04-wv" + i); I(e, { scaleY: 0.5 });
+        ft(e, { scaleY: 0.5 }, { scaleY: 1.25, duration: 0.14 + (i % 3) * 0.03, yoyo: true, repeat: 12, ease: "sine.inOut" }, tKa + 0.2 + i * 0.04);
+      }
+      [tCn, tNa, tDi].forEach((t, i) => { const w = $("s04-w" + i); I(w, { opacity: 0, y: 10 }); ft(w, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, t - 0.06); });
+      // "naikin": the caption moves up, EDIT v2, Claude answers
+      ft(cap, { y: 0 }, { y: -118, duration: 0.42, ease: "power3.inOut" }, tNa + 0.05);
+      ft(sel, { y: 0, opacity: 1 }, { y: -118, opacity: 0, duration: 0.42, ease: "power3.inOut" }, tNa + 0.05);
+      ft(q, { opacity: 1 }, { opacity: 0, duration: 0.15 }, tNa);
+      ft(upa, { opacity: 0, y: 20 }, { opacity: 1, y: -60, duration: 0.42, ease: "power2.out" }, tNa + 0.05);
+      ft(upa, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tNa + 0.5);
+      ft(tg1, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tNa + 0.3);
+      ft(tg2, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.5)" }, tNa + 0.32);
+      ft(ab, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(2.2)" }, tDi - 0.06);
+
+      // ================================================================ OUT → s05 (fast: the next line starts right away)
+      const tOut = D - 0.22;
+      [pv, chat, $("s04-strip"), stk].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.18, ease: "power2.in" }, tOut + i * 0.01));
+      ft(glow, { opacity: 0.9 }, { opacity: 0.5, duration: 0.2 }, tOut);
+
+      S.done();
     })();
   </script>
 </template>

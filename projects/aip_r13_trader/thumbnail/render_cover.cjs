@@ -1,4 +1,4 @@
-// Renders thumbnail/cover.html to PNG. Usage (from project root, static server on :8829): node thumbnail/render_cover.cjs <out.png> [query]
+// Renders thumbnail/cover.html to PNG. Usage (from project root, static server on :8933): node thumbnail/render_cover.cjs <out.png> [query]
 // Also prints the rects of the key layers (and any text that overflows its box) so overlaps can be checked numerically.
 const { chromium } = require("playwright");
 (async () => {
@@ -9,16 +9,16 @@ const { chromium } = require("playwright");
   p.on("pageerror", (e) => console.error("pageerror", e.message));
   p.on("requestfailed", (r) => console.error("requestfailed", r.url()));
   p.on("response", (r) => { if (r.status() >= 400) console.error("http", r.status(), r.url()); });
-  await p.goto("http://127.0.0.1:8829/thumbnail/cover.html" + (process.argv[3] ? "?" + process.argv[3] : ""), { timeout: 600000 });
+  await p.goto("http://127.0.0.1:8933/thumbnail/cover.html" + (process.argv[3] ? "?" + process.argv[3] : ""), { timeout: 600000 });
   await p.evaluate(() => window.COVER_READY);
   await p.waitForTimeout(300);
   const info = await p.evaluate(() => {
     const R = (e) => { const b = e.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top), Math.round(b.right), Math.round(b.bottom)]; };
     const r = (s) => { const e = document.querySelector(s); return e ? `${s} ${R(e).join(" ")}` : `${s} MISSING`; };
-    const rows = ["#logo", "#chip > span", "#l1", "#h1", "#l3"].map(r);
+    const rows = ["#logo", "#chip > span", "#l1", "#h1", "#l3", "#disc > span"].map(r);
     for (const sel of ["#l1", "#h1", "#l3"]) { const e = document.querySelector(sel), g = document.createRange(); g.selectNodeContents(e); const b = g.getBoundingClientRect(); rows.push(`${sel} text x ${Math.round(b.left)}-${Math.round(b.right)} y ${Math.round(b.top)}-${Math.round(b.bottom)}`); }
-    document.querySelectorAll(".k-tile").forEach((e) => rows.push(`${e.id} ${R(e).join(" ")}`));
-    document.querySelectorAll(".k-tile .c, .k-tile .l").forEach((e) => { const t = e.getBoundingClientRect(), b = e.closest(".k-tile").getBoundingClientRect(); if (t.right > b.right - 6) rows.push(`OVERFLOW tile ${e.textContent} ${Math.round(t.right)} > ${Math.round(b.right)}`); });
+    document.querySelectorAll(".k-shelf, .k-chip").forEach((e) => rows.push(`${e.id} ${R(e).join(" ")}`));
+    document.querySelectorAll(".k-chip .c, .k-chip .l, .k-shelf .ct").forEach((e) => { const t = e.getBoundingClientRect(), b = e.parentElement.getBoundingClientRect(); if (t.right > b.right - 6) rows.push(`OVERFLOW ${e.textContent} ${Math.round(t.right)} > ${Math.round(b.right)}`); });
     return rows.join("\n");
   });
   console.log(info);

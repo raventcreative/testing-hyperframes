@@ -1,12 +1,100 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s05-a { position: absolute; }
+    #s05-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s05-glow { left: 20px; top: 330px; width: 1040px; height: 640px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    /* the three prompts as mini cards */
+    .s05-m { position: absolute; top: 420px; width: 270px; height: 330px; transform-origin: 50% 60%; font-family: Poppins, sans-serif; }
+    .s05-m .cb { position: absolute; inset: 0; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 40px 64px -32px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s05-m .num { position: absolute; left: 24px; top: 24px; width: 84px; height: 84px; border-radius: 26px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff; font: 700 48px/84px Poppins, sans-serif; text-align: center;
+      box-shadow: 0 14px 24px -12px rgba(10,13,44,.8); }
+    .s05-m .lab { position: absolute; left: 26px; top: 128px; font: 700 15px/20px Poppins, sans-serif; letter-spacing: .16em; color: #5d6f8f; white-space: nowrap; }
+    .s05-m .tt { position: absolute; left: 24px; top: 150px; font: 700 34px/44px Poppins, sans-serif; white-space: nowrap; }
+    .s05-m .sb { position: absolute; left: 26px; top: 196px; width: 226px; font: 400 17px/24px Poppins, sans-serif; color: #5d6f8f; }
+    .s05-m .vl { position: absolute; inset: 0; border-radius: 30px; background: rgba(244,248,254,.55); }
+    .s05-m .tk { position: absolute; right: 22px; top: 30px; width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(150deg, #2fb35a, #1a7434); color: #fff; box-shadow: 0 8px 14px -6px rgba(26,116,52,.8); }
+    .s05-m .tk svg { position: absolute; left: 11px; top: 11px; width: 24px; height: 24px; display: block; }
+    .s05-stp { position: absolute; left: 30px; top: 262px; width: 210px; height: 50px; border-radius: 14px; border: 3.5px solid #0a0d2c; color: #0a0d2c; text-align: center; transform-origin: 50% 50%;
+      font: 700 20px/43px Poppins, sans-serif; letter-spacing: .12em; white-space: nowrap; background: rgba(255,255,255,.85); }
+    #s05-loop { left: 744px; top: 680px; width: 222px; height: 52px; border-radius: 26px; background: linear-gradient(150deg, #294b77, #0a0d2c); color: #fff; white-space: nowrap; transform-origin: 50% 50%;
+      box-shadow: 0 14px 24px -12px rgba(10,13,44,.85); text-align: center; }
+    #s05-loop svg { display: inline-block; vertical-align: -5px; width: 22px; height: 22px; margin-right: 8px; color: #8fd8ff; }
+    #s05-loop b { font: 700 18px/52px Poppins, sans-serif; }
+    #s05-ring { left: 708px; top: 408px; width: 294px; height: 354px; border-radius: 40px; box-shadow: 0 0 0 4px rgba(74,127,240,.55), 0 0 40px rgba(74,127,240,.35); }
+    /* next videos */
+    .s05-v { position: absolute; top: 792px; width: 196px; height: 58px; border-radius: 18px; background: #ffffff; transform-origin: 50% 50%; white-space: nowrap; font-family: Poppins, sans-serif;
+      box-shadow: 0 16px 28px -16px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s05-v i { position: absolute; left: 12px; top: 11px; width: 36px; height: 36px; border-radius: 11px; background: #eef2f9; color: #294b77; }
+    .s05-v i svg { position: absolute; left: 8px; top: 8px; width: 20px; height: 20px; display: block; }
+    .s05-v b { position: absolute; left: 58px; top: 0; font: 700 17px/58px Poppins, sans-serif; color: #0a0d2c; }
+  </style>
+  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920">
+    <div id="s05-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.157);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s05"] = tl;
+      // s05 "Prompt satu dan dua cukup sekali. Video berikutnya, tinggal prompt tiga."
+      // the three prompts as mini cards side by side · "satu" / "dua": cards 1, 2 pulse · "sekali.": stamps "SEKALI AJA" + ticks,
+      // cards 1–2 settle back · "Video berikutnya": three new video files slide in underneath · "tinggal prompt tiga": card 3 lifts with a
+      // glow ring + "tiap video baru" (loop), the files fly into it one by one. END STATE (t = D): three plain mini cards (s06 starts there).
+      const R14 = window.R14, S = R14.scene("s05"), { D, L, tl, ft, I, $ } = S;
+      const tSa = L("satu"), tDu = L("dua"), tSe = L("sekali."), tVi = L("Video"), tBe = L("berikutnya,"), tTi = L("tinggal"), tPr = L("prompt"), tTg = L("tiga.");
+      const X = [90, 405, 720], P = R14.P;
+      let h = `<div class="s05-a" id="s05-glow"></div><div class="s05-a" id="s05-ring"></div>`;
+      P.forEach((q, i) => {
+        h += `<div class="s05-m" id="s05-m${i}" style="left:${X[i]}px"><div class="cb"></div><div class="num">${q.n}</div><span class="lab">PROMPT ${q.n}</span><b class="tt r14-grad">${q.title}</b>` +
+          `<span class="sb">${q.sub}</span><div class="vl" id="s05-vl${i}"></div>` + (i < 2 ? `<div class="tk" id="s05-tk${i}">${R14.svg("check", 3)}</div><div class="s05-stp" id="s05-st${i}">SEKALI AJA</div>` : "") + `</div>`;
+      });
+      ["video-02.mp4", "video-03.mp4", "video-04.mp4"].forEach((v, i) => { h += `<div class="s05-v" id="s05-v${i}" style="left:${90 + i * 214}px"><i>${R14.svg("film", 2.2)}</i><b>${v}</b></div>`; });
+      h += `<div class="s05-a" id="s05-loop">${R14.svg("refresh", 2.4)}<b>tiap video baru</b></div>`;
+      $("s05-cam").innerHTML = h;
+      const glow = $("s05-glow"), ring = $("s05-ring"), loop = $("s05-loop");
+      I($("s05-cam"), { x: 0, y: 0 });
+      I(glow, { opacity: 0.5 }); ft(glow, { opacity: 0.5 }, { opacity: 0.9, duration: 0.4 }, 0);
+
+      // cards deal in (left → right)
+      P.forEach((q, i) => {
+        const m = $("s05-m" + i);
+        I(m, { opacity: 0, y: -60, scale: 0.8 });
+        ft(m, { opacity: 0, y: -60, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.7)" }, 0.0 + i * 0.07);
+        I($("s05-vl" + i), { opacity: 0 });
+      });
+      ft($("s05-m0"), { scale: 1 }, { scale: 1.06, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tSa - 0.05);
+      ft($("s05-m1"), { scale: 1 }, { scale: 1.06, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tDu - 0.05);
+      // "sekali.": stamps + ticks, then cards 1–2 veil a little (done)
+      [0, 1].forEach((i) => {
+        const st = $("s05-st" + i), tk = $("s05-tk" + i);
+        I(st, { opacity: 0, scale: 1.8, rotation: -14 }); I(tk, { opacity: 0, scale: 0.3 });
+        ft(st, { opacity: 0, scale: 1.8, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.26, ease: "power3.in" }, tSe - 0.12 + i * 0.1);
+        ft(tk, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(3)" }, tSe + 0.12 + i * 0.1);
+        ft($("s05-vl" + i), { opacity: 0 }, { opacity: 1, duration: 0.3 }, tVi - 0.1);
+      });
+      // "Video berikutnya": files slide in
+      [0, 1, 2].forEach((i) => {
+        const v = $("s05-v" + i);
+        I(v, { opacity: 0, x: -120 });
+        ft(v, { opacity: 0, x: -120 }, { opacity: 1, x: 0, duration: 0.34, ease: "back.out(1.6)" }, tVi - 0.08 + i * 0.09);
+      });
+      // "tinggal prompt tiga": card 3 lifts + ring + loop; files fly into it
+      const m2 = $("s05-m2");
+      I(ring, { opacity: 0, scale: 0.94 }); I(loop, { opacity: 0, scale: 0.5 });
+      ft(m2, { y: 0, scale: 1 }, { y: -16, scale: 1.04, duration: 0.3, ease: "back.out(2)" }, tTi - 0.1);
+      ft(ring, { opacity: 0, scale: 0.94, y: 0 }, { opacity: 1, scale: 1, y: -16, duration: 0.3, ease: "power2.out" }, tTi - 0.1);
+      ft(loop, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, tPr - 0.05);
+      [0, 1, 2].forEach((i) => {
+        const v = $("s05-v" + i), dx = 855 - (90 + i * 214 + 98), dy = 560 - 821, t = tPr + 0.02 + i * 0.16;
+        ft(v, { x: 0, y: 0, scale: 1, opacity: 1 }, { x: dx, y: dy, scale: 0.3, opacity: 0, duration: 0.3, ease: "power2.in" }, t);
+        ft(m2, { scale: 1.04 }, { scale: 1.08, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, t + 0.28);
+      });
+
+      // END → s06: back to three plain mini cards
+      const tOut = D - 0.3;
+      [0, 1].forEach((i) => { ft($("s05-st" + i), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut); ft($("s05-tk" + i), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut); ft($("s05-vl" + i), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut); });
+      ft(m2, { y: -16, scale: 1.04 }, { y: 0, scale: 1, duration: 0.24, ease: "power2.inOut" }, tOut);
+      ft(ring, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut); ft(loop, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut);
+
+      S.done();
     })();
   </script>
 </template>

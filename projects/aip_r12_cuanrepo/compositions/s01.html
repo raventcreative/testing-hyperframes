@@ -1,12 +1,77 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920"></div>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s01-a { position: absolute; }
+    #s01-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s01-glow { left: 20px; top: 260px; width: 1040px; height: 780px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    #s01-qm { left: 0; top: 0; width: 0; height: 0; }
+    #s01-qm i { position: absolute; left: -48px; top: -48px; width: 96px; height: 96px; border-radius: 50%; background: #f4b400; color: #0a0d2c; font: 700 60px/96px Poppins, sans-serif; text-align: center; font-style: normal;
+      box-shadow: 0 16px 30px -12px rgba(217,154,0,.85), 0 0 0 6px rgba(255,255,255,.9); }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-cam"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.957);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s01"] = tl;
+      // s01 HOOK "Resep nasi goreng gratis, tapi kamu tetap beli di warung, kan?"
+      // Frame 0: a recipe card "Nasi Goreng" is already on screen, big and centred; its ingredients tick off one by one ·
+      // "gratis,": a green GRATIS stamp slams onto it · "tapi": the recipe slides left, a WARUNG card (striped navy awning, a plate of
+      // nasi goreng — own SVG — steaming) slides in on the right · "beli": a "Tetap dibeli" pill pops · "warung,": the awning bounces ·
+      // "kan?": a gold "?" pops between the two. END STATE (hand-over to s02 at identical positions): recipe card (left, -4°) with the
+      // stamp, warung card (right, 3°) with the pill, glow; the "?" is gone.
+      const ID = "s01", K = window.K, S = K.boot(ID), { D, L, ft, I, $ } = S, tl = S.tl;
+      const tRes = L("Resep"), tGra = L("gratis,"), tTap = L("tapi"), tBel = L("beli"), tWar = L("warung,"), tKan = L("kan?");
+
+      let h = `<div class="s01-a" id="s01-glow"></div>` + K.recipe("s01") + K.warung("s01") + `<div class="s01-a" id="s01-qm"><i>?</i></div>`;
+      $("s01-cam").innerHTML = h;
+      $("s01-rc").insertAdjacentHTML("beforeend", `<div class="k-stamp" id="s01-st" style="left:190px;top:330px">GRATIS</div>`);
+      const cam = $("s01-cam"), glow = $("s01-glow"), rc = $("s01-rc"), wr = $("s01-wr"), st = $("s01-st"), qm = $("s01-qm");
+      I(cam, { x: 0, y: 0 });
+      I(glow, { opacity: 0.85, scale: 1 });
+      // only the recipe's front face + the warung's first state exist in this scene
+      I($("s01-rb"), { opacity: 0 });
+      ["mt", "ms", "kl", "m0", "m1", "m2", "m3", "m4"].forEach((k) => I($("s01-" + k), { opacity: 0 }));
+
+      // ================================================================ frame 0: the recipe, big and centred · ingredients tick
+      I(rc, { opacity: 1, x: 246, y: 30, scale: 1.22, rotation: -2 });
+      ft(rc, { y: 30 }, { y: 12, duration: 0.6, ease: "power3.out" }, 0);
+      for (let i = 0; i < 5; i++) {
+        const k = $("s01-k" + i), t = Math.max(0.12, tRes) + i * ((tGra - 0.3 - tRes) / 5);
+        I(k, { opacity: 0, scale: 0.3 });
+        ft(k, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.18, ease: "back.out(3)" }, t);
+      }
+      // "gratis,": the stamp slams
+      I(st, { opacity: 0, scale: 1.9, rotation: -4 });
+      ft(st, { opacity: 0, scale: 1.9, rotation: -4 }, { opacity: 1, scale: 1, rotation: -12, duration: 0.2, ease: "power3.in" }, tGra - 0.16);
+      ft(rc, { scale: 1.22 }, { scale: 1.18, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, tGra + 0.04);
+      S.shake(cam, tGra + 0.05, 5);
+
+      // ================================================================ "tapi": recipe moves left, the warung slides in
+      ft(rc, { x: 246, y: 12, scale: 1.22, rotation: -2 }, { x: 0, y: 0, scale: 1, rotation: -4, duration: 0.5, ease: "power3.inOut" }, tTap - 0.16);
+      I(wr, { opacity: 0, x: 460, rotation: 9, scale: 0.96 });
+      ft(wr, { opacity: 0, x: 460, rotation: 9, scale: 0.96 }, { opacity: 1, x: 0, rotation: 3, scale: 1, duration: 0.5, ease: "power3.out" }, tTap - 0.08);
+      // steam: a pure function of GLOBAL time (continues into s02)
+      const ST = S.ST;
+      document.querySelectorAll("#s01-steam .stm").forEach((p, k) => {
+        I(p, { attr: { "stroke-dashoffset": -(ST * 0.55 + k * 0.3) } });
+        ft(p, { attr: { "stroke-dashoffset": -(ST * 0.55 + k * 0.3) } }, { attr: { "stroke-dashoffset": -((ST + D) * 0.55 + k * 0.3) }, duration: D, ease: "none" }, 0);
+      });
+      // "beli": the pill pops
+      const by = $("s01-by");
+      I(by, { opacity: 0, scale: 0.4, y: 10 });
+      ft(by, { opacity: 0, scale: 0.4, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.28, ease: "back.out(2.4)" }, tBel - 0.1);
+      // "warung,": awning bounce + sign pulse
+      const aw = wr.querySelector(".aw"), sg = $("s01-sg");
+      I(aw, { scaleY: 1, transformOrigin: "50% 0%" }); I(sg, { scale: 1 });
+      ft(aw, { scaleY: 1 }, { scaleY: 1.14, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tWar - 0.06);
+      ft(sg, { scale: 1 }, { scale: 1.08, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tWar);
+      // "kan?": the "?" pops between the two cards, then leaves before the cut
+      I(qm, { opacity: 0, x: 540, y: 598, scale: 0.3, rotation: 0 });
+      ft(qm, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(3)" }, tKan - 0.1);
+      ft(qm, { rotation: 0 }, { rotation: 12, duration: 0.12, yoyo: true, repeat: 1, ease: "sine.inOut" }, tKan + 0.16);
+      ft(qm, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.5, duration: 0.16, ease: "power2.in" }, D - 0.2);
+
+      S.done();
     })();
   </script>
 </template>

@@ -137,6 +137,23 @@
   .k-stamp svg{width:26px;height:26px}
   .k-ok{background:#2da44e;box-shadow:0 10px 24px rgba(20,90,40,.45)}
   .k-no{background:#e5484d;box-shadow:0 10px 24px rgba(120,10,20,.45)}
+  .k-pz{position:absolute;transform-origin:50% 100%}
+  .k-pzg{background:linear-gradient(180deg,rgba(63,208,122,.34),rgba(63,208,122,.14));transform-origin:50% 100%}
+  .k-pzr{background:linear-gradient(180deg,rgba(255,107,94,.14),rgba(255,107,94,.34));transform-origin:50% 0%}
+  .k-pl{position:absolute;height:0;transform-origin:0% 50%}
+  .k-pdot{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.25),0 0 16px rgba(1,204,247,.8)}
+  .k-ptag{position:absolute;left:812px;width:132px;height:52px;border-radius:14px;transform-origin:0% 50%}
+  .k-ptag i{position:absolute;left:12px;top:5px;font:700 12px/16px Poppins;letter-spacing:1.5px;font-style:normal;white-space:nowrap}
+  .k-ptag b{position:absolute;left:12px;top:21px;font:700 23px/28px Poppins;white-space:nowrap}
+  .k-ptt{background:#2da44e;color:#fff}.k-ptt i{color:rgba(255,255,255,.85)}
+  .k-pte{background:#ffffff;color:#0a0d2c}.k-pte i{color:#0a7ea4}
+  .k-pts{background:#e5484d;color:#fff}.k-pts i{color:rgba(255,255,255,.85)}
+  .k-ptk{position:absolute;left:24px;top:20px;height:44px;padding:0 18px 0 10px;border-radius:22px;background:#ffffff;color:#0a0d2c;display:flex;align-items:center;gap:8px;font:700 20px/44px Poppins;white-space:nowrap}
+  .k-ptk svg{width:24px;height:24px;color:#0a7ea4}
+  .k-pnote{position:absolute;top:380px;height:44px;padding:0 18px 0 12px;border-radius:22px;display:flex;align-items:center;gap:8px;font:400 19px/44px Poppins;color:#e3edfa;
+    background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.16);white-space:nowrap}
+  .k-pnote svg{width:22px;height:22px;color:#5be08a}
+  .k-pnote b{font-weight:700;color:#6adfff;margin-left:6px}
   .k-demo{position:absolute;height:30px;padding:0 12px;border-radius:15px;font:700 15px/30px Poppins;letter-spacing:1.5px;color:#b8c7dd;
     background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1.2px rgba(255,255,255,.22);white-space:nowrap}
   `;
@@ -216,6 +233,48 @@
     for (let j = A + 1; j <= B; j++) ft($(`${P}-hg${j}`), { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.out" }, t + 0.22 + (j - A - 1) * 0.05);
     ft($(`${P}-hglow`), { opacity: 0 }, { opacity: 1, duration: 0.14, ease: "power2.out" }, t + 0.05);
     ft($(`${P}-hglow`), { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, t + 0.19);
+  };
+
+  // ------------------------------------------------------------------ PLAN CHART (t2 → s05, handed over 1:1)
+  // card at global (60, 484), 960 x 446. Card-local: candles x 30..500, entry y 240 (1.000), stop y 320 (970), target y 160 (1.030),
+  // zones x 520..800, price tags x 812..944. All prices are an illustration ("contoh"), 1R = 30.
+  K.PL = { x: 60, y: 484, w: 960, h: 446, ye: 240, ys: 320, yt: 160, zx: 520, zw: 280 };
+  K.py = (p) => 240 - (p - 1000) * (80 / 30);
+  K.PCND = [[972, 968, 975, 963], [968, 964, 970, 960], [964, 970, 972, 962], [970, 967, 973, 964], [967, 974, 976, 965], [974, 971, 977, 969],
+    [971, 977, 980, 970], [977, 980, 983, 975], [980, 977, 982, 974], [977, 985, 987, 976], [985, 991, 993, 983], [991, 1000, 1002, 989]];
+  K.planHTML = (P) => {
+    const L = K.PL, X = (i) => 30 + i * 40;
+    let svg = `<svg id="${P}-pcs" width="520" height="446" viewBox="0 0 520 446" style="position:absolute;left:0;top:0;overflow:visible">`;
+    for (let g = 0; g < 5; g++) svg += `<line x1="24" x2="944" y1="${100 + g * 70}" y2="${100 + g * 70}" stroke="rgba(255,255,255,.06)" stroke-width="1.5"/>`;
+    K.PCND.forEach(([o, c, h, l], i) => {
+      const up = c >= o, col = up ? "#3fd07a" : "#ff6b5e", x = X(i);
+      svg += `<g id="${P}-pk${i}"><line x1="${x + 12}" x2="${x + 12}" y1="${K.py(h).toFixed(1)}" y2="${K.py(l).toFixed(1)}" stroke="${col}" stroke-width="3"/>` +
+        `<rect x="${x}" y="${K.py(Math.max(o, c)).toFixed(1)}" width="24" height="${Math.max(4, Math.abs(K.py(o) - K.py(c))).toFixed(1)}" rx="4" fill="${col}"/></g>`;
+    });
+    svg += `</svg>`;
+    const tag = (id, cls, lab, val, y) => `<div class="k-ptag ${cls}" id="${P}-${id}" style="top:${y - 26}px"><i>${lab}</i><b>${val}</b></div>`;
+    return `<div class="k-glass" id="${P}-pc" style="width:960px;height:446px;overflow:hidden">${svg}` +
+      `<div class="k-pz k-pzg" id="${P}-pzg" style="left:${L.zx}px;top:${L.yt}px;width:${L.zw}px;height:${L.ye - L.yt}px"></div>` +
+      `<div class="k-pz k-pzr" id="${P}-pzr" style="left:${L.zx}px;top:${L.ye}px;width:${L.zw}px;height:${L.ys - L.ye}px"></div>` +
+      `<div class="k-pl" id="${P}-ple" style="left:30px;top:${L.ye - 1.5}px;width:${L.zx + L.zw - 30}px;border-top:3px dashed #e3edfa"></div>` +
+      `<div class="k-pl" id="${P}-plt" style="left:${L.zx}px;top:${L.yt - 1.5}px;width:${L.zw}px;border-top:3px solid #3fd07a"></div>` +
+      `<div class="k-pl" id="${P}-pls" style="left:${L.zx}px;top:${L.ys - 1.5}px;width:${L.zw}px;border-top:3px solid #ff6b5e"></div>` +
+      `<div class="k-pdot" id="${P}-pdot" style="left:${30 + 11 * 40 + 12 - 9}px;top:${L.ye - 9}px"></div>` +
+      tag("ptt", "k-ptt", "TARGET", "1.030", L.yt) + tag("pte", "k-pte", "MASUK", "1.000", L.ye) + tag("pts", "k-pts", "STOP LOSS", "970", L.ys) +
+      `<div id="${P}-ptk" class="k-ptk">${K.svg("candle")}SAHAM A</div><div class="k-demo" id="${P}-pdm" style="left:786px;top:22px">contoh</div>` +
+      `<div class="k-pnote" id="${P}-pn1" style="left:24px">${K.svg("check")}dipasang sebelum beli</div>` +
+      `<div class="k-pnote" id="${P}-pn2" style="left:330px">rasio risiko : potensi = <b>1 : 1</b></div></div>`;
+  };
+
+  K.planSetFinal = (S, P) => {
+    const { I, $ } = S;
+    I($(`${P}-pc`), { x: K.PL.x, y: K.PL.y, opacity: 1 });
+    for (let i = 0; i < K.PCND.length; i++) I($(`${P}-pk${i}`), { opacity: 1, x: 0 });
+    ["pzg", "pzr"].forEach((k) => I($(`${P}-${k}`), { scaleY: 1, scaleX: 1, opacity: 1 }));
+    ["ple", "plt", "pls"].forEach((k) => I($(`${P}-${k}`), { scaleX: 1, opacity: 1 }));
+    I($(`${P}-pdot`), { scale: 1, opacity: 1, x: 0 });
+    ["ptt", "pte", "pts"].forEach((k) => I($(`${P}-${k}`), { opacity: 1, x: 0 }));
+    ["pn1", "pn2"].forEach((k) => I($(`${P}-${k}`), { opacity: 1, y: 0 }));
   };
 
   // ------------------------------------------------------------------ SHELVES + SKILL CHIPS

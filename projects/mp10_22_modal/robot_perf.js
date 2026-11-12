@@ -65,9 +65,9 @@
   pose(TM.jual + 0.05, { hYaw: -26, hPitch: -18, lookX: -1, lookY: 0.9, yaw: -22 });
   pointR(TM.jual, TM.ada2 - 0.3, 146, 22, 10);
   // S3 · eyes follow the scan gate as it slides left -> right; a little nod on every flip
-  const FLIP = [TM.ada2 - 0.05, TM.pinj, TM.pinj + 0.4, TM.tmod, TM.tmod + 0.8, TM.prib];
-  const LOOKX = [-1, -0.85, -0.65, -0.45, -0.2, 0.05];
-  FLIP.forEach((f, i) => { pose(f, { lookX: LOOKX[i], lookY: 0.35, hYaw: -26 + i * 4, hPitch: -6 }); pose(f + 0.12, { hPitch: 2 }); pose(f + 0.32, { hPitch: -6 }); });
+  const FLIP = [TM.ada2 - 0.32, TM.pinj, TM.tmod, TM.prib];
+  const LOOKX = [-1, -0.75, -0.4, -0.05];
+  FLIP.forEach((f, i) => { pose(f, { lookX: LOOKX[i], lookY: 0.35, hYaw: -26 + i * 6, hPitch: -6 }); pose(f + 0.12, { hPitch: 2 }); pose(f + 0.32, { hPitch: -6 }); });
   pose(TM.pinj + 0.1, { happy: 1 }); pose(TM.tmod + 0.4, { happy: 0 });
   armL(TM.prib - 0.1, 15, 0, 10, 0); armL(TM.prib + 0.2, 70, 52, 30, 0, "o"); armL(TM.prib + 0.9, 70, 52, 30, 0); armL(TM.prib + 1.2, 15, 0, 10, 0);   // near arm toward the last token (uang pribadi)
   // S4 · the belt runs: watches the tokens jump into their lanes, nods on "utang" / "setoran"; "Bukan hasil jualan": head shake, arms out

@@ -1,6 +1,7 @@
-"""Synthesised SFX bed for the R9 YOUTUBE reel (adapted from the R3 DESAINER bed) (no samples, no downloads): job chips piling up,
-Claude flare + 11 tiles dealt, repo header + tiles sucked in + check stamps, header flaps, hook typing + formula reel + score bars,
-title/thumbnail pop + link, strike/cut ticks, comment sort, week board, radar + result sort, terminal paste/typing, the CTA. Deterministic.
+"""Synthesised SFX bed for the R13 TRADER reel (adapted from the R9 YOUTUBE bed) (no samples, no downloads): candles climbing, pushy
+bubble struck, Claude bubble + "Jangan dulu" lock, repo header + chip burst + three shelves, header flaps, scanner sweep + setups, news /
+report cards, entry/stop/target zones, Time Machine paths + counter, waffle fill + coin flip, PASS/BLOCK stamps, three gates unlocking,
+paper switch, note rows, paste + typing + send, the CTA. Deterministic.
 Run: python3 tools/sfx.py ."""
 import json, sys, wave
 from pathlib import Path
@@ -123,97 +124,106 @@ def typing(t0, t1, gain=0.11, rate=16):
 W = 0.15
 st = lambda i: S[i]["start"]
 
-def wt2(txt, after=0.0):
+def wt_(txt, after=0.0):
     v = wt(txt, after)
     if v is None: raise SystemExit("word not found " + txt)
     return v
-wt_ = wt2
-# --- s01 hook: creator + 7 job chips, shake, collapse, Claude disc, 11 tiles, glow run
-put(0.02, rise(0.6, 300, 1200), 0.05); put(0.05, pop(500, 900, 0.08), 0.1)
-for k in range(7): put(wt_("Ngurus") - 0.1 + k * 0.16, pop(700 + 70 * k, 1100 + 70 * k, 0.07), 0.1)
-put(wt_("sendirian?") + 0.02, buzz(0.3), 0.05); put(wt_("sendirian?") + 0.05, boom(0.35, 150, 70), 0.18)
-put(wt_("Sebelas") - 0.3, whoosh(0.35, 2400, 500, 1.4, 0.4), W * 0.7)
-for k in range(11): put(wt_("Sebelas") + 0.04 + k * 0.07, tick(0.018, 2400 + 90 * k), 0.07)
-put(wt_("Claude") - 0.1, chime((1046, 1318, 1568), 1.1), 0.07); put(wt_("Claude") + 0.02, pop(900, 500, 0.1), 0.1)
-put(wt_("gratis") - 0.04, pop(800, 1300, 0.08), 0.13); put(wt_("gratis") + 0.18, pop(900, 1400, 0.07), 0.1)
-put(wt_("naskah") - 0.06, chime((1568, 2093), 0.5), 0.05)
-for k in range(4): put(wt_("sampai") - 0.1 + k * 0.1, tick(0.016, 3000 + 200 * k), 0.06)
-put(wt_("viral.") - 0.08, chime((1318.5, 1760, 2637), 0.9), 0.06); put(wt_("viral.") - 0.06, pop(600, 1200, 0.09), 0.1)
-# --- s02 the pack: header drop, tiles sucked into the folder, 11 badge, three check stamps, key strike
-put(wt_("Namanya") - 0.1, whoosh(0.45, 2400, 600, 1.4, 0.45), W * 0.6); put(wt_("Namanya") + 0.4, flap(), 0.1)
-put(wt_("YouTube", 6) - 0.1, whoosh(0.7, 600, 3000, 1.3, 0.5), W * 0.5)
-for k in range(11): put(wt_("YouTube", 6) + 0.25 + k * 0.05, tick(0.014, 3600 - 60 * k), 0.05)
-put(wt_("Skill:") + 0.12, pop(500, 1000, 0.09), 0.14)
-for w, a in (("open", 8), ("daftar,", 9), ("key.", 10)): put(wt_(w, a) + (0.32 if w == "open" else (0.1 if w == "daftar," else -0.02)), boom(0.25, 180, 80), 0.16)
-for w, a in (("open", 8), ("tanpa", 9), ("tanpa", 9.5)): put(wt_(w, a) - 0.12, whoosh(0.3, 700, 2000, 1.4, 0.3), W * 0.4)
-put(wt_("API") + 0.02, scribble(0.2), 0.06)
-put(st("t1") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t1 /yt-script: flap, hook card, typing, reel spin + stop, score bars, verdict stamp, REC
+def out_whoosh(sid): put(st(sid) - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
+# --- s01 hook: candles climb, pushy bubble, cursor drift, strike + X, Claude bubble, "Jangan dulu." + lock
+put(0.02, rise(0.6, 300, 1200), 0.05)
+for k in range(7): put(wt_("Mau") - 0.1 + k * 0.2, tick(0.02, 2600 + 120 * k), 0.06)
+put(wt_("AI") - 0.1, pop(700, 1200, 0.08), 0.12)
+put(wt_("trading") - 0.05, whoosh(1.0, 400, 1400, 1.4, 0.5), W * 0.25)
+put(wt_("Pilih") - 0.05, rip(0.22), 0.06); put(wt_("Pilih") + 0.05, buzz(0.18), 0.03)
+put(wt_("berani") - 0.2, pop(500, 900, 0.09), 0.12); put(wt_("berani") - 0.1, chime((1046, 1318), 0.6), 0.04)
+typing(wt_("jangan") - 0.1, wt_("jangan") + 0.45, 0.07, 20)
+put(wt_("dulu.") - 0.06, boom(0.35, 140, 60), 0.2); put(wt_("dulu.") - 0.04, square_blips([660, 440]), 0.05)
+out_whoosh("s02")
+# --- s02 the pack: header drop, pack card, 11 chips burst, GRATIS, three shelves + the sort
+put(wt_("Namanya") - 0.12, whoosh(0.45, 2400, 600, 1.4, 0.45), W * 0.6); put(wt_("Namanya") + 0.3, flap(), 0.1)
+put(wt_("Day") - 0.18, pop(600, 1000, 0.09), 0.12); put(wt_("Claude") - 0.1, chime((1046, 1318, 1568), 0.9), 0.05)
+for k in range(11): put(wt_("11") + 0.02 + k * 0.055, pop(800 + 50 * k, 1300 + 50 * k, 0.05), 0.07)
+put(wt_("gratis,") - 0.04, pop(800, 1300, 0.08), 0.13)
+for k in range(3): put(wt_("dibagi") + 0.02 + k * 0.16, whoosh(0.35, 500, 1800, 1.4, 0.4), W * 0.35)
+for k in range(11): put(wt_("dibagi") + 0.5 + k * 0.05, tick(0.016, 3000 - 80 * k), 0.06)
+put(wt_("lapis.") - 0.05, chime((1318.5, 1760, 2637), 0.8), 0.05)
+out_whoosh("t1")
+# --- t1 CARI: flap, scanner panel, tiles deal, beam sweep + counter, setups, news, report
 put(st("t1") + 0.02, flap(), 0.12)
-put(wt_("naskah", 11) - 0.2, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
-typing(wt_("naskah", 11) + 0.1, wt_("naskah", 11) + 1.75, 0.08, 18)
-for k in range(16): put(wt_("21") - 0.05 + 0.04 * k * (1 + k * 0.06), tick(0.016, 2600), 0.07)
-put(wt_("hook,") + 0.02, pop(700, 1200, 0.08), 0.14); put(wt_("hook,") + 0.12, chime((1568, 2093), 0.5), 0.04)
-for k in range(5): put(wt_("skor") - 0.05 + k * 0.07, rise(0.25, 500 + 80 * k, 1100 + 80 * k), 0.025)
-put(wt_("hook-nya") - 0.02, boom(0.3, 170, 80), 0.18); put(wt_("hook-nya"), pop(300, 140, 0.12), 0.15)
-put(wt_("rekaman.") - 0.08, square_blips([880, 1320]), 0.05)
-put(st("t2") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t2 /yt-package: flap, title pop + typing, thumbnail pop, link, outline, lint ticks
+put(wt_("nyari:") - 0.22, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
+for k in range(14): put(wt_("nyari:") + 0.02 + k * 0.035, tick(0.014, 3400), 0.04)
+put(wt_("ribuan") - 0.1, rise(0.95, 500, 1600), 0.03)
+for k in range(5): put(wt_("ribuan") + 0.03 + k * 0.13, tick(0.02, 4200), 0.07)
+for k in range(3): put(wt_("ribuan") + 0.15 + k * 0.32, pop(900 + 150 * k, 1500 + 150 * k, 0.06), 0.1)
+put(wt_("berita,") - 0.24, whoosh(0.35, 600, 2000, 1.4, 0.4), W * 0.45); put(wt_("berita,") - 0.05, pop(600, 1000, 0.08), 0.11)
+put(wt_("laporan") - 0.3, whoosh(0.35, 600, 2000, 1.4, 0.4), W * 0.45)
+for k in range(3): put(wt_("laporan") - 0.1 + k * 0.14, tick(0.02, 2600 + 300 * k), 0.08)
+out_whoosh("t2")
+# --- t2 RENCANA: flap, chart rises, candles, entry line + dot, red zone, green zone, notes
 put(st("t2") + 0.02, flap(), 0.12)
-put(wt_("judul") - 0.2, pop(600, 1000, 0.08), 0.12); typing(wt_("judul") - 0.02, wt_("judul") + 0.62, 0.07, 22)
-put(wt_("thumbnail") - 0.16, pop(500, 900, 0.09), 0.14); put(wt_("thumbnail") + 0.06, boom(0.22, 220, 110), 0.1)
-put(wt_("ditulis") - 0.06, chime((1318.5, 1760), 0.6), 0.05); put(wt_("ditulis") + 0.2, tick(0.03, 1800), 0.12)
-for k in range(3): put(wt_("sepasang.") + 0.1 + k * 0.1, pop(900 + 120 * k, 1500 + 120 * k, 0.05), 0.08)
-put(st("t3") - 0.2, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t3 /yt-edit: flap, transcript slide, 3 strikes (scissor snips), cut list, timecode run
+put(wt_("ngerencanain:") - 0.26, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
+for k in range(12): put(wt_("ngerencanain:") - 0.1 + k * 0.05, tick(0.014, 2800 + 60 * k), 0.04)
+put(wt_("titik") - 0.12, scribble(0.35), 0.04); put(wt_("titik") - 0.04, pop(900, 1500, 0.07), 0.12)
+put(wt_("stop", 16) - 0.1, boom(0.3, 160, 70), 0.14)
+put(wt_("target.") - 0.18, rise(0.35, 700, 1600), 0.04); put(wt_("target.") - 0.04, chime((1568, 2093), 0.6), 0.05)
+# --- s05 TIME MACHINE: flap, zones stretch, paths fan out + counter, axis, "0 order terkirim"
+put(st("s05") + 0.1, flap(), 0.12)
+put(wt_("Plus") + 0.2, whoosh(0.6, 400, 1600, 1.2, 0.5), W * 0.45)
+put(wt_("Machine:") - 0.05, chime((1046, 1568, 2093), 1.0), 0.06)
+put(wt_("10.000") - 0.12, rumble(1.8), 0.035); put(wt_("10.000") - 0.1, rise(1.6, 300, 1800), 0.03)
+for k in range(24): put(wt_("10.000") - 0.1 + k * 0.07, tick(0.012, 3600 + 40 * (k % 6)), 0.035)
+put(wt_("sisa") - 0.1, whoosh(0.4, 700, 2000, 1.4, 0.4), W * 0.3)
+put(wt_("sepeser") - 0.1, pop(700, 1200, 0.09), 0.13); put(wt_("sepeser") - 0.05, square_blips([880, 660]), 0.04)
+out_whoosh("s06")
+# --- s06 RESULT: card, waffle fills (green, red, grey), difference chip, coin flip + verdict
+put(wt_("Di") - 0.05, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
+for k in range(10): put(wt_("peluang") + 0.1 + k * 0.055, tick(0.014, 3000 + 40 * k), 0.05)
+for k in range(9): put(wt_("sama", 25) + 0.02 + k * 0.055, tick(0.014, 2200 - 30 * k), 0.05)
+for k in range(6): put(wt_("duluan", 26.3) + 0.2 + k * 0.06, tick(0.012, 1800), 0.03)
+put(wt_("tipis:") - 0.1, pop(800, 1300, 0.08), 0.12)
+for k in range(4): put(wt_("lempar") - 0.1 + k * 0.19, tick(0.03, 5200 - 300 * k), 0.12)
+put(wt_("koin.") + 0.05, chime((1318.5, 1760), 0.7), 0.05)
+out_whoosh("t3")
+# --- t3 REM: flap, limit card, ticket 1 meter + PASS stamp, ticket 2 meter + BLOCK stamp + shake
 put(st("t3") + 0.02, flap(), 0.12)
-put(wt_("transkrip") - 0.24, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
-for k in range(5): put(wt_("transkrip") - 0.06 + k * 0.06, tick(0.014, 3200), 0.05)
-for k in range(3): put(wt_("daftar", 20) + k * 0.22, rip(0.18), 0.05); put(wt_("daftar", 20) + k * 0.22 + 0.04, tick(0.03, 1500), 0.12)
-for k in range(3): put(wt_("edit,") - 0.1 + k * 0.12, pop(700 + 100 * k, 1200 + 100 * k, 0.06), 0.09)
-for k in range(8): put(wt_("timecode.") - 0.14 + k * 0.07, tick(0.014, 4200), 0.06)
-put(st("t4") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t4 /yt-comment: flap, comments cascade, sort whoosh, pin, reply typing
-put(st("t4") + 0.02, flap(), 0.12)
-for k in range(6): put(wt_("komentar") - 0.2 + k * 0.06, pop(800 + 60 * k, 1300 + 60 * k, 0.05), 0.08)
-put(wt_("dipilah,") - 0.06, whoosh(0.5, 600, 2400, 1.3, 0.45), W * 0.6)
-for k in range(4): put(wt_("dipilah,") + k * 0.07, tick(0.02, 2400 + 200 * k), 0.07)
-put(wt_("lalu", 24) + 0.12, pop(500, 900, 0.09), 0.12)
-typing(wt_("dibalas") + 0.06, wt_("dibalas") + 1.4, 0.08, 20); put(wt_("gaya") - 0.04, chime((1568, 2093), 0.5), 0.04)
-put(st("t5") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- t5 /yt-plan: flap, board rise, 5 cards drop, hours bar fill, "muat"
-put(st("t5") + 0.02, flap(), 0.12)
-put(wt_("rencana") - 0.2, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
-for k in range(5): put((wt_("upload") - 0.08 if k == 0 else wt_("seminggu") - 0.04 + (k - 1) * 0.09) + 0.2, pop(300 + 40 * k, 160, 0.08), 0.13)
-put(wt_("waktu") - 0.2, rise(0.6, 400, 1300), 0.04); put(wt_("kamu.", 28.5) - 0.1, chime((1318.5, 1760, 2637), 0.8), 0.05)
-put(st("s07") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- s07 /yt-viral: flap, ribbon + sparkles, panel, radar pings, typing, results, bars, re-sort, formula chips
-put(st("s07") + 0.02, flap(), 0.12)
-put(wt_("seru,") - 0.12, chime((1318.5, 1760, 2637), 1.0), 0.07)
-for k in range(6): put(wt_("Paling") + 0.1 + k * 0.08, pop(1200 + 80 * k, 1800 + 80 * k, 0.04), 0.06)
-put(wt_("mesin") - 0.18, whoosh(0.5, 400, 1800, 1.2, 0.5), W * 0.6); put(wt_("mesin"), rumble(1.4), 0.03)
-for k in range(3): put(wt_("viral:") + 0.2 + k * 0.42, chime((2093,), 0.4), 0.035)
-typing(wt_("cari") - 0.04, wt_("cari") + 0.62, 0.08, 22)
-for k in range(4): put(wt_("niche") + 0.2 + k * 0.08, pop(600 + 60 * k, 1000 + 60 * k, 0.06), 0.09)
-for k in range(4): put(wt_("ngalahin") - 0.05 + k * 0.09, rise(0.5, 400 + 60 * k, 1500 + 60 * k), 0.03)
-put(wt_("rata-rata") - 0.04, pop(700, 1200, 0.08), 0.1)
-put(wt_("channel-nya") - 0.04, whoosh(0.5, 900, 2600, 1.4, 0.4), W * 0.5); put(wt_("sendiri,"), chime((1568, 2093), 0.6), 0.05)
-for k in range(4): put(wt_("rumus", 35) - 0.08 + k * 0.1, pop(900 + 100 * k, 1500 + 100 * k, 0.05), 0.08)
-put(st("s08") - 0.22, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.4)
-# --- s08 setup: flap, terminal open, paste, typing, install blips, command + enter
+put(wt_("ngerem:") - 0.24, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5)
+put(wt_("batas", 30.5) - 0.28, whoosh(0.3, 600, 1800, 1.4, 0.4), W * 0.35)
+put(wt_("rugi") - 0.15, rise(0.55, 400, 1100), 0.035); put(wt_("dijaga,") - 0.06, boom(0.25, 200, 90), 0.16); put(wt_("dijaga,"), square_blips([880, 1320]), 0.04)
+put(wt_("trade") - 0.3, whoosh(0.3, 600, 1800, 1.4, 0.4), W * 0.35)
+put(wt_("lewat") - 0.15, rise(0.7, 300, 1500), 0.04)
+put(wt_("diblokir.") - 0.08, boom(0.3, 150, 60), 0.2); put(wt_("diblokir.") + 0.1, buzz(0.32), 0.05)
+out_whoosh("s08")
+# --- s08 BROKER: flap, order card, three gates (locked), unlock one by one, "siap dikirim", PAPER pulse
 put(st("s08") + 0.02, flap(), 0.12)
-put(wt_("buka") - 0.12, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.5); put(wt_("Code,") - 0.1, square_blips([660, 990]), 0.04)
-put(wt_("link") - 0.08, tick(0.04, 1600), 0.2); put(wt_("tempel"), pop(800, 1300, 0.07), 0.1)
-typing(wt_("minta") - 0.04, wt_("minta") + 0.72, 0.08, 22)
-put(wt_("install,") + 0.04, square_blips([880, 1100, 1320]), 0.04); put(wt_("terus", 40) - 0.02, chime((1568, 2093), 0.5), 0.05)
-typing(wt_("ketik") + 0.02, wt_("ketik") + 0.47, 0.09, 22); put(wt_("/yt-script.") + 0.12, tick(0.04, 1500), 0.2)
-put(wt_("/yt-script.") + 0.16, chime((1318.5, 1760, 2637), 0.8), 0.06)
-put(st("s09") - 0.42, whoosh(0.4, 2400, 700, 1.4, 0.4), W * 0.5); put(st("s09") - 0.3, pop(600, 1000, 0.08), 0.1)
-# --- s09 CTA
+put(wt_("Nggak") + 0.1, pop(600, 1000, 0.08), 0.12)
+for k in range(3): put(wt_("Nggak") + 0.26 + k * 0.1, whoosh(0.25, 600, 1800, 1.4, 0.4), W * 0.25)
+for k, (w, a) in enumerate((("tanpa", 0), ("persetujuan", 0), ("kamu,", 35))):
+    t0 = wt_(w, a) + (-0.05, 0.12, -0.02)[k]
+    put(t0, square_blips([660 + 220 * k, 990 + 220 * k]), 0.045); put(t0 + 0.02, tick(0.03, 1600), 0.12)
+put(wt_("kamu,", 35) + 0.2, chime((1568, 2093), 0.6), 0.05)
+put(wt_("dan", 35.9) - 0.2, whoosh(0.4, 500, 1800, 1.4, 0.45), W * 0.45)
+put(wt_("bawaannya") + 0.05, pop(600, 1100, 0.08), 0.1); put(wt_("latihan.") - 0.1, chime((1318.5, 1760, 2637), 0.8), 0.05)
+out_whoosh("s09")
+# --- s09 NOTES: flap, three rows, source chips, shield shake
+put(st("s09") + 0.02, flap(), 0.12)
+put(wt_("Datanya") + 0.06, whoosh(0.35, 500, 1800, 1.4, 0.45), W * 0.45)
+for k in range(3): put(wt_("Amerika,") - 0.1 + k * 0.1, pop(900 + 100 * k, 1500 + 100 * k, 0.05), 0.08)
+put(wt_("anggap") - 0.25, whoosh(0.35, 500, 1800, 1.4, 0.45), W * 0.45)
+put(wt_("bukan", 40) - 0.28, whoosh(0.35, 500, 1800, 1.4, 0.45), W * 0.45)
+put(wt_("jaminan."), buzz(0.25), 0.035)
+put(st("s10") - 0.2, whoosh(0.3, 2000, 600, 1.4, 0.35), W * 0.3)
+# --- s10 INSTALL: flap, chat opens, paste, typing, send, hand-over to the link card
+put(st("s10") + 0.02, flap(), 0.12)
+put(wt_("Pasangnya:") + 0.15, whoosh(0.45, 500, 1800, 1.4, 0.45), W * 0.5)
+put(wt_("tempel") - 0.05, tick(0.04, 1600), 0.2); put(wt_("tempel") + 0.05, pop(800, 1300, 0.07), 0.1)
+typing(wt_("tulis") - 0.02, wt_("tulis") + 0.62, 0.09, 20)
+put(wt_("skill.", 45) + 0.08, tick(0.04, 1500), 0.18); put(wt_("skill.", 45) + 0.12, chime((1318.5, 1760, 2637), 0.8), 0.05)
+put(st("s11") - 0.42, whoosh(0.4, 2400, 700, 1.4, 0.4), W * 0.5); put(st("s11") - 0.32, pop(600, 1000, 0.08), 0.1)
+# --- s11 CTA
 put(wt_("Komen") - 0.06, whoosh(0.4, 600, 2000, 1.4, 0.5), W * 0.5)
-for k in range(7): put(wt_("YOUTUBE,") - 0.08 + k * 0.055, tick(0.022, 4200), 0.15)
-put(wt_("YOUTUBE,") + 0.44, pop(900, 1600, 0.1), 0.15)
-put(wt_("aku", 43) - 0.08, whoosh(0.7, 700, 3600, 1.2, 0.5), W); put(wt_("kirim") - 0.02, pop(600, 1000, 0.08), 0.1)
+for k in range(5): put(wt_("SAHAM,") - 0.08 + k * 0.06, tick(0.022, 4200), 0.15)
+put(wt_("SAHAM,") + 0.4, pop(900, 1600, 0.1), 0.15)
+put(wt_("aku", 46) - 0.08, whoosh(0.7, 700, 3600, 1.2, 0.5), W); put(wt_("kirim", 46) - 0.02, pop(600, 1000, 0.08), 0.1)
 put(wt_("DM.") - 0.06, chime((1568, 2093), 0.8), 0.07)
 put(T["total_sec"] - 1.4, chime((1046, 1568, 2093, 2637), 1.6), 0.07)
 x = np.clip(out, -1, 1); x = (x * 32767).astype(np.int16)

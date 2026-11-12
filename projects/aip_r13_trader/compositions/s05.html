@@ -1,12 +1,107 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s05 TIME MACHINE (17.90–23.20) "Plus Time Machine: 10.000 simulasi sisa sesi bursa, sebelum sepeser pun keluar."
+       Frame 0 = t2's end state rebuilt 1:1 (K.planSetFinal: header item 2 + the plan chart). "Plus Time Machine:" = header rolls to the
+       history icon "/trader-timemachine"; the candles and notes clear, the entry dot slides to the left edge and the green/red zones
+       stretch across the whole chart. "10.000 simulasi" = 46 simulated paths draw out of the entry dot (README: 10,000 replays of the rest
+       of the session from the stock's own recent bars), each one tinted by what it hits first: target (green), stop (red), or neither by
+       the close (cyan); the counter runs to 10.000. "sisa sesi bursa," = time axis "sekarang → tutup bursa". "sebelum sepeser pun keluar."
+       = "simulasi, bukan prediksi" + "0 order terkirim · modal masih utuh". Last 0.22 s: workspace drops out (s06 keeps the header). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s05-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s05-fan { position: absolute; left: 0; top: 0; overflow: visible; }
+    #s05-cnt { position: absolute; left: 330px; top: 16px; width: 300px; height: 52px; }
+    #s05-cnt b { position: absolute; left: 0; top: 0; width: 300px; text-align: center; font: 700 38px/52px Poppins; color: #fff; white-space: nowrap; letter-spacing: -.5px; }
+    #s05-cnt b em { font-style: normal; font: 400 20px/52px Poppins; color: #9fdcf2; margin-left: 8px; letter-spacing: 0; }
+    .s05-ax { position: absolute; top: 334px; height: 30px; display: flex; align-items: center; gap: 6px; font: 700 16px/30px Poppins; letter-spacing: 1.5px; color: #9fdcf2; white-space: nowrap; }
+    .s05-ax svg { width: 20px; height: 20px; }
+    #s05-axl { position: absolute; left: 140px; top: 348px; width: 520px; height: 2px; background: linear-gradient(90deg, rgba(159,220,242,.5), rgba(159,220,242,.1)); transform-origin: 0% 50%; }
+    #s05-sim { position: absolute; left: 24px; top: 384px; height: 44px; padding: 0 16px; border-radius: 22px; font: 700 17px/44px Poppins; letter-spacing: 1px; color: #e3edfa;
+      background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.2); white-space: nowrap; }
+    #s05-safe { position: absolute; left: 0; top: 384px; height: 44px; padding: 0 18px 0 8px; border-radius: 22px; display: flex; align-items: center; gap: 10px; background: #01ccf7; color: #0b1440;
+      font: 700 19px/44px Poppins; white-space: nowrap; box-shadow: 0 0 22px rgba(1,204,247,.45); transform-origin: 50% 50%; }
+    #s05-safe i { width: 32px; height: 32px; border-radius: 50%; background: #0b1440; color: #6adfff; position: relative; display: block; }
+    #s05-safe i svg { position: absolute; left: 7px; top: 6px; width: 18px; height: 18px; }
+  </style>
+  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920">
+    <div id="s05-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.29);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s05"] = tl;
+      const K = window.R13K, D = 5.3, P = "s05";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s05-zone"), L = K.PL;
+      // ---------------------------------------------------------------- simulated paths (deterministic): start at the entry, 60 steps
+      let seed = 19;
+      const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+      const X0 = 40, X1 = 800, NS = 60, DX = (X1 - X0) / NS, WANT = { t: 13, s: 12, n: 21 }, got = { t: [], s: [], n: [] };
+      for (let tries = 0; tries < 2000 && (got.t.length < WANT.t || got.s.length < WANT.s || got.n.length < WANT.n); tries++) {
+        let y = L.ye, pts = [[X0, y]], kind = "n";
+        for (let k = 1; k <= NS; k++) {
+          y += (rnd() + rnd() + rnd() - 1.5) * 15;
+          if (y <= L.yt) { pts.push([X0 + k * DX, L.yt]); kind = "t"; break; }
+          if (y >= L.ys) { pts.push([X0 + k * DX, L.ys]); kind = "s"; break; }
+          pts.push([X0 + k * DX, y]);
+        }
+        if (got[kind].length < WANT[kind]) got[kind].push(pts);
+      }
+      const COL = { t: "rgba(63,208,122,.8)", s: "rgba(255,107,94,.8)", n: "rgba(106,223,255,.42)" };
+      const PATHS = [];
+      for (let i = 0; i < 21; i++) ["n", "t", "s"].forEach((k) => { if (got[k][i]) PATHS.push([k, got[k][i]]); });
+      const len = (pts) => pts.reduce((a, p, i) => (i ? a + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0), 0);
+      let fan = `<svg id="s05-fan" width="960" height="446" viewBox="0 0 960 446">`;
+      PATHS.forEach(([k, pts], i) => { const l = (len(pts) + 24).toFixed(1);
+        fan += `<polyline id="s05-p${i}" points="${pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")}" fill="none" stroke="${COL[k]}" stroke-width="${k === "n" ? 2 : 2.6}" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="${l}" stroke-dashoffset="${l}" data-l="${l}"/>`; });
+      fan += `</svg>`;
+      const CNT = ["0", "800", "2.400", "4.700", "7.300", "9.200", "10.000"];
+      z.innerHTML = K.headerHTML(P) + `<div class="k-ab" id="s05-ws" style="width:1080px;height:945px">` + K.planHTML(P) + `</div>`;
+      const pc = $("s05-pc");
+      pc.insertAdjacentHTML("beforeend", fan + `<div id="s05-cnt">` + CNT.map((c, i) => `<b id="s05-n${i}">${c}<em>simulasi</em></b>`).join("") + `</div>` +
+        `<div class="s05-ax" id="s05-ax0" style="left:40px">SEKARANG</div><div id="s05-axl"></div>` +
+        `<div class="s05-ax" id="s05-ax1" style="left:668px">${K.svg("clock")}TUTUP BURSA</div>` +
+        `<div id="s05-sim">simulasi, bukan prediksi</div><div id="s05-safe"><i>${K.svg("lock")}</i>0 order terkirim &middot; modal masih utuh</div>`);
+      // the fan sits under the price tags (DOM order: tags were added before → move the svg right after the zones)
+      pc.insertBefore($("s05-fan"), $("s05-ple"));
+      // ---------------------------------------------------------------- frame 0 = t2's end state
+      K.headerSet(S, P, 2);
+      K.planSetFinal(S, P);
+      const tPl = wt("Plus"), tMa = wt("Machine:"), tN = wt("10.000"), tSim = wt("simulasi"), tSi = wt("sisa"), tBu = wt("bursa,"), tSb = wt("sebelum"), tSp = wt("sepeser"), tKe = wt("keluar.");
+      K.headerSwap(S, P, 2, 3, Math.max(0.01, tPl - 0.1));
+      // ---------------------------------------------------------------- "Plus Time Machine:": clear the candles, stretch the zones
+      const tC = tPl + 0.05;
+      K.PCND.forEach((_, i) => ft($("s05-pk" + i), { opacity: 1, x: 0 }, { opacity: 0, x: -40, duration: 0.3, ease: "power2.in" }, tC + i * 0.012));
+      ["pn1", "pn2"].forEach((k) => ft($("s05-" + k), { opacity: 1, y: 0 }, { opacity: 0, y: 14, duration: 0.2, ease: "power2.in" }, tC));
+      const SX = (X1 - X0) / L.zw;
+      ["pzg", "pzr", "plt", "pls"].forEach((k) => { const e = $("s05-" + k); I(e, { transformOrigin: k[1] === "z" ? "100% 50%" : "100% 50%" });
+        ft(e, { scaleX: 1 }, { scaleX: SX, duration: 0.55, ease: "power3.inOut" }, tC + 0.2); });
+      ["pzg"].forEach((k) => I($("s05-" + k), { transformOrigin: "100% 100%" }));
+      ["pzr"].forEach((k) => I($("s05-" + k), { transformOrigin: "100% 0%" }));
+      const dot = $("s05-pdot");
+      ft(dot, { x: 0 }, { x: X0 - (30 + 11 * 40 + 12), duration: 0.55, ease: "power3.inOut" }, tC + 0.2);
+      ft(dot, { scale: 1 }, { scale: 1.35, duration: 0.18, yoyo: true, repeat: 1, ease: "power2.out" }, tMa - 0.05);
+      // ---------------------------------------------------------------- "10.000 simulasi": the fan + the counter
+      const t0 = tN - 0.12, span = Math.max(1.2, tSi + 0.3 - t0);
+      PATHS.forEach((_, i) => { const p = $("s05-p" + i), l = parseFloat(p.getAttribute("data-l"));
+        I(p, { strokeDashoffset: l, opacity: 1 });
+        ft(p, { strokeDashoffset: l }, { strokeDashoffset: 0, duration: 0.6, ease: "power1.out" }, t0 + (i / PATHS.length) * span); });
+      CNT.forEach((_, i) => { const n = $("s05-n" + i); I(n, { opacity: 0 }); });
+      const cn = $("s05-cnt"); I(cn, { opacity: 0, y: -10 });
+      ft(cn, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.24, ease: "power3.out" }, t0 - 0.1);
+      CNT.forEach((_, i) => { const tt = t0 - 0.1 + (i / (CNT.length - 1)) * (span + 0.2); tl.set($("s05-n" + i), { opacity: 1 }, tt); if (i > 0) tl.set($("s05-n" + (i - 1)), { opacity: 0 }, tt); });
+      // ---------------------------------------------------------------- "sisa sesi bursa,": the time axis
+      const a0 = $("s05-ax0"), a1 = $("s05-ax1"), al = $("s05-axl");
+      I(a0, { opacity: 0, y: 8 }); I(a1, { opacity: 0, y: 8 }); I(al, { scaleX: 0 });
+      ft(a0, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.24 }, tSi - 0.15);
+      ft(al, { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.out" }, tSi - 0.05);
+      ft(a1, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.24 }, tBu - 0.15);
+      // ---------------------------------------------------------------- "sebelum sepeser pun keluar.": nothing sent, capital untouched
+      const sim = $("s05-sim"), safe = $("s05-safe");
+      I(sim, { opacity: 0, y: 12 }); ft(sim, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, tSb - 0.15);
+      I(safe, { x: 380, scale: 0.5, opacity: 0 });
+      ft(safe, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tSp - 0.12);
+      // ---------------------------------------------------------------- exit
+      S.exitWs($("s05-ws"));
+      S.finish();
     })();
   </script>
 </template>

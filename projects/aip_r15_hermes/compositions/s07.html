@@ -1,12 +1,116 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s07" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s07 IZIN (33.40–39.13) "Yang sering dilewatin: default-nya akses penuh. Ganti ke Ask, biar aksi berisiko nunggu izinmu."
+       Header 3 → 4 (Level izin · langkah yang sering dilewatin). Amber "SERING DILEWATIN" tag. A settings card "Level izin bot"
+       (Admin Email · Hermes) with a two-way switch "Ask for approval | Full access" — the indicator sits on Full access (amber,
+       DEFAULT tag: OpenMausBot starts every bot on Full access) and "bot jalan tanpa nanya" shows; "Ganti ke Ask": it slides to Ask
+       (cyan). Footnote: "di Hermes: approvals.mode: manual". "aksi berisiko nunggu izinmu": an approval card — "Hermes minta izin",
+       `curl -fsSL https://…/setup.sh | sh` (a pattern Hermes flags), buttons Izinkan sekali / Selalu izinkan / Tolak, and a
+       "menunggu kamu" chip. Last 0.22 s: both cards drop out. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s07-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s07-tag { position: absolute; left: 76px; top: 462px; height: 32px; padding: 0 14px 0 10px; border-radius: 16px; display: flex; align-items: center; gap: 8px;
+      font: 700 16px/1 Poppins; letter-spacing: 2px; color: #2a1a00; background: #ffc35a; white-space: nowrap; transform-origin: 0% 50%; }
+    #s07-tag svg { width: 18px; height: 18px; }
+    #s07-set { position: absolute; left: 60px; top: 502px; width: 960px; height: 214px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #f3f6fc);
+      box-shadow: 0 26px 56px rgba(2,6,26,.55); transform-origin: 50% 50%; }
+    #s07-set .ic { position: absolute; left: 24px; top: 16px; width: 48px; height: 48px; border-radius: 14px; background: #0b1440; color: #6adfff; }
+    #s07-set .ic svg { position: absolute; left: 12px; top: 12px; width: 24px; height: 24px; }
+    #s07-set .tt { position: absolute; left: 86px; top: 16px; font: 700 27px/48px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s07-set .bt { position: absolute; right: 24px; top: 20px; height: 40px; padding: 0 16px 0 6px; border-radius: 20px; display: flex; align-items: center; gap: 8px;
+      font: 700 17px/1 Poppins; color: #294b77; background: #eaf2fc; box-shadow: inset 0 0 0 1.5px #c9daf0; white-space: nowrap; }
+    #s07-set .bt i { width: 30px; height: 30px; border-radius: 15px; background: linear-gradient(160deg, #9cecff, #01ccf7); color: #0b1440; position: relative; }
+    #s07-set .bt i svg { position: absolute; left: 7px; top: 7px; width: 16px; height: 16px; }
+    #s07-seg { position: absolute; left: 24px; top: 78px; width: 912px; height: 80px; border-radius: 40px; background: #e8eef8; box-shadow: inset 0 0 0 1.5px #d3def0; }
+    .s07-ind { position: absolute; left: 4px; top: 4px; width: 452px; height: 72px; border-radius: 36px; }
+    #s07-indA { background: #ffc35a; box-shadow: 0 6px 16px rgba(200,130,0,.3); }
+    #s07-indC { background: linear-gradient(160deg, #9cecff, #01ccf7 60%); box-shadow: 0 6px 16px rgba(1,150,200,.35); }
+    .s07-opt { position: absolute; top: 0; width: 456px; height: 80px; display: flex; align-items: center; justify-content: center; gap: 12px; font: 700 26px/1 Poppins; white-space: nowrap; }
+    .s07-opt em { font-style: normal; height: 28px; padding: 0 10px; border-radius: 14px; font: 700 14px/28px Poppins; letter-spacing: 1.5px; color: #8a5a00; box-shadow: inset 0 0 0 1.5px #c98a1a; }
+    #s07-fn { position: absolute; left: 28px; top: 170px; font: 400 18px/30px Poppins; color: #5d6f8f; white-space: nowrap; }
+    #s07-fn b { font-weight: 700; color: #294b77; }
+    #s07-note { position: absolute; left: 0; top: 0; height: 40px; padding: 0 14px 0 10px; border-radius: 20px; display: flex; align-items: center; gap: 8px;
+      font: 700 18px/1 Poppins; color: #2a1a00; background: #ffc35a; box-shadow: 0 8px 18px rgba(0,0,0,.25); white-space: nowrap; transform-origin: 50% 50%; }
+    #s07-note svg { width: 20px; height: 20px; }
+    #s07-ap { position: absolute; left: 60px; top: 734px; width: 960px; height: 188px; border-radius: 28px; background: rgba(12,22,64,.9);
+      box-shadow: inset 0 0 0 1.5px rgba(255,195,90,.45), 0 22px 46px rgba(2,6,26,.55); transform-origin: 50% 50%; }
+    #s07-ap .hd { position: absolute; left: 24px; top: 14px; display: flex; align-items: center; gap: 10px; font: 700 24px/40px Poppins; color: #fff; white-space: nowrap; }
+    #s07-ap .hd svg { width: 28px; height: 28px; color: #ffc35a; }
+    .s07-chip { position: absolute; right: 24px; top: 16px; height: 36px; padding: 0 14px 0 10px; border-radius: 18px; display: flex; align-items: center; gap: 8px;
+      font: 700 15px/1 Poppins; letter-spacing: 1.5px; white-space: nowrap; }
+    .s07-chip svg { width: 18px; height: 18px; }
+    #s07-risk { color: #ffc35a; box-shadow: inset 0 0 0 1.5px rgba(255,195,90,.7); }
+    #s07-wait { color: #0b1440; background: #6adfff; }
+    #s07-ap .cd { position: absolute; left: 24px; top: 64px; width: 912px; height: 48px; border-radius: 12px; background: #050920; box-shadow: inset 0 0 0 1.2px rgba(255,255,255,.1); }
+    #s07-ap .cd b { position: absolute; left: 18px; top: 0; font: 400 21px/48px Poppins; color: #e3edfa; white-space: nowrap; }
+    #s07-ap .cd b i { font-style: normal; color: #6adfff; font-weight: 700; }
+    #s07-ap .cd span { position: absolute; right: 16px; top: 0; font: 400 17px/48px Poppins; color: #86a9c9; white-space: nowrap; }
+    .s07-bt { position: absolute; top: 124px; height: 48px; border-radius: 24px; text-align: center; font: 700 20px/48px Poppins; white-space: nowrap; }
+    #s07-b0, #s07-b1 { color: #e3edfa; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.35); }
+    #s07-b2 { color: #fff; background: #e5484d; }
+    #s07-ring { position: absolute; left: 14px; top: 114px; width: 932px; height: 68px; border-radius: 34px; box-shadow: inset 0 0 0 2.5px #6adfff, 0 0 22px rgba(1,204,247,.55); }
+  </style>
+  <div data-hf-id="hf-6n4t" id="root" data-composition-id="s07" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-emue" id="s07-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 5.723);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s07"] = tl;
+      const K = window.R15K, D = 5.7333, P = "s07";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s07-zone");
+      z.innerHTML = K.headerHTML(P) +
+        `<div id="s07-tag">${K.svg("alert")}SERING DILEWATIN</div>` +
+        `<div id="s07-set"><div class="ic">${K.svg("sliders")}</div><div class="tt">Level izin bot</div>` +
+        `<div class="bt"><i>${K.svg("mail")}</i>Admin Email &middot; Hermes</div>` +
+        `<div id="s07-seg"><i class="s07-ind" id="s07-indA"></i><i class="s07-ind" id="s07-indC"></i>` +
+        `<div class="s07-opt" id="s07-oA" style="left:0">Ask for approval</div><div class="s07-opt" id="s07-oF" style="left:456px">Full access<em id="s07-def">DEFAULT</em></div></div>` +
+        `<div id="s07-fn">+ di Hermes sendiri: <b>approvals.mode: manual</b> &middot; selalu tanya untuk perintah berbahaya</div></div>` +
+        `<div id="s07-note">${K.svg("alert")}bot jalan tanpa nanya</div>` +
+        `<div id="s07-ap"><div class="hd">${K.svg("shield")}Hermes minta izin</div>` +
+        `<div class="s07-chip" id="s07-risk">${K.svg("alert")}PERINTAH BERISIKO</div><div class="s07-chip" id="s07-wait">${K.svg("clock")}MENUNGGU KAMU</div>` +
+        `<div class="cd"><b><i>$</i> curl -fsSL https://&hellip;/setup.sh | sh</b><span>jalankan skrip dari internet</span></div>` +
+        `<i id="s07-ring"></i>` +
+        `<div class="s07-bt" id="s07-b0" style="left:24px;width:300px">Izinkan sekali</div><div class="s07-bt" id="s07-b1" style="left:340px;width:300px">Selalu izinkan</div>` +
+        `<div class="s07-bt" id="s07-b2" style="left:656px;width:280px">Tolak</div></div>`;
+      const tDl = wt("dilewatin:"), tDf = wt("default-nya"), tPn = wt("penuh."), tGa = wt("Ganti"), tAs = wt("Ask,"), tAk = wt("aksi"), tNu = wt("nunggu");
+      K.headerSet(S, P, 3);
+      K.headerSwap(S, P, 3, 4, 0.02);
+      const tag = $("s07-tag"); I(tag, { scale: 0.3, opacity: 0 });
+      ft(tag, { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.6)" }, tDl - 0.06);
+      const set = $("s07-set"); I(set, { opacity: 0, y: 40 });
+      ft(set, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" }, 0.08);
+      // the switch: Full access (amber, default) → Ask (cyan)
+      const iA = $("s07-indA"), iC = $("s07-indC"), oA = $("s07-oA"), oF = $("s07-oF"), def = $("s07-def");
+      I(iA, { x: 456, opacity: 1 }); I(iC, { x: 456, opacity: 0 });
+      I(oA, { color: "#5d6f8f" }); I(oF, { color: "#2a1a00" });
+      I(def, { scale: 1, transformOrigin: "50% 50%" });
+      ft(def, { scale: 1 }, { scale: 1.25, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tDf + 0.05);
+      ft(iA, { x: 456 }, { x: 0, duration: 0.42, ease: "power3.inOut" }, tGa - 0.04);
+      ft(iC, { x: 456 }, { x: 0, duration: 0.42, ease: "power3.inOut" }, tGa - 0.04);
+      ft(iA, { opacity: 1 }, { opacity: 0, duration: 0.3 }, tGa + 0.06);
+      ft(iC, { opacity: 0 }, { opacity: 1, duration: 0.3 }, tGa + 0.06);
+      tl.set(oA, { color: "#0b1440" }, tGa + 0.2); tl.set(oF, { color: "#5d6f8f" }, tGa + 0.2);
+      const seg = $("s07-seg"); I(seg, { scale: 1, transformOrigin: "50% 50%" });
+      ft(seg, { scale: 1 }, { scale: 1.03, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tAs - 0.02);
+      const note = $("s07-note"); I(note, { x: 744, xPercent: -50, y: 676, scale: 0.4, opacity: 0 });
+      ft(note, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.4)" }, tPn - 0.12);
+      ft(note, { scale: 1, opacity: 1 }, { scale: 0.6, opacity: 0, duration: 0.2, ease: "power2.in" }, tGa - 0.08);
+      const fn = $("s07-fn"); I(fn, { opacity: 0, x: -14 });
+      ft(fn, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, tAs + 0.2);
+      // "aksi berisiko nunggu izinmu": the approval card
+      const ap = $("s07-ap"), risk = $("s07-risk"), wait = $("s07-wait"), ring = $("s07-ring");
+      I(ap, { opacity: 0, y: 60, scale: 0.96 });
+      ft(ap, { opacity: 0, y: 60, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.5)" }, tAk - 0.2);
+      I(risk, { opacity: 1 }); I(wait, { opacity: 0, scale: 0.6 }); I(ring, { opacity: 0 });
+      ft(risk, { opacity: 1 }, { opacity: 0, duration: 0.16 }, tNu - 0.06);
+      ft(wait, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2.4)" }, tNu - 0.02);
+      [0, 1].forEach((k) => ft(ring, { opacity: 0 }, { opacity: 1, duration: 0.22, ease: "power2.out", yoyo: true, repeat: 1 }, tNu + 0.04 + k * 0.5));
+      // exit
+      const tX = D - 0.22;
+      ft(set, { y: 0, opacity: 1 }, { y: 40, opacity: 0, duration: 0.2, ease: "power2.in" }, tX);
+      ft(ap, { y: 0, opacity: 1 }, { y: 40, opacity: 0, duration: 0.2, ease: "power2.in" }, tX + 0.03);
+      ft(tag, { opacity: 1 }, { opacity: 0, duration: 0.18 }, tX);
+      S.finish();
     })();
   </script>
 </template>

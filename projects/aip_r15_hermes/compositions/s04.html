@@ -1,12 +1,83 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s04 NOTA (19.03–22.20) "Kantor dan karyawannya gratis, otaknya yang bayar."
+       Header 1 → 2 (Biayanya · aplikasinya gratis, modelnya bayar). A receipt rises: "Kantor · OpenMausBot · Apache-2.0 … Rp0" on
+       "Kantor", "Karyawan · Hermes Agent · MIT … Rp0" on "karyawannya", two green GRATIS stamps on "gratis", "Otak · model AI …"
+       on "otaknya", and on "bayar" the value turns into a cyan "bayar" pill + "Total: tergantung modelmu". Last 0.2 s: it slides out. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s04-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s04-rc { position: absolute; left: 190px; top: 478px; width: 700px; height: 440px; filter: drop-shadow(0 24px 40px rgba(2,6,26,.55)); transform-origin: 50% 100%; }
+    #s04-rc .paper { position: absolute; left: 0; top: 0; width: 700px; height: 440px; background: linear-gradient(180deg, #ffffff, #f3f6fc); }
+    #s04-rc .ic { position: absolute; left: 34px; top: 26px; width: 48px; height: 48px; border-radius: 14px; background: #0b1440; color: #6adfff; }
+    #s04-rc .ic svg { position: absolute; left: 12px; top: 12px; width: 24px; height: 24px; }
+    #s04-rc .tt { position: absolute; left: 96px; top: 26px; font: 700 32px/48px Poppins; letter-spacing: 3px; color: #0a0d2c; white-space: nowrap; }
+    #s04-rc .tr { position: absolute; right: 36px; top: 26px; font: 400 20px/48px Poppins; color: #5d6f8f; white-space: nowrap; }
+    .s04-dash { position: absolute; left: 34px; width: 632px; height: 0; border-top: 2.5px dashed #c9d6ea; }
+    .s04-row { position: absolute; left: 34px; width: 632px; height: 72px; }
+    .s04-row b { position: absolute; left: 0; top: 2px; font: 700 27px/36px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s04-row span { position: absolute; left: 0; top: 40px; font: 400 18px/26px Poppins; color: #5d6f8f; white-space: nowrap; }
+    .s04-row em { position: absolute; right: 0; top: 10px; font: 700 32px/44px Poppins; font-style: normal; color: #0a0d2c; white-space: nowrap; }
+    .s04-stamp { position: absolute; left: 0; top: 0; height: 48px; padding: 0 16px; border-radius: 10px; font: 700 24px/48px Poppins; letter-spacing: 3px; color: #2da44e;
+      box-shadow: inset 0 0 0 3.5px #2da44e; background: rgba(255,255,255,.82); white-space: nowrap; transform-origin: 50% 50%; }
+    #s04-pay { position: absolute; right: 0; top: 10px; height: 48px; padding: 0 18px 0 12px; border-radius: 24px; display: flex; align-items: center; gap: 8px;
+      font: 700 26px/1 Poppins; color: #0b1440; background: linear-gradient(160deg, #9cecff, #01ccf7 60%); box-shadow: 0 8px 20px rgba(1,150,200,.35); white-space: nowrap; transform-origin: 100% 50%; }
+    #s04-pay svg { width: 26px; height: 26px; }
+    #s04-q { position: absolute; right: 0; top: 10px; font: 700 32px/44px Poppins; color: #9fb2cf; }
+    #s04-tot b { font-size: 25px; }
+    #s04-tot em { font: 400 23px/44px Poppins; font-style: normal; color: #294b77; }
+  </style>
+  <div data-hf-id="hf-8xwg" id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-9n8v" id="s04-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.157);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s04"] = tl;
+      const K = window.R15K, D = 3.1667, P = "s04";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s04-zone");
+      // zigzag bottom edge (teeth 28 px wide, 16 px deep)
+      const W = 700, H = 440, T = 28, Dp = 16; let pts = ["0 0", `${W}px 0`, `${W}px ${H - Dp}px`];
+      for (let x = W, k = 0; x > 0; x -= T / 2, k++) pts.push(`${Math.max(0, x - T / 2)}px ${k % 2 ? H - Dp : H}px`);
+      pts.push(`0 ${H - Dp}px`);
+      const RY = [112, 196, 280];
+      z.innerHTML = K.headerHTML(P) +
+        `<div id="s04-rc"><div class="paper" style="clip-path:polygon(${pts.join(",")})"></div><div class="ic">${K.svg("receipt")}</div><div class="tt">NOTA</div><div class="tr">tim AI kamu</div>` +
+        `<i class="s04-dash" style="top:94px"></i>` +
+        `<div class="s04-row" id="s04-r0" style="top:${RY[0]}px"><b>Kantor</b><span>OpenMausBot &middot; Apache-2.0</span><em>Rp0</em></div>` +
+        `<div class="s04-row" id="s04-r1" style="top:${RY[1]}px"><b>Karyawan</b><span>Hermes Agent &middot; MIT</span><em>Rp0</em></div>` +
+        `<div class="s04-row" id="s04-r2" style="top:${RY[2]}px"><b>Otak (model AI)</b><span>ChatGPT atau DeepSeek</span><em id="s04-q">&hellip;</em>` +
+        `<div id="s04-pay">${K.svg("coins")}bayar</div></div>` +
+        `<i class="s04-dash" id="s04-d2" style="top:366px"></i>` +
+        `<div class="s04-row" id="s04-tot" style="top:376px"><b>Total</b><em>tergantung modelmu</em></div>` +
+        `<div class="s04-stamp" id="s04-s0">GRATIS</div><div class="s04-stamp" id="s04-s1">GRATIS</div></div>`;
+      const tKa = wt("Kantor"), tKr = wt("karyawannya"), tGr = wt("gratis,"), tOt = wt("otaknya"), tBa = wt("bayar.");
+      K.headerSet(S, P, 1);
+      K.headerSwap(S, P, 1, 2, 0.02);
+      const rc = $("s04-rc");
+      I(rc, { y: 80, opacity: 0, scaleY: 0.9 });
+      ft(rc, { y: 80, opacity: 0, scaleY: 0.9 }, { y: 0, opacity: 1, scaleY: 1, duration: 0.4, ease: "power3.out" }, 0.04);
+      const rowIn = (el, t) => { I(el, { opacity: 0, x: -24 }); ft(el, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, t); };
+      rowIn($("s04-r0"), Math.max(0.12, tKa + 0.1));
+      rowIn($("s04-r1"), tKr - 0.06);
+      rowIn($("s04-r2"), tOt - 0.08);
+      // GRATIS stamps over the two Rp0 values
+      [0, 1].forEach((i) => {
+        const s = $("s04-s" + i);
+        I(s, { x: 430, y: RY[i] + 12, rotation: -9, scale: 2.2, opacity: 0 });
+        ft(s, { scale: 2.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.18, ease: "power4.in" }, tGr - 0.08 + i * 0.14);
+      });
+      ft(rc, { y: 0 }, { y: 5, duration: 0.07, yoyo: true, repeat: 1 }, tGr + 0.1);
+      // "bayar": the value becomes a cyan pill, the total row lands
+      const q = $("s04-q"), pay = $("s04-pay");
+      I(q, { opacity: 1 }); I(pay, { scale: 0.3, opacity: 0 });
+      tl.set(q, { opacity: 0 }, tBa - 0.06);
+      ft(pay, { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.6)" }, tBa - 0.06);
+      const tot = $("s04-tot"), d2 = $("s04-d2");
+      I(tot, { opacity: 0, y: 10 }); I(d2, { opacity: 0 });
+      ft(d2, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tBa + 0.05);
+      ft(tot, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tBa + 0.12);
+      // exit
+      ft(rc, { x: 0, opacity: 1 }, { x: -80, opacity: 0, duration: 0.2, ease: "power2.in" }, D - 0.2);
+      S.finish();
     })();
   </script>
 </template>

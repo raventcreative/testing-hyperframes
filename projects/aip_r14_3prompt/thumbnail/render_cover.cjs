@@ -1,4 +1,4 @@
-// Renders thumbnail/cover.html to PNG. Usage (from project root, static server on :8828 at the project root): node thumbnail/render_cover.cjs <out.png>
+// Renders thumbnail/cover.html to PNG. Usage (from project root, static server on :8934 at the project root): node thumbnail/render_cover.cjs <out.png>
 // COVER_URL=<url> overrides the page URL.
 const { chromium } = require("playwright");
 (async () => {
@@ -7,7 +7,7 @@ const { chromium } = require("playwright");
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
   p.setDefaultTimeout(300000); p.setDefaultNavigationTimeout(300000);   // the render box can be busy
   p.on("pageerror", (e) => console.error("pageerror", e.message));
-  await p.goto((process.env.COVER_URL || "http://127.0.0.1:8828/thumbnail/cover.html") + (process.argv[3] ? "?" + process.argv[3] : ""));
+  await p.goto((process.env.COVER_URL || "http://127.0.0.1:8934/thumbnail/cover.html") + (process.argv[3] ? "?" + process.argv[3] : ""));
   await p.evaluate(() => window.COVER_READY);
   await p.waitForTimeout(300);
   await p.screenshot({ path: out });

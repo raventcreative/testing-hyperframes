@@ -1,12 +1,136 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s04 PICK THE BRAIN (19.90–28.20) "Pilihannya: DeepSeek bayar per pemakaian, Claude atau GPT pakai API key, atau model lokal di Ollama,
+       gratis asal laptopnya kuat."  Frame 0 = s03's end (header 01). Header rolls to 02 "Pilih otaknya". Left: the OTAK socket card
+       (same socket as s02) with a BIAYA block; right: three options. Each option lights on its words and a copy of its chip plugs into
+       the socket: DeepSeek API (per token, saldo; usage meter fills) → Claude · GPT · dll. (API key of that provider; meter fills again)
+       → model lokal · Ollama (tanpa tagihan API, GRATIS stamp; the meter becomes a RAM/GPU bar = "butuh laptop kuat"). Footer: the
+       harness itself stays free (MIT). Sources: providers.md (DeepSeek key; anthropic/openai/moonshotai/zai providers; Custom model API
+       for self-hosted OpenAI-compatible servers), Ollama docs (OpenAI-compatible endpoint at localhost:11434/v1), DeepSeek pricing page
+       (billed per token from the topped-up balance). Last 0.22 s: everything drops out (s05 starts from the header). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s04-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s04-sk { position: absolute; left: 60px; top: 476px; width: 380px; height: 456px; border-radius: 28px; background: rgba(12,22,64,.84);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), 0 20px 40px rgba(2,6,26,.45); }
+    #s04-sk .k-lab { left: 24px; top: 18px; }
+    #s04-sock { position: absolute; left: 24px; top: 56px; width: 332px; height: 190px; border-radius: 22px; border: 2.5px dashed rgba(106,223,255,.85); background: rgba(1,204,247,.05); }
+    #s04-sglow { position: absolute; left: 22px; top: 54px; width: 336px; height: 194px; border-radius: 24px; box-shadow: 0 0 0 3px rgba(106,223,255,.95), 0 0 40px rgba(1,204,247,.55); opacity: 0; }
+    #s04-empty { position: absolute; left: 0; top: 0; width: 328px; height: 186px; }
+    #s04-empty .cp { position: absolute; left: 133px; top: 34px; width: 62px; height: 62px; color: #6adfff; }
+    #s04-empty .cp svg { width: 62px; height: 62px; }
+    #s04-empty b { position: absolute; left: 0; top: 106px; width: 328px; text-align: center; font: 700 26px/36px Poppins; color: #9fdcf2; letter-spacing: 3px; }
+    .s04-pc { position: absolute; left: 14px; top: 23px; width: 300px; height: 140px; border-radius: 20px; background: linear-gradient(180deg, #ffffff, #eef3fb);
+      box-shadow: 0 14px 30px rgba(2,6,26,.5); transform-origin: 50% 50%; }
+    .s04-pc .ib { position: absolute; left: 18px; top: 18px; width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440; }
+    .s04-pc .ib svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; }
+    .s04-pc b { position: absolute; left: 88px; top: 16px; font: 700 26px/34px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s04-pc span { position: absolute; left: 88px; top: 50px; font: 400 18px/26px Poppins; color: #5d6f8f; white-space: nowrap; }
+    .s04-pc i { position: absolute; left: 18px; top: 92px; height: 32px; padding: 0 12px; border-radius: 16px; font: 700 15px/32px Poppins; letter-spacing: 1.5px; font-style: normal;
+      color: #0b1440; background: rgba(1,204,247,.22); white-space: nowrap; }
+    #s04-gr { position: absolute; left: 196px; top: 84px; height: 42px; padding: 0 16px; border-radius: 21px; background: #2da44e; color: #fff; font: 700 20px/42px Poppins; letter-spacing: 2px;
+      box-shadow: 0 6px 16px rgba(45,164,78,.45); white-space: nowrap; transform-origin: 50% 50%; }
+    #s04-sk .k-lab.b { top: 266px; }
+    .s04-cost { position: absolute; left: 24px; top: 296px; width: 332px; font: 700 23px/34px Poppins; color: #fff; white-space: nowrap; }
+    #s04-mtr { position: absolute; left: 24px; top: 346px; width: 332px; height: 16px; border-radius: 8px; background: rgba(255,255,255,.10); overflow: hidden; }
+    #s04-mtr b { position: absolute; left: 0; top: 0; width: 332px; height: 16px; border-radius: 8px; background: linear-gradient(90deg, #6adfff, #01ccf7); transform-origin: 0 50%; }
+    #s04-mtr b.h { background: linear-gradient(90deg, #ffd27a, #ffb43c); }
+    .s04-ml { position: absolute; left: 24px; top: 368px; font: 400 18px/26px Poppins; color: #9fdcf2; white-space: nowrap; }
+    #s04-ft { position: absolute; left: 24px; top: 408px; display: flex; align-items: center; gap: 8px; font: 400 18px/26px Poppins; color: #86a9c9; white-space: nowrap; }
+    #s04-ft svg { width: 18px; height: 18px; color: #6adfff; }
+    #s04-ft b { color: #e3edfa; }
+    .s04-op { position: absolute; left: 460px; width: 560px; height: 136px; border-radius: 28px; background: rgba(12,22,64,.84);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), 0 18px 36px rgba(2,6,26,.4); transform-origin: 50% 50%; }
+    .s04-op .ib { position: absolute; left: 20px; top: 32px; width: 72px; height: 72px; border-radius: 20px; background: rgba(1,204,247,.14); box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.45); color: #6adfff; }
+    .s04-op .ib svg { position: absolute; left: 18px; top: 18px; width: 36px; height: 36px; }
+    .s04-op b { position: absolute; left: 110px; top: 26px; font: 700 30px/42px Poppins; color: #fff; white-space: nowrap; }
+    .s04-op span { position: absolute; left: 110px; top: 72px; font: 400 19px/30px Poppins; color: #9fdcf2; white-space: nowrap; }
+    .s04-op .gl { position: absolute; inset: 0; border-radius: 28px; box-shadow: inset 0 0 0 2.5px #6adfff, 0 0 30px rgba(1,204,247,.5); opacity: 0; }
+    .s04-op .dot { position: absolute; right: 22px; top: 46px; width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(255,255,255,.25); }
+    .s04-op .on { position: absolute; right: 22px; top: 46px; width: 44px; height: 44px; border-radius: 50%; background: #01ccf7; color: #0b1440; box-shadow: 0 0 16px rgba(1,204,247,.7); }
+    .s04-op .on svg { position: absolute; left: 10px; top: 10px; width: 24px; height: 24px; }
+  </style>
+  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div id="s04-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 8.29);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s04"] = tl;
+      const K = window.R11K, D = 8.3, P = "s04";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s04-zone");
+      const OP = [["coins", "DeepSeek API", "bayar per pemakaian &middot; top-up saldo"], ["key", "Claude &middot; GPT &middot; dll.", "pakai API key provider-nya"],
+        ["laptop", "Model lokal &middot; Ollama", "tanpa tagihan API &middot; laptop kuat"]];
+      const PC = [["coins", "DeepSeek", "model DeepSeek", "PER TOKEN"], ["key", "Claude / GPT", "provider lain", "API KEY"], ["laptop", "Ollama", "jalan di laptop", "LOKAL"]];
+      const COST = ["per token &middot; potong saldo", "tagihan provider-nya", "tanpa tagihan API"];
+      const ML = ["makin sering dipakai, makin besar", "sama: sesuai pemakaian", "RAM / GPU &middot; butuh laptop kuat"];
+      const OY = [476, 636, 796];
+      z.innerHTML = K.headerHTML(P) +
+        `<div id="s04-sk"><div class="k-lab">OTAK TERPASANG</div><div id="s04-sglow"></div><div id="s04-sock"><div id="s04-empty"><div class="cp">${K.svg("cpu")}</div><b>KOSONG</b></div>` +
+        PC.map(([ic, b, s, t], i) => `<div class="s04-pc" id="s04-pc${i}"><div class="ib">${K.svg(ic)}</div><b>${b}</b><span>${s}</span><i>${t}</i>${i === 2 ? `<div id="s04-gr">GRATIS</div>` : ""}</div>`).join("") + `</div>` +
+        `<div class="k-lab b">BIAYA</div>` + COST.map((c, i) => `<div class="s04-cost" id="s04-c${i}">${c}</div>`).join("") +
+        `<div id="s04-mtr"><b id="s04-m0"></b><b class="h" id="s04-m1"></b></div>` + ML.map((c, i) => `<div class="s04-ml" id="s04-l${i}">${c}</div>`).join("") +
+        `<div id="s04-ft">${K.svg("unlock")}harness-nya <b>tetap gratis (MIT)</b></div></div>` +
+        OP.map(([ic, b, s], i) => `<div class="s04-op" id="s04-o${i}" style="top:${OY[i]}px"><div class="ib">${K.svg(ic)}</div><b>${b}</b><span>${s}</span><div class="dot"></div>` +
+          `<div class="on" id="s04-on${i}">${K.svg("plug")}</div><i class="gl" id="s04-g${i}"></i></div>`).join("");
+      K.headerSet(S, P, 1);
+      const tPi = wt("Pilihannya:"), tDS = wt("DeepSeek", 20), tBa = wt("bayar"), tPm = wt("pemakaian,"), tCl = wt("Claude", 22), tGP = wt("GPT"), tPa = wt("pakai", 23),
+        tAP = wt("API", 23), tKe = wt("key,", 24), tMo = wt("model", 25), tOl = wt("Ollama,"), tGr = wt("gratis", 26), tLa = wt("laptopnya"), tKu = wt("kuat.");
+      K.headerSwap(S, P, 1, 2, 0.02);
+      // ---------------------------------------------------------------- frame 0 → socket card + three dim options
+      const sk = $("s04-sk"); I(sk, { x: -60, opacity: 0 });
+      ft(sk, { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, Math.max(0.03, tPi));
+      OP.forEach((_, i) => { const o = $("s04-o" + i); I(o, { x: 80, opacity: 0, scale: 1 });
+        ft(o, { x: 80, opacity: 0 }, { x: 0, opacity: 0.55, duration: 0.36, ease: "power3.out" }, 0.18 + i * 0.1);
+        I($("s04-g" + i), { opacity: 0 }); I($("s04-on" + i), { opacity: 0, scale: 0.4, transformOrigin: "50% 50%" }); });
+      const emp = $("s04-empty"), sg = $("s04-sglow");
+      I(emp, { opacity: 1 }); I(sg, { opacity: 0 });
+      PC.forEach((_, i) => I($("s04-pc" + i), { opacity: 0, x: 0, y: 0, scale: 1 }));
+      COST.forEach((_, i) => I($("s04-c" + i), { opacity: 0, y: 12 }));
+      ML.forEach((_, i) => I($("s04-l" + i), { opacity: 0 }));
+      const m0 = $("s04-m0"), m1 = $("s04-m1"); I(m0, { scaleX: 0, opacity: 1 }); I(m1, { scaleX: 0, opacity: 0 });
+      // option k becomes active at t: row lights, its chip flies from the row into the socket, previous chip drops out
+      const act = (k, t) => {
+        const o = $("s04-o" + k), g = $("s04-g" + k), on = $("s04-on" + k), pc = $("s04-pc" + k);
+        ft(o, { opacity: 0.55, scale: 1 }, { opacity: 1, scale: 1.02, duration: 0.2, ease: "power2.out" }, t);
+        ft(g, { opacity: 0 }, { opacity: 1, duration: 0.18 }, t);
+        ft(on, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.6)" }, t + 0.06);
+        // chip: from the row's icon (global ~ x 480.., y OY[k]+68) into the socket (global ~ x 98.., y 555..)
+        ft(pc, { opacity: 0, x: 382, y: OY[k] + 32 - 555, scale: 0.45 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.42, ease: "power3.out" }, t + 0.04);
+        ft(sg, { opacity: 0 }, { opacity: 1, duration: 0.12 }, t + 0.36); ft(sg, { opacity: 1 }, { opacity: 0, duration: 0.4 }, t + 0.5);
+        if (k > 0) {
+          const po = $("s04-o" + (k - 1));
+          ft(po, { opacity: 1, scale: 1.02 }, { opacity: 0.55, scale: 1, duration: 0.2, ease: "power2.out" }, t);
+          ft($("s04-g" + (k - 1)), { opacity: 1 }, { opacity: 0, duration: 0.18 }, t);
+          ft($("s04-on" + (k - 1)), { opacity: 1 }, { opacity: 0, duration: 0.15 }, t);
+          ft($("s04-pc" + (k - 1)), { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6, duration: 0.2, ease: "power2.in" }, t);
+        } else ft(emp, { opacity: 1 }, { opacity: 0, duration: 0.18 }, t + 0.1);
+      };
+      const showCost = (k, t) => {
+        ft($("s04-c" + k), { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, t);
+        ft($("s04-l" + k), { opacity: 0 }, { opacity: 1, duration: 0.26 }, t + 0.06);
+        if (k > 0) { ft($("s04-c" + (k - 1)), { opacity: 1 }, { opacity: 0, duration: 0.14 }, t - 0.14); ft($("s04-l" + (k - 1)), { opacity: 1 }, { opacity: 0, duration: 0.14 }, t - 0.14); }
+      };
+      // ---------------------------------------------------------------- DeepSeek API: per token
+      act(0, tDS - 0.12); showCost(0, tDS + 0.3);
+      ft(m0, { scaleX: 0 }, { scaleX: 0.62, duration: 0.9, ease: "power1.inOut" }, tPm - 0.1);
+      // ---------------------------------------------------------------- Claude · GPT: API key of that provider
+      act(1, tCl - 0.12); showCost(1, tCl + 0.3);
+      ft(m0, { scaleX: 0.62 }, { scaleX: 0, duration: 0.2, ease: "power2.in" }, tCl - 0.1);
+      ft(m0, { scaleX: 0 }, { scaleX: 0.78, duration: 0.9, ease: "power1.inOut" }, tAP - 0.05);
+      const kib = $("s04-o1").querySelector(".ib svg"); I(kib, { rotation: 0, transformOrigin: "50% 50%" });
+      ft(kib, { rotation: 0 }, { rotation: -25, duration: 0.12, yoyo: true, repeat: 3, ease: "sine.inOut" }, tAP - 0.04);
+      // ---------------------------------------------------------------- model lokal · Ollama: no API bill, needs a strong laptop
+      act(2, tMo - 0.12);
+      ft(m0, { scaleX: 0.78 }, { scaleX: 0, duration: 0.2, ease: "power2.in" }, tMo - 0.1);
+      showCost(2, tMo + 0.3);
+      const gr = $("s04-gr"); I(gr, { opacity: 0, scale: 2, rotation: -14 });
+      ft(gr, { opacity: 0, scale: 2, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.2, ease: "power4.in" }, tGr - 0.04);
+      ft(m1, { opacity: 0 }, { opacity: 1, duration: 0.1 }, tLa - 0.12);
+      ft(m1, { scaleX: 0 }, { scaleX: 0.86, duration: 0.7, ease: "power2.out" }, tLa - 0.1);
+      // ---------------------------------------------------------------- exit
+      const tX = D - 0.22;
+      ft(sk, { opacity: 1, y: 0 }, { opacity: 0, y: 50, duration: 0.18, ease: "power2.in" }, tX);
+      OP.forEach((_, i) => ft($("s04-o" + i), { y: 0 }, { y: 50, opacity: 0, duration: 0.18, ease: "power2.in" }, tX + i * 0.015));
+      S.finish();
     })();
   </script>
 </template>

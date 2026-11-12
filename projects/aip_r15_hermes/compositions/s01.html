@@ -18,7 +18,6 @@
     #s01-rlab svg { width: 24px; height: 24px; color: #9fdcf2; }
     .s01-unit { position: absolute; left: 32px; width: 516px; height: 92px; border-radius: 18px; background: rgba(4,10,40,.72); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.08); }
     .s01-unit i { position: absolute; left: 22px; width: 12px; height: 12px; border-radius: 6px; background: #2f4a78; }
-    .s01-unit i.on { background: #6adfff; box-shadow: 0 0 10px rgba(1,204,247,.9); }
     .s01-bot { position: absolute; left: 0; top: 0; width: 380px; height: 68px; border-radius: 34px; background: #ffffff; box-shadow: 0 12px 26px rgba(2,6,26,.45); transform-origin: 50% 50%; }
     .s01-bot .k-av { left: 8px; top: 8px; width: 52px; height: 52px; border-radius: 26px; }
     .s01-bot .k-av svg { left: 13px; top: 13px; width: 26px; height: 26px; }
@@ -34,10 +33,10 @@
     .s01-bd b { position: absolute; left: 130px; top: 16px; font: 700 38px/50px Poppins; color: #fff; white-space: nowrap; letter-spacing: -0.5px; }
     .s01-bd span { position: absolute; left: 130px; top: 74px; height: 36px; padding: 0 14px; border-radius: 18px; font: 700 17px/36px Poppins; letter-spacing: 1.2px;
       color: #9fdcf2; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18); white-space: nowrap; }
-    .s01-bd span.lit { color: #0b1440; background: #6adfff; box-shadow: 0 0 16px rgba(1,204,247,.6); }
     #s01-lap { position: absolute; left: 200px; top: 486px; width: 680px; height: 378px; border-radius: 28px; background: linear-gradient(180deg, #13245e, #0a1440);
       box-shadow: inset 0 0 0 12px #0b1235, inset 0 0 0 13.5px rgba(255,255,255,.14), 0 28px 60px rgba(2,6,26,.6); transform-origin: 50% 100%; }
-    #s01-lap .tb { position: absolute; left: 34px; top: 30px; font: 700 20px/30px Poppins; letter-spacing: 2px; color: #6adfff; white-space: nowrap; }
+    #s01-lglow { position: absolute; left: 200px; top: 486px; width: 680px; height: 378px; border-radius: 28px; box-shadow: inset 0 0 0 2.5px rgba(106,223,255,.9), 0 0 50px rgba(1,204,247,.45); }
+    #s01-lap .tb { position: absolute; left: 34px; top: 20px; font: 700 20px/30px Poppins; letter-spacing: 2px; color: #6adfff; white-space: nowrap; }
     #s01-base { position: absolute; left: 130px; top: 862px; width: 820px; height: 36px; border-radius: 4px 4px 22px 22px; background: linear-gradient(180deg, #c9d6ea, #8ea3c4);
       box-shadow: 0 16px 30px rgba(2,6,26,.5); transform-origin: 50% 0%; }
     #s01-base i { position: absolute; left: 350px; top: 0; width: 120px; height: 10px; border-radius: 0 0 8px 8px; background: #6f84a8; }
@@ -46,8 +45,8 @@
     #s01-ok svg { width: 26px; height: 26px; }
     #s01-ok em { font-style: normal; font-weight: 400; color: #dff7e7; }
   </style>
-  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
-    <div id="s01-zone"></div>
+  <div data-hf-id="hf-4z0v" id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-x8t4" id="s01-zone"></div>
   </div>
   <script>
     (function () {
@@ -57,10 +56,10 @@
       const UY = [86, 190, 294];                       // rack unit tops (inside the rack)
       const RACK = { x: 250, y: 490 };
       const botRack = (i) => ({ x: RACK.x + 32 + 108, y: RACK.y + UY[i] + 12 });   // chip inside its rack unit
-      const botLap = (i) => ({ x: 350, y: 548 + i * 84 });                           // chip as a row on the laptop screen
+      const botLap = (i) => ({ x: 350, y: 548 + i * 78 });                           // chip as a row on the laptop screen
       z.innerHTML =
         `<div id="s01-h1">Tim AI kamu numpang di&hellip;</div><div id="s01-h2"><em>server</em> siapa?</div>` +
-        `<div id="s01-lap"><div class="tb">LAPTOP KAMU</div></div><div id="s01-base"><i></i></div>` +
+        `<div id="s01-lap"><div class="tb">LAPTOP KAMU</div></div><div id="s01-lglow"></div><div id="s01-base"><i></i></div>` +
         `<div id="s01-rack"><div id="s01-rlab">${K.svg("cloud")}SERVER ORANG LAIN</div>` +
         UY.map((y, i) => `<div class="s01-unit" style="top:${y}px">${[0, 1, 2].map((k) => `<i id="s01-led${i}${k}" style="top:${22 + k * 20}px"></i>`).join("")}</div>`).join("") + `</div>` +
         `<div id="s01-qr"></div><div id="s01-q">?</div>` +
@@ -75,8 +74,9 @@
       I(rack, { scale: 1, opacity: 1 });
       // LEDs blink (deterministic sets)
       for (let i = 0; i < 3; i++) for (let k = 0; k < 3; k++) {
-        const e = $(`s01-led${i}${k}`); I(e, { className: "" });
-        for (let n = 0; n < 9; n++) { const t = 0.12 + n * 0.41 + (i * 0.13 + k * 0.07); tl.set(e, { className: (n + i + k) % 3 === 0 ? "" : "on" }, t); }
+        const e = $(`s01-led${i}${k}`); I(e, { backgroundColor: "#2f4a78", boxShadow: "0 0 0px rgba(1,204,247,0)" });
+        for (let n = 0; n < 9; n++) { const t = 0.12 + n * 0.41 + (i * 0.13 + k * 0.07), on = (n + i + k) % 3 !== 0;
+          tl.set(e, { backgroundColor: on ? "#6adfff" : "#2f4a78", boxShadow: on ? "0 0 10px rgba(1,204,247,.9)" : "0 0 0px rgba(1,204,247,0)" }, t); }
       }
       // the three bots fill the slots on "Tim AI kamu"
       for (let i = 0; i < 3; i++) {
@@ -100,8 +100,8 @@
         const d = $("s01-d" + k);
         I(d, { y: -60, opacity: 0, scale: 0.94 });
         ft(d, { y: -60, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.42, ease: "back.out(1.6)" }, tDuo + 0.02 + k * 0.14);
-        const c = $("s01-c" + k); I(c, { className: "" });
-        tl.set(c, { className: "lit" }, tOp + 0.08 + k * 0.12);
+        const c = $("s01-c" + k); I(c, { color: "#9fdcf2", backgroundColor: "rgba(255,255,255,0.06)" });
+        tl.set(c, { color: "#0b1440", backgroundColor: "#6adfff" }, tOp + 0.08 + k * 0.12);
       });
       // ---------------------------------------------------------------- "jalanin agennya di laptopmu": rack dissolves, laptop forms
       ft(q, { scale: 1, opacity: 1 }, { scale: 0.3, opacity: 0, duration: 0.24, ease: "power2.in" }, tJl - 0.16);
@@ -115,13 +115,13 @@
         ft(b, { x: r.x, y: r.y }, { x: l.x, y: l.y, duration: 0.5, ease: "power3.inOut" }, tJl + 0.04 + i * 0.06);
       }
       const ok = $("s01-ok");
-      I(ok, { x: 540, xPercent: -50, y: 800, scale: 0.4, opacity: 0 });
+      I(ok, { x: 540, xPercent: -50, y: 790, scale: 0.4, opacity: 0 });
       ft(ok, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.32, ease: "back.out(2.4)" }, tLp - 0.04);
-      ft(lap, { boxShadow: "inset 0 0 0 12px #0b1235, inset 0 0 0 13.5px rgba(255,255,255,.14), 0 28px 60px rgba(2,6,26,.6)" },
-        { boxShadow: "inset 0 0 0 12px #0b1235, inset 0 0 0 13.5px rgba(106,223,255,.9), 0 0 50px rgba(1,204,247,.45)", duration: 0.3, ease: "power2.out" }, tLp);
+      const lg = $("s01-lglow"); I(lg, { opacity: 0 });
+      ft(lg, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, tLp);
       // ---------------------------------------------------------------- exit: the laptop group drops out (the badges stay for s02)
       const tX = D - 0.25;
-      [lap, base, ok, $("s01-b0"), $("s01-b1"), $("s01-b2")].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, tX + (i % 3) * 0.02));
+      [lap, base, ok, lg, $("s01-b0"), $("s01-b1"), $("s01-b2")].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, tX + (i % 3) * 0.02));
       S.finish();
     })();
   </script>

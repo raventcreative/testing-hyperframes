@@ -1,12 +1,100 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="t1" data-width="1080" data-height="1920"></div>
+  <style>
+    /* t1 LAPIS 1 · CARI (9.77–14.20) "Lapis satu nyari: ribuan grafik, berita, sampai laporan keuangan."
+       Frame 0 = s02's end (header item 0 only). Header rolls to 01 "Lapis cari" (segment 1 lights). "nyari:" = the scanner panel rises.
+       "ribuan grafik," = 14 mini charts deal in, a cyan beam sweeps them, the counter runs to "± 5.900 saham AS" (README: scan.py universe
+       ~5,900 US stocks) and three tiles light up as SETUP. "berita," = a news card (generic SAHAM A headline, "pemicu gerak").
+       "sampai laporan keuangan." = a quarterly-report card summarises what changed (labelled "contoh"). Last 0.22 s: workspace drops out. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #t1-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #t1-scan { width: 960px; height: 236px; overflow: hidden; }
+    #t1-scan .lb { position: absolute; left: 24px; top: 18px; font: 700 16px/24px Poppins; letter-spacing: 2.5px; color: #6adfff; white-space: nowrap; }
+    #t1-cnt { position: absolute; left: 24px; top: 0; width: 430px; height: 44px; margin-top: 42px; overflow: hidden; }
+    #t1-cnt b { position: absolute; left: 0; top: 0; font: 700 26px/36px Poppins; color: #fff; white-space: nowrap; }
+    #t1-cnt b em { font-style: normal; color: #6adfff; }
+    .t1-tile { position: absolute; left: 0; top: 0; width: 124px; height: 64px; border-radius: 14px; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.2px rgba(255,255,255,.12); }
+    .t1-tile svg { position: absolute; left: 10px; top: 10px; }
+    .t1-tile .f { position: absolute; inset: 0; border-radius: 14px; box-shadow: inset 0 0 0 3px #01ccf7, 0 0 22px rgba(1,204,247,.6); opacity: 0; }
+    .t1-tag { position: absolute; left: 0; top: 0; height: 28px; padding: 0 10px; border-radius: 14px; background: #01ccf7; color: #0b1440; font: 700 14px/28px Poppins; letter-spacing: 1px; white-space: nowrap; transform-origin: 50% 50%; }
+    #t1-beam { position: absolute; left: 0; top: 0; width: 70px; height: 236px; background: linear-gradient(90deg, rgba(1,204,247,0), rgba(1,204,247,.35) 70%, rgba(160,240,255,.9) 96%, rgba(1,204,247,0)); }
+    .t1-card { position: absolute; left: 0; top: 0; width: 470px; height: 188px; border-radius: 26px; background: linear-gradient(180deg, #ffffff, #f4f7fc); box-shadow: 0 24px 50px rgba(2,6,26,.55); }
+    .t1-card .hd { position: absolute; left: 20px; top: 18px; display: flex; align-items: center; gap: 10px; font: 700 16px/24px Poppins; letter-spacing: 2px; color: #0a7ea4; white-space: nowrap; }
+    .t1-card .hd svg { width: 24px; height: 24px; }
+    .t1-card .tm { position: absolute; right: 20px; top: 16px; height: 28px; padding: 0 10px; border-radius: 14px; background: #eef3fb; font: 700 15px/28px Poppins; color: #294b77; white-space: nowrap; }
+    #t1-news .h { position: absolute; left: 20px; top: 54px; width: 430px; font: 700 23px/31px Poppins; color: #0a0d2c; white-space: normal; }
+    #t1-news .tg { position: absolute; left: 20px; top: 130px; height: 36px; padding: 0 14px 0 10px; border-radius: 18px; background: #e6f8fe; color: #0a7ea4; font: 700 17px/36px Poppins;
+      white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+    #t1-news .tg svg { width: 20px; height: 20px; }
+    .t1-row { position: absolute; left: 20px; width: 430px; height: 40px; border-radius: 12px; background: #f1f5fb; }
+    .t1-row b { position: absolute; left: 14px; top: 0; font: 700 19px/40px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .t1-row span { position: absolute; right: 12px; top: 6px; height: 28px; padding: 0 10px 0 8px; border-radius: 14px; font: 700 16px/28px Poppins; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+    .t1-row span svg { width: 18px; height: 18px; }
+    .t1-up { background: rgba(45,164,78,.14); color: #1d7f3c; }
+    .t1-dn { background: rgba(229,72,77,.12); color: #c0333a; }
+  </style>
+  <div id="root" data-composition-id="t1" data-width="1080" data-height="1920">
+    <div id="t1-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 4.423);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["t1"] = tl;
+      const K = window.R13K, D = 4.4333, P = "t1";
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("t1-zone");
+      const hsh = (n) => { const s = Math.sin(n * 57.31 + 7.7) * 43758.5453; return s - Math.floor(s); };
+      const spark = (k) => {
+        let v = 22, pts = [];
+        for (let i = 0; i < 12; i++) { v += (hsh(k * 31 + i) - 0.5) * 16 + (k % 3 === 0 ? 1.5 : 0); v = Math.max(4, Math.min(40, v)); pts.push(`${(i * 9.4).toFixed(1)},${(44 - v).toFixed(1)}`); }
+        return `<svg width="104" height="44" viewBox="0 0 104 44"><polyline points="${pts.join(" ")}" fill="none" stroke="rgba(227,237,250,.7)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+      };
+      const NT = 14, HL = [2, 8, 11], TAG = { 2: "SETUP &middot; A", 8: "SETUP &middot; B", 11: "SETUP &middot; C" };
+      const CNT = ["0", "1.200", "2.400", "3.700", "4.900", "5.900"];
+      z.innerHTML = K.headerHTML(P) + `<div class="k-ab" id="t1-ws" style="width:1080px;height:945px">` +
+        `<div class="k-glass" id="t1-scan"><div class="lb">${"PINDAI GRAFIK"}</div><div id="t1-cnt">` +
+        CNT.map((c, i) => `<b id="t1-n${i}">&plusmn; <em>${c}</em> saham AS dipindai</b>`).join("") + `</div>` +
+        Array.from({ length: NT }, (_, k) => `<div class="t1-tile" id="t1-t${k}">${spark(k)}<i class="f" id="t1-f${k}"></i></div>`).join("") +
+        `<div id="t1-beam"></div></div>` +
+        HL.map((k) => `<div class="t1-tag" id="t1-g${k}">${TAG[k]}</div>`).join("") +
+        `<div class="t1-card" id="t1-news"><div class="hd">${K.svg("news")}BERITA</div><div class="tm">08:04</div>` +
+        `<div class="h">SAHAM A umumkan jadwal laporan kuartal minggu ini</div><div class="tg">${K.svg("trend")}pemicu gerak harga</div></div>` +
+        `<div class="t1-card" id="t1-rep"><div class="hd">${K.svg("report")}LAPORAN KUARTAL</div><div class="tm">contoh</div>` +
+        `<div class="t1-row" id="t1-r0" style="top:58px"><b>Pendapatan</b><span class="t1-up">${K.svg("trend")}naik</span></div>` +
+        `<div class="t1-row" id="t1-r1" style="top:104px"><b>Laba per saham</b><span class="t1-dn">${K.svg("trend", "", 'style="transform:scaleY(-1)"')}turun</span></div>` +
+        `<div class="t1-row" id="t1-r2" style="top:150px;height:26px;background:none"><b style="font:400 16px/26px Poppins;color:#5d6f8f;left:0">ringkasan: apa yang berubah</b></div></div>` +
+        `</div>`;
+      K.headerSet(S, P, 0);
+      const tLa = wt("Lapis", 9.7), tNy = wt("nyari:"), tRi = wt("ribuan"), tGf = wt("grafik,"), tBe = wt("berita,"), tSa = wt("sampai", 12), tLp = wt("laporan"), tKe = wt("keuangan.");
+      K.headerSwap(S, P, 0, 1, Math.max(0.01, tLa - 0.06));
+      // ---------------------------------------------------------------- "nyari:": scanner panel rises, tiles deal in
+      const scan = $("t1-scan"); I(scan, { x: 60, y: 540, opacity: 0 });
+      ft(scan, { y: 540, opacity: 0 }, { y: 484, opacity: 1, duration: 0.36, ease: "power3.out" }, tNy - 0.22);
+      for (let k = 0; k < NT; k++) {
+        const t = $("t1-t" + k), c = k % 7, r = Math.floor(k / 7), x = 22 + c * 132, y = 92 + r * 72;
+        I(t, { x, y, opacity: 0, scale: 0.7, transformOrigin: "50% 50%" });
+        ft(t, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2)" }, tNy + 0.02 + k * 0.035);
+        I($("t1-f" + k), { opacity: 0 });
+      }
+      // counter: one span per value, swapped by opacity sets (seek-safe)
+      CNT.forEach((_, i) => { const n = $("t1-n" + i); I(n, { opacity: i === 0 ? 1 : 0 }); if (i > 0) { tl.set($("t1-n" + (i - 1)), { opacity: 0 }, tRi - 0.1 + i * 0.13); tl.set(n, { opacity: 1 }, tRi - 0.1 + i * 0.13); } });
+      // ---------------------------------------------------------------- "ribuan grafik,": the sweep + three setups light up
+      const beam = $("t1-beam"); I(beam, { x: -80, opacity: 1 });
+      ft(beam, { x: -80 }, { x: 960, duration: 0.95, ease: "power1.inOut" }, tRi - 0.1);
+      HL.forEach((k, j) => {
+        const c = k % 7, r = Math.floor(k / 7), tt = tRi - 0.1 + (22 + c * 132) / 1040 * 0.95 + 0.05;
+        ft($("t1-f" + k), { opacity: 0 }, { opacity: 1, duration: 0.14 }, tt);
+        ft($("t1-t" + k), { scale: 1 }, { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tt);
+        const g = $("t1-g" + k); I(g, { x: 60 + 22 + c * 132 + 62, xPercent: -50, y: 484 + 92 + r * 72 - 16, scale: 0, opacity: 0 });
+        ft(g, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(2.6)" }, tt + 0.04);
+      });
+      // ---------------------------------------------------------------- "berita,": the news card
+      const news = $("t1-news"); I(news, { x: 60, y: 744, opacity: 0, rotation: -3 });
+      ft(news, { x: -40, opacity: 0, rotation: -3 }, { x: 60, opacity: 1, rotation: 0, duration: 0.36, ease: "back.out(1.4)" }, tBe - 0.24);
+      // ---------------------------------------------------------------- "sampai laporan keuangan.": the report card
+      const rep = $("t1-rep"); I(rep, { x: 550, y: 744, opacity: 0, rotation: 3 });
+      ft(rep, { x: 650, opacity: 0, rotation: 3 }, { x: 550, opacity: 1, rotation: 0, duration: 0.36, ease: "back.out(1.4)" }, tLp - 0.3);
+      [0, 1, 2].forEach((i) => { const r = $("t1-r" + i); I(r, { opacity: 0, x: 20 }); ft(r, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.24, ease: "power3.out" }, tLp - 0.1 + i * 0.14); });
+      // ---------------------------------------------------------------- exit
+      S.exitWs($("t1-ws"));
+      S.finish();
     })();
   </script>
 </template>

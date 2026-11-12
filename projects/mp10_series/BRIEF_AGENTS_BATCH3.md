@@ -32,6 +32,16 @@ run the full render (the lead renders and mixes music), touch only your own fold
 `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/mp<xx>/`. Disk is limited: QA as small JPG
 contact sheets, delete PNG dumps after. Stop any http.server you start (ports below) before you finish.
 
+## Lessons from videos 16–20 (real-runtime bugs found by the first builders — apply them from the start)
+- Pin every initial state at 0 in a NESTED timeline that is the FIRST child of `tl` at time 0 (pins appended at the end of the
+  timeline overwrite tweens that start exactly at 0 on a render worker's first frame).
+- Call `tl.render(0, true, true)` once at the end of the build (seeking to 0 renders nothing, so frame 0 otherwise shows the page's
+  pre-animation state). Hidden elements leaked to frame 0 in two videos before this.
+- Draw on-screen text/captions ABOVE the 3D stage so receding cards never cross the words.
+- The voice reads ~2.5 words/s: keep the spoken script ≤ 33 s, and make the brand line long enough that the chest hologram is on
+  screen ≥ 4 s.
+- Good finished examples: `mp10_17_galeri`, `mp10_19_multichannel`, `mp10_20_diskon` (read their production/NOTES.md).
+
 ## The 15 concepts (fictional sellers/brands only; no marketplace, bank, e-wallet or chat-app logos/names/colours; generic UI;
 ## every demo number gets "Ilustrasi data", every app flow "Simulasi alur")
 - **16 · Dari Chat ke Catatan Rapi** (`mp10_16_chatwa`, 8916): orders arrive as a flood of chat bubbles on a tilted 3D phone ("mau 2 ya

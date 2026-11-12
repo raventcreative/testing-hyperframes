@@ -64,6 +64,12 @@ Sheets (JPG only, PNG dumps deleted) in `/tmp/claude-0/-home-user-testing-hyperf
   "multiple instances of Three.js" + software-GL "GPU stall due to ReadPixels" performance messages. No contrast notes.
 - Found in the real runtime and fixed: at 8.63 s the s03 laptop rose from 420 px below and crossed the caption zone → now a 90 px rise with
   a fade-in (never below y 945); re-checked in `qa2_sheet.jpg`.
+- **Take-3 re-check (line 7 reworded, all cuts moved):** targeted real-runtime pass `qa3_sheet.jpg` (+ `qa3/contact-sheet-1…3.jpg`):
+  first frame, every cut ±0.03 s (3.503/3.563, 8.537/8.597, 11.737/11.797, 17.203/17.263, 20.637/20.697, 23.47/23.53, 28.47/28.53,
+  33.037/33.097, 38.303/38.363, 41.503/41.563), s07 at 24.2–28.1 s, last frame 45.27 s: all clean (new s07 text "Isi API key tiap
+  layanan" / "daftar akun gratis di tiap layanan", captions match, eyes fine, nothing in the caption zone). `validate` again: 0 errors.
+  The full 78-frame pass above was on take 2 (same scenes, times ~0.1–0.9 s earlier); the robot/mascot now look words up relative to
+  scene starts, so a new take cannot misroute their gestures.
 - Every initial state is pinned at 0 in the nested P0 timeline; hand-overs s01 → s02 (Claude Code window, identical position) and s02 → s03
   (server box, identical position) are seamless at 3.437/3.497 and 8.57/8.63.
 

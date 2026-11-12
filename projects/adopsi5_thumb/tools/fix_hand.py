@@ -1,10 +1,12 @@
-"""Rebuilds the open (left-of-frame) hand under the removed subtitle in frame 115.83 s by hand-structure instead of LaMa,
-which had smeared the ring finger into a blob:
-  - ring finger: the visible middle finger, shifted down/right onto the ring finger's visible top edge and tip (fingers are
-    near-parallel here), pasted only where the subtitle was
-  - gap between ring finger and little finger: the dark shirt colour sampled from the visible part of that gap
-  - palm under the "b" and the little finger's top edge: Navier-Stokes inpaint over the thin stroke mask (smooth skin)
-Everything outside the hand box is taken from the LaMa-cleaned frame unchanged.
+"""Rebuilds the open (left-of-frame) hand under the removed subtitle in frame 115.83 s from its real geometry.
+The finger layout was read from the pixels visible between the subtitle letters (skin / dark gap map):
+  - middle finger: lower edge ~y1150 (x250-290), tip (327,1120)            -> real, untouched
+  - ring finger:   DIAGONAL, base ~(236,1199) on the palm -> tip ~(322,1158) -> rebuilt: the middle finger's own pixels
+                   mapped (similarity transform) from its axis onto the ring finger's axis, so skin, shading and nail are real
+  - dark gaps:     middle/ring above the ring finger, ring/little below it  -> shirt-dark sampled from the visible gap
+  - little finger: top edge ~y1216, real below that                         -> untouched
+  - palm (under "b", "a"): smooth skin from the LaMa pass
+Only pixels under the subtitle strokes (+ their dark outline) are replaced, so everything visible stays the original.
 Usage: python3 -I tools/fix_hand.py <frame_115.83.png> <clean.png> <out.png>"""
 import sys
 import cv2
@@ -18,53 +20,60 @@ f = im.astype(np.float32)
 mn = im.min(axis=2)
 K = lambda r: cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1, 2 * r + 1))
 
-BX0, BX1, BY0, BY1 = 172, 346, 1138, 1240                 # hand box
+BX0, BX1, BY0, BY1 = 172, 350, 1140, 1222                 # hand box (left hand only)
 st = np.zeros((H, W), np.uint8)
 band = (slice(1150, 1232), slice(BX0, BX1))
 st[band][mn[band] > 185] = 255
-sh = np.zeros_like(st); sh[7:, 2:] = st[:-7, :-2]                 # the subtitle's drop shadow (offset down-right)
-hole = cv2.dilate(st | sh, K(7))
-hole[1146:1220, 172:194] = 255                                     # grey edge of the subtitle plate left of the "b"
+hole = cv2.dilate(st, K(4))
+hole[1206:1217, 240:350][f[1206:1217, 240:350, 2] < 80] = 255        # dark outline band under the word
+hole[1146:1220, 172:194] = 255                                      # grey edge of the subtitle plate left of the "b"
 hole[:BY0] = 0; hole[BY1:] = 0; hole[:, :BX0] = 0; hole[:, BX1:] = 0
 
-# 1. base: the LaMa result (smooth palm and little finger)
-res = cl.astype(np.float32)
-
-# 2. dark gap between ring finger and little finger: a soft wedge, closed toward the palm
-gap = np.zeros((H, W), np.uint8)
-cv2.fillPoly(gap, [np.array([[244, 1192], [300, 1190], [336, 1188], [336, 1228], [316, 1222], [300, 1213], [283, 1207], [252, 1203], [244, 1199]], np.int32)], 255)
-gap = cv2.GaussianBlur(gap, (0, 0), 3.0).astype(np.float32) / 255
-vis = np.zeros((H, W), bool); vis[1150:1240, 338:380] = True                 # shirt just right of the fingertips
-vis &= (hole == 0) & (f[..., 2] < 75)
-dark = np.median(f[vis], axis=0) if vis.sum() > 20 else np.array([18, 18, 26], np.float32)
+# ---- model of the hand inside the box
+res = cl.astype(np.float32)                                         # palm: LaMa (smooth skin)
+# finger zone right of the palm: dark gaps everywhere, then the ring finger on top, real little finger below y1216
+M = np.zeros((H, W), np.uint8)
+cv2.fillPoly(M, [np.array([[264, 1148], [342, 1146], [342, 1216], [246, 1216], [252, 1204], [262, 1170]], np.int32)], 255)
+gm = cv2.GaussianBlur(M, (0, 0), 2.2).astype(np.float32) / 255     # gaps close into the palm like a real finger web
+vis = np.zeros((H, W), bool); vis[1150:1240, 345:385] = True                  # plain shirt right of the fingertips
+vis &= (hole == 0) & (f[..., 2] < 70)
+dark = np.median(f[vis], axis=0) if vis.sum() > 15 else np.array([26, 26, 28], np.float32)
 rng = np.random.default_rng(5)
-gfill = dark[None, None, :] + rng.normal(0, 1.8, (H, W, 1)).astype(np.float32)
-res = res * (1 - gap[..., None]) + gfill * gap[..., None]
+# local dark field: normalised blur of the real, visible dark pixels around (follows the shirt's own shading)
+dm = ((hole == 0) & (f[..., 2] < 60)).astype(np.float32)
+dm[:1090] = 0; dm[1260:] = 0; dm[:, :200] = 0; dm[:, 420:] = 0
+num = cv2.GaussianBlur(f * dm[..., None], (0, 0), 10); den = cv2.GaussianBlur(dm, (0, 0), 10)[..., None]
+dfield = np.where(den > 1e-3, num / np.maximum(den, 1e-3), dark[None, None, :])
+res = res * (1 - gm[..., None]) + (dfield + rng.normal(0, 1.4, (H, W, 1)).astype(np.float32)) * gm[..., None]
+pk = np.zeros((H, W), np.float32); pk[1216:1240, 236:350] = 1; pk = cv2.GaussianBlur(pk, (0, 0), 1.2)[..., None]
+res = res * (1 - pk) + f * pk                                       # little finger: its real pixels
 
-# 2b. little finger's top band: its own visible body (just below the subtitle) moved up 10 px
-pz = np.zeros((H, W), np.uint8)
-cv2.fillPoly(pz, [np.array([[236, 1200], [283, 1205], [300, 1212], [314, 1219], [314, 1230], [236, 1230]], np.int32)], 255)
-pz = cv2.GaussianBlur(pz, (0, 0), 1.5).astype(np.float32) / 255
-pp = np.zeros_like(f); pp[:-10] = f[10:]
-res = res * (1 - pz[..., None]) + pp * pz[..., None]
+# ring finger: middle finger axis (base Bm -> tip Tm) mapped onto the ring finger axis (Br -> Tr)
+Bm, Tm = np.array([238.0, 1127.0]), np.array([322.0, 1122.0])
+Br, Tr = np.array([236.0, 1199.0]), np.array([322.0, 1158.0])
+vm, vr = Tm - Bm, Tr - Br
+s = np.linalg.norm(vr) / np.linalg.norm(vm) * 0.97
+ang = np.arctan2(vr[1], vr[0]) - np.arctan2(vm[1], vm[0])
+c, si = s * np.cos(ang), s * np.sin(ang)
+A = np.array([[c, -si, 0], [si, c, 0]], np.float32)
+A[:, 2] = Br - A[:, :2] @ Bm
+patch = cv2.warpAffine(f, A, (W, H), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REFLECT)
+patch = patch * 0.96                                                # ring finger sits a touch deeper in shadow
+# finger mask: the middle finger's own skin, carried by the same transform (exact silhouette incl. rounded tip)
+skin = ((f[..., 2] > 95) & (f[..., 2] > f[..., 0] + 20)).astype(np.uint8) * 255
+mzone = np.zeros((H, W), np.uint8)
+cv2.fillPoly(mzone, [np.array([[226, 1100], [334, 1100], [334, 1146], [226, 1150]], np.int32)], 255)
+fm = cv2.warpAffine(cv2.morphologyEx(skin & mzone, cv2.MORPH_OPEN, K(1)), A, (W, H), flags=cv2.INTER_LINEAR)
+fm = cv2.GaussianBlur(fm, (0, 0), 1.2).astype(np.float32) / 255
+fade = np.clip((np.arange(W) - 236) / 14, 0, 1)[None, :]           # melt the finger base into the palm
+fm = fm * fade
+res = res * (1 - fm[..., None]) + patch * fm[..., None]
 
-# 3. ring finger = the middle finger shifted onto the ring finger's visible top edge and tip
-DY, DX = 44, 3
-patch = np.zeros_like(f)
-patch[DY:, DX:] = f[:-DY, :-DX]
-cap = np.zeros((H, W), np.uint8)
-cv2.rectangle(cap, (232, 1146), (318, 1190), 255, -1)
-cv2.circle(cap, (318, 1168), 22, 255, -1)                    # rounded tip
-cap = cv2.GaussianBlur(cap, (0, 0), 1.8).astype(np.float32) / 255
-res = res * (1 - cap[..., None]) + patch * cap[..., None]
-
-# 4. real pixels everywhere except under the subtitle strokes + shadow; only inside the hand box
-# smooth replacement region around the strokes (a letter-shaped cut would leave ragged finger edges)
-hm = cv2.GaussianBlur(cv2.dilate(hole, K(5)), (0, 0), 2.5).astype(np.float32) / 255
-hm = np.maximum(hm, (hole > 0).astype(np.float32))[..., None]
+# ---- composite: a smooth region around what the subtitle covered (letter-shaped cuts leave ghosts / ragged edges)
+hm = np.maximum(cv2.GaussianBlur(cv2.dilate(hole, K(5)), (0, 0), 2.5).astype(np.float32) / 255, (hole > 0).astype(np.float32))[..., None]
 hand = f * (1 - hm) + res * hm
 box = np.zeros((H, W), np.float32); box[BY0:BY1, BX0:BX1] = 1
-box = cv2.GaussianBlur(box, (0, 0), 2)[..., None]
+box = cv2.GaussianBlur(box, (0, 0), 1.5)[..., None]
 outf = cl.astype(np.float32) * (1 - box) + hand * box
 cv2.imwrite(out, np.clip(outf, 0, 255).astype(np.uint8))
-print("hand fixed", out, "gap colour", dark)
+print("hand fixed", out, "gap colour", dark, "scale %.3f angle %.1f deg" % (s, np.degrees(ang)))

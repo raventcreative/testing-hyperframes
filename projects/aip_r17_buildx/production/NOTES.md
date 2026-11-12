@@ -59,8 +59,9 @@ TODO line).
 - `npx --yes hyperframes@0.8.186 lint .` → 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as R9/R13).
 - `npx --yes hyperframes@0.8.186 validate .` → 0 errors; warnings = "multiple Three.js instances" (robot + mascot bundles, as in the kit),
   SwiftShader ReadPixels notices; the contrast notes it raised on small UI text were fixed before the snapshot pass (darker cyan
-  #08729a for text on white, darker greys for line numbers / part numbers, navy "?" on amber). Remaining contrast notes are on
-  deliberately dimmed elements only (the "CV PELAMAR LAIN" pile at 35 % opacity behind "CV KAMU").
+  #08729a for text on white, darker greys for line numbers / part numbers, navy "?" on amber); re-run after the fix: 0 errors, 17
+  contrast notes left, all on secondary text — the deliberately dimmed "CV PELAMAR LAIN" pile (35 % opacity behind "CV KAMU"), and
+  the decorative kit part numbers A1–A3, editor line numbers 1–5 and "todo-app · proyek lama" at 4.2–4.4:1 (just under 4.5:1).
 - Snapshots (`snapshot . --at … --no-end --timeout 60000 --describe false`): ONE full pass of 66 frames — first frame, every scene's
   beats, both sides of every cut, the end. Contact sheets (JPG only): `production/qa/runtime_full_1.jpg` … `_6.jpg` (whole frames,
   labelled with the time), `production/qa/runtime_hero_1.jpg` … `_9.jpg` (hero zone + captions, larger),

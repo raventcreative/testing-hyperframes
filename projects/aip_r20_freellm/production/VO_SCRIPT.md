@@ -1,4 +1,4 @@
-# VO — Claude Code pakai model AI gratis (FreeLLMAPI) · background TERANG · 42,7 dtk VO (video 44,33 dtk)
+# VO — Claude Code pakai model AI gratis (FreeLLMAPI) · background TERANG · 43,4 dtk VO (video 45,30 dtk)
 Referensi: batch 5 · ref10 (28 dtk, reel bahasa Inggris, kreator lain, latar gelap → terang): "You can now run Claude Code for free with
 unlimited usage" → "7 billion free AI tokens … renew every month" → token dari ChatGPT, Gemini, Grok, Kimi, Qwen → "It's called FreeLLMAPI"
 → server kecil yang "speaks the same language as Claude's API", Claude Code "thinks it's talking to Claude" tapi permintaan dioper ke
@@ -93,28 +93,29 @@ Tag yang benar-benar dipakai (dari `assets/audio/vo.json`):
 [playful] [excited] Perintah Claude Code dioper ke jatah gratis model dari Google, Groq, Mistral, dan lainnya.
 [playful] [excited] Jadi aplikasinya Claude Code, tapi otaknya bukan Claude.
 [playful] [excited] Jatah satu habis, otomatis pindah ke yang lain.
-[playful] [excited] Pasang servernya, isi API key dari tiap penyedia, lalu satu perintah setup.
+[playful] [excited] Pasang servernya, isi API key gratis dari tiap layanan, lalu satu perintah setup.
 [playful] [excited] Jujur ya: kualitasnya beda dari Claude, limit gratisnya juga bisa berubah.
 [playful] [excited] Kodemu ikut dikirim ke server penyedia, jadi baca aturannya dan jangan kirim data sensitif.
 [playful] [excited] Pakai buat belajar dulu, bukan buat kerjaan klien.
 [playful] [excited] [confident] Komen LLM, aku kirim lewat DM.
 
-Teks tanpa tag: `production/vo_lines.txt` (108 kata). "FreeLLMAPI" ditulis "Free LLM API" supaya dieja jelas; caption menampilkan
+Teks tanpa tag: `production/vo_lines.txt` (109 kata). "FreeLLMAPI" ditulis "Free LLM API" supaya dieja jelas; caption menampilkan
 **FreeLLMAPI** (MERGE di `tools/timing.py`). Kata "rahasia" sengaja tidak dipakai di VO (auto tag klien akan memberi [whispers]) →
 "data sensitif". Dibuat dengan `python3 /home/user/testing-hyperframes/tools/el_tts_ts.py production/vo_lines.txt assets/audio/vo.mp3`
-→ **take 2, 42,80 dtk, 11 baris**. Take 1 (43,60 dtk) memakai "isi API key tiap penyedia"; faster-whisper `small` mendengar "API Kitia
-penyebiah" → baris diganti "isi API key **dari** tiap penyedia" (take 2: "API key dari tiap" jelas).
-Cek dengar ulang dengan faster-whisper `small` (bahasa id) di seluruh take 2 + `medium` di potongan baris 7 dan CTA (take 1): semua kata
-terucap; **"LLM" diucapkan per huruf (el-el-em)** — whisper menulis "Free LLM API" dan "Komen LLM" di kedua model; whisper menulis
-"Cloud Code" untuk "Claude Code" (pengucapan bahasa Inggris yang benar) dan "penyebiah/penyebia" untuk "penyedia" di baris 7 (di baris 9
-terdengar "penyedia"; caption menampilkan "penyedia,"). Tag tidak ikut terbaca.
+→ **take 3, 43,68 dtk, 11 baris**. Riwayat baris 7: take 1 "isi API key tiap penyedia" (whisper small: "API Kitia penyebiah"),
+take 2 "isi API key dari tiap penyedia" (small + medium: "penyebiah/penyebiyah") → atas permintaan lead, take 3 memakai **"isi API key
+gratis dari tiap layanan"** (kata "penyedia" dihindari di baris ini; baris 9 "server penyedia" terdengar bersih dan tetap).
+Cek dengar ulang take 3 dengan faster-whisper `small` (bahasa id) di seluruh take + `small` dan `medium` di potongan baris 7: baris 7
+terdengar persis **"Pasang servernya, isi API key gratis dari tiap layanan, lalu satu perintah setup."** di kedua model; semua baris lain
+lengkap; **"LLM" diucapkan per huruf (el-el-em)** — whisper menulis "Free LLM API" dan "Komen LLM"; whisper menulis "Cloud Code" untuk
+"Claude Code" dan "Grog" untuk "Groq" (pengucapan bahasa Inggris yang benar). Tag tidak ikut terbaca.
 Pengen belajar Claude Code, tapi belum sanggup langganan?
 Ada jalan tengahnya: Free LLM API, server kecil gratis di GitHub.
 Dia jalan di laptopmu, ngerti format API Claude.
 Perintah Claude Code dioper ke jatah gratis model dari Google, Groq, Mistral, dan lainnya.
 Jadi aplikasinya Claude Code, tapi otaknya bukan Claude.
 Jatah satu habis, otomatis pindah ke yang lain.
-Pasang servernya, isi API key dari tiap penyedia, lalu satu perintah setup.
+Pasang servernya, isi API key gratis dari tiap layanan, lalu satu perintah setup.
 Jujur ya: kualitasnya beda dari Claude, limit gratisnya juga bisa berubah.
 Kodemu ikut dikirim ke server penyedia, jadi baca aturannya dan jangan kirim data sensitif.
 Pakai buat belajar dulu, bukan buat kerjaan klien.

@@ -86,7 +86,7 @@
   const cursor = (p) => `<div class="r14-cur" id="${p}-cur"><svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#0a0d2c" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/></svg></div>`;
   // scene boilerplate: word lookup (scene-local seconds), timeline with the seek-safe "scale" shorthand, pinned initial states
   const scene = (ID) => {
-    const ST = window.SCN[ID][0], D = window.SCN[ID][1], VW = window.VO_WORDS;
+    const ST = window.SCN[ID][0], D = window.SCN[ID][1], VW = window.VO_WORDS, X = (window.OVL && window.OVL[ID]) || 0;   // X = slot overlap past the cut
     const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
     const $ = (id) => document.getElementById(id);
     const tl = gsap.timeline({ paused: true });
@@ -95,18 +95,20 @@
     const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
     const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
     const done = () => {
-      tl.set({}, {}, D - 0.01);
+      tl.set({}, {}, D + X - 0.01);
       (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
       window.__timelines = window.__timelines || {};
       window.__timelines[ID] = tl;
     };
-    return { ST, D, L, tl, ft, I, $, done };
+    return { ST, D, X, L, tl, ft, I, $, done };
   };
   // card helpers: deal in (from the deck, lower right), reveal the lines, cursor click on Salin, collapse into the strip
   const cardIn = (S, p, t) => {
     const { ft, I, $ } = S, c = $(p + "-card");
     I(c, { opacity: 0, x: 260, y: 120, rotation: 9, scale: 0.72 });
-    ft(c, { opacity: 0, x: 260, y: 120, rotation: 9, scale: 0.72 }, { opacity: 1, x: 0, y: 0, rotation: 0, scale: 1, duration: 0.5, ease: "back.out(1.3)" }, t);
+    // opaque almost at once (it is dealt OVER the previous scene's fading content), the motion takes 0.5 s
+    ft(c, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "power1.out" }, t);
+    ft(c, { x: 260, y: 120, rotation: 9, scale: 0.72 }, { x: 0, y: 0, rotation: 0, scale: 1, duration: 0.5, ease: "back.out(1.3)" }, t);
     I($(p + "-num"), { scale: 0.4 }); ft($(p + "-num"), { scale: 0.4 }, { scale: 1, duration: 0.4, ease: "back.out(3)" }, t + 0.18);
     I($(p + "-cc"), { opacity: 0, x: 20 }); ft($(p + "-cc"), { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, t + 0.4);
     for (let k = 0; k < 5; k++) { const m = $(p + "-lm" + k); I(m, { scaleX: 1 }); ft(m, { scaleX: 1 }, { scaleX: 0, duration: 0.26, ease: "power1.inOut" }, t + 0.36 + k * 0.1); }

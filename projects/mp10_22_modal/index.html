@@ -96,13 +96,16 @@
       .bico svg { width: 60px; height: 60px; }
       .bval { position: relative; height: 74px; margin-top: 22px; }
       .bval span { position: absolute; left: 0; right: 0; top: 0; text-align: center; font: 800 62px/74px Rubik; color: var(--navy); white-space: nowrap; }
-      .bval span.z { color: #C9CFE0; }
+      .bval span.z { color: #8E99C2; }
       .bpan > .ilus { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); }
       .stamp { position: absolute; left: 50%; top: 150px; width: 260px; margin-left: -130px; padding: 12px 10px 10px; border: 6px solid var(--coral); border-radius: 16px; text-align: center;
                font: 800 30px/1.08 Rubik; letter-spacing: .06em; color: var(--coral); background: rgba(255,255,255,.88); white-space: nowrap; transform: rotate(-9deg); }
       /* the omzet gauge board */
       .gwrap { position: relative; width: 400px; height: 222px; margin: 22px auto 0; }
       .gwrap svg { position: absolute; left: 0; top: 0; width: 400px; height: 222px; overflow: visible; }
+      /* needle as an HTML element with a CSS pivot at the arc centre (SVG svgOrigin drifts after backward seeks) */
+      .ndl { position: absolute; left: 192px; top: 72px; width: 16px; height: 128px; background: var(--navy); clip-path: polygon(50% 0, 100% 100%, 0 100%); transform-origin: 50% 100%; }
+      .hub { position: absolute; left: 183px; top: 183px; width: 34px; height: 34px; border-radius: 50%; background: var(--navy); box-shadow: inset 0 0 0 10px var(--navy), inset 0 0 0 17px #FED111; }
       .gk { margin-top: 6px; text-align: center; font: 700 24px/1 PS; letter-spacing: .2em; color: var(--muted); white-space: nowrap; }
       .gval { position: relative; height: 80px; margin-top: 8px; }
       .gval span { position: absolute; left: 0; right: 0; top: 0; text-align: center; font: 800 72px/80px Rubik; color: var(--navy); white-space: nowrap; }
@@ -117,7 +120,7 @@
       .naik svg { width: 26px; height: 26px; }
       /* tokens (overlay rig): pill chips standing on the belt, front = "Uang masuk", back = the real kind */
       .tok { position: absolute; left: -145px; top: -110px; width: 290px; height: 110px; transform-style: preserve-3d; }
-      .tf, .tb { position: absolute; inset: 0; border-radius: 55px; display: flex; align-items: center; gap: 12px; padding: 0 20px 0 15px; backface-visibility: hidden; -webkit-backface-visibility: hidden; white-space: nowrap; }
+      .tf, .tb { position: absolute; inset: 0; border-radius: 55px; display: flex; align-items: center; gap: 12px; padding: 0 30px 0 15px; backface-visibility: hidden; -webkit-backface-visibility: hidden; white-space: nowrap; }
       .tf { background: linear-gradient(180deg, #ffffff, #EEF1F7); box-shadow: 0 9px 0 #C9CFE0, 0 26px 40px rgba(19,27,64,.22); }
       .tb { transform: rotateY(180deg); }
       .tb.s { background: linear-gradient(180deg, #FFE440, #FED111); box-shadow: 0 9px 0 #c9a300, 0 26px 40px rgba(19,27,64,.24); }
@@ -126,7 +129,7 @@
       .tf .coin { background: radial-gradient(circle at 38% 32%, #FFF3A6, #FED111 55%, #d9b000); box-shadow: inset 0 0 0 5px rgba(255,255,255,.45), inset 0 0 0 9px rgba(201,163,0,.35); font: 800 30px/1 Rubik; color: var(--navy); }
       .tb.s .coin { background: var(--navy); } .tb.n .coin { background: #fff; }
       .coin svg { width: 46px; height: 46px; }
-      .tl { font: 700 31px/1.02 Rubik; color: var(--navy); }
+      .tl { font: 700 28px/1.04 Rubik; color: var(--navy); }
       .tb.n .tl { color: #fff; }
       .tl small { display: block; margin-top: 6px; font: 600 18px/1 PS; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
       .tb.n .tl small { color: var(--lb); }
@@ -319,8 +322,7 @@
                 <path id="gArc" d="M40 200 A160 160 0 0 1 360 200" stroke="#FED111" stroke-width="30" fill="none" stroke-dasharray="502.65" stroke-dashoffset="502.65"/>
                 <path id="gRed" d="M347.2 93 A182 182 0 0 1 382 200" stroke="#E0563F" stroke-width="9" fill="none" stroke-linecap="round" opacity=".55"/>
                 ${tk}
-                <g id="gNd"><path d="M193 200 L200 74 L207 200 Z" fill="#212C5F"/><circle cx="200" cy="200" r="17" fill="#212C5F"/><circle cx="200" cy="200" r="6.5" fill="#FED111"/></g>
-              </svg></div>
+              </svg><i class="ndl" id="gNd"></i><i class="hub"></i></div>
               <div class="gk">OMZET</div>
               <div class="gval">${["Rp0", "Rp12 jt", "Rp20 jt", "Rp25 jt", "Rp27 jt"].map((v, i) => `<span id="gv${i}"${i > 1 ? ' class="w"' : ""}>${v}</span>`).join("")}</div>
               <div class="grow" id="grow"><i class="gfl" id="gfl"></i><span style="position:relative">Barang terjual</span><div class="pc">${["0 pcs", "240 pcs"].map((v, i) => `<b id="pc${i}">${v}</b>`).join("")}<span class="tetap" id="tetap">TETAP</span></div></div>
@@ -404,7 +406,7 @@
         tl.set("#st1, #st2, #st3, #naik, #tetap", { autoAlpha: 0, scaleX: 1, scaleY: 1 }, 0); tl.set("#gfl, #c5arr", { opacity: 0 }, 0);
         tl.set("#bv1, #bv2, #bv3", { autoAlpha: 0 }, 0); tl.set("#bz1, #bz2, #bz3", { autoAlpha: 1 }, 0);
         SWAP(GV, 0, 0); SWAP(PC, 0, 0);
-        tl.set("#gNd", { rotation: -90, svgOrigin: "200 200" }, 0); tl.set("#gArc", { strokeDashoffset: 502.65 }, 0); tl.set("#ribs", { x: 0 }, 0);
+        tl.set("#gNd", { rotation: -90 }, 0); tl.set("#gArc", { strokeDashoffset: 502.65 }, 0); tl.set("#ribs", { x: 0 }, 0);
         tl.set("#led, .mini", { autoAlpha: 0 }, 0); tl.set(".lrow .lin", { opacity: 0, x: -30 }, 0); tl.set(".lrow .kd", { opacity: 0, scaleX: 0.6, scaleY: 0.6, transformOrigin: "0% 50%" }, 0);
         tl.set("#lfoot", { opacity: 0, y: 30 }, 0); tl.set("#ls27", { opacity: 0 }, 0);
         $$("#pan1b .tf, #pan1b .tb").forEach((e) => tl.set(e, { opacity: 1 }, 0));
@@ -422,19 +424,20 @@
         const T4 = 11.0;   // the belt restarts (S4)
         // hook: low, tracking the tokens as they ride toward the omzet board -> "Eh, tunggu": swings out to the frontal wide ->
         // S3: tracks right with the scan gate -> S4: wide while the belt sorts -> S5: pushes into the omzet gauge
-        const KH0 = K(540, 1020, -250, -260, -60, -19, 20, -380), KH1 = K(540, 1030, -360, -260, -120, -21, 12, -330);
+        const KH0 = K(540, 880, 360, -170, 300, -30, 16, 520), KHa = K(540, 960, 40, -200, 200, -25, 18, 120), KH1 = K(540, 1030, -360, -260, -120, -21, 12, -330);
         const KW0 = K(540, 1050, -10, -220, -200, -25, -4, -700), KW1 = K(540, 1050, 10, -220, -200, -25, -6, -680);
-        const KT0 = K(540, 1070, -380, -220, -60, -23, -6, -440), KT1 = K(540, 1070, 400, -220, -60, -23, -12, -440);
-        const KS0 = K(540, 1050, 0, -220, -200, -25, -4, -700), KS1 = K(540, 1050, -30, -230, -220, -25, -2, -660);
+        const KT0 = K(540, 1090, -380, -200, 150, -20, -6, -280), KT1 = K(540, 1090, 420, -200, 150, -20, -12, -280);
+        const KS0 = K(540, 1050, 0, -220, -200, -25, -4, -700), KS1 = K(540, 1000, -30, -330, -450, -20, -2, -480);
         const KF0 = K(540, 1000, -380, -450, -600, -16, 6, -250), KF1 = K(520, 1000, -450, -420, -650, -14, 9, -150);
         camSet(C1, KH0);
-        cam(C1, KH0, KH1, 0, TM.eh, "sine.inOut");
+        cam(C1, KH0, KHa, 0, 1.9, "power1.in");
+        cam(C1, KHa, KH1, 1.9, TM.eh - 1.9, "power2.out");
         cam(C1, KH1, KW0, TM.eh + 0.1, 1.5, "power2.inOut");
         cam(C1, KW0, KW1, TM.eh + 1.6, TM.ada2 - 0.5 - TM.eh - 1.6, "none");
         cam(C1, KW1, KT0, TM.ada2 - 0.5, 0.75, "power2.inOut");
         cam(C1, KT0, KT1, TM.ada2 + 0.25, TM.prib + 0.2 - TM.ada2 - 0.25, "sine.inOut");
         cam(C1, KT1, KS0, TM.prib + 0.2, T4 + 0.4 - TM.prib - 0.2, "power2.inOut");
-        cam(C1, KS0, KS1, T4 + 0.4, TM.kalau - T4 - 0.4, "none");
+        cam(C1, KS0, KS1, T4 + 0.4, TM.kalau - T4 - 0.4, "sine.inOut");
         cam(C1, KS1, KF0, TM.kalau, 1.1, "power2.inOut");
         cam(C1, KF0, KF1, TM.kalau + 1.1, TM.sol - TM.kalau - 1.1, "power1.inOut");
 
@@ -457,8 +460,8 @@
         // S1 · hook copy: "Uang masuk ke rekening usaha, / langsung jadi / omzet?"; the omzet gauge breathes with a "?" wobble
         RISE(HOOK[0], TM.hook - 0.18, 0.016, 0.4); RISE(HOOK[1], TM.lang - 0.05, 0.026, 0.42); RISE(HOOK[2], TM.omz - 0.12, 0.03, 0.45);
         HL("#c1ch", TM.omz + 0.25, 0.4);
-        F("#gNd", { rotation: -90, svgOrigin: "200 200" }, { rotation: -62, svgOrigin: "200 200", duration: 0.5, ease: "power2.out" }, TM.omz - 0.05);
-        F("#gNd", { rotation: -62, svgOrigin: "200 200" }, { rotation: -90, svgOrigin: "200 200", duration: 0.6, ease: "power2.inOut" }, TM.omz + 0.5);
+        F("#gNd", { rotation: -90 }, { rotation: -62, duration: 0.5, ease: "power2.out" }, TM.omz - 0.05);
+        F("#gNd", { rotation: -62 }, { rotation: -90, duration: 0.6, ease: "power2.inOut" }, TM.omz + 0.5);
         F("#bd0", { y: 0 }, { y: -16, duration: 0.18, ease: "power2.out" }, TM.omz - 0.05); F("#bd0", { y: -16 }, { y: 0, duration: 0.4, ease: "bounce.out" }, TM.omz + 0.13);
         SINK([...HOOK.flat()], TM.eh - 0.05, 0.28); HLOFF("#c1ch", TM.eh - 0.05); hide("#c1", TM.eh + 0.3);
 
@@ -509,7 +512,7 @@
           else {
             // gauge scale 0-30 jt over 180 deg: 6 deg per jt; Rp12 jt -> -18 deg
             SWAP(GV, 1, tA + 0.2); SWAP(PC, 1, tA + 0.2); POP("#gv1", tA + 0.2, 0.36, "back.out(2.4)", 0); POP("#pc1", tA + 0.24, 0.36, "back.out(2.4)", 0);
-            F("#gNd", { rotation: -90, svgOrigin: "200 200" }, { rotation: -90 + 6 * 12, svgOrigin: "200 200", duration: 0.7, ease: "back.out(1.6)" }, tA + 0.2);
+            F("#gNd", { rotation: -90 }, { rotation: -90 + 6 * 12, duration: 0.7, ease: "back.out(1.6)" }, tA + 0.2);
             F("#gArc", { strokeDashoffset: 502.65 }, { strokeDashoffset: 502.65 * (1 - 12 / 30), duration: 0.6, ease: "power2.out" }, tA + 0.2);
           }
         });
@@ -538,13 +541,13 @@
           F(id + " .tb", { opacity: 1 }, { opacity: 0, duration: 0.1 }, tLand - 0.06); hide(id, tLand + 0.06);
           const v0 = [12, 20, 25][j], v1 = [20, 25, 27][j];
           SWAP(GV, 2 + j, tLand); POP("#gv" + (2 + j), tLand, 0.34, "back.out(2.4)", 0);
-          F("#gNd", { rotation: -90 + 6 * v0, svgOrigin: "200 200" }, { rotation: -90 + 6 * v1, svgOrigin: "200 200", duration: 0.45, ease: "back.out(2)" }, tLand);
+          F("#gNd", { rotation: -90 + 6 * v0 }, { rotation: -90 + 6 * v1, duration: 0.45, ease: "back.out(2)" }, tLand);
           F("#gArc", { strokeDashoffset: 502.65 * (1 - v0 / 30) }, { strokeDashoffset: 502.65 * (1 - v1 / 30), duration: 0.4, ease: "power2.out" }, tLand);
           F("#bd0", { y: 0 }, { y: -14, duration: 0.1, ease: "power2.out" }, tLand); F("#bd0", { y: -14 }, { y: 0, duration: 0.32, ease: "back.out(3)" }, tLand + 0.1);
         });
         // "angkanya naik": needle overshoot + shake, NAIK flag; "padahal jualanmu nggak nambah": the pcs row flashes, TETAP stamp
-        F("#gNd", { rotation: 72, svgOrigin: "200 200" }, { rotation: 82, svgOrigin: "200 200", duration: 0.12, ease: "power2.out" }, TM.naik);
-        F("#gNd", { rotation: 82, svgOrigin: "200 200" }, { rotation: 72, svgOrigin: "200 200", duration: 0.5, ease: "elastic.out(1.2, 0.35)" }, TM.naik + 0.12);
+        F("#gNd", { rotation: 72 }, { rotation: 82, duration: 0.12, ease: "power2.out" }, TM.naik);
+        F("#gNd", { rotation: 82 }, { rotation: 72, duration: 0.5, ease: "elastic.out(1.2, 0.35)" }, TM.naik + 0.12);
         F("#gRed", { opacity: 0.55 }, { opacity: 1, duration: 0.2 }, TM.naik);
         for (let j = 0; j < 5; j++) F("#bd0", { rotationZ: j % 2 ? 1.6 : -1.6 }, { rotationZ: j % 2 ? -1.6 : 1.6, duration: 0.06, ease: "none" }, TM.naik + j * 0.06);
         F("#bd0", { rotationZ: 1.6 }, { rotationZ: 0, duration: 0.1 }, TM.naik + 0.3);
@@ -615,7 +618,7 @@
             return Math.max(...el.innerText.split("\n").map((l) => cx.measureText(l).width + ls * l.length)); };
           const fit3 = (el, box) => { let fs = parseFloat(getComputedStyle(el).fontSize), k = 0; while (mw(el) > box + 0.5 && k < 40) { fs *= 0.97; el.style.fontSize = fs + "px"; k++; } };
           $$(".bh b").forEach((el) => fit3(el, el.closest(".bh").offsetWidth - 36 - 50 - 14 - 8));
-          $$(".tl").forEach((el) => fit3(el, 290 - 15 - 78 - 12 - 20 - 6));
+          $$(".tl").forEach((el) => fit3(el, 290 - 15 - 78 - 12 - 30 - 4));   // keeps the label clear of the pill's rounded end
           return 1;
         });
         tl.eventCallback("onUpdate", () => { if (window.ROBOT_APPLY) window.ROBOT_APPLY(tl.time()); });

@@ -14,7 +14,8 @@ W = ",\n          ".join(json.dumps([w["w"], w["s"], w["st"]], ensure_ascii=Fals
 C = ",\n          ".join(json.dumps(c + ["mid"]) for c in T["caps"])
 # world transitions: the scene BEFORE a world (and every world) stays alive OVL s past its cut, so the next world can reveal
 # itself over it (later scenes paint on top: DOM order). Slot length = dur + ovl(id).
-ovl = lambda sid: 0.0   # no overlapping slots: scenes hand objects over at exactly matching positions
+OVL = {"s01": 0.3, "s02": 0.3, "s03": 0.3, "s04": 0.25}   # the outgoing scene fades out UNDER the next one (later slots paint on top)
+ovl = lambda sid: OVL.get(sid, 0.0)
 slots = "".join(f'      <div id="{s["id"]}" class="scene" data-composition-id="{s["id"]}" data-composition-src="compositions/{s["id"]}.html" data-start="{s["start"]}" '
                 f'data-duration="{round(s["dur"] + ovl(s["id"]), 4)}" data-track-index="{2 + k % 3}" data-width="1080" data-height="1920"></div>\n' for k, s in enumerate(T["scenes"]))
 html = f"""<!doctype html>

@@ -48,7 +48,32 @@ github.com/heygen-com/hyperframes · github.com/FFmpeg/FFmpeg · github.com/open
 github.com/yt-dlp/yt-dlp. remotion.dev itself is outside this session's network allowlist (LICENSE.md on GitHub used instead).
 
 ## QA (real runtime)
-QA_PLACEHOLDER
+- `npx --yes hyperframes@0.8.186 lint .` → 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the kit).
+- `npx --yes hyperframes@0.8.186 validate .` → **0 errors**; kit warning "multiple instances of Three.js" (robot + mascot bundles) + WebGL
+  ReadPixels perf notes. The 5 WCAG notes of that run were fixed afterwards (transcript timestamps #8a9ab8 → #5d6f8f; the "done" veil
+  on mini cards 1–2 lightened .55 → .42).
+- Real-runtime snapshots (`snapshot --at … --no-end --timeout 60000`), JPG sheets only, PNG dumps deleted:
+  - full pass, 73 frames (every scene several times, every cut ±0.03–0.07 s, first + last frame): `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r14/qa1/contact-sheet-1.jpg` … `-9.jpg`;
+  - fix passes after the fixes below: `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r14/qa2/contact-sheet-1.jpg` … `-3.jpg`, `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r14/qa3/contact-sheet-1.jpg`, `-2.jpg`,
+    `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r14/qa4/contact-sheet.jpg`.
+- Bugs found in the real runtime and fixed: (1) s03 used the id `s03-ok` for its "Pola tersimpan" chip, colliding with the prompt card's
+  own `-ok` (Tersalin) → the card showed "Tersalin" before the click and the chip appeared too early → renamed `s03-saved`; (2) s02
+  connector lines (round caps, dash offset = length) left dots at the node ends before they were drawn → hidden until drawn, ids
+  `s02-cn*` (no clash with the card's text lines `-ln*`); (3) near-empty frames between the prompt scenes → slots now overlap
+  (`OVL` s01–s03 0.3 s, s04 0.25 s, in tools/build_index.py + vendor/scenes.js): the outgoing scene fades UNDER the next card, which
+  turns opaque in 0.12 s; (4) "5 alat siap" chip collided with the HyperFrames tick → moved onto the hub's bottom edge; (5) the
+  selera.md chip crossed the transcript text → it now pops above the preview and drops into it; (6) s05 card-3 pulse fought the OUT
+  tween (end scale 1.04 ≠ s06 start) → pulse moved to its number badge; s05 end state = s06 frame 0 (verified at 46.15 / 46.2 s).
+- Every initial state is pinned on the timeline at 0 (`I()` in the kit); no Math.random / Date / rAF / CSS animation in scenes; no 3D in
+  scenes (robot + mascot are the kit's WebGL hosts).
 
 ## Known issues / notes for the lead
-KNOWN_PLACEHOLDER
+- Robot flies in on "tiga" (~1.3 s); frame 0 shows the title "[3] prompt", the card deck, the bookmark button and the mascot.
+- Prompt cards are fully readable for ~1.0–1.5 s each before they fold (viewers can pause); the complete prompts are in the DM file
+  `production/TIGA_PROMPT.md` (on-screen text = short form of the same prompts, consistent).
+- Captions: during the 0.34 s word rise a chunk can show only i-dots / descenders of the next word on a single frame (kit caption system).
+- Transitions between prompts are 0.25–0.3 s crossfades: for ~2 frames the new card is still semi-transparent over the old content.
+- Values on screen (console "cepat", "besar, di tengah", transcript lines/timestamps, video-0N.mp4, the preview person) are labelled or
+  obviously examples (CONTOH tag on the console); no numbers or results are claimed. Claude is never called free; the reel says nothing
+  about price — the DM file states that Claude Code needs a paid Claude plan and that Remotion has a company licence above 3 employees.
+- `.hyperframes/` was (re)created by the CLI snapshots (gitignored). The VO is 49.5 s (brief: 35–50 s) — at the upper end.

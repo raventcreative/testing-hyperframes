@@ -152,7 +152,7 @@ put(wt("ngedit") - 0.12, pop(700, 1100, 0.07), 0.11); put(wt("Claude") - 0.14, p
 put(wt("Ini") - 0.05, rise(0.6, 400, 1200), 0.025)
 for i in range(3): put(wt("Ini") + i * 0.16, tick(0.02, 2600 + 300 * i), 0.07)
 tAk = wt("aku", st("s01")); put(tAk + 0.1, boom(0.35, 160, 70), 0.16); put(tAk + 0.14, pop(600, 300, 0.09), 0.1)
-put(st("s02") - 0.3, whoosh(0.4, 600, 2200, 1.3, 0.4), W * 0.5)
+# (scene hand-overs: the outgoing scene fades UNDER the next card after the cut, so the card's own deal whoosh covers it)
 # --- s02 prompt 1: card, copy, fold, folder hub, five installs, ready
 deal(st("s02") + 0.02)
 copyclick(L("alat.", "s02") + 0.12)
@@ -167,7 +167,6 @@ for txt in ["yt-dlp", "Whisper", "FFmpeg", "HyperFrames", "Remotion"]:
     put(t + 0.42, chime((1568, 2093), 0.5), 0.04)
 put(L("Remotion", "s02") + 0.3, pop(700, 1100, 0.06), 0.08)
 put(L("animasi.", "s02") + 0.1, chime((1318.5, 1760, 2637), 0.9), 0.06); put(L("animasi.", "s02") + 0.12, pop(500, 900, 0.08), 0.1)
-put(st("s03") - 0.3, whoosh(0.4, 2000, 600, 1.3, 0.35), W * 0.5)
 # --- s03 prompt 2: card, copy, fold, reels + hearts, console, scan, knobs, saved, veil, caution
 deal(st("s03") + 0.02)
 copyclick(L("selera.", "s03") + 0.14)
@@ -183,7 +182,6 @@ put(L("Ambil", "s03") - 0.04, chime((1568, 2093, 2637), 0.8), 0.05); put(L("Ambi
 put(L("isinya,", "s03") - 0.12, pop(600, 950, 0.07), 0.1)
 put(L("jangan", "s03") - 0.06, buzz(0.25), 0.035); put(L("jangan", "s03") - 0.04, pop(380, 200, 0.1), 0.12)
 for k in range(3): put(L("upload", "s03") + 0.1 + k * 0.1, tick(0.02, 1500), 0.07)
-put(st("s04") - 0.3, whoosh(0.4, 2000, 600, 1.3, 0.35), W * 0.5)
 # --- s04 prompt 3: card, copy, fold, raw file, rows, cuts, captions, selera, sticker, "?", voice, caption up, reply
 deal(st("s04") + 0.02)
 copyclick(L("edit.", "s04") + 0.12)

@@ -79,7 +79,7 @@ SC = [
     ("s02", "OpenMausBot", [3, 5, 8, 10, 12], ["OpenMausBot", "kantornya:", "satu", "tugas,"], []),
     ("s03", "Hermes", [2, 4, 6, 9, 11, 14], ["Hermes", "karyawannya:", "skill", "lancar."], []),
     ("s04", "Kantor", [3, 4], ["gratis,", "bayar."], []),
-    ("s05", "Login", [3, 4, 7, 9], ["ChatGPT,", "DeepSeek,", "pemakaian."], []),
+    ("s05", "Login", [3, 4, 8, 10], ["ChatGPT,", "DeepSeek,", "pemakaian."], []),
     ("s06", "Skill,", [2, 5, 8, 10, 12], ["laptopmu,", "dikirim", "model."], []),
     ("s07", "Yang", [3, 4, 6, 9, 12], ["default-nya", "penuh.", "Ask,", "izinmu."], []),
     ("s08", "Minusnya,", [1, 5, 8, 10], ["Minusnya,", "nyala", "jaga."], []),

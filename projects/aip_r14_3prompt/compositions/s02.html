@@ -38,7 +38,7 @@
     .s02-note span { position: absolute; left: 66px; top: 40px; font: 400 15px/21px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
     #s02-perm { left: 715px; } #s02-perm .ni { background: #eaf7ee; color: #1a7434; }
     #s02-lic { left: 85px; box-shadow: 0 22px 40px -26px rgba(10,13,44,.55), 0 0 0 2px #f4c64a; } #s02-lic .ni { background: #fff6dc; color: #9a6b00; }
-    #s02-ready { left: 440px; top: 758px; width: 200px; height: 46px; border-radius: 23px; background: linear-gradient(150deg, #2fb35a, #1a7434); color: #fff; transform-origin: 50% 0%;
+    #s02-ready { left: 440px; top: 724px; width: 200px; height: 46px; border-radius: 23px; background: linear-gradient(150deg, #2fb35a, #1a7434); color: #fff; transform-origin: 50% 0%;
       box-shadow: 0 12px 20px -10px rgba(26,116,52,.8); white-space: nowrap; text-align: center; }
     #s02-ready b { font: 700 18px/46px Poppins, sans-serif; }
     #s02-ready svg { display: inline-block; vertical-align: -4px; width: 20px; height: 20px; margin-right: 6px; }
@@ -70,7 +70,7 @@
       let h = `<div class="s02-a" id="s02-glow"></div>`;
       h += `<svg class="s02-a" id="s02-lines" viewBox="0 0 1080 1920">` + N.map((n, i) => {
         const len = Math.hypot(n.x - HUB[0], n.y - HUB[1]);
-        return `<line id="s02-ln${i}" x1="${HUB[0]}" y1="${HUB[1]}" x2="${n.x}" y2="${n.y}" stroke="#294b77" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" stroke-dasharray="${len.toFixed(1)} ${len.toFixed(1)}" stroke-dashoffset="${len.toFixed(1)}"/>`;
+        return `<line id="s02-cn${i}" x1="${HUB[0]}" y1="${HUB[1]}" x2="${n.x}" y2="${n.y}" stroke="#294b77" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" stroke-dasharray="${len.toFixed(1)} ${len.toFixed(1)}" stroke-dashoffset="${len.toFixed(1)}"/>`;
       }).join("") + `</svg>`;
       N.forEach((n, i) => { h += `<div class="s02-g" id="s02-g${i}" style="left:${n.x}px;top:${n.y}px"><i>${R14.svg("plus", 2)}</i></div>`; });
       h += `<div class="s02-a" id="s02-hub"><div class="fi">${R14.svg("folderOpen", 2.2)}</div><b class="nm">studio-reels/</b>` +
@@ -112,10 +112,11 @@
 
       // each tool on its word: node pops, connector draws, tick
       N.forEach((n, i) => {
-        const e = $("s02-n" + i), ln = $("s02-ln" + i), tk = $("s02-tk" + i), len = Math.hypot(n.x - HUB[0], n.y - HUB[1]);
+        const e = $("s02-n" + i), ln = $("s02-cn" + i), tk = $("s02-tk" + i), len = Math.hypot(n.x - HUB[0], n.y - HUB[1]);
         I(e, { opacity: 0, scale: 0.55 }); I(tk, { opacity: 0, scale: 0.3 });
         ft(e, { opacity: 0, scale: 0.55 }, { opacity: 1, scale: 1, duration: 0.36, ease: "back.out(2.2)" }, n.t - 0.14);
-        I(ln, { attr: { "stroke-dashoffset": len } });
+        I(ln, { opacity: 0, attr: { "stroke-dashoffset": len } });   // hidden until drawn (round caps would show a dot)
+        ft(ln, { opacity: 0 }, { opacity: 1, duration: 0.06 }, n.t - 0.1);
         ft(ln, { attr: { "stroke-dashoffset": len } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.34, ease: "power2.out" }, n.t - 0.1);
         ft(tk, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(3)" }, n.t + 0.42);
         ft(hub, { scale: 1 }, { scale: 1.04, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, n.t + 0.2);
@@ -128,12 +129,12 @@
       I(ready, { opacity: 0, scale: 0.5, y: -8 });
       ft(ready, { opacity: 0, scale: 0.5, y: -8 }, { opacity: 1, scale: 1, y: 0, duration: 0.32, ease: "back.out(2.4)" }, tAn + 0.1);
 
-      // ================================================================ OUT → s03
-      const tOut = D - 0.32;
-      N.forEach((n, i) => ft($("s02-n" + i), { opacity: 1, y: 0 }, { opacity: 0, y: 30, duration: 0.24, ease: "power2.in" }, tOut + i * 0.02));
-      N.forEach((n, i) => ft($("s02-ln" + i), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut));
+      // ================================================================ OUT → s03 (slot overlap, under s03's card 2)
+      const tOut = D;
+      N.forEach((n, i) => ft($("s02-n" + i), { opacity: 1, y: 0 }, { opacity: 0, y: 30, duration: 0.24, ease: "power2.in" }, tOut + i * 0.01));
+      N.forEach((n, i) => ft($("s02-cn" + i), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOut));
       [hub, hcl, perm, lic, ready, $("s02-strip")].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power2.in" }, tOut + 0.03));
-      ft(glow, { opacity: 0.9 }, { opacity: 0.5, duration: 0.3 }, tOut);
+      ft(glow, { opacity: 0.9 }, { opacity: 0.5, duration: 0.26 }, tOut);
 
       S.done();
     })();

@@ -1,0 +1,353 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s10-cm { display: block; flex: none; background: url(assets/icons/lobe-claude-color.svg) center / contain no-repeat; }
+    .s10-a { position: absolute; }
+    .s10-t { position: absolute; white-space: nowrap; font-family: Poppins, sans-serif; }
+    .s10-grad { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; }
+    .s10-nav { background: linear-gradient(135deg, #0a0d2c, #294b77); }
+    .s10-ico { position: absolute; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+    .s10-card { background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 40px 76px -34px rgba(10,13,44,.5), 0 0 0 1.5px rgba(10,13,44,.07); }
+    #s10-glow { left: 40px; top: 262px; width: 1000px; height: 700px; border-radius: 50%; transform-origin: 50% 50%;
+      background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(220,232,252,.6) 48%, rgba(206,222,250,0) 100%); }
+    /* ---------- r5's LAST FRAME (replica, same geometry as r5's kit): rail all done · chat window · master-prompt sheet · pointer */
+    #s10-r5 { left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 540px 660px; }
+    #s10-rlb { left: 166px; top: 328px; width: 748px; height: 4px; border-radius: 2px; background: #d5e0f0; }
+    #s10-rl { left: 166px; top: 328px; width: 748px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #0a0d2c, #294b77); transform-origin: 50% 50%; }
+    .s10-dot { left: 0; top: 0; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: #2da44e; }
+    .s10-dot svg { position: absolute; left: 14px; top: 14px; }
+    #s10-win { left: 70px; top: 384px; width: 940px; height: 548px; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 18px 36px -20px rgba(10,13,44,.42), 0 0 0 1.5px rgba(10,13,44,.06); overflow: hidden; }
+    #s10-hd { left: 0; top: 0; width: 940px; height: 64px; border-bottom: 1.5px solid #edf1f8; box-sizing: border-box; }
+    #s10-hmk { left: 26px; top: 16px; width: 32px; height: 32px; }
+    #s10-hnm { left: 68px; top: 0; font-weight: 700; font-size: 22px; line-height: 62px; color: #0a0d2c; letter-spacing: -0.01em; }
+    #s10-httl { left: 270px; top: 0; width: 400px; text-align: center; font-weight: 400; font-size: 17px; line-height: 62px; color: #5d6f8f; }
+    #s10-hmenu { left: 882px; top: 13px; width: 36px; height: 36px; border-radius: 50%; background: #f1f5fb; }
+    #s10-hmenu svg { position: absolute; left: 8px; top: 8px; }
+    #s10-shbg { left: 14px; top: 70px; width: 912px; height: 466px; border-radius: 26px; background: #ffffff;
+      box-shadow: 0 24px 48px -24px rgba(10,13,44,.45), inset 0 0 0 1.5px #e3e9f4; }
+    #s10-sh { left: 14px; top: 70px; width: 912px; height: 466px; }
+    #s10-sic { left: 20px; top: 16px; width: 40px; height: 40px; border-radius: 12px; }
+    #s10-sic svg, #s10-tic svg { position: absolute; }
+    #s10-st { left: 74px; top: 8px; font-weight: 700; font-size: 26px; line-height: 38px; letter-spacing: -0.01em; }
+    #s10-ssub { left: 74px; top: 44px; font-weight: 400; font-size: 15px; line-height: 20px; color: #5d6f8f; }
+    #s10-sok { left: 300px; top: 14px; width: 136px; height: 30px; border-radius: 15px; background: #e6f6ea; box-shadow: inset 0 0 0 1.5px #bfe5c9; }
+    #s10-sok svg { position: absolute; left: 12px; top: 7px; }
+    #s10-sok b { position: absolute; left: 34px; top: 0; font: 700 14px/30px Poppins, sans-serif; color: #1f8a3e; white-space: nowrap; }
+    #s10-scp { left: 732px; top: 14px; width: 160px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: 9px;
+      font: 700 20px/48px Poppins, sans-serif; color: #ffffff; white-space: nowrap; background: linear-gradient(135deg, #1f8a3e, #2da44e); box-shadow: 0 12px 22px -12px rgba(17,99,41,.7); }
+    #s10-scp svg { display: block; flex: none; }
+    .s10-srow { left: 20px; width: 872px; height: 55px; }
+    .s10-strip { left: 0; top: 0; width: 872px; height: 55px; border-radius: 18px; }
+    .s10-stx { position: absolute; left: 206px; top: 0; font: 400 22px/55px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s10-ptr { left: 0; top: 0; width: 44px; height: 44px; filter: drop-shadow(0 4px 5px rgba(10,13,44,.35)); transform-origin: 7px 9px; }
+    #s10-ptr svg { display: block; }
+    /* ---------- THE 6 PROMPT BLOCKS (shared visual system — same CSS as r5): puzzle chip, colour fill, white lucide icon + label */
+    .s10-blk { position: absolute; left: 0; top: 0; width: 188px; height: 55px; border-radius: 18px; color: #ffffff; transform-origin: 0% 0%;
+      box-shadow: 0 10px 18px -10px rgba(10,13,44,.55), inset 0 1px 0 rgba(255,255,255,.28); }
+    .s10-blk::after { content: ""; position: absolute; right: -7px; top: 20px; width: 15px; height: 15px; border-radius: 50%; background: inherit; }
+    .s10-blk svg { position: absolute; left: 16px; top: 15.5px; }
+    .s10-blk b { position: absolute; left: 50px; top: 0; font: 700 19px/55px Poppins, sans-serif; letter-spacing: .03em; white-space: nowrap; text-shadow: 0 1px 2px rgba(10,13,44,.18); }
+    /* ---------- the tool (proud, centre): 420 × 530, its chips = the blocks at 0.65 */
+    #s10-tool { left: 330px; top: 347px; width: 420px; height: 530px; transform-origin: 50% 50%; }
+    #s10-lift { left: 0; top: 0; width: 420px; height: 530px; border-radius: 32px; box-shadow: 0 60px 90px -40px rgba(10,13,44,.55); }
+    #s10-tb { left: 0; top: 0; width: 420px; height: 530px; border-radius: 32px; }
+    #s10-tic { left: 22px; top: 22px; width: 48px; height: 48px; border-radius: 14px; box-shadow: 0 10px 18px -10px rgba(10,13,44,.8); }
+    #s10-tt { left: 82px; top: 19px; font: 700 22px/28px Poppins, sans-serif; letter-spacing: -.01em; }
+    #s10-ts { left: 82px; top: 48px; height: 22px; display: flex; align-items: center; gap: 6px; font: 400 15px/22px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s10-ts i.s10-cm { width: 17px; height: 17px; }
+    #s10-tin { left: 22px; top: 88px; width: 376px; height: 48px; border-radius: 14px; background: #f3f6fc; box-shadow: inset 0 0 0 1.5px #dbe4f3;
+      font: 400 16px/48px Poppins, sans-serif; color: #0a0d2c; padding-left: 16px; white-space: nowrap; }
+    #s10-tlb { left: 22px; top: 148px; font: 700 12px/16px Poppins, sans-serif; letter-spacing: .12em; color: #5d6f8f; white-space: nowrap; }
+    .s10-row { left: 22px; width: 376px; height: 36px; }
+    .s10-row p { position: absolute; left: 134px; top: 0; width: 242px; font: 400 14px/36px Poppins, sans-serif; color: #294b77; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #s10-tok { left: 22px; top: 452px; width: 376px; height: 56px; border-radius: 16px; background: linear-gradient(180deg, #34b257, #2da44e); display: flex; align-items: center; justify-content: center; gap: 10px;
+      font: 700 21px/56px Poppins, sans-serif; color: #fff; white-space: nowrap; box-shadow: 0 14px 24px -14px rgba(45,164,78,.95); }
+    #s10-tok svg { display: block; flex: none; }
+    #s10-shn { left: 0; top: 0; width: 420px; height: 530px; border-radius: 32px; overflow: hidden; }
+    #s10-shn i { position: absolute; left: -240px; top: -40px; width: 150px; height: 620px; transform: skewX(-18deg);
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.75), rgba(255,255,255,0)); }
+    #s10-zero { left: 290px; top: 414px; width: 182px; height: 58px; border-radius: 18px; background: linear-gradient(150deg, #3cc065, #2da44e); transform-origin: 50% 50%;
+      box-shadow: 0 16px 26px -14px rgba(45,164,78,1), inset 0 0 0 2px rgba(255,255,255,.28); font: 700 25px/58px Poppins, sans-serif; color: #fff; text-align: center; white-space: nowrap; }
+    /* ---------- "Kelas Prompt" ticket (gold, perforated: main + stub) */
+    #s10-tk { left: 63px; top: 389px; width: 270px; height: 430px; transform-origin: 50% 60%; }
+    #s10-tkm, #s10-tks { left: 0; width: 270px; filter: drop-shadow(0 22px 22px rgba(10,13,44,.22)); }
+    #s10-tkm { top: 0; height: 318px; transform-origin: 30% 100%; }
+    #s10-tks { top: 318px; height: 112px; transform-origin: 70% 0%; }
+    #s10-tkm svg, #s10-tks svg { position: absolute; left: 0; top: 0; display: block; }
+    #s10-tkl { left: 22px; top: 24px; height: 30px; padding: 0 12px; border-radius: 10px; background: rgba(10,13,44,.1); font: 700 13px/30px Poppins, sans-serif; letter-spacing: .14em; color: #3b3413; white-space: nowrap; }
+    #s10-tkc { left: 204px; top: 20px; width: 42px; height: 42px; background: #0a0d2c; opacity: .8; -webkit-mask-image: url(assets/icons/lucide-graduation-cap.svg); mask-image: url(assets/icons/lucide-graduation-cap.svg); }
+    .s10-tkh { left: 22px; font: 700 48px/54px Poppins, sans-serif; letter-spacing: -.02em; }
+    #s10-tku { left: 22px; top: 186px; font: 400 18px/26px Poppins, sans-serif; color: #3b3413; white-space: nowrap; }
+    #s10-tkp { left: 22px; top: 226px; font: 700 44px/56px Poppins, sans-serif; letter-spacing: -.01em; color: #0a0d2c; white-space: nowrap; }
+    #s10-tsi { left: 60px; top: 38px; height: 36px; display: flex; align-items: center; gap: 10px; font: 700 19px/36px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s10-tsi i { position: relative; flex: none; width: 32px; height: 32px; background: #0a0d2c; -webkit-mask-image: url(assets/icons/lucide-ticket.svg); mask-image: url(assets/icons/lucide-ticket.svg); }
+    /* ---------- the priced "prompt pack" */
+    #s10-pk { left: 747px; top: 412px; width: 270px; height: 400px; border-radius: 28px; transform-origin: 50% 50%; }
+    #s10-pkb { left: 0; top: 0; width: 270px; height: 134px; border-radius: 28px 28px 0 0; background: linear-gradient(150deg, #7c5cff, #3a6fe0); overflow: hidden; }
+    #s10-pkb b { position: absolute; left: 150px; top: -60px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255,255,255,.12); }
+    #s10-pkl { left: 22px; top: 20px; font: 700 13px/18px Poppins, sans-serif; letter-spacing: .16em; color: rgba(255,255,255,.88); white-space: nowrap; }
+    #s10-pki { left: 22px; top: 58px; width: 50px; height: 50px; background: #fff; -webkit-mask-image: url(assets/icons/lucide-package.svg); mask-image: url(assets/icons/lucide-package.svg); }
+    #s10-pkn { left: 84px; top: 52px; font: 700 44px/60px Poppins, sans-serif; letter-spacing: -.02em; color: #fff; white-space: nowrap; }
+    #s10-pk1 { left: 22px; top: 150px; font: 700 22px/30px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s10-pk2 { left: 22px; top: 180px; font: 400 17px/26px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s10-pks { left: 22px; top: 218px; display: flex; gap: 4px; }
+    #s10-pks svg { width: 22px; height: 22px; display: block; }
+    #s10-pkp { left: 22px; top: 262px; font: 700 36px/48px Poppins, sans-serif; letter-spacing: -.01em; color: #0a0d2c; white-space: nowrap; }
+    #s10-pkc { left: 22px; top: 330px; width: 226px; height: 46px; border-radius: 14px; background: #0a0d2c; font: 700 17px/46px Poppins, sans-serif; color: #fff; text-align: center; white-space: nowrap; }
+    .s10-ink { position: absolute; left: 0; top: 0; overflow: visible; }
+    .s10-bit { left: 0; top: 0; width: 10px; height: 14px; border-radius: 2px; }
+  </style>
+  <div data-hf-id="hf-k4dx" id="root" data-composition-id="s10" data-width="1080" data-height="1920">
+    <div class="s10-a" id="s10-glow"></div>
+    <!-- r5's last frame (rail all done, chat window covered by the master-prompt sheet, pointer on "Tersalin") -->
+    <div class="s10-a" id="s10-r5">
+      <div class="s10-a" id="s10-rlb"></div>
+      <div class="s10-a" id="s10-rl"></div>
+      <div class="s10-a" id="s10-dots"></div>
+      <div class="s10-a" id="s10-win">
+        <div class="s10-a" id="s10-hd"><i class="s10-a s10-cm" id="s10-hmk"></i><div class="s10-t" id="s10-hnm">Claude</div><div class="s10-t" id="s10-httl">Alat penyusun prompt</div>
+          <div class="s10-a" id="s10-hmenu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5d6f8f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg></div></div>
+        <div class="s10-a" id="s10-shbg"></div>
+        <div class="s10-a" id="s10-sh">
+          <div class="s10-a s10-nav" id="s10-sic"></div>
+          <div class="s10-t s10-grad" id="s10-st">Master prompt</div>
+          <div class="s10-t" id="s10-ssub">Ide: rencana konten seminggu buat kedai kopi</div>
+          <div class="s10-a" id="s10-sok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1f8a3e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg><b>6/6 lengkap</b></div>
+          <div class="s10-a" id="s10-scp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>Tersalin</div>
+          <div class="s10-a" id="s10-srows"></div>
+        </div>
+      </div>
+      <div class="s10-a" id="s10-ptr"><svg width="44" height="44" viewBox="0 0 24 24" fill="#ffffff" stroke="#0a0d2c" stroke-width="1.6" stroke-linejoin="round"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" /></svg></div>
+    </div>
+    <!-- the old way: a class ticket (left) and a priced prompt pack (right), fanned behind the tool -->
+    <div class="s10-a" id="s10-tk">
+      <div class="s10-a" id="s10-tkm">
+        <svg width="270" height="318" viewBox="0 0 270 318"><defs><linearGradient id="s10-tg1" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#ffe390" /><stop offset="1" stop-color="#f6c234" /></linearGradient></defs>
+          <path d="M26 0H244A26 26 0 0 1 270 26V302A16 16 0 0 0 254 318H16A16 16 0 0 0 0 302V26A26 26 0 0 1 26 0Z" fill="url(#s10-tg1)" />
+          <path d="M22 317H248" stroke="#0a0d2c" stroke-opacity=".28" stroke-width="2.5" stroke-dasharray="7 7" /></svg>
+        <div class="s10-a" id="s10-tkl">KELAS ONLINE</div>
+        <i class="s10-ico" id="s10-tkc"></i>
+        <div class="s10-a s10-tkh s10-grad" style="top:70px">Kelas</div>
+        <div class="s10-a s10-tkh s10-grad" style="top:122px">Prompt</div>
+        <div class="s10-a" id="s10-tku">Masterclass 3 hari</div>
+        <div class="s10-a" id="s10-tkp">Rp 2,5 jt</div>
+        <svg class="s10-ink" width="270" height="318" viewBox="0 0 270 318"><path id="s10-sk1" d="M14 262C64 255 132 250 214 244" fill="none" stroke="#e5484d" stroke-width="9" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1" /></svg>
+      </div>
+      <div class="s10-a" id="s10-tks">
+        <svg width="270" height="112" viewBox="0 0 270 112"><defs><linearGradient id="s10-tg2" x1="0" y1="0" x2="0.2" y2="1"><stop offset="0" stop-color="#f6c234" /><stop offset="1" stop-color="#eeb21a" /></linearGradient></defs>
+          <path d="M16 0H254A16 16 0 0 0 270 16V86A26 26 0 0 1 244 112H26A26 26 0 0 1 0 86V16A16 16 0 0 0 16 0Z" fill="url(#s10-tg2)" /></svg>
+        <div class="s10-a" id="s10-tsi"><i></i>1 kursi</div>
+      </div>
+    </div>
+    <div class="s10-a s10-card" id="s10-pk">
+      <div class="s10-a" id="s10-pkb"><b></b></div>
+      <div class="s10-a" id="s10-pkl">PROMPT PACK</div>
+      <i class="s10-ico" id="s10-pki"></i>
+      <div class="s10-a" id="s10-pkn">1.000+</div>
+      <div class="s10-a" id="s10-pk1">prompt siap pakai</div>
+      <div class="s10-a" id="s10-pk2">+ bonus template</div>
+      <div class="s10-a" id="s10-pks"></div>
+      <div class="s10-a" id="s10-pkp">Rp 499.000</div>
+      <div class="s10-a" id="s10-pkc">Beli sekarang</div>
+      <svg class="s10-ink" width="270" height="400" viewBox="0 0 270 400">
+        <path id="s10-sk2" d="M14 291C70 283 140 279 222 272" fill="none" stroke="#e5484d" stroke-width="9" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1" />
+        <path id="s10-x1" d="M34 46C92 128 168 246 238 352" fill="none" stroke="#e5484d" stroke-width="15" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1" />
+        <path id="s10-x2" d="M236 50C170 136 96 244 30 348" fill="none" stroke="#e5484d" stroke-width="15" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1" />
+      </svg>
+    </div>
+    <div class="s10-a" id="s10-bits"></div>
+    <!-- the tool -->
+    <div class="s10-a" id="s10-tool">
+      <div class="s10-a" id="s10-lift"></div>
+      <div class="s10-a s10-card" id="s10-tb"></div>
+      <div class="s10-a s10-nav" id="s10-tic"></div>
+      <div class="s10-a s10-grad" id="s10-tt">Penyusun Master Prompt</div>
+      <div class="s10-a" id="s10-ts"><i class="s10-cm"></i>aplikasi kecil di Claude</div>
+      <div class="s10-a" id="s10-tin">rencana konten seminggu buat kedai kopi</div>
+      <div class="s10-a" id="s10-tlb">MASTER PROMPT · 6/6 LENGKAP</div>
+      <div class="s10-a" id="s10-rows"></div>
+      <div class="s10-a" id="s10-tok"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>Tersalin</div>
+      <div class="s10-a" id="s10-shn"><i id="s10-shi"></i></div>
+      <div class="s10-a" id="s10-zero">Rp 0 · gratis</div>
+    </div>
+    <!-- r5's six blocks, lifted out of the sheet: they fly into the tool -->
+    <div class="s10-a" id="s10-fly"></div>
+  </div>
+  <script>
+    (function () {
+      // s10 "Nggak perlu kelas mahal, nggak perlu beli prompt."
+      // START = r5's LAST FRAME (replica of r5's kit end state): rail all 5 done, chat window x 70–1010 y 384–932 covered by the
+      // master-prompt sheet x 84–996 y 454–920 (6 filled rows, green "Tersalin"), pointer tip (968, 508).
+      // TRANSITION (0–0.6) "the blocks leave the chat": the six puzzle blocks lift out of the sheet and fly, one after another, into
+      // a compact "Penyusun Master Prompt" tool card in the centre while the chat window, rail and pointer dissolve back into depth ·
+      // the old way fans in behind it: a gold "Kelas Prompt" ticket (left) and a priced "prompt pack" (right) · "kelas": the ticket
+      // bumps · "mahal,": a coral marker strikes its price, then it TEARS on the perforation (stub drops, main piece flies off, paper
+      // bits) · "nggak": the pack bumps · "beli": its price is struck · "prompt.": a big coral X, the pack crumples and drops · the
+      // tool grows proud and a green "Rp 0 · gratis" sticker lands on its corner.
+      // END STATE (s11 starts from it): only the tool, centre (540, 612), scale 1.14, rotation 0; glow opacity 1 scale 1;
+      // sticker on (bottom-right corner, rotation −6); ticket, pack, chat window, rail all gone.
+      const D = 2.7666, ST = 37.1667, VW = window.VO_WORDS;
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const L = (txt, fb) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST - 0.05); return w ? w[1] - ST : fb; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      const tKel = L("kelas", 0.772), tMah = L("mahal,", 1.041), tN2 = L("nggak", 1.489), tBeli = L("beli", 2.196), tPr = L("prompt.", 2.394);
+      let seed = 1013; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+      // ---------------------------------------------------------------- the 6 blocks (shared visual system, r5's markup)
+      const sv = (w, sw, body) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+      const IC = {
+        peran: '<circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" />',
+        konteks: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /><circle cx="12" cy="10" r="3" />',
+        tugas: '<path d="M13 5h8" /><path d="M13 12h8" /><path d="M13 19h8" /><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" />',
+        format: '<rect width="18" height="7" x="3" y="3" rx="1" /><rect width="9" height="7" x="3" y="14" rx="1" /><rect width="5" height="7" x="16" y="14" rx="1" />',
+        contoh: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" />',
+        batasan: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />',
+      };
+      const WAND = '<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /><path d="m14 7 3 3" /><path d="M5 6v4" /><path d="M19 14v4" /><path d="M10 2v2" /><path d="M7 8H3" /><path d="M21 16h-4" /><path d="M11 3H9" />';
+      // [label, icon, colour, tint, r5's sheet line, the tool's short line]
+      const B = [
+        ["PERAN", "peran", "#294b77", "rgba(41,75,119,.08)", "Kamu content strategist untuk kedai kopi lokal.", "Content strategist kedai kopi"],
+        ["KONTEKS", "konteks", "#3a6fe0", "rgba(58,111,224,.08)", "Kedai kopi kecil dekat kampus, target anak muda.", "Dekat kampus, target anak muda"],
+        ["TUGAS", "tugas", "#2da44e", "rgba(45,164,78,.08)", "Susun rencana konten Instagram untuk 7 hari.", "Rencana konten 7 hari"],
+        ["FORMAT", "format", "#7c5cff", "rgba(124,92,255,.08)", "Tabel: hari · ide konten · caption · jam posting.", "Tabel: hari · ide · caption"],
+        ["CONTOH", "contoh", "#f4b400", "rgba(244,180,0,.08)", "Senin: foto latte art + promo “kopi pagi”.", "Senin: latte art + “kopi pagi”"],
+        ["BATASAN", "batasan", "#e5484d", "rgba(229,72,77,.08)", "Bahasa santai, maks. 80 kata, tanpa klaim lebay.", "Santai, maks. 80 kata"],
+      ];
+      const blk = (b, id) => `<div class="s10-blk" id="${id}" style="background:${b[2]}">${sv(24, 2.2, IC[b[1]])}<b>${b[0]}</b></div>`;
+      $("s10-sic").innerHTML = sv(22, 2, WAND); $("s10-sic").firstChild.setAttribute("style", "left:9px;top:9px");
+      $("s10-tic").innerHTML = sv(26, 2, WAND); $("s10-tic").firstChild.setAttribute("style", "left:11px;top:11px");
+      $("s10-srows").innerHTML = B.map((b, i) => `<div class="s10-a s10-srow" style="top:${82 + i * 63}px"><div class="s10-a s10-strip" style="background:${b[3]}"></div><div class="s10-stx">${b[4]}</div></div>`).join("");
+      $("s10-rows").innerHTML = B.map((b, i) => `<div class="s10-a s10-row" style="top:${172 + i * 44}px">${blk(b, "s10-c" + i)}<p id="s10-p${i}">${b[5]}</p></div>`).join("");
+      $("s10-fly").innerHTML = B.map((b, i) => blk(b, "s10-f" + i)).join("");
+      $("s10-pks").innerHTML = Array.from({ length: 5 }, () => '<svg viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" fill="#f4b400" /></svg>').join("");
+      // rail dots (RAIL SPEC: centres x = 166 + i·187, y 330), all done — r5's check
+      $("s10-dots").innerHTML = [0, 1, 2, 3, 4].map((i) => `<div class="s10-a s10-dot" id="s10-d${i}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6" /></svg></div>`).join("");
+      $("s10-bits").innerHTML = Array.from({ length: 10 }, (_, k) => `<div class="s10-a s10-bit" id="s10-b${k}"></div>`).join("");
+
+      // ---------------------------------------------------------------- TRANSITION: the blocks leave the chat, the chat dissolves
+      const r5 = $("s10-r5"), rl = $("s10-rl"), ptr = $("s10-ptr");
+      I(r5, { opacity: 1, scale: 1, y: 0 });
+      ft(r5, { scale: 1, y: 0 }, { scale: 0.9, y: 36, duration: 0.42, ease: "power3.in" }, 0.03);
+      ft(r5, { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, 0.08);
+      I(ptr, { x: 961, y: 499, opacity: 1 });                        // r5's last pointer: tip (968, 508) − hotspot (7, 9)
+      ft(ptr, { x: 961, y: 499 }, { x: 1000, y: 556, duration: 0.2, ease: "power2.in" }, 0.0);
+      ft(ptr, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "none" }, 0.04);
+      I(rl, { scaleX: 1 }); ft(rl, { scaleX: 1 }, { scaleX: 0, duration: 0.28, ease: "power3.in" }, 0.02);
+      for (let i = 0; i < 5; i++) {
+        const d = $("s10-d" + i), x = 166 + i * 187;
+        I(d, { x, y: 330, scale: 1, opacity: 1 });
+        ft(d, { x }, { x: 540, duration: 0.26, ease: "power3.in" }, 0.02);
+        ft(d, { scale: 1, opacity: 1 }, { scale: 0.3, opacity: 0, duration: 0.12, ease: "power2.in" }, 0.22);
+      }
+      // the tool card rises in the centre (empty chip slots); it is settled (scale 1, y 0) when the first block docks
+      const tool = $("s10-tool"), lift = $("s10-lift"), tDock = 0.42;
+      I(tool, { x: 0, y: 26, scale: 0.94, opacity: 0, rotation: 0 });
+      ft(tool, { opacity: 0 }, { opacity: 1, duration: 0.18, ease: "power1.out" }, 0.08);
+      ft(tool, { y: 26, scale: 0.94 }, { y: 0, scale: 1, duration: tDock - 0.08, ease: "power3.out" }, 0.08);
+      I(lift, { opacity: 0 }); ft(lift, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.14);
+      const glow = $("s10-glow");
+      I(glow, { opacity: 0, scale: 0.8 });
+      ft(glow, { opacity: 0, scale: 0.8 }, { opacity: 0.7, scale: 0.92, duration: 0.6, ease: "power2.out" }, 0.1);
+      // the six blocks: sheet slot (104, 536 + 63i) scale 1 → tool slot (352, 519 + 44i) scale 0.65, one after another
+      const CS = 0.65;
+      for (let i = 0; i < 6; i++) {
+        const f = $("s10-f" + i), c = $("s10-c" + i), p = $("s10-p" + i);
+        const x0 = 104, y0 = 536 + 63 * i, x1 = 352, y1 = 519 + 44 * i, t0 = 0.05 + i * 0.03, tL = tDock + i * 0.03, d = tL - t0;
+        I(f, { x: x0, y: y0, scale: 1, rotation: 0, opacity: 1 });
+        ft(f, { x: x0 }, { x: x1, duration: d, ease: "power3.inOut" }, t0);
+        ft(f, { y: y0 }, { y: y1, duration: d, ease: "power2.inOut" }, t0);
+        ft(f, { scale: 1 }, { scale: CS, duration: d, ease: "power3.inOut" }, t0);
+        ft(f, { rotation: 0 }, { rotation: -7, duration: d * 0.5, ease: "power2.out" }, t0);
+        ft(f, { rotation: -7 }, { rotation: 0, duration: d * 0.5, ease: "power2.in" }, t0 + d * 0.5);
+        tl.set(f, { opacity: 0 }, tL);
+        I(c, { scale: CS, opacity: 0 });
+        tl.set(c, { opacity: 1 }, tL);
+        ft(c, { scale: CS }, { scale: CS * 1.08, duration: 0.06, yoyo: true, repeat: 1, ease: "power2.out" }, tL);
+        I(p, { opacity: 0, x: -10 });
+        ft(p, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.22, ease: "power3.out" }, tL + 0.03);
+      }
+
+      // ---------------------------------------------------------------- the old way fans in behind it
+      const tk = $("s10-tk"), pk = $("s10-pk");
+      I(tk, { x: -380, y: 40, rotation: -26, opacity: 0, scale: 1 });
+      tl.set(tk, { opacity: 1 }, 0.2);
+      ft(tk, { x: -380, y: 40, rotation: -26 }, { x: 0, y: 0, rotation: -7, duration: 0.46, ease: "back.out(1.25)" }, 0.2);
+      I(pk, { x: 380, y: 40, rotation: 26, opacity: 0, scale: 1 });
+      tl.set(pk, { opacity: 1 }, 0.3);
+      ft(pk, { x: 380, y: 40, rotation: 26 }, { x: 0, y: 0, rotation: 7, duration: 0.46, ease: "back.out(1.25)" }, 0.3);
+
+      // ---------------------------------------------------------------- "kelas mahal,": the ticket bumps, its price is struck, it tears
+      ft(tk, { scale: 1 }, { scale: 1.06, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out" }, tKel - 0.04);
+      const sk1 = $("s10-sk1");
+      I(sk1, { attr: { "stroke-dashoffset": 1 } });
+      ft(sk1, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.14, ease: "power2.out" }, tMah - 0.05);
+      const tkm = $("s10-tkm"), tks = $("s10-tks"), tTear = tMah + 0.14;
+      I(tkm, { x: 0, y: 0, rotation: 0, opacity: 1 });
+      I(tks, { x: 0, y: 0, rotation: 0, opacity: 1 });
+      // tension: the stub tugs, then rips
+      ft(tks, { x: 0, rotation: 0 }, { x: 5, rotation: 4, duration: 0.04, yoyo: true, repeat: 1, ease: "power2.out" }, tTear - 0.08);
+      ft(tks, { x: 0 }, { x: 80, duration: 0.46, ease: "power1.out" }, tTear);
+      ft(tks, { y: 0 }, { y: 330, duration: 0.46, ease: "power2.in" }, tTear);
+      ft(tks, { rotation: 0 }, { rotation: 42, duration: 0.46, ease: "power1.in" }, tTear);
+      ft(tks, { opacity: 1 }, { opacity: 0, duration: 0.16, ease: "none" }, tTear + 0.3);
+      ft(tkm, { x: 0 }, { x: -170, duration: 0.5, ease: "power2.out" }, tTear);
+      ft(tkm, { y: 0 }, { y: -36, duration: 0.14, ease: "power2.out" }, tTear);
+      ft(tkm, { y: -36 }, { y: 380, duration: 0.38, ease: "power2.in" }, tTear + 0.14);
+      ft(tkm, { rotation: 0 }, { rotation: -34, duration: 0.5, ease: "power1.inOut" }, tTear);
+      ft(tkm, { opacity: 1 }, { opacity: 0, duration: 0.16, ease: "none" }, tTear + 0.34);
+      // paper bits from the perforation (ticket-local y 318 → page coords through the −7° tilt)
+      const TC = ["#f6c234", "#ffe390", "#0a0d2c", "#f6c234", "#eeb21a"];
+      const rad = (-7 * Math.PI) / 180, cx = 63 + 135, cy = 389 + 258;   // ticket transform-origin 50% 60%
+      for (let k = 0; k < 10; k++) {
+        const b = $("s10-b" + k), lx = 20 + k * 23 - 135, ly = 318 - 258;
+        const px = cx + lx * Math.cos(rad) - ly * Math.sin(rad), py = cy + lx * Math.sin(rad) + ly * Math.cos(rad);
+        const vx = (k - 4.5) * 14 + (rnd() - 0.5) * 30, up = 40 + rnd() * 50, rot = (rnd() - 0.5) * 540;
+        I(b, { x: px, y: py, rotation: 0, opacity: 0, background: TC[k % 5], scale: 0.7 + rnd() * 0.5 });
+        tl.set(b, { opacity: 1 }, tTear);
+        ft(b, { x: px }, { x: px + vx, duration: 0.5, ease: "power1.out" }, tTear);
+        ft(b, { y: py }, { y: py - up, duration: 0.16, ease: "power2.out" }, tTear);
+        ft(b, { y: py - up }, { y: py + 160 + rnd() * 80, duration: 0.36, ease: "power2.in" }, tTear + 0.16);
+        ft(b, { rotation: 0 }, { rotation: rot, duration: 0.5, ease: "none" }, tTear);
+        ft(b, { opacity: 1 }, { opacity: 0, duration: 0.14, ease: "none" }, tTear + 0.36);
+      }
+      // the tool answers: a confident pulse + a sheen
+      const shi = $("s10-shi");
+      I(shi, { x: 0 });
+      ft(tool, { scale: 1 }, { scale: 1.035, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tTear + 0.04);
+      ft(shi, { x: 0 }, { x: 760, duration: 0.5, ease: "power2.inOut" }, tTear + 0.02);
+
+      // ---------------------------------------------------------------- "nggak perlu beli prompt.": the pack is struck, crossed, dropped
+      ft(pk, { scale: 1 }, { scale: 1.06, duration: 0.11, yoyo: true, repeat: 1, ease: "power2.out" }, tN2 - 0.04);
+      const sk2 = $("s10-sk2"), x1 = $("s10-x1"), x2 = $("s10-x2");
+      [sk2, x1, x2].forEach((p) => I(p, { attr: { "stroke-dashoffset": 1 } }));
+      ft(sk2, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.14, ease: "power2.out" }, tBeli - 0.05);
+      ft(x1, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.09, ease: "power2.out" }, tPr - 0.05);
+      ft(x2, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.09, ease: "power2.out" }, tPr + 0.04);
+      const tDrop = tPr + 0.12;
+      ft(pk, { scaleX: 1, scaleY: 1 }, { scaleX: 0.62, scaleY: 0.78, duration: 0.2, ease: "power2.in" }, tDrop);
+      ft(pk, { rotation: 7 }, { rotation: 30, duration: 0.2, ease: "power2.in" }, tDrop);
+      ft(pk, { y: 0 }, { y: 360, duration: 0.2, ease: "power2.in" }, tDrop);
+      ft(pk, { x: 0 }, { x: 40, duration: 0.2, ease: "power1.in" }, tDrop);
+      ft(pk, { opacity: 1 }, { opacity: 0, duration: 0.07, ease: "none" }, tDrop + 0.13);
+
+      // ---------------------------------------------------------------- the tool stays, proud: grows, glow up, "Rp 0 · gratis" lands
+      const zero = $("s10-zero"), tProud = tPr + 0.06;
+      ft(tool, { scale: 1 }, { scale: 1.14, duration: 0.26, ease: "power3.out" }, tProud);
+      ft(glow, { opacity: 0.7, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.26, ease: "power2.out" }, tProud);
+      I(zero, { opacity: 0, scale: 2.2, rotation: 18 });
+      ft(zero, { opacity: 0 }, { opacity: 1, duration: 0.06, ease: "none" }, tProud + 0.03);
+      ft(zero, { scale: 2.2, rotation: 18 }, { scale: 1, rotation: -6, duration: 0.2, ease: "back.out(1.6)" }, tProud + 0.03);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["s10"] = tl;
+    })();
+  </script>
+</template>

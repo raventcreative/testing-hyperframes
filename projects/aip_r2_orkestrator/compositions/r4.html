@@ -1,0 +1,305 @@
+<template>
+  <style>
+    /* ========== PROMPT-BUILDER KIT (identical in r1–r5, prefix r4-): step rail · chat window · tool card · master-prompt sheet ========== */
+    .r4-a { position: absolute; }
+    .r4-g { background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .r4-ic { position: absolute; display: block; }
+    .r4-fx { position: static; display: block; flex: none; }
+    .r4-t { position: absolute; white-space: nowrap; font-family: Poppins, sans-serif; }
+    .r4-nav { background: linear-gradient(135deg, #0a0d2c, #294b77); }
+    /* RAIL — exact RAIL SPEC (shared with s04): 4 px line x 166–914 @ y 330, 5 dots of 52 px, centres x = 166 + i·187 */
+    #r4-rlb { left: 166px; top: 328px; width: 748px; height: 4px; border-radius: 2px; background: #d5e0f0; }
+    #r4-rlf { left: 166px; top: 328px; width: 748px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #0a0d2c, #294b77); clip-path: inset(0px 748px 0px 0px); }
+    .r4-dot { top: 304px; width: 52px; height: 52px; }
+    .r4-dot > div { position: absolute; left: 0; top: 0; width: 52px; height: 52px; border-radius: 50%; box-sizing: border-box; text-align: center; font: 700 22px/52px Poppins, sans-serif; }
+    .r4-dot .u { background: #ffffff; border: 2px solid #c9d6ea; color: #294b77; line-height: 48px; }
+    .r4-dot .v { background: linear-gradient(135deg, #0a0d2c, #294b77); color: #ffffff; box-shadow: 0 0 0 8px rgba(41,75,119,.18); }
+    .r4-dot .n { background: #2da44e; }
+    .r4-dot .n svg { position: absolute; left: 14px; top: 14px; }
+    /* CHAT WINDOW (generic chat app): x 70–1010, y 384–932 */
+    #r4-win { left: 70px; top: 384px; width: 940px; height: 548px; border-radius: 30px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 18px 36px -20px rgba(10,13,44,.42), 0 0 0 1.5px rgba(10,13,44,.06); overflow: hidden; transform-origin: 50% 50%; }
+    #r4-hd { left: 0; top: 0; width: 940px; height: 64px; border-bottom: 1.5px solid #edf1f8; box-sizing: border-box; }
+    #r4-hmk { left: 26px; top: 16px; width: 32px; height: 32px; }
+    #r4-hnm { left: 68px; top: 0; font-weight: 700; font-size: 22px; line-height: 62px; color: #0a0d2c; letter-spacing: -0.01em; }
+    #r4-httl { left: 270px; top: 0; width: 400px; text-align: center; font-weight: 400; font-size: 17px; line-height: 62px; color: #5d6f8f; }
+    #r4-hmenu { left: 882px; top: 13px; width: 36px; height: 36px; border-radius: 50%; background: #f1f5fb; }
+    #r4-vp { left: 0; top: 64px; width: 940px; height: 392px; overflow: hidden;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0px, #000 24px); mask-image: linear-gradient(180deg, transparent 0px, #000 24px); }
+    #r4-ml { left: 0; top: 0; width: 940px; height: 600px; }
+    #r4-emp { left: 0; top: 0; width: 940px; height: 392px; }
+    #r4-emk { left: 438px; top: 96px; width: 64px; height: 64px; }
+    #r4-et1 { left: 0; top: 176px; width: 940px; text-align: center; font-weight: 700; font-size: 32px; line-height: 42px; letter-spacing: -0.01em; }
+    #r4-et2 { left: 0; top: 226px; width: 940px; text-align: center; font-weight: 400; font-size: 18px; line-height: 24px; color: #5d6f8f; }
+    #r4-sug { left: 0; top: 268px; width: 940px; height: 40px; display: flex; justify-content: center; gap: 12px; }
+    .r4-sg { position: relative; flex: none; height: 40px; padding: 0 18px 0 46px; border-radius: 20px; background: #ffffff; box-shadow: inset 0 0 0 1.5px #e1e8f3, 0 6px 14px -10px rgba(10,13,44,.35);
+      font: 400 16px/40px Poppins, sans-serif; color: #294b77; white-space: nowrap; }
+    .r4-sg svg { position: absolute; left: 18px; top: 11px; }
+    /* user bubble (list coords) */
+    #r4-ub { left: 318px; top: 16px; width: 600px; height: 170px; border-radius: 26px 26px 8px 26px; background: linear-gradient(180deg, #eef3fb, #e7eef9);
+      box-shadow: inset 0 0 0 1.5px #dce5f3; overflow: hidden; transform-origin: 100% 100%; }
+    #r4-ubic { left: 18px; top: 16px; width: 40px; height: 40px; border-radius: 12px; }
+    #r4-ubt { left: 70px; top: 14px; font-weight: 700; font-size: 20px; line-height: 24px; color: #0a0d2c; }
+    #r4-ubs { left: 70px; top: 39px; font-weight: 400; font-size: 15px; line-height: 18px; color: #5d6f8f; }
+    #r4-ubg { left: 462px; top: 20px; width: 120px; height: 32px; border-radius: 16px; background: #fff3d3; box-shadow: inset 0 0 0 1.5px #f6dc8f; }
+    #r4-ubg b { position: absolute; left: 36px; top: 0; font: 700 15px/32px Poppins, sans-serif; color: #8a6400; white-space: nowrap; }
+    #r4-ubl { left: 18px; top: 70px; width: 564px; height: 90px; overflow: hidden; font: 400 16px/24px Poppins, sans-serif; color: #3a4f72;
+      -webkit-mask-image: linear-gradient(180deg, #000 52%, transparent 100%); mask-image: linear-gradient(180deg, #000 52%, transparent 100%); }
+    #r4-ubl div { white-space: nowrap; }
+    /* Claude's reply row (list coords) */
+    #r4-cr { left: 22px; top: 202px; width: 896px; height: 34px; }
+    #r4-crmk { left: 0; top: 2px; width: 30px; height: 30px; }
+    #r4-crt1 { left: 42px; top: 0; font-weight: 400; font-size: 17px; line-height: 34px; color: #5d6f8f; }
+    #r4-crbar { left: 214px; top: 14px; width: 150px; height: 6px; border-radius: 3px; background: #e3e9f4; overflow: hidden; }
+    #r4-crfill { left: 0; top: 0; width: 150px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, #294b77, #3a6fe0); transform-origin: 0% 50%; }
+    #r4-crt2 { left: 42px; top: 0; font-weight: 700; font-size: 17px; line-height: 34px; color: #1f8a3e; }
+    #r4-crt2 svg { position: absolute; left: 0; top: 8px; }
+    #r4-crt2 span { padding-left: 26px; }
+    #r4-crt2 i { font-style: normal; font-weight: 400; color: #5d6f8f; }
+    /* THE TOOL CARD "Penyusun Master Prompt" (list coords; after r3's scroll it sits at global x 92–988, y 522–832) */
+    #r4-card { left: 22px; top: 246px; width: 896px; height: 310px; border-radius: 26px; background: linear-gradient(180deg, #ffffff, #f8fafd);
+      box-shadow: 0 14px 30px -18px rgba(10,13,44,.38), inset 0 0 0 1.5px #e3e9f4; transform-origin: 50% 0%; }
+    #r4-cic { left: 18px; top: 10px; width: 36px; height: 36px; border-radius: 11px; }
+    #r4-ctt { left: 66px; top: 0; font-weight: 700; font-size: 22px; line-height: 56px; letter-spacing: -0.01em; }
+    #r4-ctag { left: 774px; top: 15px; width: 104px; height: 26px; border-radius: 13px; background: #e9f0fc; color: #294b77; text-align: center;
+      font: 700 13px/26px Poppins, sans-serif; letter-spacing: .08em; }
+    #r4-cdv { left: 0; top: 56px; width: 896px; height: 1.5px; background: #edf1f8; }
+    #r4-cmk { left: 14px; top: 79px; width: 160px; height: 11px; border-radius: 6px; background: rgba(244,180,0,.42); transform-origin: 0% 50%; }
+    #r4-clb { left: 18px; top: 66px; font-weight: 700; font-size: 16px; line-height: 22px; color: #5d6f8f; }
+    #r4-cex { left: 186px; top: 65px; width: 98px; height: 24px; border-radius: 12px; background: #f4b400; box-shadow: 0 6px 12px -6px rgba(138,100,0,.6); transform-origin: 0% 50%; }
+    #r4-cex b { position: absolute; left: 28px; top: 0; font: 700 12px/24px Poppins, sans-serif; color: #ffffff; letter-spacing: .06em; }
+    #r4-cin { left: 18px; top: 92px; width: 860px; height: 64px; border-radius: 16px; background: #ffffff; box-shadow: inset 0 0 0 1.5px #dfe6f2; }
+    #r4-cfo { left: 18px; top: 92px; width: 860px; height: 64px; border-radius: 16px; box-shadow: inset 0 0 0 2.5px #294b77, 0 0 0 6px rgba(41,75,119,.14); }
+    #r4-cph { left: 40px; top: 92px; font-weight: 400; font-size: 26px; line-height: 64px; color: #a7b3c9; }
+    #r4-cline { left: 40px; top: 92px; height: 64px; font-weight: 400; font-size: 27px; line-height: 64px; color: #0a0d2c; }
+    #r4-cca { display: inline-block; width: 3px; height: 32px; margin-left: 2px; border-radius: 2px; background: #294b77; vertical-align: -6px; }
+    #r4-cbt { left: 18px; top: 170px; width: 350px; height: 60px; border-radius: 18px; box-shadow: 0 12px 22px -12px rgba(10,13,44,.6); }
+    #r4-cbt > div { position: absolute; left: 0; top: 0; width: 350px; height: 60px; display: flex; align-items: center; justify-content: center; gap: 10px;
+      font: 700 20px/60px Poppins, sans-serif; color: #ffffff; white-space: nowrap; }
+    #r4-chint { left: 392px; top: 170px; font-weight: 400; font-size: 16px; line-height: 60px; color: #8293b0; }
+    #r4-cout { left: 18px; top: 244px; width: 860px; height: 50px; border-radius: 14px; border: 1.5px dashed #cfdbee; background: #f8fafd; box-sizing: border-box; }
+    .r4-gh { position: absolute; top: 7px; width: 132px; height: 33px; border-radius: 10px; }
+    .r4-gh svg { position: absolute; left: 10px; top: 8.5px; }
+    .r4-gh b { position: absolute; left: 32px; top: 0; font: 700 13px/33px Poppins, sans-serif; letter-spacing: .03em; white-space: nowrap; }
+    .r4-sk { position: absolute; background: linear-gradient(90deg, #e6ecf6 0%, #e6ecf6 40%, #f7f9fd 50%, #e6ecf6 60%, #e6ecf6 100%); background-size: 1800px 100%; background-repeat: no-repeat; }
+    /* chat input bar (window coords) */
+    #r4-in { left: 22px; top: 468px; width: 896px; height: 60px; border-radius: 30px; background: #f4f7fc; box-shadow: inset 0 0 0 1.5px #e1e8f3; overflow: hidden; }
+    #r4-inplus { left: 8px; bottom: 8px; width: 44px; height: 44px; border-radius: 50%; background: #ffffff; box-shadow: inset 0 0 0 1.5px #e1e8f3; }
+    #r4-inph { left: 66px; bottom: 0; font-weight: 400; font-size: 20px; line-height: 60px; color: #8d9bb5; }
+    #r4-insend { left: 844px; bottom: 8px; width: 44px; height: 44px; border-radius: 50%; }
+    #r4-inpc { left: 22px; top: 18px; width: 852px; height: 280px; }
+    #r4-inpi { left: 0; top: 0; width: 36px; height: 36px; border-radius: 11px; }
+    #r4-inpt { left: 48px; top: 0; font-weight: 700; font-size: 22px; line-height: 36px; color: #0a0d2c; }
+    #r4-inpu { left: 48px; top: 34px; width: 232px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, #0a0d2c, #294b77); transform-origin: 0% 50%; }
+    #r4-inpn { left: 294px; top: 0; font-weight: 400; font-size: 17px; line-height: 36px; color: #5d6f8f; }
+    #r4-inlw { left: 0; top: 52px; width: 852px; height: 224px; overflow: hidden;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 70%, transparent 100%); }
+    #r4-inl { left: 0; top: 0; width: 852px; font: 400 20px/28px Poppins, sans-serif; color: #3a4f72; }
+    #r4-inl div { white-space: nowrap; height: 28px; }
+    /* MASTER-PROMPT SHEET (r5): grows out of the tool's dashed output strip to fill the window (window coords x 14–926, y 70–536) */
+    #r4-shbg { left: 14px; top: 70px; width: 912px; height: 466px; border-radius: 26px; background: #ffffff;
+      box-shadow: 0 24px 48px -24px rgba(10,13,44,.45), inset 0 0 0 1.5px #e3e9f4; }
+    #r4-sh { left: 14px; top: 70px; width: 912px; height: 466px; }
+    #r4-sic { left: 20px; top: 16px; width: 40px; height: 40px; border-radius: 12px; }
+    #r4-stw { left: 74px; top: 8px; width: 300px; height: 38px; overflow: hidden; }
+    #r4-st1, #r4-st2 { left: 0; top: 0; font-weight: 700; font-size: 26px; line-height: 38px; letter-spacing: -0.01em; }
+    #r4-ssub { left: 74px; top: 44px; font-weight: 400; font-size: 15px; line-height: 20px; color: #5d6f8f; }
+    #r4-sok { left: 300px; top: 14px; width: 136px; height: 30px; border-radius: 15px; background: #e6f6ea; box-shadow: inset 0 0 0 1.5px #bfe5c9; transform-origin: 0% 50%; }
+    #r4-sok svg { position: absolute; left: 12px; top: 7px; }
+    #r4-sok b { position: absolute; left: 34px; top: 0; font: 700 14px/30px Poppins, sans-serif; color: #1f8a3e; white-space: nowrap; }
+    #r4-scp { left: 732px; top: 14px; width: 160px; height: 48px; }
+    #r4-scp > div { position: absolute; left: 0; top: 0; width: 160px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: 9px;
+      font: 700 20px/48px Poppins, sans-serif; color: #ffffff; white-space: nowrap; }
+    #r4-scp2 { background: linear-gradient(135deg, #1f8a3e, #2da44e); box-shadow: 0 12px 22px -12px rgba(17,99,41,.7); }
+    #r4-scp1 { box-shadow: 0 12px 22px -12px rgba(10,13,44,.6); }
+    #r4-ssel { left: 20px; top: 80px; width: 872px; height: 374px; border-radius: 20px; background: rgba(58,111,224,.13); box-shadow: inset 0 0 0 2px rgba(58,111,224,.35); }
+    .r4-row { position: absolute; left: 20px; width: 872px; height: 55px; }
+    .r4-strip { position: absolute; left: 0; top: 0; width: 872px; height: 55px; border-radius: 18px; transform-origin: 0% 50%; }
+    .r4-tx { position: absolute; left: 206px; top: 0; font: 400 22px/55px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    /* THE 6 PROMPT BLOCKS (shared visual system): puzzle chip, colour fill, white lucide icon + label, radius 18, soft shadow */
+    .r4-blk { position: absolute; left: 0; top: 0; width: 188px; height: 55px; border-radius: 18px; color: #ffffff; transform-origin: 0% 50%;
+      box-shadow: 0 10px 18px -10px rgba(10,13,44,.55), inset 0 1px 0 rgba(255,255,255,.28); }
+    .r4-blk::after { content: ""; position: absolute; right: -7px; top: 20px; width: 15px; height: 15px; border-radius: 50%; background: inherit; }
+    .r4-blk svg { position: absolute; left: 16px; top: 15.5px; }
+    .r4-blk b { position: absolute; left: 50px; top: 0; font: 700 19px/55px Poppins, sans-serif; letter-spacing: .03em; white-space: nowrap; text-shadow: 0 1px 2px rgba(10,13,44,.18); }
+    /* free elements (frame coords) */
+    #r4-fmk { left: 500px; top: 560px; width: 80px; height: 80px; }
+    #r4-tlab { left: 340px; top: 690px; width: 400px; text-align: center; font-weight: 700; font-size: 24px; line-height: 30px; color: #0a0d2c; }
+    #r4-clip { left: 305px; top: 690px; width: 470px; height: 92px; border-radius: 24px; background: linear-gradient(180deg, #ffffff, #f6f8fd);
+      box-shadow: 0 24px 44px -20px rgba(10,13,44,.55), inset 0 0 0 1.5px #e3e9f4; transform-origin: 50% 50%; }
+    #r4-clic { left: 20px; top: 20px; width: 52px; height: 52px; border-radius: 15px; }
+    #r4-clt { left: 88px; top: 18px; font-weight: 700; font-size: 23px; line-height: 28px; color: #0a0d2c; }
+    #r4-cls { left: 88px; top: 50px; font-weight: 400; font-size: 16px; line-height: 20px; color: #5d6f8f; }
+    .r4-key { position: absolute; top: 478px; height: 62px; border-radius: 14px; background: linear-gradient(180deg, #ffffff, #f2f5fb); text-align: center;
+      box-shadow: 0 5px 0 #c9d6ea, 0 12px 20px -8px rgba(10,13,44,.35), inset 0 0 0 1.5px #dfe6f2; font: 700 24px/62px Poppins, sans-serif; color: #294b77; }
+    #r4-ptr { left: 0; top: 0; width: 44px; height: 44px; filter: drop-shadow(0 4px 5px rgba(10,13,44,.35)); transform-origin: 7px 9px; }
+    #r4-rip { left: -32px; top: -32px; width: 64px; height: 64px; border-radius: 50%; border: 3px solid rgba(41,75,119,.55); box-sizing: border-box; }
+  </style>
+  <div id="root" data-composition-id="r4" data-width="1080" data-height="1920">
+    <div class="r4-a" id="r4-rail"><div class="r4-a" id="r4-rlb"></div><div class="r4-a" id="r4-rlf"></div>
+    <div class="r4-a r4-dot" id="r4-d0" style="left:140px"><div class="u" id="r4-d0u">1</div><div class="v" id="r4-d0v">1</div><div class="n" id="r4-d0n"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="r4-d0k" d="M4 12l5 5L20 6" stroke-dasharray="23" stroke-dashoffset="23"/></svg></div></div>
+    <div class="r4-a r4-dot" id="r4-d1" style="left:327px"><div class="u" id="r4-d1u">2</div><div class="v" id="r4-d1v">2</div><div class="n" id="r4-d1n"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="r4-d1k" d="M4 12l5 5L20 6" stroke-dasharray="23" stroke-dashoffset="23"/></svg></div></div>
+    <div class="r4-a r4-dot" id="r4-d2" style="left:514px"><div class="u" id="r4-d2u">3</div><div class="v" id="r4-d2v">3</div><div class="n" id="r4-d2n"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="r4-d2k" d="M4 12l5 5L20 6" stroke-dasharray="23" stroke-dashoffset="23"/></svg></div></div>
+    <div class="r4-a r4-dot" id="r4-d3" style="left:701px"><div class="u" id="r4-d3u">4</div><div class="v" id="r4-d3v">4</div><div class="n" id="r4-d3n"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="r4-d3k" d="M4 12l5 5L20 6" stroke-dasharray="23" stroke-dashoffset="23"/></svg></div></div>
+    <div class="r4-a r4-dot" id="r4-d4" style="left:888px"><div class="u" id="r4-d4u">5</div><div class="v" id="r4-d4v">5</div><div class="n" id="r4-d4n"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="r4-d4k" d="M4 12l5 5L20 6" stroke-dasharray="23" stroke-dashoffset="23"/></svg></div></div>
+    </div>
+    <div class="r4-a" id="r4-win">
+    <div class="r4-a" id="r4-hd"><svg class="r4-a" id="r4-hmk" viewBox="0 0 24 24" aria-label="Claude"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" fill="#D97757" fill-rule="nonzero"/></svg><div class="r4-t" id="r4-hnm">Claude</div><div class="r4-t" id="r4-httl">Alat penyusun prompt</div><div class="r4-a" id="r4-hmenu"><svg class="r4-ic" style="left:8px;top:8px" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5d6f8f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" /></svg></div></div>
+    <div class="r4-a" id="r4-vp"><div class="r4-a" id="r4-ml">
+    <div class="r4-a" id="r4-emp"><svg class="r4-a" id="r4-emk" viewBox="0 0 24 24" aria-label="Claude"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" fill="#D97757" fill-rule="nonzero"/></svg><div class="r4-t r4-g" id="r4-et1">Mau bikin apa hari ini?</div><div class="r4-t" id="r4-et2">Tempel prompt atau ketik ide kamu di bawah.</div><div class="r4-a" id="r4-sug"><div class="r4-sg" id="r4-sg0"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#294b77" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /> <path d="m14 7 3 3" /> <path d="M5 6v4" /> <path d="M19 14v4" /> <path d="M10 2v2" /> <path d="M7 8H3" /> <path d="M21 16h-4" /> <path d="M11 3H9" /></svg>Bikin aplikasi kecil</div><div class="r4-sg" id="r4-sg1"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#294b77" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></svg>Tulis caption</div><div class="r4-sg" id="r4-sg2"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#294b77" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3" /> <path d="M16 2v3" /> <rect x="3" y="3" width="18" height="18" rx="2" /> <path d="M3 9h18" /> <path d="M8 13h.01" /> <path d="M12 13h.01" /> <path d="M16 13h.01" /> <path d="M8 17h.01" /> <path d="M12 17h.01" /> <path d="M16 17h.01" /></svg>Rencana konten</div></div></div>
+    <div class="r4-a" id="r4-ub"><div class="r4-a r4-nav" id="r4-ubic"><svg class="r4-ic" style="left:9px;top:9px" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14h10" /> <path d="M16 4h2a2 2 0 0 1 2 2v1.344" /> <path d="m17 18 4-4-4-4" /> <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 1.793-1.113" /> <rect x="8" y="2" width="8" height="4" rx="1" /></svg></div><div class="r4-t" id="r4-ubt">Prompt pembuat alat</div><div class="r4-t" id="r4-ubs">Teks ditempel · 217 kata</div><div class="r4-a" id="r4-ubg"><svg class="r4-ic" style="left:13px;top:7.5px" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#b07f00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14" /> <path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" /> <path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5" /> <rect x="3" y="7" width="18" height="4" rx="1" /></svg><b>dari aku</b></div><div class="r4-a" id="r4-ubl"><div>Buatkan saya aplikasi web kecil bernama “Penyusun</div><div>Master Prompt” sebagai artifact interaktif (satu file,</div><div>tanpa login, tanpa API, berjalan langsung di chat).</div><div>Fungsi: 1. Ada satu kolom besar “Ide singkat kamu”…</div></div></div>
+    <div class="r4-a" id="r4-cr"><svg class="r4-a" id="r4-crmk" viewBox="0 0 24 24" aria-label="Claude"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" fill="#D97757" fill-rule="nonzero"/></svg><div class="r4-t" id="r4-crt1">Membuat aplikasi…</div><div class="r4-a" id="r4-crbar"><div class="r4-a" id="r4-crfill"></div></div><div class="r4-t" id="r4-crt2"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2da44e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /> <path d="m16 9-5.5 5.5L8 12" /></svg><span>Aplikasi siap <i>· langsung bisa dipakai di sini</i></span></div></div>
+    <div class="r4-a" id="r4-card"><div class="r4-a r4-nav" id="r4-cic"><svg class="r4-ic" style="left:8px;top:8px" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /> <path d="m14 7 3 3" /> <path d="M5 6v4" /> <path d="M19 14v4" /> <path d="M10 2v2" /> <path d="M7 8H3" /> <path d="M21 16h-4" /> <path d="M11 3H9" /></svg></div><div class="r4-t r4-g" id="r4-ctt">Penyusun Master Prompt</div><div class="r4-a" id="r4-ctag">APLIKASI</div><div class="r4-a" id="r4-cdv"></div><div class="r4-a" id="r4-cmk"></div><div class="r4-t" id="r4-clb">Ide singkat kamu</div><div class="r4-a" id="r4-cex"><svg class="r4-ic" style="left:9px;top:5px" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /> <path d="M9 18h6" /> <path d="M10 22h4" /></svg><b>CONTOH</b></div><div class="r4-a" id="r4-cin"></div><div class="r4-a" id="r4-cfo"></div><div class="r4-t" id="r4-cph">Ketik idemu di sini…</div><div class="r4-t" id="r4-cline"><span id="r4-ctx"></span><span id="r4-cca"></span></div><div class="r4-a r4-nav" id="r4-cbt"><div id="r4-cb1"><svg class="r4-fx" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" /> <path d="M20 2v4" /> <path d="M22 4h-4" /> <circle cx="4" cy="20" r="2" /></svg>Susun master prompt</div><div id="r4-cb2"><svg class="r4-fx" id="r4-csp" style="transform-origin:50% 50%" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>Menyusun…</div></div><div class="r4-t" id="r4-chint">Hasil: 6 bagian, siap disalin</div><div class="r4-a" id="r4-cout"><div class="r4-gh" id="r4-g0" style="left:5px;background:rgba(41,75,119,.13)"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#294b77" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5" /> <path d="M20 21a8 8 0 0 0-16 0" /></svg><b style="color:#294b77">PERAN</b></div><div class="r4-gh" id="r4-g1" style="left:148px;background:rgba(58,111,224,.13)"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a6fe0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /> <circle cx="12" cy="10" r="3" /></svg><b style="color:#3a6fe0">KONTEKS</b></div><div class="r4-gh" id="r4-g2" style="left:291px;background:rgba(45,164,78,.13)"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2da44e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8" /> <path d="M13 12h8" /> <path d="M13 19h8" /> <path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /></svg><b style="color:#2da44e">TUGAS</b></div><div class="r4-gh" id="r4-g3" style="left:434px;background:rgba(124,92,255,.13)"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="7" x="3" y="3" rx="1" /> <rect width="9" height="7" x="3" y="14" rx="1" /> <rect width="5" height="7" x="16" y="14" rx="1" /></svg><b style="color:#7c5cff">FORMAT</b></div><div class="r4-gh" id="r4-g4" style="left:577px;background:rgba(244,180,0,.13)"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /> <path d="M9 18h6" /> <path d="M10 22h4" /></svg><b style="color:#f4b400">CONTOH</b></div><div class="r4-gh" id="r4-g5" style="left:720px;background:rgba(229,72,77,.13)"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e5484d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /></svg><b style="color:#e5484d">BATASAN</b></div></div><div class="r4-sk" id="r4-k0" style="left:18px;top:10px;width:36px;height:36px;border-radius:11px"></div><div class="r4-sk" id="r4-k1" style="left:66px;top:19px;width:290px;height:18px;border-radius:9px"></div><div class="r4-sk" id="r4-k2" style="left:774px;top:15px;width:104px;height:26px;border-radius:13px"></div><div class="r4-sk" id="r4-k3" style="left:18px;top:68px;width:150px;height:16px;border-radius:8px"></div><div class="r4-sk" id="r4-k4" style="left:18px;top:92px;width:860px;height:64px;border-radius:16px"></div><div class="r4-sk" id="r4-k5" style="left:18px;top:170px;width:350px;height:60px;border-radius:18px"></div><div class="r4-sk" id="r4-k6" style="left:392px;top:191px;width:230px;height:16px;border-radius:8px"></div><div class="r4-sk" id="r4-k7" style="left:18px;top:244px;width:860px;height:50px;border-radius:14px"></div></div>
+    </div></div>
+    <div class="r4-a" id="r4-in"><div class="r4-a" id="r4-inplus"><svg class="r4-ic" style="left:12px;top:12px" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5d6f8f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /> <path d="M12 5v14" /></svg></div><div class="r4-t" id="r4-inph">Tulis pesan ke Claude…</div><div class="r4-a r4-nav" id="r4-insend"><svg class="r4-ic" style="left:11px;top:11px" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7" /> <path d="M12 19V5" /></svg></div><div class="r4-a" id="r4-inpc"><div class="r4-a r4-nav" id="r4-inpi"><svg class="r4-ic" style="left:8px;top:8px" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14h10" /> <path d="M16 4h2a2 2 0 0 1 2 2v1.344" /> <path d="m17 18 4-4-4-4" /> <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 1.793-1.113" /> <rect x="8" y="2" width="8" height="4" rx="1" /></svg></div><div class="r4-t" id="r4-inpt">Prompt pembuat alat</div><div class="r4-a" id="r4-inpu"></div><div class="r4-t" id="r4-inpn">· 217 kata</div><div class="r4-a" id="r4-inlw"><div class="r4-a" id="r4-inl"><div>Buatkan saya aplikasi web kecil bernama “Penyusun Master Prompt”</div><div>sebagai artifact interaktif: satu file, tanpa login, tanpa API,</div><div>berjalan langsung di chat.</div><div>Fungsi:</div><div>1. Ada satu kolom besar “Ide singkat kamu”.</div><div>2. Pilihan opsional: Platform, Gaya bahasa, Panjang hasil.</div><div>3. Tombol “Susun master prompt”.</div><div>4. Susun MASTER PROMPT lengkap dengan 6 bagian berlabel jelas:</div><div>&nbsp;&nbsp;&nbsp;&nbsp;PERAN · KONTEKS · TUGAS · FORMAT · CONTOH · BATASAN</div><div>5. Tampilkan hasilnya di kotak yang rapi + tombol “Salin”.</div><div>6. Tetap jalan tanpa koneksi ke AI mana pun.</div><div>Tampilan: bersih dan modern, latar terang, satu kolom,</div><div>tombol besar, nyaman dipakai di HP.</div></div></div></div></div>
+    <div class="r4-a" id="r4-shbg"></div><div class="r4-a" id="r4-sh">
+    <div class="r4-a r4-nav" id="r4-sic"><svg class="r4-ic" style="left:9px;top:9px" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /> <path d="m14 7 3 3" /> <path d="M5 6v4" /> <path d="M19 14v4" /> <path d="M10 2v2" /> <path d="M7 8H3" /> <path d="M21 16h-4" /> <path d="M11 3H9" /></svg></div><div class="r4-a" id="r4-stw"><div class="r4-t r4-g" id="r4-st1">Menyusun…</div><div class="r4-t r4-g" id="r4-st2">Master prompt</div></div><div class="r4-t" id="r4-ssub">Ide: rencana konten seminggu buat kedai kopi</div><div class="r4-a" id="r4-sok"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1f8a3e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg><b>6/6 lengkap</b></div><div class="r4-a" id="r4-scp"><div class="r4-nav" id="r4-scp1"><svg class="r4-fx" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>Salin</div><div id="r4-scp2"><svg class="r4-fx" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>Tersalin</div></div><div class="r4-a" id="r4-ssel"></div>
+    <div class="r4-row" id="r4-r0" style="top:82px"><div class="r4-strip" id="r4-s0" style="background:rgba(41,75,119,.08)"></div><div class="r4-blk" id="r4-b0" style="background:#294b77"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5" /> <path d="M20 21a8 8 0 0 0-16 0" /></svg><b>PERAN</b></div><div class="r4-tx" id="r4-x0">Kamu content strategist untuk kedai kopi lokal.</div></div>
+    <div class="r4-row" id="r4-r1" style="top:145px"><div class="r4-strip" id="r4-s1" style="background:rgba(58,111,224,.08)"></div><div class="r4-blk" id="r4-b1" style="background:#3a6fe0"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /> <circle cx="12" cy="10" r="3" /></svg><b>KONTEKS</b></div><div class="r4-tx" id="r4-x1">Kedai kopi kecil dekat kampus, target anak muda.</div></div>
+    <div class="r4-row" id="r4-r2" style="top:208px"><div class="r4-strip" id="r4-s2" style="background:rgba(45,164,78,.08)"></div><div class="r4-blk" id="r4-b2" style="background:#2da44e"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8" /> <path d="M13 12h8" /> <path d="M13 19h8" /> <path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /></svg><b>TUGAS</b></div><div class="r4-tx" id="r4-x2">Susun rencana konten Instagram untuk 7 hari.</div></div>
+    <div class="r4-row" id="r4-r3" style="top:271px"><div class="r4-strip" id="r4-s3" style="background:rgba(124,92,255,.08)"></div><div class="r4-blk" id="r4-b3" style="background:#7c5cff"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="7" x="3" y="3" rx="1" /> <rect width="9" height="7" x="3" y="14" rx="1" /> <rect width="5" height="7" x="16" y="14" rx="1" /></svg><b>FORMAT</b></div><div class="r4-tx" id="r4-x3">Tabel: hari · ide konten · caption · jam posting.</div></div>
+    <div class="r4-row" id="r4-r4" style="top:334px"><div class="r4-strip" id="r4-s4" style="background:rgba(244,180,0,.08)"></div><div class="r4-blk" id="r4-b4" style="background:#f4b400"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /> <path d="M9 18h6" /> <path d="M10 22h4" /></svg><b>CONTOH</b></div><div class="r4-tx" id="r4-x4">Senin: foto latte art + promo “kopi pagi”.</div></div>
+    <div class="r4-row" id="r4-r5" style="top:397px"><div class="r4-strip" id="r4-s5" style="background:rgba(229,72,77,.08)"></div><div class="r4-blk" id="r4-b5" style="background:#e5484d"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /></svg><b>BATASAN</b></div><div class="r4-tx" id="r4-x5">Bahasa santai, maks. 80 kata, tanpa klaim lebay.</div></div>
+    </div>
+    </div>
+    <svg class="r4-a" id="r4-fmk" viewBox="0 0 24 24" aria-label="Claude"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" fill="#D97757" fill-rule="nonzero"/></svg><div class="r4-t" id="r4-tlab">Claude</div>
+    <div class="r4-a" id="r4-clip"><div class="r4-a r4-nav" id="r4-clic"><svg class="r4-ic" style="left:12px;top:12px" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14h10" /> <path d="M16 4h2a2 2 0 0 1 2 2v1.344" /> <path d="m17 18 4-4-4-4" /> <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 1.793-1.113" /> <rect x="8" y="2" width="8" height="4" rx="1" /></svg></div><div class="r4-t" id="r4-clt">Prompt pembuat alat</div><div class="r4-t" id="r4-cls">Sudah disalin · siap ditempel</div></div>
+    <div class="r4-key" id="r4-key1" style="left:612px;width:100px">Ctrl</div><div class="r4-key" id="r4-key2" style="left:722px;width:64px">V</div>
+    <div class="r4-a" id="r4-rip"></div>
+    <div class="r4-a" id="r4-ptr"><svg width="44" height="44" viewBox="0 0 24 24" fill="#ffffff" stroke="#0a0d2c" stroke-width="1.6" stroke-linejoin="round"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"/></svg></div>
+  </div>
+  <script>
+    (function () {
+      // r4 — STEP 4 "Empat, ketik ide singkat. Misalnya, rencana konten seminggu buat kedai kopi." (28.00–33.20, D 5.2)
+      // START = r3 END (tool card ready in the chat, steps 1–3 done).
+      // BEATS (local): 0.30 "Empat," step 4 active, line → dot 4 · 0.52 pointer comes in · 0.92 "ketik": click into the idea field → navy
+      //   focus ring, caret blinks · 1.50 "ide singkat": a gold marker stroke under the label "Ide singkat kamu" · 2.12 "Misalnya,": a gold
+      //   CONTOH tag pops next to it · 2.94–4.88 the idea TYPES per letter (tl.set textContent), every word landing on its spoken word
+      //   (rencana 2.97 · konten 3.59 · seminggu 3.91 · buat 4.32 · kedai 4.49 · kopi 4.71) — inside the robot's holo-typing window
+      //   (28.85–32.97 global) · 4.46 pointer glides to the button · 4.92 CLICK "Susun master prompt" → "Menyusun…" + spinner · 4.94 step 4 ✓.
+      // END STATE (= r5 START): steps 1–4 done, navy line x 166–727. Tool card as r3 END but: field holds "rencana konten seminggu buat kedai
+      //   kopi" (27 px, no caret, no focus ring), marker under the label + CONTOH tag visible, button shows the spinner + "Menyusun…"
+      //   (spinner angle = (t − 32.92)·450°). Pointer visible, tip on the button's right end (418, 724).
+      const K = 4, R = window.ROUNDS[K - 1], ST = R.start, D = R.dur, VW = window.VO_WORDS;
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const L = (txt) => wt(txt, ST - 0.05) - ST;                    // LOCAL time of a word spoken in this scene
+      const $ = (id) => document.getElementById(id);
+      const E = (id) => $("r4-" + id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const I = (el, v) => { gsap.set(el, _sc(v)); tl.set(el, v, 0); };
+      // ================= KIT START STATE of scene K (= END STATE of scene K-1) — identical code in r1–r5 =================
+      const IDEA = "rencana konten seminggu buat kedai kopi";
+      const T_CLICK4 = 32.92, SPIN = 450;                            // r4 presses "Susun master prompt" at 32.92 s; spinner 450°/s (global clock)
+      const PTR_BTN = [418, 724];                                    // r4 clicks the button's right end (label stays readable); r5 starts here
+      const railClip = (i) => "inset(0px " + (748 - i * 187) + "px 0px 0px)";
+      for (let i = 0; i < 5; i++) {
+        const dn = i < K - 1;
+        I(E("d" + i), { scale: 1 });
+        I(E("d" + i + "u"), { opacity: dn ? 0 : 1 });
+        I(E("d" + i + "v"), { opacity: 0 });
+        I(E("d" + i + "n"), { opacity: dn ? 1 : 0 });
+        I(E("d" + i + "k"), { attr: { "stroke-dashoffset": dn ? 0 : 23 } });
+      }
+      I(E("rlf"), { clipPath: railClip(Math.max(0, K - 2)) });
+      const open = K >= 2;
+      I(E("win"), open ? { left: 70, top: 384, width: 940, height: 548, borderRadius: 30, opacity: 1, scale: 1, rotation: 0 }
+                       : { left: 465, top: 525, width: 150, height: 150, borderRadius: 40, opacity: 0, scale: 1, rotation: 0 });
+      I(E("hd"), { opacity: open ? 1 : 0 }); for (let i = 0; i < 3; i++) I(E("sg" + i), { opacity: open ? 1 : 0, y: 0 });
+      I(E("hmk"), { opacity: open ? 1 : 0, scale: 1 }); I(E("hnm"), { opacity: open ? 1 : 0, x: 0 }); I(E("hmenu"), { opacity: open ? 1 : 0 });
+      I(E("httl"), { opacity: K >= 3 ? 1 : 0, y: 0 });
+      I(E("ml"), { y: K >= 4 ? -172 : 0 });
+      I(E("emp"), { opacity: K === 2 ? 1 : 0, y: 0, scale: 1 });
+      I(E("emk"), { opacity: open ? 1 : 0 }); I(E("et1"), { opacity: open ? 1 : 0, y: 0 }); I(E("et2"), { opacity: open ? 1 : 0, y: 0 });
+      I(E("ub"), { opacity: K >= 3 ? 1 : 0, x: 0, y: 0, scale: 1 }); I(E("ubg"), { opacity: K >= 3 ? 1 : 0, scale: 1 });
+      I(E("cr"), { opacity: K >= 4 ? 1 : 0, y: 0 }); I(E("crmk"), { rotation: 0, scale: 1 });
+      I(E("crt1"), { opacity: 0 }); I(E("crbar"), { opacity: 0 }); I(E("crfill"), { scaleX: 1 }); I(E("crt2"), { opacity: K >= 4 ? 1 : 0, x: 0 });
+      I(E("card"), { opacity: K >= 4 ? 1 : 0, y: 0, scale: 1 });
+      ["cic", "ctt", "ctag", "cdv", "clb", "cin", "cline", "cbt", "chint", "cout"].forEach((id) => I(E(id), { opacity: K >= 4 ? 1 : 0, x: 0, y: 0, scale: 1 }));
+      for (let i = 0; i < 6; i++) I(E("g" + i), { opacity: K >= 4 ? 1 : 0, y: 0 });
+      for (let i = 0; i < 8; i++) I(E("k" + i), { opacity: 0 });
+      I(E("cph"), { opacity: K === 4 ? 1 : 0 });
+      I(E("cmk"), { scaleX: K >= 5 ? 1 : 0 }); I(E("cex"), { opacity: K >= 5 ? 1 : 0, scale: 1 });
+      I(E("cfo"), { opacity: 0 }); I(E("cca"), { opacity: 0 }); I(E("ctx"), { textContent: K >= 5 ? IDEA : "" });
+      I(E("cb1"), { opacity: K >= 5 ? 0 : 1 }); I(E("cb2"), { opacity: K >= 5 ? 1 : 0 });
+      I(E("csp"), { rotation: K >= 5 ? (ST - T_CLICK4) * SPIN : 0, transformOrigin: "50% 50%" });
+      I(E("in"), { top: 468, height: 60, borderRadius: 30, opacity: open ? 1 : 0, y: 0 });
+      I(E("inph"), { opacity: 1 }); I(E("inpc"), { opacity: 0 }); I(E("inl"), { y: 0 }); I(E("inpu"), { scaleX: 0 }); I(E("insend"), { scale: 1 });
+      I(E("shbg"), { opacity: 0 }); I(E("sh"), { opacity: 0 });
+      I(E("fmk"), { opacity: 0 }); I(E("tlab"), { opacity: 0 }); I(E("clip"), { opacity: 0 }); I(E("key1"), { opacity: 0 }); I(E("key2"), { opacity: 0 });
+      I(E("rip"), { opacity: 0, scale: 1, x: 0, y: 0 });
+      I(E("ptr"), K === 5 ? { opacity: 1, x: PTR_BTN[0] - 7, y: PTR_BTN[1] - 9, scale: 1 } : { opacity: 0, x: 0, y: 0, scale: 1 });
+      // ---------------- kit helpers
+      // rail: step k (1-based) turns ACTIVE on its number word; the navy part of the line runs to it
+      const railActive = (k, t) => {
+        const i = k - 1;
+        if (i > 0) ft(E("rlf"), { clipPath: railClip(i - 1) }, { clipPath: railClip(i), duration: 0.42, ease: "power3.inOut" }, t - 0.2);
+        ft(E("d" + i + "v"), { opacity: 0 }, { opacity: 1, duration: 0.16, ease: "power1.out" }, t - 0.02);
+        ft(E("d" + i + "u"), { opacity: 1 }, { opacity: 0, duration: 0.16, ease: "power1.out" }, t - 0.02);
+        ft(E("d" + i), { scale: 1 }, { scale: 1.2, duration: 0.13, ease: "power2.out", yoyo: true, repeat: 1 }, t - 0.02);
+      };
+      // rail: step k DONE (green + drawn check) — 0.24 s, always finished before the cut
+      const railDone = (k, t) => {
+        const i = k - 1;
+        ft(E("d" + i + "n"), { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "power1.out" }, t);
+        ft(E("d" + i + "v"), { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.out" }, t + 0.04);
+        ft(E("d" + i + "k"), { attr: { "stroke-dashoffset": 23 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.2, ease: "power2.out" }, t + 0.04);
+        ft(E("d" + i), { scale: 1 }, { scale: 1.16, duration: 0.09, ease: "power2.out", yoyo: true, repeat: 1 }, t);
+      };
+      // the user's pointer (lucide mouse-pointer-2; tip = hotspot) — moves are chained from its last position, clicks ripple
+      let PX = K === 5 ? PTR_BTN[0] : 0, PY = K === 5 ? PTR_BTN[1] : 0;
+      const ptrTo = (x, y, t, d = 0.42, ease = "power3.inOut") => { ft(E("ptr"), { x: PX - 7, y: PY - 9 }, { x: x - 7, y: y - 9, duration: d, ease }, t); PX = x; PY = y; };
+      const ptrAt = (x, y) => { I(E("ptr"), { x: x - 7, y: y - 9 }); PX = x; PY = y; };
+      const click = (t, rd = 0.36) => {
+        ft(E("ptr"), { scale: 1 }, { scale: 0.82, duration: 0.07, ease: "power2.out", yoyo: true, repeat: 1 }, t);
+        tl.set(E("rip"), { x: PX, y: PY }, t);
+        ft(E("rip"), { opacity: 0.95, scale: 0.25 }, { opacity: 0, scale: 1.5, duration: rd, ease: "power2.out" }, t);
+      };
+      // ================= SCENE BEATS =================
+      const tEm = L("Empat,"), tKet = L("ketik"), tIde = L("ide"), tMis = L("Misalnya,");
+      railActive(4, tEm);
+      // the pointer clicks into the idea field on "ketik"
+      ptrAt(1000, 790); ft(E("ptr"), { opacity: 0 }, { opacity: 1, duration: 0.16, ease: "power1.out" }, 0.5);
+      ptrTo(905, 646, 0.52, 0.4);
+      click(tKet - 0.03);
+      ft(E("cfo"), { opacity: 0, scale: 1.02 }, { opacity: 1, scale: 1, duration: 0.22, ease: "power2.out" }, tKet);
+      ft(E("cph"), { opacity: 1 }, { opacity: 0.55, duration: 0.2, ease: "power1.out" }, tKet);
+      ptrTo(958, 740, tKet + 0.14, 0.45, "power2.inOut");
+      // "ide singkat": marker stroke · "Misalnya,": the example tag in CONTOH-gold
+      ft(E("cmk"), { scaleX: 0 }, { scaleX: 1, duration: 0.34, ease: "power2.out" }, tIde - 0.04);
+      ft(E("cex"), { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.34, ease: "back.out(2.4)" }, tMis);
+      // TYPING — per letter; each spoken word is typed between its own onset and the next word's onset
+      const WD = ["rencana", "konten", "seminggu", "buat", "kedai", "kopi."], WS = WD.map((w) => L(w)), T_END = 32.88 - ST;
+      let typed = "";
+      WD.forEach((w, j) => {
+        const word = w.replace(/[.,]/g, "") + (j < WD.length - 1 ? " " : "");
+        const a = WS[j] - 0.03, b = j < WD.length - 1 ? WS[j + 1] - 0.05 : T_END;
+        for (let c = 0; c < word.length; c++) { typed += word[c]; tl.set(E("ctx"), { textContent: typed }, a + (c * (b - a)) / word.length); }
+      });
+      const tT0 = WS[0] - 0.03;
+      tl.set(E("cph"), { opacity: 0 }, tT0 - 0.01);
+      // caret: blinks from the click until the first letter, then stays solid while typing
+      tl.set(E("cca"), { opacity: 1 }, tKet);
+      for (let t = tKet + 0.45, on = false; t < tT0 - 0.1; t += 0.45, on = !on) tl.set(E("cca"), { opacity: on ? 1 : 0 }, t);
+      tl.set(E("cca"), { opacity: 1 }, tT0 - 0.04);
+      // click "Susun master prompt"
+      const tC = T_CLICK4 - ST;
+      ptrTo(PTR_BTN[0], PTR_BTN[1], tC - 0.46, 0.42);
+      click(tC, 0.25);
+      ft(E("cbt"), { scale: 1 }, { scale: 0.95, duration: 0.07, ease: "power2.out", yoyo: true, repeat: 1 }, tC);
+      ft(E("cb1"), { opacity: 1 }, { opacity: 0, duration: 0.1, ease: "none" }, tC + 0.03);
+      ft(E("cb2"), { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "none" }, tC + 0.06);
+      ft(E("csp"), { rotation: 0 }, { rotation: (D - 0.01 - tC) * SPIN, duration: D - 0.01 - tC, ease: "none" }, tC);
+      ft(E("cfo"), { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "power1.out" }, tC + 0.02);
+      tl.set(E("cca"), { opacity: 0 }, tC);
+      railDone(4, tC + 0.02);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["r4"] = tl;
+    })();
+  </script>
+</template>

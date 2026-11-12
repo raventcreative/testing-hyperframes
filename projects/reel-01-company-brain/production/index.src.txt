@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — Company Brain OS</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/robot_rig2.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --c: #01ccf7; --line: rgba(255,255,255,0.12); --card: rgba(255,255,255,0.05); --mute: rgba(255,255,255,0.62); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0b1a45; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: #fff; -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #0b1a45; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      b { font-weight: 700; } .cy { color: var(--c); }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #0b1a45; }
+      #grid { position: absolute; inset: 0; opacity: 0.45; background-image: radial-gradient(rgba(255,255,255,0.10) 1.2px, transparent 1.6px); background-size: 36px 36px; }
+      #glow { position: absolute; left: -300px; top: 260px; width: 1100px; height: 1100px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,0.14) 0%, rgba(1,204,247,0) 62%); }
+
+      /* app window */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(6,14,40,0.88);
+        border: 1.5px solid rgba(255,255,255,0.14); box-shadow: 0 40px 100px rgba(0,0,0,0.45); transform-origin: 50% 50%; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.03); }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.22); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; }
+      #vname { position: relative; width: 200px; height: 26px; font-size: 17px; color: var(--mute); }
+      #vname span { position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--c); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 20px; padding: 2px 10px; }
+      #tbar .tr { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 17px; color: var(--mute); }
+      #tbar .tr .ic { width: 18px; height: 18px; }
+      #clock { width: 52px; } #tbar .av { width: 34px; height: 34px; border-radius: 50%; background: rgba(1,204,247,0.18); color: var(--c); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+      #rail { position: absolute; left: 0; top: 60px; bottom: 0; width: 72px; border-right: 1px solid var(--line); }
+      .ri { position: absolute; left: 13px; width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); }
+      .ri .ic { width: 22px; height: 22px; }
+      #railAct { position: absolute; left: 13px; width: 46px; height: 46px; border-radius: 13px; background: rgba(1,204,247,0.16); border: 1.5px solid rgba(1,204,247,0.55); }
+      #area { position: absolute; left: 72px; top: 60px; width: 848px; height: 890px; overflow: hidden; }
+      .view { position: absolute; inset: 0; padding: 24px 28px; opacity: 0; }
+      .vh { display: flex; align-items: center; justify-content: space-between; }
+      .vh .t { font-size: 28px; font-weight: 700; } .vh .s { font-size: 15px; color: var(--mute); }
+      .pill { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 20px; background: rgba(1,204,247,0.12); border: 1.5px solid rgba(1,204,247,0.5); font-size: 16px; }
+      .pill i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); display: block; }
+      .pill b { color: var(--c); font-size: 20px; }
+      .card { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); }
+
+      /* agents grid */
+      #agrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 20px; }
+      .ag { height: 84px; border-radius: 14px; background: var(--card); border: 1.5px solid var(--line); padding: 10px 10px; position: relative; opacity: 0; }
+      .ag .ic { width: 22px; height: 22px; color: var(--c); } .ag span { display: block; font-size: 13px; margin-top: 6px; line-height: 1.2; }
+      .ag i { position: absolute; right: 9px; top: 11px; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+
+      /* brain map */
+      #search { position: absolute; left: 28px; right: 28px; top: 24px; height: 58px; border-radius: 16px; background: rgba(255,255,255,0.07); border: 1.5px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 0 18px; font-size: 19px; color: var(--mute); z-index: 3; }
+      #search .ic { width: 22px; height: 22px; color: var(--c); } #qtxt { color: #fff; } #qph { position: absolute; left: 52px; top: 16px; } #caret { width: 2px; height: 26px; background: var(--c); display: inline-block; }
+      #results { position: absolute; left: 28px; width: 560px; top: 90px; border-radius: 16px; background: rgba(12,24,62,0.98); border: 1.5px solid rgba(1,204,247,0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.45); padding: 8px; z-index: 3; opacity: 0; }
+      .res { display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 12px; border-radius: 12px; font-size: 16px; opacity: 0; }
+      .res .ic { width: 20px; height: 20px; color: var(--c); } .res em { margin-left: auto; font-style: normal; font-size: 12px; font-weight: 700; color: var(--c); background: rgba(1,204,247,0.12); padding: 3px 9px; border-radius: 10px; }
+      #bsvg { position: absolute; left: 0; top: 0; width: 848px; height: 890px; overflow: visible; }
+      .hub { position: absolute; width: 170px; margin-left: -85px; text-align: center; }
+      .hub .o { width: 120px; height: 120px; margin: 0 auto; border-radius: 50%; background: rgba(1,204,247,0.10); border: 2px solid rgba(1,204,247,0.55); display: flex; align-items: center; justify-content: center; }
+      .hub .o .ic { width: 44px; height: 44px; color: var(--c); }
+      .hub b { display: block; font-size: 20px; margin-top: 10px; } .hub em { display: block; font-style: normal; font-size: 16px; color: var(--mute); }
+      #core { position: absolute; left: 424px; top: 400px; width: 200px; margin-left: -100px; text-align: center; }
+      #core .o { width: 170px; height: 170px; margin: 0 auto; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,0.35) 0%, rgba(1,204,247,0.08) 70%); border: 2.5px solid var(--c); display: flex; align-items: center; justify-content: center; }
+      #core .o .ic { width: 70px; height: 70px; color: #fff; } #core b { display: block; font-size: 22px; margin-top: 12px; }
+
+      /* control room */
+      #kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px; }
+      .kpi { padding: 14px 16px; height: 104px; } .kpi em { display: block; font-style: normal; font-size: 13px; color: var(--mute); }
+      .kpi b { display: block; font-size: 26px; margin-top: 6px; } .kpi small { font-size: 12px; color: #22c55e; }
+      #lineCard { position: absolute; left: 28px; right: 28px; top: 228px; height: 300px; padding: 16px 18px; }
+      #lineSvg { position: absolute; left: 18px; top: 52px; width: 756px; height: 196px; overflow: visible; }
+      #dipMark { position: absolute; width: 74px; height: 74px; margin: -37px 0 0 -37px; border-radius: 50%; border: 3px solid var(--c); opacity: 0; }
+      #barCard { position: absolute; left: 28px; width: 384px; top: 544px; height: 318px; padding: 16px 18px; }
+      #bars { position: absolute; left: 18px; right: 18px; bottom: 18px; height: 220px; display: flex; align-items: flex-end; gap: 14px; }
+      #bars i { flex: 1; height: 100%; border-radius: 8px 8px 4px 4px; background: linear-gradient(180deg, #01ccf7, rgba(1,204,247,0.35)); transform-origin: 50% 100%; display: block; }
+      #logCard { position: absolute; left: 428px; right: 28px; top: 544px; height: 318px; padding: 16px 18px; }
+      .lg { display: flex; align-items: center; gap: 10px; height: 44px; font-size: 14.5px; border-bottom: 1px solid var(--line); opacity: 0; }
+      .lg .ic { width: 18px; height: 18px; color: var(--c); } .lg em { margin-left: auto; font-style: normal; font-size: 12px; color: var(--mute); }
+      #ask { position: absolute; top: 0; right: 0; bottom: 0; width: 410px; padding: 24px 22px; background: rgba(8,18,50,0.98); border-left: 1.5px solid rgba(1,204,247,0.35); box-shadow: -30px 0 60px rgba(0,0,0,0.4); transform: translateX(430px); }
+      .bub { border-radius: 16px; padding: 14px 16px; font-size: 16.5px; line-height: 1.45; margin-top: 16px; opacity: 0; }
+      .bub.me { background: rgba(1,204,247,0.18); margin-left: 60px; } .bub.ai { background: rgba(255,255,255,0.07); border: 1.5px solid var(--line); }
+      .bub .who { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--c); margin-bottom: 6px; } .bub .who .ic { width: 16px; height: 16px; }
+      .typing { display: inline-flex; gap: 5px; } .typing i { width: 8px; height: 8px; border-radius: 50%; background: var(--mute); display: block; }
+
+      /* schedule */
+      #night { position: absolute; left: 28px; right: 28px; top: 100px; height: 760px; }
+      .slot { position: absolute; left: 0; right: 0; height: 120px; display: flex; align-items: center; gap: 18px; }
+      .slot .tm { width: 86px; font-size: 18px; font-weight: 700; color: var(--mute); }
+      .slot .tk { flex: 1; height: 86px; border-radius: 16px; display: flex; align-items: center; gap: 14px; padding: 0 18px; font-size: 18px; }
+      .slot .tk .ic { width: 24px; height: 24px; color: var(--c); } .slot .tk em { display: block; font-style: normal; font-size: 13px; color: var(--mute); }
+      .slot .ck { margin-left: auto; width: 30px; height: 30px; color: #22c55e; opacity: 0; }
+      #nowLine { position: absolute; left: 0; right: 0; height: 3px; background: var(--c); box-shadow: 0 0 14px rgba(1,204,247,0.8); }
+      #nowLine b { position: absolute; left: 0; top: -14px; font-size: 12px; background: var(--c); color: #04122f; padding: 3px 8px; border-radius: 8px; }
+
+      /* chat + models */
+      #mdl { position: absolute; left: 28px; top: 24px; height: 52px; padding: 0 18px; border-radius: 14px; background: rgba(255,255,255,0.07); border: 1.5px solid var(--line); display: flex; align-items: center; gap: 10px; font-size: 18px; }
+      #mdl .ic { width: 20px; height: 20px; color: var(--c); } #mdlName { position: relative; width: 96px; height: 26px; } #mdlName span { position: absolute; left: 0; top: 0; font-weight: 700; opacity: 0; }
+      #mlist { position: absolute; left: 28px; top: 84px; width: 380px; border-radius: 16px; background: rgba(12,24,62,0.98); border: 1.5px solid rgba(1,204,247,0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.45); padding: 8px; z-index: 3; opacity: 0; }
+      .mo { display: flex; align-items: center; gap: 12px; height: 62px; padding: 0 14px; border-radius: 12px; font-size: 17px; }
+      .mo .dot { width: 34px; height: 34px; border-radius: 10px; background: rgba(1,204,247,0.14); display: flex; align-items: center; justify-content: center; color: var(--c); }
+      .mo .dot .ic { width: 18px; height: 18px; } .mo em { margin-left: auto; font-style: normal; font-size: 13px; color: var(--mute); }
+      #thread { position: absolute; left: 28px; right: 28px; top: 100px; }
+      /* debate */
+      #qcard { position: absolute; left: 28px; right: 28px; top: 90px; height: 110px; padding: 20px 24px; display: flex; align-items: center; gap: 18px; }
+      #qcard .ic { width: 40px; height: 40px; color: var(--c); } #qcard b { display: block; font-size: 25px; } #qcard em { display: block; font-style: normal; font-size: 15px; color: var(--mute); }
+      .mc { position: absolute; top: 236px; width: 386px; height: 270px; padding: 20px; opacity: 0; }
+      .mc .hd { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 700; } .mc .hd .dot { width: 36px; height: 36px; border-radius: 10px; background: rgba(1,204,247,0.14); display: flex; align-items: center; justify-content: center; color: var(--c); }
+      .mc .hd .dot .ic { width: 20px; height: 20px; } .mc .st { font-size: 14px; font-weight: 700; margin-left: auto; padding: 3px 10px; border-radius: 10px; }
+      .mc p { font-size: 16.5px; line-height: 1.5; margin-top: 14px; color: rgba(255,255,255,0.88); clip-path: inset(0 0 100% 0); }
+      #vs { position: absolute; left: 424px; top: 352px; width: 56px; height: 56px; margin-left: -28px; border-radius: 50%; background: #0b1a45; border: 2px solid var(--c); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: var(--c); opacity: 0; }
+      #dec { position: absolute; left: 28px; right: 28px; top: 540px; height: 200px; padding: 22px 24px; border: 2px solid var(--c); background: rgba(1,204,247,0.08); opacity: 0; }
+      #dec .hd { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; } #dec .hd .ic { width: 30px; height: 30px; color: var(--c); }
+      #dec p { font-size: 21px; line-height: 1.45; margin-top: 12px; } #dec p b { color: var(--c); }
+      #declink { position: absolute; left: 424px; top: 506px; width: 3px; height: 34px; margin-left: -1px; background: var(--c); transform-origin: 50% 0; transform: scaleY(0); }
+
+      /* phone */
+      #phone { position: absolute; left: 540px; top: 220px; width: 330px; height: 660px; border-radius: 50px; padding: 11px; background: #02060f; border: 2px solid rgba(255,255,255,0.28); box-shadow: 0 40px 90px rgba(0,0,0,0.6); opacity: 0; z-index: 25; }
+      #phone .scrn { position: relative; width: 100%; height: 100%; border-radius: 40px; overflow: hidden; background: linear-gradient(170deg, #12305f 0%, #0b1a45 60%, #060f2c 100%); }
+      #phone .island { position: absolute; left: 50%; top: 13px; width: 96px; height: 28px; margin-left: -48px; border-radius: 15px; background: #000; }
+      #phone .ph { position: absolute; left: 0; right: 0; top: 54px; text-align: center; font-size: 15px; font-weight: 700; } #phone .ph em { display: block; font-style: normal; font-size: 12px; color: var(--c); font-weight: 400; }
+      .pb { position: absolute; left: 14px; right: 14px; border-radius: 16px; padding: 12px 14px; font-size: 15px; line-height: 1.4; opacity: 0; }
+      .pb.me { background: var(--c); color: #04122f; left: 70px; } .pb.ai { background: rgba(255,255,255,0.12); right: 50px; }
+      #winDim { position: absolute; inset: 0; background: #030918; opacity: 0; pointer-events: none; z-index: 20; }
+
+      /* cursor */
+      #cursor { position: absolute; left: 0; top: 0; width: 42px; height: 42px; margin: -7px 0 0 -7px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; border: 3px solid var(--c); background: rgba(1,204,247,0.18); opacity: 0; z-index: 29; }
+
+      /* CTA + UI */
+      #cta { position: absolute; left: 110px; width: 860px; top: 560px; padding: 56px 48px; text-align: center; border-radius: 30px; background: rgba(6,15,42,0.96); border: 1.5px solid rgba(1,204,247,0.45); box-shadow: 0 30px 80px rgba(0,0,0,0.4); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: rgba(255,255,255,0.75); } #cta .name { font-size: 66px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; } #cta .sb b { color: var(--c); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--c); color: #04122f; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0;
+        font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.4px; text-shadow: 0 4px 18px rgba(0,0,0,0.5); }
+      .cap .in { display: block; }
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; color: var(--c); }
+      <!--ROBOT_CSS-->
+      #robot { filter: drop-shadow(0 18px 30px rgba(0,0,0,0.35)); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="43.2" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="43.2" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="grid"></div><div id="glow"></div>
+        <div id="win">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Brain OS</span>
+            <div id="vname"><span>/ Tim Agent</span><span>/ Company Brain</span><span>/ Control Room</span><span>/ Jadwal</span><span>/ Chat</span><span>/ Debat Model</span></div>
+            <span id="sim">SIMULASI</span>
+            <div class="tr"><span class="ic" data-i="clock"></span><span id="clock">21:40</span><span class="av">AI</span></div></div>
+          <div id="rail"><div id="railAct"></div></div>
+          <div id="area">
+            <div class="view" id="vAgents">
+              <div class="vh"><div><div class="lbl">TIM AGENT</div><div class="t">Satu perusahaan, puluhan agent</div></div><div class="pill"><i></i><b id="agN">0</b> agent aktif</div></div>
+              <div id="agrid"></div></div>
+            <div class="view" id="vBrain" style="padding:0">
+              <svg id="bsvg"></svg>
+              <div class="hub" id="hEmail" style="left:170px;top:150px"><div class="o"><span class="ic" data-i="mail"></span></div><b>Email</b><em><span id="nEmail">0</span> thread</em></div>
+              <div class="hub" id="hCall" style="left:678px;top:150px"><div class="o"><span class="ic" data-i="mic"></span></div><b>Rekaman call</b><em><span id="nCall">0</span> call</em></div>
+              <div class="hub" id="hDoc" style="left:424px;top:640px"><div class="o"><span class="ic" data-i="file-text"></span></div><b>Dokumen</b><em><span id="nDoc">0</span> file</em></div>
+              <div id="core"><div class="o"><span class="ic" data-i="brain"></span></div><b>Otak perusahaan</b></div>
+              <div id="search"><span class="ic" data-i="search"></span><span id="qph">Cari apa aja di otak perusahaan…</span><span id="qtxt"></span><i id="caret"></i></div>
+              <div id="results">
+                <div class="res"><span class="ic" data-i="file-text"></span>Laporan margin Oktober.pdf<em>Dokumen</em></div>
+                <div class="res"><span class="ic" data-i="mic"></span>Call review keuangan, 12 Okt<em>Call</em></div>
+                <div class="res"><span class="ic" data-i="mail"></span>Re: biaya iklan naik<em>Email</em></div></div></div>
+            <div class="view" id="vCtrl">
+              <div class="vh"><div><div class="lbl">CONTROL ROOM</div><div class="t">Semua dashboard, live</div></div><div class="pill" id="live"><i></i>LIVE</div></div>
+              <div id="kpis">
+                <div class="card kpi"><em>Pipeline</em><b id="k1">Rp 0</b><small>▲ 8%</small></div>
+                <div class="card kpi"><em>Cash masuk</em><b id="k2">Rp 0</b><small>▲ 3%</small></div>
+                <div class="card kpi"><em>Lead baru</em><b id="k3">0</b><small>▲ 12%</small></div>
+                <div class="card kpi"><em>Tiket CS</em><b id="k4">0</b><small style="color:var(--mute)">stabil</small></div></div>
+              <div class="card" id="lineCard"><div class="lbl">PENJUALAN 6 MINGGU</div><svg id="lineSvg"></svg><div id="dipMark"></div></div>
+              <div class="card" id="barCard"><div class="lbl">LEAD PER CHANNEL</div><div id="bars"><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="card" id="logCard"><div class="lbl">AKTIVITAS AGENT</div><div id="logs"></div></div>
+              <div id="ask"><div class="lbl">TANYA AGENT</div><div style="font-size:22px;font-weight:700;margin-top:4px">Agent Analis</div>
+                <div class="bub me" id="q1"><span id="qtyped"></span></div>
+                <div class="bub ai" id="a0"><div class="who"><span class="ic" data-i="bot"></span>Agent Analis</div><span class="typing"><i></i><i></i><i></i></span></div>
+                <div class="bub ai" id="a1"><div class="who"><span class="ic" data-i="bot"></span>Agent Analis</div>Turun <b class="cy">12%</b> di minggu ke-3. Dua iklan berhenti tayang dan stok produk terlaris habis. Saran: aktifkan ulang iklan hari ini.</div></div></div>
+            <div class="view" id="vSched">
+              <div class="vh"><div><div class="lbl">JADWAL AGENT</div><div class="t">Kerja waktu lu tidur</div></div><div class="pill"><span class="ic" data-i="moon" style="width:18px;height:18px;color:var(--c)"></span>Mode malam</div></div>
+              <div id="night"><div id="nowLine"><b id="nowTxt">22:00</b></div></div></div>
+            <div class="view" id="vChat">
+              <div id="mdl"><span class="ic" data-i="cpu"></span>Model:<div id="mdlName"><span>Model A</span><span>Model B</span><span>Model C</span><span>Model D</span></div><span class="ic" data-i="chevron-right" style="transform:rotate(90deg)"></span></div>
+              <div id="mlist">
+                <div class="mo"><span class="dot"><span class="ic" data-i="zap"></span></span>Model A<em>cepat</em></div>
+                <div class="mo"><span class="dot"><span class="ic" data-i="bar-chart-3"></span></span>Model B<em>analitis</em></div>
+                <div class="mo"><span class="dot"><span class="ic" data-i="pen-line"></span></span>Model C<em>kreatif</em></div>
+                <div class="mo"><span class="dot"><span class="ic" data-i="shield-check"></span></span>Model D<em>lokal &amp; privat</em></div></div>
+              <div id="thread">
+                <div class="bub me" style="opacity:1">Bikinin ide promo akhir bulan buat pelanggan lama.</div>
+                <div class="bub ai" id="mAns" style="opacity:1"><div class="who"><span class="ic" data-i="bot"></span><span id="mWho">Model A</span></div>Diskon loyalitas 15% + bonus ongkir, kirim lewat WhatsApp ke pelanggan yang belanja 3 bulan terakhir.</div></div></div>
+            <div class="view" id="vDebate">
+              <div class="vh"><div><div class="lbl">DEBAT MODEL</div><div class="t">Keputusan besar? Debat dulu.</div></div></div>
+              <div class="card" id="qcard"><span class="ic" data-i="scale"></span><div><b>Naikin harga paket 10%?</b><em>Data: margin, churn, harga kompetitor</em></div></div>
+              <div class="card mc" id="mcA" style="left:28px"><div class="hd"><span class="dot"><span class="ic" data-i="zap"></span></span>Model A<span class="st" style="background:rgba(34,197,94,0.18);color:#22c55e">SETUJU</span></div>
+                <p>Margin naik 6%. Churn pelanggan lama cuma naik tipis kalau ada masa transisi.</p></div>
+              <div class="card mc" id="mcB" style="left:434px"><div class="hd"><span class="dot"><span class="ic" data-i="bar-chart-3"></span></span>Model B<span class="st" style="background:rgba(255,255,255,0.12);color:#fff">TAHAN</span></div>
+                <p>Dua kompetitor lebih murah 8%. Risiko kehilangan lead baru di iklan.</p></div>
+              <div id="vs">VS</div><div id="declink"></div>
+              <div class="card" id="dec"><div class="hd"><span class="ic" data-i="gavel"></span>Model C · Keputusan</div><p>Naikin <b>5% dulu</b> buat pelanggan baru, pantau churn 2 minggu, baru lanjut.</p></div></div>
+          </div>
+          <div id="phone"><div class="scrn"><div class="island"></div><div class="ph">Agent Sales<em>online</em></div>
+            <div class="pb me" id="pb1" style="top:120px">Rekap penjualan kemarin dong</div>
+            <div class="pb ai" id="pb2" style="top:200px"><span class="typing"><i></i><i></i><i></i></span></div>
+            <div class="pb ai" id="pb3" style="top:200px">Rp 48,2 jt dari 37 order. Produk terlaris: paket bundling. Mau gue kirim laporan lengkapnya?</div></div></div>
+          <div id="winDim"></div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div>
+        <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><div id="caps"></div>
+          <!--ROBOT_HTML--></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="42.4" data-track-index="8" data-volume="1"></audio>
+      <!--SFX-->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const NS = "http://www.w3.org/2000/svg", C = "#01ccf7";
+        let seed = 47;
+        const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n) => `<span class="ic">${icon(n)}</span>`;
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#0b1a45" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+        const svg = (tag, a, p) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+        /* rail */
+        const RAIL = [["bot", "vAgents"], ["brain", "vBrain"], ["gauge", "vCtrl"], ["calendar-clock", "vSched"], ["message-circle", "vChat"], ["scale", "vDebate"]];
+        RAIL.forEach(([i, v], k) => { const d = document.createElement("div"); d.className = "ri"; d.id = "ri-" + v; d.style.top = 18 + k * 58 + "px"; d.innerHTML = ic(i); $("#rail").appendChild(d); });
+        $("#railAct").style.top = "18px";
+        /* agents grid */
+        const AG = [["image", "Carousel"], ["send", "Outreach"], ["file-text", "Proposal"], ["search", "Riset lead"], ["mail", "Email balas"], ["calendar-check", "Booking call"],
+          ["receipt", "Invoice"], ["wallet", "Tagihan"], ["headset", "CS chat"], ["ticket", "Tiket"], ["pen-line", "Caption"], ["megaphone", "Iklan"],
+          ["chart-pie", "Laporan"], ["database", "Data CRM"], ["user-search", "Profil klien"], ["clipboard-check", "Onboarding"], ["truck", "Pengiriman"], ["package", "Stok"],
+          ["calculator", "Pajak"], ["users", "Rekrut"], ["star", "Review"], ["bell", "Reminder"], ["list-checks", "Tugas tim"], ["layers", "SOP"],
+          ["handshake", "Partner"], ["phone", "Call notes"], ["target", "Skor lead"], ["trending-up", "Forecast"], ["presentation", "Pitch deck"], ["eye", "Kompetitor"],
+          ["message-square-text", "Komen IG"], ["reply", "Follow-up"], ["shield-check", "Kontrak"], ["building-2", "Vendor"], ["box", "Produk"], ["credit-card", "Pembayaran"],
+          ["zap", "Otomasi"], ["user-plus", "Lead baru"], ["file-check", "Approval"], ["tag", "Harga"], ["map", "Rute"], ["rocket", "Launch"],
+          ["heart-pulse", "Health score"], ["git-merge", "Integrasi"], ["activity", "Monitor"], ["mic", "Transkrip"], ["sparkles", "Ide konten"]];
+        $("#agrid").innerHTML = AG.map(([i, n]) => `<div class="ag">${ic(i)}<span>${n}</span><i></i></div>`).join("");
+        /* brain map */
+        const bsvg = $("#bsvg"), CX = 424, CY = 485;
+        const HUBS = [["#hEmail", 170, 210], ["#hCall", 678, 210], ["#hDoc", 424, 700]];
+        const flows = [], parts = [];
+        HUBS.forEach(([id, hx, hy]) => {
+          const len = Math.hypot(hx - CX, hy - CY);
+          flows.push(svg("line", { x1: hx, y1: hy, x2: CX, y2: CY, stroke: C, "stroke-width": 2.5, "stroke-dasharray": "8 10", opacity: 0.6 }, bsvg));
+          for (let i = 0; i < 26; i++) { const a = rnd() * 6.283, r = 85 + rnd() * 55; parts.push(svg("circle", { cx: hx + Math.cos(a) * r, cy: hy + Math.sin(a) * r * 0.8, r: 2 + rnd() * 2.2, fill: "#bff3ff", opacity: (0.35 + rnd() * 0.5).toFixed(2) }, bsvg)); }
+        });
+        const ring = [];
+        for (let i = 0; i < 28; i++) { const a = (i / 28) * 6.283, x = CX + Math.cos(a) * 395, y = CY + Math.sin(a) * 395;
+          if (y < 100 || y > 875) continue;
+          svg("line", { x1: x, y1: y, x2: CX, y2: CY, stroke: "rgba(255,255,255,0.07)", "stroke-width": 1 }, bsvg);
+          ring.push(svg("circle", { cx: x, cy: y, r: 7, fill: "#0b1a45", stroke: C, "stroke-width": 2 }, bsvg)); }
+        /* control room */
+        const ls = $("#lineSvg"), W = 756, Hh = 196, PTS = [0.48, 0.62, 0.34, 0.5, 0.66, 0.8];
+        for (let g = 0; g < 4; g++) svg("line", { x1: 0, y1: (g / 3) * Hh, x2: W, y2: (g / 3) * Hh, stroke: "rgba(255,255,255,0.08)" }, ls);
+        const px = (i) => 20 + i * ((W - 40) / 5), py = (v) => Hh - v * Hh;
+        let dPath = `M${px(0)},${py(PTS[0])}`; for (let i = 1; i < 6; i++) { const x0 = px(i - 1), x1 = px(i); dPath += ` C${(x0 + x1) / 2},${py(PTS[i - 1])} ${(x0 + x1) / 2},${py(PTS[i])} ${x1},${py(PTS[i])}`; }
+        const area = svg("path", { d: dPath + ` L${px(5)},${Hh} L${px(0)},${Hh} Z`, fill: "rgba(1,204,247,0.12)" }, ls);
+        const line = svg("path", { d: dPath, fill: "none", stroke: C, "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": "1400 1400", "stroke-dashoffset": 1400 }, ls);
+        PTS.forEach((v, i) => svg("circle", { cx: px(i), cy: py(v), r: 6, fill: "#0b1a45", stroke: C, "stroke-width": 3, class: "lp" }, ls));
+        ["W1", "W2", "W3", "W4", "W5", "W6"].forEach((t, i) => { const tx = svg("text", { x: px(i), y: Hh + 22, "text-anchor": "middle", "font-size": 13, fill: "rgba(255,255,255,0.5)", "font-family": "Poppins" }, ls); tx.textContent = t; });
+        { const d = $("#dipMark"); d.style.left = 18 + px(2) + "px"; d.style.top = 52 + py(PTS[2]) + "px"; }
+        $("#logs").innerHTML = [["send", "Outreach kirim 120 email", "21:42"], ["file-text", "Proposal klien baru dibuat", "21:44"], ["receipt", "3 invoice terkirim", "21:45"], ["message-square-text", "Balas 18 komen IG", "21:47"], ["chart-pie", "Laporan harian siap", "21:48"]]
+          .map(([i, t, m]) => `<div class="lg">${ic(i)}<span>${t}</span><em>${m}</em></div>`).join("");
+        /* schedule */
+        const SL = [["22:00", "user-search", "Rekap lead hari ini", "Agent Sales"], ["00:30", "reply", "Follow-up 120 email", "Agent Outreach"], ["02:00", "eye", "Riset harga kompetitor", "Agent Riset"],
+          ["04:00", "chart-pie", "Laporan harian", "Agent Analis"], ["06:00", "presentation", "Siapin briefing meeting", "Agent Asisten"]];
+        $("#night").insertAdjacentHTML("afterbegin", SL.map(([t, i, n, a], k) => `<div class="slot" style="top:${k * 142}px"><div class="tm">${t}</div><div class="tk card">${ic(i)}<div>${n}<em>${a}</em></div><span class="ck">${icon("circle-check")}</span></div></div>`).join(""));
+
+        /* captions (white, key words bold cyan) */
+        const KEY = new Set(["puluhan", "ai", "agent.", "simulasinya.", "otak", "perusahaan.", "email,", "call,", "ribuan", "dokumen.", "cari:", "margin", "sumbernya.", "control", "room.", "dashboard,", "live.",
+          "agentnya:", "turun?", "data", "terjadwal,", "tidur.", "chat", "hp.", "gila:", "model", "debat,", "keputusan.", "sistem", "link", "bio,", "aipreneur", "automation."]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase()) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().replace(/[^a-z0-9]/g, "").startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 43.2;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        let cur = { x: 720, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.55, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const press = (el, at) => ft(el, { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1 }], duration: 0.25 }, at);
+        const count = (el, to, at, dur, fmt) => { const o = { v: 0 }; ft(o, { v: 0 }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v).toLocaleString("id-ID")) }, at); };
+        const typeIn = (el, text, at, dur) => { const o = { v: 0 }; st(el, { textContent: "" }, 0); ft(o, { v: 0 }, { v: text.length, duration: dur, ease: "none", onUpdate: () => (el.textContent = text.slice(0, Math.round(o.v))) }, at); };
+        // views + rail + title
+        const VIEWS = ["vAgents", "vBrain", "vCtrl", "vSched", "vChat", "vDebate"], vnames = $$("#vname span");
+        let curV = -1;
+        const show = (k, at) => { if (curV >= 0) ft("#" + VIEWS[curV], { opacity: 1, x: 0 }, { opacity: 0, x: -30, duration: 0.3, ease: "power2.in" }, at);
+          ft("#" + VIEWS[k], { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, at + 0.15);
+          if (curV >= 0) ft(vnames[curV], { opacity: 1 }, { opacity: 0, duration: 0.2 }, at);
+          ft(vnames[k], { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, at + 0.1);
+          ft("#railAct", { y: (curV < 0 ? 0 : curV) * 58 }, { y: k * 58, duration: 0.35, ease: "power2.inOut" }, at);
+          ft("#ri-" + VIEWS[k], { color: "rgba(255,255,255,0.45)" }, { color: C, duration: 0.2 }, at);
+          if (curV >= 0) ft("#ri-" + VIEWS[curV], { color: C }, { color: "rgba(255,255,255,0.45)", duration: 0.2 }, at);
+          curV = k; };
+        const railTo = (k, at) => { moveEl($("#ri-" + VIEWS[k]), at - 0.55, 0.5); click(at - 0.05); press("#ri-" + VIEWS[k], at - 0.05); show(k, at); };
+        const clockTo = (a, b, at, dur) => { const o = { v: 0 }, el = $("#clock"); ft(o, { v: a }, { v: b, duration: dur, ease: "none", onUpdate: () => { const m = Math.round(o.v) % 1440; el.textContent = String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); } }, at); };
+        // ambient
+        ft("#glow", { x: 0, y: 0 }, { x: 520, y: 600, duration: D, ease: "sine.inOut" }, 0);
+
+        /* initial states */
+        st([".ag", "#results", ".res", "#ask .bub", ".lg", "#mlist"], { opacity: 0 }, 0);
+        st(["#hEmail", "#hCall", "#hDoc", "#core", "#search", ...flows, ...parts, ...ring], { opacity: 0 }, 0);
+        st("#bars i", { scaleY: 0 }, 0);
+        st($$("#mdlName span")[0], { opacity: 1 }, 0);
+
+        /* S0 hook: agents grid 0-5.6 */
+        ft(win, { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 0.0);
+        show(0, 0.05);
+        ft(".ag", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.8)", stagger: { each: 0.045, from: "random" } }, 0.25);
+        count($("#agN"), 47, wt("puluhan AI", "puluhan") - 0.2, 1.0);
+        ft(".ag i", { opacity: 1 }, { opacity: 0.25, duration: 0.5, repeat: 9, yoyo: true, stagger: { each: 0.05, from: "random" } }, 2.6);
+        const tSim = ph("Ini simulasinya").start;
+        ft("#sim", { scale: 1, backgroundColor: "rgba(1,204,247,0)" }, { keyframes: [{ scale: 1.25, backgroundColor: "rgba(1,204,247,0.18)" }, { scale: 1, backgroundColor: "rgba(1,204,247,0)" }], duration: 0.6 }, wt("Ini simulasinya", "simulasinya"));
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tSim);
+        moveTo(470, 470, tSim, 0.6);
+
+        /* S1 brain 5.7-11.4 */
+        const tBrain = ph("Semua agent baca").start;
+        railTo(1, tBrain);
+        ft("#core", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, tBrain + 0.3);
+        ft(ring, { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.02 }, tBrain + 0.4);
+        ft("#search", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.4 }, tBrain + 0.5);
+        const tOtak = wt("dari satu otak", "otak");
+        ft("#core .o", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 26px rgba(1,204,247,0)", duration: 0.8 }, tOtak);
+        [["#hEmail", 0, wt("Email,", "email"), "#nEmail", 12480], ["#hCall", 1, wt("Email,", "call"), "#nCall", 1236], ["#hDoc", 2, wt("sampai ribuan", "ribuan"), "#nDoc", 5800]].forEach(([id, k, t, nid, n]) => {
+          ft(id, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.8)" }, t - 0.1);
+          ft(flows[k], { opacity: 0 }, { opacity: 0.7, duration: 0.3 }, t);
+          ft(parts.slice(k * 26, k * 26 + 26), { opacity: 0 }, { opacity: 0.8, duration: 0.25, stagger: 0.015 }, t);
+          count($(nid), n, t, 1.0);
+        });
+        ft(flows, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -180 }, duration: 6, ease: "none" }, tBrain + 1);
+        /* S2 search 11.7-14.9 */
+        const tCari = ph("Coba cari").start;
+        moveEl($("#search"), tCari - 0.45, 0.45, -200, 0); click(tCari); press("#search", tCari);
+        ft("#search", { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: C, duration: 0.2 }, tCari);
+        ft("#qph", { opacity: 1 }, { opacity: 0, duration: 0.1 }, tCari + 0.1);
+        typeIn($("#qtxt"), "margin bulan ini", ph("margin bulan").start - 0.05, ph("margin bulan").end - ph("margin bulan").start + 0.1);
+        ft("#caret", { opacity: 1 }, { opacity: 0, duration: 0.25, repeat: 7, yoyo: true }, tCari);
+        const tKet = ph("Langsung ketemu").start;
+        ft("#results", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.3 }, tKet - 0.2);
+        ft(".res", { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.12 }, tKet - 0.1);
+        ft($$(".res")[0], { backgroundColor: "rgba(1,204,247,0)" }, { backgroundColor: "rgba(1,204,247,0.14)", duration: 0.2 }, tKet + 0.5);
+        moveEl($$(".res")[0], tKet + 0.1, 0.5, -120, 0);
+
+        /* S3 control room 15.2-17.6 */
+        const tCtrl = ph("Pindah ke control").start;
+        railTo(2, tCtrl);
+        st(".kpi", { opacity: 0 }, 0);
+        ft(".kpi", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.07 }, tCtrl + 0.35);
+        count($("#k1"), 2.4, tCtrl + 0.4, 1.2, (v) => "Rp " + v.toFixed(1).replace(".", ",") + " M");
+        count($("#k2"), 610, tCtrl + 0.45, 1.2, (v) => "Rp " + Math.round(v) + " jt");
+        count($("#k3"), 1284, tCtrl + 0.5, 1.2); count($("#k4"), 37, tCtrl + 0.55, 1.0);
+        ft(line, { attr: { "stroke-dashoffset": 1400 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.3, ease: "power2.out" }, tCtrl + 0.5);
+        st([area, ...$$(".lp")], { opacity: 0 }, 0);
+        ft(area, { opacity: 0 }, { opacity: 1, duration: 0.6 }, tCtrl + 0.9);
+        ft(".lp", { opacity: 0 }, { opacity: 1, duration: 0.2, stagger: 0.15 }, tCtrl + 0.6);
+        ft("#bars i", { scaleY: 0 }, { scaleY: (i) => [0.55, 0.85, 0.4, 0.7, 0.95][i], duration: 0.6, ease: "power3.out", stagger: 0.08 }, tCtrl + 0.6);
+        ft(".lg", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.25 }, tCtrl + 0.7);
+        const tLive = wt("Semua dashboard", "live");
+        ft("#live i", { opacity: 1 }, { opacity: 0.2, duration: 0.4, repeat: 11, yoyo: true }, tLive - 0.3);
+        ft("#live", { scale: 1 }, { keyframes: [{ scale: 1.12 }, { scale: 1 }], duration: 0.4 }, tLive);
+        clockTo(21 * 60 + 40, 21 * 60 + 48, tCtrl, 6);
+
+        /* S4 ask agent 18-21.7 */
+        const tAsk = ph("Tanya agentnya").start;
+        moveTo(760, 120, tAsk - 0.4, 0.4); click(tAsk);
+        ft("#ask", { x: 430 }, { x: 0, duration: 0.5, ease: "power3.out" }, tAsk + 0.05);
+        ft("#q1", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.25 }, ph("kenapa penjualan").start - 0.15);
+        typeIn($("#qtyped"), "Kenapa penjualan turun?", ph("kenapa penjualan").start - 0.1, ph("kenapa penjualan").end - ph("kenapa penjualan").start + 0.1);
+        ft("#a0", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.25 }, ph("kenapa penjualan").end + 0.05);
+        ft("#a0 .typing i", { y: 0 }, { y: -5, duration: 0.25, repeat: 3, yoyo: true, stagger: 0.1 }, ph("kenapa penjualan").end + 0.1);
+        const tJawab = ph("Dia jawab").start;
+        ft("#a0", { opacity: 1 }, { opacity: 0, duration: 0.15 }, tJawab - 0.05);
+        st("#a1", { y: 0 }, 0);
+        ft("#a1", { opacity: 0, y: -96 }, { opacity: 1, y: -96, duration: 0.35 }, tJawab);
+        ft("#dipMark", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, wt("Dia jawab", "data"));
+        ft("#dipMark", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 18px rgba(1,204,247,0)", duration: 0.7, repeat: 1 }, wt("Dia jawab", "data") + 0.3);
+        moveTo(330, 330, wt("Dia jawab", "data") - 0.3, 0.5);
+
+        /* S5 schedule 22-25.4 */
+        const tSch = ph("Agent yang ini").start;
+        ft("#ask", { x: 0 }, { x: 430, duration: 0.35, ease: "power2.in" }, tSch - 0.3);
+        railTo(3, tSch);
+        st(".slot", { opacity: 0 }, 0);
+        ft(".slot", { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.08 }, tSch + 0.3);
+        const tNight0 = tSch + 0.6, tNight1 = ph("waktu lu tidur").end + 0.3;
+        ft("#nowLine", { y: 60 }, { y: 4 * 142 + 60, duration: tNight1 - tNight0, ease: "none" }, tNight0);
+        const nowTxt = $("#nowTxt"); { const o = { v: 0 }; ft(o, { v: 22 * 60 }, { v: 30 * 60 + 30, duration: tNight1 - tNight0, ease: "none", onUpdate: () => { const m = Math.round(o.v) % 1440; nowTxt.textContent = String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); } }, tNight0); }
+        clockTo(22 * 60, 30 * 60 + 30, tNight0, tNight1 - tNight0);
+        $$(".slot .ck").forEach((c, k) => ft(c, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, tNight0 + (k + 0.6) * (tNight1 - tNight0) / 4.6));
+        ft("#vSched .pill", { scale: 1 }, { keyframes: [{ scale: 1.1 }, { scale: 1 }], duration: 0.4 }, wt("waktu lu tidur", "tidur"));
+
+        /* S6 phone 25.6-28 */
+        const tHP = ph("Lagi di luar").start;
+        ft("#winDim", { opacity: 0 }, { opacity: 0.55, duration: 0.3 }, tHP - 0.1);
+        ft("#phone", { opacity: 0, y: 600 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, tHP - 0.15);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tHP);
+        ft("#pb1", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3 }, wt("Chat aja", "chat"));
+        ft("#pb2", { opacity: 0 }, { opacity: 1, duration: 0.2 }, wt("Chat aja", "chat") + 0.5);
+        ft("#pb2", { opacity: 1 }, { opacity: 0, duration: 0.15 }, wt("Chat aja", "hp") + 0.05);
+        ft("#pb3", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3 }, wt("Chat aja", "hp") + 0.1);
+        const tGila = ph("Dan bagian").start;
+        ft("#phone", { opacity: 1, y: 0 }, { opacity: 0, y: 600, duration: 0.5, ease: "power3.in" }, tGila + 0.3);
+        ft("#winDim", { opacity: 0.55 }, { opacity: 0, duration: 0.3 }, tGila + 0.55);
+
+        /* S7 model picker 28-32.6 */
+        show(4, tGila + 0.55);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tGila + 0.8);
+        const tPilih = wt("lu bisa pilih", "pilih");
+        moveEl($("#mdl"), tPilih - 0.6, 0.5); click(tPilih - 0.1); press("#mdl", tPilih - 0.1);
+        ft("#mlist", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.25 }, tPilih);
+        const mos = $$(".mo"), mnames = $$("#mdlName span"), mWho = $("#mWho");
+        const picks = [1, 2, 3], tP0 = wt("lu bisa pilih", "model");
+        picks.forEach((m, i) => { const t = tP0 + i * 0.55;
+          moveEl(mos[m], t - 0.3, 0.3, -60, 0);
+          ft(mos[m], { backgroundColor: "rgba(1,204,247,0)" }, { keyframes: [{ backgroundColor: "rgba(1,204,247,0.18)", duration: 0.15 }, { duration: 0.25 }, { backgroundColor: "rgba(1,204,247,0)", duration: 0.15 }] }, t);
+          ft(mnames[m - 1], { opacity: 1 }, { opacity: 0, duration: 0.12 }, t); ft(mnames[m], { opacity: 0 }, { opacity: 1, duration: 0.15 }, t + 0.05);
+          ft("#mAns", { opacity: 1 }, { keyframes: [{ opacity: 0.3, duration: 0.12 }, { opacity: 1, duration: 0.2 }] }, t);
+          ft({ v: 0 }, { v: 0 }, { v: 1, duration: 0.01, onUpdate() { mWho.textContent = this.progress() > 0.5 ? "Model " + "ABCD"[m] : "Model " + "ABCD"[m - 1]; } }, t + 0.08);
+        });
+        ft("#mlist", { opacity: 1 }, { opacity: 0, duration: 0.2 }, ph("di chat yang").end + 0.1);
+
+        /* S8 debate 32.9-36.4 */
+        const tDeb = ph("Kalau keputusannya").start;
+        railTo(5, tDeb);
+        st(["#qcard"], { opacity: 0 }, 0);
+        ft("#qcard", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35 }, tDeb + 0.25);
+        const tD2 = ph("suruh mereka").start;
+        ft("#mcA", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35 }, tD2 - 0.1);
+        ft("#mcB", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.35 }, tD2 + 0.05);
+        ft("#vs", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, wt("suruh mereka", "debat"));
+        ft(".mc p", { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 0.9, ease: "none" }, tD2 + 0.2);
+        const tDec = wt("satu yang", "keputusan") - 0.3;
+        ft("#declink", { scaleY: 0 }, { scaleY: 1, duration: 0.25 }, tDec - 0.2);
+        ft("#dec", { opacity: 0, y: 20, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, tDec);
+        ft("#dec", { boxShadow: "0 0 0 0 rgba(1,204,247,0.5)" }, { boxShadow: "0 0 0 16px rgba(1,204,247,0)", duration: 0.7 }, tDec + 0.3);
+        moveEl($("#dec"), tDec - 0.1, 0.5, 120, 20);
+
+        /* S9 CTA */
+        const tCta = ph("Mau sistem").start;
+        ft("#winDim", { opacity: 0 }, { opacity: 0.7, duration: 0.4 }, tCta - 0.2);
+        ft(win, { scale: 1 }, { scale: 0.94, duration: 0.6, ease: "power2.inOut" }, tCta - 0.2);
+        ft("#cta", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
+        const tF = wt("Klik link", "link");
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 22px rgba(1,204,247,0)", duration: 0.7 }, tF + 0.05);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.38 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /*ROBOT_SETUP*/
+        // presenter gestures
+        const G = [];
+        [tSim - 0.1, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
+        [tBrain, tCari, tCtrl, tAsk, tSch, tPilih - 0.1, tDeb, tF].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
+        [wt("puluhan AI", "puluhan"), tOtak, wt("sampai ribuan", "ribuan"), tLive, wt("waktu lu tidur", "tidur"), wt("Chat aja", "hp"), wt("Dan bagian", "gila"), wt("suruh mereka", "debat"), tDec + 0.3]
+          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
+        G.sort((x, y) => x.t - y.t);
+        let busy = -1, beatN = 0;
+        G.forEach((g) => {
+          if (g.t < busy + 0.05) return;
+          busy = g.t + g.d;
+          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
+            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
+            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
+          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
+            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
+        });
+
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-OFFSET, FPS, TAIL = 9 / 30, 30, 1.3
+OFFSET, FPS, TAIL = 9 / 30, 30, 1.6
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 # alignment fixes (raw seconds), checked against the energy envelope + faster-whisper small (none needed so far)
@@ -15,13 +15,12 @@ TFIX = {}
 for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {}
+MERGE = {2: (3, "Claude Code,", "klodkod"), 11: (13, "FreeLLMAPI,", "frielelemeipiai"), 28: (29, "Claude Code", "klodkod"),
+         43: (44, "Claude Code,", "klodkod")}
 FIX = {}
-FIXI = {106: "JASA,"}   # the CTA keyword is spoken from lowercase "jasa," (so the voice never spells it) and shown in caps
-PRON = {"dm": "diem", "website": "websait", "ai": "eiai", "github": "githab", "postiz": "postis", "autoclip": "otoklip",
-        "chatwoot": "cetwut", "whatsapp": "wotsep", "openhands": "openhens", "remotion": "rimosyen", "umkm": "uemkaem",
-        "inbox": "inboks", "podcaster": "podkaster", "seller": "seler", "live": "laif", "template": "templet", "reel": "ril",
-        "chat": "cet", "jasa": "jasa"}
+FIXI = {}
+PRON = {"dm": "diem", "api": "eipiai", "llm": "elelem", "github": "githab", "google": "gugel", "groq": "grok", "laptopmu": "leptopmu",
+        "setup": "setap", "server": "serfer", "servernya": "serfernya", "key": "ki", "claude": "klod", "model": "model"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -58,7 +57,7 @@ while i < len(raw):
         j, txt, spk = MERGE[i]; e = raw[j]["e"]; i2 = j + 1
     else:
         txt = FIXI.get(i, FIX.get(w["w"], w["w"])); spk = spoken(txt); e = w["e"]; i2 = i + 1
-    s = snap(w["s"], e)
+    s = w["s"] if i in MERGE else snap(w["s"], e)   # merged two-word names keep the alignment start (the stop consonant between them is not a pause)
     words.append({"w": txt, "s": round(s + OFFSET, 3), "s0": round(w["s"] + OFFSET, 3), "e": round(e + OFFSET, 3), "sp": spk})
     i = i2
 # a snapped start compresses the rest of its phrase: re-spread the phrase between the new onset and the phrase end
@@ -74,21 +73,23 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Resep", [4, 8], ["beli", "warung,"], ["gratis,"]),
-    ("s02", "Lima", [3, 6, 9], ["GitHub", "gratis,", "bayar"], ["ngerjain."]),
-    ("s03", "Satu,", [2, 4, 7], ["jadwalin", "sekaligus,", "sosmed."], ["Postiz:"]),
-    ("s04", "Dua,", [2, 4, 7, 9], ["panjang", "bersubtitle,", "live."], ["AutoClip:"]),
-    ("s05", "Tiga,", [2, 4, 6, 9], ["inbox,", "admin"], ["Chatwoot:"]),
-    ("s06", "Empat,", [2, 6, 8], ["ngoding", "website", "UMKM."], ["OpenHands:"]),
-    ("s07", "Lima,", [2, 5, 8, 10], ["kode,", "template,", "produk."], ["Remotion:"]),
-    ("s08", "Tapi", [2, 5, 8, 10], ["gratis", "bebas:", "tiga."], ["lisensi"]),
-    ("s09", "Cek", [2, 5], ["lisensinya,", "satu", "teman."], []),
-    ("s10", "Komen", [2], ["DM."], ["JASA,"]),
+    ("s01", "Pengen", [3, 6], ["Claude Code,"], ["langganan?"]),
+    ("s02", "Ada", [3, 4, 7], ["tengahnya:", "gratis"], ["FreeLLMAPI,"]),
+    ("s03", "Dia", [4], ["laptopmu,", "Claude."], []),
+    ("s04", "Perintah", [3, 7, 10], ["dioper", "gratis"], []),
+    ("s05", "Jadi", [3, 5], ["aplikasinya", "otaknya"], ["bukan"]),
+    ("s06", "Jatah", [3, 5], ["habis,", "pindah"], []),
+    ("s07", "Pasang", [2, 5, 8], ["servernya,", "key", "setup."], []),
+    ("s08", "Jujur", [2, 6, 8], ["beda", "berubah."], []),
+    ("s09", "Kodemu", [3, 6, 9, 12], ["dikirim", "aturannya"], ["sensitif."]),
+    ("s10", "Pakai", [4], ["belajar", "klien."], []),
+    ("s11", "Komen", [2], ["DM."], ["LLM,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",
          "punya", "tetap", "bisa", "langsung", "semua", "masuk", "tiap", "pakai", "kalian", "mau", "isi", "sama", "mana", "buat",
          "terus", "dia", "soalnya", "sekarang", "cukup", "gini", "udah", "apa", "pun", "jadi", "dulu", "atau", "namanya", "isinya",
-         "menurutku", "seberapa", "ini", "cara", "tapi", "juga", "atau", "sesuai", "kalau", "lebih", "belum", "tentu", "kan"}
+         "menurutku", "seberapa", "ini", "cara", "tapi", "juga", "atau", "sesuai", "kalau", "lebih", "belum", "tentu", "kan",
+         "dia", "ya", "ikut", "lalu", "dan", "dari"}
 starts = []; k = 0
 for sid, first, *_ in SC:
     while words[k]["w"] != first: k += 1

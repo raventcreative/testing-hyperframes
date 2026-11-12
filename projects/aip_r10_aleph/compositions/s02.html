@@ -31,7 +31,9 @@
       // ================================================================ DOM
       let h = `<div class="s02-a" id="s02-glow"></div>` + R10.player(P) + `<div class="s02-a" id="s02-ring"></div>` + R10.prompt(P, LINES);
       $("s02-cam").innerHTML = h;
-      $(P + "-stg").innerHTML = R10.copy("s02a", R10.park("s02a", "day")) + R10.copy("s02b", R10.park("s02b", "night"));
+      $(P + "-stg").innerHTML = R10.copy("s02a", R10.park("s02a", "day")) + R10.copy("s02b", R10.park("s02b", "night")) + `<div class="r10-cp" id="s02n-w" style="left:940px">${R10.park("s02n", "day")}</div>`;
+      // the NEXT scene's first frame (same framing as its own footage at t = 0): the carousel slides it into place at the cut
+      R10.footage({ tl, I, ft: () => null }, ["s02n"], 0, D, { pan: 26, push: 0.045, s0: 1.16, ox: 32, oy: 52 });
       $(P + "-vp").insertAdjacentHTML("beforeend", R10.sub("s02-sA", "A", "sun", "Siang") + R10.sub("s02-sB", "B", "moon", "Malam"));
       I($("s02-cam"), { x: 0, y: 0 }); I($("s02-glow"), { opacity: 0.6 });
       const fr = $(P + "-fr"), vp = $(P + "-vp"), stg = $(P + "-stg"), dv = $(P + "-dv"), lbA = $(P + "-lbA"), lbB = $(P + "-lbB"), il = $(P + "-il"), stk = $(P + "-stk");
@@ -44,8 +46,7 @@
       R10.footage(api, ["s02a", "s02b"], 0, D, { pan: 30, push: 0.04, s0: 1.12, ox: 72, oy: 60, lampOn: tMal + 0.42 });
       I($("s02b-w"), { clipPath: R10.clip(940) });
       // whip in
-      I(stg, { x: 760 }); ft(stg, { x: 760 }, { x: 0, duration: 0.28, ease: "power3.out" }, 0);
-      I(stk, { opacity: 0.7 }); ft(stk, { opacity: 0.7 }, { opacity: 0, duration: 0.24, ease: "power2.out" }, 0);
+      I(stg, { x: 0 }); I(stk, { opacity: 0 });   // the previous scene slid this clip into place (carousel)
       ft(lbA, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 0.12);
       ft(sA, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, 0.22);
 
@@ -71,10 +72,9 @@
       ft(pp, { scale: 1 }, { scale: 1.04, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tKet - 0.06);
       ft(sd, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tMal + 0.2);
 
-      // ================================================================ TRANSITION → s03 (whip inside the player)
-      const tOut = D - 0.22;
-      ft(stg, { x: 0 }, { x: -760, duration: 0.22, ease: "power2.in" }, tOut);
-      ft(stk, { opacity: 0 }, { opacity: 0.7, duration: 0.22, ease: "power2.in" }, tOut);
+      // ================================================================ TRANSITION (carousel) → s03 (whip inside the player)
+      const tOut = D - 0.334;
+      ft(stg, { x: 0 }, { x: -940, duration: 0.3, ease: "power3.inOut" }, tOut);
       [dv, lbA, lbB, sA, sB, ring].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tOut));
       R10.untype(api, P, LINES, 0, tOut + 0.02, 0.1);
       tl.set($(P + "-pph"), { display: "inline" }, tOut + 0.14);

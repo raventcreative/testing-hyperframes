@@ -133,8 +133,8 @@ def bell(dur=0.9):
 
 st = lambda i: S[i]["start"]
 L = lambda i: S[i]["start"] + S[i]["dur"]
-def whip_out(t): put(t, whoosh(0.24, 1600, 4200, 1.4, 0.75), W * 0.55)
-def whip_in(t): put(t, whoosh(0.3, 3600, 900, 1.3, 0.25), W * 0.45); put(t + 0.2, pop(500, 760, 0.07), 0.06)
+def whip_out(t): put(t - 0.11, whoosh(0.36, 900, 3400, 1.3, 0.55), W * 0.6)     # carousel slide (last 0.33 s of a clip)
+def whip_in(t): put(t + 0.01, pop(520, 760, 0.06), 0.05)                       # the next clip lands
 def send(t): put(t, tick(0.035, 1900), 0.24); put(t + 0.02, pop(520, 320, 0.08), 0.11)
 def sweep(t, d=0.42): put(t, whoosh(d + 0.1, 500, 3200, 1.6, 0.55), W * 0.55); put(t + 0.05, rise(d, 600, 1800), 0.018)
 def typed(t0, t1, g=0.1): typing(t0, t1, g, 22)

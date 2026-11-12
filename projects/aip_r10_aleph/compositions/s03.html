@@ -30,7 +30,9 @@
       // ================================================================ DOM
       let h = `<div class="s03-a" id="s03-glow"></div>` + R10.player(P) + R10.prompt(P, LINES);
       $("s03-cam").innerHTML = h;
-      $(P + "-stg").innerHTML = R10.copy("s03a", R10.park("s03a", "day")) + R10.copy("s03b", R10.park("s03b", "sakura")) + R10.copy("s03c", R10.park("s03c", "snow"));
+      $(P + "-stg").innerHTML = R10.copy("s03a", R10.park("s03a", "day")) + R10.copy("s03b", R10.park("s03b", "sakura")) + R10.copy("s03c", R10.park("s03c", "snow")) + `<div class="r10-cp" id="s03n-w" style="left:940px">${R10.street("s03n", false)}</div>`;
+      // the NEXT scene's first frame (same framing as its own footage at t = 0): the carousel slides it into place at the cut
+      R10.footage({ tl, I, ft: () => null }, ["s03n"], 0, D, { pan: 26, push: 0.03, s0: 1.0, ox: 50, oy: 62, y: -30, walk: -190 });
       $(P + "-vp").insertAdjacentHTML("beforeend", R10.sub("s03-sA", "A", "sun", "Musim panas") + R10.sub("s03-sB1", "B", "flower", "Musim sakura") + R10.sub("s03-sB2", "B", "snow", "Musim salju"));
       I($("s03-cam"), { x: 0, y: 0 }); I($("s03-glow"), { opacity: 0.6 });
       const fr = $(P + "-fr"), vp = $(P + "-vp"), stg = $(P + "-stg"), dv = $(P + "-dv"), lbA = $(P + "-lbA"), lbB = $(P + "-lbB"), il = $(P + "-il"), stk = $(P + "-stk");
@@ -43,8 +45,7 @@
       // ================================================================ the clip: framed on the tree + person (three identical copies)
       R10.footage(api, ["s03a", "s03b", "s03c"], 0, D, { pan: 26, push: 0.045, s0: 1.16, ox: 32, oy: 52 });
       I($("s03b-w"), { clipPath: R10.clip(940) }); I($("s03c-w"), { clipPath: R10.clip(940) });
-      I(stg, { x: 760 }); ft(stg, { x: 760 }, { x: 0, duration: 0.28, ease: "power3.out" }, 0);
-      I(stk, { opacity: 0.7 }); ft(stk, { opacity: 0.7 }, { opacity: 0, duration: 0.24, ease: "power2.out" }, 0);
+      I(stg, { x: 0 }); I(stk, { opacity: 0 });   // the previous scene slid this clip into place (carousel)
       ft(lbA, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 0.12);
       // "musim?": "Musim panas" · "panas": it bumps
       ft(sA, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.24, ease: "power3.out" }, tMus - 0.1);
@@ -76,10 +77,9 @@
       ft(lbB, { scale: 1 }, { scale: 1.08, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tSal + 0.04);
       tl.set(dv, { opacity: 0 }, tSal + 0.26);
 
-      // ================================================================ TRANSITION → s04 (whip inside the player)
-      const tOut = D - 0.22;
-      ft(stg, { x: 0 }, { x: -760, duration: 0.22, ease: "power2.in" }, tOut);
-      ft(stk, { opacity: 0 }, { opacity: 0.7, duration: 0.22, ease: "power2.in" }, tOut);
+      // ================================================================ TRANSITION (carousel) → s04 (whip inside the player)
+      const tOut = D - 0.334;
+      ft(stg, { x: 0 }, { x: -940, duration: 0.3, ease: "power3.inOut" }, tOut);
       [lbB, sB2].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tOut));
       R10.untype(api, P, LINES, 1, tOut + 0.02, 0.1);
       tl.set($(P + "-pph"), { display: "inline" }, tOut + 0.14);

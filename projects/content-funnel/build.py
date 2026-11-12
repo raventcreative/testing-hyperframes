@@ -33,7 +33,6 @@ CSS = (D / "style.css").read_text()
 (D / "carousel.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Content Funnel</title><style>{CSS}</style></head><body>
 <section class="slide">
  <div class="tp"><img class="logo" src="assets/logo_navy.png" alt="AIpreneur"><span class="save">Save this</span></div>
- <div class="hero"><img src="assets/phone.png" alt=""></div>
  <div class="label">For AI and business creators</div>
  <h1>The Instagram<br><span>content funnel.</span></h1>
  <div class="body"><div class="fw">{svg}{labels}</div><div class="cards">{cards}</div></div>

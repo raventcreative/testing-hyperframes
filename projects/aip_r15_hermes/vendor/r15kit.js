@@ -114,6 +114,9 @@
   }
 
   // ------------------------------------------------------------------ timeline boilerplate
+  // scene length from the generated timing (vendor/vo_words.js), so a re-timed VO never needs hand edits
+  K.dur = (id) => { const s = (window.VO_SCENES || []).find((x) => x.id === id); if (!s) throw new Error("no scene " + id); return s.dur; };
+  K.total = () => { const v = window.VO_SCENES || []; const L = v[v.length - 1]; return L ? Math.round((L.start + L.dur) * 1e4) / 1e4 : 0; };
   K.scene = (id, D) => {
     const tl = gsap.timeline({ paused: true });
     const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
@@ -138,7 +141,7 @@
     const esc = (c) => c.replace(/&/g, "&amp;").replace(/</g, "&lt;");
     const type = (el, text, t0, cps, cls = "") => {
       el.innerHTML = text.split(" ").map((w) => `<span style="white-space:nowrap">${Array.from(w).map((c) => `<span class="${cls}">${esc(c)}</span>`).join("")}</span>`).join(" ");
-      const sp = el.querySelectorAll("span > span"); let k = 0, ci = 0;
+      const sp = el.querySelectorAll(":scope > span > span"); let k = 0, ci = 0;
       Array.from(text).forEach((c) => { if (c === " ") { ci++; return; } const s = sp[k++]; I(s, { opacity: 0 }); tl.set(s, { opacity: 1 }, t0 + ci / cps); ci++; });
       return t0 + text.length / cps;
     };

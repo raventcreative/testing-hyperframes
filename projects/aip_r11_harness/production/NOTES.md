@@ -57,4 +57,29 @@ Checklist aman (dari SAFETY.md di repo): 1) jalankan di VM / container / kompute
 perintah sebelum klik izinkan. Ingat: masih developer preview dan belum diaudit keamanan.
 
 ## QA (real runtime, hyperframes 0.8.186)
-(filled in below after the snapshot pass)
+- `npx --yes hyperframes@0.8.186 lint .` → 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the R9 kit).
+- `npx --yes hyperframes@0.8.186 validate .` → 0 errors; warnings = "multiple Three.js instances" (robot + mascot bundles, as in the
+  kit), SwiftShader ReadPixels notices, contrast notes on hidden text only (off-screen digits of the header number roll, the step
+  numbers hidden under their check badges in s06). The two real low-contrast items it found (white "TAGIH" on coral 2.79:1, cyan "→" on
+  white 2.77:1) were fixed (#d63b30 ≈ 4.6:1, #0889b3 ≈ 4.0:1 on large bold text).
+- Snapshots (`snapshot . --at … --no-end --timeout 60000`): one full pass of 65 frames — first frame, every scene's beats, both sides of
+  every cut, the end — plus one targeted fix pass (4.9, 33.3, 43.3, 43.45, 43.6 s) after the s06 → s07 hand-over fix. Contact sheets:
+  `production/qa/runtime_full_1..3.jpg` (full frames), `production/qa/runtime_hero_1..3.jpg` (hero zone + captions, larger),
+  `production/qa/runtime_fix_*.jpg`. The PNGs were deleted after the sheets were made (disk budget).
+- Every scene script checked for exceptions (a throwing scene stays static in snapshots); every `wt()` word lookup verified against
+  timing.json; all 37 caption chunks measured: one line each, x 124–956, y 960–1030 (nothing covers them; hero content ends ≤ 932).
+- Initial states pinned at 0 through the kit's `I()` (gsap.set + tl.set at 0); positions clamped ≥ 0.
+
+## Known issues / notes for the lead
+- Frame 0 shows the code editor + phone but no hosts yet: the robot flies in over 0.75 s and the mascot pops up over 0.5 s (kit
+  behaviour, same as R9). The cover PNG is the intended thumbnail.
+- Short header-only beats at the very start of s03–s06 (≈0.1–0.3 s while the header number rolls) — intentional breathing room, as in R9.
+- s01 "Reel ini aku bikin bareng agen AI yang nulis kode" is true for AI PRENEUR reels (HTML/GSAP written by an AI coding agent with
+  HyperFrames); the reel is NOT made with DeepSeek Harness and the VO does not say so.
+- "★ 279 rb+ bintang" is the count on the official repo page on 12 Nov 2026 (279.5k); it can only go up, so "279 rb+" stays true.
+- DeepSeek pricing was read from the official pricing page's search snippet (the host api-docs.deepseek.com is not reachable from
+  this session); the reel shows no prices, only "bayar per pemakaian / per token, potong saldo".
+- The Web UI, terminal and browser cards are our own mocks of the documented flow (labelled CONTOH where they show example data); the
+  file names (menu.json, katalog.html), `npm run dev`, "toko-kue/" and the masked key are illustrative.
+- `tools/render_chunks.py` (kit helper) now cuts at the s04 and s06 starts; `hyperframes snapshot/validate` wrote `.hyperframes/`
+  (video state) into the project folder; harmless.

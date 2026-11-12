@@ -100,7 +100,7 @@
   .k-hd-lc.info { background: #eaf0fe; color: #2a55c4; box-shadow: inset 0 0 0 1.5px rgba(42,85,196,.2); }
   .k-hd-lc.warn { background: #fff3dc; color: #94540a; box-shadow: inset 0 0 0 1.5px rgba(148,84,10,.25); }
   .k-hd-pg { right: 28px; top: 84px; font: 700 30px/38px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
-  .k-hd-pg span { font: 400 20px/38px Poppins, sans-serif; color: #8a97b0; margin-left: 2px; }
+  .k-hd-pg span { font: 400 20px/38px Poppins, sans-serif; color: #5d6f8f; margin-left: 2px; }
   .k-tkw { position: absolute; left: 110px; top: 800px; width: 860px; height: 124px; filter: drop-shadow(0 20px 22px rgba(10,13,44,.2)); transform-origin: 50% 50%; }
   .k-tk { position: absolute; left: 0; top: 0; width: 860px; height: 124px; border-radius: 24px; overflow: hidden; font-family: Poppins, sans-serif; background: linear-gradient(180deg, #ffffff, #f6f8fd);
     -webkit-mask: radial-gradient(circle at 170px 0, transparent 15px, #000 16px) top / 100% 51% no-repeat, radial-gradient(circle at 170px 100%, transparent 15px, #000 16px) bottom / 100% 51% no-repeat;

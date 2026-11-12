@@ -175,11 +175,11 @@ for k, t in enumerate((TM['pes'], TM['pot'], TM['cair'])):
     put(t - 0.06, pop(650 + 80 * k, 1300 + 100 * k, 0.08), 0.12); put(t - 0.02, ding(2093 * (1.0595 ** (2 * k)), 0.5), 0.06)
     put(t + 0.02, shimmer(0.5), 0.03)
 # S4 · fly downstream; every token jumps into its own note (flick + paper tap), notes pop back, scribbles, the "untung?" card, ribet rattle
-wh(TM['pisah'] - 0.05, 1.15, 400, 1700, 0.9, 0.55, 0.55)
-for i in range(3): put(TM['pisah'] - 0.08 + i * 0.06, paper(0.2), 0.08)
+wh(TM['pisah'] - 0.53, 1.05, 400, 1700, 0.9, 0.55, 0.55)
+for i in range(3): put(TM['pisah'] + 0.08 + i * 0.06, paper(0.2), 0.08)
 for r in range(3):
     for k in range(3):
-        tf = TM['pisah'] - 0.02 + r * 0.1 + (2 - k) * 0.12
+        tf = TM['pisah'] + 0.1 + r * 0.1 + (2 - k) * 0.12
         put(tf, whoosh(0.35, 900, 2600, 1.4, 0.4), W * 0.16); put(tf + 0.48, paper(0.12), 0.07); put(tf + 0.48, tick(0.016, 3800), 0.04)
 for i in range(3): put(TM['untung'] - 0.38 + i * 0.12, marker(0.7), MK * 0.6)
 put(TM['untung'] - 0.36, knock(110, 0.3), 0.14); put(TM['untung'] - 0.3, pop(380, 760, 0.12), 0.1)

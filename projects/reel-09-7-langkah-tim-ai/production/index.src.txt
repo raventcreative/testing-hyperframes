@@ -189,7 +189,7 @@
       #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--c); color: #04122f; font-size: 32px; font-weight: 700; }
       #fbtn .ic { width: 32px; height: 32px; }
       #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
-      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; z-index: 2; } /* captions stay above the robot while it travels */
       .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0;
         font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; text-shadow: 0 4px 18px rgba(0,0,0,0.5); }
       .cap .in { display: block; } .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; color: var(--c); }
@@ -198,7 +198,7 @@
       #win { opacity: 0; transform-origin: 50% 50%; }
       #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
       .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoD { opacity: 0; }
-      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(760px); }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(760px); z-index: 1; }
       #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 30px rgba(0,0,0,0.42)); }
       .stk { position: absolute; display: flex; align-items: center; gap: 9px; padding: 9px 18px; border-radius: 15px; background: #fff; font-size: 22px; font-weight: 700; color: #0a0d2c;
         box-shadow: 0 12px 28px rgba(0,0,0,0.35); white-space: nowrap; opacity: 0; }
@@ -723,6 +723,17 @@
         });
 
         FX.runGestures();
+
+        /* NO CUT TEXT: any text run sliced by the window edge (camera zoom / pan, tilt) fades out instead of showing half words */
+        { const runs = new Map(), walk = (el) => { for (const n of el.childNodes) { if (n.nodeType === 3 && n.textContent.trim()) { if (!runs.has(el)) runs.set(el, []); runs.get(el).push(n); } else if (n.nodeType === 1) walk(n); } };
+          walk($("#wcam")); const R = document.createRange(), list = Array.from(runs.entries());
+          const cut = () => { const wr = win.getBoundingClientRect(); if (!wr.width) return;
+            list.forEach(([el, nodes]) => { let L = 1e9, T = 1e9, Rr = -1e9, B = -1e9;
+              nodes.forEach((n) => { R.selectNodeContents(n); const b = R.getBoundingClientRect(); if (b.width && b.height) { L = Math.min(L, b.left); T = Math.min(T, b.top); Rr = Math.max(Rr, b.right); B = Math.max(B, b.bottom); } });
+              if (Rr < L) return;
+              const o = Math.max(wr.left - L, Rr - wr.right, wr.top - T, B - wr.bottom, 0), v = o <= 0.5 ? 1 : Math.max(0, 1 - o / 6);
+              const f = v >= 1 ? "" : "opacity(" + v.toFixed(2) + ")"; if (el.style.filter !== f) el.style.filter = f; }); };
+          window.addEventListener("hf-seek", cut); tl.eventCallback("onUpdate", cut); }
         tl.set({}, {}, D - 0.01);
         window.__timelines["main"] = tl;
       })();

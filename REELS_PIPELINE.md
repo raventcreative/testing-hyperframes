@@ -65,6 +65,15 @@ module robot3d.js, `<canvas id="robo3d" width="820" height="700">` at left -92, 
 **Never zoom/crop the robot (no "close" pose) — the client wants it big but whole, also at the CTA.** All motion eased
 (sine/power3, no back-overshoot pops). Render ≈ 20–25 min per 35 s reel (WebGL per frame).
 
+## Client rules added 2026-11-13 (batch 2 re-send)
+- **No cut text in the demo, ever.** Every text element visible in a frame must be fully readable. When the screen-recording
+  camera (#wcam) zooms, any panel the frame edge would slice fades out for that shot (or the shot frames whole panels).
+  Check pop-outs, chips, receipts for overflow/clipped words. Snapshot every camera shot before rendering.
+- **Robot must travel:** besides bottom home/center/right, use peekL/peekR/low and 2-3 "up"/"upL"/"upR" moments where it
+  stands full-body in the middle of the screen (lay those scenes out around it). CTA: robot whole, never zoomed.
+- **Transitions differ per reel** (sets from: stripes, blocks, sweep, iris, shutter, doors, slats, dots).
+- Run heavy local tools under `flock /tmp/claude-0/cpu.lock`, renders under `flock /tmp/claude-0/render.lock`.
+
 ## Alternating themes (one per video, see reels_log.json → `next_theme`)
 | theme | background | text | accents | logo |
 |---|---|---|---|---|

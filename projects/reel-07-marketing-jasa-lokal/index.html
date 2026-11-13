@@ -460,8 +460,9 @@
         const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
           if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
         let cc = cState(460, 475, 1);
-        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); };
-        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; };
+        const SHOTS = [];
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); SHOTS.push({ t: at, d: 0, c: cc }); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; SHOTS.push({ t: at, d: dur || 0.8, c: nx }); };
         const whip = (x, y, s, at) => camTo(x, y, s, at, 0.42, "expo.inOut");
         const tabSet = (sel, at) => { const el = $(sel); st("#tabPill", { x: el.offsetLeft - 4, width: el.offsetWidth }, at); TABS.forEach((s) => st(s, { color: s === sel ? "#ffffff" : "rgba(255,255,255,0.62)" }, at)); };
 
@@ -501,7 +502,7 @@
         FX.dip("right", tW1 - 0.05, 0.3);
         FX.iris(tW1, "dark", (m) => { st("#hook", { display: "none" }, m); st(win, { opacity: 1 }, m); }, { x: 180, y: 410, ex: 760, ey: 1000 });
         const sim = posIn($("#sim"));
-        camSet(sim.x + 20, sim.y + 230, 1.8, 0);
+        camSet(288, 0, 1.6, 0); // macro: title bar + header + chips, all whole
         st([".mod", "#dirCard", "#day"], { opacity: 1 }, tW1 + 0.5);
         ft("#dirSt .a .ic", { rotation: 0 }, { rotation: 1080, duration: 8, ease: "none" }, tW1 + 0.5);
         ft("#sim", { scale: 1 }, { keyframes: [{ scale: 1.25, backgroundColor: "rgba(1,204,247,0.18)" }, { scale: 1, backgroundColor: "rgba(1,204,247,0)" }], duration: 0.6 }, wt("Gue tunjukin", "simulasinya"));
@@ -509,17 +510,17 @@
         ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tW1 + 0.7);
         moveEl($("#sim"), tW1 + 0.75, 0.5, 6, 4); click(wt("Gue tunjukin", "simulasinya")); FX.point(wt("Gue tunjukin", "simulasinya") - 0.3);
         const tAC = wt("Ini mesin", "AC"), tKm = wt("radius 5", "5");
-        whip(300, 190, 1.75, ph("Ini mesin").start - 0.25);
+        camTo(270, 0, 1.7, ph("Ini mesin").start - 0.25, 0.9, "sine.inOut");
         moveTo(420, 230, ph("Ini mesin").start, 0.6);
         pop("#chAC", tAC - 0.1); pop("#chKm", tKm - 0.1);
         FX.face("wide", tAC - 0.05, 0.7); FX.beat(tKm - 0.08);
         // director decides modules
         const tDir = ph("Direkturnya").start, tMod = wt("modul mana", "modul");
-        camTo(460, 300, 1.3, tDir - 0.35, 0.7);
+        camTo(460, 300, 1.04, tDir - 0.35, 0.7);
         FX.go("center", tDir - 0.4);
         glowOn($("#dirCard"), tDir, "#01ccf7");
         moveEl($("#dirCard .av"), tDir - 0.2, 0.6, 30, 20);
-        camTo(460, 640, 1.42, tMod - 0.25, 0.6);
+        camTo(460, 560, 1.04, tMod - 0.25, 0.6);
         for (let k = 0; k < 7; k++) { const t = tMod + k * 0.17, m = $("#md" + k);
           ft($(".tg", m), { backgroundColor: "rgba(255,255,255,0.14)" }, { backgroundColor: "#01ccf7", duration: 0.2 }, t);
           ft($(".tg i", m), { x: 0 }, { x: 24, duration: 0.2, ease: "power2.out" }, t);
@@ -527,13 +528,12 @@
           ft($(".bx", m), { backgroundColor: "rgba(255,255,255,0.07)" }, { backgroundColor: "rgba(1,204,247,0.22)", duration: 0.25 }, t); }
         moveTo(800, 700, tMod - 0.1, 1.1);
         FX.point(tMod - 0.3);
-        camTo(460, 420, 1.12, tMod + 1.15, 0.6);
         ft("#dirSt .a", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tMod + 1.25);
         ft("#dirSt .b", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tMod + 1.3);
         FX.face("happy", tMod + 1.3, 0.7);
         // not the calendar, the city
         const tCal = wt("Bukan dari", "kalender"), tKej = wt("tapi dari", "kejadian");
-        whip(460, 309, 1.8, tCal - 0.62);
+        camTo(460, 300, 1.5, tCal - 0.62, 0.5); // calendar line only (its text is centred)
         moveEl($("#cal"), tCal - 0.5, 0.4, 120, 0);
         ft("#calStrike", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.out" }, tCal);
         FX.face("flat", tCal - 0.05, 0.9); FX.shiver(tCal + 0.05, 0.35);
@@ -541,12 +541,12 @@
         ["#sg1", "#sg2", "#sg3"].forEach((s, i) => pop(s, tKej - 0.2 + i * 0.22));
         FX.face("excited", tKej, 0.9);
         ft(".sig", { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: "#01ccf7", duration: 0.3, stagger: 0.12 }, ph("di kota").start);
-        camTo(460, 330, 1.35, ph("di kota").start - 0.1, 0.8);
+        camTo(460, 300, 1.04, tKej - 0.5, 0.6); // all three city signals whole
 
         /* ===== slats -> SCENE 3 · radar: weather, search spike, competitor rating, budget (3D split) ===== */
         const tRad = wt("Pertama, radar", "radar"), tW2 = ph("Pertama, radar").start - 0.15;
         ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tW2 - 0.1);
-        FX.dip("peekL", tW2 - 0.05, 0.3);
+        FX.go("up", tW2 - 0.08, 0.6); FX.face("excited", tW2 + 0.1, 0.6); FX.dip("peekL", tW2 + 0.55, 0.15);
         FX.slats(tW2, "dark", (m) => { st("#vDir", { opacity: 0 }, m); st("#vRad", { opacity: 1, x: 0 }, m); tabSet("#tabRad", m); camSet(460, 475, 1, m); });
         st("#cursor", { x: 760, y: 900 }, tW2 + 0.6); cur = { x: 760, y: 900 };
         ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tRad + 0.6);
@@ -591,19 +591,21 @@
         ft(flow, { attr: { "stroke-dashoffset": 260 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.7, ease: "power2.out" }, tPindah);
         ft("#budNote", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.35 }, wt("ke area itu", "duluan") - 0.2);
         ft("#budChip", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, wt("ke area itu", "duluan") - 0.3);
-        camTo(460, 330, 1.25, ph("Kamis bakal").start - 0.2, 0.7);
+        camTo(730, 300, 1.6, ph("Kamis bakal").start - 0.2, 0.7); // right column cards whole
         FX.beat(tHujan - 0.08);
-        whip(730, 330, 1.7, tCari - 0.15);
+        whip(730, 360, 1.6, tCari - 0.15);
         FX.face("wide", wt("Pencarian service", "naik") - 0.05, 0.8);
         FX.go("home", wt("Pencarian service", "naik") + 0.4);
         whip(284, 780, 1.6, tArea - 0.25);
-        whip(560, 460, 1.45, tRate - 0.15);
-        FX.face("excited", tTurun - 0.05, 0.9); FX.hop(tTurun);
+        whip(640, 470, 1.3, tRate - 0.15);
+        FX.go("peekR", tRate - 0.55, 0.8); FX.face("excited", tTurun - 0.05, 0.9);
         // budget: window swings back in 3D, the budget card floats in front (pop-out)
         const tSw = tBud - 0.2;
+        FX.go("right", tSw - 0.3, 0.8);
         camTo(460, 475, 1, tSw - 0.1, 0.5);
         ft(win, { rotationY: 0, scale: 1, x: 0, transformOrigin: "0% 50%" }, { rotationY: 20, scale: 0.9, x: -12, duration: 0.6, ease: "power3.inOut" }, tSw);
-        ft("#winDim", { opacity: 0 }, { opacity: 0.35, duration: 0.5 }, tSw);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.55, duration: 0.5 }, tSw);
+        ft("#radCards", { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.35 }, tSw); // nothing half-hidden behind the pop-out card
         ft("#pBud", { opacity: 0, x: 170, rotationY: -28 }, { opacity: 1, x: 0, rotationY: 0, duration: 0.6, ease: "power3.out" }, tSw + 0.1);
         ft("#pBud .pb", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.06 }, tSw + 0.35);
         $("#pbL").innerHTML = [["Utara", 20, 15], ["Barat", 20, 15], ["Pusat", 20, 15], ["Timur", 20, 10], ["Selatan", 20, 45]]
@@ -686,9 +688,9 @@
           ft(s, { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: "#ff8a8a", duration: 0.3 }, tKomp + i * 0.15); });
         moveEl($("#rtA"), tKomp - 0.3, 0.5, 60, 60);
         camTo(216, 470, 1.6, wt("Jam 9", "chat") - 0.55, 0.6);
-        FX.face("wide", tBocor - 0.05, 0.8); FX.beat(tBocor - 0.08);
-        whip(663, 224, 1.6, tBal - 0.32);
-        FX.face("excited", tBal + 0.1, 0.9); FX.hop(tBal + 0.2);
+        FX.go("lowR", tJam - 0.35, 0.7); FX.face("wide", tBocor - 0.05, 0.8);
+        whip(660, 300, 1.5, tBal - 0.32);
+        FX.go("right", tBal - 0.4, 0.6); FX.face("excited", tBal + 0.1, 0.9); FX.hop(tBal + 0.3);
         // booking pops out of the phone as a big card
         const tJad = wt("jadwal teknisi", "jadwal");
         ft(win, { scale: 1, transformOrigin: "50% 50%" }, { scale: 0.95, duration: 0.45, ease: "power2.inOut" }, tJad - 0.05);
@@ -702,7 +704,7 @@
         const tKin = tBook + 0.02;
         ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tKin - 0.2);
         ft("#pBook", { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.9, y: -30, duration: 0.3, ease: "power2.in" }, tKin - 0.1);
-        ft(win, { scale: 0.95, opacity: 1 }, { scale: 0.84, opacity: 0.14, duration: 0.45, ease: "power2.inOut" }, tKin);
+        ft(win, { scale: 0.95, opacity: 1 }, { scale: 0.84, opacity: 0, duration: 0.45, ease: "power2.inOut" }, tKin);
         ft("#winDim", { opacity: 0.7 }, { opacity: 0, duration: 0.3 }, tKin);
         FX.go("center", tKin - 0.1);
         ft("#k1", { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, tKin + 0.1);
@@ -738,6 +740,32 @@
 
         { const _D = 52.6; tl.fromTo({ v: 0 }, { v: 0 }, { v: 1, duration: _D, ease: "none", immediateRender: false, onUpdate: () => { const T = tl.time();
           TXT.forEach(([el, arr]) => { let x; if (typeof arr === "function") x = arr(T); else { x = arr[0][1]; arr.forEach(([t, v]) => { if (T >= t) x = v; }); } if (el.textContent !== x) el.textContent = x; }); } }, 0); }
+
+        /* ===== no-cut-text guard: text leaves sliced by the camera frame fade out during that shot, back in when whole ===== */
+        { const wc = $("#wcam"), wr = wc.getBoundingClientRect(), k = wr.width / VW;
+          const leaves = $$("#wcam *").filter((e) => e.tagName.toLowerCase() === "text" || Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim()));
+          const UNIT = ".rt, #sched, .rc, .mod, #tabs, .sig, .chip, #dirSt, #day, #ffw, #resHd .ck, #resHd em, #pinComp, #budChip, #tbar .app, #sim";
+          const box = (r) => ({ x0: (r.left - wr.left) / k, y0: (r.top - wr.top) / k, x1: (r.right - wr.left) / k, y1: (r.bottom - wr.top) / k });
+          const textBox = (e) => { if (e.tagName.toLowerCase() === "text") return box(e.getBoundingClientRect());
+            const rg = document.createRange(); let u = null;
+            Array.from(e.childNodes).filter((n) => n.nodeType === 3 && n.textContent.trim()).forEach((n) => { rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
+            return u ? box(u) : box(e.getBoundingClientRect()); };
+          const seen = new Set(), R = [];
+          leaves.forEach((e) => { const u = e.closest(UNIT); const tgt = u && wc.contains(u) ? u : e; if (seen.has(tgt)) return; seen.add(tgt);
+            const q = Object.assign({ e: tgt }, tgt === e ? textBox(e) : box(tgt.getBoundingClientRect())); if (q.x1 - q.x0 > 1 && q.y1 - q.y0 > 1) R.push(q); });
+          const sh = SHOTS.slice().sort((a, b) => a.t - b.t);
+          const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
+            const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
+            return inter && !inside; };
+          R.forEach((q) => { let prev = false; const H = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = H[i]; if (!h && prev && i + 1 < sh.length && H[i + 1] && nextT - inT < 0.5) h = true; // too short to show: stay hidden
+              if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }
+              else if (h && !prev) ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.18, ease: "power1.out" }, S.t);
+              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.25, ease: "power1.out" }, inT);
+              prev = h; }); });
+          window.__noCut = { leaves: R.length, shots: sh.length }; }
 
         FX.runGestures();
         tl.set({}, {}, D - 0.01);

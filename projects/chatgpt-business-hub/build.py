@@ -23,20 +23,19 @@ cover = frame("cover", f'''<div class="brk">Breaking</div>
   <h1>ChatGPT now lets you<br><span>register your business.</span></h1>
   <p class="lede">Claim a free business profile so ChatGPT can show your brand, products and website when people ask.</p>
   <div class="scene">
-    <div class="tile3">{oai("#fff")}</div>
-    <div class="chat">
-      <div class="q">Where can I buy good kopi susu in Jakarta?</div>
+    <div class="chat"><div class="cht">{oai()}<b>ChatGPT</b></div>
+      <div class="q">Can you recommend a good local coffee shop in Jakarta?</div>
       <div class="a"><span class="av">{oai()}</span><div>
-        <p>Here are a few popular spots:</p>
-        <div class="biz"><div class="bl">KS</div><div><b>Kopi Senja</b><small>Coffee shop · Jakarta Selatan</small></div><span class="vb">{L("badge-check")}Verified</span></div>
+        <p>Here’s one people like:</p>
+        <div class="biz"><div class="bl">{L("store")}</div><div><b>Your Business</b><small>Your category · Your city</small></div><span class="vb">{L("badge-check")}Verified</span></div>
         <div class="acts"><span>{L("arrow-up-right")}Website</span><span>{L("package")}Products</span></div></div></div>
     </div></div>''', swipe=True)
 
 # STEP 1
 m1 = f'''<div class="ui"><div class="uh">{L("store")}<b>Claim your business</b></div>
-  <label>Business name</label><div class="in">Kopi Senja</div>
+  <label>Business name</label><div class="in">Your Business</div>
   <label>Phone number</label><div class="row"><div class="in cc">🇮🇩 +62</div><div class="in f">812 3456 7890</div><span class="ok">{L("check", 3)}</span></div>
-  <label>Business email</label><div class="row"><div class="in f">halo@kopisenja.id</div><span class="ok">{L("check", 3)}</span></div>
+  <label>Business email</label><div class="row"><div class="in f">hello@yourbusiness.com</div><span class="ok">{L("check", 3)}</span></div>
   <div class="btn">Send verification code</div></div>'''
 s1 = step(1, "Claim it, then verify<br><span>your phone + email.</span>",
   "Find your business in ChatGPT’s Business Hub and confirm you own it.", m1,
@@ -45,15 +44,15 @@ s1 = step(1, "Claim it, then verify<br><span>your phone + email.</span>",
 # STEP 2
 m2 = f'''<div class="ui"><div class="id">
   <div class="sh">{L("shield-check")}</div><div><b>Verify your identity with a government ID</b><small>Required before you can publish edits or see insights.</small></div></div>
-  <div class="card"><div class="ph"></div><div class="ln"><i></i><i></i><i class="s"></i></div><span>ID card</span></div>
+  <div class="idr"><div class="ic">{L("id-card", 1.6)}<b>Upload your ID</b><small>Photo of the front</small></div><div class="ic">{L("scan-face", 1.6)}<b>Take a selfie</b><small>To match your face</small></div></div>
   <div class="prog"><span class="d">{L("check", 3)}Phone</span><span class="d">{L("check", 3)}Email</span><span class="n">ID check</span><span>Live</span></div></div>'''
 s2 = step(2, "The step most people<br><span>skip: verify your ID.</span>",
   "This is what unlocks editing, insights and everything after it.", m2,
   "Skip this and your profile stays locked. Most people stop right here.")
 
 # STEP 3
-PR = [("Kopi Susu Gula Aren", "Rp28.000"), ("Cold Brew 1L", "Rp95.000"), ("Biji Kopi Arabika 250g", "Rp120.000")]
-prods = "".join(f'<div class="pc"><div class="pi"><span></span></div><b>{a}</b><small>{b}</small></div>' for a, b in PR)
+PR = [("coffee", "Iced coffee", "Rp28.000"), ("cup-soda", "Cold brew 1L", "Rp95.000"), ("bean", "Coffee beans 250g", "Rp120.000")]
+prods = "".join(f'<div class="pc"><div class="pi">{L(i, 1.6)}</div><b>{a}</b><small>{b}</small></div>' for i, a, b in PR)
 m3 = f'''<div class="ui"><div class="uh">{L("package")}<b>Bring your products into the conversation</b></div>
   <p class="ux">Your products can show up in ChatGPT answers when they match what people ask, and in your business side panel.</p>
   <div class="pg">{prods}</div></div>'''

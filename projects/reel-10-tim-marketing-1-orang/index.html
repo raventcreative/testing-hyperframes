@@ -407,8 +407,23 @@
         const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
           if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
         let cc;
-        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); };
-        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; };
+        // whole-text rule (client): a text block the window frame would slice is faded out for that shot, so no word is ever cut.
+        // Units are measured once (real text extent via a Range), visibility re-evaluated for every camera state.
+        const UNIT_SEL = "#tbar .app, #sim, #tbar .who, .scr > .eyebrow, .scr > .h2, .scr .topR, #center, #nodes > *, #vs > div, .card.list > .eyebrow, .lrow, "
+          + "#dPost > .eyebrow, .dthumb, #dPost .tln, #dMail > .eyebrow, .mailhd, #dMail .tln, #mailCta, #crs > *, #lockBar, #chs > *, #cmts > .eyebrow, .cm, .tr, .prow, "
+          + "#plan > .eyebrow, #planWait, .sec > *, #split > div";
+        const UNITS = (() => { const wcR = $("#wcam").getBoundingClientRect(), rg = document.createRange();
+          return $$(UNIT_SEL).map((el) => { rg.selectNodeContents(el); let r = rg.getBoundingClientRect(); if (!r.width) r = el.getBoundingClientRect();
+            return { el, x0: r.left - wcR.left, y0: r.top - wcR.top, x1: r.right - wcR.left, y1: r.bottom - wcR.top, v: 1 }; }); })();
+        const unitsFor = (c, at, dur) => UNITS.forEach((u) => {
+          const v = (c.x + u.x0 * c.scale >= -1 && c.x + u.x1 * c.scale <= VW + 1 && c.y + u.y0 * c.scale >= -1 && c.y + u.y1 * c.scale <= VH + 1) ? 1 : 0;
+          if (v === u.v) return;
+          if (!dur) st(u.el, { filter: "opacity(" + v + ")" }, at);
+          else if (v) ft(u.el, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: Math.max(0.12, dur * 0.4), ease: "sine.out" }, at + dur * 0.6);
+          else ft(u.el, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: Math.max(0.1, dur * 0.35), ease: "sine.in" }, at);
+          u.v = v; });
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); unitsFor(cc, at, 0); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); unitsFor(nx, at, dur || 0.8); cc = nx; };
         const whip = (x, y, s, at) => camTo(x, y, s, at, 0.42, "expo.inOut");
         const camOn = (el, s, at, dur, ease, dx, dy) => { const q = posIn(el); camTo(q.x + (dx || 0), q.y + (dy || 0), s, at, dur, ease); };
         const camOnSet = (el, s, at, dx, dy) => { const q = posIn(el); camSet(q.x + (dx || 0), q.y + (dy || 0), s, at); };
@@ -448,7 +463,7 @@
         /* ===== SCENE 1 · kinetic hook, robot rises full-body into the stage (UP #1) ===== */
         const tLengkap = wt("punya tim", "lengkap"), tJaw = ph("Jawabannya").start, t36 = wt("Jawabannya", "36"), tLoop = wt("yang kerja", "loop");
         const RD = $$("#hRing i"), hArcL = 2 * Math.PI * 292;
-        FX.enter("up", 0.0); FX.wave(1.15);
+        FX.enter("up", 0.0); ft("#rmove", { x: -760, y: FX.UP, rotation: 0 }, { x: 222, y: FX.UP, rotation: 0, duration: 1.3, ease: "power3.out" }, 0.0); FX.wave(1.15);
         ft("#hQ .k1", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, 0.05);
         FX.drop($("#hQ .big"), 0.3, 0.045);
         ft("#hQ .k2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, ph("punya tim").start - 0.05);
@@ -562,7 +577,7 @@
         ft(win, { rotationY: 20, scale: 0.9, x: -12 }, { rotationY: 0, scale: 1, x: 0, duration: 0.55, ease: "power3.inOut" }, tBack + 0.05);
         ft("#winDim", { opacity: 0.35 }, { opacity: 0, duration: 0.4 }, tBack + 0.05);
         // comments: tight on the thread, the reply types itself
-        camOn($("#cmts"), 1.5, tCm - 0.2, 0.7);
+        camOn($("#cmts"), 1.15, tCm - 0.2, 0.7);
         ft("#cmts", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35 }, tCm - 0.3);
         ft("#cm1", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, tCm - 0.1);
         ft("#cm2", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, wt("dan komentar", "dibalas"));
@@ -575,7 +590,7 @@
         const tM3 = ph("Modul tiga").start, sb = posIn($("#sortBtn"));
         FX.dip("peekR", tM3 - 0.7, 0.3);
         const ORDER0 = [1, 0, 3, 2];
-        FX.iris(tM3 - 0.62, "light", (m) => { showScr("#sM3", m); rail(3, m); camSet(496, 363, 1.25, m); ORDER0.forEach((k, pos) => st("#rw" + k, { y: RY(pos) - RY(k) }, m)); }, { x: 980, y: 300, ex: 140, ey: 1150 });
+        FX.iris(tM3 - 0.62, "light", (m) => { showScr("#sM3", m); rail(3, m); camSet(496, 363, 1.15, m); ORDER0.forEach((k, pos) => st("#rw" + k, { y: RY(pos) - RY(k) }, m)); }, { x: 980, y: 300, ex: 140, ey: 1150 });
         st(".tr.row", { y: 0 }, 0);
         ft(".tr.row", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.14 }, ph("Agent ngecek").start - 0.1);
         const tTel = wt("yang beneran", "telepon");
@@ -589,12 +604,12 @@
         moveEl($("#sortBtn"), tSort - 0.5, 0.4);
         click(tSort); press("#sortBtn", tSort); FX.point(tSort - 0.3);
         ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tSort + 0.4);
-        camTo(496, 363, 1.25, tSort + 0.2, 0.55, "expo.inOut");
+        camTo(496, 363, 1.15, tSort + 0.2, 0.55, "expo.inOut");
         ORDER0.forEach((k, pos) => ft("#rw" + k, { y: RY(pos) - RY(k) }, { y: 0, duration: 0.55, ease: "power3.inOut" }, tSort + 0.3));
         ft("#rw0", { backgroundColor: "rgba(41,75,119,0.05)" }, { backgroundColor: "#e8f7ee", duration: 0.3 }, tSort + 0.7);
         const tHasil = ph("Hasilnya langsung").start;
         ft("#plan", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35 }, tHasil - 0.4);
-        camTo(496, 680, 1.25, tHasil - 0.2, 0.9);
+        camTo(496, 680, 1.15, tHasil - 0.2, 0.9);
         ft(feed, { attr: { "stroke-dashoffset": FL } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.6, ease: "power2.out" }, tHasil);
         ft(feedHead, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tHasil + 0.5);
         ft("#planWait", { opacity: 1 }, { opacity: 0, duration: 0.25 }, ph("ke rencana").start - 0.35);
@@ -604,12 +619,12 @@
         /* ===== dots wipe (from bottom-left) -> SCENE 6 · morning report, the camera scrolls the page ===== */
         const tRep = ph("Tiap pagi").start;
         FX.dip("home", tRep - 0.7, 0.2);
-        FX.dots(tRep - 0.6, "light", (m) => { showScr("#sRep", m); rail(4, m); camSet(496, 330, 1.3, m); }, { x: 120, y: 1750 });
+        FX.dots(tRep - 0.6, "light", (m) => { showScr("#sRep", m); rail(4, m); camSet(496, 330, 1.15, m); }, { x: 120, y: 1750 });
         const secT = [ph("apa yang berhasil").start, ph("siapa yang").start, ph("dan langkah").start];
         $$(".sec").forEach((s, k) => { ft(s, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, secT[k] - 0.25);
           ft($$(".it", s), { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.15 }, secT[k]); });
-        camTo(496, 400, 1.3, secT[1] - 0.4, 0.8, "sine.inOut");
-        camTo(496, 600, 1.3, secT[2] - 0.4, 0.8, "sine.inOut");
+        camTo(496, 400, 1.15, secT[1] - 0.4, 0.8, "sine.inOut");
+        camTo(496, 600, 1.15, secT[2] - 0.4, 0.8, "sine.inOut");
         FX.go("center", secT[0] - 0.5);
         FX.face("happy", secT[0], 0.8); FX.face("excited", wt("siapa yang", "booking") - 0.1, 0.9); FX.beat(secT[2] - 0.08);
 

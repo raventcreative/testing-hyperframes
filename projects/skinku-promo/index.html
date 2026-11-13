@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
     <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="assets/audio/lipsync.js"></script>
     <style>
       @font-face {
         font-family: "Montserrat";
@@ -20,6 +21,7 @@
       :root {
         --ink: #800000;
         --font: "Montserrat", sans-serif;
+        --pill: rgba(255, 255, 255, 0.82);
       }
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body {
@@ -37,96 +39,529 @@
         font-family: var(--font);
         color: var(--ink);
       }
-      .bg {
+      .full { position: absolute; inset: 0; overflow: hidden; }
+      .abs { position: absolute; display: block; }
+      b, .b { font-weight: 700; }
+
+      /* background */
+      #bg-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .blob { position: absolute; border-radius: 50%; display: block; }
+      #blobA { left: -260px; top: 260px; width: 900px; height: 900px;
+        background: radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0) 65%); }
+      #blobB { left: 420px; top: 980px; width: 1000px; height: 1000px;
+        background: radial-gradient(circle, rgba(255,190,205,0.55), rgba(255,190,205,0) 65%); }
+
+      /* logo */
+      #logo { position: absolute; top: 150px; left: 0; right: 0; height: 200px; }
+      #logo-img { display: block; width: 200px; height: auto; margin: 0 auto; }
+
+      /* pills */
+      .pill {
         position: absolute;
-        inset: 0;
-        overflow: hidden;
-      }
-      .bg img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
         display: block;
-      }
-      .logo-wrap {
-        position: absolute;
-        top: 170px;
-        left: 0;
-        right: 0;
-        display: flex;
-        justify-content: center;
-      }
-      .logo {
-        display: block;
-        width: 200px;
-        height: auto;
-      }
-      .copy {
-        position: absolute;
-        left: 90px;
-        right: 90px;
-        top: 760px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 18px;
-      }
-      .line-reg {
-        display: block;
-        font-weight: 400;
-        font-size: 58px;
-        line-height: 1.15;
-      }
-      .line-bold {
-        display: block;
+        white-space: nowrap;
+        background: var(--pill);
+        border-radius: 999px;
+        padding: 18px 40px;
+        font-size: 52px;
         font-weight: 700;
-        font-size: 104px;
-        line-height: 1.02;
-        letter-spacing: -0.02em;
+        line-height: 1.1;
+        box-shadow: 0 18px 40px rgba(128, 0, 0, 0.12);
       }
-      .tag {
-        display: block;
-        margin-top: 26px;
-        font-weight: 400;
-        font-size: 40px;
-        letter-spacing: 0.04em;
+      .pill .dot {
+        display: inline-block;
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        background: var(--ink);
+        margin-right: 18px;
+        vertical-align: middle;
       }
-      .tag b { font-weight: 700; }
+
+      /* generic bottles (hook) */
+      .gbottle { position: absolute; display: block; width: 170px; height: 300px; top: 560px; }
+      .gbottle .cap { position: absolute; left: 50px; top: 0; width: 70px; height: 70px; border-radius: 14px; background: #c98e9c; display: block; }
+      .gbottle .body { position: absolute; left: 0; top: 60px; width: 170px; height: 240px; border-radius: 36px; display: block;
+        background: linear-gradient(160deg, rgba(255,255,255,0.75), rgba(230,170,185,0.85)); box-shadow: 0 20px 40px rgba(128,0,0,0.12); }
+      .gbottle .lbl { position: absolute; left: 30px; top: 140px; width: 110px; height: 80px; border-radius: 12px; background: rgba(128,0,0,0.12); display: block; }
+      #qmark { position: absolute; left: 0; right: 0; top: 470px; text-align: center; font-size: 300px; font-weight: 700; line-height: 1; display: block; }
+
+      /* product */
+      .halo { position: absolute; display: block; border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,226,233,0.55) 38%, rgba(255,226,233,0) 70%); }
+      .serum { position: absolute; display: block; }
+      .serum img { width: 100%; height: 100%; object-fit: contain; display: block; }
+      .shadow { position: absolute; display: block; height: 40px; border-radius: 50%;
+        background: radial-gradient(ellipse, rgba(128,0,0,0.28), rgba(128,0,0,0) 70%); }
+      #name2 { position: absolute; left: 70px; top: 470px; width: 520px; display: block; }
+      #name2 .k { display: block; font-size: 40px; font-weight: 400; margin-bottom: 10px; }
+      #name2 .t { display: block; font-size: 68px; font-weight: 700; line-height: 1.02; letter-spacing: -0.01em; }
+      #name2 .s { display: block; font-size: 40px; font-weight: 400; margin-top: 14px; }
+      #badge2 { position: absolute; left: 790px; top: 620px; width: 250px; height: 250px; border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #a3122a, #800000 60%, #5c0000);
+        color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        box-shadow: 0 20px 44px rgba(128,0,0,0.35); }
+      #badge2 .n { display: block; font-size: 72px; font-weight: 700; line-height: 0.95; }
+      #badge2 .l { display: block; font-size: 28px; font-weight: 700; line-height: 1.05; margin-top: 4px; width: 190px; }
+      #drop3 { position: absolute; left: 250px; top: 600px; width: 150px; height: 180px; display: block; }
+      #drop3 .jelly { position: absolute; inset: 0; display: block; border-radius: 50% 50% 46% 46% / 62% 62% 40% 40%;
+        background: radial-gradient(circle at 36% 34%, #ffb3bf 0%, #e0283f 34%, #a3001a 72%, #7a0012 100%);
+        box-shadow: inset -10px -14px 26px rgba(70,0,10,0.45), 0 22px 40px rgba(128,0,0,0.3); }
+      #drop3 .hl { position: absolute; left: 34px; top: 40px; width: 40px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.85); display: block; }
+
+      /* ingredients */
+      .bub { position: absolute; left: 90px; top: 440px; width: 420px; height: 420px; display: block; }
+      .bub img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .bub .rim { position: absolute; inset: 0; border-radius: 50%; display: block;
+        background: radial-gradient(circle at 32% 26%, rgba(255,255,255,0.75), rgba(255,255,255,0) 22%),
+                    radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 62%, rgba(255,255,255,0.55) 71%, rgba(255,255,255,0) 74%);
+        box-shadow: inset 0 0 0 4px rgba(255,255,255,0.55), 0 26px 60px rgba(160,0,30,0.25); }
+      .itxt { position: absolute; left: 545px; top: 470px; width: 480px; display: block; }
+      .itxt .pct { display: block; font-size: 128px; font-weight: 700; line-height: 0.95; letter-spacing: -0.03em; }
+      .itxt .nm { display: block; font-size: 56px; font-weight: 700; line-height: 1.05; margin-top: 4px; }
+      .itxt .chips { display: block; margin-top: 26px; }
+      .chip { display: block; width: max-content; background: var(--pill); border-radius: 999px; padding: 12px 26px;
+        font-size: 32px; font-weight: 400; margin-bottom: 14px; box-shadow: 0 10px 24px rgba(128,0,0,0.1); }
+      .mb { position: absolute; display: block; border-radius: 50%;
+        background: radial-gradient(circle at 34% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0.15) 45%, rgba(255,120,150,0.18) 100%);
+        box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6); }
+
+      /* hero + cta */
+      #rays5 { position: absolute; left: 90px; top: 190px; width: 900px; height: 900px; border-radius: 50%; display: block;
+        background: repeating-conic-gradient(rgba(255,255,255,0.32) 0deg 7deg, rgba(255,255,255,0) 7deg 22deg);
+        -webkit-mask-image: radial-gradient(circle, #000 18%, transparent 68%); mask-image: radial-gradient(circle, #000 18%, transparent 68%); }
+      .spark { position: absolute; display: block; width: 46px; height: 46px; }
+      .petal { position: absolute; display: block; width: 34px; height: 40px; top: -80px; }
+      #head5 { position: absolute; left: 40px; right: 40px; top: 955px; text-align: center; display: block; }
+      #head5 .l1 { display: block; font-size: 54px; font-weight: 400; line-height: 1.2; }
+      #head5 .l2 { display: block; font-size: 92px; font-weight: 700; line-height: 1.04; letter-spacing: -0.02em; }
+      .w { display: inline-block; }
+      #cta6 { position: absolute; left: 0; right: 0; top: 960px; display: flex; justify-content: center; }
+      #cta6 .btn { display: flex; align-items: center; gap: 26px; background: #fff; border-radius: 999px; padding: 22px 46px 22px 26px;
+        box-shadow: 0 24px 50px rgba(128,0,0,0.22); font-size: 50px; font-weight: 700; white-space: nowrap; }
+      #cta6 .cart { width: 92px; height: 92px; border-radius: 50%; background: #ffc928; display: flex; align-items: center; justify-content: center; }
+      #cta6 .cart svg { width: 56px; height: 56px; display: block; }
+      #cta6b { position: absolute; left: 40px; right: 40px; top: 1115px; text-align: center; font-size: 50px; font-weight: 400; display: block; }
+
+      /* character rig (source pixels: 1250 x 2000) */
+      #charPos, #charHop, #charIdle { position: absolute; left: 0; top: 0; width: 1250px; height: 2000px; transform-origin: 627px 1850px; }
+      .part { position: absolute; left: 0; top: 0; width: 1250px; height: 2000px; display: block; }
+      #head { position: absolute; left: 0; top: 0; width: 1250px; height: 2000px; transform-origin: 627px 930px; }
+      .eye { position: absolute; display: block; width: 200px; height: 136px; transform-origin: 50% 64%; }
+      #eyeL { left: 395px; top: 669px; }
+      #eyeR { left: 654px; top: 669px; }
+      #mouth { position: absolute; left: 592px; top: 842px; width: 64px; height: 34px; transform-origin: 50% 0%; opacity: 0; display: block; }
+      #mouth svg { width: 64px; height: 34px; display: block; }
+
+      /* subtitles */
+      .sub { position: absolute; left: 70px; right: 70px; top: 1100px; display: flex; justify-content: center; }
+      .sub .sp { display: block; max-width: 920px; text-align: center; background: var(--pill); border-radius: 34px;
+        padding: 16px 36px 18px; font-size: 58px; font-weight: 400; line-height: 1.18;
+        box-shadow: 0 16px 40px rgba(128,0,0,0.12); }
+
+      #flash { background: radial-gradient(circle at 50% 42%, rgba(255,255,255,0.95), rgba(255,255,255,0.6) 45%, rgba(255,255,255,0) 80%); opacity: 0; }
     </style>
   </head>
   <body>
-    <div
-      id="root"
-      data-composition-id="main"
-      data-start="0"
-      data-duration="4"
-      data-width="1080"
-      data-height="1920"
-    >
-      <div id="bg" class="bg clip" data-start="0" data-duration="4" data-track-index="0">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="32.8" data-width="1080" data-height="1920">
+      <!-- background -->
+      <div id="bg" class="full clip" data-start="0" data-duration="32.8" data-track-index="0">
         <img id="bg-img" data-layout-allow-overflow src="assets/brand/bg-pink.png" alt="" />
+        <div id="blobA" class="blob" data-layout-allow-overflow></div>
+        <div id="blobB" class="blob" data-layout-allow-overflow></div>
       </div>
 
-      <div id="logo" class="logo-wrap clip" data-start="0" data-duration="4" data-track-index="1">
-        <img id="logo-img" class="logo" src="assets/brand/skinku-logo.png" alt="SKIN-KU" />
+      <!-- S1 hook -->
+      <div id="s1" class="full clip" data-start="0" data-duration="6.6" data-track-index="1">
+        <div id="s1in" class="full">
+          <div id="p1" class="pill" style="left:110px; top:500px"><span class="dot"></span>Kulit kusam</div>
+          <div id="p2" class="pill" style="left:560px; top:650px"><span class="dot"></span>Kering</div>
+          <div id="p3" class="pill" style="left:170px; top:800px"><span class="dot"></span>Noda gak pudar</div>
+          <div id="gb1" class="gbottle" style="left:215px"><span class="cap"></span><span class="body"></span><span class="lbl"></span></div>
+          <div id="gb2" class="gbottle" style="left:455px"><span class="cap"></span><span class="body"></span><span class="lbl"></span></div>
+          <div id="gb3" class="gbottle" style="left:695px"><span class="cap"></span><span class="body"></span><span class="lbl"></span></div>
+          <div id="qmark">?</div>
+        </div>
       </div>
 
-      <div id="copy" class="copy clip" data-start="0" data-duration="4" data-track-index="2">
-        <span id="l1" class="line-reg">Udah mandi 2x sehari,</span>
-        <span id="l2" class="line-bold">kok badan masih kusam?</span>
-        <span id="l3" class="tag">Produk Jepang <b>glownya beda level</b></span>
+      <!-- S2/S3 reveal + texture -->
+      <div id="s23" class="full clip" data-start="6.1" data-duration="8.0" data-track-index="2">
+        <div id="s23in" class="full">
+          <div id="halo2" class="halo" style="left:420px; top:370px; width:620px; height:620px"></div>
+          <div id="shadow2" class="shadow" style="left:600px; top:990px; width:240px"></div>
+          <div id="serum2" class="serum" style="left:614px; top:370px; width:212px; height:640px">
+            <img src="assets/product/serum-cutout.png" alt="SKIN-KU Hada Hydra Glow" />
+          </div>
+          <div id="name2">
+            <span class="k">Kenalin,</span>
+            <span class="t">HADA HYDRA GLOW</span>
+            <span class="s">Glow <b>Jelly Serum</b></span>
+          </div>
+          <div id="badge2"><span class="n">10X</span><span class="l">GLOW BOOSTING EFFECT</span></div>
+          <div id="drop3"><span class="jelly"></span><span class="hl"></span></div>
+          <div id="t3a" class="pill" style="left:80px; top:850px; font-size:44px">Tekstur <b>jelly</b></div>
+          <div id="t3b" class="pill" style="left:120px; top:960px; font-size:44px; font-weight:400">Ringan <b>di kulit</b></div>
+        </div>
       </div>
+
+      <!-- S4 ingredients -->
+      <div id="s4" class="full clip" data-start="13.6" data-duration="12.15" data-track-index="3">
+        <div id="s4in" class="full">
+          <div id="mbs" class="full"></div>
+          <div id="bub1" class="bub"><img src="assets/ingredients/niacinamide.png" alt="" /><span class="rim"></span></div>
+          <div id="bub2" class="bub"><img src="assets/ingredients/panthenol.png" alt="" /><span class="rim"></span></div>
+          <div id="bub3" class="bub"><img src="assets/ingredients/lycoric.png" alt="" /><span class="rim"></span></div>
+          <div id="it1" class="itxt">
+            <span class="pct">10%</span><span class="nm">Niacinamide</span>
+            <span class="chips"><span class="chip">Haluskan <b>tekstur</b></span><span class="chip">Kulit tampak <b>glowing</b></span></span>
+          </div>
+          <div id="it2" class="itxt">
+            <span class="pct">2%</span><span class="nm">Panthenol</span>
+            <span class="chips"><span class="chip">Jaga <b>skin barrier</b></span><span class="chip">Bantu jaga <b>kelembapan</b></span></span>
+          </div>
+          <div id="it3" class="itxt">
+            <span class="pct" style="font-size:96px">Lycoric</span><span class="nm">Extract</span>
+            <span class="chips"><span class="chip">Bantu <b>cerahkan</b> kulit</span><span class="chip">Samarkan <b>noda</b></span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- S5/S6 hero + CTA -->
+      <div id="s56" class="full clip" data-start="25.35" data-duration="7.45" data-track-index="4">
+        <div id="s56in" class="full">
+          <div id="rays5" data-layout-allow-overflow></div>
+          <div id="halo5" class="halo" style="left:220px; top:320px; width:640px; height:640px"></div>
+          <div id="sparks" class="full"></div>
+          <div id="shadow5" class="shadow" style="left:430px; top:915px; width:220px"></div>
+          <div id="serum5" class="serum" style="left:447px; top:370px; width:186px; height:560px">
+            <img src="assets/product/serum-cutout.png" alt="SKIN-KU Hada Hydra Glow" />
+          </div>
+          <div id="head5">
+            <span class="l1"><span class="w">Rahasia</span> <span class="w">glow</span> <span class="w">ala</span> <span class="w b">Jepang,</span></span>
+            <span class="l2"><span class="w">glownya</span> <span class="w">emang</span></span>
+            <span class="l2"><span class="w">beda</span> <span class="w">level!</span></span>
+          </div>
+          <div id="cta6">
+            <div class="btn">
+              <span class="cart">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#800000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2.5 3.5h2.6l2.3 11.2a1.6 1.6 0 0 0 1.6 1.3h8.4a1.6 1.6 0 0 0 1.6-1.2l1.6-6.8H6.2" />
+                  <circle cx="9.5" cy="20" r="1.3" /><circle cx="17.5" cy="20" r="1.3" />
+                </svg>
+              </span>
+              <span>Klik <b>keranjang kuning</b></span>
+            </div>
+          </div>
+          <div id="cta6b"><span class="w b">Checkout</span> <span class="w b">SKIN-KU</span> <span class="w">sekarang!</span></div>
+          <div id="petals" class="full"></div>
+        </div>
+      </div>
+
+      <!-- character -->
+      <div id="charLayer" class="full clip" data-start="0" data-duration="32.8" data-track-index="5">
+        <div id="charPos" data-layout-allow-overflow>
+          <div id="charHop">
+            <div id="charIdle">
+              <img class="part" src="assets/character/body.png" alt="" />
+              <div id="head">
+                <img class="part" src="assets/character/head.png" alt="" />
+                <img id="eyeL" class="eye" src="assets/character/eyeL.png" alt="" />
+                <img id="eyeR" class="eye" src="assets/character/eyeR.png" alt="" />
+                <div id="mouth">
+                  <svg viewBox="0 0 64 34">
+                    <defs><clipPath id="mclip"><path d="M2 4 Q32 11 62 4 Q58 31 32 33 Q6 31 2 4 Z" /></clipPath></defs>
+                    <path d="M2 4 Q32 11 62 4 Q58 31 32 33 Q6 31 2 4 Z" fill="#5e1620" />
+                    <g clip-path="url(#mclip)">
+                      <path d="M8 4 Q32 12 56 4 L56 9 Q32 16 8 9 Z" fill="#ffffff" opacity="0.9" />
+                      <ellipse cx="32" cy="31" rx="17" ry="8" fill="#d9606c" />
+                    </g>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- subtitles -->
+      <div id="subs" class="full clip" data-start="0" data-duration="25.75" data-track-index="6"></div>
+
+      <!-- logo -->
+      <div id="logo" class="clip" data-start="0" data-duration="32.8" data-track-index="7">
+        <img id="logo-img" src="assets/brand/skinku-logo.png" alt="SKIN-KU" />
+      </div>
+
+      <!-- light bloom used by transitions -->
+      <div id="flashLayer" class="full clip" data-start="0" data-duration="32.8" data-track-index="8">
+        <div id="flash" class="full"></div>
+      </div>
+
+      <audio id="vo" src="assets/audio/vo.mp3" data-start="0" data-duration="32.21" data-track-index="10" data-volume="1"></audio>
     </div>
+
     <script>
-      const tl = gsap.timeline({ paused: true });
-      tl.fromTo("#bg-img", { scale: 1.08 }, { scale: 1, duration: 4, ease: "none" }, 0);
-      tl.fromTo("#logo-img", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.1);
-      tl.fromTo("#l1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.35);
-      tl.fromTo("#l2", { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.6)" }, 0.55);
-      tl.fromTo("#l3", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 1.1);
-      window.__timelines["main"] = tl;
-      tl.seek(0);
+      (function () {
+        const DUR = 32.8;
+        const tl = gsap.timeline({ paused: true });
+        const $ = (s) => document.querySelector(s);
+
+        // deterministic RNG
+        let seed = 20261113;
+        const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+        /* ---------------- background ---------------- */
+        tl.fromTo("#bg-img", { scale: 1.12 }, { scale: 1, duration: DUR, ease: "none" }, 0);
+        tl.fromTo("#blobA", { x: 0, y: 0 }, { x: 160, y: -120, duration: DUR, ease: "sine.inOut" }, 0);
+        tl.fromTo("#blobB", { x: 0, y: 0 }, { x: -200, y: -160, duration: DUR, ease: "sine.inOut" }, 0);
+        tl.fromTo("#logo-img", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.05);
+
+        /* ---------------- transitions: soft light bloom ---------------- */
+        [6.12, 13.62, 25.38].forEach((t) => {
+          tl.fromTo("#flash", { opacity: 0 }, { opacity: 0.7, duration: 0.32, ease: "sine.in", immediateRender: false }, t - 0.32);
+          tl.to("#flash", { opacity: 0, duration: 0.55, ease: "sine.out" }, t);
+        });
+
+        /* ---------------- S1 hook ---------------- */
+        const popIn = (sel, t, rot) =>
+          tl.fromTo(sel, { opacity: 0, scale: 0.5, y: 30, rotation: rot * 2 },
+            { opacity: 1, scale: 1, y: 0, rotation: rot, duration: 0.55, ease: "back.out(1.8)" }, t);
+        popIn("#p1", 0.25, -4);
+        popIn("#p2", 0.92, 3);
+        popIn("#p3", 1.6, -2);
+        ["#p1", "#p2", "#p3"].forEach((s, i) => {
+          tl.to(s, { y: -12, duration: 0.9, ease: "sine.inOut", yoyo: true, repeat: 1 }, 1.2 + i * 0.3);
+          tl.to(s, { opacity: 0, y: -60, scale: 0.85, filter: "blur(8px)", duration: 0.4, ease: "power2.in" }, 3.3 + i * 0.06);
+        });
+        ["#gb1", "#gb2", "#gb3"].forEach((s, i) => {
+          tl.fromTo(s, { opacity: 0, y: 80, scale: 0.7 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 3.5 + i * 0.28);
+          tl.to(s, { rotation: [-14, 10, -8][i], y: 30, opacity: 0.7, filter: "grayscale(0.8)", duration: 0.6, ease: "power2.out" }, 4.95 + i * 0.05);
+        });
+        tl.fromTo("#qmark", { opacity: 0, scale: 0.3, rotation: -20 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.6, ease: "back.out(2)" }, 5.25);
+        tl.to("#qmark", { rotation: 8, duration: 0.18, ease: "sine.inOut", yoyo: true, repeat: 3 }, 5.85);
+        tl.to("#s1in", { opacity: 0, scale: 1.06, filter: "blur(14px)", duration: 0.45, ease: "power2.in" }, 6.0);
+
+        /* ---------------- S2 reveal ---------------- */
+        tl.fromTo("#s23in", { opacity: 0, scale: 0.94, filter: "blur(16px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.6, ease: "power2.out" }, 6.15);
+        tl.fromTo("#serum2", { y: 160, scale: 0.7, rotation: -8 }, { y: 0, scale: 1, rotation: 0, duration: 0.9, ease: "power3.out" }, 6.2);
+        tl.fromTo("#halo2", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.0, ease: "power2.out" }, 6.25);
+        tl.to("#serum2", { y: -16, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: 4 }, 7.1);
+        tl.to("#halo2", { scale: 1.08, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: 3 }, 7.3);
+        tl.fromTo("#name2 .k", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 6.3);
+        tl.fromTo("#name2 .t", { opacity: 0, y: 40, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" }, 7.9);
+        tl.fromTo("#name2 .s", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 9.15);
+        tl.fromTo("#badge2", { opacity: 0, scale: 0.2, rotation: -30 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.6, ease: "back.out(2)" }, 10.45);
+        tl.to("#badge2", { scale: 1.07, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, 11.08);
+        // to texture beat
+        tl.to(["#name2", "#badge2"], { opacity: 0, x: -40, filter: "blur(10px)", duration: 0.4, ease: "power2.in" }, 11.45);
+
+        /* ---------------- S3 texture ---------------- */
+        tl.fromTo("#drop3", { opacity: 0, x: 400, y: -260, scale: 0.2 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.7, ease: "power2.in" }, 11.7);
+        tl.fromTo("#drop3", { scaleX: 1, scaleY: 1 }, { scaleX: 1.25, scaleY: 0.78, duration: 0.12, ease: "power1.out", immediateRender: false }, 12.4);
+        tl.to("#drop3", { scaleX: 1, scaleY: 1, duration: 0.9, ease: "elastic.out(1.2, 0.3)" }, 12.52);
+        tl.fromTo("#t3a", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 12.4);
+        tl.fromTo("#t3b", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 12.66);
+        tl.to("#s23in", { opacity: 0, scale: 1.05, filter: "blur(14px)", duration: 0.4, ease: "power2.in" }, 13.62);
+
+        /* ---------------- S4 ingredients ---------------- */
+        tl.fromTo("#s4in", { opacity: 0, filter: "blur(14px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "power2.out" }, 13.65);
+        // rising micro bubbles
+        const mbs = $("#mbs");
+        for (let i = 0; i < 16; i++) {
+          const d = document.createElement("div");
+          d.className = "mb";
+          const size = 18 + Math.round(rnd() * 46);
+          d.style.width = size + "px"; d.style.height = size + "px";
+          d.style.left = Math.round(40 + rnd() * 1000) + "px"; d.style.top = "1960px";
+          mbs.appendChild(d);
+          const t0 = 13.7 + rnd() * 9.5;
+          tl.fromTo(d, { y: 0, x: 0, opacity: 0 }, { y: -(900 + rnd() * 700), x: (rnd() - 0.5) * 120, opacity: 0.9, duration: 4 + rnd() * 2, ease: "none" }, t0);
+        }
+        const slots = [[400, 945], [540, 945], [680, 945]];
+        const bubIn = (n, t) => {
+          tl.fromTo("#bub" + n, { opacity: 0, x: 0, y: 260, scale: 0.45, rotation: -25, filter: "blur(12px)" },
+            { opacity: 1, y: 0, scale: 1, rotation: 0, filter: "blur(0px)", duration: 0.8, ease: "power3.out" }, t);
+          tl.to("#bub" + n, { rotation: 10, duration: 2.6, ease: "sine.inOut" }, t + 0.8);
+          const it = "#it" + n;
+          tl.fromTo(it + " .pct", { opacity: 0, y: 40, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, ease: "power3.out" }, t + 0.1);
+          tl.fromTo(it + " .nm", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, t + 0.25);
+          tl.fromTo(it + " .chip", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out", stagger: 0.9 }, t + 1.0);
+        };
+        const bubOut = (n, t) => {
+          const [sx, sy] = slots[n - 1];
+          tl.to("#bub" + n, { x: sx - 300, y: sy - 650, scale: 0.262, rotation: 0, duration: 0.65, ease: "power3.inOut" }, t);
+          tl.to("#it" + n, { opacity: 0, x: 40, filter: "blur(10px)", duration: 0.35, ease: "power2.in" }, t);
+        };
+        bubIn(1, 13.75); bubOut(1, 18.35);
+        bubIn(2, 18.55); bubOut(2, 21.85);
+        bubIn(3, 22.05); bubOut(3, 24.95);
+        tl.to("#s4in", { opacity: 0, scale: 1.05, filter: "blur(14px)", duration: 0.4, ease: "power2.in" }, 25.35);
+
+        /* ---------------- S5 hero ---------------- */
+        tl.fromTo("#s56in", { opacity: 0, filter: "blur(16px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.6, ease: "power2.out" }, 25.4);
+        tl.fromTo("#serum5", { y: 180, scale: 0.75 }, { y: 0, scale: 1, duration: 0.9, ease: "power3.out" }, 25.4);
+        tl.fromTo("#rays5", { rotation: 0, scale: 0.6, opacity: 0 }, { rotation: 150, scale: 1, opacity: 1, duration: 7.4, ease: "none" }, 25.4);
+        tl.fromTo("#halo5", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 1, ease: "power2.out" }, 25.45);
+        tl.to("#serum5", { y: -14, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: 1 }, 26.3);
+        // sparkles
+        const sparks = $("#sparks");
+        const sparkPts = [[300, 420], [780, 480], [250, 780], [820, 820], [360, 600], [720, 650], [450, 330], [640, 930]];
+        sparkPts.forEach(([x, y], i) => {
+          const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          s.setAttribute("viewBox", "0 0 20 20"); s.setAttribute("class", "spark");
+          s.style.left = x + "px"; s.style.top = y + "px";
+          s.innerHTML = '<path d="M10 0 C11 7 13 9 20 10 C13 11 11 13 10 20 C9 13 7 11 0 10 C7 9 9 7 10 0 Z" fill="#ffffff"/>';
+          sparks.appendChild(s);
+          const t0 = 25.7 + i * 0.35;
+          tl.fromTo(s, { opacity: 0, scale: 0.2, rotation: 0 }, { opacity: 1, scale: 1, rotation: 90, duration: 0.45, ease: "power2.out", yoyo: true, repeat: 5, repeatDelay: 0.25 }, t0);
+        });
+        // sakura petals
+        const petals = $("#petals");
+        for (let i = 0; i < 16; i++) {
+          const p = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          p.setAttribute("viewBox", "0 0 20 24"); p.setAttribute("class", "petal");
+          p.style.left = Math.round(rnd() * 1040) + "px";
+          p.innerHTML = '<path d="M10 24 C2 18 0 10 4 3 C6 0 8 2 10 4 C12 2 14 0 16 3 C20 10 18 18 10 24 Z" fill="#f6a3b8" opacity="0.92"/>';
+          petals.appendChild(p);
+          const t0 = 25.5 + rnd() * 4.5;
+          const sc = 0.7 + rnd() * 0.8;
+          tl.fromTo(p, { y: 0, x: 0, rotation: rnd() * 180, scale: sc, opacity: 0.95 },
+            { y: 2100, x: (rnd() - 0.5) * 360, rotation: 360 + rnd() * 360, duration: 4.5 + rnd() * 2.5, ease: "none" }, t0);
+        }
+        // headline words
+        const w5 = document.querySelectorAll("#head5 .w");
+        const w5t = [25.7, 26.32, 26.67, 26.93, 27.55, 28.16, 28.6, 28.95];
+        w5.forEach((el, i) => {
+          tl.fromTo(el, { opacity: 0, y: 30, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, w5t[i] - 0.06);
+        });
+        tl.fromTo("#head5 .l2", { scale: 1 }, { scale: 1.06, duration: 0.25, ease: "sine.out", yoyo: true, repeat: 1, immediateRender: false }, 28.95);
+
+        /* ---------------- S6 CTA ---------------- */
+        tl.to("#head5", { opacity: 0, y: -30, filter: "blur(10px)", duration: 0.35, ease: "power2.in" }, 29.2);
+        tl.to("#serum5", { scale: 0.8, y: -60, duration: 0.7, ease: "power3.inOut" }, 29.2);
+        tl.to("#halo5", { scale: 0.85, y: -60, duration: 0.7, ease: "power3.inOut" }, 29.2);
+        tl.to("#shadow5", { opacity: 0, duration: 0.3 }, 29.2);
+        tl.fromTo("#cta6 .btn", { opacity: 0, scale: 0.5, y: 40 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.8)" }, 29.42);
+        tl.fromTo("#cta6 .cart", { rotation: 0 }, { rotation: 14, duration: 0.12, ease: "sine.inOut", yoyo: true, repeat: 5, immediateRender: false }, 29.75);
+        tl.to("#cta6 .btn", { scale: 1.05, duration: 0.45, ease: "sine.inOut", yoyo: true, repeat: 3 }, 30.35);
+        const w6 = document.querySelectorAll("#cta6b .w");
+        [30.73, 31.1, 31.48].forEach((t, i) => {
+          tl.fromTo(w6[i], { opacity: 0, y: 26, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, t - 0.06);
+        });
+
+        /* ---------------- subtitles ---------------- */
+        const P = [
+          [["Muka", 0.0], ["kusam,", 0.38, 1], ["kering,", 0.96, 1]],
+          [["noda", 1.62, 1], ["gak", 2.01], ["pudar-pudar?", 2.29, 1]],
+          [["Udah", 3.44], ["ganti", 3.76], ["skincare,", 4.17, 1]],
+          [["tetep", 4.89], ["gitu-gitu", 5.29, 1], ["aja?", 6.02]],
+          [["Kenalin,", 6.34], ["SKIN-KU", 7.1, 1]],
+          [["Hada", 7.95, 1], ["Hydra", 8.23, 1], ["Glow.", 8.71, 1]],
+          [["Glow", 9.18], ["jelly", 9.44, 1], ["serum", 9.77, 1]],
+          [["dengan", 10.1], ["glow", 10.49, 1], ["boosting", 10.76, 1], ["effect.", 11.28, 1]],
+          [["Teksturnya", 11.74], ["jelly,", 12.44, 1]],
+          [["ringan", 12.86, 1], ["di", 13.28], ["kulit.", 13.42]],
+          [["10%", 13.84, 1], ["Niacinamide", 14.08, 1]],
+          [["bantu", 14.96], ["haluskan", 15.36, 1], ["tekstur", 16.0, 1]],
+          [["dan", 16.56], ["bikin", 16.8], ["kulit", 17.2], ["tampak", 17.6], ["glowing.", 18.0, 1]],
+          [["2%", 18.64, 1], ["Panthenol", 18.8, 1]],
+          [["bantu", 19.46], ["jaga", 19.88], ["skin", 20.2, 1], ["barrier", 20.54, 1]],
+          [["tetap", 21.11], ["lembap.", 21.52, 1]],
+          [["Plus", 22.1], ["Lycoric", 22.41, 1], ["Extract,", 22.94, 1]],
+          [["bantu", 23.55], ["cerahin", 23.94, 1]],
+          [["dan", 24.47], ["samarkan", 24.7, 1], ["noda.", 25.32, 1]],
+        ];
+        const PEND = [1.6, 3.18, 4.69, 6.05, 7.85, 9.04, 10.05, 11.52, 12.8, 13.68, 14.9, 16.5, 18.46, 19.4, 21.05, 21.96, 23.38, 24.42, 25.57];
+        const subs = $("#subs");
+        P.forEach((words, pi) => {
+          const line = document.createElement("div");
+          line.className = "sub";
+          const sp = document.createElement("div");
+          sp.className = "sp";
+          words.forEach(([txt, , bold], wi) => {
+            const s = document.createElement("span");
+            s.className = "w" + (bold ? " b" : "");
+            s.textContent = txt;
+            sp.appendChild(s);
+            if (wi < words.length - 1) sp.appendChild(document.createTextNode(" "));
+          });
+          line.appendChild(sp);
+          subs.appendChild(line);
+          const start = words[0][1];
+          const next = pi < P.length - 1 ? P[pi + 1][0][1] : 25.75;
+          const exitAt = Math.min(next - 0.04, PEND[pi] + 0.4);
+          tl.fromTo(sp, { opacity: 0, y: 18, scale: 0.96, filter: "blur(6px)" }, { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.26, ease: "power3.out" }, Math.max(0, start - 0.1));
+          sp.querySelectorAll(".w").forEach((el, wi) => {
+            const t = words[wi][1];
+            tl.fromTo(el, { opacity: 0.3, y: 5 }, { opacity: 1, y: 0, duration: 0.24, ease: "power2.out" }, Math.max(0, t - 0.04));
+          });
+          tl.to(sp, { opacity: 0, y: -14, filter: "blur(6px)", duration: 0.2, ease: "power2.in" }, exitAt);
+        });
+
+        /* ---------------- character staging (moves left/right between beats) ---------------- */
+        const place = (fx, fy, s) => ({ x: fx - 627, y: fy - 1850, scale: s });
+        tl.fromTo("#charPos", { ...place(540, 2420, 0.62) }, { ...place(540, 2130, 0.62), duration: 0.7, ease: "back.out(1.4)" }, 0);
+        tl.to("#charPos", { ...place(250, 2000, 0.47), duration: 1.0, ease: "power2.inOut" }, 6.1);
+        tl.to("#charPos", { ...place(300, 2000, 0.47), duration: 1.6, ease: "sine.inOut" }, 11.6);
+        tl.to("#charPos", { ...place(790, 2000, 0.47), duration: 1.1, ease: "power2.inOut" }, 13.55);
+        tl.to("#charPos", { ...place(740, 2000, 0.47), duration: 3.0, ease: "sine.inOut" }, 19.0);
+        tl.to("#charPos", { ...place(790, 2000, 0.47), duration: 2.0, ease: "sine.inOut" }, 22.4);
+        tl.to("#charPos", { ...place(540, 2080, 0.5), duration: 1.1, ease: "power2.inOut" }, 25.3);
+        // hops on key beats
+        [6.34, 10.45, 13.84, 18.64, 22.1, 28.95, 29.48].forEach((t) => {
+          tl.fromTo("#charHop", { y: 0 }, { y: -46, duration: 0.18, ease: "power2.out", immediateRender: false }, t);
+          tl.to("#charHop", { y: 0, duration: 0.32, ease: "bounce.out" }, t + 0.18);
+        });
+
+        /* ---------------- character rig driver (idle sway, blink, lip-sync) ---------------- */
+        const LS = window.SKINKU_LIPSYNC;
+        const idle = $("#charIdle"), head = $("#head"), eL = $("#eyeL"), eR = $("#eyeR"), mouth = $("#mouth");
+        const blinks = [0.9, 3.25, 5.55, 8.3, 8.52, 11.1, 13.95, 16.6, 19.05, 21.4, 24.2, 26.75, 28.4, 30.95];
+        const TAU = Math.PI * 2;
+        const lip = (arr, t) => {
+          const f = t * LS.fps, i = Math.floor(f), a = f - i;
+          const v0 = arr[Math.min(arr.length - 1, Math.max(0, i))], v1 = arr[Math.min(arr.length - 1, i + 1)];
+          return (v0 + (v1 - v0) * a) / 100;
+        };
+        const blinkAt = (t) => {
+          for (const b of blinks) {
+            const d = t - b;
+            if (d >= 0 && d < 0.07) return 1 - 0.92 * (d / 0.07);
+            if (d >= 0.07 && d < 0.18) return 0.08 + 0.92 * ((d - 0.07) / 0.11);
+          }
+          return 1;
+        };
+        const render = (t) => {
+          const open = t < 32.21 ? lip(LS.open, t) : 0;
+          const round = t < 32.21 ? lip(LS.round, t) : 0.5;
+          // whole body: left-right drift + sway + breathing
+          const sx = 34 * Math.sin((TAU * t) / 4.4);
+          const by = -8 * (0.5 + 0.5 * Math.sin((TAU * t) / 1.7));
+          const rot = 2.2 * Math.sin((TAU * t) / 3.6) + 0.8 * Math.sin((TAU * t) / 1.3);
+          const breath = 1 + 0.007 * Math.sin((TAU * t) / 2.2);
+          idle.style.transform = `translate(${sx.toFixed(2)}px, ${by.toFixed(2)}px) rotate(${rot.toFixed(3)}deg) scale(1, ${breath.toFixed(4)})`;
+          // head: tilt + talk nod + "gitu-gitu aja?" head shake
+          let hr = 2.6 * Math.sin((TAU * t) / 3.1 + 0.7) + (open - 0.3) * 2.2;
+          if (t > 4.85 && t < 6.15) hr += 4.5 * Math.sin(TAU * 2.6 * (t - 4.85)) * Math.sin((Math.PI * (t - 4.85)) / 1.3);
+          const hy = -open * 6;
+          head.style.transform = `translateY(${hy.toFixed(2)}px) rotate(${hr.toFixed(3)}deg)`;
+          // eyes: blink + gentle gaze drift
+          const b = blinkAt(t);
+          const gx = 3 * Math.sin((TAU * t) / 5.3);
+          const eyeT = `translateX(${gx.toFixed(2)}px) scaleY(${b.toFixed(3)})`;
+          eL.style.transform = eyeT; eR.style.transform = eyeT;
+          // mouth: jaw opening from VO loudness, width from vowel shape
+          const mo = Math.min(1, Math.max(0, (open - 0.04) / 0.08));
+          const msy = 0.18 + open * 1.05;
+          const msx = 0.74 + 0.3 * (1 - round) + open * 0.08;
+          mouth.style.opacity = mo.toFixed(3);
+          mouth.style.transform = `scale(${msx.toFixed(3)}, ${msy.toFixed(3)})`;
+        };
+        const drv = { t: 0 };
+        tl.to(drv, { t: DUR, duration: DUR, ease: "none", onUpdate: () => render(drv.t) }, 0);
+        render(0);
+
+        window.__timelines["main"] = tl;
+        tl.seek(0);
+      })();
     </script>
   </body>
 </html>

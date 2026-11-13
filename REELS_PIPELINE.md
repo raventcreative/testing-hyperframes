@@ -16,6 +16,10 @@ The ElevenLabs API is already connected (key saved on the testing-hyperframes en
   Head stays still. Left hand waves (first beat + CTA), right hand points at the demo on every click, alternating hand
   beats on key words, eye blinks every 3–4 s, chest/base light follows VO loudness. Reuse the rig code from
   projects/blueprint-demo (tools/build.py injects it).
+- **Robot v3 (current, client-approved):** front-facing AIpreneur robot with an animated, lip-synced mouth (glowing
+  D-shaped smile that opens/closes with the VO loudness) + blinking eyes + hand gestures. After `tools/build.py`, always
+  run `python3 -I tools/add_mouth.py projects/<name>` (copies brand/robot/r3_head.png + cleaned parts + robot_rig3.js and
+  injects the mouth). Source art: brand/robot/robot3_src.webp.
 - Layout: app window ≈ x 80–1000, y 250–1270; captions y 1282–1400 (2 lines max); robot y ≥ 1408. Nothing overlaps.
 - Captions: phrase chunks, smooth fade in/out, words brighten in sync (no pop/bounce). Poppins Bold for key words,
   Poppins Regular for the rest.

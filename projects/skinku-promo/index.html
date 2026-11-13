@@ -145,6 +145,8 @@
       /* character rig (source pixels: 1250 x 2000) */
       #charPos, #charHop, #charIdle { position: absolute; left: 0; top: 0; width: 1250px; height: 2000px; transform-origin: 627px 1850px; }
       .part { position: absolute; left: 0; top: 0; width: 1250px; height: 2000px; display: block; }
+      .limb { position: absolute; left: 0; top: 0; width: 1250px; height: 2000px; }
+      .pc { position: absolute; display: block; }
       #head { position: absolute; left: 0; top: 0; width: 1250px; height: 2000px; transform-origin: 627px 930px; }
       .eye { position: absolute; display: block; width: 200px; height: 136px; transform-origin: 50% 64%; }
       #eyeL { left: 395px; top: 669px; }
@@ -273,7 +275,19 @@
           <div id="charHop">
             <div id="charIdle">
               <div id="aura"></div>
-              <img class="part" src="assets/character/body.png" alt="" />
+              <img class="part" src="assets/character/body2.png" alt="" />
+              <div id="armL" class="limb" style="transform-origin: 456px 1032px">
+                <div id="handL" class="limb" style="transform-origin: 296px 1362px">
+                  <img class="pc" src="assets/character/handL.png" alt="" style="left:224px; top:1308px; width:92px; height:105px" />
+                </div>
+                <img class="pc" src="assets/character/armL.png" alt="" style="left:228px; top:999px; width:246px; height:718px" />
+              </div>
+              <div id="armR" class="limb" style="transform-origin: 797px 1032px">
+                <div id="handR" class="limb" style="transform-origin: 940px 1372px">
+                  <img class="pc" src="assets/character/handR.png" alt="" style="left:921px; top:1321px; width:103px; height:96px" />
+                </div>
+                <img class="pc" src="assets/character/armR.png" alt="" style="left:778px; top:987px; width:248px; height:613px" />
+              </div>
               <div id="head">
                 <img class="part" src="assets/character/head.png" alt="" />
                 <img id="eyeL" class="eye" src="assets/character/eyeL.png" alt="" />
@@ -571,6 +585,49 @@
         /* ---------------- character rig driver (idle sway, blink, lip-sync) ---------------- */
         const LS = window.SKINKU_LIPSYNC;
         const idle = $("#charIdle"), head = $("#head"), eL = $("#eyeL"), eR = $("#eyeR"), mouth = $("#mouth");
+        const armL = $("#armL"), armR = $("#armR"), handL = $("#handL"), handR = $("#handR");
+        // presenting gestures: [arm, start, end, outward angle (deg), hand wave]
+        const GEST = [
+          ["B", 0.3, 1.4, 10, 0],
+          ["L", 1.55, 3.15, 30, 0],
+          ["R", 3.4, 4.75, 26, 0],
+          ["B", 4.85, 6.1, 20, 0],
+          ["R", 6.3, 9.15, 40, 0],
+          ["R", 9.15, 11.55, 30, 0], ["L", 9.3, 11.5, 9, 0],
+          ["L", 11.7, 13.65, 30, 0],
+          ["L", 13.8, 18.45, 38, 0], ["R", 15.2, 17.8, 10, 0],
+          ["L", 18.6, 21.95, 33, 0], ["R", 19.4, 21.6, 12, 0],
+          ["L", 22.05, 25.5, 38, 0],
+          ["B", 25.65, 27.4, 22, 0],
+          ["R", 27.45, 29.35, 46, 0], ["L", 27.45, 29.35, 14, 0],
+          ["R", 29.45, 33, 44, 1], ["L", 30.6, 33, 16, 0],
+        ];
+        const smooth = (u) => u * u * (3 - 2 * u);
+        const backOut = (u) => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };
+        const env = (t, a, b) => {
+          if (t <= a || t >= b + 0.45) return 0;
+          if (t < a + 0.38) return backOut((t - a) / 0.38);
+          if (t <= b) return 1;
+          return 1 - smooth((t - b) / 0.45);
+        };
+        const limbs = (t, open) => {
+          const out = { L: 0, R: 0 }, hand = { L: 0, R: 0 }, wave = { L: 0, R: 0 }, act = { L: 0, R: 0 };
+          for (const [arm, a, b, ang, w] of GEST) {
+            const e = env(t, a, b);
+            if (!e) continue;
+            for (const k of arm === "B" ? ["L", "R"] : [arm]) {
+              out[k] += ang * e; act[k] = Math.max(act[k], Math.min(1, e)); wave[k] = Math.max(wave[k], w * Math.min(1, e));
+            }
+          }
+          for (const k of ["L", "R"]) {
+            const ph = k === "L" ? 0 : 1.9;
+            // idle sway when resting, speech beats while gesturing
+            out[k] += 2.4 * Math.sin((TAU * t) / 2.9 + ph) * (1 - act[k]) + act[k] * (5 * open + 1.6 * Math.sin((TAU * t) / 0.9 + ph));
+            // open palm when presenting + soft follow-through + optional wave
+            hand[k] = 14 * act[k] + 5 * Math.sin((TAU * t) / 1.7 + ph + 0.8) + wave[k] * 20 * Math.sin(TAU * 2.6 * t);
+          }
+          return { out, hand };
+        };
         const blinks = [0.9, 3.25, 5.55, 8.3, 8.52, 11.1, 13.95, 16.6, 19.05, 21.4, 24.2, 26.75, 28.4, 30.95];
         const TAU = Math.PI * 2;
         const lip = (arr, t) => {
@@ -611,6 +668,12 @@
           const msx = 0.74 + 0.3 * (1 - round) + open * 0.08;
           mouth.style.opacity = mo.toFixed(3);
           mouth.style.transform = `scale(${msx.toFixed(3)}, ${msy.toFixed(3)})`;
+          // arms: left arm raises with +deg, right arm with -deg (mirror)
+          const lb = limbs(t, open);
+          armL.style.transform = `rotate(${lb.out.L.toFixed(3)}deg)`;
+          armR.style.transform = `rotate(${(-lb.out.R).toFixed(3)}deg)`;
+          handL.style.transform = `rotate(${lb.hand.L.toFixed(3)}deg)`;
+          handR.style.transform = `rotate(${(-lb.hand.R).toFixed(3)}deg)`;
         };
         const drv = { t: 0 };
         tl.to(drv, { t: DUR, duration: DUR, ease: "none", onUpdate: () => render(drv.t) }, 0);

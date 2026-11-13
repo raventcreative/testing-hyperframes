@@ -8,7 +8,8 @@
    Requirements in the page: #rmove wrapping #robot (full-frame box), #scene, #bgD (dark bg), #logoD/#logoL,
    #main[data-sc] caption styles. All tweens are deterministic (seek-safe). */
 window.REEL_FX = function (c) {
-  const { tl, ft, st, $, $$, rob, lh, rh, headIn, RG } = c;
+  const { tl, ft, st, $, $$, rob, lh, rh, headIn, RG, r3d } = c;
+  const S3 = r3d && r3d.state, REST = (r3d && r3d.REST) || {}; // 3D presenter robot (brand/robot3d) when r3d is passed
   // ONE background theme per reel (client rule): c.base = "light" (white reels) or "dark" (blue reels).
   // Wipes only use shades of that theme; theme() never mixes backgrounds.
   const BASE = c.base || "light";
@@ -25,12 +26,13 @@ window.REEL_FX = function (c) {
   const poseAt = (t) => { let p = track[0].p; track.forEach((k) => { if (k.t <= t) p = k.p; }); return p; };
   const side = (t) => (poseAt(t).x > 300 ? "R" : "L");
   st(rm, Object.assign({ transformOrigin: "318px 1990px" }, cur, { y: 700 }), 0);
-  const squash = (at) => ft(rob, { scaleX: 1, scaleY: 1 }, { keyframes: [{ scaleX: 1.06, scaleY: 0.92, duration: 0.07, ease: "power1.out" }, { scaleX: 1, scaleY: 1, duration: 0.3, ease: "back.out(2.5)" }] }, at);
+  const squash = (at) => S3 ? ft(S3, { sq: 1 }, { keyframes: [{ sq: 0.93, duration: 0.07, ease: "power1.out" }, { sq: 1, duration: 0.3, ease: "back.out(2.5)" }] }, at) : ft(rob, { scaleX: 1, scaleY: 1 }, { keyframes: [{ scaleX: 1.06, scaleY: 0.92, duration: 0.07, ease: "power1.out" }, { scaleX: 1, scaleY: 1, duration: 0.3, ease: "back.out(2.5)" }] }, at);
   const enter = (pose, at) => { const n = POSE[pose || "home"]; ft(rm, Object.assign({}, n, { y: 700 }), Object.assign({}, n, { duration: 0.55, ease: "back.out(1.4)" }), at); cur = n; track.push({ t: at, p: n }); squash(at + 0.5); };
   const go = (pose, at, dur) => { const n = POSE[pose]; dur = dur || 0.7; const dir = n.x > cur.x ? 1 : -1;
     ft(rm, { x: cur.x, scale: cur.scale }, { x: n.x, scale: n.scale, duration: dur, ease: "power2.inOut" }, at);
     ft(rm, { y: cur.y }, { keyframes: [{ y: Math.min(cur.y, n.y) - 70, duration: dur * 0.5, ease: "power2.out" }, { y: n.y, duration: dur * 0.5, ease: "power2.in" }] }, at);
     ft(rm, { rotation: 0 }, { keyframes: [{ rotation: 7 * dir, duration: dur * 0.35, ease: "power2.out" }, { rotation: -3 * dir, duration: dur * 0.4, ease: "sine.inOut" }, { rotation: 0, duration: dur * 0.25 }] }, at);
+    if (S3) ft(S3, { yawT: 0 }, { keyframes: [{ yawT: 24 * dir, duration: dur * 0.4, ease: "power2.out" }, { yawT: 0, duration: dur * 0.6, ease: "power2.inOut" }] }, at);
     squash(at + dur - 0.02); cur = n; track.push({ t: at + dur * 0.5, p: n }); };
   const dip = (pose, at, gap) => { const n = POSE[pose]; gap = gap == null ? 0.25 : gap;
     ft(rm, Object.assign({}, cur), { keyframes: [{ y: 700, duration: 0.28, ease: "power2.in" }, { x: n.x, scale: n.scale, duration: 0.01 }, { y: n.y, duration: 0.5, delay: gap, ease: "back.out(1.5)" }] }, at);
@@ -47,7 +49,7 @@ window.REEL_FX = function (c) {
     exR: '<path d="M37 17 L7 35 L37 53" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>',
     flat: '<path d="M5 36 L39 36" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>' };
   const covs = [], exs = [];
-  RG.eyes.forEach((e, i) => {
+  if (!S3) RG.eyes.forEach((e, i) => {
     const x = e[0] - RG.head[0], y = e[1] - RG.head[1];
     const cv = document.createElement("i"); cv.className = "ecov";
     Object.assign(cv.style, { position: "absolute", left: x - 6 + "px", top: y - 6 + "px", width: e[2] + 12 + "px", height: e[3] + 12 + "px", borderRadius: "50%", background: "#030407", opacity: 0, display: "block" });
@@ -59,7 +61,8 @@ window.REEL_FX = function (c) {
     sv.innerHTML = keys.map((k) => `<g data-k="${k === "exL" || k === "exR" ? "excited" : k}" style="opacity:0;transform-origin:22px 35px">${EX[k]}</g>`).join("");
     headIn.appendChild(sv); exs.push(sv);
   });
-  const face = (name, at, dur) => { const gs = exs.map((s) => s.querySelector(`[data-k="${name}"]`));
+  const face = (name, at, dur) => { if (S3) { ft(S3, { [name]: 0 }, { [name]: 1, duration: 0.12, ease: "power2.out" }, at); ft(S3, { [name]: 1 }, { [name]: 0, duration: 0.1 }, at + dur); return; }
+    const gs = exs.map((s) => s.querySelector(`[data-k="${name}"]`));
     ft(covs, { opacity: 0 }, { opacity: 1, duration: 0.06 }, at);
     ft(gs, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.18, ease: "back.out(2.2)" }, at + 0.02);
     ft(gs, { opacity: 1 }, { opacity: 0, duration: 0.1 }, at + dur);
@@ -73,6 +76,18 @@ window.REEL_FX = function (c) {
   const runGestures = () => {
     G.sort((a, b) => a.t - b.t); let busy = -1, n = 0;
     G.forEach((g) => { if (g.t < busy + 0.05) return; busy = g.t + g.d; const R = side(g.t + 0.2) === "R";
+      if (S3) { const L0 = REST.aLz || 0, R0 = REST.aRz || 0;
+        const arm = (keys, at) => { const f = {}; Object.keys(keys[0]).forEach((k) => (f[k] = S3[k] === undefined ? 0 : (k === "aLz" ? L0 : k === "aRz" ? R0 : 0)));
+          ft(S3, f, { keyframes: keys }, at); };
+        if (g.k === "wave") { if (R) arm([{ aRz: 55, aRx: -15, duration: 0.3, ease: "power2.out" }, { aRz: 38, duration: 0.2 }, { aRz: 58, duration: 0.2 }, { aRz: 40, duration: 0.2 }, { aRz: R0, aRx: 0, duration: 0.45, ease: "power2.inOut" }], g.t);
+          else arm([{ aLz: -28, aLx: -15, duration: 0.3, ease: "power2.out" }, { aLz: -8, duration: 0.2 }, { aLz: -30, duration: 0.2 }, { aLz: -10, duration: 0.2 }, { aLz: L0, aLx: 0, duration: 0.45, ease: "power2.inOut" }], g.t); }
+        if (g.k === "point") { const m = R ? -1 : 1;
+          if (R) arm([{ aLz: -40, aLx: -25, duration: 0.33, ease: "power2.out" }, { aLz: -40, aLx: -25, duration: 0.7 }, { aLz: L0, aLx: 0, duration: 0.45, ease: "power2.inOut" }], g.t);
+          else arm([{ aRz: 50, aRx: -25, duration: 0.33, ease: "power2.out" }, { aRz: 50, aRx: -25, duration: 0.7 }, { aRz: R0, aRx: 0, duration: 0.45, ease: "power2.inOut" }], g.t);
+          ft(S3, { yaw: 0, lookX: 0 }, { keyframes: [{ yaw: 16 * m, lookX: 0.018 * m, duration: 0.33, ease: "power2.out" }, { duration: 0.7 }, { yaw: 0, lookX: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
+        if (g.k === "beat") { if (n++ % 2) arm([{ aLz: L0 - 16, aLx: -8, duration: 0.2, ease: "power2.out" }, { aLz: L0, aLx: 0, duration: 0.32, ease: "power2.in" }], g.t);
+          else arm([{ aRz: R0 + 16, aRx: -8, duration: 0.2, ease: "power2.out" }, { aRz: R0, aRx: 0, duration: 0.32, ease: "power2.in" }], g.t); }
+        return; }
       if (g.k === "wave") { const h = R ? rh : lh, m = R ? -1 : 1;
         ft(h, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10 * m, y: -95, rotation: 20 * m, duration: 0.28, ease: "power2.out" }, { rotation: -18 * m, duration: 0.2 }, { rotation: 20 * m, duration: 0.2 },
           { rotation: -15 * m, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }

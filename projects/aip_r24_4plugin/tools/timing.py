@@ -11,16 +11,20 @@ OFFSET, FPS, TAIL = 9 / 30, 30, 1.6
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
 # alignment fixes (raw seconds), checked against the energy envelope + faster-whisper small (none needed so far)
-TFIX = {}
+# alignment fixes (raw seconds), checked against the VO energy envelope + faster-whisper small/medium: the ElevenLabs alignment put
+# "Context Seven dari Upstash" ~0.2 s late (silence 7.46-7.60, voiced from 7.62; "Up" stop closure 8.55) and "production." (line 7)
+# 0.4 s late (voiced 36.65-37.25, whisper medium 36.68).
+TFIX = {22: (7.62, 7.88), 23: (7.92, 8.14), 24: (8.18, 8.36), 25: (8.40, 9.12), 94: (36.66, 37.26)}
 for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {2: (3, "Claude Code,", "klodkod"), 11: (13, "FreeLLMAPI,", "frielelemeipiai"), 28: (29, "Claude Code", "klodkod"),
-         43: (44, "Claude Code,", "klodkod")}
+MERGE = {2: (3, "Claude Code", "klodkod"), 22: (23, "Context7", "kontekseven")}
 FIX = {}
-FIXI = {}
-PRON = {"dm": "diem", "api": "eipiai", "llm": "elelem", "github": "githab", "google": "gugel", "groq": "grok", "laptopmu": "leptopmu",
-        "setup": "setap", "server": "serfer", "servernya": "serfernya", "key": "ki", "claude": "klod", "model": "model"}
+FIXI = {107: "ALAT,"}   # spoken "alat" (an Indonesian word, read naturally); the caption shows the CTA keyword upper case
+PRON = {"dm": "diem", "claude": "klod", "context7": "kontekseven", "upstash": "apstes", "supabase": "supabeis", "mcp": "emsipi",
+        "chrome": "krom", "devtools": "devtuls", "google": "gugel", "vercel": "versel", "deploy": "diploi", "preview": "priviu",
+        "production": "prodakson", "console": "konsol", "network": "netwerk", "online": "onlain", "migration": "maigreisyen",
+        "database": "deitabeis", "project": "projek", "webnya": "webnya", "link": "link", "kode": "kode", "ngoding": "ngoding"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -73,17 +77,14 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Pengen", [3, 6], ["Claude Code,"], ["langganan?"]),
-    ("s02", "Ada", [3, 4, 7], ["tengahnya:", "gratis"], ["FreeLLMAPI,"]),
-    ("s03", "Dia", [4], ["laptopmu,", "Claude."], []),
-    ("s04", "Perintah", [3, 7, 10], ["dioper", "gratis"], []),
-    ("s05", "Jadi", [3, 5], ["aplikasinya", "otaknya"], ["bukan"]),
-    ("s06", "Jatah", [3, 5], ["habis,", "pindah"], []),
-    ("s07", "Pasang", [2, 6, 9], ["servernya,", "gratis", "setup."], []),
-    ("s08", "Jujur", [2, 6, 8], ["beda", "berubah."], []),
-    ("s09", "Kodemu", [3, 6, 9, 12], ["dikirim", "aturannya"], ["sensitif."]),
-    ("s10", "Pakai", [4], ["belajar", "klien."], []),
-    ("s11", "Komen", [2], ["DM."], ["LLM,"]),
+    ("s01", "Kode", [3], ["Claude Code"], ["setengah"]),
+    ("s02", "Biar", [3, 6, 9], ["online,", "empat"], ["alat"]),
+    ("s03", "Satu,", [4, 6, 10], ["dokumentasi", "versi"], ["Context7"]),
+    ("s04", "Dua,", [3, 7, 9, 12], ["tabel", "migration."], ["Supabase"]),
+    ("s05", "Tiga,", [4, 6, 11, 15, 18], ["pembeli,", "console", "network."], ["DevTools"]),
+    ("s06", "Empat,", [2, 7, 10, 12], ["preview", "production"], ["Vercel:"]),
+    ("s07", "Hati-hati,", [1, 5, 8, 12, 16], ["production.", "tes,", "baca"], ["Hati-hati,"]),
+    ("s08", "Komen", [2], ["DM."], ["ALAT,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",
          "punya", "tetap", "bisa", "langsung", "semua", "masuk", "tiap", "pakai", "kalian", "mau", "isi", "sama", "mana", "buat",

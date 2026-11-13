@@ -418,10 +418,11 @@
         const unitsFor = (c, at, dur) => UNITS.forEach((u) => {
           const v = (c.x + u.x0 * c.scale >= -1 && c.x + u.x1 * c.scale <= VW + 1 && c.y + u.y0 * c.scale >= -1 && c.y + u.y1 * c.scale <= VH + 1) ? 1 : 0;
           if (v === u.v) return;
-          if (!dur) st(u.el, { filter: "opacity(" + v + ")" }, at);
-          else if (v) ft(u.el, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: Math.max(0.12, dur * 0.4), ease: "sine.out" }, at + dur * 0.6);
-          else ft(u.el, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: Math.max(0.1, dur * 0.35), ease: "sine.in" }, at);
-          u.v = v; });
+          // a newer camera move supersedes a fade that has not started yet (no fighting tweens)
+          if (u.tw && u.t0 >= at) { tl.remove(u.tw); u.tw = null; u.v = 1 - u.v; if (v === u.v) return; }
+          const t0 = !dur ? at : v ? at + dur * 0.6 : at, d = !dur ? 0.001 : v ? Math.max(0.12, dur * 0.4) : Math.max(0.1, dur * 0.35);
+          const tw = gsap.fromTo(u.el, { filter: "opacity(" + (1 - v) + ")" }, { filter: "opacity(" + v + ")", duration: d, ease: v ? "sine.out" : "sine.in", immediateRender: false });
+          tl.add(tw, t0); u.tw = tw; u.t0 = t0; u.v = v; });
         const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); unitsFor(cc, at, 0); };
         const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); unitsFor(nx, at, dur || 0.8); cc = nx; };
         const whip = (x, y, s, at) => camTo(x, y, s, at, 0.42, "expo.inOut");
@@ -598,7 +599,6 @@
         $$(".tr.row .c4 .cn").forEach((el) => count(el, +el.dataset.n, wt("dan penjualan", "penjualan") - 0.2, 0.9));
         FX.go("right", tTel - 0.6); FX.face("wide", tTel - 0.05, 0.9);
         const tSort = wt("dan penjualan", "penjualan") + 0.5;
-        camTo(sb.x - 120, sb.y + 160, 1.85, tSort - 0.7, 0.5, "expo.inOut");
         st("#cursor", { x: sb.x - 160, y: sb.y + 190 }, tSort - 0.75); cur = { x: sb.x - 160, y: sb.y + 190 };
         ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tSort - 0.6);
         moveEl($("#sortBtn"), tSort - 0.5, 0.4);

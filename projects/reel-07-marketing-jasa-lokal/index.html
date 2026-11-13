@@ -528,7 +528,6 @@
           ft($(".bx", m), { backgroundColor: "rgba(255,255,255,0.07)" }, { backgroundColor: "rgba(1,204,247,0.22)", duration: 0.25 }, t); }
         moveTo(800, 700, tMod - 0.1, 1.1);
         FX.point(tMod - 0.3);
-        camTo(460, 300, 1.04, tMod + 1.15, 0.6);
         ft("#dirSt .a", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tMod + 1.25);
         ft("#dirSt .b", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tMod + 1.3);
         FX.face("happy", tMod + 1.3, 0.7);
@@ -758,13 +757,14 @@
           const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
             const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
             return inter && !inside; };
-          R.forEach((q) => { let prev = false;
-            sh.forEach((S, i) => { const h = cut(q, S.c);
+          R.forEach((q) => { let prev = false; const H = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = H[i]; if (!h && prev && i + 1 < sh.length && H[i + 1] && nextT - inT < 0.5) h = true; // too short to show: stay hidden
               if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }
               else if (h && !prev) ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.18, ease: "power1.out" }, S.t);
-              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.25, ease: "power1.out" }, S.t + S.d - 0.05);
+              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.25, ease: "power1.out" }, inT);
               prev = h; }); });
-          window.__noCut = { leaves: R.length, shots: sh.length }; }
+          window.__noCut = { leaves: R.length, shots: sh.length, R, sh }; }
 
         FX.runGestures();
         tl.set({}, {}, D - 0.01);

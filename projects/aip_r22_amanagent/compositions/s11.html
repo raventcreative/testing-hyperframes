@@ -1,0 +1,165 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .s11-a { position: absolute; }
+    #s11-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s11-glow { left: 40px; top: 300px; width: 1000px; height: 700px; border-radius: 50%; transform-origin: 50% 50%;
+      background: radial-gradient(closest-side, rgba(255,255,255,.95), rgba(220,232,252,.6) 48%, rgba(206,222,250,0) 100%); }
+    .s11-card { background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 40px 76px -34px rgba(10,13,44,.5), 0 0 0 1.5px rgba(10,13,44,.07); }
+    /* the package: what gets sent by DM */
+    #s11-pk { left: 220px; top: 340px; width: 640px; height: 150px; border-radius: 30px; transform-origin: 50% 50%; font-family: Poppins, sans-serif; }
+    #s11-pk > * { position: absolute; }
+    #s11-pk .ic { left: 24px; top: 27px; width: 96px; height: 96px; border-radius: 28px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #ffffff; }
+    #s11-pk .ic svg { position: absolute; left: 24px; top: 24px; width: 48px; height: 48px; display: block; }
+    #s11-pk .eb { left: 144px; top: 26px; font: 700 15px/22px Poppins, sans-serif; letter-spacing: .16em; color: #5d6f8f; white-space: nowrap; }
+    #s11-pk .tt { left: 142px; top: 46px; font: 700 36px/46px Poppins, sans-serif; white-space: nowrap; padding-right: 4px; }
+    #s11-pk .ts { left: 144px; top: 94px; font: 400 19px/26px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    /* comment sheet */
+    #s11-cmt { left: 60px; top: 560px; width: 960px; height: 236px; }
+    #s11-cbg { left: 0; top: 0; width: 960px; height: 236px; border-radius: 38px; }
+    #s11-chd { left: 36px; top: 20px; height: 34px; display: flex; align-items: center; gap: 10px; font: 700 22px/34px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s11-chd svg { width: 28px; height: 28px; display: block; color: #3a6fe0; }
+    #s11-av { left: 30px; top: 84px; width: 104px; height: 104px; border-radius: 50%; background: linear-gradient(150deg, #3a6fe0, #294b77); color: #fff; box-shadow: 0 12px 22px -12px rgba(41,75,119,.9); }
+    #s11-av svg { position: absolute; left: 26px; top: 24px; width: 52px; height: 52px; display: block; }
+    #s11-fld, #s11-ring { left: 152px; top: 72px; width: 640px; height: 136px; border-radius: 68px; }
+    #s11-fld { background: #f3f6fc; box-shadow: inset 0 0 0 2px #dbe4f3; }
+    #s11-ring { box-shadow: 0 0 0 6px rgba(58,111,224,.16), inset 0 0 0 3px #3a6fe0; }
+    #s11-ph { left: 198px; top: 72px; font: 400 30px/136px Poppins, sans-serif; color: #9aa7c0; white-space: nowrap; }
+    #s11-line { left: 192px; top: 72px; height: 136px; display: flex; align-items: center; }
+    .s11-lt { display: inline-block; font: 700 82px/1 Poppins, sans-serif; letter-spacing: .01em; padding: 10px 1px 6px; transform-origin: 50% 85%;
+      background: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #s11-caret { display: inline-block; width: 7px; height: 74px; margin-left: 6px; border-radius: 4px; background: #3a6fe0; }
+    #s11-heart { left: 452px; top: 138px; width: 0; height: 0; }
+    #s11-heart svg { position: absolute; left: -32px; top: -30px; width: 64px; height: 64px; overflow: visible; }
+    #s11-send { left: 818px; top: 86px; width: 108px; height: 108px; border-radius: 50%; background: #c9d4e6; }
+    #s11-son { left: 0; top: 0; width: 108px; height: 108px; border-radius: 50%; background: linear-gradient(150deg, #4a7ff0, #294b77); box-shadow: 0 14px 24px -12px rgba(58,111,224,.95); }
+    #s11-sni { left: 28px; top: 30px; width: 50px; height: 50px; color: #fff; }
+    #s11-sni svg { width: 50px; height: 50px; display: block; }
+    #s11-pl { left: 0; top: 0; width: 0; height: 0; }
+    #s11-pl i { position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; color: #294b77; }
+    #s11-pl i svg { width: 92px; height: 92px; display: block; }
+    /* DM card */
+    #s11-dm { left: 100px; top: 560px; width: 880px; height: 262px; border-radius: 34px; transform-origin: 50% 50%; }
+    #s11-dav { left: 28px; top: 22px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(150deg, #3a6fe0, #294b77); color: #fff; }
+    #s11-dav svg { position: absolute; left: 15px; top: 15px; width: 30px; height: 30px; display: block; }
+    #s11-dt { left: 104px; top: 20px; font: 700 24px/32px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s11-ds { left: 104px; top: 52px; font: 400 18px/26px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s11-ddv { left: 28px; top: 100px; width: 824px; height: 1.5px; background: #e6ecf6; }
+    #s11-bub { left: 300px; top: 116px; width: 552px; height: 96px; border-radius: 28px 28px 10px 28px; background: linear-gradient(150deg, #294b77, #0a0d2c); transform-origin: 100% 100%;
+      box-shadow: 0 18px 30px -18px rgba(10,13,44,.85); }
+    #s11-b1 { left: 28px; top: 16px; font: 700 24px/32px Poppins, sans-serif; color: #fff; white-space: nowrap; }
+    #s11-b2 { left: 28px; top: 50px; font: 400 17px/26px Poppins, sans-serif; color: rgba(255,255,255,.8); white-space: nowrap; }
+    #s11-sent { left: 560px; top: 220px; width: 292px; height: 32px; display: flex; align-items: center; justify-content: flex-end; gap: 8px; font: 700 21px/32px Poppins, sans-serif; color: #2da44e; white-space: nowrap; }
+    #s11-ok { position: relative; flex: none; width: 30px; height: 30px; }
+    #s11-ok svg { width: 30px; height: 30px; display: block; overflow: visible; }
+    #s11-logo { left: 250px; top: 852px; width: 580px; height: auto; transform-origin: 50% 50%; }
+    #s11-lg { left: 250px; top: 852px; width: 580px; height: 52px; -webkit-mask: url(assets/brand/logo_dark_trim.png) 0 0 / 100% 100% no-repeat; mask: url(assets/brand/logo_dark_trim.png) 0 0 / 100% 100% no-repeat;
+      background: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(160,196,255,.95) 50%, rgba(255,255,255,0) 58%); background-size: 300% 100%; background-repeat: no-repeat; }
+  </style>
+  <div id="root" data-composition-id="s11" data-width="1080" data-height="1920">
+    <div id="s11-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s11 CTA "Komen LLM, aku kirim lewat DM."  (structure = the house CTA of R8/R12; content ours)
+      // The package card "Panduan FreeLLMAPI · link repo, 3 langkah setup, catatan aman" pops at the top · "Komen": a comment sheet
+      // rises, the field focuses · "LLM,": LLM types itself big, a heart pops, the send button lights · "aku kirim": send is pressed,
+      // a paper plane flies up into the package card; the comment sheet turns into a DM thread · "DM.": the bubble "Link repo + 3
+      // langkah setup / plus catatan biar kodemu aman" + "terkirim" with a drawn double check · END BEAT (from the small corner
+      // logo's exit): glow blooms, the dark AI PRENEUR logo settles under the DM card with one glint. Ends on this end card.
+      const ID = "s11", ST = window.SCN[ID][0], D = window.SCN[ID][1], VW = window.VO_WORDS, K = window.K;
+      const L = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= ST + after - 0.05); return w ? w[1] - ST : 0; };
+      const $ = (id) => document.getElementById(id);
+      const tl = gsap.timeline({ paused: true });
+      const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+      { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+      const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+      const P0 = gsap.timeline(); tl.add(P0, 0);      // every initial state: nested timeline, first child at 0
+      const I = (el, v) => { gsap.set(el, _sc(v)); P0.set(el, _sc(v), 0); };
+      const tKom = Math.max(0, L("Komen")), tRem = L("LLM,"), tAku = L("aku"), tKir = L("kirim"), tDM = L("DM.");
+      const tEnd = window.TOTAL - 1.2 - ST;          // the small corner logo leaves here → end beat
+
+      // ================================================================ DOM
+      let h = `<div class="s11-a" id="s11-glow"></div>`;
+      h += `<div class="s11-a s11-card" id="s11-cmt"><div class="s11-a" id="s11-chd">${K.svg("message-circle", 2.2)}Komentar</div>` +
+        `<div class="s11-a" id="s11-av">${K.svg("user", 2)}</div><div class="s11-a" id="s11-fld"></div><div class="s11-a" id="s11-ring"></div>` +
+        `<div class="s11-a" id="s11-ph">Tulis komentar…</div>` +
+        `<div class="s11-a" id="s11-line">${"LLM".split("").map((c, i) => `<span class="s11-lt" id="s11-l${i}">${c}</span>`).join("")}<i id="s11-caret"></i></div>` +
+        `<div class="s11-a" id="s11-heart"><svg id="s11-hs" viewBox="0 0 24 24"><path d="${'M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5'}" fill="#e5484d" stroke="#e5484d" stroke-width="1.6" stroke-linejoin="round"/></svg></div>` +
+        `<div class="s11-a" id="s11-send"><div class="s11-a" id="s11-son"></div><div class="s11-a" id="s11-sni">${K.svg("send", 2)}</div></div></div>`;
+      h += `<div class="s11-a s11-card" id="s11-dm"><div class="s11-a" id="s11-dav">${K.svg("message-circle", 2.2)}</div><div class="s11-a" id="s11-dt">Pesan langsung · DM</div>` +
+        `<div class="s11-a" id="s11-ds">baru saja</div><div class="s11-a" id="s11-ddv"></div>` +
+        `<div class="s11-a" id="s11-bub"><div class="s11-a" id="s11-b1">Link repo + 3 langkah setup</div><div class="s11-a" id="s11-b2">plus catatan biar kodemu aman</div></div>` +
+        `<div class="s11-a" id="s11-sent"><div id="s11-ok"><svg viewBox="0 0 24 24"><path id="s11-okp" d="M18 6 7 17l-5-5M22 10l-7.5 7.5L13 16" fill="none" stroke="#2da44e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/></svg></div><span>terkirim</span></div></div>`;
+      h += `<div class="s11-a s11-card" id="s11-pk"><div class="ic">${K.svg("list-checks", 2)}</div><div class="eb">DIKIRIM LEWAT DM</div><div class="tt k-grad">Panduan FreeLLMAPI</div><div class="ts">link repo · 3 langkah setup · catatan aman</div></div>`;
+      h += `<div class="s11-a" id="s11-pl"><i>${K.svg("send", 1.8)}</i></div>`;
+      h += `<img class="s11-a" id="s11-logo" src="assets/brand/logo_dark_trim.png" alt="AI PRENEUR"><div class="s11-a" id="s11-lg"></div>`;
+      $("s11-cam").innerHTML = h;
+      const cam = $("s11-cam"); I(cam, { x: 0, y: 0 });
+      const glow = $("s11-glow"), pk = $("s11-pk"); I(glow, { opacity: 0.9, scale: 1 });
+
+      // ================================================================ the package card pops in (s09 ends empty)
+      I(pk, { opacity: 0, scale: 0.8, y: 30 });
+      ft(pk, { opacity: 0, scale: 0.8, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.32, ease: "back.out(1.8)" }, 0.0);
+
+      // ================================================================ "Komen": the comment sheet rises · "LLM,": it types itself
+      const cmt = $("s11-cmt"), ring = $("s11-ring"), ph = $("s11-ph"), caret = $("s11-caret");
+      I(cmt, { opacity: 0, y: 80 });
+      ft(cmt, { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.4)" }, 0.0);
+      I(ring, { opacity: 0 }); ft(ring, { opacity: 0 }, { opacity: 1, duration: 0.15 }, tKom + 0.08);
+      I(ph, { opacity: 1 }); I(caret, { opacity: 0 });
+      tl.set(caret, { opacity: 1 }, tKom + 0.1);
+      const ta = Math.max(0.2, tRem - 0.1), tb = ta + 0.3;
+      tl.set(ph, { opacity: 0 }, ta - 0.02);
+      for (let i = 0; i < 3; i++) {
+        const e = $("s11-l" + i), t = ta + (tb - ta) * i / 2;
+        I(e, { opacity: 0, scale: 1.5, y: -10 });
+        ft(e, { opacity: 0, scale: 1.5, y: -10 }, { opacity: 1, scale: 1, y: 0, duration: 0.14, ease: "power3.out" }, t);
+      }
+      const hs = $("s11-hs"); I(hs, { opacity: 0, scale: 0.2 });
+      ft(hs, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1.25, duration: 0.18, ease: "back.out(3)" }, tb + 0.12);
+      ft(hs, { scale: 1.25 }, { scale: 1, duration: 0.2, ease: "power2.out" }, tb + 0.3);
+      const son = $("s11-son"); I(son, { opacity: 0, scale: 1 });
+      ft(son, { opacity: 0 }, { opacity: 1, duration: 0.15 }, tb + 0.05);
+
+      // ================================================================ "aku kirim": send → plane → package lands in the DM bubble
+      ft(son, { scale: 1 }, { scale: 0.86, duration: 0.07, yoyo: true, repeat: 1, ease: "power2.out" }, tAku);
+      const pl = $("s11-pl"), sx = 60 + 818 + 54, sy = 560 + 86 + 54, px = 540, py = 415;
+      I(pl, { opacity: 0, x: sx, y: sy, scale: 0.6, rotation: 0 });
+      tl.set(pl, { opacity: 1 }, tAku + 0.06);
+      ft(pl, { x: sx }, { x: px, duration: 0.34, ease: "power2.inOut" }, tAku + 0.06);
+      ft(pl, { y: sy }, { y: py, duration: 0.34, ease: "power3.out" }, tAku + 0.06);
+      ft(pl, { scale: 0.6, rotation: 0 }, { scale: 1, rotation: -30, duration: 0.34, ease: "power1.out" }, tAku + 0.06);
+      tl.set(pl, { opacity: 0 }, tAku + 0.42);
+      ft(pk, { scale: 1 }, { scale: 1.06, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, tAku + 0.4);
+      // the comment sheet becomes the DM thread
+      const dm = $("s11-dm"), bub = $("s11-bub"), sent = $("s11-sent"), okp = $("s11-okp");
+      ft(cmt, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.94, duration: 0.2, ease: "power2.in" }, tKir + 0.12);
+      I(dm, { opacity: 0, scale: 0.94, y: 20 });
+      ft(dm, { opacity: 0, scale: 0.94, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "back.out(1.6)" }, tKir + 0.22);
+      I(bub, { opacity: 0, scale: 0.4 });
+      ft(bub, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(2)" }, tDM - 0.12);
+      I(sent, { opacity: 0, x: 10 }); ft(sent, { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.2 }, tDM + 0.08);
+      I(okp, { attr: { "stroke-dashoffset": 1 } });
+      ft(okp, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.3, ease: "power2.out" }, tDM + 0.1);
+
+      // ================================================================ END BEAT: glow blooms, the dark logo settles, one glint
+      ft(glow, { scale: 1 }, { scale: 1.08, duration: D - tEnd, ease: "sine.out" }, tEnd);
+      const logo = $("s11-logo"), lg = $("s11-lg");
+      I(logo, { opacity: 0, y: 24, scale: 0.92 });
+      ft(logo, { opacity: 0, y: 24, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, tEnd + 0.05);
+      I(lg, { opacity: 0, backgroundPosition: "100% 0" });
+      tl.set(lg, { opacity: 1 }, tEnd + 0.45);
+      ft(lg, { backgroundPosition: "100% 0" }, { backgroundPosition: "0% 0", duration: 0.6, ease: "power2.inOut" }, tEnd + 0.45);
+      tl.set(lg, { opacity: 0 }, tEnd + 1.06);
+      ft(dm, { y: 0 }, { y: -12, duration: 0.5, ease: "power2.out" }, tEnd);
+      ft(pk, { y: 0 }, { y: -8, duration: 0.5, ease: "power2.out" }, tEnd);
+
+      tl.set({}, {}, D - 0.01);
+      (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+      tl.render(0, true, true);
+      window.__timelines = window.__timelines || {};
+      window.__timelines[ID] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,80 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s01-glow { left: 40px; top: 280px; width: 1000px; height: 720px; }
+    /* the paywall card that drops over the terminal */
+    #s01-gate { left: 150px; top: 540px; width: 780px; height: 176px; border-radius: 30px; transform-origin: 50% 0%; }
+    #s01-gate > * { position: absolute; }
+    #s01-gate .ic { left: 26px; top: 28px; width: 120px; height: 120px; border-radius: 34px; background: #fff3dc; color: #94540a; box-shadow: inset 0 0 0 2px rgba(148,84,10,.22); }
+    #s01-gate .ic svg { position: absolute; left: 30px; top: 30px; width: 60px; height: 60px; display: block; }
+    #s01-gate .eb { left: 172px; top: 30px; font: 700 15px/22px Poppins, sans-serif; letter-spacing: .16em; color: #94540a; white-space: nowrap; }
+    #s01-gate .tt { left: 170px; top: 52px; font: 700 40px/52px Poppins, sans-serif; white-space: nowrap; padding-right: 4px; }
+    #s01-gate .ts { left: 172px; top: 108px; font: 400 21px/30px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    /* wallet + question */
+    #s01-wal { left: 90px; top: 770px; width: 560px; height: 130px; border-radius: 28px; transform-origin: 50% 50%; }
+    #s01-wal > * { position: absolute; }
+    #s01-wal .ic { left: 22px; top: 22px; width: 86px; height: 86px; border-radius: 26px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #ffffff; }
+    #s01-wal .ic svg { position: absolute; left: 21px; top: 21px; width: 44px; height: 44px; display: block; }
+    #s01-wal .tt { left: 130px; top: 20px; font: 700 28px/38px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s01-wal .tr { left: 132px; top: 72px; width: 300px; height: 16px; border-radius: 8px; background: #e1e8f3; overflow: hidden; }
+    #s01-wal .fl { position: absolute; left: 0; top: 0; width: 300px; height: 16px; border-radius: 8px; background: linear-gradient(90deg, #d9534f, #f0a35e); transform-origin: 0 50%; }
+    #s01-wal .lb { left: 450px; top: 60px; font: 700 20px/40px Poppins, sans-serif; color: #b4322f; white-space: nowrap; }
+    #s01-q { left: 760px; top: 750px; width: 170px; height: 170px; border-radius: 50%; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #ffffff; transform-origin: 50% 80%;
+      box-shadow: 0 30px 46px -24px rgba(10,13,44,.8); text-align: center; font: 700 112px/170px Poppins, sans-serif; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s01 HOOK "Pengen belajar Claude Code, tapi belum sanggup langganan?"
+      // Frame 0: the Claude Code app window (text label + generic terminal icon, no logo) is already on screen with a learner's
+      // folder · "belajar": a learner's request types itself · "tapi": a paywall card drops over the window ("Perlu paket
+      // berbayar · paket langganan Claude atau kredit API", verified on support.claude.com) · "belum sanggup": the wallet card
+      // rises, its bar drains · "langganan?": a big "?" pops. END STATE (hand-over to s02): only the window stays, unchanged.
+      const ID = "s01", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, typeD } = S, tl = S.tl;
+      const tBel = L("belajar"), tCC = L("Claude Code,"), tTap = L("tapi"), tBlm = L("belum"), tSan = L("sanggup"), tLan = L("langganan?");
+      let h = `<div class="k-glow k-a" id="s01-glow"></div>`;
+      h += K.term("s01", { x: 90, y: 318, w: 900, h: 300, tag: "TERMINAL", ty: true, fs: 30, lh: 50, t0: 22,
+        lines: [`<em>~/belajar-ngoding</em>`, `<b>$</b> claude`] });
+      h += `<div class="k-a k-card" id="s01-gate"><div class="ic">${K.svg("lock", 2)}</div><div class="eb">BIASANYA</div>` +
+        `<div class="tt k-grad">Perlu paket berbayar</div><div class="ts">paket langganan Claude atau kredit API</div></div>`;
+      h += `<div class="k-a k-card" id="s01-wal"><div class="ic">${K.svg("wallet", 2)}</div><div class="tt">Dompet pelajar</div>` +
+        `<div class="tr"><div class="fl" id="s01-wf"></div></div><div class="lb" id="s01-wl">tipis</div></div>`;
+      h += `<div class="k-a" id="s01-q">?</div>`;
+      $("s01-cam").innerHTML = h;
+      const glow = $("s01-glow"), tm = $("s01-tm");
+      I(glow, { opacity: 0.85, scale: 1 });
+      // the window is there from frame 0 (a tiny settle only)
+      I(tm, { opacity: 1, y: 14, scale: 0.985 });
+      ft(tm, { y: 14, scale: 0.985 }, { y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, 0);
+      // "belajar": the learner's request types itself
+      typeD($("s01-ty"), "> ajarin aku bikin web portofolio", Math.max(0.12, tBel - 0.3), tCC + 0.5, true);
+      ft(tm, { scale: 1 }, { scale: 1.025, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tCC - 0.04);
+      // "tapi": paywall drops over the window
+      const gate = $("s01-gate");
+      I(gate, { opacity: 0, y: -70, rotation: -4, scale: 0.92 });
+      ft(gate, { opacity: 0, y: -70, rotation: -4, scale: 0.92 }, { opacity: 1, y: 0, rotation: -1.5, scale: 1, duration: 0.34, ease: "back.out(1.7)" }, tTap - 0.12);
+      ft(tm, { opacity: 1 }, { opacity: 0.55, duration: 0.25 }, tTap + 0.05);
+      const gic = gate.querySelector(".ic svg"); I(gic, { rotation: 0 });
+      ft(gic, { rotation: 0 }, { rotation: 14, duration: 0.07, yoyo: true, repeat: 3, ease: "sine.inOut" }, tTap + 0.22);
+      // "belum sanggup": the wallet rises, its bar drains
+      pop($("s01-wal"), tBlm - 0.12, { y: 60, scale: 0.94 }, 0.32, "back.out(1.6)");
+      const wf = $("s01-wf"); I(wf, { scaleX: 0.7 });
+      ft(wf, { scaleX: 0.7 }, { scaleX: 0.12, duration: 0.5, ease: "power2.inOut" }, tSan - 0.05);
+      pop($("s01-wl"), tSan + 0.3, { scale: 0.4, y: 0 }, 0.2, "back.out(3)");
+      // "langganan?": the big question mark
+      const q = $("s01-q");
+      I(q, { opacity: 0, scale: 0.2, rotation: -30 });
+      ft(q, { opacity: 0, scale: 0.2, rotation: -30 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.36, ease: "back.out(2.4)" }, tLan - 0.06);
+      ft(q, { rotation: 0 }, { rotation: 8, duration: 0.14, yoyo: true, repeat: 3, ease: "sine.inOut" }, tLan + 0.32);
+      // ================================================================ hand-over → s02: everything but the window leaves
+      const tOut = D - 0.3;
+      K.out(S, [gate, $("s01-wal")], tOut);
+      ft(q, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6, duration: 0.22, ease: "power2.in" }, tOut);
+      ft(tm, { opacity: 0.55 }, { opacity: 1, duration: 0.25 }, tOut);
+      S.done();
+    })();
+  </script>
+</template>

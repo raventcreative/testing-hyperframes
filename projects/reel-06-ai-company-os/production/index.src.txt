@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — AI Company OS</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/robot_rig2.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --n1: #0a0d2c; --n2: #294b77; --grad: linear-gradient(100deg, #0a0d2c 0%, #294b77 100%); --line: rgba(10,13,44,0.10);
+        --auto: #2f6fe4; --autoBg: #e7f0ff; --hum: #f08c1a; --humBg: #fff1e0; --mute: rgba(10,13,44,0.55); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fd; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: var(--n1); -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #f4f7fd; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+
+      /* window: x 80-1000, y 290-1240 */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.84);
+        border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); transform-origin: 50% 50%; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.92); }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 2px 10px; }
+      #mode { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; }
+      #mode .lm { color: var(--hum); } #mode .la { color: var(--mute); }
+      #sw { position: relative; width: 62px; height: 34px; border-radius: 17px; background: rgba(240,140,26,0.25); }
+      #knob { position: absolute; left: 4px; top: 4px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(10,13,44,0.25); }
+      #rail { position: absolute; left: 0; top: 60px; bottom: 0; width: 72px; border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 18px; }
+      .ri { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; color: rgba(10,13,44,0.45); }
+      .ri .ic { width: 22px; height: 22px; } .ri.on { background: rgba(41,75,119,0.10); color: var(--n2); }
+      #area { position: absolute; left: 72px; top: 60px; width: 848px; height: 890px; overflow: hidden; background: rgba(244,247,253,0.6); }
+      #areaGrid { position: absolute; inset: 0; background-image: radial-gradient(rgba(41,75,119,0.13) 1px, transparent 1.4px); background-size: 22px 22px; }
+      #cam { position: absolute; left: 0; top: 0; width: 848px; height: 890px; transform-origin: 0 0; }
+      .card { position: absolute; background: #fff; border: 1.5px solid var(--line); border-radius: 18px; box-shadow: 0 6px 20px rgba(41,75,119,0.08); }
+      .card .hd { display: flex; align-items: center; gap: 10px; padding: 16px 18px 6px; font-size: 17px; font-weight: 700; }
+      .card .hd .ic { width: 20px; height: 20px; color: var(--n2); }
+      .badge { margin-left: auto; font-size: 13px; font-weight: 700; color: #fff; background: #e5484d; border-radius: 12px; padding: 2px 10px; }
+
+      /* run button */
+      #runBtn { margin-left: auto; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border-radius: 19px; background: var(--grad); color: #fff; font-size: 15px; font-weight: 700; }
+      #runBtn .ic { width: 16px; height: 16px; }
+      #agentsOn { font-size: 14px; color: var(--mute); display: flex; align-items: center; gap: 6px; margin-left: 4px; }
+      #agentsOn i { width: 9px; height: 9px; border-radius: 50%; background: #22c55e; display: block; }
+
+      /* org board */
+      .ag { position: absolute; width: 256px; height: 190px; background: #fff; border: 1.5px solid var(--line); border-radius: 18px; box-shadow: 0 6px 20px rgba(41,75,119,0.08); padding: 14px 14px 0; }
+      .ag .top { display: flex; align-items: center; gap: 10px; }
+      .ag .av { width: 50px; height: 50px; border-radius: 13px; background: rgba(41,75,119,0.09); color: var(--n2); display: flex; align-items: center; justify-content: center; flex: none; }
+      .ag .av .ic { width: 22px; height: 22px; }
+      .ag .nm { font-size: 20px; font-weight: 700; line-height: 1.1; }
+      .ag .st { margin-left: auto; position: relative; width: 78px; height: 26px; flex: none; }
+      .ag .st span { position: absolute; inset: 0; border-radius: 13px; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+      .ag .st .s0 { background: rgba(10,13,44,0.06); color: var(--mute); }
+      .ag .st .s1 { background: var(--autoBg); color: var(--auto); opacity: 0; }
+      .ag .st .s2 { background: #e8f8ee; color: #16a34a; opacity: 0; }
+      .ag .st .ic { width: 12px; height: 12px; }
+      .ag .role { font-size: 15px; color: rgba(10,13,44,0.7); margin-top: 16px; min-height: 40px; line-height: 1.3; opacity: 0; }
+      .ag .chips { display: flex; gap: 8px; margin-top: 14px; }
+      .ag .chip { display: flex; align-items: center; gap: 5px; height: 30px; padding: 0 11px; border-radius: 15px; background: rgba(41,75,119,0.07); font-size: 13px; font-weight: 700; color: var(--n2); opacity: 0; }
+      .ag .chip .ic { width: 13px; height: 13px; }
+
+      /* handoff flow */
+      #flowCard { left: 20px; top: 440px; width: 808px; height: 262px; opacity: 0; }
+      #hint { position: absolute; left: 50%; top: 214px; transform: translateX(-50%); font-size: 14px; font-weight: 700; color: var(--mute); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+      #hint .ic { width: 15px; height: 15px; }
+      #pipe { position: absolute; left: 0; top: 0; width: 808px; height: 262px; overflow: visible; }
+      .nd { position: absolute; width: 130px; margin-left: -65px; text-align: center; }
+      .nd .c { width: 64px; height: 64px; margin: 0 auto; border-radius: 50%; background: #fff; border: 2px solid rgba(41,75,119,0.25); display: flex; align-items: center; justify-content: center; color: var(--n2); }
+      .nd .c .ic { width: 28px; height: 28px; }
+      .nd b { display: block; font-size: 15px; margin-top: 8px; }
+      .nd .out { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; height: 28px; padding: 0 10px; border-radius: 14px; background: var(--autoBg); color: var(--auto); font-size: 12px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      .nd .out .ic { width: 12px; height: 12px; }
+      #tok { position: absolute; left: 0; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--auto); box-shadow: 0 0 12px rgba(47,111,228,0.9); opacity: 0; }
+
+      /* CEO priorities */
+      #prioCard { left: 20px; top: 720px; width: 808px; height: 232px; opacity: 0; }
+      .pr { position: absolute; left: 18px; right: 18px; height: 46px; border-radius: 12px; border: 1.5px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 0 14px; font-size: 16px; background: #fff; opacity: 0; }
+      .pr .n { width: 28px; height: 28px; border-radius: 8px; background: var(--grad); color: #fff; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+      .prs { position: absolute; left: 18px; right: 18px; height: 46px; border-radius: 12px; border: 1.5px dashed rgba(41,75,119,0.22); display: flex; align-items: center; gap: 12px; padding: 0 14px; }
+      .prs i { width: 28px; height: 28px; border-radius: 8px; background: rgba(41,75,119,0.08); display: block; flex: none; }
+      .prs b { height: 12px; border-radius: 6px; background: rgba(41,75,119,0.08); display: block; }
+      #prioWait { position: absolute; right: 18px; top: 16px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(10,13,44,0.06); color: var(--mute); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+      #prioWait .ic { width: 14px; height: 14px; color: var(--mute); }
+      .pr em { margin-left: auto; font-style: normal; font-size: 12px; font-weight: 700; color: var(--n2); background: rgba(41,75,119,0.08); padding: 3px 10px; border-radius: 10px; }
+
+      /* shared memory view (inside #area, outside #cam) */
+      #memView { position: absolute; left: 0; top: 0; width: 848px; height: 890px; opacity: 0; }
+      #memSvg { position: absolute; left: 0; top: 0; width: 848px; height: 890px; overflow: visible; }
+      #memNode { position: absolute; left: 424px; top: 392px; width: 196px; height: 196px; margin: -98px 0 0 -98px; border-radius: 50%; background: var(--grad); color: #fff;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 18px 44px rgba(10,13,44,0.35); text-align: center; }
+      #memNode .ic { width: 44px; height: 44px; } #memNode b { font-size: 19px; line-height: 1.15; } #memNode span { font-size: 13px; opacity: 0.8; }
+      #memRing { position: absolute; left: 424px; top: 392px; width: 196px; height: 196px; margin: -98px 0 0 -98px; border-radius: 50%; border: 3px solid rgba(47,111,228,0.55); opacity: 0; }
+      .mc { position: absolute; width: 214px; height: 78px; margin: -39px 0 0 -107px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 8px 22px rgba(41,75,119,0.12);
+        display: flex; align-items: center; gap: 10px; padding: 0 14px; opacity: 0; }
+      .mc .av { width: 40px; height: 40px; border-radius: 12px; background: rgba(41,75,119,0.09); color: var(--n2); display: flex; align-items: center; justify-content: center; flex: none; }
+      .mc .av .ic { width: 20px; height: 20px; }
+      .mc b { font-size: 16px; display: block; } .mc .use { font-size: 12px; font-weight: 700; color: #16a34a; display: flex; align-items: center; gap: 4px; opacity: 0; }
+      .mc .use .ic { width: 12px; height: 12px; }
+      .mpk { position: absolute; left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--auto); box-shadow: 0 0 12px rgba(47,111,228,0.9); opacity: 0; }
+      #insight { position: absolute; left: 40px; top: 128px; width: 272px; padding: 12px 14px; border-radius: 14px; background: var(--n1); color: #fff; font-size: 14px; line-height: 1.35;
+        box-shadow: 0 12px 30px rgba(10,13,44,0.3); opacity: 0; display: flex; gap: 10px; align-items: flex-start; }
+      #insight .ic { width: 18px; height: 18px; color: #ffd666; flex: none; margin-top: 1px; }
+      #usedPill { position: absolute; left: 424px; top: 512px; transform: translateX(-50%); height: 44px; padding: 0 18px; border-radius: 22px; background: #e8f8ee; color: #16a34a; font-size: 17px; font-weight: 700;
+        display: flex; align-items: center; gap: 6px; opacity: 0; white-space: nowrap; }
+      #usedPill .ic { width: 16px; height: 16px; }
+      #zero { position: absolute; left: 424px; top: 512px; transform: translateX(-50%); height: 44px; padding: 0 18px; border-radius: 22px; background: #fde8e8; color: #e5484d; font-size: 17px; font-weight: 700;
+        display: flex; align-items: center; gap: 6px; opacity: 0; white-space: nowrap; }
+      #zero .ic { width: 16px; height: 16px; } #zero s { text-decoration: none; position: relative; }
+      #zeroLine { position: absolute; left: -2px; right: -2px; top: 52%; height: 2px; background: #e5484d; transform-origin: 0 50%; transform: scaleX(0); }
+      #smart { position: absolute; left: 40px; top: 752px; width: 768px; height: 118px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 8px 22px rgba(41,75,119,0.12); opacity: 0; }
+      #smart .l { position: absolute; left: 20px; top: 16px; } #smart .big { font-size: 38px; font-weight: 700; line-height: 1.05; margin-top: 4px; }
+      #smart .big small { font-size: 15px; font-weight: 400; color: var(--mute); margin-left: 6px; }
+      #smartSvg { position: absolute; left: 330px; top: 18px; width: 300px; height: 82px; overflow: visible; }
+      #smartTag { position: absolute; right: 18px; top: 38px; height: 40px; padding: 0 14px; border-radius: 20px; background: var(--autoBg); color: var(--auto); font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; opacity: 0; }
+      #smartTag .ic { width: 16px; height: 16px; }
+
+      /* cursor + misc */
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(10,13,44,0.35)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--n2); background: rgba(41,75,119,0.12); opacity: 0; z-index: 29; }
+      #winDim { position: absolute; inset: 0; background: rgba(244,247,253,0.78); opacity: 0; }
+      #cta { position: absolute; left: 110px; width: 860px; top: 560px; padding: 56px 48px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 66px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; color: rgba(10,13,44,0.75); } #cta .sb b { color: var(--n2); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--grad); color: #fff; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
+      <!--ROBOT_CSS-->
+      #robot { filter: drop-shadow(0 18px 30px rgba(41,75,119,0.25)); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="46.6" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="46.6" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="dots"></div>
+        <div id="win">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Company OS</span><span id="sim">SIMULASI</span>
+            <span id="agentsOn"><i></i>6 agent aktif</span>
+            <div id="runBtn"><span class="ic" data-i="play"></span>Jalankan</div></div>
+          <div id="rail"><div class="ri on"><span class="ic" data-i="layout-grid"></span></div><div class="ri"><span class="ic" data-i="users"></span></div>
+            <div class="ri"><span class="ic" data-i="workflow"></span></div><div class="ri"><span class="ic" data-i="brain-circuit"></span></div><div class="ri"><span class="ic" data-i="settings"></span></div></div>
+          <div id="area"><div id="areaGrid"></div>
+            <div id="cam">
+              <div id="org"></div>
+              <div class="card" id="flowCard"><div class="hd"><span class="ic" data-i="workflow"></span>Alur kerja antar agent<span class="lbl" style="margin-left:auto;margin-right:4px">HARI INI</span></div>
+                <svg id="pipe"></svg><div id="nodes"></div><i id="tok"></i><div id="hint"><span class="ic" data-i="play"></span>Belum jalan · klik Jalankan</div></div>
+              <div class="card" id="prioCard"><div class="hd"><span class="ic" data-i="crown"></span>Prioritas CEO · minggu ini</div><div id="prioWait"><span class="ic" data-i="hourglass"></span>Nunggu CEO</div><div id="prioSk"></div><div id="prioRows"></div></div>
+            </div>
+            <div id="memView"><svg id="memSvg"></svg><div id="memRing"></div>
+              <div id="memNode"><span class="ic" data-i="brain-circuit"></span><b>Memori<br />Bersama</b><span>semua agent baca</span></div>
+              <div id="chipsM"></div>
+              <div id="insight"><span class="ic" data-i="lightbulb"></span><div><b>Insight baru</b><br />Kompetitor turunin harga 10% minggu ini</div></div>
+              <div id="usedPill"><span class="ic" data-i="circle-check"></span>Dipakai 6 agent</div>
+              <div id="zero"><span class="ic" data-i="circle-x"></span><s>Mulai dari nol<i id="zeroLine"></i></s></div>
+              <div id="smart"><div class="l"><div class="lbl">INSIGHT TERSIMPAN</div><div class="big"><span id="insN">0</span><small>angka ilustrasi</small></div></div>
+                <svg id="smartSvg"></svg><div id="smartTag"><span class="ic" data-i="trending-up"></span>Makin pintar</div></div>
+            </div>
+          </div>
+          <div id="winDim"></div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div>
+        <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name gt">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><div id="caps"></div>
+          <!--ROBOT_HTML--></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="45.84" data-track-index="8" data-volume="1"></audio>
+      <!--SFX-->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const NS = "http://www.w3.org/2000/svg";
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n) => `<span class="ic">${icon(n)}</span>`;
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#0a0d2c" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+        const svg = (tag, a, p) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+        /* ---------- build UI ---------- */
+        // org board: 3 x 2 agent cards
+        const AG = [["ceo", "crown", "CEO", "Tentuin prioritas & keputusan", "5 tugas", "konteks bisnis"],
+          ["cmo", "megaphone", "CMO", "Ubah data jadi brief konten", "8 tugas", "brand & pasar"],
+          ["riset", "user-search", "Riset", "Data kompetitor & pasar", "6 tugas", "24 sumber"],
+          ["sales", "handshake", "Sales", "Cek lead & follow-up", "12 tugas", "CRM & chat"],
+          ["dev", "code-xml", "Developer", "Perbaiki workflow", "4 tugas", "semua alur"],
+          ["data", "chart-line", "Analis Data", "Pantau performa", "7 tugas", "dashboard"]];
+        $("#org").innerHTML = AG.map(([k, i, n, r, t, c], j) => `<div class="ag" id="ag-${k}" style="left:${20 + (j % 3) * 276}px;top:${20 + Math.floor(j / 3) * 210}px">
+          <div class="top"><div class="av">${ic(i)}</div><div class="nm">${n}</div><div class="st"><span class="s0">Siap</span><span class="s1">${ic("loader-circle")}Kerja</span><span class="s2">${ic("check")}Selesai</span></div></div>
+          <div class="role">${r}</div><div class="chips"><span class="chip c-t">${ic("list-checks")}${t}</span><span class="chip c-k">${ic("database")}${c}</span></div></div>`).join("");
+        // handoff pipeline
+        const FL = [["riset", "user-search", "Riset", "Data pasar"], ["cmo", "megaphone", "CMO", "Brief konten"], ["sales", "handshake", "Sales", "12 lead"],
+          ["data", "chart-line", "Analis", "Laporan"], ["dev", "code-xml", "Developer", "Workflow v2"], ["ceo", "crown", "CEO", "3 prioritas"]];
+        const NX = (i) => 70 + i * 133.6, NCY = 96;
+        $("#nodes").innerHTML = FL.map(([k, i, n, o], j) => `<div class="nd" id="nd-${k}" style="left:${NX(j)}px;top:64px"><div class="c">${ic(i)}</div><b>${n}</b><div class="out">${ic("check")}${o}</div></div>`).join("");
+        const pipe = $("#pipe");
+        svg("line", { x1: NX(0), y1: NCY, x2: NX(5), y2: NCY, stroke: "rgba(41,75,119,0.18)", "stroke-width": 4, "stroke-linecap": "round" }, pipe);
+        const PLEN = NX(5) - NX(0);
+        const prog = svg("line", { x1: NX(0), y1: NCY, x2: NX(5), y2: NCY, stroke: "#2f6fe4", "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": `${PLEN} ${PLEN}`, "stroke-dashoffset": PLEN }, pipe);
+        // CEO priorities
+        const PR = [["Follow-up 12 lead hangat", "Sales"], ["Publish 3 konten dari brief", "CMO"], ["Rapikan workflow onboarding", "Developer"]];
+        $("#prioSk").innerHTML = [0, 1, 2].map(k => `<div class="prs" style="top:${60 + k * 54}px"><i></i><b style="width:${[300, 240, 270][k]}px"></b><b style="width:70px;margin-left:auto"></b></div>`).join("");
+        $("#prioRows").innerHTML = PR.map(([t, w], k) => `<div class="pr" style="top:${60 + k * 54}px"><span class="n">${k + 1}</span><span>${t}</span><em>${w}</em></div>`).join("");
+        // shared memory hexagon
+        const MC = [["ceo", "crown", "CEO", 424, 132], ["cmo", "megaphone", "CMO", 675, 262], ["sales", "handshake", "Sales", 675, 522],
+          ["data", "chart-line", "Analis Data", 424, 652], ["dev", "code-xml", "Developer", 173, 522], ["riset", "user-search", "Riset", 173, 262]];
+        $("#chipsM").innerHTML = MC.map(([k, i, n, x, y]) => `<div class="mc" id="mc-${k}" style="left:${x}px;top:${y}px"><div class="av">${ic(i)}</div><div><b>${n}</b><span class="use">${ic("circle-check")}pakai insight</span></div></div>`).join("");
+        const msvg = $("#memSvg");
+        const ML = MC.map(([k, i, n, x, y]) => {
+          const l = svg("line", { x1: 424, y1: 392, x2: x, y2: y, stroke: "rgba(41,75,119,0.22)", "stroke-width": 2.5, "stroke-dasharray": "6 6" }, msvg);
+          const pk = document.createElement("i"); pk.className = "mpk"; $("#memView").appendChild(pk);
+          return { k, x, y, l, pk };
+        });
+        // "smarter" sparkline
+        const ss = $("#smartSvg");
+        const SP = [[0, 70], [40, 66], [80, 60], [120, 58], [160, 46], [200, 40], [240, 26], [280, 14], [300, 8]];
+        const spPath = svg("path", { d: "M" + SP.map((p) => p.join(",")).join(" L"), fill: "none", stroke: "#2f6fe4", "stroke-width": 4, "stroke-linecap": "round", "stroke-linejoin": "round" }, ss);
+        const spLen = spPath.getTotalLength(); spPath.setAttribute("stroke-dasharray", `${spLen} ${spLen}`); spPath.setAttribute("stroke-dashoffset", spLen);
+
+        /* captions */
+        const KEY = new Set(["bisnis", "enam", "agent", "sekaligus?", "simulasinya.", "ceo,", "cmo,", "riset,", "sales,", "developer,", "analis", "peran,", "tugas,", "konteksnya", "jalankan.",
+          "riset", "kompetitor", "pasar.", "cmo", "brief", "konten.", "lead", "di-follow-up.", "performa,", "workflow.", "ceo", "duluan.", "kunci", "memori", "bersama.", "belajar",
+          "semua", "pakai.", "nol", "pintar.", "sistem", "dipasang", "link", "bio,", "aipreneur", "automation."]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase()) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().replace(/[^a-z0-9-]/g, "").startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 46.6;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        const cState = (x, y, s) => ({ x: 424 - x * s, y: 445 - y * s, scale: s });
+        let cc = cState(424, 445, 1);
+        st("#cam", cc, 0);
+        const camTo = (x, y, s, at, dur) => { const nx = cState(x, y, s); ft("#cam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: "power3.inOut" }), at); cc = nx; };
+        const toWin = (ax, ay, c) => ({ x: 72 + c.x + ax * c.scale, y: 60 + c.y + ay * c.scale });
+        let cur = { x: 760, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const count = (el, to, at, dur, fmt) => { const o = { v: 0 }; ft(o, { v: 0 }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const status = (k, from, to, at) => { const c = $("#ag-" + k); ft($(".s" + from, c), { opacity: 1 }, { opacity: 0, duration: 0.18 }, at); ft($(".s" + to, c), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, at + 0.05); };
+        const hi = (el, at, hold) => ft(el, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 6px 20px rgba(41,75,119,0.08)" },
+          { keyframes: [{ borderColor: "#294b77", boxShadow: "0 0 0 4px rgba(41,75,119,0.14)", duration: 0.22 }, { duration: hold || 0.6 }, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 6px 20px rgba(41,75,119,0.08)", duration: 0.3 }] }, at);
+
+        /* initial */
+        st(["#tbar", "#rail", ".ag"], { opacity: 0 }, 0);
+
+        /* S0 hook 0-3.7: the org of 6 agents boots */
+        ft(win, { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 0.0);
+        ft(["#tbar", "#rail"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.25);
+        ft(".ag", { opacity: 0, y: 26, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, stagger: 0.14, ease: "back.out(1.6)" }, 0.45);
+        ft("#flowCard", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 1.35);
+        ft(".nd", { opacity: 0, y: 14 }, { opacity: 0.55, y: 0, duration: 0.3, stagger: 0.06 }, 1.5);
+        ft("#agentsOn", { opacity: 0 }, { opacity: 1, duration: 0.3 }, wt("dijalanin", "enam"));
+        ft("#agentsOn i", { scale: 1 }, { keyframes: [{ scale: 1.8 }, { scale: 1 }], duration: 0.5, repeat: 2 }, wt("dijalanin", "enam"));
+        const tSim = ph("Gue tunjukin").start;
+        ft("#sim", { scale: 1, backgroundColor: "rgba(41,75,119,0)" }, { keyframes: [{ scale: 1.25, backgroundColor: "rgba(41,75,119,0.15)" }, { scale: 1, backgroundColor: "rgba(41,75,119,0)" }], duration: 0.6 }, wt("Gue tunjukin", "simulasinya"));
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tSim);
+        moveTo(470, 250, tSim, 0.8);
+        /* S1 roles 5.4-10: each agent highlighted as it is named */
+        const NAMES = [["ceo", wt("Ada CEO", "CEO")], ["cmo", wt("Ada CEO", "CMO")], ["riset", wt("Ada CEO", "riset")], ["sales", wt("sales,", "sales")], ["dev", wt("sales,", "developer")], ["data", wt("sales,", "analis")]];
+        NAMES.forEach(([k, t]) => { hi("#ag-" + k, t - 0.05, 0.5); });
+        NAMES.forEach(([k, t], i) => { const p = posIn($("#ag-" + k)); moveTo(p.x + 40, p.y + 20, t - 0.25, 0.3); });
+        /* roles, tasks, context per card */
+        const tPeran = wt("Masing-masing", "peran"), tTugas = wt("tugas,", "tugas"), tKonteks = wt("tugas,", "konteksnya");
+        ft(".ag .role", { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.05 }, tPeran - 0.1);
+        ft(".ag .c-t", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, stagger: 0.05, ease: "back.out(2)" }, tTugas - 0.05);
+        ft(".ag .c-k", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, stagger: 0.05, ease: "back.out(2)" }, tKonteks - 0.05);
+
+        /* S2 run 13.7-14.8 */
+        const tRun = wt("Klik jalankan", "jalankan");
+        moveEl($("#runBtn"), ph("Klik jalankan").start - 0.35, 0.55, -10, 2);
+        click(tRun - 0.05);
+        ft("#runBtn", { scale: 1 }, { keyframes: [{ scale: 0.92 }, { scale: 1.04 }, { scale: 1 }], duration: 0.35 }, tRun - 0.05);
+        ft("#hint", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tRun);
+        ft("#flowCard", { borderColor: "rgba(10,13,44,0.10)" }, { keyframes: [{ borderColor: "#2f6fe4", duration: 0.25 }, { duration: 0.6 }, { borderColor: "rgba(10,13,44,0.10)", duration: 0.4 }] }, tRun + 0.05);
+        const camFlow = cState(424, 571, 1.08);
+        ft("#prioCard", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, tRun + 0.55);
+        camTo(424, 571, 1.08, tRun + 0.35, 0.8);
+        /* S3 handoffs 14.8-28.4 */
+        const NT = [ph("Agent riset").start, ph("CMO langsung").start, ph("Sales ngecek").start, ph("Analis mantau").start, ph("developer benerin").start, ph("Terus CEO").start];
+        ft(".nd", { opacity: 0.55 }, { opacity: 1, duration: 0.3, stagger: 0.05 }, tRun + 0.1);
+        FL.forEach(([k], i) => {
+          const t = NT[i], nd = $("#nd-" + k);
+          ft($(".c", nd), { backgroundColor: "#ffffff", borderColor: "rgba(41,75,119,0.25)", color: "#294b77", scale: 1 },
+            { backgroundColor: "#2f6fe4", borderColor: "#2f6fe4", color: "#ffffff", scale: 1.12, duration: 0.3, ease: "back.out(2)" }, t - 0.05);
+          ft($(".c", nd), { scale: 1.12 }, { scale: 1, duration: 0.3 }, t + 0.4);
+          ft($(".out", nd), { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, t + 0.55);
+          if (i > 0) ft(prog, { attr: { "stroke-dashoffset": PLEN - (NX(i - 1) - NX(0)) } }, { attr: { "stroke-dashoffset": PLEN - (NX(i) - NX(0)) }, duration: 0.45, ease: "power2.inOut" }, t - 0.5);
+          if (i > 0) ft("#tok", { x: NX(i - 1), y: NCY }, { x: NX(i), y: NCY, duration: 0.45, ease: "power2.inOut" }, t - 0.5);
+          status(k, 0, 1, t);
+          if (i < 5) status(k, 1, 2, NT[i + 1] - 0.1);
+          const p = toWin(20 + NX(i), 440 + NCY + 40, camFlow); moveTo(p.x + 26, p.y + 10, t - 0.35, 0.35);
+        });
+        st("#tok", { x: NX(0), y: NCY }, 0);
+        ft("#tok", { opacity: 0 }, { opacity: 1, duration: 0.2 }, NT[0]);
+        ft("#tok", { opacity: 1 }, { opacity: 0, duration: 0.2 }, NT[5] + 0.4);
+        // CEO prioritises
+        const camPrio = cState(424, 620, 1.1), pRow = toWin(20 + 330, 720 + 60 + 23, camPrio);
+        camTo(424, 620, 1.1, NT[5] + 0.3, 0.8);
+        const tDik = wt("mana yang", "dikerjain");
+        ft(["#prioWait", "#prioSk"], { opacity: 1 }, { opacity: 0, duration: 0.25 }, tDik - 0.3);
+        ft(".pr", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.18, ease: "power2.out" }, tDik - 0.25);
+        status("ceo", 1, 2, wt("mana yang", "duluan"));
+        moveTo(pRow.x, pRow.y, NT[5] + 0.4, 0.8);
+
+        /* S4 shared memory 28.4-39.8 */
+        const tKunci = ph("Tapi kunci").start;
+        camTo(424, 445, 1, tKunci - 0.1, 0.6);
+        ft("#cam", { opacity: 1 }, { opacity: 0, duration: 0.4 }, tKunci + 0.2);
+        ft("#memView", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tKunci + 0.35);
+        ft("#memNode", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.8)" }, tKunci + 0.5);
+        ft(".mc", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, stagger: 0.09, ease: "back.out(2)" }, tKunci + 0.75);
+        ft(ML.map((m) => m.l), { opacity: 0 }, { opacity: 1, duration: 0.4 }, tKunci + 0.9);
+        const tMem = wt("memori bersama", "memori");
+        moveTo(72 + 424 + 30, 60 + 392 + 30, tKunci + 0.8, 0.7);
+        click(tMem);
+        ft("#memNode", { boxShadow: "0 18px 44px rgba(10,13,44,0.35)" }, { keyframes: [{ boxShadow: "0 0 0 18px rgba(47,111,228,0.25)" }, { boxShadow: "0 18px 44px rgba(10,13,44,0.35)" }], duration: 0.8 }, tMem);
+        ft("#memRing", { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.6, duration: 1.0, ease: "power2.out", repeat: 1 }, tMem);
+        // one agent learns something
+        const tBel = wt("Satu agent", "belajar");
+        const ri = ML.find((m) => m.k === "riset");
+        hi("#mc-riset", ph("Satu agent").start - 0.05, 1.2);
+        ft("#insight", { opacity: 0, y: 12, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(2)" }, tBel - 0.1);
+        st(ri.pk, { x: ri.x, y: ri.y }, 0);
+        ft(ri.pk, { opacity: 0 }, { opacity: 1, duration: 0.1 }, tBel + 0.3);
+        ft(ri.pk, { x: ri.x, y: ri.y }, { x: 424, y: 392, duration: 0.6, ease: "power2.in" }, tBel + 0.3);
+        ft(ri.pk, { opacity: 1 }, { opacity: 0, duration: 0.1 }, tBel + 0.9);
+        ft("#memNode", { scale: 1 }, { keyframes: [{ scale: 1.08 }, { scale: 1 }], duration: 0.35 }, tBel + 0.9);
+        // every agent uses it
+        const tSem = ph("semua agent").start;
+        ML.forEach((m, i) => { const at = tSem + i * 0.09;
+          ft(m.pk, { x: 424, y: 392, opacity: 1 }, { x: m.x, y: m.y, duration: 0.5, ease: "power2.out" }, at);
+          st(m.pk, { opacity: 0 }, at + 0.52);
+          ft(m.l, { attr: { stroke: "rgba(41,75,119,0.22)" } }, { attr: { stroke: "#2f6fe4" }, duration: 0.2 }, at);
+          ft($(".use", $("#mc-" + m.k)), { opacity: 0, y: 4 }, { opacity: 1, y: 0, duration: 0.25 }, at + 0.5);
+          ft("#mc-" + m.k, { borderColor: "rgba(10,13,44,0.10)" }, { borderColor: "#16a34a", duration: 0.25 }, at + 0.5); });
+        ft("#insight", { opacity: 1 }, { opacity: 0, duration: 0.3 }, tSem + 1.1);
+        ft("#usedPill", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, wt("semua agent", "pakai"));
+        // not from zero again
+        const tNol = wt("Nggak mulai", "nol");
+        ft("#usedPill", { opacity: 1 }, { opacity: 0, duration: 0.2 }, ph("Nggak mulai").start - 0.05);
+        ft("#zero", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, ph("Nggak mulai").start);
+        ft("#zeroLine", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }, tNol);
+        // the system gets smarter
+        const tMak = ph("Makin lama").start;
+        ft("#zero", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tMak + 0.4);
+        ft("#smart", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tMak - 0.1);
+        count($("#insN"), 412, tMak + 0.1, 2.0);
+        ft(spPath, { attr: { "stroke-dashoffset": spLen } }, { attr: { "stroke-dashoffset": 0 }, duration: 2.0, ease: "power1.inOut" }, tMak + 0.1);
+        ft("#smartTag", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, wt("sistemnya", "pintar") - 0.1);
+        moveTo(700, 860, tMak, 0.8);
+
+        /* S5 CTA 39.9-46.6 */
+        const tCta = ph("Mau sistem").start;
+        ft("#winDim", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tCta - 0.2);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tCta - 0.2);
+        ft(win, { scale: 1 }, { scale: 0.94, duration: 0.6, ease: "power2.inOut" }, tCta - 0.2);
+        ft("#cta", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
+        const tF = wt("Klik link", "link");
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.5;
+          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /*ROBOT_SETUP*/
+        // presenter gestures for this script
+        const G = [];
+        [0.2, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
+        [tRun, tMem, tF].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
+        [wt("dijalanin", "enam"), ...NAMES.map((n) => n[1]), tPeran, tKonteks, ...NT, tDik, wt("Satu agent", "belajar"), wt("semua agent", "pakai"), tNol, wt("sistemnya", "pintar")]
+          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
+        G.sort((x, y) => x.t - y.t);
+        let busy = -1, beatN = 0;
+        G.forEach((g) => {
+          if (g.t < busy + 0.05) return;
+          busy = g.t + g.d;
+          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
+            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
+            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
+          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
+            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
+        });
+
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

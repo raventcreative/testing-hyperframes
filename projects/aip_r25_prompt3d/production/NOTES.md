@@ -59,7 +59,24 @@ question on "Soal", compare on "bandingkan", reveal on "lima"/"Gabungin"/"gratis
 - MDN prefers-reduced-motion (github.com/mdn/content 92395f8; developer.mozilla.org DNS-blocked).
 
 ## QA (real runtime, hyperframes 0.8.186)
-QA_PLACEHOLDER
+- `npx --yes hyperframes@0.8.186 lint .` → 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the R19 kit).
+- `npx --yes hyperframes@0.8.186 validate .` → 0 errors, 0 contrast warnings; remaining warnings = "multiple Three.js instances"
+  (robot + mascot bundles, as in the kit) + SwiftShader ReadPixels notices. (A first run flagged 18 contrast notes: preview/placeholder
+  grey, WhatsApp green, CONTOH tag, and off-screen sections measured through the phone clip → all fixed, see below.)
+- All four scene timelines + robot + mascot register in the preview (checked with a Playwright script on :8955, then stopped; the
+  preview's stamped `data-hf-id` attributes were stripped again). Layout check in the same run: no text outside its box (only the
+  intentional ellipsis previews), the five typed prompt lines fit the open row (≤ 108 px of 152), the s01 paragraphs fit (58 of 94 px).
+- Snapshots (`snapshot . --at … --no-end --timeout 60000`): one full pass of 71 frames (first frame, every beat of every scene, both sides
+  of each cut 5.90 / 31.60 / 39.73, the end 45.86) + two targeted fix passes (6 + 6 frames). Contact sheets (JPG):
+  `production/qa/runtime_full_1..3.jpg` (full frames), `production/qa/runtime_hero_1..3.jpg` (hero zone + captions, larger),
+  `production/qa/runtime_hosts_1..2.jpg` (mascot + robot, eye check), `production/qa/runtime_fix.jpg` (after the fixes). PNG dumps deleted.
+- Mascot eyes: pupils in every frame of the full pass (closed lids at 15.5 / 31.1 / 45.5 s = blinks); glance disabled from the start.
+- Captions: never covered (hero content ends at y 930, captions at y≈960–1030, hosts below).
+- Fixed during QA: (1) s04 "tinggal isi" fill text rendered as stacked letters — a generic `.bl span` rule also hit the per-letter typing
+  spans → scoped to `.bl > span`; (2) s01 "isinya": the card read almost empty for ~0.2 s while the strips moved → paragraph text now
+  cross-fades into the row labels; (3) contrast: previews/placeholders #8a99b3 → #5d6f8f, WhatsApp button #2da44e → #1f7f3a (18 px),
+  CONTOH tag darker, product/testimonial sections hidden whenever they sit below the screen clip; (4) s03: the cost stack now stays
+  centred until "lalu" and slides left when the comparison card arrives (the right half was empty for 3 s).
 
 ## Known issues / notes for the lead
 - Frame 0 shows the prompt card + finished phone page only: the mascot pops up from below over 0.5 s and the robot flies in over

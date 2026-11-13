@@ -56,6 +56,15 @@ as `<div id="rmove"><!--ROBOT_HTML--></div>` (CSS `transform: translateY(700px)`
   (small rotated tags around the hook cards), `FX.marker` (cyan highlight sweep).
 - Reference build: projects/reel-08-admin-wa-ramah (v3).
 
+## 3D presenter robot (current, client-approved direction) — brand/robot3d
+Client's own GLB (decimated, Draco) with an AI PRENEUR chest logo, skinned arms, glass-smooth visor and a procedural face
+(blink, happy/x/wide/excited/flat cross-fades, mouth low-passed from VO_ENV). Ship it with `python3 -I tools/add_robot3d.py
+projects/<name>` (instead of add_mouth.py) and wire it like projects/reel-08-admin-wa-ramah: importmap + robot3d_state.js +
+module robot3d.js, `<canvas id="robo3d" width="820" height="700">` at left -92, top 1362 inside #rmove, and
+`REEL_FX({ ..., r3d: window.R3D, base })`. Size: R3D.pxPerUnit 650 (head top y 1402, chest logo visible).
+**Never zoom/crop the robot (no "close" pose) — the client wants it big but whole, also at the CTA.** All motion eased
+(sine/power3, no back-overshoot pops). Render ≈ 20–25 min per 35 s reel (WebGL per frame).
+
 ## Alternating themes (one per video, see reels_log.json → `next_theme`)
 | theme | background | text | accents | logo |
 |---|---|---|---|---|

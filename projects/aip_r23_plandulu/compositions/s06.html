@@ -1,0 +1,111 @@
+<template>
+  <style>
+    /* s06 OPENCODE · AGENT PLAN (21.47–25.53) "Di OpenCode, aktifkan agent Plan: boleh baca, nggak boleh ngedit."
+       Header rolls to "OpenCode · agent Plan · PLAN". A dark switcher card: "AGENT" + our own segmented control [Build | Plan] + a
+       white keycap "Shift+Tab" (OpenCode 2.x: cycle agents). "aktifkan agent Plan": the keycap presses, the cyan thumb slides from
+       Build to Plan. Below, a white file card (toko-kue/, CONTOH) with three files and two columns: BACA / EDIT. "boleh baca": eye
+       marks light green on every row; "nggak boleh ngedit": a pencil darts at tombol-wa.js, a lock slams, "ditolak" (amber), the pencil
+       bounces back. Footnote: the Plan exception (its own plan file) + older versions use Tab. Last 0.26 s: drop out (header stays). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s06-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s06-sw { left: 90px; top: 476px; width: 900px; height: 118px; }
+    #s06-sw .k-lab { left: 26px; top: 46px; }
+    #s06-seg { position: absolute; left: 140px; top: 22px; width: 440px; height: 74px; border-radius: 37px; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.16); }
+    #s06-th { position: absolute; left: 6px; top: 6px; width: 214px; height: 62px; border-radius: 31px; background: rgba(255,255,255,.18); }
+    #s06-thc { position: absolute; left: 6px; top: 6px; width: 214px; height: 62px; border-radius: 31px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); box-shadow: 0 0 22px rgba(1,204,247,.55); }
+    .s06-op { position: absolute; top: 0; width: 220px; height: 74px; text-align: center; font: 700 28px/74px Poppins; white-space: nowrap; }
+    #s06-o0 { left: 0; color: #ffffff; } #s06-o1 { left: 220px; color: #9fb3cf; } #s06-o1c { left: 220px; color: #0b1440; }
+    #s06-key { position: absolute; left: 616px; top: 22px; width: 260px; height: 74px; }
+    #s06-key .bs { position: absolute; left: 0; top: 8px; width: 260px; height: 66px; border-radius: 16px; background: #7f93b6; }
+    #s06-key .tp { position: absolute; left: 0; top: 0; width: 260px; height: 66px; border-radius: 16px; background: linear-gradient(180deg, #ffffff, #e6edf8); text-align: center;
+      font: 700 28px/66px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s06-fc { left: 90px; top: 612px; width: 900px; height: 238px; }
+    #s06-fc .hd { position: absolute; left: 22px; top: 12px; font: 700 20px/32px Poppins; color: #294b77; white-space: nowrap; letter-spacing: .5px; }
+    #s06-fc .hd svg { width: 22px; height: 22px; vertical-align: -4px; margin-right: 6px; }
+    #s06-fc .cl { position: absolute; top: 12px; width: 150px; text-align: center; font: 700 16px/32px Poppins; letter-spacing: 2px; color: #8a94a6; }
+    .s06-r { position: absolute; left: 14px; width: 872px; height: 58px; border-radius: 14px; }
+    .s06-r.hl { background: #f2f6fd; }
+    .s06-r svg.fi { position: absolute; left: 12px; top: 13px; width: 32px; height: 32px; color: #294b77; }
+    .s06-r b { position: absolute; left: 56px; top: 0; font: 700 24px/58px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s06-ey { position: absolute; left: 541px; top: 7px; width: 132px; height: 44px; border-radius: 22px; background: #e3f6e9; color: #1d7a3a; font: 700 17px/44px Poppins; white-space: nowrap; }
+    .s06-ey svg { position: absolute; left: 12px; top: 10px; width: 24px; height: 24px; }
+    .s06-ey span { position: absolute; left: 44px; top: 0; }
+    .s06-ed { position: absolute; left: 706px; top: 7px; width: 150px; height: 44px; border-radius: 22px; background: #eef3fb; color: #8a94a6; font: 700 17px/44px Poppins; white-space: nowrap; }
+    .s06-ed svg { position: absolute; left: 12px; top: 10px; width: 24px; height: 24px; }
+    .s06-ed span { position: absolute; left: 44px; top: 0; }
+    #s06-no { position: absolute; left: 0; top: 0; width: 150px; height: 44px; border-radius: 22px; background: #fff1dc; box-shadow: inset 0 0 0 2px #f0a020; color: #a35b00; font: 700 17px/44px Poppins; white-space: nowrap; }
+    #s06-no svg { position: absolute; left: 12px; top: 10px; width: 24px; height: 24px; }
+    #s06-no span { position: absolute; left: 44px; top: 0; }
+    #s06-pen { position: absolute; left: 0; top: 0; width: 64px; height: 64px; border-radius: 32px; background: #0b1440; color: #6adfff; box-shadow: 0 10px 22px rgba(2,6,26,.5), 0 0 0 3px rgba(106,223,255,.5); }
+    #s06-pen svg { position: absolute; left: 16px; top: 16px; width: 32px; height: 32px; }
+    #s06-lk { position: absolute; left: 0; top: 0; width: 70px; height: 70px; border-radius: 20px; background: #f0a020; color: #fff; box-shadow: 0 0 0 6px rgba(240,160,32,.25), 0 12px 24px rgba(2,6,26,.4); }
+    #s06-lk svg { position: absolute; left: 17px; top: 15px; width: 36px; height: 36px; }
+    #s06-ft { left: 90px; top: 866px; }
+  </style>
+  <div data-hf-id="hf-wofu" id="root" data-composition-id="s06" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-mv9l" id="s06-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R23K, P = "s06", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s06-zone");
+      const FILES = ["index.html", "tombol-wa.js", "style.css"];
+      z.innerHTML = K.headerHTML(P) +
+        `<div class="k-glass" id="s06-sw"><div class="k-lab">AGENT</div><div id="s06-seg"><div id="s06-th"></div><div id="s06-thc"></div>` +
+        `<div class="s06-op" id="s06-o0">Build</div><div class="s06-op" id="s06-o1">Plan</div><div class="s06-op" id="s06-o1c">Plan</div></div>` +
+        `<div id="s06-key"><div class="bs"></div><div class="tp" id="s06-kt">Shift + Tab</div></div></div>` +
+        `<div class="k-white" id="s06-fc"><div class="hd">${K.svg("folder-open")}toko-kue/ &middot; CONTOH</div><div class="cl" style="left:532px">BACA</div><div class="cl" style="left:706px">EDIT</div>` +
+        FILES.map((f, i) => `<div class="s06-r${i === 1 ? " hl" : ""}" id="s06-r${i}" style="top:${52 + i * 60}px">${K.svg("file-code", "fi")}<b>${f}</b>` +
+          `<div class="s06-ey" id="s06-e${i}">${K.svg("eye")}<span>dibaca</span></div><div class="s06-ed" id="s06-d${i}">${K.svg("pencil")}<span>terkunci</span></div></div>`).join("") +
+        `</div><div id="s06-no">${K.svg("ban")}<span>ditolak</span></div><div id="s06-pen">${K.svg("pencil")}</div><div id="s06-lk">${K.svg("lock")}</div>` +
+        `<div class="k-foot" id="s06-ft">Kecuali file rencananya sendiri &middot; <b>OpenCode versi lama: tombol Tab</b></div>`;
+      const tOc = wt("OpenCode,"), tAk = wt("aktifkan"), tPl = wt("Plan:"), tBa = wt("baca,"), tNg = wt("nggak"), tEd = wt("ngedit.");
+      K.headerScene(S, P, 1, 2);
+      // ---------------------------------------------------------------- switcher + file card rise
+      const sw = $("s06-sw"), fc = $("s06-fc");
+      I(sw, { y: 36, opacity: 0 }); I(fc, { y: 40, opacity: 0 });
+      ft(sw, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.38, ease: "power3.out" }, 0.16);
+      ft(fc, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.3);
+      // ---------------------------------------------------------------- "aktifkan agent Plan": key press, thumb slides Build -> Plan
+      const kt = $("s06-kt"), thc = $("s06-thc"), th = $("s06-th"), o0 = $("s06-o0"), o1c = $("s06-o1c"), o1 = $("s06-o1");
+      I(kt, { y: 0 }); I(thc, { x: 0, opacity: 0 }); I(th, { x: 0, opacity: 1 }); I(o0, { opacity: 1 }); I(o1c, { opacity: 0 }); I(o1, { opacity: 1 });
+      ft(kt, { y: 0 }, { y: 8, duration: 0.1, ease: "power2.in" }, tAk + 0.1);
+      ft(kt, { y: 8 }, { y: 0, duration: 0.24, ease: "back.out(3)" }, tAk + 0.34);
+      ft(th, { x: 0 }, { x: 220, duration: 0.42, ease: "power3.inOut" }, tAk + 0.16);
+      ft(th, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPl - 0.12);
+      ft(thc, { x: 220, opacity: 0 }, { x: 220, opacity: 1, duration: 0.22, ease: "power2.out" }, tPl - 0.14);
+      ft(o0, { opacity: 1 }, { opacity: 0.45, duration: 0.2 }, tAk + 0.2);
+      ft(o1c, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tPl - 0.12);
+      ft(o1, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPl - 0.12);
+      ft(sw, { scale: 1 }, { scale: 1.02, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "50% 50%" }, tPl - 0.02);
+      // ---------------------------------------------------------------- "boleh baca": eye marks light up row by row
+      FILES.forEach((_, i) => {
+        const e = $("s06-e" + i); I(e, { opacity: 0.25, scale: 1, transformOrigin: "50% 50%" });
+        ft(e, { opacity: 0.25 }, { opacity: 1, duration: 0.18, ease: "power2.out" }, tBa - 0.2 + i * 0.1);
+        ft(e, { scale: 1 }, { scale: 1.12, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tBa - 0.2 + i * 0.1);
+        I($("s06-d" + i), { opacity: 1 });
+      });
+      // ---------------------------------------------------------------- "nggak boleh ngedit": the pencil darts at tombol-wa.js, a lock slams
+      const pen = $("s06-pen"), lk = $("s06-lk"), no = $("s06-no");
+      const rx = 90 + 14 + 706, ry = 612 + 52 + 60 + 7;   // global top-left of the EDIT slot on row 1
+      I(pen, { x: 900, y: 640, scale: 0.6, opacity: 0, rotation: 0, transformOrigin: "50% 50%" });
+      ft(pen, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "back.out(2)" }, tNg - 0.3);
+      ft(pen, { x: 900, y: 640 }, { x: rx + 80, y: ry - 14, duration: 0.3, ease: "power3.in" }, tNg - 0.12);
+      ft(pen, { x: rx + 80, y: ry - 14, rotation: 0 }, { x: 905, y: 615, rotation: 30, duration: 0.36, ease: "power3.out" }, tEd + 0.02);
+      ft(pen, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tEd + 0.3);
+      I(lk, { x: rx + 40, y: ry - 13, scale: 0.3, opacity: 0, transformOrigin: "50% 50%" });
+      ft(lk, { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(2.8)" }, tEd - 0.1);
+      ft(lk, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6, duration: 0.2, ease: "power2.in" }, tEd + 0.3);
+      I(no, { x: rx, y: ry, opacity: 0 });
+      ft(no, { opacity: 0 }, { opacity: 1, duration: 0.16 }, tEd + 0.05);
+      ft($("s06-r1"), { x: 0 }, { x: 7, duration: 0.05, yoyo: true, repeat: 3, ease: "sine.inOut" }, tEd);
+      const ftn = $("s06-ft"); I(ftn, { opacity: 0, y: 8 });
+      ft(ftn, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, tBa + 0.2);
+      // ---------------------------------------------------------------- exit
+      const tX = D - 0.26;
+      [sw, fc, no, ftn].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, tX + (i % 3) * 0.02));
+      S.finish();
+    })();
+  </script>
+</template>

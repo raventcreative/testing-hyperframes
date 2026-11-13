@@ -1,0 +1,138 @@
+<template>
+  <style>
+    /* s01 HOOK (0.00–6.83) "Enam agent AI lagi rame. Sebelum pilih, jawab ini dulu: tinggal pakai, atau pegang sendiri?"
+       Shot A: big "6" + "agent AI" + "lagi rame" chip; six agent cards (our own mocks: generic lucide icon + name + maker) pop in
+       scattered like a burst of notifications, each with a ping dot; "rame": they wobble, +1 badges pop.
+       Shot B ("Sebelum pilih"): the cards are sucked into the centre and a white question card slams in ("Sebelum pilih: 1 pertanyaan").
+       Shot C ("tinggal pakai … pegang sendiri"): the card shrinks to a top label and a road FORK draws itself: two signposts,
+       "Tinggal pakai · jalan di cloud mereka" (left) and "Pegang sendiri · open source, di mesinmu" (right). A "kamu" disc drives up
+       the stem, leans left on "tinggal pakai", right on "pegang sendiri", a "?" bubble pulses. Last 0.26 s: everything fades. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s01-six { position: absolute; left: 92px; top: 296px; font: 700 210px/220px Poppins; letter-spacing: -6px; white-space: nowrap;
+      background: linear-gradient(170deg, #b8f3ff 10%, #01ccf7 60%, #0a9fd0 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 0 26px rgba(1,204,247,.35)); }
+    #s01-ttl { position: absolute; left: 262px; top: 336px; font: 700 78px/92px Poppins; color: #fff; white-space: nowrap; letter-spacing: -1px; }
+    #s01-hot { position: absolute; left: 266px; top: 438px; height: 50px; padding: 0 20px 0 14px; border-radius: 25px; display: flex; align-items: center; gap: 10px;
+      font: 700 24px/1 Poppins; letter-spacing: 1px; color: #0b1440; background: linear-gradient(160deg, #9cecff, #01ccf7 60%); box-shadow: 0 0 22px rgba(1,204,247,.45); white-space: nowrap; transform-origin: 0% 50%; }
+    #s01-hot svg { width: 26px; height: 26px; }
+    .s01-ping { position: absolute; right: -10px; top: -10px; width: 36px; height: 36px; border-radius: 18px; background: #01ccf7; box-shadow: 0 0 0 4px rgba(10,16,51,.9), 0 0 14px rgba(1,204,247,.9);
+      font: 700 17px/36px Poppins; color: #0b1440; text-align: center; }
+    #s01-q { position: absolute; left: 0; top: 0; width: 640px; height: 250px; border-radius: 32px; background: linear-gradient(180deg, #ffffff, #f2f6fd); box-shadow: 0 28px 60px rgba(2,6,26,.6); transform-origin: 50% 50%; }
+    #s01-q .ic { position: absolute; left: 34px; top: 52px; width: 146px; height: 146px; border-radius: 40px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440; box-shadow: 0 0 26px rgba(1,204,247,.45); }
+    #s01-q .ic svg { position: absolute; left: 33px; top: 33px; width: 80px; height: 80px; }
+    #s01-q .a { position: absolute; left: 212px; top: 58px; font: 400 30px/40px Poppins; color: #5d6f8f; white-space: nowrap; }
+    #s01-q .b { position: absolute; left: 210px; top: 100px; font: 700 62px/80px Poppins; color: #0a0d2c; white-space: nowrap; letter-spacing: -1px; }
+    #s01-lab { position: absolute; left: 0; top: 0; height: 52px; padding: 0 22px 0 14px; border-radius: 26px; display: flex; align-items: center; gap: 10px;
+      font: 700 24px/1 Poppins; letter-spacing: 2px; color: #6adfff; background: rgba(12,22,64,.9); box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.6); white-space: nowrap; }
+    #s01-lab svg { width: 26px; height: 26px; }
+    #s01-svg { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: visible; }
+    .s01-sign { position: absolute; top: 452px; width: 430px; height: 178px; border-radius: 28px; background: rgba(12,22,64,.88); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12), 0 22px 46px rgba(2,6,26,.55); transform-origin: 50% 100%; }
+    .s01-sign .ic { position: absolute; left: 24px; top: 26px; width: 84px; height: 84px; border-radius: 24px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440; }
+    .s01-sign .ic svg { position: absolute; left: 21px; top: 21px; width: 42px; height: 42px; }
+    .s01-sign b { position: absolute; left: 126px; top: 26px; font: 700 37px/48px Poppins; color: #fff; white-space: nowrap; letter-spacing: -.5px; }
+    .s01-sign span { position: absolute; left: 126px; top: 76px; font: 400 21px/30px Poppins; color: #9fdcf2; white-space: nowrap; }
+    .s01-sign i { position: absolute; left: 24px; top: 128px; height: 32px; padding: 0 12px; border-radius: 16px; font: 700 15px/32px Poppins; font-style: normal; letter-spacing: 1.5px; color: #b8c7dd;
+      background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1.2px rgba(255,255,255,.2); white-space: nowrap; }
+    .s01-sign .gl { position: absolute; inset: 0; border-radius: 28px; box-shadow: inset 0 0 0 3px rgba(106,223,255,.95), 0 0 44px rgba(1,204,247,.5); }
+    #s01-you { position: absolute; left: 0; top: 0; width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 38px; background: #ffffff; color: #0b1440;
+      box-shadow: 0 0 0 6px rgba(1,204,247,.35), 0 0 30px rgba(1,204,247,.6); }
+    #s01-you svg { position: absolute; left: 20px; top: 18px; width: 36px; height: 36px; }
+    #s01-you b { position: absolute; left: 96px; top: 21px; height: 34px; padding: 0 14px; border-radius: 17px; background: rgba(8,14,46,.92); box-shadow: inset 0 0 0 1.5px rgba(106,223,255,.6);
+      font: 700 17px/34px Poppins; letter-spacing: 2px; color: #6adfff; white-space: nowrap; }
+    #s01-qb { position: absolute; left: 0; top: 0; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 32px; background: #01ccf7; color: #0b1440; font: 700 40px/64px Poppins; text-align: center;
+      box-shadow: 0 0 22px rgba(1,204,247,.8); }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R21K, P = "s01", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s01-zone");
+      // scattered "notification" layout (global px, card 296 x 82, small variant)
+      const CARDS = [
+        { k: "dots", x: 88, y: 552, r: -4 }, { k: "grok", x: 604, y: 534, r: 4 }, { k: "muse", x: 156, y: 670, r: 3 },
+        { k: "claw", x: 586, y: 654, r: -3 }, { k: "herm", x: 96, y: 790, r: -2 }, { k: "maus", x: 598, y: 776, r: 4 },
+      ];
+      const J = { x: 540, y: 790 };                       // fork junction
+      const L = { x: 296, y: 652 }, R = { x: 784, y: 652 }; // branch ends (under the signs)
+      const B = { x: 540, y: 935 };                       // stem bottom (edge of the hero zone)
+      z.innerHTML =
+        `<div id="s01-six">6</div><div id="s01-ttl">agent AI</div><div id="s01-hot">${K.svg("flame")}lagi rame</div>` +
+        CARDS.map((c, i) => K.agentHTML("s01-c" + i, c.k, 344, 98, `<div class="s01-ping" id="s01-p${i}">+1</div>`)).join("") +
+        `<svg id="s01-svg" viewBox="0 0 1080 945">` +
+        `<path id="s01-road" d="M${B.x} ${B.y} L${J.x} ${J.y}" fill="none" stroke="#e3edfa" stroke-width="16" stroke-linecap="round"/>` +
+        `<path id="s01-rl" d="M${J.x} ${J.y} Q${J.x - 40} ${J.y - 70} ${L.x} ${L.y}" fill="none" stroke="#e3edfa" stroke-width="16" stroke-linecap="round"/>` +
+        `<path id="s01-rr" d="M${J.x} ${J.y} Q${J.x + 40} ${J.y - 70} ${R.x} ${R.y}" fill="none" stroke="#e3edfa" stroke-width="16" stroke-linecap="round"/>` +
+        `<path id="s01-gl" d="M${J.x} ${J.y} Q${J.x - 40} ${J.y - 70} ${L.x} ${L.y}" fill="none" stroke="#01ccf7" stroke-width="16" stroke-linecap="round"/>` +
+        `<path id="s01-gr" d="M${J.x} ${J.y} Q${J.x + 40} ${J.y - 70} ${R.x} ${R.y}" fill="none" stroke="#01ccf7" stroke-width="16" stroke-linecap="round"/></svg>` +
+        `<div class="s01-sign" id="s01-sl" style="left:80px"><div class="gl" id="s01-sgl"></div><div class="ic">${K.svg("cloud")}</div><b>Tinggal pakai</b><span>jalan di cloud mereka</span><i>DAFTAR &middot; LANGSUNG JALAN</i></div>` +
+        `<div class="s01-sign" id="s01-sr" style="left:570px"><div class="gl" id="s01-sgr"></div><div class="ic">${K.svg("key-round")}</div><b>Pegang sendiri</b><span>open source, di mesinmu</span><i>PASANG &middot; KAMU YANG ATUR</i></div>` +
+        `<div id="s01-you">${K.svg("user")}<b>KAMU</b></div><div id="s01-qb">?</div>` +
+        `<div id="s01-q"><div class="ic">${K.svg("circle-help")}</div><div class="a">Sebelum pilih:</div><div class="b">1 pertanyaan</div></div>` +
+        `<div id="s01-lab">${K.svg("signpost")}1 PERTANYAAN</div>`;
+      const tEn = wt("Enam"), tAg = wt("agent"), tRa = wt("rame."), tSe = wt("Sebelum"), tPi = wt("pilih,"), tJa = wt("jawab"), tDu = wt("dulu:");
+      const tTi = wt("tinggal"), tPa = wt("pakai,"), tAt = wt("atau"), tPe = wt("pegang"), tSn = wt("sendiri?");
+      // ---------------------------------------------------------------- shot A: "6 agent AI" + the burst of agent cards
+      const six = $("s01-six"), ttl = $("s01-ttl"), hot = $("s01-hot");
+      I(six, { y: 0, opacity: 1, scale: 1, transformOrigin: "30% 50%" }); I(ttl, { x: 0, opacity: 1 }); I(hot, { scale: 0.4, opacity: 0 });
+      ft(six, { scale: 1 }, { scale: 1.08, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tEn - 0.04);
+      ft(hot, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tRa - 0.12);
+      CARDS.forEach((c, i) => {
+        const e = $("s01-c" + i), p = $("s01-p" + i);
+        I(e, { x: c.x, y: c.y, rotation: c.r, scale: 0.5, opacity: 0 });
+        const t = 0.04 + i * 0.15;
+        ft(e, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.32, ease: "back.out(2)" }, t);
+        I(p, { scale: 0, opacity: 0, transformOrigin: "50% 50%" });
+        ft(p, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.22, ease: "back.out(3)" }, tRa - 0.06 + i * 0.05);
+        // "rame": wobble
+        ft(e, { rotation: c.r }, { rotation: c.r + (i % 2 ? 4 : -4), duration: 0.12, yoyo: true, repeat: 3, ease: "sine.inOut" }, tRa - 0.04 + i * 0.03);
+        // shot B: sucked into the centre
+        ft(e, { x: c.x, y: c.y, scale: 1, opacity: 1, rotation: c.r }, { x: 368, y: 590, scale: 0.4, opacity: 0, rotation: 0, duration: 0.34, ease: "power3.in" }, tSe - 0.12 + i * 0.04);
+      });
+      [six, ttl, hot].forEach((e, i) => ft(e, { y: 0, opacity: 1 }, { y: -40, opacity: 0, duration: 0.24, ease: "power2.in" }, tSe - 0.14 + i * 0.03));
+      // ---------------------------------------------------------------- shot B: the question card
+      const q = $("s01-q"); I(q, { x: 220, y: 500, scale: 0.3, opacity: 0, rotation: -6 });
+      ft(q, { scale: 0.3, opacity: 0, rotation: -6 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.34, ease: "back.out(1.8)" }, tSe + 0.16);
+      ft(q, { scale: 1 }, { scale: 1.05, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tJa - 0.04);
+      ft(q, { x: 220, y: 500, scale: 1, opacity: 1 }, { x: 220, y: 330, scale: 0.6, opacity: 0, duration: 0.3, ease: "power3.in" }, tTi - 0.42);
+      const lab = $("s01-lab"); I(lab, { x: 540, xPercent: -50, y: 340, scale: 0.6, opacity: 0, transformOrigin: "50% 50%" });
+      ft(lab, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.2)" }, tTi - 0.18);
+      // ---------------------------------------------------------------- shot C: the fork
+      const road = $("s01-road"), rl = $("s01-rl"), rr = $("s01-rr"), gl = $("s01-gl"), gr = $("s01-gr");
+      const len = (e) => e.getTotalLength();
+      [[road, len(road)], [rl, len(rl)], [rr, len(rr)], [gl, len(gl)], [gr, len(gr)]].forEach(([e, l]) => I(e, { attr: { "stroke-dasharray": l, "stroke-dashoffset": l } }));
+      const tF = tTi - 0.36;
+      ft(road, { attr: { "stroke-dashoffset": len(road) } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.24, ease: "power2.out" }, tF);
+      ft(rl, { attr: { "stroke-dashoffset": len(rl) } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.28, ease: "power2.out" }, tF + 0.2);
+      ft(rr, { attr: { "stroke-dashoffset": len(rr) } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.28, ease: "power2.out" }, tF + 0.2);
+      const sl = $("s01-sl"), sr = $("s01-sr"), sgl = $("s01-sgl"), sgr = $("s01-sgr");
+      [sl, sr].forEach((e, i) => { I(e, { scaleY: 0.2, opacity: 0 }); ft(e, { scaleY: 0.2, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.3, ease: "back.out(1.8)" }, tF + 0.32 + i * 0.08); });
+      I(sgl, { opacity: 0 }); I(sgr, { opacity: 0 });
+      // "tinggal pakai": left lights (cyan path + glow), "pegang sendiri": right lights
+      ft(gl, { attr: { "stroke-dashoffset": len(gl) } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.34, ease: "power2.inOut" }, tTi - 0.04);
+      ft(sgl, { opacity: 0 }, { opacity: 1, duration: 0.16 }, tPa - 0.1);
+      ft(sl, { scale: 1 }, { scale: 1.05, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tPa - 0.1);
+      ft(gl, { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": len(gl) }, duration: 0.3, ease: "power2.inOut" }, tAt - 0.1);
+      ft(sgl, { opacity: 1 }, { opacity: 0, duration: 0.26 }, tAt - 0.1);
+      ft(gr, { attr: { "stroke-dashoffset": len(gr) } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.34, ease: "power2.inOut" }, tPe - 0.16);
+      ft(sgr, { opacity: 0 }, { opacity: 1, duration: 0.16 }, tSn - 0.1);
+      ft(sr, { scale: 1 }, { scale: 1.05, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tSn - 0.1);
+      // the "kamu" disc drives up the stem, leans left, then right; "?" bubble
+      const you = $("s01-you"), qb = $("s01-qb");
+      I(you, { x: B.x, y: B.y + 40, opacity: 0, scale: 0.6 });
+      ft(you, { y: B.y + 40, opacity: 0, scale: 0.6 }, { y: J.y + 60, opacity: 1, scale: 1, duration: 0.42, ease: "power3.out" }, tF + 0.1);
+      ft(you, { x: B.x, y: J.y + 60 }, { x: J.x - 46, y: J.y + 30, duration: 0.34, ease: "power2.inOut" }, tPa - 0.2);
+      ft(you, { x: J.x - 46, y: J.y + 30 }, { x: J.x + 46, y: J.y + 30, duration: 0.42, ease: "power2.inOut" }, tPe - 0.2);
+      I(qb, { x: J.x + 46, y: J.y - 50, scale: 0, opacity: 0 });
+      ft(qb, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(3)" }, tSn + 0.02);
+      ft(qb, { scale: 1 }, { scale: 1.15, duration: 0.16, yoyo: true, repeat: 1, ease: "sine.inOut" }, tSn + 0.3);
+      // ---------------------------------------------------------------- exit
+      const tX = D - 0.26;
+      [lab, sl, sr, $("s01-svg"), you, qb].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, tX + (i % 3) * 0.02));
+      S.finish();
+    })();
+  </script>
+</template>

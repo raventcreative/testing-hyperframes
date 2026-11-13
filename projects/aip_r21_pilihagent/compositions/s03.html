@@ -1,0 +1,121 @@
+<template>
+  <style>
+    /* s03 TRADE-OFF (13.20–18.30) "Praktis, kerja terus di cloud mereka, tapi data dan login aplikasimu ikut di sana."
+       Header rolls to "Plus-minusnya · praktis · tapi datamu di sana · JUJUR". The cloud from s02 stays (same position).
+       "Praktis": green chip "praktis · tanpa install". "kerja terus": the laptop's lid closes (moon, "laptopmu mati") while the
+       "KOMPUTER CLOUD" card keeps ticking its task list (contoh). "tapi data dan login": both slide away; three chips (data bisnismu,
+       login email, login aplikasi lain) rise from the bottom; "ikut di sana": they fly up into the cloud, the cloud gets a lock badge
+       and an amber chip "data & login-mu disimpan di server mereka". Last 0.24 s: workspace fades (header stays). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s03-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s03-svg { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: visible; }
+    #s03-cl .lb { position: absolute; left: 556px; top: 528px; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; white-space: nowrap; font: 700 24px/32px Poppins; letter-spacing: 3px; color: #6adfff; }
+    #s03-cl .lb svg { width: 32px; height: 32px; }
+    #s03-cl .sb { position: absolute; left: 556px; top: 566px; transform: translateX(-50%); white-space: nowrap; font: 400 19px/26px Poppins; color: #9fdcf2; }
+    #s03-lock { position: absolute; left: 0; top: 0; width: 64px; height: 64px; border-radius: 32px; background: #1a1f3d; color: #ffc761; box-shadow: inset 0 0 0 3px #ffb74d, 0 8px 18px rgba(2,6,26,.5); }
+    #s03-lock svg { position: absolute; left: 17px; top: 16px; width: 30px; height: 30px; }
+    /* laptop: lid (screen) + base, flat planes */
+    #s03-lap { position: absolute; left: 92px; top: 694px; width: 420px; height: 226px; }
+    #s03-lid { position: absolute; left: 30px; top: 0; width: 360px; height: 200px; border-radius: 16px 16px 6px 6px; background: #dfe7f3; box-shadow: inset 0 0 0 8px #c3cfe2; transform-origin: 50% 100%; overflow: hidden; }
+    #s03-scr { position: absolute; left: 14px; top: 14px; width: 332px; height: 172px; border-radius: 8px; background: linear-gradient(160deg, #13245e, #0a1440); }
+    #s03-scr i { position: absolute; left: 26px; height: 12px; border-radius: 6px; background: rgba(106,223,255,.5); }
+    #s03-base { position: absolute; left: 0; top: 200px; width: 420px; height: 24px; border-radius: 4px 4px 14px 14px; background: linear-gradient(180deg, #e9eef7, #b9c6da); }
+    #s03-zz { position: absolute; left: 0; top: 0; height: 60px; padding: 0 22px 0 14px; border-radius: 30px; display: flex; align-items: center; gap: 12px; font: 700 27px/1 Poppins; color: #e3edfa;
+      background: rgba(12,22,64,.9); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.14); white-space: nowrap; }
+    #s03-zz svg { width: 34px; height: 34px; color: #ffd58a; }
+    #s03-cc { position: absolute; left: 540px; top: 694px; width: 450px; height: 226px; }
+    #s03-cc .hd { position: absolute; left: 24px; top: 18px; display: flex; align-items: center; gap: 10px; font: 700 20px/28px Poppins; letter-spacing: 2px; color: #6adfff; white-space: nowrap; }
+    #s03-cc .hd svg { width: 26px; height: 26px; }
+    .s03-row { position: absolute; left: 24px; width: 402px; height: 50px; }
+    .s03-row b { position: absolute; left: 50px; top: 0; font: 400 25px/50px Poppins; color: #e3edfa; white-space: nowrap; }
+    .s03-row .bx { position: absolute; left: 0; top: 10px; width: 30px; height: 30px; border-radius: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.35); }
+    .s03-row .ok { position: absolute; left: 0; top: 10px; width: 30px; height: 30px; border-radius: 8px; background: #2da44e; color: #fff; }
+    .s03-row .ok svg { position: absolute; left: 5px; top: 5px; width: 20px; height: 20px; }
+    #s03-spin { position: absolute; right: 22px; top: 16px; width: 30px; height: 30px; border-radius: 15px; border: 4px solid rgba(106,223,255,.25); border-top-color: #01ccf7; }
+    .s03-it { position: absolute; left: 0; top: 0; height: 84px; padding: 0 26px 0 16px; border-radius: 42px; display: flex; align-items: center; gap: 14px; font: 700 28px/1 Poppins; color: #0a0d2c;
+      background: linear-gradient(180deg, #ffffff, #eef3fb); box-shadow: 0 14px 30px rgba(2,6,26,.5); white-space: nowrap; transform-origin: 50% 50%; }
+    .s03-it span { display: block; width: 56px; height: 56px; border-radius: 28px; background: #0b1440; color: #6adfff; position: relative; }
+    .s03-it span svg { position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; }
+    #s03-tray { position: absolute; left: 90px; top: 664px; width: 900px; height: 256px; border-radius: 30px; border: 3px dashed rgba(106,223,255,.5); background: rgba(1,204,247,.04); }
+    #s03-tray b { position: absolute; left: 24px; top: 16px; font: 700 19px/26px Poppins; letter-spacing: 2.5px; color: #6adfff; white-space: nowrap; }
+    #s03-call { position: absolute; left: 90px; top: 664px; width: 900px; height: 256px; border-radius: 30px; background: linear-gradient(180deg, #fff8ec, #ffeccc); box-shadow: 0 26px 56px rgba(2,6,26,.55); }
+    #s03-call .ic { position: absolute; left: 34px; top: 52px; width: 132px; height: 132px; border-radius: 36px; background: linear-gradient(160deg, #ffe1a8, #ffb74d 60%); color: #3a2a10; }
+    #s03-call .ic svg { position: absolute; left: 34px; top: 34px; width: 64px; height: 64px; }
+    #s03-call b { position: absolute; left: 196px; top: 50px; font: 700 40px/52px Poppins; color: #3a2a10; white-space: nowrap; letter-spacing: -.5px; }
+    #s03-call span { position: absolute; left: 196px; top: 110px; font: 400 25px/36px Poppins; color: #7a5a24; white-space: nowrap; }
+    #s03-call i { position: absolute; left: 196px; top: 168px; height: 40px; padding: 0 16px; border-radius: 20px; font: 700 18px/40px Poppins; font-style: normal; letter-spacing: 1.5px; color: #94600c; background: rgba(255,183,77,.22); white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div id="s03-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R21K, P = "s03", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s03-zone");
+      const LOBES = [[240, 572, 40], [380, 550, 58], [560, 540, 70], [730, 548, 62], [870, 570, 42]];
+      const shape = (d, fill) => LOBES.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r + d}" fill="${fill}"/>`).join("") +
+        `<rect x="${230 - d}" y="${560 - d}" width="${650 + 2 * d}" height="${52 + 2 * d}" rx="${26 + d}" fill="${fill}"/>`;
+      const TASKS = ["cek email pelanggan", "rekap pesanan", "kirim laporan"];
+      const ITEMS = [{ ic: "file-text", t: "data bisnismu", x: 120, y: 716 }, { ic: "mail", t: "login email", x: 560, y: 716 }, { ic: "key-round", t: "login aplikasi", x: 330, y: 816 }];
+      z.innerHTML = K.headerHTML(P) +
+        `<div id="s03-cloud" style="position:absolute;left:0;top:0;width:1080px;height:945px"><svg id="s03-svg" viewBox="0 0 1080 945"><g id="s03-rim" opacity="0.85">${shape(3, "#6adfff")}</g>${shape(0, "#12215e")}</svg></div>` +
+        `<div id="s03-cl"><div class="lb" id="s03-lb">${K.svg("cloud")}CLOUD MEREKA</div><div class="sb" id="s03-sb">komputer &amp; server milik penyedia</div></div>` +
+        `<div class="k-chk" id="s03-pr">${K.svg("circle-check")}praktis &middot; tanpa install</div>` +
+        `<div id="s03-lap"><div id="s03-lid"><div id="s03-scr"><i style="top:24px;width:150px"></i><i style="top:50px;width:210px"></i><i style="top:76px;width:120px"></i></div></div><div id="s03-base"></div></div>` +
+        `<div id="s03-zz">${K.svg("moon")}laptopmu mati</div>` +
+        `<div class="k-glass" id="s03-cc"><div class="hd">${K.svg("cloud")}KOMPUTER CLOUD</div><div id="s03-spin"></div>` +
+        TASKS.map((t, i) => `<div class="s03-row" style="top:${62 + i * 52}px"><div class="bx"></div><div class="ok" id="s03-ok${i}">${K.svg("check")}</div><b>${t}</b></div>`).join("") +
+        `<div class="k-demo" style="left:24px;top:-44px" id="s03-demo">CONTOH</div></div>` +
+        ITEMS.map((it, i) => `<div class="s03-it" id="s03-i${i}"><span>${K.svg(it.ic)}</span>${it.t}</div>`).join("") +
+        `<div id="s03-lock">${K.svg("lock")}</div>` +
+        `<div id="s03-tray"><b>PUNYAMU</b></div>` +
+        `<div id="s03-call"><div class="ic">${K.svg("lock")}</div><b>Disimpan di server mereka</b><span>data bisnis + login aplikasi yang kamu sambungkan</span><i>PRAKTIS, TAPI BUKAN DI TANGANMU</i></div>`;
+      const tKe = wt("kerja"), tTe = wt("terus"), tCl = wt("cloud"), tTa = wt("tapi"), tDa = wt("data"), tLo = wt("login"), tIk = wt("ikut"), tSa = wt("sana.");
+      K.headerScene(S, P, 0, 1);
+      // ---------------------------------------------------------------- the cloud (same as the end of s02) + float
+      const cloud = $("s03-cloud");
+      I(cloud, { opacity: 1, scale: 1, y: 0, transformOrigin: "556px 540px" });
+      ft(cloud, { y: 0 }, { y: -6, duration: 1.2, yoyo: true, repeat: 1, ease: "sine.inOut" }, 0.1);
+      // ---------------------------------------------------------------- "Praktis": green chip; laptop + cloud computer
+      const pr = $("s03-pr"); I(pr, { x: 92, y: 630, scale: 0.4, opacity: 0, transformOrigin: "0% 50%" });
+      ft(pr, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, 0.06);
+      const lap = $("s03-lap"), lid = $("s03-lid"), cc = $("s03-cc"), zz = $("s03-zz"), spin = $("s03-spin");
+      I(lap, { opacity: 0, y: 30 }); ft(lap, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 0.18);
+      I(cc, { opacity: 0, y: 30 }); ft(cc, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 0.28);
+      I(lid, { scaleY: 1 });
+      // "kerja terus": the lid closes, the cloud computer keeps working
+      ft(lid, { scaleY: 1 }, { scaleY: 0.06, duration: 0.36, ease: "power2.in" }, tKe - 0.1);
+      I(zz, { x: 140, y: 790, opacity: 0 }); ft(zz, { opacity: 0, y: 800 }, { opacity: 1, y: 790, duration: 0.3, ease: "power2.out" }, tKe + 0.24);
+      I(spin, { rotation: 0, transformOrigin: "50% 50%" }); ft(spin, { rotation: 0 }, { rotation: 720, duration: 2.2, ease: "none" }, 0.3);
+      [0, 1, 2].forEach((i) => { const ok = $("s03-ok" + i); I(ok, { scale: 0, opacity: 0, transformOrigin: "50% 50%" });
+        ft(ok, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "back.out(3)" }, [tKe + 0.1, tTe + 0.2, tCl + 0.22][i]); });
+      I($("s03-demo"), { opacity: 1 });
+      // ---------------------------------------------------------------- "tapi data dan login": they leave, the data chips rise
+      const tOut = tTa - 0.12;
+      [[pr, 630], [lap, 0], [zz, 790], [cc, 0]].forEach(([e, y0], i) => ft(e, { opacity: 1, y: y0 }, { opacity: 0, y: y0 + 40, duration: 0.24, ease: "power2.in" }, tOut + (i % 2) * 0.04));
+      ITEMS.forEach((it, i) => {
+        const e = $("s03-i" + i), t = [tDa, tLo, tLo + 0.3][i] - 0.12;
+        I(e, { x: it.x, y: it.y, scale: 0.5, opacity: 0 });
+        ft(e, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.2)" }, t);
+        // "ikut di sana": up into the cloud
+        ft(e, { x: it.x, y: it.y, scale: 1, opacity: 1 }, { x: 400 + i * 30, y: 520, scale: 0.35, opacity: 0, duration: 0.42, ease: "power3.in" }, tIk - 0.22 + i * 0.07);
+      });
+      const rim = $("s03-rim");
+      ft(rim, { opacity: 0.85 }, { opacity: 1, duration: 0.12, yoyo: true, repeat: 1 }, tIk + 0.2);
+      const lock = $("s03-lock"); I(lock, { x: 880, y: 470, scale: 0, opacity: 0, transformOrigin: "50% 50%" });
+      ft(lock, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.6)" }, tSa - 0.04);
+      const tray = $("s03-tray"), call = $("s03-call");
+      I(tray, { opacity: 0, scale: 0.97, transformOrigin: "50% 50%" });
+      ft(tray, { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" }, tDa - 0.24);
+      ft(tray, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tIk + 0.14);
+      I(call, { opacity: 0, y: 30, scale: 0.96, transformOrigin: "50% 50%" });
+      ft(call, { opacity: 0, y: 30, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.6)" }, tSa - 0.06);
+      const am = call;
+      // ---------------------------------------------------------------- exit (header stays for s04)
+      const tX = D - 0.24;
+      [cloud, $("s03-cl"), lock, am].forEach((e, i) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, tX + (i % 2) * 0.02));
+      S.finish();
+    })();
+  </script>
+</template>

@@ -1,0 +1,114 @@
+<template>
+  <style>
+    /* s01 HOOK (0.00–5.90) "Prompt website 3D yang keren itu bukan sihir. Kalau dibedah, isinya cuma lima bagian."
+       Frame 0: left, the white "prompt-website-3d.txt" card as one wall of text (our own example prompt, CONTOH); right, the phone with
+       the finished example page (toko parfum lokal, amber bottle floating in warm light). "3D": the bottle spins 360°. "keren itu":
+       sparkles + a "sihir?" chip pop over the prompt. "bukan": the chip is struck through, then drops away. "Kalau dibedah": a cyan
+       laser with scissors sweeps down the card and leaves cut lines between the five parts. "isinya": the parts separate into five
+       labelled rows; "cuma lima": number discs 1–5 pop; "bagian": footer "5 bagian · kita isi satu per satu". Last 0.6 s: a scan line
+       rewinds the phone page to an empty page (s02 rebuilds it layer by layer from exactly this state). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s01-chip { position: absolute; left: 0; top: 0; height: 84px; padding: 0 30px 0 18px; border-radius: 42px; display: flex; align-items: center; gap: 12px;
+      background: rgba(10,18,56,.94); box-shadow: inset 0 0 0 2px rgba(106,223,255,.75), 0 0 34px rgba(1,204,247,.35), 0 18px 40px rgba(2,6,26,.5);
+      font: 700 44px/1 Poppins; color: #fff; white-space: nowrap; transform-origin: 50% 50%; }
+    #s01-chip svg { width: 44px; height: 44px; color: #6adfff; }
+    #s01-strike { position: absolute; left: 10px; right: 10px; top: 39px; height: 7px; border-radius: 4px; background: #ffffff; box-shadow: 0 0 12px rgba(255,255,255,.7); transform-origin: 0 50%; }
+    .s01-sp { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -20px 0 0 -20px; color: #9cecff; filter: drop-shadow(0 0 8px rgba(1,204,247,.9)); }
+    .s01-sp svg { width: 40px; height: 40px; }
+    #s01-laser { position: absolute; left: 50px; top: 0; width: 620px; height: 5px; border-radius: 3px; background: #9cecff;
+      box-shadow: 0 0 0 1.5px #01ccf7, 0 0 22px 6px rgba(1,204,247,.75); }
+    #s01-sc { position: absolute; left: 0; top: 0; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 26px; background: #01ccf7; color: #0b1440;
+      box-shadow: 0 0 20px rgba(1,204,247,.8); }
+    #s01-sc svg { position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; }
+    .s01-cut { position: absolute; left: 60px; top: 0; width: 600px; height: 3px; background: #01ccf7; box-shadow: 0 0 12px rgba(1,204,247,.9); }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R25K, P = "s01", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s01-zone");
+      const SP = [[118, 360], [610, 372], [96, 884], [628, 860]];
+      const BND = [1, 2, 3, 4].map((i) => K.CARD.y + K.WALL0 + i * K.WALLH - 5);   // global y of the four cuts (between the paragraphs)
+      z.innerHTML = K.cardHTML(P) + K.phoneHTML(P) +
+        SP.map((_, i) => `<div class="s01-sp" id="s01-sp${i}">${K.svg("sparkles")}</div>`).join("") +
+        `<div id="s01-chip">${K.svg("wand-sparkles")}sihir?<div id="s01-strike"></div></div>` +
+        BND.map((_, i) => `<div class="s01-cut" id="s01-cut${i}"></div>`).join("") +
+        `<div id="s01-laser"></div><div id="s01-sc">${K.svg("scissors")}</div>`;
+      const t3D = wt("3D"), tKe = wt("keren"), tBu = wt("bukan"), tSi = wt("sihir."), tKa = wt("Kalau"), tDi = wt("dibedah,"),
+            tIs = wt("isinya"), tCu = wt("cuma"), tLi = wt("lima"), tBa = wt("bagian.");
+      // ---------------------------------------------------------------- frame 0: the wall of text + the finished page
+      I($("s01-card"), { x: K.CARD.x, y: K.CARD.y, scale: 1, opacity: 1 });
+      I($("s01-cg"), { opacity: 0 }); I($("s01-ft"), { opacity: 0, scale: 0.6, transformOrigin: "50% 50%" });
+      K.ROWS.forEach((_, i) => {
+        const r = (x) => $(`s01-r${i}${x}`);
+        I(r(""), { top: K.WALL0 + i * K.WALLH, height: K.WALLH, x: 0, rotation: 0, opacity: 1 });
+        I(r("-bp"), { opacity: 0 }); I(r("-hi"), { opacity: 0 }); I(r("-para"), { opacity: 1 });
+        I(r("-dc"), { scale: 0, opacity: 0, transformOrigin: "50% 50%" }); I(r("-on"), { opacity: 0 }); I(r("-ok"), { opacity: 0 });
+        I(r("-lb"), { opacity: 0, x: -16 }); I(r("-pv"), { opacity: 0 }); I(r("-tx"), { opacity: 1 });
+      });
+      K.phoneSet(S, P, "full");
+      K.bob(S, $("s01-bfl"), 0.005, 5.3);
+      // "Prompt": the card glows once (this is the prompt we will cut open)
+      ft($("s01-cg"), { opacity: 0 }, { opacity: 1, duration: 0.18 }, 0.3); ft($("s01-cg"), { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 0.55);
+      // "3D": the bottle spins 360°, the phone breathes
+      K.spin(S, P, t3D - 0.08, 0.9);
+      ft($("s01-ph"), { scale: 1 }, { scale: 1.03, duration: 0.22, yoyo: true, repeat: 1, ease: "sine.inOut" }, t3D - 0.06);
+      // ---------------------------------------------------------------- "keren itu": sparkles + "sihir?" chip; "bukan": struck through, drops
+      SP.forEach(([x, y], i) => {
+        const e = $("s01-sp" + i); I(e, { x, y, scale: 0, opacity: 0, rotation: 0, transformOrigin: "50% 50%" });
+        ft(e, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(3)" }, tKe - 0.06 + i * 0.05);
+        ft(e, { rotation: 0 }, { rotation: 40, duration: 0.5, yoyo: true, repeat: 1, ease: "sine.inOut" }, tKe + 0.2);
+        ft(e, { scale: 1, opacity: 1 }, { scale: 0.3, opacity: 0, duration: 0.24, ease: "power2.in" }, tSi + 0.36 + i * 0.03);
+      });
+      const ch = $("s01-chip"), stk = $("s01-strike");
+      I(ch, { x: 360, xPercent: -50, y: 588, scale: 0.4, opacity: 0, rotation: 0 });
+      ft(ch, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.4)" }, tKe + 0.04);
+      I(stk, { scaleX: 0 }); ft(stk, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power3.out" }, tBu - 0.04);
+      ft(ch, { x: 360 }, { x: 368, duration: 0.05, yoyo: true, repeat: 3, ease: "sine.inOut" }, tSi);
+      ft(ch, { y: 588, rotation: 0, opacity: 1 }, { y: 660, rotation: 9, opacity: 0, duration: 0.36, ease: "power2.in" }, tSi + 0.38);
+      // ---------------------------------------------------------------- "Kalau dibedah": the laser cuts between the five parts
+      const ly0 = K.CARD.y + 60, ly1 = K.CARD.y + 588, tL0 = tKa - 0.02, tLd = Math.max(0.5, tIs - 0.12 - tL0);
+      const las = $("s01-laser"), sc = $("s01-sc");
+      I(las, { y: ly0, opacity: 0, scaleX: 0.6, transformOrigin: "50% 50%" }); I(sc, { x: 62, y: ly0 + 2, opacity: 0, rotation: -90, scale: 0.5, transformOrigin: "50% 50%" });
+      ft(las, { opacity: 0, scaleX: 0.6 }, { opacity: 1, scaleX: 1, duration: 0.14, ease: "power2.out" }, tL0 - 0.12);
+      ft(sc, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.16, ease: "back.out(2.4)" }, tL0 - 0.12);
+      ft(las, { y: ly0 }, { y: ly1, duration: tLd, ease: "none" }, tL0);
+      ft(sc, { y: ly0 + 2 }, { y: ly1 + 2, duration: tLd, ease: "none" }, tL0);
+      ft(sc, { rotation: -90 }, { rotation: -70, duration: 0.09, yoyo: true, repeat: Math.max(1, Math.round(tLd / 0.09)) - 1, ease: "sine.inOut" }, tL0);
+      ft(las, { opacity: 1 }, { opacity: 0, duration: 0.14 }, tL0 + tLd);
+      ft(sc, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.5, duration: 0.16 }, tL0 + tLd);
+      BND.forEach((y, i) => {
+        const c = $("s01-cut" + i), tc = tL0 + tLd * (y - ly0) / (ly1 - ly0);
+        I(c, { y, opacity: 0, scaleX: 0.2, transformOrigin: "0% 50%" });
+        ft(c, { opacity: 0, scaleX: 0.2 }, { opacity: 1, scaleX: 1, duration: 0.12, ease: "power2.out" }, tc);
+        ft(c, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tIs + 0.02);
+      });
+      // ---------------------------------------------------------------- "isinya": the parts separate into five labelled rows
+      const tops = K.rowTops(-1);
+      K.ROWS.forEach((_, i) => {
+        const r = (x) => $(`s01-r${i}${x}`), rot = [-1.4, 1.2, -1.0, 1.3, -1.2][i], dx = [-10, 12, -8, 10, -12][i];
+        ft(r(""), { top: K.WALL0 + i * K.WALLH, height: K.WALLH, rotation: 0, x: 0 },
+           { top: tops[i], height: K.RH, rotation: rot, x: dx, duration: 0.3, ease: "power3.out" }, tIs - 0.06 + i * 0.03);
+        ft(r(""), { rotation: rot, x: dx }, { rotation: 0, x: 0, duration: 0.36, ease: "power2.inOut" }, tIs + 0.3 + i * 0.03);
+        ft(r("-para"), { opacity: 1 }, { opacity: 0, duration: 0.16 }, tIs - 0.06);
+        ft(r("-bp"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tIs + 0.02 + i * 0.03);
+        ft(r("-lb"), { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.26, ease: "power3.out" }, tIs + 0.16 + i * 0.04);
+        // "cuma lima": discs 1..5
+        ft(r("-dc"), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "back.out(3)" }, tCu - 0.04 + i * 0.07);
+        ft(r("-on"), { opacity: 0 }, { opacity: 1, duration: 0.1, yoyo: true, repeat: 1 }, tLi - 0.06 + i * 0.07);
+      });
+      ft($("s01-ft"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.2)" }, tBa - 0.06);
+      // ---------------------------------------------------------------- last 0.6 s: rewind the phone page to an empty page
+      const tR = D - 0.62, scan = $("s01-scan");
+      ft(scan, { y: 580, opacity: 0 }, { y: -10, opacity: 1, duration: 0.42, ease: "power2.inOut" }, tR);
+      ft(scan, { opacity: 1 }, { opacity: 0, duration: 0.12 }, tR + 0.42);
+      ["bg", "lit", "beam", "hl", "shd", "bpos", "wa"].forEach((k, i) => ft($(`s01-${k}`), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power2.in" }, tR + 0.06 + (6 - i) * 0.025));
+      ft($("s01-blank"), { opacity: 0 }, { opacity: 1, duration: 0.26, ease: "power2.out" }, tR + 0.16);
+      S.finish();
+    })();
+  </script>
+</template>

@@ -1,7 +1,8 @@
-"""Builds index.html for the R20 reel (Claude Code pakai model AI gratis — FreeLLMAPI; adapted from the R12 builder) from production/timing.json: the client's light
+"""Builds index.html for the R22 reel (Agent AI di server klien: checklist AMAN; adapted from the R20/R12 builder) from production/timing.json: the client's light
 background (white -> soft blue; its baked grid removed and re-created as an ANIMATED CSS grid in the top-right that drifts and
 breathes), word-synced Poppins captions in the navy text gradient (#0a0d2c -> #294b77), the dark AI PRENEUR logo (top-left),
-scene slots (s01–s11), the robot (co-host) and the mascot (host). Shared visual system: vendor/r20kit.js (window.K).
+scene slots (s01–s11), the robot (co-host) and the mascot (host), and the PHASE RAIL of the reel's three-act checklist
+(Sebelum · Selama · Sesudah; one dot per checklist item, ticked on the item's key word). Shared visual system: vendor/r22kit.js (window.K).
 Every initial state is pinned at 0 in a NESTED timeline (P0, first child at 0); tl.render(0, true, true) at the end of the build.
 Caption styles: b = 700, r = 400, c = 700 + drawn underline, m = navy gradient pill + white 700.   Run: python3 -I tools/build_index.py ."""
 import json, sys
@@ -18,19 +19,29 @@ C = ",\n          ".join(json.dumps(c + ["mid"]) for c in T["caps"])
 ovl = lambda sid: 0.0   # no overlapping slots: scenes hand objects over at exactly matching positions
 slots = "".join(f'      <div id="{s["id"]}" class="scene" data-composition-id="{s["id"]}" data-composition-src="compositions/{s["id"]}.html" data-start="{s["start"]}" '
                 f'data-duration="{round(s["dur"] + ovl(s["id"]), 4)}" data-track-index="{2 + k % 3}" data-width="1080" data-height="1920"></div>\n' for k, s in enumerate(T["scenes"]))
+def wt(txt, sid):
+    st = S[sid]["start"]; en = st + S[sid]["dur"]
+    for w in T["words"]:
+        if w["w"] == txt and st - 0.05 <= w["s"] <= en: return w["s"]
+    raise SystemExit("rail: word not found " + txt + " in " + sid)
+# [phase, dot index, time] — a dot fills on the key word of its checklist item
+TICKS = [[0, 0, wt("sudo.", "s03") + 0.3], [0, 1, wt("awal.", "s04") + 0.2], [0, 2, wt("yolo.", "s05") + 0.3], [0, 3, wt("ask.", "s06") + 0.3],
+         [1, 0, wt("jamnya.", "s07") + 0.2], [1, 1, wt("jejaknya.", "s08") + 0.3], [2, 0, wt("ubah.", "s09") + 0.3]]
+RAIL = {"in": round(S["s03"]["start"] - 0.42, 3), "act": [S["s03"]["start"], S["s07"]["start"], S["s09"]["start"]], "allDone": S["s10"]["start"],
+        "out": S["s11"]["start"], "ticks": [[a, b, round(t, 3)] for a, b, t in TICKS]}
 html = f"""<!doctype html>
 <html lang="id" data-resolution="portrait">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>Claude Code pakai model AI gratis — AI PRENEUR</title>
+    <title>Agent AI di server klien: checklist AMAN — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/scenes.js"></script>
-    <script src="vendor/r20icons.js"></script>
-    <script src="vendor/r20kit.js"></script>
+    <script src="vendor/r22icons.js"></script>
+    <script src="vendor/r22kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -61,6 +72,20 @@ html = f"""<!doctype html>
       .cap .c {{ font-weight: 700; }}
       .cap .c::after {{ content: ""; position: absolute; left: 0.04em; right: 0.04em; bottom: 0.02em; height: 0.11em; border-radius: 0.06em; background: linear-gradient(90deg, rgba(41,75,119,.5), rgba(10,13,44,.3)); }}
       .cap .k {{ font-weight: 700; color: #fff; -webkit-background-clip: border-box; background-clip: border-box; background: var(--grad); padding: 0 0.22em; border-radius: 0.24em; box-shadow: 0 8px 22px rgba(10,13,44,.22); }}
+      /* PHASE RAIL: the three acts of the checklist (y 308-364, full width under the logo) */
+      #rail {{ position: absolute; left: 84px; top: 308px; width: 912px; height: 56px; }}
+      .rp {{ position: absolute; top: 0; width: 296px; height: 56px; border-radius: 28px; font-family: Poppins, sans-serif; }}
+      .rp > * {{ position: absolute; }}
+      .rp .bg {{ left: 0; top: 0; width: 296px; height: 56px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #f6f8fd); box-shadow: 0 14px 26px -18px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.08); }}
+      .rp .on {{ left: 0; top: 0; width: 296px; height: 56px; border-radius: 28px; background: linear-gradient(135deg, #0a0d2c, #294b77); box-shadow: 0 16px 28px -14px rgba(10,13,44,.85); }}
+      .rp .nu {{ left: 9px; top: 9px; width: 38px; height: 38px; border-radius: 50%; background: #eef2f9; color: #294b77; text-align: center; font: 700 19px/38px Poppins, sans-serif; }}
+      .rp .nuo {{ left: 9px; top: 9px; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.16); color: #ffffff; text-align: center; font: 700 19px/38px Poppins, sans-serif; }}
+      .rp .lb {{ left: 58px; top: 0; font: 700 21px/56px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }}
+      .rp .lbo {{ left: 58px; top: 0; font: 700 21px/56px Poppins, sans-serif; color: #ffffff; white-space: nowrap; }}
+      .rp .dt {{ top: 23px; width: 10px; height: 10px; border-radius: 50%; background: #dfe6f1; box-shadow: inset 0 0 0 1.5px #cdd7e6; }}
+      .rp .df {{ top: 21px; width: 14px; height: 14px; margin-left: -2px; border-radius: 50%; background: #2da44e; box-shadow: 0 0 0 2.5px #ffffff, 0 4px 8px -2px rgba(31,122,58,.7); }}
+      .rp .ck {{ left: 9px; top: 9px; width: 38px; height: 38px; border-radius: 50%; background: #2da44e; color: #ffffff; }}
+      .rp .ck svg {{ position: absolute; left: 9px; top: 9px; width: 20px; height: 20px; display: block; }}
       /* persistent brand mark (client logo, dark) — top-left inside the safe zone */
       #brandlogo {{ opacity: 0; position: absolute; left: 84px; top: 262px; width: 236px; height: auto; }}
     </style>
@@ -72,7 +97,7 @@ html = f"""<!doctype html>
       </div>
 {slots}      <div id="robot" class="clip" data-composition-id="robot" data-composition-src="compositions/robot.html" data-start="0" data-duration="{total}" data-track-index="6" data-width="1080" data-height="1920"></div>
       <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{total}" data-track-index="7" data-width="1080" data-height="1920"></div>
-      <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_dark_trim.png" alt="AI PRENEUR"></div>
+      <div id="fx" class="clip layer" data-start="0" data-duration="{total}" data-track-index="8"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_dark_trim.png" alt="AI PRENEUR"><div id="rail"></div></div>
       <div id="caps" class="clip layer" data-start="0" data-duration="{total}" data-track-index="9"></div>
       <audio id="vo" src="assets/audio/vo.mp3" data-start="{off}" data-duration="{T['vo_sec']}" data-track-index="10" data-volume="1"></audio>
       <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="{total}" data-track-index="11" data-volume="0.9"></audio>
@@ -111,6 +136,37 @@ html = f"""<!doctype html>
             tl.fromTo(w, {{ yPercent: 118 }}, {{ yPercent: 0, duration: 0.34, ease: "power4.out", immediateRender: false }}, t);
             if (st === "m") tl.fromTo(w, {{ scale: 1 }}, {{ scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }}, t + 0.3);
           }}
+        }});
+        // ---------------------------------------------------------------- PHASE RAIL (Sebelum 4 items · Selama 2 · Sesudah 1)
+        const R = {json.dumps(RAIL)};
+        const NAMES = ["Sebelum", "Selama", "Sesudah"], NDOT = [4, 2, 1], CHK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+        const rail = document.getElementById("rail");
+        NAMES.forEach((n, k) => {{
+          const p = mk("div", "rp", rail); p.id = "rp" + k; p.style.left = (k * 308) + "px";
+          let h = `<div class="bg"></div><div class="on" id="rpon${{k}}"></div><div class="nu">${{k + 1}}</div><div class="nuo" id="rpno${{k}}">${{k + 1}}</div>` +
+            `<div class="lb">${{n}}</div><div class="lbo" id="rplo${{k}}">${{n}}</div><div class="ck" id="rpck${{k}}">${{CHK}}</div>`;
+          for (let d = 0; d < NDOT[k]; d++) {{ const x = 296 - 22 - (NDOT[k] - 1 - d) * 18; h += `<div class="dt" style="left:${{x}}px"></div><div class="df" id="rpd${{k}}_${{d}}" style="left:${{x}}px"></div>`; }}
+          p.innerHTML = h;
+          pin(p, {{ opacity: 0, y: -40 }});
+          tl.fromTo(p, {{ opacity: 0, y: -40 }}, {{ opacity: 1, y: 0, duration: 0.38, ease: "power3.out", immediateRender: false }}, R.in + k * 0.06);
+          tl.fromTo(p, {{ opacity: 1, y: 0 }}, {{ opacity: 0, y: -30, duration: 0.3, ease: "power2.in", immediateRender: false }}, R.out - 0.3 + k * 0.04);
+          // active phase: navy fill (from its first scene until the next phase starts)
+          ["rpon", "rpno", "rplo"].forEach((q) => {{ const e = document.getElementById(q + k); pin(e, {{ opacity: 0 }});
+            tl.fromTo(e, {{ opacity: 0 }}, {{ opacity: 1, duration: 0.25, immediateRender: false }}, R.act[k]);
+            tl.fromTo(e, {{ opacity: 1 }}, {{ opacity: 0, duration: 0.25, immediateRender: false }}, k < 2 ? R.act[k + 1] : R.allDone); }});
+          const pk = document.getElementById("rp" + k);
+          pin(pk, {{ scale: 1 }});
+          tl.fromTo(pk, {{ scale: 1 }}, {{ scale: 1.05, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }}, R.act[k]);
+        }});
+        R.ticks.forEach(([k, d, t]) => {{
+          const e = document.getElementById(`rpd${{k}}_${{d}}`); pin(e, {{ opacity: 0, scale: 0.2 }});
+          tl.fromTo(e, {{ opacity: 0, scale: 0.2 }}, {{ opacity: 1, scale: 1, duration: 0.24, ease: "back.out(3)", immediateRender: false }}, t);
+        }});
+        // a phase is complete when its last dot fills → its number turns into a green check
+        [0, 1, 2].forEach((k) => {{
+          const last = Math.max(...R.ticks.filter((x) => x[0] === k).map((x) => x[2]));
+          const e = document.getElementById("rpck" + k); pin(e, {{ opacity: 0, scale: 0.3 }});
+          tl.fromTo(e, {{ opacity: 0, scale: 0.3 }}, {{ opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2.6)", immediateRender: false }}, last + 0.12);
         }});
         // ambient (slow, seekable): the client's grid drifts diagonally by whole cells, a soft light wanders over it, the tint breathes
         tl.fromTo("#grid", {{ x: 0, y: 0 }}, {{ x: 430, y: 430, duration: {total}, ease: "none", immediateRender: false }}, 0);

@@ -1,7 +1,7 @@
-"""Builds index.html for the R20 reel (Claude Code pakai model AI gratis — FreeLLMAPI; adapted from the R12 builder) from production/timing.json: the client's light
+"""Builds index.html for the R24 reel (4 alat biar web dari Claude Code jadi sampai online; adapted from the R20/R12 builder) from production/timing.json: the client's light
 background (white -> soft blue; its baked grid removed and re-created as an ANIMATED CSS grid in the top-right that drifts and
 breathes), word-synced Poppins captions in the navy text gradient (#0a0d2c -> #294b77), the dark AI PRENEUR logo (top-left),
-scene slots (s01–s11), the robot (co-host) and the mascot (host). Shared visual system: vendor/r20kit.js (window.K).
+scene slots (s01–s08), the robot (co-host) and the mascot (host). Shared visual system: vendor/r24kit.js (window.K).
 Every initial state is pinned at 0 in a NESTED timeline (P0, first child at 0); tl.render(0, true, true) at the end of the build.
 Caption styles: b = 700, r = 400, c = 700 + drawn underline, m = navy gradient pill + white 700.   Run: python3 -I tools/build_index.py ."""
 import json, sys
@@ -23,14 +23,14 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>Claude Code pakai model AI gratis — AI PRENEUR</title>
+    <title>4 alat Claude Code: dari kode sampai online — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/scenes.js"></script>
-    <script src="vendor/r20icons.js"></script>
-    <script src="vendor/r20kit.js"></script>
+    <script src="vendor/r24icons.js"></script>
+    <script src="vendor/r24kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -119,7 +119,7 @@ html = f"""<!doctype html>
         pin("#brandlogo", {{ opacity: 0.95 }});   // visible from frame 0
         pin("#grid", {{ x: 0, y: 0 }}); pin("#gridhl", {{ x: 600, y: 180 }}); pin("#grain", {{ x: 0, y: 0 }});
         // the CTA end beat shows its own big logo: the small corner mark steps away
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s11"]["start"] + S["s11"]["dur"] - 1.2, 3)});
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s08"]["start"] + S["s08"]["dur"] - 1.2, 3)});
         tl.set({{}}, {{}}, {round(total - 0.01, 4)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         tl.render(0, true, true);

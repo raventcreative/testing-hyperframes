@@ -13,8 +13,10 @@ raw = [w for s in R["segments"] for w in s["words"]]
 # alignment fixes (raw seconds), checked against the energy envelope + faster-whisper small (none needed so far)
 # alignment fixes (raw seconds), checked against the VO energy envelope + faster-whisper small/medium: the ElevenLabs alignment put
 # "Context Seven dari Upstash" ~0.2 s late (silence 7.46-7.60, voiced from 7.62; "Up" stop closure 8.55) and "production." (line 7)
-# 0.4 s late (voiced 36.65-37.25, whisper medium 36.68).
-TFIX = {22: (7.62, 7.88), 23: (7.92, 8.14), 24: (8.18, 8.36), 25: (8.40, 9.12), 94: (36.66, 37.26)}
+# 0.4 s late (voiced 36.65-37.25, whisper medium 36.68); line 6 "Empat," (voiced 28.07-28.37, the alignment said 28.30 and the
+# energy snap would have pushed it onto "Vercel"), "cek," (31.30-31.42) and "oke." (33.33-33.50) — same snap problem.
+TFIX = {22: (7.62, 7.88), 23: (7.92, 8.14), 24: (8.18, 8.36), 25: (8.40, 9.12), 94: (36.66, 37.26),
+        72: (28.07, 28.37), 81: (31.30, 31.44), 86: (33.33, 33.50)}
 for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)

@@ -15,8 +15,8 @@
   </div>
   <script>
     (function () {
-      // AI PRENEUR ROBOT = the operator (R19 "Atticus"): types while the keys are held, scans the windows / files / email / screen,
-      // types the draft and the install ask, startles at "ingat" / "dikirim", cheers the CTA.
+      // AI PRENEUR ROBOT = the operator (R25 SITUS): types each part of the prompt on the holo keyboard, scans the page layers,
+      // shakes its head at "bukan" / "lupakan", claps the combined prompt, cheers the CTA.
       // Pure function of global time (hf-seek, __T0 for chunked renders).
       const VW = window.VO_WORDS, SC = window.VO_SCENES, D = (SC[SC.length - 1].start + SC[SC.length - 1].dur), M3 = window.Mascot3D;
       const one = (x) => Math.max(0, Math.min(1, x));
@@ -28,28 +28,31 @@
       const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : -99; };
       const HEAD_FIX = [-0.0775, -0.227, -0.1287];
       const STAND = { fx: 832, fy: 1668, h: 330, ry: -0.38 };
+      const HOPS = [S("s02").start, S("s03").start, S("s04").start].concat(["Dua,", "Tiga,", "Empat,", "Lima,", "Gabungin"].map((x) => wt(x) - 0.05));
       const T_IN = 0.0;                                              // at the keyboard from frame 0 (flies in over the first 0.75 s)
       function frame(t) {
         if (t < T_IN) return null;
         const u = io3((t - T_IN) / 0.75), arc = Math.sin(Math.PI * u) * 160;
         let f = { fx: L(1330, STAND.fx, u), fy: L(1500, STAND.fy, u) - arc, h: L(300, STAND.h, u), ry: L(-1.1, STAND.ry, u), fly: u };
         // small hops on scene cuts inside the steps (keeps it alive between gestures)
-        for (const id of ["s02", "s03", "s04", "s05", "s06", "s07", "s08", "s09", "s10"]) { const s0 = S(id).start, k = t - s0; if (k > 0 && k < 0.5) f.fy -= 34 * Math.sin(Math.PI * k / 0.5); }
+        for (const s0 of HOPS) { const k = t - s0; if (k > 0 && k < 0.5) f.fy -= 34 * Math.sin(Math.PI * k / 0.5); }
         return f;
       }
       // ---------------------------------------------------------------- gestures
       const G = [];
       const add = (t, k, d = 0.9, x) => { if (t > 0) G.push(Object.assign({ t, k, d }, x || {})); };
       const s = (id) => S(id).start;
-      add(0.3, "wave", 0.9); add(wt("Tahan") - 0.05, "type", 1.7); add(wt("lepas.") - 0.05, "happy", 0.5); add(wt("beresin") - 0.05, "cheer", 0.7);
-      add(wt("Atticus,") - 0.05, "present", 0.8, { side: "L" }); add(wt("open") - 0.05, "nod", 0.5);
-      add(wt("Bilang:") - 0.05, "point", 0.6, { up: 1 }); add(wt("Jendelanya") - 0.05, "scan", 0.8); add(wt("pindah.") - 0.05, "happy", 0.5);
-      add(wt("Cari") - 0.05, "think", 0.8); add(wt("nyari") - 0.05, "scan", 1.0); add(wt("filenya,") - 0.05, "cheer", 0.6);
-      add(wt("email,") - 0.05, "present", 0.6, { side: "L" }); add(wt("balas,") - 0.05, "scan", 0.8); add(wt("Drafnya") - 0.05, "type", 1.0); add(wt("nggak") - 0.05, "no", 0.6);
-      add(wt("tempel") - 0.05, "type", 0.8); add(wt("minta") - 0.05, "nod", 0.5); add(wt("pasangin.") - 0.05, "cheer", 0.6);
-      add(wt("gratis,") - 0.05, "happy", 0.6); add(wt("otaknya") - 0.05, "think", 0.7); add(wt("Pro") - 0.05, "point", 0.6, { up: 1 }); add(wt("lokal.") - 0.05, "nod", 0.5);
-      add(wt("ingat,") - 0.05, "shock", 0.6); add(wt("layarmu.") - 0.05, "scan", 0.8); add(wt("mikrofon,") - 0.05, "present", 0.7, { side: "L" }); add(wt("rekam") - 0.05, "nod", 0.5);
-      add(wt("Suaramu") - 0.05, "happy", 0.6); add(wt("dikirim") - 0.05, "shock", 0.5); add(wt("model.") - 0.05, "nod", 0.5);
+      add(0.3, "wave", 0.9); add(wt("keren") - 0.05, "happy", 0.5); add(wt("bukan") - 0.05, "no", 0.6); add(wt("dibedah,") - 0.05, "scan", 0.9);
+      add(wt("lima") - 0.05, "cheer", 0.6);
+      add(wt("Satu,") - 0.05, "point", 0.6, { up: 1 }); add(wt("objek") - 0.05, "type", 1.3); add(wt("melayang.") - 0.05, "happy", 0.6);
+      add(wt("Dua,") - 0.05, "type", 1.4); add(wt("cahaya,") - 0.05, "scan", 0.8); add(wt("bayangan.") - 0.05, "nod", 0.5);
+      add(wt("Tiga,") - 0.05, "type", 1.2); add(wt("muter") - 0.05, "cheer", 0.6); add(wt("mendekat.") - 0.05, "happy", 0.5);
+      add(wt("Empat,") - 0.05, "type", 1.3); add(wt("produk,") - 0.05, "scan", 0.8); add(wt("WhatsApp.") - 0.05, "present", 0.7, { side: "L" });
+      add(wt("Lima,") - 0.05, "type", 1.6); add(wt("Three.js") - 0.05, "nod", 0.5); add(wt("ringan") - 0.05, "cheer", 0.7);
+      add(wt("Gabungin") - 0.05, "clap", 0.7); add(wt("Claude,") - 0.05, "type", 1.0); add(wt("sehari-hari.") - 0.05, "happy", 0.6);
+      add(wt("harga,") - 0.05, "think", 0.8); add(wt("lupakan") - 0.05, "no", 0.6); add(wt("Hitung") - 0.05, "type", 1.4); add(wt("domain") - 0.05, "nod", 0.5);
+      add(wt("bandingkan") - 0.05, "scan", 1.0); add(wt("kotamu.") - 0.05, "point", 0.6, { up: 1 });
+      add(wt("Template") - 0.05, "present", 0.8, { side: "L" }); add(wt("gratis,") - 0.05, "cheer", 0.6);
       add(wt("Komen") - 0.08, "cheer", 0.9); add(wt("DM.") - 0.1, "point", 0.7, { up: 1 }); add(D - 1.05, "wave", 0.95);
       const envG = (t, g) => sm((t - g.t + 0.16) / 0.2) * (1 - sm((t - (g.t + g.d)) / 0.26));
       const BL = []; { let x = T_IN + 1.2, h = 13; while (x < D) { BL.push(x); h = (h * 9301 + 49297) % 233280; x += 2.1 + (h / 233280) * 2.3; } }

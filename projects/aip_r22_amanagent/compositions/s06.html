@@ -2,81 +2,82 @@
   <style>
     #root { position: absolute; inset: 0; overflow: hidden; }
     #s06-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
-    #s06-glow { left: 40px; top: 300px; width: 1000px; height: 700px; }
-    #s06-a1 { left: 70px; top: 330px; }
-    #s06-ar { left: 352px; top: 343px; width: 30px; height: 30px; color: #9fb3d6; }
-    #s06-ar svg { width: 30px; height: 30px; display: block; }
-    #s06-a2 { left: 396px; top: 330px; }
-    #s06-auto { left: 694px; top: 324px; height: 66px; padding: 0 26px 0 70px; border-radius: 33px; background: linear-gradient(135deg, #3a6fe0, #294b77); color: #ffffff;
-      font: 700 25px/66px Poppins, sans-serif; white-space: nowrap; box-shadow: 0 18px 30px -16px rgba(58,111,224,.9); transform-origin: 50% 50%; }
-    #s06-auto i { position: absolute; left: 22px; top: 17px; width: 32px; height: 32px; }
-    #s06-auto i svg { width: 32px; height: 32px; display: block; }
-    #s06-move { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
-    #s06-ck { left: 452px; top: 610px; }
-    #s06-bt { left: 128px; top: 852px; }
+    #s06-glow { left: 40px; top: 380px; width: 1000px; height: 600px; }
+    /* toll gates: one lane per tool */
+    #s06-gt { left: 90px; top: 392px; width: 900px; height: 372px; border-radius: 32px; transform-origin: 50% 50%; }
+    #s06-gt > * { position: absolute; }
+    .s06-ln { left: 24px; width: 852px; height: 56px; border-radius: 18px; background: #f4f7fc; box-shadow: inset 0 0 0 1.5px #e3e9f4; transform-origin: 50% 50%; overflow: hidden; }
+    .s06-ln > * { position: absolute; }
+    .s06-ln .ic { left: 16px; top: 12px; width: 32px; height: 32px; color: #294b77; }
+    .s06-ln .ic svg { width: 32px; height: 32px; display: block; }
+    .s06-ln .nm { left: 62px; top: 0; font: 700 22px/56px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s06-ln .nm span { font-weight: 400; color: #5d6f8f; font-size: 18px; }
+    .s06-ln .post { left: 556px; top: 8px; width: 14px; height: 40px; border-radius: 5px; background: linear-gradient(180deg, #5d6f8f, #294b77); }
+    .s06-ln .arm { left: 562px; top: 22px; width: 150px; height: 12px; border-radius: 6px; transform-origin: 0 50%;
+      background: repeating-linear-gradient(90deg, #e5484d 0 18px, #ffffff 18px 34px); box-shadow: 0 0 0 1.5px rgba(10,13,44,.18), 0 6px 10px -6px rgba(10,13,44,.6); }
+    .s06-ln .arm.y { background: repeating-linear-gradient(90deg, #e3a008 0 18px, #ffffff 18px 34px); }
+    .s06-ln .pl { right: 12px; top: 8px; width: 112px; height: 40px; border-radius: 20px; text-align: center; font: 700 18px/40px Poppins, sans-serif; white-space: nowrap; }
+    .s06-ln .pl.al { background: #e8f6ed; color: #1f7a3a; box-shadow: inset 0 0 0 1.5px rgba(31,122,58,.25); }
+    .s06-ln .pl.as { background: #fff3dc; color: #8a4d08; box-shadow: inset 0 0 0 1.5px rgba(148,84,10,.3); }
+    .s06-ln .pl.dn { background: #fdeaea; color: #b4322f; box-shadow: inset 0 0 0 1.5px rgba(180,50,47,.3); }
+    #s06-bw { left: 606px; top: 30px; }
+    #s06-cmd { left: 90px; top: 782px; font-size: 18px; }
+    #s06-fn { left: 90px; top: 852px; }
   </style>
   <div id="root" data-composition-id="s06" data-width="1080" data-height="1920">
     <div id="s06-cam"></div>
   </div>
   <script>
     (function () {
-      // s06 "Jatah satu habis, otomatis pindah ke yang lain."
-      // The "Sisa jatah gratis" panel is back with Google serving · "Jatah satu habis": Google's bar drains to zero, turns red,
-      // status "habis" + shake · "otomatis": a blue "Otomatis pindah" pill (spinning refresh icon) · "pindah": the blue ring slides
-      // from Google down to Groq along a curved arrow, Groq → "melayani" · "lain.": green tick on Groq. Bottom chip: no settings
-      // change needed (README: "falls over to the next provider when one is rate-limited"). END STATE: everything leaves.
-      const ID = "s06", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, shake } = S, tl = S.tl;
-      const tJat = L("Jatah"), tSat = L("satu"), tHab = L("habis,"), tOto = L("otomatis"), tPin = L("pindah"), tLai = L("lain.");
-      const ROWS = [{ n: "Google", pct: 0.86 }, { n: "Groq", pct: 0.72 }, { n: "Mistral", pct: 0.64 }, { n: "+ penyedia lain", more: true, sub: "Cerebras, OpenRouter, dll." }];
-      const QY = 420, R0 = 100, RS = 76, RH = 66;
+      // s06 "Di OpenCode, setelan awalnya serba boleh, jadi ubah permission-nya ke ask."  (act 1, item 4 — TOLL GATES per tool)
+      // OpenCode docs (v1 permissions.mdx: "Most permissions default to allow"; V2 base policy allows everything except .env reads):
+      // three lanes bash / edit / webfetch, barrier arms UP and green "allow" on "serba boleh" (tag BAWAAN) · "ubah permission-nya
+      // ke ask": arms come down one by one, pills turn amber "ask" · a fourth lane "bash: rm *" closes red "deny". The real config
+      // types (V1 `permission` keys — still read by OpenCode 2 per migrate-v1.mdx) and a footnote: put it in /etc/opencode/opencode.json
+      // (managed config, root-owned, highest priority) so the agent account can't loosen it itself.
+      const ID = "s06", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, typeD, shake } = S, tl = S.tl;
+      const tOC = L("OpenCode,"), tSet = L("setelan"), tSer = L("serba"), tBol = L("boleh,"), tUb = L("ubah"), tPer = L("permission-nya"), tAsk = L("ask.");
+      const LN = [["square-terminal", "bash", "jalanin perintah"], ["file-code", "edit", "ubah file"], ["globe", "webfetch", "buka web"], ["trash-2", "bash: rm *", "hapus file"]];
       let h = `<div class="k-glow k-a" id="s06-glow"></div>`;
-      h += `<div class="k-chip navy" id="s06-a1">${K.svg("square-terminal", 2.2)}Claude Code</div><div class="k-a" id="s06-ar">${K.svg("arrow-right", 2.6)}</div>`;
-      h += `<div class="k-chip" id="s06-a2">${K.svg("server", 2.2)}FreeLLMAPI</div>`;
-      h += `<div class="k-a" id="s06-auto"><i id="s06-ai">${K.svg("refresh-cw", 2.4)}</i>Otomatis pindah</div>`;
-      h += K.quota("s06", { x: 70, y: QY, w: 940, rows: ROWS, r0: R0, rs: RS, rh: RH, bar: 360 });
-      h += `<svg class="k-a" id="s06-move" viewBox="0 0 1080 1920" fill="none"><path id="s06-mp" d="M86 ${QY + R0 + 33} C 40 ${QY + R0 + 50}, 40 ${QY + R0 + RS + 16}, 86 ${QY + R0 + RS + 33}" stroke="#3a6fe0" stroke-width="6" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/></svg>`;
-      h += `<div class="k-ok" id="s06-ck" style="left:${70 + 940 - 22 - 236}px;top:${QY + R0 + RS + 13}px">${K.svg("check", 3.2)}</div>`;
-      h += `<div class="k-chip ok" id="s06-bt">${K.svg("circle-check", 2.2)}Claude Code tetap jalan, tanpa ganti setting</div>`;
+      h += `<div class="k-a k-card" id="s06-gt">${K.hd({ icon: "fence", eb: "OPENCODE · opencode.json", tt: "permission", ts: "tiap alat punya palang sendiri" })}` +
+        `<div class="k-tag" id="s06-bw">BAWAAN: HAMPIR SEMUA ALLOW</div>` +
+        LN.map((l, k) => `<div class="s06-ln" id="s06-l${k}" style="top:${118 + k * 62}px"><div class="ic">${K.svg(l[0], 2)}</div><div class="nm">${l[1]} <span>· ${l[2]}</span></div>` +
+          `<div class="arm${k < 3 ? " y" : ""}" id="s06-a${k}"></div><div class="post"></div>` +
+          (k < 3 ? `<div class="pl al" id="s06-p${k}a">allow</div><div class="pl as" id="s06-p${k}s">ask</div>` : `<div class="pl dn" id="s06-p${k}d">deny</div>`) + `</div>`).join("") + `</div>`;
+      h += `<div class="k-cmd" id="s06-cmd"></div>`;
+      h += `<div class="k-fn" id="s06-fn">${K.svg("lock", 2.2)}taruh di <b>/etc/opencode/opencode.json</b> — milik root, agent nggak bisa ngubah</div>`;
       $("s06-cam").innerHTML = h;
-      const glow = $("s06-glow"); I(glow, { opacity: 0.85, scale: 1 });
-      // panel + header chips in at once (Google already serving)
-      const q = $("s06-q"); pop(q, 0.0, { y: 60, scale: 0.97 }, 0.3, "power3.out");
-      pop($("s06-a1"), 0.04, { scale: 0.6, y: 0, x: -20 }, 0.26, "back.out(2)");
-      pop($("s06-ar"), 0.1, { scale: 0.4, y: 0 }, 0.2, "back.out(2)");
-      pop($("s06-a2"), 0.14, { scale: 0.6, y: 0, x: -20 }, 0.26, "back.out(2)");
-      ROWS.forEach((r, i) => {
-        I($("s06-rg" + i), { opacity: i === 0 ? 1 : 0, y: 0 });
-        if (r.more) return;
-        I($("s06-qf" + i), { scaleX: r.pct }); I($("s06-ql" + i), { opacity: 0, scaleX: r.pct });
-        I($("s06-qs" + i + "-idle"), { opacity: i === 0 ? 0 : 1 }); I($("s06-qs" + i + "-on"), { opacity: i === 0 ? 1 : 0 }); I($("s06-qs" + i + "-bad"), { opacity: 0 });
+      I($("s06-glow"), { opacity: 0.85, scale: 1 });
+      const gt = $("s06-gt");
+      pop(gt, 0.0, { y: 40, scale: 0.96 }, 0.32, "back.out(1.5)");
+      // three lanes: arms UP (open), pills "allow" — the default
+      [0, 1, 2].forEach((k) => {
+        pop($("s06-l" + k), 0.12 + k * 0.08, { x: -24, y: 0, scale: 0.97 }, 0.26, "power3.out");
+        const a = $("s06-a" + k); I(a, { rotation: -78 });
+        const pa = $(`s06-p${k}a`), ps = $(`s06-p${k}s`);
+        I(pa, { opacity: 0, scale: 0.6 }); ft(pa, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2.4)" }, tSer - 0.1 + k * 0.1);
+        I(ps, { opacity: 0, scale: 0.6 });
+        // "ubah ... ke ask": the arm drops, the pill turns amber
+        const ta = tPer - 0.1 + k * 0.16;
+        ft(a, { rotation: -78 }, { rotation: 0, duration: 0.3, ease: "bounce.out" }, ta);
+        ft(pa, { opacity: 1 }, { opacity: 0, duration: 0.12 }, ta + 0.12);
+        ft(ps, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2.4)" }, ta + 0.14);
       });
-      // "Jatah satu habis": Google drains to zero, red, "habis"
-      const f0 = $("s06-qf0"), l0 = $("s06-ql0");
-      ft(f0, { scaleX: 0.86 }, { scaleX: 0.0, duration: Math.max(0.3, tHab - tSat + 0.05), ease: "power1.in" }, tSat - 0.05);
-      ft(l0, { opacity: 0, scaleX: 0.86 }, { opacity: 1, scaleX: 0.0, duration: Math.max(0.3, tHab - tSat + 0.05), ease: "power1.in" }, tSat - 0.05);
-      tl.set($("s06-qs0-on"), { opacity: 0 }, tHab);
-      ft($("s06-qs0-bad"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2.6)" }, tHab);
-      shake($("s06-qr0"), tHab + 0.04, 7);
-      // "otomatis": the pill, its icon spins
-      const auto = $("s06-auto"), ai = $("s06-ai");
-      pop(auto, tOto - 0.1, { scale: 0.5, y: 0 }, 0.3, "back.out(2.4)");
-      I(ai, { rotation: 0 }); ft(ai, { rotation: 0 }, { rotation: 540, duration: 1.0, ease: "power2.inOut" }, tOto);
-      // "pindah": the ring moves Google → Groq along the curved arrow; Groq starts serving
-      const mp = $("s06-mp"), rg0 = $("s06-rg0");
-      I(mp, { attr: { "stroke-dashoffset": 1 }, opacity: 1 });
-      ft(mp, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.3, ease: "power2.out" }, tPin - 0.22);
-      ft(rg0, { y: 0 }, { y: RS, duration: 0.32, ease: "power3.inOut" }, tPin - 0.12);
-      tl.set($("s06-qs1-idle"), { opacity: 0 }, tPin + 0.18);
-      ft($("s06-qs1-on"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.4)" }, tPin + 0.18);
-      ft($("s06-qr1"), { scale: 1 }, { scale: 1.03, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, tPin + 0.2);
-      ft(mp, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPin + 0.4);
-      // "lain.": tick + bottom chip
-      const ck = $("s06-ck"); I(ck, { opacity: 0, scale: 0.3 });
-      ft(ck, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(3)" }, tLai - 0.08);
-      pop($("s06-bt"), tOto + 0.15, { scale: 0.7, y: 24 }, 0.3, "back.out(2)");
+      pop($("s06-bw"), tBol - 0.1, { scale: 0.6, y: 0 }, 0.22, "back.out(2.4)");
+      ft($("s06-bw"), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPer + 0.4);
+      // the fourth lane: rm * → deny
+      const l3 = $("s06-l3"), a3 = $("s06-a3");
+      pop(l3, tAsk - 0.05, { x: -24, y: 0, scale: 0.97 }, 0.24, "power3.out");
+      I(a3, { rotation: -78 }); ft(a3, { rotation: -78 }, { rotation: 0, duration: 0.24, ease: "power3.in" }, tAsk + 0.16);
+      pop($("s06-p3d"), tAsk + 0.36, { scale: 1.8, y: 0 }, 0.18, "power3.in");
+      shake(l3, tAsk + 0.4, 6);
+      // the real config types + the footnote
+      pop($("s06-cmd"), tUb - 0.25, { y: 16, scale: 0.97 }, 0.2, "power3.out");
+      typeD($("s06-cmd"), '"permission": { "bash": { "*": "ask", "rm *": "deny" }, "edit": "ask" }', tUb - 0.22, tAsk + 0.2, true);
+      pop($("s06-fn"), tAsk + 0.3, { y: 12, scale: 1 }, 0.26, "power3.out");
       // ================================================================ exit → s07
       const tOut = D - 0.24;
-      K.out(S, [$("s06-a1"), $("s06-ar"), $("s06-a2"), auto, q, ck, $("s06-bt")], tOut);
+      K.out(S, [gt, $("s06-cmd"), $("s06-fn")], tOut);
       S.done();
     })();
   </script>

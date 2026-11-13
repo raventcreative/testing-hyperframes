@@ -1,0 +1,64 @@
+<template>
+  <style>
+    /* s08 CHECK THE PLAN (30.37–34.57) "Cek tiga hal: file yang disentuh, yang dihapus, dan cara ngetesnya."
+       Header rolls to "Cek rencana · 3 hal sebelum kamu setuju · 3 CEK". The plan document (handed over from s07, same position).
+       "tiga": the three number tiles pulse. A magnifier glides over the rows: "disentuh": row 1 lights amber — style.css is in the list
+       although only the button was asked for: amber flag on the row + a small amber callout "style.css? kok ikut" under it; "dihapus":
+       row 2 cyan + green check (tidak ada); "ngetesnya": row 3 cyan + green check. The end state (row 1 amber + flag, rows 2–3 checked)
+       is exactly what s09 starts from. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s08-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s08-lens { position: absolute; left: 0; top: 0; width: 120px; height: 120px; color: #01a9d6; filter: drop-shadow(0 6px 14px rgba(2,6,26,.45)); }
+    #s08-lens svg { width: 120px; height: 120px; }
+    #s08-lens i { position: absolute; left: 16px; top: 16px; width: 64px; height: 64px; border-radius: 32px; background: rgba(1,204,247,.16); }
+    #s08-call { position: absolute; left: 0; top: 0; height: 44px; padding: 0 16px 0 12px; border-radius: 22px; display: flex; align-items: center; gap: 8px; background: #f0a020; color: #2a1800;
+      font: 700 19px/1 Poppins; white-space: nowrap; box-shadow: 0 10px 22px rgba(2,6,26,.35); }
+    #s08-call svg { width: 22px; height: 22px; }
+  </style>
+  <div data-hf-id="hf-me1o" id="root" data-composition-id="s08" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-m45f" id="s08-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R23K, P = "s08", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s08-zone");
+      z.innerHTML = K.headerHTML(P) + K.docHTML(P, "RENCANA", ".hermes/plans/&hellip;-tombol-wa.md") +
+        `<div id="s08-lens"><i></i>${K.svg("search")}</div><div id="s08-call">${K.svg("triangle-alert")}style.css? kok ikut</div>`;
+      const tTi = wt("tiga"), tDs = wt("disentuh,"), tDh = wt("dihapus,"), tNt = wt("ngetesnya.");
+      K.headerScene(S, P, 3, 4);
+      K.docSet(S, P);
+      const rowY = (i) => K.DOC.y + 82 + i * 86;     // global top of row i
+      // ---------------------------------------------------------------- "tiga": the three number tiles pulse
+      [1, 2, 3].forEach((i, k) => {
+        const nb = $(`${P}-r${i}`).querySelector(".nb"); I(nb, { scale: 1, transformOrigin: "50% 50%" });
+        ft(nb, { scale: 1 }, { scale: 1.25, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tTi - 0.05 + k * 0.12);
+      });
+      // ---------------------------------------------------------------- the magnifier walks rows 1 → 2 → 3
+      const lens = $("s08-lens"), LX = 600;
+      I(lens, { x: LX, y: rowY(1) - 20, opacity: 0, scale: 0.6, transformOrigin: "35% 35%" });
+      ft(lens, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2)" }, tDs - 0.4);
+      ft(lens, { x: LX, y: rowY(1) - 20 }, { x: LX + 40, y: rowY(2) - 20, duration: 0.32, ease: "power2.inOut" }, tDh - 0.3);
+      ft(lens, { x: LX + 40, y: rowY(2) - 20 }, { x: LX + 80, y: rowY(3) - 20, duration: 0.32, ease: "power2.inOut" }, tNt - 0.36);
+      ft(lens, { opacity: 1 }, { opacity: 0, duration: 0.24 }, tNt + 0.4);
+      // row 1: amber (style.css came along) + flag + callout
+      const a1 = $(`${P}-a1`), w1 = $(`${P}-w1`), call = $("s08-call");
+      ft(a1, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, tDs - 0.05);
+      ft(w1, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.8)" }, tDs + 0.2);
+      const xt = $(`${P}-v1`).querySelector(".xtra b"); I(xt, { color: "#0a0d2c" });
+      ft(xt, { color: "#0a0d2c" }, { color: "#c46d00", duration: 0.2 }, tDs + 0.1);
+      I(call, { x: 640, y: rowY(2) - 20, scale: 0.5, opacity: 0, transformOrigin: "85% 0%" });
+      ft(call, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.4)" }, tDs + 0.3);
+      // rows 2 and 3: cyan + green checks
+      [[2, tDh], [3, tNt]].forEach(([i, t]) => {
+        const h = $(`${P}-h${i}`), o = $(`${P}-o${i}`);
+        ft(h, { opacity: 0 }, { opacity: 1, duration: 0.18, ease: "power2.out" }, t - 0.08);
+        ft(h, { opacity: 1 }, { opacity: 0.55, duration: 0.4, ease: "power2.inOut" }, t + 0.4);
+        ft(o, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(2.8)" }, t + 0.16);
+      });
+      // ---------------------------------------------------------------- exit: the callout leaves, the document (row states) stays for s09
+      ft(call, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, D - 0.26);
+      S.finish();
+    })();
+  </script>
+</template>

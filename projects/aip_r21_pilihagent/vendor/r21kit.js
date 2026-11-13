@@ -1,32 +1,40 @@
-// R19 ASISTEN (Atticus) — shared scene kit (loaded in index.html <head> after vo_words.js + r19icons.js; every scene uses window.R19K).
-// Adapted from the R15 kit. Components (identical in every scene that shows them): the TOPIC HEADER (icon roll, name, one-line job,
-// chip, 8 progress segments), lucide icons (ISC), the VOICE PILL (mic + live bars + typed command), window cards, the timeline
-// boilerplate (scale patch, ft, I, wt, seek patch, per-letter typing). Every initial state is pinned at 0 in a NESTED timeline that is
-// the first child of the scene timeline at 0 (I); finish() = end marker + backward-seek patch + tl.render(0, true, true) + registration.
-// Deterministic: no Math.random, no Date, no rAF.
+// R21 PILIH (6 agent AI: cloud vs open source vs orchestrator) — shared scene kit (loaded in index.html <head> after vo_words.js +
+// r21icons.js; every scene uses window.R21K). Adapted from the R19 kit. Components (identical in every scene that shows them): the
+// TOPIC HEADER (icon roll, name, one-line job, chip, 7 progress segments), lucide icons (ISC), the AGENT CARD (our own mock: generic
+// lucide icon + name + maker, never the products' logos), the timeline boilerplate (scale patch, ft, I, wt, seek patch, per-letter
+// typing). Every initial state is pinned at 0 in a NESTED timeline that is the first child of the scene timeline at 0 (I);
+// finish() = end marker + backward-seek patch + tl.render(0, true, true) + registration. Deterministic: no Math.random, no Date, no rAF.
 (function () {
-  const K = (window.R19K = {});
-  const ICO = window.R19_ICO || {};
+  const K = (window.R21K = {});
+  const ICO = window.R21_ICO || {};
   K.svg = (n, cls = "", extra = "") =>
     `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${ICO[n] || ""}</svg>`;
 
-  // ------------------------------------------------------------------ topic header items (s02 … s09)
+  // ------------------------------------------------------------------ the six agents (names + makers verified, see production/VO_SCRIPT.md)
+  K.AG = {
+    dots: { n: "Dots", by: "OpenAI &middot; di ChatGPT", ic: "circle-dot" },
+    grok: { n: "Grok Bot", by: "x.ai &middot; tim bot", ic: "bot" },
+    muse: { n: "Muse", by: "Meta &middot; agen personal", ic: "sparkles" },
+    claw: { n: "OpenClaw", by: "OpenClaw Foundation", ic: "message-circle" },
+    herm: { n: "Hermes", by: "Nous Research", ic: "book-open" },
+    maus: { n: "MausBot", by: "open source &middot; Apache 2.0", ic: "network" },
+  };
+
+  // ------------------------------------------------------------------ topic header items (s02 … s08)
   K.HD = [
-    { tile: "mic", name: "Atticus", sub: "asisten suara open source &middot; <i>khusus Mac</i>", chip: "MIT", chipIc: "lock-open" },
-    { tile: "layout-panel-left", name: "Atur jendela", sub: "buka aplikasi &middot; geser jendela", chip: "TANPA AI", chipIc: "zap" },
-    { tile: "file-search", name: "Cari file", sub: "dicari dari isinya, bukan namanya", chip: "ISI FILE", chipIc: "file-text" },
-    { tile: "scan-eye", name: "Baca layar", sub: "nulis draf &middot; <i>kamu yang kirim</i>", chip: "AMAN", chipIc: "shield-check" },
-    { tile: "square-terminal", name: "Cara pasang", sub: "lewat Claude Code &middot; <i>macOS 26+</i>", chip: "1 LINK", chipIc: "link" },
-    { tile: "plug", name: "Biayanya", sub: "aplikasinya gratis &middot; <i>otaknya pilih</i>", chip: "JUJUR", chipIc: "coins" },
-    { tile: "shield-alert", name: "Izin akses", sub: "yang kamu kasih ke Atticus", chip: "PENTING", chipIc: "triangle-alert" },
-    { tile: "cloud", name: "Data kamu", sub: "yang tinggal &amp; yang terkirim", chip: "PRIVASI", chipIc: "lock" },
+    { tile: "cloud", name: "Tinggal pakai", sub: "jalan di cloud mereka &middot; <i>3 agent</i>", chip: "CLOUD", chipIc: "cloud" },
+    { tile: "scale", name: "Plus-minusnya", sub: "praktis &middot; <i>tapi datamu di sana</i>", chip: "JUJUR", chipIc: "info" },
+    { tile: "key-round", name: "Pegang sendiri", sub: "open source &middot; <i>di mesinmu</i>", chip: "OPEN SOURCE", chipIc: "lock-open" },
+    { tile: "message-circle", name: "OpenClaw &amp; Hermes", sub: "chat dari WhatsApp &middot; <i>belajar sendiri</i>", chip: "MIT", chipIc: "lock-open" },
+    { tile: "shield-alert", name: "Izin bawaan", sub: "cek dulu sebelum dipakai", chip: "PENTING", chipIc: "triangle-alert" },
+    { tile: "network", name: "MausBot", sub: "pengatur agent yang kamu punya", chip: "APACHE 2.0", chipIc: "lock-open" },
+    { tile: "signpost", name: "Cara milih", sub: "praktis &middot; <i>atau kendali</i>", chip: "PILIH", chipIc: "check" },
   ];
-  K.NSEG = 8;
-  K.REPO = "github.com/SaarthurR/atticus-mac";
+  K.NSEG = 7;
 
   // ------------------------------------------------------------------ geometry (global px)
   K.HDR = { x: 60, y: 312, w: 960, h: 140 };
-  K.SEG = (k) => ({ x: 768 + (k - 1) * 29, y: 342 });
+  K.SEG = (k) => ({ x: 798 + (k - 1) * 29, y: 342 });
 
   // ------------------------------------------------------------------ shared CSS (injected once)
   const CSS = `
@@ -61,25 +69,25 @@
   .k-demo{position:absolute;height:30px;padding:0 12px;border-radius:15px;font:700 15px/30px Poppins;letter-spacing:1.5px;color:#b8c7dd;
     background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1.2px rgba(255,255,255,.22);white-space:nowrap}
   .k-demo.w{color:#5d6f8f;background:#eef3fb;box-shadow:inset 0 0 0 1.2px #d5deec}
-  /* voice pill: what you say while holding the shortcut */
-  .k-voice{position:absolute;left:0;top:0;height:92px;border-radius:46px;background:rgba(8,16,52,.92);box-shadow:inset 0 0 0 2px rgba(106,223,255,.55),0 0 30px rgba(1,204,247,.25),0 20px 40px rgba(2,6,26,.5);transform-origin:50% 50%}
-  .k-voice .mc{position:absolute;left:12px;top:12px;width:68px;height:68px;border-radius:34px;background:linear-gradient(160deg,#9cecff,#01ccf7 55%,#0aa7d6);color:#0b1440;box-shadow:0 0 20px rgba(1,204,247,.5)}
-  .k-voice .mc svg{position:absolute;left:18px;top:18px;width:32px;height:32px}
-  .k-voice .br{position:absolute;left:96px;top:24px;width:76px;height:44px}
-  .k-voice .br i{position:absolute;bottom:0;width:7px;height:44px;border-radius:4px;background:#6adfff;transform-origin:50% 50%;top:0}
-  .k-voice .tx{position:absolute;left:188px;top:0;font:400 30px/92px Poppins;color:#ffffff;white-space:nowrap}
-  .k-voice .tx b{font-weight:700;color:#6adfff}
-  /* window card (our own mock: cyan title strip + label, never a real app UI) */
-  .k-win{position:absolute;left:0;top:0;border-radius:16px;background:#ffffff;box-shadow:0 16px 34px rgba(2,6,26,.45);overflow:hidden;transform-origin:50% 50%}
-  .k-win .tb{position:absolute;left:0;top:0;right:0;height:38px;background:#e8eef8;border-bottom:1.5px solid #d6dfec}
-  .k-win .tb b{position:absolute;left:14px;top:0;font:700 18px/38px Poppins;color:#0a0d2c;white-space:nowrap}
-  .k-win .tb i{position:absolute;right:12px;top:13px;width:40px;height:12px;border-radius:6px;background:#c9d5e8}
-  .k-win .ln{position:absolute;left:16px;height:10px;border-radius:5px;background:#dfe6f2}
-  .k-win .ln.c{background:#bfefff}
+  /* agent card: white, generic lucide icon in a cyan tile, name + maker (text only, never a product logo) */
+  .k-ag{position:absolute;left:0;top:0;border-radius:24px;background:linear-gradient(180deg,#ffffff,#f3f7fd);box-shadow:0 18px 40px rgba(2,6,26,.5);transform-origin:50% 50%}
+  .k-ag .it{position:absolute;left:18px;top:18px;width:64px;height:64px;border-radius:18px;background:linear-gradient(160deg,#9cecff,#01ccf7 55%,#0aa7d6);color:#0b1440;box-shadow:0 0 16px rgba(1,204,247,.35)}
+  .k-ag .it svg{position:absolute;left:16px;top:16px;width:32px;height:32px}
+  .k-ag .nm{position:absolute;left:98px;top:14px;font:700 32px/42px Poppins;color:#0a0d2c;white-space:nowrap;letter-spacing:-.3px}
+  .k-ag .by{position:absolute;left:98px;top:56px;font:400 18px/26px Poppins;color:#5d6f8f;white-space:nowrap}
+  .k-ag.sm .it{left:14px;top:14px;width:52px;height:52px;border-radius:15px}
+  .k-ag.sm .it svg{left:13px;top:13px;width:26px;height:26px}
+  .k-ag.sm .nm{left:80px;top:10px;font-size:27px;line-height:36px}
+  .k-ag.sm .by{left:80px;top:46px;font-size:16px;line-height:22px}
   `;
-  if (!document.getElementById("r19kit-css")) {
-    const st = document.createElement("style"); st.id = "r19kit-css"; st.textContent = CSS; document.head.appendChild(st);
+  if (!document.getElementById("r21kit-css")) {
+    const st = document.createElement("style"); st.id = "r21kit-css"; st.textContent = CSS; document.head.appendChild(st);
   }
+  // agent card markup (w x h set by caller); extra = inner html appended (chips, stamps)
+  K.agentHTML = (id, key, w, h, extra = "", sm = false) => {
+    const a = K.AG[key];
+    return `<div class="k-ag${sm ? " sm" : ""}" id="${id}" style="width:${w}px;height:${h}px"><div class="it">${K.svg(a.ic)}</div><div class="nm">${a.n}</div><div class="by">${a.by}</div>${extra}</div>`;
+  };
 
   // ------------------------------------------------------------------ timeline boilerplate
   const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
@@ -120,27 +128,12 @@
     return { tl, ft, I, wt, $, finish, type, typeIn, popIn, T0, D, P0 };
   };
 
-  // ------------------------------------------------------------------ VOICE PILL
-  // markup: K.voiceHTML(id, width) → pill with mic disc, 7 bars and a text slot (#id-tx)
-  K.voiceHTML = (id, w) => `<div class="k-voice" id="${id}" style="width:${w}px"><div class="mc">${K.svg("mic")}</div>` +
-    `<div class="br">${[0, 1, 2, 3, 4, 5, 6].map((i) => `<i id="${id}-b${i}" style="left:${i * 11}px"></i>`).join("")}</div><div class="tx" id="${id}-tx"></div></div>`;
-  // bars dance between t0 and t1 (seekable yoyo tweens), then settle low
-  K.voiceBars = (S, id, t0, t1) => {
-    const { I, ft, $ } = S;
-    for (let i = 0; i < 7; i++) {
-      const b = $(`${id}-b${i}`), per = 0.13 + ((i * 37) % 7) * 0.018, lo = 0.22 + ((i * 13) % 5) * 0.04, hi = 0.62 + ((i * 29) % 4) * 0.1;
-      I(b, { scaleY: lo });
-      const n = Math.max(1, Math.floor((t1 - t0) / (2 * per)));
-      ft(b, { scaleY: lo }, { scaleY: hi, duration: per, yoyo: true, repeat: 2 * n - 1, ease: "sine.inOut" }, t0 + i * 0.03);
-    }
-  };
-
   // ------------------------------------------------------------------ TOPIC HEADER
   K.headerHTML = (P) => {
     let h = `<div class="k-hplate" id="${P}-hplate"></div><div class="k-hglow" id="${P}-hglow"></div>`;
     h += `<div class="k-hnum" id="${P}-hnum"><div class="k-hroll" id="${P}-hroll">` + K.HD.map((d) => `<b>${K.svg(d.tile)}</b>`).join("") + `</div></div>`;
-    h += `<div class="k-hbox" id="${P}-hnb" style="left:214px;top:328px;width:540px;height:66px">` + K.HD.map((d, k) => `<div class="k-hname" id="${P}-hn${k}">${d.name}</div>`).join("") + `</div>`;
-    h += `<div class="k-hbox" id="${P}-hsb" style="left:214px;top:396px;width:520px;height:40px">` + K.HD.map((d, k) => `<div class="k-hsub" id="${P}-hs${k}">${d.sub}</div>`).join("") + `</div>`;
+    h += `<div class="k-hbox" id="${P}-hnb" style="left:214px;top:328px;width:560px;height:66px">` + K.HD.map((d, k) => `<div class="k-hname" id="${P}-hn${k}">${d.name}</div>`).join("") + `</div>`;
+    h += `<div class="k-hbox" id="${P}-hsb" style="left:214px;top:396px;width:540px;height:40px">` + K.HD.map((d, k) => `<div class="k-hsub" id="${P}-hs${k}">${d.sub}</div>`).join("") + `</div>`;
     h += `<div class="k-hbox" id="${P}-hlb" style="left:752px;top:384px;width:250px;height:40px">` + K.HD.map((d, k) => `<div class="k-hchip${d.chip === "PENTING" ? " am" : ""}" id="${P}-hl${k}">${K.svg(d.chipIc)}${d.chip}</div>`).join("") + `</div>`;
     for (let k = 1; k <= K.NSEG; k++) h += `<div class="k-hseg" id="${P}-ht${k}" style="left:${K.SEG(k).x}px"><b id="${P}-hg${k}"></b></div>`;
     return `<div class="k-ab" id="${P}-hdr" style="width:1080px;height:1920px">${h}</div>`;
@@ -173,6 +166,8 @@
     ft($(`${P}-hglow`), { opacity: 0 }, { opacity: 1, duration: 0.14, ease: "power2.out" }, t + 0.05);
     ft($(`${P}-hglow`), { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, t + 0.19);
   };
-  // standard scene opening for s03 … s09: header shows item a at 0 and rolls to b
+  // standard scene opening for s03 … s08: header shows item a at 0 and rolls to b
   K.headerScene = (S, P, a, b, t = 0.02) => { K.headerSet(S, P, a); K.headerSwap(S, P, a, b, t); };
+  // header exit (last scene with a header): plate + contents lift away
+  K.headerOut = (S, P, t) => { const { ft, $ } = S; ft($(`${P}-hdr`), { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.24, ease: "power2.in" }, t); };
 })();

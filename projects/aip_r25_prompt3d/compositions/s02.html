@@ -1,0 +1,194 @@
+<template>
+  <style>
+    /* s02 THE FIVE PARTS + COMBINE (5.90–31.60)
+       "Satu … melayang." · "Dua … bayangan." · "Tiga … mendekat." · "Empat … WhatsApp." · "Lima … HP." · "Gabungin … sehari-hari."
+       Starts exactly where s01 ends: the prompt card with five labelled rows (footer "5 bagian") + the phone with an empty page.
+       For each part its row opens (accordion), its line of the prompt types in (our own example text, CONTOH) and the phone page gains
+       that layer: 1 the amber bottle drops in and floats · 2 teal background wipes in, warm light beam, highlight, shadow · 3 scroll
+       gesture + scrollbar, the bottle spins 360° and comes closer · 4 headline, products, testimonial, WhatsApp button (page scrolls)
+       · 5 a sheet: index.html (1 file) ✓, Three.js ✓, Ringan di HP (meter) ✓, green glow. Done rows get a green check + preview.
+       "Gabungin kelimanya": the rows stack into a deck that becomes ONE chat message to Claude (title bar → "Chat dengan Claude");
+       Claude answers "Siap! Halamannya jadi: index.html" (phone re-scans); "revisi pakai bahasa sehari-hari": “judulnya gedein dikit,
+       ya” is typed and sent, the phone headline grows + tag "judul diperbesar". Last 0.28 s: card + phone fade (s03 = new layout). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s02-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s02-ttl2 { position: absolute; left: 0; top: 0; width: 600px; height: 58px; background: #ffffff; border-bottom: 1.5px solid #e2e8f3; }
+    #s02-ttl2 .fi { position: absolute; left: 16px; top: 12px; width: 34px; height: 34px; border-radius: 10px; background: #0b1440; color: #6adfff; }
+    #s02-ttl2 .fi svg { position: absolute; left: 7px; top: 7px; width: 20px; height: 20px; }
+    #s02-ttl2 b { position: absolute; left: 62px; top: 0; font: 700 21px/58px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s02-ttl2 .k-demo { right: 16px; top: 14px; }
+    .s02-ub { position: absolute; border-radius: 22px 22px 6px 22px; background: #e6f8fe; box-shadow: inset 0 0 0 1.5px rgba(1,169,214,.55); transform-origin: 100% 100%; }
+    .s02-ab { position: absolute; border-radius: 22px 22px 22px 6px; background: #eef3fb; box-shadow: inset 0 0 0 1.5px #dde5f1; transform-origin: 0% 100%; }
+    #s02-ub1 b { position: absolute; left: 20px; top: 12px; font: 700 22px/32px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s02-ub1 .d { position: absolute; top: 58px; width: 32px; height: 32px; border-radius: 16px; background: linear-gradient(160deg,#9cecff,#01ccf7 55%,#0aa7d6);
+      font: 700 16px/32px Poppins; color: #0b1440; text-align: center; }
+    #s02-ub1 span { position: absolute; left: 232px; top: 58px; font: 400 18px/32px Poppins; color: #294b77; white-space: nowrap; }
+    #s02-dots i { position: absolute; top: 22px; width: 12px; height: 12px; border-radius: 6px; background: #8a99b3; }
+    #s02-ab1 b { position: absolute; left: 20px; top: 12px; font: 400 22px/32px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s02-ab1 .fc { position: absolute; left: 20px; top: 54px; height: 38px; padding: 0 16px 0 10px; border-radius: 19px; background: #ffffff; box-shadow: inset 0 0 0 1.5px #d5deec;
+      display: flex; align-items: center; gap: 8px; font: 700 18px/1 Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s02-ab1 .fc svg { width: 22px; height: 22px; color: #01a9d6; }
+    #s02-ub2 b { position: absolute; left: 20px; top: 0; font: 400 22px/60px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s02-in { position: absolute; left: 16px; top: 520px; width: 568px; height: 64px; border-radius: 32px; background: #eef3fb; box-shadow: inset 0 0 0 1.5px #dde5f1; }
+    #s02-in .ph { position: absolute; left: 24px; top: 0; font: 400 19px/64px Poppins; color: #8a99b3; white-space: nowrap; }
+    #s02-in .ty { position: absolute; left: 24px; top: 0; font: 400 21px/64px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s02-in .sd { position: absolute; right: 8px; top: 8px; width: 48px; height: 48px; border-radius: 24px; background: #01ccf7; color: #0b1440; transform-origin: 50% 50%; }
+    #s02-in .sd svg { position: absolute; left: 12px; top: 13px; width: 24px; height: 24px; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R25K, P = "s02", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $ } = S;
+      const z = $("s02-zone");
+      z.innerHTML = K.cardHTML(P) + K.phoneHTML(P);
+      const card = $("s02-card");
+      card.insertAdjacentHTML("beforeend",
+        `<div id="s02-ttl2"><div class="fi">${K.svg("message-square")}</div><b>Chat dengan Claude</b><div class="k-demo w">CONTOH</div></div>` +
+        `<div class="s02-ub" id="s02-ub1" style="left:150px;top:82px;width:434px;height:108px"><b>Prompt website 3D</b>` +
+          [1, 2, 3, 4, 5].map((n, i) => `<div class="d" style="left:${20 + i * 40}px">${n}</div>`).join("") + `<span>5 bagian, lengkap</span></div>` +
+        `<div class="s02-ab" id="s02-dots" style="left:16px;top:210px;width:100px;height:56px">${[0, 1, 2].map((i) => `<i id="s02-dt${i}" style="left:${22 + i * 22}px"></i>`).join("")}</div>` +
+        `<div class="s02-ab" id="s02-ab1" style="left:16px;top:210px;width:400px;height:106px"><b>Siap! Halamannya jadi:</b><div class="fc">${K.svg("file-code")}index.html</div></div>` +
+        `<div class="s02-ub" id="s02-ub2" style="left:244px;top:336px;width:340px;height:60px"><b>judulnya gedein dikit, ya</b></div>` +
+        `<div id="s02-in"><div class="ph" id="s02-inph">Tulis revisi pakai bahasa biasa&hellip;</div><div class="ty" id="s02-inty"></div><div class="sd" id="s02-insd">${K.svg("send")}</div></div>`);
+      const R = (i, x = "") => $(`s02-r${i}${x}`), PH = (x) => $(`s02-${x}`);
+      // ---------------------------------------------------------------- frame 0 = s01's last frame
+      K.cardCollapsed(S, P);
+      K.phoneSet(S, P, "blank");
+      ["ttl2", "ub1", "dots", "ab1", "ub2", "in"].forEach((k) => I($("s02-" + k), { opacity: 0, scale: 1, x: 0, y: 0 }));
+      I($("s02-inph"), { opacity: 1 }); I($("s02-insd"), { scale: 1 });
+      [0, 1, 2].forEach((i) => I($("s02-dt" + i), { y: 0 }));
+      // ---------------------------------------------------------------- accordion: row `from` closes (done), row `to` opens
+      const acc = (from, to, t) => {
+        const A = K.rowTops(from), B = K.rowTops(to);
+        K.ROWS.forEach((_, i) => {
+          const h0 = from === i ? K.RX : K.RH, h1 = to === i ? K.RX : K.RH;
+          if (A[i] !== B[i] || h0 !== h1) ft(R(i), { top: A[i], height: h0 }, { top: B[i], height: h1, duration: 0.42, ease: "power3.inOut" }, t);
+        });
+        if (from >= 0) {
+          ft(R(from, "-hi"), { opacity: 1 }, { opacity: 0, duration: 0.25 }, t);
+          ft(R(from, "-on"), { opacity: 1 }, { opacity: 0, duration: 0.2 }, t);
+          ft(R(from, "-ok"), { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, t + 0.1);
+          ft(R(from, "-tx"), { opacity: 1 }, { opacity: 0, duration: 0.14 }, t);
+          ft(R(from, "-pv"), { opacity: 0 }, { opacity: 1, duration: 0.3 }, t + 0.24);
+        }
+        if (to >= 0) {
+          ft(R(to, "-hi"), { opacity: 0 }, { opacity: 1, duration: 0.3 }, t + 0.05);
+          ft(R(to, "-on"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, t + 0.05);
+        }
+      };
+      K.ROWS.forEach((_, i) => I(R(i, "-ok"), { scale: 0.4, transformOrigin: "50% 50%" }));
+      // word times (scene-local)
+      const w = (x, a) => wt(x, a);
+      const tSatu = w("Satu,"), tObj = w("objek"), tBot = w("botol"), tMel = w("melayang."),
+            tDua = w("Dua,"), tWar = w("warna"), tAra = w("arah"), tCah = w("cahaya,"), tBay = w("bayangan."),
+            tTig = w("Tiga,"), tGer = w("gerakan:"), tPas = w("pas"), tBotn = w("botolnya"), tMut = w("muter"), tMen = w("mendekat."),
+            tEmp = w("Empat,"), tJud = w("judul,"), tPro = w("produk,"), tTes = w("testimoni,"), tTom = w("tombol"), tWA = w("WhatsApp."),
+            tLim = w("Lima,"), tTek = w("teknis:"), tHTML = w("HTML,"), tThr = w("Three.js"), t3D = w("3D-nya,"), tRin = w("ringan"), tHP = w("HP."),
+            tGab = w("Gabungin"), tKel = w("kelimanya,"), tKas = w("kasih"), tCla = w("Claude,"), tRev = w("revisi"), tSeh = w("sehari-hari.");
+      // ================================================================ PART 1 · OBJEK UTAMA
+      acc(-1, 0, tSatu - 0.08);
+      ft($("s02-ft"), { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.9, duration: 0.22, ease: "power2.in" }, tSatu - 0.1);
+      S.typeIn(R(0, "-tx"), K.ROWS[0].txt, tObj + 0.02, tMel + 0.3);
+      ft(PH("phd"), { scale: 1 }, { scale: 1.07, duration: 0.18, yoyo: true, repeat: 3, ease: "sine.inOut" }, tObj);
+      ft(PH("phd"), { opacity: 1 }, { opacity: 0, duration: 0.18 }, tBot - 0.14);
+      ft(PH("bpos"), { y: -280, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "back.out(1.5)" }, tBot - 0.1);
+      K.bob(S, PH("bfl"), tBot + 0.4, D);
+      K.tagIn(S, P, 0, tMel - 0.04); K.tagOut(S, P, 0, tDua - 0.1);
+      // ================================================================ PART 2 · SUASANA
+      acc(0, 1, tDua - 0.08);
+      S.typeIn(R(1, "-tx"), K.ROWS[1].txt, tDua + 0.4, tBay + 0.3);
+      ft(PH("bg"), { opacity: 0, clipPath: "circle(0% at 0% 0%)" }, { opacity: 1, clipPath: "circle(150% at 0% 0%)", duration: 0.6, ease: "power2.inOut" }, tWar - 0.06);
+      K.tagIn(S, P, 1, tWar + 0.32);
+      ft(PH("beam"), { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.55, ease: "power3.out" }, tAra - 0.04);
+      ft(PH("lit"), { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, tAra);
+      ft(PH("bhi"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, tCah - 0.02);
+      K.tagIn(S, P, 2, tCah - 0.02);
+      ft(PH("shd"), { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.42, ease: "power3.out" }, tBay - 0.06);
+      K.tagIn(S, P, 3, tBay);
+      [1, 2, 3].forEach((k) => K.tagOut(S, P, k, tTig - 0.16 + (k - 1) * 0.03));
+      // ================================================================ PART 3 · GERAKAN
+      acc(1, 2, tTig - 0.08);
+      S.typeIn(R(2, "-tx"), K.ROWS[2].txt, tTig + 0.36, tMen + 0.3);
+      ft(PH("sbar"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tGer);
+      ft(PH("hand"), { opacity: 0, y: 470 }, { opacity: 1, y: 470, duration: 0.2 }, tGer + 0.05);
+      // two swipes up (scroll)
+      [0, 1].forEach((k) => {
+        const t = tPas - 0.06 + k * 0.42;
+        ft(PH("hand"), { y: 470 }, { y: 330, duration: 0.32, ease: "power2.inOut" }, t);
+        if (k === 0) ft(PH("hand"), { y: 330 }, { y: 470, duration: 0.08, ease: "none" }, t + 0.34);
+      });
+      ft(PH("hand"), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPas + 0.78);
+      ft(PH("sth"), { y: 0 }, { y: 150, duration: tMen + 0.3 - (tPas - 0.06), ease: "power1.inOut" }, tPas - 0.06);
+      K.spin(S, P, tBotn + 0.02, 0.9);
+      K.tagIn(S, P, 4, tMut - 0.1); K.tagOut(S, P, 4, tEmp - 0.14);
+      ft(PH("bpos"), { scale: 1, y: 0 }, { scale: 1.3, y: -14, duration: 0.5, ease: "power2.out" }, tMen - 0.08);
+      ft(PH("shd"), { scale: 1 }, { scale: 1.32, duration: 0.5, ease: "power2.out" }, tMen - 0.08);
+      K.tagIn(S, P, 5, tMen); K.tagOut(S, P, 5, tEmp - 0.12);
+      ft(PH("bpos"), { scale: 1.3, y: -14 }, { scale: 1, y: 0, duration: 0.42, ease: "power2.inOut" }, tEmp - 0.1);
+      ft(PH("shd"), { scale: 1.32 }, { scale: 1, duration: 0.42, ease: "power2.inOut" }, tEmp - 0.1);
+      ft(PH("sbar"), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tEmp - 0.1);
+      // ================================================================ PART 4 · ISI HALAMAN
+      acc(2, 3, tEmp - 0.08);
+      S.typeIn(R(3, "-tx"), K.ROWS[3].txt, tEmp + 0.36, tWA + 0.2);
+      ft(PH("hl"), { opacity: 0, y: -24 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, tJud - 0.08);
+      ft(PH("col"), { y: 0 }, { y: -330, duration: 0.5, ease: "power3.inOut" }, tPro - 0.12);
+      ft(PH("prod"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tPro - 0.02);
+      PH("prod").querySelectorAll(".pc").forEach((e, i) => { I(e, { scale: 0.6, opacity: 0, transformOrigin: "50% 50%" });
+        ft(e, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2.2)" }, tPro + 0.08 + i * 0.08); });
+      ft(PH("col"), { y: -330 }, { y: -480, duration: 0.42, ease: "power3.inOut" }, tTes - 0.12);
+      ft(PH("testi"), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, tTes);
+      ft(PH("wa"), { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(2.2)" }, tTom + 0.06);
+      ft(PH("wa"), { scale: 1 }, { scale: 1.06, duration: 0.12, yoyo: true, repeat: 1, ease: "sine.inOut" }, tWA + 0.04);
+      // ================================================================ PART 5 · TEKNIS
+      acc(3, 4, tLim - 0.08);
+      S.typeIn(R(4, "-tx"), K.ROWS[4].txt, tLim + 0.36, tHP + 0.2);
+      ft(PH("col"), { y: -480 }, { y: 0, duration: 0.5, ease: "power3.inOut" }, tLim - 0.04);
+      ft(PH("wa"), { y: 0, opacity: 1 }, { y: 80, opacity: 0, duration: 0.3, ease: "power2.in" }, tTek - 0.08);
+      ft(PH("sheet"), { y: 230, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, tTek);
+      const ck = (k, t) => ft(PH("ck" + k), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.26, ease: "back.out(3)" }, t);
+      ck(0, tHTML); ck(1, tThr + 0.1);
+      K.spin(S, P, t3D - 0.04, 0.9);
+      ft(PH("mt"), { scaleX: 0.08 }, { scaleX: 1, duration: 0.45, ease: "power2.out" }, tRin - 0.12);
+      ck(2, tHP - 0.02);
+      ft(PH("glw"), { opacity: 0 }, { opacity: 1, duration: 0.16 }, tHP); ft(PH("glw"), { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, tHP + 0.3);
+      // ================================================================ GABUNG → CLAUDE → REVISI
+      acc(4, -1, tGab - 0.08);
+      ft(PH("sheet"), { y: 0, opacity: 1 }, { y: 230, opacity: 0, duration: 0.36, ease: "power2.in" }, tGab - 0.04);
+      ft(PH("wa"), { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.34, ease: "power3.out" }, tGab + 0.2);
+      // "kelimanya": the five rows stack into a deck, then the deck becomes ONE chat message
+      const T1 = K.rowTops(-1);
+      K.ROWS.forEach((_, i) => {
+        ft(R(i), { top: T1[i] }, { top: 90 + i * 6, duration: 0.36, ease: "power3.inOut" }, tKel - 0.08 + (4 - i) * 0.03);
+        ft(R(i), { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.86, duration: 0.24, ease: "power2.in" }, tKel + 0.34);
+      });
+      ft($("s02-ttl2"), { opacity: 0 }, { opacity: 1, duration: 0.24 }, tKas - 0.12);
+      ft($("s02-in"), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tKas - 0.06);
+      ft($("s02-ub1"), { opacity: 0, scale: 0.7, x: -110 }, { opacity: 1, scale: 1, x: 0, duration: 0.38, ease: "back.out(1.7)" }, tKel + 0.36);
+      ft($("s02-insd"), { scale: 1 }, { scale: 0.84, duration: 0.08, yoyo: true, repeat: 1 }, tKas + 0.06);
+      // Claude types (dots), then answers; the phone re-scans the page
+      ft($("s02-dots"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2)" }, tKas + 0.16);
+      [0, 1, 2].forEach((i) => ft($("s02-dt" + i), { y: 0 }, { y: -8, duration: 0.14, yoyo: true, repeat: 1, ease: "sine.inOut" }, tKas + 0.2 + i * 0.08));
+      ft($("s02-dots"), { opacity: 1 }, { opacity: 0, duration: 0.1 }, tCla + 0.24);
+      ft($("s02-ab1"), { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(1.8)" }, tCla + 0.26);
+      ft(PH("scan"), { y: -10, opacity: 1 }, { y: 580, opacity: 1, duration: 0.5, ease: "power1.inOut" }, tCla + 0.22);
+      ft(PH("scan"), { opacity: 1 }, { opacity: 0, duration: 0.1 }, tCla + 0.72);
+      // "revisi pakai bahasa sehari-hari": typed in plain words, sent; the headline grows
+      const tTy = tRev + 0.12, tSend = Math.min(tSeh + 0.12, D - 0.86);
+      ft($("s02-inph"), { opacity: 1 }, { opacity: 0, duration: 0.1 }, tTy - 0.06);
+      S.typeIn($("s02-inty"), "judulnya gedein dikit, ya", tTy, tSend - 0.1);
+      ft($("s02-inty"), { opacity: 1 }, { opacity: 0, duration: 0.12 }, tSend);
+      ft($("s02-insd"), { scale: 1 }, { scale: 0.84, duration: 0.08, yoyo: true, repeat: 1 }, tSend - 0.04);
+      ft($("s02-ub2"), { opacity: 0, scale: 0.6, y: 120 }, { opacity: 1, scale: 1, y: 0, duration: 0.34, ease: "back.out(1.6)" }, tSend);
+      I($("s02-inty"), { opacity: 1 });
+      ft(PH("hl"), { scale: 1 }, { scale: 1.17, duration: 0.36, ease: "back.out(2)" }, tSend + 0.18);
+      K.tagIn(S, P, 6, tSend + 0.22);
+      // ---------------------------------------------------------------- exit (s03 is a new layout)
+      ft($("s02-card"), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power2.in" }, D - 0.28);
+      ft($("s02-ph"), { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power2.in" }, D - 0.26);
+      S.finish();
+    })();
+  </script>
+</template>

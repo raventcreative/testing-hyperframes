@@ -1,7 +1,8 @@
-"""Synthesised SFX bed for R20 (Claude Code pakai model AI gratis — FreeLLMAPI) — no samples, no downloads: typing on the terminal,
-paywall drop + lock jiggle, wallet drain, "?" pop, road scribble + box landing, LED blips, chips, laptop rise, request envelope,
-"ngerti" chime, token arc, quota rows, ring move, drain + "habis" buzz, step cards + typed commands + keys, honest-note stamps,
-file flight, magnifier sweep, red chips, stamps, CTA (LLM typing, plane, DM chime), end chime.
+"""Synthesised SFX bed for R22 (Agent AI di server klien: checklist AMAN) — no samples, no downloads: chat typing dots + message pop,
+evidence card + KOSONG stamp, clipboard drop + column pops, phase-rail slide + ticks, badge swing + typed commands, key/ban, sudo
+refusal, camera shutter + snapshot slide + pin + flag, selector slide + approval prompt + yolo strikes + JANGAN stamp, toll-gate arms
++ deny, receipt printer (motor + line feeds), vault padlock + eraser bounce + error buzz, diff handle + restore, sticky note flutter
++ wall bounce, CTA (AMAN typing, plane, DM chime), end chime.
 Deterministic. Writes assets/audio/sfx.wav. Run: python3 tools/sfx.py ."""
 import json, sys, wave
 from pathlib import Path
@@ -139,98 +140,96 @@ def card(t, g=1.0): put(t, whoosh(0.35, 500, 1600, 1.2, 0.45), W * 0.35 * g); pu
 def chip(t, g=1.0): put(t, pop(700, 1150, 0.07), 0.1 * g); put(t + 0.1, tick(0.02, 2600), 0.05 * g)
 def okck(t): put(t, pop(900, 1500, 0.06), 0.1); put(t + 0.04, chime((1568, 2093), 0.5), 0.035)
 def stamp(t, bad=False): put(t, boom(0.35, 170, 70), 0.18); put(t + 0.02, pop(320, 160, 0.1), 0.1); (put(t + 0.04, buzz(0.18), 0.03) if bad else None)
-# --- s01 hook: typing, paywall drop + lock jiggle, wallet rises + drains, "?"
+def rail_tick(t): put(t, pop(1200, 1900, 0.05), 0.08); put(t + 0.03, chime((2093, 2637), 0.35), 0.025)
+def shutter(t): put(t, tick(0.02, 5200), 0.22); put(t + 0.06, tick(0.03, 2600), 0.16); put(t + 0.02, whoosh(0.18, 3000, 1200, 1.5, 0.2), W * 0.3)
+def printer(t0, t1, gain=0.05):
+    n = int((t1 - t0) * SR); tt = np.arange(n) / SR
+    x = svf_bp(rng.standard_normal(n), np.full(n, 900.0), 3.0) * (0.55 + 0.45 * np.sign(np.sin(2 * np.pi * 38 * tt))) * env(n, 0.1, 1.0)
+    put(t0, x / (np.abs(x).max() + 1e-9), gain)
+def latch(t): put(t, pop(260, 120, 0.08), 0.16); put(t + 0.025, tick(0.02, 1800), 0.14)
+# --- s01 hook: typing dots, question bubble, evidence card, KOSONG stamp
 put(0.02, pop(500, 760, 0.08), 0.07)
-typing(max(0.12, wt("belajar") - 0.3), wt("Claude Code,") + 0.5, 0.075)
-tt = wt("tapi"); put(tt - 0.2, whoosh(0.7, 300, 1800, 1.2, 0.5), W * 0.25)            # robot flies in
-put(tt - 0.14, whoosh(0.3, 2200, 700, 1.4, 0.35), W * 0.4); put(tt + 0.12, boom(0.3, 170, 70), 0.13)
-for k in range(4): put(tt + 0.22 + k * 0.07, tick(0.02, 1900 + 200 * (k % 2)), 0.07)
-card(wt("belum") - 0.12, 0.8); put(wt("sanggup") - 0.05, rise(0.5, 900, 260), 0.025)
-tq = wt("langganan?"); put(tq - 0.06, pop(500, 1100, 0.1), 0.14); put(tq + 0.36, tick(0.02, 2200), 0.05); put(tq + 0.5, tick(0.02, 1800), 0.05)
+for r in range(6): put(0.12 + r * 0.26, tick(0.018, 2600), 0.03)
+tq = ws("\u201cKemarin", "s01"); put(tq - 0.14, pop(600, 1150, 0.1), 0.14); put(tq - 0.1, chime((1318.5, 1760), 0.4), 0.03)
+tk = ws("Kamu", "s01"); card(tk - 0.18, 0.8); put(tk - 0.25, whoosh(0.7, 300, 1800, 1.2, 0.5), W * 0.25)   # robot flies in
+stamp(ws("buktinya?", "s01") + 0.2, True)
 out_("s02")
-# --- s02 window shrinks, road draws, signpost, box lands, repo card, LEDs, chips, underline
-put(wt("Ada") - 0.05, whoosh(0.4, 1600, 500, 1.2, 0.4), W * 0.4)
-put(wt("jalan") - 0.05, scribble(0.5), 0.05); chip(wt("tengahnya:") - 0.06)
-tf = wt("FreeLLMAPI,"); put(tf - 0.3, whoosh(0.35, 1800, 500, 1.3, 0.4), W * 0.4); put(tf + 0.05, boom(0.4, 150, 60), 0.2); put(tf + 0.08, pop(320, 180, 0.1), 0.1)
-card(tf - 0.1, 0.7); put(tf + 0.25, chime((1318.5, 1760, 2349), 0.7), 0.04)
-put(wt("server") - 0.05, square_blips([1320, 1760, 1320, 1760, 2093], 0.09), 0.025); chip(wt("server") - 0.1)
-put(wt("kecil") - 0.02, pop(600, 900, 0.07), 0.07)
-chip(wt("gratis", 7) - 0.1); put(wt("gratis", 7), chime((1568, 2093, 2637), 0.6), 0.04)
-put(wt("GitHub.") - 0.12, tick(0.03, 3000), 0.08); put(wt("GitHub.") - 0.1, whoosh(0.3, 900, 2600, 1.6, 0.3), W * 0.2)
-put(st("s03") - 0.3, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.35)
-# --- s03 laptop rises, box settles, chip, Claude Code pill + bubble, envelope, "ngerti" badge, OpenAI chip
-put(ws("Dia", "s03") - 0.15, whoosh(0.5, 300, 1200, 1.1, 0.5), W * 0.45); put(ws("Dia", "s03") + 0.3, pop(380, 700, 0.09), 0.1)
-tl3 = ws("laptopmu,", "s03"); chip(tl3 - 0.1); put(tl3, square_blips([1046, 1318.5, 1046, 1568], 0.1), 0.02)
-tn = ws("ngerti", "s03"); chip(tn - 0.3); put(tn - 0.05, pop(600, 1000, 0.08), 0.1)
-tfo = ws("format", "s03"); put(tfo - 0.1, whoosh(0.5, 600, 2400, 1.4, 0.4), W * 0.45); put(tfo + 0.4, pop(900, 1400, 0.06), 0.09)
-okck(ws("API", "s03") + 0.05); chip(ws("Claude.", "s03") - 0.05)
+# --- s02 clipboard + three columns, rail slides in at the end
+card(st("s02") + 0.0); put(ws("tiga", "s02") - 0.12, pop(700, 1200, 0.08), 0.1)
+for w_ in ["sebelum,", "selama,", "sesudah"]:
+    t = ws(w_, "s02") - 0.16; put(t, pop(520, 900, 0.08), 0.1); [put(t + 0.2 + j * 0.09, tick(0.02, 2400 + 150 * j), 0.05) for j in range(2)]
+put(st("s03") - 0.42, whoosh(0.45, 1600, 600, 1.3, 0.4), W * 0.45)
+for k in range(3): put(st("s03") - 0.36 + k * 0.06, pop(800 + 120 * k, 1200 + 120 * k, 0.05), 0.05)
+# rail: phase changes + ticks (same times as index.html)
+for sid in ["s03", "s07", "s09"]: put(st(sid) + 0.02, pop(900, 1400, 0.06), 0.06)
+for w_, sid, dt in [("sudo.", "s03", 0.3), ("awal.", "s04", 0.2), ("yolo.", "s05", 0.3), ("ask.", "s06", 0.3), ("jamnya.", "s07", 0.2), ("jejaknya.", "s08", 0.3), ("ubah.", "s09", 0.3)]:
+    rail_tick(ws(w_, sid) + dt)
+# --- s03 badge swings in, command types, master key + ban, sudo group refusal
+put(st("s03") + 0.1, whoosh(0.5, 500, 1400, 1.2, 0.5), W * 0.4); put(st("s03") + 0.5, tick(0.03, 1500), 0.08)
+typing(ws("dapat", "s03") - 0.05, ws("sendiri,", "s03") + 0.2, 0.07)
+card(ws("sendiri,", "s03") - 0.05, 0.7); put(ws("admin,", "s03") - 0.02, pop(420, 220, 0.09), 0.12); put(ws("admin,", "s03") + 0.18, buzz(0.14), 0.02)
+card(ws("grup", "s03") - 0.5, 0.6); put(ws("sudo.", "s03") + 0.02, buzz(0.2), 0.035); put(ws("sudo.", "s03") + 0.06, pop(500, 250, 0.1), 0.1)
 out_("s04")
-# --- s04 app card + typing, box, token arc, panel, rows on names, token drop into Google
-put(st("s04") + 0.0, pop(500, 900, 0.08), 0.08); typing(st("s04") + 0.12, ws("Claude Code", "s04") + 0.2, 0.065)
-chip(ws("Claude Code", "s04") - 0.12)
-td = ws("dioper", "s04"); put(td - 0.12, whoosh(0.5, 600, 2600, 1.4, 0.4), W * 0.5); put(td + 0.36, pop(800, 1300, 0.07), 0.1)
-put(td + 0.36, square_blips([1318.5, 1760, 1318.5], 0.09), 0.02)
-card(ws("jatah", "s04") - 0.16)
-for w_ in ["Google,", "Groq,", "Mistral,", "dan"]: t = ws(w_, "s04") - 0.14; put(t, pop(700, 1100, 0.06), 0.08); put(t + 0.1, rise(0.35, 500, 1100), 0.012)
-tg = ws("Google,", "s04"); put(tg - 0.02, whoosh(0.3, 2000, 700, 1.4, 0.3), W * 0.3); okck(tg + 0.3)
+# --- s04 folder, shutter + snapshot, pin, typed git commands, flag
+card(st("s04") + 0.0, 0.7)
+tc = ws("Commit", "s04"); shutter(tc + 0.1); put(tc + 0.18, whoosh(0.5, 400, 1600, 1.2, 0.45), W * 0.4); put(tc + 0.62, pop(300, 160, 0.09), 0.12)
+typing(ws("folder", "s04") - 0.24, ws("git,", "s04") + 0.25, 0.065)
+put(ws("titik", "s04") - 0.05, pop(260, 130, 0.1), 0.14); put(ws("titik", "s04"), tick(0.03, 1200), 0.08); put(ws("awal.", "s04"), chime((1568, 2093), 0.5), 0.035)
 out_("s05")
-# --- s05 body rises, tag, brain drops + wires, BUKAN CLAUDE stamp, swap, footnote
-put(st("s05") + 0.0, whoosh(0.45, 300, 1300, 1.1, 0.5), W * 0.4); put(st("s05") + 0.32, pop(400, 700, 0.09), 0.09)
-chip(ws("Claude Code,", "s05") - 0.12)
-th = ws("tapi", "s05"); put(th - 0.1, whoosh(0.3, 1800, 600, 1.3, 0.35), W * 0.35); put(th + 0.22, pop(300, 160, 0.1), 0.12)
-for k in range(3): put(th + 0.2 + k * 0.05, tick(0.02, 2400 + 200 * k), 0.06)
-stamp(ws("bukan", "s05") - 0.02 + 0.18, True)
-put(min(ws("Claude.", "s05") - 0.1, ws("bukan", "s05") + 0.24) + 0.06, pop(900, 1400, 0.06), 0.08)
-chip(ws("Claude Code,", "s05") + 0.25, 0.6)
+# --- s05 selector card, typed command, knob slide, approval prompt, yolo strikes + stamp
+card(st("s05") + 0.0, 0.7); typing(ws("set", "s05") - 0.18, ws("manual,", "s05") + 0.15, 0.065)
+tm = ws("manual,", "s05"); put(tm - 0.12, whoosh(0.36, 700, 1500, 1.6, 0.4), W * 0.35); put(tm + 0.22, tick(0.03, 1700), 0.12); put(tm + 0.24, pop(600, 900, 0.06), 0.08)
+card(tm + 0.18, 0.6)
+for k in range(4): put(tm + 0.34 + k * 0.06, pop(700 + 80 * k, 1100 + 80 * k, 0.05), 0.05)
+tn = ws("nyalain", "s05")
+for k in range(3): put(tn + k * 0.08, scribble(0.16), 0.04)
+stamp(ws("yolo.", "s05") + 0.2, True)
 out_("s06")
-# --- s06 panel, drain + "habis", "otomatis" pill + spin, ring moves, tick
-card(st("s06") + 0.0, 0.8)
-ts6 = ws("satu", "s06"); put(ts6 - 0.05, rise(0.55, 900, 200), 0.03)
-th6 = ws("habis,", "s06"); put(th6, buzz(0.22), 0.035); put(th6 + 0.02, pop(500, 250, 0.1), 0.1)
-to = ws("otomatis", "s06"); chip(to - 0.1); put(to, whoosh(0.9, 500, 1700, 2.0, 0.5), W * 0.25)
-tp = ws("pindah", "s06"); put(tp - 0.12, whoosh(0.32, 1400, 600, 1.4, 0.35), W * 0.4); put(tp + 0.2, pop(800, 1300, 0.07), 0.1)
-okck(ws("lain.", "s06") - 0.08); chip(to + 0.15, 0.6)
+# --- s06 lanes, allow pills, arms drop (ask), deny lane, typed config, footnote
+card(st("s06") + 0.0, 0.7)
+for k in range(3): put(st("s06") + 0.12 + k * 0.08, pop(500 + 90 * k, 800 + 90 * k, 0.05), 0.05)
+for k in range(3): put(ws("serba", "s06") - 0.1 + k * 0.1, pop(900, 1400, 0.05), 0.06)
+tp = ws("permission-nya", "s06")
+for k in range(3): put(tp + 0.12 + k * 0.16, pop(240, 110, 0.08), 0.13); put(tp + 0.14 + k * 0.16, tick(0.02, 1500), 0.1)
+typing(ws("ubah", "s06") - 0.22, ws("ask.", "s06") + 0.2, 0.06)
+ta = ws("ask.", "s06"); put(ta + 0.3, pop(240, 110, 0.08), 0.14); put(ta + 0.38, buzz(0.16), 0.03); chip(ta + 0.3, 0.6)
 out_("s07")
-# --- s07 three step cards, typed commands, keys, ticks, result
-card(st("s07") + 0.0); typing(ws("servernya,", "s07") - 0.1, ws("isi", "s07") - 0.2, 0.07); okck(ws("isi", "s07") - 0.12)
-card(ws("isi", "s07") - 0.14)
-for t in [ws("API", "s07"), ws("key", "s07") + 0.12, ws("layanan,", "s07")]: put(t - 0.1, pop(600, 1000, 0.07), 0.1); put(t + 0.22, tick(0.03, 2300), 0.09)
-okck(ws("layanan,", "s07") + 0.3)
-card(ws("lalu", "s07") - 0.14); typing(ws("satu", "s07") - 0.15, ws("perintah", "s07") + 0.25, 0.07)
-tr = ws("perintah", "s07") + 0.42; chip(tr); okck(tr + 0.2); put(tr + 0.05, chime((1318.5, 1760, 2349), 0.8), 0.045)
+# --- s07 printer lands, REC blips, paper feeds, typed rule, ring
+card(st("s07") + 0.05, 0.8)
+tau = ws("auditd", "s07")
+for k in range(8): put(tau + k * 0.45, tick(0.015, 3400), 0.025)
+for w_, dt in [("merekam", -0.15), ("semua", -0.1), ("perintah", -0.1), ("akun", -0.1), ("akun", 0.2), ("plus", -0.2)]: printer(ws(w_, "s07") + dt, ws(w_, "s07") + dt + 0.26, 0.05)
+typing(ws("semua", "s07") - 0.22, ws("akun", "s07") + 0.4, 0.055)
+put(ws("akun", "s07") + 0.3, pop(700, 1100, 0.07), 0.08); put(ws("jamnya.", "s07") - 0.18, whoosh(0.3, 900, 2400, 1.6, 0.3), W * 0.25)
 out_("s08")
-# --- s08 honest notes: chip + headline, card 1 tiles + "≠" slam, card 2 bar jumps
-chip(st("s08") + 0.0); put(ws("Jujur", "s08") + 0.1, whoosh(0.3, 600, 1600, 1.2, 0.4), W * 0.3)
-card(ws("kualitasnya", "s08") - 0.2)
-for k, dt in enumerate([-0.05, 0.1]): put(ws("kualitasnya", "s08") + dt, pop(600 + 150 * k, 1000 + 150 * k, 0.07), 0.08)
-stamp(ws("beda", "s08") + 0.1)
-card(ws("limit", "s08") - 0.2); put(ws("limit", "s08"), rise(0.4, 400, 1000), 0.015); chip(ws("gratisnya", "s08") - 0.05)
-for t in [ws("bisa", "s08") - 0.05, ws("berubah.", "s08") - 0.02, ws("berubah.", "s08") + 0.24, ws("berubah.", "s08") + 0.48]: put(t, tick(0.025, 2000), 0.09); put(t, pop(700, 450, 0.06), 0.06)
-put(ws("berubah.", "s08") + 0.24, buzz(0.16), 0.025)
+# --- s08 vault, receipt slides in, owner chip, padlock, eraser hit + bounce, error, ok chip
+card(st("s08") + 0.0, 0.7); put(ws("Log-nya", "s08"), whoosh(0.4, 1400, 500, 1.3, 0.35), W * 0.3)
+chip(ws("milik", "s08") - 0.05); latch(ws("root,", "s08") - 0.06)
+put(ws("agent", "s08") - 0.15, whoosh(0.35, 600, 1800, 1.3, 0.35), W * 0.35); typing(ws("agent", "s08") - 0.22, ws("hapus", "s08") - 0.05, 0.06)
+th = ws("hapus", "s08"); put(th + 0.04, boom(0.3, 150, 60), 0.16); put(th + 0.06, pop(400, 200, 0.1), 0.12); put(th + 0.1, buzz(0.24), 0.04)
+okck(ws("jejaknya.", "s08") + 0.05)
 out_("s09")
-# --- s09 nodes, file flight, eye, ToS + magnifier + highlight, red chips, tip
-for k in range(3): put(st("s09") + 0.0 + k * 0.12, pop(500 + 120 * k, 900 + 120 * k, 0.07), 0.08)
-tdk = ws("dikirim", "s09"); put(tdk - 0.05, whoosh(0.45, 600, 2200, 1.4, 0.4), W * 0.4); put(ws("server", "s09") - 0.05, whoosh(0.45, 700, 2400, 1.4, 0.4), W * 0.4)
-tpn = ws("penyedia,", "s09"); put(tpn + 0.2, pop(900, 500, 0.08), 0.1); put(tpn + 0.24, buzz(0.12), 0.02)
-card(ws("baca", "s09") - 0.4); put(ws("baca", "s09") - 0.08, whoosh(0.6, 800, 1800, 2.0, 0.5), W * 0.25)
-put(ws("aturannya", "s09") - 0.1, scribble(0.35), 0.05); put(ws("aturannya", "s09"), chime((1318.5, 1760), 0.5), 0.03)
-for w_ in ["jangan", "kirim", "data"]: put(ws(w_, "s09") - 0.08, pop(600, 350, 0.08), 0.11)
-put(ws("sensitif.", "s09") + 0.02, buzz(0.2), 0.035); okck(ws("sensitif.", "s09") + 0.15)
+# --- s09 status card + rows, diff card + panels + handle, rings, typed restore
+card(st("s09") + 0.0, 0.7)
+for k in range(2): put(ws("status", "s09") - 0.1 + k * 0.16, pop(600 + 150 * k, 950 + 150 * k, 0.06), 0.08)
+card(ws("diff", "s09") - 0.3, 0.7); put(ws("diff", "s09") + 0.08, whoosh(0.3, 1800, 700, 1.4, 0.3), W * 0.3); put(ws("diff", "s09") + 0.3, tick(0.03, 1600), 0.1)
+put(ws("file", "s09") - 0.1, pop(900, 1400, 0.06), 0.07); put(ws("baris", "s09") - 0.06, pop(900, 1400, 0.06), 0.07)
+typing(ws("ubah.", "s09") - 0.22, ws("ubah.", "s09") + 0.5, 0.06)
 out_("s10")
-# --- s10 two cards, rows, COCOK + NANTI DULU stamps
-card(st("s10") + 0.0)
-for k in range(3): put(ws("belajar", "s10") - 0.1 + k * 0.12, tick(0.025, 2600 + 200 * k), 0.07)
-stamp(ws("dulu,", "s10") - 0.05 + 0.15); put(ws("dulu,", "s10") + 0.1, chime((1568, 2093), 0.5), 0.035)
-card(ws("bukan", "s10") - 0.15)
-for k in range(2): put(ws("bukan", "s10") + 0.15 + k * 0.12, tick(0.025, 2000 + 150 * k), 0.07)
-chip(ws("kerjaan", "s10") + 0.05, 0.7); stamp(ws("klien.", "s10") - 0.05 + 0.15, True)
+# --- s10 note flutters, action passes through, BUKAN PAGAR stamp, fence rises, action bounces off the wall
+card(st("s10") + 0.0, 0.7); put(ws("larangan", "s10") - 0.15, whoosh(0.3, 900, 2000, 1.4, 0.3), W * 0.25)
+tb = ws("bukan", "s10"); put(tb - 0.05, whoosh(0.45, 500, 2200, 1.4, 0.4), W * 0.4); put(tb + 0.1, rip(0.3), 0.025); put(tb + 0.42, pop(500, 250, 0.1), 0.1)
+stamp(ws("pagar.", "s10") + 0.2, True)
+card(ws("Pagarnya", "s10") - 0.3, 0.7)
+for k in range(3): put(ws("Pagarnya", "s10") - 0.05 + k * 0.12, pop(240 + 40 * k, 130, 0.08), 0.1)
+ts_ = ws("sistem.", "s10"); put(ts_ - 0.3, whoosh(0.25, 600, 1600, 1.4, 0.3), W * 0.3); put(ts_ - 0.06, boom(0.25, 160, 70), 0.14); okck(ts_ + 0.06)
 put(st("s11") - 0.2, whoosh(0.3, 1800, 600, 1.3, 0.35), W * 0.4)
-# --- s11 CTA: package card, comment "LLM", heart, send, plane, DM chime, end logo
+# --- s11 CTA: package card, comment "AMAN", heart, send, plane, DM chime, end logo
 s11 = st("s11")
 put(s11 + 0.0, pop(500, 900, 0.09), 0.12); put(s11 + 0.02, whoosh(0.4, 400, 1800, 1.3, 0.45), W * 0.5)
-tR = wt("LLM,"); ta = max(s11 + 0.2, tR - 0.1)
-for k in range(3): put(ta + k * 0.15, tick(0.022, 4200), 0.16)
-put(ta + 0.42, pop(900, 1600, 0.1), 0.15)
+tR = wt("AMAN,"); ta2 = max(s11 + 0.2, tR - 0.1)
+for k in range(4): put(ta2 + k * 0.1, tick(0.022, 4200), 0.16)
+put(ta2 + 0.42, pop(900, 1600, 0.1), 0.15)
 put(wt("aku", s11) - 0.01, tick(0.03, 2000), 0.2); put(wt("aku", s11) + 0.06, whoosh(0.5, 700, 3600, 1.2, 0.45), W * 0.9)
 put(wt("DM.") - 0.12, pop(800, 1300, 0.07), 0.1); put(wt("DM.") + 0.08, chime((1568, 2093), 0.8), 0.07)
 put(T["total_sec"] - 1.15, chime((1046, 1568, 2093, 2637), 1.6), 0.07)

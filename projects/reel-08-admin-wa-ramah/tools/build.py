@@ -24,14 +24,17 @@ def wt(s, w):
     return next((x[1] for x in W if x[3] == k and x[0].lower().startswith(w.lower())), ph(s)["start"])
 DUR = {"whoosh": 0.574, "pop": 0.72, "click": 0.366, "ping": 1.32}
 VOL = {"whoosh": 0.06, "pop": 0.045, "click": 0.08, "ping": 0.045}
-ev = [("whoosh", 0.05), ("pop", 0.55), ("pop", 0.9), ("pop", wt("orderan kabur", "kabur")), ("click", wt("Coba lihat", "simulasi")),
-      ("whoosh", wt("Coba lihat", "simulasi") + 0.25)]
-for s0, w0, dt in [("Pelanggan chat", "Halo", -0.15), ("AI admin", "nyapa", -0.05), ("Dia minta", "Dia", 0.05), ("menu lengkap", "menu", 0.05), ("Pesan ayam", "Pesan", -0.05),
-                   ("pesanan langsung dicatat", "dicatat", -0.25), ("Nambah es teh", "Nambah", -0.05), ("Pesanan diupdate", "Pesanan", -0.1), ("Begitu beres", "Begitu", -0.35),
-                   ("pesanan langsung masuk", "pesanan", -0.15)]:
+ev = [("pop", 0.05), ("pop", 0.35), ("click", wt("orderan kabur", "kabur") - 0.02), ("pop", wt("orderan kabur", "warung") - 0.2),
+      ("whoosh", ph("Coba lihat")["start"] - 0.42), ("click", wt("Coba lihat", "simulasi")), ("whoosh", wt("Coba lihat", "simulasi") + 0.28)]
+for s0, w0, dt in [("Pelanggan chat", "Halo", -0.15), ("AI admin", "nyapa", -0.05), ("Dia minta", "Dia", 0.05), ("Pesan ayam", "Pesan", -0.05),
+                   ("Nambah es teh", "Nambah", -0.05), ("Begitu beres", "Begitu", -0.35), ("pesanan langsung masuk", "pesanan", -0.15)]:
     ev.append(("pop", wt(s0, w0) + dt))
-ev += [("ping", wt("totalnya dihitung", "dihitung") + 0.8), ("ping", wt("totalnya ikut", "totalnya") + 0.8), ("ping", wt("pesanan langsung masuk", "dapur") - 0.25),
-       ("pop", wt("dan kecatat", "rekap") - 0.3), ("pop", wt("Ramah, cepet", "cepet")), ("pop", wt("jalan dua", "jam") - 0.35),
+ev += [("whoosh", ph("menu lengkap")["start"] + 0.18), ("ping", wt("langsung dikirim", "dikirim") - 0.1),
+       ("whoosh", ph("pesanan langsung dicatat")["start"] - 0.14), ("whoosh", ph("totalnya dihitung")["start"] - 0.24),
+       ("ping", wt("totalnya dihitung", "dihitung") + 0.8), ("whoosh", ph("Pesanan diupdate")["start"] - 0.25), ("ping", wt("totalnya ikut", "totalnya") + 0.8),
+       ("whoosh", ph("pesanan langsung masuk")["start"] + 0.28), ("ping", wt("pesanan langsung masuk", "dapur") - 0.2),
+       ("pop", wt("dan kecatat", "rekap") - 0.3), ("whoosh", ph("Ramah, cepet")["start"] - 0.3), ("pop", ph("Ramah, cepet")["start"] - 0.05),
+       ("pop", wt("Ramah, cepet", "cepet") - 0.05), ("pop", ph("jalan dua")["start"] - 0.05),
        ("whoosh", ph("Mau sistem")["start"] - 0.2), ("click", wt("Klik link", "link"))]
 tags = [f'<audio id="sx{i:02d}" class="clip" src="assets/sfx/{k}.wav" data-start="{t:.2f}" data-duration="{DUR[k]}" data-track-index="{10 + i % 4}" data-volume="{VOL[k]}"></audio>'
         for i, (k, t) in enumerate(sorted(ev, key=lambda e: e[1]))]

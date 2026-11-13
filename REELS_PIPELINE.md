@@ -24,6 +24,21 @@ The ElevenLabs API is already connected (key saved on the testing-hyperframes en
 - Captions: phrase chunks, smooth fade in/out, words brighten in sync (no pop/bounce). Poppins Bold for key words,
   Poppins Regular for the rest.
 
+## Demo variety (no monotone single-window demos) — reference: projects/reel-08-admin-wa-ramah
+Client feedback: one static window with tiny push-ins feels monotonous. Change the "shot" every ~2–4 s, mixing:
+- **Kinetic hook (no window):** big cards in the stage area (chat bubble, huge counter, stamp slam + shake), then a
+  zoom-through transition (hook scales up + fades, app window scales in).
+- **Screen-recording camera:** wrap all window content in `#wcam` (transform-origin 0 0) inside the fixed frame;
+  `cState(x, y, s)` clamped so no empty edge shows. Use macro close-ups (s 1.8–2.0) on what gets clicked, medium
+  shots (≈1.26) on the main panel, and **whip pans** (0.42 s, expo.inOut) between two close-ups.
+- **Pop-out cards:** the key UI element flies out of the window as a big floating card (window dims + scales 0.95),
+  then flies back.
+- **3D split:** window swings back (rotationY ≈20°, origin left) while a detail card (receipt, report…) floats in front.
+- **Kinetic stat stack** before the CTA: window recedes (scale 0.84, opacity 0.16), 2–3 big stat rows stack in.
+- Small life everywhere: slow 3D drift on the window, printed-reveal (clip-path) for tickets, mini bar charts,
+  background dot drift. A whoosh SFX on each big transition (keep it quiet).
+All of it stays inside the stage (x 80–1000, y 290–1240); captions and robot untouched.
+
 ## Alternating themes (one per video, see reels_log.json → `next_theme`)
 | theme | background | text | accents | logo |
 |---|---|---|---|---|

@@ -89,7 +89,7 @@
   .k-row .dc .ok{position:absolute;inset:0;border-radius:20px;background:#2da44e;color:#fff;opacity:0}
   .k-row .dc .ok svg{position:absolute;left:9px;top:9px;width:22px;height:22px}
   .k-row .lb{position:absolute;left:66px;top:12px;font:700 22px/40px Poppins;color:#0a0d2c;white-space:nowrap}
-  .k-row .pv{position:absolute;left:228px;top:12px;width:326px;font:400 17px/40px Poppins;color:#8a99b3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .k-row .pv{position:absolute;left:228px;top:12px;width:326px;font:400 17px/40px Poppins;color:#5d6f8f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .k-row .tx{position:absolute;left:66px;top:58px;width:486px;font:400 25px/36px Poppins;color:#1f2d4d}
   .k-row .para{position:absolute;left:14px;top:6px;width:540px;font:400 20px/29px Poppins;color:#34445f}
   .k-row .para b{font-weight:700;color:#0a0d2c}
@@ -125,8 +125,8 @@
   .k-ph .tb .st svg{width:16px;height:16px;fill:#f5b43c}
   .k-ph .tb b{position:absolute;left:14px;top:34px;font:700 16px/24px Poppins;color:#0a0d2c;white-space:nowrap}
   .k-ph .tb span{position:absolute;left:14px;top:62px;font:400 13px/20px Poppins;color:#5d6f8f;white-space:nowrap}
-  .k-ph .wa{position:absolute;left:24px;top:500px;width:248px;height:54px;border-radius:27px;background:#2da44e;box-shadow:0 8px 20px rgba(0,0,0,.3);
-    display:flex;align-items:center;justify-content:center;gap:8px;font:700 17px/1 Poppins;color:#fff;white-space:nowrap;transform-origin:50% 50%}
+  .k-ph .wa{position:absolute;left:24px;top:500px;width:248px;height:54px;border-radius:27px;background:#1f7f3a;box-shadow:0 8px 20px rgba(0,0,0,.3);
+    display:flex;align-items:center;justify-content:center;gap:8px;font:700 18px/1 Poppins;color:#fff;white-space:nowrap;transform-origin:50% 50%}
   .k-ph .wa svg{width:22px;height:22px}
   .k-ph .sbar{position:absolute;right:7px;top:70px;width:5px;height:420px;border-radius:3px;background:rgba(255,255,255,.18)}
   .k-ph .sbar i{position:absolute;left:0;top:0;width:5px;height:70px;border-radius:3px;background:#ffffff}
@@ -147,7 +147,7 @@
   .k-ph .sheet .mt i{position:absolute;left:0;top:0;width:150px;height:8px;border-radius:4px;background:linear-gradient(90deg,#5be08a,#2da44e);transform-origin:0 50%}
   .k-ph .scan{position:absolute;left:0;top:0;width:296px;height:4px;background:#6adfff;box-shadow:0 0 16px 4px rgba(1,204,247,.7)}
   .k-ph .isl{position:absolute;left:106px;top:10px;width:84px;height:24px;border-radius:12px;background:#05060c}
-  .k-ph .cth{position:absolute;right:12px;top:42px;height:22px;padding:0 8px;border-radius:11px;font:700 11px/22px Poppins;letter-spacing:1.2px;color:#5d6f8f;background:rgba(255,255,255,.85)}
+  .k-ph .cth{position:absolute;right:12px;top:42px;height:22px;padding:0 8px;border-radius:11px;font:700 11px/22px Poppins;letter-spacing:1.2px;color:#3d4c66;background:rgba(255,255,255,.9)}
   `;
   if (!document.getElementById("r25kit-css")) {
     const st = document.createElement("style"); st.id = "r25kit-css"; st.textContent = CSS; document.head.appendChild(st);
@@ -316,7 +316,7 @@
     I($(`${P}-bsp`), { scaleX: 1 });
     I($(`${P}-front`), { opacity: 1 });
     I($(`${P}-bhi`), { opacity: full ? 1 : 0 });
-    I($(`${P}-prod`), { opacity: full ? 1 : 0 }); I($(`${P}-testi`), { opacity: full ? 1 : 0 });
+    I($(`${P}-prod`), { opacity: 0 }); I($(`${P}-testi`), { opacity: 0 });
     I($(`${P}-sbar`), { opacity: 0 }); I($(`${P}-sth`), { y: 0 });
     for (let k = 0; k < 7; k++) I($(`${P}-tg${k}`), { x: K.TAGS[k][0], y: K.TAGS[k][1], xPercent: -50, yPercent: -50, scale: 0.5, opacity: 0 });
     I($(`${P}-hand`), { x: 190, y: 470, opacity: 0 });

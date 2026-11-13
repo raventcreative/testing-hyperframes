@@ -59,7 +59,7 @@ on "Indonesia"/"Bukan", types the cloud task / the chat / the config command, sh
 - `npx --yes hyperframes@0.8.186 lint .` → 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the R15/R19 kit).
 - `npx --yes hyperframes@0.8.186 validate .` → 0 errors; warnings = "multiple Three.js instances" (robot + mascot bundles, as in the kit)
   + SwiftShader ReadPixels notices. The first run flagged 2 contrast warnings on the s05 phone at t=23.1 s (phone fading in; placeholder
-  "ketik pesan…" too pale) → fixed (phone slides in fully opaque, darker sub-label, lighter placeholder); re-run: VALIDATE2_RESULT.
+  "ketik pesan…" too pale) → fixed (phone slides in fully opaque, darker sub-label, lighter placeholder); re-run: 0 errors, 0 contrast warnings.
 - Script check (`tools/check_scene.cjs`, HyperFrames preview on :8951, then stopped): s01–s09, robot, mascot, main all register, no
   exceptions; the preview's stamped `data-hf-id` attributes were stripped again afterwards.
 - Snapshots (`snapshot . --at … --no-end --timeout 60000`): one full pass of 71 frames (first frame, every scene's beats, both sides of

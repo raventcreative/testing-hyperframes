@@ -40,8 +40,9 @@ teknis > instruksi" dan CTA kata kunci.
 - **Dibuang:** nama kreator, sapaan, daftar terima kasih, traktir kopi, ajakan follow; "least privilege" sebagai lapis terpisah (dilebur ke
   item akun + akses folder); sandbox sebagai lapis tersendiri (disebut singkat di DM: backend container Hermes melewati approval karena
   container-nya yang jadi batas); "mode YOLO" sebagai satu-satunya bahaya (kita tunjukkan `--yolo`, `/yolo`, dan `mode: off`).
-- **Aturan 3 kata:** dicek baris per baris terhadap transkrip referensi. Kesamaan terpanjang 2 kata ("akun agent", "mode manual" tidak dipakai,
-  "Di Hermes," + kata lain). Kalimat referensi "Di open code, bawaannya…" sengaja dihindari → "Di OpenCode, setelan awalnya serba boleh";
+- **Aturan 3 kata:** dicek baris per baris terhadap transkrip referensi. Dicek otomatis (n-gram): satu-satunya kesamaan 3 token
+  adalah "Di OpenCode," (kata depan + nama produk; transkrip menulisnya "di open code"); sisanya maksimal 2 kata ("akun agent", "di server",
+  "yang dia", "Di Hermes,"). "mode manual" tidak dipakai — kita bilang "approvals ke manual". Kalimat referensi "Di open code, bawaannya…" sengaja dihindari → "Di OpenCode, setelan awalnya serba boleh";
   "baris mana yang diganti" → "file dan baris yang dia ubah"; "dia bisa menghapus jejaknya" → "agent nggak bisa hapus jejaknya".
 
 ## Fakta yang dicek (2026-11-13, sumber resmi)

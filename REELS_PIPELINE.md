@@ -24,6 +24,38 @@ The ElevenLabs API is already connected (key saved on the testing-hyperframes en
 - Captions: phrase chunks, smooth fade in/out, words brighten in sync (no pop/bounce). Poppins Bold for key words,
   Poppins Regular for the rest.
 
+## Demo variety (no monotone single-window demos) — reference: projects/reel-08-admin-wa-ramah
+Client feedback: one static window with tiny push-ins feels monotonous. Change the "shot" every ~2–4 s, mixing:
+- **Kinetic hook (no window):** big cards in the stage area (chat bubble, huge counter, stamp slam + shake), then a
+  zoom-through transition (hook scales up + fades, app window scales in).
+- **Screen-recording camera:** wrap all window content in `#wcam` (transform-origin 0 0) inside the fixed frame;
+  `cState(x, y, s)` clamped so no empty edge shows. Use macro close-ups (s 1.8–2.0) on what gets clicked, medium
+  shots (≈1.26) on the main panel, and **whip pans** (0.42 s, expo.inOut) between two close-ups.
+- **Pop-out cards:** the key UI element flies out of the window as a big floating card (window dims + scales 0.95),
+  then flies back.
+- **3D split:** window swings back (rotationY ≈20°, origin left) while a detail card (receipt, report…) floats in front.
+- **Kinetic stat stack** before the CTA: window recedes (scale 0.84, opacity 0.16), 2–3 big stat rows stack in.
+- Small life everywhere: slow 3D drift on the window, printed-reveal (clip-path) for tickets, mini bar charts,
+  background dot drift. A whoosh SFX on each big transition (keep it quiet).
+All of it stays inside the stage (x 80–1000, y 290–1240); captions untouched.
+
+## Motion style v3 (client reference: explainer with a living robot) — kit: brand/fx/reel_fx.js
+`tools/add_mouth.py` copies the kit to `vendor/reel_fx.js` (+ bg-blue/bg-light/both logos). In the page: wrap the robot
+as `<div id="rmove"><!--ROBOT_HTML--></div>` (CSS `transform: translateY(700px)` so it starts hidden), add `#bgD`,
+`#logoD`/`#logoL`, dark caption CSS (`#main[data-sc="dark"]`), put `/*ROBOT_SETUP*/` before the scenes, then
+`const FX = REEL_FX({ tl, ft, st, $, $$, D, rob, lh, rh, headIn, RG }); FX.theme("light"|"dark", 0);` and end with
+`FX.runGestures()`. In tools/build.py replace the rig's slide-in with `st(rob, { opacity: 1 }, 0)`.
+- **Robot is a co-star, never static:** `FX.enter(pose, t)`, `FX.go(pose, t)` (hop + lean while moving),
+  `FX.dip(pose, t)` (sinks out during a wipe, pops up somewhere else), `FX.hop`, `FX.shiver`; poses home / center /
+  right / close (CTA close-up, head ≥ y 1420 so captions stay clear). Expressions `FX.face("happy"|"x"|"wide"|"excited"|"flat", t, dur)`
+  on story beats (bad news = x/wide, AI works = excited/happy). Gestures `FX.point/wave/beat` are side-aware.
+- **ONE background per reel — never mix white and blue** (client rule). Pass `base: "light"` (white reel) or
+  `base: "dark"` (blue reel) to REEL_FX; wipes `FX.stripes`, `FX.blocks`, `FX.sweep` then use only shades of that
+  theme (+ a thin accent: #294b77 on white, #01ccf7 on blue). Use a wipe between scenes every ~5–8 s.
+- **Kinetic text:** `FX.drop(el, t)` (letters fall in, add `data-letter="gt"` for gradient letters), `FX.sticker`
+  (small rotated tags around the hook cards), `FX.marker` (cyan highlight sweep).
+- Reference build: projects/reel-08-admin-wa-ramah (v3).
+
 ## Alternating themes (one per video, see reels_log.json → `next_theme`)
 | theme | background | text | accents | logo |
 |---|---|---|---|---|

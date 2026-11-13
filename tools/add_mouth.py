@@ -14,6 +14,10 @@ shutil.copy(B / "r3_head.png", P / "assets/robot/r2_head.png")
 for n in ("r2_body.png", "r2_lhand.png", "r2_rhand.png"):
     shutil.copy(B / n, P / "assets/robot" / n)
 shutil.copy(B / "robot_rig3.js", P / "vendor/robot_rig2.js")
+if (ROOT / "brand/fx/reel_fx.js").exists(): shutil.copy(ROOT / "brand/fx/reel_fx.js", P / "vendor/reel_fx.js")
+if not (P / "assets/bg-blue.png").exists(): shutil.copy(ROOT / "brand/bg-blue.png", P / "assets/bg-blue.png")
+for lg in ("logo-aipreneur-white.png", "logo-aipreneur-dark.png", "bg-light.png"):
+    if not (P / "assets" / lg).exists(): shutil.copy(ROOT / "brand" / lg, P / "assets" / lg)
 rig = json.loads((B / "robot_rig3.js").read_text().split("= ", 1)[1].rstrip(";\n"))
 mx, my, mw, mh = rig["mouth"]; hx, hy = rig["head"][0], rig["head"][1]
 

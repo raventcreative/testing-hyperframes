@@ -8,7 +8,10 @@
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/icons.js"></script>
     <script src="vendor/vo_env.js"></script>
-    <script src="vendor/robot_rig2.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
     <style>
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
@@ -21,12 +24,38 @@
       .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
       .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
       #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #132650; opacity: 0; }
       #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
       .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+      .simtag { font-size: 15px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 3px 12px; }
 
-      /* window: x 80-1000, y 290-1240 */
-      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.84);
+      /* ---------- HOOK (kinetic, stage x 80-1000, y 290-1240) ---------- */
+      #hook { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; transform-origin: 50% 45%; }
+      .hc { position: absolute; background: #fff; border: 1.5px solid rgba(10,13,44,0.08); border-radius: 30px; box-shadow: 0 30px 70px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); }
+      #hBub { left: 60px; top: 20px; width: 800px; padding: 24px 30px 28px; }
+      #hBub .hd { display: flex; align-items: center; gap: 14px; font-size: 21px; color: var(--mute); }
+      #hBub .av { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #f08c1a, #e5484d); color: #fff; font-weight: 700; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+      #hBub .hd b { display: block; color: var(--n1); font-size: 24px; line-height: 1.2; }
+      #hBub .hd .simtag { margin-left: auto; }
+      #hBub .tx { position: relative; margin-top: 16px; display: inline-block; background: #d9fbd0; border-radius: 26px 26px 26px 8px; padding: 16px 26px 30px; font-size: 40px; line-height: 1.25; font-weight: 700; color: #0a0d2c; }
+      #hBub .tx i { position: absolute; right: 18px; bottom: 6px; font-style: normal; font-size: 17px; font-weight: 400; color: rgba(10,13,44,0.5); }
+      #hTim { left: 150px; top: 340px; width: 620px; height: 330px; text-align: center; padding-top: 34px; }
+      #hTim .k { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 26px; font-weight: 700; letter-spacing: 4px; color: var(--red); }
+      #hTim .k .ic { width: 32px; height: 32px; }
+      #hTim .n { font-size: 196px; font-weight: 700; line-height: 1; color: var(--red); margin-top: 12px; letter-spacing: -4px; }
+      #hTim .n small { font-size: 54px; letter-spacing: 0; margin-left: 12px; }
+      #hStamp { position: absolute; left: 150px; top: 588px; width: 620px; text-align: center; font-size: 80px; font-weight: 700; line-height: 1.15; color: var(--red); border: 9px solid var(--red);
+        border-radius: 24px; padding: 4px 0 8px; background: rgba(255,255,255,0.94); letter-spacing: 3px; box-shadow: 0 20px 50px rgba(229,72,77,0.25); }
+      #hLost { left: 60px; top: 720px; width: 800px; padding: 22px 28px; display: flex; align-items: center; gap: 22px; }
+      #hLost .lg { width: 86px; height: 86px; border-radius: 22px; background: rgba(229,72,77,0.1); color: var(--red); display: flex; align-items: center; justify-content: center; flex: none; }
+      #hLost .lg .ic { width: 44px; height: 44px; }
+      #hLost .tx { font-size: 34px; line-height: 1.25; } #hLost .tx b { font-weight: 700; }
+      #hLost .ar { margin-left: auto; width: 46px; height: 46px; color: var(--red); }
+
+      /* ---------- app window: x 80-1000, y 290-1240 ---------- */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.95);
         border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); transform-origin: 50% 50%; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
       #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.92); }
       #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
       #tbar .app { font-size: 19px; font-weight: 700; }
@@ -40,7 +69,7 @@
       .ri .ic { width: 22px; height: 22px; } .ri.on { background: rgba(41,75,119,0.10); color: var(--n2); }
       #area { position: absolute; left: 72px; top: 60px; width: 848px; height: 890px; overflow: hidden; background: rgba(244,247,253,0.6); }
       #areaGrid { position: absolute; inset: 0; background-image: radial-gradient(rgba(41,75,119,0.13) 1px, transparent 1.4px); background-size: 22px 22px; }
-      #cam { position: absolute; left: 0; top: 0; width: 848px; height: 890px; transform-origin: 0 0; }
+      #cam { position: absolute; left: 0; top: 0; width: 848px; height: 890px; }
       .card { position: absolute; background: #fff; border: 1.5px solid var(--line); border-radius: 18px; box-shadow: 0 6px 20px rgba(41,75,119,0.08); }
 
       /* left column: workflow */
@@ -61,10 +90,6 @@
       .arrow { position: absolute; left: 50%; width: 3px; margin-left: -1.5px; background: rgba(41,75,119,0.22); border-radius: 2px; }
       .arrow i { position: absolute; left: 50%; top: 0; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--auto); box-shadow: 0 0 10px rgba(47,111,228,0.8); opacity: 0; }
       #a1 { top: 136px; height: 60px; } #a2 { top: 392px; height: 60px; }
-      #lost { position: absolute; left: 14px; right: 14px; top: 560px; border-radius: 14px; padding: 14px; background: rgba(229,72,77,0.08); border: 1.5px solid rgba(229,72,77,0.35); opacity: 0; }
-      #lost b { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--red); } #lost b .ic { width: 18px; height: 18px; }
-      #lost span { display: block; font-size: 13px; color: rgba(10,13,44,0.7); margin-top: 4px; line-height: 1.35; }
-      /* kitchen + counter (replace lost box area) */
       #ticket { position: absolute; left: 14px; right: 14px; top: 548px; border-radius: 16px; background: #fffaf2; border: 1.5px dashed rgba(240,140,26,0.6); padding: 12px 14px; opacity: 0; }
       #ticket .th { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #c46d0e; }
       #ticket .th .ic { width: 18px; height: 18px; color: #f08c1a; }
@@ -75,6 +100,8 @@
       #today .k { font-size: 12.5px; color: var(--n2); font-weight: 700; letter-spacing: 1px; }
       #today .v { font-size: 34px; font-weight: 700; line-height: 1.1; color: var(--auto); }
       #today .v small { font-size: 14px; font-weight: 400; color: var(--mute); margin-left: 4px; }
+      #today .bars { position: absolute; right: 14px; bottom: 14px; height: 44px; display: flex; align-items: flex-end; gap: 5px; }
+      #today .bars i { display: block; width: 9px; border-radius: 3px; background: var(--auto); opacity: 0.85; transform-origin: 50% 100%; }
 
       /* phone */
       #phone { left: 300px; top: 18px; width: 530px; height: 854px; border-radius: 46px; padding: 12px; background: #0b0f22; border: none; box-shadow: 0 24px 60px rgba(10,13,44,0.35); }
@@ -99,41 +126,101 @@
       .ord { margin-top: 6px; border-radius: 12px; background: rgba(41,75,119,0.06); padding: 8px 12px; }
       .ord .ln { display: flex; justify-content: space-between; gap: 16px; font-size: 17px; }
       .ord .tot { display: flex; justify-content: space-between; border-top: 1px dashed rgba(10,13,44,0.2); margin-top: 6px; padding-top: 6px; font-size: 18px; font-weight: 700; color: var(--n2); }
-      .sys { margin: 14px auto 0; width: max-content; max-width: 420px; text-align: center; padding: 6px 14px; border-radius: 12px; font-size: 14px; font-weight: 700; opacity: 0; }
-      .sys.warn { background: rgba(229,72,77,0.12); color: var(--red); } .sys.ok { background: var(--autoBg); color: var(--auto); }
+      .sys { margin: 14px auto 0; width: max-content; max-width: 420px; text-align: center; padding: 6px 14px; border-radius: 12px; font-size: 14px; font-weight: 700; }
+      .sys.warn { background: rgba(229,72,77,0.12); color: var(--red); }
+      #oldWrap .bb { opacity: 1; }
       #pIn { position: absolute; left: 12px; right: 12px; bottom: 12px; height: 50px; border-radius: 25px; background: #fff; display: flex; align-items: center; padding: 0 18px; font-size: 15px; color: var(--mute); box-shadow: 0 1px 3px rgba(10,13,44,0.12); }
       #pIn i { margin-left: auto; width: 38px; height: 38px; border-radius: 50%; background: var(--wa); display: flex; align-items: center; justify-content: center; color: #fff; }
       #pIn i .ic { width: 18px; height: 18px; }
-      #pills { position: absolute; left: 300px; top: 370px; width: 530px; display: flex; flex-direction: column; align-items: center; gap: 16px; z-index: 5; }
-      #scrim { position: absolute; inset: 0; background: rgba(234,240,246,0.84); opacity: 0; z-index: 4; }
-      .pill { display: flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 22px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #fff; font-size: 27px; font-weight: 700; box-shadow: 0 16px 40px rgba(10,13,44,0.3); opacity: 0; }
-      .pill .ic { width: 30px; height: 30px; color: #8fb6ff; }
 
       /* cursor + misc */
       #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(10,13,44,0.35)); }
       #cursor svg { width: 100%; height: 100%; display: block; }
       #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--n2); background: rgba(41,75,119,0.12); opacity: 0; z-index: 29; }
       #winDim { position: absolute; inset: 0; background: rgba(244,247,253,0.78); opacity: 0; }
+
+      /* ---------- pop-out cards (float over the window) ---------- */
+      #pMenu { position: absolute; left: 190px; top: 455px; width: 700px; padding: 28px 36px 24px; border-radius: 32px; background: #fff; opacity: 0;
+        box-shadow: 0 40px 90px rgba(10,13,44,0.28), 0 6px 18px rgba(41,75,119,0.12); }
+      #pMenu .hd { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+      #pMenu .who { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: var(--auto); background: var(--autoBg); border-radius: 14px; padding: 6px 14px; }
+      #pMenu .who .ic { width: 22px; height: 22px; }
+      #pMenu .ttl { font-size: 32px; font-weight: 700; }
+      #pMenu .hd .simtag { margin-left: auto; }
+      #pMenu .row { display: flex; justify-content: space-between; align-items: center; font-size: 31px; padding: 12px 6px; border-bottom: 1.5px dashed rgba(10,13,44,0.12); }
+      #pMenu .row b { font-weight: 700; color: var(--n2); display: inline-block; }
+      #pMenu .ft { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; font-size: 22px; font-weight: 700; color: var(--wa); opacity: 0; }
+      #pMenu .ft .ic { width: 28px; height: 28px; color: #34b7f1; }
+      #pRcpt { position: absolute; left: 548px; top: 430px; width: 440px; padding: 28px 28px 30px; background: #fff; border-radius: 24px; opacity: 0;
+        box-shadow: 0 40px 90px rgba(10,13,44,0.32), 0 6px 18px rgba(41,75,119,0.12); }
+      #pRcpt .rh { display: flex; align-items: center; gap: 12px; }
+      #pRcpt .rh .lg { width: 54px; height: 54px; border-radius: 15px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; }
+      #pRcpt .rh .lg .ic { width: 28px; height: 28px; }
+      #pRcpt .rh b { display: block; font-size: 28px; line-height: 1.15; }
+      #pRcpt .rh em { display: block; font-style: normal; font-size: 16px; color: var(--mute); }
+      #pRcpt .sep { border-top: 2px dashed rgba(10,13,44,0.16); margin: 18px 0 8px; }
+      #pRcpt .rl { display: flex; justify-content: space-between; align-items: center; height: 52px; padding: 0 12px; border-radius: 12px; font-size: 24px; overflow: hidden; }
+      #pRcpt .rl b { font-weight: 700; }
+      #rNew { height: 0; opacity: 0; }
+      #pRcpt .rt { display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px dashed rgba(10,13,44,0.16); margin-top: 10px; padding: 14px 12px 0; }
+      #pRcpt .rt span { font-size: 22px; color: var(--mute); }
+      #pRcpt .rt b { font-size: 44px; font-weight: 700; line-height: 1; color: var(--auto); display: inline-block; }
+      #pRcpt .tag { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 16px; font-weight: 700; color: var(--auto); background: var(--autoBg); border-radius: 12px; padding: 4px 12px; }
+      #pRcpt .tag .ic { width: 18px; height: 18px; }
+
+      /* ---------- kinetic stat rows ---------- */
+      #kin { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; }
+      .kr { position: absolute; left: 40px; width: 840px; height: 200px; border-radius: 32px; background: #fff; display: flex; align-items: center; gap: 30px; padding: 0 40px; opacity: 0;
+        box-shadow: 0 26px 64px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); }
+      .kr .lg { width: 124px; height: 124px; border-radius: 32px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+      .kr .lg .ic { width: 62px; height: 62px; }
+      .kr .w { font-size: 84px; font-weight: 700; line-height: 1; letter-spacing: 1px; }
+      .kr .s { font-size: 28px; color: rgba(10,13,44,0.65); margin-top: 10px; }
+      #k1 { top: 120px; } #k2 { top: 375px; } #k3 { top: 630px; background: linear-gradient(135deg, #0a0d2c, #294b77); }
+      #k3 .w { color: #fff; } #k3 .s { color: rgba(255,255,255,0.78); } #k3 .lg { background: rgba(255,255,255,0.14); }
+
       #cta { position: absolute; left: 110px; width: 860px; top: 560px; padding: 56px 48px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
       #cta .k { font-size: 27px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 66px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
       #cta .sb { font-size: 27px; margin-top: 10px; color: rgba(10,13,44,0.75); } #cta .sb b { color: var(--n2); }
       #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--grad); color: #fff; font-size: 32px; font-weight: 700; }
       #fbtn .ic { width: 32px; height: 32px; }
+      #ctaChips { position: absolute; left: 60px; width: 960px; top: 1025px; display: flex; justify-content: center; gap: 16px; z-index: 40; }
+      #ctaChips .stk { position: relative; opacity: 0; font-size: 27px; padding: 12px 22px; border-radius: 18px; } #ctaChips .stk .ic { color: var(--n2); width: 28px; height: 28px; }
+      #win { opacity: 0; }
+      #hBub, #hTim, #hStamp, #hLost, #hook .stk { opacity: 0; }
       #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
-      #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoL { opacity: 0; }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); }
+      .stk { position: absolute; display: flex; align-items: center; gap: 9px; padding: 9px 18px; border-radius: 15px; background: #fff; font-size: 22px; font-weight: 700; color: var(--n1);
+        box-shadow: 0 12px 28px rgba(41,75,119,0.24); border: 1.5px solid rgba(10,13,44,0.07); white-space: nowrap; }
+      .stk .ic { width: 22px; height: 22px; color: var(--red); } .stk.y { background: #01ccf7; color: #0a0d2c; border-color: transparent; } .stk.y .ic { color: #0a0d2c; }
+      #sk1 { left: 610px; top: 318px; } #sk2 { left: 0px; top: 610px; } #sk3 { left: 640px; top: 668px; }
+      .hl { position: relative; display: inline-block; isolation: isolate; } .hl i { position: absolute; left: -6px; right: -6px; bottom: 3px; height: 15px; border-radius: 5px; background: rgba(1,204,247,0.5); z-index: -1; transform-origin: 0 50%; }
       #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
       .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
       .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
       .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
-      <!--ROBOT_CSS-->
-      #robot { filter: drop-shadow(0 18px 30px rgba(41,75,119,0.25)); }
+      #main[data-sc="dark"] .cap .in { background: none; color: #fff; text-shadow: 0 4px 18px rgba(0,0,0,0.45); } #main[data-sc="dark"] .cap s.k { color: #01ccf7; }
+      #robo3d { position: absolute; left: -2px; top: 1362px; width: 640px; height: 760px; filter: drop-shadow(0 18px 26px rgba(41,75,119,0.22)); }
     </style>
   </head>
   <body>
     <div id="main" data-composition-id="main" data-start="0" data-duration="34.4" data-width="1080" data-height="1920" data-fps="30">
       <div id="scene" class="clip" data-start="0" data-duration="34.4" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
-        <div id="bg"></div><div id="dots"></div>
-        <div id="win">
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div>
+
+        <div id="hook">
+          <div class="hc" id="hBub"><div class="hd"><div class="av">P</div><div><b>Pelanggan</b>chat masuk · 18.21</div><span class="simtag">SIMULASI</span></div>
+            <div class="tx">Kak, masih buka? Mau pesan nih<i>18.21</i></div></div>
+          <div class="hc" id="hTim"><div class="k"><span class="ic" data-i="timer"></span>BELUM DIBALAS</div><div class="n"><span id="hN">0</span><small>menit</small></div></div>
+          <div id="hStamp">ORDER KABUR</div>
+          <div class="stk" id="sk1"><span class="ic" data-i="message-square-text"></span>Chat numpuk</div>
+          <div class="stk y" id="sk2"><span class="ic" data-i="hourglass"></span>Slow respon</div>
+          <div class="stk" id="sk3"><span class="ic" data-i="frown"></span>Admin sibuk</div>
+          <div class="hc" id="hLost"><div class="lg"><span class="ic" data-i="store"></span></div><div class="tx gt">Pelanggan pindah ke <b>warung sebelah</b></div><span class="ic ar" data-i="arrow-right"></span></div>
+        </div>
+
+        <div id="win"><div id="wcam">
           <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Admin WhatsApp</span><span id="sim">SIMULASI</span>
             <div id="mode">AI Admin<div id="sw"><i id="knob"></i></div><span class="st" id="stTxt">OFF</span></div></div>
           <div id="rail"><div class="ri on"><span class="ic" data-i="message-square-text"></span></div><div class="ri"><span class="ic" data-i="workflow"></span></div>
@@ -150,27 +237,41 @@
                   <div class="chip" id="cOrd"><span class="ic" data-i="notebook-pen"></span>Catat pesanan</div></div>
                 <div class="arrow" id="a2"><i></i></div>
                 <div class="fnode" id="nOut"><div class="t"><div class="lg"><span class="ic" data-i="send"></span></div><div>Balas pelanggan<em>dalam hitungan detik</em></div></div></div>
-                <div id="lost"><b><span class="ic" data-i="x"></span>Order hilang</b><span>Pelanggan pindah ke warung sebelah.</span></div>
                 <div id="ticket"><div class="th"><span class="ic" data-i="chef-hat"></span>MASUK DAPUR</div><div class="no">Pesanan #038</div>
                   <div class="ln"><span>Ayam Geprek</span><b>×2</b></div><div class="ln"><span>Es Teh</span><b>×1</b></div><span class="stt">Sedang dimasak</span></div>
-                <div id="today"><div class="k">REKAP HARI INI</div><div class="v"><span id="nToday">0</span><small>pesanan</small></div></div>
+                <div id="today"><div class="k">REKAP HARI INI</div><div class="v"><span id="nToday">0</span><small>pesanan</small></div>
+                  <div class="bars"><i style="height:16px"></i><i style="height:24px"></i><i style="height:19px"></i><i style="height:30px"></i><i style="height:27px"></i><i style="height:36px"></i><i style="height:44px"></i></div></div>
               </div>
               <div class="card" id="phone"><div id="scr">
                 <div id="pHead"><div class="av">GM</div><div><b>Warung Geprek Mantap</b><div class="sub"><span id="sOn">online</span><span id="sTy" style="opacity:0">AI admin sedang mengetik…</span></div></div></div>
                 <div id="chatBg"><div id="chat"></div></div>
                 <div id="pIn">Ketik pesan<i><span class="ic" data-i="send"></span></i></div>
-                <div id="scrim"></div>
               </div></div>
-              <div id="pills"><div class="pill" id="pl1"><span class="ic" data-i="zap"></span>Balas ±3 detik</div><div class="pill" id="pl2"><span class="ic" data-i="clock"></span>Online 24 jam</div></div>
             </div>
           </div>
-          <div id="winDim"></div>
           <div id="ripple"></div><div id="cursor"></div>
+        </div><div id="winDim"></div></div>
+
+        <div id="pMenu"><div class="hd"><span class="who"><span class="ic" data-i="bot"></span>AI Admin</span><span class="ttl gt">Menu hari ini</span><span class="simtag">SIMULASI</span></div>
+          <div id="mRows"></div><div class="ft"><span class="ic" data-i="check-check"></span>Terkirim otomatis · 19.05</div></div>
+        <div id="pRcpt"><div class="rh"><div class="lg"><span class="ic" data-i="receipt"></span></div><div><b class="gt">Pesanan #038</b><em>Warung Geprek Mantap</em></div></div>
+          <div class="sep"></div>
+          <div class="rl"><span>Ayam Geprek ×2</span><b>Rp30.000</b></div>
+          <div class="rl" id="rNew"><span>Es Teh ×1</span><b>Rp4.000</b></div>
+          <div class="rt"><span>Total</span><b id="rTot">Rp30.000</b></div>
+          <span class="tag"><span class="ic" data-i="calculator"></span>Dihitung otomatis · SIMULASI</span></div>
+
+        <div id="kin">
+          <div class="kr" id="k1"><div class="lg"><span class="ic" data-i="handshake"></span></div><div><div class="w" data-letter="gt">RAMAH</div><div class="s">Nyapa duluan, jawab dengan sopan</div></div></div>
+          <div class="kr" id="k2"><div class="lg"><span class="ic" data-i="zap"></span></div><div><div class="w" data-letter="gt">CEPET</div><div class="s">Balas dalam <span class="hl"><i></i>hitungan detik</span></div></div></div>
+          <div class="kr" id="k3"><div class="lg"><span class="ic" data-i="clock"></span></div><div><div class="w"><span id="n24">0</span> JAM</div><div class="s">Tetap jalan walau admin lagi tidur</div></div></div>
         </div>
+
         <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name gt">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
           <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
-        <div id="ui"><img id="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><div id="caps"></div>
-          <!--ROBOT_HTML--></div>
+        <div id="ctaChips"><div class="stk"><span class="ic" data-i="message-square-text"></span>Balas otomatis</div><div class="stk"><span class="ic" data-i="notebook-pen"></span>Catat pesanan</div><div class="stk"><span class="ic" data-i="chart-pie"></span>Rekap harian</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="" /><div id="caps"></div>
+          <div id="rmove"><canvas id="robo3d" width="640" height="760"></canvas></div></div>
       </div>
       <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="33.28" data-track-index="8" data-volume="1"></audio>
       <!--SFX-->
@@ -199,18 +300,15 @@
         const tick = `<span class="ic">${icon("check-check")}</span>`;
         const who = `<div class="who">${ic("bot")}AI Admin</div>`;
         const rp = (n) => "Rp" + Math.round(n).toLocaleString("id-ID");
-        const OLD = [{ k: "in", h: "Kak, masih buka? Mau pesan nih", tm: "18.21", id: "old1" },
-          { k: "sys warn", h: "Belum dibalas · <span id='late'>0</span> menit", id: "old2" },
-          { k: "sys warn", h: "Pelanggan pindah ke warung sebelah", id: "old3" }];
         const tHalo = wt("Pelanggan chat", "Halo"), tNyapa = wt("AI admin", "nyapa"), tMinta = ph("Dia minta").start, tMenu = ph("menu lengkap").start,
           tPesan = ph("Pesan ayam").start, tCatat = wt("pesanan langsung dicatat", "dicatat"), tTot = wt("totalnya dihitung", "dihitung"),
           tTeh = ph("Nambah es teh").start, tUpd = ph("Pesanan diupdate").start, tBer = ph("totalnya ikut").start, tBeres = ph("Begitu beres").start;
+        const MENU = [["1. Ayam Geprek", 15000], ["2. Geprek Keju", 19000], ["3. Nasi Putih", 4000], ["4. Es Teh", 4000], ["5. Es Jeruk", 6000], ["6. Air Mineral", 4000]];
         const NEW = [
           { k: "in", h: "Halo kak", tm: "19.04", at: tHalo - 0.15 },
           { k: "out", h: who + "Halo kak! Selamat datang di Warung Geprek Mantap. Mau pesan apa hari ini?", tm: "19.04", at: tNyapa - 0.05 },
           { k: "in", h: "Menunya apa aja kak?", tm: "19.05", at: tMinta + 0.05 },
-          { k: "out", h: who + "Ini menu hari ini kak:<div class='menu'>" + [["1. Ayam Geprek", 15000], ["2. Geprek Keju", 19000], ["3. Nasi Putih", 4000], ["4. Es Teh", 4000], ["5. Es Jeruk", 6000], ["6. Air Mineral", 4000]]
-              .map(([n, p]) => `<div><span>${n}</span><b>${rp(p)}</b></div>`).join("") + "</div>", tm: "19.05", at: tMenu + 0.05 },
+          { k: "out", h: who + "Ini menu hari ini kak:<div class='menu'>" + MENU.map(([n, p]) => `<div><span>${n}</span><b>${rp(p)}</b></div>`).join("") + "</div>", tm: "19.05", at: tMenu + 0.05 },
           { k: "in", h: "Ayam geprek 2 ya kak", tm: "19.06", at: tPesan - 0.05 },
           { k: "out", h: who + "Siap kak, pesanan dicatat:<div class='ord'><div class='ln'><span>Ayam Geprek ×2</span><span>Rp30.000</span></div><div class='tot'><span>Total</span><span id='tot1'>Rp0</span></div></div>", tm: "19.06", at: tCatat - 0.25 },
           { k: "in", h: "Tambah es teh 1 kak", tm: "19.06", at: tTeh - 0.05 },
@@ -218,14 +316,12 @@
           { k: "in", h: "Udah itu aja kak", tm: "19.07", at: tBeres - 0.35 },
           { k: "out", h: who + "Terima kasih kak! Pesanan langsung diteruskan ke dapur ya.", tm: "19.07", at: ph("pesanan langsung masuk").start - 0.15 }];
         const chat = $("#chat");
-        const mk = (m) => { const el = document.createElement("div");
-          if (m.k.startsWith("sys")) { el.className = "sys " + m.k.split(" ")[1]; el.innerHTML = m.h; }
-          else { el.className = "bb " + m.k; el.innerHTML = m.h + `<span class="tm">${m.tm}${m.k === "in" ? tick : ""}</span>`; }
-          if (m.id) el.id = m.id; chat.appendChild(el); m.el = el; return el; };
-        OLD.forEach(mk);
-        const oldWrap = document.createElement("div"); oldWrap.id = "oldWrap"; chat.prepend(oldWrap); OLD.forEach((m) => oldWrap.appendChild(m.el));
+        const oldWrap = document.createElement("div"); oldWrap.id = "oldWrap"; chat.appendChild(oldWrap);
+        oldWrap.innerHTML = `<div class="bb in">Kak, masih buka? Mau pesan nih<span class="tm">18.21${tick}</span></div><div class="sys warn">Belum dibalas · 27 menit</div>`;
         const newWrap = document.createElement("div"); newWrap.id = "newWrap"; chat.appendChild(newWrap);
-        NEW.forEach((m) => { mk(m); newWrap.appendChild(m.el); });
+        NEW.forEach((m) => { const el = document.createElement("div"); el.className = "bb " + m.k;
+          el.innerHTML = m.h + `<span class="tm">${m.tm}${m.k === "in" ? tick : ""}</span>`; newWrap.appendChild(el); m.el = el; });
+        $("#mRows").innerHTML = MENU.map(([n, p]) => `<div class="row"><span>${n.slice(3)}</span><b>${rp(p)}</b></div>`).join("");
 
         /* captions */
         const KEY = new Set(["telat", "bales", "chat,", "kabur", "sebelah.", "simulasi", "halo", "kak\",", "nyapa", "ramah.", "menu,", "menu", "harganya", "dikirim.", "ayam", "geprek",
@@ -235,12 +331,16 @@
         const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
           el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].replace(/^"/, "").toLowerCase()) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
 
+        /* ---------- camera (zooms the whole app inside the fixed window frame, screen-recording style) ---------- */
         const win = $("#win");
         const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
-        const cState = (x, y, s) => ({ x: 424 - x * s, y: 445 - y * s, scale: s });
-        let cc = cState(424, 445, 1);
-        st("#cam", cc, 0);
-        const camTo = (x, y, s, at, dur) => { const nx = cState(x, y, s); ft("#cam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: "power3.inOut" }), at); cc = nx; };
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc;
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; };
+        const whip = (x, y, s, at) => camTo(x, y, s, at, 0.42, "expo.inOut");
         let cur = { x: 760, y: 820 };
         st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
         const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
@@ -256,45 +356,63 @@
         const typing = (at, dur) => { ft("#sOn", { opacity: 1 }, { opacity: 0, duration: 0.12 }, at); ft("#sTy", { opacity: 0 }, { opacity: 1, duration: 0.12 }, at);
           ft("#sTy", { opacity: 1 }, { opacity: 0, duration: 0.12 }, at + dur); ft("#sOn", { opacity: 0 }, { opacity: 1, duration: 0.12 }, at + dur); };
 
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "light" });
+        FX.theme("light", 0);
+        ft("#dots", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -238px", duration: D, ease: "none" }, 0);
+
         /* initial */
-        st(["#tbar", "#rail", "#flow", "#phone"], { opacity: 0 }, 0);
-        st("#newWrap", { opacity: 1 }, 0);
+        st(win, { opacity: 0, transformPerspective: 2000, transformOrigin: "50% 50%" }, 0);
+        st(["#hBub", "#hTim", "#hStamp", "#hLost"], { opacity: 0 }, 0);
         st(["#flow .fnode", "#flow .arrow"], { opacity: 0.35 }, 0);
+        st(["#pMenu", "#pRcpt"], { transformPerspective: 1400 }, 0);
+        const tSim = wt("Coba lihat", "simulasi"), tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");
 
-        /* S0 hook 0-3.6: unanswered chat, lost order */
-        ft(win, { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 0.0);
-        ft(["#tbar", "#rail"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.25);
-        ft(["#flow", "#phone"], { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.1, ease: "power3.out" }, 0.3);
-        ft("#old1", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.8)" }, 0.55);
-        ft("#old2", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 0.9);
-        count($("#late"), 0, 27, 0.95, 1.0);
-        ft("#old2", { scale: 1 }, { keyframes: [{ scale: 1.08 }, { scale: 1 }], duration: 0.3 }, wt("Admin lu", "telat"));
-        const tKabur = wt("orderan kabur", "kabur");
-        ft("#old3", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, tKabur - 0.05);
-        ft("#lost", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.35, ease: "back.out(1.6)" }, tKabur);
-        ft("#lost", { x: 0 }, { keyframes: [{ x: -6 }, { x: 6 }, { x: -3 }, { x: 0 }], duration: 0.35 }, tKabur + 0.4);
-        camTo(424, 445, 1.03, 0.6, 2.4);
+        /* ===== SCENE 1 · HOOK (light, kinetic) ===== */
+        const tTelat = wt("Admin lu", "telat"), tKabur = wt("orderan kabur", "kabur");
+        FX.enter("home", 0.0); FX.wave(0.5);
+        ft("#hBub", { opacity: 0, y: 40, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.5)" }, 0.02);
+        ft("#hTim", { opacity: 0, y: 34, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, 0.32);
+        count($("#hN"), 0, 27, 0.42, 1.25);
+        FX.face("wide", tTelat - 0.05, 1.0);
+        ft("#hTim", { scale: 1 }, { keyframes: [{ scale: 1.05, duration: 0.12 }, { scale: 1, duration: 0.25 }] }, tTelat + 0.05);
+        FX.sticker($("#sk1"), tTelat + 0.25, 6); FX.sticker($("#sk2"), tTelat + 0.55, -7); FX.sticker($("#sk3"), tTelat + 0.85, 5);
+        ft("#hStamp", { opacity: 0, scale: 1.9, rotation: -8 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.26, ease: "power4.in" }, tKabur - 0.22);
+        ft("#hook", { x: 0, y: 0 }, { keyframes: [{ x: -12, y: 6, duration: 0.05 }, { x: 10, y: -5, duration: 0.05 }, { x: -6, y: 3, duration: 0.05 }, { x: 0, y: 0, duration: 0.06 }] }, tKabur + 0.04);
+        ft("#hBub", { opacity: 1 }, { opacity: 0.45, duration: 0.3 }, tKabur + 0.05);
+        FX.face("x", tKabur - 0.02, 1.0); FX.shiver(tKabur + 0.05, 0.45);
+        ft("#hLost", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.38, ease: "power3.out" }, tKabur + 0.28);
+        ft("#hLost .ar", { x: 0 }, { keyframes: [{ x: 14, duration: 0.2 }, { x: 0, duration: 0.2 }, { x: 14, duration: 0.2 }, { x: 0, duration: 0.2 }] }, tKabur + 0.6);
 
-        /* S1 turn the AI admin on */
-        const tSim = wt("Coba lihat", "simulasi");
-        camTo(424, 445, 1, ph("Coba lihat").start - 0.2, 0.6);
-        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, ph("Coba lihat").start - 0.3);
-        moveEl($("#sw"), ph("Coba lihat").start - 0.3, 0.55, 4, 2);
-        click(tSim);
+        /* ===== stripes -> SCENE 2 · app (dark): macro close-up on the AI switch, click, pull back ===== */
+        const tW1 = tSim - 1.15;
+        FX.dip("right", tW1 - 0.05, 0.3);
+        FX.stripes(tW1, "dark", (m) => { st("#hook", { display: "none" }, m); st(win, { opacity: 1 }, m); });
+        const sw = posIn($("#sw"));
+        camSet(sw.x - 140, sw.y + 170, 2.0, 0);
+        st("#cursor", { x: sw.x - 210, y: sw.y + 200 }, 0); cur = { x: sw.x - 210, y: sw.y + 200 };
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tW1 + 0.7);
+        moveEl($("#sw"), tW1 + 0.7, Math.max(0.3, tSim - tW1 - 0.75), 4, 2);
+        click(tSim); FX.point(tSim - 0.3);
         ft("#knob", { x: 0 }, { x: 28, duration: 0.3, ease: "power2.inOut" }, tSim + 0.05);
         ft("#sw", { backgroundColor: "rgba(10,13,44,0.14)" }, { backgroundColor: "#1fa855", duration: 0.3 }, tSim + 0.05);
         ft("#stTxt", { color: "#e5484d" }, { color: "#1fa855", duration: 0.3 }, tSim + 0.05);
         const stTxt = $("#stTxt"), aiState = $("#aiState");
         ft({ v: 0 }, { v: 0 }, { v: 1, duration: 0.01, onUpdate() { const on = this.progress() > 0.5; stTxt.textContent = on ? "ON" : "OFF"; aiState.textContent = on ? "AKTIF" : "OFF"; } }, tSim + 0.1);
         ft("#aiState", { backgroundColor: "rgba(229,72,77,0.12)", color: "#e5484d" }, { backgroundColor: "rgba(31,168,85,0.14)", color: "#1fa855", duration: 0.25 }, tSim + 0.1);
+        FX.face("excited", tSim + 0.12, 1.0); FX.hop(tSim + 0.2, 45);
+        camTo(460, 475, 1, tSim + 0.28, 0.75, "power3.inOut");
         ft("#oldWrap", { opacity: 1 }, { opacity: 0, duration: 0.3 }, tSim + 0.2);
         st("#oldWrap", { display: "none" }, tSim + 0.55);
-        ft("#lost", { opacity: 1 }, { opacity: 0, duration: 0.3 }, tSim + 0.2);
-        ft(["#flow .fnode", "#flow .arrow"], { opacity: 0.35 }, { opacity: 1, duration: 0.35, stagger: 0.08 }, tSim + 0.25);
-        moveTo(700, 830, tSim + 0.5, 0.7);
-        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tSim + 1.3);
+        ft(["#flow .fnode", "#flow .arrow"], { opacity: 0.35 }, { opacity: 1, duration: 0.3, stagger: 0.07 }, tSim + 0.4);
+        moveTo(sw.x - 60, sw.y + 380, tSim + 0.4, 0.6);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tSim + 0.85);
 
-        /* S2.. conversation */
+        /* phone medium, slow 3D drift */
+        const tPel = ph("Pelanggan chat").start;
+        camTo(637, 469, 1.26, tPel + 0.05, 0.7);
+        ft(win, { rotationY: 0 }, { rotationY: -5, duration: tMenu - tPel - 0.6, ease: "sine.inOut" }, tPel + 0.4);
+        FX.face("happy", tNyapa + 0.1, 1.3); FX.beat(tNyapa - 0.08);
+
         NEW.forEach((m) => {
           if (m.k === "out") typing(m.at - 0.55, 0.5);
           ft(m.el, { opacity: 0, y: 18, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "back.out(1.6)" }, m.at);
@@ -307,7 +425,6 @@
         count($("#tot1"), 0, 30000, ph("totalnya dihitung").start + 0.05, 0.9, rp);
         count($("#tot2"), 30000, 34000, tBer - 0.05, 0.9, rp);
         ft("#tot1", { scale: 1 }, { keyframes: [{ scale: 1.12 }, { scale: 1 }], duration: 0.35 }, tTot + 0.8);
-        ft("#tot2", { scale: 1 }, { keyframes: [{ scale: 1.12 }, { scale: 1 }], duration: 0.35 }, tBer + 0.8);
         // auto-scroll the chat so the newest bubble is always in view (computed from live layout, deterministic in time)
         const chatBg = $("#chatBg"), newWrapEl = $("#newWrap");
         const offAfter = (k) => { const el = NEW[k].el; const bottom = newWrapEl.offsetTop + el.offsetTop + el.offsetHeight + 14; return Math.max(0, bottom - chatBg.offsetHeight); };
@@ -315,63 +432,97 @@
           const t = tl.time(); let k = -1; NEW.forEach((m, i) => { if (m.at <= t) k = i; });
           let y = 0; if (k >= 0) { const a = k > 0 ? offAfter(k - 1) : 0, b = offAfter(k); const f = Math.min(1, (t - NEW[k].at) / 0.4); const e = f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2; y = a + (b - a) * e; }
           chat.style.transform = "translateY(" + (-y).toFixed(1) + "px)"; } }, 0);
-        // gentle push-ins on the phone during the menu / order cards
-        camTo(424, 445, 1.025, tMenu - 0.2, 1.2);
-        camTo(424, 445, 1, tBeres - 0.2, 0.9);
 
-        /* S3 kitchen + daily recap */
-        const tDapur = wt("pesanan langsung masuk", "dapur");
-        ft("#ticket", { opacity: 0, y: 24, rotation: -2 }, { opacity: 1, y: 0, rotation: 0, duration: 0.45, ease: "back.out(1.6)" }, tDapur - 0.3);
-        ft("#ticket", { boxShadow: "0 0 0 0 rgba(240,140,26,0.5)" }, { boxShadow: "0 0 0 14px rgba(240,140,26,0)", duration: 0.7 }, tDapur + 0.1);
-        const tRek = wt("dan kecatat", "rekap");
+        /* menu pops OUT of the phone as a big floating card; robot walks to the middle */
+        const tHarga = wt("menu lengkap", "harganya"), tKirim = wt("langsung dikirim", "dikirim"), tMenuOut = tPesan - 0.5;
+        FX.go("center", tMenu - 0.35, 0.7); FX.point(tMenu + 0.4); FX.face("wide", tMenu + 0.45, 0.8);
+        ft(win, { rotationY: -5, scale: 1, transformOrigin: "50% 50%" }, { rotationY: 0, scale: 0.95, duration: 0.5, ease: "power2.inOut" }, tMenu + 0.15);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.7, duration: 0.4 }, tMenu + 0.15);
+        ft("#pMenu", { opacity: 0, x: 150, y: 120, scale: 0.42, rotationX: 0 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.25)" }, tMenu + 0.2);
+        ft("#mRows .row", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.07, ease: "power2.out" }, tMenu + 0.45);
+        ft("#mRows .row b", { color: "#294b77", scale: 1 }, { keyframes: [{ color: "#2f6fe4", scale: 1.12, duration: 0.18 }, { color: "#2f6fe4", scale: 1, duration: 0.2 }], stagger: 0.06 }, tHarga - 0.05);
+        ft("#pMenu .ft", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, tKirim - 0.1);
+        FX.hop(tKirim - 0.05);
+        ft("#pMenu", { opacity: 1, x: 0, y: 0, scale: 1 }, { opacity: 0, x: 150, y: 120, scale: 0.42, duration: 0.38, ease: "power2.in" }, tMenuOut);
+        ft(win, { scale: 0.95 }, { scale: 1, duration: 0.45, ease: "power2.inOut" }, tMenuOut + 0.1);
+        ft("#winDim", { opacity: 0.7 }, { opacity: 0, duration: 0.35 }, tMenuOut + 0.1);
+
+        /* ===== blocks -> SCENE 3 · order (light): tight on the chat, whip to the AI flow, whip back ===== */
+        const pTight = [637, 640, 1.7], fTight = [222, 400, 1.7];
+        FX.dip("home", tPesan - 0.7, 0.2);
+        FX.blocks(tPesan - 0.62, "light", (m) => camSet(...pTight, m));
+        whip(...fTight, ph("pesanan langsung dicatat").start - 0.12);
+        FX.point(tCatat - 0.3);
+        whip(...pTight, ph("totalnya dihitung").start - 0.22);
+        FX.face("wide", tTot - 0.05, 0.9); FX.beat(tTot - 0.08);
+
+        /* 3D split: window swings back, receipt floats in front; robot steps to the middle */
+        const tSwing = tUpd - 0.25, tSwingBack = tBeres - 0.3;
+        FX.go("center", tSwing - 0.1, 0.7);
+        ft(win, { rotationY: 0, scale: 1, x: 0, transformOrigin: "0% 50%" }, { rotationY: 20, scale: 0.9, x: -12, duration: 0.6, ease: "power3.inOut" }, tSwing);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.35, duration: 0.5 }, tSwing);
+        ft("#pRcpt", { opacity: 0, x: 170, rotationY: -28 }, { opacity: 1, x: 0, rotationY: 0, duration: 0.6, ease: "power3.out" }, tSwing + 0.1);
+        ft("#rNew", { height: 0, opacity: 0 }, { height: 52, opacity: 1, duration: 0.35, ease: "power2.out" }, tUpd + 0.5);
+        ft("#rNew", { backgroundColor: "rgba(47,111,228,0)" }, { keyframes: [{ backgroundColor: "rgba(47,111,228,0.14)", duration: 0.2 }, { duration: 0.9 }, { backgroundColor: "rgba(47,111,228,0)", duration: 0.4 }] }, tUpd + 0.6);
+        count($("#rTot"), 30000, 34000, tBer - 0.05, 0.9, rp);
+        ft("#rTot", { scale: 1 }, { keyframes: [{ scale: 1.14, duration: 0.15 }, { scale: 1, duration: 0.25 }] }, tBer + 0.8);
+        FX.face("happy", tBer + 0.7, 1.0); FX.hop(tBer + 0.75);
+        ft("#pRcpt", { opacity: 1, x: 0, y: 0, scale: 1 }, { opacity: 0, x: 60, y: 40, scale: 0.85, duration: 0.35, ease: "power2.in" }, tSwingBack);
+        ft(win, { rotationY: 20, scale: 0.9, x: -12 }, { rotationY: 0, scale: 1, x: 0, duration: 0.55, ease: "power3.inOut" }, tSwingBack + 0.05);
+        ft("#winDim", { opacity: 0.35 }, { opacity: 0, duration: 0.4 }, tSwingBack + 0.05);
+
+        /* ===== diagonal sweep -> SCENE 4 · kitchen (dark): ticket prints + daily recap, slow push ===== */
+        const tDapur = wt("pesanan langsung masuk", "dapur"), tRek = wt("dan kecatat", "rekap"), tRam = ph("Ramah, cepet").start;
+        const tW3 = ph("pesanan langsung masuk").start - 0.2;
+        FX.dip("right", tW3 - 0.05, 0.3);
+        const m3 = FX.sweep(tW3, "dark", (m) => camSet(222, 705, 1.8, m));
+        camTo(222, 725, 1.92, m3 + 0.1, (tRam - 0.85) - (m3 + 0.1), "sine.inOut");
+        ft("#ticket", { opacity: 1, y: -10, clipPath: "inset(0% 0% 100% 0%)" }, { y: 0, clipPath: "inset(0% 0% 0% 0%)", duration: 0.7, ease: "power2.out" }, tDapur - 0.2);
+        FX.point(tDapur - 0.3);
+        ft("#ticket", { boxShadow: "0 0 0 0 rgba(240,140,26,0.5)" }, { boxShadow: "0 0 0 14px rgba(240,140,26,0)", duration: 0.7 }, tDapur + 0.45);
+        ft("#ticket .stt", { opacity: 1 }, { keyframes: [{ opacity: 0.4, duration: 0.3 }, { opacity: 1, duration: 0.3 }, { opacity: 0.4, duration: 0.3 }, { opacity: 1, duration: 0.3 }] }, tDapur + 0.6);
         ft("#today", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tRek - 0.35);
-        count($("#nToday"), 0, 38, tRek - 0.2, 1.1);
-        /* S4 ramah, cepet, 24 jam */
-        const tRam = ph("Ramah, cepet").start;
-        ft("#scrim", { opacity: 0 }, { opacity: 1, duration: 0.3 }, wt("Ramah, cepet", "cepet") - 0.25);
-        ft("#pl1", { opacity: 0, y: 20, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, wt("Ramah, cepet", "cepet") - 0.05);
-        ft("#pl2", { opacity: 0, y: 20, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, wt("jalan dua", "jam") - 0.4);
-        ft("#pHead .av", { scale: 1 }, { keyframes: [{ scale: 1.15 }, { scale: 1 }], duration: 0.4 }, tRam);
+        count($("#nToday"), 0, 38, tRek - 0.2, 1.0);
+        ft("#today .bars i", { scaleY: 0 }, { scaleY: 1, duration: 0.4, stagger: 0.06, ease: "power2.out" }, tRek - 0.1);
+        FX.face("happy", tRek - 0.1, 0.8); FX.beat(tRek - 0.08);
 
-        /* S5 CTA */
-        const tCta = ph("Mau sistem").start;
-        ft("#winDim", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tCta - 0.2);
-        ft(win, { scale: 1 }, { scale: 0.94, duration: 0.6, ease: "power2.inOut" }, tCta - 0.2);
+        /* ===== stripes -> SCENE 5 · kinetic stat stack (light), letters drop in ===== */
+        const tCep = wt("Ramah, cepet", "cepet"), tJal = ph("jalan dua").start, tJam = wt("jalan dua", "jam");
+        FX.go("center", tRam - 0.8, 0.7);
+        FX.stripes(tRam - 0.8, "light", (m) => { st(win, { scale: 0.84, opacity: 0.14, rotationY: 0, x: 0, transformOrigin: "50% 50%" }, m); camSet(460, 475, 1, m); });
+        ft("#k1", { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, tRam - 0.12);
+        FX.drop($("#k1 .w"), tRam - 0.02);
+        ft("#k2", { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, tCep - 0.12);
+        FX.drop($("#k2 .w"), tCep - 0.02);
+        FX.marker($("#k2 .hl i"), tCep + 0.35);
+        ft("#k3", { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, tJal - 0.08);
+        ft("#k2 .lg", { rotation: 0 }, { keyframes: [{ rotation: -12, duration: 0.1 }, { rotation: 10, duration: 0.1 }, { rotation: 0, duration: 0.15 }] }, tCep + 0.3);
+        count($("#n24"), 0, 24, tJal + 0.1, 0.85);
+        ft("#k3 .lg .ic", { rotation: 0 }, { rotation: 360, duration: 1.0, ease: "power2.inOut" }, tJal + 0.1);
+        FX.face("happy", tRam - 0.05, 0.8); FX.face("excited", tCep + 0.05, 0.85); FX.hop(tCep - 0.05); FX.hop(tJam - 0.1, 70);
+
+        /* ===== blocks -> SCENE 6 · CTA (dark), robot close-up ===== */
+        ft(["#k1", "#k2", "#k3"], { opacity: 1, y: 0 }, { opacity: 0, y: -40, duration: 0.3, stagger: 0.05, ease: "power2.in" }, tCta - 0.6);
+        FX.blocks(tCta - 0.62, "dark", (m) => st(win, { opacity: 0 }, m));
+        FX.go("close", tCta - 0.45, 0.8);
         ft("#cta", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
-        const tF = wt("Klik link", "link");
+        ft("#ctaChips .stk", { opacity: 0, y: 24, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, stagger: 0.12, ease: "back.out(2)" }, tCta + 0.5);
+        FX.wave(tCta + 0.4); FX.point(tF - 0.3); FX.face("happy", tF + 0.05, 1.5);
         ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
         ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
+        FX.face("excited", D - 1.6, 0.9);
 
         /* captions */
         capEls.forEach(({ el, ws, p }, k) => {
           const next = capEls[k + 1];
           const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
-          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
           ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
-          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
           ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
         });
 
-        /*ROBOT_SETUP*/
-        // presenter gestures for this script
-        const G = [];
-        [0.2, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
-        [tSim, tMenu, tCatat, tDapur, tF].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
-        [wt("Admin lu", "telat"), tKabur, tNyapa, tTot, tUpd, tBer, tRek, wt("Ramah, cepet", "cepet"), wt("jalan dua", "jam")]
-          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
-        G.sort((x, y) => x.t - y.t);
-        let busy = -1, beatN = 0;
-        G.forEach((g) => {
-          if (g.t < busy + 0.05) return;
-          busy = g.t + g.d;
-          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
-            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
-            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
-          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
-            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
-        });
+        FX.runGestures();
 
         tl.set({}, {}, D - 0.01);
         window.__timelines["main"] = tl;

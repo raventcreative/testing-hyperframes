@@ -9,9 +9,8 @@
   <script>
     (function () {
       // AI PRENEUR chibi businessman = the HOST: half body, left of centre (the robot co-hosts at screen right). Already in frame at
-      // 0 s, asks the hook question, introduces FreeLLMAPI, explains app vs brain, gets serious on the honest notes and the data
-      // caution, delivers the CTA (no glances at the robot: they made the eyes read blank in the R12/R13 renders).
-      // Live WebGL, lip sync from the VO phones.
+      // 0 s, delivers the hook, introduces each tool, gets serious on the production caution, delivers the CTA (no glances at the
+      // robot: they made the eyes read blank in the R12/R13 renders). Live WebGL, lip sync from the VO phones.
       const M3 = window.Mascot3D;
       const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump } = M3;
       const VW = window.VO_WORDS, SC = window.VO_SCENES, D = window.TOTAL;
@@ -26,7 +25,7 @@
       const L = (a, b, u) => a + (b - a) * u;
       const add = (...ds) => { const o = {}; for (const d of ds) for (const [k, v] of Object.entries(d || {})) { const a = o[k] || [0, 0, 0]; o[k] = [a[0] + v[0], a[1] + v[1], a[2] + v[2]]; } return o; };
       const S = (id) => SC.find((s) => s.id === id);
-      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : 0; };
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); if (!w) throw new Error("mascot: word not found " + txt); return w[1]; };
       function accents(t) { let n = 0; for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; } return Math.min(1.3, n); }
       // ---------------------------------------------------------------- framing
       const HOST = { fx: 392, fy: 2185, h: 1040, pitch: 4 };
@@ -36,48 +35,53 @@
       }
       const shown = () => true;
       // ---------------------------------------------------------------- acting
+      const s6 = S("s06").start, s7 = S("s07").start;
       const intents = [
         { t: 0.2, action: "welcome" },
-        { t: wt("Pengen") - 0.1, action: "present", side: "right" },
-        { t: wt("Claude Code,") - 0.1, action: "explain", side: "left" },
-        { t: wt("tapi") - 0.1, action: "explain", side: "right" },
-        { t: wt("sanggup") - 0.12, action: "emphasize", side: "left" },
-        { t: wt("langganan?") - 0.1, action: "question", side: "right" },
-        { t: wt("Ada") - 0.1, action: "reveal" },
-        { t: wt("FreeLLMAPI,") - 0.12, action: "emphasize", side: "right" },
-        { t: wt("server") - 0.1, action: "point", side: "right" },
-        { t: wt("gratis", S("s02").start) - 0.12, action: "emphasize", side: "left" },
-        { t: wt("GitHub.") - 0.1, action: "present", side: "right" },
-        { t: wt("Dia") - 0.1, action: "explain", side: "left" },
-        { t: wt("laptopmu,") - 0.1, action: "point", side: "right" },
-        { t: wt("ngerti") - 0.1, action: "explain", side: "right" },
-        { t: wt("Claude.") - 0.12, action: "emphasize", side: "left" },
-        { t: wt("Perintah") - 0.1, action: "reveal" },
-        { t: wt("dioper") - 0.1, action: "point", side: "right" },
-        { t: wt("jatah") - 0.1, action: "explain", side: "left" },
-        { t: wt("Google,") - 0.1, action: "present", side: "right" },
-        { t: wt("lainnya.") - 0.12, action: "emphasize", side: "right" },
-        { t: wt("Jadi") - 0.1, action: "compare" },
-        { t: wt("aplikasinya") - 0.1, action: "explain", side: "left" },
-        { t: wt("otaknya") - 0.1, action: "point", side: "right" },
-        { t: wt("bukan") - 0.12, action: "emphasize", side: "right" },
-        { t: wt("Jatah") - 0.1, action: "explain", side: "left" },
-        { t: wt("habis,") - 0.12, action: "emphasize", side: "left" },
-        { t: wt("otomatis") - 0.1, action: "point", side: "right" },
-        { t: wt("Pasang") - 0.1, action: "reveal" },
-        { t: wt("isi") - 0.1, action: "explain", side: "left" },
-        { t: wt("perintah", S("s07").start) - 0.1, action: "point", side: "right" },
-        { t: wt("setup.") - 0.12, action: "emphasize", side: "right" },
-        { t: wt("Jujur") - 0.1, action: "compare" },
-        { t: wt("beda") - 0.12, action: "emphasize", side: "right" },
-        { t: wt("limit") - 0.1, action: "explain", side: "left" },
-        { t: wt("berubah.") - 0.12, action: "emphasize", side: "left" },
-        { t: wt("Kodemu") - 0.1, action: "point", side: "right" },
-        { t: wt("aturannya") - 0.1, action: "explain", side: "left" },
-        { t: wt("jangan") - 0.12, action: "emphasize", side: "right" },
-        { t: wt("Pakai") - 0.1, action: "present", side: "right" },
-        { t: wt("bukan", S("s10").start) - 0.1, action: "compare" },
-        { t: wt("klien.") - 0.12, action: "emphasize", side: "left" },
+        { t: wt("Kode") - 0.1, action: "present", side: "right" },
+        { t: wt("Claude Code") - 0.1, action: "explain", side: "left" },
+        { t: wt("setengah") - 0.12, action: "emphasize", side: "right" },
+        { t: wt("jalan.") - 0.1, action: "explain", side: "left" },
+        { t: wt("Biar") - 0.1, action: "reveal" },
+        { t: wt("pesanan") - 0.1, action: "point", side: "right" },
+        { t: wt("online,") - 0.12, action: "emphasize", side: "right" },
+        { t: wt("pasang") - 0.1, action: "present", side: "right" },
+        { t: wt("empat") - 0.12, action: "emphasize", side: "left" },
+        { t: wt("Satu,") - 0.1, action: "reveal" },
+        { t: wt("Context7") - 0.12, action: "emphasize", side: "right" },
+        { t: wt("Upstash:") - 0.1, action: "present", side: "right" },
+        { t: wt("sebelum") - 0.1, action: "explain", side: "left" },
+        { t: wt("dokumentasi") - 0.1, action: "point", side: "right" },
+        { t: wt("versi") - 0.12, action: "emphasize", side: "left" },
+        { t: wt("pakai.") - 0.1, action: "explain", side: "right" },
+        { t: wt("Dua,") - 0.1, action: "reveal" },
+        { t: wt("Supabase") - 0.12, action: "emphasize", side: "right" },
+        { t: wt("tabel") - 0.1, action: "point", side: "right" },
+        { t: wt("database,") - 0.1, action: "explain", side: "left" },
+        { t: wt("perubahan") - 0.12, action: "emphasize", side: "right" },
+        { t: wt("migration.") - 0.1, action: "present", side: "left" },
+        { t: wt("Tiga,") - 0.1, action: "reveal" },
+        { t: wt("DevTools") - 0.12, action: "emphasize", side: "right" },
+        { t: wt("Google:") - 0.1, action: "present", side: "right" },
+        { t: wt("buka") - 0.1, action: "point", side: "right" },
+        { t: wt("pembeli,") - 0.12, action: "emphasize", side: "left" },
+        { t: wt("console") - 0.1, action: "explain", side: "right" },
+        { t: wt("network.") - 0.1, action: "point", side: "right" },
+        { t: wt("Empat,") - 0.1, action: "reveal" },
+        { t: wt("Vercel:") - 0.12, action: "emphasize", side: "right" },
+        { t: wt("deploy", s6) - 0.1, action: "point", side: "right" },
+        { t: wt("preview") - 0.1, action: "explain", side: "left" },
+        { t: wt("cek,") - 0.1, action: "present", side: "right" },
+        { t: wt("production", s6) - 0.1, action: "compare" },
+        { t: wt("oke.") - 0.12, action: "emphasize", side: "right" },
+        { t: wt("Hati-hati,") - 0.12, action: "emphasize", side: "left" },
+        { t: wt("akses") - 0.1, action: "explain", side: "right" },
+        { t: wt("production.") - 0.12, action: "emphasize", side: "right" },
+        { t: wt("Latihan") - 0.1, action: "present", side: "left" },
+        { t: wt("tes,") - 0.1, action: "point", side: "right" },
+        { t: wt("baca") - 0.1, action: "explain", side: "left" },
+        { t: wt("perintah", s7) - 0.12, action: "emphasize", side: "right" },
+        { t: wt("izinkan.") - 0.1, action: "compare" },
         { t: wt("Komen") - 0.1, action: "cta", side: "right" },
         { t: wt("DM.") - 0.2, action: "point", side: "left" },
         { t: D - 0.6, action: "idle" },

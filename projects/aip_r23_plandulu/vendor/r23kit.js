@@ -81,15 +81,15 @@
     background-image:linear-gradient(rgba(140,225,255,.18) 1.5px,transparent 1.5px),linear-gradient(90deg,rgba(140,225,255,.18) 1.5px,transparent 1.5px);background-size:22px 22px,22px 22px}
   .k-doc .st svg{position:absolute;left:22px;top:17px;width:32px;height:32px;color:#bff0ff}
   .k-doc .st b{position:absolute;left:66px;top:0;font:700 25px/66px Poppins;letter-spacing:3px;color:#ffffff;white-space:nowrap}
-  .k-doc .st span{position:absolute;left:218px;top:0;font:400 21px/66px Poppins;color:#9fdcf2;white-space:nowrap}
+  .k-doc .st span{position:absolute;left:236px;top:0;font:400 21px/66px Poppins;color:#9fdcf2;white-space:nowrap}
   .k-doc .st i{position:absolute;right:18px;top:16px;height:34px;padding:0 13px;border-radius:17px;font:700 15px/34px Poppins;font-style:normal;letter-spacing:1.5px;color:#0b1440;background:#bff0ff;white-space:nowrap}
   .k-doc .rw{position:absolute;left:18px;width:864px;height:80px;border-radius:18px}
   .k-doc .rw .hl{position:absolute;inset:0;border-radius:18px;background:#e6f8ff;box-shadow:inset 0 0 0 2px #8fe3fb;opacity:0}
   .k-doc .rw .hl.am{background:#fff4e0;box-shadow:inset 0 0 0 2px #ffc761}
   .k-doc .rw .nb{position:absolute;left:12px;top:18px;width:44px;height:44px;border-radius:13px;background:#0e3478;color:#bff0ff;font:700 22px/44px Poppins;text-align:center}
   .k-doc .rw .nb svg{position:absolute;left:10px;top:10px;width:24px;height:24px}
-  .k-doc .rw .lb{position:absolute;left:72px;top:0;font:700 22px/80px Poppins;color:#294b77;white-space:nowrap}
-  .k-doc .rw .vl{position:absolute;left:278px;top:0;font:400 26px/80px Poppins;color:#0a0d2c;white-space:nowrap}
+  .k-doc .rw .lb{position:absolute;left:72px;top:0;font:700 23px/80px Poppins;color:#294b77;white-space:nowrap}
+  .k-doc .rw .vl{position:absolute;left:282px;top:0;font:400 28px/80px Poppins;color:#0a0d2c;white-space:nowrap}
   .k-doc .rw .vl b{font-weight:700}
   .k-doc .rw .ok{position:absolute;right:14px;top:16px;width:48px;height:48px;border-radius:24px;background:#2da44e;color:#fff;box-shadow:0 0 0 5px rgba(45,164,78,.18)}
   .k-doc .rw .ok svg{position:absolute;left:11px;top:11px;width:26px;height:26px}

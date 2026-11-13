@@ -15,10 +15,11 @@
   </div>
   <script>
     (function () {
-      // AI PRENEUR ROBOT = the CO-HOST / operator (screen right): flies in on "tapi" in the hook, thinks on "langganan?", cheers the
-      // FreeLLMAPI box, TYPES on its holo keyboard whenever a request is sent or something is set up (ngerti, perintah, pasang, key,
-      // setup), scans the providers, shakes its head on "bukan Claude" / "beda" / "jangan", gets a small shock when a quota runs out
-      // ("habis") and when limits change, cheers the CTA and waves at the end. Pure function of global time (hf-seek, __T0).
+      // AI PRENEUR ROBOT = the CO-HOST / operator (screen right): flies in on "baru" in the hook, thinks on "setengah", TYPES on its
+      // holo keyboard whenever Claude Code is asked to do something (install the tools, the docs request, the table, the test
+      // buyer's form), scans the docs / migrations / DevTools, cheers each tool name, gets a small shock at the failed order and at
+      // "Hati-hati" / "production", shakes its head on "nyentuh" and on the refused DELETE, cheers the CTA and waves at the end.
+      // Pure function of global time (hf-seek, __T0). Word lookups THROW on a missing word (no silent misrouting after a re-take).
       const VW = window.VO_WORDS, SC = window.VO_SCENES, D = window.TOTAL, M3 = window.Mascot3D;
       const one = (x) => Math.max(0, Math.min(1, x));
       const sm = (u) => { u = one(u); return u * u * (3 - 2 * u); };
@@ -26,10 +27,10 @@
       const L = (a, b, u) => a + (b - a) * u;
       const vn = M3.vnoise;
       const S = (id) => SC.find((s) => s.id === id);
-      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : -99; };
+      const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); if (!w) throw new Error("robot: word not found " + txt); return w[1]; };
       const HEAD_FIX = [-0.0775, -0.227, -0.1287];
       const STAND = { fx: 832, fy: 1668, h: 330, ry: -0.38 };
-      const T_IN = wt("tapi") - 0.2;                                 // flies in on "tapi" (the paywall beat)
+      const T_IN = wt("baru") - 0.25;                                // flies in on "baru" (the half-road beat)
       function frame(t) {
         if (t < T_IN) return null;
         const u = io3((t - T_IN) / 0.75), arc = Math.sin(Math.PI * u) * 160;
@@ -41,41 +42,41 @@
       // ---------------------------------------------------------------- gestures
       const G = [];
       const add = (t, k, d = 0.9, x) => { if (t > 0) G.push(Object.assign({ t, k, d }, x || {})); };
-      add(wt("langganan?") - 0.05, "think", 0.75);
-      add(wt("Ada") - 0.05, "nod", 0.5);
-      add(wt("tengahnya:") - 0.05, "point", 0.6, { up: 1 });
-      add(wt("FreeLLMAPI,") + 0.05, "cheer", 0.7);
-      add(wt("server") - 0.05, "scan", 0.7);
-      add(wt("gratis", S("s02").start) - 0.05, "happy", 0.6);
-      add(wt("GitHub.") - 0.05, "nod", 0.45);
-      add(wt("laptopmu,") - 0.1, "point", 0.6);
-      add(wt("ngerti") - 0.1, "type", wt("Claude.") - wt("ngerti") + 0.1);
-      add(wt("Claude.") + 0.15, "nod", 0.4);
-      add(wt("Perintah") - 0.1, "type", 0.8);
-      add(wt("dioper") - 0.05, "point", 0.6, { up: 1 });
-      add(wt("Google,") - 0.1, "scan", wt("lainnya.") - wt("Google,"));
-      add(wt("lainnya.") + 0.05, "happy", 0.6);
-      add(wt("aplikasinya") - 0.05, "present", 0.8, { side: "L" });
-      add(wt("otaknya") - 0.05, "think", 0.5);
-      add(wt("bukan") - 0.05, "no", 0.8);
-      add(wt("habis,") - 0.05, "shock", 0.6);
-      add(wt("otomatis") - 0.05, "nod", 0.5);
-      add(wt("pindah") - 0.05, "point", 0.5);
-      add(wt("lain.") - 0.05, "cheer", 0.6);
-      add(wt("Pasang") - 0.05, "type", wt("isi") - wt("Pasang"));
-      add(wt("key") - 0.1, "type", wt("layanan,") - wt("key") + 0.3);
-      add(wt("satu", S("s07").start) - 0.05, "type", wt("setup.") - wt("satu", S("s07").start));
-      add(wt("setup.") + 0.02, "cheer", 0.55);
-      add(wt("Jujur") - 0.05, "nod", 0.5);
-      add(wt("beda") - 0.05, "no", 0.7);
-      add(wt("limit") - 0.05, "scan", 0.7);
-      add(wt("berubah.") - 0.05, "shock", 0.5);
-      add(wt("dikirim") - 0.05, "point", 0.7);
-      add(wt("aturannya") - 0.15, "scan", 0.7);
-      add(wt("jangan") - 0.05, "no", 0.8);
-      add(wt("belajar", S("s10").start) - 0.05, "happy", 0.7);
-      add(wt("bukan", S("s10").start) - 0.05, "no", 0.6);
-      add(wt("klien.") - 0.05, "nod", 0.5);
+      const s2 = S("s02").start, s3 = S("s03").start, s4 = S("s04").start, s5 = S("s05").start, s6 = S("s06").start, s7 = S("s07").start, s8 = S("s08").start;
+      add(wt("setengah") - 0.05, "think", 0.6);
+      add(wt("jalan.") - 0.05, "nod", 0.5);
+      add(wt("Biar") - 0.05, "point", 0.6);
+      add(wt("online,") - 0.05, "cheer", 0.6);
+      add(wt("pasang") - 0.08, "type", wt("ini.") - wt("pasang") + 0.2);
+      add(wt("Context7") - 0.05, "happy", 0.6);
+      add(wt("Upstash:") - 0.05, "nod", 0.5);
+      add(wt("sebelum", s3) - 0.4, "type", 1.1);
+      add(wt("ngecek", s3) - 0.05, "scan", wt("resmi") - wt("ngecek", s3) + 0.2);
+      add(wt("versi") - 0.05, "point", 0.6, { up: 1 });
+      add(wt("pakai.") - 0.05, "nod", 0.5);
+      add(wt("Supabase") - 0.05, "happy", 0.6);
+      add(wt("MCP:") - 0.05, "point", 0.7, { up: 1 });
+      add(wt("tabel") - 0.1, "type", wt("database,") - wt("tabel") + 0.3);
+      add(wt("perubahan") - 0.05, "scan", 0.7);
+      add(wt("migration.") - 0.05, "cheer", 0.6);
+      add(wt("DevTools") - 0.05, "happy", 0.6);
+      add(wt("Google:") - 0.05, "nod", 0.5);
+      add(wt("buka") - 0.05, "point", 0.6);
+      add(wt("nyobain") - 0.1, "type", wt("pembeli,") - wt("nyobain") + 0.1);
+      add(wt("pembeli,") + 0.25, "shock", 0.5);
+      add(wt("console") - 0.15, "scan", wt("network.") - wt("console") + 0.5);
+      add(wt("Vercel:") - 0.05, "cheer", 0.6);
+      add(wt("deploy", s6) - 0.05, "point", 0.6);
+      add(wt("preview") - 0.05, "happy", 0.5);
+      add(wt("cek,") - 0.05, "nod", 0.5);
+      add(wt("production", s6) - 0.05, "think", 0.6);
+      add(wt("oke.") - 0.08, "cheer", 0.6);
+      add(wt("Hati-hati,") - 0.05, "shock", 0.6);
+      add(wt("nyentuh") - 0.05, "no", 0.7);
+      add(wt("Latihan") - 0.05, "nod", 0.5);
+      add(wt("tes,") - 0.05, "happy", 0.6);
+      add(wt("baca") - 0.1, "scan", 0.8);
+      add(wt("izinkan.") - 0.05, "no", 0.7);
       add(wt("Komen") + 0.05, "cheer", 0.8); add(wt("DM.") - 0.1, "point", 0.7, { up: 1 }); add(D - 1.1, "wave", 1.0);
       const envG = (t, g) => sm((t - g.t + 0.16) / 0.2) * (1 - sm((t - (g.t + g.d)) / 0.26));
       const BL = []; { let x = T_IN + 1.2, h = 13; while (x < D) { BL.push(x); h = (h * 9301 + 49297) % 233280; x += 2.1 + (h / 233280) * 2.3; } }

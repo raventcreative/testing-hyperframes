@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>Cover Reels — Website 3D dari 1 prompt: bedah promptnya</title>
+<script src="../vendor/gsap/dist/gsap.min.js"></script>
+<script src="../vendor/mascot3d.js"></script>
+<script src="../vendor/robot3d.js"></script>
+<script src="../vendor/r25icons.js"></script>
+<script src="../vendor/r25kit.js"></script>
+<!-- IG Reels cover 1080x1920 on the client's navy background (R25 SITUS): chip "WEBSITE 3D · BEDAH PROMPT", hook "Bedah prompt /
+     WEBSITE 3D / 5 bagian, tulis sendiri", the reel's prompt card cut into five labelled rows (cyan cut line + scissors) next to the
+     phone with the example 3D page (amber bottle in warm light, CONTOH), the mascot (host) pointing at it at bottom-left and the robot
+     typing at bottom-right. No third-party logos. Poppins 700/400, white + #01ccf7. Everything that matters sits inside the 4:5
+     profile-grid crop (y 285-1635).
+     Render: PORT=8955 node thumbnail/render_cover.cjs thumbnail/COVER_SITUS_1080x1920.png   (static server on :8955 at the project root) -->
+<style>
+  @font-face { font-family: Poppins; src: url(../assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+  @font-face { font-family: Poppins; src: url(../assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0a1033; font-family: Poppins, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #c { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  .plate { position: absolute; inset: 0; background: url(../assets/brand/bg_1080x1920.png) center / 1080px 1920px no-repeat; }
+  .glow { position: absolute; border-radius: 50%; mix-blend-mode: screen; }
+  #g1 { left: 40px; top: 330px; width: 1000px; height: 520px; background: radial-gradient(ellipse, rgba(48,93,143,.40), rgba(48,93,143,0) 66%); }
+  #g2 { left: -60px; top: 860px; width: 1200px; height: 600px; background: radial-gradient(ellipse, rgba(1,204,247,.22), rgba(1,204,247,0) 62%); }
+  .grain { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; background: url(../assets/brand/grain_256.png); opacity: .06; z-index: 40; }
+  .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; z-index: 30; }
+  #logo { position: absolute; left: 432px; top: 318px; width: 216px; height: auto; filter: drop-shadow(0 2px 8px rgba(4,8,30,.55)); z-index: 30; }
+  #chip { top: 366px; display: flex; justify-content: center; }
+  #chip > span { height: 60px; padding: 0 28px 0 7px; border-radius: 30px; display: flex; align-items: center; gap: 15px; background: rgba(1,204,247,.12);
+    box-shadow: inset 0 0 0 1.5px rgba(1,204,247,.5); font: 700 23px/1 Poppins; letter-spacing: 3px; color: #6adfff; }
+  #chip b { height: 46px; padding: 0 18px 0 21px; border-radius: 23px; display: flex; align-items: center; background: #01ccf7; color: #0b1440; letter-spacing: 2.5px;
+    box-shadow: 0 0 20px rgba(1,204,247,.5), inset 0 1px 0 rgba(255,255,255,.4); margin-right: 3px; }
+  #l1 { top: 456px; font: 700 76px/1 Poppins; letter-spacing: -2px; color: #fff; text-shadow: 0 6px 22px rgba(4,8,30,.5); }
+  #h1 { top: 548px; font: 700 134px/1 Poppins; letter-spacing: -4px; color: #fff; }
+  #h1 span { display: inline-block; background: linear-gradient(170deg, #b8f1ff 4%, #01ccf7 46%, #0aa7d6 96%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 28px rgba(1,204,247,.5)); padding: 0 8px; }
+  #l3 { top: 712px; font: 400 44px/1 Poppins; letter-spacing: -1px; color: #e3edfa; }
+  #l3 b { font-weight: 700; color: #fff; }
+  #grp { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; z-index: 15; transform-origin: 540px 330px; }
+  #cut { position: absolute; left: 50px; width: 620px; height: 5px; border-radius: 3px; background: #9cecff; box-shadow: 0 0 0 1.5px #01ccf7, 0 0 22px 6px rgba(1,204,247,.75); }
+  #sc { position: absolute; width: 56px; height: 56px; border-radius: 28px; background: #01ccf7; color: #0b1440; box-shadow: 0 0 20px rgba(1,204,247,.8); }
+  #sc svg { position: absolute; left: 13px; top: 13px; width: 30px; height: 30px; transform: rotate(-90deg); }
+  canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  #r { z-index: 21; } #m { z-index: 22; }
+  #kb { position: absolute; left: 0; top: 0; width: 300px; height: 100px; margin: -50px 0 0 -150px; opacity: .9; transform-origin: 50% 50%; z-index: 23; }
+  #kb .pl { position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(180deg, rgba(1,204,247,.30), rgba(1,204,247,.10));
+    box-shadow: 0 0 0 1.5px rgba(106,223,255,.7), 0 0 26px rgba(1,204,247,.55), inset 0 0 18px rgba(1,204,247,.25); }
+  #kb .ks { position: absolute; left: 16px; top: 13px; width: 268px; height: 74px; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(3, 1fr); gap: 4px; }
+  #kb .ks i { display: block; border-radius: 4px; background: rgba(160,235,255,.22); box-shadow: inset 0 0 0 1px rgba(160,235,255,.35); }
+  #kb .ks i.on { background: rgba(220,250,255,.95); box-shadow: 0 0 10px rgba(1,204,247,.95); }
+</style>
+</head>
+<body>
+<div id="c">
+  <div class="plate"></div><div id="g1" class="glow"></div><div id="g2" class="glow"></div>
+  <div id="grp"></div>
+  <canvas id="r"></canvas>
+  <canvas id="m"></canvas>
+  <div id="kb"><div class="pl"></div><div class="ks" id="kbk"></div></div>
+  <img id="logo" src="../assets/brand/logo_white_trim.png" alt="AI PRENEUR">
+  <div id="chip" class="ctr"><span><b>WEBSITE 3D</b>BEDAH PROMPT</span></div>
+  <div id="l1" class="ctr"><span>Bedah 1 prompt</span></div>
+  <div id="h1" class="ctr"><span>WEBSITE 3D</span></div>
+  <div id="l3" class="ctr"><b>5 bagian</b> &middot; tulis sendiri, gratis</div>
+  <div class="grain"></div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search), P = (k, d) => parseFloat(q.get(k) || d);
+  const K = window.R25K, M3 = window.Mascot3D;
+  // the reel's own prompt card (five labelled rows, done + preview, one cut line) + phone with the finished example page (shifted down)
+  const g = document.getElementById("grp");
+  g.innerHTML = K.cardHTML("c") + K.phoneHTML("c") + `<div id="cut"></div><div id="sc">${K.svg("scissors")}</div>`;
+  const S = { I: (el, v) => gsap.set(el, v), $: (x) => document.getElementById(x) };
+  const DY = P("dy", "540");
+  K.phoneSet(S, "c", "full");
+  gsap.set("#c-ph", { y: K.PHONE.y + DY });
+  gsap.set("#c-card", { x: K.CARD.x, y: K.CARD.y + DY });
+  const tops = K.rowTops(-1);
+  K.ROWS.forEach((_, i) => {
+    const r = (x) => document.getElementById(`c-r${i}${x}`);
+    gsap.set(r(""), { top: tops[i], height: K.RH }); gsap.set(r("-para"), { opacity: 0 }); gsap.set(r("-hi"), { opacity: i === 2 ? 1 : 0 });
+    gsap.set(r("-on"), { opacity: 1 }); gsap.set(r("-ok"), { opacity: 0 }); gsap.set(r("-pv"), { opacity: 1 });
+  });
+  gsap.set("#c-ft", { opacity: 1 });
+  const cy = K.CARD.y + DY + K.ROW0 + 2 * (K.RH + K.RG) - 5;   // a cut line between part 2 and part 3
+  gsap.set("#cut", { top: cy }); gsap.set("#sc", { left: 34, top: cy - 26 });
+  gsap.set("#grp", { scale: P("gs", "0.86") });
+  // tag on the phone
+  gsap.set("#c-tg4", { scale: 1, opacity: 1 });
+  document.getElementById("kbk").innerHTML = Array.from({ length: 30 }, (_, i) => `<i class="${[3, 7, 12, 16, 21, 25, 28].includes(i) ? "on" : ""}"></i>`).join("");
+  async function buildRobot() {
+    const cv = document.getElementById("r"); cv.width = 1080; cv.height = 1920;
+    const rb = await window.Robot3D.Robot.create(cv, { url: "../assets/robot3d/robot_aipreneur.glb", width: 1080, height: 1920, envIntensity: 0.55 });
+    const HF = [-0.0775, -0.227, -0.1287];
+    const fx = P("rx", "860"), fy = P("ry", "1720"), hh = P("rh", "320");
+    rb.setView({ fx, fy, h: hh, pitch: 5 });
+    rb.setState({ root: { x: 0, y: 0, z: 0, rx: 0.05, ry: P("bry", "-0.12"), rz: 0, s: 1 },
+      bones: { body: [0, 0, 0], head: [HF[0] + 0.1, HF[1] - 0.16, HF[2]], hand_L: [0.55, 0, 0], hand_R: [0.6, 0, 0] },
+      offs: { hand_L: [-0.09, -0.06, 0.15], hand_R: [0.09, -0.07, 0.15], head: [0, 0, 0] },
+      face: { blink: 0, gaze: [-0.24, 0.12], happy: 0.8, squint: 0, talk: 0, bars: [0, 0, 0, 0, 0], glow: 1 }, ring: 1.4, shadow: false });
+    rb.render();
+    const kb = document.getElementById("kb"), x = fx - 0.06 * hh, y = fy - 0.1 * hh;
+    kb.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) perspective(600px) rotateX(52deg) scale(1)`;
+  }
+  async function buildMascot() {
+    const src = await (await fetch("../compositions/mascot.html")).text();
+    const FACE = JSON.parse(src.match(/const FACE = (\{.*?\});\n/s)[1]);
+    const DECALS = JSON.parse(src.match(/const DECALS = (\[.*?\]);\n/s)[1].replace(/"assets\//g, '"../assets/'));
+    const cv = document.getElementById("m"); cv.width = 1080; cv.height = 1920;
+    const m = await M3.Mascot.create(cv, { url: "../assets/mascot3d/mascot_biz_rigged.glb", face: FACE, decals: DECALS, width: 1080, height: 1920, envIntensity: 0.6 });
+    for (const o of m.scene.children) if (o.isDirectionalLight && o.position.z < 0) { o.intensity = 1.9; o.color.setRGB(0.5, 0.86, 1.0); o.position.set(1.6, 1.5, -1.4); }
+    if (m.shadow) m.shadow.visible = false;
+    const DIR = M3.direct([["lihat", 0.3, 3.2, 1]], 6, { intents: [{ t: 0.3, action: q.get("act") || "point", side: q.get("side") || "right" }], seed: 9, quiet: 0, look: 0 });
+    const PERF = M3.buildPerformance(DIR.tracks, 6.05, { smooth: 1 });
+    m.setView({ fx: P("mx", "290"), fy: P("my", "1935"), h: P("mh", "580"), yaw: 0, pitch: 4 });
+    const pf = PERF(P("pt", "0.9")), B = Object.assign({}, pf.bones);
+    m.setState({ root: { x: pf.root.x, y: pf.root.y, ry: P("mry", "0.22"), rz: 0, rx: 0, s: 1 }, bones: B,
+      face: { blink: [0, 0], gaze: [0, 0], mouthMix: 1, mouth: [0.03, 0.012, 0.012, 0.5] } });
+    m.render();
+  }
+  window.COVER_READY = Promise.all([document.fonts.ready, q.get("nor") ? 0 : buildRobot(), q.get("nom") ? 0 : buildMascot()]);
+</script>
+</body>
+</html>

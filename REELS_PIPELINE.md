@@ -49,8 +49,9 @@ as `<div id="rmove"><!--ROBOT_HTML--></div>` (CSS `transform: translateY(700px)`
   `FX.dip(pose, t)` (sinks out during a wipe, pops up somewhere else), `FX.hop`, `FX.shiver`; poses home / center /
   right / close (CTA close-up, head ≥ y 1420 so captions stay clear). Expressions `FX.face("happy"|"x"|"wide"|"excited"|"flat", t, dur)`
   on story beats (bad news = x/wide, AI works = excited/happy). Gestures `FX.point/wave/beat` are side-aware.
-- **Scenes alternate light/dark inside one reel** under full-frame wipes: `FX.stripes`, `FX.blocks`, `FX.sweep`
-  (cyan leading edge). The reel's main theme (reels_log.json) opens the hook; switch every ~5–8 s.
+- **ONE background per reel — never mix white and blue** (client rule). Pass `base: "light"` (white reel) or
+  `base: "dark"` (blue reel) to REEL_FX; wipes `FX.stripes`, `FX.blocks`, `FX.sweep` then use only shades of that
+  theme (+ a thin accent: #294b77 on white, #01ccf7 on blue). Use a wipe between scenes every ~5–8 s.
 - **Kinetic text:** `FX.drop(el, t)` (letters fall in, add `data-letter="gt"` for gradient letters), `FX.sticker`
   (small rotated tags around the hook cards), `FX.marker` (cyan highlight sweep).
 - Reference build: projects/reel-08-admin-wa-ramah (v3).

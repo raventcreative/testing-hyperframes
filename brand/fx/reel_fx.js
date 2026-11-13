@@ -9,7 +9,11 @@
    #main[data-sc] caption styles. All tweens are deterministic (seek-safe). */
 window.REEL_FX = function (c) {
   const { tl, ft, st, $, $$, rob, lh, rh, headIn, RG } = c;
-  const NAVY = c.navy || "#132650", LIGHT = c.light || "#f4f7fd", CYAN = "#01ccf7";
+  // ONE background theme per reel (client rule): c.base = "light" (white reels) or "dark" (blue reels).
+  // Wipes only use shades of that theme; theme() never mixes backgrounds.
+  const BASE = c.base || "light";
+  const PAL = BASE === "dark" ? { a: "#132650", b: "#1f3f7a", acc: "#01ccf7" } : { a: "#ffffff", b: "#e4ecf8", acc: "#c3d4ee" };
+  const NAVY = PAL.a, LIGHT = PAL.b, CYAN = PAL.acc;
   const rm = $("#rmove");
   const ns = "http://www.w3.org/2000/svg";
 
@@ -83,11 +87,11 @@ window.REEL_FX = function (c) {
   /* ---------------- scene themes + full-frame wipes ---------------- */
   const scene = $("#scene");
   const fx = document.createElement("div"); fx.id = "fx"; Object.assign(fx.style, { position: "absolute", inset: "0", zIndex: 45, pointerEvents: "none", overflow: "hidden" }); scene.appendChild(fx);
-  const theme = (name, at) => { const d = name === "dark";
+  const theme = (name, at) => { name = BASE; const d = name === "dark";
     st("#bgD", { opacity: d ? 1 : 0 }, at); st("#dots", { opacity: d ? 0.12 : 0.6 }, at);
     st("#logoD", { opacity: d ? 0 : 1 }, at); st("#logoL", { opacity: d ? 1 : 0 }, at);
     st("#main", { attr: { "data-sc": name } }, at); };
-  const colOf = (name) => (name === "dark" ? NAVY : LIGHT);
+  const colOf = () => PAL.a;
   const mk = (css) => { const el = document.createElement("div"); Object.assign(el.style, { position: "absolute" }, css); fx.appendChild(el); return el; };
   // vertical bars slide in from alternate ends, scene switches under them, bars continue out
   const stripes = (at, to, onMid) => { const n = 7, w = 1080 / n, bars = [];
@@ -101,7 +105,7 @@ window.REEL_FX = function (c) {
   const blocks = (at, to, onMid) => { const cols = 6, rows = 10, bw = 180, bh = 192, list = [];
     let seed = 7; const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
     for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) { const k = rnd(); const acc = k > 0.86;
-      list.push({ el: mk({ left: q * bw + "px", top: r * bh + "px", width: bw + 1 + "px", height: bh + 1 + "px", background: acc ? (to === "dark" ? CYAN : "#294b77") : colOf(to), opacity: 0 }), o: rnd() }); }
+      list.push({ el: mk({ left: q * bw + "px", top: r * bh + "px", width: bw + 1 + "px", height: bh + 1 + "px", background: acc ? PAL.b : colOf(to), opacity: 0 }), o: rnd() }); }
     list.forEach(({ el, o }) => { st(el, { opacity: 0 }, 0);
       ft(el, { scale: 0, opacity: 1 }, { scale: 1, duration: 0.16, ease: "power2.out" }, at + o * 0.32);
       ft(el, { scale: 1 }, { scale: 0, duration: 0.16, ease: "power2.in" }, at + 0.6 + o * 0.32); st(el, { opacity: 0 }, at + 0.6 + o * 0.32 + 0.17); });

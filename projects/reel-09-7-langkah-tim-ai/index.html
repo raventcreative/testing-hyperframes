@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — Agent Builder (7 langkah tim AI)</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/robot_rig2.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --c: #01ccf7; --line: rgba(255,255,255,0.12); --card: rgba(255,255,255,0.05); --mute: rgba(255,255,255,0.62); --ok: #2fe39a; --bad: #ff6b6b; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0b1a45; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: #fff; -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #0b1a45; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      b { font-weight: 700; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #0b1a45; }
+      #grid { position: absolute; inset: 0; opacity: 0.4; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 54px 54px; }
+      #glow { position: absolute; left: 380px; top: 200px; width: 1100px; height: 1100px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,0.13) 0%, rgba(1,204,247,0) 62%); }
+
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(7, 15, 42, 0.88);
+        border: 1.5px solid rgba(255,255,255,0.14); box-shadow: 0 40px 100px rgba(0,0,0,0.45); }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 22px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.03); }
+      #tbar .dots { display: flex; gap: 8px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.22); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--c); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 20px; padding: 2px 10px; }
+      #status { margin-left: auto; position: relative; width: 132px; height: 34px; }
+      #status span { position: absolute; inset: 0; border-radius: 17px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700; }
+      #status .dr { border: 1.5px solid rgba(255,255,255,0.25); color: var(--mute); }
+      #status .lv { background: rgba(47,227,154,0.16); border: 1.5px solid rgba(47,227,154,0.6); color: var(--ok); opacity: 0; }
+      #status i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; display: block; }
+
+      /* vertical step rail */
+      #rail { position: absolute; left: 0; top: 60px; width: 236px; bottom: 0; border-right: 1px solid var(--line); background: rgba(255,255,255,0.025); }
+      #railHd { position: absolute; left: 22px; right: 18px; top: 22px; display: flex; align-items: baseline; justify-content: space-between; }
+      #railHd .lb { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); } #railHd b { font-size: 18px; }
+      #rTrack, #rFill { position: absolute; left: 49px; top: 120px; width: 3px; height: 708px; border-radius: 2px; }
+      #rTrack { background: rgba(255,255,255,0.1); } #rFill { background: var(--c); transform-origin: 50% 0; transform: scaleY(0); }
+      .ri { position: absolute; left: 14px; width: 208px; height: 104px; border-radius: 16px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 1.5px solid rgba(255,255,255,0); }
+      .ri .nb { width: 44px; height: 44px; border-radius: 13px; background: #102257; border: 1.5px solid rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; color: rgba(255,255,255,0.75); position: relative; flex: none; }
+      .ri .nb .ck { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; color: #04122f; } .ri .nb .ck .ic { width: 22px; height: 22px; }
+      .ri b { display: block; font-size: 16.5px; line-height: 1.2; color: rgba(255,255,255,0.72); } .ri em { display: block; font-style: normal; font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+      /* stage */
+      #stage { position: absolute; left: 264px; top: 88px; width: 628px; height: 834px; }
+      .scr { position: absolute; inset: 0; opacity: 0; }
+      .eyebrow { font-size: 14px; font-weight: 700; letter-spacing: 3px; color: var(--c); }
+      .h2 { font-size: 34px; font-weight: 700; line-height: 1.15; margin-top: 4px; }
+      .card { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); }
+      .glass { background: linear-gradient(160deg, rgba(1,204,247,0.10), rgba(255,255,255,0.03) 55%); border: 1.5px solid rgba(1,204,247,0.28); border-radius: 20px; }
+
+      /* S0 hook */
+      .claim { position: absolute; width: 520px; height: 96px; display: flex; align-items: center; gap: 14px; padding: 0 18px; opacity: 0; border-radius: 22px; background: #13245c; border: 1.5px solid rgba(255,255,255,0.14); }
+      .claim .av { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.8); flex: none; }
+      .claim .av .ic { width: 28px; height: 28px; } .claim b { display: block; font-size: 20px; } .claim em { display: block; font-style: normal; font-size: 14px; color: var(--mute); }
+      #howCard { position: absolute; left: 0; top: 420px; width: 628px; height: 300px; border: 2.5px dashed rgba(1,204,247,0.55); border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      #howCard .ic { width: 54px; height: 54px; color: var(--c); } #howCard b { font-size: 30px; margin-top: 14px; } #howCard em { font-style: normal; font-size: 18px; color: var(--mute); margin-top: 4px; }
+      #sIn .team { position: absolute; left: 0; top: 120px; width: 628px; height: 420px; padding: 28px; }
+      .slot { position: absolute; top: 120px; width: 170px; height: 200px; border-radius: 20px; border: 2px dashed rgba(255,255,255,0.22); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: rgba(255,255,255,0.45); font-size: 15px; }
+      .slot .ic { width: 44px; height: 44px; }
+      #ring { position: absolute; left: 0; top: 580px; width: 628px; height: 140px; display: flex; align-items: center; gap: 22px; padding: 0 28px; }
+      #ring .num { font-size: 56px; font-weight: 700; color: var(--c); line-height: 1; } #ring b { display: block; font-size: 22px; } #ring em { display: block; font-style: normal; font-size: 15px; color: var(--mute); }
+
+      /* S1 workflow */
+      #seg { position: absolute; right: 0; top: 2px; display: flex; gap: 4px; padding: 5px; border-radius: 14px; background: rgba(255,255,255,0.06); }
+      #seg div { position: relative; z-index: 1; height: 40px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--mute); }
+      #seg div .ic { width: 17px; height: 17px; }
+      #segPill { position: absolute; z-index: 0; top: 5px; height: 40px; border-radius: 10px; background: var(--c); }
+      #job { position: absolute; left: 114px; top: 230px; width: 400px; height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; }
+      #job .ic { width: 58px; height: 58px; color: rgba(255,255,255,0.8); } #job b { font-size: 30px; } #job em { font-style: normal; font-size: 16px; color: var(--mute); }
+      #job b { position: relative; display: inline-block; } #job s { position: absolute; left: -14px; right: -14px; top: 52%; height: 4px; background: var(--bad); border-radius: 2px; transform-origin: 0 50%; transform: scaleX(0); }
+      #flowT { position: absolute; left: 0; top: 190px; font-size: 22px; font-weight: 700; opacity: 0; } #flowT span { color: var(--c); }
+      .fn { position: absolute; top: 250px; width: 170px; height: 196px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; opacity: 0; }
+      .fn .bx { width: 68px; height: 68px; border-radius: 20px; background: rgba(1,204,247,0.15); display: flex; align-items: center; justify-content: center; color: var(--c); } .fn .bx .ic { width: 36px; height: 36px; }
+      .fn b { font-size: 22px; } .fn em { font-style: normal; font-size: 14px; color: var(--mute); }
+      #flowSvg { position: absolute; left: 0; top: 0; width: 628px; height: 834px; overflow: visible; }
+      #outCard { position: absolute; left: 0; top: 500px; width: 628px; height: 110px; display: flex; align-items: center; gap: 16px; padding: 0 24px; opacity: 0; }
+      #outCard .ic { width: 34px; height: 34px; color: var(--c); } #outCard b { display: block; font-size: 21px; } #outCard em { display: block; font-style: normal; font-size: 15px; color: var(--mute); }
+
+      /* S2 instructions */
+      #form { position: absolute; left: 0; top: 104px; width: 628px; height: 430px; padding: 24px; }
+      .fld { margin-bottom: 20px; opacity: 0; } .fld .lbl { margin-bottom: 8px; }
+      .fld .box { height: 72px; border-radius: 14px; background: rgba(0,0,0,0.25); border: 1.5px solid rgba(255,255,255,0.16); display: flex; align-items: center; gap: 10px; padding: 0 18px; font-size: 19px; }
+      .fld .box .ic { width: 20px; height: 20px; color: var(--c); } .fld .caret { width: 2px; height: 26px; background: var(--c); display: inline-block; opacity: 0; }
+      #idc { position: absolute; left: 0; top: 560px; width: 628px; height: 200px; padding: 24px; display: flex; align-items: center; gap: 22px; opacity: 0; }
+      #idc .ph { width: 130px; height: 150px; border-radius: 18px; background: rgba(1,204,247,0.15); display: flex; align-items: center; justify-content: center; color: var(--c); flex: none; } #idc .ph .ic { width: 70px; height: 70px; }
+      #idc .t { font-size: 13px; letter-spacing: 2.5px; font-weight: 700; color: var(--c); } #idc b { display: block; font-size: 28px; margin-top: 4px; } #idc em { display: block; font-style: normal; font-size: 16px; color: var(--mute); }
+      #idc .on { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; height: 34px; padding: 0 14px; border-radius: 17px; background: rgba(47,227,154,0.15); color: var(--ok); font-size: 14px; font-weight: 700; }
+      #idc .on i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: block; }
+
+      /* S3 brain */
+      #brainSvg { position: absolute; left: 0; top: 0; width: 628px; height: 834px; overflow: visible; }
+      #brain { position: absolute; left: 224px; top: 380px; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,0.35), rgba(1,204,247,0.08) 70%); border: 2.5px solid var(--c);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; opacity: 0; }
+      #brain .ic { width: 60px; height: 60px; color: #fff; } #brain b { font-size: 16px; }
+      .src { position: absolute; width: 296px; height: 110px; display: flex; align-items: center; gap: 14px; padding: 0 18px; opacity: 0; }
+      .src .bx { width: 54px; height: 54px; border-radius: 15px; background: rgba(1,204,247,0.14); display: flex; align-items: center; justify-content: center; color: var(--c); flex: none; } .src .bx .ic { width: 28px; height: 28px; }
+      .src b { display: block; font-size: 19px; } .src em { display: block; font-style: normal; font-size: 14px; color: var(--mute); }
+      #ctxBar { position: absolute; left: 0; top: 730px; width: 628px; height: 84px; display: flex; align-items: center; gap: 14px; padding: 0 22px; opacity: 0; }
+      #ctxBar .ic { width: 28px; height: 28px; color: var(--c); } #ctxBar b { font-size: 19px; } #ctxBar em { margin-left: auto; font-style: normal; font-size: 26px; font-weight: 700; color: var(--c); }
+
+      /* S4 tools + cloud */
+      #tools { position: absolute; left: 0; top: 104px; width: 628px; height: 350px; padding: 16px 20px; }
+      .tr { display: flex; align-items: center; gap: 14px; height: 62px; border-bottom: 1px solid rgba(255,255,255,0.07); opacity: 0; }
+      .tr:last-child { border-bottom: 0; } .tr .ic { width: 24px; height: 24px; color: rgba(255,255,255,0.85); } .tr span.n { font-size: 18px; }
+      .tg { margin-left: auto; width: 58px; height: 32px; border-radius: 16px; background: rgba(255,255,255,0.15); position: relative; }
+      .tg i { position: absolute; left: 4px; top: 4px; width: 24px; height: 24px; border-radius: 50%; background: #fff; display: block; }
+      #cloud, #laptop { position: absolute; top: 474px; width: 304px; height: 300px; padding: 22px; text-align: center; opacity: 0; }
+      #cloud { left: 0; } #laptop { left: 324px; }
+      #cloud .big { width: 96px; height: 96px; margin: 8px auto 0; color: var(--c); } #cloud b, #laptop b { display: block; font-size: 21px; margin-top: 12px; }
+      #cloud em, #laptop em { display: block; font-style: normal; font-size: 15px; color: var(--mute); margin-top: 2px; }
+      #cloud .up { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; height: 36px; padding: 0 16px; border-radius: 18px; background: rgba(47,227,154,0.15); color: var(--ok); font-size: 16px; font-weight: 700; }
+      #cloud .up i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: block; }
+      #lap { position: relative; width: 170px; height: 120px; margin: 10px auto 0; }
+      #lapScr { position: absolute; left: 20px; bottom: 16px; width: 130px; height: 88px; border-radius: 8px 8px 2px 2px; background: #1b3a86; border: 3px solid rgba(255,255,255,0.75); transform-origin: 50% 100%; }
+      #lapScr::after { content: ""; position: absolute; inset: 10px; border-radius: 4px; background: linear-gradient(135deg, rgba(1,204,247,0.5), rgba(1,204,247,0.1)); }
+      #lapBase { position: absolute; left: 0; bottom: 4px; width: 170px; height: 14px; border-radius: 3px 3px 8px 8px; background: rgba(255,255,255,0.75); }
+      #uptime { position: absolute; left: 0; top: 794px; width: 628px; height: 40px; display: flex; align-items: center; gap: 12px; font-size: 16px; color: var(--mute); opacity: 0; }
+      #uptime b { color: var(--c); font-size: 20px; } #hbSvg { flex: 1; height: 36px; overflow: visible; }
+
+      /* S5 SOP */
+      #sop { position: absolute; left: 0; top: 104px; width: 628px; height: 300px; padding: 18px 22px; }
+      #sop .hd { display: flex; align-items: center; gap: 12px; } #sop .hd .ic { width: 26px; height: 26px; color: var(--c); } #sop .hd b { font-size: 20px; }
+      .sr { display: flex; align-items: center; gap: 14px; height: 50px; font-size: 17px; opacity: 0; }
+      .sr .k { width: 32px; height: 32px; border-radius: 10px; background: rgba(1,204,247,0.15); color: var(--c); font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+      #exRow { position: absolute; left: 0; top: 420px; width: 628px; display: flex; gap: 12px; }
+      .ex { flex: 1; height: 92px; border-radius: 16px; padding: 12px 14px; opacity: 0; }
+      .ex .lbl { font-size: 11px; } .ex b { display: block; font-size: 16px; margin-top: 6px; line-height: 1.25; }
+      #dd { position: absolute; left: 0; top: 530px; width: 628px; display: flex; gap: 14px; }
+      .ddc { flex: 1; height: 150px; padding: 14px 16px; opacity: 0; }
+      .ddc .t { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; letter-spacing: 1.5px; } .ddc .t .ic { width: 20px; height: 20px; }
+      .ddc .it { display: flex; align-items: center; gap: 8px; font-size: 15.5px; margin-top: 12px; } .ddc .it .ic { width: 18px; height: 18px; }
+      .ddc.ok .t, .ddc.ok .it .ic { color: var(--ok); } .ddc.no .t, .ddc.no .it .ic { color: var(--bad); }
+      #qa { position: absolute; left: 0; top: 700px; width: 628px; height: 124px; padding: 14px 20px; opacity: 0; }
+      #qa .row { display: flex; gap: 12px; margin-top: 12px; }
+      .q { flex: 1; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 15px; }
+      .q .bx { width: 24px; height: 24px; border-radius: 7px; border: 2px solid rgba(255,255,255,0.3); position: relative; flex: none; }
+      .q .bx i { position: absolute; inset: -2px; border-radius: 7px; background: var(--ok); transform: scale(0); display: flex; align-items: center; justify-content: center; color: #04122f; }
+      .q .bx i .ic { width: 16px; height: 16px; }
+
+      /* S6 bot team */
+      .bot { position: absolute; top: 104px; width: 180px; height: 220px; padding: 18px 12px; text-align: center; opacity: 0; }
+      .bot .av { width: 76px; height: 76px; margin: 0 auto; border-radius: 22px; background: rgba(1,204,247,0.15); display: flex; align-items: center; justify-content: center; color: var(--c); }
+      .bot .av .ic { width: 42px; height: 42px; } .bot b { display: block; font-size: 20px; margin-top: 12px; } .bot em { display: block; font-style: normal; font-size: 14px; color: var(--mute); }
+      .bot .stt { display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.25); color: var(--mute); }
+      #teamSvg { position: absolute; left: 0; top: 0; width: 628px; height: 834px; overflow: visible; }
+      #tok { position: absolute; left: 0; top: 0; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 13px; background: var(--c); color: #04122f; display: flex; align-items: center; justify-content: center; opacity: 0; box-shadow: 0 6px 20px rgba(1,204,247,0.45); }
+      #tok .ic { width: 24px; height: 24px; }
+      #fb { position: absolute; left: 0; top: 350px; width: 628px; height: 200px; padding: 20px 22px; opacity: 0; }
+      #fb .q2 { font-size: 18px; margin-top: 8px; } #fb .btns { display: flex; gap: 14px; margin-top: 18px; }
+      .fbb { flex: 1; height: 62px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 19px; font-weight: 700; }
+      .fbb .ic { width: 22px; height: 22px; } #fbGood { background: rgba(47,227,154,0.15); border: 1.5px solid rgba(47,227,154,0.6); color: var(--ok); }
+      #fbFix { background: rgba(255,107,107,0.10); border: 1.5px solid rgba(255,107,107,0.45); color: var(--bad); }
+      #score { position: absolute; left: 0; top: 570px; width: 628px; height: 250px; padding: 20px 22px; opacity: 0; }
+      #score .hd { display: flex; justify-content: space-between; align-items: flex-end; } #score .hd b { font-size: 20px; }
+      #score .v { text-align: right; } #score .v b { display: block; font-size: 44px; line-height: 1; color: var(--c); } #score .v em { font-style: normal; font-size: 12px; color: var(--mute); }
+      #bars { position: absolute; left: 22px; right: 22px; bottom: 22px; height: 118px; display: flex; align-items: flex-end; gap: 14px; }
+      #bars div { flex: 1; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, var(--c), rgba(1,204,247,0.3)); transform-origin: 50% 100%; transform: scaleY(0); position: relative; }
+      #bars div span { position: absolute; left: 0; right: 0; bottom: -2px; transform: translateY(100%); }
+
+      /* S7 chief of staff */
+      #chief { position: absolute; left: 179px; top: 116px; width: 270px; height: 200px; padding: 18px; text-align: center; opacity: 0; }
+      #chief .av { width: 84px; height: 84px; margin: 0 auto; border-radius: 24px; background: var(--c); color: #04122f; display: flex; align-items: center; justify-content: center; } #chief .av .ic { width: 46px; height: 46px; }
+      #chief b { display: block; font-size: 22px; margin-top: 12px; } #chief em { display: block; font-style: normal; font-size: 14px; color: var(--mute); }
+      .kid { position: absolute; top: 470px; width: 142px; height: 170px; padding: 14px 8px; text-align: center; opacity: 0; }
+      .kid .av { width: 60px; height: 60px; margin: 0 auto; border-radius: 18px; background: rgba(1,204,247,0.15); color: var(--c); display: flex; align-items: center; justify-content: center; } .kid .av .ic { width: 32px; height: 32px; }
+      .kid b { display: block; font-size: 17px; margin-top: 10px; } .kid .tk { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 10px; background: var(--c); color: #04122f; opacity: 0; }
+      #chiefSvg { position: absolute; left: 0; top: 0; width: 628px; height: 834px; overflow: visible; }
+      #feed { position: absolute; left: 0; top: 670px; width: 628px; height: 150px; padding: 16px 20px; opacity: 0; }
+      .fd { display: flex; align-items: center; gap: 10px; height: 38px; font-size: 15.5px; opacity: 0; } .fd .ic { width: 18px; height: 18px; color: var(--c); } .fd em { margin-left: auto; font-style: normal; font-size: 13px; color: var(--mute); }
+
+      /* cursor etc */
+      #cursor { position: absolute; left: 0; top: 0; width: 42px; height: 42px; margin: -7px 0 0 -7px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; border: 3px solid var(--c); background: rgba(1,204,247,0.18); opacity: 0; z-index: 29; }
+      #winDim { position: absolute; inset: 0; background: #030918; opacity: 0; }
+      #cta { position: absolute; left: 110px; width: 860px; top: 560px; padding: 56px 48px; text-align: center; border-radius: 30px; background: rgba(6, 15, 42, 0.96); border: 1.5px solid rgba(1,204,247,0.4); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: rgba(255,255,255,0.78); } #cta .name { font-size: 66px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; } #cta .sb b { color: var(--c); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--c); color: #04122f; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0;
+        font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; text-shadow: 0 4px 18px rgba(0,0,0,0.5); }
+      .cap .in { display: block; } .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; color: var(--c); }
+      #robot { position: absolute; left: 18px; top: 1408px; width: 600px; height: 582px; transform-origin: 50% 100%; opacity: 0; }
+      #robot .sway, #robot .bob, #robot .talk { position: absolute; inset: 0; }
+      #robot .sway { transform-origin: 50% 90%; }
+      #robot .talk { transform-origin: 50% 100%; }
+      #robot .part { position: absolute; }
+      #robot .part img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+      #robot .headIn { position: absolute; inset: 0; }
+      #robot .lid { position: absolute; display: block; border-radius: 50%; background: #030407; transform-origin: 50% 0%; transform: scaleY(0); }
+      #robot .glow { position: absolute; border-radius: 50%; background: radial-gradient(ellipse, rgba(1,204,247,0.6) 0%, rgba(1,204,247,0) 70%); }
+      #robot .chest { position: absolute; border-radius: 50%; mix-blend-mode: screen; opacity: 0;
+        background: radial-gradient(ellipse, rgba(80,200,255,0.9) 0%, rgba(1,140,255,0.3) 45%, rgba(1,204,247,0) 72%); }
+      #robot .base { position: absolute; border-radius: 50%; mix-blend-mode: screen; opacity: 0; background: radial-gradient(ellipse, rgba(120,220,255,1) 0%, rgba(1,204,247,0) 70%); }
+    
+      /* robot-mouth:css */
+      #robot .mouth { position: absolute; left: 181.3px; top: 193.6px; width: 69.0px; height: 30.3px; display: block;
+        filter: drop-shadow(0 0 2px rgba(120,190,255,0.95)) drop-shadow(0 0 7px rgba(40,120,255,0.65)); }
+      #robot .mouth svg { width: 100%; height: 100%; display: block; overflow: visible; transform-origin: 50% 8%; }
+      /* /robot-mouth:css */
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="61.6" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="61.6" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="grid"></div><div id="glow"></div>
+        <div id="win">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Agent Builder</span><span id="sim">SIMULASI</span>
+            <div id="status"><span class="dr"><i></i>Draft</span><span class="lv"><i></i>Live</span></div></div>
+          <div id="rail"><div id="railHd"><span class="lb">LANGKAH</span><b><span id="rN">0</span>/7</b></div><div id="rTrack"></div><div id="rFill"></div><div id="ris"></div></div>
+          <div id="stage">
+            <!-- S0 hook -->
+            <div class="scr" id="s0">
+              <div class="claim" id="cl0" style="left:0;top:20px"><div class="av"><span class="ic" data-i="user-round"></span></div><div><b>"Gue punya 20 AI agent"</b><em>2,1 rb suka · 340 komentar</em></div></div>
+              <div class="claim" id="cl1" style="left:90px;top:136px"><div class="av"><span class="ic" data-i="user-round"></span></div><div><b>"Bisnis gue full jalan pakai AI"</b><em>5,4 rb suka · 610 komentar</em></div></div>
+              <div class="claim" id="cl2" style="left:30px;top:252px"><div class="av"><span class="ic" data-i="user-round"></span></div><div><b>"Agent gue kerja nonstop"</b><em>3,8 rb suka · 420 komentar</em></div></div>
+              <div id="howCard"><span class="ic" data-i="lock"></span><b>Cara nyusunnya?</b><em>Nggak pernah ditunjukin</em></div>
+            </div>
+            <!-- intro -->
+            <div class="scr" id="sIn"><div class="eyebrow">AGENT BUILDER</div><div class="h2">Susun tim AI dalam 7 langkah</div>
+              <div class="glass team"><div class="lbl">TIM AI LU</div>
+                <div class="slot" style="left:28px"><span class="ic" data-i="bot"></span>Belum ada</div><div class="slot" style="left:229px"><span class="ic" data-i="bot"></span>Belum ada</div><div class="slot" style="left:430px"><span class="ic" data-i="bot"></span>Belum ada</div></div>
+              <div class="card" id="ring"><div class="num"><span id="ringN">0</span>/7</div><div><b>Langkah siap disusun</b><em>Ikutin urutannya, jangan loncat</em></div></div>
+            </div>
+            <!-- S1 workflow -->
+            <div class="scr" id="s1"><div class="eyebrow">LANGKAH 1</div><div class="h2">Pikir pakai workflow</div>
+              <div id="seg"><span id="segPill"></span><div id="segJob"><span class="ic" data-i="briefcase"></span>Jabatan</div><div id="segFlow"><span class="ic" data-i="workflow"></span>Workflow</div></div>
+              <div class="card" id="job"><span class="ic" data-i="user-round"></span><b>"Marketing"<s></s></b><em>Jabatan · tugasnya nggak jelas</em></div>
+              <svg id="flowSvg"></svg>
+              <div id="flowT">Alur: <span>Bikin iklan</span></div>
+              <div class="glass fn" id="fn0" style="left:0"><div class="bx"><span class="ic" data-i="search"></span></div><b>Riset</b><em>Cari angle & data</em></div>
+              <div class="glass fn" id="fn1" style="left:229px"><div class="bx"><span class="ic" data-i="pen-line"></span></div><b>Bikin</b><em>Draft copy & visual</em></div>
+              <div class="glass fn" id="fn2" style="left:458px"><div class="bx"><span class="ic" data-i="eye"></span></div><b>Review</b><em>Cek sebelum tayang</em></div>
+              <div class="card" id="outCard"><span class="ic" data-i="target"></span><div><b>1 alur = 1 tim kecil agent</b><em>Bukan satu agent buat semua kerjaan</em></div></div>
+            </div>
+            <!-- S2 instructions -->
+            <div class="scr" id="s2"><div class="eyebrow">LANGKAH 2</div><div class="h2">Kasih instruksi</div>
+              <div class="card" id="form">
+                <div class="fld" id="f0"><div class="lbl">TANGGUNG JAWAB</div><div class="box"><span class="ic" data-i="clipboard-check"></span><span class="tx"></span><i class="caret"></i></div></div>
+                <div class="fld" id="f1"><div class="lbl">ATURAN</div><div class="box"><span class="ic" data-i="shield-check"></span><span class="tx"></span><i class="caret"></i></div></div>
+                <div class="fld" id="f2"><div class="lbl">PRIORITAS</div><div class="box"><span class="ic" data-i="star"></span><span class="tx"></span><i class="caret"></i></div></div>
+              </div>
+              <div class="glass" id="idc"><div class="ph"><span class="ic" data-i="bot"></span></div><div><div class="t">KARTU KARYAWAN AI</div><b>Agent Iklan</b><em>Content creator · Tim marketing</em><div class="on"><i></i>Siap kerja</div></div></div>
+            </div>
+            <!-- S3 brain -->
+            <div class="scr" id="s3"><div class="eyebrow">LANGKAH 3</div><div class="h2">Isi otaknya</div>
+              <svg id="brainSvg"></svg>
+              <div class="card src" id="sr0" style="left:0;top:110px"><div class="bx"><span class="ic" data-i="book-open"></span></div><div><b>Brand guide</b><em>Tone, warna, gaya</em></div></div>
+              <div class="card src" id="sr1" style="left:332px;top:110px"><div class="bx"><span class="ic" data-i="target"></span></div><div><b>Kompetitor</b><em>Harga & angle mereka</em></div></div>
+              <div class="card src" id="sr2" style="left:0;top:600px"><div class="bx"><span class="ic" data-i="image"></span></div><div><b>Iklan lama</b><em>Yang laku & yang gagal</em></div></div>
+              <div class="card src" id="sr3" style="left:332px;top:600px"><div class="bx"><span class="ic" data-i="folder-open"></span></div><div><b>Dokumen</b><em>SOP, FAQ, katalog</em></div></div>
+              <div id="brain"><span class="ic" data-i="brain-circuit"></span><b>Otak agent</b></div>
+              <div class="card" id="ctxBar"><span class="ic" data-i="database"></span><b>Konteks tersimpan</b><em><span id="ctxN">0</span> file</em></div>
+            </div>
+            <!-- S4 tools -->
+            <div class="scr" id="s4"><div class="eyebrow">LANGKAH 4</div><div class="h2">Sambungin tools</div>
+              <div class="card" id="tools"></div>
+              <div class="glass" id="cloud"><div class="big"><span class="ic" data-i="cloud"></span></div><b>Jalan di cloud</b><em>Nggak tergantung laptop lu</em><div class="up"><i></i>Online</div></div>
+              <div class="card" id="laptop"><div id="lap"><div id="lapScr"></div><div id="lapBase"></div></div><b>Laptop lu</b><em id="lapT">Nyala</em></div>
+              <div id="uptime"><b>24/7</b>agent tetap kerja<svg id="hbSvg" viewBox="0 0 300 36" preserveAspectRatio="none"></svg></div>
+            </div>
+            <!-- S5 SOP -->
+            <div class="scr" id="s5"><div class="eyebrow">LANGKAH 5</div><div class="h2">Tulis SOP-nya</div>
+              <div class="card" id="sop"><div class="hd"><span class="ic" data-i="scroll-text"></span><b>SOP · Bikin draft iklan</b></div><div id="srs"></div></div>
+              <div id="exRow"></div>
+              <div id="dd">
+                <div class="card ddc ok" id="ddOk"><div class="t"><span class="ic" data-i="circle-check"></span>BOLEH</div><div class="it"><span class="ic" data-i="check"></span>Hook di 3 detik pertama</div><div class="it"><span class="ic" data-i="check"></span>Satu CTA yang jelas</div></div>
+                <div class="card ddc no" id="ddNo"><div class="t"><span class="ic" data-i="circle-x"></span>NGGAK BOLEH</div><div class="it"><span class="ic" data-i="x"></span>Klaim berlebihan</div><div class="it"><span class="ic" data-i="x"></span>Keluar dari brand guide</div></div>
+              </div>
+              <div class="card" id="qa"><div class="lbl">CARA NGECEK HASIL</div><div class="row" id="qas"></div></div>
+            </div>
+            <!-- S6 bot team -->
+            <div class="scr" id="s6"><div class="eyebrow">LANGKAH 6</div><div class="h2">Sambungin jadi tim</div>
+              <svg id="teamSvg"></svg>
+              <div class="glass bot" id="bt0" style="left:0"><div class="av"><span class="ic" data-i="search"></span></div><b>Bot Riset</b><em>Cari angle</em><span class="stt">Siap</span></div>
+              <div class="glass bot" id="bt1" style="left:224px"><div class="av"><span class="ic" data-i="pen-line"></span></div><b>Bot Bikin</b><em>Tulis draft</em><span class="stt">Siap</span></div>
+              <div class="glass bot" id="bt2" style="left:448px"><div class="av"><span class="ic" data-i="eye"></span></div><b>Bot Review</b><em>Cek kualitas</em><span class="stt">Siap</span></div>
+              <div id="tok"><span class="ic" data-i="file-text"></span></div>
+              <div class="card" id="fb"><div class="lbl">FEEDBACK MINGGU INI</div><div class="q2">Gimana hasil draft iklan minggu ini?</div>
+                <div class="btns"><div class="fbb" id="fbGood"><span class="ic" data-i="thumbs-up"></span>Bagus</div><div class="fbb" id="fbFix"><span class="ic" data-i="thumbs-down"></span>Perbaiki</div></div></div>
+              <div class="card" id="score"><div class="hd"><div><div class="lbl">SKOR KUALITAS · PER MINGGU</div><b>Makin bagus tiap minggu</b></div><div class="v"><b id="scN">62</b><em>angka ilustrasi</em></div></div>
+                <div id="bars"><div style="height:46%"></div><div style="height:55%"></div><div style="height:63%"></div><div style="height:74%"></div><div style="height:85%"></div><div style="height:96%"></div></div></div>
+            </div>
+            <!-- S7 chief -->
+            <div class="scr" id="s7"><div class="eyebrow">LANGKAH 7</div><div class="h2">Pasang chief of staff</div>
+              <svg id="chiefSvg"></svg>
+              <div class="glass" id="chief"><div class="av"><span class="ic" data-i="crown"></span></div><b>Chief of Staff</b><em>Bot yang ngatur bot lain</em></div>
+              <div class="card kid" id="kd0" style="left:0"><div class="av"><span class="ic" data-i="search"></span></div><b>Riset</b><span class="tk">Tugas baru</span></div>
+              <div class="card kid" id="kd1" style="left:162px"><div class="av"><span class="ic" data-i="pen-line"></span></div><b>Bikin</b><span class="tk">Tugas baru</span></div>
+              <div class="card kid" id="kd2" style="left:324px"><div class="av"><span class="ic" data-i="eye"></span></div><b>Review</b><span class="tk">Tugas baru</span></div>
+              <div class="card kid" id="kd3" style="left:486px"><div class="av"><span class="ic" data-i="megaphone"></span></div><b>Iklan</b><span class="tk">Tugas baru</span></div>
+              <div class="card" id="feed"><div class="lbl">LOG CHIEF OF STAFF</div><div id="fds"></div></div>
+            </div>
+          </div>
+          <div id="winDim"></div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div>
+        <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><div id="caps"></div>
+          <div id="robot"><div class="glow"></div><div class="sway"><div class="bob"><div class="talk"><div class="part head"><div class="headIn"><img src="assets/robot/r2_head.png" alt="" /><i class="lid"></i><i class="lid"></i><i class="mouth"><svg viewBox="0 0 123 54" preserveAspectRatio="none"><defs><linearGradient id="mFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b2fb8"/><stop offset="1" stop-color="#2b8cff"/></linearGradient><pattern id="mDots" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.9" fill="rgba(160,215,255,0.55)"/></pattern></defs><path d="M6,6 H117 C117,33 97,49 61.5,49 C26,49 6,33 6,6 Z" fill="url(#mFill)"/><path d="M6,6 H117 C117,33 97,49 61.5,49 C26,49 6,33 6,6 Z" fill="url(#mDots)"/><path d="M6,6 H117 C117,33 97,49 61.5,49 C26,49 6,33 6,6 Z" fill="none" stroke="#f3f9ff" stroke-width="2.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg></i></div></div><div class="part body"><img src="assets/robot/r2_body.png" alt="" /></div><div class="chest"></div><div class="base"></div><div class="part lhand"><img src="assets/robot/r2_lhand.png" alt="" /></div><div class="part rhand"><img src="assets/robot/r2_rhand.png" alt="" /></div></div></div></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="60.8" data-track-index="8" data-volume="1"></audio>
+      <audio id="sx00" class="clip" src="assets/sfx/whoosh.wav" data-start="0.05" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx01" class="clip" src="assets/sfx/pop.wav" data-start="0.20" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx02" class="clip" src="assets/sfx/pop.wav" data-start="0.74" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx03" class="clip" src="assets/sfx/pop.wav" data-start="1.35" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx04" class="clip" src="assets/sfx/pop.wav" data-start="3.29" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx05" class="clip" src="assets/sfx/whoosh.wav" data-start="4.47" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx06" class="clip" src="assets/sfx/ping.wav" data-start="6.34" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx07" class="clip" src="assets/sfx/click.wav" data-start="8.74" data-duration="0.366" data-track-index="13" data-volume="0.08"></audio>
+      <audio id="sx08" class="clip" src="assets/sfx/whoosh.wav" data-start="8.89" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx09" class="clip" src="assets/sfx/click.wav" data-start="11.90" data-duration="0.366" data-track-index="11" data-volume="0.08"></audio>
+      <audio id="sx10" class="clip" src="assets/sfx/pop.wav" data-start="15.49" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx11" class="clip" src="assets/sfx/pop.wav" data-start="15.92" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx12" class="clip" src="assets/sfx/pop.wav" data-start="16.54" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx13" class="clip" src="assets/sfx/click.wav" data-start="17.54" data-duration="0.366" data-track-index="11" data-volume="0.08"></audio>
+      <audio id="sx14" class="clip" src="assets/sfx/whoosh.wav" data-start="17.69" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx15" class="clip" src="assets/sfx/pop.wav" data-start="22.18" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx16" class="clip" src="assets/sfx/click.wav" data-start="24.51" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+      <audio id="sx17" class="clip" src="assets/sfx/whoosh.wav" data-start="24.66" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx18" class="clip" src="assets/sfx/pop.wav" data-start="26.83" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx19" class="clip" src="assets/sfx/pop.wav" data-start="27.81" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx20" class="clip" src="assets/sfx/pop.wav" data-start="28.59" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx21" class="clip" src="assets/sfx/pop.wav" data-start="29.41" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx22" class="clip" src="assets/sfx/click.wav" data-start="30.36" data-duration="0.366" data-track-index="12" data-volume="0.08"></audio>
+      <audio id="sx23" class="clip" src="assets/sfx/whoosh.wav" data-start="30.51" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx24" class="clip" src="assets/sfx/click.wav" data-start="31.63" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+      <audio id="sx25" class="clip" src="assets/sfx/pop.wav" data-start="32.61" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx26" class="clip" src="assets/sfx/ping.wav" data-start="35.34" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx27" class="clip" src="assets/sfx/click.wav" data-start="36.60" data-duration="0.366" data-track-index="13" data-volume="0.08"></audio>
+      <audio id="sx28" class="clip" src="assets/sfx/whoosh.wav" data-start="36.75" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx29" class="clip" src="assets/sfx/pop.wav" data-start="40.12" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx30" class="clip" src="assets/sfx/pop.wav" data-start="40.91" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx31" class="clip" src="assets/sfx/ping.wav" data-start="42.32" data-duration="1.32" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx32" class="clip" src="assets/sfx/click.wav" data-start="43.18" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+      <audio id="sx33" class="clip" src="assets/sfx/whoosh.wav" data-start="43.33" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx34" class="clip" src="assets/sfx/click.wav" data-start="48.50" data-duration="0.366" data-track-index="12" data-volume="0.08"></audio>
+      <audio id="sx35" class="clip" src="assets/sfx/ping.wav" data-start="49.48" data-duration="1.32" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx36" class="clip" src="assets/sfx/click.wav" data-start="50.62" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+      <audio id="sx37" class="clip" src="assets/sfx/whoosh.wav" data-start="50.77" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx38" class="clip" src="assets/sfx/ping.wav" data-start="53.70" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx39" class="clip" src="assets/sfx/whoosh.wav" data-start="54.70" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx40" class="clip" src="assets/sfx/click.wav" data-start="57.22" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const NS = "http://www.w3.org/2000/svg", C = "#01ccf7";
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n) => `<span class="ic">${icon(n)}</span>`;
+        const svg = (tag, a, p) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+        /* ---------- build UI ---------- */
+        const STEPS = [["Workflow", "Alur kerja"], ["Instruksi", "Tugas & aturan"], ["Otak", "Konteks bisnis"], ["Tools", "Cloud 24/7"], ["SOP", "Langkah & cek"], ["Tim bot", "Saling oper"], ["Chief of Staff", "Bos para bot"]];
+        const RY = (i) => 124 - 60 + i * 118;   // rail item top, relative to #rail
+        $("#ris").innerHTML = STEPS.map(([t, s], i) => `<div class="ri" id="ri${i}" style="top:${RY(i)}px"><div class="nb"><span class="n">${i + 1}</span><span class="ck">${ic("check")}</span></div><div><b>${t}</b><em>${s}</em></div></div>`).join("");
+        $("#tools").innerHTML = [["mail", "Email"], ["table", "Spreadsheet"], ["palette", "Tool desain"], ["megaphone", "Platform iklan"], ["database", "CRM"]]
+          .map(([i, t]) => `<div class="tr">${ic(i)}<span class="n">${t}</span><div class="tg"><i></i></div></div>`).join("");
+        $("#srs").innerHTML = ["Ambil brief & data produk", "Tulis 3 opsi hook", "Susun copy + visual", "Kirim ke Bot Review"]
+          .map((t, i) => `<div class="sr"><span class="k">${i + 1}</span>${t}</div>`).join("");
+        $("#exRow").innerHTML = [["CONTOH 1", "Hook pertanyaan"], ["CONTOH 2", "Before / after"], ["CONTOH 3", "Testimoni"]]
+          .map(([a, b]) => `<div class="glass ex"><div class="lbl">${a}</div><b>${b}</b></div>`).join("");
+        $("#qas").innerHTML = ["Sesuai brand", "Ada CTA", "Ejaan rapi"].map((t) => `<div class="q"><span class="bx"><i>${ic("check")}</i></span>${t}</div>`).join("");
+        $("#fds").innerHTML = [["Bagi brief minggu ini ke 4 bot", "08:00"], ["Ingetin Bot Review: deadline Jumat", "08:01"]]
+          .map(([t, w]) => `<div class="fd">${ic("send")}${t}<em>${w}</em></div>`).join("");
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#0b1a45" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+
+        // workflow arrows (S1)
+        const fs = $("#flowSvg");
+        const FA = [[172, 348, 227, 348], [401, 348, 456, 348]].map(([x1, y1, x2, y2]) => { const g = svg("g", {}, fs);
+          const l = svg("line", { x1, y1, x2: x2 - 8, y2, stroke: C, "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": "60 60", "stroke-dashoffset": 60 }, g);
+          const h = svg("path", { d: `M${x2 - 14},${y2 - 9} L${x2},${y2} L${x2 - 14},${y2 + 9}`, fill: "none", stroke: C, "stroke-width": 4, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: 0 }, g); return { l, h }; });
+        // brain lines (S3): from each source card to the brain
+        const bsv = $("#brainSvg");
+        const BL = [[148, 220], [480, 220], [148, 600], [480, 600]].map(([x, y]) => { const x2 = 314, y2 = 470, len = Math.hypot(x2 - x, y2 - y);
+          const l = svg("line", { x1: x, y1: y, x2: x + (x2 - x) * 0.78, y2: y + (y2 - y) * 0.78, stroke: C, "stroke-width": 3, "stroke-dasharray": `${len} ${len}`, "stroke-dashoffset": len, "data-len": len }, bsv);
+          const d = svg("circle", { cx: x, cy: y, r: 7, fill: C, opacity: 0 }, bsv); return { l, d, x, y }; });
+        // heartbeat (S4)
+        const hb = svg("path", { d: "M0,18 L60,18 L72,6 L84,30 L96,18 L160,18 L172,4 L184,32 L196,18 L300,18", fill: "none", stroke: C, "stroke-width": 2.5, "stroke-dasharray": "420 420", "stroke-dashoffset": 420 }, $("#hbSvg"));
+        // team arrows (S6)
+        const tsv = $("#teamSvg");
+        const TA = [[182, 214, 222], [406, 214, 446]].map(([x1, y, x2]) => svg("line", { x1, y1: y, x2, y2: y, stroke: "rgba(1,204,247,0.55)", "stroke-width": 3, "stroke-dasharray": "6 6" }, tsv));
+        // chief lines (S7)
+        const csv = $("#chiefSvg");
+        const CL = [71, 233, 395, 557].map((x) => { const p = `M314,316 C314,400 ${x},390 ${x},470`; const len = 320;
+          return svg("path", { d: p, fill: "none", stroke: C, "stroke-width": 3, "stroke-dasharray": `${len} ${len}`, "stroke-dashoffset": len }, csv); });
+
+        /* captions */
+        const KEY = new Set(["ai", "agent,", "nyusunnya.", "simulasinya.", "tujuh", "langkah,", "beres.", "jabatan.", "workflow.", "iklan:", "riset,", "bikin,", "review.", "instruksi.", "tanggung", "jawab,", "aturan,", "prioritasnya.", "karyawan.",
+          "otak.", "konteks:", "brand", "guide,", "kompetitor,", "iklan", "dokumen.", "tools-nya,", "cloud.", "laptop", "ditutup", "24", "jam.", "sop.", "langkahnya,", "contohnya,", "boleh", "boleh,", "ngecek", "hasilnya.", "bot.", "riset,", "review.",
+          "feedback,", "naik", "chief", "staff,", "ngatur", "semua", "link", "bio,", "aipreneur", "automation."]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase()) ? "k" : ""}">${w[0].replace(/-/g, "‑")}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => { const r = PH.find((p) => p.text.startsWith(s)); if (!r) throw new Error("phrase " + s); return r; };
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().replace(/^"/, "").startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 61.6;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        let cur = { x: 760, y: 860 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const press = (el, at) => ft(el, { scale: 1 }, { keyframes: [{ scale: 0.93 }, { scale: 1 }], duration: 0.25 }, at);
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const show = (el, at) => ft(el, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, at);
+        const hide = (el, at) => ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -20, duration: 0.3, ease: "power2.in" }, at);
+        const pop = (el, at, from) => ft(el, Object.assign({ opacity: 0, y: 18, scale: 0.96 }, from || {}), { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.38, ease: "back.out(1.6)" }, at);
+        const typeIn = (el, text, at, dur) => { const o = { v: 0 }; st(el, { textContent: "" }, 0); ft(o, { v: 0 }, { v: text.length, duration: dur, ease: "none", onUpdate: () => (el.textContent = text.slice(0, Math.round(o.v))) }, at); };
+
+        /* initial states */
+        st(["#tbar", "#rail"], { opacity: 0 }, 0);
+        st(".ri", { opacity: 0.35 }, 0);
+        // rail step activation
+        let fillTo = 0, prevStep = -1;
+        const stepOn = (i, at) => {
+          const r = $("#ri" + i);
+          ft(r, { opacity: 0.35, backgroundColor: "rgba(1,204,247,0)", borderColor: "rgba(255,255,255,0)" }, { opacity: 1, backgroundColor: "rgba(1,204,247,0.12)", borderColor: "rgba(1,204,247,0.55)", duration: 0.3 }, at);
+          ft($(".nb", r), { backgroundColor: "#102257", borderColor: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.75)" }, { backgroundColor: C, borderColor: C, color: "#04122f", duration: 0.3 }, at);
+          ft($("b", r), { color: "rgba(255,255,255,0.72)" }, { color: "#ffffff", duration: 0.3 }, at);
+          ft($(".nb", r), { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 14px rgba(1,204,247,0)", duration: 0.7 }, at + 0.05);
+          ft("#rFill", { scaleY: fillTo }, { scaleY: i / 6, duration: 0.5, ease: "power2.inOut" }, at); fillTo = i / 6;
+          ft({ v: 0 }, { v: 0 }, { v: 1, duration: 0.01, onUpdate() { $("#rN").textContent = this.progress() > 0.5 ? i + 1 : i; } }, at);
+          if (prevStep >= 0) { const p = $("#ri" + prevStep);
+            ft(p, { backgroundColor: "rgba(1,204,247,0.12)", borderColor: "rgba(1,204,247,0.55)" }, { backgroundColor: "rgba(1,204,247,0)", borderColor: "rgba(255,255,255,0)", duration: 0.3 }, at);
+            ft($(".n", p), { opacity: 1 }, { opacity: 0, duration: 0.2 }, at); ft($(".ck", p), { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, at); }
+          prevStep = i;
+        };
+        const clickStep = (i, at) => { moveEl($("#ri" + i + " .nb"), at - 0.6, 0.5, 4, 4); click(at - 0.08); press($("#ri" + i), at - 0.08); stepOn(i, at); };
+
+        /* S0 hook 0-4.6 */
+        ft(win, { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 0);
+        ft(["#tbar", "#rail"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.3);
+        st("#s0", { opacity: 1 }, 0);
+        pop("#cl0", 0.2); pop("#cl1", wt("Semua orang", "punya") - 0.1); pop("#cl2", wt("Semua orang", "agent") - 0.05);
+        const tTapi = ph("tapi nggak").start;
+        ft(".claim", { opacity: 1 }, { opacity: 0.35, duration: 0.3 }, tTapi);
+        pop("#howCard", wt("tapi nggak", "nunjukin") - 0.1, { scale: 0.9 });
+        ft("#howCard .ic", { rotation: 0 }, { keyframes: [{ rotation: -12 }, { rotation: 12 }, { rotation: -6 }, { rotation: 0 }], duration: 0.5 }, wt("tapi nggak", "nyusunnya"));
+
+        /* intro 4.6-8.8 */
+        const tSim = ph("Gue tunjukin").start;
+        hide("#s0", tSim - 0.15); show("#sIn", tSim);
+        ft("#sim", { scale: 1 }, { keyframes: [{ scale: 1.3 }, { scale: 1 }], duration: 0.5 }, wt("Gue tunjukin", "simulasinya"));
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tSim + 0.2);
+        moveTo(560, 640, tSim + 0.2, 0.8);
+        const t7 = ph("Tujuh langkah").start;
+        $$(".ri").forEach((r, i) => ft(r, { opacity: 0.35, x: 0 }, { keyframes: [{ opacity: 1, x: 8, duration: 0.15 }, { opacity: 0.55, x: 0, duration: 0.25 }] }, t7 + i * 0.12));
+        count($("#ringN"), 0, 7, t7, 1.0);
+        ft(".slot", { borderColor: "rgba(255,255,255,0.22)" }, { borderColor: "rgba(1,204,247,0.7)", duration: 0.3, stagger: 0.15 }, wt("Tujuh langkah", "beres"));
+
+        /* S1 workflow 8.8-17.6 */
+        const t1 = ph("Satu, berhenti").start;
+        clickStep(0, t1); hide("#sIn", t1 - 0.05); show("#s1", t1 + 0.1);
+        st("#segPill", { x: 0, width: 0 }, 0);
+        { const a = $("#segJob"), b = $("#segFlow");
+          st("#segPill", { x: a.offsetLeft - 5, width: a.offsetWidth }, t1); st(a, { color: "#04122f" }, t1);
+          const tF = ph("Mulai mikir").start;
+          ft("#segPill", { x: a.offsetLeft - 5, width: a.offsetWidth }, { x: b.offsetLeft - 5, width: b.offsetWidth, duration: 0.35, ease: "power2.inOut" }, wt("Mulai mikir", "workflow") - 0.1);
+          ft(a, { color: "#04122f" }, { color: "rgba(255,255,255,0.62)", duration: 0.2 }, wt("Mulai mikir", "workflow") - 0.1);
+          ft(b, { color: "rgba(255,255,255,0.62)" }, { color: "#04122f", duration: 0.2 }, wt("Mulai mikir", "workflow") - 0.05);
+          moveEl(b, tF - 0.2, 0.5); click(wt("Mulai mikir", "workflow") - 0.12); press(b, wt("Mulai mikir", "workflow") - 0.12); }
+        pop("#job", t1 + 0.4);
+        ft("#job s", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.out" }, wt("Satu, berhenti", "jabatan") - 0.05);
+        ft("#job", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.92, duration: 0.35 }, wt("Mulai mikir", "workflow") + 0.2);
+        const tAl = ph("Bukan marketing").start;
+        ft("#flowT", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.35 }, wt("Bukan marketing", "alur") - 0.1);
+        const tFn = [wt("riset, bikin", "riset"), wt("riset, bikin", "bikin"), wt("riset, bikin", "review")];
+        tFn.forEach((t, k) => { pop("#fn" + k, t - 0.12); if (k) { const a = FA[k - 1]; ft(a.l, { attr: { "stroke-dashoffset": 60 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.25 }, t - 0.2); ft(a.h, { opacity: 0 }, { opacity: 1, duration: 0.15 }, t - 0.05); } });
+        ft("#fn0, #fn1, #fn2", { borderColor: "rgba(1,204,247,0.28)" }, { keyframes: [{ borderColor: C, duration: 0.2 }, { borderColor: "rgba(1,204,247,0.28)", duration: 0.4 }], stagger: 0.15 }, tFn[2] + 0.4);
+        pop("#outCard", tFn[2] + 0.5);
+        moveTo(500, 600, tAl, 0.7);
+
+        /* S2 instructions 17.6-24.5 */
+        const t2 = ph("Dua, instruksi").start;
+        hide("#s1", t2 - 0.1); clickStep(1, t2); show("#s2", t2 + 0.12);
+        const tTj = wt("Tulis tanggung", "tanggung"), tAt = wt("Tulis tanggung", "aturan"), tPr = wt("sama prioritasnya", "prioritasnya");
+        [[0, tTj, "Bikin 10 draft iklan tiap minggu", 1.2], [1, tAt - 0.05, "Ikut brand guide, tanpa klaim lebay", 1.4], [2, tPr - 0.05, "Produk terlaris dulu", 0.9]].forEach(([k, t, txt, d]) => {
+          const f = $("#f" + k); pop(f, t - 0.25); typeIn($(".tx", f), txt, t, d);
+          ft($(".caret", f), { opacity: 0 }, { opacity: 1, duration: 0.1 }, t); ft($(".caret", f), { opacity: 1 }, { opacity: 0, duration: 0.1 }, t + d + 0.1);
+          ft($(".box", f), { borderColor: "rgba(255,255,255,0.16)" }, { keyframes: [{ borderColor: C, duration: 0.2 }, { duration: d }, { borderColor: "rgba(255,255,255,0.16)", duration: 0.3 }] }, t - 0.1); });
+        moveTo(560, 420, tTj - 0.3, 0.6);
+        const tKar = wt("Ini yang bikin", "karyawan");
+        pop("#idc", ph("Ini yang bikin").start + 0.1, { x: 40, y: 0 });
+        ft("#idc .on", { scale: 1 }, { keyframes: [{ scale: 1.15 }, { scale: 1 }], duration: 0.4 }, tKar);
+
+        /* S3 brain 24.6-30.4 */
+        const t3 = ph("Tiga, otak").start;
+        hide("#s2", t3 - 0.1); clickStep(2, t3); show("#s3", t3 + 0.12);
+        pop("#brain", wt("Tiga, otak", "otak") - 0.05, { scale: 0.6 });
+        const tSr = [wt("brand guide", "brand"), wt("brand guide", "kompetitor"), wt("iklan lama", "iklan"), wt("iklan lama", "dokumen")];
+        tSr.forEach((t, k) => { pop("#sr" + k, t - 0.15); const b = BL[k];
+          ft(b.l, { attr: { "stroke-dashoffset": +b.l.getAttribute("data-len") } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.4, ease: "power2.out" }, t + 0.1);
+          ft(b.d, { attr: { cx: b.x, cy: b.y }, opacity: 0 }, { keyframes: [{ opacity: 1, duration: 0.1 }, { attr: { cx: 314, cy: 470 }, duration: 0.5, ease: "power2.in" }, { opacity: 0, duration: 0.1 }] }, t + 0.2);
+          ft("#brain", { scale: 1 }, { keyframes: [{ scale: 1.08 }, { scale: 1 }], duration: 0.3 }, t + 0.7); });
+        pop("#ctxBar", tSr[3] + 0.3);
+        count($("#ctxN"), 0, 128, tSr[0], 4.0);
+        moveTo(330, 820, ph("Masukin semua").start, 0.8);
+
+        /* S4 tools + cloud 30.5-36.6 */
+        const t4 = ph("Empat, sambungin").start;
+        hide("#s3", t4 - 0.1); clickStep(3, t4); show("#s4", t4 + 0.12);
+        ft(".tr", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.07 }, t4 + 0.3);
+        const tTool = wt("Empat, sambungin", "tools");
+        $$(".tr .tg").forEach((g, k) => { ft(g, { backgroundColor: "rgba(255,255,255,0.15)" }, { backgroundColor: C, duration: 0.2 }, tTool - 0.2 + k * 0.14); ft($("i", g), { x: 0 }, { x: 26, duration: 0.2, ease: "power2.out" }, tTool - 0.2 + k * 0.14); });
+        moveEl($$(".tr .tg")[0], t4 + 0.4, 0.5); click(tTool - 0.22);
+        const tCl = wt("terus jalanin", "cloud");
+        pop("#cloud", tCl - 0.25);
+        ft("#cloud .big", { y: 0 }, { keyframes: [{ y: -8 }, { y: 0 }], duration: 0.5 }, tCl);
+        const tLp = ph("Laptop ditutup").start;
+        pop("#laptop", tLp - 0.25);
+        ft("#lapScr", { scaleY: 1, opacity: 1 }, { scaleY: 0.08, opacity: 0.6, duration: 0.5, ease: "power2.in" }, wt("Laptop ditutup", "ditutup"));
+        ft({ v: 0 }, { v: 0 }, { v: 1, duration: 0.01, onUpdate() { $("#lapT").textContent = this.progress() > 0.5 ? "Ditutup, tetap jalan" : "Nyala"; } }, wt("Laptop ditutup", "ditutup") + 0.3);
+        ft("#cloud", { borderColor: "rgba(1,204,247,0.28)" }, { keyframes: [{ borderColor: C, duration: 0.25 }, { duration: 1.2 }, { borderColor: "rgba(1,204,247,0.28)", duration: 0.3 }] }, ph("agent tetap").start);
+        const t24 = wt("agent tetap", "24");
+        ft("#uptime", { opacity: 0 }, { opacity: 1, duration: 0.3 }, t24 - 0.3);
+        ft(hb, { attr: { "stroke-dashoffset": 420 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.4, ease: "none" }, t24 - 0.2);
+        moveTo(700, 690, tLp - 0.4, 0.6);
+
+        /* S5 SOP 36.7-43 */
+        const t5 = ph("Lima, SOP").start;
+        hide("#s4", t5 - 0.1); clickStep(4, t5); show("#s5", t5 + 0.12);
+        ft(".sr", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.18 }, wt("Langkahnya, contohnya", "Langkahnya") - 0.1);
+        ft(".ex", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.12 }, wt("Langkahnya, contohnya", "contohnya") - 0.1);
+        pop("#ddOk", wt("yang boleh", "boleh") - 0.1); pop("#ddNo", wt("yang boleh", "nggak") - 0.05);
+        const tCek = wt("sama cara ngecek", "ngecek");
+        pop("#qa", ph("sama cara ngecek").start - 0.05);
+        $$(".q .bx i").forEach((c, k) => ft(c, { scale: 0 }, { scale: 1, duration: 0.25, ease: "back.out(2.5)" }, tCek + 0.1 + k * 0.25));
+        moveTo(650, 884, tCek - 0.3, 0.5);
+
+        /* S6 bot team 43.3-50.6 */
+        const t6 = ph("Enam, sambungin").start;
+        hide("#s5", t6 - 0.1); clickStep(5, t6); show("#s6", t6 + 0.12);
+        ft(".bot", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.12, ease: "back.out(1.5)" }, t6 + 0.4);
+        const tB = [wt("Satu riset", "riset"), wt("Satu riset", "bikin"), wt("Satu riset", "review")];
+        const BC = [[164, 112], [388, 112], [612, 112]];
+        st("#tok", { x: BC[0][0], y: BC[0][1] }, 0);
+        ft("#tok", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.25 }, tB[0] - 0.1);
+        tB.forEach((t, k) => { const b = $("#bt" + k);
+          ft(b, { borderColor: "rgba(1,204,247,0.28)" }, { keyframes: [{ borderColor: C, duration: 0.2 }, { duration: 0.5 }, { borderColor: "rgba(1,204,247,0.28)", duration: 0.3 }] }, t - 0.1);
+          ft($(".stt", b), { color: "rgba(255,255,255,0.62)", borderColor: "rgba(255,255,255,0.25)" }, { color: C, borderColor: C, duration: 0.2 }, t - 0.1);
+          if (k) ft("#tok", { x: BC[k - 1][0], y: BC[k - 1][1] }, { x: BC[k][0], y: BC[k][1], duration: 0.45, ease: "power2.inOut" }, t - 0.45); });
+        ft("#tok", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tB[2] + 0.6);
+        const tFb = wt("Tiap minggu", "feedback");
+        pop("#fb", ph("Tiap minggu").start - 0.1);
+        moveEl($("#fbGood"), ph("Tiap minggu").start + 0.1, 0.5, 78, 12); click(tFb); press("#fbGood", tFb);
+        ft("#fbGood", { backgroundColor: "rgba(47,227,154,0.15)" }, { backgroundColor: "rgba(47,227,154,0.35)", duration: 0.2 }, tFb + 0.05);
+        const tNaik = wt("kualitasnya naik", "naik");
+        pop("#score", ph("kualitasnya naik").start - 0.25);
+        ft("#bars div", { scaleY: 0 }, { scaleY: 1, duration: 0.4, stagger: 0.1, ease: "power2.out" }, ph("kualitasnya naik").start);
+        count($("#scN"), 62, 91, tNaik - 0.2, 1.2);
+
+        /* S7 chief 50.7-54.9 */
+        const t7b = ph("Tujuh, pasang").start;
+        hide("#s6", t7b - 0.1); clickStep(6, t7b); show("#s7", t7b + 0.12);
+        pop("#chief", wt("Tujuh, pasang", "chief") - 0.1, { scale: 0.85 });
+        ft(".kid", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.1 }, t7b + 0.5);
+        const tNg = wt("satu bot yang", "ngatur");
+        CL.forEach((l, k) => ft(l, { attr: { "stroke-dashoffset": 320 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.45, ease: "power2.out" }, tNg - 0.2 + k * 0.1));
+        ft(".kid .tk", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.25, stagger: 0.12, ease: "back.out(2)" }, tNg + 0.3);
+        ft(".kid", { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: C, duration: 0.25, stagger: 0.12 }, tNg + 0.3);
+        pop("#feed", tNg + 0.2); ft(".fd", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.3 }, tNg + 0.4);
+        moveTo(330, 260, t7b + 0.3, 0.6);
+        // team goes live
+        ft("#status .dr", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tNg + 0.6);
+        ft("#status .lv", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tNg + 0.65);
+        { const p = $("#ri6"); ft($(".n", p), { opacity: 1 }, { opacity: 0, duration: 0.2 }, tNg + 0.9); ft($(".ck", p), { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tNg + 0.9);
+          ft("#rFill", { scaleY: 1 }, { scaleY: 1, duration: 0.01 }, tNg + 0.9); }
+
+        /* CTA 54.9-61.6 */
+        const tCta = ph("Mau sistem").start;
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.3 }, tCta - 0.3);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.7, duration: 0.4 }, tCta - 0.2);
+        ft(win, { scale: 1 }, { scale: 0.94, duration: 0.6, ease: "power2.inOut" }, tCta - 0.2);
+        ft("#cta", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
+        const tF = wt("Klik link", "link");
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 22px rgba(1,204,247,0)", duration: 0.7 }, tF + 0.05);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.38 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /* robot presenter rig v2 (front-facing AIpreneur robot): head, body, two hands, eyelids */
+        const RG = window.ROBOT_RIG2, rob = $("#robot");
+        const box = (el, b, pad) => { pad = pad || 0; Object.assign(el.style, { left: b[0] - pad + "px", top: b[1] - pad + "px", width: b[2] + 2 * pad + "px", height: b[3] + 2 * pad + "px" }); };
+        const head = $(".head", rob), headIn = $(".headIn", rob), lh = $(".lhand", rob), rh = $(".rhand", rob), lids = $$(".lid", rob);
+        const chest = $(".chest", rob), baseL = $(".base", rob), talk = $(".talk", rob);
+        box(head, RG.head); box($(".body", rob), RG.body); box(lh, RG.lhand); box(rh, RG.rhand);
+        lids.forEach((l, i) => box(l, [RG.eyes[i][0] - RG.head[0], RG.eyes[i][1] - RG.head[1], RG.eyes[i][2], RG.eyes[i][3]], 4));
+        head.style.transformOrigin = (RG.neck[0] - RG.head[0]) + "px " + (RG.neck[1] - RG.head[1]) + "px";
+        lh.style.transformOrigin = "80% 30%"; rh.style.transformOrigin = "20% 30%";
+        box(chest, [RG.chest[0] - 20, RG.chest[1] - 10, RG.chest[2] + 40, RG.chest[3] + 20]);
+        box(baseL, [RG.base[0] - 10, RG.base[1] - 8, RG.base[2] + 20, RG.base[3] + 16]);
+        box($(".glow", rob), [RG.base[0] - 80, RG.base[1] + 4, RG.base[2] + 160, 50]);
+        // entrance
+        ft(rob, { opacity: 0, x: -320 }, { opacity: 1, x: 0, duration: 0.8, ease: "power3.out" }, 0.4);
+        // idle life: float, sway, hands hover out of phase, head drifts
+        const rep = (p) => Math.floor((D - 1.2) / p) - 1;
+        ft($(".bob", rob), { y: 0 }, { y: -9, duration: 1.4, ease: "sine.inOut", repeat: rep(1.4), yoyo: true }, 1.2);
+        ft($(".sway", rob), { rotation: -1.2 }, { rotation: 1.2, duration: 3.1, ease: "sine.inOut", repeat: rep(3.1), yoyo: true }, 1.2);
+        ft($(".glow", rob), { opacity: 1, scaleX: 1 }, { opacity: 0.55, scaleX: 0.82, duration: 1.4, ease: "sine.inOut", repeat: rep(1.4), yoyo: true }, 1.2);
+        ft($("img", lh), { y: 0 }, { y: -7, duration: 1.1, ease: "sine.inOut", repeat: rep(1.1), yoyo: true }, 1.0);
+        ft($("img", rh), { y: -6 }, { y: 2, duration: 1.25, ease: "sine.inOut", repeat: rep(1.25), yoyo: true }, 1.3);
+        // speaking: head micro-bob + chest/base light follow the VO loudness
+        const env = window.VO_ENV || [];
+        ft({ v: 0 }, { v: 0 }, { v: 1, duration: D, ease: "none", onUpdate: () => { const f = Math.min(env.length - 1, Math.max(0, Math.round(tl.time() * 30))); const e = env[f] || 0;
+          const e2 = env[Math.max(0, f - 3)] || 0;
+          chest.style.opacity = (0.12 + 0.75 * e).toFixed(3); baseL.style.opacity = (0.2 + 0.8 * e).toFixed(3); chest.style.transform = "scale(" + (0.9 + 0.2 * e).toFixed(3) + ")";
+          talk.style.transform = "translateY(" + (-3 * e).toFixed(2) + "px)"; } }, 0);
+        // blinking (occasionally a double blink)
+        for (let t = 2.0, k = 0; t < D - 1; t += [3.2, 2.6, 4.1, 3.4][k++ % 4]) {
+          ft(lids, { scaleY: 0 }, { keyframes: [{ scaleY: 1, duration: 0.07 }, { scaleY: 0, duration: 0.09 }] }, t);
+          if (k % 3 === 0) ft(lids, { scaleY: 0 }, { keyframes: [{ scaleY: 1, duration: 0.06 }, { scaleY: 0, duration: 0.08 }] }, t + 0.24);
+        }
+        // head: tilts and looks while presenting (head layer sits behind the collar, so it can move freely)
+        const headTo = () => {}; // head stays still (client request)
+        const headToOld = (t, r, x, y, hold) => ft(head, { rotation: 0, x: 0, y: 0 }, { keyframes: [{ rotation: r, x, y, duration: 0.35, ease: "power2.out" }, { rotation: r, x, y, duration: hold },
+          { rotation: 0, x: 0, y: 0, duration: 0.45, ease: "power2.inOut" }] }, t);
+        const G = [];
+        [0.9, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
+        [t1, wt("Mulai mikir", "workflow") - 0.12, t2, t3, t4, t5, t6, tFb, t7b].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
+        [tTapi + 0.4, t7, wt("Satu, berhenti", "jabatan"), tFn[0], tFn[2], tTj, tPr, tKar, tSr[0], tSr[2], tCl, t24, tCek, tB[0], tB[2], tNaik, tNg]
+          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
+        G.sort((x, y) => x.t - y.t);
+        let busy = -1, beatN = 0;
+        G.forEach((g) => {
+          if (g.t < busy + 0.05) return;
+          busy = g.t + g.d;
+          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
+            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
+            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
+          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
+            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
+        });
+
+        tl.set({}, {}, D - 0.01);
+
+        /* robot-mouth:js */
+        { const _m = document.querySelector("#robot .mouth svg"), _env = window.VO_ENV || [], _D = (typeof D !== "undefined") ? D : tl.duration();
+          tl.fromTo({ v: 0 }, { v: 0 }, { v: 1, duration: _D, ease: "none", immediateRender: false, onUpdate: () => {
+            const f = Math.min(_env.length - 1, Math.max(0, Math.round(tl.time() * 30)));
+            const e = _env[f] || 0, ep = _env[Math.max(0, f - 2)] || 0;
+            const sy = Math.min(1.05, 0.3 + 0.72 * e + 0.5 * Math.abs(e - ep));
+            const sx = 0.9 + 0.13 * e;
+            _m.style.transform = "scale(" + sx.toFixed(3) + "," + sy.toFixed(3) + ")"; } }, 0); }
+        /* /robot-mouth:js */
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

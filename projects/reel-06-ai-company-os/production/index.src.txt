@@ -8,7 +8,10 @@
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/icons.js"></script>
     <script src="vendor/vo_env.js"></script>
-    <script src="vendor/robot_rig2.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
     <style>
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
@@ -21,12 +24,14 @@
       .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
       .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
       #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #132650; opacity: 0; }
       #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
       .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
 
       /* window: x 80-1000, y 290-1240 */
-      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.84);
-        border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); transform-origin: 50% 50%; }
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.95);
+        border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); transform-origin: 50% 50%; opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
       #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.92); }
       #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
       #tbar .app { font-size: 19px; font-weight: 700; }
@@ -40,7 +45,7 @@
       .ri .ic { width: 22px; height: 22px; } .ri.on { background: rgba(41,75,119,0.10); color: var(--n2); }
       #area { position: absolute; left: 72px; top: 60px; width: 848px; height: 890px; overflow: hidden; background: rgba(244,247,253,0.6); }
       #areaGrid { position: absolute; inset: 0; background-image: radial-gradient(rgba(41,75,119,0.13) 1px, transparent 1.4px); background-size: 22px 22px; }
-      #cam { position: absolute; left: 0; top: 0; width: 848px; height: 890px; transform-origin: 0 0; }
+      #cam { position: absolute; left: 0; top: 0; width: 848px; height: 890px; }
       .card { position: absolute; background: #fff; border: 1.5px solid var(--line); border-radius: 18px; box-shadow: 0 6px 20px rgba(41,75,119,0.08); }
       .card .hd { display: flex; align-items: center; gap: 10px; padding: 16px 18px 6px; font-size: 17px; font-weight: 700; }
       .card .hd .ic { width: 20px; height: 20px; color: var(--n2); }
@@ -70,8 +75,8 @@
       .ag .chip .ic { width: 13px; height: 13px; }
 
       /* handoff flow */
-      #flowCard { left: 20px; top: 440px; width: 808px; height: 262px; opacity: 0; }
-      #hint { position: absolute; left: 50%; top: 214px; transform: translateX(-50%); font-size: 14px; font-weight: 700; color: var(--mute); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+      #flowCard { left: 20px; top: 440px; width: 808px; height: 236px; opacity: 0; }
+      #hint { position: absolute; left: 50%; top: 200px; transform: translateX(-50%); font-size: 14px; font-weight: 700; color: var(--mute); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
       #hint .ic { width: 15px; height: 15px; }
       #pipe { position: absolute; left: 0; top: 0; width: 808px; height: 262px; overflow: visible; }
       .nd { position: absolute; width: 130px; margin-left: -65px; text-align: center; }
@@ -83,13 +88,13 @@
       #tok { position: absolute; left: 0; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--auto); box-shadow: 0 0 12px rgba(47,111,228,0.9); opacity: 0; }
 
       /* CEO priorities */
-      #prioCard { left: 20px; top: 720px; width: 808px; height: 232px; opacity: 0; }
-      .pr { position: absolute; left: 18px; right: 18px; height: 46px; border-radius: 12px; border: 1.5px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 0 14px; font-size: 16px; background: #fff; opacity: 0; }
+      #prioCard { left: 20px; top: 690px; width: 808px; height: 196px; opacity: 0; }
+      .pr { position: absolute; left: 18px; right: 18px; height: 40px; border-radius: 12px; border: 1.5px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 0 14px; font-size: 16px; background: #fff; opacity: 0; }
       .pr .n { width: 28px; height: 28px; border-radius: 8px; background: var(--grad); color: #fff; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
-      .prs { position: absolute; left: 18px; right: 18px; height: 46px; border-radius: 12px; border: 1.5px dashed rgba(41,75,119,0.22); display: flex; align-items: center; gap: 12px; padding: 0 14px; }
+      .prs { position: absolute; left: 18px; right: 18px; height: 40px; border-radius: 12px; border: 1.5px dashed rgba(41,75,119,0.22); display: flex; align-items: center; gap: 12px; padding: 0 14px; }
       .prs i { width: 28px; height: 28px; border-radius: 8px; background: rgba(41,75,119,0.08); display: block; flex: none; }
       .prs b { height: 12px; border-radius: 6px; background: rgba(41,75,119,0.08); display: block; }
-      #prioWait { position: absolute; right: 18px; top: 16px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(10,13,44,0.06); color: var(--mute); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+      #prioWait { position: absolute; right: 18px; top: 12px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(10,13,44,0.06); color: var(--mute); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
       #prioWait .ic { width: 14px; height: 14px; color: var(--mute); }
       .pr em { margin-left: auto; font-style: normal; font-size: 12px; font-weight: 700; color: var(--n2); background: rgba(41,75,119,0.08); padding: 3px 10px; border-radius: 10px; }
 
@@ -129,26 +134,71 @@
       #cursor svg { width: 100%; height: 100%; display: block; }
       #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--n2); background: rgba(41,75,119,0.12); opacity: 0; z-index: 29; }
       #winDim { position: absolute; inset: 0; background: rgba(244,247,253,0.78); opacity: 0; }
-      #cta { position: absolute; left: 110px; width: 860px; top: 560px; padding: 56px 48px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
-      #cta .k { font-size: 27px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 66px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta { position: absolute; left: 110px; width: 860px; top: 290px; padding: 40px 48px 42px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 60px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
       #cta .sb { font-size: 27px; margin-top: 10px; color: rgba(10,13,44,0.75); } #cta .sb b { color: var(--n2); }
-      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--grad); color: #fff; font-size: 32px; font-weight: 700; }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 24px; height: 74px; padding: 0 46px; border-radius: 41px; background: var(--grad); color: #fff; font-size: 32px; font-weight: 700; }
       #fbtn .ic { width: 32px; height: 32px; }
       #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
-      #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoL { opacity: 0; }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(760px); }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(41,75,119,0.22)); }
+      .simtag { font-size: 15px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 3px 12px; }
+      /* ---------- kinetic hook (stage x 80-1000, content y 290-640; robot stands below) ---------- */
+      #hook, #keyK { position: absolute; left: 80px; top: 290px; width: 920px; height: 360px; transform-origin: 50% 60%; }
+      #hBiz { position: absolute; left: 0; right: 0; top: 0; display: flex; justify-content: center; }
+      #hBiz span { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 24px; border-radius: 26px; background: #fff; box-shadow: 0 12px 30px rgba(41,75,119,0.18); font-size: 24px; font-weight: 700; color: var(--n2); }
+      #hBiz .ic { width: 26px; height: 26px; }
+      #hTitle { position: absolute; left: 0; right: 0; top: 62px; text-align: center; font-size: 132px; font-weight: 700; line-height: 1.08; letter-spacing: 2px; white-space: nowrap; }
+      #hTitle .q { display: inline-block; color: #f08c1a; }
+      #hChips { position: absolute; left: 0; right: 0; top: 232px; display: grid; grid-template-columns: repeat(3, 268px); gap: 14px 18px; justify-content: center; }
+      .stk { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 18px; border-radius: 16px; background: #fff; font-size: 22px; font-weight: 700; color: var(--n1);
+        box-shadow: 0 12px 28px rgba(41,75,119,0.22); border: 1.5px solid rgba(10,13,44,0.07); white-space: nowrap; }
+      .stk .ic { width: 26px; height: 26px; color: var(--n2); flex: none; }
+      #hook .stk { opacity: 0; } #hBiz, #hTitle, #kTile, #kLab, #kBig { opacity: 0; }
+      #kTile { position: absolute; left: 400px; top: 0; width: 120px; height: 120px; border-radius: 32px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 18px 40px rgba(10,13,44,0.3); }
+      #kTile .ic { width: 64px; height: 64px; }
+      #kLab { position: absolute; left: 0; right: 0; top: 138px; text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 6px; color: var(--n2); }
+      #kBig { position: absolute; left: 0; right: 0; top: 192px; text-align: center; font-size: 90px; font-weight: 700; line-height: 1.05; white-space: nowrap; }
+      .hl { position: relative; display: inline-block; isolation: isolate; } .hl i { position: absolute; left: -8px; right: -8px; bottom: 6px; height: 26px; border-radius: 8px; background: rgba(47,111,228,0.22); z-index: -1; transform-origin: 0 50%; }
+      /* ---------- pop-out cards ---------- */
+      .pop { position: absolute; background: #fff; border-radius: 30px; opacity: 0; box-shadow: 0 40px 90px rgba(10,13,44,0.28), 0 6px 18px rgba(41,75,119,0.12); }
+      #pAg { left: 190px; top: 450px; width: 700px; padding: 30px 34px 26px; }
+      #pAg .hd2 { display: flex; align-items: center; gap: 16px; } #pAg .av { width: 76px; height: 76px; border-radius: 20px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; }
+      #pAg .av .ic { width: 38px; height: 38px; } #pAg .nm { font-size: 44px; font-weight: 700; line-height: 1; } #pAg .nm em { display: block; font-style: normal; font-size: 18px; font-weight: 400; color: var(--mute); margin-top: 6px; }
+      #pAg .simtag { margin-left: auto; }
+      #pAg .row { display: flex; align-items: center; gap: 16px; margin-top: 16px; padding: 16px 18px; border-radius: 18px; background: rgba(41,75,119,0.05); border: 2px solid transparent; }
+      #pAg .row .ic { width: 30px; height: 30px; color: var(--n2); flex: none; } #pAg .row b { display: block; font-size: 15px; letter-spacing: 2px; color: var(--n2); }
+      #pAg .row span.v { display: block; font-size: 27px; font-weight: 700; }
+      #pLead { left: 548px; top: 420px; width: 440px; padding: 26px 26px 24px; border-radius: 24px; }
+      #pLead .t { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 700; } #pLead .t .ic { width: 30px; height: 30px; color: var(--n2); }
+      #pLead .sub { font-size: 15px; color: var(--mute); margin: 4px 0 12px; }
+      #pLead .ld { display: flex; align-items: center; gap: 12px; height: 62px; padding: 0 12px; border-radius: 14px; margin-top: 8px; background: rgba(41,75,119,0.05); opacity: 0; }
+      #pLead .ld i { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #f08c1a, #e5484d); color: #fff; font-style: normal; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; flex: none; }
+      #pLead .ld b { font-size: 19px; display: block; } #pLead .ld small { font-size: 14px; color: var(--mute); }
+      #pLead .ld em { margin-left: auto; font-style: normal; font-size: 13px; font-weight: 700; color: #c46d0e; background: rgba(240,140,26,0.15); border-radius: 10px; padding: 3px 10px; }
+      #pSmart { left: 130px; top: 440px; width: 820px; padding: 34px 40px 30px; }
+      #pSmart .lbl2 { font-size: 18px; font-weight: 700; letter-spacing: 3px; color: var(--n2); display: flex; align-items: center; gap: 10px; } #pSmart .lbl2 .ic { width: 24px; height: 24px; }
+      #pSmart .big { font-size: 150px; font-weight: 700; line-height: 1; margin-top: 10px; } #pSmart .big small { display: block; font-size: 22px; font-weight: 400; color: var(--mute); margin-top: 6px; letter-spacing: 0; }
+      #pSmartSvg { position: absolute; right: 44px; top: 78px; width: 340px; height: 150px; overflow: visible; }
+      #pSmartTag { position: absolute; right: 44px; bottom: 28px; height: 50px; padding: 0 20px; border-radius: 25px; background: var(--autoBg); color: var(--auto); font-size: 21px; font-weight: 700; display: flex; align-items: center; gap: 8px; opacity: 0; }
+      #pSmartTag .ic { width: 22px; height: 22px; }
       #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
       .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
       .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
       .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
-      <!--ROBOT_CSS-->
-      #robot { filter: drop-shadow(0 18px 30px rgba(41,75,119,0.25)); }
     </style>
   </head>
   <body>
     <div id="main" data-composition-id="main" data-start="0" data-duration="46.6" data-width="1080" data-height="1920" data-fps="30">
       <div id="scene" class="clip" data-start="0" data-duration="46.6" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
-        <div id="bg"></div><div id="dots"></div>
-        <div id="win">
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div>
+        <div id="hook"><div id="hBiz"><span><span class="ic" data-i="building-2"></span>1 BISNIS</span></div>
+          <div id="hTitle" data-letter="gt">6 AI AGENT</div>
+          <div id="hChips"></div></div>
+        <div id="keyK"><div id="kTile"><span class="ic" data-i="target"></span></div><div id="kLab">KUNCI UTAMANYA</div>
+          <div id="kBig"><span class="hl"><i></i><span id="kWord" data-letter="gt">MEMORI BERSAMA</span></span></div></div>
+        <div id="win"><div id="wcam">
           <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Company OS</span><span id="sim">SIMULASI</span>
             <span id="agentsOn"><i></i>6 agent aktif</span>
             <div id="runBtn"><span class="ic" data-i="play"></span>Jalankan</div></div>
@@ -167,17 +217,24 @@
               <div id="insight"><span class="ic" data-i="lightbulb"></span><div><b>Insight baru</b><br />Kompetitor turunin harga 10% minggu ini</div></div>
               <div id="usedPill"><span class="ic" data-i="circle-check"></span>Dipakai 6 agent</div>
               <div id="zero"><span class="ic" data-i="circle-x"></span><s>Mulai dari nol<i id="zeroLine"></i></s></div>
-              <div id="smart"><div class="l"><div class="lbl">INSIGHT TERSIMPAN</div><div class="big"><span id="insN">0</span><small>angka ilustrasi</small></div></div>
-                <svg id="smartSvg"></svg><div id="smartTag"><span class="ic" data-i="trending-up"></span>Makin pintar</div></div>
             </div>
           </div>
-          <div id="winDim"></div>
           <div id="ripple"></div><div id="cursor"></div>
-        </div>
+        </div><div id="winDim"></div></div>
+        <div class="pop" id="pAg"><div class="hd2"><div class="av"><span class="ic" data-i="megaphone"></span></div><div class="nm">CMO<em>AI agent · marketing</em></div><span class="simtag">SIMULASI</span></div>
+          <div class="row" id="rPeran"><span class="ic" data-i="target"></span><div><b>PERAN</b><span class="v">Ubah data jadi brief konten</span></div></div>
+          <div class="row" id="rTugas"><span class="ic" data-i="list-checks"></span><div><b>TUGAS</b><span class="v">8 tugas minggu ini</span></div></div>
+          <div class="row" id="rKonteks"><span class="ic" data-i="database"></span><div><b>KONTEKS</b><span class="v">Brand, produk &amp; pasar</span></div></div></div>
+        <div class="pop" id="pLead"><div class="t"><span class="ic" data-i="handshake"></span>Lead perlu follow-up</div><div class="sub">Agent Sales · SIMULASI</div>
+          <div class="ld"><i>RA</i><div><b>Rina A.</b><small>tanya harga paket 2</small></div><em>Hangat</em></div>
+          <div class="ld"><i>BS</i><div><b>Budi S.</b><small>belum balas 2 hari</small></div><em>Follow-up</em></div>
+          <div class="ld"><i>DK</i><div><b>Dewi K.</b><small>minta demo produk</small></div><em>Hangat</em></div></div>
+        <div class="pop" id="pSmart"><div class="lbl2"><span class="ic" data-i="brain-circuit"></span>INSIGHT TERSIMPAN DI MEMORI</div>
+          <div class="big"><span id="insN">0</span><small>angka ilustrasi</small></div><svg id="pSmartSvg"></svg>
+          <div id="pSmartTag"><span class="ic" data-i="trending-up"></span>Makin pintar</div></div>
         <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name gt">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
           <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
-        <div id="ui"><img id="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><div id="caps"></div>
-          <!--ROBOT_HTML--></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="" /><div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div><div id="caps"></div></div>
       </div>
       <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="45.84" data-track-index="8" data-volume="1"></audio>
       <!--SFX-->
@@ -218,8 +275,8 @@
         const prog = svg("line", { x1: NX(0), y1: NCY, x2: NX(5), y2: NCY, stroke: "#2f6fe4", "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": `${PLEN} ${PLEN}`, "stroke-dashoffset": PLEN }, pipe);
         // CEO priorities
         const PR = [["Follow-up 12 lead hangat", "Sales"], ["Publish 3 konten dari brief", "CMO"], ["Rapikan workflow onboarding", "Developer"]];
-        $("#prioSk").innerHTML = [0, 1, 2].map(k => `<div class="prs" style="top:${60 + k * 54}px"><i></i><b style="width:${[300, 240, 270][k]}px"></b><b style="width:70px;margin-left:auto"></b></div>`).join("");
-        $("#prioRows").innerHTML = PR.map(([t, w], k) => `<div class="pr" style="top:${60 + k * 54}px"><span class="n">${k + 1}</span><span>${t}</span><em>${w}</em></div>`).join("");
+        $("#prioSk").innerHTML = [0, 1, 2].map(k => `<div class="prs" style="top:${50 + k * 46}px"><i></i><b style="width:${[300, 240, 270][k]}px"></b><b style="width:70px;margin-left:auto"></b></div>`).join("");
+        $("#prioRows").innerHTML = PR.map(([t, w], k) => `<div class="pr" style="top:${50 + k * 46}px"><span class="n">${k + 1}</span><span>${t}</span><em>${w}</em></div>`).join("");
         // shared memory hexagon
         const MC = [["ceo", "crown", "CEO", 424, 132], ["cmo", "megaphone", "CMO", 675, 262], ["sales", "handshake", "Sales", 675, 522],
           ["data", "chart-line", "Analis Data", 424, 652], ["dev", "code-xml", "Developer", 173, 522], ["riset", "user-search", "Riset", 173, 262]];
@@ -230,11 +287,13 @@
           const pk = document.createElement("i"); pk.className = "mpk"; $("#memView").appendChild(pk);
           return { k, x, y, l, pk };
         });
-        // "smarter" sparkline
-        const ss = $("#smartSvg");
-        const SP = [[0, 70], [40, 66], [80, 60], [120, 58], [160, 46], [200, 40], [240, 26], [280, 14], [300, 8]];
-        const spPath = svg("path", { d: "M" + SP.map((p) => p.join(",")).join(" L"), fill: "none", stroke: "#2f6fe4", "stroke-width": 4, "stroke-linecap": "round", "stroke-linejoin": "round" }, ss);
+        // "smarter" sparkline (pop-out card)
+        const ss = $("#pSmartSvg");
+        const SP = [[0, 132], [42, 124], [84, 116], [126, 112], [168, 92], [210, 80], [252, 56], [294, 30], [340, 10]];
+        const spPath = svg("path", { d: "M" + SP.map((p) => p.join(",")).join(" L"), fill: "none", stroke: "#2f6fe4", "stroke-width": 7, "stroke-linecap": "round", "stroke-linejoin": "round" }, ss);
         const spLen = spPath.getTotalLength(); spPath.setAttribute("stroke-dasharray", `${spLen} ${spLen}`); spPath.setAttribute("stroke-dashoffset", spLen);
+        // hook role chips
+        $("#hChips").innerHTML = AG.map(([k, i, n]) => `<div class="stk" id="hc-${k}">${ic(i)}${n}</div>`).join("");
 
         /* captions */
         const KEY = new Set(["bisnis", "enam", "agent", "sekaligus?", "simulasinya.", "ceo,", "cmo,", "riset,", "sales,", "developer,", "analis", "peran,", "tugas,", "konteksnya", "jalankan.",
@@ -244,7 +303,7 @@
         const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
           el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase()) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
 
-        /* ---------- timeline ---------- */
+        /* ---------- timeline helpers ---------- */
         const tl = gsap.timeline({ paused: true });
         const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
         const st = (el, v, at) => tl.set(el, v, at);
@@ -253,11 +312,15 @@
         const D = 46.6;
         const win = $("#win");
         const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
-        const cState = (x, y, s) => ({ x: 424 - x * s, y: 445 - y * s, scale: s });
-        let cc = cState(424, 445, 1);
-        st("#cam", cc, 0);
-        const camTo = (x, y, s, at, dur) => { const nx = cState(x, y, s); ft("#cam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: "power3.inOut" }), at); cc = nx; };
-        const toWin = (ax, ay, c) => ({ x: 72 + c.x + ax * c.scale, y: 60 + c.y + ay * c.scale });
+        // screen-recording camera: zooms the whole app (#wcam) inside the fixed window frame; clamped so no empty edge shows
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc;
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; };
+        const whip = (x, y, s, at) => camTo(x, y, s, at, 0.42, "expo.inOut");
+        const A = (ax, ay) => ({ x: 72 + ax, y: 60 + ay }); // area coords -> window coords
         let cur = { x: 760, y: 820 };
         st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
         const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
@@ -269,43 +332,77 @@
         const hi = (el, at, hold) => ft(el, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 6px 20px rgba(41,75,119,0.08)" },
           { keyframes: [{ borderColor: "#294b77", boxShadow: "0 0 0 4px rgba(41,75,119,0.14)", duration: 0.22 }, { duration: hold || 0.6 }, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 6px 20px rgba(41,75,119,0.08)", duration: 0.3 }] }, at);
 
-        /* initial */
-        st(["#tbar", "#rail", ".ag"], { opacity: 0 }, 0);
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "light" });
+        FX.theme("light", 0);
+        ft("#dots", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -300px", duration: D, ease: "none" }, 0);
+        st(win, { opacity: 0, transformPerspective: 2000, transformOrigin: "50% 50%" }, 0);
+        st(".ag", { opacity: 0 }, 0);
+        st("#pLead", { transformPerspective: 1400 }, 0);
+        camSet(460, 475, 1, 0);
 
-        /* S0 hook 0-3.7: the org of 6 agents boots */
-        ft(win, { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 0.0);
-        ft(["#tbar", "#rail"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.25);
-        ft(".ag", { opacity: 0, y: 26, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, stagger: 0.14, ease: "back.out(1.6)" }, 0.45);
-        ft("#flowCard", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 1.35);
-        ft(".nd", { opacity: 0, y: 14 }, { opacity: 0.55, y: 0, duration: 0.3, stagger: 0.06 }, 1.5);
-        ft("#agentsOn", { opacity: 0 }, { opacity: 1, duration: 0.3 }, wt("dijalanin", "enam"));
-        ft("#agentsOn i", { scale: 1 }, { keyframes: [{ scale: 1.8 }, { scale: 1 }], duration: 0.5, repeat: 2 }, wt("dijalanin", "enam"));
-        const tSim = ph("Gue tunjukin").start;
+        /* ===== SCENE 1 · kinetic hook (no window): 1 bisnis -> 6 AI agent; robot rises full-body into the stage ===== */
+        const tEnam = wt("dijalanin", "enam"), tSek = wt("dijalanin", "sekaligus"), tSim = ph("Gue tunjukin").start;
+        FX.enter("up", 0.0); FX.wave(0.6); FX.face("wide", 0.55, 0.9);
+        ft("#hBiz", { opacity: 0, y: 24, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }, 0.1);
+        ft("#hBiz span", { scale: 1 }, { keyframes: [{ scale: 1.08, duration: 0.12 }, { scale: 1, duration: 0.25 }] }, wt("Gimana", "bisnis"));
+        st("#hTitle", { opacity: 1 }, tEnam - 0.15);
+        FX.drop($("#hTitle"), tEnam - 0.12, 0.05);
+        $$("#hChips .stk").forEach((el, i) => FX.sticker(el, tEnam + 0.35 + i * 0.12, [-5, 4, -3, 5, -4, 3][i]));
+        FX.face("excited", tEnam + 0.05, 1.0); FX.hop(tSek - 0.05, 46);
+        ft("#hook", { y: 0 }, { keyframes: [{ y: -8, duration: 0.12 }, { y: 0, duration: 0.25 }] }, tSek);
+
+        /* ===== iris -> SCENE 2 · org board (window), names with camera close-ups ===== */
+        const tW1 = tSim - 0.55;
+        FX.dip("home", tW1 - 0.1, 0.3);
+        FX.iris(tW1, "light", (m) => { st("#hook", { display: "none" }, m); st(win, { opacity: 1 }, m); }, { x: 540, y: 900, ex: 540, ey: 700 });
+        ft(".ag", { opacity: 0, y: 26, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, stagger: 0.1, ease: "back.out(1.6)" }, tW1 + 0.6);
+        ft("#flowCard", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, tW1 + 1.15);
+        ft(".nd", { opacity: 0, y: 14 }, { opacity: 0.55, y: 0, duration: 0.3, stagger: 0.06 }, tW1 + 1.3);
+        ft("#agentsOn", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tW1 + 0.6);
         ft("#sim", { scale: 1, backgroundColor: "rgba(41,75,119,0)" }, { keyframes: [{ scale: 1.25, backgroundColor: "rgba(41,75,119,0.15)" }, { scale: 1, backgroundColor: "rgba(41,75,119,0)" }], duration: 0.6 }, wt("Gue tunjukin", "simulasinya"));
-        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tSim);
-        moveTo(470, 250, tSim, 0.8);
-        /* S1 roles 5.4-10: each agent highlighted as it is named */
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tSim + 0.2);
+        moveTo(470, 250, tSim + 0.2, 0.8);
         const NAMES = [["ceo", wt("Ada CEO", "CEO")], ["cmo", wt("Ada CEO", "CMO")], ["riset", wt("Ada CEO", "riset")], ["sales", wt("sales,", "sales")], ["dev", wt("sales,", "developer")], ["data", wt("sales,", "analis")]];
-        NAMES.forEach(([k, t]) => { hi("#ag-" + k, t - 0.05, 0.5); });
-        NAMES.forEach(([k, t], i) => { const p = posIn($("#ag-" + k)); moveTo(p.x + 40, p.y + 20, t - 0.25, 0.3); });
-        /* roles, tasks, context per card */
-        const tPeran = wt("Masing-masing", "peran"), tTugas = wt("tugas,", "tugas"), tKonteks = wt("tugas,", "konteksnya");
+        NAMES.forEach(([k, t]) => { hi("#ag-" + k, t - 0.05, 0.5); const p = posIn($("#ag-" + k)); moveTo(p.x + 40, p.y + 20, t - 0.25, 0.3); FX.beat(t - 0.08); });
+        camTo(358, 175, 1.6, NAMES[0][1] - 0.45, 0.6);
+        whip(772, 175, 1.6, NAMES[2][1] - 0.28);
+        whip(358, 385, 1.6, NAMES[3][1] - 0.28);
+        whip(772, 385, 1.6, NAMES[5][1] - 0.28);
+        FX.point(NAMES[0][1] - 0.3);
+        /* pop-out: one agent card explains role / tasks / context */
+        const tPeran = wt("Masing-masing", "peran"), tTugas = wt("tugas,", "tugas"), tKonteks = wt("tugas,", "konteksnya"), tMas = ph("Masing-masing").start;
+        camTo(460, 475, 1, tMas - 0.35, 0.6);
         ft(".ag .role", { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.05 }, tPeran - 0.1);
         ft(".ag .c-t", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, stagger: 0.05, ease: "back.out(2)" }, tTugas - 0.05);
         ft(".ag .c-k", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.25, stagger: 0.05, ease: "back.out(2)" }, tKonteks - 0.05);
+        FX.go("peekR", tMas - 0.4); FX.face("happy", tPeran, 1.1);
+        const pAgIn = tMas + 0.05, pAgOut = ph("Klik jalankan").start - 0.75;
+        ft(win, { scale: 1 }, { scale: 0.95, duration: 0.5, ease: "power2.inOut" }, pAgIn);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.72, duration: 0.4 }, pAgIn);
+        ft("#pAg", { opacity: 0, x: -120, y: -160, scale: 0.4 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.25)" }, pAgIn);
+        ft("#pAg .row", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.1, ease: "power2.out" }, pAgIn + 0.3);
+        [["#rPeran", tPeran], ["#rTugas", tTugas], ["#rKonteks", tKonteks]].forEach(([r, t]) =>
+          ft(r, { borderColor: "rgba(47,111,228,0)", backgroundColor: "rgba(41,75,119,0.05)" }, { keyframes: [{ borderColor: "#2f6fe4", backgroundColor: "#e7f0ff", duration: 0.2 }, { duration: 0.6 }, { borderColor: "rgba(47,111,228,0)", backgroundColor: "rgba(41,75,119,0.05)", duration: 0.3 }] }, t - 0.05));
+        ft("#pAg", { opacity: 1, x: 0, y: 0, scale: 1 }, { opacity: 0, x: -120, y: -160, scale: 0.4, duration: 0.35, ease: "power2.in" }, pAgOut);
+        ft(win, { scale: 0.95 }, { scale: 1, duration: 0.4, ease: "power2.inOut" }, pAgOut + 0.1);
+        ft("#winDim", { opacity: 0.72 }, { opacity: 0, duration: 0.3 }, pAgOut + 0.1);
 
-        /* S2 run 13.7-14.8 */
-        const tRun = wt("Klik jalankan", "jalankan");
-        moveEl($("#runBtn"), ph("Klik jalankan").start - 0.35, 0.55, -10, 2);
-        click(tRun - 0.05);
+        /* ===== shutter -> SCENE 3 · macro on "Jalankan", click, then follow the hand-offs ===== */
+        const tRun = wt("Klik jalankan", "jalankan"), tW2 = ph("Klik jalankan").start - 0.62;
+        FX.dip("right", tW2 - 0.05, 0.25);
+        const rb = posIn($("#runBtn"));
+        FX.shutter(tW2, "light", (m) => { camSet(rb.x - 150, rb.y + 190, 2.0, m); st("#cursor", { x: rb.x - 220, y: rb.y + 170 }, m); });
+        cur = { x: rb.x - 220, y: rb.y + 170 };
+        moveTo(rb.x - 6, rb.y + 4, tRun - 0.45, 0.4);
+        click(tRun - 0.05); FX.point(tRun - 0.35); FX.face("excited", tRun + 0.05, 0.9);
         ft("#runBtn", { scale: 1 }, { keyframes: [{ scale: 0.92 }, { scale: 1.04 }, { scale: 1 }], duration: 0.35 }, tRun - 0.05);
         ft("#hint", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tRun);
         ft("#flowCard", { borderColor: "rgba(10,13,44,0.10)" }, { keyframes: [{ borderColor: "#2f6fe4", duration: 0.25 }, { duration: 0.6 }, { borderColor: "rgba(10,13,44,0.10)", duration: 0.4 }] }, tRun + 0.05);
-        const camFlow = cState(424, 571, 1.08);
         ft("#prioCard", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, tRun + 0.55);
-        camTo(424, 571, 1.08, tRun + 0.35, 0.8);
-        /* S3 handoffs 14.8-28.4 */
         const NT = [ph("Agent riset").start, ph("CMO langsung").start, ph("Sales ngecek").start, ph("Analis mantau").start, ph("developer benerin").start, ph("Terus CEO").start];
+        const NXw = (i) => A(20 + NX(i), 0).x, NYw = A(0, 440 + NCY).y;
+        camTo(NXw(0) + 120, NYw + 40, 1.7, tRun + 0.3, 0.7);
+        camTo(NXw(1) + 60, NYw + 40, 1.7, NT[1] - 0.45, 0.6);
         ft(".nd", { opacity: 0.55 }, { opacity: 1, duration: 0.3, stagger: 0.05 }, tRun + 0.1);
         FL.forEach(([k], i) => {
           const t = NT[i], nd = $("#nd-" + k);
@@ -317,36 +414,61 @@
           if (i > 0) ft("#tok", { x: NX(i - 1), y: NCY }, { x: NX(i), y: NCY, duration: 0.45, ease: "power2.inOut" }, t - 0.5);
           status(k, 0, 1, t);
           if (i < 5) status(k, 1, 2, NT[i + 1] - 0.1);
-          const p = toWin(20 + NX(i), 440 + NCY + 40, camFlow); moveTo(p.x + 26, p.y + 10, t - 0.35, 0.35);
+          if (i !== 2) { const p = A(20 + NX(i), 440 + NCY + 40); moveTo(p.x + 26, p.y + 10, t - 0.35, 0.35); }
+          FX.beat(t - 0.08);
         });
         st("#tok", { x: NX(0), y: NCY }, 0);
         ft("#tok", { opacity: 0 }, { opacity: 1, duration: 0.2 }, NT[0]);
         ft("#tok", { opacity: 1 }, { opacity: 0, duration: 0.2 }, NT[5] + 0.4);
-        // CEO prioritises
-        const camPrio = cState(424, 620, 1.1), pRow = toWin(20 + 330, 720 + 60 + 23, camPrio);
-        camTo(424, 620, 1.1, NT[5] + 0.3, 0.8);
-        const tDik = wt("mana yang", "dikerjain");
+        FX.go("center", NT[0] - 0.3);
+
+        /* ===== doors -> 3D split: window swings back, the Sales lead list floats in front ===== */
+        const tW3 = NT[2] - 0.55, tBack = NT[3] - 0.3;
+        FX.dip("lowL", tW3 - 0.05, 0.25);
+        FX.doors(tW3, "light", (m) => { camSet(560, 600, 1.25, m); st(win, { rotationY: 20, scale: 0.9, x: -12, transformOrigin: "0% 50%" }, m); st("#winDim", { opacity: 0.3 }, m);
+          st("#pLead", { opacity: 1, x: 0, rotationY: 0 }, m); });
+        ft("#pLead .ld", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.14, ease: "power2.out" }, tW3 + 0.75);
+        ft("#pLead .ld em", { scale: 1 }, { keyframes: [{ scale: 1.15, duration: 0.15 }, { scale: 1, duration: 0.25 }], stagger: 0.14 }, wt("yang perlu", "di-follow-up") - 0.1);
+        FX.face("wide", NT[2] + 0.4, 0.8);
+        ft("#pLead", { opacity: 1, x: 0, y: 0, scale: 1 }, { opacity: 0, x: 70, y: 40, scale: 0.85, duration: 0.35, ease: "power2.in" }, tBack);
+        ft(win, { rotationY: 20, scale: 0.9, x: -12 }, { rotationY: 0, scale: 1, x: 0, duration: 0.55, ease: "power3.inOut" }, tBack + 0.05);
+        ft("#winDim", { opacity: 0.3 }, { opacity: 0, duration: 0.4 }, tBack + 0.05);
+        FX.go("home", tBack + 0.1);
+        camTo(NXw(3) + 40, NYw + 40, 1.55, tBack + 0.05, 0.6);
+        camTo(NXw(4), NYw + 40, 1.55, NT[4] - 0.4, 0.6);
+        /* CEO prioritises */
+        const tDik = wt("mana yang", "dikerjain"), pRow = A(20 + 330, 690 + 50 + 20);
+        camTo(496, 848, 1.12, NT[5] - 0.2, 0.7);
         ft(["#prioWait", "#prioSk"], { opacity: 1 }, { opacity: 0, duration: 0.25 }, tDik - 0.3);
         ft(".pr", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.18, ease: "power2.out" }, tDik - 0.25);
         status("ceo", 1, 2, wt("mana yang", "duluan"));
-        moveTo(pRow.x, pRow.y, NT[5] + 0.4, 0.8);
+        moveTo(pRow.x, pRow.y, NT[5] + 0.3, 0.8);
+        FX.go("right", NT[5] - 0.4); FX.point(NT[5] + 0.35); FX.face("happy", tDik, 0.9);
 
-        /* S4 shared memory 28.4-39.8 */
-        const tKunci = ph("Tapi kunci").start;
-        camTo(424, 445, 1, tKunci - 0.1, 0.6);
-        ft("#cam", { opacity: 1 }, { opacity: 0, duration: 0.4 }, tKunci + 0.2);
-        ft("#memView", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tKunci + 0.35);
-        ft("#memNode", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.8)" }, tKunci + 0.5);
-        ft(".mc", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, stagger: 0.09, ease: "back.out(2)" }, tKunci + 0.75);
-        ft(ML.map((m) => m.l), { opacity: 0 }, { opacity: 1, duration: 0.4 }, tKunci + 0.9);
-        const tMem = wt("memori bersama", "memori");
-        moveTo(72 + 424 + 30, 60 + 392 + 30, tKunci + 0.8, 0.7);
-        click(tMem);
-        ft("#memNode", { boxShadow: "0 18px 44px rgba(10,13,44,0.35)" }, { keyframes: [{ boxShadow: "0 0 0 18px rgba(47,111,228,0.25)" }, { boxShadow: "0 18px 44px rgba(10,13,44,0.35)" }], duration: 0.8 }, tMem);
-        ft("#memRing", { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.6, duration: 1.0, ease: "power2.out", repeat: 1 }, tMem);
-        // one agent learns something
-        const tBel = wt("Satu agent", "belajar");
-        const ri = ML.find((m) => m.k === "riset");
+        /* ===== iris -> SCENE 4 · kinetic "kunci utamanya: MEMORI BERSAMA", robot rises into the stage ===== */
+        const tKunci = ph("Tapi kunci").start, tW4 = tKunci - 0.5, tMem = wt("memori bersama", "memori");
+        FX.go("up", tW4 - 0.05);
+        FX.iris(tW4, "light", (m) => { st(win, { opacity: 0 }, m); st("#cam", { opacity: 0 }, m); st("#memView", { opacity: 1 }, m); camSet(460, 475, 1, m); st("#cursor", { opacity: 0 }, m); }, { x: 540, y: 320, ex: 540, ey: 1100 });
+        ft("#kTile", { opacity: 0, scale: 0.4, rotation: -20 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.5, ease: "back.out(1.8)" }, tKunci + 0.15);
+        ft("#kLab", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, wt("Tapi kunci", "kunci") - 0.05);
+        FX.face("wide", wt("Tapi kunci", "kunci"), 0.9); FX.point(wt("Tapi kunci", "utamanya"));
+        st("#kBig", { opacity: 1 }, tMem - 0.2);
+        FX.drop($("#kWord"), tMem - 0.18, 0.035);
+        FX.marker($("#kBig .hl i"), tMem + 0.5, 0.4);
+        FX.face("excited", tMem + 0.05, 0.8); FX.hop(tMem + 0.1, 50);
+        /* zoom-through into the shared-memory view; robot drops back to the bottom first */
+        const tZ = ph("Satu agent").start - 0.55;
+        FX.dip("home", tZ - 0.45, 0.3);
+        ft("#keyK", { scale: 1, opacity: 1 }, { scale: 1.3, opacity: 0, duration: 0.4, ease: "power2.in" }, tZ);
+        st("#keyK", { display: "none" }, tZ + 0.42);
+        ft(win, { opacity: 0, scale: 0.86 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, tZ + 0.08);
+        ft("#memNode", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }, tZ + 0.2);
+        ft(".mc", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.32, stagger: 0.06, ease: "back.out(2)" }, tZ + 0.3);
+        ft(ML.map((m) => m.l), { opacity: 0 }, { opacity: 1, duration: 0.4 }, tZ + 0.4);
+        ft("#memRing", { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.6, duration: 1.0, ease: "power2.out" }, tZ + 0.45);
+        // one agent learns something (close-up on Riset + the insight)
+        const tBel = wt("Satu agent", "belajar"), ri = ML.find((m) => m.k === "riset");
+        camTo(250, 290, 1.55, tBel - 0.45, 0.6);
         hi("#mc-riset", ph("Satu agent").start - 0.05, 1.2);
         ft("#insight", { opacity: 0, y: 12, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(2)" }, tBel - 0.1);
         st(ri.pk, { x: ri.x, y: ri.y }, 0);
@@ -354,8 +476,10 @@
         ft(ri.pk, { x: ri.x, y: ri.y }, { x: 424, y: 392, duration: 0.6, ease: "power2.in" }, tBel + 0.3);
         ft(ri.pk, { opacity: 1 }, { opacity: 0, duration: 0.1 }, tBel + 0.9);
         ft("#memNode", { scale: 1 }, { keyframes: [{ scale: 1.08 }, { scale: 1 }], duration: 0.35 }, tBel + 0.9);
-        // every agent uses it
+        FX.point(tBel - 0.3);
+        // every agent uses it (pull back wide)
         const tSem = ph("semua agent").start;
+        camTo(460, 475, 1, tSem - 0.3, 0.6);
         ML.forEach((m, i) => { const at = tSem + i * 0.09;
           ft(m.pk, { x: 424, y: 392, opacity: 1 }, { x: m.x, y: m.y, duration: 0.5, ease: "power2.out" }, at);
           st(m.pk, { opacity: 0 }, at + 0.52);
@@ -364,27 +488,32 @@
           ft("#mc-" + m.k, { borderColor: "rgba(10,13,44,0.10)" }, { borderColor: "#16a34a", duration: 0.25 }, at + 0.5); });
         ft("#insight", { opacity: 1 }, { opacity: 0, duration: 0.3 }, tSem + 1.1);
         ft("#usedPill", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, wt("semua agent", "pakai"));
-        // not from zero again
+        FX.go("center", tSem - 0.2); FX.face("happy", wt("semua agent", "pakai"), 1.0);
+        // not from zero again (close-up on the crossed-out pill)
         const tNol = wt("Nggak mulai", "nol");
         ft("#usedPill", { opacity: 1 }, { opacity: 0, duration: 0.2 }, ph("Nggak mulai").start - 0.05);
         ft("#zero", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, ph("Nggak mulai").start);
         ft("#zeroLine", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }, tNol);
-        // the system gets smarter
+        camTo(496, 600, 1.8, ph("Nggak mulai").start - 0.25, 0.55, "expo.inOut");
+        FX.face("flat", ph("Nggak mulai").start, 0.7);
+        /* kinetic stat moment: the memory counter pops out big */
         const tMak = ph("Makin lama").start;
-        ft("#zero", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tMak + 0.4);
-        ft("#smart", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tMak - 0.1);
-        count($("#insN"), 412, tMak + 0.1, 2.0);
-        ft(spPath, { attr: { "stroke-dashoffset": spLen } }, { attr: { "stroke-dashoffset": 0 }, duration: 2.0, ease: "power1.inOut" }, tMak + 0.1);
-        ft("#smartTag", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, wt("sistemnya", "pintar") - 0.1);
-        moveTo(700, 860, tMak, 0.8);
+        ft("#zero", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tMak + 0.3);
+        camTo(460, 475, 1, tMak - 0.3, 0.5);
+        ft(win, { scale: 1 }, { scale: 0.95, duration: 0.5, ease: "power2.inOut" }, tMak - 0.2);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.72, duration: 0.4 }, tMak - 0.2);
+        ft("#pSmart", { opacity: 0, y: 80, scale: 0.6 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.3)" }, tMak - 0.1);
+        count($("#insN"), 412, tMak + 0.2, 2.0);
+        ft(spPath, { attr: { "stroke-dashoffset": spLen } }, { attr: { "stroke-dashoffset": 0 }, duration: 2.0, ease: "power1.inOut" }, tMak + 0.2);
+        ft("#pSmartTag", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, wt("sistemnya", "pintar") - 0.1);
+        FX.go("right", tMak - 0.35); FX.face("excited", wt("sistemnya", "pintar"), 0.9); FX.beat(wt("sistemnya", "pintar") - 0.08);
 
-        /* S5 CTA 39.9-46.6 */
-        const tCta = ph("Mau sistem").start;
-        ft("#winDim", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tCta - 0.2);
-        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tCta - 0.2);
-        ft(win, { scale: 1 }, { scale: 0.94, duration: 0.6, ease: "power2.inOut" }, tCta - 0.2);
-        ft("#cta", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
-        const tF = wt("Klik link", "link");
+        /* ===== shutter -> SCENE 5 · CTA (card raised, robot full-body in the stage) ===== */
+        const tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");
+        FX.go("up", tCta - 0.7);
+        FX.shutter(tCta - 0.62, "light", (m) => { st([win, "#pSmart"], { opacity: 0 }, m); });
+        ft("#cta", { opacity: 0, y: -40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta + 0.05);
+        FX.wave(tCta + 0.45); FX.point(tF - 0.3); FX.face("happy", tF + 0.05, 1.4); FX.face("excited", D - 1.7, 0.9);
         ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
         ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
 
@@ -392,32 +521,13 @@
         capEls.forEach(({ el, ws, p }, k) => {
           const next = capEls[k + 1];
           const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.5;
-          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
           ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
-          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
           ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
         });
 
-        /*ROBOT_SETUP*/
-        // presenter gestures for this script
-        const G = [];
-        [0.2, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
-        [tRun, tMem, tF].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
-        [wt("dijalanin", "enam"), ...NAMES.map((n) => n[1]), tPeran, tKonteks, ...NT, tDik, wt("Satu agent", "belajar"), wt("semua agent", "pakai"), tNol, wt("sistemnya", "pintar")]
-          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
-        G.sort((x, y) => x.t - y.t);
-        let busy = -1, beatN = 0;
-        G.forEach((g) => {
-          if (g.t < busy + 0.05) return;
-          busy = g.t + g.d;
-          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
-            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
-            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
-          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
-            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
-        });
+        FX.runGestures();
 
         tl.set({}, {}, D - 0.01);
         window.__timelines["main"] = tl;

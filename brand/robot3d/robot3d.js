@@ -22,7 +22,7 @@ scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnviron
 scene.environmentIntensity = 0.85;
 const key = new THREE.DirectionalLight(0xfff3e6, 1.15); key.position.set(1.2, 2.2, 3); scene.add(key);
 const rim = new THREE.DirectionalLight(0xbfd8ff, 0.9); rim.position.set(-2.5, 1.5, -1.5); scene.add(rim);
-// framing: 628 px per model unit, head top ~40 px below the canvas top
+// framing: PX px per model unit, head top 40 px below the canvas top (close-ups zoom in 3D, never by CSS scaling)
 const PX = R3D.pxPerUnit || 628, visH = H / PX, fov = 22, dist = visH / (2 * Math.tan((fov * Math.PI) / 360));
 const camY = 0.978 - (H / 2 - 40) / PX;
 const cam = new THREE.PerspectiveCamera(fov, W / H, 0.05, 20); cam.position.set(0, camY, dist); cam.lookAt(0, camY, 0);
@@ -71,6 +71,19 @@ function skin(geo) {
       c.set(0, 0, 0); v.forEach((i) => c.add(p.set(P.getX(i), P.getY(i), P.getZ(i)))); c.multiplyScalar(1 / 3); if (c.distanceTo(S) > 0.075) bad = true; } }
     if (bad) dropped++; else keep.push(v[0], v[1], v[2]); }
   geo.setIndex(keep); R3D.dropped = dropped;
+  { const N = new Float32Array(n * 3), A = keep, a = new THREE.Vector3(), b = new THREE.Vector3(), q = new THREE.Vector3(), r = new THREE.Vector3();
+    for (let t = 0; t < A.length; t += 3) { const i0 = rep[A[t]], i1 = rep[A[t + 1]], i2 = rep[A[t + 2]];
+      a.set(P.getX(i0), P.getY(i0), P.getZ(i0)); b.set(P.getX(i1), P.getY(i1), P.getZ(i1)); q.set(P.getX(i2), P.getY(i2), P.getZ(i2));
+      r.subVectors(b, a).cross(q.clone().sub(a)); for (const i of [i0, i1, i2]) { N[i * 3] += r.x; N[i * 3 + 1] += r.y; N[i * 3 + 2] += r.z; } }
+    const norm = (B) => { for (let i = 0; i < n; i++) if (rep[i] === i) { const l = Math.hypot(B[i * 3], B[i * 3 + 1], B[i * 3 + 2]) || 1; B[i * 3] /= l; B[i * 3 + 1] /= l; B[i * 3 + 2] /= l; } };
+    norm(N);
+    const visor = (i) => { const x = P.getX(i), y = P.getY(i), z = P.getZ(i); return z > 0.1 && Math.abs(x) < 0.3 && y > 0.43 && y < 0.9; };
+    for (let it = 0; it < 14; it++) { const M = new Float32Array(N);
+      for (let t = 0; t < A.length; t += 3) { const v = [rep[A[t]], rep[A[t + 1]], rep[A[t + 2]]];
+        if (it >= 4 && !visor(v[0])) continue;
+        for (const i of v) for (const j of v) if (i !== j) { M[i * 3] += N[j * 3]; M[i * 3 + 1] += N[j * 3 + 1]; M[i * 3 + 2] += N[j * 3 + 2]; } }
+      norm(M); N.set(M); }
+    const NA = geo.attributes.normal; for (let i = 0; i < n; i++) { const k = rep[i]; NA.setXYZ(i, N[k * 3], N[k * 3 + 1], N[k * 3 + 2]); } NA.needsUpdate = true; }
   geo.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(si, 4)); geo.setAttribute("skinWeight", new THREE.Float32BufferAttribute(sw, 4));
   if (R3D.debugWeights) { const c = new Float32Array(n * 3); for (let i = 0; i < n; i++) { c[i * 3] = 1 - sw[i * 4 + 2] * 0.8; c[i * 3 + 1] = 1 - sw[i * 4 + 1] * 0.8 - sw[i * 4 + 2] * 0.1; c[i * 3 + 2] = 1 - sw[i * 4 + 1] * 0.8 - sw[i * 4 + 2] * 0.8; }
     geo.setAttribute("color", new THREE.Float32BufferAttribute(c, 3)); }
@@ -80,10 +93,11 @@ function faceShader(mat) {
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, U);
     sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying vec3 vBP;")
-      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvBP = position; vArm = skinWeight.y + skinWeight.z;")
-      .replace("varying vec3 vBP;", "varying vec3 vBP; varying float vArm;");
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvBP = position; vArm = skinWeight.y + skinWeight.z; vVN = normalMatrix * normalize(vec3(position.x / 0.40, (position.y - 0.66) / 0.29, 1.0));")
+      .replace("varying vec3 vBP;", "varying vec3 vBP; varying float vArm; varying vec3 vVN;");
     sh.fragmentShader = sh.fragmentShader.replace("#include <common>", `#include <common>
-varying vec3 vBP; varying float vArm; uniform sampler2D uLogo; uniform vec4 uLogoBox; uniform float uBlink; uniform vec4 uW; uniform float uFlat; uniform float uMouth; uniform vec2 uLook; uniform vec3 uVisor;
+varying vec3 vBP; varying float vArm; varying vec3 vVN; uniform sampler2D uLogo; uniform vec4 uLogoBox; uniform float uBlink; uniform vec4 uW; uniform float uFlat; uniform float uMouth; uniform vec2 uLook; uniform vec3 uVisor;
+float visorMaskBig(vec2 p){ vec2 q = abs((p - vec2(0.0, 0.662)) / vec2(0.29, 0.226)); float s = pow(pow(q.x,4.0)+pow(q.y,4.0), 0.25); return 1.0 - smoothstep(0.9, 1.0, s); }
 float visorMask(vec2 p){ vec2 q = abs((p - vec2(0.0, 0.66)) / vec2(0.262, 0.198)); float s = pow(pow(q.x,4.0)+pow(q.y,4.0), 0.25); return 1.0 - smoothstep(0.86, 0.99, s); }
 float seg(vec2 p, vec2 a, vec2 b){ vec2 pa = p - a, ba = b - a; float h = clamp(dot(pa,ba)/dot(ba,ba), 0.0, 1.0); return length(pa - ba*h); }
 float ell(vec2 p, vec2 r){ return (length(p / r) - 1.0) * min(r.x, r.y); }
@@ -96,17 +110,22 @@ float eyeD(vec2 p, float side){
   float dx = min(seg(p, vec2(-0.036, 0.04), vec2(0.036, -0.04)), seg(p, vec2(-0.036, -0.04), vec2(0.036, 0.04))) - 0.011;
   float dg = min(seg(p, vec2(-0.034 * side, 0.036), vec2(0.03 * side, 0.0)), seg(p, vec2(0.03 * side, 0.0), vec2(-0.034 * side, -0.036))) - 0.011;
   float df = seg(p, vec2(-0.045, 0.0), vec2(0.045, 0.0)) - 0.01;
+  // soft union weighted by expression weights: each shape fades and grows in with its weight
   float d = 1.0;
-  if (wn > 0.01) d = min(d, mix(1.0, dn, step(0.5, wn)));
-  if (uW.x > 0.5) d = min(d, dh); if (uW.y > 0.5) d = min(d, dx); if (uW.w > 0.5) d = min(d, dg); if (uFlat > 0.5) d = min(d, df);
-  if (uW.z > 0.5) d = min(d, dn);
+  d = min(d, mix(0.05, dn, smoothstep(0.0, 1.0, max(wn, uW.z))));
+  d = min(d, mix(0.05, dh / mix(0.6, 1.0, uW.x), smoothstep(0.0, 1.0, uW.x)));
+  d = min(d, mix(0.05, dx / mix(0.6, 1.0, uW.y), smoothstep(0.0, 1.0, uW.y)));
+  d = min(d, mix(0.05, dg / mix(0.6, 1.0, uW.w), smoothstep(0.0, 1.0, uW.w)));
+  d = min(d, mix(0.05, df / mix(0.6, 1.0, uFlat), smoothstep(0.0, 1.0, uFlat)));
   return d; }
 `).replace("#include <map_fragment>", `#include <map_fragment>
-float vm = (vBP.z > 0.1) ? visorMask(vBP.xy) : 0.0; diffuseColor.rgb = mix(diffuseColor.rgb, uVisor, vm);
+float lum0 = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
+float vm = max((vBP.z > 0.1) ? visorMask(vBP.xy) : 0.0, ((vBP.z > 0.05) ? visorMaskBig(vBP.xy) : 0.0) * (1.0 - smoothstep(0.32, 0.55, lum0)));
+diffuseColor.rgb = mix(diffuseColor.rgb, uVisor, vm);
 vec2 luv = (vBP.xy - uLogoBox.xy) / uLogoBox.zw;
 if (vBP.z > 0.05 && vArm < 0.5 && luv.x > 0.0 && luv.x < 1.0 && luv.y > 0.0 && luv.y < 1.0) { vec4 lc = texture2D(uLogo, luv); diffuseColor.rgb = mix(diffuseColor.rgb, lc.rgb, lc.a * 0.96); }`)
-      .replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.3, vm);")
-      .replace("#include <normal_fragment_maps>", "#include <normal_fragment_maps>\nnormal = normalize(mix(normal, nonPerturbedNormal, (vBP.z > 0.1) ? visorMask(vBP.xy) : 0.0));")
+      .replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.22, vm);")
+      .replace("#include <normal_fragment_maps>", "#include <normal_fragment_maps>\nnormal = normalize(mix(normal, normalize(vVN), vm));")
       .replace("#include <lights_fragment_maps>", "#include <lights_fragment_maps>\n#if defined( RE_IndirectSpecular )\nradiance *= mix(1.0, 0.28, vm);\n#endif")
       .replace("#include <metalnessmap_fragment>", "#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, 0.0, vm);")
       .replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
@@ -129,7 +148,7 @@ R3D.buildReady = new Promise((res, rej) => {
   ld.load(base + "robot.glb", (g) => {
     let mesh; g.scene.traverse((o) => { if (o.isMesh) mesh = o; });
     const geo = mesh.geometry; skin(geo);
-    const mat = mesh.material; if (R3D.debugWeights) { mat.vertexColors = true; } faceShader(mat);
+    const mat = mesh.material; if (R3D.debugWeights) { mat.vertexColors = true; } if (mat.normalScale) mat.normalScale.set(0.35, 0.35); faceShader(mat);
     root = new THREE.Bone(); armL = new THREE.Bone(); armR = new THREE.Bone();
     armL.position.copy(SL); armR.position.copy(SR); root.add(armL); root.add(armR);
     const sm = new THREE.SkinnedMesh(geo, mat); sm.add(root); sm.bind(new THREE.Skeleton([root, armL, armR]));
@@ -143,22 +162,25 @@ window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady
 const D2R = Math.PI / 180;
 function blinkAt(t) { // deterministic blinks every 2.6-4.1 s, sometimes double
   let b = 0; for (let s = 1.6, k = 0; s < 400; s += [3.2, 2.6, 4.1, 3.4][k++ % 4]) { if (s > t + 0.3) break;
-    for (const o of k % 3 === 0 ? [0, 0.24] : [0]) { const d = t - (s + o); if (d >= 0 && d < 0.16) b = Math.max(b, d < 0.07 ? d / 0.07 : 1 - (d - 0.07) / 0.09); } }
+    for (const o of k % 3 === 0 ? [0, 0.3] : [0]) { const d = t - (s + o); if (d >= 0 && d < 0.22) { const u = d < 0.09 ? d / 0.09 : 1 - (d - 0.09) / 0.13; b = Math.max(b, 0.5 - 0.5 * Math.cos(Math.PI * u)); } } }
   return b; }
 function render(t) {
   R3D.lastT = t; if (!ready) return;
   const S = R3D.state, env = window.VO_ENV || [];
-  const f = Math.min(env.length - 1, Math.max(0, Math.round(t * 30))), e = env[f] || 0, ep = env[Math.max(0, f - 2)] || 0;
+  const fe = (k) => env[Math.min(env.length - 1, Math.max(0, k))] || 0, ft = t * 30 + 1.2, f0 = Math.floor(ft), fr = ft - f0;
+  const lin = (k) => fe(k) * (1 - fr) + fe(k + 1) * fr; // sub-frame interpolation
+  const e = 0.12 * lin(f0 + 1) + 0.38 * lin(f0) + 0.3 * lin(f0 - 1) + 0.2 * lin(f0 - 2);
   const talk = R3D.talkUntil == null || t < R3D.talkUntil ? 1 : 0;
-  U.uMouth.value = talk * Math.min(1, 0.04 + 1.15 * e + 0.6 * Math.abs(e - ep));
+  const mo = Math.min(1, Math.max(0, (e - 0.04) * 1.35)); U.uMouth.value = talk * (mo * mo * (3 - 2 * mo));
   const expr = S.happy + S.x + S.wide + S.excited + S.flat;
   U.uBlink.value = expr > 0.3 ? 0 : blinkAt(t);
   U.uW.value.set(S.happy, S.x, S.wide, S.excited); U.uFlat.value = S.flat; U.uLook.value.set(-S.lookX, -S.lookY);
   // idle life (functions of t only) + tweened state
   const idle = Math.sin(t * 2 * Math.PI / 2.8), idle2 = Math.sin(t * 2 * Math.PI / 3.7 + 1.3);
   group.rotation.set(S.pitch * D2R, (S.yaw + (S.yawT || 0) + 3 * idle2) * D2R, (S.lean + 1.2 * idle) * D2R);
-  group.position.set(0, S.bob + 0.006 * Math.sin(t * 2 * Math.PI / 1.4) + 0.004 * e, 0);
-  group.scale.set(1 / Math.sqrt(S.sq), S.sq, 1 / Math.sqrt(S.sq));
+  const z = S.zoom || 1, A = 0.978 - ((R3D.anchorY || 1990) - (R3D.headTopY || 1402)) / PX; // zoom about the robot's base anchor
+  group.position.set(0, A * (1 - z) - (S.zy || 0) / PX + S.bob + 0.005 * Math.sin(t * 2 * Math.PI / 1.6) + 0.003 * e, 0);
+  group.scale.set(z / Math.sqrt(S.sq), z * S.sq, z / Math.sqrt(S.sq));
   armL.rotation.set((S.aLx + 3 * idle) * D2R, S.aLy * D2R, (S.aLz + 4 * idle2) * D2R);
   armR.rotation.set((S.aRx - 3 * idle) * D2R, S.aRy * D2R, (S.aRz - 4 * idle) * D2R);
   renderer.render(scene, cam);

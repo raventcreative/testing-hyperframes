@@ -26,7 +26,7 @@ window.REEL_FX = function (c) {
   const poseAt = (t) => { let p = track[0].p; track.forEach((k) => { if (k.t <= t) p = k.p; }); return p; };
   const side = (t) => (poseAt(t).x > 300 ? "R" : "L");
   st(rm, Object.assign({ transformOrigin: "318px 1990px" }, cur, { y: 700 }), 0);
-  const squash = (at) => S3 ? ft(S3, { sq: 1 }, { keyframes: [{ sq: 0.93, duration: 0.07, ease: "power1.out" }, { sq: 1, duration: 0.3, ease: "back.out(2.5)" }] }, at) : ft(rob, { scaleX: 1, scaleY: 1 }, { keyframes: [{ scaleX: 1.06, scaleY: 0.92, duration: 0.07, ease: "power1.out" }, { scaleX: 1, scaleY: 1, duration: 0.3, ease: "back.out(2.5)" }] }, at);
+  const squash = (at) => S3 ? ft(S3, { sq: 1 }, { keyframes: [{ sq: 0.955, duration: 0.12, ease: "sine.out" }, { sq: 1, duration: 0.4, ease: "sine.inOut" }] }, at) : ft(rob, { scaleX: 1, scaleY: 1 }, { keyframes: [{ scaleX: 1.06, scaleY: 0.92, duration: 0.07, ease: "power1.out" }, { scaleX: 1, scaleY: 1, duration: 0.3, ease: "back.out(2.5)" }] }, at);
   const enter = (pose, at) => { const n = POSE[pose || "home"]; ft(rm, Object.assign({}, n, { y: 700 }), Object.assign({}, n, { duration: 0.55, ease: "back.out(1.4)" }), at); cur = n; track.push({ t: at, p: n }); squash(at + 0.5); };
   const go = (pose, at, dur) => { const n = POSE[pose]; dur = dur || 0.7; const dir = n.x > cur.x ? 1 : -1;
     ft(rm, { x: cur.x, scale: cur.scale }, { x: n.x, scale: n.scale, duration: dur, ease: "power2.inOut" }, at);
@@ -37,6 +37,32 @@ window.REEL_FX = function (c) {
   const dip = (pose, at, gap) => { const n = POSE[pose]; gap = gap == null ? 0.25 : gap;
     ft(rm, Object.assign({}, cur), { keyframes: [{ y: 700, duration: 0.28, ease: "power2.in" }, { x: n.x, scale: n.scale, duration: 0.01 }, { y: n.y, duration: 0.5, delay: gap, ease: "back.out(1.5)" }] }, at);
     squash(at + 0.28 + gap + 0.47); cur = n; track.push({ t: at + 0.3, p: n }); };
+  // ---- 3D robot: everything eased (no overshoot pops); zoom/zy live in R3D.state so close-ups stay sharp
+  const css = (n) => ({ x: n.x, y: 0, scale: 1 });
+  const zTo = (n, at, dur) => ft(S3, { zoom: cur.scale, zy: cur.y }, { zoom: n.scale, zy: n.y, duration: dur, ease: "sine.inOut" }, at);
+  if (S3) {
+    st(rm, Object.assign({ transformOrigin: "318px 1990px" }, css(cur), { y: 760 }), 0);
+    const enter3 = (pose, at) => { const n = POSE[pose || "home"];
+      ft(rm, Object.assign({}, css(n), { y: 760 }), Object.assign({}, css(n), { duration: 1.0, ease: "power3.out" }), at);
+      ft(S3, { yawT: 18, sq: 0.94, zoom: n.scale, zy: n.y }, { yawT: 0, sq: 1, zoom: n.scale, zy: n.y, duration: 1.1, ease: "sine.out" }, at);
+      cur = n; track.push({ t: at, p: n }); };
+    const go3 = (pose, at, dur) => { const n = POSE[pose]; dur = dur || 0.9; const dir = n.x > cur.x ? 1 : n.x < cur.x ? -1 : 0;
+      ft(rm, { x: cur.x }, { x: n.x, duration: dur, ease: "sine.inOut" }, at);
+      ft(rm, { y: 0 }, { keyframes: [{ y: -38, duration: dur * 0.5, ease: "sine.out" }, { y: 0, duration: dur * 0.5, ease: "sine.in" }] }, at);
+      ft(rm, { rotation: 0 }, { keyframes: [{ rotation: 3 * dir, duration: dur * 0.45, ease: "sine.inOut" }, { rotation: 0, duration: dur * 0.55, ease: "sine.inOut" }] }, at);
+      ft(S3, { yawT: 0 }, { keyframes: [{ yawT: 14 * dir, duration: dur * 0.45, ease: "sine.inOut" }, { yawT: 0, duration: dur * 0.55, ease: "sine.inOut" }] }, at);
+      if (n.scale !== cur.scale || n.y !== cur.y) zTo(n, at, dur);
+      squash(at + dur - 0.05); cur = n; track.push({ t: at + dur * 0.5, p: n }); };
+    const dip3 = (pose, at, gap) => { const n = POSE[pose]; gap = gap == null ? 0.25 : gap;
+      ft(rm, css(cur), { keyframes: [{ y: 760, duration: 0.4, ease: "power2.in" }, { x: n.x, duration: 0.01 }, { y: 0, duration: 0.8, delay: gap, ease: "power3.out" }] }, at);
+      if (n.scale !== cur.scale || n.y !== cur.y) ft(S3, { zoom: cur.scale, zy: cur.y }, { zoom: n.scale, zy: n.y, duration: 0.01 }, at + 0.42);
+      ft(S3, { yawT: 0 }, { keyframes: [{ yawT: 0, duration: 0.41 + gap }, { yawT: n.x > cur.x ? -16 : 16, duration: 0.01 }, { yawT: 0, duration: 0.9, ease: "sine.out" }] }, at);
+      cur = n; track.push({ t: at + 0.3, p: n }); };
+    const hop3 = (at, h) => { ft(rm, { y: 0 }, { keyframes: [{ y: -(h || 40), duration: 0.26, ease: "sine.out" }, { y: 0, duration: 0.3, ease: "sine.in" }] }, at); squash(at + 0.54); };
+    const shiver3 = (at, dur) => { const x = cur.x, k = []; for (let i = 0; i < Math.round((dur || 0.5) / 0.07); i++) k.push({ x: x + (i % 2 ? -6 : 6), duration: 0.07, ease: "sine.inOut" }); k.push({ x, duration: 0.07 });
+      ft(rm, { x }, { keyframes: k }, at); };
+    Object.assign(c, { _3d: { enter3, go3, dip3, hop3, shiver3 } });
+  }
   const hop = (at, h) => { const y = cur.y; ft(rm, { y }, { keyframes: [{ y: y - (h || 55), duration: 0.18, ease: "power2.out" }, { y, duration: 0.2, ease: "power2.in" }] }, at); squash(at + 0.37); };
   const shiver = (at, dur) => { const x = cur.x, k = []; for (let i = 0; i < Math.round((dur || 0.5) / 0.05); i++) k.push({ x: x + (i % 2 ? -9 : 9), duration: 0.05 }); k.push({ x, duration: 0.05 });
     ft(rm, { x }, { keyframes: k }, at); };
@@ -61,7 +87,7 @@ window.REEL_FX = function (c) {
     sv.innerHTML = keys.map((k) => `<g data-k="${k === "exL" || k === "exR" ? "excited" : k}" style="opacity:0;transform-origin:22px 35px">${EX[k]}</g>`).join("");
     headIn.appendChild(sv); exs.push(sv);
   });
-  const face = (name, at, dur) => { if (S3) { ft(S3, { [name]: 0 }, { [name]: 1, duration: 0.12, ease: "power2.out" }, at); ft(S3, { [name]: 1 }, { [name]: 0, duration: 0.1 }, at + dur); return; }
+  const face = (name, at, dur) => { if (S3) { ft(S3, { [name]: 0 }, { [name]: 1, duration: 0.22, ease: "sine.inOut" }, at); ft(S3, { [name]: 1 }, { [name]: 0, duration: 0.22, ease: "sine.inOut" }, at + dur); return; }
     const gs = exs.map((s) => s.querySelector(`[data-k="${name}"]`));
     ft(covs, { opacity: 0 }, { opacity: 1, duration: 0.06 }, at);
     ft(gs, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.18, ease: "back.out(2.2)" }, at + 0.02);
@@ -70,23 +96,24 @@ window.REEL_FX = function (c) {
 
   /* ---------------- side-aware gestures (scheduled, never overlapping) ---------------- */
   const G = [];
-  const point = (at) => G.push({ t: at, k: "point", d: 1.5 });
-  const wave = (at) => G.push({ t: at, k: "wave", d: 1.4 });
-  const beat = (at) => G.push({ t: at, k: "beat", d: 0.55 });
+  const point = (at) => G.push({ t: at, k: "point", d: S3 ? 1.7 : 1.5 });
+  const wave = (at) => G.push({ t: at, k: "wave", d: S3 ? 1.9 : 1.4 });
+  const beat = (at) => G.push({ t: at, k: "beat", d: S3 ? 0.7 : 0.55 });
   const runGestures = () => {
     G.sort((a, b) => a.t - b.t); let busy = -1, n = 0;
     G.forEach((g) => { if (g.t < busy + 0.05) return; busy = g.t + g.d; const R = side(g.t + 0.2) === "R";
       if (S3) { const L0 = REST.aLz || 0, R0 = REST.aRz || 0;
         const arm = (keys, at) => { const f = {}; Object.keys(keys[0]).forEach((k) => (f[k] = S3[k] === undefined ? 0 : (k === "aLz" ? L0 : k === "aRz" ? R0 : 0)));
           ft(S3, f, { keyframes: keys }, at); };
-        if (g.k === "wave") { if (R) arm([{ aRz: 55, aRx: -15, duration: 0.3, ease: "power2.out" }, { aRz: 38, duration: 0.2 }, { aRz: 58, duration: 0.2 }, { aRz: 40, duration: 0.2 }, { aRz: R0, aRx: 0, duration: 0.45, ease: "power2.inOut" }], g.t);
-          else arm([{ aLz: -28, aLx: -15, duration: 0.3, ease: "power2.out" }, { aLz: -8, duration: 0.2 }, { aLz: -30, duration: 0.2 }, { aLz: -10, duration: 0.2 }, { aLz: L0, aLx: 0, duration: 0.45, ease: "power2.inOut" }], g.t); }
+        const s = "sine.inOut";
+        if (g.k === "wave") { if (R) arm([{ aRz: 52, aRx: -14, duration: 0.42, ease: s }, { aRz: 36, duration: 0.3, ease: s }, { aRz: 54, duration: 0.3, ease: s }, { aRz: 38, duration: 0.3, ease: s }, { aRz: R0, aRx: 0, duration: 0.55, ease: s }], g.t);
+          else arm([{ aLz: -26, aLx: -14, duration: 0.42, ease: s }, { aLz: -8, duration: 0.3, ease: s }, { aLz: -28, duration: 0.3, ease: s }, { aLz: -10, duration: 0.3, ease: s }, { aLz: L0, aLx: 0, duration: 0.55, ease: s }], g.t); }
         if (g.k === "point") { const m = R ? -1 : 1;
-          if (R) arm([{ aLz: -40, aLx: -25, duration: 0.33, ease: "power2.out" }, { aLz: -40, aLx: -25, duration: 0.7 }, { aLz: L0, aLx: 0, duration: 0.45, ease: "power2.inOut" }], g.t);
-          else arm([{ aRz: 50, aRx: -25, duration: 0.33, ease: "power2.out" }, { aRz: 50, aRx: -25, duration: 0.7 }, { aRz: R0, aRx: 0, duration: 0.45, ease: "power2.inOut" }], g.t);
-          ft(S3, { yaw: 0, lookX: 0 }, { keyframes: [{ yaw: 16 * m, lookX: 0.018 * m, duration: 0.33, ease: "power2.out" }, { duration: 0.7 }, { yaw: 0, lookX: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
-        if (g.k === "beat") { if (n++ % 2) arm([{ aLz: L0 - 16, aLx: -8, duration: 0.2, ease: "power2.out" }, { aLz: L0, aLx: 0, duration: 0.32, ease: "power2.in" }], g.t);
-          else arm([{ aRz: R0 + 16, aRx: -8, duration: 0.2, ease: "power2.out" }, { aRz: R0, aRx: 0, duration: 0.32, ease: "power2.in" }], g.t); }
+          if (R) arm([{ aLz: -38, aLx: -24, duration: 0.45, ease: s }, { aLz: -42, aLx: -24, duration: 0.6, ease: s }, { aLz: L0, aLx: 0, duration: 0.6, ease: s }], g.t);
+          else arm([{ aRz: 48, aRx: -24, duration: 0.45, ease: s }, { aRz: 52, aRx: -24, duration: 0.6, ease: s }, { aRz: R0, aRx: 0, duration: 0.6, ease: s }], g.t);
+          ft(S3, { yaw: 0, lookX: 0 }, { keyframes: [{ yaw: 14 * m, lookX: 0.016 * m, duration: 0.45, ease: s }, { duration: 0.6 }, { yaw: 0, lookX: 0, duration: 0.6, ease: s }] }, g.t); }
+        if (g.k === "beat") { if (n++ % 2) arm([{ aLz: L0 - 14, aLx: -8, duration: 0.28, ease: s }, { aLz: L0, aLx: 0, duration: 0.4, ease: s }], g.t);
+          else arm([{ aRz: R0 + 14, aRx: -8, duration: 0.28, ease: s }, { aRz: R0, aRx: 0, duration: 0.4, ease: s }], g.t); }
         return; }
       if (g.k === "wave") { const h = R ? rh : lh, m = R ? -1 : 1;
         ft(h, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10 * m, y: -95, rotation: 20 * m, duration: 0.28, ease: "power2.out" }, { rotation: -18 * m, duration: 0.2 }, { rotation: 20 * m, duration: 0.2 },
@@ -144,5 +171,6 @@ window.REEL_FX = function (c) {
   const sticker = (el, at, rot) => { st(el, { opacity: 0 }, 0); ft(el, { opacity: 0, scale: 0.3, rotation: rot * 3 }, { opacity: 1, scale: 1, rotation: rot, duration: 0.35, ease: "back.out(2.4)" }, at); };
   const marker = (el, at, dur) => ft(el, { scaleX: 0 }, { scaleX: 1, duration: dur || 0.35, ease: "power2.inOut", transformOrigin: "0% 50%" }, at);
 
-  return { POSE, enter, go, dip, hop, shiver, face, point, wave, beat, runGestures, poseAt, side, theme, stripes, blocks, sweep, drop, sticker, marker, split };
+  const X = c._3d; const api3 = X ? { enter: X.enter3, go: X.go3, dip: X.dip3, hop: X.hop3, shiver: X.shiver3 } : {};
+  return Object.assign({ POSE, enter, go, dip, hop, shiver, face, point, wave, beat, runGestures, poseAt, side, theme, stripes, blocks, sweep, drop, sticker, marker, split }, api3);
 };

@@ -51,10 +51,42 @@ Mascot (host, left): an intent on every beat (present / question / explain / emp
 (`const glance = (t) => 0;`). All robot/mascot word lookups were checked against timing.json (none missing).
 
 ## QA (real runtime: `npx --yes hyperframes@0.8.186 snapshot` + `validate`)
-QA_PLACEHOLDER
+Sheets (JPG only, PNG dumps deleted) in `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r22/`:
+- **Full pass qa1, 76 frames** (first frame, every scene 4–6×, every cut ±0.03 s, last frame 46.53): labelled sheets `qa1_sheet_a.jpg`
+  (0–10.13 s) · `qa1_sheet_b.jpg` (10.6–20.2) · `qa1_sheet_c.jpg` (21.0–29.6) · `qa1_sheet_d.jpg` (30.5–38.7) · `qa1_sheet_e.jpg`
+  (38.76–46.53) + the tool's own `qa1/contact-sheet-1…9.jpg`; mascot/robot eyes close-up `qa1_eyes.jpg` (0, 4.5, 10.6, 19.4, 27.8, 33.1,
+  41.0, 46.53 s: pupils/irises present everywhere; at 0 s the mascot is in its settle, at 4.5 s it squints on the question — eyes not blank).
+- Found in qa1 and fixed: (1) active rail pill showed a blank white number circle (white digit over the light inactive circle) → the inactive
+  number + label now fade out while a pill is active; (2) s06 raised barrier arms read as stray stubs → open lanes show no arm, the arm swings in
+  on "ask"; (3) s01 exit left the hero empty ~0.25 s before the cut → exit 0.08 s later; (4) s02 clipboard still overlapped the incoming rail →
+  exits 0.16 s earlier; (5) s03 command strip showed an empty box before typing → pop + typing synced.
+- **Fix pass qa2** (13 frames: 5.2, 5.437, 9.6, 9.85, 10.13, 11.75, 12.2, 23.5, 25.2, 26.1, 29.6, 36.5, 39.3 s): `qa2_sheet.jpg` (+ `zoom_c.jpg`
+  rail/arms close-up) — all clean. `validate` then flagged 5 WCAG contrast notes (light grey #9aa7c0 small text in s01) → all small grey text
+  in s01–s10 now #5d6f8f; **`validate` again: 0 errors, 0 contrast warnings** (warnings left = kit "multiple instances of Three.js" + software-GL
+  "GPU stall due to ReadPixels"). **qa3** (0, 4.66, 25.0, 25.3, 46.53 s, `qa3_sheet.jpg`) confirms the last edits.
+- `lint`: 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the kit).
+- Dev-preview sheets used while building (not the real runtime): `dev_s01.jpg` … `dev_s11.jpg`; text-overflow checker `tools/overflow.cjs`
+  (every text element inside its card and inside the hero zone at each scene's fully built moment: clean; the rotated KOSONG stamp was moved
+  inside its card); caption-width check `tools/capw.cjs` (all 36 caption chunks ≤ 869 px of the 940 px caption box → one line each).
+- Every initial state is pinned at 0 in the nested P0 timeline (scenes, captions, rail); scene words throw if missing; all robot/mascot word
+  lookups exist in timing.json.
 
 ## Known issues / notes for the lead
-KNOWN_PLACEHOLDER
+- Duration 46.57 s (speech ≈ 44.7 s, within 35–48 s; ~1.4 s end card after "DM."). VO is the only take (no re-take, ≈ 707 ElevenLabs
+  characters used).
+- Captions: during the 0.34 s word rise a chunk can show part of a word for a frame (kit caption system). The last chunk ("aku kirim lewat
+  DM.") stays up over the end card (same as R8/R12/R20).
+- "auditd" is spoken "audit-D" (written "audit-d" for the TTS; caption shows auditd). "git diff" is pronounced correctly (checked with English
+  whisper); Indonesian whisper spells it "Git Div".
+- Facts are from the official docs (13 Nov 2026). hermes-agent.nousresearch.com and opencode.ai are blocked by this sandbox's proxy, so their
+  docs were read from the source files in the official GitHub repos (website/docs/… and services/site/src/docs/…), same content.
+- OpenCode now has V1 (`opencode-ai` 1.19.5) and V2 (`@opencode/cli` 2.3.0): the screen shows the V1 `permission` keys (still read by V2 per its
+  migration guide); the DM gives the optional native V2 `permissions` array too.
+- Hermes `approvals.mode: manual` asks only for commands on Hermes' dangerous-pattern list (said on screen: "perintah bahaya: tanya kamu" and in
+  the DM), not for every command.
+- Illustrative content (client chat, /var/www/toko files, 09.xx log lines, Promo Lebaran diff, backup.sql) is labelled CONTOH / contoh on screen.
+- The robot types on its holo keyboard at three beats (commit, OpenCode config, git status) by design. No music (lead adds it).
+- `.hyperframes/` in this folder is created by the CLI (lint/validate/snapshot) and is git-ignored.
 
 ## Assets
 Poppins 400/700 (OFL, `assets/fonts/OFL-Poppins.txt`) · lucide-static 0.460.0 icons (ISC, `assets/icons/LICENSE-lucide.txt`, inlined in

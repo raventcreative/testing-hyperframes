@@ -56,7 +56,43 @@ keyboard, scans the blueprint/folder/files/plan, shock on "malah", "disentuh," a
   hermes-agent.nousresearch.com is blocked by this session's proxy (docs read from their source in the repo).
 
 ## QA (real runtime, hyperframes 0.8.186)
-(see below — filled after the snapshot passes)
+- `npx --yes hyperframes@0.8.186 lint .` → 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the R9/R15/R19 kit).
+- `npx --yes hyperframes@0.8.186 validate .` → **0 errors, 0 contrast warnings**; remaining warnings = "multiple Three.js instances"
+  (robot + mascot bundles, as in the kit) + SwiftShader ReadPixels notices. (The first run flagged the s04 repo text at 3.8:1 and the plan
+  rows / stamp under the s10 action sheet → repo text darkened, sheet + stamps made opaque, the two covered rows fade out under the sheet.)
+- Script check (`tools/check_scene.cjs`, preview on :8953, then stopped): s01–s11, robot, mascot, main all register, no exceptions; every
+  `wt("…")` word lookup in the scenes, hosts and `tools/sfx.py` exists in `vendor/vo_words.js`; every scene timeline ends inside its slot.
+- Text widths measured with the real Poppins files for every long string (headlines, plan rows at 28 px, chips, stamps, CTA card, header
+  names/subs, cover lines): all fit their boxes (the WhatsApp button label was 7 px from its edge → recentred).
+- Snapshots (`snapshot . --at … --no-end --timeout 60000`): one full pass of 77 frames (first frame, every beat, both sides of every cut,
+  the end) + two targeted fix passes (13 + 8 frames). Contact sheets (JPG): `production/qa/runtime_full_1..4.jpg` (full frames),
+  `production/qa/runtime_hero_1..5.jpg` (hero zone + captions), `production/qa/runtime_hosts_1..5.jpg` (mascot + robot, eye check),
+  `production/qa/runtime_fix_1.jpg`, `production/qa/runtime_fix_2.jpg` (after the fixes). The full-pass sheets predate the fixes listed
+  below. PNG dumps deleted.
+- Mascot eyes: pupils in every frame of the full pass (closed lids only in blinks); glance disabled from the start. Captions never covered
+  (hero content stays above y 935; hosts below).
+- Fixed during QA: **s10 ID collision** — the action-sheet chips were `s10-r0/r1`, the same ids as the plan document's rows, so their
+  pop-in hid rows 0–1 at the start of s10 (renamed `s10-q0/q1`); s03 the lifted gate arm touched the headline (shorter arm, 72°); s10
+  progress label unreadable over the dark track (white label, darker fill); plan document: more space between "RENCANA" and the file name,
+  row text 26 → 28 px, strike lines centred on the text box; s07 stamp moved so "tidak ada" stays readable; s05 "…dan banyak lainnya" →
+  the honest "biaya ikut model yang kamu pilih"; s04/s06 tweens that ran past their slot end.
 
 ## Known issues / notes for the lead
-(see below)
+- Frame 0 shows the hook headline, the shop card and the empty panel only: the mascot pops up from below over 0.5 s and the robot flies
+  in over 0.75 s (kit behaviour, same as R9/R15/R19). The cover is separate.
+- Short "header only" beat at the start of s04 (≈0.2 s while the header plate builds) and a caption chunk can show an empty chip for 1–2
+  frames while its first word rises (house caption behaviour).
+- All examples are illustrative and labelled CONTOH / mocks: tokokue.id, "Kue Lapis Legit", the file names, "1 + 5", folder `toko-kue/`,
+  the plan's contents, "4 m" on the blueprint. The Build | Plan switcher, BACA/EDIT columns, command bar, plan document, stamps and progress
+  are our own mocks, not screenshots. Tool names are text only (no logos).
+- Honest nuances kept off the VO (for the DM template): OpenCode's Plan agent may still write its own plan file and its shell commands
+  follow the permission config; switch keys = **Shift+Tab** in OpenCode 2.x (`/agents` also works), **Tab** in 1.x. Hermes `/plan` is a
+  planning-only instruction that saves `.hermes/plans/<timestamp>-<slug>.md` and then offers to execute — it is not a hard lock; for a hard
+  block there is the community plugin "plan-mode" (`github.com/100yenadmin/hermes-plan-mode`, listed in Hermes' plugin catalog). After
+  approval: OpenCode → back to the Build agent; Hermes → ask it to run the plan. Links: `github.com/anomalyco/opencode`,
+  `github.com/NousResearch/hermes-agent`.
+- No "aku pakai ini" claim (not verified that Freddie uses either tool).
+- `hyperframes preview/snapshot/validate` wrote `.hyperframes/` and `.thumbnails/` into the project folder (harmless, as in R15/R19); an
+  empty `.hyperframes/video-state-lock/` left by the last run was removed. The preview's stamped `data-hf-id` attributes were stripped and
+  `index.html` rebuilt with `tools/build_index.py`.
+- `vendor/r23icons.js` lists 86 icons; a few are unused (kept for consistency, ~40 KB).

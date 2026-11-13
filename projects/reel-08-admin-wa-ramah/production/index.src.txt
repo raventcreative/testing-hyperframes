@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — Admin WA Ramah</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/robot_rig2.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --n1: #0a0d2c; --n2: #294b77; --grad: linear-gradient(100deg, #0a0d2c 0%, #294b77 100%); --line: rgba(10,13,44,0.10);
+        --auto: #2f6fe4; --autoBg: #e7f0ff; --wa: #1fa855; --waBg: #dcf6e4; --red: #e5484d; --mute: rgba(10,13,44,0.55); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fd; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: var(--n1); -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #f4f7fd; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+
+      /* window: x 80-1000, y 290-1240 */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.84);
+        border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); transform-origin: 50% 50%; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.92); }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 2px 10px; }
+      #mode { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; color: var(--mute); }
+      #mode .st { min-width: 34px; color: var(--red); }
+      #sw { position: relative; width: 62px; height: 34px; border-radius: 17px; background: rgba(10,13,44,0.14); }
+      #knob { position: absolute; left: 4px; top: 4px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(10,13,44,0.25); }
+      #rail { position: absolute; left: 0; top: 60px; bottom: 0; width: 72px; border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 18px; }
+      .ri { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; color: rgba(10,13,44,0.45); }
+      .ri .ic { width: 22px; height: 22px; } .ri.on { background: rgba(41,75,119,0.10); color: var(--n2); }
+      #area { position: absolute; left: 72px; top: 60px; width: 848px; height: 890px; overflow: hidden; background: rgba(244,247,253,0.6); }
+      #areaGrid { position: absolute; inset: 0; background-image: radial-gradient(rgba(41,75,119,0.13) 1px, transparent 1.4px); background-size: 22px 22px; }
+      #cam { position: absolute; left: 0; top: 0; width: 848px; height: 890px; transform-origin: 0 0; }
+      .card { position: absolute; background: #fff; border: 1.5px solid var(--line); border-radius: 18px; box-shadow: 0 6px 20px rgba(41,75,119,0.08); }
+
+      /* left column: workflow */
+      #flow { left: 18px; top: 18px; width: 264px; height: 854px; padding: 18px 14px; }
+      #flow .hd { display: flex; align-items: center; justify-content: space-between; }
+      #aiState { font-size: 12px; font-weight: 700; border-radius: 10px; padding: 2px 9px; background: rgba(229,72,77,0.12); color: var(--red); }
+      .fnode { position: absolute; left: 14px; right: 14px; border-radius: 16px; border: 1.5px solid var(--line); background: #fff; padding: 12px 12px; box-shadow: 0 4px 14px rgba(41,75,119,0.08); }
+      .fnode .t { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; line-height: 1.2; }
+      .fnode .t .lg { width: 40px; height: 40px; border-radius: 11px; background: rgba(41,75,119,0.08); display: flex; align-items: center; justify-content: center; color: var(--n1); flex: none; }
+      .fnode .t .lg .ic { width: 22px; height: 22px; }
+      .fnode .t em { display: block; font-style: normal; font-size: 12.5px; font-weight: 400; color: var(--mute); }
+      #nIn { top: 64px; } #nIn .lg { color: var(--wa); }
+      #nAi { top: 196px; padding-bottom: 14px; }
+      #nAi .t .lg { background: var(--grad); color: #fff; }
+      .chip { display: flex; align-items: center; gap: 8px; height: 38px; margin-top: 8px; padding: 0 10px; border-radius: 11px; background: rgba(41,75,119,0.06); border: 1.5px solid transparent; font-size: 14px; }
+      .chip .ic { width: 17px; height: 17px; color: var(--n2); }
+      #nOut { top: 452px; }
+      .arrow { position: absolute; left: 50%; width: 3px; margin-left: -1.5px; background: rgba(41,75,119,0.22); border-radius: 2px; }
+      .arrow i { position: absolute; left: 50%; top: 0; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--auto); box-shadow: 0 0 10px rgba(47,111,228,0.8); opacity: 0; }
+      #a1 { top: 136px; height: 60px; } #a2 { top: 392px; height: 60px; }
+      #lost { position: absolute; left: 14px; right: 14px; top: 560px; border-radius: 14px; padding: 14px; background: rgba(229,72,77,0.08); border: 1.5px solid rgba(229,72,77,0.35); opacity: 0; }
+      #lost b { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--red); } #lost b .ic { width: 18px; height: 18px; }
+      #lost span { display: block; font-size: 13px; color: rgba(10,13,44,0.7); margin-top: 4px; line-height: 1.35; }
+      /* kitchen + counter (replace lost box area) */
+      #ticket { position: absolute; left: 14px; right: 14px; top: 548px; border-radius: 16px; background: #fffaf2; border: 1.5px dashed rgba(240,140,26,0.6); padding: 12px 14px; opacity: 0; }
+      #ticket .th { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #c46d0e; }
+      #ticket .th .ic { width: 18px; height: 18px; color: #f08c1a; }
+      #ticket .no { font-size: 20px; font-weight: 700; margin-top: 4px; }
+      #ticket .ln { display: flex; justify-content: space-between; font-size: 14px; margin-top: 3px; }
+      #ticket .stt { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 700; color: #c46d0e; background: rgba(240,140,26,0.15); border-radius: 10px; padding: 2px 10px; }
+      #today { position: absolute; left: 14px; right: 14px; top: 728px; border-radius: 16px; background: var(--autoBg); padding: 12px 14px; opacity: 0; }
+      #today .k { font-size: 12.5px; color: var(--n2); font-weight: 700; letter-spacing: 1px; }
+      #today .v { font-size: 34px; font-weight: 700; line-height: 1.1; color: var(--auto); }
+      #today .v small { font-size: 14px; font-weight: 400; color: var(--mute); margin-left: 4px; }
+
+      /* phone */
+      #phone { left: 300px; top: 18px; width: 530px; height: 854px; border-radius: 46px; padding: 12px; background: #0b0f22; border: none; box-shadow: 0 24px 60px rgba(10,13,44,0.35); }
+      #scr { position: relative; width: 100%; height: 100%; border-radius: 36px; overflow: hidden; background: #eaf0f6; }
+      #pHead { position: absolute; left: 0; right: 0; top: 0; height: 86px; background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 18px 20px 0; z-index: 2; }
+      #pHead .av { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #f08c1a, #e5484d); color: #fff; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center; }
+      #pHead b { display: block; font-size: 18px; line-height: 1.2; }
+      #pHead .sub { position: relative; height: 18px; width: 220px; font-size: 13.5px; color: var(--wa); }
+      #pHead .sub span { position: absolute; left: 0; top: 0; white-space: nowrap; }
+      #chatBg { position: absolute; left: 0; right: 0; top: 86px; bottom: 72px; overflow: hidden;
+        background-image: radial-gradient(rgba(41,75,119,0.10) 1.2px, transparent 1.6px); background-size: 20px 20px; }
+      #chat { position: absolute; left: 0; right: 0; top: 0; padding: 16px 16px 10px; }
+      .bb { position: relative; max-width: 380px; margin-top: 12px; padding: 11px 15px 22px; border-radius: 18px; font-size: 19px; line-height: 1.34; box-shadow: 0 1px 2px rgba(10,13,44,0.12); opacity: 0; }
+      .bb.in { margin-left: auto; background: #d9fbd0; border-bottom-right-radius: 6px; }
+      .bb.out { background: #fff; border-bottom-left-radius: 6px; }
+      .bb .tm { position: absolute; right: 12px; bottom: 5px; font-size: 11px; color: rgba(10,13,44,0.45); display: flex; align-items: center; gap: 3px; }
+      .bb .tm .ic { width: 15px; height: 15px; color: #34b7f1; }
+      .bb .who { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--auto); margin-bottom: 2px; }
+      .bb .who .ic { width: 14px; height: 14px; }
+      .menu { margin-top: 4px; } .menu div { display: flex; justify-content: space-between; gap: 18px; font-size: 17.5px; }
+      .menu div b { font-weight: 700; }
+      .ord { margin-top: 6px; border-radius: 12px; background: rgba(41,75,119,0.06); padding: 8px 12px; }
+      .ord .ln { display: flex; justify-content: space-between; gap: 16px; font-size: 17px; }
+      .ord .tot { display: flex; justify-content: space-between; border-top: 1px dashed rgba(10,13,44,0.2); margin-top: 6px; padding-top: 6px; font-size: 18px; font-weight: 700; color: var(--n2); }
+      .sys { margin: 14px auto 0; width: max-content; max-width: 420px; text-align: center; padding: 6px 14px; border-radius: 12px; font-size: 14px; font-weight: 700; opacity: 0; }
+      .sys.warn { background: rgba(229,72,77,0.12); color: var(--red); } .sys.ok { background: var(--autoBg); color: var(--auto); }
+      #pIn { position: absolute; left: 12px; right: 12px; bottom: 12px; height: 50px; border-radius: 25px; background: #fff; display: flex; align-items: center; padding: 0 18px; font-size: 15px; color: var(--mute); box-shadow: 0 1px 3px rgba(10,13,44,0.12); }
+      #pIn i { margin-left: auto; width: 38px; height: 38px; border-radius: 50%; background: var(--wa); display: flex; align-items: center; justify-content: center; color: #fff; }
+      #pIn i .ic { width: 18px; height: 18px; }
+      #pills { position: absolute; left: 300px; top: 370px; width: 530px; display: flex; flex-direction: column; align-items: center; gap: 16px; z-index: 5; }
+      #scrim { position: absolute; inset: 0; background: rgba(234,240,246,0.84); opacity: 0; z-index: 4; }
+      .pill { display: flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 22px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #fff; font-size: 27px; font-weight: 700; box-shadow: 0 16px 40px rgba(10,13,44,0.3); opacity: 0; }
+      .pill .ic { width: 30px; height: 30px; color: #8fb6ff; }
+
+      /* cursor + misc */
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(10,13,44,0.35)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--n2); background: rgba(41,75,119,0.12); opacity: 0; z-index: 29; }
+      #winDim { position: absolute; inset: 0; background: rgba(244,247,253,0.78); opacity: 0; }
+      #cta { position: absolute; left: 110px; width: 860px; top: 560px; padding: 56px 48px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 66px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; color: rgba(10,13,44,0.75); } #cta .sb b { color: var(--n2); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--grad); color: #fff; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
+      <!--ROBOT_CSS-->
+      #robot { filter: drop-shadow(0 18px 30px rgba(41,75,119,0.25)); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="34.4" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="34.4" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="dots"></div>
+        <div id="win">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Admin WhatsApp</span><span id="sim">SIMULASI</span>
+            <div id="mode">AI Admin<div id="sw"><i id="knob"></i></div><span class="st" id="stTxt">OFF</span></div></div>
+          <div id="rail"><div class="ri on"><span class="ic" data-i="message-square-text"></span></div><div class="ri"><span class="ic" data-i="workflow"></span></div>
+            <div class="ri"><span class="ic" data-i="utensils"></span></div><div class="ri"><span class="ic" data-i="chart-pie"></span></div><div class="ri"><span class="ic" data-i="settings"></span></div></div>
+          <div id="area"><div id="areaGrid"></div>
+            <div id="cam">
+              <div class="card" id="flow">
+                <div class="hd"><span class="lbl">ALUR AI ADMIN</span><span id="aiState">OFF</span></div>
+                <div class="fnode" id="nIn"><div class="t"><div class="lg"><span class="ic" data-i="si-whatsapp"></span></div><div>WhatsApp masuk<em>pesan pelanggan</em></div></div></div>
+                <div class="arrow" id="a1"><i></i></div>
+                <div class="fnode" id="nAi"><div class="t"><div class="lg"><span class="ic" data-i="bot"></span></div><div>AI Admin<em>ramah, 24 jam</em></div></div>
+                  <div class="chip" id="cMem"><span class="ic" data-i="brain"></span>Memori chat</div>
+                  <div class="chip" id="cMenu"><span class="ic" data-i="utensils"></span>Daftar menu</div>
+                  <div class="chip" id="cOrd"><span class="ic" data-i="notebook-pen"></span>Catat pesanan</div></div>
+                <div class="arrow" id="a2"><i></i></div>
+                <div class="fnode" id="nOut"><div class="t"><div class="lg"><span class="ic" data-i="send"></span></div><div>Balas pelanggan<em>dalam hitungan detik</em></div></div></div>
+                <div id="lost"><b><span class="ic" data-i="x"></span>Order hilang</b><span>Pelanggan pindah ke warung sebelah.</span></div>
+                <div id="ticket"><div class="th"><span class="ic" data-i="chef-hat"></span>MASUK DAPUR</div><div class="no">Pesanan #038</div>
+                  <div class="ln"><span>Ayam Geprek</span><b>×2</b></div><div class="ln"><span>Es Teh</span><b>×1</b></div><span class="stt">Sedang dimasak</span></div>
+                <div id="today"><div class="k">REKAP HARI INI</div><div class="v"><span id="nToday">0</span><small>pesanan</small></div></div>
+              </div>
+              <div class="card" id="phone"><div id="scr">
+                <div id="pHead"><div class="av">GM</div><div><b>Warung Geprek Mantap</b><div class="sub"><span id="sOn">online</span><span id="sTy" style="opacity:0">AI admin sedang mengetik…</span></div></div></div>
+                <div id="chatBg"><div id="chat"></div></div>
+                <div id="pIn">Ketik pesan<i><span class="ic" data-i="send"></span></i></div>
+                <div id="scrim"></div>
+              </div></div>
+              <div id="pills"><div class="pill" id="pl1"><span class="ic" data-i="zap"></span>Balas ±3 detik</div><div class="pill" id="pl2"><span class="ic" data-i="clock"></span>Online 24 jam</div></div>
+            </div>
+          </div>
+          <div id="winDim"></div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div>
+        <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name gt">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><div id="caps"></div>
+          <!--ROBOT_HTML--></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="33.28" data-track-index="8" data-volume="1"></audio>
+      <!--SFX-->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n) => `<span class="ic">${icon(n)}</span>`;
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#0a0d2c" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+
+        /* ---------- timeline helpers ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].replace(/^"/, "").toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 34.4;
+
+        /* ---------- chat content ---------- */
+        const tick = `<span class="ic">${icon("check-check")}</span>`;
+        const who = `<div class="who">${ic("bot")}AI Admin</div>`;
+        const rp = (n) => "Rp" + Math.round(n).toLocaleString("id-ID");
+        const OLD = [{ k: "in", h: "Kak, masih buka? Mau pesan nih", tm: "18.21", id: "old1" },
+          { k: "sys warn", h: "Belum dibalas · <span id='late'>0</span> menit", id: "old2" },
+          { k: "sys warn", h: "Pelanggan pindah ke warung sebelah", id: "old3" }];
+        const tHalo = wt("Pelanggan chat", "Halo"), tNyapa = wt("AI admin", "nyapa"), tMinta = ph("Dia minta").start, tMenu = ph("menu lengkap").start,
+          tPesan = ph("Pesan ayam").start, tCatat = wt("pesanan langsung dicatat", "dicatat"), tTot = wt("totalnya dihitung", "dihitung"),
+          tTeh = ph("Nambah es teh").start, tUpd = ph("Pesanan diupdate").start, tBer = ph("totalnya ikut").start, tBeres = ph("Begitu beres").start;
+        const NEW = [
+          { k: "in", h: "Halo kak", tm: "19.04", at: tHalo - 0.15 },
+          { k: "out", h: who + "Halo kak! Selamat datang di Warung Geprek Mantap. Mau pesan apa hari ini?", tm: "19.04", at: tNyapa - 0.05 },
+          { k: "in", h: "Menunya apa aja kak?", tm: "19.05", at: tMinta + 0.05 },
+          { k: "out", h: who + "Ini menu hari ini kak:<div class='menu'>" + [["1. Ayam Geprek", 15000], ["2. Geprek Keju", 19000], ["3. Nasi Putih", 4000], ["4. Es Teh", 4000], ["5. Es Jeruk", 6000], ["6. Air Mineral", 4000]]
+              .map(([n, p]) => `<div><span>${n}</span><b>${rp(p)}</b></div>`).join("") + "</div>", tm: "19.05", at: tMenu + 0.05 },
+          { k: "in", h: "Ayam geprek 2 ya kak", tm: "19.06", at: tPesan - 0.05 },
+          { k: "out", h: who + "Siap kak, pesanan dicatat:<div class='ord'><div class='ln'><span>Ayam Geprek ×2</span><span>Rp30.000</span></div><div class='tot'><span>Total</span><span id='tot1'>Rp0</span></div></div>", tm: "19.06", at: tCatat - 0.25 },
+          { k: "in", h: "Tambah es teh 1 kak", tm: "19.06", at: tTeh - 0.05 },
+          { k: "out", h: who + "Pesanan diupdate kak:<div class='ord'><div class='ln'><span>Ayam Geprek ×2</span><span>Rp30.000</span></div><div class='ln'><span>Es Teh ×1</span><span>Rp4.000</span></div><div class='tot'><span>Total</span><span id='tot2'>Rp30.000</span></div></div>", tm: "19.07", at: tUpd - 0.1 },
+          { k: "in", h: "Udah itu aja kak", tm: "19.07", at: tBeres - 0.35 },
+          { k: "out", h: who + "Terima kasih kak! Pesanan langsung diteruskan ke dapur ya.", tm: "19.07", at: ph("pesanan langsung masuk").start - 0.15 }];
+        const chat = $("#chat");
+        const mk = (m) => { const el = document.createElement("div");
+          if (m.k.startsWith("sys")) { el.className = "sys " + m.k.split(" ")[1]; el.innerHTML = m.h; }
+          else { el.className = "bb " + m.k; el.innerHTML = m.h + `<span class="tm">${m.tm}${m.k === "in" ? tick : ""}</span>`; }
+          if (m.id) el.id = m.id; chat.appendChild(el); m.el = el; return el; };
+        OLD.forEach(mk);
+        const oldWrap = document.createElement("div"); oldWrap.id = "oldWrap"; chat.prepend(oldWrap); OLD.forEach((m) => oldWrap.appendChild(m.el));
+        const newWrap = document.createElement("div"); newWrap.id = "newWrap"; chat.appendChild(newWrap);
+        NEW.forEach((m) => { mk(m); newWrap.appendChild(m.el); });
+
+        /* captions */
+        const KEY = new Set(["telat", "bales", "chat,", "kabur", "sebelah.", "simulasi", "halo", "kak\",", "nyapa", "ramah.", "menu,", "menu", "harganya", "dikirim.", "ayam", "geprek",
+          "dua,", "dicatat,", "otomatis.", "es", "teh", "satu?", "diupdate,", "berubah.", "beres,", "dapur,", "rekap", "harian.", "ramah,", "cepet,", "dua", "puluh", "empat", "jam.", "sistem", "dipasang",
+          "link", "bio,", "aipreneur", "automation."]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].replace(/^"/, "").toLowerCase()) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        const cState = (x, y, s) => ({ x: 424 - x * s, y: 445 - y * s, scale: s });
+        let cc = cState(424, 445, 1);
+        st("#cam", cc, 0);
+        const camTo = (x, y, s, at, dur) => { const nx = cState(x, y, s); ft("#cam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: "power3.inOut" }), at); cc = nx; };
+        let cur = { x: 760, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const pulse = (el, at, col) => ft(el, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 4px 14px rgba(41,75,119,0.08)" },
+          { keyframes: [{ borderColor: col || "#2f6fe4", boxShadow: "0 0 0 6px rgba(47,111,228,0.18)", duration: 0.2 }, { duration: 0.5 }, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 4px 14px rgba(41,75,119,0.08)", duration: 0.35 }] }, at);
+        const chipOn = (el, at) => ft(el, { borderColor: "rgba(47,111,228,0)", backgroundColor: "rgba(41,75,119,0.06)" },
+          { keyframes: [{ borderColor: "#2f6fe4", backgroundColor: "#e7f0ff", duration: 0.2 }, { duration: 0.9 }, { borderColor: "rgba(47,111,228,0)", backgroundColor: "rgba(41,75,119,0.06)", duration: 0.35 }] }, at);
+        const dotRun = (arrow, at) => ft($("i", arrow), { y: 0, opacity: 0 }, { keyframes: [{ opacity: 1, duration: 0.05 }, { y: arrow.offsetHeight - 10, duration: 0.35, ease: "power1.inOut" }, { opacity: 0, duration: 0.12 }] }, at);
+        const typing = (at, dur) => { ft("#sOn", { opacity: 1 }, { opacity: 0, duration: 0.12 }, at); ft("#sTy", { opacity: 0 }, { opacity: 1, duration: 0.12 }, at);
+          ft("#sTy", { opacity: 1 }, { opacity: 0, duration: 0.12 }, at + dur); ft("#sOn", { opacity: 0 }, { opacity: 1, duration: 0.12 }, at + dur); };
+
+        /* initial */
+        st(["#tbar", "#rail", "#flow", "#phone"], { opacity: 0 }, 0);
+        st("#newWrap", { opacity: 1 }, 0);
+        st(["#flow .fnode", "#flow .arrow"], { opacity: 0.35 }, 0);
+
+        /* S0 hook 0-3.6: unanswered chat, lost order */
+        ft(win, { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 0.0);
+        ft(["#tbar", "#rail"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.25);
+        ft(["#flow", "#phone"], { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.1, ease: "power3.out" }, 0.3);
+        ft("#old1", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.8)" }, 0.55);
+        ft("#old2", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 0.9);
+        count($("#late"), 0, 27, 0.95, 1.0);
+        ft("#old2", { scale: 1 }, { keyframes: [{ scale: 1.08 }, { scale: 1 }], duration: 0.3 }, wt("Admin lu", "telat"));
+        const tKabur = wt("orderan kabur", "kabur");
+        ft("#old3", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, tKabur - 0.05);
+        ft("#lost", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.35, ease: "back.out(1.6)" }, tKabur);
+        ft("#lost", { x: 0 }, { keyframes: [{ x: -6 }, { x: 6 }, { x: -3 }, { x: 0 }], duration: 0.35 }, tKabur + 0.4);
+        camTo(424, 445, 1.03, 0.6, 2.4);
+
+        /* S1 turn the AI admin on */
+        const tSim = wt("Coba lihat", "simulasi");
+        camTo(424, 445, 1, ph("Coba lihat").start - 0.2, 0.6);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, ph("Coba lihat").start - 0.3);
+        moveEl($("#sw"), ph("Coba lihat").start - 0.3, 0.55, 4, 2);
+        click(tSim);
+        ft("#knob", { x: 0 }, { x: 28, duration: 0.3, ease: "power2.inOut" }, tSim + 0.05);
+        ft("#sw", { backgroundColor: "rgba(10,13,44,0.14)" }, { backgroundColor: "#1fa855", duration: 0.3 }, tSim + 0.05);
+        ft("#stTxt", { color: "#e5484d" }, { color: "#1fa855", duration: 0.3 }, tSim + 0.05);
+        const stTxt = $("#stTxt"), aiState = $("#aiState");
+        ft({ v: 0 }, { v: 0 }, { v: 1, duration: 0.01, onUpdate() { const on = this.progress() > 0.5; stTxt.textContent = on ? "ON" : "OFF"; aiState.textContent = on ? "AKTIF" : "OFF"; } }, tSim + 0.1);
+        ft("#aiState", { backgroundColor: "rgba(229,72,77,0.12)", color: "#e5484d" }, { backgroundColor: "rgba(31,168,85,0.14)", color: "#1fa855", duration: 0.25 }, tSim + 0.1);
+        ft("#oldWrap", { opacity: 1 }, { opacity: 0, duration: 0.3 }, tSim + 0.2);
+        st("#oldWrap", { display: "none" }, tSim + 0.55);
+        ft("#lost", { opacity: 1 }, { opacity: 0, duration: 0.3 }, tSim + 0.2);
+        ft(["#flow .fnode", "#flow .arrow"], { opacity: 0.35 }, { opacity: 1, duration: 0.35, stagger: 0.08 }, tSim + 0.25);
+        moveTo(700, 830, tSim + 0.5, 0.7);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tSim + 1.3);
+
+        /* S2.. conversation */
+        NEW.forEach((m) => {
+          if (m.k === "out") typing(m.at - 0.55, 0.5);
+          ft(m.el, { opacity: 0, y: 18, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "back.out(1.6)" }, m.at);
+          if (m.k === "in") { pulse($("#nIn"), m.at, "#1fa855"); dotRun($("#a1"), m.at + 0.15); }
+          else { pulse($("#nAi"), m.at - 0.5); dotRun($("#a2"), m.at - 0.15); pulse($("#nOut"), m.at); }
+        });
+        chipOn($("#cMenu"), tMenu - 0.4);
+        chipOn($("#cOrd"), tCatat - 0.4);
+        chipOn($("#cMem"), tUpd - 0.5); chipOn($("#cOrd"), tUpd + 0.75);
+        count($("#tot1"), 0, 30000, ph("totalnya dihitung").start + 0.05, 0.9, rp);
+        count($("#tot2"), 30000, 34000, tBer - 0.05, 0.9, rp);
+        ft("#tot1", { scale: 1 }, { keyframes: [{ scale: 1.12 }, { scale: 1 }], duration: 0.35 }, tTot + 0.8);
+        ft("#tot2", { scale: 1 }, { keyframes: [{ scale: 1.12 }, { scale: 1 }], duration: 0.35 }, tBer + 0.8);
+        // auto-scroll the chat so the newest bubble is always in view (computed from live layout, deterministic in time)
+        const chatBg = $("#chatBg"), newWrapEl = $("#newWrap");
+        const offAfter = (k) => { const el = NEW[k].el; const bottom = newWrapEl.offsetTop + el.offsetTop + el.offsetHeight + 14; return Math.max(0, bottom - chatBg.offsetHeight); };
+        ft({ v: 0 }, { v: 0 }, { v: 1, duration: D, ease: "none", onUpdate: () => {
+          const t = tl.time(); let k = -1; NEW.forEach((m, i) => { if (m.at <= t) k = i; });
+          let y = 0; if (k >= 0) { const a = k > 0 ? offAfter(k - 1) : 0, b = offAfter(k); const f = Math.min(1, (t - NEW[k].at) / 0.4); const e = f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2; y = a + (b - a) * e; }
+          chat.style.transform = "translateY(" + (-y).toFixed(1) + "px)"; } }, 0);
+        // gentle push-ins on the phone during the menu / order cards
+        camTo(424, 445, 1.025, tMenu - 0.2, 1.2);
+        camTo(424, 445, 1, tBeres - 0.2, 0.9);
+
+        /* S3 kitchen + daily recap */
+        const tDapur = wt("pesanan langsung masuk", "dapur");
+        ft("#ticket", { opacity: 0, y: 24, rotation: -2 }, { opacity: 1, y: 0, rotation: 0, duration: 0.45, ease: "back.out(1.6)" }, tDapur - 0.3);
+        ft("#ticket", { boxShadow: "0 0 0 0 rgba(240,140,26,0.5)" }, { boxShadow: "0 0 0 14px rgba(240,140,26,0)", duration: 0.7 }, tDapur + 0.1);
+        const tRek = wt("dan kecatat", "rekap");
+        ft("#today", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tRek - 0.35);
+        count($("#nToday"), 0, 38, tRek - 0.2, 1.1);
+        /* S4 ramah, cepet, 24 jam */
+        const tRam = ph("Ramah, cepet").start;
+        ft("#scrim", { opacity: 0 }, { opacity: 1, duration: 0.3 }, wt("Ramah, cepet", "cepet") - 0.25);
+        ft("#pl1", { opacity: 0, y: 20, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, wt("Ramah, cepet", "cepet") - 0.05);
+        ft("#pl2", { opacity: 0, y: 20, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, wt("jalan dua", "jam") - 0.4);
+        ft("#pHead .av", { scale: 1 }, { keyframes: [{ scale: 1.15 }, { scale: 1 }], duration: 0.4 }, tRam);
+
+        /* S5 CTA */
+        const tCta = ph("Mau sistem").start;
+        ft("#winDim", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tCta - 0.2);
+        ft(win, { scale: 1 }, { scale: 0.94, duration: 0.6, ease: "power2.inOut" }, tCta - 0.2);
+        ft("#cta", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
+        const tF = wt("Klik link", "link");
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /*ROBOT_SETUP*/
+        // presenter gestures for this script
+        const G = [];
+        [0.2, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
+        [tSim, tMenu, tCatat, tDapur, tF].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
+        [wt("Admin lu", "telat"), tKabur, tNyapa, tTot, tUpd, tBer, tRek, wt("Ramah, cepet", "cepet"), wt("jalan dua", "jam")]
+          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
+        G.sort((x, y) => x.t - y.t);
+        let busy = -1, beatN = 0;
+        G.forEach((g) => {
+          if (g.t < busy + 0.05) return;
+          busy = g.t + g.d;
+          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
+            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
+            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
+            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
+          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
+            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
+        });
+
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

@@ -56,7 +56,24 @@ on "Indonesia"/"Bukan", types the cloud task / the chat / the config command, sh
   apps/docs/content/docs/providers/index.mdx.
 
 ## QA (real runtime, hyperframes 0.8.186)
-- QA_PLACEHOLDER
+- `npx --yes hyperframes@0.8.186 lint .` → 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the R15/R19 kit).
+- `npx --yes hyperframes@0.8.186 validate .` → 0 errors; warnings = "multiple Three.js instances" (robot + mascot bundles, as in the kit)
+  + SwiftShader ReadPixels notices. The first run flagged 2 contrast warnings on the s05 phone at t=23.1 s (phone fading in; placeholder
+  "ketik pesan…" too pale) → fixed (phone slides in fully opaque, darker sub-label, lighter placeholder); re-run: VALIDATE2_RESULT.
+- Script check (`tools/check_scene.cjs`, HyperFrames preview on :8951, then stopped): s01–s09, robot, mascot, main all register, no
+  exceptions; the preview's stamped `data-hf-id` attributes were stripped again afterwards.
+- Snapshots (`snapshot . --at … --no-end --timeout 60000`): one full pass of 71 frames (first frame, every scene's beats, both sides of
+  every cut, the end) + targeted fix passes (27 + 9 + 2 + 2 frames). Contact sheets (JPG): `production/qa/runtime_full_1..3.jpg` (full
+  frames, full pass — predates the fixes below), `production/qa/runtime_hosts_1..2.jpg` (mascot + robot, eye check),
+  `production/qa/runtime_fix1_hero_1.jpg` (hero zone after fix 1), `production/qa/runtime_fix2_hero_1.jpg` (after fix 2),
+  `production/qa/runtime_fix3_hero_1.jpg` (s05 opening + s06 end after the last fixes). PNG dumps deleted (disk budget).
+- Mascot eyes: pupils in every frame of the full pass (half-closed lids at 3.5 / 43.4 / 44.4 s = blinks); glance disabled from the start.
+- Fixed during QA: s02 cloud was offset +67 px vs s03 (GSAP svgOrigin on an SVG group in the real runtime) → cloud wrapped in an HTML
+  layer, tweened with a CSS transform-origin; cloud label crossed the lobe notches → bigger cloud body; s01 "KAMU" label sat on the road
+  stem → moved beside the disc on a chip; s01 cards enlarged; s03 rebuilt fuller (bigger laptop + cloud computer, PUNYAMU tray, big amber
+  "Disimpan di server mereka" card instead of a small chip); s05 bigger bubbles + composer bar, skill card stays on screen and a copy
+  flies into the drawer; s06 bigger text, card resized so the last command line is never clipped; s07 bigger agent chips; s08
+  "MausBot" chip was clipped by a PENGATUR tag → tag removed (role moved to the note line).
 
 ## Known issues / notes for the lead
 - Frame 0 shows the "6 agent AI" headline only: the agent cards pop in from 0.04 s, the mascot pops up from below over 0.5 s and the

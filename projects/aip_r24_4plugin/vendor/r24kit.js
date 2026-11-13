@@ -63,7 +63,7 @@
   .k-st .lg { left: 0; top: 0; width: 64px; height: 64px; border-radius: 20px; background: linear-gradient(150deg, #f7a25c, #e2712a); color: #fff; box-shadow: 0 10px 18px -10px rgba(226,113,42,.9); }
   .k-st .lg svg { position: absolute; left: 15px; top: 15px; width: 34px; height: 34px; display: block; }
   .k-st .nm { left: 80px; top: 3px; font: 700 21px/30px Poppins, sans-serif; white-space: nowrap; color: #0a0d2c; }
-  .k-st .sb { left: 80px; top: 34px; font: 400 15px/22px Poppins, sans-serif; white-space: nowrap; color: #6b7a96; }
+  .k-st .sb { left: 80px; top: 34px; font: 400 15px/22px Poppins, sans-serif; white-space: nowrap; color: #55647f; }
   .k-it { position: absolute; height: 70px; border-radius: 20px; background: #fbf7f2; box-shadow: inset 0 0 0 1.5px #f1e6d8; }
   .k-it > * { position: absolute; }
   .k-it .ii { left: 12px; top: 11px; width: 48px; height: 48px; border-radius: 15px; background: #ffe9d6; color: #d0651f; }

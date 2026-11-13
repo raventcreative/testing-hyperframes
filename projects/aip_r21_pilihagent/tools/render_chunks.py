@@ -9,8 +9,8 @@ P = Path(sys.argv[1]).resolve(); OUT = Path(sys.argv[2]).resolve(); Q = sys.argv
 T = json.loads((P / "production/timing.json").read_text()); TOTAL = T["total_sec"]; FPS = 30
 S = {s["id"]: s for s in T["scenes"]}
 # (render start, keep from, end): scenes do not overlap in this reel, so no pre-roll is needed
-CH = [(0.0, 0.0, S["r2"]["start"]),
-      (S["r2"]["start"], S["r2"]["start"], S["s07"]["start"]),
+CH = [(0.0, 0.0, S["s04"]["start"]),                               # R21: three chunks cut at scene starts
+      (S["s04"]["start"], S["s04"]["start"], S["s07"]["start"]),
       (S["s07"]["start"], S["s07"]["start"], TOTAL)]
 WORK = OUT.parent / (OUT.stem + "_chunks"); WORK.mkdir(parents=True, exist_ok=True)
 src = (P / "index.html").read_text()

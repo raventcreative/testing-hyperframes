@@ -54,4 +54,41 @@ end. Mascot (host, left): an intent on every beat (present / explain / emphasize
 (`const glance = (t) => 0;`).
 
 ## QA (real runtime: `npx --yes hyperframes@0.8.186 snapshot` + `validate`)
-(filled in below after the passes)
+Sheets (JPG only, PNG dumps deleted) in `/tmp/claude-0/-home-user-testing-hyperframes/a8ae6177-e310-5942-a663-2ca4db15bda7/scratchpad/r24/`:
+- **Full pass** `qa1` — 74 frames (first frame, every scene 6–12×, every cut ±0.03–0.05 s, last frame 45.17): labelled sheets
+  `qa1_sheet_a.jpg` (0–7.25 s) · `qa1_sheet_b.jpg` (7.33–20.6) · `qa1_sheet_c.jpg` (20.77–34.05) · `qa1_sheet_d.jpg` (34.6–45.17) + the
+  tool's own `qa1/contact-sheet-1…9.jpg`.
+- **Fix pass** `qa2` — 14 frames: hand-overs s01→s02 (3.05 / 3.083) and s02→s03 (7.28 / 7.317) pixel-identical, the tile flight (7.45),
+  s03 after the glyph fix (11.9 / 12.9 / 13.5: the widest caption chunk "Claude ngecek dokumentasi resmi" ≈ 899 px stays on one line),
+  test-buyer typing (25.0 / 25.3), LIVE moment (33.55 / 33.9), refused DELETE (40.9), last frame (45.19): `qa2_sheet.jpg` + `qa2/contact-sheet-1…2.jpg`.
+- **Eyes** `qa_eyes.jpg` (mascot + robot close-ups at 0, 2.5, 8.5, 19.4, 26, 33.7, 38.9, 44.4, 45.19 s): pupils/irises present
+  everywhere (glances disabled); the robot is not on screen before it flies in at ≈1.5 s by design.
+- Dev-preview sheets used while building (NOT the real runtime): `dev_s01.jpg` … `dev_s08.jpg`; text-overflow checker
+  `tools/overflow.cjs` (every text element inside its card and the hero zone y 290–945 at each scene's fully built moment: clean; the
+  only hits are the DevTools drawer while it is still parked below the browser's clipped edge).
+- `lint`: 0 errors (2 kit warnings: #bg / #fx nested in index.html, same as the kit). `validate` (final state): **0 errors**; warnings =
+  kit "multiple instances of Three.js" + software-GL "GPU stall due to ReadPixels". Contrast: fixed 5 small grey texts; the one note
+  left ("export default function", 1.13:1) is light text on the navy code block — the checker reads the card behind it (false positive).
+- Found and fixed during QA: two duplicate element ids (the s03 version stamp collided with the phone's store header `s03-st`, the s03
+  target badge with the terminal tag `s03-tg`) → `$()` now throws on duplicates; s05 third field typed backwards (end < start) → re-timed;
+  s06 toggle knob outside its track (missing `position:absolute`) → fixed; `→ ● ✓` are not in the Poppins subset → replaced by inline
+  lucide icons / CSS dot (no font fallback in the render); LIVE chip moved inside the preview card; "kamu" cursor label kept above y 945.
+- Every initial state is pinned at 0 in the nested P0 timeline; `tl.render(0, true, true)` at the end of every build.
+
+## Known issues / notes for the lead
+- Duration 45.20 s (speech 0.37–43.74 s on the timeline, ≈43.4 s spoken, within 35–48 s; ≈1.5 s end card after "DM."). VO = take 1.
+- whisper writes the brand names phonetically (Cloud Code, SuperBase, Versal, Contact/kontek 7) — the voice says them correctly; no
+  Indonesian word was misheard by both small and medium (details in VO_SCRIPT.md).
+- Captions: during the 0.34 s word rise a chunk can show only the top of the next word for a frame (kit caption system). The last chunk
+  ("aku kirim lewat DM.") stays up over the end card (same as R8/R12/R20).
+- Facts are from official READMEs/docs read on 2026-11-13 (sources in VO_SCRIPT.md). supabase.com and vercel.com are DNS-blocked in
+  this sandbox: Supabase docs were read from the source files in the supabase/supabase GitHub repo; the Vercel facts come from the official
+  vercel/vercel-plugin repo (+ WebSearch for the manual `claude mcp add` command).
+- Everything shown about the order web (shop, prices, buyers, URLs `tokokue-k3x9-kamu.vercel.app` / `tokokue-kamu.vercel.app`, version
+  16.x, the 500 error) is illustrative and labelled CONTOH / ILUSTRASI / "contoh error".
+- No music (lead adds it). `.hyperframes/` in this folder is created by the CLI and git-ignored.
+
+## Assets
+Poppins 400/700 (OFL, `assets/fonts/OFL-Poppins.txt`) · lucide-static 0.460.0 icons (ISC, `assets/icons/LICENSE-lucide.txt`, inlined in
+`vendor/r24icons.js`) · AI PRENEUR logo, background, robot and mascot = the client's own kit assets (copied from `aip_r20_freellm`) ·
+SFX synthesised by `tools/sfx.py` (no samples) · VO: ElevenLabs, the client's saved voice. No third-party logos or screenshots.

@@ -22,7 +22,7 @@ def step(n, title, lede, mock, note):
 cover = frame("cover", f'''<div class="brk">Breaking</div>
   <h1>ChatGPT now lets you<br><span>register your business.</span></h1>
   <p class="lede">Claim a free business profile so ChatGPT can show your brand, products and website when people ask.</p>
-  <div class="scene">
+  <div class="scene"><div class="app"><span class="ai">{oai()}</span><div><b>ChatGPT</b><small>Business Hub · Beta</small></div></div>
     <div class="chat"><div class="cht">{oai()}<b>ChatGPT</b></div>
       <div class="q">Can you recommend a good local coffee shop in Jakarta?</div>
       <div class="a"><span class="av">{oai()}</span><div>

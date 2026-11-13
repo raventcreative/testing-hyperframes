@@ -8,7 +8,10 @@
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/icons.js"></script>
     <script src="vendor/vo_env.js"></script>
-    <script src="vendor/robot_rig2.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
     <style>
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
@@ -21,11 +24,13 @@
       .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
       .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
       #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #132650; opacity: 0; }
       #dots { position: absolute; inset: 0; opacity: 0.55; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
 
       /* app window */
-      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.84);
-        border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); }
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.95);
+        border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); transform-origin: 50% 50%; opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
       #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.92); }
       #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
       #tbar .app { font-size: 19px; font-weight: 700; }
@@ -38,6 +43,7 @@
       #railAct { position: absolute; left: 13px; top: 18px; width: 46px; height: 46px; border-radius: 13px; background: rgba(41,75,119,0.10); }
       #area { position: absolute; left: 72px; top: 60px; width: 848px; height: 890px; overflow: hidden; background: rgba(244,247,253,0.6); }
       .scr { position: absolute; inset: 0; opacity: 0; padding: 26px 28px; }
+      #sLoop { opacity: 1; } .swap > .pill + .pill { opacity: 0; }
       .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
       .h2 { font-size: 30px; font-weight: 700; line-height: 1.2; margin-top: 4px; }
       .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 15px; font-size: 17px; font-weight: 700; white-space: nowrap; }
@@ -135,43 +141,75 @@
       #winDim { position: absolute; inset: 0; background: rgba(244,247,253,0.75); opacity: 0; }
 
       /* CTA + UI */
-      #cta { position: absolute; left: 110px; width: 860px; top: 560px; padding: 56px 48px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
-      #cta .k { font-size: 27px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 66px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      /* ---------- hook: content stays in y 290-640, the robot stands full-body in the lower stage ---------- */
+      #hook { position: absolute; left: 80px; top: 290px; width: 920px; height: 360px; }
+      #hQ { position: absolute; left: 0; top: 0; width: 920px; text-align: center; }
+      #hQ .k1 { font-size: 34px; font-weight: 700; letter-spacing: 6px; color: var(--n2); opacity: 0; }
+      #hQ .big { font-size: 150px; font-weight: 700; line-height: 1.04; letter-spacing: 2px; }
+      #hQ .k2 { font-size: 44px; font-weight: 700; margin-top: 6px; opacity: 0; }
+      .hl { position: relative; display: inline-block; isolation: isolate; } .hl i { position: absolute; left: -6px; right: -6px; bottom: 4px; height: 16px; border-radius: 5px; background: rgba(1,204,247,0.45); z-index: -1; transform-origin: 0 50%; transform: scaleX(0); }
+      #hA { position: absolute; left: 0; top: 18px; width: 920px; display: flex; align-items: center; justify-content: center; gap: 30px; opacity: 0; }
+      #hA .n { font-size: 210px; font-weight: 700; line-height: 0.92; }
+      #hA .lb { font-size: 66px; font-weight: 700; line-height: 1; } #hA .lb em { display: block; font-style: normal; font-size: 30px; font-weight: 400; color: rgba(10,13,44,0.65); margin-top: 12px; }
+      #hRing { position: absolute; left: 220px; top: 625px; width: 640px; height: 640px; }
+      #hRing i { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; display: block; opacity: 0; }
+      #hRing svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+      .gl { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; } .wl { color: #fff; }
+
+      /* ---------- pop-out cards ---------- */
+      .simtag { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 3px 12px; }
+      #pPost { position: absolute; left: 170px; top: 400px; width: 740px; padding: 26px 30px 28px; border-radius: 30px; background: #fff; opacity: 0;
+        box-shadow: 0 40px 90px rgba(10,13,44,0.28), 0 6px 18px rgba(41,75,119,0.12); }
+      #pPost .hd, #pCh .hd { display: flex; align-items: center; gap: 12px; } #pPost .hd .simtag, #pCh .hd .simtag { margin-left: auto; }
+      .agentchip { display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; color: var(--blue); background: #e7f0ff; border-radius: 14px; padding: 6px 14px; }
+      .agentchip .ic { width: 22px; height: 22px; }
+      #pPost .ttl { font-size: 30px; font-weight: 700; }
+      #pPost .th { height: 230px; border-radius: 20px; margin-top: 16px; background: linear-gradient(135deg, #1b2c55, #3a6aa8); color: #fff; padding: 24px; position: relative; overflow: hidden; }
+      #pPost .th b { font-size: 42px; line-height: 1.15; display: block; } #pPost .th .cup { position: absolute; right: 22px; bottom: 18px; width: 84px; height: 84px; opacity: 0.9; }
+      #pPost .ln { font-size: 28px; line-height: 1.5; clip-path: inset(0 100% 0 0); } #pPost .ln.tag { color: var(--n2); font-weight: 700; }
+      #pMail { position: absolute; left: 560px; top: 330px; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 18px; background: var(--grad); color: #fff; font-size: 22px; font-weight: 700; opacity: 0;
+        box-shadow: 0 18px 40px rgba(10,13,44,0.3); }
+      #pMail .ic { width: 28px; height: 28px; } #pMail em { display: block; font-style: normal; font-size: 16px; font-weight: 400; opacity: 0.85; }
+      #pCh { position: absolute; left: 548px; top: 420px; width: 440px; padding: 26px 26px 22px; border-radius: 24px; background: #fff; opacity: 0;
+        box-shadow: 0 40px 90px rgba(10,13,44,0.3), 0 6px 18px rgba(41,75,119,0.12); }
+      #pCh .t { font-size: 27px; font-weight: 700; line-height: 1.15; } #pCh .t em { display: block; font-style: normal; font-size: 16px; font-weight: 400; color: var(--mute); }
+      #pCh .r { display: flex; align-items: center; gap: 12px; height: 62px; padding: 0 12px; margin-top: 10px; border-radius: 14px; background: rgba(41,75,119,0.05); font-size: 22px; font-weight: 700; }
+      #pCh .r .lg { width: 40px; height: 40px; border-radius: 12px; background: var(--tint); display: flex; align-items: center; justify-content: center; } #pCh .r .lg .ic { width: 22px; height: 22px; }
+      #pCh .r .ok { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 16px; color: var(--ok); opacity: 0; } #pCh .r .ok .ic { width: 18px; height: 18px; }
+
+      /* ---------- AI vs Lu kinetic (cards in the upper stage, robot below) ---------- */
+      .kc { position: absolute; top: 296px; width: 440px; border-radius: 30px; background: #fff; padding: 28px 32px 30px; opacity: 0; box-shadow: 0 26px 64px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); }
+      #kAI { left: 80px; } #kLu { left: 560px; background: linear-gradient(135deg, #0a0d2c, #294b77); }
+      .kc .lg { width: 84px; height: 84px; border-radius: 24px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; } .kc .lg .ic { width: 46px; height: 46px; }
+      #kLu .lg { background: rgba(255,255,255,0.14); }
+      .kc .w { font-size: 96px; font-weight: 700; line-height: 1; margin-top: 14px; }
+      .kc .s { font-size: 27px; line-height: 1.3; margin-top: 10px; color: rgba(10,13,44,0.7); } #kLu .s { color: rgba(255,255,255,0.85); }
+
+      #cta { position: absolute; left: 110px; width: 860px; top: 300px; padding: 40px 44px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 26px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 62px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
       #cta .sb { font-size: 27px; margin-top: 10px; color: rgba(10,13,44,0.75); } #cta .sb b { color: var(--n2); }
-      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; height: 82px; padding: 0 46px; border-radius: 41px; background: var(--grad); color: #fff; font-size: 32px; font-weight: 700; }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 24px; height: 76px; padding: 0 46px; border-radius: 41px; background: var(--grad); color: #fff; font-size: 32px; font-weight: 700; }
       #fbtn .ic { width: 32px; height: 32px; }
       #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
-      #logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoL { opacity: 0; }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(41,75,119,0.22)); }
       #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
       .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
       .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
       .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
-      #robot { position: absolute; left: 18px; top: 1408px; width: 600px; height: 582px; transform-origin: 50% 100%; opacity: 0; }
-      #robot .sway, #robot .bob, #robot .talk { position: absolute; inset: 0; }
-      #robot .sway { transform-origin: 50% 90%; }
-      #robot .talk { transform-origin: 50% 100%; }
-      #robot .part { position: absolute; }
-      #robot .part img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
-      #robot .headIn { position: absolute; inset: 0; }
-      #robot .lid { position: absolute; display: block; border-radius: 50%; background: #030407; transform-origin: 50% 0%; transform: scaleY(0); }
-      #robot .glow { position: absolute; border-radius: 50%; background: radial-gradient(ellipse, rgba(1,204,247,0.6) 0%, rgba(1,204,247,0) 70%); }
-      #robot .chest { position: absolute; border-radius: 50%; mix-blend-mode: screen; opacity: 0;
-        background: radial-gradient(ellipse, rgba(80,200,255,0.9) 0%, rgba(1,140,255,0.3) 45%, rgba(1,204,247,0) 72%); }
-      #robot .base { position: absolute; border-radius: 50%; mix-blend-mode: screen; opacity: 0; background: radial-gradient(ellipse, rgba(120,220,255,1) 0%, rgba(1,204,247,0) 70%); }
-      #robot { filter: drop-shadow(0 18px 30px rgba(41,75,119,0.25)); }
-    
-      /* robot-mouth:css */
-      #robot .mouth { position: absolute; left: 181.3px; top: 193.6px; width: 69.0px; height: 30.3px; display: block;
-        filter: drop-shadow(0 0 2px rgba(120,190,255,0.95)) drop-shadow(0 0 7px rgba(40,120,255,0.65)); }
-      #robot .mouth svg { width: 100%; height: 100%; display: block; overflow: visible; transform-origin: 50% 8%; }
-      /* /robot-mouth:css */
     </style>
   </head>
   <body>
     <div id="main" data-composition-id="main" data-start="0" data-duration="63.9" data-width="1080" data-height="1920" data-fps="30">
       <div id="scene" class="clip" data-start="0" data-duration="63.9" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
-        <div id="bg"></div><div id="dots"></div>
-        <div id="win">
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div>
+        <div id="hook">
+          <div id="hQ"><div class="k1">GIMANA CARANYA</div><div class="big" data-letter="gl">1 ORANG</div><div class="k2 gt">punya tim marketing <span class="hl"><i></i>lengkap?</span></div></div>
+          <div id="hA"><div class="n gt"><span id="h36">0</span></div><div class="lb gt">AGENT AI<em>kerja dalam satu loop</em></div></div>
+        </div>
+        <div id="hRing"><svg viewBox="0 0 640 640"><circle id="hArc" cx="320" cy="320" r="292" fill="none" stroke="#01ccf7" stroke-width="5" stroke-linecap="round" opacity="0.8" transform="rotate(-90 320 320)"/></svg></div>
+        <div id="win"><div id="wcam">
           <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Marketing Loop OS</span><span id="sim">SIMULASI</span>
             <div class="who">Kopi Senja<i>KS</i></div></div>
           <div id="rail"><span id="railAct"></span><div class="ri"><span class="ic" data-i="repeat"></span></div><div class="ri"><span class="ic" data-i="search"></span></div>
@@ -236,41 +274,51 @@
                 <div id="spMe"><div class="who"><div class="av"><span class="ic" data-i="user-round"></span></div><b>Lu</b></div><p>Pegang brand dan budget. Tinggal approve.</p></div></div>
             </div>
           </div>
-          <div id="winDim"></div>
           <div id="ripple"></div><div id="cursor"></div>
-        </div>
+        </div><div id="winDim"></div></div>
+        <div id="pPost"><div class="hd"><span class="agentchip"><span class="ic" data-i="bot"></span>Agent konten</span><span class="ttl gt">Draft postingan</span><span class="simtag">SIMULASI</span></div>
+          <div class="th"><b>Pulang kerja?<br />Kopi susu aren nunggu.</b><span class="ic cup" data-i="coffee"></span></div>
+          <div class="ln" style="margin-top:14px">Capek abis kerja? Mampir dulu,</div><div class="ln">kami buka sampai jam 10 malam.</div>
+          <div class="ln">Wifi kenceng, colokan banyak.</div><div class="ln tag">#kopisenja #pulangkerja</div></div>
+        <div id="pMail"><span class="ic" data-i="mail"></span><div>Draft email siap<em>ke 1.240 pelanggan · Senin 15.30</em></div></div>
+        <div id="pCh"><div class="hd"><div class="t gt">Tayang di semua channel<em>Kopi Senja · baru di-approve</em></div><span class="simtag">SIMULASI</span></div><div id="pChRows"></div></div>
+        <div class="kc" id="kAI"><div class="lg"><span class="ic" data-i="bot"></span></div><div class="w" data-letter="gl">AI</div><div class="s">Mindahin informasi: riset, posting, balas, laporan.</div></div>
+        <div class="kc" id="kLu"><div class="lg"><span class="ic" data-i="user-round"></span></div><div class="w" data-letter="wl">LU</div><div class="s">Pegang <span class="hl"><i></i>brand dan budget</span>. Tinggal approve.</div></div>
         <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name gt">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
           <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
-        <div id="ui"><img id="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><div id="caps"></div>
-          <div id="robot"><div class="glow"></div><div class="sway"><div class="bob"><div class="talk"><div class="part head"><div class="headIn"><img src="assets/robot/r2_head.png" alt="" /><i class="lid"></i><i class="lid"></i><i class="mouth"><svg viewBox="0 0 123 54" preserveAspectRatio="none"><defs><linearGradient id="mFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b2fb8"/><stop offset="1" stop-color="#2b8cff"/></linearGradient><pattern id="mDots" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.9" fill="rgba(160,215,255,0.55)"/></pattern></defs><path d="M6,6 H117 C117,33 97,49 61.5,49 C26,49 6,33 6,6 Z" fill="url(#mFill)"/><path d="M6,6 H117 C117,33 97,49 61.5,49 C26,49 6,33 6,6 Z" fill="url(#mDots)"/><path d="M6,6 H117 C117,33 97,49 61.5,49 C26,49 6,33 6,6 Z" fill="none" stroke="#f3f9ff" stroke-width="2.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg></i></div></div><div class="part body"><img src="assets/robot/r2_body.png" alt="" /></div><div class="chest"></div><div class="base"></div><div class="part lhand"><img src="assets/robot/r2_lhand.png" alt="" /></div><div class="part rhand"><img src="assets/robot/r2_rhand.png" alt="" /></div></div></div></div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="" /><div id="caps"></div>
+          <div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div></div>
       </div>
       <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="63.28" data-track-index="8" data-volume="1"></audio>
-      <audio id="sx00" class="clip" src="assets/sfx/whoosh.wav" data-start="0.02" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
-      <audio id="sx01" class="clip" src="assets/sfx/pop.wav" data-start="1.04" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
-      <audio id="sx02" class="clip" src="assets/sfx/pop.wav" data-start="3.54" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
-      <audio id="sx03" class="clip" src="assets/sfx/pop.wav" data-start="5.36" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
-      <audio id="sx04" class="clip" src="assets/sfx/pop.wav" data-start="7.90" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx00" class="clip" src="assets/sfx/pop.wav" data-start="0.05" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx01" class="clip" src="assets/sfx/pop.wav" data-start="0.30" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx02" class="clip" src="assets/sfx/pop.wav" data-start="4.00" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx03" class="clip" src="assets/sfx/ping.wav" data-start="6.60" data-duration="1.32" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx04" class="clip" src="assets/sfx/whoosh.wav" data-start="7.00" data-duration="0.574" data-track-index="10" data-volume="0.05"></audio>
       <audio id="sx05" class="clip" src="assets/sfx/pop.wav" data-start="9.73" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
       <audio id="sx06" class="clip" src="assets/sfx/click.wav" data-start="10.76" data-duration="0.366" data-track-index="12" data-volume="0.08"></audio>
       <audio id="sx07" class="clip" src="assets/sfx/pop.wav" data-start="11.48" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
       <audio id="sx08" class="clip" src="assets/sfx/pop.wav" data-start="12.16" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
       <audio id="sx09" class="clip" src="assets/sfx/pop.wav" data-start="12.92" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
       <audio id="sx10" class="clip" src="assets/sfx/pop.wav" data-start="13.62" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
-      <audio id="sx11" class="clip" src="assets/sfx/whoosh.wav" data-start="15.50" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx11" class="clip" src="assets/sfx/whoosh.wav" data-start="15.10" data-duration="0.574" data-track-index="13" data-volume="0.05"></audio>
       <audio id="sx12" class="clip" src="assets/sfx/click.wav" data-start="16.55" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
-      <audio id="sx13" class="clip" src="assets/sfx/pop.wav" data-start="21.80" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
-      <audio id="sx14" class="clip" src="assets/sfx/whoosh.wav" data-start="24.12" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
-      <audio id="sx15" class="clip" src="assets/sfx/pop.wav" data-start="30.88" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
-      <audio id="sx16" class="clip" src="assets/sfx/click.wav" data-start="32.85" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
-      <audio id="sx17" class="clip" src="assets/sfx/ping.wav" data-start="35.06" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
-      <audio id="sx18" class="clip" src="assets/sfx/pop.wav" data-start="35.94" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
-      <audio id="sx19" class="clip" src="assets/sfx/whoosh.wav" data-start="38.84" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
-      <audio id="sx20" class="clip" src="assets/sfx/click.wav" data-start="44.40" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
-      <audio id="sx21" class="clip" src="assets/sfx/pop.wav" data-start="45.12" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
-      <audio id="sx22" class="clip" src="assets/sfx/whoosh.wav" data-start="47.54" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
-      <audio id="sx23" class="clip" src="assets/sfx/ping.wav" data-start="55.30" data-duration="1.32" data-track-index="13" data-volume="0.045"></audio>
-      <audio id="sx24" class="clip" src="assets/sfx/whoosh.wav" data-start="57.10" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
-      <audio id="sx25" class="clip" src="assets/sfx/click.wav" data-start="59.78" data-duration="0.366" data-track-index="11" data-volume="0.08"></audio>
+      <audio id="sx13" class="clip" src="assets/sfx/pop.wav" data-start="21.75" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx14" class="clip" src="assets/sfx/pop.wav" data-start="23.59" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx15" class="clip" src="assets/sfx/whoosh.wav" data-start="23.84" data-duration="0.574" data-track-index="13" data-volume="0.05"></audio>
+      <audio id="sx16" class="clip" src="assets/sfx/pop.wav" data-start="30.88" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx17" class="clip" src="assets/sfx/click.wav" data-start="32.85" data-duration="0.366" data-track-index="11" data-volume="0.08"></audio>
+      <audio id="sx18" class="clip" src="assets/sfx/ping.wav" data-start="35.06" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx19" class="clip" src="assets/sfx/pop.wav" data-start="35.94" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx20" class="clip" src="assets/sfx/whoosh.wav" data-start="38.52" data-duration="0.574" data-track-index="10" data-volume="0.05"></audio>
+      <audio id="sx21" class="clip" src="assets/sfx/click.wav" data-start="44.40" data-duration="0.366" data-track-index="11" data-volume="0.08"></audio>
+      <audio id="sx22" class="clip" src="assets/sfx/pop.wav" data-start="45.12" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx23" class="clip" src="assets/sfx/whoosh.wav" data-start="47.24" data-duration="0.574" data-track-index="13" data-volume="0.05"></audio>
+      <audio id="sx24" class="clip" src="assets/sfx/whoosh.wav" data-start="52.69" data-duration="0.574" data-track-index="10" data-volume="0.05"></audio>
+      <audio id="sx25" class="clip" src="assets/sfx/pop.wav" data-start="53.14" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx26" class="clip" src="assets/sfx/ping.wav" data-start="55.30" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx27" class="clip" src="assets/sfx/whoosh.wav" data-start="56.70" data-duration="0.574" data-track-index="13" data-volume="0.05"></audio>
+      <audio id="sx28" class="clip" src="assets/sfx/click.wav" data-start="59.78" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
     </div>
 
     <script>
@@ -329,6 +377,13 @@
         $("#secs").innerHTML = SECS.map(([i, t, items], k) => `<div class="card sec" style="top:${108 + k * 196}px"><div class="hdr"><div class="lg">${ic(i)}</div><b>${t}</b></div>
           ${items.map(([x, e]) => `<div class="it">${ic(k === 2 ? "circle-dot" : "circle-check")}${x}${e ? `<em>${e}</em>` : ""}</div>`).join("")}</div>`).join("");
 
+        // hook: 36 agent dots in a ring around the robot
+        { const hr = $("#hRing"); for (let i = 0; i < 36; i++) { const a = (i / 36) * Math.PI * 2 - Math.PI / 2, d = document.createElement("i");
+            d.style.left = 320 + Math.cos(a) * 292 + "px"; d.style.top = 320 + Math.sin(a) * 292 + "px"; d.style.background = i % 3 ? "#294b77" : "#2f6fe4";
+            d.style.boxShadow = i % 3 ? "none" : "0 0 12px rgba(47,111,228,0.7)"; hr.appendChild(d); } }
+        $("#pChRows").innerHTML = [["si-instagram", "Instagram"], ["si-tiktok", "TikTok"], ["si-youtube", "YouTube"], ["si-facebook", "Facebook"]]
+          .map(([i, n]) => `<div class="r"><div class="lg">${ic(i)}</div>${n}<span class="ok">${ic("circle-check")}Tayang 16.00</span></div>`).join("");
+
         /* captions */
         const KEY = new Set(["satu", "orang", "marketing", "lengkap?", "36", "agent", "ai", "loop.", "simulasinya.", "corong,", "riset,", "konten,", "approve,", "posting,", "analitik,", "riset.",
           "modul", "tren,", "audiens", "draft", "postingan", "email.", "kreatif", "distribusi.", "grafik,", "video", "voice", "over", "antrian.", "tayang", "approve.", "di-approve,", "channel,",
@@ -347,17 +402,26 @@
         const D = 63.9;
         const win = $("#win");
         const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        // screen-recording camera: zooms the whole app inside the fixed window frame (clamped, never shows an empty edge)
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc;
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; };
+        const whip = (x, y, s, at) => camTo(x, y, s, at, 0.42, "expo.inOut");
+        const camOn = (el, s, at, dur, ease, dx, dy) => { const q = posIn(el); camTo(q.x + (dx || 0), q.y + (dy || 0), s, at, dur, ease); };
+        const camOnSet = (el, s, at, dx, dy) => { const q = posIn(el); camSet(q.x + (dx || 0), q.y + (dy || 0), s, at); };
         let cur = { x: 700, y: 820 };
         st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
         const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.55, ease: "power2.inOut" }, at); cur = { x, y }; };
-        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const moveEl = (el, at, dur, dx, dy) => { const q = posIn(el); moveTo(q.x + (dx || 0), q.y + (dy || 0), at, dur); };
         const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
           ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
         const press = (el, at) => ft(el, { scale: 1 }, { keyframes: [{ scale: 0.94 }, { scale: 1 }], duration: 0.25 }, at);
-        const scrIn = (el, at) => ft(el, { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, at);
-        const scrOut = (el, at) => ft(el, { opacity: 1, x: 0 }, { opacity: 0, x: -50, duration: 0.3, ease: "power2.in" }, at);
-        const rail = (i, at) => { const y = i * 58; ft("#railAct", { y: rail.y || 0 }, { y, duration: 0.3, ease: "power2.inOut" }, at); rail.y = y; };
-        const swapPill = (box, from, to, at) => { const p = $$(":scope > .pill", box); ft(p[from], { opacity: 1 }, { opacity: 0, duration: 0.2 }, at); ft(p[to], { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, at + 0.05); };
+        const showScr = (el, at) => { st(".scr", { opacity: 0 }, at); st(el, { opacity: 1 }, at); };
+        const rail = (i, at) => st("#railAct", { y: i * 58 }, at);
+        const swapPill = (box, from, to, at) => { const q = $$(":scope > .pill", box); ft(q[from], { opacity: 1 }, { opacity: 0, duration: 0.2 }, at); ft(q[to], { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, at + 0.05); };
         const count = (el, to, at, dur) => { const o = { v: 0 }; ft(o, { v: 0 }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = Math.round(o.v)) }, at); };
         const pulse = (el, at, s) => ft(el, { scale: 1 }, { keyframes: [{ scale: s || 1.08 }, { scale: 1 }], duration: 0.4 }, at);
         const nodeOn = (k, at) => { const n = $("#nd" + k);
@@ -365,209 +429,223 @@
             { borderColor: "rgba(10,13,44,0.10)", backgroundColor: "#ffffff", duration: 0.35 }] }, at);
           pulse(n, at, 1.1); };
 
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "light" });
+        FX.theme("light", 0);
+        Object.assign(FX.POSE.peekL, { x: -170, y: 30, r: 8 }); Object.assign(FX.POSE.peekR, { x: 610, y: 30, r: -8 }); // peeks show most of the robot (no heavy crop)
+        ft("#dots", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -440px", duration: D, ease: "none" }, 0);
+
         /* initial states */
         st(".swap > .pill:not(:first-child)", { opacity: 0 }, 0);
-        st("#sLoop", { opacity: 1 }, 0);
+        st(win, { opacity: 0, transformPerspective: 2000, transformOrigin: "50% 50%" }, 0);
         st(AG, { opacity: 0, scale: 0, transformOrigin: "50% 50%" }, 0);
         st(".node", { opacity: 0 }, 0);
         st(["#center", "#agentBox"], { opacity: 0 }, 0);
         st("#orbit", { opacity: 0, rotation: 0 }, 0);
+        st(["#pPost", "#pCh"], { transformPerspective: 1400 }, 0);
+        st("#split", { opacity: 0 }, 0);
+        camSet(460, 475, 1, 0);
 
-        /* S1 loop 0-15.8 */
-        ft(win, { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }, 0);
-        ft("#center", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }, 0.25);
-        pulse("#center", wt("Gimana caranya", "satu") - 0.05, 1.1);
-        ft("#agentBox", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.35 }, ph("punya tim").start);
-        const t36 = ph("Jawabannya").start + 0.6;
-        ft(AG, { opacity: 0, scale: 0 }, { opacity: 0.85, scale: 1, duration: 0.25, ease: "back.out(3)", stagger: 0.035 }, t36 - 0.2);
-        count($("#agN"), 36, t36 - 0.2, 1.4);
-        const tLoop = wt("yang kerja", "loop");
-        ft(".node", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)", stagger: 0.1 }, wt("punya tim", "marketing") - 0.1);
-        ft(ringHi, { attr: { "stroke-dashoffset": 2 * Math.PI * R } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.0, ease: "power2.inOut" }, tLoop - 0.3);
-        ft("#orbit", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tLoop);
-        ft("#orbit", { rotation: 0 }, { rotation: 360 * 3, duration: 15.8 - tLoop, ease: "none" }, tLoop);
+        /* ===== SCENE 1 · kinetic hook, robot rises full-body into the stage (UP #1) ===== */
+        const tLengkap = wt("punya tim", "lengkap"), tJaw = ph("Jawabannya").start, t36 = wt("Jawabannya", "36"), tLoop = wt("yang kerja", "loop");
+        const RD = $$("#hRing i"), hArcL = 2 * Math.PI * 292;
+        FX.enter("up", 0.0); FX.wave(1.15);
+        ft("#hQ .k1", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, 0.05);
+        FX.drop($("#hQ .big"), 0.3, 0.045);
+        ft("#hQ .k2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, ph("punya tim").start - 0.05);
+        FX.marker($("#hQ .hl i"), tLengkap - 0.05);
+        FX.face("wide", tLengkap - 0.1, 0.9); FX.beat(tLengkap - 0.1);
+        ft("#hQ", { opacity: 1, y: 0 }, { opacity: 0, y: -40, duration: 0.3, ease: "power2.in" }, tJaw - 0.12);
+        ft("#hA", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, tJaw + 0.12);
+        count($("#h36"), 36, t36 - 0.25, 0.9);
+        FX.face("excited", t36 - 0.05, 1.1); FX.hop(t36 + 0.1, 45);
+        ft(RD, { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(3)", stagger: 0.025 }, t36 - 0.1);
+        st("#hArc", { attr: { "stroke-dasharray": hArcL + " " + hArcL, "stroke-dashoffset": hArcL } }, 0);
+        ft("#hArc", { attr: { "stroke-dashoffset": hArcL } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.9, ease: "power2.inOut" }, tLoop - 0.35);
+        ft("#hRing", { rotation: 0 }, { rotation: 75, duration: 4.0, ease: "sine.inOut" }, t36 + 0.6);
+        FX.face("happy", tLoop - 0.05, 1.0);
+
+        /* ===== dots wipe (ripple from the robot) -> SCENE 2 · the loop inside the app ===== */
         const tSim = ph("Gue tunjukin").start;
+        FX.dip("home", tSim - 0.42, 0.2);
+        FX.dots(tSim - 0.32, "light", (m) => { st(["#hook", "#hRing"], { display: "none" }, m); st(win, { opacity: 1 }, m); }, { x: 540, y: 950 });
+        ft("#center", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.8)" }, tSim + 0.4);
+        ft("#agentBox", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.35 }, tSim + 0.5);
+        count($("#agN"), 36, tSim + 0.5, 1.0);
+        ft(AG, { opacity: 0, scale: 0 }, { opacity: 0.85, scale: 1, duration: 0.22, ease: "back.out(3)", stagger: 0.02 }, tSim + 0.45);
+        ft(".node", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)", stagger: 0.08 }, tSim + 0.6);
+        ft(ringHi, { attr: { "stroke-dashoffset": 2 * Math.PI * R } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.9, ease: "power2.inOut" }, tSim + 0.85);
+        ft("#orbit", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tSim + 1.1);
+        ft("#orbit", { rotation: 0 }, { rotation: 360 * 3, duration: 15.6 - tSim - 1.1, ease: "none" }, tSim + 1.1);
         ft("#sim", { scale: 1, backgroundColor: "rgba(41,75,119,0)" }, { keyframes: [{ scale: 1.25, backgroundColor: "rgba(41,75,119,0.15)" }, { scale: 1, backgroundColor: "rgba(41,75,119,0)" }], duration: 0.6 }, wt("Gue tunjukin", "simulasinya"));
-        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tSim);
-        const tCorong = wt("Bukan corong", "corong");
+        // corong vs loop: camera dives onto the comparison bar
+        const tCorong = wt("Bukan corong", "corong"), tLp = wt("Bukan corong", "loop");
+        camOn($("#vs"), 1.15, ph("Bukan corong").start - 0.3, 0.7);
         ft("#vsFunnel", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3 }, tCorong - 0.3);
         ft("#strike", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.out" }, tCorong + 0.25);
         ft("#vsFunnel", { opacity: 1 }, { opacity: 0.5, duration: 0.3 }, tCorong + 0.6);
-        ft("#vsLoop", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3 }, wt("Bukan corong", "loop") - 0.15);
-        ft("#vsLoop", { boxShadow: "0 0 0 0 rgba(47,111,228,0)" }, { keyframes: [{ boxShadow: "0 0 0 8px rgba(47,111,228,0.18)" }, { boxShadow: "0 0 0 0 rgba(47,111,228,0)" }], duration: 0.8 }, wt("Bukan corong", "loop"));
-        // click the Riset node, then each stage lights up on its word
+        ft("#vsLoop", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3 }, tLp - 0.15);
+        ft("#vsLoop", { boxShadow: "0 0 0 0 rgba(47,111,228,0)" }, { keyframes: [{ boxShadow: "0 0 0 8px rgba(47,111,228,0.18)" }, { boxShadow: "0 0 0 0 rgba(47,111,228,0)" }], duration: 0.8 }, tLp);
+        FX.face("flat", tCorong, 0.6); FX.face("happy", tLp + 0.05, 0.9);
+        // ring tour: the camera glides node to node as each stage lights up
         const tRiset = ph("Riset, konten").start;
-        moveEl($("#nd0"), tRiset - 0.7, 0.55, 30, 10);
-        click(tRiset - 0.1);
         const stageT = [tRiset, wt("Riset, konten", "konten"), wt("Riset, konten", "approve"), ph("posting, analitik").start, wt("posting, analitik", "analitik")];
-        stageT.forEach((t, k) => nodeOn(k, t - 0.05));
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tRiset - 0.9);
+        moveEl($("#nd0"), tRiset - 0.8, 0.6, 30, 10);
+        click(tRiset - 0.1); FX.point(tRiset - 0.35);
+        stageT.forEach((t, k) => { nodeOn(k, t - 0.05); camOn($("#nd" + k), 1.42, t - 0.4, k ? 0.5 : 0.7, "power2.inOut"); });
+        FX.go("center", stageT[2] - 0.3);
         nodeOn(0, wt("terus balik", "riset") - 0.05);
         pulse("#center", wt("terus balik", "balik"), 1.06);
-        moveTo(700, 815, wt("posting, analitik", "analitik") + 0.3, 0.8);
+        camTo(460, 475, 1, ph("terus balik").start - 0.1, 0.9);
+        moveTo(700, 815, stageT[4] + 0.3, 0.8);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, stageT[4] + 1.0);
 
-        /* S2 module 1 15.8-24.3 */
-        const tM1 = ph("Modul satu").start;
-        scrOut("#sLoop", tM1 - 0.3); rail(1, tM1 - 0.3); scrIn("#sM1", tM1 - 0.05);
+        /* ===== slats wipe -> SCENE 3 · module 1: macro on Run, lists, draft pops out of the app ===== */
+        const tM1 = ph("Modul satu").start, rb = posIn($("#runBtn"));
+        FX.dip("right", tM1 - 0.8, 0.25);
+        FX.slats(tM1 - 0.7, "light", (m) => { showScr("#sM1", m); rail(1, m); camSet(rb.x - 120, rb.y + 150, 1.9, m); st("#cursor", { x: rb.x - 160, y: rb.y + 170, opacity: 0 }, m); });
+        cur = { x: rb.x - 160, y: rb.y + 170 };
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tM1 + 0.05);
         moveEl($("#runBtn"), tM1 + 0.1, 0.55);
-        const tRun = tM1 + 0.75; click(tRun); press("#runBtn", tRun);
+        const tRun = tM1 + 0.75; click(tRun); press("#runBtn", tRun); FX.point(tRun - 0.3);
+        camTo(496, 340, 1.15, tRun + 0.3, 0.8);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tRun + 0.6);
         ft("#sM1 .list", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.12 }, tM1 + 0.1);
-        const tTren = ph("Agent nyari").start;
+        const tTren = ph("Agent nyari").start, tAsk = ph("dan apa yang ditanyain").start;
         ft("#trends .lrow", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.18 }, tTren);
-        ft("#asks .lrow", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.18 }, ph("dan apa yang ditanyain").start);
-        const tNulis = ph("Terus langsung nulis").start;
-        ft("#dPost", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, tNulis - 0.1);
-        ft("#dMail", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, tNulis + 0.2);
-        $$("#dPost .tln").forEach((l, i) => ft(l, { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.4, ease: "none" }, tNulis + 0.15 + i * 0.32));
-        $$("#dMail .tln").forEach((l, i) => ft(l, { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "none" }, tNulis + 0.45 + i * 0.24));
-        ft("#mailCta", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tNulis + 1.7);
-        moveTo(496, 470, tTren + 0.2, 0.9);
+        FX.face("wide", wt("Agent nyari", "tren") - 0.05, 0.8); FX.beat(wt("Agent nyari", "tren") - 0.08);
+        whip(700, 337, 1.55, tAsk - 0.25);
+        ft("#asks .lrow", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.18 }, tAsk);
+        const tNulis = ph("Terus langsung nulis").start, tMail = wt("draft postingan", "email"), tM1out = ph("Modul dua").start - 0.75;
+        FX.go("center", tNulis - 0.4);
+        ft(win, { scale: 1 }, { scale: 0.95, duration: 0.5, ease: "power2.inOut" }, tNulis - 0.2);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.7, duration: 0.4 }, tNulis - 0.2);
+        ft("#pPost", { opacity: 0, x: -140, y: 160, scale: 0.42 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.25)" }, tNulis - 0.15);
+        $$("#pPost .ln").forEach((l, i) => ft(l, { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.38, ease: "none" }, tNulis + 0.35 + i * 0.3));
+        ft("#pMail", { opacity: 0, y: -20, scale: 0.6, rotation: -6 }, { opacity: 1, y: 0, scale: 1, rotation: -3, duration: 0.4, ease: "back.out(2)" }, tMail - 0.15);
+        FX.face("happy", tNulis + 0.2, 1.2);
 
-        /* S3 module 2 24.4-38.9 */
+        /* ===== shutter wipe -> SCENE 4 · module 2: whip between creatives, macro approve, 3D split, comments ===== */
         const tM2 = ph("Modul dua").start;
-        scrOut("#sM1", tM2 - 0.3); rail(2, tM2 - 0.3); scrIn("#sM2", tM2 - 0.05);
-        st(["#cmts", ".cm"], { opacity: 0 }, tM2 - 0.06);
+        FX.dip("peekL", tM2 - 0.65, 0.3);
+        FX.shutter(tM2 - 0.58, "light", (m) => { st(["#pPost", "#pMail"], { opacity: 0 }, m); st("#winDim", { opacity: 0 }, m); st(win, { scale: 1 }, m);
+          showScr("#sM2", m); rail(2, m); camSet(496, 340, 1.15, m); st(["#cmts", ".cm"], { opacity: 0 }, m); });
         ft(".cr", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.1 }, tM2 + 0.1);
-        [wt("Grafik, video", "grafik"), wt("Grafik, video", "video"), ph("sama voice over").start].forEach((t, k) => pulse("#cr" + k, t - 0.05, 1.06));
-        moveTo(520, 860, tM2 + 0.1, 0.7);
-        const tLock = ph("Tapi nggak").start;
+        const crT = [wt("Grafik, video", "grafik"), wt("Grafik, video", "video"), ph("sama voice over").start];
+        crT.forEach((t, k) => { pulse("#cr" + k, t - 0.05, 1.06); k ? whip(226 + 270 * k, 341, 1.7, t - 0.3) : camOn($("#cr0"), 1.7, t - 0.35, 0.55); });
+        camTo(460, 475, 1, ph("udah siap").start - 0.1, 0.7);
+        ft("#chs .ch", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", stagger: 0.1 }, tM2 + 0.5);
+        const tLock = ph("Tapi nggak").start, tAp = wt("sebelum lu klik", "approve") - 0.05, ab = posIn($("#apBtn"));
+        FX.go("home", tLock - 0.3);
         ft("#lockBar", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, tLock + 0.1);
-        moveEl($("#apBtn"), tLock + 0.4, 0.6);
-        const tAp = wt("sebelum lu klik", "approve") - 0.05;
-        click(tAp); press("#apBtn", tAp);
+        FX.face("flat", tLock + 0.1, 1.0);
+        camTo(ab.x - 120, ab.y + 160, 1.9, tAp - 0.75, 0.6);
+        st("#cursor", { x: ab.x - 170, y: ab.y + 190 }, tAp - 0.8); cur = { x: ab.x - 170, y: ab.y + 190 };
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tAp - 0.6);
+        moveEl($("#apBtn"), tAp - 0.55, 0.45);
+        click(tAp); press("#apBtn", tAp); FX.point(tAp - 0.3); FX.face("excited", tAp + 0.1, 1.0);
         $$(".cr .swap").forEach((s, k) => swapPill(s, 0, 1, tAp + 0.15 + k * 0.12));
         ft("#lockBar", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tAp + 0.4);
-        const tPost = ph("langsung posting").start;
-        ft("#chs .ch", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", stagger: 0.1 }, tM2 + 0.5);
-        $$("#chs .swap").forEach((s, k) => swapPill(s, 0, 1, wt("langsung posting", "posting") - 0.1 + k * 0.16));
-        ft("#chs .ch", { scale: 1 }, { keyframes: [{ scale: 1.05 }, { scale: 1 }], duration: 0.3, stagger: 0.16 }, wt("langsung posting", "posting") - 0.05);
-        const tCm = ph("dan komentar").start;
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tAp + 0.5);
+        camTo(460, 475, 1, tAp + 0.3, 0.6);
+        // 3D split: the app swings back, a floating card shows every channel going live
+        const tSwing = ph("Begitu di-approve").start - 0.15, tPost = wt("langsung posting", "posting"), tCm = ph("dan komentar").start, tBack = tCm - 0.45;
+        FX.go("center", tSwing);
+        ft(win, { rotationY: 0, scale: 1, x: 0, transformOrigin: "0% 50%" }, { rotationY: 20, scale: 0.9, x: -12, duration: 0.6, ease: "power3.inOut" }, tSwing);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.35, duration: 0.5 }, tSwing);
+        ft("#pCh", { opacity: 0, x: 170, rotationY: -28 }, { opacity: 1, x: 0, rotationY: 0, duration: 0.6, ease: "power3.out" }, tSwing + 0.1);
+        ft("#pCh .r .ok", { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.16 }, tPost - 0.05);
+        ft("#pCh .r", { scale: 1 }, { keyframes: [{ scale: 1.04 }, { scale: 1 }], duration: 0.3, stagger: 0.16 }, tPost);
+        $$("#chs .swap").forEach((s, k) => swapPill(s, 0, 1, tPost - 0.1 + k * 0.16));
+        FX.hop(tPost, 40);
+        ft("#pCh", { opacity: 1, x: 0, y: 0, scale: 1 }, { opacity: 0, x: 60, y: 40, scale: 0.85, duration: 0.35, ease: "power2.in" }, tBack);
+        ft(win, { rotationY: 20, scale: 0.9, x: -12 }, { rotationY: 0, scale: 1, x: 0, duration: 0.55, ease: "power3.inOut" }, tBack + 0.05);
+        ft("#winDim", { opacity: 0.35 }, { opacity: 0, duration: 0.4 }, tBack + 0.05);
+        // comments: tight on the thread, the reply types itself
+        camOn($("#cmts"), 1.5, tCm - 0.2, 0.7);
         ft("#cmts", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35 }, tCm - 0.3);
         ft("#cm1", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, tCm - 0.1);
         ft("#cm2", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, wt("dan komentar", "dibalas"));
         const repTxt = "Buka sampai jam 10 malam, Kak. Wifi kenceng, colokan banyak, cocok buat nugas!", repEl = $("#rep");
         st(repEl, { textContent: "" }, 0);
         ft({ v: 0 }, { v: 0 }, { v: repTxt.length, duration: 2.0, ease: "none", onUpdate() { repEl.textContent = repTxt.slice(0, Math.round(this.targets()[0].v)); } }, wt("dan komentar", "dibalas") + 0.1);
+        FX.face("happy", wt("pakai gaya", "gaya") - 0.1, 1.0); FX.beat(wt("pakai gaya", "gaya") - 0.1);
 
-        /* S4 module 3 39.1-47.6 */
-        const tM3 = ph("Modul tiga").start;
-        scrOut("#sM2", tM3 - 0.3); rail(3, tM3 - 0.3); scrIn("#sM3", tM3 - 0.05);
-        st(".tr.row", { y: 0 }, 0);
-        // rows start in "views" order (barista first), then get re-ranked by sales
+        /* ===== iris wipe (from the top-right) -> SCENE 5 · module 3: table, macro sort, pan to next week's plan ===== */
+        const tM3 = ph("Modul tiga").start, sb = posIn($("#sortBtn"));
+        FX.dip("peekR", tM3 - 0.7, 0.3);
         const ORDER0 = [1, 0, 3, 2];
-        ORDER0.forEach((k, pos) => st("#rw" + k, { y: RY(pos) - RY(k) }, tM3 - 0.06));
-        ft("#plan", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35 }, tM3 + 0.3);
+        FX.iris(tM3 - 0.62, "light", (m) => { showScr("#sM3", m); rail(3, m); camSet(496, 363, 1.25, m); ORDER0.forEach((k, pos) => st("#rw" + k, { y: RY(pos) - RY(k) }, m)); }, { x: 980, y: 300, ex: 140, ey: 1150 });
+        st(".tr.row", { y: 0 }, 0);
         ft(".tr.row", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.14 }, ph("Agent ngecek").start - 0.1);
         const tTel = wt("yang beneran", "telepon");
         $$(".tr.row .c3 .cn").forEach((el) => count(el, +el.dataset.n, tTel - 0.1, 0.9));
         $$(".tr.row .c4 .cn").forEach((el) => count(el, +el.dataset.n, wt("dan penjualan", "penjualan") - 0.2, 0.9));
-        moveEl($("#sortBtn"), tTel - 0.6, 0.5);
+        FX.go("right", tTel - 0.6); FX.face("wide", tTel - 0.05, 0.9);
         const tSort = wt("dan penjualan", "penjualan") + 0.5;
-        click(tSort); press("#sortBtn", tSort);
-        ORDER0.forEach((k, pos) => ft("#rw" + k, { y: RY(pos) - RY(k) }, { y: 0, duration: 0.55, ease: "power3.inOut" }, tSort + 0.1));
-        ft("#rw0", { backgroundColor: "rgba(41,75,119,0.05)" }, { backgroundColor: "#e8f7ee", duration: 0.3 }, tSort + 0.5);
+        camTo(sb.x - 120, sb.y + 160, 1.85, tSort - 0.7, 0.5, "expo.inOut");
+        st("#cursor", { x: sb.x - 160, y: sb.y + 190 }, tSort - 0.75); cur = { x: sb.x - 160, y: sb.y + 190 };
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tSort - 0.6);
+        moveEl($("#sortBtn"), tSort - 0.5, 0.4);
+        click(tSort); press("#sortBtn", tSort); FX.point(tSort - 0.3);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tSort + 0.4);
+        camTo(496, 363, 1.25, tSort + 0.2, 0.55, "expo.inOut");
+        ORDER0.forEach((k, pos) => ft("#rw" + k, { y: RY(pos) - RY(k) }, { y: 0, duration: 0.55, ease: "power3.inOut" }, tSort + 0.3));
+        ft("#rw0", { backgroundColor: "rgba(41,75,119,0.05)" }, { backgroundColor: "#e8f7ee", duration: 0.3 }, tSort + 0.7);
         const tHasil = ph("Hasilnya langsung").start;
+        ft("#plan", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35 }, tHasil - 0.4);
+        camTo(496, 680, 1.25, tHasil - 0.2, 0.9);
         ft(feed, { attr: { "stroke-dashoffset": FL } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.6, ease: "power2.out" }, tHasil);
         ft(feedHead, { opacity: 0 }, { opacity: 1, duration: 0.2 }, tHasil + 0.5);
         ft("#planWait", { opacity: 1 }, { opacity: 0, duration: 0.25 }, ph("ke rencana").start - 0.35);
         ft(".prow", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.25 }, ph("ke rencana").start - 0.1);
+        FX.face("happy", ph("ke rencana").start, 1.0); FX.beat(ph("ke rencana").start - 0.05);
 
-        /* S5 morning report 47.8-57.2 */
+        /* ===== dots wipe (from bottom-left) -> SCENE 6 · morning report, the camera scrolls the page ===== */
         const tRep = ph("Tiap pagi").start;
-        scrOut("#sM3", tRep - 0.3); rail(4, tRep - 0.3); scrIn("#sRep", tRep - 0.05);
-        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tRep);
+        FX.dip("home", tRep - 0.7, 0.2);
+        FX.dots(tRep - 0.6, "light", (m) => { showScr("#sRep", m); rail(4, m); camSet(496, 330, 1.3, m); }, { x: 120, y: 1750 });
         const secT = [ph("apa yang berhasil").start, ph("siapa yang").start, ph("dan langkah").start];
         $$(".sec").forEach((s, k) => { ft(s, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, secT[k] - 0.25);
           ft($$(".it", s), { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.15 }, secT[k]); });
-        const tAI = ph("AI yang mindahin").start, tLu = ph("lu yang pegang").start;
-        ft("#spAI", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.6)" }, tAI - 0.1);
-        ft("#spMe", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.6)" }, tLu - 0.1);
-        ft("#spMe", { borderColor: "rgba(10,13,44,0.10)" }, { borderColor: "#294b77", duration: 0.3 }, wt("lu yang pegang", "brand"));
+        camTo(496, 400, 1.3, secT[1] - 0.4, 0.8, "sine.inOut");
+        camTo(496, 600, 1.3, secT[2] - 0.4, 0.8, "sine.inOut");
+        FX.go("center", secT[0] - 0.5);
+        FX.face("happy", secT[0], 0.8); FX.face("excited", wt("siapa yang", "booking") - 0.1, 0.9); FX.beat(secT[2] - 0.08);
 
-        /* S6 CTA */
-        const tCta = ph("Mau sistem").start;
-        ft("#winDim", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tCta - 0.2);
-        ft(win, { scale: 1 }, { scale: 0.94, duration: 0.6, ease: "power2.inOut" }, tCta - 0.2);
-        ft("#cta", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
-        const tF = wt("Klik link", "link");
+        /* ===== iris wipe (out of the robot) -> SCENE 7 · AI vs Lu, robot jumps up into the stage (UP #2) ===== */
+        const tAI = ph("AI yang mindahin").start, tLu = ph("lu yang pegang").start;
+        FX.iris(tAI - 0.55, "light", (m) => st(win, { opacity: 0 }, m), { x: 540, y: 1560, ex: 540, ey: 470 });
+        FX.go("up", tAI - 0.5, 1.2);
+        ft("#kAI", { opacity: 0, y: 40, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.5)" }, tAI - 0.1);
+        FX.drop($("#kAI .w"), tAI + 0.05, 0.08);
+        ft("#kLu", { opacity: 0, y: 40, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.5)" }, tLu - 0.15);
+        FX.drop($("#kLu .w"), tLu, 0.08);
+        FX.marker($("#kLu .hl i"), wt("lu yang pegang", "brand") - 0.05);
+        FX.face("happy", tAI + 0.5, 0.9); FX.beat(tAI + 0.7); FX.point(tLu - 0.05); FX.face("excited", tLu + 0.3, 1.0);
+
+        /* ===== shutter wipe -> SCENE 8 · CTA: raised card, robot stays whole and big under it (UP #3) ===== */
+        const tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");
+        FX.shutter(tCta - 0.6, "light", (m) => st(["#kAI", "#kLu"], { opacity: 0 }, m));
+        ft("#cta", { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
+        FX.hop(tCta + 0.1, 34); FX.wave(tCta + 0.45);
         ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
         ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
+        FX.point(tF - 0.3); FX.face("happy", tF + 0.05, 1.4); FX.face("excited", D - 1.6, 0.9);
 
         /* captions */
         capEls.forEach(({ el, ws, p }, k) => {
           const next = capEls[k + 1];
           const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
-          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
           ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
-          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
           ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
         });
 
-        /* robot presenter rig v2 (front-facing AIpreneur robot): head, body, two hands, eyelids */
-        const RG = window.ROBOT_RIG2, rob = $("#robot");
-        const box = (el, b, pad) => { pad = pad || 0; Object.assign(el.style, { left: b[0] - pad + "px", top: b[1] - pad + "px", width: b[2] + 2 * pad + "px", height: b[3] + 2 * pad + "px" }); };
-        const head = $(".head", rob), headIn = $(".headIn", rob), lh = $(".lhand", rob), rh = $(".rhand", rob), lids = $$(".lid", rob);
-        const chest = $(".chest", rob), baseL = $(".base", rob), talk = $(".talk", rob);
-        box(head, RG.head); box($(".body", rob), RG.body); box(lh, RG.lhand); box(rh, RG.rhand);
-        lids.forEach((l, i) => box(l, [RG.eyes[i][0] - RG.head[0], RG.eyes[i][1] - RG.head[1], RG.eyes[i][2], RG.eyes[i][3]], 4));
-        head.style.transformOrigin = (RG.neck[0] - RG.head[0]) + "px " + (RG.neck[1] - RG.head[1]) + "px";
-        lh.style.transformOrigin = "80% 30%"; rh.style.transformOrigin = "20% 30%";
-        box(chest, [RG.chest[0] - 20, RG.chest[1] - 10, RG.chest[2] + 40, RG.chest[3] + 20]);
-        box(baseL, [RG.base[0] - 10, RG.base[1] - 8, RG.base[2] + 20, RG.base[3] + 16]);
-        box($(".glow", rob), [RG.base[0] - 80, RG.base[1] + 4, RG.base[2] + 160, 50]);
-        // entrance
-        ft(rob, { opacity: 0, x: -320 }, { opacity: 1, x: 0, duration: 0.8, ease: "power3.out" }, 0.4);
-        // idle life: float, sway, hands hover out of phase, head drifts
-        const rep = (p) => Math.floor((D - 1.2) / p) - 1;
-        ft($(".bob", rob), { y: 0 }, { y: -9, duration: 1.4, ease: "sine.inOut", repeat: rep(1.4), yoyo: true }, 1.2);
-        ft($(".sway", rob), { rotation: -1.2 }, { rotation: 1.2, duration: 3.1, ease: "sine.inOut", repeat: rep(3.1), yoyo: true }, 1.2);
-        ft($(".glow", rob), { opacity: 1, scaleX: 1 }, { opacity: 0.55, scaleX: 0.82, duration: 1.4, ease: "sine.inOut", repeat: rep(1.4), yoyo: true }, 1.2);
-        ft($("img", lh), { y: 0 }, { y: -7, duration: 1.1, ease: "sine.inOut", repeat: rep(1.1), yoyo: true }, 1.0);
-        ft($("img", rh), { y: -6 }, { y: 2, duration: 1.25, ease: "sine.inOut", repeat: rep(1.25), yoyo: true }, 1.3);
-        // speaking: head micro-bob + chest/base light follow the VO loudness
-        const env = window.VO_ENV || [];
-        ft({ v: 0 }, { v: 0 }, { v: 1, duration: D, ease: "none", onUpdate: () => { const f = Math.min(env.length - 1, Math.max(0, Math.round(tl.time() * 30))); const e = env[f] || 0;
-          const e2 = env[Math.max(0, f - 3)] || 0;
-          chest.style.opacity = (0.12 + 0.75 * e).toFixed(3); baseL.style.opacity = (0.2 + 0.8 * e).toFixed(3); chest.style.transform = "scale(" + (0.9 + 0.2 * e).toFixed(3) + ")";
-          talk.style.transform = "translateY(" + (-3 * e).toFixed(2) + "px)"; } }, 0);
-        // blinking (occasionally a double blink)
-        for (let t = 2.0, k = 0; t < D - 1; t += [3.2, 2.6, 4.1, 3.4][k++ % 4]) {
-          ft(lids, { scaleY: 0 }, { keyframes: [{ scaleY: 1, duration: 0.07 }, { scaleY: 0, duration: 0.09 }] }, t);
-          if (k % 3 === 0) ft(lids, { scaleY: 0 }, { keyframes: [{ scaleY: 1, duration: 0.06 }, { scaleY: 0, duration: 0.08 }] }, t + 0.24);
-        }
-        // head: tilts and looks while presenting (head layer sits behind the collar, so it can move freely)
-        const headTo = () => {}; // head stays still (client request)
-        const headToOld = (t, r, x, y, hold) => ft(head, { rotation: 0, x: 0, y: 0 }, { keyframes: [{ rotation: r, x, y, duration: 0.35, ease: "power2.out" }, { rotation: r, x, y, duration: hold },
-          { rotation: 0, x: 0, y: 0, duration: 0.45, ease: "power2.inOut" }] }, t);
-        const G = [];
-        [ph("Gimana caranya").start + 0.2, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
-        [tRiset, tRun, tAp, tPost, tSort, tHasil].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
-        [t36, tLoop, tCorong, tTren, tNulis, wt("Grafik, video", "grafik"), tLock, tCm, tTel, secT[0], secT[1], tAI, tLu, wt("Modul tiga", "loop")]
-          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
-        G.sort((x, y) => x.t - y.t);
-        let busy = -1, beatN = 0;
-        G.forEach((g) => {
-          if (g.t < busy + 0.05) return;
-          busy = g.t + g.d;
-          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
-            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
-            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
-          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
-            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
-        });
+        FX.runGestures();
 
         tl.set({}, {}, D - 0.01);
-
-        /* robot-mouth:js */
-        { const _m = document.querySelector("#robot .mouth svg"), _env = window.VO_ENV || [], _D = (typeof D !== "undefined") ? D : tl.duration();
-          tl.fromTo({ v: 0 }, { v: 0 }, { v: 1, duration: _D, ease: "none", immediateRender: false, onUpdate: () => {
-            const f = Math.min(_env.length - 1, Math.max(0, Math.round(tl.time() * 30)));
-            const e = _env[f] || 0, ep = _env[Math.max(0, f - 2)] || 0;
-            const sy = Math.min(1.05, 0.3 + 0.72 * e + 0.5 * Math.abs(e - ep));
-            const sx = 0.9 + 0.13 * e;
-            _m.style.transform = "scale(" + sx.toFixed(3) + "," + sy.toFixed(3) + ")"; } }, 0); }
-        /* /robot-mouth:js */
         window.__timelines["main"] = tl;
       })();
     </script>

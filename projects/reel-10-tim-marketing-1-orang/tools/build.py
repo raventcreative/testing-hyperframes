@@ -24,15 +24,19 @@ def wt(s, w):
     return next((x[1] for x in W if x[3] == k and x[0].lower().startswith(w.lower())), ph(s)["start"])
 DUR = {"whoosh": 0.574, "pop": 0.72, "click": 0.366, "ping": 1.32}
 VOL = {"whoosh": 0.06, "pop": 0.045, "click": 0.08, "ping": 0.045}
-ev = [("whoosh", 0.02), ("pop", wt("Gimana caranya", "orang") - 0.1), ("pop", ph("Jawabannya")["start"] + 0.4), ("pop", ph("yang kerja")["start"]),
-      ("pop", wt("Gue tunjukin", "simulasinya")), ("pop", wt("Bukan corong", "loop") - 0.15), ("click", ph("Riset, konten")["start"] - 0.1),
+VOL["whoosh"] = 0.05
+tSim = ph("Gue tunjukin")["start"]; tM1 = ph("Modul satu")["start"]; tM2 = ph("Modul dua")["start"]; tM3 = ph("Modul tiga")["start"]
+tRep = ph("Tiap pagi")["start"]; tAI = ph("AI yang mindahin")["start"]; tCta = ph("Mau sistem")["start"]
+ev = [("pop", 0.05), ("pop", 0.3), ("pop", wt("Jawabannya", "36") - 0.1), ("ping", wt("yang kerja", "loop") - 0.2),
+      # one quiet whoosh per wipe
+      ("whoosh", tSim - 0.32), ("whoosh", tM1 - 0.7), ("whoosh", tM2 - 0.58), ("whoosh", tM3 - 0.62), ("whoosh", tRep - 0.6), ("whoosh", tAI - 0.55), ("whoosh", tCta - 0.6),
+      ("pop", wt("Bukan corong", "loop") - 0.15), ("click", ph("Riset, konten")["start"] - 0.1),
       ("pop", wt("Riset, konten", "konten")), ("pop", wt("Riset, konten", "approve")), ("pop", ph("posting, analitik")["start"]), ("pop", wt("posting, analitik", "analitik")),
-      ("whoosh", ph("Modul satu")["start"] - 0.3), ("click", ph("Modul satu")["start"] + 0.75), ("pop", ph("Terus langsung nulis")["start"] - 0.1),
-      ("whoosh", ph("Modul dua")["start"] - 0.3), ("pop", ph("Tapi nggak")["start"] + 0.1), ("click", wt("sebelum lu klik", "approve") - 0.05),
+      ("click", tM1 + 0.75), ("pop", ph("Terus langsung nulis")["start"] - 0.15), ("pop", wt("draft postingan", "email") - 0.15),
+      ("pop", ph("Tapi nggak")["start"] + 0.1), ("click", wt("sebelum lu klik", "approve") - 0.05),
       ("ping", wt("langsung posting", "posting")), ("pop", ph("dan komentar")["start"] - 0.1),
-      ("whoosh", ph("Modul tiga")["start"] - 0.3), ("click", wt("dan penjualan", "penjualan") + 0.5), ("pop", ph("Hasilnya langsung")["start"] + 0.3),
-      ("whoosh", ph("Tiap pagi")["start"] - 0.3), ("ping", ph("lu yang pegang")["start"] - 0.1),
-      ("whoosh", ph("Mau sistem")["start"] - 0.2), ("click", wt("Klik link", "link"))]
+      ("click", wt("dan penjualan", "penjualan") + 0.5), ("pop", ph("Hasilnya langsung")["start"] + 0.3),
+      ("pop", ph("AI yang mindahin")["start"] - 0.1), ("ping", ph("lu yang pegang")["start"] - 0.1), ("click", wt("Klik link", "link"))]
 tags = [f'<audio id="sx{i:02d}" class="clip" src="assets/sfx/{k}.wav" data-start="{t:.2f}" data-duration="{DUR[k]}" data-track-index="{10 + i % 4}" data-volume="{VOL[k]}"></audio>'
         for i, (k, t) in enumerate(sorted(ev, key=lambda e: e[1]))]
 out = src.replace("<!--ROBOT_CSS-->", css.strip()).replace("<!--ROBOT_HTML-->", html).replace("/*ROBOT_SETUP*/", js.strip()).replace("<!--SFX-->", "\n      ".join(tags))

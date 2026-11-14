@@ -22,7 +22,7 @@ ev = [("pop", 0.05), ("pop", S("resto lu") - 0.12), ("pop", wt("resto lu", "AI")
       ("whoosh", tCoba - 0.22),
       ("pop", wt("Pertama", "bangunin") + 0.4), ("whoosh", S("Dia baca") - 0.42), ("pop", wt("nemu cabai", "cabai")), ("pop", wt("nemu cabai", "ayam")),
       ("whoosh", tHab + 0.08), ("ping", wt("langsung order", "supplier") - 0.15),
-      ("whoosh", tJad - 1.13), ("whoosh", tJad + 0.42), ("pop", wt("Agent jadwal", "reservasi") - 0.15), ("pop", wt("sama cuaca", "cuaca") - 0.25), ("pop", S("Jumat") - 0.2),
+      ("whoosh", tJad - 1.13), ("pop", wt("Agent jadwal", "reservasi") - 0.15), ("pop", wt("sama cuaca", "cuaca") - 0.25), ("pop", S("Jumat") - 0.2),
       ("pop", S("jadi dia minta") - 0.05), ("ping", wt("jadi dia minta", "lebih") - 0.1),
       ("whoosh", tSeh - 0.55), ("pop", wt("Seharian", "bales") - 0.1), ("pop", wt("Seharian", "bales") + 0.32), ("pop", wt("Seharian", "bales") + 0.74),
       ("whoosh", tRev - 0.42), ("pop", wt("Agent review", "bales") - 0.1), ("pop", wt("Agent review", "bales") + 0.3), ("ping", wt("yang bintang", "dilempar") - 0.25),

@@ -8,7 +8,10 @@
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/icons.js"></script>
     <script src="vendor/vo_env.js"></script>
-    <script src="vendor/robot_rig2.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
     <style>
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
@@ -128,8 +131,8 @@
       .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
       .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; text-shadow: 0 4px 18px rgba(0,0,0,0.45); }
       .cap s { text-decoration: none; display: inline; font-weight: 400; color: #fff; } .cap s.k { font-weight: 700; color: var(--c); }
-      <!--ROBOT_CSS-->
-      #robot { filter: drop-shadow(0 18px 30px rgba(0,0,0,0.35)); }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 30px rgba(0,0,0,0.4)); }
     </style>
   </head>
   <body>
@@ -171,7 +174,7 @@
         <div id="cta"><div class="k">Mau sistem kayak gini dipasang di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
           <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
         <div id="ui"><img id="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><div id="caps"></div>
-          <!--ROBOT_HTML--></div>
+          <div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div></div>
       </div>
       <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="29.84" data-track-index="8" data-volume="1"></audio>
       <!--SFX-->
@@ -225,6 +228,8 @@
         const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
         const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
         const D = 30.8;
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "dark" });
+        Object.assign(FX.POSE.peekR, { x: 560, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 }); // peeks fully visible
         const win = $("#win");
         const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
         let cur = { x: 760, y: 900 };
@@ -318,11 +323,11 @@
         moveTo(700, 420, tDiam, 0.7);
         /* S6 dashboard */
         const tDash = ph("Semua lead").start;
-        moveEl($("#tabDash"), tDash - 0.55, 0.5); click(tDash - 0.05); press("#tabDash", tDash - 0.05);
-        tab($("#tabDash"), tDash); ft("#tabFlow", { color: "#ffffff" }, { color: "rgba(255,255,255,0.62)", duration: 0.2 }, tDash);
-        nodeOn(6, tDash - 0.4);
-        ft("#flowView", { opacity: 1 }, { opacity: 0, duration: 0.3 }, tDash + 0.05);
-        ft("#dashView", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, tDash + 0.2);
+        const tWd = tDash - 0.5; // sweep: covered tWd+0.42 .. tWd+0.5, gone by tWd+0.95
+        moveEl($("#tabDash"), tWd - 0.75, 0.45); click(tWd - 0.25); press("#tabDash", tWd - 0.25);
+        tab($("#tabDash"), tWd - 0.2); ft("#tabFlow", { color: "#ffffff" }, { color: "rgba(255,255,255,0.62)", duration: 0.2 }, tWd - 0.2);
+        nodeOn(6, tWd - 0.4);
+        FX.sweep(tWd, "dark", (m) => { st("#flowView", { opacity: 0 }, m); st("#dashView", { opacity: 1, x: 0 }, m); });
         ft(".dc", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.08 }, tDash + 0.35);
         [wt("Semua lead", "lead"), wt("Semua lead", "mockup"), wt("Semua lead", "order"), ph("masuk ke dashboard").start].forEach((t, i) => {
           const n = $(".n", $("#dc" + i)); count(n, +n.dataset.n, t, 1.0);
@@ -330,7 +335,7 @@
         ft(".fr", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.25 }, wt("masuk ke dashboard", "dashboard"));
         ft("#exec", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35 }, ph("masuk ke dashboard").start + 0.3);
         ft("#err", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35 }, ph("masuk ke dashboard").start + 0.4);
-        moveTo(560, 620, tDash + 0.6, 0.9);
+        moveTo(560, 620, tDash + 0.3, 0.9);
         /* S7 executions + error rate */
         const tRb = ph("Ribuan").start;
         count($("#nExec"), 12480, tRb - 0.1, 1.6, (v) => Math.round(v).toLocaleString("id-ID"));
@@ -342,10 +347,9 @@
         ft("#err", { borderColor: "#3ddc97" }, { borderColor: "rgba(255,255,255,0.12)", duration: 1.0 }, wt("error di bawah", "persen"));
         moveEl($("#err"), tErr, 0.6, 40, 10);
         /* S8 CTA */
-        const tCta = ph("Mau sistem").start;
-        ft("#winDim", { opacity: 0 }, { opacity: 0.6, duration: 0.4 }, tCta - 0.2);
-        ft(win, { scale: 1 }, { scale: 0.94, duration: 0.6, ease: "power2.inOut" }, tCta - 0.2);
-        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tCta - 0.2);
+        const tCta = ph("Mau sistem").start, tWc = tCta - 0.55; // stripes: covered by tWc+0.53, gone by ~tWc+1.13
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tWc);
+        FX.stripes(tWc, "dark", (m) => { st("#winDim", { opacity: 0.6 }, m); st(win, { scale: 0.94 }, m); });
         ft("#cta", { opacity: 0, y: 50, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
         const tF = wt("Klik link", "link");
         ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
@@ -355,30 +359,30 @@
         capEls.forEach(({ el, ws, p }, k) => {
           const next = capEls[k + 1];
           const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
-          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
           ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
-          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
           ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
         });
 
-        /*ROBOT_SETUP*/
-        const G = [];
-        [0.6, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
-        [tLead, tAI, tJadi - 0.4, tFu, tDash - 0.05, tRb, tF].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
-        [wt("Bisnis lu", "closing"), tTidur, tJam, tMinta, tLogo, tDet, tDiam, tErr, wt("error di bawah", "persen")].forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
-        G.sort((x, y) => x.t - y.t);
-        let busy = -1, beatN = 0;
-        G.forEach((g) => {
-          if (g.t < busy + 0.05) return;
-          busy = g.t + g.d;
-          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
-            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
-            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
-          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
-            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
-        });
+        /* ---------- 3D presenter robot (bottom band only, never in the middle of the demo) ---------- */
+        const tAIb = wt("AI langsung", "bales");
+        FX.enter("home", 0.0); FX.wave(0.6);
+        FX.face("happy", wt("pas lu lagi", "tidur") - 0.1, 0.9);
+        FX.face("excited", wt("Coba lihat", "simulasi") - 0.05, 0.8);
+        FX.face("wide", tJam + 0.05, 0.9);
+        FX.go("center", tAI - 0.45, 0.9); FX.face("happy", tAIb - 0.05, 1.0);
+        FX.face("wide", tDet + 0.1, 0.8); FX.face("excited", tJadi - 0.1, 0.9); FX.hop(tJadi + 0.05, 34);
+        FX.go("right", tDiam - 0.4, 0.9); FX.face("flat", tDiam + 0.15, 0.8); FX.shiver(tDiam + 0.25, 0.3);
+        FX.face("happy", tFu + 0.4, 1.0);
+        FX.dip("home", tWd - 0.05, 0.2);
+        FX.face("excited", tRb - 0.05, 0.9); FX.face("happy", wt("error di bawah", "persen") - 0.05, 0.8);
+        FX.dip("center", tWc - 0.05, 0.25);
+        FX.face("happy", tF + 0.05, 1.3); FX.face("excited", D - 1.6, 0.9);
+        [0.6, tCta + 0.35].forEach((t) => FX.wave(t));
+        [tLead, tAI, tJadi - 0.4, tFu, tRb, tF].forEach((t) => FX.point(t - 0.25));
+        [wt("Bisnis lu", "closing"), tTidur, tJam, tMinta, tLogo, tDet, tDiam, tErr, wt("error di bawah", "persen")].forEach((t) => FX.beat(t - 0.08));
+        FX.runGestures();
 
         tl.set({}, {}, D - 0.01);
         window.__timelines["main"] = tl;

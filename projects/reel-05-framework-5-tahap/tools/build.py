@@ -27,7 +27,9 @@ VOL = {"whoosh": 0.06, "pop": 0.045, "click": 0.08, "ping": 0.045}
 ev = [("whoosh", 0.05), ("click", wt("bikin AI agent", "agent") - 0.1), ("pop", ph("Padahal")["start"] - 0.1), ("pop", wt("Padahal", "itu")),
       ("whoosh", wt("datang paling", "terakhir") - 0.45), ("pop", wt("Gue tunjukin", "simulasinya")), ("ping", ph("Lima tahap")["start"])]
 for s0 in ["Tahap satu", "Tahap dua", "Tahap tiga", "Tahap empat", "Tahap lima"]:
-    ev += [("click", ph(s0)["start"] - 0.05), ("whoosh", ph(s0)["start"] + 0.1)]
+    ev += [("click", ph(s0)["start"] - 0.05)]
+ev += [("whoosh", ph("Tahap satu")["start"] - 1.12), ("whoosh", ph("Tahap dua")["start"] - 1.2), ("whoosh", ph("Tahap tiga")["start"] - 1.12),
+       ("whoosh", ph("Tahap empat")["start"] + 0.1), ("whoosh", ph("Tahap lima")["start"] + 0.1), ("whoosh", ph("Terakhir")["start"] - 1.15)]
 ev += [("pop", ph("Stop dulu")["start"]), ("pop", ph("Dokumentasi")["start"]), ("pop", ph("Hapus")["start"]), ("pop", ph("Sederhanakan")["start"]),
        ("ping", ph("masuk ke satu")["start"] + 0.2), ("click", wt("mereka yang", "jalan") - 0.35), ("ping", wt("mereka yang", "jalan") - 0.2),
        ("pop", wt("Ada booking", "booking") + 0.25), ("pop", wt("penjualan baru", "penjualan") + 0.25), ("pop", wt("penjualan baru", "email") + 0.25),

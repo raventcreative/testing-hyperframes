@@ -15,8 +15,9 @@
   const starRow = (n, size) => `<span class="k-stars">${Array.from({ length: n || 5 }, () => svg("star", 1.5, "", size ? ` style="width:${size}px;height:${size}px"` : "")).join("")}</span>`;
 
   // one seek-safe timeline + its P0 (initial states)
-  function timeline() {
-    const tl = gsap.timeline({ paused: true });
+  // master = the composition's timeline (paused, driven by HyperFrames); demo timelines are children (NOT paused: a paused child never moves)
+  function timeline(master) {
+    const tl = gsap.timeline({ paused: !!master });
     const P0 = gsap.timeline(); tl.add(P0, 0);
     const I = (el, v) => { gsap.set(el, _sc(v)); P0.set(el, _sc(v), 0); };
     const ft = (el, a, b, t) => tl.fromTo(el, _sc(a), Object.assign({ immediateRender: false }, _sc(b)), Math.max(0, t));
@@ -85,7 +86,7 @@
   }
   function header(stage, S) {
     stage.insertAdjacentHTML("beforeend", `<img class="hd-logo" src="vendor/brand/logo_dark.png" alt="AI PRENEUR"><i class="hd-div"></i>` +
-      `<div class="hd-name">Freddie Kashawan</div><div class="ctr">${String(S.index).padStart(2, "0")} <span>/ ${String(S.total).padStart(2, "0")}</span></div>`);
+      `<div class="hd-name">Freddie Kashawan</div><div class="car-ctr">${String(S.index).padStart(2, "0")} <span>/ ${String(S.total).padStart(2, "0")}</span></div>`);
   }
   function footer(stage, S, M, D) {
     const sw = mk("div", "ft-sw", stage, `${S.swipe}<i class="ft-ar">${svg(S.swipeIcon || "arrow-right", 2.4)}</i>`);
@@ -96,7 +97,7 @@
     return { sw, dots };
   }
   function promptStrip(stage, S, M) {
-    const p = mk("div", "pr", stage, `<div class="pr-lb">PROMPT</div><div class="pr-tx"><span>${S.promptLead}</span> <span class="bl">${S.promptRest}</span></div>` +
+    const p = mk("div", "car-pr", stage, `<div class="pr-lb">PROMPT</div><div class="pr-tx"><span>${S.promptLead}</span> <span class="bl">${S.promptRest}</span></div>` +
       `<div class="pr-btn">${svg("message-circle-more", 2.2)}Komen <b>${S.keyword}</b><i class="sh"></i></div>`);
     const sh = p.querySelector(".sh");
     M.I(sh, { x: -140 });
@@ -104,7 +105,7 @@
     return p;
   }
   function browser(stage, S, cls) {
-    const b = mk("div", "br" + (cls ? " " + cls : ""), stage,
+    const b = mk("div", "car-br" + (cls ? " " + cls : ""), stage,
       `<div class="br-dots"><i style="left:0;background:#f4a59d"></i><i style="left:22px;background:#f5d27f"></i><i style="left:44px;background:#9bd8a6"></i></div>` +
       `<div class="br-url">${svg("lock", 2.4)}${S.url}</div><div class="br-chip">${svg("sparkles", 2.2)}CONTOH · 1 PROMPT</div><div class="br-body"></div>`);
     return b;
@@ -113,27 +114,27 @@
   // ------------------------------------------------------------------ slide kinds
   function effectSlide(stage, S, M, D) {
     stage.insertAdjacentHTML("beforeend",
-      `<div class="wm">${S.num}</div>` +
-      `<div class="eb"><i>${svg(S.icon, 2.2)}</i><span>${S.num} / ${S.count}</span><em>·</em><b>${S.category}</b></div>` +
-      `<div class="ttl grad" style="font-size:${S.titleSize || 92}px">${S.title}</div>` +
-      `<div class="sub">${S.subtitle}</div>`);
+      `<div class="car-wm">${S.num}</div>` +
+      `<div class="car-eb"><i>${svg(S.icon, 2.2)}</i><span>${S.num} / ${S.count}</span><em>·</em><b>${S.category}</b></div>` +
+      `<div class="car-ttl car-grad" style="font-size:${S.titleSize || 92}px">${S.title}</div>` +
+      `<div class="car-sub">${S.subtitle}</div>`);
     const b = browser(stage, S);
     const demo = makeDemo(S.effect, b.querySelector(".br-body"), D);
     M.tl.add(demo.tl, 0);
-    mk("div", "use", stage, `<b>COCOK BUAT</b><span>${S.use}</span>`);
+    mk("div", "car-use", stage, `<b>COCOK BUAT</b><span>${S.use}</span>`);
     promptStrip(stage, S, M);
   }
 
   function cover(stage, S, M, D) {
     const C = S.cover;
     stage.insertAdjacentHTML("beforeend",
-      `<div class="eb"><i>${svg("gift", 2.2)}</i><span>${C.eyebrow}</span></div>` +
-      `<div class="cv-t1 grad">${C.title1}</div><div class="cv-t2 grad">${C.title2}</div>` +
+      `<div class="car-eb"><i>${svg("gift", 2.2)}</i><span>${C.eyebrow}</span></div>` +
+      `<div class="cv-t1 car-grad">${C.title1}</div><div class="cv-t2 car-grad">${C.title2}</div>` +
       `<div class="cv-sub">${C.sub}</div>` +
       `<div class="cv-stk"><i>${svg("sparkles", 2.2)}</i>${C.sticker}</div>`);
     const n = S.effects.length;
     const rows = n <= 4 ? 1 : n <= 10 ? 2 : 3, cols = Math.ceil(n / rows);
-    const gx = 14, gy = 14, W = 952, top = 498, avail = 470;
+    const gx = 14, gy = 14, W = 952, top = 528, avail = 520;
     let tw = (W - gx * (cols - 1)) / cols;
     const chrome = 14, lab = 30;
     let bh = tw * 588 / 932;
@@ -161,10 +162,10 @@
   function closing(stage, S, M, D) {
     const C = S.closing, H = helpers(M, D);
     stage.insertAdjacentHTML("beforeend",
-      `<div class="eb"><i>${svg("package", 2.2)}</i><span>${C.eyebrow}</span></div>` +
-      `<div class="cl-t grad">${C.title1}</div><div class="cl-t2 grad">${C.title2}</div><div class="cl-sub">${C.sub}</div>`);
+      `<div class="car-eb"><i>${svg("package", 2.2)}</i><span>${C.eyebrow}</span></div>` +
+      `<div class="cl-t car-grad">${C.title1}</div><div class="cl-t2 car-grad">${C.title2}</div><div class="cl-sub">${C.sub}</div>`);
     // three steps
-    const steps = C.steps.map((s, i) => mk("div", "cl-step", stage, `<i class="n">${i + 1}</i><i class="ic">${svg(s[0], 2.1)}</i><b>${s[1]}</b><span>${s[2]}</span>`, `left:${64 + i * 324}px`));
+    const steps = C.steps.map((s, i) => mk("div", "cl-step", stage, `<i class="ic">${svg(s[0], 2.1)}</i><b>${s[1]}</b><span>${s[2]}</span>`, `left:${64 + i * 324}px`));
     C.steps.slice(0, 2).forEach((_, i) => mk("i", "cl-arr", stage, svg("chevron-right", 2.6), `left:${64 + i * 324 + 296}px`));
     steps.forEach((s, i) => {
       const t = 0.35 + i * 0.55;
@@ -205,12 +206,11 @@
     M.tl.set({}, {}, D);
     (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(M.tl);
     M.tl.render(0, true, true);
-    window.__timelines = window.__timelines || {};
-    window.__timelines[comp] = M.tl;
+    return M.tl;
   }
   function run(S) {
     const stage = document.getElementById("stage");
-    const D = S.duration, M = timeline();
+    const D = S.duration, M = timeline(true);
     background(stage, M, D);
     header(stage, S);
     if (S.kind === "effect") effectSlide(stage, S, M, D);
@@ -218,7 +218,7 @@
     else if (S.kind === "closing") closing(stage, S, M, D);
     else throw new Error("unknown slide kind " + S.kind);
     footer(stage, S, M, D);
-    done(M, S.comp, D);
+    return done(M, S.comp, D);              // the page registers it: window.__timelines[comp] = CAR.run(SLIDE)
   }
 
   window.CAR = { svg, mk, def, run, makeDemo, timeline, helpers, starRow };

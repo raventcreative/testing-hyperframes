@@ -58,7 +58,8 @@ def page(comp, title, dur, css, js, slide):
 </div>
 <script>
 window.SLIDE = {data};
-CAR.run(window.SLIDE);
+window.__timelines = window.__timelines || {{}};
+window.__timelines["{comp}"] = CAR.run(window.SLIDE);
 </script>
 </body>
 </html>
@@ -135,7 +136,7 @@ def main():
     # DM hand-out
     dm = [fill(cfg["dm"]["title"]), "", fill(cfg["dm"]["intro"]), ""]
     for i, e in enumerate(effects, start=1):
-        dm += [f"## {i:02d} · {e['title'].rstrip('.')} ({e['category'].title()})", "", f"_{e['use']}_", "", "```text", e["prompt"], "```", ""]
+        dm += [f"## {i:02d} · {e['title'].rstrip('.')}", "", f"**{e['category']}** · cocok buat: {e['use']}", "", "```text", e["prompt"], "```", ""]
     dm += [fill(cfg["dm"]["outro"]), ""]
     (ROOT / "production" / "DM_ANIMASI.md").write_text("\n".join(dm))
     print(f"built {len(slides)} slides ({n} effects) -> slides/, production/DM_ANIMASI.md")

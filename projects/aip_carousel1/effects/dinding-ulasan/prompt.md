@@ -1,0 +1,12 @@
+Bikin "dinding ulasan" pelanggan: tiga kolom kartu testimoni yang bergerak terus (naik, turun, naik) di landing page laundry. Satu file HTML, pakai HTML + CSS + GSAP 3 (dari cdnjs), font Poppins, semua teks Bahasa Indonesia.
+
+Tampilan (lebar sekitar 930 px, latar putih dengan semburat biru muda):
+- Navbar putih: logo bulat biru dengan ikon baju + "Laundry Wangi Kilat", menu "Layanan  Harga  Ulasan", tombol biru kecil "Jemput gratis".
+- Kolom kiri (lebar sekitar 270 px): label "KATA PELANGGAN" dengan ikon kutip, judul 3 baris "Wangi, rapi," / "pelanggan" / "balik lagi." (baris terakhir biru), kartu ringkasan rating: angka besar "4,9", 5 bintang kuning, "dari 2.300+ ulasan", lalu 3 bar distribusi (5 = 94%, 4 = 5%, 3 = 1%), tombol biru "Jemput cucian" (ikon truk), dan teks kecil "Ulasan asli dari pelanggan terverifikasi".
+- Kanan: area dinding setinggi halaman berisi 3 kolom kartu (lebar kartu 180 px, jarak 14 px). Atas dan bawah area ini memudar halus pakai mask-image linear-gradient (70 px).
+- Tiap kartu putih sudut 18 px: avatar bulat berwarna dengan inisial, nama tebal, kota kecil di bawahnya, 5 bintang, lalu kutipan 2 sampai 3 baris pendek. Isi 12 ulasan, contoh: "Bu Sari, Bekasi: Kemeja kantor rapi, wangi, besok pagi sudah sampai.", "Andi P., Depok: Antar-jemputnya selalu tepat waktu.", "Mbak Yuni, Jakarta Timur: Noda kopi di blus putih hilang total!", "Pak Hendra, Bekasi: Langganan 2 tahun, belum pernah ada baju yang hilang.", "Rara, Cikarang: Selimut tebal jadi lembut lagi.", "Bu Lina, Bekasi: Setrikaannya rapi, dilipat per jenis, gampang disimpan.", "Fajar, Tambun: Harga per kilo jelas, nggak ada biaya tambahan.", "Dewi A., Bekasi: Adminnya ramah, balasnya cepat.", "Kak Mira, Jatiasih: Gorden ruang tamu bersih dan wangi.", "Rizky, Bekasi: Sepatu putihku balik kinclong.", "Bu Ningsih, Bekasi: Pesan pagi, sore sudah diantar. Kilat beneran!", "Yoga, Jakarta Timur: Packing-nya rapi, plastiknya tebal."
+
+Animasi:
+- Tiap kolom berisi 4 kartu, lalu 4 kartu yang sama diulang sekali lagi di bawahnya (jadi isinya 2 set).
+- Kolom 1 dan 3 bergerak ke atas, kolom 2 ke bawah, kecepatan konstan (ease: "none"). Dalam 6 detik tiap kolom bergeser tepat sejauh tinggi 1 set (tinggi 4 kartu + jaraknya), lalu timeline diulang (repeat: -1). Karena geserannya pas 1 set, sambungannya tidak kelihatan dan dindingnya terlihat jalan terus tanpa putus.
+- Hitung tinggi set dari tinggi kartu di JavaScript (jangan pakai angka tebakan), supaya kalau ulasannya diganti loop-nya tetap mulus.

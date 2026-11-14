@@ -9,7 +9,7 @@ NAMES = """sparkles message-circle message-circle-more arrow-right chevron-right
 star shopping-cart shopping-bag heart lock eye map-pin truck package clock tag percent gift ticket copy x menu search user phone house
 calendar badge-check flame zap shield-check store scissors camera leaf coffee cookie utensils bookmark send timer bell info hand
 list-checks credit-card wallet smile circle-help refresh-cw globe navigation box layers mail badge-percent circle-dollar-sign
-cake-slice sprout flower-2 footprints wind shirt shopping-basket receipt-text party-popper hourglass thumbs-up quote panel-bottom
+cake cake-slice sprout flower-2 footprints wind shirt shopping-basket receipt-text party-popper hourglass thumbs-up quote panel-bottom
 mouse-pointer-click arrow-up arrow-down move-down chevrons-down headset ruler map file-text folder-open clipboard-list
 """.split()
 

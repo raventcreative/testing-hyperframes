@@ -1,7 +1,7 @@
 """Download + crop the CC0 photos (WordPress Photo Directory via Openverse) used inside the demo landing pages.
 
 Usage: python3 -I tools/prep_photos.py <cache_dir>   (run from the project folder; originals are cached in <cache_dir>)
-Writes effects/<effect>/img/<name>.jpg and production/asset_credits.json (photo part).
+Writes effects/<effect>/img/<name>.jpg and the "photos" list of production/asset_credits.json.
 """
 import json
 import subprocess
@@ -58,12 +58,14 @@ def main():
         out = ROOT / "effects" / eff / "img" / f"{name}.jpg"
         out.parent.mkdir(parents=True, exist_ok=True)
         im = Image.open(src).convert("RGB")
-        crop(im, w * 2 // 2, h, fx, fy).save(out, quality=82, optimize=True, progressive=True)
+        crop(im, w, h, fx, fy).save(out, quality=82, optimize=True, progressive=True)
         credits.append({"file": f"effects/{eff}/img/{name}.jpg", "source": landing, "original": url, "author": creator,
                         "licence": "CC0 1.0 (WordPress Photo Directory, found via Openverse)", "changes": f"cropped + resized to {w}x{h}"})
         print("ok", out.relative_to(ROOT), out.stat().st_size)
-    (ROOT / "production").mkdir(exist_ok=True)
-    (ROOT / "production" / "photo_credits.json").write_text(json.dumps(credits, indent=1, ensure_ascii=False))
+    f = ROOT / "production" / "asset_credits.json"
+    data = json.loads(f.read_text()) if f.exists() else {}
+    data["photos"] = credits
+    f.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n")
 
 
 if __name__ == "__main__":

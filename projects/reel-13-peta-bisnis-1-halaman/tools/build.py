@@ -30,7 +30,7 @@ ev = [("pop", 0.03), ("pop", 0.33), ("pop", 0.53), ("click", tBer - 0.02), ("who
       ("whoosh", tGes), ("pop", tTech - 0.15), ("whoosh", tAtur - 0.42), ("pop", tAtur + 0.05),
       ("whoosh", tS2)] + [("pop", t - 0.12) for t in DN] + [
       ("click", tKF), ("whoosh", tP), ("pop", tP + 0.75), ("ping", tPem - 0.05), ("pop", tAng - 0.25),
-      ("whoosh", tTer - 0.05), ("pop", tKas - 0.35), ("ping", tTiga - 0.1), ("pop", tTiga + 0.5),
+      ("whoosh", tTer - 0.05), ("pop", wt("Terus AI", "baca") - 0.1), ("ping", tTiga - 0.1), ("pop", tTiga + 0.25),
       ("whoosh", tSatu - 0.62), ("pop", tSatu - 0.15), ("pop", tSem - 0.15), ("pop", tNgg - 0.15),
       ("whoosh", tCta - 0.6), ("pop", tCta + 0.55), ("click", tF)]
 tags = [f'<audio id="sx{i:02d}" class="clip" src="assets/sfx/{k}.wav" data-start="{t:.2f}" data-duration="{DUR[k]}" data-track-index="{10 + i % 4}" data-volume="{VOL[k]}"></audio>'

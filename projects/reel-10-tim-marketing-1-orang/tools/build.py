@@ -29,7 +29,7 @@ tSim = ph("Gue tunjukin")["start"]; tM1 = ph("Modul satu")["start"]; tM2 = ph("M
 tRep = ph("Tiap pagi")["start"]; tAI = ph("AI yang mindahin")["start"]; tCta = ph("Mau sistem")["start"]
 ev = [("pop", 0.05), ("pop", 0.3), ("pop", wt("Jawabannya", "36") - 0.1), ("ping", wt("yang kerja", "loop") - 0.2),
       # one quiet whoosh per wipe
-      ("whoosh", tSim - 0.32), ("whoosh", tM1 - 0.7), ("whoosh", tM2 - 0.58), ("whoosh", tM3 - 0.62), ("whoosh", tRep - 0.6), ("whoosh", tAI - 0.55), ("whoosh", tCta - 0.6),
+      ("whoosh", ph("yang kerja")["end"] - 0.25), ("pop", tM1 - 0.45), ("pop", tM2 - 0.4), ("whoosh", tM3 - 1.2), ("whoosh", tRep - 1.15), ("pop", tAI - 0.3), ("pop", tCta - 0.3),
       ("pop", wt("Bukan corong", "loop") - 0.15), ("click", ph("Riset, konten")["start"] - 0.1),
       ("pop", wt("Riset, konten", "konten")), ("pop", wt("Riset, konten", "approve")), ("pop", ph("posting, analitik")["start"]), ("pop", wt("posting, analitik", "analitik")),
       ("click", tM1 + 0.75), ("pop", ph("Terus langsung nulis")["start"] - 0.15), ("pop", wt("draft postingan", "email") - 0.15),

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Uji voxel 3D — 7 AI jadi panel penilai CV — AI PRENEUR</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/mascot_face.js"></script>
+    <script src="vendor/mascot3d.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
+    <script type="module" src="vendor/vx.js"></script>
+    <style>
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: block; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #eef4fc; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Poppins, sans-serif; color: #0a0d2c; -webkit-font-smoothing: antialiased; }
+      .layer { position: absolute; inset: 0; }
+      #vx { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      /* soft white lift behind the top UI and the captions (keeps text readable over the 3D) */
+      #veilT { position: absolute; left: 0; top: 0; width: 1080px; height: 560px; background: linear-gradient(180deg, rgba(246,250,255,.7) 0%, rgba(246,250,255,.35) 55%, rgba(246,250,255,0) 100%); }
+      #veilB { position: absolute; left: 0; top: 900px; width: 1080px; height: 340px; background: radial-gradient(ellipse 560px 150px at 540px 165px, rgba(246,250,255,.82) 0%, rgba(246,250,255,.55) 55%, rgba(246,250,255,0) 100%); }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/brand/grain_256.png); opacity: .03; mix-blend-mode: multiply; }
+      #brandlogo { position: absolute; left: 84px; top: 236px; width: 236px; height: auto; opacity: .95; }
+      /* section title: navy tab card with a cyan tab, flips down from the top */
+      .tt { position: absolute; left: 540px; top: 330px; opacity: 0; display: flex; align-items: center; gap: 18px; padding: 16px 34px 18px 20px;
+            background: #0a0d2c; color: #fff; border-radius: 22px; font: 700 44px/1.1 Poppins; letter-spacing: -.3px; white-space: nowrap;
+            box-shadow: 0 16px 34px rgba(10,13,44,.24), inset 0 -4px 0 rgba(1,204,247,.35); }
+      .tt .tab { width: 14px; height: 44px; border-radius: 6px; background: #01ccf7; flex: none; }
+      .tt b { color: #7fe3ff; }
+      /* counter chip */
+      .chip { position: absolute; left: 84px; top: 452px; opacity: 0; display: flex; align-items: center; gap: 16px; padding: 12px 22px 12px 14px;
+              background: #ffffff; border: 3px solid #0a0d2c; border-radius: 20px; box-shadow: 0 10px 24px rgba(10,13,44,.16); transform-origin: 0% 50%; }
+      .chip .ic { width: 52px; height: 52px; border-radius: 14px; background: #0a0d2c; display: grid; place-items: center; }
+      .chip .ic svg { width: 30px; height: 30px; }
+      .chip .lb { font: 700 20px/1 Poppins; letter-spacing: 3px; color: #294b77; }
+      .chip .nm { font: 700 50px/1 Poppins; color: #0a0d2c; min-width: 66px; text-align: right; }
+      .chip.bad { border-color: #ff4d5e; } .chip.bad .ic { background: #ff4d5e; } .chip.bad .nm { color: #ff4d5e; }
+      /* captions */
+      .cap { position: absolute; left: 60px; right: 60px; top: 1004px; text-align: center; font-size: 58px; line-height: 1.22; opacity: 0; }
+      .cap .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .04em .1em .2em; margin: -.04em -.06em -.2em; }
+      .cap .w { display: inline-block; position: relative; color: #0a0d2c; font-weight: 400; }
+      .cap .w.k { font-weight: 700; background: linear-gradient(172deg, #0a0d2c 10%, #294b77 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap .hl { position: absolute; left: -4px; right: -4px; bottom: .16em; height: .3em; background: rgba(1,204,247,.38); border-radius: 6px; transform-origin: 0 50%; z-index: -1; }
+      /* cube wipe + flash */
+      #wipe { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(6, 180px); grid-template-rows: repeat(11, 174.6px); pointer-events: none; }
+      #wipe i { display: block; width: 100%; height: 100%; transform: scale(0); }
+      #flash { position: absolute; inset: 0; background: #ffffff; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="18" data-width="1080" data-height="1920" data-fps="30">
+      <div id="stage" class="clip layer" data-start="0" data-duration="18" data-track-index="1"><canvas id="vx" width="1080" height="1920"></canvas></div>
+      <div id="ui" class="clip layer" data-start="0" data-duration="18" data-track-index="3">
+        <div id="veilT"></div><div id="veilB"></div><div id="grain"></div>
+        <img id="brandlogo" src="assets/brand/logo_dark_trim.png" alt="AI PRENEUR" />
+        <div class="tt" id="t1"><span class="tab"></span><span><b>50</b> LAMARAN TERKIRIM</span></div>
+        <div class="tt" id="t2"><span class="tab"></span><span><b>0</b> BALASAN. KENAPA?</span></div>
+        <div class="tt" id="t3"><span class="tab"></span><span><b>7 AI</b> JADI PANEL PENILAI</span></div>
+        <div class="tt" id="t4"><span class="tab"></span><span>PENILAI <b>#1</b> · SISTEM ATS</span></div>
+        <div class="chip" id="c1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></span><span><div class="lb" id="c1l">CV TERKIRIM</div></span><span class="nm" id="c1n">0</span></div>
+        <div class="chip" id="c2"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1"/><path d="M9 13h.01M15 13h.01"/></svg></span><span><div class="lb">PANEL AI</div></span><span class="nm" id="c2n">0/7</span></div>
+        <div class="chip" id="c3"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span><span><div class="lb">KATA KUNCI</div></span><span class="nm" id="c3n">0/3</span></div>
+        <div id="caps"></div>
+        <div id="wipe"></div>
+        <div id="flash"></div>
+      </div>
+      <div id="host" class="clip layer" data-start="0" data-duration="18" data-track-index="4"><canvas id="ms" width="1080" height="1920" style="position:absolute;left:0;top:0;width:1080px;height:1920px"></canvas></div>
+      <audio id="vo" src="assets/audio/vo.mp3" data-start="0.3" data-duration="16.8" data-track-index="10" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="18" data-track-index="11" data-volume="1"></audio>
+    </div>
+    <script>
+      (function () {
+        const OFF = 0.3, DUR = 18;
+        const WORDS = [["Kirim", 0.08, 0.32], ["CV", 0.4, 0.72], ["ke", 0.8, 0.84], ["lima", 0.88, 1.04], ["puluh", 1.12, 1.24], ["perusahaan,", 1.28, 2.12], ["balasannya", 2.24, 2.72], ["cuma", 2.8, 2.96], ["sunyi?", 3.04, 3.6], ["Nggak", 3.84, 3.96], ["ada", 4.0, 4.16], ["yang", 4.24, 4.32], ["jelasin", 4.453, 4.8], ["salahnya", 4.88, 5.2], ["di", 5.24, 5.28], ["mana.", 5.36, 6.007], ["Coba", 6.08, 6.4], ["bikin", 6.48, 6.64], ["tujuh", 6.72, 6.92], ["AI", 6.96, 7.24], ["jadi", 7.28, 7.52], ["panel", 7.64, 7.76], ["penilai", 7.84, 8.08], ["CV", 8.16, 8.4], ["kamu,", 8.44, 8.987], ["biar", 9.013, 9.2], ["alasannya", 9.24, 9.6], ["kebongkar", 9.68, 10.0], ["duluan.", 10.08, 10.887], ["Penilai", 10.96, 11.2], ["pertama,", 11.28, 11.947], ["sistem", 11.973, 12.32], ["ATS:", 12.4, 13.2], ["dia", 13.28, 13.44], ["nyaring", 13.48, 13.76], ["CV", 13.8, 14.08], ["pakai", 14.16, 14.32], ["kata", 14.4, 14.56], ["kunci,", 14.6, 15.16], ["sebelum", 15.2, 15.6], ["manusia", 15.68, 16.0], ["sempat", 16.04, 16.24], ["baca.", 16.28, 16.88]];           // [word, start, end] from the ElevenLabs alignment (VO time)
+        const CHUNKS = [[0, 6], [6, 9], [9, 16], [16, 20], [20, 25], [25, 29], [29, 33], [33, 39], [39, 43]];
+        const KEY = new Set([3, 4, 8, 13, 18, 19, 21, 22, 27, 31, 32, 37, 38, 40]);
+        const tl = gsap.timeline({ paused: true });
+        const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+        { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+        const P0 = gsap.timeline(); tl.add(P0, 0);
+        const pin = (el, v) => { gsap.set(el, _sc(v)); P0.set(el, _sc(v), 0); };
+        const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+
+        // captions: words rise in on their spoken start; key words get a cyan marker sweep
+        const caps = document.getElementById("caps");
+        CHUNKS.forEach(([a, b], ci) => {
+          const d = document.createElement("div"); d.className = "cap"; d.style.top = (ci < 3 ? 1440 : 1004) + "px"; caps.appendChild(d);
+          const ws = [];
+          for (let i = a; i < b; i++) {
+            const m = document.createElement("span"); m.className = "m";
+            const w = document.createElement("span"); w.className = "w" + (KEY.has(i) ? " k" : ""); w.textContent = WORDS[i][0];
+            if (KEY.has(i)) { const h = document.createElement("span"); h.className = "hl"; w.appendChild(h); }
+            m.appendChild(w); d.appendChild(m); d.appendChild(document.createTextNode(" ")); ws.push([w, WORDS[i][1] + OFF, i]);
+          }
+          const tIn = ws[0][1] - 0.06, next = CHUNKS[ci + 1], tOut = next ? WORDS[next[0]][1] + OFF - 0.08 : DUR - 0.25;
+          pin(d, { opacity: 0 });
+          ft(d, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, tIn);
+          ft(d, { opacity: 1, y: 0 }, { opacity: 0, y: -12, duration: 0.14, ease: "power2.in" }, tOut - 0.14);
+          ws.forEach(([w, t, i]) => {
+            pin(w, { yPercent: 118 });
+            ft(w, { yPercent: 118 }, { yPercent: 0, duration: 0.3, ease: "power4.out" }, Math.max(tIn, t - 0.05));
+            const h = w.querySelector(".hl"); if (h) { pin(h, { scaleX: 0 }); ft(h, { scaleX: 0 }, { scaleX: 1, duration: 0.28, ease: "power2.out" }, t + 0.08); }
+          });
+        });
+
+        // section titles (flip down, slide up out)
+        const title = (id, a, b) => { const e = document.getElementById(id); pin(e, { xPercent: -50, opacity: 0 });
+          ft(e, { opacity: 0, rotationX: -88, y: -20, transformPerspective: 900, transformOrigin: "50% 0%" }, { opacity: 1, rotationX: 0, y: 0, duration: 0.5, ease: "back.out(1.6)" }, a);
+          if (b) ft(e, { opacity: 1, y: 0 }, { opacity: 0, y: -26, duration: 0.24, ease: "power2.in" }, b); };
+        title("t1", 0.35, 2.55); title("t2", 2.62, 5.9); title("t3", 7.3, 10.86); title("t4", 11.62, null);
+        // chips
+        const chip = (id, a, b) => { const e = document.getElementById(id); pin(e, { opacity: 0, scale: 0.6 });
+          ft(e, { opacity: 0, scale: 0.6, x: -30 }, { opacity: 1, scale: 1, x: 0, duration: 0.42, ease: "back.out(2)" }, a);
+          if (b) ft(e, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.8, duration: 0.2, ease: "power2.in" }, b); };
+        chip("c1", 0.55, 5.9); chip("c2", 7.35, 10.86); chip("c3", 13.9, null);
+        const bump = (sel, t, s = 1.18) => ft(sel, { scale: 1 }, { scale: s, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+        bump("#c1", 2.62, 1.22); ft("#c1", { x: 0 }, { keyframes: [{ x: -12 }, { x: 10 }, { x: -6 }, { x: 0 }], duration: 0.3 }, 2.66);
+        const LAND = [0, 1, 2, 3, 4, 5, 6].map((i) => 7.42 + i * 0.2);
+        LAND.forEach((t) => bump("#c2n", t, 1.3));
+        [14.55, 14.8, 15.05].forEach((t) => bump("#c3n", t + 0.1, 1.3));
+        ft("#c3", { x: 0 }, { keyframes: [{ x: -12 }, { x: 10 }, { x: -6 }, { x: 0 }], duration: 0.3 }, 15.15);
+
+        // caption backing follows the captions (bottom while full frame, above the host afterwards)
+        pin("#veilB", { y: 436 }); ft("#veilB", { y: 436 }, { y: 0, duration: 0.4, ease: "power2.inOut" }, 6.3);
+        // cube wipe A -> B
+        const wipe = document.getElementById("wipe"), COLS = ["#0a0d2c", "#294b77", "#01ccf7", "#ffffff", "#1d3a66", "#0a0d2c"];
+        for (let i = 0; i < 66; i++) { const c = document.createElement("i"); c.style.background = COLS[(i * 7 + (i >> 2)) % 6]; wipe.appendChild(c); }
+        const cells = wipe.querySelectorAll("i"); pin(cells, { scale: 0 });
+        ft(cells, { scale: 0, rotation: -25 }, { scale: 1.03, rotation: 0, duration: 0.2, ease: "power2.out", stagger: { amount: 0.16, from: "center", grid: [11, 6] } }, 6.86);
+        ft(cells, { scale: 1.03, rotation: 0 }, { scale: 0, rotation: 25, duration: 0.2, ease: "power2.in", stagger: { amount: 0.18, from: "edges", grid: [11, 6] } }, 7.08);
+        // white flash on the CV dive (B -> C match cut)
+        pin("#flash", { opacity: 0 });
+        ft("#flash", { opacity: 0 }, { opacity: 1, duration: 0.24, ease: "power2.in" }, 11.03);
+        ft("#flash", { opacity: 1 }, { opacity: 0, duration: 0.38, ease: "power2.out" }, 11.3);
+        // ambient grain
+        tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: DUR, ease: "steps(540)", immediateRender: false }, 0);
+        pin("#grain", { x: 0, y: 0 });
+        tl.set({}, {}, DUR - 0.01);
+        (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+        tl.render(0, true, true);
+        window.__timelines = window.__timelines || {}; window.__timelines["main"] = tl;
+
+        // counter numbers are pure functions of time (set on every seek)
+        const n1 = document.getElementById("c1n"), l1 = document.getElementById("c1l"), c1 = document.getElementById("c1"),
+              n2 = document.getElementById("c2n"), n3 = document.getElementById("c3n"), c3 = document.getElementById("c3");
+        const ease = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 2);
+        function texts(t) {
+          if (t < 2.62) { n1.textContent = Math.round(50 * ease((t - 0.62) / 1.7)); l1.textContent = "CV TERKIRIM"; c1.classList.remove("bad"); }
+          else { n1.textContent = "0"; l1.textContent = "BALASAN"; c1.classList.add("bad"); }
+          n2.textContent = LAND.filter((x) => t >= x).length + "/7";
+          const k = [14.65, 14.9].filter((x) => t >= x).length; n3.textContent = k + "/3"; c3.classList.toggle("bad", t >= 15.15);
+        }
+        texts(0); window.addEventListener("hf-seek", (e) => texts(e.detail.time));
+      })();
+    </script>
+    <script src="vendor/mascot_host.js"></script>
+  </body>
+</html>

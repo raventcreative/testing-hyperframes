@@ -21,9 +21,12 @@ put(2.92, "click", 0.3, 0.8)                                                    
 put(4.12, "sparkle", 0.16)                                                         # "?" assembles
 put(5.95, "whoosh", 0.3, 0.8)                                                      # zoom out
 put(6.12, "pop", 0.22, 0.9)                                                        # host pops in
-put(6.86, "whoosh", 0.28, 1.1)                                                     # cube wipe
-for i in range(7): put(7.42 + i * 0.2 - 0.02, "pop", 0.2, 0.8 + 0.06 * i)         # robots land
-put(8.3, "whoosh", 0.14, 1.3)                                                      # CV slides in
+put(6.85, "whoosh", 0.3, 0.7); put(7.2, "whoosh", 0.22, 0.9)                     # island hop
+for i in range(7): put(7.55 + i * 0.19 - 0.02, "pop", 0.2, 0.8 + 0.06 * i)        # robots land
+put(8.78, "sparkle", 0.2, 0.9)                                                     # confetti
+put(8.75, "whoosh", 0.14, 1.3)                                                     # CV slides in
+for k in range(0, 24, 3): put(0.72 + k / 24 * 1.55, "key", 0.07, 1.1)            # "50" builds
+put(3.24, "pop", 0.32, 0.45)                                                       # red 0 slams
 put(9.83, "sparkle", 0.15); [put(9.83 + i * 0.06, "key", 0.08) for i in range(7)]  # score cards
 put(10.75, "whoosh", 0.3, 0.75); put(11.3, "whoosh", 0.18, 1.2)                    # dive + pull out
 for t, r in ((14.55, 1.0), (14.8, 1.12)): put(t, "ping", 0.16, r)                  # keyword hits

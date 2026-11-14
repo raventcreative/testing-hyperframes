@@ -39,9 +39,8 @@
       .chip.bad { border-color: #ff4d5e; } .chip.bad .ic { background: #ff4d5e; } .chip.bad .nm { color: #ff4d5e; }
       /* captions */
       .cap { position: absolute; left: 50px; right: 50px; top: 1004px; text-align: center; font-size: 62px; line-height: 1.5; opacity: 0; }
-      .cap .bx { background: rgba(255,255,255,.9); border-radius: 18px; padding: .06em .32em .1em; -webkit-box-decoration-break: clone; box-decoration-break: clone;
-                 box-shadow: 0 8px 22px rgba(10,13,44,.14); }
-      .cap .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .04em .1em .2em; margin: -.04em -.06em -.2em; }
+      .cap .bx { }
+      .cap .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .02em .2em .16em; margin: -.02em -.07em -.16em; background: rgba(255,255,255,.93); border-radius: 14px; }
       .cap .w { display: inline-block; position: relative; color: #0a0d2c; font-weight: 700; }
       .cap .w.k { font-weight: 700; background: linear-gradient(172deg, #0a0d2c 10%, #294b77 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
       .cap .hl { position: absolute; left: -4px; right: -4px; bottom: .16em; height: .3em; background: rgba(1,204,247,.38); border-radius: 6px; transform-origin: 0 50%; z-index: -1; }
@@ -53,7 +52,8 @@
   </head>
   <body>
     <div id="main" data-composition-id="main" data-start="0" data-duration="18" data-width="1080" data-height="1920" data-fps="30">
-      <div id="stage" class="clip layer" data-start="0" data-duration="18" data-track-index="1"><canvas id="vx" width="1080" height="1920"></canvas></div>
+      <div id="stage" class="clip layer" data-start="0" data-duration="18" data-track-index="1"><canvas id="vx" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas></div>
+      <div id="host" class="clip layer" data-layout-ignore data-layout-allow-occlusion data-start="0" data-duration="18" data-track-index="2"><canvas id="ms" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion style="position:absolute;left:0;top:0;width:1080px;height:1920px"></canvas></div>
       <div id="ui" class="clip layer" data-start="0" data-duration="18" data-track-index="3">
         <div id="veilT"></div><div id="veilB"></div><div id="grain"></div>
         <img id="brandlogo" src="assets/brand/logo_dark_trim.png" alt="AI PRENEUR" />
@@ -68,7 +68,6 @@
         <div id="wipe"></div>
         <div id="flash"></div>
       </div>
-      <div id="host" class="clip layer" data-start="0" data-duration="18" data-track-index="4"><canvas id="ms" width="1080" height="1920" style="position:absolute;left:0;top:0;width:1080px;height:1920px"></canvas></div>
       <audio id="vo" src="assets/audio/vo.mp3" data-start="0.3" data-duration="16.8" data-track-index="10" data-volume="1"></audio>
       <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="18" data-track-index="11" data-volume="1"></audio>
     </div>
@@ -102,6 +101,7 @@
           ft(d, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, tIn);
           ft(d, { opacity: 1, y: 0 }, { opacity: 0, y: -12, duration: 0.14, ease: "power2.in" }, tOut - 0.14);
           ws.forEach(([w, t, i]) => {
+            pin(w.parentNode, { opacity: 0 }); ft(w.parentNode, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Math.max(tIn, t - 0.06));
             pin(w, { yPercent: 118 });
             ft(w, { yPercent: 118 }, { yPercent: 0, duration: 0.3, ease: "power4.out" }, Math.max(tIn, t - 0.05));
             const h = w.querySelector(".hl"); if (h) { pin(h, { scaleX: 0 }); ft(h, { scaleX: 0 }, { scaleX: 1, duration: 0.28, ease: "power2.out" }, t + 0.08); }
@@ -112,15 +112,15 @@
         const title = (id, a, b) => { const e = document.getElementById(id); pin(e, { xPercent: -50, opacity: 0 });
           ft(e, { opacity: 0, rotationX: -88, y: -20, transformPerspective: 900, transformOrigin: "50% 0%" }, { opacity: 1, rotationX: 0, y: 0, duration: 0.5, ease: "back.out(1.6)" }, a);
           if (b) ft(e, { opacity: 1, y: 0 }, { opacity: 0, y: -26, duration: 0.24, ease: "power2.in" }, b); };
-        title("t1", 0.35, 2.55); title("t2", 2.62, 5.9); title("t3", 7.3, 10.86); title("t4", 11.62, null);
+        title("t1", 0.35, 2.55); title("t2", 2.62, 5.9); title("t3", 7.5, 10.86); title("t4", 11.62, null);
         // chips
         const chip = (id, a, b) => { const e = document.getElementById(id); pin(e, { opacity: 0, scale: 0.6 });
           ft(e, { opacity: 0, scale: 0.6, x: -30 }, { opacity: 1, scale: 1, x: 0, duration: 0.42, ease: "back.out(2)" }, a);
           if (b) ft(e, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.8, duration: 0.2, ease: "power2.in" }, b); };
-        chip("c1", 0.55, 5.9); chip("c2", 7.35, 10.86); chip("c3", 13.9, null);
+        chip("c1", 0.55, 5.9); chip("c2", 7.55, 10.86); chip("c3", 13.9, null);
         const bump = (sel, t, s = 1.18) => ft(sel, { scale: 1 }, { scale: s, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, t);
         bump("#c1", 2.62, 1.22); ft("#c1", { x: 0 }, { keyframes: [{ x: -12 }, { x: 10 }, { x: -6 }, { x: 0 }], duration: 0.3 }, 2.66);
-        const LAND = [0, 1, 2, 3, 4, 5, 6].map((i) => 7.42 + i * 0.2);
+        const LAND = [0, 1, 2, 3, 4, 5, 6].map((i) => 7.55 + i * 0.19);
         LAND.forEach((t) => bump("#c2n", t, 1.3));
         [14.55, 14.8, 15.05].forEach((t) => bump("#c3n", t + 0.1, 1.3));
         ft("#c3", { x: 0 }, { keyframes: [{ x: -12 }, { x: 10 }, { x: -6 }, { x: 0 }], duration: 0.3 }, 15.15);
@@ -131,8 +131,6 @@
         const wipe = document.getElementById("wipe"), COLS = ["#0a0d2c", "#294b77", "#01ccf7", "#ffffff", "#1d3a66", "#0a0d2c"];
         for (let i = 0; i < 66; i++) { const c = document.createElement("i"); c.style.background = COLS[(i * 7 + (i >> 2)) % 6]; wipe.appendChild(c); }
         const cells = wipe.querySelectorAll("i"); pin(cells, { scale: 0 });
-        ft(cells, { scale: 0, rotation: -25 }, { scale: 1.03, rotation: 0, duration: 0.2, ease: "power2.out", stagger: { amount: 0.16, from: "center", grid: [11, 6] } }, 6.86);
-        ft(cells, { scale: 1.03, rotation: 0 }, { scale: 0, rotation: 25, duration: 0.2, ease: "power2.in", stagger: { amount: 0.18, from: "edges", grid: [11, 6] } }, 7.08);
         // white flash on the CV dive (B -> C match cut)
         pin("#flash", { opacity: 0 });
         ft("#flash", { opacity: 0 }, { opacity: 1, duration: 0.24, ease: "power2.in" }, 11.03);

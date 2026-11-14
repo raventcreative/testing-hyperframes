@@ -32,7 +32,7 @@
       .glg { background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
 
       /* ---------- HOOK (kinetic, stage x 80-1000, y 290-1240) ---------- */
-      #hook { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; }
+      #hook { position: absolute; left: 80px; top: 320px; width: 920px; height: 950px; }
       .hc { position: absolute; background: #fff; border: 1.5px solid rgba(10,13,44,0.08); border-radius: 30px; box-shadow: 0 30px 70px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); }
       #hClock { left: 170px; top: 0px; width: 580px; height: 300px; text-align: center; padding-top: 26px; }
       #hClock .hd { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 24px; font-weight: 700; letter-spacing: 5px; color: var(--org); }
@@ -112,8 +112,9 @@
       /* log */
       #logC { left: 20px; top: 524px; width: 290px; height: 410px; padding: 14px 14px; }
       #logL { position: relative; margin-top: 10px; }
-      .le { position: relative; height: 56px; padding-left: 20px; border-left: 2px solid rgba(41,75,119,0.15); margin-left: 6px; opacity: 0; }
-      .le::before { content: ""; position: absolute; left: -7px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: var(--ok); }
+      .le { position: relative; height: 56px; padding-left: 20px; border-left: 2px solid rgba(41,75,119,0.15); margin-left: 6px; opacity: 0.45; }
+      .le::before { content: ""; position: absolute; left: -7px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: #c5cfdf; }
+      .le[data-d="1"]::before { background: var(--ok); } .le[data-d="1"] b { color: var(--ok); }
       .le b { display: block; font-size: 13px; color: var(--n2); line-height: 1.3; } .le span { display: block; font-size: 15px; line-height: 1.3; white-space: nowrap; }
       /* stock */
       #vStok { left: 330px; top: 524px; width: 570px; height: 410px; padding: 16px 20px; opacity: 0; }
@@ -300,7 +301,7 @@
           <div class="node" id="nMkt"><div class="t"><div class="lg"><span class="ic" data-i="megaphone"></span></div><div><b>Agent Marketing</b><em>promo &amp; broadcast</em></div></div><span class="stt" data-s="0"></span></div>
           <div class="node" id="nRev"><div class="t"><div class="lg"><span class="ic" data-i="star"></span></div><div><b>Agent Review</b><em>ulasan Google</em></div></div><span class="stt" data-s="0"></span></div>
 
-          <div class="card" id="logC"><div class="hd"><span class="lbl">LOG HARI INI</span></div><div id="logL"></div></div>
+          <div class="card" id="logC"><div class="hd"><span class="lbl">JADWAL AGENT HARI INI</span></div><div id="logL"></div></div>
           <div class="card" id="vStok"><div class="hd"><div class="lg"><span class="ic" data-i="package"></span></div><b>Cek stok · 06.05</b><span class="ilu">angka ilustrasi</span></div>
             <div class="src"><span><span class="ic" data-i="receipt"></span>Penjualan kemarin</span><span><span class="ic" data-i="file-spreadsheet"></span>Stok gudang</span></div>
             <div id="sRows"></div></div>
@@ -442,8 +443,8 @@
           `<div class="fr tot"><span>Laba hari ini</span><b>Rp6,1 jt</b>${ic("circle-check", "ck")}</div>`;
         const OC = [["Sen", 64], ["Sel", 23], ["Rab", 58], ["Kam", 61], ["Jum", 92], ["Sab", 97], ["Min", 88]];
         $("#bars").innerHTML = OC.map(([d, p], i) => `<div class="bc${i === 1 ? " sepi" : ""}"><span class="pv" style="bottom:${48 + p * 2.2}px">${p}%</span><i class="b" style="height:${p * 2.2}px"></i><span class="d">${d}</span>${i === 1 ? '<span id="sepiT" style="bottom:' + (78 + p * 2.2) + 'px;top:auto">SEPI</span>' : ""}</div>`).join("");
-        const LOG = [["06.12 · Stok", "PO cabai &amp; ayam"], ["09.30 · Jadwal", "Koki masuk 14.00"], ["12.00 · Admin", "12 meja dibooking"], ["13.10 · Review", "1 ulasan ke owner"],
-          ["15.10 · Marketing", "Promo es teh jalan"], ["23.05 · Keuangan", "Ringkasan terkirim"]];
+        const LOG = [["06.00 · Stok", "Cek bahan &amp; PO"], ["09.30 · Jadwal", "Atur shift koki"], ["12.00 · Admin", "Chat &amp; booking"], ["13.00 · Review", "Bales ulasan"],
+          ["15.00 · Marketing", "Promo hari sepi"], ["23.00 · Keuangan", "Tutup buku"]];
         $("#logL").innerHTML = LOG.map(([a, b]) => `<div class="le"><b>${a}</b><span>${b}</span></div>`).join("");
         $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
 
@@ -493,6 +494,7 @@
           const o = { v: 0 }; ft(o, { v: 0 }, { v: 1, duration: dur, ease: "power2.inOut", onUpdate: () => { const q = w.p1.getPointAtLength(o.v * w.L); w.c.setAttribute("cx", q.x.toFixed(1)); w.c.setAttribute("cy", q.y.toFixed(1)); } }, at);
           ft(w.c, { opacity: 0 }, { keyframes: [{ opacity: 1, duration: 0.05 }, { opacity: 1, duration: dur - 0.1 }, { opacity: 0, duration: 0.15 }] }, at); };
         const wake = (id, at) => { ft("#mgr", { scale: 1 }, { keyframes: [{ scale: 1.05, duration: 0.15 }, { scale: 1, duration: 0.25 }] }, at); wire(id, at + 0.05, 0.5); stt(id, 1, at + 0.5); pulse($("#" + id), at + 0.5); };
+        const done = (i, at) => { const le = $$(".le")[i]; st(le, { attr: { "data-d": "1" } }, at); ft(le, { opacity: 0.45, x: 0 }, { keyframes: [{ opacity: 1, x: 6, duration: 0.18 }, { x: 0, duration: 0.25 }] }, at); };
         const fade = (sel, to, at, d) => ft(sel, { opacity: to ? 0 : 1 }, { opacity: to ? 1 : 0, duration: d || 0.3, ease: "sine.inOut" }, at);
         const popIn = (el, at, from) => ft(el, Object.assign({ opacity: 0, y: 14, scale: 0.97 }, from || {}), { opacity: 1, y: 0, x: 0, scale: 1, duration: 0.32, ease: "back.out(1.6)" }, at);
         const pX = (h) => 140 + (h - 6) * (710 / 18); // day bar position for hour h
@@ -529,25 +531,25 @@
         /* ===== ZOOM 1 · the AI Manager card becomes the app: hook dives in, window opens on the manager node, camera pulls out ===== */
         const tZ1 = tCoba - 0.2;
         FX.go("center", tZ1, 0.9);
-        ft("#hook", { scale: 1, opacity: 1, transformOrigin: "460px 505px" }, { scale: 1.35, opacity: 0, duration: 0.42, ease: "power2.in" }, tZ1);
+        ft("#hook", { scale: 1, opacity: 1, transformOrigin: "460px 505px" }, { scale: 1.9, opacity: 0, duration: 0.36, ease: "power2.in" }, tZ1);
         st("#hook", { display: "none" }, tZ1 + 0.45);
         camSet(460, 322, 2.25, 0);
-        ft(win, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.35, ease: "sine.out" }, tZ1 + 0.18);
-        camTo(460, 475, 1, tZ1 + 0.45, 1.0, "power3.inOut");
+        ft(win, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.32, ease: "power2.out" }, tZ1 + 0.24);
+        camTo(460, 475, 1, tZ1 + 0.5, 0.75, "power3.inOut");
         const tPer = ph("Pertama").start;
-        ft("#nStok, #nJad, #nAdm, #nFin, #nMkt, #nRev", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.35, stagger: 0.06, ease: "back.out(1.6)" }, tZ1 + 0.6);
-        ft(["#logC", "#dayBar"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, tZ1 + 0.9);
+        ft("#nStok, #nJad, #nAdm, #nFin, #nMkt, #nRev", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.35, stagger: 0.06, ease: "back.out(1.6)" }, tZ1 + 1.2);
+        ft(["#logC", "#dayBar"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, tZ1 + 1.3);
         FX.face("happy", tCoba + 0.3, 0.9);
 
         /* ===== SCENE 2 · inventory agent ===== */
         const tBang = wt("Pertama", "bangunin"), tStok = wt("Pertama", "stok"), tBaca = ph("Dia baca").start, tCab = wt("nemu cabai", "cabai"), tAym = wt("nemu cabai", "ayam"), tHab = wt("nemu cabai", "hampir"),
           tOrd = ph("langsung order").start;
         wake("nStok", tBang - 0.1); FX.point(tBang - 0.2);
-        camTo(300, 330, 1.25, tPer + 0.05, 1.3, "sine.inOut"); // slow push onto the manager + inventory agent
         // punch-in on the stock check (sources + rows), rows fill in
         camTo(615, 729, 1.55, tBaca - 0.4, 0.55, "power3.inOut");
         FX.go("right", tBaca - 0.35);
-        ft("#vStok", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, tBaca - 0.35);
+        ft("#vStok", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, tStok);
+        st(["#vStok .src span", "#sRows .srow"], { opacity: 0 }, 0);
         ft("#vStok .src span", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.25, ease: "power2.out" }, tBaca + 0.05);
         ft("#sRows .srow", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.12, ease: "power2.out" }, wt("Dia baca", "penjualan"));
         ft("#sRows .bar i", { scaleX: 0 }, { scaleX: 1, duration: 0.6, stagger: 0.12, ease: "power2.out" }, wt("Dia baca", "penjualan") + 0.1);
@@ -563,7 +565,7 @@
         ft("#pPO .pr", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.15, ease: "power2.out" }, tPO + 0.35);
         ft("#pPO .ft", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, wt("langsung order", "supplier") - 0.15);
         FX.point(tOrd - 0.1); FX.face("happy", tOrd + 0.45, 1.0);
-        stt("nStok", 2, tOrd + 0.6); st($$(".le")[0], { opacity: 1 }, tOrd + 0.6);
+        stt("nStok", 2, tOrd + 0.6); done(0, tOrd + 0.6);
         TXT.push([$("#clkT"), [[0, "06.00"], [tOrd + 0.5, "06.12"], [ph("Agent jadwal").start - 0.55, "09.30"], [ph("Seharian").start - 0.1, "12.00"], [ph("Agent review").start - 0.3, "13.10"],
           [ph("Jam tiga").start - 0.5, "15.00"], [ph("Jam sebelas").start - 0.65, "23.00"], [ph("kirim satu").start - 0.1, "23.05"], [wt("Besok jam", "jam") - 0.1, "06.00"]]]);
         dayTo(6.2, tOrd + 0.5, 0.3);
@@ -588,7 +590,7 @@
         popIn("#mb1", tMinta - 0.05, { x: 30 });
         popIn("#mb2", tAwal - 0.1, { x: -30 });
         FX.point(tRes - 0.25); FX.face("excited", tRame - 0.05, 0.9); FX.hop(tRame, 38); FX.beat(wt("jadi dia minta", "koki") - 0.1); FX.face("happy", tAwal + 0.1, 0.9);
-        stt("nJad", 2, tAwal + 0.3); st($$(".le")[1], { opacity: 1 }, tAwal + 0.3); dayTo(12, tSwB + 0.3, 0.6);
+        stt("nJad", 2, tAwal + 0.3); done(1, tAwal + 0.3); dayTo(12, tSwB + 0.3, 0.6);
         ft("#pPlan", { opacity: 1, x: 0, y: 0, scale: 1 }, { opacity: 0, x: 60, y: 40, scale: 0.85, duration: 0.35, ease: "power2.in" }, tSwB);
         ft(win, { rotationY: 22, scale: 0.88, x: -14, opacity: 0.3 }, { rotationY: 0, scale: 1, x: 0, opacity: 1, duration: 0.55, ease: "power3.inOut" }, tSwB + 0.05);
         ft("#winDim", { opacity: 0.4 }, { opacity: 0, duration: 0.4 }, tSwB + 0.05);
@@ -605,7 +607,7 @@
         count($("#nChat"), 0, 37, tBal - 0.05, 1.4); count($("#nMeja"), 0, 12, tBook - 0.1, 0.9);
         ft($$("#cRows .cr")[0], { scale: 1 }, { keyframes: [{ scale: 1.04, duration: 0.15 }, { scale: 1, duration: 0.25 }] }, tBook);
         FX.point(tBal - 0.25); FX.face("happy", tBook, 0.8);
-        stt("nAdm", 2, tRev - 0.2); st($$(".le")[2], { opacity: 1 }, tRev - 0.2);
+        stt("nAdm", 2, tRev - 0.2); done(2, tRev - 0.2);
         camTo(623, 643, 1.55, tRev - 0.42, 0.42, "expo.inOut"); // whip pan to the review agent
         fade("#vRev", 1, tRev - 0.3, 0.3);
         wake("nRev", tRev - 0.05);
@@ -619,7 +621,7 @@
         ft("#pNotif", { opacity: 0, y: -90, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.3)" }, tLem - 0.25);
         ft("#pNotif .lg", { rotation: 0 }, { keyframes: [{ rotation: -16, duration: 0.08 }, { rotation: 14, duration: 0.08 }, { rotation: -10, duration: 0.08 }, { rotation: 8, duration: 0.08 }, { rotation: 0, duration: 0.1 }] }, tLem + 0.25);
         FX.point(tLem - 0.2);
-        stt("nRev", 2, tLem + 0.5); st($$(".le")[3], { opacity: 1 }, tLem + 0.5); dayTo(13.2, tRev - 0.3, 0.4);
+        stt("nRev", 2, tLem + 0.5); done(3, tLem + 0.5); dayTo(13.2, tRev - 0.3, 0.4);
 
         /* ===== ZOOM 2 · punch-in INTO the Marketing node, which opens up into the marketing scene ===== */
         const tJ3 = ph("Jam tiga").start, tAgM = wt("Jam tiga", "marketing"), tBikin = ph("bikin promo").start, tLima = wt("bikin promo", "lima"), tSel = wt("buat Selasa", "Selasa");
@@ -629,6 +631,7 @@
         FX.go("home", tZ2 - 0.1, 0.9);
         dayTo(15, tZ2, 0.4);
         camTo(770, 322, 2.4, tZ2, 0.45, "power3.in");
+        st("#nFin", { visibility: "hidden" }, tZ2 - 0.05); // would cross the frame edge during the punch-in
         wire("nMkt", tZ2 - 0.1, 0.35); stt("nMkt", 1, tZ2 + 0.1);
         { const c = cState(770, 322, 2.4), nx0 = 640 * c.scale + c.x, ny0 = 268 * c.scale + c.y, nx1 = 900 * c.scale + c.x, ny1 = 376 * c.scale + c.y; // node rect on screen at the end of the punch-in
           ft("#mk", { opacity: 1, clipPath: `inset(${ny0.toFixed(0)}px ${(VW - nx1).toFixed(0)}px ${(VH - ny1).toFixed(0)}px ${nx0.toFixed(0)}px round 43px)` },
@@ -678,14 +681,14 @@
         count($("#nBc"), 0, 200, tKir + 0.35, 0.95);
         ft("#pBc .tr i", { scaleX: 0 }, { scaleX: 1, duration: 0.95, ease: "power2.out" }, tKir + 0.35);
         ft("#pBc .ft", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, tKir + 1.2);
-        FX.point(tKir + 0.05); stt("nMkt", 2, tKir + 0.5); st($$(".le")[4], { opacity: 1 }, tKir + 0.5);
+        FX.point(tKir + 0.05); stt("nMkt", 2, tKir + 0.5); done(4, tKir + 0.5);
 
         /* ===== SHUTTER (resto closes for the night) -> SCENE 6 · finance agent closes the day ===== */
         const t11 = ph("Jam sebelas").start, tKeu = wt("agent keuangan", "keuangan"), tTut = wt("agent keuangan", "tutup"), tKirim = ph("kirim satu").start, tRing = wt("kirim satu", "ringkasan");
         const tSh = t11 - 1.16;
         FX.dip("peekL", tSh - 0.02, 0.3);
         FX.shutter(tSh, "light", (m) => { st(["#mk", "#pBc", "#vAdm", "#vRev"], { opacity: 0 }, m); st(["#logC"], { opacity: 1 }, m); st("#vFin", { opacity: 1 }, m);
-          st(win, { scale: 1, opacity: 1 }, m); st("#wcam", { opacity: 1 }, m); st("#winDim", { opacity: 0 }, m); camSet(460, 475, 1, m); dayTo(23, m, 0.01);
+          st(win, { scale: 1, opacity: 1 }, m); st("#wcam", { opacity: 1 }, m); st("#nFin", { visibility: "visible" }, m); st("#winDim", { opacity: 0 }, m); camSet(460, 475, 1, m); dayTo(23, m, 0.01);
           ["nStok", "nJad", "nAdm", "nRev", "nMkt"].forEach((id) => stt(id, 2, m)); ["nStok", "nJad", "nAdm", "nRev"].forEach((id) => st(W[id].p1, { strokeDashoffset: 0 }, m));
           st("#icSun", { opacity: 0 }, m); st("#icMoon", { opacity: 1 }, m); st("#clk", { backgroundColor: "rgba(41,75,119,0.12)", color: "#294b77" }, m); });
         st("#fRows .fr", { opacity: 0 }, 0);
@@ -700,7 +703,7 @@
         ft("#pSum", { opacity: 0, y: -80, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.3)" }, tKirim - 0.25);
         ft("#pSum .sr", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.14, ease: "power2.out" }, tKirim + 0.05);
         FX.point(tRing - 0.25); FX.face("happy", tRing, 1.0);
-        stt("nFin", 2, tRing + 0.3); st($$(".le")[5], { opacity: 1 }, tRing + 0.3);
+        stt("nFin", 2, tRing + 0.3); done(5, tRing + 0.3);
 
         /* ===== ZOOM-OUT REVEAL · back to 06.00, everything restarts; window recedes, stat stack ===== */
         const tBes = ph("Besok").start, tJ6 = wt("Besok jam", "jam"), tSem = ph("semuanya").start, tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");

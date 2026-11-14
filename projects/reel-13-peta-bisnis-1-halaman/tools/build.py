@@ -23,7 +23,7 @@ tKF = ph("Klik funnel")["start"]; tAs = ph("dari orang")["start"]; tPem = wt("sa
 tTer = ph("Terus AI")["start"]; tKas = ph("dan kasih")["start"]; tTiga = wt("tiga prioritas", "tiga")
 tSatu = ph("Satu halaman")["start"]; tSem = ph("semua divisi")["start"]; tNgg = ph("nggak ada")["start"]
 tCta = ph("Mau sistem")["start"]; tF = wt("Klik link", "link")
-tS1 = tCoba - 1.27; tS2 = tTiap - 1.15; tP = tKF + 0.18
+tS1 = tCoba - 1.35; tS2 = tTiap - 1.15; tP = tKF + 0.18
 ev = [("pop", 0.03), ("pop", 0.33), ("pop", 0.53), ("click", tBer - 0.02), ("whoosh", tItu + 0.3), ("pop", tItu + 0.85), ("pop", tNy - 0.1),
       ("whoosh", tS1), ("click", tKlik), ("whoosh", tKlik + 0.3), ("ping", tHal - 0.1),
       ("click", tPal + 0.1), ("whoosh", tPal + 0.35), ("sparkle", tKeb - 0.1), ("whoosh", tGes - 0.42),
@@ -31,8 +31,8 @@ ev = [("pop", 0.03), ("pop", 0.33), ("pop", 0.53), ("click", tBer - 0.02), ("who
       ("whoosh", tS2)] + [("pop", t - 0.12) for t in DN] + [
       ("click", tKF), ("whoosh", tP), ("pop", tP + 0.75), ("ping", tPem - 0.05), ("pop", tAng - 0.25),
       ("whoosh", tTer - 0.05), ("pop", tKas - 0.35), ("ping", tTiga - 0.1), ("pop", tTiga + 0.5),
-      ("whoosh", tSatu - 0.45), ("pop", tSatu - 0.15), ("pop", tSem - 0.15), ("pop", tNgg - 0.15),
-      ("whoosh", tCta - 0.42), ("pop", tCta + 0.55), ("click", tF)]
+      ("whoosh", tSatu - 0.62), ("pop", tSatu - 0.15), ("pop", tSem - 0.15), ("pop", tNgg - 0.15),
+      ("whoosh", tCta - 0.6), ("pop", tCta + 0.55), ("click", tF)]
 tags = [f'<audio id="sx{i:02d}" class="clip" src="assets/sfx/{k}.wav" data-start="{t:.2f}" data-duration="{DUR[k]}" data-track-index="{10 + i % 4}" data-volume="{VOL[k]}"></audio>'
         for i, (k, t) in enumerate(sorted(ev, key=lambda e: e[1]))]
 (P / "index.html").write_text(src.replace("<!--SFX-->", "\n      ".join(tags)))

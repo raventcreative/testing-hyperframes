@@ -23,7 +23,7 @@ rows = "".join(f'''<div class="r"><div class="c"><span class="ci">{L(ic)}</span>
  <div class="ts">{"".join(f'<div class="t"><img src="assets/apps/{f}.png" alt=""><span>{n}</span></div>' for f, n in tools)}</div></div>''' for ic, name, tools in C)
 CSS = (D / "style.css").read_text()
 (D / "carousel.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>AI Productivity Tools</title><style>{CSS}</style></head><body>
-<section class="slide"><div class="hd"><img class="logo" src="assets/logo_navy.png" alt="AIpreneur"><span class="cnt">Save this</span></div>
- <h1>AI productivity tools.</h1><p class="sub">{n_tools} picks, sorted by the job you need done.</p>
+<section class="slide"><div class="hd"><img class="logo" src="assets/logo_white.png" alt="AIpreneur"><span class="cnt">Save this</span></div>
+ <h1>AI productivity <span>tools.</span></h1><p class="sub">{n_tools} picks, sorted by the job you need done.</p>
  <div class="rows">{rows}</div></section></body></html>''')
 print("ok", n_tools)

@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur Automation — Sistem Operasi AI</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --c: #01ccf7; --line: rgba(255,255,255,0.12); --card: rgba(255,255,255,0.05); --mute: rgba(255,255,255,0.62); --ok: #3ddc97; --heat: #ffb547; --bad: #ff8a8a; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0b1a45; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: #fff; -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #0b1a45; }
+      .ic { display: inline-block; flex: none; }
+      .ic svg { width: 100%; height: 100%; display: block; }
+      b { font-weight: 700; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #0b1a45; }
+      #dots { position: absolute; inset: 0; }
+      #grid { position: absolute; inset: 0; opacity: 0.45; background-image: radial-gradient(rgba(255,255,255,0.10) 1.2px, transparent 1.6px); background-size: 36px 36px; }
+      #glow { position: absolute; left: -300px; top: 300px; width: 1100px; height: 1100px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,0.14) 0%, rgba(1,204,247,0) 62%); }
+      .simtag { display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--c); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 20px; padding: 3px 12px; white-space: nowrap; }
+      .stk { position: absolute; display: flex; align-items: center; gap: 9px; padding: 9px 18px; border-radius: 15px; background: #fff; font-size: 22px; font-weight: 700; color: #0a0d2c;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.35); white-space: nowrap; }
+      .stk .ic { width: 22px; height: 22px; color: #0b3a8c; } .stk.y { background: var(--c); color: #04122f; } .stk.y .ic { color: #04122f; }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); white-space: nowrap; }
+
+      /* ---------- HOOK (stage x 80-1000, y 290-1240): 4 divisions run themselves around one AI hub, owner asleep ---------- */
+      #hook { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; }
+      #hSvg { position: absolute; left: 0; top: 0; width: 920px; height: 950px; overflow: visible; }
+      #hTop { position: absolute; left: 40px; top: 0; width: 840px; height: 170px; border-radius: 30px; background: linear-gradient(135deg, rgba(12,34,84,0.97), rgba(6,15,42,0.97));
+        border: 1.5px solid rgba(1,204,247,0.4); box-shadow: 0 30px 70px rgba(0,0,0,0.45); display: flex; align-items: center; gap: 22px; padding: 0 30px; }
+      #hTop .lg { width: 96px; height: 96px; border-radius: 26px; background: var(--c); color: #04122f; display: flex; align-items: center; justify-content: center; flex: none; }
+      #hTop .lg .ic { width: 52px; height: 52px; }
+      #hTop .k { font-size: 17px; font-weight: 700; letter-spacing: 3px; color: var(--c); white-space: nowrap; } #hTop .t { font-size: 36px; font-weight: 700; line-height: 1.15; margin-top: 2px; white-space: nowrap; }
+      #h247 { margin-left: auto; font-size: 92px; font-weight: 700; line-height: 1; color: var(--c); letter-spacing: 1px; text-shadow: 0 8px 30px rgba(1,204,247,0.35); white-space: nowrap; }
+      .ht { position: absolute; width: 380px; height: 168px; border-radius: 26px; background: rgba(8,18,50,0.95); border: 1.5px solid rgba(255,255,255,0.16); padding: 20px 22px; box-shadow: 0 24px 60px rgba(0,0,0,0.4); }
+      .ht .row { display: flex; align-items: center; gap: 16px; }
+      .ht .bx { width: 62px; height: 62px; border-radius: 18px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; flex: none; } .ht .bx .ic { width: 32px; height: 32px; }
+      .ht b { font-size: 27px; line-height: 1.15; white-space: nowrap; }
+      .ht .stt { position: relative; height: 34px; margin-top: 16px; }
+      .ht .stt span { position: absolute; left: 0; top: 0; height: 34px; padding: 0 14px; border-radius: 17px; display: flex; align-items: center; gap: 7px; font-size: 16px; font-weight: 700; white-space: nowrap; }
+      .ht .stt .ic { width: 17px; height: 17px; }
+      .ht .stt .a { background: rgba(255,255,255,0.08); color: var(--mute); } .ht .stt .b { background: rgba(1,204,247,0.16); color: var(--c); opacity: 0; }
+      .ht .bar { position: absolute; right: 22px; bottom: 30px; width: 104px; height: 10px; border-radius: 5px; background: rgba(255,255,255,0.08); overflow: hidden; }
+      .ht .bar i { display: block; width: 100%; height: 100%; background: var(--c); transform-origin: 0 50%; transform: scaleX(0); }
+      #ht0 { left: 40px; top: 200px; } #ht1 { left: 500px; top: 200px; } #ht2 { left: 40px; top: 580px; } #ht3 { left: 500px; top: 580px; }
+      #hHub { position: absolute; left: 375px; top: 374px; width: 170px; height: 170px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        background: radial-gradient(circle, rgba(1,204,247,0.45) 0%, rgba(1,204,247,0.12) 64%, rgba(1,204,247,0.06) 100%); border: 3px solid #01ccf7; box-shadow: 0 0 50px rgba(1,204,247,0.45); }
+      #hHub .ic { width: 50px; height: 50px; } #hHub b { font-size: 17px; line-height: 1.15; margin-top: 4px; white-space: nowrap; }
+      #hOwner { position: absolute; left: 40px; top: 780px; width: 840px; height: 130px; border-radius: 28px; background: rgba(8,18,50,0.95); border: 1.5px solid rgba(255,255,255,0.16);
+        display: flex; align-items: center; gap: 22px; padding: 0 30px; box-shadow: 0 24px 60px rgba(0,0,0,0.4); }
+      #hOwner .av { position: relative; width: 84px; height: 84px; border-radius: 50%; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; flex: none; }
+      #hOwner .av .ic { width: 44px; height: 44px; color: rgba(255,255,255,0.75); }
+      #hOwner .av .mn { opacity: 0; position: absolute; right: -6px; bottom: -4px; width: 38px; height: 38px; border-radius: 50%; background: #ffd166; color: #2a1d00; display: flex; align-items: center; justify-content: center; }
+      #hOwner .av .mn .ic { width: 22px; height: 22px; color: #2a1d00; }
+      #hOwner .k { font-size: 17px; color: var(--mute); } #hOwner .t { font-size: 32px; font-weight: 700; line-height: 1.15; white-space: nowrap; }
+      #hOwner .rt { margin-left: auto; text-align: right; } #hOwner .rt b { display: block; font-size: 48px; line-height: 1; color: var(--c); } #hOwner .rt span { font-size: 17px; color: var(--mute); white-space: nowrap; }
+      #hZ { position: absolute; left: 132px; top: 760px; font-size: 30px; font-weight: 700; letter-spacing: 3px; color: rgba(255,255,255,0.6); } #hZ span { display: inline-block; }
+      #sk1 { left: 610px; top: 750px; }
+      #hTop, .ht, #hHub, #hOwner, #hZ, #hook .stk { opacity: 0; }
+
+      /* ---------- app window ---------- */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(6, 14, 40, 0.9);
+        border: 1.5px solid rgba(255,255,255,0.14); box-shadow: 0 40px 100px rgba(0,0,0,0.45); transform-origin: 50% 50%; opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 62px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.03); }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 2px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.22); display: block; }
+      #tbar .app { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; white-space: nowrap; } #tbar .app .ic { width: 20px; height: 20px; color: var(--c); }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--c); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 20px; padding: 2px 10px; white-space: nowrap; }
+      #live { margin-left: auto; display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 17px; background: rgba(61,220,151,0.12); border: 1px solid rgba(61,220,151,0.45); color: var(--ok); font-size: 14px; font-weight: 700; white-space: nowrap; }
+      #live i { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); display: block; }
+      #side { position: absolute; left: 0; top: 62px; width: 210px; bottom: 0; border-right: 1px solid var(--line); background: rgba(255,255,255,0.02); padding-top: 18px; }
+      #side .lbl { padding: 0 22px; margin-bottom: 8px; }
+      #navPill { position: absolute; left: 12px; top: 0; width: 186px; height: 52px; border-radius: 14px; background: rgba(1,204,247,0.16); border: 1px solid rgba(1,204,247,0.5); }
+      .nav { position: relative; display: flex; align-items: center; gap: 10px; height: 52px; margin: 4px 12px; padding: 0 12px; font-size: 16px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+      .nav .ic { width: 20px; height: 20px; }
+      #sideFoot { position: absolute; left: 12px; right: 12px; bottom: 16px; padding: 14px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); }
+      #sideFoot .r { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mute); white-space: nowrap; } #sideFoot .r .ic { width: 16px; height: 16px; color: #ffd166; }
+      #sideFoot b { display: block; font-size: 15px; margin-top: 4px; white-space: nowrap; }
+      #mn { position: absolute; left: 210px; top: 62px; width: 710px; height: 888px; }
+      .view { position: absolute; inset: 0; opacity: 0; }
+      .hd { position: absolute; left: 24px; top: 20px; right: 24px; display: flex; align-items: center; gap: 14px; }
+      .hd .av { width: 56px; height: 56px; border-radius: 16px; background: var(--c); color: #04122f; display: flex; align-items: center; justify-content: center; flex: none; } .hd .av .ic { width: 30px; height: 30px; }
+      .hd .tt { font-size: 26px; font-weight: 700; line-height: 1.15; white-space: nowrap; } .hd em { display: block; font-style: normal; font-size: 14px; color: var(--mute); white-space: nowrap; }
+      .hd .st { margin-left: auto; display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px; border-radius: 17px; background: rgba(61,220,151,0.12); border: 1px solid rgba(61,220,151,0.45); color: var(--ok); font-size: 13.5px; font-weight: 700; white-space: nowrap; }
+      .hd .st .ic { width: 15px; height: 15px; } .hd .st.nt { background: rgba(255,209,102,0.12); border-color: rgba(255,209,102,0.5); color: #ffd166; }
+      .pan { position: absolute; border-radius: 20px; background: var(--card); border: 1.5px solid var(--line); }
+
+      /* home: control centre */
+      #vHome { opacity: 1; }
+      #vHome .hd { display: block; } #vHome .tt { font-size: 30px; margin-top: 4px; position: relative; display: inline-block; }
+      #ttMk { position: absolute; left: -6px; right: -6px; bottom: 2px; height: 14px; background: rgba(1,204,247,0.35); border-radius: 4px; transform-origin: 0 50%; transform: scaleX(0); z-index: -1; }
+      #clk { position: absolute; right: 0; top: 0; font-size: 14px; color: var(--mute); display: flex; align-items: center; gap: 6px; white-space: nowrap; } #clk .ic { width: 16px; height: 16px; color: #ffd166; }
+      #kpis { position: absolute; left: 24px; right: 24px; top: 112px; height: 104px; display: flex; gap: 14px; }
+      .kpi { flex: 1; border-radius: 18px; background: var(--card); border: 1.5px solid var(--line); padding: 14px 18px; }
+      .kpi em { display: block; font-style: normal; font-size: 13.5px; color: var(--mute); white-space: nowrap; } .kpi b { display: block; font-size: 36px; line-height: 1.2; }
+      #agents { position: absolute; left: 24px; top: 236px; width: 662px; height: 392px; }
+      .ag { position: absolute; width: 321px; height: 186px; border-radius: 20px; background: #0c1840; border: 1.5px solid var(--line); padding: 18px 18px; }
+      .ag .t { display: flex; align-items: center; gap: 12px; } .ag .bx { width: 50px; height: 50px; border-radius: 14px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; flex: none; }
+      .ag .bx .ic { width: 26px; height: 26px; } .ag b { display: block; font-size: 19px; line-height: 1.2; white-space: nowrap; } .ag em { display: block; font-style: normal; font-size: 13px; color: var(--mute); white-space: nowrap; }
+      .ag .ss { position: relative; height: 30px; margin-top: 16px; }
+      .ag .ss span { position: absolute; left: 0; top: 0; height: 30px; padding: 0 12px; border-radius: 15px; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+      .ag .ss i { width: 8px; height: 8px; border-radius: 50%; display: block; background: currentColor; }
+      .ag .ss .a { background: rgba(255,255,255,0.08); color: var(--mute); } .ag .ss .b { background: rgba(61,220,151,0.14); color: var(--ok); opacity: 0; }
+      .ag .tk { font-size: 14px; color: rgba(255,255,255,0.82); margin-top: 12px; white-space: nowrap; opacity: 0; }
+      #agS { left: 0; top: 0; } #agO { left: 341px; top: 0; } #agF { left: 0; top: 206px; } #agM { left: 341px; top: 206px; }
+      #feed { left: 24px; right: 24px; top: 648px; height: 216px; padding: 16px 18px; }
+      .fr { display: flex; align-items: center; gap: 12px; height: 46px; margin-top: 8px; padding: 0 12px; border-radius: 12px; background: rgba(255,255,255,0.04); font-size: 14.5px; white-space: nowrap; opacity: 0; }
+      .fr .ic { width: 18px; height: 18px; color: var(--c); } .fr em { margin-left: auto; font-style: normal; font-size: 13px; color: var(--mute); }
+
+      /* sales */
+      #skS { position: absolute; left: 24px; right: 24px; top: 104px; display: flex; gap: 10px; }
+      .sk { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 19px; background: rgba(1,204,247,0.10); border: 1.5px solid rgba(1,204,247,0.45); font-size: 15px; font-weight: 700; white-space: nowrap; }
+      .sk .ic { width: 16px; height: 16px; color: var(--c); }
+      #pipe { left: 24px; right: 24px; top: 162px; height: 424px; padding: 14px 16px; }
+      .ld { display: flex; align-items: center; gap: 12px; height: 64px; margin-top: 8px; padding: 0 12px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); }
+      .ld .ini { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex: none; }
+      .ld b { display: block; font-size: 16.5px; line-height: 1.2; white-space: nowrap; } .ld em { display: block; font-style: normal; font-size: 13px; color: var(--mute); white-space: nowrap; }
+      .stg { position: relative; margin-left: auto; width: 150px; height: 32px; flex: none; }
+      .stg span { position: absolute; right: 0; top: 0; height: 32px; padding: 0 12px; border-radius: 16px; display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 700; white-space: nowrap; }
+      .stg .ic { width: 15px; height: 15px; }
+      .stg .a { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75); } .stg .a.nw { background: rgba(1,204,247,0.16); color: var(--c); }
+      .stg .b { background: rgba(61,220,151,0.14); color: var(--ok); opacity: 0; }
+      #ld3, #ld4 { opacity: 0; }
+      #propMini { left: 24px; right: 24px; top: 604px; height: 120px; padding: 16px 18px; display: flex; align-items: center; gap: 16px; border-color: rgba(1,204,247,0.4); background: rgba(1,204,247,0.06); }
+      #propMini .bx { width: 64px; height: 64px; border-radius: 18px; background: rgba(1,204,247,0.18); color: var(--c); display: flex; align-items: center; justify-content: center; flex: none; } #propMini .bx .ic { width: 34px; height: 34px; }
+      #propMini b { display: block; font-size: 18px; white-space: nowrap; } #propMini em { display: block; font-style: normal; font-size: 14px; color: var(--mute); white-space: nowrap; }
+      #propMini .ok { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--ok); white-space: nowrap; } #propMini .ok .ic { width: 16px; height: 16px; }
+      #fuBtn { position: absolute; left: 24px; top: 748px; display: flex; align-items: center; gap: 10px; height: 60px; padding: 0 26px; border-radius: 30px; background: var(--c); color: #04122f; font-size: 19px; font-weight: 700; white-space: nowrap; }
+      #fuBtn .ic { width: 22px; height: 22px; }
+      #fuNote { position: absolute; left: 300px; top: 766px; font-size: 14px; color: var(--mute); white-space: nowrap; }
+
+      /* ops */
+      #sop { left: 24px; top: 104px; width: 372px; height: 760px; padding: 18px 20px; }
+      #sop .dh { display: flex; align-items: center; gap: 10px; } #sop .dh .ic { width: 22px; height: 22px; color: var(--c); } #sop .dh b { font-size: 18px; white-space: nowrap; }
+      #sopW { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--c); background: rgba(1,204,247,0.12); border-radius: 12px; padding: 4px 10px; white-space: nowrap; }
+      #sopW .ic { width: 14px; height: 14px; }
+      .sl { margin-top: 18px; } .sl b { display: flex; align-items: center; gap: 10px; font-size: 15.5px; white-space: nowrap; }
+      .sl b i { font-style: normal; width: 26px; height: 26px; border-radius: 8px; background: rgba(1,204,247,0.16); color: var(--c); font-size: 13px; display: flex; align-items: center; justify-content: center; flex: none; }
+      .sl .sk2 { height: 9px; border-radius: 5px; background: rgba(255,255,255,0.10); margin: 9px 0 0 36px; transform-origin: 0 50%; }
+      #onb { left: 412px; top: 104px; width: 274px; height: 760px; padding: 18px 18px; }
+      #onb .k { font-size: 13px; color: var(--mute); white-space: nowrap; } #onb .nm { font-size: 21px; font-weight: 700; white-space: nowrap; }
+      #ring { position: relative; width: 150px; height: 150px; margin: 18px auto 6px; } #ring svg { width: 150px; height: 150px; transform: rotate(-90deg); }
+      #ringT { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 700; }
+      .os { display: flex; align-items: center; gap: 10px; height: 50px; margin-top: 10px; padding: 0 12px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); font-size: 15px; white-space: nowrap; }
+      .os .cb { width: 24px; height: 24px; border-radius: 7px; border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; flex: none; }
+      .os .cb .ic { width: 16px; height: 16px; color: #04122f; opacity: 0; }
+
+      /* finance */
+      #rep { left: 24px; right: 24px; top: 104px; height: 300px; padding: 18px 20px; }
+      #rep .dh { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--mute); white-space: nowrap; } #rep .dh .ic { width: 20px; height: 20px; color: var(--c); }
+      #rep .nums { display: flex; gap: 28px; margin-top: 8px; } #rep .nums div { font-size: 13px; color: var(--mute); white-space: nowrap; } #rep .nums b { display: block; font-size: 26px; color: #fff; }
+      #bars { position: absolute; left: 20px; right: 20px; bottom: 18px; height: 118px; display: flex; align-items: flex-end; gap: 14px; }
+      #bars div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; } #bars i { display: block; width: 100%; border-radius: 6px 6px 3px 3px; background: rgba(1,204,247,0.55); transform-origin: 50% 100%; }
+      #bars span { font-size: 12px; color: var(--mute); }
+      #rec { left: 24px; right: 24px; top: 424px; height: 440px; padding: 16px 18px; }
+      #rec .top { display: flex; align-items: center; } #recN { margin-left: auto; font-size: 15px; font-weight: 700; color: var(--ok); white-space: nowrap; }
+      .rr { display: flex; align-items: center; gap: 12px; height: 60px; margin-top: 10px; padding: 0 14px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); font-size: 15px; white-space: nowrap; }
+      .rr .ic { width: 18px; height: 18px; color: var(--mute); } .rr b { font-size: 15px; } .rr .amt { color: rgba(255,255,255,0.85); } .rr .src { color: var(--mute); font-size: 13.5px; }
+      .rr .stg { width: 110px; }
+
+      /* marketing */
+      #src { left: 165px; top: 104px; width: 380px; height: 150px; padding: 18px; display: flex; align-items: center; gap: 16px; border-color: rgba(1,204,247,0.5); background: rgba(1,204,247,0.07); }
+      #src .th { width: 112px; height: 112px; border-radius: 16px; background: linear-gradient(135deg, #1f3f7a, #0c1840); display: flex; align-items: center; justify-content: center; flex: none; position: relative; }
+      #src .th .ic { width: 44px; height: 44px; color: #fff; } #src .th em { position: absolute; right: 6px; bottom: 6px; font-style: normal; font-size: 11px; font-weight: 700; background: rgba(0,0,0,0.5); border-radius: 6px; padding: 1px 6px; }
+      #src b { display: block; font-size: 20px; white-space: nowrap; } #src span { display: block; font-size: 14px; color: var(--mute); white-space: nowrap; }
+      #src .cut { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--c); background: rgba(1,204,247,0.14); border-radius: 12px; padding: 4px 10px; white-space: nowrap; }
+      #src .cut .ic { width: 14px; height: 14px; }
+      #mkSvg { position: absolute; left: 0; top: 0; width: 710px; height: 888px; overflow: visible; }
+      .pt { position: absolute; width: 206px; height: 176px; border-radius: 20px; background: #0c1840; border: 1.5px solid var(--line); padding: 16px; opacity: 0; }
+      .pt .bx { width: 46px; height: 46px; border-radius: 13px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; } .pt .bx .ic { width: 24px; height: 24px; }
+      .pt b { display: block; font-size: 16px; margin-top: 12px; white-space: nowrap; } .pt em { display: block; font-style: normal; font-size: 13px; color: var(--mute); white-space: nowrap; }
+      .pt .ok { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 12.5px; font-weight: 700; color: var(--ok); white-space: nowrap; opacity: 0; } .pt .ok .ic { width: 14px; height: 14px; }
+      #mkNote { left: 28px; right: 28px; top: 742px; height: 70px; display: flex; align-items: center; gap: 12px; padding: 0 20px; font-size: 16px; white-space: nowrap; opacity: 0; }
+      #mkNote .ic { width: 22px; height: 22px; color: var(--ok); } #mkNote b { color: var(--ok); }
+
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--c); background: rgba(1,204,247,0.18); opacity: 0; z-index: 29; }
+      #winDim { position: absolute; inset: 0; background: #030918; opacity: 0; }
+      #winFlash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, rgba(160,240,255,0.9), rgba(1,204,247,0.35) 60%, rgba(1,204,247,0.1)); opacity: 0; }
+
+      /* pop-out cards */
+      .pcard { position: absolute; border-radius: 28px; background: rgba(8,18,50,0.97); border: 1.5px solid rgba(1,204,247,0.45); box-shadow: 0 40px 90px rgba(0,0,0,0.55); opacity: 0; }
+      #pProp { left: 560px; top: 330px; width: 440px; padding: 26px 26px 28px; }
+      .pch { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--c); white-space: nowrap; } .pch .ic { width: 22px; height: 22px; }
+      .pct { font-size: 30px; font-weight: 700; line-height: 1.2; margin-top: 12px; white-space: nowrap; } .pcs { font-size: 15px; color: var(--mute); white-space: nowrap; }
+      .pi { display: flex; align-items: center; gap: 10px; height: 54px; margin-top: 10px; padding: 0 14px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); font-size: 16.5px; white-space: nowrap; }
+      .pi .ic { width: 18px; height: 18px; color: var(--c); } .pi b { margin-left: auto; font-size: 16.5px; }
+      #pTot { display: flex; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed rgba(255,255,255,0.2); font-size: 17px; color: var(--mute); white-space: nowrap; }
+      #pTot b { margin-left: auto; font-size: 32px; color: var(--c); }
+      #pStamp { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; height: 42px; padding: 0 16px; border-radius: 21px; background: rgba(61,220,151,0.16); border: 1.5px solid rgba(61,220,151,0.6); color: var(--ok); font-size: 16px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      #pStamp .ic { width: 18px; height: 18px; }
+      #pRep { left: 520px; top: 410px; width: 470px; padding: 26px 26px 28px; }
+      #pRep .row { display: flex; align-items: center; gap: 12px; height: 62px; margin-top: 12px; padding: 0 16px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); font-size: 17px; white-space: nowrap; }
+      #pRep .row .ic { width: 20px; height: 20px; color: var(--c); } #pRep .row b { margin-left: auto; font-size: 22px; } #pRep .row.lb { border-color: rgba(61,220,151,0.55); background: rgba(61,220,151,0.10); } #pRep .row.lb b { color: var(--ok); }
+      #pRep .pdf { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 15px; font-weight: 700; color: #ffd166; background: rgba(255,209,102,0.12); border-radius: 12px; padding: 6px 12px; white-space: nowrap; }
+      #pRep .pdf .ic { width: 16px; height: 16px; }
+
+      /* memory hub */
+      #mem { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; opacity: 0; }
+      #mSvg { position: absolute; left: 0; top: 0; width: 920px; height: 950px; overflow: visible; }
+      #mHub { position: absolute; left: 315px; top: 230px; width: 290px; height: 290px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        background: radial-gradient(circle, rgba(1,204,247,0.42) 0%, rgba(1,204,247,0.12) 62%, rgba(1,204,247,0.06) 100%); border: 3px solid #01ccf7; box-shadow: 0 0 60px rgba(1,204,247,0.45), inset 0 0 40px rgba(1,204,247,0.25); opacity: 0; }
+      #mHub .ic { width: 70px; height: 70px; } #mHub b { display: block; font-size: 31px; line-height: 1.15; margin-top: 8px; white-space: nowrap; } #mHub em { display: block; font-style: normal; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--c); margin-top: 4px; }
+      .mn { position: absolute; width: 250px; height: 104px; border-radius: 20px; background: #0c1840; border: 1.5px solid rgba(1,204,247,0.5); padding: 0 16px; display: flex; align-items: center; gap: 12px; opacity: 0; }
+      .mn .bx { width: 52px; height: 52px; border-radius: 14px; background: var(--c); color: #04122f; display: flex; align-items: center; justify-content: center; flex: none; } .mn .bx .ic { width: 28px; height: 28px; }
+      .mn b { display: block; font-size: 19px; white-space: nowrap; } .mn em { display: block; font-style: normal; font-size: 13px; color: var(--ok); white-space: nowrap; }
+      #mn0 { left: 0; top: 40px; } #mn1 { left: 670px; top: 40px; } #mn2 { left: 0; top: 600px; } #mn3 { left: 670px; top: 600px; }
+      .mc { position: absolute; top: 790px; width: 290px; height: 136px; border-radius: 24px; background: rgba(8,18,50,0.95); border: 1.5px solid rgba(255,255,255,0.16); padding: 18px 20px; opacity: 0; }
+      .mc .h { display: flex; align-items: center; gap: 9px; font-size: 16px; color: var(--mute); white-space: nowrap; } .mc .h .ic { width: 22px; height: 22px; color: var(--c); }
+      .mc b { display: block; font-size: 44px; line-height: 1.15; margin-top: 6px; color: #fff; }
+      #mc0 { left: 0; } #mc1 { left: 315px; } #mc2 { left: 630px; }
+
+      /* kinetic: before vs now (robot stands left, rows on the right half) */
+      #kin { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; }
+      #kTitle { position: absolute; left: 10px; top: 40px; font-size: 80px; font-weight: 700; line-height: 1; letter-spacing: 1px; white-space: nowrap; }
+      #kSim { position: absolute; left: 14px; top: 140px; }
+      .kr { position: absolute; left: 480px; width: 440px; height: 250px; border-radius: 30px; background: rgba(8,18,50,0.95); border: 1.5px solid rgba(255,255,255,0.16); padding: 24px 26px; opacity: 0;
+        box-shadow: 0 26px 64px rgba(0,0,0,0.45); }
+      .kr .t { display: flex; align-items: center; gap: 14px; } .kr .lg { width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center; flex: none; background: rgba(255,138,138,0.18); color: var(--bad); }
+      .kr .lg .ic { width: 34px; height: 34px; } .kr .w { font-size: 18px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.8); white-space: nowrap; }
+      .kr .v { font-size: 36px; font-weight: 700; line-height: 1.12; margin-top: 16px; color: var(--bad); white-space: nowrap; } .kr .s { font-size: 16px; color: var(--mute); margin-top: 6px; white-space: nowrap; }
+      .kr .x { position: absolute; right: 22px; top: 22px; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,138,138,0.2); color: var(--bad); display: flex; align-items: center; justify-content: center; }
+      .kr .x .ic { width: 22px; height: 22px; }
+      #k1 { top: 30px; } #k2 { top: 320px; } #k3 { top: 610px; border-color: rgba(1,204,247,0.7); background: linear-gradient(135deg, rgba(1,204,247,0.20), rgba(8,18,50,0.95)); }
+      #k3 .lg { background: var(--c); color: #04122f; } #k3 .v { color: var(--c); } #k3 .x { background: var(--c); color: #04122f; }
+
+      /* business types (robot stands right, cards on the left half) */
+      #biz { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; }
+      #bTitle { position: absolute; left: 0; top: 10px; width: 920px; text-align: center; font-size: 50px; font-weight: 700; line-height: 1.1; white-space: nowrap; } #bTitle b { color: var(--c); }
+      .bz { position: absolute; left: 0; width: 450px; height: 112px; border-radius: 24px; background: rgba(8,18,50,0.95); border: 1.5px solid rgba(255,255,255,0.16); display: flex; align-items: center; gap: 16px; padding: 0 20px; opacity: 0;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+      .bz .bx { width: 66px; height: 66px; border-radius: 18px; background: rgba(1,204,247,0.16); color: var(--c); display: flex; align-items: center; justify-content: center; flex: none; } .bz .bx .ic { width: 34px; height: 34px; }
+      .bz b { display: block; font-size: 28px; line-height: 1.15; white-space: nowrap; } .bz em { display: block; font-style: normal; font-size: 15px; color: var(--mute); white-space: nowrap; }
+      .bz .ck { margin-left: auto; width: 40px; height: 40px; border-radius: 50%; background: var(--c); color: #04122f; display: flex; align-items: center; justify-content: center; flex: none; opacity: 0; } .bz .ck .ic { width: 24px; height: 24px; }
+      #bz0 { top: 130px; } #bz1 { top: 262px; } #bz2 { top: 394px; }
+      #tools { position: absolute; left: 0; top: 534px; width: 450px; height: 128px; border-radius: 24px; background: rgba(8,18,50,0.95); border: 1.5px solid rgba(255,255,255,0.16); padding: 16px 20px; opacity: 0; }
+      #tools .row { display: flex; gap: 12px; margin-top: 12px; } .tl { width: 66px; height: 54px; border-radius: 14px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; opacity: 0; } .tl .ic { width: 28px; height: 28px; }
+      #voice { position: absolute; left: 0; top: 680px; width: 450px; height: 196px; border-radius: 24px; background: rgba(8,18,50,0.95); border: 1.5px solid rgba(255,255,255,0.16); padding: 16px 20px; opacity: 0; }
+      #voice .bub { margin-top: 12px; padding: 14px 16px; border-radius: 18px 18px 18px 6px; background: #0f5f78; font-size: 18px; line-height: 1.4; opacity: 0; }
+      #voice .bub .tag { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--c); margin-bottom: 2px; }
+      #sk2 { left: 560px; top: 150px; }
+      #bTitle, #biz .stk { opacity: 0; }
+
+      /* CTA + UI */
+      #cta { position: absolute; left: 110px; width: 860px; top: 540px; padding: 34px 40px; text-align: center; border-radius: 30px; background: rgba(6, 15, 42, 0.96); border: 1.5px solid rgba(1,204,247,0.4); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: rgba(255,255,255,0.75); } #cta .name { font-size: 60px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; } #cta .sb b { color: var(--c); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 22px; height: 74px; padding: 0 46px; border-radius: 41px; background: var(--c); color: #04122f; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoD { opacity: 0; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; text-shadow: 0 4px 18px rgba(0,0,0,0.45); }
+      .cap s { text-decoration: none; display: inline; white-space: nowrap; font-weight: 400; color: #fff; } .cap s.k { font-weight: 700; color: var(--c); }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(0,0,0,0.38)); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="58" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="58" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bgD"></div><div id="dots"></div><div id="grid"></div><div id="glow"></div>
+
+        <div id="hook"><svg id="hSvg" viewBox="0 0 920 950"></svg>
+          <div id="hTop"><div class="lg"><span class="ic" data-i="cpu"></span></div><div><div class="k">BISNIS LU · SIMULASI</div><div class="t">Semua divisi jalan</div></div><div id="h247">24/7</div></div>
+          <div class="ht" id="ht0"><div class="row"><div class="bx"><span class="ic" data-i="handshake"></span></div><b>Sales</b></div>
+            <div class="stt"><span class="a"><span class="ic" data-i="clock"></span>Nunggu owner…</span><span class="b"><span class="ic" data-i="zap"></span>Jalan sendiri</span></div><div class="bar"><i></i></div></div>
+          <div class="ht" id="ht1"><div class="row"><div class="bx"><span class="ic" data-i="settings"></span></div><b>Operasional</b></div>
+            <div class="stt"><span class="a"><span class="ic" data-i="clock"></span>Nunggu owner…</span><span class="b"><span class="ic" data-i="zap"></span>Jalan sendiri</span></div><div class="bar"><i></i></div></div>
+          <div class="ht" id="ht2"><div class="row"><div class="bx"><span class="ic" data-i="wallet"></span></div><b>Keuangan</b></div>
+            <div class="stt"><span class="a"><span class="ic" data-i="clock"></span>Nunggu owner…</span><span class="b"><span class="ic" data-i="zap"></span>Jalan sendiri</span></div><div class="bar"><i></i></div></div>
+          <div class="ht" id="ht3"><div class="row"><div class="bx"><span class="ic" data-i="megaphone"></span></div><b>Marketing</b></div>
+            <div class="stt"><span class="a"><span class="ic" data-i="clock"></span>Nunggu owner…</span><span class="b"><span class="ic" data-i="zap"></span>Jalan sendiri</span></div><div class="bar"><i></i></div></div>
+          <div id="hHub"><span class="ic" data-i="bot"></span><b>OS Bisnis AI</b></div>
+          <div id="hOwner"><div class="av"><span class="ic" data-i="user-round"></span><div class="mn"><span class="ic" data-i="moon"></span></div></div>
+            <div><div class="k" id="hOk">Owner · 22.00</div><div class="t" id="hOt">Semua nunggu lu</div></div><div class="rt"><b id="hDiv">0/4</b><span>divisi jalan sendiri</span></div></div>
+          <div id="hZ"><span>z</span><span>z</span><span>z</span></div>
+          <div class="stk y" id="sk1"><span class="ic" data-i="circle-check"></span>Tanpa nungguin lu</div>
+        </div>
+
+        <div id="win"><div id="wcam">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app"><span class="ic" data-i="cpu"></span>OS Bisnis AI</span><span id="sim">SIMULASI</span><div id="live"><i></i>4 agent aktif</div></div>
+          <div id="side"><div class="lbl">DIVISI</div><div id="navPill"></div>
+            <div class="nav" id="nHome"><span class="ic" data-i="layout-dashboard"></span>Pusat Kendali</div>
+            <div class="nav" id="nSales"><span class="ic" data-i="handshake"></span>Sales</div>
+            <div class="nav" id="nOps"><span class="ic" data-i="settings"></span>Operasional</div>
+            <div class="nav" id="nFin"><span class="ic" data-i="wallet"></span>Keuangan</div>
+            <div class="nav" id="nMkt"><span class="ic" data-i="megaphone"></span>Marketing</div>
+            <div class="nav" id="nMem"><span class="ic" data-i="brain-circuit"></span>Memori Pusat</div>
+            <div id="sideFoot"><div class="r"><span class="ic" data-i="moon"></span>Owner offline</div><b>Agent tetap jalan</b></div></div>
+          <div id="mn">
+            <!-- control centre -->
+            <div class="view" id="vHome">
+              <div class="hd"><div class="lbl">PUSAT KENDALI</div><div class="tt"><span id="ttMk"></span>Sistem Operasi AI</div><div id="clk"><span class="ic" data-i="moon"></span>Kamis · 02.14</div></div>
+              <div id="kpis"><div class="kpi"><em>Leads baru</em><b id="kp0">0</b></div><div class="kpi"><em>Proposal terkirim</em><b id="kp1">0</b></div><div class="kpi"><em>Transaksi dicek</em><b id="kp2">0</b></div></div>
+              <div id="agents">
+                <div class="ag" id="agS"><div class="t"><div class="bx"><span class="ic" data-i="handshake"></span></div><div><b>Agent Sales</b><em>proposal · leads · follow up</em></div></div>
+                  <div class="ss"><span class="a"><i></i>Siap</span><span class="b"><i></i>Aktif</span></div><div class="tk">Nulis proposal PT Arunika…</div></div>
+                <div class="ag" id="agO"><div class="t"><div class="bx"><span class="ic" data-i="settings"></span></div><div><b>Agent Operasional</b><em>SOP · onboarding klien</em></div></div>
+                  <div class="ss"><span class="a"><i></i>Siap</span><span class="b"><i></i>Aktif</span></div><div class="tk">Onboarding Studio Lumi…</div></div>
+                <div class="ag" id="agF"><div class="t"><div class="bx"><span class="ic" data-i="wallet"></span></div><div><b>Agent Keuangan</b><em>laporan · rekonsiliasi</em></div></div>
+                  <div class="ss"><span class="a"><i></i>Siap</span><span class="b"><i></i>Aktif</span></div><div class="tk">Cocokin transaksi kemarin…</div></div>
+                <div class="ag" id="agM"><div class="t"><div class="bx"><span class="ic" data-i="megaphone"></span></div><div><b>Agent Marketing</b><em>konten · semua platform</em></div></div>
+                  <div class="ss"><span class="a"><i></i>Siap</span><span class="b"><i></i>Aktif</span></div><div class="tk">Motong podcast jadi 6 klip…</div></div>
+              </div>
+              <div class="pan" id="feed"><div class="lbl">AKTIVITAS LIVE</div>
+                <div class="fr" id="fr0"><span class="ic" data-i="send"></span>Agent Sales kirim follow up ke 12 leads<em>02.10</em></div>
+                <div class="fr" id="fr1"><span class="ic" data-i="refresh-cw"></span>Agent Keuangan cocokin transaksi kemarin<em>02.05</em></div>
+                <div class="fr" id="fr2"><span class="ic" data-i="calendar-clock"></span>Agent Marketing jadwalin 6 konten<em>01.58</em></div></div>
+            </div>
+            <!-- sales -->
+            <div class="view" id="vSales">
+              <div class="hd"><div class="av"><span class="ic" data-i="handshake"></span></div><div><div class="tt">Agent Sales</div><em>Proposal · leads · follow up</em></div><div class="st"><span class="ic" data-i="zap"></span>Aktif 24 jam</div></div>
+              <div id="skS"><span class="sk"><span class="ic" data-i="file-text"></span>Bikin proposal</span><span class="sk"><span class="ic" data-i="search"></span>Cari leads</span><span class="sk"><span class="ic" data-i="send"></span>Follow up</span></div>
+              <div class="pan" id="pipe"><div class="lbl">LEADS MINGGU INI</div><div id="ldL"></div></div>
+              <div class="pan" id="propMini"><div class="bx"><span class="ic" data-i="file-check"></span></div><div><b>Proposal · PT Arunika Kreasi</b><em>Rp 18.500.000 · dibikin agent</em></div><div class="ok"><span class="ic" data-i="circle-check"></span>Siap kirim</div></div>
+              <div id="fuBtn"><span class="ic" data-i="send"></span>Follow up semua</div><div id="fuNote">otomatis · tiap 2 hari</div>
+            </div>
+            <!-- operations -->
+            <div class="view" id="vOps">
+              <div class="hd"><div class="av"><span class="ic" data-i="settings"></span></div><div><div class="tt">Agent Operasional</div><em>SOP · onboarding klien</em></div><div class="st"><span class="ic" data-i="zap"></span>Aktif</div></div>
+              <div class="pan" id="sop"><div class="dh"><span class="ic" data-i="file-text"></span><b>SOP · Onboarding Klien</b></div><div id="sopW"><span class="ic" data-i="pen-line"></span>AI lagi nulis…</div><div id="sopL"></div></div>
+              <div class="pan" id="onb"><div class="k">KLIEN BARU</div><div class="nm">Studio Lumi</div>
+                <div id="ring"><svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="62" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12"/><circle id="ringC" cx="75" cy="75" r="62" fill="none" stroke="#01ccf7" stroke-width="12" stroke-linecap="round"/></svg><div id="ringT">0%</div></div>
+                <div id="onL"></div></div>
+            </div>
+            <!-- finance -->
+            <div class="view" id="vFin">
+              <div class="hd"><div class="av"><span class="ic" data-i="wallet"></span></div><div><div class="tt">Agent Keuangan</div><em>Laporan · rekonsiliasi</em></div><div class="st nt" id="finNt"><span class="ic" data-i="moon"></span>Jalan tiap 02.00</div></div>
+              <div class="pan" id="rep"><div class="dh"><span class="ic" data-i="chart-column"></span>Laporan minggu ini · angka ilustrasi</div>
+                <div class="nums"><div>Omzet<b>Rp 84,2 jt</b></div><div>Biaya<b>Rp 31,5 jt</b></div><div>Laba<b>Rp 52,7 jt</b></div></div><div id="bars"></div></div>
+              <div class="pan" id="rec"><div class="top"><div class="lbl">REKONSILIASI TRANSAKSI</div><div id="recN">0 / 312 cocok</div></div><div id="recL"></div></div>
+            </div>
+            <!-- marketing -->
+            <div class="view" id="vMkt">
+              <div class="hd"><div class="av"><span class="ic" data-i="megaphone"></span></div><div><div class="tt">Agent Marketing</div><em>1 konten → semua platform</em></div><div class="st"><span class="ic" data-i="zap"></span>Aktif</div></div>
+              <svg id="mkSvg"></svg>
+              <div class="pan" id="src"><div class="th"><span class="ic" data-i="play"></span><em>12:04</em></div><div><b>Video podcast</b><span>1 konten mentah</span><div class="cut"><span class="ic" data-i="sparkles"></span>dipecah AI</div></div></div>
+              <div id="pts"></div>
+              <div class="pan" id="mkNote"><span class="ic" data-i="calendar-check"></span><b>Terjadwal semua</b>· 6 platform, minggu ini</div>
+            </div>
+          </div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div><div id="winDim"></div><div id="winFlash"></div></div>
+
+        <div class="pcard" id="pProp"><div class="pch"><span class="ic" data-i="file-text"></span>PROPOSAL · DRAFT AI<span class="simtag" style="margin-left:auto">SIMULASI</span></div>
+          <div class="pct">PT Arunika Kreasi</div><div class="pcs">Paket sistem AI · 3 bulan</div>
+          <div class="pi" id="pi0"><span class="ic" data-i="settings"></span>Setup sistem<b>Rp 7.500.000</b></div>
+          <div class="pi" id="pi1"><span class="ic" data-i="bot"></span>Agent sales<b>Rp 4.000.000</b></div>
+          <div class="pi" id="pi2"><span class="ic" data-i="headset"></span>Maintenance 3 bln<b>Rp 7.000.000</b></div>
+          <div id="pTot">Total<b id="pTotV">Rp 0</b></div>
+          <div id="pStamp"><span class="ic" data-i="circle-check"></span>Draft siap dikirim</div></div>
+        <div class="pcard" id="pRep"><div class="pch"><span class="ic" data-i="chart-column"></span>LAPORAN MINGGUAN<span class="simtag" style="margin-left:auto">SIMULASI</span></div>
+          <div class="pct">Ditarik otomatis</div><div class="pcs">Senin–Minggu · angka ilustrasi</div>
+          <div class="row" id="pr0"><span class="ic" data-i="trending-up"></span>Omzet<b>Rp 84,2 jt</b></div>
+          <div class="row" id="pr1"><span class="ic" data-i="receipt"></span>Biaya<b>Rp 31,5 jt</b></div>
+          <div class="row lb" id="pr2"><span class="ic" data-i="wallet"></span>Laba<b>Rp 52,7 jt</b></div>
+          <div class="pdf"><span class="ic" data-i="file-check"></span>PDF siap · 02.00</div></div>
+
+        <div id="mem"><svg id="mSvg" viewBox="0 0 920 950"></svg>
+          <div id="mHub"><span class="ic" data-i="brain-circuit"></span><b>Memori Pusat</b><em>SIMULASI</em></div>
+          <div class="mn" id="mn0"><div class="bx"><span class="ic" data-i="handshake"></span></div><div><b>Agent Sales</b><em>tersambung</em></div></div>
+          <div class="mn" id="mn1"><div class="bx"><span class="ic" data-i="settings"></span></div><div><b>Operasional</b><em>tersambung</em></div></div>
+          <div class="mn" id="mn2"><div class="bx"><span class="ic" data-i="wallet"></span></div><div><b>Keuangan</b><em>tersambung</em></div></div>
+          <div class="mn" id="mn3"><div class="bx"><span class="ic" data-i="megaphone"></span></div><div><b>Marketing</b><em>tersambung</em></div></div>
+          <div class="mc" id="mc0"><div class="h"><span class="ic" data-i="users"></span>Pelanggan</div><b id="mv0">0</b></div>
+          <div class="mc" id="mc1"><div class="h"><span class="ic" data-i="handshake"></span>Deal</div><b id="mv1">0</b></div>
+          <div class="mc" id="mc2"><div class="h"><span class="ic" data-i="message-circle"></span>Obrolan</div><b id="mv2">0</b></div>
+        </div>
+
+        <div id="kin"><div id="kTitle">BEDANYA?</div><span class="simtag" id="kSim">SIMULASI</span>
+          <div class="kr" id="k1"><div class="t"><div class="lg"><span class="ic" data-i="unlink"></span></div><div class="w">WORKFLOW TEMPELAN</div></div><div class="v">Rusak tiap minggu</div><div class="s">1 step error, semua macet</div><div class="x"><span class="ic" data-i="x"></span></div></div>
+          <div class="kr" id="k2"><div class="t"><div class="lg"><span class="ic" data-i="message-circle"></span></div><div class="w">CHAT AI BIASA</div></div><div class="v">Lupa besoknya</div><div class="s">tiap hari jelasin dari nol</div><div class="x"><span class="ic" data-i="x"></span></div></div>
+          <div class="kr" id="k3"><div class="t"><div class="lg"><span class="ic" data-i="brain-circuit"></span></div><div class="w">SISTEM OPERASI AI</div></div><div class="v"><span id="kZero">9</span> kelupaan</div><div class="s">semua nyambung ke memori</div><div class="x"><span class="ic" data-i="check"></span></div></div>
+        </div>
+
+        <div id="biz"><div id="bTitle">Cocok buat <b>bisnis lu</b></div>
+          <div class="bz" id="bz0"><div class="bx"><span class="ic" data-i="briefcase"></span></div><div><b>Agency</b><em>klien · brief · laporan</em></div><div class="ck"><span class="ic" data-i="check"></span></div></div>
+          <div class="bz" id="bz1"><div class="bx"><span class="ic" data-i="shopping-bag"></span></div><div><b>Toko online</b><em>order · stok · chat pembeli</em></div><div class="ck"><span class="ic" data-i="check"></span></div></div>
+          <div class="bz" id="bz2"><div class="bx"><span class="ic" data-i="store"></span></div><div><b>Bisnis jasa</b><em>booking · jadwal · follow up</em></div><div class="ck"><span class="ic" data-i="check"></span></div></div>
+          <div id="tools"><div class="lbl">PAKAI TOOLS LU</div><div class="row"><div class="tl"><span class="ic" data-i="si-gmail"></span></div><div class="tl"><span class="ic" data-i="si-whatsapp"></span></div>
+            <div class="tl"><span class="ic" data-i="si-googlesheets"></span></div><div class="tl"><span class="ic" data-i="si-googledrive"></span></div><div class="tl"><span class="ic" data-i="si-notion"></span></div></div></div>
+          <div id="voice"><div class="lbl">GAYA BAHASA LU</div><div class="bub"><span class="tag">AGENT · SIMULASI</span>Siap kak! Besok jam 10 tim kita mampir ya.</div></div>
+          <div class="stk" id="sk2"><span class="ic" data-i="sparkles"></span>Custom, bukan template</div>
+        </div>
+
+        <div id="cta"><div class="k">Mau sistem kayak gini dipasang di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><div id="caps"></div>
+          <div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="57.2" data-track-index="8" data-volume="1"></audio>
+      <!--SFX-->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const NS = "http://www.w3.org/2000/svg";
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n) => `<span class="ic">${icon(n)}</span>`;
+        const svg = (tag, a, p) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+        /* ---------- build UI ---------- */
+        const LEADS = [["BR", "Bu Rina", "Klinik gigi · Instagram", "Proposal", ""], ["PD", "Pak Dimas", "Kontraktor · WhatsApp", "Nego", ""], ["KS", "Kak Sasa", "Butik online · Web", "Baru", " nw"],
+          ["PY", "Pak Yoga", "Kedai kopi · Maps", "Lead baru", " nw"], ["BL", "Bu Lina", "Studio foto · Instagram", "Lead baru", " nw"]];
+        $("#ldL").innerHTML = LEADS.map(([a, n, s, g, c], k) => `<div class="ld" id="ld${k}"><div class="ini">${a}</div><div><b>${n}</b><em>${s}</em></div>`
+          + `<div class="stg"><span class="a${c}">${g}</span><span class="b">${ic("circle-check")}Follow up</span></div></div>`).join("");
+        const SOP = [["Kirim welcome pack + kontrak", 0.92], ["Jadwalin kickoff call", 0.7], ["Buka akses tools & folder", 0.84], ["Kenalin tim & PIC proyek", 0.62], ["Laporan minggu pertama", 0.78]];
+        $("#sopL").innerHTML = SOP.map(([t, w], k) => `<div class="sl" id="sl${k}"><b><i>${k + 1}</i>${t}</b><div class="sk2" style="width:${Math.round(w * 290)}px"></div><div class="sk2" style="width:${Math.round(w * 210)}px"></div></div>`).join("");
+        const ONB = ["Welcome pack", "Kickoff call", "Akses tools", "Kenalan tim", "Laporan #1"];
+        $("#onL").innerHTML = ONB.map((t, k) => `<div class="os" id="os${k}"><div class="cb">${ic("check")}</div>${t}</div>`).join("");
+        const BARS = [0.42, 0.55, 0.48, 0.7, 0.63, 0.9, 0.78];
+        $("#bars").innerHTML = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map((d, k) => `<div><i style="height:${Math.round(BARS[k] * 92)}px"></i><span>${d}</span></div>`).join("");
+        const REC = [["INV-2041", "Rp 2.400.000", "mutasi bank"], ["INV-2042", "Rp 875.000", "payment gateway"], ["INV-2043", "Rp 5.150.000", "mutasi bank"], ["INV-2044", "Rp 1.200.000", "e-wallet"], ["INV-2045", "Rp 3.300.000", "mutasi bank"]];
+        $("#recL").innerHTML = REC.map(([i, a, s], k) => `<div class="rr" id="rr${k}">${ic("receipt")}<b>${i}</b><span class="amt">${a}</span><span class="src">${s}</span>`
+          + `<div class="stg"><span class="a">Dicek…</span><span class="b">${ic("circle-check")}Cocok</span></div></div>`).join("");
+        const PTS = [["si-instagram", "Instagram", "3 Reels", 28, 330], ["si-tiktok", "TikTok", "3 video", 252, 330], ["si-youtube", "YouTube", "3 Shorts", 476, 330],
+          ["si-threads", "Threads", "5 thread", 28, 532], ["si-facebook", "Facebook", "2 post", 252, 532], ["mail", "Newsletter", "1 email", 476, 532]];
+        $("#pts").innerHTML = PTS.map(([i, t, s, x, y], k) => `<div class="pt" id="pt${k}" style="left:${x}px;top:${y}px"><div class="bx">${ic(i)}</div><b>${t}</b><em>${s}</em><div class="ok">${ic("circle-check")}Terjadwal</div></div>`).join("");
+        const mk = $("#mkSvg"), mkLines = PTS.map(([i, t, s, x, y]) => { const x1 = 355, y1 = 254, x2 = x + 103, y2 = y, len = Math.hypot(x2 - x1, y2 - y1);
+          svg("line", { x1, y1, x2, y2, stroke: "rgba(255,255,255,0.12)", "stroke-width": 2.5 }, mk);
+          return svg("line", { x1, y1, x2, y2, stroke: "#01ccf7", "stroke-width": 3, "stroke-linecap": "round", "stroke-dasharray": `${len} ${len}`, "stroke-dashoffset": len, "data-len": len }, mk); });
+        // hook lines: hub to the 4 division tiles
+        const hs = $("#hSvg"), HX = 460, HY = 459, hLines = [[420, 368], [500, 368], [420, 580], [500, 580]].map(([x, y]) => {
+          const a = Math.atan2(y - HY, x - HX), x1 = HX + 88 * Math.cos(a), y1 = HY + 88 * Math.sin(a), len = Math.hypot(x - x1, y - y1);
+          svg("line", { x1, y1, x2: x, y2: y, stroke: "rgba(255,255,255,0.14)", "stroke-width": 3 }, hs);
+          return svg("line", { x1, y1, x2: x, y2: y, stroke: "#01ccf7", "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": `${len} ${len}`, "stroke-dashoffset": len, "data-len": len }, hs); });
+        // memory hub lines + pulses
+        const ms = $("#mSvg"), MX = 460, MY = 375, mEnds = [[250, 92], [670, 92], [250, 652], [670, 652]];
+        const mLines = mEnds.map(([x, y]) => { const a = Math.atan2(y - MY, x - MX), x1 = MX + 148 * Math.cos(a), y1 = MY + 148 * Math.sin(a), len = Math.hypot(x - x1, y - y1);
+          svg("line", { x1, y1, x2: x, y2: y, stroke: "rgba(255,255,255,0.14)", "stroke-width": 3 }, ms);
+          const l = svg("line", { x1, y1, x2: x, y2: y, stroke: "#01ccf7", "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": `${len} ${len}`, "stroke-dashoffset": len, "data-len": len }, ms);
+          l._p = [x, y, x1, y1]; return l; });
+        const mDots = mLines.map(() => svg("circle", { cx: 0, cy: 0, r: 7, fill: "#ffffff", opacity: 0 }, ms));
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#0b1a45" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+
+        /* captions */
+        const KEY = new Set(["divisi", "sendiri", "24", "jam", "nungguin", "simulasinya", "sistem", "operasi", "ai", "agent", "khusus", "sales", "proposal", "harganya", "leads", "follow", "up", "otomatis",
+          "operasional", "sop", "onboarding", "keuangan", "laporan", "transaksi", "malam", "marketing", "konten", "platform", "nyambung", "memori", "pusat", "pelanggan", "deal", "obrolan",
+          "workflow", "rusak", "chat", "lupa", "kelupaan", "agency", "toko", "online", "jasa", "tools", "gaya", "bahasa", "link", "bio", "aipreneur", "automation"]);
+        const nk = (w) => w.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(nk(w[0])) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const TXT = [];
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 58;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        let cur = { x: 760, y: 900 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const press = (el, at) => ft(el, { scale: 1 }, { keyframes: [{ scale: 0.93 }, { scale: 1 }], duration: 0.25 }, at);
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const dots = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        const glowOn = (el, at, col) => ft(el, { borderColor: "rgba(255,255,255,0.12)" }, { keyframes: [{ borderColor: col || "#01ccf7", duration: 0.25 }, { duration: 0.6 }, { borderColor: "rgba(255,255,255,0.12)", duration: 0.5 }] }, at);
+        const pop = (el, at) => ft(el, { opacity: 0, y: 16, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, at);
+        const flip = (wrap, at) => { ft($(".a", wrap), { opacity: 1, y: 0 }, { opacity: 0, y: -8, duration: 0.2 }, at); ft($(".b", wrap), { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.25, ease: "back.out(2)" }, at + 0.08); };
+        // sidebar nav
+        const NAVS = ["#nHome", "#nSales", "#nOps", "#nFin", "#nMkt", "#nMem"]; let navCur = "#nHome";
+        const navY = (sel) => $(sel).offsetTop;
+        const nav = (sel, at) => { ft("#navPill", { y: navY(navCur) }, { y: navY(sel), duration: 0.3, ease: "power2.inOut" }, at);
+          ft(sel, { color: "rgba(255,255,255,0.62)" }, { color: "#ffffff", duration: 0.2 }, at); ft(navCur, { color: "#ffffff" }, { color: "rgba(255,255,255,0.62)", duration: 0.2 }, at); navCur = sel; };
+        const navSet = (sel, at) => { st("#navPill", { y: navY(sel) }, at); NAVS.forEach((s) => st(s, { color: s === sel ? "#ffffff" : "rgba(255,255,255,0.62)" }, at)); navCur = sel; };
+        const swap = (from, to, at) => { ft(from, { opacity: 1, x: 0 }, { opacity: 0, x: -30, duration: 0.28, ease: "power2.in" }, at); ft(to, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.42, ease: "power3.out" }, at + 0.18); };
+
+        /* ---------- camera: zooms the app inside the fixed window frame (screen-recording style) ---------- */
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc = cState(460, 475, 1);
+        const SHOTS = [];
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); SHOTS.push({ t: at, d: 0, c: cc }); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; SHOTS.push({ t: at, d: dur || 0.8, c: nx }); };
+        const whip = (x, y, s, at) => camTo(x, y, s, at, 0.42, "expo.inOut");
+
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "dark" });
+        Object.assign(FX.POSE.peekR, { x: 560, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 }); // client: peeks fully visible
+        FX.theme("dark", 0);
+        ft("#grid", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -288px", duration: D, ease: "none" }, 0);
+        ft("#glow", { x: 0, y: 0 }, { x: 220, y: 360, duration: D, ease: "sine.inOut" }, 0);
+
+        /* initial states */
+        camSet(460, 475, 1, 0);
+        st(win, { opacity: 0, transformPerspective: 2000, transformOrigin: "50% 50%" }, 0);
+        st(["#vSales", "#vOps", "#vFin", "#vMkt"], { opacity: 0 }, 0); st("#vHome", { opacity: 1 }, 0);
+        navSet("#nHome", 0);
+        st(["#hTop", ".ht", "#hHub", "#hOwner", "#hZ", "#hook .stk", "#mem", "#mHub", ".mn", ".mc", ".kr", "#kTitle", "#kSim", ".bz", "#tools", "#voice", "#bTitle", "#biz .stk", "#cta", "#pProp", "#pRep",
+          ".ag .tk", ".fr", "#ld3", "#ld4", "#propMini", ".pt", "#mkNote", "#pStamp"], { opacity: 0 }, 0);
+        st(["#pProp", "#pRep"], { transformPerspective: 1400 }, 0);
+        const ringC = $("#ringC"), RL = 2 * Math.PI * 62; ringC.setAttribute("stroke-dasharray", `${RL} ${RL}`); ringC.setAttribute("stroke-dashoffset", RL);
+        st(".sl .sk2", { scaleX: 0 }, 0); st(".sl b", { clipPath: "inset(0% 100% 0% 0%)" }, 0);
+        st("#bars i", { scaleY: 0 }, 0);
+
+        const tSim = ph("Gue tunjukin").start, tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");
+
+        /* ===== SCENE 1 · HOOK (kinetic): every division runs itself around one AI hub, owner asleep ===== */
+        const tJalan = wt("di bisnis lu", "jalan"), t24 = ph("24 jam").start, tTanpa = ph("tanpa nungguin").start;
+        FX.enter("home", 0.0); FX.wave(0.5);
+        ft("#hTop", { opacity: 0, y: -40, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, 0.05);
+        st("#h247", { opacity: 0 }, 0);
+        $$(".ht").forEach((el, i) => ft(el, { opacity: 0, y: 40, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.5)" }, 0.3 + i * 0.12));
+        ft("#hHub", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }, wt("Gini jadinya", "divisi") - 0.2);
+        ft("#hHub", { rotation: 0 }, { keyframes: [{ rotation: -6, duration: 0.15 }, { rotation: 5, duration: 0.15 }, { rotation: 0, duration: 0.2 }] }, wt("Gini jadinya", "divisi") + 0.3);
+        // divisions switch to "running by itself" one after another
+        $$(".ht").forEach((el, i) => { const t = tJalan - 0.15 + i * 0.16;
+          ft(hLines[i], { attr: { "stroke-dashoffset": +hLines[i].dataset.len } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.3, ease: "power2.out" }, t - 0.2);
+          flip($(".stt", el), t);
+          ft(el, { borderColor: "rgba(255,255,255,0.16)" }, { borderColor: "rgba(1,204,247,0.7)", duration: 0.3 }, t);
+          ft($(".bx", el), { backgroundColor: "rgba(255,255,255,0.08)", color: "#ffffff" }, { backgroundColor: "#01ccf7", color: "#04122f", duration: 0.3 }, t);
+          ft($(".bar i", el), { scaleX: 0 }, { scaleX: 1, duration: 1.6, ease: "none", repeat: 2 }, t + 0.1); });
+        FX.face("excited", tJalan, 0.9); FX.beat(tJalan - 0.1);
+        // 24/7
+        ft("#h247", { opacity: 0, scale: 1.8, rotation: -8 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.45, ease: "back.out(1.7)" }, t24 - 0.15);
+        ft("#hTop", { x: 0 }, { keyframes: [{ x: -8, duration: 0.05 }, { x: 7, duration: 0.05 }, { x: -4, duration: 0.05 }, { x: 0, duration: 0.05 }] }, t24 + 0.25);
+        ft("#hTop .lg .ic", { rotation: 0 }, { rotation: 360, duration: 0.9, ease: "power2.inOut" }, t24 - 0.1);
+        FX.face("happy", t24 + 0.1, 0.8); FX.hop(t24 - 0.1, 34);
+        // owner asleep
+        ft("#hOwner", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 0.9);
+        TXT.push([$("#hOk"), [[0, "Owner · 22.00"], [tTanpa - 0.1, "Owner · 02.14 pagi"]]], [$("#hOt"), [[0, "Semua nunggu lu"], [tTanpa - 0.1, "Lagi tidur, offline"]]]);
+        TXT.push([$("#hDiv"), [[0, "0/4"], [tJalan - 0.05, "1/4"], [tJalan + 0.11, "2/4"], [tJalan + 0.27, "3/4"], [tJalan + 0.43, "4/4"]]]);
+        ft(["#hOk", "#hOt"], { opacity: 1 }, { keyframes: [{ opacity: 0, duration: 0.12 }, { opacity: 1, duration: 0.2 }] }, tTanpa - 0.22);
+        ft("#hOwner .av .mn", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2.4)" }, tTanpa - 0.05);
+        ft("#hOwner", { borderColor: "rgba(255,255,255,0.16)" }, { borderColor: "rgba(255,209,102,0.6)", duration: 0.3 }, tTanpa - 0.05);
+        ft("#hDiv", { scale: 1 }, { keyframes: [{ scale: 1.25, duration: 0.15 }, { scale: 1, duration: 0.25 }] }, tJalan + 0.45);
+        ft("#hZ", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tTanpa + 0.1);
+        $$("#hZ span").forEach((z, i) => ft(z, { opacity: 0, y: 10 }, { keyframes: [{ opacity: 1, y: -8, duration: 0.35 }, { opacity: 0.45, y: -16, duration: 0.4 }] }, tTanpa + 0.15 + i * 0.18));
+        FX.sticker($("#sk1"), wt("tanpa nungguin", "nungguin") - 0.1, 4);
+        FX.point(tTanpa + 0.1);
+
+        /* ===== ZOOM-IN #1: camera punches into the AI hub, which opens up as the app window (SCENE 2) ===== */
+        const tZ1 = wt("tanpa nungguin", "lu") - 0.25; // ends before "Gue tunjukin"
+        ft("#hook", { scale: 1, transformOrigin: "460px 459px" }, { scale: 3.4, duration: 0.6, ease: "power2.in" }, tZ1);
+        ft("#hook", { opacity: 1 }, { opacity: 0, duration: 0.4, ease: "power1.in" }, tZ1 + 0.1);
+        st("#hook", { display: "none" }, tZ1 + 0.62);
+        ft(win, { opacity: 0, scale: 0.18, transformOrigin: "460px 459px" }, { opacity: 1, scale: 1, duration: 0.62, ease: "power3.out" }, tZ1 + 0.18);
+        ft("#winFlash", { opacity: 0.8 }, { opacity: 0, duration: 0.5, ease: "power2.out" }, tZ1 + 0.2);
+        FX.go("right", tZ1 - 0.05, 0.9);
+
+        /* ===== SCENE 2 · control centre: SIMULASI macro, "Sistem Operasi AI", 4 agents light up ===== */
+        const tSimW = wt("Gue tunjukin", "simulasinya");
+        const sim = posIn($("#sim"));
+        st("#cursor", { x: sim.x + 150, y: sim.y + 170 }, 0); cur = { x: sim.x + 150, y: sim.y + 170 };
+        camTo(270, 0, 1.7, tSim - 0.15, 0.6, "power2.inOut"); // macro: title bar, SIMULASI tag whole
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tSim);
+        moveEl($("#sim"), tSim + 0.05, 0.5, 6, 4); click(tSimW); FX.point(tSimW - 0.3);
+        ft("#sim", { scale: 1 }, { keyframes: [{ scale: 1.25, backgroundColor: "rgba(1,204,247,0.18)" }, { scale: 1, backgroundColor: "rgba(1,204,247,0)" }], duration: 0.6 }, tSimW);
+        const tOS = ph("Ini sistem").start;
+        camTo(565, 150, 1.36, tOS - 0.4, 0.7); // header + KPI row
+        ft("#ttMk", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power2.out" }, wt("Ini sistem", "sistem"));
+        FX.go("center", tOS - 0.2); FX.face("happy", wt("Ini sistem", "operasi"), 0.8);
+        count($("#kp0"), 0, 128, tOS + 0.2, 1.2); count($("#kp1"), 0, 14, tOS + 0.35, 1.2); count($("#kp2"), 0, 312, tOS + 0.5, 1.2);
+        const tKer = ph("Tiap kerjaan").start, tKhus = ph("dipegang").start;
+        camTo(460, 475, 1, tKer - 0.45, 0.6); // whole view: all four agent cards whole
+        moveTo(420, 520, tKer - 0.2, 0.7);
+        FX.go("home", tKer - 0.2);
+        ["#agS", "#agO", "#agF", "#agM"].forEach((s, i) => { const t = tKhus + 0.05 + i * 0.32, el = $(s);
+          flip($(".ss", el), t); glowOn(el, t);
+          ft($(".bx", el), { backgroundColor: "rgba(255,255,255,0.08)", color: "#ffffff" }, { backgroundColor: "#01ccf7", color: "#04122f", duration: 0.3 }, t);
+          ft($(".tk", el), { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3 }, t + 0.15); });
+        $$(".fr").forEach((el, i) => pop(el, tKer + 0.1 + i * 0.25));
+        FX.point(tKhus + 0.1); FX.face("excited", wt("dipegang", "agent"), 0.9);
+
+        /* ===== ZOOM-IN #2: punch into the Sales agent card -> it becomes the Sales agent screen (SCENE 3) ===== */
+        const tAS = ph("Agent sales").start, tZ2 = tAS - 0.62;
+        const agS = posIn($("#agS"));
+        moveEl($("#agS"), tZ2 - 0.5, 0.4, 40, 10); click(tZ2 - 0.1); press("#agS", tZ2 - 0.1);
+        camTo(agS.x, agS.y, 2.5, tZ2, 0.45, "power2.in");
+        ft("#winFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.65, duration: 0.12 }, { opacity: 0, duration: 0.35 }] }, tZ2 + 0.35);
+        st("#vHome", { opacity: 0 }, tZ2 + 0.45); st("#vSales", { opacity: 1, x: 0 }, tZ2 + 0.45); navSet("#nSales", tZ2 + 0.45);
+        st("#cursor", { opacity: 0 }, tZ2 + 0.45);
+        camSet(460, 475, 1, tZ2 + 0.45); ft("#vSales", { scale: 1.2, transformOrigin: "25% 30%" }, { scale: 1, duration: 0.55, ease: "power3.out" }, tZ2 + 0.45);
+
+        // proposal pops out of the window (right half); the robot rises at the left, beside it (SIDE RISE #1)
+        const tProp = wt("Agent sales", "proposal"), tHarga = ph("lengkap sama").start, tHargaW = wt("lengkap sama", "harganya");
+        FX.go("upL", tProp - 0.6, 1.15);
+        ft(win, { scale: 1, opacity: 1 }, { scale: 0.9, opacity: 0.14, duration: 0.5, ease: "power2.inOut" }, tProp - 0.6);
+        ft("#pProp", { opacity: 0, x: -260, y: 60, scale: 0.55, rotationY: 30 }, { opacity: 1, x: 0, y: 0, scale: 1, rotationY: 0, duration: 0.6, ease: "power3.out" }, tProp - 0.35);
+        ["#pi0", "#pi1", "#pi2"].forEach((s, i) => { ft(s, { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, tProp + 0.1 + i * 0.22);
+          ft($("b", $(s)), { opacity: 0 }, { opacity: 1, duration: 0.25 }, tHarga + i * 0.18); glowOn($(s), tHarga + i * 0.18); });
+        count($("#pTotV"), 0, 18500000, tHargaW - 0.2, 0.8, (v) => "Rp " + dots(Math.round(v / 100000) * 100000));
+        ft("#pStamp", { opacity: 0, scale: 1.6, rotation: -6 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.35, ease: "back.out(2)" }, tHargaW + 0.55);
+        FX.point(tProp - 0.2); FX.face("happy", tProp + 0.3, 0.8); FX.beat(tHargaW - 0.1); FX.face("excited", tHargaW + 0.5, 0.7);
+
+        // proposal flies back into the app; robot back to the bottom; new leads + follow up all
+        const tLeads = ph("Terus nyari").start, tLeadsW = wt("Terus nyari", "leads"), tFu = wt("dan follow", "follow");
+        const tBack = tLeads - 0.25;
+        ft("#pProp", { opacity: 1, x: 0, y: 0, scale: 1 }, { opacity: 0, x: -300, y: 280, scale: 0.3, duration: 0.45, ease: "power2.in" }, tBack);
+        ft(win, { scale: 0.9, opacity: 0.14 }, { scale: 1, opacity: 1, duration: 0.5, ease: "power2.inOut" }, tBack + 0.1);
+        ft("#propMini", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.8)" }, tBack + 0.4);
+        FX.go("home", tBack - 0.05, 1.1);
+        ["#ld3", "#ld4"].forEach((s, i) => ft(s, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.35, ease: "back.out(1.6)" }, tLeadsW - 0.2 + i * 0.2));
+        ["#ld3", "#ld4"].forEach((s, i) => glowOn($(s), tLeadsW + i * 0.2));
+        camTo(565, 380, 1.32, tLeadsW - 0.35, 0.6); // pipeline whole
+        st("#cursor", { x: 600, y: 860 }, tBack + 0.5); cur = { x: 600, y: 860 };
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tBack + 0.6);
+        camTo(520, 520, 1.12, tFu - 0.55, 0.5); // pipeline + follow-up button whole
+        moveEl($("#fuBtn"), tFu - 0.5, 0.45, 20, 4); click(tFu - 0.02); press("#fuBtn", tFu - 0.02);
+        $$(".ld").forEach((el, i) => flip($(".stg", el), tFu + 0.2 + i * 0.16));
+        FX.point(tFu - 0.3); FX.face("excited", wt("dan follow", "otomatis"), 0.9); FX.hop(wt("dan follow", "otomatis") - 0.05, 30);
+
+        /* ===== sidebar click -> SCENE 4 · operations: SOP being written + onboarding ticks (whip pans) ===== */
+        const tOp = ph("Agent operasional").start, tNulis = wt("Agent operasional", "nulis"), tOnb = ph("dan onboarding").start;
+        camTo(460, 475, 1, tOp - 1.0, 0.45);
+        moveEl($("#nOps"), tOp - 0.95, 0.45, 20, 0); click(tOp - 0.45); press("#nOps", tOp - 0.45);
+        nav("#nOps", tOp - 0.42); swap("#vSales", "#vOps", tOp - 0.42);
+        FX.go("right", tOp - 0.5); FX.face("happy", tOp + 0.1, 0.7);
+        camTo(330, 380, 1.62, tNulis - 0.4, 0.6); // SOP document whole
+        ft("#sopW .ic", { rotation: 0 }, { keyframes: [{ rotation: -12, duration: 0.15 }, { rotation: 10, duration: 0.15 }], repeat: 6 }, tNulis - 0.3);
+        $$(".sl").forEach((el, i) => { const t = tNulis - 0.25 + i * 0.28;
+          ft($("b", el), { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.3, ease: "none" }, t);
+          ft($$(".sk2", el), { scaleX: 0 }, { scaleX: 1, duration: 0.25, stagger: 0.08, ease: "power2.out" }, t + 0.18); });
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tNulis - 0.3);
+        FX.beat(tNulis - 0.05);
+        whip(760, 440, 1.62, tOnb - 0.3); // onboarding tracker whole
+        $$(".os").forEach((el, i) => { const t = wt("dan onboarding", "onboarding") + 0.05 + i * 0.22;
+          ft($(".cb", el), { backgroundColor: "rgba(1,204,247,0)", borderColor: "rgba(255,255,255,0.3)" }, { backgroundColor: "#01ccf7", borderColor: "#01ccf7", duration: 0.2 }, t);
+          ft($(".cb .ic", el), { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, t);
+          ft(el, { color: "#ffffff" }, { color: "rgba(255,255,255,0.7)", duration: 0.3 }, t + 0.1); });
+        { const t0 = wt("dan onboarding", "onboarding") + 0.05;
+          ft(ringC, { attr: { "stroke-dashoffset": RL } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.1, ease: "power1.inOut" }, t0);
+          count($("#ringT"), 0, 100, t0, 1.1, (v) => Math.round(v) + "%"); }
+        FX.go("peekR", tOnb - 0.2, 0.8); FX.point(tOnb + 0.2); FX.face("excited", wt("dan onboarding", "klien"), 0.8);
+
+        /* ===== sidebar click -> SCENE 5 · finance: 3D split (report floats out), then reconciliation ticks ===== */
+        const tFin = ph("Agent keuangan").start, tTarik = wt("Agent keuangan", "tarik"), tCoc = ph("terus cocokin").start, tMalam = ph("tiap malam").start;
+        camTo(460, 475, 1, tFin - 0.95, 0.45);
+        st("#cursor", { x: 600, y: 700 }, tFin - 1.0); cur = { x: 600, y: 700 };
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tFin - 0.95);
+        moveEl($("#nFin"), tFin - 0.9, 0.42, 20, 0); click(tFin - 0.42); press("#nFin", tFin - 0.42);
+        nav("#nFin", tFin - 0.4); swap("#vOps", "#vFin", tFin - 0.4);
+        FX.go("center", tFin - 0.45); FX.face("happy", tFin + 0.15, 0.7);
+        $$("#bars i").forEach((b, i) => ft(b, { scaleY: 0 }, { scaleY: 1, duration: 0.45, ease: "power2.out" }, tFin + 0.1 + i * 0.06));
+        // 3D split: the window swings back, the weekly report floats in front
+        const tSw = tTarik - 0.35;
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tSw - 0.1);
+        ft(win, { rotationY: 0, scale: 1, x: 0, transformOrigin: "0% 50%" }, { rotationY: 22, scale: 0.9, x: -14, duration: 0.6, ease: "power3.inOut" }, tSw);
+        ft("#winDim", { opacity: 0 }, { opacity: 0.6, duration: 0.5 }, tSw);
+        ft("#pRep", { opacity: 0, x: 190, rotationY: -30 }, { opacity: 1, x: 0, rotationY: 0, duration: 0.6, ease: "power3.out" }, tSw + 0.12);
+        ft(["#pr0", "#pr1", "#pr2"], { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.12, ease: "power2.out" }, tSw + 0.45);
+        FX.point(tTarik - 0.2); FX.face("excited", tTarik + 0.2, 0.7);
+        // back flat: reconciliation ticks
+        const tFlat = tCoc - 0.4;
+        ft("#pRep", { opacity: 1, x: 0, scale: 1 }, { opacity: 0, x: 120, scale: 0.85, duration: 0.35, ease: "power2.in" }, tFlat);
+        ft(win, { rotationY: 22, scale: 0.9, x: -14 }, { rotationY: 0, scale: 1, x: 0, duration: 0.5, ease: "power3.inOut" }, tFlat + 0.05);
+        ft("#winDim", { opacity: 0.6 }, { opacity: 0, duration: 0.4 }, tFlat + 0.05);
+        camSet(460, 475, 1, tFlat); camTo(565, 640, 1.38, tFlat + 0.15, 0.6); // reconciliation list whole
+        const tTrx = wt("terus cocokin", "transaksi");
+        $$(".rr").forEach((el, i) => { const t = tCoc - 0.05 + i * 0.2; flip($(".stg", el), t);
+          ft(el, { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: "rgba(61,220,151,0.55)", duration: 0.3 }, t); });
+        count($("#recN"), 0, 312, tCoc - 0.05, 1.5, (v) => Math.round(v) + " / 312 cocok");
+        ft("#finNt", { scale: 1 }, { keyframes: [{ scale: 1.15, boxShadow: "0 0 0 10px rgba(255,209,102,0.15)", duration: 0.2 }, { scale: 1, boxShadow: "0 0 0 0 rgba(255,209,102,0)", duration: 0.3 }] }, tMalam - 0.2);
+        FX.face("wide", tTrx - 0.05, 0.7); FX.beat(tTrx - 0.1);
+        camTo(460, 475, 1, tMalam - 0.5, 0.35, "power2.inOut"); // whole view: nightly-run chip + sidebar for the next click
+
+        /* ===== sidebar click -> SCENE 6 · marketing: one piece of content fans out to six platforms ===== */
+        const tMk = ph("Agent marketing").start, tPecah = wt("Agent marketing", "pecah"), tPlat = ph("ke semua platform").start;
+        const tMkSw = tMk - 0.32; // VO runs straight on from "tiap malam": quick click + swap
+        moveEl($("#nMkt"), tMkSw - 0.5, 0.35, 20, 0); click(tMkSw - 0.1);
+        st("#cursor", { opacity: 1 }, tMkSw - 0.5);
+        camSet(460, 475, 1, tMkSw - 0.1); nav("#nMkt", tMkSw - 0.08); swap("#vFin", "#vMkt", tMkSw - 0.08);
+        FX.go("home", tMk - 0.3); FX.face("happy", tMk + 0.2, 0.7);
+        camTo(565, 300, 1.55, tMk + 0.2, 0.6); // source content card whole
+        ft("#src", { scale: 1 }, { keyframes: [{ scale: 1.05, duration: 0.18 }, { scale: 1, duration: 0.3 }] }, tPecah - 0.05);
+        ft("#src .cut", { scale: 1 }, { keyframes: [{ scale: 1.2, duration: 0.15 }, { scale: 1, duration: 0.25 }] }, tPecah);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPecah - 0.2);
+        camTo(460, 475, 1, tPecah + 0.15, 0.6); // pull out: all six platforms whole
+        PTS.forEach((p, k) => { const t = tPecah + 0.35 + k * 0.13, el = $("#pt" + k);
+          ft(mkLines[k], { attr: { "stroke-dashoffset": +mkLines[k].dataset.len } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.3, ease: "power2.out" }, t - 0.15);
+          ft(el, { opacity: 0, y: 20, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, t);
+          const to = tPlat + 0.05 + k * 0.08;
+          ft($(".ok", el), { opacity: 0, x: -6 }, { opacity: 1, x: 0, duration: 0.25 }, to);
+          ft(el, { borderColor: "rgba(255,255,255,0.12)" }, { borderColor: "rgba(61,220,151,0.6)", duration: 0.3 }, to); });
+        ft("#mkNote", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, tPlat + 0.3);
+        FX.point(tPecah + 0.2); FX.face("excited", tPlat, 0.8); FX.hop(tPlat + 0.1, 30);
+
+        /* ===== ZOOM-OUT #3: the app shrinks into the Marketing node; the shared-memory map is revealed (SCENE 7) ===== */
+        const tMem = ph("Dan semuanya").start, tZ3 = tMem - 0.78, tNy = wt("Dan semuanya", "nyambung"), tPus = wt("ke satu memori", "memori");
+        // window centre (540, 765) -> Marketing node centre (875, 942)
+        ft(win, { scale: 1, x: 0, y: 0, opacity: 1, transformOrigin: "50% 50%" }, { scale: 0.27, x: 335, y: 177, duration: 0.72, ease: "power3.inOut" }, tZ3);
+        ft(win, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tZ3 + 0.45);
+        ft("#mem", { opacity: 0, scale: 2.2, transformOrigin: "795px 652px" }, { opacity: 1, scale: 1, duration: 0.72, ease: "power3.inOut" }, tZ3);
+        ft("#mn3", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tZ3 + 0.4);
+        ft("#mHub", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, tZ3 + 0.45);
+        ["#mn0", "#mn1", "#mn2"].forEach((s, i) => ft(s, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, tZ3 + 0.55 + i * 0.1));
+        FX.go("center", tZ3 + 0.05, 0.9);
+        mLines.forEach((l, i) => { ft(l, { attr: { "stroke-dashoffset": +l.dataset.len } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.35, ease: "power2.out" }, tNy - 0.25 + i * 0.1);
+          const [x, y, x1, y1] = l._p, d = mDots[i];
+          ft(d, { attr: { cx: x, cy: y, opacity: 0 } }, { keyframes: [{ attr: { opacity: 1 }, duration: 0.1 }, { attr: { cx: x1, cy: y1 }, duration: 0.8, ease: "power1.in" }, { attr: { opacity: 0 }, duration: 0.1 }], repeat: 3, repeatDelay: 0.35 }, tNy + 0.2 + i * 0.18); });
+        ft(".mn", { borderColor: "rgba(1,204,247,0.5)" }, { borderColor: "#01ccf7", duration: 0.3, stagger: 0.1 }, tNy);
+        ft("#mHub", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { keyframes: [{ boxShadow: "0 0 0 30px rgba(1,204,247,0)", duration: 0.7 }, { boxShadow: "0 0 0 0 rgba(1,204,247,0)", duration: 0.01 }, { boxShadow: "0 0 0 30px rgba(1,204,247,0)", duration: 0.7 }] }, tPus - 0.1);
+        ft("#mHub .ic", { scale: 1 }, { keyframes: [{ scale: 1.18, duration: 0.2 }, { scale: 1, duration: 0.3 }] }, tPus);
+        FX.beat(tNy - 0.1); FX.face("excited", tPus - 0.05, 0.9); FX.hop(tPus - 0.1, 36);
+        const tPel = wt("Dia inget", "pelanggan"), tDeal = wt("tiap deal", "deal"), tObr = wt("tiap deal", "obrolan");
+        [["#mc0", "#mv0", 1284, tPel - 0.25], ["#mc1", "#mv1", 86, tDeal - 0.25], ["#mc2", "#mv2", 9420, tObr - 0.45]].forEach(([c, v, n, t]) => {
+          ft(c, { opacity: 0, y: 30, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, t);
+          count($(v), 0, n, t + 0.1, 0.7, dots); glowOn($(c), t + 0.2); });
+        FX.point(tPel - 0.3); FX.face("happy", tDeal, 0.7);
+
+        /* ===== doors -> SCENE 8 · kinetic: old way vs this (robot rises at the LEFT, rows on the right half: SIDE RISE #2) ===== */
+        const tBuk = ph("Bukan workflow").start, tW1 = tBuk - 1.08, tBuk2 = ph("Bukan juga").start, tSini = ph("Di sini").start;
+        FX.dip("upL", tW1 - 0.05, 0.3);
+        FX.doors(tW1, "dark", (m) => { st("#mem", { opacity: 0 }, m); st(win, { opacity: 0, x: 0, y: 0, scale: 1 }, m); });
+        FX.drop($("#kTitle"), tW1 + 0.75, 0.05); st("#kTitle", { opacity: 1 }, tW1 + 0.7);
+        ft("#kSim", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tW1 + 1.0);
+        ft("#k1", { opacity: 0, x: 80, scale: 0.94 }, { opacity: 1, x: 0, scale: 1, duration: 0.45, ease: "power3.out" }, tBuk - 0.15);
+        ft("#k1 .lg", { rotation: 0 }, { keyframes: [{ rotation: -14, duration: 0.08 }, { rotation: 12, duration: 0.08 }, { rotation: 0, duration: 0.1 }] }, wt("Bukan workflow", "rusak"));
+        ft("#k1", { x: 0 }, { keyframes: [{ x: -10 }, { x: 10 }, { x: -6 }, { x: 0 }], duration: 0.35 }, wt("Bukan workflow", "rusak") + 0.05);
+        ft("#k1 .x", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, wt("Bukan workflow", "rusak"));
+        FX.face("x", wt("Bukan workflow", "rusak") - 0.05, 1.0); FX.point(tBuk + 0.1); FX.shiver(wt("Bukan workflow", "rusak") + 0.1, 0.4);
+        ft("#k2", { opacity: 0, x: 80, scale: 0.94 }, { opacity: 1, x: 0, scale: 1, duration: 0.45, ease: "power3.out" }, tBuk2 - 0.15);
+        ft("#k2 .x", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, wt("yang lupa", "lupa"));
+        ft("#k2", { x: 0 }, { keyframes: [{ x: -10 }, { x: 10 }, { x: -6 }, { x: 0 }], duration: 0.35 }, wt("yang lupa", "lupa") + 0.05);
+        FX.face("flat", wt("yang lupa", "lupa") - 0.05, 1.0); FX.beat(tBuk2 + 0.05);
+        ft(["#k1", "#k2"], { opacity: 1 }, { opacity: 0.45, duration: 0.3 }, tSini - 0.2);
+        ft("#k3", { opacity: 0, x: 80, scale: 0.94 }, { opacity: 1, x: 0, scale: 1, duration: 0.45, ease: "power3.out" }, tSini - 0.15);
+        count($("#kZero"), 9, 0, wt("Di sini", "nggak") - 0.1, 0.7);
+        ft("#k3", { boxShadow: "0 0 0 0 rgba(1,204,247,0.55)" }, { boxShadow: "0 0 0 22px rgba(1,204,247,0)", duration: 0.8 }, wt("Di sini", "kelupaan") - 0.1);
+        ft("#k3 .x", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, wt("Di sini", "nggak"));
+        FX.face("excited", tSini, 1.0); FX.hop(wt("Di sini", "nggak") - 0.05, 40); FX.point(wt("Di sini", "kelupaan") - 0.4);
+
+        /* ===== blocks -> SCENE 9 · built for your business (robot rises at the RIGHT, cards on the left half: SIDE RISE #3) ===== */
+        const tAg = ph("Mau agency").start, tW2 = tAg - 1.1, tJasa = ph("atau bisnis").start, tTools = wt("sistemnya dibangun", "tools"), tGaya = ph("dan gaya").start;
+        FX.dip("upR", tW2 + 0.05, 0.2);
+        FX.blocks(tW2, "dark", (m) => { st("#kin", { display: "none" }, m); });
+        ft("#bTitle", { opacity: 0, y: -24 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tW2 + 0.75);
+        FX.sticker($("#sk2"), tW2 + 1.0, 4);
+        [["#bz0", wt("Mau agency", "agency")], ["#bz1", wt("Mau agency", "toko")], ["#bz2", wt("atau bisnis", "jasa")]].forEach(([s, t]) => {
+          ft(s, { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, t - 0.2);
+          ft($(".ck", $(s)), { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, t + 0.2); glowOn($(s), t + 0.1); });
+        ft("#tools", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, tTools - 0.45);
+        ft(".tl", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, stagger: 0.09, ease: "back.out(2)" }, tTools - 0.25);
+        ft("#voice", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, tGaya - 0.35);
+        ft("#voice .bub", { opacity: 0, y: 14, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.8)" }, wt("dan gaya", "bahasa") - 0.15);
+        FX.point(tAg + 0.6); FX.face("happy", wt("Mau agency", "toko"), 0.8); FX.beat(tJasa + 0.2); FX.point(tTools - 0.3); FX.face("excited", wt("dan gaya", "bahasa"), 0.8);
+
+        /* ===== iris -> SCENE 10 · CTA: box centred, robot whole at the bottom ===== */
+        const tW3 = tCta - 1.08;
+        FX.dip("center", tW3, 0.25);
+        FX.iris(tW3, "dark", (m) => { st("#biz", { display: "none" }, m); }, { x: 540, y: 980, ex: 540, ey: 800 });
+        ft("#cta", { opacity: 0, y: -40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta - 0.02);
+        FX.wave(tCta + 0.9); FX.point(tF - 0.35); FX.face("happy", tF + 0.05, 1.4); FX.hop(ph("tim AIpreneur").start - 0.1, 30);
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 22px rgba(1,204,247,0)", duration: 0.7 }, tF + 0.05);
+        FX.face("excited", D - 1.6, 0.9);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        { tl.fromTo({ v: 0 }, { v: 0 }, { v: 1, duration: D, ease: "none", immediateRender: false, onUpdate: () => { const T = tl.time();
+          TXT.forEach(([el, arr]) => { let x; if (typeof arr === "function") x = arr(T); else { x = arr[0][1]; arr.forEach(([t, v]) => { if (T >= t) x = v; }); } if (el.textContent !== x) el.textContent = x; }); } }, 0); }
+
+        /* ===== no-cut-text guard: text leaves sliced by the camera frame fade out during that shot, back in when whole ===== */
+        { const wc = $("#wcam"), wr = wc.getBoundingClientRect(), k = wr.width / VW;
+          const leaves = $$("#wcam *").filter((e) => e.tagName.toLowerCase() === "text" || Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim()));
+          const UNIT = ".ag, .kpi, .fr, .ld, .sk, .nav, .sl, .os, .rr, .pt, #src, .hd .tt, .hd em, .hd .st, .hd .lbl, #clk, #fuBtn, #fuNote, #propMini, #rep .dh, #rep .nums > div, #bars div, #rec .top, #sop .dh, #sopW, #onb .k, #onb .nm, #ringT, #mkNote, #feed .lbl, #pipe .lbl, #sideFoot, #side .lbl, #tbar .app, #sim, #live";
+          const box = (r) => ({ x0: (r.left - wr.left) / k, y0: (r.top - wr.top) / k, x1: (r.right - wr.left) / k, y1: (r.bottom - wr.top) / k });
+          const textBox = (e) => { if (e.tagName.toLowerCase() === "text") return box(e.getBoundingClientRect());
+            const rg = document.createRange(); let u = null;
+            Array.from(e.childNodes).filter((n) => n.nodeType === 3 && n.textContent.trim()).forEach((n) => { rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
+            return u ? box(u) : box(e.getBoundingClientRect()); };
+          const seen = new Set(), R = [];
+          leaves.forEach((e) => { const u = e.closest(UNIT); const tgt = u && wc.contains(u) ? u : e; if (seen.has(tgt)) return; seen.add(tgt);
+            const q = Object.assign({ e: tgt }, tgt === e ? textBox(e) : box(tgt.getBoundingClientRect())); if (q.x1 - q.x0 > 1 && q.y1 - q.y0 > 1) R.push(q); });
+          const sh = SHOTS.slice().sort((a, b) => a.t - b.t);
+          const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
+            const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
+            return inter && !inside; };
+          R.forEach((q) => { let prev = false; const H = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = H[i]; if (!h && prev && i + 1 < sh.length && H[i + 1] && nextT - inT < 0.5) h = true;
+              if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }
+              else if (h && !prev) ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.18, ease: "power1.out" }, S.t);
+              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.25, ease: "power1.out" }, inT);
+              prev = h; }); });
+          window.__noCut = { leaves: R.length, shots: sh.length }; }
+
+        FX.runGestures();
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

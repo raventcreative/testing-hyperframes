@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — Peta Bisnis 1 Halaman</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --n1: #0a0d2c; --n2: #294b77; --grad: linear-gradient(100deg, #0a0d2c 0%, #294b77 100%); --line: rgba(10,13,44,0.10);
+        --auto: #2f6fe4; --autoBg: #e7f0ff; --ok: #1fa855; --okBg: #dcf6e4; --red: #e5484d; --org: #f08c1a; --mute: rgba(10,13,44,0.55); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fd; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: var(--n1); -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #f4f7fd; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #132650; opacity: 0; }
+      #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+      .simtag { font-size: 15px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 3px 12px; white-space: nowrap; }
+
+      /* ---------- HOOK (kinetic, stage x 80-1000, y 290-1240) ---------- */
+      #hook { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; }
+      .sn { position: absolute; width: 380px; padding: 20px 26px 24px; border-radius: 14px; box-shadow: 0 22px 50px rgba(41,75,119,0.22), 0 3px 10px rgba(41,75,119,0.08); opacity: 0; }
+      .sn .tg { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; letter-spacing: 2px; color: rgba(10,13,44,0.55); }
+      .sn .tg .ic { width: 20px; height: 20px; }
+      .sn b { display: block; margin-top: 8px; font-size: 31px; line-height: 1.2; font-weight: 700; color: #0a0d2c; }
+      #sn1 { left: 20px; top: 30px; background: #fff3b8; } #sn2 { left: 510px; top: 60px; background: #dbe9ff; } #sn3 { left: 40px; top: 300px; background: #ffd9dc; }
+      #sn4 { left: 520px; top: 330px; background: #d6f5e0; } #sn5 { left: 30px; top: 600px; background: #ffe2c2; } #sn6 { left: 500px; top: 630px; background: #eadfff; }
+      #hStamp { position: absolute; left: 150px; top: 390px; width: 620px; text-align: center; font-size: 84px; font-weight: 700; line-height: 1.15; color: var(--red); border: 9px solid var(--red);
+        border-radius: 24px; padding: 4px 0 8px; background: rgba(255,255,255,0.95); letter-spacing: 3px; box-shadow: 0 20px 50px rgba(229,72,77,0.25); opacity: 0; }
+      #hHead { position: absolute; left: 230px; top: 150px; width: 460px; height: 460px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        box-shadow: 0 34px 80px rgba(41,75,119,0.26), 0 4px 14px rgba(41,75,119,0.08); border: 1.5px solid rgba(10,13,44,0.07); opacity: 0; }
+      #hHead .bi { width: 180px; height: 180px; color: var(--n2); }
+      #hHead b { margin-top: 14px; font-size: 34px; line-height: 1.15; font-weight: 700; text-align: center; }
+      #hRing { position: absolute; left: 230px; top: 150px; width: 460px; height: 460px; border-radius: 50%; border: 6px solid var(--red); opacity: 0; }
+      #hOver { position: absolute; left: 600px; top: 150px; display: flex; align-items: center; gap: 10px; padding: 10px 22px; border-radius: 30px; background: var(--red); color: #fff; font-size: 30px; font-weight: 700; letter-spacing: 2px;
+        box-shadow: 0 16px 34px rgba(229,72,77,0.35); opacity: 0; }
+      #hOver .ic { width: 30px; height: 30px; }
+      #hCnt { position: absolute; left: 150px; top: 680px; width: 620px; padding: 24px 30px; border-radius: 26px; background: #fff; text-align: center; font-size: 32px; line-height: 1.25; opacity: 0;
+        box-shadow: 0 26px 60px rgba(41,75,119,0.22), 0 3px 10px rgba(41,75,119,0.08); }
+      #hCnt b { font-weight: 700; color: var(--red); font-size: 44px; }
+
+      /* ---------- app window: x 80-1000, y 290-1240 ---------- */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.96);
+        border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); transform-origin: 50% 50%; opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
+      #mapBg { position: absolute; left: 0; top: 60px; width: 920px; height: 890px; background-color: #f5f8fe; background-image: radial-gradient(rgba(41,75,119,0.13) 1px, transparent 1.4px); background-size: 22px 22px; }
+      #tbar { position: absolute; left: 0; top: 0; width: 920px; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fff; }
+      #tbIn { display: flex; align-items: center; gap: 12px; width: 100%; height: 60px; opacity: 0; }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; }
+      #tbar .sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 2px 10px; }
+      #pgBadge { margin-left: auto; display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 700; color: var(--n2); background: rgba(41,75,119,0.08); border-radius: 14px; padding: 5px 12px; opacity: 0; }
+      #pgBadge .ic { width: 17px; height: 17px; }
+      #aiBadge { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 700; color: var(--ok); background: var(--okBg); border-radius: 14px; padding: 5px 12px; opacity: 0; }
+      #aiBadge .ic { width: 17px; height: 17px; }
+      #empty { position: absolute; left: 250px; top: 365px; width: 420px; height: 280px; border-radius: 24px; background: #fff; border: 1.5px dashed rgba(41,75,119,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+      #empty .ei { width: 64px; height: 64px; border-radius: 18px; background: rgba(41,75,119,0.08); color: var(--n2); display: flex; align-items: center; justify-content: center; }
+      #empty .ei .ic { width: 34px; height: 34px; }
+      #empty b { margin-top: 12px; font-size: 21px; font-weight: 700; } #empty em { font-style: normal; font-size: 14px; color: var(--mute); }
+      #btnAI { margin-top: 16px; display: inline-flex; align-items: center; gap: 9px; height: 50px; padding: 0 24px; border-radius: 25px; background: var(--grad); color: #fff; font-size: 18px; font-weight: 700; box-shadow: 0 10px 24px rgba(41,75,119,0.3); }
+      #btnAI .ic { width: 21px; height: 21px; }
+      .pn { position: absolute; background: #fff; border: 1.5px solid var(--line); border-radius: 16px; box-shadow: 0 6px 18px rgba(41,75,119,0.08); padding: 12px 12px; opacity: 0; }
+      .pn .ph { display: flex; align-items: center; justify-content: space-between; height: 18px; }
+      .pn .ph .cnt { font-size: 12px; font-weight: 700; color: var(--mute); }
+      .pn:not(#tbar) > * { opacity: 0; }
+      .pn::before { content: ""; position: absolute; left: 16px; right: 16px; top: 16px; bottom: 18px; border-radius: 6px; opacity: var(--sk, 0); pointer-events: none;
+        background: repeating-linear-gradient(180deg, rgba(41,75,119,0.085) 0 11px, transparent 11px 26px); }
+      #tbar.pn { opacity: 1; border-radius: 0; border: none; border-bottom: 1px solid var(--line); box-shadow: none; padding: 0 18px; }
+      #pPlat { left: 16px; top: 76px; width: 888px; height: 150px; }
+      #pPlat .tiles { display: flex; gap: 12px; margin-top: 10px; }
+      .tile { width: 162px; height: 96px; border-radius: 13px; background: rgba(41,75,119,0.05); padding: 10px 11px; }
+      .tile .bi { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #fff; }
+      .tile .bi .ic { width: 19px; height: 19px; }
+      .tile b { display: block; margin-top: 6px; font-size: 14.5px; line-height: 1.2; font-weight: 700; } .tile em { display: block; font-style: normal; font-size: 12px; line-height: 1.2; color: var(--mute); white-space: nowrap; }
+      #pTech { left: 16px; top: 242px; width: 290px; height: 214px; }
+      #pTech .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+      .tc { display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 10px; border-radius: 11px; background: rgba(41,75,119,0.05); border: 1.5px solid transparent; font-size: 14px; font-weight: 700; }
+      .tc .ic { width: 19px; height: 19px; }
+      #pAset { left: 318px; top: 242px; width: 280px; height: 214px; }
+      .ar { display: flex; align-items: center; gap: 9px; height: 38px; margin-top: 4px; padding: 0 10px; border-radius: 10px; font-size: 14px; border: 1.5px solid transparent; }
+      .ar:first-of-type { margin-top: 10px; }
+      .ar .ic { width: 18px; height: 18px; color: var(--n2); } .ar b { margin-left: auto; font-weight: 700; color: var(--n2); }
+      #pRule { left: 610px; top: 242px; width: 294px; height: 214px; }
+      .rr { display: flex; align-items: center; gap: 9px; height: 40px; margin-top: 6px; padding: 0 10px; border-radius: 10px; background: rgba(229,72,77,0.06); font-size: 14px; font-weight: 700; border: 1.5px solid transparent; }
+      .rr:first-of-type { margin-top: 10px; }
+      .rr .ic { width: 18px; height: 18px; color: var(--red); }
+      #rBadge { display: inline-flex; align-items: center; gap: 6px; margin-top: 9px; font-size: 12.5px; font-weight: 700; color: var(--ok); background: var(--okBg); border-radius: 10px; padding: 3px 10px; opacity: 0; }
+      #rBadge .ic { width: 15px; height: 15px; }
+      #pDiv { left: 16px; top: 472px; width: 888px; height: 270px; }
+      #pDiv .cols { display: flex; gap: 14px; margin-top: 10px; }
+      .dc { width: 162px; height: 216px; border-radius: 13px; background: rgba(41,75,119,0.05); padding: 10px 11px; position: relative; }
+      .dc .hd { display: flex; align-items: center; gap: 8px; height: 40px; }
+      .dc .hd i { width: 30px; height: 30px; border-radius: 9px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+      .dc .hd i .ic { width: 17px; height: 17px; }
+      .dc .hd b { font-size: 14px; line-height: 1.12; font-weight: 700; }
+      .dc ul { list-style: none; margin-top: 8px; } .dc li { font-size: 13px; line-height: 1.25; padding: 5px 0 5px 14px; position: relative; border-bottom: 1px dashed rgba(10,13,44,0.1); }
+      .dc li::before { content: ""; position: absolute; left: 2px; top: 12px; width: 6px; height: 6px; border-radius: 50%; background: var(--n2); opacity: 0.6; }
+      .dc .kp { position: absolute; left: 11px; bottom: 11px; font-size: 12px; font-weight: 700; color: var(--auto); background: var(--autoBg); border-radius: 9px; padding: 2px 9px; white-space: nowrap; }
+      #pFun { left: 16px; top: 758px; width: 540px; height: 176px; }
+      .fb { height: 27px; margin-top: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; color: #fff; font-size: 12.5px; font-weight: 700; }
+      .fb:first-of-type { margin-top: 10px; }
+      #pMet { left: 568px; top: 758px; width: 336px; height: 176px; }
+      .mr { display: flex; align-items: center; justify-content: space-between; height: 34px; margin-top: 4px; padding: 0 10px; border-radius: 9px; background: rgba(41,75,119,0.05); font-size: 13.5px; }
+      .mr:first-of-type { margin-top: 10px; }
+      .mr b { font-weight: 700; color: var(--n2); font-size: 15px; }
+      #pMet .nt { font-size: 11.5px; color: var(--mute); margin-top: 6px; text-align: right; }
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(10,13,44,0.35)); }
+      #cursor svg, #cur2 svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--n2); background: rgba(41,75,119,0.12); opacity: 0; z-index: 29; }
+      #winDim { position: absolute; inset: 0; background: rgba(244,247,253,0.8); opacity: 0; }
+
+      /* ---------- pop-out: platforms (left half; robot rises on the right) ---------- */
+      #popPlat { position: absolute; left: 90px; top: 330px; width: 430px; padding: 26px 26px 18px; border-radius: 30px; background: #fff; opacity: 0;
+        box-shadow: 0 40px 90px rgba(10,13,44,0.28), 0 6px 18px rgba(41,75,119,0.12); }
+      #popPlat .hd { display: flex; align-items: center; justify-content: space-between; }
+      #popPlat .hd b { font-size: 32px; font-weight: 700; }
+      .pr { display: flex; align-items: center; gap: 18px; height: 104px; border-bottom: 1.5px dashed rgba(10,13,44,0.12); }
+      .pr:last-child { border-bottom: none; }
+      .pr .bi { width: 66px; height: 66px; border-radius: 18px; display: flex; align-items: center; justify-content: center; color: #fff; flex: none; }
+      .pr .bi .ic { width: 36px; height: 36px; }
+      .pr .nm { font-size: 28px; font-weight: 700; line-height: 1.15; } .pr .nm em { display: block; font-style: normal; font-size: 19px; font-weight: 400; color: var(--mute); }
+      .pr .ok { margin-left: auto; width: 40px; height: 40px; border-radius: 50%; background: var(--okBg); color: var(--ok); display: flex; align-items: center; justify-content: center; opacity: 0; }
+      .pr .ok .ic { width: 24px; height: 24px; }
+
+      /* ---------- departments (right half; robot rises on the left) ---------- */
+      #dept { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; opacity: 0; }
+      #dHd { position: absolute; left: 575px; top: 300px; width: 425px; height: 108px; padding: 18px 24px; border-radius: 24px; background: #fff; box-shadow: 0 24px 60px rgba(41,75,119,0.2); }
+      #dHd .t { display: flex; align-items: center; justify-content: space-between; } #dHd b { display: block; margin-top: 4px; font-size: 36px; line-height: 1.1; font-weight: 700; }
+      .dr { position: absolute; left: 575px; width: 425px; height: 132px; padding: 0 22px; border-radius: 24px; background: #fff; display: flex; align-items: center; gap: 16px;
+        box-shadow: 0 22px 54px rgba(41,75,119,0.18), 0 3px 10px rgba(41,75,119,0.07); border: 2px solid transparent; }
+      .dr .lg { width: 72px; height: 72px; border-radius: 20px; background: rgba(41,75,119,0.12); color: var(--n2); display: flex; align-items: center; justify-content: center; flex: none; }
+      .dr .lg .ic { width: 38px; height: 38px; }
+      .dr .nm { font-size: 27px; line-height: 1.1; font-weight: 700; white-space: nowrap; }
+      .dr .cs { display: flex; gap: 8px; margin-top: 10px; }
+      .dr .cs > span { display: inline-flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 700; color: var(--n2); background: rgba(41,75,119,0.07); border-radius: 10px; padding: 4px 10px; white-space: nowrap; }
+      .dr .cs > span .ic { width: 16px; height: 16px; }
+      #chFun { border: 2px solid transparent; }
+      #dHd, .dr, .pr { opacity: 0; }
+      #cur2 { position: absolute; left: 0; top: 0; width: 46px; height: 46px; margin: -7px 0 0 -7px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(10,13,44,0.35)); }
+      #rip2 { position: absolute; left: 0; top: 0; width: 80px; height: 80px; margin: -40px 0 0 -40px; border-radius: 50%; border: 3px solid var(--n2); background: rgba(41,75,119,0.14); opacity: 0; z-index: 29; }
+
+      /* ---------- funnel (full stage card) ---------- */
+      #fun { position: absolute; left: 100px; top: 320px; width: 880px; height: 730px; border-radius: 30px; background: #fff; overflow: hidden; opacity: 0;
+        box-shadow: 0 34px 80px rgba(41,75,119,0.24), 0 4px 14px rgba(41,75,119,0.08); }
+      #fun .hd { position: absolute; left: 34px; right: 34px; top: 28px; display: flex; align-items: center; gap: 14px; }
+      #fun .hd .lg { width: 58px; height: 58px; border-radius: 16px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; } #fun .hd .lg .ic { width: 30px; height: 30px; }
+      #fun .hd b { font-size: 34px; font-weight: 700; } #fun .hd .simtag { margin-left: auto; }
+      #fun .il { position: absolute; right: 34px; top: 92px; font-size: 16px; color: var(--mute); }
+      .fs { position: absolute; left: 50%; height: 118px; border-radius: 22px; display: flex; align-items: center; gap: 16px; padding: 0 26px; color: #fff; opacity: 0; }
+      .fs .lg { width: 58px; height: 58px; border-radius: 16px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; flex: none; } .fs .lg .ic { width: 30px; height: 30px; }
+      .fs .l { font-size: 26px; font-weight: 700; line-height: 1.15; white-space: nowrap; } .fs .n { margin-left: auto; font-size: 42px; font-weight: 700; white-space: nowrap; }
+      #fs1 { top: 132px; width: 820px; margin-left: -410px; background: #6f8fbf; } #fs2 { top: 282px; width: 680px; margin-left: -340px; background: #4a6fa5; }
+      #fs3 { top: 432px; width: 540px; margin-left: -270px; background: #294b77; } #fs4 { top: 582px; width: 400px; margin-left: -200px; background: #0a0d2c; }
+      .cv { position: absolute; display: flex; align-items: center; gap: 5px; font-size: 23px; font-weight: 700; color: var(--auto); background: var(--autoBg); border-radius: 14px; padding: 4px 12px; opacity: 0; }
+      .cv .ic { width: 20px; height: 20px; }
+      #cv1 { left: 798px; top: 322px; } #cv2 { left: 728px; top: 472px; } #cv3 { left: 658px; top: 622px; }
+      #fDot { position: absolute; left: 434px; top: 120px; width: 14px; height: 14px; border-radius: 50%; background: #01ccf7; box-shadow: 0 0 14px rgba(1,204,247,0.9); opacity: 0; }
+      #scan { position: absolute; left: 0; top: 0; width: 880px; height: 90px; background: linear-gradient(180deg, rgba(1,204,247,0) 0%, rgba(1,204,247,0.28) 80%, rgba(1,204,247,0.9) 100%); opacity: 0; }
+      #funDim { position: absolute; inset: 0; background: rgba(244,247,253,0.55); opacity: 0; }
+
+      /* ---------- AI priorities card (3D split) ---------- */
+      #pri { position: absolute; left: 470px; top: 360px; width: 520px; padding: 26px 26px 20px; border-radius: 28px; background: #fff; opacity: 0;
+        box-shadow: 0 40px 90px rgba(10,13,44,0.3), 0 6px 18px rgba(41,75,119,0.12); }
+      #pri .hd { display: flex; align-items: center; gap: 12px; } #pri .hd .lg { width: 54px; height: 54px; border-radius: 15px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; }
+      #pri .hd .lg .ic { width: 28px; height: 28px; } #pri .hd b { display: block; font-size: 25px; line-height: 1.15; font-weight: 700; } #pri .hd em { display: block; font-style: normal; font-size: 15px; color: var(--mute); }
+      #pri .st { position: relative; height: 34px; margin-top: 14px; font-size: 19px; font-weight: 700; }
+      #pri .st > span { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+      #pri .st .ic { width: 22px; height: 22px; } #stA { color: var(--n2); } #stB { color: var(--ok); opacity: 0; }
+      #pri::after { content: ""; position: absolute; left: 26px; right: 26px; top: 150px; bottom: 28px; border-radius: 8px; opacity: var(--sk, 0); pointer-events: none;
+        background: repeating-linear-gradient(180deg, rgba(41,75,119,0.09) 0 16px, transparent 16px 40px); }
+      .pi { display: flex; gap: 14px; padding: 14px 0; border-top: 1.5px dashed rgba(10,13,44,0.12); opacity: 0; }
+      .pi .no { width: 46px; height: 46px; border-radius: 50%; background: var(--grad); color: #fff; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+      .pi b { display: block; font-size: 23px; line-height: 1.22; font-weight: 700; }
+      .pi .tg { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 15px; font-weight: 700; border-radius: 10px; padding: 2px 10px; }
+      .pi .tg .ic { width: 15px; height: 15px; }
+
+      /* ---------- kinetic stat rows (left half; robot rises on the right) ---------- */
+      #kin { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .kr { position: absolute; left: 80px; width: 450px; height: 184px; border-radius: 30px; background: #fff; display: flex; align-items: center; gap: 20px; padding: 0 26px; opacity: 0;
+        box-shadow: 0 26px 64px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); }
+      .kr .lg { width: 78px; height: 78px; border-radius: 24px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+      .kr .lg .ic { width: 42px; height: 42px; }
+      .kr .w { font-size: 46px; font-weight: 700; line-height: 1; letter-spacing: 0.5px; white-space: nowrap; }
+      .kr .s { font-size: 19px; line-height: 1.3; color: rgba(10,13,44,0.65); margin-top: 8px; }
+      #k1 { top: 330px; } #k2 { top: 540px; } #k3 { top: 750px; background: linear-gradient(135deg, #0a0d2c, #294b77); }
+      #k3 .w { color: #fff; } #k3 .s { color: rgba(255,255,255,0.8); } #k3 .lg { background: rgba(255,255,255,0.14); }
+      .hl { position: relative; display: inline-block; isolation: isolate; } .hl i { position: absolute; left: -5px; right: -5px; bottom: 2px; height: 13px; border-radius: 5px; background: rgba(1,204,247,0.5); z-index: -1; transform-origin: 0 50%; }
+
+      #cta { position: absolute; left: 110px; width: 860px; top: 470px; padding: 40px 44px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 26px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 62px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; color: rgba(10,13,44,0.75); } #cta .sb b { color: var(--n2); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 24px; height: 76px; padding: 0 46px; border-radius: 41px; background: var(--grad); color: #fff; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ctaRow { position: absolute; left: 80px; width: 920px; top: 900px; display: flex; justify-content: center; gap: 16px; z-index: 40; }
+      #ctaRow .stk { position: relative; opacity: 0; font-size: 25px; padding: 12px 20px; border-radius: 18px; } #ctaRow .stk .ic { color: var(--n2); width: 26px; height: 26px; }
+      .stk { display: flex; align-items: center; gap: 9px; padding: 9px 18px; border-radius: 15px; background: #fff; font-size: 22px; font-weight: 700; color: var(--n1);
+        box-shadow: 0 12px 28px rgba(41,75,119,0.24); border: 1.5px solid rgba(10,13,44,0.07); white-space: nowrap; }
+
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoL { opacity: 0; }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(41,75,119,0.22)); }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+        filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 7px rgba(255,255,255,0.95)); } /* halo keeps captions readable when the robot passes behind them */
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="44.4" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="44.4" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div>
+
+        <div id="hook">
+          <div class="sn" id="sn1"><div class="tg"><span class="ic" data-i="package"></span>STOK</div><b>Stok sisa berapa?</b></div>
+          <div class="sn" id="sn2"><div class="tg"><span class="ic" data-i="megaphone"></span>IKLAN</div><b>Iklan jalan gak sih?</b></div>
+          <div class="sn" id="sn3"><div class="tg"><span class="ic" data-i="receipt"></span>KEUANGAN</div><b>Invoice belum ditagih</b></div>
+          <div class="sn" id="sn4"><div class="tg"><span class="ic" data-i="file-text"></span>SOP</div><b>SOP admin di mana?</b></div>
+          <div class="sn" id="sn5"><div class="tg"><span class="ic" data-i="target"></span>SALES</div><b>Target bulan ini berapa?</b></div>
+          <div class="sn" id="sn6"><div class="tg"><span class="ic" data-i="key-round"></span>AKUN</div><b>Password IG siapa?</b></div>
+          <div id="hStamp">BERANTAKAN</div>
+          <div id="hRing"></div>
+          <div id="hHead"><span class="ic bi" data-i="brain"></span><b class="gt">Semua di<br />kepala lu</b></div>
+          <div id="hOver"><span class="ic" data-i="triangle-alert"></span>OVERLOAD</div>
+          <div id="hCnt"><b>37</b> urusan cuma diinget sendiri</div>
+        </div>
+
+        <div id="win"><div id="wcam">
+          <div id="mapBg"></div>
+          <div id="tbar" class="pn"><div id="tbIn"><span class="dots"><i></i><i></i><i></i></span><span class="app">Peta Bisnis</span><span class="sim">SIMULASI</span>
+            <span id="pgBadge"><span class="ic" data-i="layers"></span>1 halaman · 7 panel</span><span id="aiBadge"><span class="ic" data-i="sparkles"></span>AI aktif</span></div></div>
+          <div id="empty"><div class="ei"><span class="ic" data-i="map"></span></div><b>Belum ada peta bisnis</b><em>Info bisnis masih kepisah-pisah</em>
+            <div id="btnAI"><span class="ic" data-i="wand-sparkles"></span>Petain pakai AI</div></div>
+
+          <div class="pn" id="pPlat"><div class="ph"><span class="lbl">PLATFORM</span><span class="cnt">5 channel</span></div><div class="tiles">
+            <div class="tile"><i class="bi" style="background:#e1306c"><span class="ic" data-i="si-instagram"></span></i><b>Instagram</b><em>12,4rb followers</em></div>
+            <div class="tile"><i class="bi" style="background:#0a0d2c"><span class="ic" data-i="si-tiktok"></span></i><b>TikTok</b><em>8,1rb followers</em></div>
+            <div class="tile"><i class="bi" style="background:#1fa855"><span class="ic" data-i="si-whatsapp"></span></i><b>WhatsApp</b><em>46 chat / hari</em></div>
+            <div class="tile"><i class="bi" style="background:#ee4d2d"><span class="ic" data-i="si-shopee"></span></i><b>Shopee</b><em>320 order / bln</em></div>
+            <div class="tile"><i class="bi" style="background:#e5302a"><span class="ic" data-i="si-youtube"></span></i><b>YouTube</b><em>2,1rb subscriber</em></div></div></div>
+          <div class="pn" id="pTech"><div class="ph"><span class="lbl">TECH STACK</span><span class="cnt">6 tools</span></div><div class="grid">
+            <div class="tc"><span class="ic" data-i="si-googlesheets" style="color:#0f9d58"></span>Sheets</div><div class="tc"><span class="ic" data-i="si-notion"></span>Notion</div>
+            <div class="tc"><span class="ic" data-i="si-meta" style="color:#0866ff"></span>Meta Ads</div><div class="tc"><span class="ic" data-i="si-gmail" style="color:#ea4335"></span>Gmail</div>
+            <div class="tc"><span class="ic" data-i="si-googledrive" style="color:#1a73e8"></span>Drive</div><div class="tc"><span class="ic" data-i="si-trello" style="color:#0052cc"></span>Trello</div></div></div>
+          <div class="pn" id="pAset"><div class="ph"><span class="lbl">ASET</span><span class="cnt">263 file</span></div>
+            <div class="ar"><span class="ic" data-i="palette"></span>Brand kit<b>1</b></div><div class="ar"><span class="ic" data-i="image"></span>Foto produk<b>214</b></div>
+            <div class="ar"><span class="ic" data-i="layers"></span>Template konten<b>36</b></div><div class="ar"><span class="ic" data-i="file-text"></span>SOP tim<b>12</b></div></div>
+          <div class="pn" id="pRule"><div class="ph"><span class="lbl">ATURAN MAIN</span><span class="cnt">3 aturan</span></div>
+            <div class="rr"><span class="ic" data-i="lock"></span>Diskon maks 10%</div><div class="rr"><span class="ic" data-i="lock"></span>Balas chat &lt; 5 menit</div>
+            <div class="rr"><span class="ic" data-i="lock"></span>Harga ikut price list</div><span id="rBadge"><span class="ic" data-i="shield-check"></span>AI wajib patuh</span></div>
+          <div class="pn" id="pDiv"><div class="ph"><span class="lbl">DIVISI</span><span class="cnt">5 kolom</span></div><div class="cols">
+            <div class="dc"><div class="hd"><i><span class="ic" data-i="megaphone"></span></i><b>Marketing</b></div><ul><li>Konten harian</li><li>Iklan Meta</li><li>Kolab KOL</li></ul><span class="kp">CPL Rp8rb</span></div>
+            <div class="dc"><div class="hd"><i><span class="ic" data-i="handshake"></span></i><b>Sales</b></div><ul><li>Funnel</li><li>Closing</li><li>Follow up</li></ul><span class="kp">Closing 30%</span></div>
+            <div class="dc"><div class="hd"><i><span class="ic" data-i="headset"></span></i><b>Customer Service</b></div><ul><li>Komplain</li><li>Garansi</li><li>Retensi</li></ul><span class="kp">Respon 2 mnt</span></div>
+            <div class="dc"><div class="hd"><i><span class="ic" data-i="wallet"></span></i><b>Keuangan</b></div><ul><li>Cashflow</li><li>Invoice</li><li>Laporan</li></ul><span class="kp">Margin 38%</span></div>
+            <div class="dc"><div class="hd"><i><span class="ic" data-i="workflow"></span></i><b>Otomasi</b></div><ul><li>Bot WA</li><li>CRM</li><li>Reminder</li></ul><span class="kp">12 flow aktif</span></div></div></div>
+          <div class="pn" id="pFun"><div class="ph"><span class="lbl">FUNNEL</span><span class="cnt">bulan ini</span></div>
+            <div class="fb" style="width:100%;background:#6f8fbf"><span>Lihat konten</span><span>10.000</span></div><div class="fb" style="width:82%;background:#4a6fa5"><span>Klik profil</span><span>1.800</span></div>
+            <div class="fb" style="width:64%;background:#294b77"><span>Chat masuk</span><span>420</span></div><div class="fb" style="width:46%;background:#0a0d2c"><span>Beli</span><span>126</span></div></div>
+          <div class="pn" id="pMet"><div class="ph"><span class="lbl">METRIK</span><span class="cnt">bulan ini</span></div>
+            <div class="mr"><span>Omzet</span><b>Rp182 jt</b></div><div class="mr"><span>ROAS iklan</span><b>3,4x</b></div><div class="mr"><span>Closing rate</span><b>30%</b></div><div class="nt">angka ilustrasi</div></div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div><div id="winDim"></div></div>
+
+        <div id="popPlat"><div class="hd"><b class="gt">Platform</b><span class="simtag">SIMULASI</span></div><div id="pRows">
+          <div class="pr"><i class="bi" style="background:#e1306c"><span class="ic" data-i="si-instagram"></span></i><div class="nm">Instagram<em>12,4rb followers · konten</em></div><span class="ok"><span class="ic" data-i="check"></span></span></div>
+          <div class="pr"><i class="bi" style="background:#0a0d2c"><span class="ic" data-i="si-tiktok"></span></i><div class="nm">TikTok<em>8,1rb followers · konten</em></div><span class="ok"><span class="ic" data-i="check"></span></span></div>
+          <div class="pr"><i class="bi" style="background:#1fa855"><span class="ic" data-i="si-whatsapp"></span></i><div class="nm">WhatsApp<em>46 chat / hari · jualan</em></div><span class="ok"><span class="ic" data-i="check"></span></span></div>
+          <div class="pr"><i class="bi" style="background:#ee4d2d"><span class="ic" data-i="si-shopee"></span></i><div class="nm">Shopee<em>320 order / bln · jualan</em></div><span class="ok"><span class="ic" data-i="check"></span></span></div>
+          <div class="pr"><i class="bi" style="background:#e5302a"><span class="ic" data-i="si-youtube"></span></i><div class="nm">YouTube<em>2,1rb subscriber · konten</em></div><span class="ok"><span class="ic" data-i="check"></span></span></div></div></div>
+
+        <div id="dept">
+          <div id="dHd"><div class="t"><span class="lbl">DIVISI</span><span class="simtag">SIMULASI</span></div><b class="gt">5 kolom, 1 peta</b></div>
+          <div class="dr" id="dr1" style="top:428px"><div class="lg"><span class="ic" data-i="megaphone"></span></div><div><div class="nm gt">Marketing</div><div class="cs"><span>Konten</span><span>Iklan</span><span>KOL</span></div></div></div>
+          <div class="dr" id="dr2" style="top:574px"><div class="lg"><span class="ic" data-i="handshake"></span></div><div><div class="nm gt">Sales</div><div class="cs"><span id="chFun"><span class="ic" data-i="funnel"></span>Funnel</span><span>Closing</span><span>Follow up</span></div></div></div>
+          <div class="dr" id="dr3" style="top:720px"><div class="lg"><span class="ic" data-i="headset"></span></div><div><div class="nm gt">Customer Service</div><div class="cs"><span>Komplain</span><span>Garansi</span><span>Retensi</span></div></div></div>
+          <div class="dr" id="dr4" style="top:866px"><div class="lg"><span class="ic" data-i="wallet"></span></div><div><div class="nm gt">Keuangan</div><div class="cs"><span>Cashflow</span><span>Invoice</span><span>Laporan</span></div></div></div>
+          <div class="dr" id="dr5" style="top:1012px"><div class="lg"><span class="ic" data-i="workflow"></span></div><div><div class="nm gt">Otomasi</div><div class="cs"><span>Bot WA</span><span>CRM</span><span>Reminder</span></div></div></div>
+          <div id="rip2"></div><div id="cur2"></div>
+        </div>
+
+        <div id="fun">
+          <div class="hd"><div class="lg"><span class="ic" data-i="funnel"></span></div><b class="gt">Funnel penjualan</b><span class="simtag">SIMULASI</span></div>
+          <div class="il">angka ilustrasi · bulan ini</div>
+          <div class="fs" id="fs1"><div class="lg"><span class="ic" data-i="eye"></span></div><div class="l">Orang asing lihat konten</div><div class="n" id="n1">0</div></div>
+          <div class="fs" id="fs2"><div class="lg"><span class="ic" data-i="mouse-pointer-click"></span></div><div class="l">Klik profil &amp; link</div><div class="n" id="n2">0</div></div>
+          <div class="fs" id="fs3"><div class="lg"><span class="ic" data-i="message-circle"></span></div><div class="l">Chat masuk</div><div class="n" id="n3">0</div></div>
+          <div class="fs" id="fs4"><div class="lg"><span class="ic" data-i="shopping-cart"></span></div><div class="l">Jadi pembeli</div><div class="n" id="n4">0</div></div>
+          <div class="cv" id="cv1"><span class="ic" data-i="trending-up"></span>18%</div><div class="cv" id="cv2"><span class="ic" data-i="trending-up"></span>23%</div><div class="cv" id="cv3"><span class="ic" data-i="trending-up"></span>30%</div>
+          <div id="fDot"></div><div id="scan"></div><div id="funDim"></div>
+        </div>
+
+        <div id="pri"><div class="hd"><div class="lg"><span class="ic" data-i="bot"></span></div><div><b class="gt">Prioritas minggu ini</b><em>dari AI · SIMULASI</em></div></div>
+          <div class="st"><span id="stA"><span class="ic" data-i="scan-line"></span>AI lagi baca peta bisnis…</span><span id="stB"><span class="ic" data-i="check-check"></span>3 prioritas ditemukan</span></div>
+          <div class="pi"><div class="no">1</div><div><b>Follow up 38 chat yang nyangkut</b><span class="tg" style="color:#2f6fe4;background:#e7f0ff"><span class="ic" data-i="handshake"></span>Sales</span></div></div>
+          <div class="pi"><div class="no">2</div><div><b>Gas konten TikTok, kliknya paling tinggi</b><span class="tg" style="color:#c46d0e;background:rgba(240,140,26,0.14)"><span class="ic" data-i="megaphone"></span>Marketing</span></div></div>
+          <div class="pi"><div class="no">3</div><div><b>Tagih 4 invoice jatuh tempo</b><span class="tg" style="color:#1fa855;background:#dcf6e4"><span class="ic" data-i="wallet"></span>Keuangan</span></div></div></div>
+
+        <div id="kin">
+          <div class="kr" id="k1"><div class="lg"><span class="ic" data-i="map"></span></div><div><div class="w" data-letter="gt">1 HALAMAN</div><div class="s">Seluruh bisnis kebaca sekali lihat</div></div></div>
+          <div class="kr" id="k2"><div class="lg"><span class="ic" data-i="layout-grid"></span></div><div><div class="w" data-letter="gt">5 DIVISI</div><div class="s">Tiap divisi punya <span class="hl"><i></i>kolom sendiri</span></div></div></div>
+          <div class="kr" id="k3"><div class="lg"><span class="ic" data-i="target"></span></div><div><div class="w"><span id="n0">9</span> TEBAKAN</div><div class="s">Keputusan pakai data, bukan feeling</div></div></div>
+        </div>
+
+        <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name gt">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ctaRow"><div class="stk"><span class="ic" data-i="map"></span>Peta bisnis</div><div class="stk"><span class="ic" data-i="sparkles"></span>Prioritas AI</div><div class="stk"><span class="ic" data-i="layout-grid"></span>Semua divisi</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="" /><div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div><div id="caps"></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="43.52" data-track-index="8" data-volume="1"></audio>
+      <!--SFX-->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        const CUR = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#0a0d2c" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+        $("#cursor").innerHTML = CUR; $("#cur2").innerHTML = CUR;
+
+        /* ---------- timeline helpers ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].replace(/^"/, "").toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 44.4;
+        const fade = (sel, to, at, d) => ft(sel, { opacity: to ? 0 : 1 }, { opacity: to ? 1 : 0, duration: d || 0.3, ease: "sine.inOut" }, at);
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const dot = (n) => Math.round(n).toLocaleString("id-ID");
+
+        /* captions */
+        const KEY = new Set(["berantakan?", "kepala", "simulasi", "klik,", "ai", "metain", "satu", "halaman.", "platform", "jualan", "konten", "geser", "tech", "stack,", "aset,", "aturan", "main",
+          "dilanggar.", "divisi", "kolomnya", "marketing,", "sales,", "customer", "service,", "keuangan,", "otomasi.", "funnel,", "jalurnya", "asing", "pembeli,", "angkanya.", "baca", "petanya,",
+          "tiga", "prioritas", "halaman,", "divisi,", "tebak-tebakan.", "sistem", "dipasang", "link", "bio,", "aipreneur", "automation."]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].replace(/^"/, "").toLowerCase()) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        /* ---------- camera (screen-recording style: zooms the app inside the fixed window frame) ---------- */
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc;
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; };
+        // no cut text: every panel the frame would slice fades out for that shot, panels fully inside fade back in
+        const PN = $$("#wcam .pn"), vis = {};
+        const kids = (p) => (p.id === "tbar" ? [$("#tbIn")] : Array.from(p.children));
+        const frameOf = (c) => ({ x0: -c.x / c.scale, y0: -c.y / c.scale, x1: (VW - c.x) / c.scale, y1: (VH - c.y) / c.scale });
+        const inside = (p, f) => p.offsetLeft >= f.x0 - 1 && p.offsetLeft + p.offsetWidth <= f.x1 + 1 && p.offsetTop >= f.y0 - 1 && p.offsetTop + p.offsetHeight <= f.y1 + 1;
+        // a panel the frame would slice keeps a faint empty box (context) and hides its text; whole panels show everything
+        const shot = (x, y, s, at, dur, ease) => { camTo(x, y, s, at, dur, ease); const f = frameOf(cc);
+          PN.forEach((p) => { const want = inside(p, f) ? 1 : 0; if (vis[p.id] === want) return; vis[p.id] = want;
+            const t = want ? at + dur - 0.12 : at - 0.04;
+            ft(kids(p), { opacity: 1 - want }, { opacity: want, duration: 0.22, ease: "sine.inOut" }, t);
+            if (p.id !== "tbar") ft(p, { opacity: want ? 0.45 : 1 }, { opacity: want ? 1 : 0.45, duration: 0.22, ease: "sine.inOut" }, t); }); };
+        const whip = (x, y, s, at) => shot(x, y, s, at, 0.42, "expo.inOut");
+        let cur = { x: 600, y: 700 };
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const pulse = (el, at, col) => ft(el, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 6px 18px rgba(41,75,119,0.08)" },
+          { keyframes: [{ borderColor: col || "#2f6fe4", boxShadow: "0 0 0 6px rgba(47,111,228,0.18)", duration: 0.2 }, { duration: 0.7 }, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 6px 18px rgba(41,75,119,0.08)", duration: 0.35 }] }, at);
+        const lite = (el, at, col, bg) => ft(el, { borderColor: "rgba(47,111,228,0)" }, { keyframes: [{ borderColor: col || "#2f6fe4", backgroundColor: bg || "#e7f0ff", duration: 0.2 }, { duration: 1.1 }] }, at);
+
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "light" });
+        Object.assign(FX.POSE.peekR, { x: 560, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 }); // client: peeks fully visible
+        FX.POSE.upR.x = 495; FX.POSE.upL.x = -10; // side rises sit clear of the element on the other half
+        FX.theme("light", 0);
+        ft("#dots", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -260px", duration: D, ease: "none" }, 0);
+        st(win, { transformPerspective: 2000, transformOrigin: "50% 50%" }, 0);
+        st(["#popPlat", "#pri", "#fun"], { transformPerspective: 1600 }, 0);
+
+        /* ===== SCENE 1 · HOOK: sticky-note chaos -> everything sucked into one overloaded head ===== */
+        const tBer = wt("Bisnis lu", "berantakan"), tItu = ph("Itu karena").start, tNy = wt("Itu karena", "nyangkut");
+        FX.enter("home", 0.0); FX.wave(0.5);
+        const SN = $$(".sn"), ROT = [-5, 4, 3, -4, -2, 5];
+        SN.forEach((el, i) => ft(el, { opacity: 0, scale: 0.4, rotation: ROT[i] * 3 }, { opacity: 1, scale: 1, rotation: ROT[i], duration: 0.38, ease: "back.out(2)" }, 0.03 + i * 0.1));
+        ft("#hStamp", { opacity: 0, scale: 1.9, rotation: -8 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.26, ease: "power4.in" }, tBer - 0.2);
+        ft("#hook", { x: 0, y: 0 }, { keyframes: [{ x: -12, y: 6, duration: 0.05 }, { x: 10, y: -5, duration: 0.05 }, { x: -6, y: 3, duration: 0.05 }, { x: 0, y: 0, duration: 0.06 }] }, tBer + 0.06);
+        FX.face("wide", tBer - 0.05, 1.0); FX.shiver(tBer + 0.08, 0.4);
+        ft("#hStamp", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.85, duration: 0.25, ease: "power2.in" }, tItu - 0.1);
+        ft("#hHead", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, tItu);
+        const HC = { x: 460, y: 380 };
+        SN.forEach((el, i) => { const dx = HC.x - (el.offsetLeft + el.offsetWidth / 2), dy = HC.y - (el.offsetTop + el.offsetHeight / 2);
+          ft(el, { x: 0, y: 0, scale: 1, opacity: 1, rotation: ROT[i] }, { x: dx, y: dy, scale: 0.12, opacity: 0, rotation: ROT[i] * 5, duration: 0.5, ease: "power2.in" }, tItu + 0.25 + i * 0.09); });
+        ft("#hHead", { scale: 1 }, { keyframes: [{ scale: 1.06, duration: 0.12 }, { scale: 1, duration: 0.25 }] }, tItu + 0.85);
+        ft("#hRing", { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.35, duration: 0.7, ease: "power2.out" }, tNy - 0.05);
+        FX.sticker($("#hOver"), tNy - 0.1, 8);
+        ft("#hHead", { x: 0 }, { keyframes: [{ x: -9, duration: 0.05 }, { x: 8, duration: 0.05 }, { x: -6, duration: 0.05 }, { x: 5, duration: 0.05 }, { x: 0, duration: 0.05 }] }, tNy);
+        ft("#hCnt", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tNy + 0.1);
+        count($("#hCnt b"), 0, 37, tNy + 0.1, 0.7);
+        FX.face("x", tNy - 0.05, 1.0);
+
+        /* ===== slats -> SCENE 2 · app: macro close-up on the AI button, click, ZOOM-OUT REVEAL of the whole map ===== */
+        const tCoba = ph("Coba lihat").start, tKlik = wt("Sekali klik", "klik"), tHal = wt("di satu", "halaman");
+        const tS1 = tCoba - 1.35;
+        FX.dip("peekR", tS1 - 0.05, 0.3);
+        FX.slats(tS1, "light", (m) => { st("#hook", { display: "none" }, m); st(win, { opacity: 1 }, m); });
+        const bt = posIn($("#btnAI"));
+        camSet(bt.x, bt.y - 40, 2.0, 0);
+        st("#cursor", { x: bt.x + 120, y: bt.y + 110, opacity: 0 }, 0); cur = { x: bt.x + 120, y: bt.y + 110 };
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tCoba + 0.2);
+        moveEl($("#btnAI"), tCoba + 0.35, tKlik - tCoba - 0.45, 30, 4);
+        click(tKlik); FX.point(tKlik - 0.35);
+        ft("#btnAI", { scale: 1 }, { keyframes: [{ scale: 0.92, duration: 0.1 }, { scale: 1.04, duration: 0.14 }, { scale: 1, duration: 0.12 }] }, tKlik);
+        ft("#empty", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.9, duration: 0.3, ease: "power2.in" }, tKlik + 0.25);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tKlik + 0.3);
+        FX.face("excited", tKlik + 0.1, 1.1); FX.hop(tKlik + 0.2, 40);
+        // pull back to the full page while the panels build in: each panel appears the moment the widening frame holds it whole
+        const z0 = cc, z1 = cState(460, 475, 1), tZ = tKlik + 0.3, zDur = 1.6, zEase = gsap.parseEase("power3.out");
+        ft("#wcam", z0, Object.assign({}, z1, { duration: zDur, ease: "power3.out" }), tZ); cc = z1;
+        const zAt = (p) => { const e = zEase(p); return { x: z0.x + (z1.x - z0.x) * e, y: z0.y + (z1.y - z0.y) * e, scale: z0.scale + (z1.scale - z0.scale) * e }; };
+        const bc = posIn($("#btnAI")), dist = (p) => Math.hypot(p.offsetLeft + p.offsetWidth / 2 - bc.x, p.offsetTop + p.offsetHeight / 2 - bc.y);
+        PN.slice().sort((a, b) => dist(a) - dist(b)).forEach((p, r) => { const tb = tZ + 0.05 + r * 0.06;
+          if (p.id !== "tbar") ft(p, { opacity: 0, scale: 0.94, "--sk": 1 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out" }, tb);
+          let k = 0; while (k < 80 && !inside(p, frameOf(zAt(k / 80)))) k++; const tc = Math.max(tZ + zDur * k / 80 + 0.02, tb + 0.22);
+          if (p.id !== "tbar") ft(p, { "--sk": 1 }, { "--sk": 0, duration: 0.25 }, tc);
+          ft(kids(p), { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.03, ease: "power2.out" }, tc); vis[p.id] = 1; });
+        ft("#aiBadge", { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.3 }, tZ + 0.2);
+        ft("#pgBadge", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, tHal - 0.15);
+        ft("#pgBadge", { backgroundColor: "rgba(41,75,119,0.08)" }, { keyframes: [{ backgroundColor: "rgba(1,204,247,0.35)", duration: 0.2 }, { backgroundColor: "rgba(41,75,119,0.08)", duration: 0.6 }] }, tHal + 0.2);
+        FX.beat(tHal - 0.1); FX.face("happy", tHal, 0.9);
+        ft(win, { rotationY: 0 }, { rotationY: -4, duration: 1.4, ease: "sine.inOut" }, tZ + zDur);
+
+        /* ===== SCENE 3 · platforms: click the top row, it pops OUT as a big card on the left; robot rises on the right ===== */
+        const tPal = ph("Paling atas").start, tPlat = wt("Paling atas", "platform"), tKeb = wt("kebaca", "kebaca"), tGes = ph("Geser dikit").start;
+        const tPop = tPal + 0.35, tBack = tGes - 0.42;
+        const pp = posIn($("#pPlat .ph .lbl"));
+        st("#cursor", { x: pp.x + 40, y: pp.y + 160 }, tPal - 0.4); cur = { x: pp.x + 40, y: pp.y + 160 };
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tPal - 0.35);
+        moveTo(pp.x + 20, pp.y + 4, tPal - 0.3, 0.38); click(tPal + 0.1);
+        pulse($("#pPlat"), tPal + 0.1);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPal + 0.35);
+        FX.go("upR", tPal - 0.15);
+        ft(win, { rotationY: -4, scale: 1 }, { rotationY: 0, scale: 0.95, duration: 0.5, ease: "power2.inOut" }, tPop);
+        ft("#winDim", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tPop);
+        ft("#popPlat", { opacity: 0, x: 240, y: -250, scale: 0.36, rotationX: 0 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.2)" }, tPop);
+        ft("#pRows .pr", { opacity: 0, x: -26 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.09, ease: "power2.out" }, tPop + 0.3);
+        $$("#pRows .ok").forEach((el, i) => ft(el, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.2)" }, tKeb - 0.1 + i * 0.12));
+        FX.point(tPlat - 0.2); FX.face("happy", tKeb, 1.0); FX.beat(wt("jualan", "konten") - 0.05);
+        ft("#popPlat", { opacity: 1, x: 0, y: 0, scale: 1 }, { opacity: 0, x: 240, y: -250, scale: 0.36, duration: 0.38, ease: "power2.in" }, tBack);
+        ft(win, { scale: 0.95 }, { scale: 1, duration: 0.45, ease: "power2.inOut" }, tBack + 0.08);
+        ft("#winDim", { opacity: 1 }, { opacity: 0, duration: 0.35 }, tBack + 0.08);
+        FX.go("right", tBack - 0.1, 1.1);
+
+        /* ===== SCENE 4 · "geser dikit": whip pan to tech stack + assets, second whip to the rules ===== */
+        const tTech = wt("Geser dikit", "tech"), tAset = wt("aset, sampai", "aset"), tAtur = wt("aset, sampai", "aturan"), tDil = wt("yang nggak", "dilanggar");
+        const SA = [307, 372, 1.53], SB = [611, 372, 1.53];
+        whip(...SA, tGes);
+        $$("#pTech .tc").forEach((el, i) => lite(el, tTech - 0.15 + i * 0.07));
+        $$("#pAset .ar").forEach((el, i) => lite(el, tAset - 0.12 + i * 0.08));
+        FX.point(tTech - 0.25);
+        whip(...SB, tAtur - 0.42);
+        $$("#pRule .rr").forEach((el, i) => { lite(el, tAtur + 0.05 + i * 0.12, "#e5484d", "rgba(229,72,77,0.12)");
+          ft($(".ic", el), { scale: 1, rotation: 0 }, { keyframes: [{ scale: 1.35, rotation: -12, duration: 0.15 }, { scale: 1, rotation: 0, duration: 0.2 }] }, tAtur + 0.05 + i * 0.12); });
+        ft("#rBadge", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, tDil - 0.35);
+        FX.face("wide", tAtur + 0.1, 0.8); FX.beat(tDil - 0.1);
+
+        /* ===== stripes -> SCENE 5 · departments: rows on the right, robot rises on the left ===== */
+        const tTiap = ph("Tiap divisi").start, tKol = ph("kolomnya").start;
+        const tS2 = tTiap - 1.15;
+        FX.dip("upL", tS2 - 0.05, 0.2);
+        FX.stripes(tS2, "light", (m) => { st(win, { opacity: 0 }, m); st("#dept", { opacity: 1 }, m); });
+        const DR = $$(".dr"), DN = [wt("marketing", "marketing"), wt("marketing", "sales"), wt("customer", "customer"), wt("customer", "keuangan"), wt("sampai otomasi", "otomasi")];
+        ft("#dHd", { opacity: 0, y: -24 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tS2 + 0.5);
+        DR.forEach((el, i) => { ft(el, { opacity: 0, x: 90 }, { opacity: 0.4, x: 0, duration: 0.4, ease: "power3.out" }, tS2 + 0.6 + i * 0.07);
+          ft(el, { opacity: 0.4, scale: 1 }, { opacity: 1, keyframes: [{ scale: 1.04, duration: 0.16 }, { scale: 1, duration: 0.22 }] }, DN[i] - 0.12);
+          ft(el, { borderColor: "rgba(47,111,228,0)" }, { keyframes: [{ borderColor: "#2f6fe4", duration: 0.15 }, { duration: 0.6 }, { borderColor: "rgba(47,111,228,0)", duration: 0.3 }] }, DN[i] - 0.12);
+          ft($(".lg", el), { backgroundColor: "rgba(41,75,119,0.12)", color: "#294b77" }, { backgroundColor: "#294b77", color: "#ffffff", duration: 0.25 }, DN[i] - 0.1); });
+        ft("#dHd b", { scale: 1 }, { keyframes: [{ scale: 1.06, duration: 0.15 }, { scale: 1, duration: 0.2 }] }, tKol);
+        FX.wave(tTiap + 0.25); FX.point(DN[0] - 0.2); FX.face("happy", DN[1], 0.8); FX.beat(DN[3] - 0.08); FX.face("excited", DN[4], 0.8);
+
+        /* ===== "klik funnel": click the Funnel chip, ZOOM PUNCH-IN through it into the funnel ===== */
+        const tKF = ph("Klik funnel").start, tFun = wt("Klik funnel", "funnel"), tJal = wt("kelihatan", "jalurnya"), tAs = ph("dari orang").start, tPem = wt("sampai jadi", "pembeli"), tAng = wt("lengkap", "angkanya");
+        const ch = $("#chFun"); let chx = ch.offsetWidth / 2, chy = ch.offsetHeight / 2; for (let e = ch; e && e.id !== "dept"; e = e.offsetParent) { chx += e.offsetLeft; chy += e.offsetTop; }
+        st("#cur2", { x: chx + 150, y: chy + 190, opacity: 0 }, 0);
+        ft("#cur2", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tKF - 0.6);
+        ft("#cur2", { x: chx + 150, y: chy + 190 }, { x: chx + 6, y: chy + 4, duration: 0.5, ease: "power2.inOut" }, tKF - 0.55);
+        ft("#cur2", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, tKF);
+        ft("#rip2", { x: chx, y: chy, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.5, ease: "power2.out" }, tKF);
+        ft("#chFun", { backgroundColor: "rgba(41,75,119,0.07)", color: "#294b77" }, { backgroundColor: "#294b77", color: "#ffffff", duration: 0.15 }, tKF);
+        const tP = tKF + 0.18;
+        ft("#dept", { scale: 1, transformOrigin: `${chx}px ${chy}px` }, { scale: 7, duration: 0.6, ease: "power3.in" }, tP);
+        ft("#dept", { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power1.in" }, tP + 0.08);
+        st("#dept", { display: "none" }, tP + 0.62);
+        ft("#fun", { opacity: 0, scale: 0.14, transformOrigin: `${chx - 100}px ${chy - 320}px` }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }, tP + 0.26);
+        FX.go("home", tKF - 0.55, 1.15);
+        const FS = $$(".fs"), NV = [10000, 1800, 420, 126];
+        FS.forEach((el, i) => { ft(el, { opacity: 0, y: 26, scaleX: 0.85 }, { opacity: 1, y: 0, scaleX: 1, duration: 0.4, ease: "power3.out" }, tP + 0.75 + i * 0.12);
+          count($(".n", el), 0, NV[i], tP + 0.85 + i * 0.12, 0.9, dot); });
+        ft("#fs1", { boxShadow: "0 0 0 0 rgba(1,204,247,0)" }, { keyframes: [{ boxShadow: "0 0 0 8px rgba(1,204,247,0.55)", duration: 0.2 }, { duration: 0.5 }, { boxShadow: "0 0 0 0 rgba(1,204,247,0)", duration: 0.3 }] }, tAs + 0.1);
+        ft("#fDot", { opacity: 0, x: 0, y: 0 }, { keyframes: [{ opacity: 1, duration: 0.08 }, { y: 150, duration: 0.42, ease: "sine.inOut" }, { y: 300, duration: 0.42, ease: "sine.inOut" }, { y: 450, duration: 0.42, ease: "sine.inOut" }, { opacity: 0, duration: 0.12 }] }, tAs + 0.3);
+        ft("#fs4", { boxShadow: "0 0 0 0 rgba(1,204,247,0)", scale: 1 }, { keyframes: [{ boxShadow: "0 0 0 10px rgba(1,204,247,0.6)", scale: 1.05, duration: 0.2 }, { scale: 1, duration: 0.25 }, { duration: 0.4 }, { boxShadow: "0 0 0 0 rgba(1,204,247,0)", duration: 0.35 }] }, tPem - 0.05);
+        $$(".cv").forEach((el, i) => ft(el, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.32, ease: "back.out(2.2)" }, tAng - 0.25 + i * 0.12));
+        ft(".fs .n", { scale: 1 }, { keyframes: [{ scale: 1.1, duration: 0.15 }, { scale: 1, duration: 0.2 }], stagger: 0.08 }, tAng - 0.1);
+        FX.face("happy", tJal, 0.8); FX.point(tAs - 0.1); FX.face("excited", tPem, 0.9); FX.beat(tAng - 0.05);
+
+        /* ===== 3D split · AI reads the map: funnel swings back + scan, priorities card floats in front ===== */
+        const tTer = ph("Terus AI").start, tBaca = wt("Terus AI", "baca"), tKas = ph("dan kasih").start, tTiga = wt("tiga prioritas", "tiga");
+        ft("#fun", { rotationY: 0, scale: 1, x: 0, transformOrigin: "0% 50%" }, { rotationY: 22, scale: 0.88, x: -40, duration: 0.7, ease: "power3.inOut" }, tTer - 0.05);
+        ft("#funDim", { opacity: 0 }, { opacity: 1, duration: 0.6 }, tBaca + 0.1);
+        ft("#scan", { opacity: 0, y: -90 }, { keyframes: [{ opacity: 1, duration: 0.1 }, { y: 700, duration: 1.0, ease: "sine.inOut" }, { opacity: 0, duration: 0.15 }] }, tBaca - 0.15);
+        FX.go("right", tTer - 0.1, 0.9);
+        ft("#pri", { opacity: 0, x: 170, rotationY: -28 }, { opacity: 1, x: 0, rotationY: 0, duration: 0.6, ease: "power3.out" }, tBaca - 0.1);
+        ft("#stA .ic", { rotation: 0 }, { keyframes: [{ y: -3, duration: 0.2 }, { y: 3, duration: 0.2 }, { y: 0, duration: 0.2 }] }, tKas);
+        ft("#stA", { opacity: 1 }, { opacity: 0, duration: 0.18 }, tTiga - 0.25); ft("#stB", { opacity: 0 }, { opacity: 1, duration: 0.18 }, tTiga - 0.12);
+        ft("#pri", { "--sk": 0 }, { keyframes: [{ "--sk": 1, duration: 0.3 }, { duration: tTiga - tBaca - 0.45 }, { "--sk": 0, duration: 0.25 }] }, tBaca - 0.1);
+        $$(".pi").forEach((el, i) => ft(el, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, tTiga - 0.15 + i * 0.2));
+        FX.face("wide", tBaca, 0.7); FX.point(tKas - 0.1); FX.face("excited", tTiga + 0.1, 0.9);
+
+        /* ===== ZOOM-OUT · scene recedes, kinetic stat stack on the left, robot rises on the right ===== */
+        const tSatu = ph("Satu halaman").start, tSem = ph("semua divisi").start, tNgg = ph("nggak ada").start, tTeb = wt("nggak ada", "tebak");
+        const tR = tSatu - 0.62;
+        ft("#fun", { opacity: 1, scale: 0.88 }, { opacity: 0, scale: 0.6, duration: 0.38, ease: "power3.in" }, tR);
+        ft("#pri", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6, duration: 0.38, ease: "power3.in", transformOrigin: "50% 50%" }, tR);
+        FX.go("upR", tR - 0.05, 1.15);
+        const kin = (sel, at) => ft(sel, { opacity: 0, x: -70, scale: 0.94 }, { opacity: 1, x: 0, scale: 1, duration: 0.45, ease: "power3.out" }, at);
+        kin("#k1", tSatu - 0.25); FX.drop($("#k1 .w"), tSatu - 0.15);
+        kin("#k2", tSem - 0.15); FX.drop($("#k2 .w"), tSem - 0.05); FX.marker($("#k2 .hl i"), tSem + 0.4);
+        kin("#k3", tNgg - 0.15); count($("#n0"), 9, 0, tNgg, 0.9);
+        ft("#k3 .lg .ic", { rotation: 0, scale: 1 }, { keyframes: [{ scale: 1.25, duration: 0.15 }, { scale: 1, rotation: 360, duration: 0.7, ease: "power2.inOut" }] }, tTeb - 0.2);
+        FX.face("happy", tSatu, 0.8); FX.point(tSem - 0.1); FX.hop(tNgg - 0.1, 40); FX.face("excited", tTeb, 0.8);
+
+        /* ===== SCENE 8 · CTA: centred box, robot whole at the bottom ===== */
+        const tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");
+        ft(["#k1", "#k2", "#k3"], { opacity: 1, y: 0 }, { opacity: 0, y: -30, duration: 0.28, stagger: 0.04, ease: "power2.in" }, tCta - 0.6);
+        FX.go("center", tCta - 1.12, 1.05);
+        ft("#cta", { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tCta);
+        ft("#ctaRow .stk", { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.12, ease: "power3.out" }, tCta + 0.55);
+        FX.hop(tCta + 0.7, 30); FX.wave(tCta + 0.8);
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
+        FX.point(tF - 0.3); FX.face("happy", tF + 0.05, 1.4); FX.face("excited", D - 1.6, 0.9);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        FX.runGestures();
+
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

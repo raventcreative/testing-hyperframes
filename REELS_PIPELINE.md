@@ -69,9 +69,11 @@ module robot3d.js, `<canvas id="robo3d" width="820" height="700">` at left -92, 
 - **No cut text in the demo, ever.** Every text element visible in a frame must be fully readable. When the screen-recording
   camera (#wcam) zooms, any panel the frame edge would slice fades out for that shot (or the shot frames whole panels).
   Check pop-outs, chips, receipts for overflow/clipped words. Snapshot every camera shot before rendering.
-- **Robot stays in the bottom band (client, 2026-11-14 reviews):** it moves home/center/right and peeks, but NEVER stands in the
-  middle of the screen (no up/upL/upR) — the centre always belongs to the demo element. Peeks fully visible
-  (peekR x 560, peekL x -110); no low poses. CTA: the AIpreneur Automation box centred, robot whole at the bottom.
+- **Robot placement (client, 2026-11-14 reviews):** it moves home/center/right and peeks, but NEVER stands in the
+  middle of the screen covering the demo (no centre `up`) — the centre always belongs to the demo element. Peeks fully
+  visible (peekR x 560, peekL x -110); no low poses. CTA: the AIpreneur Automation box centred, robot whole at the bottom.
+- **Side rises allowed (batch 3 brief):** the robot may rise to mid-left/right (`upL`/`upR`) and stand next to an element
+  that sits on the other half of the stage ("pas elemennya disamping dia bisa ikut di sebelahnya"). Aim for ≥2 per reel.
 - **Sync:** every wipe finishes before the VO line that introduces the next scene; elements are on screen when the VO names them.
 - **No dots wipe** (client dislikes it).
 - **Transitions differ per reel** (sets from: stripes, blocks, sweep, iris, shutter, doors, slats, dots).

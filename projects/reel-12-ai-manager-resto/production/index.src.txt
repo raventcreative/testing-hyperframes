@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur — AI Manager Resto</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --n1: #0a0d2c; --n2: #294b77; --grad: linear-gradient(100deg, #0a0d2c 0%, #294b77 100%); --line: rgba(10,13,44,0.10);
+        --auto: #2f6fe4; --autoBg: #e7f0ff; --ok: #1fa855; --okBg: #dcf6e4; --red: #e5484d; --redBg: rgba(229,72,77,0.12); --org: #f08c1a; --mute: rgba(10,13,44,0.55); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fd; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: var(--n1); -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #f4f7fd; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #132650; opacity: 0; }
+      #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+      .simtag { font-size: 15px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 3px 12px; white-space: nowrap; }
+      .ilu { font-size: 13px; font-weight: 400; color: var(--mute); white-space: nowrap; }
+      .glg { background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+
+      /* ---------- HOOK (kinetic, stage x 80-1000, y 290-1240) ---------- */
+      #hook { position: absolute; left: 80px; top: 320px; width: 920px; height: 950px; }
+      .hc { position: absolute; background: #fff; border: 1.5px solid rgba(10,13,44,0.08); border-radius: 30px; box-shadow: 0 30px 70px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); }
+      #hClock { left: 170px; top: 0px; width: 580px; height: 300px; text-align: center; padding-top: 26px; }
+      #hClock .hd { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 24px; font-weight: 700; letter-spacing: 5px; color: var(--org); }
+      #hClock .hd .ic { width: 36px; height: 36px; }
+      #hClock .tm { font-size: 168px; font-weight: 700; line-height: 1; letter-spacing: -2px; margin-top: 14px; }
+      #hClock .tm i { font-style: normal; display: inline-block; }
+      #hClock .simtag { position: absolute; right: 22px; top: 22px; font-size: 13px; }
+      #hMgr { left: 30px; top: 340px; width: 860px; height: 330px; padding: 28px 34px; }
+      #hMgr .hd { display: flex; align-items: center; gap: 22px; }
+      #hMgr .lg { width: 92px; height: 92px; border-radius: 26px; } #hMgr .lg .ic { width: 50px; height: 50px; }
+      #hMgr .ttl { font-size: 52px; font-weight: 700; line-height: 1.1; }
+      #hMgr .pill { display: inline-flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 22px; font-weight: 700; color: var(--ok); background: var(--okBg); border-radius: 16px; padding: 4px 16px; }
+      #hMgr .pill i { width: 12px; height: 12px; border-radius: 50%; background: var(--ok); display: block; }
+      #hAg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 26px; }
+      #hAg span { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 18px; border-radius: 18px; background: rgba(41,75,119,0.07); font-size: 25px; font-weight: 700; color: var(--n1); border: 2px solid transparent; }
+      #hAg span .ic { width: 30px; height: 30px; color: var(--n2); }
+      #hSleep { left: 230px; top: 712px; width: 440px; height: 118px; display: flex; align-items: center; gap: 20px; padding: 0 26px; }
+      #hSleep .lg { width: 70px; height: 70px; border-radius: 50%; background: #e9eef8; color: var(--n2); display: flex; align-items: center; justify-content: center; flex: none; }
+      #hSleep .lg .ic { width: 36px; height: 36px; }
+      #hSleep .k { font-size: 20px; color: var(--mute); line-height: 1.2; } #hSleep b { display: block; font-size: 36px; line-height: 1.15; }
+      #hSleep .zz { position: absolute; right: 26px; top: 14px; width: 70px; height: 90px; }
+      #hSleep .zz i { position: absolute; font-style: normal; font-weight: 700; color: var(--n2); opacity: 0; }
+      #hook .stk { opacity: 0; }
+      #sk1 { left: 660px; top: 318px; } #sk2 { left: 690px; top: 772px; }
+
+      /* ---------- app window: x 80-1000, y 290-1240 ---------- */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.96);
+        border: 1.5px solid rgba(10,13,44,0.09); box-shadow: 0 30px 80px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; background: rgba(244,247,253,0.7); }
+      #wgrid { position: absolute; left: 0; top: 60px; width: 920px; height: 890px; background-image: radial-gradient(rgba(41,75,119,0.12) 1px, transparent 1.4px); background-size: 22px 22px; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fff; }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 2px 10px; }
+      #clk { margin-left: auto; position: relative; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px 0 40px; border-radius: 19px; background: var(--autoBg); color: var(--auto); font-size: 19px; font-weight: 700; }
+      #clk .ic { position: absolute; left: 12px; top: 9px; width: 20px; height: 20px; }
+      #clk #icMoon { opacity: 0; color: var(--n2); }
+      #dayBar { position: absolute; left: 20px; top: 74px; width: 880px; height: 46px; border-radius: 14px; background: #fff; border: 1.5px solid var(--line); }
+      #dayBar .lbl { position: absolute; left: 16px; top: 15px; font-size: 12px; }
+      #dTrack { position: absolute; left: 140px; top: 4px; width: 710px; height: 38px; }
+      #dLine { position: absolute; left: 0; top: 10px; width: 710px; height: 6px; border-radius: 3px; background: rgba(41,75,119,0.12); }
+      #dFill { position: absolute; left: 0; top: 0; width: 710px; height: 6px; border-radius: 3px; background: var(--auto); transform-origin: 0 50%; transform: scaleX(0); }
+      #dMark { position: absolute; left: -7px; top: -4px; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--auto); }
+      .dt { position: absolute; top: 20px; font-size: 11.5px; line-height: 16px; font-weight: 700; color: var(--mute); width: 30px; margin-left: -15px; text-align: center; }
+
+      #wires { position: absolute; left: 0; top: 0; width: 920px; height: 950px; overflow: visible; }
+      #wires path { fill: none; stroke-linecap: round; }
+      #wires .w0 { stroke: rgba(41,75,119,0.20); stroke-width: 3; }
+      #wires .w1 { stroke: var(--auto); stroke-width: 3.5; }
+      #wires circle { fill: var(--auto); opacity: 0; }
+      #mgr { position: absolute; left: 340px; top: 236px; width: 240px; height: 172px; border-radius: 22px; background: #fff; border: 2px solid rgba(41,75,119,0.22); text-align: center; padding-top: 16px;
+        box-shadow: 0 10px 30px rgba(41,75,119,0.16); }
+      #mgr .lg { width: 60px; height: 60px; border-radius: 18px; margin: 0 auto; } #mgr .lg .ic { width: 32px; height: 32px; }
+      #mgr b { display: block; font-size: 22px; line-height: 1.2; margin-top: 8px; }
+      #mgr em { display: block; font-style: normal; font-size: 14px; color: var(--mute); }
+      #mgr .on { display: inline-block; margin-top: 6px; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: var(--ok); background: var(--okBg); border-radius: 10px; padding: 1px 10px; }
+      .node { position: absolute; width: 260px; height: 108px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 6px 18px rgba(41,75,119,0.08); padding: 13px 14px; }
+      .node .t { display: flex; align-items: center; gap: 12px; }
+      .node .lg { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; flex: none; }
+      .node .lg .ic { width: 26px; height: 26px; }
+      .node b { display: block; font-size: 19px; line-height: 1.2; } .node em { display: block; font-style: normal; font-size: 13.5px; color: var(--mute); }
+      .stt { position: absolute; left: 76px; bottom: 11px; height: 22px; border-radius: 11px; padding: 0 10px 0 22px; font-size: 12px; font-weight: 700; letter-spacing: 1px; line-height: 22px;
+        background: rgba(10,13,44,0.07); color: rgba(10,13,44,0.5); }
+      .stt::before { content: ""; position: absolute; left: 9px; top: 7px; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+      .stt::after { content: "STANDBY"; } .stt[data-s="1"] { background: var(--autoBg); color: var(--auto); } .stt[data-s="1"]::after { content: "JALAN"; }
+      .stt[data-s="2"] { background: var(--okBg); color: var(--ok); } .stt[data-s="2"]::after { content: "BERES"; }
+      #nStok { left: 20px; top: 140px; } #nJad { left: 20px; top: 268px; } #nAdm { left: 20px; top: 396px; }
+      #nFin { left: 640px; top: 140px; } #nMkt { left: 640px; top: 268px; } #nRev { left: 640px; top: 396px; }
+      #nStok .lg { background: #f08c1a; } #nJad .lg { background: #2f6fe4; } #nAdm .lg { background: #1fa855; }
+      #nFin .lg { background: #294b77; } #nMkt .lg { background: #e5484d; } #nRev .lg { background: #e8a200; }
+
+      .card { position: absolute; background: #fff; border: 1.5px solid var(--line); border-radius: 18px; box-shadow: 0 6px 20px rgba(41,75,119,0.08); }
+      .card .hd { display: flex; align-items: center; gap: 10px; }
+      .card .hd .lg { width: 38px; height: 38px; border-radius: 11px; color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+      .card .hd .lg .ic { width: 21px; height: 21px; }
+      .card .hd b { font-size: 18px; } .card .hd .ilu { margin-left: auto; }
+      /* log */
+      #logC { left: 20px; top: 524px; width: 290px; height: 410px; padding: 14px 14px; }
+      #logL { position: relative; margin-top: 10px; }
+      .le { position: relative; height: 56px; padding-left: 20px; border-left: 2px solid rgba(41,75,119,0.15); margin-left: 6px; opacity: 0.45; }
+      .le::before { content: ""; position: absolute; left: -7px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: #c5cfdf; }
+      .le[data-d="1"]::before { background: var(--ok); } .le[data-d="1"] b { color: var(--ok); }
+      .le b { display: block; font-size: 13px; color: var(--n2); line-height: 1.3; } .le span { display: block; font-size: 15px; line-height: 1.3; white-space: nowrap; }
+      /* stock */
+      #vStok { left: 330px; top: 524px; width: 570px; height: 410px; padding: 16px 20px; opacity: 0; }
+      #vStok .hd .lg { background: #f08c1a; }
+      .src { display: flex; gap: 10px; margin-top: 12px; }
+      .src span { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border-radius: 10px; background: rgba(41,75,119,0.07); font-size: 14.5px; font-weight: 700; color: var(--n2); }
+      .src span .ic { width: 17px; height: 17px; }
+      .srow { position: relative; display: flex; align-items: center; height: 50px; margin-top: 4px; padding: 0 10px; border-radius: 12px; font-size: 18px; }
+      .srow .nm { width: 150px; font-weight: 700; } .srow .bar { position: relative; width: 140px; height: 12px; border-radius: 6px; background: rgba(41,75,119,0.10); overflow: hidden; }
+      .srow .bar i { position: absolute; left: 0; top: 0; height: 12px; border-radius: 6px; background: var(--ok); transform-origin: 0 50%; display: block; }
+      .srow .pc { width: 58px; text-align: right; font-weight: 700; font-size: 17px; }
+      .srow .lowt { margin-left: auto; font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #fff; background: var(--red); border-radius: 9px; padding: 2px 9px; opacity: 0; white-space: nowrap; }
+      .srow.low .bar i { background: var(--red); } .srow.low .pc { color: var(--red); }
+      /* admin + review (scene 4) */
+      #vAdm, #vRev { top: 524px; width: 560px; height: 410px; padding: 16px 20px; opacity: 0; }
+      #vAdm { left: 20px; } #vRev { left: 340px; }
+      #vAdm .hd .lg { background: #1fa855; } #vRev .hd .lg { background: #e8a200; }
+      .cnt { display: flex; gap: 12px; margin-top: 12px; }
+      .cnt div { flex: 1; border-radius: 12px; background: var(--okBg); padding: 6px 12px; }
+      .cnt b { display: block; font-size: 30px; line-height: 1.1; color: var(--ok); } .cnt span { font-size: 13px; color: var(--mute); }
+      .cr { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 9px; opacity: 0; }
+      .cr .q { font-size: 17px; background: rgba(10,13,44,0.06); border-radius: 12px 12px 12px 4px; padding: 6px 11px; white-space: nowrap; }
+      .cr .a { display: flex; align-items: center; gap: 5px; font-size: 17px; font-weight: 700; color: #136b37; background: #d9fbd0; border-radius: 12px 12px 4px 12px; padding: 6px 11px; white-space: nowrap; }
+      .cr .a .ic { width: 15px; height: 15px; color: #34b7f1; }
+      .rv { position: relative; margin-top: 14px; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--line); opacity: 0; }
+      .rv .st { display: flex; gap: 3px; color: #e8a200; } .rv .st .ic { width: 21px; height: 21px; } .rv .st .ic.off { color: rgba(10,13,44,0.15); }
+      .rv .q { font-size: 19px; margin-top: 4px; white-space: nowrap; }
+      .rv .tg { position: absolute; right: 14px; top: 14px; display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; border-radius: 9px; padding: 2px 9px; background: var(--okBg); color: var(--ok); opacity: 0; }
+      .rv .tg .ic { width: 16px; height: 16px; } .rv .tg.bad { background: var(--redBg); color: var(--red); }
+      /* finance (scene 6) */
+      #vFin { left: 330px; top: 524px; width: 570px; height: 410px; padding: 16px 20px; opacity: 0; }
+      #vFin .hd .lg { background: #294b77; }
+      .fr { display: flex; align-items: center; height: 54px; margin-top: 6px; padding: 0 12px; border-radius: 12px; background: rgba(41,75,119,0.05); font-size: 18px; opacity: 0; }
+      .fr b { margin-left: auto; font-weight: 700; } .fr .ck { width: 26px; height: 26px; margin-left: 14px; color: var(--ok); }
+      .fr.tot { background: var(--autoBg); font-size: 20px; } .fr.tot b { font-size: 26px; color: var(--auto); }
+
+      /* marketing layer (scene 5) — fills the window, emerges out of the Marketing node */
+      #mk { position: absolute; left: 0; top: 0; width: 920px; height: 950px; background: #f6f8fd; opacity: 0; }
+      #mkH { position: absolute; left: 0; top: 0; width: 920px; height: 74px; display: flex; align-items: center; gap: 14px; padding: 0 24px; background: #fff; border-bottom: 1px solid var(--line); }
+      #mkH .lg { width: 46px; height: 46px; border-radius: 13px; background: #e5484d; color: #fff; display: flex; align-items: center; justify-content: center; } #mkH .lg .ic { width: 26px; height: 26px; }
+      #mkH b { font-size: 24px; } #mkH .tmc { margin-left: auto; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 20px; background: var(--autoBg); color: var(--auto); font-size: 20px; font-weight: 700; }
+      #mkH .tmc .ic { width: 20px; height: 20px; }
+      #occ { position: absolute; left: 30px; top: 98px; width: 860px; height: 400px; padding: 20px 26px; }
+      #occ .hd b { font-size: 22px; }
+      #bars { position: absolute; left: 26px; right: 26px; bottom: 22px; height: 300px; display: flex; justify-content: space-between; align-items: flex-end; }
+      .bc { position: relative; width: 96px; height: 300px; text-align: center; }
+      .bc .pv { position: absolute; left: 0; right: 0; font-size: 18px; font-weight: 700; color: var(--n2); }
+      .bc .b { position: absolute; left: 18px; width: 60px; bottom: 40px; border-radius: 12px 12px 6px 6px; background: linear-gradient(180deg, #4f8bf0, #2f6fe4); transform-origin: 50% 100%; }
+      .bc .d { position: absolute; left: 0; right: 0; bottom: 0; font-size: 20px; font-weight: 700; }
+      .bc.sepi .b { background: linear-gradient(180deg, #f27a7e, #e5484d); } .bc.sepi .pv { color: var(--red); }
+      #sepiT { position: absolute; left: 50%; top: 0; transform: translateX(-50%); font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #fff; background: var(--red); border-radius: 9px; padding: 2px 10px; opacity: 0; white-space: nowrap; }
+      #draft { position: absolute; left: 30px; top: 526px; width: 860px; height: 250px; padding: 22px 28px; opacity: 0; }
+      #draft .k { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; letter-spacing: 2px; color: var(--red); }
+      #draft .k .ic { width: 20px; height: 20px; }
+      #draft .big { position: relative; display: inline-block; font-size: 58px; font-weight: 700; line-height: 1.15; margin-top: 12px; white-space: nowrap; }
+      #draft .big .strike { position: absolute; left: -6px; right: -6px; top: 52%; height: 7px; border-radius: 4px; background: var(--red); transform-origin: 0 50%; transform: scaleX(0); }
+      #draft .sb { font-size: 17px; color: var(--mute); margin-top: 10px; }
+      #draft .big2 { position: absolute; left: 28px; top: 70px; font-size: 58px; font-weight: 700; line-height: 1.15; color: var(--ok); opacity: 0; white-space: nowrap; }
+      #mkNote { position: absolute; left: 30px; top: 800px; width: 860px; height: 120px; padding: 0 28px; display: flex; align-items: center; gap: 16px; opacity: 0; }
+      #mkNote .lg { width: 56px; height: 56px; border-radius: 16px; } #mkNote .lg .ic { width: 30px; height: 30px; }
+      #mkNote b { font-size: 24px; } #mkNote span { display: block; font-size: 16px; color: var(--mute); }
+
+      /* cursor + misc */
+      #winDim { position: absolute; inset: 0; background: rgba(244,247,253,0.80); opacity: 0; }
+
+      /* ---------- pop-out cards (float over the window) ---------- */
+      .pop { position: absolute; background: #fff; border-radius: 28px; opacity: 0; box-shadow: 0 40px 90px rgba(10,13,44,0.28), 0 6px 18px rgba(41,75,119,0.12); }
+      .pop .ph { display: flex; align-items: center; gap: 14px; }
+      .pop .ph .lg { width: 58px; height: 58px; border-radius: 17px; } .pop .ph .lg .ic { width: 30px; height: 30px; }
+      .pop .ph b { display: block; font-size: 29px; line-height: 1.15; } .pop .ph em { display: block; font-style: normal; font-size: 16px; color: var(--mute); }
+      .pop .ph .simtag { margin-left: auto; font-size: 12px; padding: 2px 9px; align-self: flex-start; }
+      .pr { display: flex; justify-content: space-between; align-items: center; font-size: 27px; padding: 13px 4px; border-bottom: 1.5px dashed rgba(10,13,44,0.12); }
+      .pr b { font-weight: 700; }
+      #pPO { left: 520px; top: 560px; width: 460px; padding: 28px 28px 26px; }
+      #pPO .ph .lg { background: #f08c1a; }
+      #pPO .to { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 17px; color: var(--mute); } #pPO .to .ic { width: 20px; height: 20px; color: #1fa855; }
+      #pPO .nt { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 19px; font-weight: 700; color: var(--n2); } #pPO .nt .ic { width: 22px; height: 22px; }
+      #pPO .ft { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 19px; font-weight: 700; color: var(--ok); opacity: 0; } #pPO .ft .ic { width: 24px; height: 24px; color: #34b7f1; }
+      #pPlan { left: 540px; top: 318px; width: 456px; padding: 26px 26px 26px; background: transparent; box-shadow: none; }
+      #pPlan > :not(.pbg) { position: relative; }
+      .pbg { position: absolute; left: 0; top: 0; width: 100%; height: 120px; border-radius: 28px; background: #fff; box-shadow: 0 40px 90px rgba(10,13,44,0.28), 0 6px 18px rgba(41,75,119,0.12); }
+      #pPlan .ph .lg { background: #2f6fe4; }
+      .pb { margin-top: 14px; border-radius: 18px; background: rgba(41,75,119,0.06); padding: 12px 16px; display: flex; align-items: center; gap: 14px; opacity: 0; }
+      .pb .ic { width: 34px; height: 34px; color: var(--n2); } .pb .k { font-size: 16px; color: var(--mute); line-height: 1.2; } .pb .v { font-size: 30px; font-weight: 700; line-height: 1.15; }
+      #gauge { margin-top: 14px; border-radius: 18px; background: #fff4e6; padding: 12px 16px; opacity: 0; }
+      #gauge .k { display: flex; justify-content: space-between; font-size: 16px; color: var(--mute); } #gauge .k b { font-size: 26px; color: var(--org); letter-spacing: 2px; }
+      #gauge .tr { height: 14px; border-radius: 7px; background: rgba(240,140,26,0.18); margin-top: 6px; overflow: hidden; } #gauge .tr i { display: block; height: 14px; width: 92%; border-radius: 7px; background: var(--org); transform-origin: 0 50%; }
+      .mb { margin-top: 14px; max-width: 400px; padding: 10px 14px 12px; border-radius: 18px; font-size: 20px; line-height: 1.3; opacity: 0; }
+      .mb.out { margin-left: auto; background: #d9fbd0; border-bottom-right-radius: 6px; } .mb.in { background: #eef1f6; border-bottom-left-radius: 6px; }
+      .mb .w { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--auto); margin-bottom: 2px; } .mb .w .ic { width: 15px; height: 15px; }
+      #pNotif { left: 120px; top: 330px; width: 840px; padding: 24px 28px; display: flex; gap: 20px; align-items: flex-start; }
+      #pNotif .lg { width: 70px; height: 70px; border-radius: 50%; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; } #pNotif .lg .ic { width: 36px; height: 36px; }
+      #pNotif .k { font-size: 17px; color: var(--mute); } #pNotif b { display: block; font-size: 32px; line-height: 1.2; }
+      #pNotif .q { font-size: 23px; margin-top: 4px; color: rgba(10,13,44,0.8); }
+      #pNotif .tg { display: inline-block; margin-top: 10px; font-size: 16px; font-weight: 700; letter-spacing: 1px; color: var(--red); background: var(--redBg); border-radius: 12px; padding: 4px 14px; }
+      #pNotif .st { display: flex; gap: 3px; margin-top: 6px; color: #e8a200; } #pNotif .st .ic { width: 24px; height: 24px; } #pNotif .st .ic.off { color: rgba(10,13,44,0.15); }
+      #pChk { left: 80px; top: 360px; width: 420px; height: 680px; padding: 26px 24px; }
+      #pChk .ph .lg { background: var(--grad); }
+      .cs { position: absolute; left: 24px; right: 24px; top: 118px; }
+      .cs .lb { font-size: 15px; font-weight: 700; letter-spacing: 2px; color: var(--n2); margin-bottom: 6px; }
+      .cs .pr { font-size: 25px; opacity: 0; }
+      .cs .res { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding: 14px 16px; border-radius: 16px; opacity: 0; }
+      .cs .res span { font-size: 21px; font-weight: 700; } .cs .res b { font-size: 42px; font-weight: 700; line-height: 1; white-space: nowrap; } .cs .res small { font-size: 17px; font-weight: 400; }
+      #csA .res { background: var(--redBg); color: var(--red); } #csB .res { background: var(--okBg); color: var(--ok); } #csB .res b { font-size: 32px; }
+      #csB { opacity: 0; }
+      .stamp { position: absolute; left: 50%; top: 492px; width: 350px; margin-left: -175px; text-align: center; font-size: 58px; font-weight: 700; line-height: 1.2; border: 8px solid; border-radius: 22px;
+        padding: 2px 0 6px; background: rgba(255,255,255,0.94); letter-spacing: 3px; opacity: 0; }
+      #stNo { color: var(--red); border-color: var(--red); box-shadow: 0 16px 40px rgba(229,72,77,0.25); }
+      #stOk { color: var(--ok); border-color: var(--ok); box-shadow: 0 16px 40px rgba(31,168,85,0.25); }
+      #pChk .ilu { position: absolute; left: 26px; bottom: 22px; font-size: 14px; }
+      #pBc { left: 80px; top: 420px; width: 420px; padding: 26px 24px 22px; }
+      #pBc .ph .lg { background: #1fa855; }
+      #pBc .msg { margin-top: 18px; padding: 12px 16px; border-radius: 16px; background: #d9fbd0; font-size: 21px; line-height: 1.3; }
+      #pBc .n { display: flex; align-items: baseline; gap: 12px; margin-top: 16px; } #pBc .n b { font-size: 96px; font-weight: 700; line-height: 1; color: var(--ok); } #pBc .n span { font-size: 22px; color: var(--mute); }
+      #pBc .tr { height: 14px; border-radius: 7px; background: rgba(31,168,85,0.15); margin-top: 12px; overflow: hidden; } #pBc .tr i { display: block; height: 14px; border-radius: 7px; background: var(--ok); transform-origin: 0 50%; transform: scaleX(0); }
+      #pBc .ft { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 18px; font-weight: 700; color: var(--ok); opacity: 0; } #pBc .ft .ic { width: 22px; height: 22px; color: #34b7f1; }
+      #pSum { left: 300px; top: 420px; width: 560px; padding: 28px 30px 24px; }
+      #pSum .ph .lg { background: var(--grad); }
+      #pSum .sr { display: flex; align-items: center; gap: 14px; height: 70px; border-bottom: 1.5px dashed rgba(10,13,44,0.12); font-size: 25px; opacity: 0; }
+      #pSum .sr .ic { width: 32px; height: 32px; color: var(--n2); } #pSum .sr b { font-weight: 700; }
+      #pSum .ilu { display: block; margin-top: 12px; font-size: 14px; }
+
+      /* ---------- kinetic stat rows ---------- */
+      #kin { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; transform-origin: 50% 48%; }
+      .kr { position: absolute; left: 225px; width: 470px; height: 176px; border-radius: 30px; background: #fff; display: flex; align-items: center; gap: 20px; padding: 0 26px; opacity: 0;
+        box-shadow: 0 26px 64px rgba(41,75,119,0.22), 0 4px 14px rgba(41,75,119,0.08); }
+      .kr .lg { width: 84px; height: 84px; border-radius: 24px; } .kr .lg .ic { width: 44px; height: 44px; }
+      .kr .w { font-size: 56px; font-weight: 700; line-height: 1; letter-spacing: 1px; white-space: nowrap; }
+      .kr .s { font-size: 20px; line-height: 1.3; color: rgba(10,13,44,0.65); margin-top: 8px; }
+      #k1 { top: 150px; } #k2 { top: 350px; } #k3 { top: 550px; background: linear-gradient(135deg, #0a0d2c, #294b77); }
+      #k3 .w { color: #fff; } #k3 .s { color: rgba(255,255,255,0.78); } #k3 .lg { background: rgba(255,255,255,0.14); }
+
+      #cta { position: absolute; left: 110px; width: 860px; top: 340px; padding: 38px 44px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 25px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 60px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 25px; margin-top: 10px; color: rgba(10,13,44,0.75); } #cta .sb b { color: var(--n2); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 24px; height: 72px; padding: 0 42px; border-radius: 36px; background: var(--grad); color: #fff; font-size: 30px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ctaChips { position: absolute; left: 80px; width: 920px; top: 770px; display: flex; justify-content: center; gap: 16px; z-index: 40; }
+      #ctaChips .stk { position: relative; opacity: 0; font-size: 24px; padding: 12px 20px; border-radius: 18px; } #ctaChips .stk .ic { color: var(--n2); width: 26px; height: 26px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoL { opacity: 0; }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); }
+      .stk { position: absolute; display: flex; align-items: center; gap: 9px; padding: 9px 18px; border-radius: 15px; background: #fff; font-size: 22px; font-weight: 700; color: var(--n1);
+        box-shadow: 0 12px 28px rgba(41,75,119,0.24); border: 1.5px solid rgba(10,13,44,0.07); white-space: nowrap; }
+      .stk .ic { width: 22px; height: 22px; color: var(--org); } .stk.y { background: #01ccf7; color: #0a0d2c; border-color: transparent; } .stk.y .ic { color: #0a0d2c; }
+      .hl { position: relative; display: inline-block; isolation: isolate; } .hl i { position: absolute; left: -6px; right: -6px; bottom: 3px; height: 15px; border-radius: 5px; background: rgba(1,204,247,0.5); z-index: -1; transform-origin: 0 50%; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
+      #main[data-sc="dark"] .cap .in { background: none; color: #fff; text-shadow: 0 4px 18px rgba(0,0,0,0.45); } #main[data-sc="dark"] .cap s.k { color: #01ccf7; }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(41,75,119,0.22)); }
+      #hClock, #hMgr, #hSleep { opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="58.8" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="58.8" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div>
+
+        <div id="hook">
+          <div class="hc" id="hClock"><span class="simtag">SIMULASI</span><div class="hd"><span class="ic" data-i="sunrise"></span>PAGI · RESTO LU</div>
+            <div class="tm gt"><i>06</i><i id="hCol">:</i><i>00</i></div></div>
+          <div class="hc" id="hMgr"><div class="hd"><div class="lg glg"><span class="ic" data-i="bot"></span></div><div><div class="ttl gt">AI Manager</div><span class="pill"><i></i>Menjalankan resto</span></div></div>
+            <div id="hAg"><span><span class="ic" data-i="package"></span>Stok</span><span><span class="ic" data-i="calendar-clock"></span>Jadwal</span><span><span class="ic" data-i="message-circle"></span>Admin</span>
+              <span><span class="ic" data-i="star"></span>Review</span><span><span class="ic" data-i="megaphone"></span>Marketing</span><span><span class="ic" data-i="wallet"></span>Keuangan</span></div></div>
+          <div class="hc" id="hSleep"><div class="lg"><span class="ic" data-i="moon"></span></div><div><div class="k">Owner</div><b class="gt">masih tidur</b></div>
+            <div class="zz"><i style="left:0;top:50px;font-size:24px">z</i><i style="left:22px;top:30px;font-size:30px">z</i><i style="left:46px;top:6px;font-size:36px">Z</i></div></div>
+          <div class="stk y" id="sk1"><span class="ic" data-i="zap"></span>Otomatis</div>
+          <div class="stk" id="sk2"><span class="ic" data-i="sparkles"></span>Tanpa disuruh</div>
+        </div>
+
+        <div id="win"><div id="wcam">
+          <div id="wgrid"></div>
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Resto AI Manager</span><span id="sim">SIMULASI</span>
+            <div id="clk"><span class="ic" id="icSun" data-i="sun"></span><span class="ic" id="icMoon" data-i="moon"></span><span id="clkT">06.00</span></div></div>
+          <div id="dayBar"><span class="lbl">HARI INI</span><div id="dTrack"><div id="dLine"><div id="dFill"></div><div id="dMark"></div></div>
+            <span class="dt" style="left:0px">06</span><span class="dt" style="left:118px">09</span><span class="dt" style="left:237px">12</span><span class="dt" style="left:355px">15</span>
+            <span class="dt" style="left:473px">18</span><span class="dt" style="left:592px">21</span><span class="dt" style="left:710px">24</span></div></div>
+          <svg id="wires" viewBox="0 0 920 950"></svg>
+          <div id="mgr"><div class="lg glg"><span class="ic" data-i="bot"></span></div><b>AI Manager</b><em>ngatur 6 agent</em><span class="on">AKTIF</span></div>
+          <div class="node" id="nStok"><div class="t"><div class="lg"><span class="ic" data-i="package"></span></div><div><b>Agent Stok</b><em>bahan &amp; supplier</em></div></div><span class="stt" data-s="0"></span></div>
+          <div class="node" id="nJad"><div class="t"><div class="lg"><span class="ic" data-i="calendar-clock"></span></div><div><b>Agent Jadwal</b><em>shift &amp; reservasi</em></div></div><span class="stt" data-s="0"></span></div>
+          <div class="node" id="nAdm"><div class="t"><div class="lg"><span class="ic" data-i="message-circle"></span></div><div><b>Agent Admin</b><em>chat &amp; booking</em></div></div><span class="stt" data-s="0"></span></div>
+          <div class="node" id="nFin"><div class="t"><div class="lg"><span class="ic" data-i="wallet"></span></div><div><b>Agent Keuangan</b><em>tutup buku</em></div></div><span class="stt" data-s="0"></span></div>
+          <div class="node" id="nMkt"><div class="t"><div class="lg"><span class="ic" data-i="megaphone"></span></div><div><b>Agent Marketing</b><em>promo &amp; broadcast</em></div></div><span class="stt" data-s="0"></span></div>
+          <div class="node" id="nRev"><div class="t"><div class="lg"><span class="ic" data-i="star"></span></div><div><b>Agent Review</b><em>ulasan Google</em></div></div><span class="stt" data-s="0"></span></div>
+
+          <div class="card" id="logC"><div class="hd"><span class="lbl">JADWAL AGENT HARI INI</span></div><div id="logL"></div></div>
+          <div class="card" id="vStok"><div class="hd"><div class="lg"><span class="ic" data-i="package"></span></div><b>Cek stok · 06.05</b><span class="ilu">angka ilustrasi</span></div>
+            <div class="src"><span><span class="ic" data-i="receipt"></span>Penjualan kemarin</span><span><span class="ic" data-i="file-spreadsheet"></span>Stok gudang</span></div>
+            <div id="sRows"></div></div>
+          <div class="card" id="vAdm"><div class="hd"><div class="lg"><span class="ic" data-i="si-whatsapp"></span></div><b>Agent Admin · WhatsApp</b></div>
+            <div class="cnt"><div><b id="nChat">0</b><span>chat dibales</span></div><div><b id="nMeja">0</b><span>meja dibooking</span></div></div>
+            <div id="cRows"></div></div>
+          <div class="card" id="vRev"><div class="hd"><div class="lg"><span class="ic" data-i="star"></span></div><b>Agent Review · Google</b></div><div id="rRows"></div></div>
+          <div class="card" id="vFin"><div class="hd"><div class="lg"><span class="ic" data-i="wallet"></span></div><b>Tutup buku · 23.00</b><span class="ilu">angka ilustrasi</span></div><div id="fRows"></div></div>
+        </div>
+        <div id="mk">
+          <div id="mkH"><div class="lg"><span class="ic" data-i="megaphone"></span></div><b>Agent Marketing</b><span class="simtag">SIMULASI</span><div class="tmc"><span class="ic" data-i="clock"></span>15.00</div></div>
+          <div class="card" id="occ"><div class="hd"><b>Okupansi minggu depan</b><span class="ilu">angka ilustrasi</span></div><div id="bars"></div></div>
+          <div class="card" id="draft"><div class="k"><span class="ic" data-i="pen-line"></span>DRAFT PROMO · SELASA</div>
+            <div class="big gt" id="dTxt">Diskon 50% semua menu<span class="strike"></span></div><div class="big2">Gratis es teh</div>
+            <div class="sb">Dibuat agent marketing · 15.02</div></div>
+          <div class="card" id="mkNote"><div class="lg glg"><span class="ic" data-i="bot"></span></div><div><b>Nunggu cek AI Manager…</b><span>Promo baru boleh jalan kalau angkanya aman</span></div></div>
+        </div>
+        <div id="winDim"></div></div>
+
+        <div class="pop" id="pPO"><div class="ph"><div class="lg glg"><span class="ic" data-i="truck"></span></div><div><b>PO otomatis</b><em>ke Supplier Pasar</em></div><span class="simtag">SIMULASI</span></div>
+          <div class="to"><span class="ic" data-i="si-whatsapp"></span>dikirim via WhatsApp</div>
+          <div class="pr"><span>Cabai rawit</span><b>5 kg</b></div><div class="pr"><span>Ayam potong</span><b>20 ekor</b></div>
+          <div class="nt"><span class="ic" data-i="alarm-clock"></span>Kirim sebelum 07.00</div>
+          <div class="ft"><span class="ic" data-i="check-check"></span>Terkirim · 06.12</div></div>
+
+        <div class="pop" id="pPlan"><div class="pbg"></div><div class="ph"><div class="lg glg"><span class="ic" data-i="calendar-clock"></span></div><div><b>Agent Jadwal</b><em>Jumat · 09.30</em></div><span class="simtag">SIMULASI</span></div>
+          <div class="pb" id="pb1"><span class="ic" data-i="calendar-check"></span><div><div class="k">Reservasi malam ini</div><div class="v"><span id="nRes">0</span> meja</div></div></div>
+          <div class="pb" id="pb2"><span class="ic" data-i="sun"></span><div><div class="k">Cuaca</div><div class="v">Cerah · 31°C</div></div></div>
+          <div id="gauge"><div class="k"><span>Prediksi malam ini</span><b>RAMAI</b></div><div class="tr"><i></i></div></div>
+          <div class="mb out" id="mb1"><div class="w"><span class="ic" data-i="bot"></span>Agent Jadwal → Koki Rani</div>Jumat bakal rame. Bisa masuk lebih awal, jam 14.00?</div>
+          <div class="mb in" id="mb2"><div class="w" style="color:#1fa855"><span class="ic" data-i="chef-hat"></span>Koki Rani</div>Siap! Jam 14.00 udah di dapur.</div></div>
+
+        <div class="pop" id="pNotif"><div class="lg"><span class="ic" data-i="bell-ring"></span></div><div><div class="k">Agent Review → Owner · 13.10</div><b>Ulasan bintang 1 masuk</b>
+          <div class="st"><span class="ic" data-i="star"></span><span class="ic off" data-i="star"></span><span class="ic off" data-i="star"></span><span class="ic off" data-i="star"></span><span class="ic off" data-i="star"></span></div>
+          <div class="q">“Pesanan nunggu 40 menit.”</div><span class="tg">PERLU LU CEK</span></div></div>
+
+        <div class="pop" id="pChk"><div class="ph"><div class="lg glg"><span class="ic" data-i="bot"></span></div><div><b>Cek AI Manager</b><em>sebelum promo jalan</em></div></div>
+          <div class="cs" id="csA"><div class="lb">PROMO: DISKON 50%</div>
+            <div class="pr"><span>Harga rata-rata</span><b>Rp40.000</b></div><div class="pr"><span>Setelah diskon</span><b>Rp20.000</b></div><div class="pr"><span>Modal per porsi</span><b>Rp24.000</b></div>
+            <div class="res"><span>Hasil</span><b>−Rp<span id="nRugi">0</span> <small>/porsi</small></b></div></div>
+          <div class="cs" id="csB"><div class="lb">PROMO BARU: GRATIS ES TEH</div>
+            <div class="pr"><span>Harga rata-rata</span><b>Rp40.000</b></div><div class="pr"><span>Modal es teh</span><b>Rp2.000</b></div><div class="pr"><span>Modal per porsi</span><b>Rp24.000</b></div>
+            <div class="res"><span>Hasil</span><b>Margin aman</b></div></div>
+          <div class="stamp" id="stNo">DITOLAK</div><div class="stamp" id="stOk">DISETUJUI</div>
+          <span class="ilu">SIMULASI · angka ilustrasi</span></div>
+
+        <div class="pop" id="pBc"><div class="ph"><div class="lg glg"><span class="ic" data-i="si-whatsapp"></span></div><div><b>Broadcast promo</b><em>ke pelanggan lama</em></div></div>
+          <div class="msg">Selasa ini: <b>gratis es teh</b> tiap makan di tempat!</div>
+          <div class="n"><b id="nBc">0</b><span>pelanggan</span></div><div class="tr"><i></i></div>
+          <div class="ft"><span class="ic" data-i="check-check"></span>Terkirim semua</div><span class="ilu" style="display:block;margin-top:8px">SIMULASI · angka ilustrasi</span></div>
+
+        <div class="pop" id="pSum"><div class="ph"><div class="lg glg"><span class="ic" data-i="bot"></span></div><div><b>Ringkasan hari ini</b><em>AI Manager → Owner · 23.05</em></div></div>
+          <div class="sr"><span class="ic" data-i="trending-up"></span>Laba <b>Rp6,1 jt</b></div>
+          <div class="sr"><span class="ic" data-i="package"></span>Stok aman buat besok</div>
+          <div class="sr"><span class="ic" data-i="star"></span><b>1</b> ulasan perlu dicek</div>
+          <div class="sr"><span class="ic" data-i="megaphone"></span>Promo Selasa: <b>200</b> terkirim</div>
+          <span class="ilu">SIMULASI · angka ilustrasi</span></div>
+
+        <div id="kin">
+          <div class="kr" id="k1"><div class="lg glg"><span class="ic" data-i="layout-grid"></span></div><div><div class="w" data-letter="gt">6 AGENT</div><div class="s">Kerja di bagiannya masing-masing</div></div></div>
+          <div class="kr" id="k2"><div class="lg glg"><span class="ic" data-i="bot"></span></div><div><div class="w" data-letter="gt">1 MANAGER</div><div class="s">Cek <span class="hl"><i></i>angka</span> sebelum eksekusi</div></div></div>
+          <div class="kr" id="k3"><div class="lg glg"><span class="ic" data-i="rotate-ccw"></span></div><div><div class="w">06.00</div><div class="s">Besok jalan lagi, otomatis</div></div></div>
+        </div>
+
+        <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name gt">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ctaChips"><div class="stk"><span class="ic" data-i="package"></span>Cek stok otomatis</div><div class="stk"><span class="ic" data-i="message-circle"></span>Bales chat</div><div class="stk"><span class="ic" data-i="chart-column"></span>Ringkasan harian</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="" /><div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div><div id="caps"></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="58.06" data-track-index="8" data-volume="1"></audio>
+      <!--SFX-->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n, cls) => `<span class="ic${cls ? " " + cls : ""}">${icon(n)}</span>`;
+        const D = 58.8;
+
+        /* ---------- generated content (before icon fill) ---------- */
+        const SR = [["Beras", 78, 0], ["Minyak goreng", 64, 0], ["Cabai rawit", 9, 1], ["Ayam potong", 12, 1], ["Bawang merah", 55, 0]];
+        $("#sRows").innerHTML = SR.map(([n, p, low]) => `<div class="srow${low ? " low" : ""}"><span class="nm">${n}</span><span class="bar"><i style="width:${p}%"></i></span><span class="pc">${p}%</span>${low ? '<span class="lowt">HAMPIR HABIS</span>' : ""}</div>`).join("");
+        const CR = [["Meja 4 orang jam 7?", "Booked, meja 12"], ["Masih buka kak?", "Buka sampai 22.00"], ["Ada parkir mobil?", "Ada, gratis"], ["Bisa pesan antar?", "Bisa, lewat ojol"], ["Ada menu anak?", "Ada, 3 pilihan"]];
+        $("#cRows").innerHTML = CR.map(([q, a]) => `<div class="cr"><span class="q">${q}</span><span class="a">${a}${ic("check-check")}</span></div>`).join("");
+        const stars = (n, cls) => [0, 1, 2, 3, 4].map((i) => ic("star", i < n ? "" : "off")).join("");
+        const RV = [[5, "“Sambalnya juara!”", 0], [4, "“Cepat &amp; ramah.”", 0], [1, "“Pesanan nunggu 40 menit.”", 1]];
+        $("#rRows").innerHTML = RV.map(([n, q, bad]) => `<div class="rv"><div class="st">${stars(n)}</div><div class="q">${q}</div><span class="tg${bad ? " bad" : ""}">${bad ? ic("bell-ring") + "Ke owner" : ic("check") + "Dibalas"}</span></div>`).join("");
+        const FR = [["Penjualan hari ini", "Rp18,4 jt"], ["Biaya bahan", "Rp7,1 jt"], ["Gaji &amp; operasional", "Rp5,2 jt"]];
+        $("#fRows").innerHTML = FR.map(([k, v]) => `<div class="fr"><span>${k}</span><b>${v}</b>${ic("circle-check", "ck")}</div>`).join("") +
+          `<div class="fr tot"><span>Laba hari ini</span><b>Rp6,1 jt</b>${ic("circle-check", "ck")}</div>`;
+        const OC = [["Sen", 64], ["Sel", 23], ["Rab", 58], ["Kam", 61], ["Jum", 92], ["Sab", 97], ["Min", 88]];
+        $("#bars").innerHTML = OC.map(([d, p], i) => `<div class="bc${i === 1 ? " sepi" : ""}"><span class="pv" style="bottom:${48 + p * 2.2}px">${p}%</span><i class="b" style="height:${p * 2.2}px"></i><span class="d">${d}</span>${i === 1 ? '<span id="sepiT" style="bottom:' + (78 + p * 2.2) + 'px;top:auto">SEPI</span>' : ""}</div>`).join("");
+        const LOG = [["06.00 · Stok", "Cek bahan &amp; PO"], ["09.30 · Jadwal", "Atur shift koki"], ["12.00 · Admin", "Chat &amp; booking"], ["13.00 · Review", "Bales ulasan"],
+          ["15.00 · Marketing", "Promo hari sepi"], ["23.00 · Keuangan", "Tutup buku"]];
+        $("#logL").innerHTML = LOG.map(([a, b]) => `<div class="le"><b>${a}</b><span>${b}</span></div>`).join("");
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+
+        /* wires: AI manager -> 6 agent nodes */
+        const svg = $("#wires"), NS = "http://www.w3.org/2000/svg";
+        const WY = { nStok: [194, -1], nJad: [322, -1], nAdm: [450, -1], nFin: [194, 1], nMkt: [322, 1], nRev: [450, 1] };
+        const W = {};
+        Object.keys(WY).forEach((k) => { const [y, s] = WY[k], x0 = s < 0 ? 340 : 580, x1 = s < 0 ? 280 : 640, xm = (x0 + x1) / 2;
+          const d = `M${x0} 322 C${xm} 322 ${xm} ${y} ${x1} ${y}`;
+          const p0 = document.createElementNS(NS, "path"); p0.setAttribute("d", d); p0.setAttribute("class", "w0"); svg.appendChild(p0);
+          const p1 = document.createElementNS(NS, "path"); p1.setAttribute("d", d); p1.setAttribute("class", "w1"); svg.appendChild(p1);
+          const c = document.createElementNS(NS, "circle"); c.setAttribute("r", "7"); svg.appendChild(c);
+          const L = p1.getTotalLength(); p1.style.strokeDasharray = L + " " + L; p1.style.strokeDashoffset = L;
+          W[k] = { p1, c, L }; });
+
+        /* ---------- timeline helpers ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), Math.max(0, at));
+        const st = (el, v, at) => tl.set(el, v, Math.max(0, at));
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].replace(/^"/, "").toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const TXT = []; // seek-safe text swaps: [el, [[t, text], ...]]
+
+        /* captions */
+        const KEY = new Set(["enam", "pagi,", "ai", "manager.", "manager", "tidur.", "simulasinya.", "agent", "stok.", "penjualan", "cabai", "ayam", "habis,", "order", "supplier.", "jadwal", "reservasi",
+          "cuaca.", "jumat", "rame,", "koki", "awal.", "admin", "chat", "booking", "meja.", "review", "ulasan,", "bintang", "satu", "tiga", "marketing", "promo", "diskon", "lima", "puluh", "persen",
+          "selasa", "sepi.", "angkanya", "rugi,", "ditolak.", "gratis", "es", "teh,", "disetujui,", "dua", "ratus", "pelanggan.", "sebelas", "keuangan", "tutup", "buku,", "ringkasan", "besok", "jalan",
+          "lagi.", "sistem", "dipasang", "link", "bio,", "aipreneur", "automation."]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].replace(/^"/, "").toLowerCase()) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        /* ---------- camera (screen-recording style inside the fixed window frame) ---------- */
+        const win = $("#win");
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc; const SHOTS = [];
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); SHOTS.push({ t: Math.max(0, at), d: 0, c: cc }); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; SHOTS.push({ t: at, d: dur || 0.8, c: nx }); };
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const pulse = (el, at, col) => ft(el, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 6px 18px rgba(41,75,119,0.08)" },
+          { keyframes: [{ borderColor: col || "#2f6fe4", boxShadow: "0 0 0 7px rgba(47,111,228,0.20)", duration: 0.2 }, { duration: 0.6 }, { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 6px 18px rgba(41,75,119,0.08)", duration: 0.4 }] }, at);
+        const stt = (id, s, at) => st(`#${id} .stt`, { attr: { "data-s": String(s) } }, at);
+        const wire = (id, at, dur) => { const w = W[id]; dur = dur || 0.5;
+          ft(w.p1, { strokeDashoffset: w.L }, { strokeDashoffset: 0, duration: dur, ease: "power2.inOut" }, at);
+          const o = { v: 0 }; ft(o, { v: 0 }, { v: 1, duration: dur, ease: "power2.inOut", onUpdate: () => { const q = w.p1.getPointAtLength(o.v * w.L); w.c.setAttribute("cx", q.x.toFixed(1)); w.c.setAttribute("cy", q.y.toFixed(1)); } }, at);
+          ft(w.c, { opacity: 0 }, { keyframes: [{ opacity: 1, duration: 0.05 }, { opacity: 1, duration: dur - 0.1 }, { opacity: 0, duration: 0.15 }] }, at); };
+        const wake = (id, at) => { ft("#mgr", { scale: 1 }, { keyframes: [{ scale: 1.05, duration: 0.15 }, { scale: 1, duration: 0.25 }] }, at); wire(id, at + 0.05, 0.5); stt(id, 1, at + 0.5); pulse($("#" + id), at + 0.5); };
+        const done = (i, at) => { const le = $$(".le")[i]; st(le, { attr: { "data-d": "1" } }, at); ft(le, { opacity: 0.45, x: 0 }, { keyframes: [{ opacity: 1, x: 6, duration: 0.18 }, { x: 0, duration: 0.25 }] }, at); };
+        const fade = (sel, to, at, d) => ft(sel, { opacity: to ? 0 : 1 }, { opacity: to ? 1 : 0, duration: d || 0.3, ease: "sine.inOut" }, at);
+        const popIn = (el, at, from) => ft(el, Object.assign({ opacity: 0, y: 14, scale: 0.97 }, from || {}), { opacity: 1, y: 0, x: 0, scale: 1, duration: 0.32, ease: "back.out(1.6)" }, at);
+        const pX = (h) => 140 + (h - 6) * (710 / 18); // day bar position for hour h
+        let dayH = 6; const dayTo = (h, at, dur) => { ft("#dMark", { x: pX(dayH) - 140 }, { x: pX(h) - 140, duration: dur || 0.6, ease: "power2.inOut" }, at);
+          ft("#dFill", { scaleX: (dayH - 6) / 18 }, { scaleX: (h - 6) / 18, duration: dur || 0.6, ease: "power2.inOut" }, at); dayH = h; };
+
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "light" });
+        Object.assign(FX.POSE.peekR, { x: 560, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 }); // client: peeks fully visible
+        Object.assign(FX.POSE.upL, { x: -40 }); Object.assign(FX.POSE.upR, { x: 495 }); // side rises: robot on one half, the element on the other
+        FX.theme("light", 0);
+        ft("#dots", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -300px", duration: D, ease: "none" }, 0);
+
+        /* initial */
+        st(win, { opacity: 0, transformPerspective: 2000, transformOrigin: "50% 50%" }, 0);
+        st(["#pPO", "#pPlan", "#pNotif", "#pChk", "#pBc", "#pSum"], { transformPerspective: 1400 }, 0);
+        st(["#nStok", "#nJad", "#nAdm", "#nFin", "#nMkt", "#nRev", "#logC", "#dayBar"], { opacity: 0 }, 0);
+
+        /* ===== SCENE 1 · HOOK (kinetic, no window) ===== */
+        const tMgr = ph("resto lu").start, tTid = ph("Padahal").start, tCoba = ph("Coba lihat").start;
+        FX.enter("home", 0.0); FX.wave(0.45);
+        ft("#hClock", { opacity: 0, y: 40, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.5)" }, 0.02);
+        ft("#hClock .tm", { scale: 1 }, { keyframes: [{ scale: 1.07, duration: 0.14 }, { scale: 1, duration: 0.3 }] }, wt("Jam enam", "enam") + 0.05);
+        ft("#hClock .hd .ic", { y: 10, opacity: 0.3 }, { y: 0, opacity: 1, duration: 0.8, ease: "power2.out" }, 0.25);
+        ft("#hCol", { opacity: 1 }, { keyframes: [0, 1, 2, 3, 4, 5].map((i) => ({ opacity: i % 2 ? 1 : 0.15, duration: 0.5, ease: "steps(1)" })) }, 0.6);
+        ft("#hMgr", { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, tMgr - 0.15);
+        ft("#hAg > span", { opacity: 0.35, borderColor: "rgba(47,111,228,0)" }, { opacity: 1, borderColor: "rgba(47,111,228,0.55)", duration: 0.22, stagger: 0.17, ease: "sine.out" }, wt("resto lu", "dijalanin") - 0.05);
+        ft("#hMgr .pill i", { scale: 1 }, { keyframes: [1, 2, 3, 4, 5, 6].map((i) => ({ scale: i % 2 ? 1.6 : 1, duration: 0.35, ease: "sine.inOut" })) }, tMgr + 0.4);
+        FX.sticker($("#sk1"), wt("resto lu", "AI") + 0.05, 6);
+        FX.face("excited", wt("resto lu", "manager") - 0.05, 0.9); FX.beat(wt("resto lu", "AI") - 0.1);
+        ft("#hSleep", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, tTid - 0.1);
+        $$("#hSleep .zz i").forEach((z, i) => ft(z, { opacity: 0, y: 10 }, { keyframes: [{ opacity: 1, y: 0, duration: 0.35 }, { opacity: 0, y: -26, duration: 0.6 }], repeat: 1, repeatDelay: 0.15 }, tTid + 0.15 + i * 0.22));
+        FX.sticker($("#sk2"), wt("Padahal", "tidur") + 0.1, -5);
+        FX.face("flat", tTid + 0.05, 1.2); FX.hop(wt("Padahal", "tidur") + 0.05, 30);
+
+        /* ===== ZOOM 1 · the AI Manager card becomes the app: hook dives in, window opens on the manager node, camera pulls out ===== */
+        const tZ1 = tCoba - 0.2;
+        FX.go("center", tZ1, 0.9);
+        ft("#hook", { scale: 1, transformOrigin: "460px 505px" }, { scale: 1.9, duration: 0.36, ease: "power2.in" }, tZ1);
+        ft("#hook", { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power1.in" }, tZ1 + 0.04);
+        ft(["#sk1", "#sk2", "#hSleep"], { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.12 }, tZ1 - 0.08);
+        st("#hook", { display: "none" }, tZ1 + 0.45);
+        camSet(460, 322, 2.25, 0);
+        ft(win, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.32, ease: "power2.out" }, tZ1 + 0.24);
+        camTo(460, 475, 1, tZ1 + 0.5, 0.75, "power3.inOut");
+        const tPer = ph("Pertama").start;
+        ft("#nStok, #nJad, #nAdm, #nFin, #nMkt, #nRev", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.35, stagger: 0.06, ease: "back.out(1.6)" }, tZ1 + 1.2);
+        ft(["#logC", "#dayBar"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, tZ1 + 1.3);
+        FX.face("happy", tCoba + 0.3, 0.9);
+
+        /* ===== SCENE 2 · inventory agent ===== */
+        const tBang = wt("Pertama", "bangunin"), tStok = wt("Pertama", "stok"), tBaca = ph("Dia baca").start, tCab = wt("nemu cabai", "cabai"), tAym = wt("nemu cabai", "ayam"), tHab = wt("nemu cabai", "hampir"),
+          tOrd = ph("langsung order").start;
+        wake("nStok", tBang - 0.1); FX.point(tBang - 0.2);
+        // punch-in on the stock check (sources + rows), rows fill in
+        camTo(615, 729, 1.55, tBaca - 0.4, 0.55, "power3.inOut");
+        FX.go("right", tBaca - 0.35);
+        ft("#vStok", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, tStok);
+        st(["#vStok .src span", "#sRows .srow"], { opacity: 0 }, 0);
+        ft("#vStok .src span", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.25, ease: "power2.out" }, tBaca + 0.05);
+        ft("#sRows .srow", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.12, ease: "power2.out" }, wt("Dia baca", "penjualan"));
+        ft("#sRows .bar i", { scaleX: 0 }, { scaleX: 1, duration: 0.6, stagger: 0.12, ease: "power2.out" }, wt("Dia baca", "penjualan") + 0.1);
+        const lowRows = $$("#sRows .srow.low");
+        [tCab, tAym].forEach((t, i) => { ft(lowRows[i], { backgroundColor: "rgba(229,72,77,0)" }, { keyframes: [{ backgroundColor: "rgba(229,72,77,0.16)", duration: 0.2 }, { backgroundColor: "rgba(229,72,77,0.08)", duration: 0.5 }] }, t - 0.05);
+          ft($(".lowt", lowRows[i]), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, t + 0.05); });
+        FX.point(tCab - 0.25); FX.face("wide", tHab - 0.05, 0.9); FX.shiver(tHab + 0.05, 0.35);
+        // pop-out: purchase order flies out of the app
+        const tPO = tHab + 0.1;
+        ft(win, { scale: 1, opacity: 1 }, { scale: 0.95, opacity: 0.32, duration: 0.45, ease: "power2.inOut" }, tPO);
+        ft("#pPO", { opacity: 0, x: -140, y: 80, scale: 0.45 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.2)" }, tPO + 0.05);
+        ft("#pPO .pr", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.15, ease: "power2.out" }, tPO + 0.35);
+        ft("#pPO .ft", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, wt("langsung order", "supplier") - 0.15);
+        FX.point(tOrd - 0.1); FX.face("happy", tOrd + 0.45, 1.0);
+        stt("nStok", 2, tOrd + 0.6); done(0, tOrd + 0.6);
+        TXT.push([$("#clkT"), [[0, "06.00"], [tOrd + 0.5, "06.12"], [ph("Agent jadwal").start - 0.55, "09.30"], [ph("Seharian").start - 0.1, "12.00"], [ph("Agent review").start - 0.3, "13.10"],
+          [ph("Jam tiga").start - 0.5, "15.00"], [ph("Jam sebelas").start - 0.65, "23.00"], [ph("kirim satu").start - 0.1, "23.05"], [wt("Besok jam", "jam") - 0.1, "06.00"]]]);
+        dayTo(6.2, tOrd + 0.5, 0.3);
+
+        /* ===== DOORS -> SCENE 3 · schedule agent (3D split: window swings back, planner card in front, robot rises beside it) ===== */
+        const tJad = ph("Agent jadwal").start, tRes = wt("Agent jadwal", "reservasi"), tCua = wt("sama cuaca", "cuaca"), tJum = ph("Jumat").start, tRame = wt("Jumat", "rame"),
+          tMinta = ph("jadi dia minta").start, tAwal = wt("jadi dia minta", "lebih");
+        const tD = tJad - 1.13;
+        FX.dip("upL", tD - 0.05, 0.15); // robot sinks out, rises on the LEFT next to the planner card (right half)
+        const mD = FX.doors(tD, "light", (m) => { st("#pPO", { opacity: 0 }, m); st(win, { rotationY: 22, scale: 0.88, x: -14, opacity: 0.2, transformOrigin: "0% 50%" }, m); st("#winDim", { opacity: 0.4 }, m);
+          camSet(460, 475, 1, m); dayTo(9.5, m, 0.01); });
+        wake("nJad", tJad - 0.05);
+        const tSwB = ph("Seharian").start - 0.55;
+        ft("#pPlan", { opacity: 0, x: 70, rotationY: -24 }, { opacity: 1, x: 0, rotationY: 0, duration: 0.6, ease: "power3.out" }, mD + 0.1);
+        const pbg = $("#pPlan .pbg"), hB = (sel) => { const e = $(sel); return e.offsetTop + e.offsetHeight + 26; };
+        let hPrev = hB("#pPlan .ph"); st(pbg, { height: hPrev }, 0);
+        const grow = (sel, at) => { const h = hB(sel); ft(pbg, { height: hPrev }, { height: h, duration: 0.35, ease: "power2.out" }, at); hPrev = h; };
+        grow("#pb1", tRes - 0.2); popIn("#pb1", tRes - 0.15); count($("#nRes"), 0, 46, tRes, 0.8);
+        grow("#pb2", tCua - 0.3); popIn("#pb2", tCua - 0.25);
+        ft("#pb2 .ic", { rotation: -40 }, { rotation: 0, duration: 0.8, ease: "power2.out" }, tCua - 0.2);
+        grow("#gauge", tJum - 0.25); popIn("#gauge", tJum - 0.2);
+        ft("#gauge .tr i", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power2.out" }, tJum - 0.05);
+        ft("#gauge .k b", { scale: 1 }, { keyframes: [{ scale: 1.25, duration: 0.15 }, { scale: 1, duration: 0.25 }] }, tRame);
+        grow("#mb1", tMinta - 0.1); popIn("#mb1", tMinta - 0.05, { x: 30 });
+        grow("#mb2", tAwal - 0.15); popIn("#mb2", tAwal - 0.1, { x: -30 });
+        FX.point(tRes - 0.25); FX.face("excited", tRame - 0.05, 0.9); FX.hop(tRame, 38); FX.beat(wt("jadi dia minta", "koki") - 0.1); FX.face("happy", tAwal + 0.1, 0.9);
+        stt("nJad", 2, tAwal + 0.3); done(1, tAwal + 0.3); dayTo(12, tSwB + 0.3, 0.6);
+        ft("#pPlan", { opacity: 1, x: 0, y: 0, scale: 1 }, { opacity: 0, x: 60, y: 40, scale: 0.85, duration: 0.35, ease: "power2.in" }, tSwB);
+        ft(win, { rotationY: 22, scale: 0.88, x: -14, opacity: 0.2 }, { rotationY: 0, scale: 1, x: 0, opacity: 1, duration: 0.55, ease: "power3.inOut" }, tSwB + 0.05);
+        ft("#winDim", { opacity: 0.4 }, { opacity: 0, duration: 0.4 }, tSwB + 0.05);
+
+        /* ===== SCENE 4 · front desk + reviews: whip pans between two close-ups ===== */
+        const tSeh = ph("Seharian").start, tAdm = wt("Seharian", "admin"), tBal = wt("Seharian", "bales"), tBook = wt("dan booking", "booking"), tRev = ph("Agent review").start,
+          tUlas = wt("Agent review", "ulasan"), tBin = wt("yang bintang", "bintang"), tLem = wt("yang bintang", "dilempar");
+        FX.dip("peekR", tSwB - 0.05, 0.2);
+        st(["#logC", "#vStok"], { opacity: 0 }, tSwB + 0.02); st("#vAdm", { opacity: 1 }, tSwB + 0.02);
+        camSet(297, 643, 1.55, tSwB + 0.02);
+        wake("nAdm", tAdm - 0.45);
+        $$("#cRows .cr").forEach((r, i) => ft(r, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.6)" }, tBal - 0.1 + i * 0.3));
+        count($("#nChat"), 0, 37, tBal - 0.05, 1.4); count($("#nMeja"), 0, 12, tBook - 0.1, 0.9);
+        ft($$("#cRows .cr")[0], { scale: 1 }, { keyframes: [{ scale: 1.04, duration: 0.15 }, { scale: 1, duration: 0.25 }] }, tBook);
+        FX.point(tBal - 0.25); FX.face("happy", tBook, 0.8);
+        stt("nAdm", 2, tRev - 0.2); done(2, tRev - 0.2);
+        camTo(623, 643, 1.55, tRev - 0.42, 0.42, "expo.inOut"); // whip pan to the review agent
+        fade("#vRev", 1, tRev - 0.3, 0.3);
+        wake("nRev", tRev - 0.05);
+        const rvs = $$("#rRows .rv");
+        rvs.forEach((r, i) => { ft(r, { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, (i < 2 ? wt("Agent review", "bales") - 0.1 + i * 0.4 : tBin - 0.2));
+          ft($(".tg", r), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(2)" }, (i < 2 ? tUlas - 0.1 + i * 0.3 : wt("yang bintang", "satu"))); });
+        ft(rvs[2], { borderColor: "rgba(10,13,44,0.10)" }, { borderColor: "#e5484d", duration: 0.25 }, wt("yang bintang", "satu"));
+        FX.beat(tUlas - 0.1); FX.face("wide", tBin - 0.05, 0.9);
+        // pop-out: the 1-star review lands on the owner's phone
+        ft(win, { scale: 1, opacity: 1, transformOrigin: "50% 50%" }, { scale: 0.95, opacity: 0.32, duration: 0.4, ease: "power2.inOut" }, tLem - 0.25);
+        ft("#pNotif", { opacity: 0, y: -90, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.3)" }, tLem - 0.25);
+        ft("#pNotif .lg", { rotation: 0 }, { keyframes: [{ rotation: -16, duration: 0.08 }, { rotation: 14, duration: 0.08 }, { rotation: -10, duration: 0.08 }, { rotation: 8, duration: 0.08 }, { rotation: 0, duration: 0.1 }] }, tLem + 0.25);
+        FX.point(tLem - 0.2);
+        stt("nRev", 2, tLem + 0.5); done(3, tLem + 0.5); dayTo(13.2, tRev - 0.3, 0.4);
+
+        /* ===== ZOOM 2 · punch-in INTO the Marketing node, which opens up into the marketing scene ===== */
+        const tJ3 = ph("Jam tiga").start, tAgM = wt("Jam tiga", "marketing"), tBikin = ph("bikin promo").start, tLima = wt("bikin promo", "lima"), tSel = wt("buat Selasa", "Selasa");
+        const tZ2 = tJ3 - 0.8;
+        ft("#pNotif", { opacity: 1, y: 0 }, { opacity: 0, y: -70, duration: 0.3, ease: "power2.in" }, tZ2 - 0.12);
+        ft(win, { scale: 0.95, opacity: 0.32 }, { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" }, tZ2 - 0.12);
+        FX.go("home", tZ2 - 0.1, 0.9);
+        dayTo(15, tZ2, 0.4);
+        camTo(770, 322, 2.4, tZ2, 0.45, "power3.in");
+        ft("#nFin", { opacity: 1 }, { opacity: 0, duration: 0.12 }, tZ2 - 0.05); // would cross the frame edge during the punch-in
+        wire("nMkt", tZ2 - 0.1, 0.35); stt("nMkt", 1, tZ2 + 0.1);
+        { const c = cState(770, 322, 2.4), cx = 770 * c.scale + c.x, cy = 322 * c.scale + c.y; // node centre on screen at the end of the punch-in
+          ft("#mk", { opacity: 0, scale: 0.3, transformOrigin: `${cx.toFixed(0)}px ${cy.toFixed(0)}px` }, { opacity: 1, scale: 1, duration: 0.42, ease: "power3.out" }, tZ2 + 0.36); }
+        camSet(460, 475, 1, tZ2 + 1.0); // behind the opaque marketing layer
+        st("#wcam", { opacity: 0 }, tZ2 + 1.0);
+        ft("#mk", { scale: 1 }, { scale: 1.035, duration: 4.0, ease: "sine.inOut" }, tZ2 + 0.8);
+        ft("#mkH .tmc", { scale: 1 }, { keyframes: [{ scale: 1.12, duration: 0.15 }, { scale: 1, duration: 0.3 }] }, tJ3 + 0.05);
+        st("#bars .b", { scaleY: 0.04 }, 0); st(["#bars .pv", "#sepiT"], { opacity: 0 }, 0);
+        ft("#bars .b", { scaleY: 0.04 }, { scaleY: 1, duration: 0.55, stagger: 0.07, ease: "power2.out" }, tJ3 - 0.05);
+        ft("#bars .pv", { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.07 }, tJ3 + 0.25);
+        ft("#mkH .lg", { rotation: 0 }, { keyframes: [{ rotation: -14, duration: 0.1 }, { rotation: 12, duration: 0.1 }, { rotation: 0, duration: 0.15 }] }, tAgM);
+        FX.wave(tJ3 + 0.1);
+        ft("#draft", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, tBikin - 0.2);
+        ft("#dTxt", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.1, ease: "steps(21)" }, tBikin + 0.05);
+        ft("#dTxt", { scale: 1 }, { keyframes: [{ scale: 1.05, duration: 0.15 }, { scale: 1, duration: 0.25 }] }, tLima + 0.1);
+        FX.point(tBikin - 0.1);
+        ft($(".bc.sepi"), { y: 0 }, { keyframes: [{ y: -10, duration: 0.15 }, { y: 0, duration: 0.25 }] }, tSel - 0.05);
+        ft("#sepiT", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tSel);
+        ft("#mkNote", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, wt("buat Selasa", "sepi") + 0.05);
+
+        /* manager check: pop-out on the LEFT, robot rises on the RIGHT next to it */
+        const tTapi = ph("Tapi AI").start, tCek = wt("Tapi AI", "cek"), tRugi = wt("Promo itu", "rugi"), tTol = wt("jadi ditolak", "ditolak"), tGan = ph("Diganti").start,
+          tEs = wt("Diganti", "es"), tSet = ph("disetujui").start, tKir = ph("langsung dikirim").start, tDua = wt("langsung dikirim", "dua");
+        FX.go("upR", tTapi - 0.55);
+        ft(win, { scale: 1, opacity: 1 }, { scale: 0.95, opacity: 0.1, duration: 0.45, ease: "power2.inOut" }, tTapi - 0.1);
+        ft(["#draft", "#mkNote", "#occ"], { opacity: 1 }, { opacity: 0, duration: 0.3 }, tTapi - 0.1);
+        ft("#pChk", { opacity: 0, x: -60, rotationY: 26 }, { opacity: 1, x: 0, rotationY: 0, duration: 0.55, ease: "power3.out" }, tTapi - 0.05);
+        ft("#csA .pr", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.32, ease: "power2.out" }, tCek - 0.15);
+        ft("#csA .res", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, ph("Promo itu").start - 0.1);
+        count($("#nRugi"), 0, 4000, ph("Promo itu").start, 0.7, (v) => Math.round(v).toLocaleString("id-ID"));
+        FX.point(tCek - 0.2); FX.face("wide", tRugi - 0.1, 0.8);
+        ft("#stNo", { opacity: 0, scale: 1.9, rotation: -9 }, { opacity: 1, scale: 1, rotation: -9, duration: 0.26, ease: "power4.in" }, tTol - 0.2);
+        ft("#pChk", { x: 0, y: 0 }, { keyframes: [{ x: -12, y: 6, duration: 0.05 }, { x: 10, y: -5, duration: 0.05 }, { x: -6, y: 3, duration: 0.05 }, { x: 0, y: 0, duration: 0.06 }] }, tTol + 0.06);
+        FX.face("x", tTol - 0.05, 0.85); FX.shiver(tTol + 0.06, 0.4);
+        ft("#draft .strike", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }, tTol);
+        ft(["#csA", "#stNo"], { opacity: 1, x: 0 }, { opacity: 0, x: -40, duration: 0.3, ease: "power2.in" }, tGan - 0.25);
+        ft("#csB", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, tGan + 0.05);
+        ft("#csB .pr", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.15, ease: "power2.out" }, tGan + 0.2);
+        ft("#csB .pr:nth-of-type(3)", { backgroundColor: "rgba(31,168,85,0)" }, { keyframes: [{ backgroundColor: "rgba(31,168,85,0.14)", duration: 0.2 }, { duration: 0.6 }, { backgroundColor: "rgba(31,168,85,0)", duration: 0.3 }] }, tEs - 0.05);
+        ft("#csB .res", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, tEs + 0.25);
+        ft(["#dTxt"], { opacity: 1 }, { opacity: 0, duration: 0.25 }, tGan + 0.1);
+        ft("#draft .big2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, tGan + 0.25);
+        ft("#stOk", { opacity: 0, scale: 1.9, rotation: -7 }, { opacity: 1, scale: 1, rotation: -7, duration: 0.26, ease: "power4.in" }, tSet - 0.2);
+        FX.face("excited", tSet - 0.05, 0.9); FX.hop(tSet + 0.08, 44); FX.beat(tGan + 0.1);
+        // broadcast to past guests (replaces the check card on the left)
+        ft("#pChk", { opacity: 1, x: 0, scale: 1 }, { opacity: 0, x: -50, scale: 0.9, duration: 0.32, ease: "power2.in" }, tKir - 0.12);
+        ft("#pBc", { opacity: 0, x: -50, scale: 0.9 }, { opacity: 1, x: 0, scale: 1, duration: 0.45, ease: "power3.out" }, tKir + 0.12);
+        count($("#nBc"), 0, 200, tKir + 0.35, 0.95);
+        ft("#pBc .tr i", { scaleX: 0 }, { scaleX: 1, duration: 0.95, ease: "power2.out" }, tKir + 0.35);
+        ft("#pBc .ft", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, tKir + 1.2);
+        FX.point(tKir + 0.05); stt("nMkt", 2, tKir + 0.5); done(4, tKir + 0.5);
+
+        /* ===== SHUTTER (resto closes for the night) -> SCENE 6 · finance agent closes the day ===== */
+        const t11 = ph("Jam sebelas").start, tKeu = wt("agent keuangan", "keuangan"), tTut = wt("agent keuangan", "tutup"), tKirim = ph("kirim satu").start, tRing = wt("kirim satu", "ringkasan");
+        const tSh = t11 - 1.16;
+        FX.dip("peekL", tSh - 0.02, 0.3);
+        FX.shutter(tSh, "light", (m) => { st(["#mk", "#pBc", "#vAdm", "#vRev"], { opacity: 0 }, m); st(["#logC"], { opacity: 1 }, m); st("#vFin", { opacity: 1 }, m);
+          st(win, { scale: 1, opacity: 1 }, m); st("#wcam", { opacity: 1 }, m); st("#nFin", { opacity: 1 }, m); st("#winDim", { opacity: 0 }, m); camSet(460, 475, 1, m); dayTo(23, m, 0.01);
+          ["nStok", "nJad", "nAdm", "nRev", "nMkt"].forEach((id) => stt(id, 2, m)); ["nStok", "nJad", "nAdm", "nRev"].forEach((id) => st(W[id].p1, { strokeDashoffset: 0 }, m));
+          st("#icSun", { opacity: 0 }, m); st("#icMoon", { opacity: 1 }, m); st("#clk", { backgroundColor: "rgba(41,75,119,0.12)", color: "#294b77" }, m); });
+        st("#fRows .fr", { opacity: 0 }, 0);
+        ft("#clk", { scale: 1 }, { keyframes: [{ scale: 1.12, duration: 0.15 }, { scale: 1, duration: 0.3 }] }, t11 + 0.1);
+        wake("nFin", wt("agent keuangan", "agent") - 0.4);
+        camTo(615, 729, 1.55, tKeu - 0.15, 0.55, "power3.inOut"); // punch-in on the closing books
+        $$("#fRows .fr").forEach((r, i) => ft(r, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.28, ease: "power2.out" }, tTut - 0.25 + i * 0.26));
+        ft("#fRows .ck", { scale: 0 }, { scale: 1, duration: 0.25, stagger: 0.26, ease: "back.out(2.5)" }, tTut - 0.05);
+        FX.point(tTut - 0.2);
+        // pop-out: one summary to the owner (right half), robot peeks in from the left
+        ft(win, { scale: 1, opacity: 1 }, { scale: 0.95, opacity: 0.2, duration: 0.4, ease: "power2.inOut" }, tKirim - 0.25);
+        ft("#pSum", { opacity: 0, y: -80, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.3)" }, tKirim - 0.25);
+        ft("#pSum .sr", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.14, ease: "power2.out" }, tKirim + 0.05);
+        FX.point(tRing - 0.25); FX.face("happy", tRing, 1.0);
+        stt("nFin", 2, tRing + 0.3); done(5, tRing + 0.3);
+
+        /* ===== ZOOM-OUT REVEAL · back to 06.00, everything restarts; window recedes, stat stack ===== */
+        const tBes = ph("Besok").start, tJ6 = wt("Besok jam", "jam"), tSem = ph("semuanya").start, tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");
+        ft("#pSum", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.9, duration: 0.22, ease: "power2.in" }, tBes - 0.38);
+        ft(win, { scale: 0.95, opacity: 0.2 }, { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" }, tBes - 0.18);
+        camTo(460, 475, 1, tBes - 0.25, 0.6, "power3.inOut");
+        FX.go("right", tBes - 0.2, 0.9);
+        st("#icSun", { opacity: 1 }, tJ6); st("#icMoon", { opacity: 0 }, tJ6); ft("#clk", { backgroundColor: "rgba(41,75,119,0.12)", color: "#294b77" }, { backgroundColor: "#e7f0ff", color: "#2f6fe4", duration: 0.2 }, tJ6);
+        ft("#clk", { scale: 1, rotationX: 0 }, { keyframes: [{ rotationX: 90, duration: 0.12 }, { rotationX: 0, duration: 0.18 }] }, tJ6 - 0.12);
+        dayTo(6, tJ6 - 0.1, 0.45);
+        ["nStok", "nJad", "nAdm", "nFin", "nMkt", "nRev"].forEach((id, i) => { stt(id, 1, tJ6 + 0.1 + i * 0.06); pulse($("#" + id), tJ6 + 0.1 + i * 0.06); });
+        FX.face("excited", tJ6, 0.9);
+        const tK = tSem - 0.15;
+        ft(win, { scale: 1, opacity: 1, transformOrigin: "50% 50%" }, { scale: 0.84, opacity: 0.16, duration: 0.5, ease: "power2.inOut" }, tK);
+        ft("#k1", { opacity: 0, x: -60, scale: 0.94 }, { opacity: 1, x: 0, scale: 1, duration: 0.4, ease: "power3.out" }, tK + 0.1);
+        FX.drop($("#k1 .w"), tK + 0.15, 0.03);
+        ft("#k2", { opacity: 0, x: -60, scale: 0.94 }, { opacity: 1, x: 0, scale: 1, duration: 0.4, ease: "power3.out" }, tK + 0.38);
+        FX.drop($("#k2 .w"), tK + 0.43, 0.03);
+        FX.marker($("#k2 .hl i"), tK + 0.75);
+        ft("#k3", { opacity: 0, x: -60, scale: 0.94 }, { opacity: 1, x: 0, scale: 1, duration: 0.4, ease: "power3.out" }, tK + 0.66);
+        ft("#k3 .lg .ic", { rotation: 0 }, { rotation: -360, duration: 0.9, ease: "power2.inOut" }, tK + 0.75);
+        FX.beat(tK + 0.4);
+
+        /* ===== ZOOM -> CTA: stat stack punches through, CTA card zooms in (robot whole at the bottom) ===== */
+        const tZc = tCta - 0.55;
+        ft("#kin", { scale: 1, opacity: 1 }, { scale: 1.45, opacity: 0, duration: 0.38, ease: "power2.in" }, tZc);
+        ft(win, { opacity: 0.16 }, { opacity: 0, duration: 0.3 }, tZc);
+        FX.go("home", tZc - 0.05, 1.0);
+        ft("#cta", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, tZc + 0.18);
+        ft("#ctaChips .stk", { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.14, ease: "power3.out" }, tCta + 0.5);
+        FX.wave(tCta + 0.35); FX.point(tF - 0.3); FX.face("happy", tF + 0.05, 1.5);
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
+        FX.face("excited", D - 1.7, 0.9);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        { tl.fromTo({ v: 0 }, { v: 0 }, { v: 1, duration: D, ease: "none", immediateRender: false, onUpdate: () => { const T = tl.time();
+          TXT.forEach(([el, arr]) => { let x = arr[0][1]; arr.forEach(([t, v]) => { if (T >= t) x = v; }); if (el.textContent !== x) el.textContent = x; }); } }, 0); }
+
+        /* ===== no-cut-text guard: text units sliced by the camera frame fade out during that shot, back in when whole ===== */
+        { const wc = $("#wcam"), wr = wc.getBoundingClientRect(), k = wr.width / VW;
+          const leaves = $$("#wcam *").filter((e) => e.tagName.toLowerCase() === "text" || Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim()));
+          const UNIT = ".node, #mgr, #dayBar, .card, #tbar .app, #sim, #clk";
+          const box = (r) => ({ x0: (r.left - wr.left) / k, y0: (r.top - wr.top) / k, x1: (r.right - wr.left) / k, y1: (r.bottom - wr.top) / k });
+          const textBox = (e) => { const rg = document.createRange(); let u = null;
+            Array.from(e.childNodes).filter((n) => n.nodeType === 3 && n.textContent.trim()).forEach((n) => { rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
+            return u ? box(u) : box(e.getBoundingClientRect()); };
+          const seen = new Set(), R = [];
+          leaves.forEach((e) => { const u = e.closest(UNIT); const tgt = u && wc.contains(u) ? u : e; if (seen.has(tgt)) return; seen.add(tgt);
+            const q = Object.assign({ e: tgt }, tgt === e ? textBox(e) : box(tgt.getBoundingClientRect())); if (q.x1 - q.x0 > 1 && q.y1 - q.y0 > 1) R.push(q); });
+          const sh = SHOTS.slice().sort((a, b) => a.t - b.t);
+          const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
+            const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
+            return inter && !inside ? 1 : !inter ? 2 : 0; }; // 1 = sliced, 2 = fully out of view
+          R.forEach((q) => { let prev = false; const H = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = H[i] === 1 || (H[i] === 2 && (prev || S.d > 0)); if (!h && prev && i + 1 < sh.length && (H[i + 1] === 1 || (H[i + 1] === 2 && sh[i + 1].d > 0)) && nextT - inT < 0.5) h = true; // too short to show: stay hidden
+              if (i === 0) { if (h) st(q.e, { filter: "opacity(0)", visibility: "hidden" }, S.t); }
+              else if (h && !prev && S.d === 0) st(q.e, { filter: "opacity(0)", visibility: "hidden" }, S.t); // hard cut: hide at once
+              else if (h && !prev) { ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.18, ease: "power1.out" }, S.t); st(q.e, { visibility: "hidden" }, S.t + 0.19); }
+              else if (!h && prev) { st(q.e, { visibility: "visible" }, inT); ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.25, ease: "power1.out" }, inT); }
+              else if (!h && !prev && S.d > 0 && H[i - 1] === 2) { st(q.e, { filter: "opacity(0)", visibility: "hidden" }, S.t); // enters the frame during this move: show it once the move lands
+                st(q.e, { visibility: "visible" }, inT); ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.25, ease: "power1.out" }, inT); }
+              prev = h; }); });
+          window.__noCut = { leaves: R.length, shots: sh.length }; }
+
+        FX.runGestures();
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

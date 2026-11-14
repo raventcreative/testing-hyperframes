@@ -27,8 +27,8 @@ VOL = {"whoosh": 0.06, "pop": 0.045, "click": 0.08, "ping": 0.045}
 ev = [("whoosh", 0.05), ("ping", wt("pas lu lagi", "tidur") - 0.1), ("pop", wt("Coba lihat", "simulasi")), ("ping", ph("Jam dua")["start"]),
       ("pop", ph("ada lead")["start"] - 0.1), ("pop", wt("ada lead", "masuk")), ("pop", wt("AI langsung", "WhatsApp")), ("pop", ph("Logo masuk")["start"]),
       ("pop", wt("mockup produknya", "jadi") - 0.45), ("whoosh", ph("Yang diem")["start"] - 0.1), ("pop", ph("Dia follow-up")["start"] + 0.15),
-      ("pop", ph("Dia follow-up")["start"] + 0.59), ("click", ph("Semua lead")["start"] - 0.05), ("whoosh", ph("Semua lead")["start"] + 0.15),
-      ("ping", ph("error di bawah")["start"] + 0.2), ("whoosh", ph("Mau sistem")["start"] - 0.2), ("click", wt("Klik link", "link"))]
+      ("pop", ph("Dia follow-up")["start"] + 0.59), ("click", ph("Semua lead")["start"] - 0.75), ("whoosh", ph("Semua lead")["start"] - 0.5),
+      ("ping", ph("error di bawah")["start"] + 0.2), ("whoosh", ph("Mau sistem")["start"] - 0.55), ("click", wt("Klik link", "link"))]
 tags = [f'<audio id="sx{i:02d}" class="clip" src="assets/sfx/{k}.wav" data-start="{t:.2f}" data-duration="{DUR[k]}" data-track-index="{10 + i % 4}" data-volume="{VOL[k]}"></audio>'
         for i, (k, t) in enumerate(sorted(ev, key=lambda e: e[1]))]
 out = src.replace("<!--ROBOT_CSS-->", css.strip()).replace("<!--ROBOT_HTML-->", html).replace("/*ROBOT_SETUP*/", js.strip()).replace("<!--SFX-->", "\n      ".join(tags))

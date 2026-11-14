@@ -8,7 +8,10 @@
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/icons.js"></script>
     <script src="vendor/vo_env.js"></script>
-    <script src="vendor/robot_rig2.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
     <style>
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
       @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
@@ -158,13 +161,14 @@
       .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0;
         font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; text-shadow: 0 4px 18px rgba(0,0,0,0.5); }
       .cap .in { display: block; } .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; color: var(--c); }
-      <!--ROBOT_CSS-->
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(760px); }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(0,0,0,0.38)); }
     </style>
   </head>
   <body>
     <div id="main" data-composition-id="main" data-start="0" data-duration="63.0" data-width="1080" data-height="1920" data-fps="30">
       <div id="scene" class="clip" data-start="0" data-duration="63.0" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
-        <div id="bg"></div><div id="grid"></div><div id="glow"></div>
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div><div id="grid"></div><div id="glow"></div>
         <div id="win">
           <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">AI Roadmap OS</span><span id="sim">SIMULASI</span>
             <div class="tr"><span class="ic" data-i="building-2"></span>Bisnis lu</div></div>
@@ -206,8 +210,8 @@
         </div>
         <div id="cta"><div class="k">Mau sistem kayak gini di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
           <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
-        <div id="ui"><img id="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><div id="caps"></div>
-          <!--ROBOT_HTML--></div>
+        <div id="ui"><img id="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><i id="logoD"></i><i id="logoL"></i><div id="caps"></div>
+          <div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div></div>
       </div>
       <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="62.32" data-track-index="8" data-volume="1"></audio>
       <!--SFX-->
@@ -282,6 +286,9 @@
         const PH = VO_PHR, ph = (s) => { const r = PH.find((p) => p.text.startsWith(s)); if (!r) throw new Error("phrase " + s); return r; };
         const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().replace(/^"/, "").startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
         const D = 63.0;
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "dark" });
+        Object.assign(FX.POSE.peekR, { x: 560, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 });
+        FX.theme("dark", 0);
         const win = $("#win");
         const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
         let cur = { x: 760, y: 860 };
@@ -347,8 +354,8 @@
         /* S1 audit 10.8-17.3 */
         const t1 = ph("Tahap satu").start;
         clickStep(0, t1);
-        hide("#sR", t1 - 0.1);
-        show("#s1", t1 + 0.1);
+        FX.dip("right", t1 - 1.17, 0.25);
+        FX.iris(t1 - 1.12, "dark", (m) => { st("#sR", { opacity: 0 }, m); st("#s1", { opacity: 1 }, m); }, { x: 540, y: 820, ex: 540, ey: 700 });
         ft(".arow", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.08 }, t1 + 0.35);
         ft("#procCard", { opacity: 0 }, { opacity: 1, duration: 0.4 }, t1 + 0.5);
         $$(".pi").forEach((p, i) => ft(p, { opacity: 0, x: 14 }, { opacity: 1, x: 0, duration: 0.2 }, t1 + 0.6 + i * 0.05));
@@ -366,7 +373,8 @@
 
         /* S2 second brain 17.3-24.9 */
         const t2 = ph("Tahap dua").start;
-        hide("#s1", t2 - 0.1); clickStep(1, t2); show("#s2", t2 + 0.15);
+        FX.dip("center", t2 - 1.25, 0.25);
+        FX.shutter(t2 - 1.2, "dark", (m) => { st("#s1", { opacity: 0 }, m); st("#s2", { opacity: 1 }, m); }); clickStep(1, t2);
         const fSOP = wt("Semua SOP", "SOP"), fT = wt("Semua SOP", "tools"), fO = wt("Semua SOP", "orang"), fP = wt("Semua SOP", "proses");
         [fSOP, fT, fO, fP].forEach((t, k) => { const f = $("#fd" + k); ft(f, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.5)" }, t - 0.15);
           ft($$(".fl", f), { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.2, stagger: 0.12 }, t + 0.1); const em = $("em", f); count(em, 0, +em.dataset.n, t, 1.0); });
@@ -379,7 +387,8 @@
 
         /* S3 departments 24.9-34 */
         const t3 = ph("Tahap tiga").start;
-        hide("#s2", t3 - 0.1); clickStep(2, t3); show("#s3", t3 + 0.15);
+        FX.dip("home", t3 - 1.17, 0.25);
+        FX.doors(t3 - 1.12, "dark", (m) => { st("#s2", { opacity: 0 }, m); st("#s3", { opacity: 1 }, m); }); clickStep(2, t3);
         const tDv = [wt("Marketing, revenue", "Marketing"), wt("Marketing, revenue", "revenue"), wt("operasional, keuangan", "operasional"), wt("operasional, keuangan", "keuangan")];
         tDv.forEach((t, k) => ft("#dc" + k, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.5)" }, t - 0.12));
         ft(".dcol .chip.sk", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.2, stagger: 0.05 }, wt("Tiap divisi punya", "skill") - 0.1);
@@ -406,6 +415,7 @@
 
         /* S5 autonomy 41.7-51 */
         const t5 = ph("Tahap lima").start;
+        FX.go("center", t5 - 0.35, 0.8); // no wipe here: "mereka yang jalan" ends 0.36 s before "Tahap lima"
         hide("#s4", t5 - 0.1); clickStep(4, t5); show("#s5", t5 + 0.15);
         ft("#agentBadge", { opacity: 1 }, { opacity: 0, duration: 0.3 }, t5);
         ft("#beat", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35 }, t5 + 0.3);
@@ -425,7 +435,8 @@
 
         /* S6 compounding 51-56.2 */
         const t6 = ph("Terakhir").start;
-        hide("#s5", t6 - 0.1); show("#s6", t6 + 0.1);
+        FX.dip("right", t6 - 1.2, 0.25);
+        FX.stripes(t6 - 1.15, "dark", (m) => { st("#s5", { opacity: 0 }, m); st("#s6", { opacity: 1 }, m); });
         ft("#sFill", { scaleX: 1 }, { keyframes: [{ opacity: 0.4 }, { opacity: 1 }], duration: 0.5 }, t6);
         const tIn = [wt("Terakhir, kasih", "tujuan"), wt("data, dan", "data"), wt("data, dan", "aturan")];
         tIn.forEach((t, k) => ft("#in" + k, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.6)" }, t - 0.12));
@@ -450,31 +461,25 @@
         capEls.forEach(({ el, ws, p }, k) => {
           const next = capEls[k + 1];
           const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
-          const tin = p.start - 0.05, tout = Math.max(tin + 0.3, end - 0.2);
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
           ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
-          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.38 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, ws[i][1] - 0.05));
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.38 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
           ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
         });
 
-        /*ROBOT_SETUP*/
-        const G = [];
-        [ph("Gue tunjukin").start - 0.15, tCta + 0.1].forEach((t) => G.push({ t, k: "wave", d: 1.4 }));
-        [tDep, t1, t2, t3, t4, tJal, t5].forEach((t) => G.push({ t: t - 0.25, k: "point", d: 1.5 }));
+        /* 3D presenter robot: bottom band only (client rule), expressions on story beats */
+        FX.enter("home", 0);
+        FX.go("peekR", t4 - 0.35, 0.9); FX.go("right", tJal + 0.6, 0.8);
+        FX.hop(tCta - 0.35, 34);
+        FX.face("wide", ph("Padahal").start, 1.1); FX.face("excited", ph("Lima tahap").start, 1.0);
+        FX.face("happy", tSed, 0.9); FX.face("happy", tBaca - 0.1, 0.9); FX.face("excited", tDv[0], 0.8);
+        FX.face("happy", tJal - 0.1, 1.0); FX.face("excited", tWf, 1.0); FX.face("happy", tNum, 1.2);
+        FX.face("happy", tF + 0.05, 1.4); FX.face("excited", D - 1.6, 0.9);
+        [ph("Gue tunjukin").start - 0.15, tCta + 0.1].forEach((t) => FX.wave(t));
+        [tDep, t1, t2, t3, t4, tJal, t5].forEach((t) => FX.point(t - 0.25));
         [wt("datang paling", "terakhir"), ph("Lima tahap").start, tStop, tDok, tHap, tSed, fSOP, fP, tDv[0], tDv[2], wt("Tiap divisi punya", "skill"), wt("tiap 30", "30"), tTr[0], tTr[1], tTr[2], tWf, tIn[0], tIn[2], tNum]
-          .forEach((t) => G.push({ t: t - 0.08, k: "beat", d: 0.55 }));
-        G.sort((x, y) => x.t - y.t);
-        let busy = -1, beatN = 0;
-        G.forEach((g) => {
-          if (g.t < busy + 0.05) return;
-          busy = g.t + g.d;
-          if (g.k === "wave") ft(lh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 10, y: -95, rotation: 20, duration: 0.28, ease: "power2.out" }, { rotation: -18, duration: 0.2 }, { rotation: 20, duration: 0.2 },
-            { rotation: -15, duration: 0.2 }, { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-          if (g.k === "point") { ft(rh, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ x: 40, y: -150, rotation: -38, duration: 0.33, ease: "power2.out" }, { x: 40, y: -150, rotation: -38, duration: 0.7 },
-            { x: 0, y: 0, rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t);
-            ft(rob, { rotation: 0 }, { keyframes: [{ rotation: 3, duration: 0.33, ease: "power2.out" }, { rotation: 3, duration: 0.7 }, { rotation: 0, duration: 0.45, ease: "power2.inOut" }] }, g.t); }
-          if (g.k === "beat") { const hand = beatN++ % 2 ? lh : rh, dir = hand === lh ? 1 : -1;
-            ft(hand, { x: 0, y: 0, rotation: 0 }, { keyframes: [{ y: -40, rotation: 12 * dir, duration: 0.2, ease: "power2.out" }, { y: 0, rotation: 0, duration: 0.32, ease: "power2.in" }] }, g.t); }
-        });
+          .forEach((t) => FX.beat(t - 0.08));
+        FX.runGestures();
 
         tl.set({}, {}, D - 0.01);
         window.__timelines["main"] = tl;

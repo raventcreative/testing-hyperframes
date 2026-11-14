@@ -26,7 +26,7 @@ ev = [("pop", 0.05), ("pop", S("resto lu") - 0.12), ("pop", wt("resto lu", "AI")
       ("pop", S("jadi dia minta") - 0.05), ("ping", wt("jadi dia minta", "lebih") - 0.1),
       ("whoosh", tSeh - 0.55), ("pop", wt("Seharian", "bales") - 0.1), ("pop", wt("Seharian", "bales") + 0.32), ("pop", wt("Seharian", "bales") + 0.74),
       ("whoosh", tRev - 0.42), ("pop", wt("Agent review", "bales") - 0.1), ("pop", wt("Agent review", "bales") + 0.3), ("ping", wt("yang bintang", "dilempar") - 0.25),
-      ("whoosh", tJ3 - 0.68), ("pop", S("bikin promo") - 0.2), ("pop", wt("buat Selasa", "Selasa")),
+      ("whoosh", tJ3 - 0.8), ("pop", S("bikin promo") - 0.2), ("pop", wt("buat Selasa", "Selasa")),
       ("whoosh", tTapi - 0.05), ("pop", wt("jadi ditolak", "ditolak") + 0.04), ("whoosh", S("Diganti") + 0.02),
       ("pop", S("disetujui") + 0.04), ("sparkle", S("disetujui") + 0.1), ("whoosh", tKir + 0.1), ("ping", tKir + 1.2),
       ("whoosh", t11 - 1.16), ("whoosh", wt("agent keuangan", "keuangan") - 0.15), ("pop", wt("agent keuangan", "tutup") - 0.05), ("ping", tKirim - 0.25),

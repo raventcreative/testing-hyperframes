@@ -21,7 +21,7 @@ tJalan = wt("trigger langsung", "jalan"); tYang = ph("Yang ini")["start"]; tNama
 # one quiet whoosh per transition / big camera move
 ev = [("whoosh", W1), ("whoosh", tSimW + 0.35), ("whoosh", tJalan + 0.2), ("whoosh", tYang - 0.42), ("whoosh", tZ + 0.3),
       ("whoosh", tNama - 0.38), ("whoosh", W3), ("whoosh", tKir + 0.32), ("whoosh", tZ3 + 0.3), ("whoosh", tZ3 + 0.85), ("whoosh", W5)]
-ev += [("pop", 0.06), ("pop", wt("Lead lu nanya", "sebelas") - 0.15), ("pop", ph("baru dibales")["start"] - 0.2), ("pop", wt("baru dibales", "siang") - 0.2),
+ev += [("pop", wt("Lead lu nanya", "sebelas") - 0.15), ("pop", ph("baru dibales")["start"] - 0.2), ("pop", wt("baru dibales", "siang") - 0.2),
        ("pop", wt("Pas dibales", "udah") - 0.2), ("click", wt("Pas dibales", "kompetitor") - 0.02), ("pop", wt("Pas dibales", "kompetitor")),
        ("pop", wt("Satu, ada", "komen") - 0.12), ("pop", wt("Satu, ada", "DM") - 0.12), ("ping", tJalan + 0.05), ("ping", wt("cuma nanya", "siap") + 0.35),
        ("pop", tYang - 0.25), ("sparkle", wt("Yang ini", "enam")), ("pop", ph("lead panas")["start"] - 0.1),

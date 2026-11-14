@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>Cover — Struktur Tim Manusia + AI (navy, 5 Level Adopsi AI cover style)</title>
+<!-- Same system as projects/humanagent_thumb/thumbnail/cover3.html: the real frame (115.60 s — both hands clear of the burned-in
+     subtitle, so no finger is reconstructed; v1 used 115.83 s, where the subtitle crossed the open hand) as a full-bleed background with the
+     edit's burned-in hook / subtitle / watermark removed (tools/clean_frame.py) and an HD pass (tools/enhance.py), deep-navy
+     gradients top and bottom, a thin square grid behind the subject only, logo + eyebrow + 2-line headline + tagline.
+     ?text=0 -> clean photo only. Render: node thumbnail/render_cover.cjs <out.png> [query]  (HTTP=<port> for the CSS mask) -->
+<style>
+  @font-face { font-family: Poppins; src: url(../assets/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+  @font-face { font-family: Poppins; src: url(../assets/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #050b22; font-family: Poppins, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #c { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  #bg { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  .layer { position: absolute; left: 0; width: 1080px; }
+  #top { top: 0; height: 900px; background: linear-gradient(180deg, rgba(4,9,26,.97) 0%, rgba(5,11,33,.93) 34%, rgba(6,14,42,.72) 56%, rgba(7,16,48,.28) 78%, rgba(7,16,48,0) 100%); }
+  #bot { bottom: 0; height: 760px; background: linear-gradient(0deg, rgba(4,9,26,.98) 0%, rgba(5,11,33,.92) 24%, rgba(6,14,42,.62) 50%, rgba(7,16,48,.22) 76%, rgba(7,16,48,0) 100%); }
+  #vig { top: 0; height: 1920px; background: radial-gradient(ellipse 760px 1150px at 50% 52%, rgba(5,11,34,0) 58%, rgba(5,11,34,.55) 100%); }
+  #tint { top: 0; height: 1920px; background: rgba(18,40,110,.10); mix-blend-mode: soft-light; }
+  #grid { top: 0; height: 1920px; opacity: .12;
+    background-image: linear-gradient(90deg, rgba(214,228,255,1) 0 1.6px, transparent 1.6px), linear-gradient(0deg, rgba(214,228,255,1) 0 1.6px, transparent 1.6px);
+    background-size: 108px 108px; background-position: -0.8px 12px;
+    -webkit-mask-image: url(../assets/gridmask.png); mask-image: url(../assets/gridmask.png); -webkit-mask-size: 1080px 1920px; mask-size: 1080px 1920px; }
+  .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; }
+  .t { display: none; }
+  body.text .t { display: block; }
+  #logo { position: absolute; left: 460px; top: 296px; width: 160px; height: auto; opacity: .9; }
+  #eyebrow { top: 350px; font: 400 22px/1 Poppins; letter-spacing: 9px; color: #a9c4f5; }
+  #eyebrow b { font-weight: 700; color: #ffffff; }
+  #h1 { top: 392px; font: 700 88px/1 Poppins; letter-spacing: -2px; color: #ffffff; text-shadow: 0 6px 30px rgba(2,6,24,.6); }
+  #h2 { top: 490px; font: 700 112px/1 Poppins; letter-spacing: -3px;
+    background: linear-gradient(180deg, #ffffff 20%, #a9c8ff 80%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 8px 26px rgba(2,6,24,.55)); padding-bottom: .26em; }
+  #rule { position: absolute; left: 480px; top: 1548px; width: 120px; height: 1.5px; background: linear-gradient(90deg, rgba(169,196,245,0), rgba(169,196,245,.8), rgba(169,196,245,0)); }
+  #tag { top: 1568px; font: 400 34px/1.2 Poppins; color: #dbe5f8; letter-spacing: .3px; }
+  #tag b { font-weight: 700; color: #ffffff; }
+</style>
+</head>
+<body class="text">
+<div id="c">
+  <img id="bg" src="../assets/bg.jpg" alt="" />
+  <div class="layer" id="tint"></div>
+  <div class="layer" id="vig"></div>
+  <div class="layer" id="top"></div>
+  <div class="layer" id="bot"></div>
+  <div class="layer" id="grid"></div>
+  <img class="t" id="logo" src="../assets/logo_white_trim.png" alt="AI PRENEUR" />
+  <div class="ctr t" id="eyebrow"><b>MANUSIA</b>&nbsp;+ AI</div>
+  <div class="ctr t" id="h1">Struktur Tim Lo</div>
+  <div class="ctr t" id="h2">Udah Pakai AI?</div>
+  <div class="t" id="rule"></div>
+  <div class="ctr t" id="tag">AI yang kerja, <b>manusia yang review.</b></div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  if (q.get("text") === "0") document.body.classList.remove("text");
+  if (q.get("v") === "photo") {   // the clean photo the client sent (tools/build_photo.py)
+    document.getElementById("bg").src = "../assets/bg_photo.jpg";
+    const gs = document.getElementById("grid").style; gs.webkitMaskImage = gs.maskImage = "url(../assets/gridmask_photo.png)";
+  }
+  if (q.has("go")) document.getElementById("grid").style.opacity = q.get("go");
+  // keep both headline lines inside a 960 px measure (shrink the font if a line would be wider)
+  const fit = (id, max) => { const e = document.getElementById(id); let s = parseFloat(getComputedStyle(e).fontSize);
+    const r = document.createRange(); r.selectNodeContents(e);
+    while (r.getBoundingClientRect().width > max && s > 40) { s -= 2; e.style.fontSize = s + "px"; } };
+  Promise.all([document.fonts.ready, new Promise((r) => { const i = document.getElementById("bg"); if (i.complete && i.naturalWidth) r(); else { i.onload = r; i.onerror = r; } })]).then(() => {
+    if (document.body.classList.contains("text")) { fit("h1", 940); fit("h2", 960); }
+    window.COVER_READY = true;
+  });
+</script>
+</body>
+</html>

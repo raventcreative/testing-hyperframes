@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>R26 · 1x syuting, ratusan iklan: hook × isi × CTA — AI PRENEUR</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/mascot_face.js"></script>
+    <script src="vendor/mascot3d.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
+    <script type="module" src="vendor/vx.js"></script>
+    <style>
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: block; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #050b22; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Poppins, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+      .layer { position: absolute; inset: 0; }
+      #vx { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #veilT { position: absolute; left: 0; top: 0; width: 1080px; height: 560px; background: linear-gradient(180deg, rgba(4,9,28,.62) 0%, rgba(4,9,28,.3) 55%, rgba(4,9,28,0) 100%); }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/brand/grain_256.png); opacity: .035; mix-blend-mode: screen; }
+      #brandlogo { position: absolute; left: 84px; top: 236px; width: 236px; height: auto; opacity: .95; }
+      .tt { position: absolute; left: 540px; top: 330px; opacity: 0; display: flex; align-items: center; gap: 16px; padding: 14px 30px 16px 18px;
+            background: #ffffff; color: #0a0d2c; border-radius: 22px; font: 700 40px/1.1 Poppins; letter-spacing: -.3px; white-space: nowrap;
+            box-shadow: 0 16px 34px rgba(0,0,0,.35), 0 0 0 3px rgba(1,204,247,.35); }
+      .tt .tab { width: 14px; height: 40px; border-radius: 6px; background: #01ccf7; flex: none; }
+      .tt b { color: #1f6fd1; }
+      #chip { position: absolute; left: 84px; top: 452px; opacity: 0; display: flex; align-items: center; gap: 14px; padding: 10px 20px 10px 12px;
+              background: rgba(10,18,52,.9); border: 3px solid #01ccf7; border-radius: 20px; box-shadow: 0 10px 24px rgba(0,0,0,.35); transform-origin: 0% 50%; }
+      #chip .ic { width: 48px; height: 48px; border-radius: 13px; background: #01ccf7; display: grid; place-items: center; }
+      #chip .ic svg { width: 28px; height: 28px; }
+      #chip .lb { font: 700 19px/1 Poppins; letter-spacing: 3px; color: #9fdcff; }
+      #chip .il { font: 400 15px/1 Poppins; letter-spacing: 1px; color: #7f95c8; margin-top: 6px; }
+      #chip .nm { font: 700 48px/1 Poppins; color: #ffffff; min-width: 62px; text-align: right; }
+      #tag { position: absolute; left: 0; width: 1080px; top: 560px; text-align: center; opacity: 0; }
+      #tag span { display: inline-block; padding: 12px 30px 16px; border-radius: 20px; background: rgba(10,18,52,.9); border: 3px solid #ffc531; font: 700 44px/1 Poppins; color: #fff; }
+      #math { position: absolute; left: 0; width: 1080px; top: 560px; text-align: center; opacity: 0; }
+      #math span { display: inline-block; padding: 12px 30px 16px; border-radius: 20px; background: rgba(10,18,52,.88); border: 3px solid #ffc531; font: 700 52px/1 Poppins; color: #fff; }
+      #math b { color: #ffc531; }
+      /* captions: white bold words, each in its own navy box; key words with a cyan marker */
+      .cap { position: absolute; left: 50px; right: 50px; top: 1000px; text-align: center; font-size: 60px; line-height: 1.5; opacity: 0; }
+      .cap .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .02em .2em .16em; margin: -.02em -.07em -.16em; background: rgba(10,13,44,.84); border-radius: 14px; }
+      .cap .w { display: inline-block; position: relative; color: #ffffff; font-weight: 700; }
+      .cap .w.k { color: #7fe8ff; }
+      .cap .hl { position: absolute; left: -4px; right: -4px; bottom: .14em; height: .14em; background: #01ccf7; border-radius: 6px; transform-origin: 0 50%; }
+      #flash { position: absolute; inset: 0; background: #ffd75e; opacity: 0; }
+      #flashW { position: absolute; inset: 0; background: #ffffff; opacity: 0; }
+      #iris { position: absolute; inset: 0; background: #050b22; --r: 1600px; opacity: 0; visibility: hidden;
+              -webkit-mask-image: radial-gradient(circle at 540px 730px, transparent var(--r), #000 calc(var(--r) + 3px)); mask-image: radial-gradient(circle at 540px 730px, transparent var(--r), #000 calc(var(--r) + 3px)); }
+      #ring { position: absolute; left: 340px; top: 530px; width: 400px; height: 400px; border-radius: 50%; border: 22px solid #ff4d5e; opacity: 0; box-shadow: 0 0 40px #ff4d5e; }
+      #ctaveil { position: absolute; left: 0; top: 0; width: 1080px; height: 1300px; background: rgba(5,11,34,.55); opacity: 0; }
+      #cbox { position: absolute; left: 110px; top: 560px; width: 860px; opacity: 0; display: flex; align-items: center; gap: 22px; padding: 22px 26px; background: #ffffff; border-radius: 28px; box-shadow: 0 20px 44px rgba(0,0,0,.45); }
+      #cbox .av { width: 74px; height: 74px; border-radius: 50%; background: linear-gradient(135deg, #01ccf7, #294b77); flex: none; }
+      #cbox .in { flex: 1; font: 700 54px/1 Poppins; color: #0a0d2c; letter-spacing: 2px; min-height: 60px; display: flex; align-items: center; }
+      #cbox .ph { font: 400 34px/1 Poppins; color: #8a97b3; letter-spacing: 0; }
+      #cbox .cur { width: 4px; height: 56px; background: #01ccf7; margin-left: 4px; }
+      #cbox .send { padding: 14px 26px; border-radius: 18px; background: #01ccf7; color: #0a0d2c; font: 700 34px/1 Poppins; }
+      #dm { position: absolute; left: 150px; top: 760px; width: 780px; opacity: 0; padding: 22px 28px; border-radius: 26px; background: rgba(10,18,52,.95); border: 3px solid #01ccf7; box-shadow: 0 20px 44px rgba(0,0,0,.45); }
+      #dm .h { font: 700 26px/1 Poppins; letter-spacing: 3px; color: #7fe8ff; }
+      #dm .b { font: 700 40px/1.25 Poppins; color: #fff; margin-top: 12px; }
+      #dm .b span { color: #2ecc71; }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="57.8" data-width="1080" data-height="1920" data-fps="30">
+      <div id="stage" class="clip layer" data-start="0" data-duration="57.8" data-track-index="1"><canvas id="vx" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas></div>
+      <div id="host" class="clip layer" data-layout-ignore data-layout-allow-occlusion data-start="0" data-duration="57.8" data-track-index="2"><canvas id="ms" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion style="position:absolute;left:0;top:0;width:1080px;height:1920px"></canvas></div>
+      <div id="ui" class="clip layer" data-start="0" data-duration="57.8" data-track-index="3">
+        <div id="veilT"></div><div id="grain"></div>
+        <img id="brandlogo" src="assets/brand/logo_white_trim.png" alt="AI PRENEUR" />
+        <div class="tt" id="t1"><span class="tab"></span><span><b>1x</b> SYUTING → RATUSAN IKLAN</span></div>
+        <div class="tt" id="t2"><span class="tab"></span><span>1 IKLAN = <b>HOOK + ISI + CTA</b></span></div>
+        <div class="tt" id="t3"><span class="tab"></span><span><b>50</b> HOOK · <b>3–5</b> ISI · <b>1–3</b> CTA</span></div>
+        <div class="tt" id="t4"><span class="tab"></span><span>KOMBINASI = <b>IKLAN BARU</b></span></div>
+        <div class="tt" id="t5"><span class="tab"></span><span>SUMBER HOOK <b>YANG TERBUKTI</b></span></div>
+        <div class="tt" id="t6"><span class="tab"></span><span><b>3</b> LEVEL KESADARAN</span></div>
+        <div class="tt" id="t7"><span class="tab"></span><span><b>5</b> FORMAT ISI</span></div>
+        <div class="tt" id="t8"><span class="tab"></span><span>CTA JAWAB <b>5 HAL</b></span></div>
+        <div class="tt" id="t9"><span class="tab"></span><span><b>AI</b> BANTU NULIS HOOK</span></div>
+        <div id="chip"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0a0d2c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/><path d="M8 14h5"/></svg></span><span><div class="lb" id="cl">IKLAN</div><div class="il" id="ci">ilustrasi</div></span><span class="nm" id="cn">0</span></div>
+        <div id="tag"><span id="tg"></span></div>
+        <div id="math"><span id="mt">50 × 3 × 1 = <b>150</b></span></div>
+        <div id="caps"></div>
+        <div id="ctaveil"></div>
+        <div id="cbox"><span class="av"></span><span class="in" id="cin"><span class="ph" id="cph">Tulis komentar…</span><span id="ctx"></span><span class="cur" id="cur"></span></span><span class="send" id="send">Kirim</span></div>
+        <div id="dm"><div class="h">DM · AI PRENEUR</div><div class="b">Prompt <b>HOOK × ISI × CTA</b> siap dikirim <span>✓</span></div></div>
+        <div id="flash" data-layout-ignore data-layout-allow-occlusion></div><div id="flashW" data-layout-ignore data-layout-allow-occlusion></div><div id="iris" data-layout-ignore data-layout-allow-occlusion></div><div id="ring" data-layout-ignore data-layout-allow-occlusion></div>
+      </div>
+      <audio id="vo" src="assets/audio/vo.mp3" data-start="0.3" data-duration="55.9" data-track-index="10" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="57.8" data-track-index="11" data-volume="1"></audio>
+    </div>
+    <script>
+      (function () {
+        const OFF = 0.3, DUR = 57.8;
+        const WORDS = [["Satu", 0.08, 0.28], ["kali", 0.32, 0.48], ["syuting,", 0.56, 1.16], ["bisa", 1.28, 1.52], ["jadi", 1.6, 1.68], ["ratusan", 1.72, 2.16], ["iklan.", 2.24, 2.96], ["Formula", 3.484, 3.52], ["yang", 3.56, 3.6], ["dipopulerkan", 3.64, 4.24], ["Alex", 4.32, 4.48], ["Hormozi:", 4.56, 5.24], ["tiap", 5.44, 5.6], ["iklan", 5.68, 6.0], ["dipotong", 6.053, 6.32], ["jadi", 6.4, 6.56], ["tiga,", 6.64, 7.12], ["hook,", 7.28, 7.68], ["isi,", 7.84, 8.24], ["dan", 8.32, 8.48], ["CTA.", 8.64, 9.28], ["Bikin", 9.513, 9.68], ["lima", 9.76, 9.96], ["puluh", 10.0, 10.16], ["hook,", 10.24, 10.68], ["tiga", 10.72, 10.96], ["sampai", 11.12, 11.36], ["lima", 11.44, 11.6], ["isi,", 11.68, 12.04], ["dan", 12.08, 12.32], ["satu", 12.4, 12.64], ["sampai", 12.72, 12.96], ["tiga", 13.12, 13.28], ["CTA.", 13.44, 14.166], ["Lalu", 14.234, 14.4], ["kombinasikan.", 14.48, 15.48], ["Tiap", 15.52, 15.68], ["kombinasi", 15.72, 16.24], ["jadi", 16.32, 16.48], ["satu", 16.64, 16.88], ["iklan:", 16.96, 17.573], ["seratus", 17.627, 17.84], ["lima", 17.92, 18.08], ["puluh", 18.16, 18.4], ["sampai", 18.48, 18.88], ["tujuh", 18.96, 19.2], ["ratus", 19.28, 19.52], ["lima", 19.6, 19.76], ["puluh", 19.84, 19.92], ["iklan.", 20.16, 20.738], ["Hook-nya", 20.942, 21.2], ["ambil", 21.32, 21.44], ["dari", 21.48, 21.6], ["yang", 21.64, 21.68], ["sudah", 21.76, 21.92], ["terbukti:", 22.0, 22.68], ["iklan", 22.72, 22.96], ["lama", 23.08, 23.2], ["kamu", 23.24, 23.36], ["yang", 23.44, 23.52], ["menang,", 23.6, 24.04], ["konten", 24.16, 24.48], ["gratis", 24.64, 24.8], ["kamu,", 24.88, 25.24], ["dan", 25.28, 25.44], ["iklan", 25.52, 25.84], ["orang", 25.92, 26.08], ["yang", 26.16, 26.24], ["lagi", 26.36, 26.52], ["laris.", 26.56, 27.207], ["Sebar", 27.28, 27.6], ["ke", 27.64, 27.68], ["tiga", 27.76, 27.92], ["level:", 28.24, 28.613], ["yang", 28.667, 28.72], ["belum", 28.8, 28.88], ["sadar", 28.96, 29.2], ["punya", 29.28, 29.44], ["masalah,", 29.56, 30.2], ["yang", 30.24, 30.4], ["lagi", 30.52, 30.68], ["cari", 30.72, 30.88], ["solusi,", 30.96, 31.48], ["sampai", 31.52, 31.92], ["yang", 32.0, 32.08], ["sudah", 32.16, 32.4], ["kenal", 32.48, 32.64], ["produkmu.", 32.72, 33.458], ["Isinya", 33.662, 33.92], ["ganti-ganti", 33.973, 34.32], ["format:", 34.4, 35.227], ["demo,", 35.413, 35.68], ["testimoni,", 35.76, 36.453], ["edukasi,", 36.507, 37.12], ["cerita,", 37.2, 37.68], ["atau", 37.8, 37.96], ["tanpa", 38.0, 38.24], ["wajah.", 38.28, 38.887], ["CTA-nya", 38.96, 39.6], ["jawab", 39.68, 39.92], ["lima", 40.0, 40.12], ["hal:", 40.16, 40.667], ["lakukan", 40.693, 41.04], ["apa,", 41.12, 41.6], ["kenapa", 41.68, 41.92], ["penting,", 42.08, 42.68], ["kapan,", 42.8, 43.12], ["segampang", 43.2, 43.6], ["apa,", 43.68, 44.08], ["dan", 44.2, 44.32], ["habis", 44.4, 44.64], ["itu", 44.72, 44.96], ["dapat", 45.04, 45.2], ["apa.", 45.28, 45.932], ["Bagian", 46.068, 46.24], ["paling", 46.32, 46.48], ["berat", 46.56, 46.8], ["itu", 46.96, 47.12], ["nulis", 47.16, 47.44], ["lima", 47.52, 47.68], ["puluh", 47.76, 47.92], ["hook.", 48.08, 48.693], ["Di", 48.747, 48.8], ["sini", 48.84, 49.12], ["AI", 49.16, 49.36], ["bantu:", 49.4, 50.027], ["satu", 50.053, 50.24], ["brief,", 50.32, 50.773], ["keluar", 50.827, 51.12], ["puluhan", 51.16, 51.6], ["hook", 51.68, 51.76], ["per", 51.8, 51.84], ["level,", 51.92, 52.36], ["kamu", 52.4, 52.64], ["tinggal", 52.72, 52.96], ["pilih.", 53.0, 53.525], ["Komen", 53.6, 53.84], ["hook,", 54.04, 54.28], ["aku", 54.32, 54.48], ["kirim", 54.56, 54.8], ["prompt-nya", 54.88, 55.04], ["lewat", 55.12, 55.28], ["DM.", 55.36, 55.92]];
+        const KEYW = new Set(["ratusan", "hormozi", "hook", "isi", "cta", "kombinasikan", "seratus", "tujuh", "terbukti", "menang", "gratis", "laris", "level", "sadar", "solusi", "kenal",
+          "produkmu", "format", "demo", "testimoni", "edukasi", "cerita", "wajah", "berat", "ai", "brief", "pilih", "komen", "hooknya", "ctanya", "lima", "puluh", "ratus"]);
+        const bare = (w) => w.toLowerCase().replace(/[^a-z]/g, "");
+        // chunks: break after , . : ? or at 4 words
+        const CHUNKS = []; { let a = 0; for (let i = 0; i < WORDS.length; i++) { const end = /[,.:?]$/.test(WORDS[i][0]) || i - a === 3 || i === WORDS.length - 1; if (end) { CHUNKS.push([a, i + 1]); a = i + 1; } } }
+        const tl = gsap.timeline({ paused: true });
+        const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+        { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+        const P0 = gsap.timeline(); tl.add(P0, 0);
+        const pin = (el, v) => { gsap.set(el, _sc(v)); P0.set(el, _sc(v), 0); };
+        const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+        // captions
+        const caps = document.getElementById("caps");
+        CHUNKS.forEach(([a, b], ci) => {
+          const d = document.createElement("div"); d.className = "cap"; const t0 = WORDS[a][1] + OFF; d.style.top = (t0 < 3.44 ? 1430 : 1000) + "px"; caps.appendChild(d);
+          const ws = [];
+          for (let i = a; i < b; i++) { const m = document.createElement("span"); m.className = "m"; const w = document.createElement("span"); const key = KEYW.has(bare(WORDS[i][0]));
+            w.className = "w" + (key ? " k" : ""); w.textContent = WORDS[i][0]; if (key) { const h = document.createElement("span"); h.className = "hl"; w.appendChild(h); }
+            m.appendChild(w); d.appendChild(m); if (i < b - 1) d.appendChild(document.createTextNode(" ")); ws.push([w, WORDS[i][1] + OFF]); }
+          const tIn = ws[0][1] - 0.06, next = CHUNKS[ci + 1], tOut = next ? WORDS[next[0]][1] + OFF - 0.08 : DUR - 0.3;
+          pin(d, { opacity: 0 }); ft(d, { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, tIn); ft(d, { opacity: 1, y: 0 }, { opacity: 0, y: -10, duration: 0.12, ease: "power2.in" }, Math.max(tIn + 0.2, tOut - 0.12));
+          ws.forEach(([w, t]) => { pin(w.parentNode, { opacity: 0 }); ft(w.parentNode, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Math.max(tIn, t - 0.06));
+            pin(w, { yPercent: 118 }); ft(w, { yPercent: 118 }, { yPercent: 0, duration: 0.3, ease: "power4.out" }, Math.max(tIn, t - 0.05));
+            const h = w.querySelector(".hl"); if (h) { pin(h, { scaleX: 0 }); ft(h, { scaleX: 0 }, { scaleX: 1, duration: 0.26, ease: "power2.out" }, t + 0.08); } });
+        });
+        // titles
+        const title = (id, a, b) => { const e = document.getElementById(id); pin(e, { xPercent: -50, opacity: 0 });
+          ft(e, { opacity: 0, rotationX: -88, y: -20, transformPerspective: 900, transformOrigin: "50% 0%" }, { opacity: 1, rotationX: 0, y: 0, duration: 0.45, ease: "back.out(1.6)" }, a);
+          ft(e, { opacity: 1, y: 0 }, { opacity: 0, y: -24, duration: 0.22, ease: "power2.in" }, b); };
+        [["t1", 0.45, 3.25], ["t2", 4.45, 9.3], ["t3", 10.1, 13.9], ["t4", 15.0, 20.45], ["t5", 21.6, 27.15], ["t6", 28.05, 33.2], ["t7", 34.3, 38.8], ["t8", 39.7, 45.55], ["t9", 46.6, 53.7]].forEach((x) => title(...x));
+        // chip windows (content set per seek below)
+        const CHIP = [[2.1, 3.25, "IKLAN", true], [10.1, 13.9, "HOOK", false], [17.8, 20.45, "IKLAN", true], [22.85, 27.15, "SUMBER", false], [28.95, 33.2, "LEVEL", false],
+          [35.55, 38.8, "FORMAT", false], [40.85, 45.55, "CTA", false], [50.85, 53.7, "DRAF HOOK", true]];
+        pin("#chip", { opacity: 0, scale: 0.6 });
+        CHIP.forEach(([a, b]) => { ft("#chip", { opacity: 0, scale: 0.6, x: -30 }, { opacity: 1, scale: 1, x: 0, duration: 0.38, ease: "back.out(2)" }, a);
+          ft("#chip", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.8, duration: 0.18, ease: "power2.in" }, b); });
+        const TAGS = [[23.0, 24.4, "#1 · IKLAN LAMA YANG MENANG", "#ffc531"], [24.45, 25.75, "#2 · KONTEN GRATIS KAMU", "#ff4d5e"], [25.8, 27.1, "#3 · IKLAN ORANG YANG LARIS", "#ff8a3d"],
+          [29.05, 30.95, "LEVEL 1 · BELUM SADAR", "#7c5cff"], [31.0, 32.7, "LEVEL 2 · CARI SOLUSI", "#2ecc71"], [32.75, 33.3, "LEVEL 3 · KENAL PRODUK", "#ff8a3d"]];
+        pin("#tag", { opacity: 0 }); TAGS.forEach(([a, b]) => { ft("#tag", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, a); ft("#tag", { opacity: 1 }, { opacity: 0, duration: 0.12 }, b - 0.12); });
+        window.__TAGS = TAGS;
+        // slot-machine math
+        pin("#math", { opacity: 0 }); ft("#math", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, 17.9);
+        ft("#math", { scale: 1 }, { scale: 1.12, duration: 0.1, yoyo: true, repeat: 1 }, 19.25); ft("#math", { opacity: 1 }, { opacity: 0, duration: 0.2 }, 20.45);
+        // transitions on the page layer
+        pin("#flash", { opacity: 0 }); ft("#flash", { opacity: 0 }, { opacity: 1, duration: 0.16, ease: "power2.in" }, 20.96); ft("#flash", { opacity: 1 }, { opacity: 0, duration: 0.45, ease: "power2.out" }, 21.13);
+        pin("#flashW", { opacity: 0 }); ft("#flashW", { opacity: 0 }, { opacity: 0.45, duration: 0.08 }, 3.36); ft("#flashW", { opacity: 0.45 }, { opacity: 0, duration: 0.3 }, 3.45);
+        ft("#flashW", { opacity: 0 }, { opacity: 1, duration: 0.18 }, 46.08); ft("#flashW", { opacity: 1 }, { opacity: 0, duration: 0.35 }, 46.36);
+        pin("#iris", { "--r": "1600px", autoAlpha: 0 }); tl.set("#iris", { autoAlpha: 1 }, 27.15); tl.set("#iris", { autoAlpha: 0 }, 28.2); ft("#iris", { "--r": "1600px" }, { "--r": "0px", duration: 0.4, ease: "power3.in" }, 27.2); ft("#iris", { "--r": "0px" }, { "--r": "1600px", duration: 0.5, ease: "power3.out" }, 27.63);
+        pin("#vx", { filter: "blur(0px)" }); ft("#vx", { filter: "blur(0px)" }, { filter: "blur(16px)", duration: 0.45, ease: "power2.in" }, 38.98); ft("#vx", { filter: "blur(16px)" }, { filter: "blur(0px)", duration: 0.35, ease: "power2.out" }, 39.45);
+        pin("#ring", { opacity: 0, scale: 0.1 }); ft("#ring", { opacity: 1, scale: 0.1 }, { opacity: 0, scale: 6, duration: 0.6, ease: "power2.out" }, 45.66);
+        // CTA
+        pin("#ctaveil", { opacity: 0 }); ft("#ctaveil", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 53.85);
+        pin("#cbox", { opacity: 0, y: 40 }); ft("#cbox", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.6)" }, 53.9);
+        ft("#send", { scale: 1 }, { scale: 0.88, duration: 0.08, yoyo: true, repeat: 1 }, 54.75);
+        pin("#dm", { opacity: 0, x: 120 }); ft("#dm", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.4, ease: "back.out(1.4)" }, 55.0);
+        tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: DUR, ease: "steps(1734)", immediateRender: false }, 0); pin("#grain", { x: 0, y: 0 });
+        tl.set({}, {}, DUR - 0.01);
+        (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+        tl.render(0, true, true);
+        window.__timelines = window.__timelines || {}; window.__timelines["main"] = tl;
+        // per-seek text (pure functions of time)
+        const $ = (id) => document.getElementById(id), ez = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 2);
+        const HOOKT = (k) => 10.15 + k * 0.03, SRC = [23.0, 24.45, 25.8], LV = [29.05, 31.0, 32.75], FMT = [35.7, 36.05, 36.8, 37.5, 38.3], DOM = [40.95, 41.95, 43.05, 43.45, 45.3];
+        const cnt = (arr, t) => arr.filter((x) => t >= x).length;
+        function texts(t) {
+          const c = CHIP.find(([a, b]) => t >= a - 0.05 && t < b + 0.3) || CHIP[0]; $("cl").textContent = c[2]; $("ci").textContent = c[3] ? "ilustrasi" : "";
+          let n = "";
+          if (c[2] === "IKLAN" && c[0] < 5) n = Math.round(750 * ez((t - 2.1) / 1.0));
+          else if (c[2] === "HOOK") n = [...Array(50).keys()].filter((k) => t >= HOOKT(k)).length + "/50";
+          else if (c[2] === "IKLAN") n = Math.round(150 + 600 * ez((t - 17.9) / 2.3));
+          else if (c[2] === "SUMBER") n = cnt(SRC, t) + "/3"; else if (c[2] === "LEVEL") n = cnt(LV, t) + "/3"; else if (c[2] === "FORMAT") n = cnt(FMT, t) + "/5";
+          else if (c[2] === "CTA") n = cnt(DOM, t) + "/5"; else n = Math.min(30, Math.max(0, Math.floor((t - 50.85) / 0.06)));
+          $("cn").textContent = n;
+          { const g = TAGS.find(([a, b]) => t >= a - 0.02 && t < b) || TAGS.find(([a]) => a > t) || TAGS[0]; $("tg").textContent = g[2]; $("tg").style.borderColor = g[3]; }
+          $("mt").innerHTML = t < 19.25 ? "50 × 3 × 1 = <b>150</b>" : "50 × 5 × 3 = <b>750</b>";
+          const typed = "HOOK".slice(0, Math.max(0, Math.min(4, Math.floor((t - 54.1) / 0.1) + 1)));
+          $("ctx").textContent = t >= 54.1 ? typed : ""; $("cph").style.display = t >= 54.1 ? "none" : "inline";
+          $("cur").style.opacity = Math.floor(t * 3) % 2 ? 1 : 0.2;
+        }
+        texts(0); window.addEventListener("hf-seek", (e) => texts(e.detail.time));
+      })();
+    </script>
+    <script src="vendor/mascot_host.js"></script>
+  </body>
+</html>

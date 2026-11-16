@@ -75,6 +75,11 @@ module robot3d.js, `<canvas id="robo3d" width="820" height="700">` at left -92, 
 - **Side rises allowed (batch 3 brief):** the robot may rise to mid-left/right (`upL`/`upR`) and stand next to an element
   that sits on the other half of the stage ("pas elemennya disamping dia bisa ikut di sebelahnya"). Aim for ≥2 per reel.
 - **Sync:** every wipe finishes before the VO line that introduces the next scene; elements are on screen when the VO names them.
+- **No blank demo window (batch 3 lesson):** whip pans/short camera moves must cross-fade the outgoing and incoming panels
+  mid-pan (no-cut guard: for shots ≤0.45 s fade out at t+0.06 for 0.16 s, fade in at t+0.17 for 0.2 s — see
+  projects/reel-16-tim-agent-satu-otak). Scan the render: no frame where the window is empty except inside a wipe.
+- **Captions above the robot:** `#caps { z-index: 2 }`, `#rmove { z-index: 1 }` (or caps after rmove in the DOM) so side
+  rises never hide caption text.
 - **No dots wipe** (client dislikes it).
 - **Transitions differ per reel** (sets from: stripes, blocks, sweep, iris, shutter, doors, slats, dots).
 - Run heavy local tools under `flock /tmp/claude-0/cpu.lock`, renders under `flock /tmp/claude-0/render.lock`.

@@ -8,39 +8,43 @@ import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 # caption phrases (short on-screen chunks), in spoken order
-PHRASES = """Bayangin lu ngetik
-satu kalimat soal agency lu,
-terus lu tidur.
-Pas bangun,
-kerjaannya udah jalan semua.
+PHRASES = """Bayangin tim sosmed lu
+isinya lima agent AI.
+Yang mikirin ide, nulis konten,
+sampai bales komentar.
 Cek simulasinya.
-Di atas ada agent CEO.
-Tiap malem dia baca bisnisnya,
-terus bagi tugas ke agent lain.
-Agent web bikin nama, logo,
-sama halaman penawaran.
-Agent riset nyari
-dua puluh tujuh klinik kecantikan
-yang layak dipitching.
-Terus agent sales nulis
-dua puluh tujuh email, satu-satu,
-sesuai tiap klinik.
-Tapi nggak ada yang kekirim
-sebelum lu baca.
-Ada satu email yang salah
-nyebut nama klinik, lu coret.
-Tombol kirim tetep di tangan lu.
-Dua puluh enam sisanya,
-tinggal klik kirim.
-Satu kalimat, satu tim agent,
-dan lu yang pegang keputusan terakhir.
+Aturannya satu:
+nggak ada yang tayang
+sebelum lu setujuin.
+Pertama, agent strategi
+baca komentar di postingan yang lagi rame,
+buat nyari masalah yang paling sering ditanyain.
+Tiap minggu keluar sepuluh ide.
+Kedua, agent copy nulis
+caption dan naskah video,
+agent desain bikin carousel-nya.
+Semuanya masuk papan mingguan.
+Lu tinggal klik setujui,
+dan jadwalnya jalan di jam terbaik.
+Ketiga, agent komunitas
+baca semua komentar dan DM.
+Yang nanya harga,
+ditandain sebagai calon pembeli.
+Dibales pakai gaya lu,
+lengkap sama link booking.
+Terakhir, agent analis nyambungin
+postingan, komentar, sama booking.
+Jadi lu tau postingan mana
+yang beneran bawa klien.
+Tiap Senin, lu terima
+satu halaman ringkasan.
 Mau sistem kayak gini
 dipasang di bisnis lu?
 Klik link di bio,
 ngobrol langsung sama
 tim AIpreneur Automation.""".strip().split("\n")
 NUM = {}
-ALIAS = {"lo": "lu", "5": "lima", "6": "enam", "7": "tujuh", "pake": "pakai", "tetap": "tetep", "kaya": "kayak", "reset": "riset", "tetemu": "ketemu", "chat": "chatgpt", "gpt": "chatgpt", "sekarang": "simulasinya", "riset": "riset", "maps": "maps", "fres": "fresh", "pres": "fresh", "ai": "ai", "nggak": "gak", "2": "dua", "1": "satu", "cepat": "cepet", "diupdate": "diupdate", "kecatet": "kecatat", "tercatat": "kecatat", "27": "puluh", "26": "puluh", "ceo": "ceo", "seo": "ceo", "malam": "malem", "ngetik": "ngetik", "mengetik": "ngetik", "agensi": "agency", "agen": "agent", "pitching": "dipitching", "dipitching": "dipitching", "kekirim": "kekirim", "terkirim": "kekirim", "kirim": "kirim", "satusatu": "satusatu", "satu-satu": "satusatu"}
+ALIAS = {"10": "sepuluh", "kopi": "copy", "karuselnya": "carouselnya", "balas": "bales", "tahu": "tau", "jatualnya": "jadwalnya", "dibales": "dibales", "pake": "pakai", "banyak": "nanya", "lo": "lu", "5": "lima", "6": "enam", "7": "tujuh", "pake": "pakai", "tetap": "tetep", "kaya": "kayak", "reset": "riset", "tetemu": "ketemu", "chat": "chatgpt", "gpt": "chatgpt", "sekarang": "simulasinya", "riset": "riset", "maps": "maps", "fres": "fresh", "pres": "fresh", "ai": "ai", "nggak": "gak", "2": "dua", "1": "satu", "cepat": "cepet", "diupdate": "diupdate", "kecatet": "kecatat", "tercatat": "kecatat", "27": "puluh", "26": "puluh", "ceo": "ceo", "seo": "ceo", "malam": "malem", "ngetik": "ngetik", "mengetik": "ngetik", "agensi": "agency", "agen": "agent", "pitching": "dipitching", "dipitching": "dipitching", "kekirim": "kekirim", "terkirim": "kekirim", "kirim": "kirim", "satusatu": "satusatu", "satu-satu": "satusatu"}
 norm = lambda w: ALIAS.get(re.sub(r"[^a-z0-9]", "", w.lower()), re.sub(r"[^a-z0-9]", "", w.lower()))
 
 w = wave.open(str(P / "assets/audio/vo.wav")); sr = w.getframerate()

@@ -5,7 +5,7 @@ import subprocess, sys, wave
 from pathlib import Path
 import numpy as np
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-PADS = [(6.46, 6.88, 0.60), (11.38, 11.72, 0.55), (19.82, 20.26, 0.50), (30.84, 31.02, 0.75), (40.14, 40.56, 0.60), (50.38, 50.68, 0.50)]   # (search from, to, seconds added)
+PADS = [(7.10, 7.50, 0.70), (12.32, 12.64, 0.50), (29.98, 30.28, 0.60), (47.12, 47.42, 0.60), (62.44, 62.66, 0.60), (67.58, 67.86, 0.60), (75.36, 75.62, 0.50), (81.34, 81.64, 0.20)]   # (search from, to, seconds added)
 raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(P / "assets/audio/vo.mp3"), "-ac", "1", "-ar", "44100", "-f", "s16le", "-"], capture_output=True, check=True).stdout
 x = np.frombuffer(raw, np.int16).astype(np.float32); sr = 44100
 win = int(0.03 * sr); out, last = [], 0

@@ -9,42 +9,54 @@ import numpy as np
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 # caption phrases (short on-screen chunks), in spoken order
 PHRASES = """Bayangin tim sosmed lu
-isinya lima agent AI.
-Yang mikirin ide, nulis konten,
-sampai bales komentar.
+jalan sendiri.
+Yang mikirin ide, bikin video, posting,
+sampai bales komentar dan DM.
 Cek simulasinya.
 Aturannya satu:
-nggak ada yang tayang
+nggak ada yang tayang,
 sebelum lu setujuin.
-Pertama, agent strategi
-baca komentar di postingan yang lagi rame,
-buat nyari masalah yang paling sering ditanyain.
-Tiap minggu keluar sepuluh ide.
-Kedua, agent copy nulis
-caption dan naskah video,
-agent desain bikin carousel-nya.
-Semuanya masuk papan mingguan.
-Lu tinggal klik setujui,
-dan jadwalnya jalan di jam terbaik.
-Ketiga, agent komunitas
-baca semua komentar dan DM.
-Yang nanya harga,
-ditandain sebagai calon pembeli.
-Dibales pakai gaya lu,
-lengkap sama link booking.
-Terakhir, agent analis nyambungin
-postingan, komentar, sama booking.
-Jadi lu tau postingan mana
-yang beneran bawa klien.
-Tiap Senin, lu terima
-satu halaman ringkasan.
+Modul satu, ide.
+Dia dengerin call klien lu,
+terus scan postingan teratas di niche lu.
+Bukan yang paling banyak di-like,
+tapi yang paling banyak dikomentarin.
+Soalnya orang cuma komen,
+kalau postingannya kena ke masalah yang nyata.
+Tiap minggu, lu dapet sepuluh ide postingan
+dari apa yang lagi ditanyain pelanggan lu.
+Modul dua, konten.
+Tiap minggu dia nulis tiga postingan teks,
+sama tiga naskah video.
+AI video ngubah naskah itu jadi video pendek,
+dan desain bikin carousel-nya.
+Lu tinggal setujuin,
+terus semuanya tayang di jam terbaik.
+Jadi lu muncul tiap hari,
+tanpa ngabisin hari lu buat bikin konten.
+Modul tiga, leads.
+Dia baca semua komentar dan DM.
+Pas ada yang nanya, gimana cara mulai,
+atau, bisa nggak kerja sama,
+dia tandain sebagai calon pembeli.
+Terus dia kirim voice note pakai suara lu,
+plus link booking.
+Callnya langsung masuk kalender lu.
+Kebanyakan orang baru bales dua hari kemudian.
+Pas itu, calonnya udah booking ke tempat lain.
+Yang ngatur semuanya, brand brain.
+Dia nyambungin postingan, komentar, sama call,
+jadi lu tau postingan mana yang beneran bawa klien.
+Tiap Senin, lu terima satu halaman ringkasan.
+Bukan cuma lebih banyak like.
+Tapi lebih banyak klien.
 Mau sistem kayak gini
 dipasang di bisnis lu?
 Klik link di bio,
 ngobrol langsung sama
 tim AIpreneur Automation.""".strip().split("\n")
 NUM = {}
-ALIAS = {"10": "sepuluh", "kopi": "copy", "karuselnya": "carouselnya", "balas": "bales", "tahu": "tau", "jatualnya": "jadwalnya", "dibales": "dibales", "pake": "pakai", "banyak": "nanya", "lo": "lu", "5": "lima", "6": "enam", "7": "tujuh", "pake": "pakai", "tetap": "tetep", "kaya": "kayak", "reset": "riset", "tetemu": "ketemu", "chat": "chatgpt", "gpt": "chatgpt", "sekarang": "simulasinya", "riset": "riset", "maps": "maps", "fres": "fresh", "pres": "fresh", "ai": "ai", "nggak": "gak", "2": "dua", "1": "satu", "cepat": "cepet", "diupdate": "diupdate", "kecatet": "kecatat", "tercatat": "kecatat", "27": "puluh", "26": "puluh", "ceo": "ceo", "seo": "ceo", "malam": "malem", "ngetik": "ngetik", "mengetik": "ngetik", "agensi": "agency", "agen": "agent", "pitching": "dipitching", "dipitching": "dipitching", "kekirim": "kekirim", "terkirim": "kekirim", "kirim": "kirim", "satusatu": "satusatu", "satu-satu": "satusatu"}
+ALIAS = {"dilike": "dilike", "dikomentarin": "dikomentarin", "komen": "komen", "10": "sepuluh", "kopi": "copy", "karuselnya": "carouselnya", "balas": "bales", "tahu": "tau", "jatualnya": "jadwalnya", "dibales": "dibales", "pake": "pakai", "banyak": "nanya", "lo": "lu", "5": "lima", "6": "enam", "7": "tujuh", "pake": "pakai", "tetap": "tetep", "kaya": "kayak", "reset": "riset", "tetemu": "ketemu", "chat": "chatgpt", "gpt": "chatgpt", "sekarang": "simulasinya", "riset": "riset", "maps": "maps", "fres": "fresh", "pres": "fresh", "ai": "ai", "nggak": "gak", "2": "dua", "1": "satu", "cepat": "cepet", "diupdate": "diupdate", "kecatet": "kecatat", "tercatat": "kecatat", "27": "puluh", "26": "puluh", "ceo": "ceo", "seo": "ceo", "malam": "malem", "ngetik": "ngetik", "mengetik": "ngetik", "agensi": "agency", "agen": "agent", "pitching": "dipitching", "dipitching": "dipitching", "kekirim": "kekirim", "terkirim": "kekirim", "kirim": "kirim", "satusatu": "satusatu", "satu-satu": "satusatu"}
 norm = lambda w: ALIAS.get(re.sub(r"[^a-z0-9]", "", w.lower()), re.sub(r"[^a-z0-9]", "", w.lower()))
 
 w = wave.open(str(P / "assets/audio/vo.wav")); sr = w.getframerate()

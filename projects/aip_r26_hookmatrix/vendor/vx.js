@@ -4,6 +4,7 @@
    turntable spin-blur (R->D, + page blur), button shockwave (D->A, page ring). */
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
 import { MAT, rnd, setSeed, boxes, emi, ctex, rr, cl, EZ, U, keys, blinkAt, person, robot, glow, label, setLabel, FONT } from "./vxlib.js";
 
 const cv = document.getElementById("vx");
@@ -52,6 +53,16 @@ function clouds(k, n, sd) { setSeed(sd); for (let i = 0; i < n; i++) { const x =
   for (let j = 0; j < q; j++) L.push([(j - q / 2) * sz * 0.8, (rnd() - 0.3) * sz * 0.5, (rnd() - 0.5) * sz, sz * (1 + rnd()), sz * (0.55 + rnd() * 0.5), sz * (1 + rnd() * 0.8), j & 1 ? "#22386c" : "#1b2f60"]);
   const m = boxes(L, MAT, false); m.castShadow = m.receiveShadow = false; m.position.set(x, y, z); worlds[k].add(m); } }
 
+/* ---------------------------------------------------------------- 3D brand logos (Simple Icons CC0 paths -> extruded meshes) */
+function logo3d(name, color, size, depth = 3.2) {
+  const Lg = window.LOGOS[name]; const data = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${Lg.path}"/></svg>`);
+  const shapes = data.paths.flatMap((p) => SVGLoader.createShapes(p));
+  const g = new THREE.ExtrudeGeometry(shapes, { depth, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.32, bevelSegments: 2, curveSegments: 10 });
+  g.translate(-12, -12, -depth / 2); g.rotateX(Math.PI); g.scale(size / 24, size / 24, size / 24);
+  const c = new THREE.Color(color); const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.28, roughness: 0.35, metalness: 0.1 }));
+  m.castShadow = true; const w = new THREE.Group(); w.add(m); return w;
+}
+const LOGO = {};
 /* ---------------------------------------------------------------- textures */
 const TX = {};
 function adBand(g, w, h, k) { // the ad mock in three bands: 0 hook, 1 isi, 2 cta
@@ -123,6 +134,7 @@ function buildH() {
   Hh.cards.frustumCulled = false; g.add(Hh.cards); setSeed(13);
   Hh.cv = []; for (let i = 0; i < N; i++) { const a = rnd() * Math.PI * 2, el = 0.15 + rnd() * 1.1, sp = 2.2 + rnd() * 6.5;
     Hh.cv.push({ v: new THREE.Vector3(Math.cos(a) * Math.cos(el) * sp, Math.sin(el) * sp + 1.2, Math.sin(a) * Math.cos(el) * sp), r: [rnd() * 6, rnd() * 6, rnd() * 6], d: rnd() * 0.12 }); }
+  LOGO.h = [["instagram", window.LOGOS.instagram.hex, -1.25, 1.1, 0.4], ["tiktok", "#ffffff", 1.3, 1.45, 0.2], ["meta", window.LOGOS.meta.hex, -0.2, 2.25, -0.2]].map(([n, c, x, y, z]) => { const o = logo3d(n, c, 0.5); o.userData.p = new THREE.Vector3(x, y, z); o.visible = false; g.add(o); return o; });
   // portal hero card
   Hh.hero = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.35), new THREE.MeshBasicMaterial({ map: TX.ad, toneMapped: false })); g.add(Hh.hero);
   Hh.hg = glow("#38dcff", 1.6, 2.4); g.add(Hh.hg);
@@ -139,6 +151,7 @@ function animH(t) {
       _o.position.set(c.v.x * f, 1.25 + c.v.y * f + 0.25 * tau, 0.9 + c.v.z * f); _o.rotation.set(c.r[0] + tau * 3, c.r[1] + tau * 2, c.r[2]);
       _o.scale.setScalar(tau < c.d ? 0.001 : Math.min(1, (tau - c.d) * 6)); _o.updateMatrix(); Hh.cards.setMatrixAt(i, _o.matrix); });
     Hh.cards.instanceMatrix.needsUpdate = true; }
+  LOGO.h.forEach((o, i) => { const u = U(t, 2.06 + i * 0.07, 2.5 + i * 0.07, "back"); o.visible = t > 2.06 + i * 0.07; o.position.set(o.userData.p.x * u, 1.25 + (o.userData.p.y - 1.25 + 1.0) * u, 0.9 + (o.userData.p.z - 0.9 + 0.8) * u); o.rotation.set(0.2 * Math.sin(t * 2 + i), (1 - u) * 6 + Math.sin(t * 1.6 + i) * 0.6, 0); o.scale.setScalar(Math.max(0.001, u)); });
   const hu = U(t, 2.25, 2.9, "out"); Hh.hero.visible = Hh.hg.visible = t > 2.2;
   Hh.hero.position.set(0.6 * (1 - hu), 1.4 + 1.2 * hu, 0.9 + 1.3 * hu); Hh.hero.rotation.set(0, (1 - hu) * 2.5, (1 - hu) * 0.8); Hh.hero.scale.setScalar(0.25 + 0.75 * hu);
   Hh.hg.position.copy(Hh.hero.position); Hh.hg.position.z -= 0.05; Hh.hg.material.opacity = 0.5 * hu;
@@ -221,6 +234,7 @@ function buildM() {
   M.cards = []; for (let i = 0; i < 44; i++) { const c = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.46), new THREE.MeshBasicMaterial({ map: TX.ad, toneMapped: false, side: THREE.DoubleSide })); c.visible = false; g.add(c); M.cards.push(c); }
   M.coins = new THREE.InstancedMesh(new THREE.BoxGeometry(0.16, 0.16, 0.05), new THREE.MeshStandardMaterial({ color: 0xffc531, emissive: 0xffa400, emissiveIntensity: 0.8, metalness: 0.3, roughness: 0.4 }), 220);
   M.coins.frustumCulled = false; g.add(M.coins); setSeed(29); M.cv = []; for (let i = 0; i < 220; i++) M.cv.push({ v: new THREE.Vector3((rnd() - 0.5) * 7, 1 + rnd() * 5, 3 + rnd() * 9), r: rnd() * 9, d: rnd() * 0.25 });
+  LOGO.m = [["meta", window.LOGOS.meta.hex, -2.15, 2.7], ["tiktok", "#ffffff", 2.45, 3.1]].map(([n, c, x, y]) => { const o = logo3d(n, c, 0.62); o.position.set(x, y, 0.3); o.userData.y = y; g.add(o); return o; });
   M.glow = glow("#ffc531", 6, 6); M.glow.position.set(0, 2.2, 1.2); g.add(M.glow);
 }
 function reelAngle(r, t) { let a = 0; for (const [t0, t1, face] of REEL[r]) { const base = a; if (t < t0) break;
@@ -228,6 +242,7 @@ function reelAngle(r, t) { let a = 0; for (const [t0, t1, face] of REEL[r]) { co
   a = t >= t1 ? target : base + (target - base) * EZ.out((t - t0) / (t1 - t0)); } return a; }
 function animM(t) {
   M.reels.forEach((d, r) => (d.rotation.x = reelAngle(r, t)));
+  LOGO.m.forEach((o, i) => { o.rotation.y = t * 1.6 + i * 1.5; o.position.y = o.userData.y + 0.08 * Math.sin(t * 2.2 + i) + (t > 20.45 ? 0.5 * EZ.out(cl((t - 20.45) / 0.4, 0, 1)) : 0); });
   M.lever.rotation.x = 1.15 * U(t, 14.78, 14.95, "in") * (1 - U(t, 15.05, 15.5, "back"));
   const jack = U(t, 20.45, 20.6); const ph = Math.floor(t * 7) % 2;
   M.bA.emissiveIntensity = jack > 0 ? 4 : ph ? 2.6 : 0.3; M.bB.emissiveIntensity = jack > 0 ? 4 : ph ? 0.3 : 2.6;
@@ -331,12 +346,13 @@ function buildR() {
       p.eyes.forEach((e) => (e.visible = false)); p.setMouth("none"); p.armR.rotation.x = -1.1; p.armR.add(boxes([[0, -0.6, 0.18, 0.2, 0.34, 0.03, "#0a0d2c"]])); }
     const lb = label(n, c, "#0a0d2c", 0.34); lb.position.set(0, 2.0, 0.3); s.add(lb); s.userData.lb = lb; R.sets.push(s); });
 }
-function ttAngle(t) { // present set i at the front (+z) on its word, then the spin-blur exit
-  const K = [[34.0, [0.6]], [FMT_T[0] - 0.05, [0]], ...FMT_T.slice(1).map((ft, i) => [ft - 0.02, [-(i + 1) * Math.PI * 2 / 5], "back"])]; let a = keys(t, K)[0];
-  a -= 0.06 * (t - 34) ; return a - 9 * Math.PI * EZ.in(cl((t - 38.85) / 0.6, 0, 1)); }
+function ttAngle(t) { // hold each set at the front, snap (0.22 s) to the next one on its word, spin-blur exit
+  const st = (i) => -i * Math.PI * 2 / 5; const K = [[34.0, [0.5]], [FMT_T[0], [st(0)], "out"]];
+  for (let i = 1; i < 5; i++) { const h = Math.max(K[K.length - 1][0] + 0.02, FMT_T[i] - 0.22); K.push([h, [st(i - 1)]], [FMT_T[i], [st(i)], "out"]); }
+  return keys(t, K)[0] - 9 * Math.PI * EZ.in(cl((t - 38.85) / 0.6, 0, 1)); }
 function animR(t) {
   R.tt.rotation.y = ttAngle(t);
-  R.sets.forEach((s, i) => { setLabel(s.userData.lb, EZ.back(U(t, FMT_T[i] - 0.05, FMT_T[i] + 0.25)) * (1 - U(t, 38.85, 39.0))); if (s.userData.p) s.userData.p.eyes.forEach((e) => (e.scale.y = blinkAt(t, 0.4))); });
+  R.sets.forEach((s, i) => { s.userData.lb.visible = false; if (s.userData.p) s.userData.p.eyes.forEach((e) => (e.scale.y = blinkAt(t, 0.4))); });
 }
 
 /* ---------------------------------------------------------------- D: five dominoes -> CTA button */
@@ -381,6 +397,7 @@ function buildA() {
   A.cards = []; for (let i = 0; i < 30; i++) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.4), new THREE.MeshBasicMaterial({ map: TX.card, toneMapped: false, side: THREE.DoubleSide })); m.visible = false; g.add(m); A.cards.push(m); }
   A.pick = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.56), new THREE.MeshBasicMaterial({ map: TX.card, toneMapped: false, side: THREE.DoubleSide })); g.add(A.pick);
   A.pg = glow("#ffc531", 1.8, 2.2); g.add(A.pg);
+  LOGO.a = logo3d("claude", window.LOGOS.claude.hex, 0.55); LOGO.a.position.set(0.9, 1.55, -0.2); g.add(LOGO.a);
 }
 function animA(t) {
   const w = A.w; w.eyes.forEach((e) => (e.scale.y = blinkAt(t, 0.3))); w.setMouth("sad");
@@ -395,7 +412,8 @@ function animA(t) {
   A.pl.material.emissiveIntensity = t > 50.6 && t < 52.8 ? (Math.floor(t * 8) % 2 ? 3 : 0.5) : 1.2;
   A.cards.forEach((m, i) => { const e = 50.85 + i * 0.06, u = U(t, e, e + 0.55, "out"); m.visible = t > e; if (!m.visible) return; const k = i % 3, x = A.tray[k];
     m.position.set(0.9 + (x - 0.9) * u, 0.6 + 1.0 * Math.sin(Math.PI * u) + (0.22 + Math.floor(i / 3) * 0.012 - 0.6) * u, 0.4 + 1.2 * u); m.rotation.set(-Math.PI / 2 * u, (1 - u) * 3, 0); });
-  A.tl.forEach((l, i) => setLabel(l, EZ.back(U(t, 51.9 + i * 0.12, 52.2 + i * 0.12))));
+  A.tl.forEach((l) => (l.visible = false));
+  { const u = U(t, 49.75, 50.1, "back"); LOGO.a.visible = t > 49.75; LOGO.a.scale.setScalar(Math.max(0.001, u)); LOGO.a.rotation.y = t * 1.8; LOGO.a.position.y = 1.55 + 0.06 * Math.sin(t * 2.4); }
   const pk = U(t, PICK, PICK + 0.45, "back"); A.pick.visible = A.pg.visible = t > PICK;
   A.pick.position.set(0.9, 0.35 + 1.5 * pk, 1.6 + 0.3 * pk); A.pick.rotation.set(0, Math.sin(t * 2) * 0.3, 0); A.pg.position.copy(A.pick.position); A.pg.position.z -= 0.05; A.pg.material.opacity = 0.8 * pk;
 }
@@ -419,20 +437,21 @@ k("M", 17.7, [1.6, 3.6, 13.2, 1.0, 2.5, 0, 42], "io"); k("M", 20.3, [0.8, 3.8, 1
 // P — after the jackpot burst
 cut("P", 21.12, [0, 3.0, 4.5, 0, 1.5, -1, 40]); k("P", 22.5, [0, 6.8, 13.5, 0, 1.4, -2.8, 44], "io"); k("P", 23.4, [-2.8, 2.9, 3.6, -4.8, 1.6, -3, 40], "expo");
 k("P", 24.25, [-2.6, 2.9, 3.3, -4.8, 1.6, -3, 40], "sine"); k("P", 24.85, [0.4, 3.4, -0.6, 0, 2.6, -6.5, 40], "expo"); k("P", 25.6, [0.3, 3.4, -0.9, 0, 2.6, -6.5, 40], "sine");
-k("P", 26.2, [3.2, 2.9, 3.2, 4.8, 1.6, -3, 40], "expo"); k("P", 27.3, [0, 6.6, 13, 0, 1.4, -2.8, 44], "io");
+k("P", 26.2, [3.2, 2.9, 3.2, 4.8, 1.6, -3, 40], "expo"); k("P", 27.3, [0, 6.6, 13, 0, 1.4, -2.8, 44], "io"); k("P", 27.61, [0, 6.4, 12.4, 0, 1.4, -2.8, 44], "sine");
 // L — after the iris; 180° orbit at the end towards R
 cut("L", 27.62, [0, 4.4, 15.5, 0, 2.3, 0, 42]); k("L", 28.9, [-2.4, 2.7, 7.8, -2.4, 1.55, 0, 40], "io"); k("L", 30.8, [0, 3.3, 7.8, 0, 2.35, 0, 40], "io");
 k("L", 32.6, [2.6, 4.1, 8.0, 2.6, 3.15, 0, 40], "io"); k("L", 33.3, [0, 4.4, 15.5, 0, 2.3, 0, 42], "io");
 for (let i = 1; i <= 16; i++) { const u = i / 16, a = Math.PI * EZ.io(u), r = 15.5; k("L", 33.3 + 0.95 * u, [Math.sin(a) * r * 0.9, 4.4 + 2.2 * Math.sin(a), Math.cos(a) * r, 0, 2.3 - 0.6 * u, 8 * u, 42], "lin"); }
-k("R", 34.6, [0, 3.6, 9.6, 0, 1.2, 0, 40], "out"); k("R", 38.8, [0.3, 3.4, 8.8, 0, 1.2, 0, 40], "sine");
+k("R", 34.6, [0, 4.6, 12.6, 0, 1.4, 1.2, 40], "out"); k("R", 38.8, [0.3, 4.3, 11.6, 0, 1.4, 1.2, 40], "sine"); k("R", 39.44, [0.0, 3.6, 8.6, 0, 1.4, 1.2, 40], "in");
 // D — after the spin-blur cut; track the dominoes
-cut("D", 39.45, [-3.6, 2.4, 5.8, -3.0, 1.1, 0, 40]); k("D", 41.0, [-3.3, 2.4, 5.6, -2.8, 1.1, 0, 40], "sine"); k("D", 42.3, [-1.9, 2.4, 5.6, -1.6, 1.1, 0, 40], "io");
-k("D", 43.6, [-0.4, 2.5, 5.8, -0.4, 1.1, 0, 40], "io"); k("D", 45.0, [1.2, 2.7, 6.4, 1.2, 1.0, 0, 40], "io"); k("D", 45.75, [2.0, 2.2, 5.0, 2.2, 0.8, 0, 40], "in");
+cut("D", 39.45, [-2.4, 3.0, 9.4, -1.9, 1.2, 0, 40]); k("D", 41.0, [-2.2, 3.0, 9.2, -1.7, 1.2, 0, 40], "sine"); k("D", 42.6, [-1.0, 3.0, 9.2, -0.9, 1.2, 0, 40], "io");
+k("D", 44.0, [0.0, 3.0, 9.2, 0.0, 1.2, 0, 40], "io"); k("D", 45.1, [0.8, 3.0, 9.0, 0.8, 1.1, 0, 40], "io"); k("D", 45.75, [1.8, 2.4, 6.4, 2.0, 0.9, 0, 40], "in"); k("D", 46.34, [1.9, 2.3, 5.9, 2.1, 0.85, 0, 40], "sine");
 // A
 cut("A", 46.35, [-2.2, 2.5, 4.9, -2.0, 1.4, 0, 40]); k("A", 48.8, [-1.8, 2.5, 4.6, -1.8, 1.4, 0, 40], "sine"); k("A", 49.7, [1.0, 2.9, 7.6, 1.0, 1.4, 0, 42], "expo");
-k("A", 51.0, [0.9, 3.3, 8.8, 0.9, 1.3, 0, 42], "io"); k("A", 53.0, [0.9, 3.2, 8.4, 0.9, 1.4, 0.4, 42], "sine"); k("A", 53.8, [0.9, 2.9, 7.2, 0.9, 1.7, 0.6, 42], "io"); k("A", 58.5, [0.9, 3.3, 8.6, 0.9, 1.5, 0.4, 42], "sine");
+k("A", 51.0, [0.9, 3.4, 11.2, 0.9, 1.0, 0, 42], "io"); k("A", 53.0, [0.9, 3.3, 10.8, 0.9, 1.1, 0.4, 42], "sine"); k("A", 53.8, [0.9, 3.0, 9.4, 0.9, 1.4, 0.6, 42], "io"); k("A", 58.5, [0.9, 3.3, 10.4, 0.9, 1.3, 0.4, 42], "sine");
 C.sort((a, b) => a[0] - b[0]);
 window.VX = { C, WP };
+scene.add(cam);
 
 /* ---------------------------------------------------------------- render */
 let ready = false; const LIFTAT = (t) => 230 * U(t, 3.45, 4.2);
@@ -445,6 +464,10 @@ function render(t) {
   cam.position.set(v[0] + hx, v[1] + hy, v[2]); cam.fov = fov; cam.setViewOffset(W, Hf, 0, 2 * LIFT, W, H); cam.updateProjectionMatrix();
   cam.up.set(0, 1, 0); cam.lookAt(v[3], v[4], v[5]);
   const roll = 0.35 * Math.sin(Math.PI * cl((t - 38.85) / 0.6, 0, 1)) + 0.05 * Math.sin(Math.PI * cl((t - 45.6) / 0.6, 0, 1)); if (roll) cam.rotateZ(roll);
+  if (!LOGO.ig) { LOGO.ig = logo3d("instagram", window.LOGOS.instagram.hex, 1); cam.add(LOGO.ig); }
+  { const on = U(t, 53.95, 54.35, "back"), d = 3.0; LOGO.ig.visible = t > 53.95; cam.updateMatrixWorld();
+    const v2 = new THREE.Vector3((905 / W) * 2 - 1, 1 - (470 / H) * 2, 0.5).unproject(cam).sub(cam.position).normalize().multiplyScalar(d).add(cam.position); cam.worldToLocal(v2);
+    LOGO.ig.position.copy(v2); LOGO.ig.position.y += 0.03 * Math.sin(t * 3); LOGO.ig.rotation.set(0, Math.sin(t * 1.4) * 0.5 + (1 - on) * 5, 0); LOGO.ig.scale.setScalar(Math.max(0.001, on) * 0.34 * (1 + 0.12 * Math.max(0, Math.sin((t - 54.75) * 12)) * (t > 54.75 && t < 55.0 ? 1 : 0))); }
   stars.position.copy(cam.position);
   const tx = v[3], tz = v[5]; moon.position.set(tx - 6, 12, tz + 8); moon.target.position.set(tx, 0, tz - 1); warm.position.set(tx + 6, 4, tz + 7); warm.target.position.set(tx, 1, tz);
   renderer.render(scene, cam);

@@ -48,7 +48,7 @@ def pslide(i, key, name, desc):
 cover = frame("cover", f'''<span class="chip c">Part 2</span>
   <h1 class="ch1">Viral website<br>prompts.</h1>
   <p class="tg2">5 prompts. 5 websites. Paste one into Claude tonight.</p>
-  <img class="ico" src="assets/claude3d_cut.png" alt="Claude"><img class="host" src="assets/mascot_host.png" alt="">''', swipe=True, foot=False)
+  <img class="ico" src="assets/claude3d_cut.png" alt="Claude">''', swipe=True, foot=False)
 STEPS = [("clipboard-paste", "Copy", "Grab the full prompt from your DM."), ("wand-sparkles", "Rebuild", "Paste it into Claude. Any project, any stack."),
          ("copy", "Remix", "Swap the copy, brand, sections and motion."), ("rocket", "Ship", "A proven base. A site nobody else has.")]
 st = "".join(f'<div class="sc"><span class="si">{L(ic)}</span><em>{i+1:02d}</em><div><b>{t}</b><p>{d}</p></div></div>' for i, (ic, t, d) in enumerate(STEPS))

@@ -8,36 +8,32 @@ import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 # caption phrases (short on-screen chunks), in spoken order
-PHRASES = """Bayangin, lima manajer,
-masing-masing pegang tim sendiri,
-dan nggak ada satu pun
-yang manusia.
+PHRASES = """Bayangin, satu komputer,
+dua puluh empat agent AI,
+semuanya kerja barengan
+di detik yang sama.
 Gue tunjukin simulasinya.
-Ini struktur timnya.
-Satu otak di tengah,
-lima manajer AI di bawahnya.
-Klik tim sales.
-Mereka follow up tiap lead,
-kualifikasi,
-terus tracking sampai closing.
-Semua di satu sistem.
-Pindah ke tim riset.
-Mereka mantau kompetitor,
-nyari apa yang lagi jalan di industri,
-sampai update AI terbaru.
-Dan semua kerjaan mereka
-masuk ke satu otak bersama.
-Tiap chat, tiap lead, tiap catatan,
-kesimpen di sini.
-Jadi bukan sepuluh tools
-sama lima orang
-yang nggak saling ngobrol.
-Tapi satu sistem
-yang jalanin bisnis,
-dan inget semuanya.
-Kalau tim lu masih ngerjain
-hal yang sama berulang-ulang,
-ini jawabannya.
+Tugasnya: launching produk baru
+di toko online lu.
+Pertama, agent pengatur
+mecah satu tugas gede
+jadi dua puluh empat tugas kecil.
+Terus semuanya jalan paralel.
+Ada yang riset harga kompetitor,
+ada yang nulis deskripsi produk,
+ada yang bikin caption,
+ada yang nyiapin balasan chat.
+Kalau ada yang nyangkut,
+agent pengatur langsung
+oper tugasnya ke agent lain.
+Hasilnya digabung jadi satu paket:
+halaman produk, caption,
+sama jadwal posting.
+Tinggal lu cek.
+Satu tugas gede,
+dua puluh empat agent,
+satu komputer.
+Lu tinggal approve.
 Mau sistem kayak gini
 dipasang di bisnis lu?
 Klik link di bio,

@@ -8,40 +8,30 @@ import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 # caption phrases (short on-screen chunks), in spoken order
-PHRASES = """Jam dua pagi,
-lu lagi tidur.
-Tapi lima agent AI
-lagi kerja buat website bisnis lu.
+PHRASES = """Mau tau omzet empat bulan terakhir,
+tapi harus nunggu admin rekap seharian?
+Analis data lu harusnya workflow,
+bukan orang.
 Cek simulasinya.
-Agent riset ngecek
-semua kompetitor di kota lu:
-website, review Google,
-sampai listing Maps.
-Terus dibandingin sama website lu,
-halaman per halaman.
-Ketemu enam pencarian
-yang lu belum punya halamannya.
-Agent strategi ngecek
-berapa banyak yang nyari,
-terus milih yang paling potensial.
-Agent penulis bikin halamannya,
-pakai info bisnis asli
-dan gaya bahasa brand lu.
-Agent editor ngecek
-pakai standar Google dan ChatGPT.
-Ada dua yang kurang,
-dibalikin ke penulis.
-Direvisi, baru lolos.
-Agent publish naikin halamannya
-ke website,
-terus update halaman lama
-biar tetep fresh.
-Jam tujuh pagi,
-semua beres.
-Biar pas orang deket lu
-nanya Google atau ChatGPT,
-bisnis lu yang muncul.
-Malam ini, jalan lagi.
+Lu cukup chat lewat WhatsApp:
+omzet Maret sampai Juni berapa?
+AI baca pertanyaannya,
+terus buka spreadsheet penjualan lu.
+Dia filter semua transaksi
+dari Maret sampai Juni.
+Yang refund sama batal, dikeluarin.
+Cuma yang selesai yang dihitung.
+Terus semuanya dijumlahin,
+dan jawabannya dikirim balik
+ke WhatsApp lu.
+Bonusnya, dia nemu pola
+yang sering kelewat:
+penjualan TikTok naik terus,
+tapi refund paling banyak
+dari satu produk yang sama.
+Nggak perlu buka laptop,
+nggak perlu rumus.
+Tinggal nanya.
 Mau sistem kayak gini
 dipasang di bisnis lu?
 Klik link di bio,

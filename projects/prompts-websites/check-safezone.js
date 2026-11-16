@@ -5,7 +5,7 @@ const SAFE = { x0: 110, y0: 110, x1: 970, y1: 1240 };
 (async () => {
   const b = await chromium.launch();
   const p = await b.newPage({ viewport: { width: 1080, height: 1350 } });
-  await p.goto('file://' + path.join(__dirname, 'cover.html'));
+  await p.goto('file://' + path.join(__dirname, 'carousel.html'));
   await p.evaluate(() => document.fonts.ready);
   const bad = await p.evaluate((S) => {
     const out = [];

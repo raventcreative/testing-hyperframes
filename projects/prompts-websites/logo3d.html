@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="UTF-8"/>
+<!-- Claude mark (Simple Icons CC0) -> SVGLoader -> ExtrudeGeometry, transparent PNG for the cover. -->
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
+<style>html,body{margin:0;width:800px;height:800px;background:transparent;overflow:hidden}</style></head>
+<body><canvas id="c" width="800" height="800"></canvas>
+<script type="module">
+import * as THREE from "three";
+import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+const txt = await (await fetch("assets/logos/claude.svg")).text();
+const r = new THREE.WebGLRenderer({ canvas: document.getElementById("c"), antialias: true, alpha: true, preserveDrawingBuffer: true });
+r.setSize(800, 800, false); r.setClearColor(0, 0); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping;
+const scene = new THREE.Scene(); scene.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.5;
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const k = new THREE.DirectionalLight(0xffffff, 2.2); k.position.set(2, 3, 5); scene.add(k);
+const rim = new THREE.DirectionalLight(0x9fc0ff, 1.6); rim.position.set(-4, 2, -3); scene.add(rim);
+const shapes = new SVGLoader().parse(txt).paths.flatMap((p) => SVGLoader.createShapes(p));
+const geo = new THREE.ExtrudeGeometry(shapes, { depth: 3, bevelEnabled: true, bevelThickness: 0.7, bevelSize: 0.35, bevelSegments: 5, curveSegments: 28 });
+geo.center(); geo.scale(1, -1, 1);
+const col = "#D97757";
+const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: new THREE.Color(col), roughness: 0.32, emissive: new THREE.Color(col), emissiveIntensity: 0.16 })); mesh.rotation.set(0.14, -0.4, 0.05); scene.add(mesh);
+const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 200); cam.position.set(0, 0, 56); cam.lookAt(0, 0, 0);
+r.render(scene, cam); window.READY = true;
+</script></body></html>

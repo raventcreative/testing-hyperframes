@@ -62,6 +62,36 @@ s3 = slide("Dunia finance", "Analis paling", "terdampak AI.", "Kerja analisa dat
            "Analis keuangan 57,2%. Teller bank cuma 2,3%.")
 s4 = slide("Kerja lapangan", "Kerja fisik,", "minim terdampak AI.", "Dibanding programmer, kerja lapangan nyaris belum tersentuh AI.", LAP,
            "Banyak kerja lapangan masih 0%. Skill tangan belum tergantikan.")
+# 6: gap 94 vs 33 (vertical bars)
+def gapchart():
+    W,H,PL,PT=860,620,60,40; base=H-70; ph=base-PT; y=lambda v: PT+ph*(1-v/100)
+    g="".join(f'<line x1="{PL}" x2="{W}" y1="{y(t):.1f}" y2="{y(t):.1f}" class="gl{" base" if t==0 else ""}"/><text x="{PL-10}" y="{y(t)+5:.1f}" class="yl">{t}%</text>' for t in range(0,101,20))
+    bw=200; xs=[PL+90, PL+430]
+    out=g
+    for x,v,cls,lab in [(xs[0],94,"b",["Bisa dikerjain AI","(secara teori)"]),(xs[1],33,"b hi",["Udah beneran","dikerjain AI"])]:
+        out+=f'<rect x="{x}" y="{y(v):.1f}" width="{bw}" height="{base-y(v):.1f}" rx="10" class="{cls}"/>'
+        out+=f'<text x="{x+bw/2}" y="{y(v)-18:.1f}" class="big{" vh" if "hi" in cls else ""}">{v}%</text>'
+        out+="".join(f'<text x="{x+bw/2}" y="{base+30+k*20}" class="xl2">{l}</text>' for k,l in enumerate(lab))
+    out+=f'<polyline points="{xs[0]+bw},{y(94):.1f} {xs[1]},{y(33):.1f}" class="tr"/><circle cx="{xs[0]+bw}" cy="{y(94):.1f}" r="6" class="dt"/><circle cx="{xs[1]}" cy="{y(33):.1f}" r="6" class="dt"/>'
+    out+=f'<line x1="{xs[1]+bw+30}" x2="{xs[1]+bw+30}" y1="{y(94):.1f}" y2="{y(33):.1f}" class="gap"/>'
+    out+=f'<text x="{xs[1]+bw+44}" y="{(y(94)+y(33))/2+8:.1f}" class="gt">61 poin</text>'
+    return f'<svg class="ch" viewBox="0 0 {W} {H}">{out}</svg>'
+s6 = frame("cs", f'''<div class="label">Masih bisa naik</div>
+  <h1>AI baru dipakai 33%,<br><span>padahal bisa 94%.</span></h1>
+  <p class="sub">Porsi tugas di kerjaan komputer & matematika.</p>
+  <div class="cw">{gapchart()}</div>
+  <div class="ft"><p class="nt">Kata Anthropic, celah ini bakal makin ketutup. Jadi skor di slide sebelumnya masih bisa naik.</p><p class="src">{SRC}</p></div>''')
+
+# 7: cara baca
+RD = [("Skor terdampak AI = porsi tugas yang udah dikerjain pakai AI", "Dihitung dari pemakaian Claude buat kerja (Agustus & November 2025). Kalau AI cuma bantu, dihitung setengah."),
+      ("Ini data Amerika Serikat", "Daftar pekerjaan dan tugasnya versi AS. Belum ada hitungan yang sama untuk Indonesia."),
+      ("Skor tinggi ≠ pasti diganti", "Skor nunjukin tugas yang udah dibantu AI, bukan jumlah orang yang kena PHK.")]
+rd = "".join(f'<div class="rc"><b class="n">{i+1}</b><div><h3>{t}</h3><p>{d}</p></div></div>' for i,(t,d) in enumerate(RD))
+s7 = frame("cs rd", f'''<div class="label">Cara baca angka ini</div>
+  <h1>Kerjaan lo masuk<br><span>yang mana?</span></h1>
+  <div class="rcs">{rd}</div>
+  <div class="ft"><p class="nt">Yang aman bukan kerjaannya, tapi orang yang paling cepat pakai AI di kerjaannya.</p><p class="src">Sumber: Anthropic, Labor market impacts of AI (Maret 2026); Eloundou dkk. (2023), diolah</p></div>''')
+
 CSS = (D / "style.css").read_text()
-(D / "carousel.html").write_text(f'<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Anthropic jobs AI</title><style>{CSS}</style></head><body>{cover}{s1}{s2}{s3}{s4}</body></html>')
+(D / "carousel.html").write_text(f'<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Anthropic jobs AI</title><style>{CSS}</style></head><body>{cover}{s1}{s2}{s3}{s4}{s6}{s7}</body></html>')
 print("ok")

@@ -20,7 +20,7 @@ tSum = ph("Terus semuanya")["start"]; tKirim = ph("dan jawabannya")["start"]; tW
 tBon = ph("Bonusnya")["start"]; tTik = ph("penjualan TikTok")["start"]; tRefP = ph("tapi refund")["start"]; tSatu = ph("dari satu produk")["start"]; tSatuE = ph("dari satu produk")["end"]
 tLap = ph("Nggak perlu buka")["start"]; tRum = ph("nggak perlu rumus")["start"]; tNya = ph("Tinggal nanya")["start"]; tCta = ph("Mau sistem")["start"]
 ev = [("pop", 0.1), ("pop", tNung), ("pop", tSehari - 0.05), ("whoosh", tAna - 0.1), ("pop", tWf), ("pop", tOrg - 0.05),
-      ("whoosh", tCek + 0.04),                                   # zoom-through 1
+      ("whoosh", tCek - 0.3),                                    # zoom-through 1
       ("pop", tOm - 0.1), ("click", tOm + 0.05), ("pop", tBaca + 0.15), ("pop", tBaca + 0.43), ("pop", tBaca + 0.71), ("ping", tBaca + 1.0),
       ("pop", tBuka + 0.05),
       ("whoosh", tBukaE - 0.8),                                  # zoom punch-in 2

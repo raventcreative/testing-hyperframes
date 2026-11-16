@@ -10,3 +10,10 @@ check frames before delivering, commit + push to `main`).
 from an open-source set — Simple Icons (CC0, npm `simple-icons`) by default — never hand-drawn or copied from a reference. Then build it
 as a real 3D object (SVG path → Three.js SVGLoader + ExtrudeGeometry with a small bevel, brand colour) so it can be animated (spin, pop,
 orbit). Record source + licence in the project's production/asset_credits.json.
+
+**Thumbnails / covers (client rules, 2026-11-16):** follow the brand theme table in REELS_PIPELINE.md exactly — navy = the client's navy
+background plate (e.g. projects/aip_r25_prompt3d/assets/brand/bg_1080x1920.png), white text, accent #01ccf7 only, white logo; white =
+brand/bg-light.png, text gradient #0a0d2c → #294b77, accent #294b77, dark logo. No other colours (no red badges, no yellow headlines).
+Minimal layout with negative space: logo, one chip, 2-line headline, short tagline, the 3D mascot, and ONE topic logo in 3D (open-source,
+see Logos rule) floating above the mascot's head — e.g. TikTok topic → TikTok logo; "3 AI" topic → those three AI logos. Free/value hooks
+("GRATIS") are fine only when the DM really delivers that exact thing.

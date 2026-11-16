@@ -19,8 +19,21 @@ function boxes(list, mat = MAT, shade = true) { // [cx, cy, cz, w, h, d, hex]
 }
 const emi = (hex, k = 1.6) => new THREE.MeshStandardMaterial({ color: 0x0b1640, emissive: new THREE.Color(hex), emissiveIntensity: k, roughness: 0.4 });
 function ctexRaw(w, h, draw) { const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h); return new THREE.CanvasTexture(c); }
+function safeText(g, w, h) { // no cut text: shrink the font until the text's ends land inside the canvas (any transform)
+  const orig = g.fillText.bind(g), pad = 8;
+  g.fillText = (t, x, y, mw) => {
+    const f0 = g.font, m0 = /(\d+(?:\.\d+)?)px/.exec(f0); if (!m0) return orig(t, x, y, mw);
+    let px = parseFloat(m0[1]);
+    const fits = () => { const m = g.measureText(t).width, al = g.textAlign, T = g.getTransform();
+      const l = al === "center" ? x - m / 2 : al === "right" || al === "end" ? x - m : x, r = l + m;
+      return [[l, y - px * 0.8], [r, y - px * 0.8], [l, y + px * 0.25], [r, y + px * 0.25]].every(([u, v]) => {
+        const X = T.a * u + T.c * v + T.e, Y = T.b * u + T.d * v + T.f; return X >= pad && X <= w - pad && Y >= 0 && Y <= h; }); };
+    while (!fits() && px > 10) { px -= 2; g.font = f0.replace(/(\d+(?:\.\d+)?)px/, px + "px"); }
+    orig(t, x, y, mw); g.font = f0;
+  };
+}
 function ctex(w, h, draw) {
-  const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
+  const c = document.createElement("canvas"); c.width = w; c.height = h; const g0 = c.getContext("2d"); safeText(g0, w, h); draw(g0, w, h);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
 }
 function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }

@@ -622,7 +622,9 @@
           const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
             const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
             return inter && !inside; };
-          R.forEach((q) => { let prev = false; const H = sh.map((S) => cut(q, S.c));
+          R.forEach((q) => { let prev = false;
+            const vis = (c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc; return q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y; };
+            const H = sh.map((S, i) => cut(q, S.c) || (i > 0 && S.d > 0 && vis(sh[i - 1].c) && !vis(S.c))); // also fade what slides out of frame during a move
             sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
               let h = H[i]; if (!h && prev && i + 1 < sh.length && H[i + 1] && nextT - inT < 0.5) h = true;
               if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }

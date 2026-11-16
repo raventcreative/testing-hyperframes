@@ -18,7 +18,7 @@ VOL = {"whoosh": 0.06, "pop": 0.045, "click": 0.08, "ping": 0.045, "sparkle": 0.
 G2, G3, G5 = 11.28, 28.84, 39.90
 tZ1 = 5.95; tW2 = G2 + 0.02; tMecah = ph("mecah satu")["start"]; tPar = ph("Terus semuanya")["start"]; tPoA = tPar + 0.95
 tDes = ph("ada yang nulis")["start"]; tStuck = ph("Kalau ada yang")["start"]; tHand = ph("oper tugasnya")["start"]; tW3 = G3 - 0.02
-tPoB = ph("halaman produk")["start"] - 0.1; tCek = ph("Tinggal lu cek")["start"]; tRec = tCek + 0.5; tW5 = G5 - 0.04
+tPoB = ph("halaman produk")["start"] - 0.1; tCek = ph("Tinggal lu cek")["start"]; tRec = tCek + 0.62; tW5 = G5 - 0.04
 tCap = ph("ada yang bikin")["start"]; tLu = ph("Lu tinggal")["start"]; tAp = wt("Lu tinggal", "approve")
 ev = [("whoosh", t) for t in (tZ1 + 0.1, tW2, tMecah - 0.3, tPoA, tDes - 0.04, tCap - 0.3, tStuck - 0.3, tHand, tW3, tPoB, tRec, tW5)]
 ev += [("pop", 0.1), ("pop", 0.45), ("sparkle", ph("dua puluh empat agent AI")["start"] + 0.2), ("pop", ph("semuanya kerja")["start"] + 0.05), ("click", ph("di detik")["start"] + 0.3),

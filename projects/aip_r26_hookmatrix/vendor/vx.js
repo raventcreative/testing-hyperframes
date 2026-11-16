@@ -112,7 +112,7 @@ const Hh = {};
 function buildH() {
   const g = mk("H"); g.add(island(5, 4)); clouds("H", 9, 3);
   // camera rig
-  const rig = new THREE.Group(); rig.position.set(-1.9, 0, -0.6); rig.rotation.y = 0.55; g.add(rig);
+  const rig = new THREE.Group(); rig.position.set(-1.05, 0, -1.5); rig.rotation.y = 0.45; g.add(rig);
   rig.add(boxes([[0, 0.55, 0, 0.08, 1.1, 0.08, "#8a9bb8"], [0, 0.03, 0, 0.7, 0.06, 0.7, "#5b6b8c"], [0, 1.45, 0, 0.5, 0.42, 0.8, "#1b2238"], [0, 1.45, 0.52, 0.32, 0.32, 0.26, "#3a4560"],
     [0, 1.45, 0.66, 0.36, 0.36, 0.04, "#0b1020"], [0, 1.82, -0.14, 0.06, 0.36, 0.36, "#2a3350"], [0, 1.82, 0.22, 0.06, 0.3, 0.3, "#2a3350"]]));
   Hh.rec = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), emi("#ff3344", 3)); Hh.rec.position.set(0.18, 1.7, 0.3); rig.add(Hh.rec);
@@ -137,7 +137,7 @@ function buildH() {
   Hh.cards.frustumCulled = false; g.add(Hh.cards); setSeed(13);
   Hh.cv = []; for (let i = 0; i < N; i++) { const a = rnd() * Math.PI * 2, el = 0.15 + rnd() * 1.1, sp = 2.2 + rnd() * 6.5;
     Hh.cv.push({ v: new THREE.Vector3(Math.cos(a) * Math.cos(el) * sp, Math.sin(el) * sp + 1.2, Math.sin(a) * Math.cos(el) * sp), r: [rnd() * 6, rnd() * 6, rnd() * 6], d: rnd() * 0.12 }); }
-  LOGO.h = [["instagram", window.LOGOS.instagram.hex, -1.25, 1.1, 0.4], ["tiktok", "#ffffff", 1.3, 1.45, 0.2], ["meta", window.LOGOS.meta.hex, -0.2, 2.25, -0.2]].map(([n, c, x, y, z]) => { const o = logo3d(n, c, 0.5); o.userData.p = new THREE.Vector3(x, y, z); o.visible = false; g.add(o); return o; });
+  LOGO.h = [["instagram", window.LOGOS.instagram.hex, -0.85, 1.1, 0.4], ["tiktok", "#ffffff", 0.9, 1.45, 0.2], ["meta", window.LOGOS.meta.hex, -0.1, 2.3, -0.2]].map(([n, c, x, y, z]) => { const o = logo3d(n, c, 0.5); o.userData.p = new THREE.Vector3(x, y, z); o.visible = false; g.add(o); return o; });
   // portal hero card
   Hh.hero = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.35), new THREE.MeshBasicMaterial({ map: TX.ad, toneMapped: false })); g.add(Hh.hero);
   Hh.hg = glow("#38dcff", 1.6, 2.4); g.add(Hh.hg);
@@ -168,11 +168,11 @@ function buildS() {
   g.add(boxes([[0, 0.15, 0, 2.2, 0.3, 1.6, "#24407a"], [0, 0.31, 0, 2.24, 0.03, 1.64, "#3b5ea8"]]));
   S.lay = [0, 1, 2].map((k) => { const l = new THREE.Group(); g.add(l);
     const m = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.2, 1.0), new THREE.MeshStandardMaterial({ color: 0xe8eef8, roughness: 0.6 })); m.castShadow = m.receiveShadow = true; l.add(m);
-    const f = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.2), new THREE.MeshBasicMaterial({ map: TX.band[2 - k] === undefined ? TX.band[0] : TX.band[k === 0 ? 2 : k === 2 ? 0 : 1], toneMapped: false })); f.position.z = 0.501; l.add(f);
+    const f = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.2), new THREE.MeshBasicMaterial({ transparent: true, map: TX.band[2 - k] === undefined ? TX.band[0] : TX.band[k === 0 ? 2 : k === 2 ? 0 : 1], toneMapped: false })); f.position.z = 0.501; l.add(f);
     const side = new THREE.MeshStandardMaterial({ color: 0x0b1640, emissive: new THREE.Color(ROLE[2 - k]), emissiveIntensity: 0 });
     for (const x of [-0.805, 0.805]) { const s = new THREE.Mesh(new THREE.BoxGeometry(0.01, 1.2, 1.0), side); s.position.x = x; l.add(s); }
     const lb = label(["CTA", "ISI", "HOOK"][k], ROLE[2 - k], "#0a0d2c", 0.36); lb.position.set(1.45, 0, 0.6); l.add(lb);
-    return { l, side, lb }; });   // k = 0 bottom (CTA) .. 2 top (HOOK)
+    return { l, side, lb, f }; });   // k = 0 bottom (CTA) .. 2 top (HOOK)
   S.em = [-1, 1].map((sx) => { const e = boxes([[0, 0, 0, 0.22, 0.22, 0.22, "#3a4560"]]); e.position.set(sx * 1.45, 0, 0.8); g.add(e); return e; });
   S.beam = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.03, 0.04), emi("#ff3b6b", 4)); g.add(S.beam);
   S.bg = glow("#ff3b6b", 3.2, 0.5); g.add(S.bg);
@@ -184,7 +184,7 @@ function animS(t) {
   S.lay.forEach((o, k) => { const y0 = 0.9 + 1.2 * k;
     o.l.position.set((k === 1 ? 1 : -1) * 3.8 * slide, y0 + 0.28 * k * sep, 0); o.l.rotation.z = (k - 1) * 0.04 * sep * (1 - slide);
     const on = [U(t, 8.9, 9.1), U(t, 8.1, 8.3), U(t, 7.55, 7.75)][k];
-    o.side.emissiveIntensity = 2.4 * on; setLabel(o.lb, EZ.back(cl(on, 0, 1)) * (1 - slide)); });
+    o.side.emissiveIntensity = 2.4 * on; const fade = 1 - U(t, 8.95, 9.2); setLabel(o.lb, EZ.back(cl(on, 0, 1)) * fade); o.f.material.opacity = fade; });
   // two laser passes front -> back at the two seams
   let bv = false; [0, 1].forEach((c) => { const u = (t - cutAt[c]) / 0.32; if (u > 0 && u < 1) { bv = true;
     S.beam.position.set(0, hy[c], 0.75 - 1.5 * u); S.bg.position.copy(S.beam.position); S.em.forEach((e) => { e.position.y = hy[c]; e.position.z = S.beam.position.z; }); } });
@@ -211,7 +211,7 @@ function drop(m, t, t0) { const u = U(t, t0 - 0.3, t0, "in"), s = t - t0; m.visi
   m.position.copy(m.userData.p); m.position.y += 5 * (1 - u) + (s > 0 ? Math.exp(-s * 10) * Math.abs(Math.sin(s * 18)) * 0.12 : 0); }
 function animT(t) {
   T.hook.forEach((m, k) => drop(m, t, T_HOOK(k))); T.isi.forEach((m, k) => drop(m, t, T_ISI(k))); T.cta.forEach((m, k) => drop(m, t, T_CTA(k)));
-  [10.35, 11.95, 13.3].forEach((a, i) => setLabel(T.lb[i], EZ.back(U(t, a, a + 0.35))));
+  T.lb.forEach((l) => (l.visible = false));
 }
 
 /* ---------------------------------------------------------------- M: slot machine + conveyor + jackpot burst */
@@ -234,10 +234,10 @@ function buildM() {
   M.lever = new THREE.Group(); M.lever.position.set(1.78, 1.9, 0); g.add(M.lever);
   M.lever.add(boxes([[0, 0.55, 0, 0.08, 1.1, 0.08, "#c3cfe2"]])); const ball = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.26, 0.26), emi("#ff4d5e", 1.4)); ball.position.y = 1.15; M.lever.add(ball);
   g.add(boxes([[3.6, 0.5, 1.05, 4.6, 0.1, 0.7, "#2b3348"], [3.6, 0.25, 1.4, 4.6, 0.5, 0.05, "#3a4560"], [3.6, 0.25, 0.7, 4.6, 0.5, 0.05, "#3a4560"]]));
-  M.cards = []; for (let i = 0; i < 44; i++) { const c = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.46), new THREE.MeshBasicMaterial({ map: TX.ad, toneMapped: false, side: THREE.DoubleSide })); c.visible = false; g.add(c); M.cards.push(c); }
+  M.cards = []; for (let i = 0; i < 24; i++) { const c = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.46), new THREE.MeshBasicMaterial({ map: TX.ad, toneMapped: false, side: THREE.DoubleSide })); c.visible = false; g.add(c); M.cards.push(c); }
   M.coins = new THREE.InstancedMesh(new THREE.BoxGeometry(0.16, 0.16, 0.05), new THREE.MeshStandardMaterial({ color: 0xffc531, emissive: 0xffa400, emissiveIntensity: 0.8, metalness: 0.3, roughness: 0.4 }), 220);
   M.coins.frustumCulled = false; g.add(M.coins); setSeed(29); M.cv = []; for (let i = 0; i < 220; i++) M.cv.push({ v: new THREE.Vector3((rnd() - 0.5) * 7, 1 + rnd() * 5, 3 + rnd() * 9), r: rnd() * 9, d: rnd() * 0.25 });
-  LOGO.m = [["meta", window.LOGOS.meta.hex, -2.15, 2.7], ["tiktok", "#ffffff", 2.45, 3.1]].map(([n, c, x, y]) => { const o = logo3d(n, c, 0.62); o.position.set(x, y, 0.3); o.userData.y = y; g.add(o); return o; });
+  LOGO.m = [["meta", window.LOGOS.meta.hex, 1.15, 0.5], ["tiktok", "#ffffff", 1.15, 1.02]].map(([n, c, x, y]) => { const o = logo3d(n, c, 0.42); o.position.set(x, y, 0.95); o.userData.y = y; g.add(o); return o; });
   M.glow = glow("#ffc531", 6, 6); M.glow.position.set(0, 2.2, 1.2); g.add(M.glow);
 }
 function reelAngle(r, t) { let a = 0; for (const [t0, t1, face] of REEL[r]) { const base = a; if (t < t0) break;
@@ -245,14 +245,14 @@ function reelAngle(r, t) { let a = 0; for (const [t0, t1, face] of REEL[r]) { co
   a = t >= t1 ? target : base + (target - base) * EZ.out((t - t0) / (t1 - t0)); } return a; }
 function animM(t) {
   M.reels.forEach((d, r) => (d.rotation.x = reelAngle(r, t)));
-  LOGO.m.forEach((o, i) => { o.rotation.y = t * 1.6 + i * 1.5; o.position.y = o.userData.y + 0.08 * Math.sin(t * 2.2 + i) + (t > 20.45 ? 0.5 * EZ.out(cl((t - 20.45) / 0.4, 0, 1)) : 0); });
+  LOGO.m.forEach((o, i) => { o.rotation.y = 0.5 * Math.sin(t * 1.6 + i * 1.5); o.position.y = o.userData.y + 0.08 * Math.sin(t * 2.2 + i) + (t > 20.45 ? 0.5 * EZ.out(cl((t - 20.45) / 0.4, 0, 1)) : 0); });
   M.lever.rotation.x = 1.15 * U(t, 14.78, 14.95, "in") * (1 - U(t, 15.05, 15.5, "back"));
   const jack = U(t, 20.45, 20.6); const ph = Math.floor(t * 7) % 2;
   M.bA.emissiveIntensity = jack > 0 ? 4 : ph ? 2.6 : 0.3; M.bB.emissiveIntensity = jack > 0 ? 4 : ph ? 0.3 : 2.6;
   M.glow.material.opacity = 0.9 * jack * (0.7 + 0.3 * Math.sin(t * 30));
-  M.cards.forEach((c, i) => { const e = 16.45 + i * 0.09, s = t - e; c.visible = s > 0 && s < 3.2; if (!c.visible) return;
-    const pop = U(t, e, e + 0.22, "back"); const q = Math.max(0, s - 0.15), side = i % 2 ? 1 : -1; c.position.set(side * q * (1.4 + (i % 5) * 0.25), 0.9 + q * (3.2 + (i % 3) * 0.5) - 1.1 * q * q, 1.0 + q * 0.6);
-    c.rotation.set(-0.2, side * q * 1.5, side * q * 0.8); c.scale.setScalar(Math.max(0.001, pop) * 1.5); });
+  M.cards.forEach((c, i) => { const e = 16.45 + i * 0.16, s = t - e; c.visible = s > 0 && s < 1.6; if (!c.visible) return;
+    const pop = U(t, e, e + 0.22, "back"); const q = Math.max(0, s - 0.15), side = i % 2 ? 1 : -1; c.position.set(side * (0.9 + q * 1.6), 0.95 + q * 1.1 - 0.5 * q * q, 1.1 + q * 0.9);
+    c.rotation.set(-0.2, side * q * 1.2, side * q * 0.5); c.scale.setScalar(Math.max(0.001, pop) * 1.3 * (1 - U(t, e + 1.15, e + 1.55))); });
   const tau = t - 20.55; M.coins.visible = tau > 0;
   if (tau > 0) { M.cv.forEach((c, i) => { const s = Math.max(0, tau - c.d * 0.4); _o.position.set(c.v.x * s * 1.2, 2.0 + c.v.y * s - 2.5 * s * s, 0.9 + c.v.z * s * 1.3);
       _o.rotation.set(c.r + s * 9, s * 7, 0); _o.scale.setScalar(s > 0 ? 1 + s * 2 : 0.001); _o.updateMatrix(); M.coins.setMatrixAt(i, _o.matrix); }); M.coins.instanceMatrix.needsUpdate = true; }
@@ -301,7 +301,7 @@ function buildL() {
   for (const [x, y] of [[-2.6, 0.41], [0, 1.21], [2.6, 2.01]]) { const e = new THREE.Mesh(new THREE.BoxGeometry(1.92, 0.03, 0.03), RIM); e.position.set(x, y, 1.0); g.add(e); }
   const base = { skin: "#f1c39d", hair: "#3b2a20", pants: "#26314d", fringe: [[-0.36, 0.18], [-0.18, 0.14], [0, 0.2], [0.18, 0.12], [0.36, 0.18]] };
   L.p = [Object.assign({}, base, { top: "#7c5cff", top2: "#6847ef" }), Object.assign({}, base, { top: "#2ecc71", top2: "#27b062", glasses: true }), Object.assign({}, base, { top: "#ff8a3d", top2: "#f2772a", bun: true, hair: "#4a2c1e" })].map((o) => person(o));
-  L.p[0].root.position.set(-2.4, 0.72, 0.2); L.p[0].root.rotation.set(0, 0, Math.PI / 2); L.p[0].root.scale.setScalar(0.7);
+  L.p[0].root.position.set(-1.9, 0.72, 0.2); L.p[0].root.rotation.set(0, 0, Math.PI / 2); L.p[0].root.scale.setScalar(0.7);
   L.p[1].root.position.set(0, 1.2, 0.1); L.p[2].root.position.set(2.6, 2.0, 0.1);
   L.p.forEach((p) => g.add(p.root));
   const mag = boxes([[0, -0.68, 0.12, 0.05, 0.25, 0.05, "#5b4636"], [0, -0.42, 0.12, 0.26, 0.26, 0.04, "#d8f3ff"]]); L.p[1].armR.add(mag);
@@ -319,7 +319,7 @@ function animL(t) {
   L.p[2].armL.rotation.set(-1.0, 0, 0.35); L.p[2].armR.rotation.set(-1.0, 0, -0.35);
   L.p[0].root.position.y = 0.72 + 0.25 * U(t, LV_T[0] + 0.35, LV_T[0] + 0.6, "back");
   setLabel(L.zz, (1 - U(t, LV_T[0] + 0.3, LV_T[0] + 0.45)) * (0.85 + 0.15 * Math.sin(t * 4))); L.zz.position.y = 1.55 + 0.08 * Math.sin(t * 3);
-  const tgt = [[-2.4, 1.3, 0.6], [0, 2.4, 0.6], [2.6, 3.2, 0.6]];
+  const tgt = [[-2.6, 1.3, 0.6], [0, 2.4, 0.6], [2.6, 3.2, 0.6]];
   L.hooks.forEach((m, i) => { const u = U(t, LV_T[i] - 0.15, LV_T[i] + 0.35, "out"); m.visible = L.hg[i].visible = t > LV_T[i] - 0.15 && t < LV_T[i] + 0.9;
     m.position.set(-5 + (tgt[i][0] + 5) * u, 6 - (6 - tgt[i][1]) * u, 2.5 - (2.5 - tgt[i][2]) * u); m.rotation.set(0, (1 - u) * 6, 0); m.scale.setScalar(1 - 0.7 * U(t, LV_T[i] + 0.45, LV_T[i] + 0.9));
     L.hg[i].position.copy(m.position); });
@@ -339,7 +339,7 @@ function buildR() {
     if (i === 0) { s.add(boxes([[0, 0.45, 0, 1.2, 0.08, 0.7, "#e9cfa8"], [0, 0.22, 0, 1.0, 0.44, 0.08, "#d8b98e"], [0, 0.51, 0.05, 0.7, 0.04, 0.45, "#aab6c8"]]));
       const lid = new THREE.Mesh(new THREE.PlaneGeometry(0.66, 0.42), new THREE.MeshBasicMaterial({ map: TX.screen, toneMapped: false })); lid.position.set(0, 0.76, -0.16); lid.rotation.x = -0.25; s.add(lid); }
     if (i === 1) { const p = person({ skin: "#e8b48f", hair: "#2a1e18", top: "#ffc531", top2: "#e8b22a", pants: "#26314d", fringe: [[-0.36, 0.16], [0, 0.2], [0.36, 0.16]] }); p.root.scale.setScalar(0.62); p.setMouth("smile"); s.add(p.root); s.userData.p = p;
-      const st = label("★★★★★", "#ffc531", "#0a0d2c", 0.26); st.position.set(0, 1.75, 0.2); s.add(st); }
+      const st = label("★★★★★", "#ffc531", "#0a0d2c", 0.24); st.position.set(0, 1.9, 0.2); s.add(st); s.userData.st = st; }
     if (i === 2) { s.add(boxes([[-0.45, 0.6, -0.1, 0.05, 1.2, 0.05, "#8a6a4a"], [0.45, 0.6, -0.1, 0.05, 1.2, 0.05, "#8a6a4a"]]));
       const b = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.8), new THREE.MeshBasicMaterial({ map: TX.board, toneMapped: false })); b.position.set(0, 1.05, -0.05); s.add(b); }
     if (i === 3) { s.add(boxes([[-0.3, 0.12, 0, 0.6, 0.06, 0.8, "#fff6e0"], [0.3, 0.12, 0, 0.6, 0.06, 0.8, "#fff6e0"], [0, 0.07, 0, 1.25, 0.06, 0.85, "#c0392b"]]));
@@ -355,7 +355,7 @@ function ttAngle(t) { // hold each set at the front, snap (0.22 s) to the next o
   return keys(t, K)[0] - 9 * Math.PI * EZ.in(cl((t - 38.85) / 0.6, 0, 1)); }
 function animR(t) {
   R.tt.rotation.y = ttAngle(t);
-  R.sets.forEach((s, i) => { s.userData.lb.visible = false; if (s.userData.p) s.userData.p.eyes.forEach((e) => (e.scale.y = blinkAt(t, 0.4))); });
+  R.sets.forEach((s, i) => { s.userData.lb.visible = false; if (s.userData.st) s.userData.st.visible = false; if (s.userData.p) s.userData.p.eyes.forEach((e) => (e.scale.y = blinkAt(t, 0.4))); });
 }
 
 /* ---------------------------------------------------------------- D: five dominoes -> CTA button */
@@ -363,13 +363,13 @@ const D = {};
 const DOM_T = [40.95, 41.95, 43.05, 43.45, 45.3], PRESS = 45.62;
 function buildD() {
   const g = mk("D"); g.add(island(5, 2)); clouds("D", 9, 19);
-  D.dom = TX.dom.map((tx, i) => { const piv = new THREE.Group(); piv.position.set(-3.6 + i * 1.05 + 0.13, 0, 0); g.add(piv);
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.26, 1.7, 0.95), [MATW, MATW, MATW, MATW, new THREE.MeshStandardMaterial({ map: tx, roughness: 0.6 }), MATW]); m.position.set(-0.13, 0.85, 0); m.castShadow = true; piv.add(m);
+  D.dom = TX.dom.map((tx, i) => { const piv = new THREE.Group(); piv.position.set(-3.1 + i * 0.95 + 0.15, 0, 0); g.add(piv);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.2, 1.05), [MATW, MATW, MATW, MATW, new THREE.MeshStandardMaterial({ map: tx, roughness: 0.6 }), MATW]); m.position.set(-0.15, 1.1, 0); m.castShadow = true; piv.add(m);
     return piv; });
-  g.add(boxes([[2.4, 0.15, 0, 1.6, 0.3, 1.6, "#1f3c62"], [2.4, 0.32, 0, 1.64, 0.04, 1.64, "#ffc531"]]));
-  D.btn = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.66, 0.36, 32), new THREE.MeshStandardMaterial({ color: 0xff4d5e, emissive: 0xff2a44, emissiveIntensity: 0.6, roughness: 0.4 })); D.btn.position.set(2.4, 0.52, 0); g.add(D.btn);
-  D.bl = label("CTA", "#ff4d5e", "#ffffff", 0.42); D.bl.position.set(2.4, 1.45, 0.3); g.add(D.bl);
-  D.bg = glow("#ff4d5e", 3.5, 3.5); D.bg.position.set(2.4, 0.8, 0.2); g.add(D.bg);
+  g.add(boxes([[2.3, 0.15, 0, 1.6, 0.3, 1.6, "#1f3c62"], [2.3, 0.32, 0, 1.64, 0.04, 1.64, "#01ccf7"]]));
+  D.btn = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.66, 0.36, 32), new THREE.MeshStandardMaterial({ color: 0xff4d5e, emissive: 0xff2a44, emissiveIntensity: 0.6, roughness: 0.4 })); D.btn.position.set(2.3, 0.52, 0); g.add(D.btn);
+  D.bl = label("CTA", "#ff4d5e", "#ffffff", 0.42); D.bl.position.set(2.3, 1.45, 0.3); g.add(D.bl);
+  D.bg = glow("#ff4d5e", 3.5, 3.5); D.bg.position.set(2.3, 0.8, 0.2); g.add(D.bg);
 }
 const MATW = new THREE.MeshStandardMaterial({ color: 0xf4f7fc, roughness: 0.6 });
 function animD(t) {
@@ -393,7 +393,7 @@ function buildA() {
   // printer + robot
   g.add(boxes([[0.9, 0.45, -0.2, 1.5, 0.9, 1.0, "#f3f6fb"], [0.9, 0.93, -0.2, 1.3, 0.06, 0.8, "#c3cfe2"], [0.9, 0.55, 0.31, 1.0, 0.08, 0.02, "#0a0d2c"], [0.4, 0.75, 0.31, 0.12, 0.12, 0.02, "#2ecc71"]]));
   A.pl = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.02), emi("#2ecc71", 2)); A.pl.position.set(0.4, 0.75, 0.32); g.add(A.pl);
-  A.bot = robot("#01ccf7", TX.robo); A.bot.root.position.set(2.5, 0.1, -0.5); A.bot.root.scale.setScalar(1.25); A.bot.root.rotation.y = -0.5; A.bot.card.visible = false; g.add(A.bot.root);
+  A.bot = robot("#01ccf7", TX.robo); A.bot.root.position.set(2.2, 0.1, -0.5); A.bot.root.scale.setScalar(1.25); A.bot.root.rotation.y = -0.5; A.bot.card.visible = false; g.add(A.bot.root);
   A.brief = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.53), new THREE.MeshBasicMaterial({ map: TX.brief, toneMapped: false, side: THREE.DoubleSide })); g.add(A.brief);
   A.tray = [-0.6, 0.9, 2.4].map((x, i) => { g.add(boxes([[x, 0.08, 1.6, 1.0, 0.16, 0.8, "#1f3c62"], [x, 0.17, 1.6, 1.04, 0.02, 0.84, ROLE[[0, 1, 2][i]]]])); return x; });
   A.tl = [["BELUM SADAR", "#7c5cff"], ["CARI SOLUSI", "#2ecc71"], ["KENAL PRODUK", "#ff8a3d"]].map(([s, c], i) => { const l = label(s, c, "#ffffff", 0.26); l.position.set(A.tray[i], 0.75, 2.1); g.add(l); return l; });
@@ -426,32 +426,31 @@ const C = []; const at = (w) => (v) => [v[0] + WP[w][0], v[1] + WP[w][1], v[2] +
 const k = (w, t, v, e) => C.push([t, at(w)(v), e]);
 const cut = (w, t, v) => C.push([t, at(w)(v), "lin"]);
 // H — hook, full frame
-k("H", 0, [1.3, 1.7, 4.6, -0.3, 1.25, 0.2, 42]); k("H", 1.55, [0.8, 1.55, 3.7, -0.1, 1.3, 0.5, 42], "sine");
+k("H", 0, [0.7, 1.9, 5.6, -0.1, 1.35, 0.2, 42]); k("H", 1.55, [0.5, 1.75, 4.8, -0.05, 1.35, 0.4, 42], "sine");
 k("H", 2.5, [1.6, 3.2, 7.4, 0, 2.2, 0, 50], "out"); k("H", 2.85, [0.3, 2.6, 5.4, 0, 2.6, 2.2, 42], "io"); k("H", 3.43, [0, 2.6, 2.62, 0, 2.6, 2.2, 40], "in");
 // S — match cut on the ad face, zoom-out reveal, slicing, elevator exit
-cut("S", 3.44, [0, 2.1, 1.05, 0, 2.1, 0, 40]); k("S", 4.35, [0, 5.2, 17, 0, 2.0, 0, 32], "io"); k("S", 5.6, [4.2, 3.6, 13.4, 0.3, 2.5, 0, 40], "io");
-k("S", 7.3, [3.0, 3.4, 13.0, 0.3, 2.55, 0, 40], "sine"); k("S", 8.95, [2.6, 3.3, 12.6, 0.3, 2.5, 0, 40], "sine"); k("S", 9.25, [0, 2.15, 3.7, 0, 2.15, 0, 44], "io"); k("S", 9.5, [0, 2.2, 3.4, 0, 2.2, 0, 44], "sine");
-C.push([9.98, [60, 4.3, -30 + 16.8, 60, 2.5, -30, 42], "in"]);
+cut("S", 3.44, [0, 2.1, 1.05, 0, 2.1, 0, 40]); k("S", 4.35, [0, 5.2, 17, 0, 2.0, 0, 32], "io"); k("S", 5.6, [4.6, 4.2, 17.6, 0.3, 2.4, 0, 40], "io");
+k("S", 7.3, [3.4, 4.0, 17.4, 0.3, 2.4, 0, 40], "sine"); k("S", 8.95, [3.0, 3.9, 17.0, 0.3, 2.4, 0, 40], "sine"); k("S", 9.3, [0, 2.6, 8.4, 0, 2.4, 0, 44], "io"); k("S", 9.5, [0, 2.5, 7.0, 0, 2.35, 0, 44], "sine");
+C.push([9.98, [60, 4.4, -30 + 18.6, 60, 2.5, -30, 42], "in"]);
 // T
-k("T", 13.95, [0, 4.1, 15.8, 0, 2.5, 0, 42], "sine"); k("T", 14.48, [0, 4.3, 15.8, 0, 30, -12, 42], "expo");
+k("T", 13.95, [0, 4.2, 17.8, 0, 2.5, 0, 42], "sine"); k("T", 14.48, [0, 4.4, 17.8, 0, 30, -12, 42], "expo");
 // M — starts looking at the sky, tilts down
-cut("M", 14.49, [0.3, 4.0, 13, 0.2, 30, -12, 42]); k("M", 15.0, [0.3, 4.0, 13, 0, 2.4, 0, 40], "expo"); k("M", 16.3, [0, 2.15, 4.9, 0, 1.95, 0, 40], "io");
-k("M", 17.7, [1.6, 3.6, 13.2, 1.0, 2.5, 0, 42], "io"); k("M", 20.3, [0.8, 3.8, 13.8, 0.8, 2.6, 0, 42], "sine"); k("M", 21.1, [0, 2.2, 4.6, 0, 2.0, 0, 42], "in");
+cut("M", 14.49, [0.3, 4.0, 13.6, 0.2, 30, -12, 42]); k("M", 15.1, [0.3, 3.9, 13.6, 0, 2.35, 0, 40], "io"); k("M", 16.3, [0, 3.2, 10.8, 0, 2.4, 0, 40], "sine");
+k("M", 17.7, [0.2, 3.7, 14.2, 0.1, 2.3, 0, 42], "io"); k("M", 20.3, [0.1, 3.7, 13.8, 0.1, 2.3, 0, 42], "sine"); k("M", 21.1, [0, 2.6, 7.0, 0, 2.2, 0, 42], "in");
 // P — after the jackpot burst
-cut("P", 21.12, [0, 3.0, 4.5, 0, 1.5, -1, 40]); k("P", 22.5, [0, 6.8, 13.5, 0, 1.4, -2.8, 44], "io"); k("P", 23.4, [-2.8, 2.9, 3.6, -4.8, 1.6, -3, 40], "expo");
-k("P", 24.25, [-2.6, 2.9, 3.3, -4.8, 1.6, -3, 40], "sine"); k("P", 24.85, [0.4, 3.4, -0.6, 0, 2.6, -6.5, 40], "expo"); k("P", 25.6, [0.3, 3.4, -0.9, 0, 2.6, -6.5, 40], "sine");
-k("P", 26.2, [3.2, 2.9, 3.2, 4.8, 1.6, -3, 40], "expo"); k("P", 27.3, [0, 6.6, 13, 0, 1.4, -2.8, 44], "io"); k("P", 27.61, [0, 6.4, 12.4, 0, 1.4, -2.8, 44], "sine");
+cut("P", 21.12, [0, 3.0, 4.5, 0, 1.5, -1, 40]); k("P", 22.5, [0, 6.8, 13.5, 0, 1.4, -2.8, 44], "io"); k("P", 23.4, [-3.4, 3.0, 5.0, -4.9, 1.45, -3, 40], "io");
+k("P", 24.25, [-3.3, 3.0, 4.7, -4.9, 1.45, -3, 40], "sine"); k("P", 24.85, [0.1, 3.9, 1.4, 0, 3.2, -6.5, 40], "io"); k("P", 25.6, [0.1, 3.9, 1.2, 0, 3.2, -6.5, 40], "sine");
+k("P", 26.2, [3.4, 3.0, 5.0, 4.9, 1.45, -3, 40], "io"); k("P", 27.3, [0, 6.6, 13, 0, 1.4, -2.8, 44], "io"); k("P", 27.61, [0, 6.4, 12.4, 0, 1.4, -2.8, 44], "sine");
 // L — after the iris; 180° orbit at the end towards R
-cut("L", 27.62, [0, 4.4, 15.5, 0, 2.3, 0, 42]); k("L", 28.9, [-2.4, 2.7, 7.8, -2.4, 1.55, 0, 40], "io"); k("L", 30.8, [0, 3.3, 7.8, 0, 2.35, 0, 40], "io");
-k("L", 32.6, [2.6, 4.1, 8.0, 2.6, 3.15, 0, 40], "io"); k("L", 33.3, [0, 4.4, 15.5, 0, 2.3, 0, 42], "io");
-for (let i = 1; i <= 16; i++) { const u = i / 16, a = Math.PI * EZ.io(u), r = 15.5; k("L", 33.3 + 0.95 * u, [Math.sin(a) * r * 0.9, 4.4 + 2.2 * Math.sin(a), Math.cos(a) * r, 0, 2.3 - 0.6 * u, 8 * u, 42], "lin"); }
-k("R", 34.6, [0, 4.6, 12.6, 0, 1.4, 1.2, 40], "out"); k("R", 38.8, [0.3, 4.3, 11.6, 0, 1.4, 1.2, 40], "sine"); k("R", 39.44, [0.0, 3.6, 8.6, 0, 1.4, 1.2, 40], "in");
+cut("L", 27.62, [0, 4.8, 18.2, 0, 2.0, 0, 42]); k("L", 28.9, [-2.7, 2.8, 8.6, -2.7, 1.5, 0, 40], "io"); k("L", 30.8, [0, 3.3, 7.8, 0, 2.35, 0, 40], "io");
+k("L", 32.6, [2.6, 4.1, 8.4, 2.6, 3.15, 0, 40], "io"); k("L", 33.3, [0, 4.8, 18.2, 0, 2.0, 0, 42], "io");
+for (let i = 1; i <= 16; i++) { const u = i / 16, a = Math.PI * EZ.io(u), r = 18.2; k("L", 33.3 + 0.95 * u, [Math.sin(a) * r * 0.9, 4.8 + 2.2 * Math.sin(a), Math.cos(a) * r, 0, 2.0 - 0.4 * u, 8 * u, 42], "lin"); }
+k("R", 34.6, [0, 5.2, 17.0, 0, 0.8, 2.0, 40], "out"); k("R", 38.8, [0.2, 5.0, 16.4, 0, 0.8, 2.0, 40], "sine"); k("R", 39.44, [0.0, 4.4, 13.4, 0, 0.8, 2.0, 40], "in");
 // D — after the spin-blur cut; track the dominoes
-cut("D", 39.45, [-2.4, 3.0, 9.4, -1.9, 1.2, 0, 40]); k("D", 41.0, [-2.2, 3.0, 9.2, -1.7, 1.2, 0, 40], "sine"); k("D", 42.6, [-1.0, 3.0, 9.2, -0.9, 1.2, 0, 40], "io");
-k("D", 44.0, [0.0, 3.0, 9.2, 0.0, 1.2, 0, 40], "io"); k("D", 45.1, [0.8, 3.0, 9.0, 0.8, 1.1, 0, 40], "io"); k("D", 45.75, [1.8, 2.4, 6.4, 2.0, 0.9, 0, 40], "in"); k("D", 46.34, [1.9, 2.3, 5.9, 2.1, 0.85, 0, 40], "sine");
+cut("D", 39.45, [-0.6, 4.2, 17.4, -0.35, 1.25, 0, 40]); k("D", 45.2, [-0.4, 4.0, 16.4, -0.35, 1.2, 0, 40], "sine"); k("D", 45.75, [0.6, 3.4, 13.2, 0.4, 1.1, 0, 40], "io"); k("D", 46.34, [0.7, 3.3, 12.6, 0.5, 1.1, 0, 40], "sine");
 // A
-cut("A", 46.35, [-2.2, 2.5, 4.9, -2.0, 1.4, 0, 40]); k("A", 48.8, [-1.8, 2.5, 4.6, -1.8, 1.4, 0, 40], "sine"); k("A", 49.7, [1.0, 2.9, 7.6, 1.0, 1.4, 0, 42], "expo");
-k("A", 51.0, [0.9, 3.4, 11.2, 0.9, 1.0, 0, 42], "io"); k("A", 53.0, [0.9, 3.3, 10.8, 0.9, 1.1, 0.4, 42], "sine"); k("A", 53.8, [0.9, 3.0, 9.4, 0.9, 1.4, 0.6, 42], "io"); k("A", 58.5, [0.9, 3.3, 10.4, 0.9, 1.3, 0.4, 42], "sine");
+cut("A", 46.35, [-2.0, 3.0, 7.8, -1.95, 1.55, 0, 40]); k("A", 48.8, [-1.9, 2.9, 7.4, -1.9, 1.55, 0, 40], "sine"); k("A", 49.7, [0.7, 3.3, 11.0, 0.7, 1.3, 0, 42], "io");
+k("A", 51.0, [0.7, 3.5, 12.2, 0.7, 1.0, 0, 42], "io"); k("A", 53.0, [0.7, 3.4, 11.8, 0.7, 1.1, 0.4, 42], "sine"); k("A", 53.8, [0.7, 3.2, 10.8, 0.7, 1.3, 0.6, 42], "io"); k("A", 58.5, [0.7, 3.4, 11.6, 0.7, 1.2, 0.4, 42], "sine");
 C.sort((a, b) => a[0] - b[0]);
 window.VX = { C, WP };
 scene.add(cam);
@@ -469,8 +468,8 @@ function render(t) {
   const roll = 0.35 * Math.sin(Math.PI * cl((t - 38.85) / 0.6, 0, 1)) + 0.05 * Math.sin(Math.PI * cl((t - 45.6) / 0.6, 0, 1)); if (roll) cam.rotateZ(roll);
   if (!LOGO.ig) { LOGO.ig = logo3d("instagram", window.LOGOS.instagram.hex, 1); cam.add(LOGO.ig); }
   { const on = U(t, 53.95, 54.35, "back"), d = 3.0; LOGO.ig.visible = t > 53.95; cam.updateMatrixWorld();
-    const v2 = new THREE.Vector3((905 / W) * 2 - 1, 1 - (470 / H) * 2, 0.5).unproject(cam).sub(cam.position).normalize().multiplyScalar(d).add(cam.position); cam.worldToLocal(v2);
-    LOGO.ig.position.copy(v2); LOGO.ig.position.y += 0.03 * Math.sin(t * 3); LOGO.ig.rotation.set(0, Math.sin(t * 1.4) * 0.5 + (1 - on) * 5, 0); LOGO.ig.scale.setScalar(Math.max(0.001, on) * 0.34 * (1 + 0.12 * Math.max(0, Math.sin((t - 54.75) * 12)) * (t > 54.75 && t < 55.0 ? 1 : 0))); }
+    const v2 = new THREE.Vector3((540 / W) * 2 - 1, 1 - (420 / H) * 2, 0.5).unproject(cam).sub(cam.position).normalize().multiplyScalar(d).add(cam.position); cam.worldToLocal(v2);
+    LOGO.ig.position.copy(v2); LOGO.ig.position.y += 0.03 * Math.sin(t * 3); LOGO.ig.rotation.set(0, Math.sin(t * 1.4) * 0.5 + (1 - on) * 5, 0); LOGO.ig.scale.setScalar(Math.max(0.001, on) * 0.2 * (1 + 0.12 * Math.max(0, Math.sin((t - 54.75) * 12)) * (t > 54.75 && t < 55.0 ? 1 : 0))); }
   stars.position.copy(cam.position);
   const tx = v[3], tz = v[5]; moon.position.set(tx - 6, 12, tz + 8); moon.target.position.set(tx, 0, tz - 1); warm.position.set(tx + 6, 4, tz + 7); warm.target.position.set(tx, 1, tz);
   renderer.render(scene, cam);

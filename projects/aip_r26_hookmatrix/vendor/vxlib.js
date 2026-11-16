@@ -117,8 +117,8 @@ const glow = (hex, sx, sy) => { const s = new THREE.Sprite(new THREE.SpriteMater
 function label(text, bg, fg = "#ffffff", h = 0.32) { // pill sprite, always readable (drawn on top)
   const c = document.createElement("canvas"), g2 = c.getContext("2d"); g2.font = `700 64px ${FONT}`;
   const tw = Math.ceil(g2.measureText(text).width) + 72; c.width = tw; c.height = 104;
-  const g = c.getContext("2d"); g.font = `700 64px ${FONT}`; g.fillStyle = bg; rr(g, 2, 2, tw - 4, 100, 50); g.fill();
-  g.fillStyle = fg; g.textBaseline = "middle"; g.fillText(text, 36, 55);
+  const g = c.getContext("2d"); g.font = `700 64px ${FONT}`; g.fillStyle = "#0a1644"; rr(g, 4, 4, tw - 8, 96, 48); g.fill();   // brand UI: navy pill, cyan rim, white text
+  g.lineWidth = 6; g.strokeStyle = "#01ccf7"; rr(g, 4, 4, tw - 8, 96, 48); g.stroke(); g.fillStyle = "#ffffff"; g.textBaseline = "middle"; g.fillText(text, 36, 55);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthTest: false, toneMapped: false }));
   sp.renderOrder = 20; sp.userData.aspect = tw / 104; sp.userData.h = h; sp.scale.set(h * tw / 104, h, 1); return sp;

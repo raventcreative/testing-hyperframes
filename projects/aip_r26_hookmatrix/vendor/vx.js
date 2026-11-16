@@ -65,14 +65,17 @@ function logo3d(name, color, size, depth = 3.2) {
 const LOGO = {};
 /* ---------------------------------------------------------------- textures */
 const TX = {};
+function fitFont(g, lines, px, maxW) { // shrink until every line fits the card (no cut text)
+  do { g.font = `700 ${px}px ${FONT}`; if (lines.every((l) => g.measureText(l).width <= maxW)) return; px -= 2; } while (px > 10);
+}
 function adBand(g, w, h, k) { // the ad mock in three bands: 0 hook, 1 isi, 2 cta
   if (k === 0) { g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h); g.fillStyle = "#ff5c8a"; g.fillRect(0, 0, w, 14);
-    g.fillStyle = "#0a0d2c"; g.font = `700 ${Math.round(h * 0.2)}px ${FONT}`; g.textAlign = "center"; g.fillText("Masih bikin", w / 2, h * 0.46); g.fillText("iklan satu-satu?", w / 2, h * 0.74); }
+    g.fillStyle = "#0a0d2c"; g.textAlign = "center"; fitFont(g, ["Masih bikin", "iklan satu-satu?"], Math.round(h * 0.2), w * 0.84); g.fillText("Masih bikin", w / 2, h * 0.46); g.fillText("iklan satu-satu?", w / 2, h * 0.74); }
   if (k === 1) { g.fillStyle = "#eef3fb"; g.fillRect(0, 0, w, h); g.fillStyle = "#b9cdeb"; rr(g, w * 0.1, h * 0.08, w * 0.8, h * 0.56, 18); g.fill();
     g.fillStyle = "#ffffff"; g.beginPath(); g.moveTo(w * 0.45, h * 0.24); g.lineTo(w * 0.58, h * 0.36); g.lineTo(w * 0.45, h * 0.48); g.fill();
     g.fillStyle = "#c9d6ea"; for (let i = 0; i < 2; i++) { rr(g, w * 0.1, h * (0.72 + i * 0.12), w * (0.8 - i * 0.25), h * 0.06, 8); g.fill(); } }
   if (k === 2) { g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h); g.fillStyle = "#01ccf7"; rr(g, w * 0.14, h * 0.26, w * 0.72, h * 0.42, h * 0.21); g.fill();
-    g.fillStyle = "#0a0d2c"; g.font = `700 ${Math.round(h * 0.17)}px ${FONT}`; g.textAlign = "center"; g.fillText("Pesan sekarang", w / 2, h * 0.53); }
+    g.fillStyle = "#0a0d2c"; g.textAlign = "center"; fitFont(g, ["Pesan sekarang"], Math.round(h * 0.17), w * 0.66); g.fillText("Pesan sekarang", w / 2, h * 0.53); }
 }
 function makeTextures() {
   TX.band = [0, 1, 2].map((k) => ctex(600, 450, (g, w, h) => adBand(g, w, h, k)));

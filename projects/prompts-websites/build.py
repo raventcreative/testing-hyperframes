@@ -1,4 +1,4 @@
-# Viral website prompts Part 2 (AIpreneur white theme, 1080x1350). Websites are original fictional mockups.
+# Viral website prompts (AIpreneur white theme, 1080x1350). Websites are original fictional mockups.
 import re
 from pathlib import Path
 D = Path(__file__).parent
@@ -54,7 +54,7 @@ def pslide(i, key, name, desc):
   <p>“You are an expert creative front-end developer. Build a single self-contained <code>index.html</code> for <b>{name}</b>…”</p>
   <p class="pd">{desc}</p></div>''')
 
-cover = frame("cover", f'''<span class="chip c">Part 2</span>
+cover = frame("cover", f'''
   <h1 class="ch1">Viral website<br>prompts.</h1>
   <p class="tg2">5 prompts. 5 websites. Paste one into Claude tonight.</p>
   <img class="ico" src="assets/claude3d_cut.png" alt="Claude">''', swipe=True, foot=False)

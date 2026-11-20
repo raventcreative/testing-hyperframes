@@ -145,7 +145,7 @@ function buildH() {
   Hh.pass = person({ pants: "#243156", top: "#9fb6e8", top2: "#ffffff", skin: "#e8b48c", hair: "#1a1410", fringe: [[-0.18, 0.1]], glasses: false, bun: false, strings: false });
   Hh.pass.root.scale.setScalar(0.92); Hh.pass.setMouth("n"); g.add(Hh.pass.root);
   // question mark over your stall / cyan knowledge beam over theirs
-  Hh.qm = label("?", null, null, 0.85); Hh.qm.position.set(-2.9, 3.5, -0.3); g.add(Hh.qm); setLabel(Hh.qm, 0);
+  Hh.qm = label("?", null, null, 0.6); Hh.qm.position.set(-2.9, 2.95, -0.1); g.add(Hh.qm); setLabel(Hh.qm, 0);
   Hh.beam = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.9, 3.4, 18, 1, true), new THREE.MeshBasicMaterial({ color: 0x36e0ff, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
   Hh.beam.position.set(3.0, 4.2, -0.6); g.add(Hh.beam);
   Hh.portal = glow("#36e0ff", 3.2, 2.6); Hh.portal.position.set(-2.9, 1.78, -0.1); Hh.portal.material.opacity = 0; g.add(Hh.portal);
@@ -163,7 +163,7 @@ function animH(t) {
     p.root.scale.setScalar(Math.max(0.001, 0.92 * u)); p.root.position.y = (1 - u) * 0.7;
     p.armL.rotation.x = Math.sin(t * 3 + i) * 0.18; p.head.rotation.y = Math.sin(t * 1.4 + i) * 0.25; });
   // line 3: "?" over your stall, knowledge beam over theirs
-  setLabel(Hh.qm, U(t, 6.9, 7.3, "back")); Hh.qm.position.y = 3.5 + 0.08 * Math.sin(t * 2.4);
+  setLabel(Hh.qm, U(t, 6.9, 7.3, "back") * (1 - U(t, 9.3, 9.6))); Hh.qm.position.y = 2.95 + 0.07 * Math.sin(t * 2.4);
   Hh.beam.visible = false;
   Hh.portal.material.opacity = 0.9 * U(t, 9.5, 9.9, "in"); // portal bloom before the zoom-through
 }
@@ -365,7 +365,7 @@ C.push([20.62, [120, 8.4, 22.0, 120, 2.0, 0, 44], "io"]);
 // K — the three stalls, one by one, then down to the two gaps
 k("K", 21.5, [0, 7.0, 20.5, 0, 1.9, 0, 42], "sine"); k("K", 23.0, [-3.4, 3.6, 8.0, -3.4, 1.8, 0, 40], "io");
 k("K", 24.6, [0, 3.7, 8.2, 0, 1.8, 0, 40], "io"); k("K", 26.2, [3.4, 3.6, 8.0, 3.4, 1.8, 0, 40], "io");
-k("K", 27.5, [-0.25, 4.0, 11.2, -0.55, 1.7, 2.1, 42], "io"); k("K", 29.4, [0.9, 3.8, 10.4, 0.9, 1.6, 2.2, 42], "io");
+k("K", 27.5, [-0.25, 4.0, 11.2, -0.55, 1.7, 2.1, 42], "io"); k("K", 29.2, [0.9, 3.8, 10.4, 0.9, 1.6, 2.2, 42], "io");
 k("K", 30.9, [0, 5.4, 13.6, 0, 1.8, 1.4, 44], "sine");
 // V — after the iris: the review wall, then the buyer phrases
 cut("V", 31.0, [0, 4.4, 15.4, 0, 2.1, -1.2, 42]); k("V", 34.4, [0, 4.0, 13.4, 0, 2.0, -1.2, 40], "sine");

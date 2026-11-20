@@ -10,3 +10,9 @@
 4. Render (delayed nohup launch), then: ffprobe duration; whisper the final audio once; sample 12–19 frames and look.
 5. Covers: render, look, check headline/name widths and that nothing touches the frame edge.
 6. Commit + push (`out/` is gitignored; MP4s are sent, not committed).
+7. VO edits (lesson R30): never cut/pad the VO at line boundaries taken from the ElevenLabs alignment — they can sit
+   inside speech (lines run together) and chop the next word ("Modul" → "odul"). Cut only at measured silence
+   (20 ms RMS < −60 dB, search ±0.3 s), with 5–10 ms fades. Don't put a hard sidechain compressor on the SFX (it pumps);
+   lower the SFX level instead. Final check: whisper MEDIUM on the final MP4, diff against vo_lines.txt word by word.
+8. Loudness: render_aip.sh normalises in one pass and can land at −18 LUFS; measure (ebur128) and, if off by > 1 LU,
+   remix with a two-pass loudnorm (see projects/aip_r30_timmarketingai/tools/remix_audio.sh).

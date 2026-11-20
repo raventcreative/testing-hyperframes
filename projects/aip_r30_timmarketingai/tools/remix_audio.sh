@@ -1,14 +1,13 @@
 #!/bin/bash
-# Rebuild the R30 mix without re-rendering: VO lead, SFX ducked hard under the voice (so "Modul" stays clear), music bed
-# ducked under the voice, two-pass loudnorm to -14 LUFS; the rendered video stream is copied.
+# R30 final mix without re-rendering the picture: VO (re-padded at true silences, see production/NOTES.md) + SFX at a fixed
+# lower level (no pumping compressor) + music bed ducked under the voice, two-pass loudnorm -14 LUFS; video stream copied.
 set -eu
-IN=out/AIP_R30_TIM_MARKETING_AI.mp4; OUT=out/AIP_R30_TIM_MARKETING_AI_fix.mp4; D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $IN)
-G="[0:a]aformat=sample_rates=48000:channel_layouts=mono,adelay=300,apad,atrim=end=$D,asplit=3[vo][k1][k2];\
-[1:a]aformat=sample_rates=48000:channel_layouts=mono,volume=0.9,apad,atrim=end=$D[sfx];\
-[2:a]aformat=sample_rates=48000:channel_layouts=mono,volume=0.35,apad,atrim=end=$D[bed];\
-[sfx][k1]sidechaincompress=threshold=0.015:ratio=8:attack=5:release=250[sfxd];\
-[bed][k2]sidechaincompress=threshold=0.02:ratio=4:attack=15:release=450[bedd];\
-[vo][sfxd][bedd]amix=inputs=3:normalize=0:duration=first"
+IN=out/AIP_R30_preremix.mp4; OUT=out/AIP_R30_TIM_MARKETING_AI.mp4; D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $IN)
+G="[0:a]aformat=sample_rates=48000:channel_layouts=mono,adelay=300,apad,atrim=end=$D,asplit=2[vo][k];\
+[1:a]aformat=sample_rates=48000:channel_layouts=mono,volume=0.62,apad,atrim=end=$D[sfx];\
+[2:a]aformat=sample_rates=48000:channel_layouts=mono,volume=0.32,apad,atrim=end=$D[bed];\
+[bed][k]sidechaincompress=threshold=0.03:ratio=3:attack=40:release=600[bedd];\
+[vo][sfx][bedd]amix=inputs=3:normalize=0:duration=first"
 J=$(ffmpeg -hide_banner -i assets/audio/vo.mp3 -i assets/audio/sfx.wav -i assets/audio/bed.wav -filter_complex "$G,loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json" -f null - 2>&1 | sed -n '/^{/,/^}/p')
 v(){ echo "$J" | python3 -c "import json,sys;print(json.load(sys.stdin)['$1'])"; }
 ffmpeg -v error -y -i assets/audio/vo.mp3 -i assets/audio/sfx.wav -i assets/audio/bed.wav -i $IN -filter_complex \

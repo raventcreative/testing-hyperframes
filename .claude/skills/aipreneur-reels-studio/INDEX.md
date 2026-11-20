@@ -14,3 +14,4 @@
 | /product-launch-film | 15 s 2D product launch film, 1920×1080 60 fps, one continuous take, beat-locked to a 130 BPM drop |
 | /landing-flythrough-3d | 14.5 s cinematic 3D fly-through of a landing page (1440×1152 60 fps), WebGL2, DOF, title card |
 | /beat-promo-film | 20 s minimal promo cut to 10 bars @120 BPM with real clips, 3D carousel, beat-grid cuts |
+| /design-taste-frontend | (Leonxlnx Taste Skill, MIT) professional website/landing pages — real photos, one system, browser-checked gate |

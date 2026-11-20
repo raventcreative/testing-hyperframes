@@ -21,4 +21,4 @@ see Logos rule) floating above the mascot's head — e.g. TikTok topic → TikTo
 **Skills (2026-11-20):** project skills live in `.claude/skills/` (auto-loaded) and a portable copy in `skills/`
 (index: skills/aipreneur-reels-studio/INDEX.md). Pick the matching one even when the client doesn't name it:
 voxel-reels, aip-remake, masterpajak-video, automation-demo, video-carousel, cover-topik, cover-testimoni, cover-foto,
-html-demo (MengTo, MIT — live HTML app demos for web pages). Keep both copies in sync when a skill changes.
+html-demo (MengTo, MIT — live HTML app demos for web pages), product-launch-film (15 s 2D launch film, landscape). Keep both copies in sync when a skill changes.

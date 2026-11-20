@@ -257,15 +257,15 @@ function buildV() {
 }
 const _o = new THREE.Object3D();
 function animV(t) {
-  const lit = cl((t - 31.3) / 3.2, 0, 1) * Vv.N;
+  const lit = cl((t - 31.2) / 3.0, 0, 1) * Vv.N;
   for (let i = 0; i < Vv.N; i++) { const p = Vv.pos[i], on = i < lit ? 1 : 0;
-    const u = U(t, 31.0 + i * 0.012, 31.3 + i * 0.012, "back");
+    const u = U(t, 30.86 + i * 0.006, 31.16 + i * 0.006, "back");
     _o.position.set(p[0], p[1], p[2] + (1 - u) * -0.5); _o.rotation.set(0, 0, 0); _o.scale.setScalar(Math.max(0.001, u));
     _o.updateMatrix(); Vv.tiles.setMatrixAt(i, _o.matrix); }
   Vv.tiles.instanceMatrix.needsUpdate = true;
-  Vv.tiles.material.emissiveIntensity = 0.06 + 0.26 * cl((t - 31.2) / 3, 0, 1);
+  Vv.tiles.material.emissiveIntensity = 0.06 + 0.26 * cl((t - 31.1) / 3, 0, 1);
   Vv.ph.forEach((m, i) => { const a = 36.3 + i * 0.75, u = U(t, a, a + 0.55, "out"); m.visible = t > a - 0.02;
-    m.material.opacity = u * (1 - U(t, 40.2, 40.5)); m.position.z = 1.1 * u + 0.2; m.position.y = 1.1 + i * 0.72 + (1 - u) * -0.4 + 0.03 * Math.sin(t * 2 + i);
+    m.material.opacity = u * (1 - U(t, 40.34, 40.52)); m.position.z = 1.1 * u + 0.2; m.position.y = 1.1 + i * 0.72 + (1 - u) * -0.4 + 0.03 * Math.sin(t * 2 + i);
     m.scale.setScalar(0.6 + 0.4 * u); });
 }
 
@@ -370,7 +370,7 @@ k("K", 30.9, [0, 5.4, 13.6, 0, 1.8, 1.4, 44], "sine");
 // V — after the iris: the review wall, then the buyer phrases
 cut("V", 31.0, [0, 4.4, 15.4, 0, 2.1, -1.2, 42]); k("V", 34.4, [0, 4.0, 13.4, 0, 2.0, -1.2, 40], "sine");
 k("V", 36.6, [0, 4.0, 13.4, 0, 2.1, 0.3, 42], "io"); k("V", 39.6, [0, 4.2, 14.0, 0, 2.3, 0.4, 42], "sine");
-k("V", 40.52, [0, 4.0, 12.2, 0, 30, -8, 42], "expo"); // whip tilt up to the sky
+k("V", 40.28, [0, 4.2, 13.9, 0, 2.3, 0.4, 42], "sine"); k("V", 40.52, [0, 4.2, 13.9, 0, 30, -8, 42], "in"); // whip tilt up to the sky
 // R — starts on the sky, tilts down onto the radar, then the bars sit on the right half
 cut("R", 40.56, [-0.9, 4.4, 12.4, -0.9, 30, -8, 42]); k("R", 41.4, [-0.9, 4.2, 11.8, -0.9, 1.5, 0.3, 42], "io");
 k("R", 43.8, [-2.3, 3.6, 9.6, -2.3, 1.2, 0.2, 40], "io"); k("R", 45.6, [0.5, 3.9, 9.4, 0.5, 2.27, 1.4, 42], "io");

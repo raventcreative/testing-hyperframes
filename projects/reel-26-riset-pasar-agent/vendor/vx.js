@@ -86,6 +86,15 @@ function phrase(txt) { // a buyer phrase slab
     g.fillStyle = "#ffffff"; g.font = `700 44px ${FONT}`; g.textBaseline = "middle"; g.textAlign = "center"; fitFont(g, [txt], 44, 440); g.textAlign = "center"; g.fillText(txt, 256, 66);
   });
 }
+function demandRow(name, pct, c) {
+  return ctex(640, 160, (g) => {
+    g.fillStyle = "#0a1644"; rr(g, 0, 0, 640, 160, 26); g.fill(); g.lineWidth = 5; g.strokeStyle = c; rr(g, 3, 3, 634, 154, 24); g.stroke();
+    g.fillStyle = "#ffffff"; g.font = `700 40px ${FONT}`; g.textBaseline = "middle"; fitFont(g, [name], 40, 390); g.fillText(name, 34, 56);
+    g.fillStyle = c; g.font = `700 44px ${FONT}`; g.textAlign = "right"; fitFont(g, ["+" + pct + "%"], 44, 150); g.textAlign = "right"; g.fillText("+" + pct + "%", 606, 56); g.textAlign = "left";
+    g.fillStyle = "rgba(255,255,255,.12)"; rr(g, 34, 100, 572, 22, 11); g.fill();
+    g.fillStyle = c; rr(g, 34, 100, Math.max(40, 572 * pct / 70), 22, 11); g.fill();
+  });
+}
 function page() { // the Monday one-pager
   return ctex(512, 672, (g) => {
     g.fillStyle = "#f3f7ff"; rr(g, 0, 0, 512, 672, 24); g.fill();
@@ -105,6 +114,7 @@ function makeTextures() {
   TX.k2 = card("LAPAK B · SIMULASI", [["Penawaran", "6 paket"], ["Harga", "Rp210rb"], ["Review", "3,9 ★"]]);
   TX.k3 = card("LAPAK C · SIMULASI", [["Penawaran", "3 paket"], ["Harga", "Rp175rb"], ["Review", "4,5 ★"]]);
   TX.page = page();
+  TX.row = BARS.map(([n, pct, c]) => demandRow(n, pct, c));
   TX.ph = ["“ada slot besok?”", "“harganya berapa?”", "“bisa booking lewat WA?”", "“ready kapan?”"].map(phrase);
   TX.gap = [["LAYANAN YANG", "NGGAK ADA"], ["KELUHAN YANG", "NGGAK DIBERESIN"]].map(([a, b]) => twoLine(a, b));
 }
@@ -135,7 +145,7 @@ function buildH() {
   Hh.pass = person({ pants: "#243156", top: "#9fb6e8", top2: "#ffffff", skin: "#e8b48c", hair: "#1a1410", fringe: [[-0.18, 0.1]], glasses: false, bun: false, strings: false });
   Hh.pass.root.scale.setScalar(0.92); Hh.pass.setMouth("n"); g.add(Hh.pass.root);
   // question mark over your stall / cyan knowledge beam over theirs
-  Hh.qm = label("?", null, null, 0.85); Hh.qm.position.set(-2.9, 3.5, -0.3); g.add(Hh.qm); setLabel(Hh.qm, 0);
+  Hh.qm = label("?", null, null, 0.6); Hh.qm.position.set(-2.9, 2.95, -0.1); g.add(Hh.qm); setLabel(Hh.qm, 0);
   Hh.beam = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.9, 3.4, 18, 1, true), new THREE.MeshBasicMaterial({ color: 0x36e0ff, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
   Hh.beam.position.set(3.0, 4.2, -0.6); g.add(Hh.beam);
   Hh.portal = glow("#36e0ff", 3.2, 2.6); Hh.portal.position.set(-2.9, 1.78, -0.1); Hh.portal.material.opacity = 0; g.add(Hh.portal);
@@ -153,7 +163,7 @@ function animH(t) {
     p.root.scale.setScalar(Math.max(0.001, 0.92 * u)); p.root.position.y = (1 - u) * 0.7;
     p.armL.rotation.x = Math.sin(t * 3 + i) * 0.18; p.head.rotation.y = Math.sin(t * 1.4 + i) * 0.25; });
   // line 3: "?" over your stall, knowledge beam over theirs
-  setLabel(Hh.qm, U(t, 6.9, 7.3, "back")); Hh.qm.position.y = 3.5 + 0.08 * Math.sin(t * 2.4);
+  setLabel(Hh.qm, U(t, 6.9, 7.3, "back") * (1 - U(t, 9.3, 9.6))); Hh.qm.position.y = 2.95 + 0.07 * Math.sin(t * 2.4);
   Hh.beam.visible = false;
   Hh.portal.material.opacity = 0.9 * U(t, 9.5, 9.9, "in"); // portal bloom before the zoom-through
 }
@@ -173,7 +183,7 @@ function buildG() {
   Gg.tow = Q3.map(([txt, c], i) => { const grp = new THREE.Group(); grp.position.set((i - 1) * 3.5, 0, 0); g.add(grp);
     const base = boxes([[0, 0.12, 0, 2.2, 0.24, 2.2, "#17306a"]], MAT, false); grp.add(base);
     const ring = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.05, 1.7), emi(c, 0.55)); ring.position.y = 0.26; grp.add(ring);
-    const lb = label(txt, null, null, 0.34); lb.position.set(0, 2.6, 0); grp.add(lb); setLabel(lb, 0);
+    const lb = label(txt, null, null, 0.3); lb.position.set(0, 2.5, 0); grp.add(lb); setLabel(lb, 0);
     const gl = glow(c, 3.0, 2.0); gl.position.set(0, 1.2, 0); gl.material.opacity = 0; grp.add(gl);
     return { grp, ring, lb, gl, c }; });
 }
@@ -193,7 +203,7 @@ function animG(t) {
     const pad = U(t, 15.9 + i * 0.95, 16.5 + i * 0.95, "out"); T.grp.visible = pad > 0.002;
     T.grp.scale.set(Math.max(0.002, pad), 1, Math.max(0.002, pad));
     T.ring.material.emissiveIntensity = (0.15 + 0.75 * on) * pad; setLabel(T.lb, U(t, 15.9 + i * 0.95, 16.4 + i * 0.95, "back"));
-    T.lb.position.y = 2.6 + 0.06 * Math.sin(t * 2 + i); T.gl.material.opacity = 0.22 * on; });
+    T.lb.position.y = 2.5 + 0.06 * Math.sin(t * 2 + i); T.gl.material.opacity = 0.22 * on; });
 }
 
 /* ------------------------------------------------------------------ K: three competitor stalls scanned -> two gaps */
@@ -227,7 +237,7 @@ function animK(t) {
   Kk.beam.visible = false;
   Kk.gap.forEach((G2, i) => { const a = 26.9 + i * 1.9, u = U(t, a, a + 0.55, "back");
     G2.grp.visible = t > a - 0.02; G2.pil.scale.y = Math.max(0.001, u); G2.pil.position.y = 0.75 * u;
-    const lu = U(t, a + 0.25, a + 0.7, "out"); G2.lb.material.opacity = lu * (1 - U(t, 30.5, 30.85));
+    const lu = U(t, a + 0.25, a + 0.7, "out"); G2.lb.material.opacity = lu * (1 - (i === 0 ? U(t, 29.15, 29.55) : U(t, 30.5, 30.85)));
     G2.lb.position.y = 1.95 + (1 - lu) * -0.2 + 0.05 * Math.sin(t * 2.2 + i); G2.lb.scale.setScalar(0.7 + 0.3 * lu);
     G2.gl.material.opacity = 0.26 * u; });
 }
@@ -247,53 +257,54 @@ function buildV() {
 }
 const _o = new THREE.Object3D();
 function animV(t) {
-  const lit = cl((t - 31.3) / 3.2, 0, 1) * Vv.N;
+  const lit = cl((t - 31.2) / 3.0, 0, 1) * Vv.N;
   for (let i = 0; i < Vv.N; i++) { const p = Vv.pos[i], on = i < lit ? 1 : 0;
-    const u = U(t, 31.0 + i * 0.012, 31.3 + i * 0.012, "back");
+    const u = U(t, 30.86 + i * 0.006, 31.16 + i * 0.006, "back");
     _o.position.set(p[0], p[1], p[2] + (1 - u) * -0.5); _o.rotation.set(0, 0, 0); _o.scale.setScalar(Math.max(0.001, u));
     _o.updateMatrix(); Vv.tiles.setMatrixAt(i, _o.matrix); }
   Vv.tiles.instanceMatrix.needsUpdate = true;
-  Vv.tiles.material.emissiveIntensity = 0.06 + 0.26 * cl((t - 31.2) / 3, 0, 1);
+  Vv.tiles.material.emissiveIntensity = 0.06 + 0.26 * cl((t - 31.1) / 3, 0, 1);
   Vv.ph.forEach((m, i) => { const a = 36.3 + i * 0.75, u = U(t, a, a + 0.55, "out"); m.visible = t > a - 0.02;
-    m.material.opacity = u * (1 - U(t, 40.2, 40.5)); m.position.z = 1.1 * u + 0.2; m.position.y = 1.1 + i * 0.72 + (1 - u) * -0.4 + 0.03 * Math.sin(t * 2 + i);
+    m.material.opacity = u * (1 - U(t, 40.34, 40.52)); m.position.z = 1.1 * u + 0.2; m.position.y = 1.1 + i * 0.72 + (1 - u) * -0.4 + 0.03 * Math.sin(t * 2 + i);
     m.scale.setScalar(0.6 + 0.4 * u); });
 }
 
 /* ------------------------------------------------------------------ R: local demand radar */
 const Rr = {};
-const BARS = [["facial malam hari", 64, "#01ccf7"], ["paket pengantin", 38, "#ffc531"], ["kulit berminyak", 21, "#7c5cff"], ["promo gajian", 12, "#3ddc97"]];
+const BARS = [["facial malam hari", 64, "#01ccf7"], ["paket pengantin", 38, "#ffc531"], ["kulit berminyak", 21, "#7c5cff"]];
 function buildR() {
   const g = mk("R"); g.add(island(6, 5)); clouds("R", 7, 59);
-  const dish = new THREE.Group(); dish.position.set(-2.2, 0, 0.4); g.add(dish);
+  const dish = new THREE.Group(); dish.position.set(-2.3, 0, 0.2); dish.scale.setScalar(1.25); g.add(dish);
   dish.add(boxes([[0, 0.4, 0, 0.3, 0.8, 0.3, "#8a9bb8"], [0, 0.06, 0, 1.0, 0.12, 1.0, "#5b6b8c"]]));
   Rr.dish = new THREE.Group(); Rr.dish.position.y = 1.0; dish.add(Rr.dish);
   Rr.dish.add(boxes([[0, 0, 0, 1.6, 0.14, 1.6, "#e2e8f2"], [0, 0.3, -0.7, 1.6, 0.6, 0.14, "#c3cfe2"]]));
   const sweep = new THREE.Mesh(new THREE.CircleGeometry(2.6, 32, 0, 1.0), new THREE.MeshBasicMaterial({ color: 0x36e0ff, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
-  sweep.rotation.x = -Math.PI / 2; sweep.position.set(-2.2, 0.03, 0.4); g.add(sweep); Rr.sweep = sweep;
-  for (let r = 1; r <= 3; r++) { const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 0.85, 0.02, 6, 40), emi("#36e0ff", 0.8)); ring.rotation.x = -Math.PI / 2; ring.position.set(-2.2, 0.03, 0.4); g.add(ring); }
+  sweep.rotation.x = -Math.PI / 2; sweep.position.set(-2.3, 0.03, 0.2); g.add(sweep); Rr.sweep = sweep;
+  for (let r = 1; r <= 3; r++) { const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 0.85, 0.02, 6, 40), emi("#36e0ff", 0.8)); ring.rotation.x = -Math.PI / 2; ring.position.set(-2.3, 0.03, 0.2); g.add(ring); }
   Rr.blip = []; setSeed(17);
   for (let i = 0; i < 7; i++) { const a = rnd() * 6.28, r = 0.7 + rnd() * 1.8;
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.16), emi("#ffc531", 2.0)); m.position.set(-2.2 + Math.cos(a) * r, 0.12, 0.4 + Math.sin(a) * r); g.add(m); Rr.blip.push({ m, a }); }
-  // rising bars
-  Rr.bars = BARS.map(([txt, pct, c], i) => { const grp = new THREE.Group(); grp.position.set(2.1, 0, 1.9 - i * 1.25); g.add(grp);
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.44, 1, 0.44), emi(c, 1.0)); bar.position.y = 0.5; grp.add(bar);
-    const lb = label(txt + "  +" + pct + "%", null, null, 0.36); lb.position.set(1.0, 0.5, 0); grp.add(lb); setLabel(lb, 0);
-    return { grp, bar, lb, pct, c }; });
-  Rr.gl = glow("#01ccf7", 3.0, 3.0); Rr.gl.position.set(2.1, 1.6, 1.9); Rr.gl.material.opacity = 0; g.add(Rr.gl);
-  Rr.core = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), emi("#01ccf7", 2.4)); Rr.core.position.set(2.1, 1.7, 1.9); Rr.core.visible = false; g.add(Rr.core);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.16), emi("#ffc531", 2.0)); m.position.set(-2.3 + Math.cos(a) * r, 0.12, 0.2 + Math.sin(a) * r); g.add(m); Rr.blip.push({ m, a }); }
+  // demand rows (name + % + bar drawn in the texture, so nothing can be sliced)
+  Rr.bars = BARS.map(([txt, pct, c], i) => { const grp = new THREE.Group(); grp.position.set(0.5, 0, 1.4); g.add(grp);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 0.75), new THREE.MeshBasicMaterial({ map: TX.row[i], toneMapped: false, transparent: true, opacity: 0 }));
+    m.position.set(0, 2.55 - i * 0.78, 0); grp.add(m);
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.6, 0.1), emi("#2b5bbf", 0.5)); post.position.set(-1.4, 1.3, -0.06); grp.add(post);
+    post.visible = i === 0;
+    return { grp, m, post, pct, c, y0: 2.55 - i * 0.78 }; });
+  Rr.gl = glow("#01ccf7", 4.0, 1.9); Rr.gl.position.set(0.5, 2.55, 1.45); Rr.gl.material.opacity = 0; g.add(Rr.gl);
+  Rr.core = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), emi("#01ccf7", 2.4)); Rr.core.position.set(0.5, 2.55, 1.45); Rr.core.visible = false; g.add(Rr.core);
 }
 function animR(t) {
   Rr.dish.rotation.y = t * 0.9; Rr.sweep.rotation.z = -t * 0.9;
   Rr.blip.forEach((b, i) => { const ph = ((t * 0.9 + b.a) % 6.28) / 6.28; const k = Math.exp(-ph * 4);
     b.m.material.emissiveIntensity = 0.2 + 3 * k; b.m.scale.setScalar(0.7 + 0.8 * k); });
-  Rr.bars.forEach((B, i) => { const a = 41.4 + i * 0.5, u = U(t, a, a + 0.7, "out");
-    const h = Math.max(0.001, (0.45 + B.pct * 0.032) * u); B.bar.scale.y = h / 1; B.bar.position.y = h / 2;
-    B.grp.visible = t > a - 0.02; setLabel(B.lb, U(t, a + 0.2, a + 0.6, "back")); B.lb.position.y = h + 0.3;
-    const win = i === 0 ? U(t, 45.0, 45.5) : 0;
-    B.bar.material.emissiveIntensity = 1.0 + 2.2 * win * (0.7 + 0.3 * Math.sin(t * 6)); });
-  Rr.gl.material.opacity = 0.3 * U(t, 45.0, 45.6);
-  Rr.gl.position.y = 0.45 + 64 * 0.032 + 0.2;
-  const dv = U(t, 49.6, 50.18, "in"); Rr.core.visible = t > 49.5; Rr.core.position.set(2.1, 0.45 + 64 * 0.032 + 0.2, 1.9); Rr.core.scale.setScalar(0.3 + 9 * dv);
+  Rr.bars.forEach((B, i) => { const a = 44.6 + i * 0.42, u = U(t, a, a + 0.55, "out");
+    B.grp.visible = t > a - 0.02; B.m.material.opacity = u * (1 - U(t, 49.9, 50.15));
+    B.m.position.y = B.y0 + (1 - u) * -0.3 + 0.02 * Math.sin(t * 1.8 + i); B.m.scale.setScalar(0.75 + 0.25 * u);
+    B.post.visible = i === 0 && t > 44.5; if (i === 0) B.post.scale.y = Math.max(0.002, U(t, 44.5, 45.2, "out")); });
+  Rr.bars.forEach((B) => { B.grp.position.y = 0; });
+  Rr.gl.material.opacity = 0.26 * U(t, 45.0, 45.6) * (1 - U(t, 49.9, 50.15));
+  const dv = U(t, 49.6, 50.18, "in"); Rr.core.visible = t > 49.5; Rr.core.scale.setScalar(0.3 + 9 * dv);
   Rr.core.material.emissiveIntensity = 2.4 + 8 * dv;
 }
 
@@ -306,7 +317,7 @@ function buildB() {
   for (let i = 0; i < 46; i++) { const a = rnd() * 6.28, b = Math.acos(2 * rnd() - 1), r = 0.55 + rnd() * 0.25, s = 0.16 + rnd() * 0.12;
     L.push([Math.sin(b) * Math.cos(a) * r, Math.cos(b) * r, Math.sin(b) * Math.sin(a) * r, s, s, s, i % 3 ? "#1b3a7a" : "#2b5bbf"]); }
   Bb.core.add(boxes(L, MAT, false));
-  Bb.lit = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 0), emi("#01ccf7", 2.2)); Bb.core.add(Bb.lit);
+  Bb.lit = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 0), emi("#01ccf7", 1.3)); Bb.core.add(Bb.lit);
   Bb.gl = glow("#01ccf7", 4.2, 4.2); Bb.gl.position.copy(Bb.core.position); g.add(Bb.gl); Bb.gl.material.opacity = 0.2;
   // three streams of cubes flowing in
   Bb.str = [0, 1, 2].map((i) => { const c = Q3[i][1]; const ang = -0.9 + i * 0.9;
@@ -320,7 +331,7 @@ function buildB() {
 function animB(t) {
   Bb.core.rotation.y = t * 0.35; Bb.core.position.y = 2.0 + 0.07 * Math.sin(t * 1.3);
   Bb.lit.rotation.set(t * 0.8, t * 0.6, 0);
-  const pulse = 0.7 + 0.3 * Math.sin(t * 3.4); Bb.lit.material.emissiveIntensity = 1.6 + 1.6 * pulse;
+  const pulse = 0.7 + 0.3 * Math.sin(t * 3.4); Bb.lit.material.emissiveIntensity = 0.9 + 0.9 * pulse;
   Bb.gl.position.copy(Bb.core.position); Bb.gl.material.opacity = 0.18 + 0.1 * pulse;
   Bb.str.forEach((S, si) => { for (let i = 0; i < 9; i++) {
       const ph = ((t * 0.55 + i / 9 + si * 0.1) % 1); const d = 6.5 * (1 - ph);
@@ -347,26 +358,26 @@ k("H", 8.2, [0.1, 5.6, 19.5, 0.1, 2.1, -0.3, 44], "io"); k("H", 9.45, [-2.0, 3.6
 k("H", 9.99, [-2.78, 2.1, 1.1, -2.9, 1.78, -0.42, 38], "in");
 // G — portal zoom-through lands among the agents, pulls out over the grid, then wide on the three towers
 cut("G", 10.0, [0.0, 1.15, 2.1, 0, 0.8, -0.3, 38]); k("G", 11.8, [0, 8.0, 16.6, 0, 1.1, -0.3, 42], "io");
-k("G", 14.2, [0, 7.6, 15.6, 0, 1.0, -0.3, 42], "sine"); k("G", 17.8, [0, 8.4, 22.5, 0, 2.0, 0, 44], "io");
-k("G", 20.0, [0, 8.2, 22.0, 0, 2.0, 0, 44], "sine");
+k("G", 14.2, [0, 7.6, 15.6, 0, 1.0, -0.3, 42], "sine"); k("G", 15.85, [0, 8.6, 23.5, 0, 2.1, 0, 44], "io");
+k("G", 20.0, [0, 8.4, 23.0, 0, 2.1, 0, 44], "sine");
 // island hop: one flight key, the camera physically crosses to K
-C.push([20.62, [120, 8.4, 22.0, 120, 2.0, 0, 44], "io"]);
+C.push([20.42, [120, 8.4, 22.0, 120, 2.0, 0, 44], "io"]);
 // K — the three stalls, one by one, then down to the two gaps
 k("K", 21.5, [0, 7.0, 20.5, 0, 1.9, 0, 42], "sine"); k("K", 23.0, [-3.4, 3.6, 8.0, -3.4, 1.8, 0, 40], "io");
 k("K", 24.6, [0, 3.7, 8.2, 0, 1.8, 0, 40], "io"); k("K", 26.2, [3.4, 3.6, 8.0, 3.4, 1.8, 0, 40], "io");
-k("K", 27.5, [-0.25, 4.0, 11.2, -0.55, 1.7, 2.1, 42], "io"); k("K", 29.5, [1.75, 3.8, 10.4, 1.75, 1.6, 2.2, 42], "io");
+k("K", 27.5, [-0.25, 4.0, 11.2, -0.55, 1.7, 2.1, 42], "io"); k("K", 29.2, [0.9, 3.8, 10.4, 0.9, 1.6, 2.2, 42], "io");
 k("K", 30.9, [0, 5.4, 13.6, 0, 1.8, 1.4, 44], "sine");
 // V — after the iris: the review wall, then the buyer phrases
 cut("V", 31.0, [0, 4.4, 15.4, 0, 2.1, -1.2, 42]); k("V", 34.4, [0, 4.0, 13.4, 0, 2.0, -1.2, 40], "sine");
 k("V", 36.6, [0, 4.0, 13.4, 0, 2.1, 0.3, 42], "io"); k("V", 39.6, [0, 4.2, 14.0, 0, 2.3, 0.4, 42], "sine");
-k("V", 40.52, [0, 4.0, 12.2, 0, 30, -8, 42], "expo"); // whip tilt up to the sky
+k("V", 40.38, [0, 4.2, 13.9, 0, 2.3, 0.4, 42], "sine"); k("V", 40.52, [0, 4.2, 13.9, 0, 18, -5, 42], "in"); // whip tilt up to the sky
 // R — starts on the sky, tilts down onto the radar, then the bars sit on the right half
-cut("R", 40.56, [-0.4, 5.2, 16.0, -0.4, 30, -8, 42]); k("R", 41.4, [-0.4, 5.0, 15.4, -0.4, 1.6, 0.4, 42], "io");
-k("R", 43.8, [-2.2, 3.4, 9.0, -2.2, 1.3, 0.4, 40], "io"); k("R", 45.6, [0.5, 4.2, 11.6, 0.5, 2.0, 0.9, 42], "io");
-k("R", 48.8, [0.6, 4.2, 11.2, 0.5, 2.1, 1.0, 42], "sine"); k("R", 50.16, [2.09, 2.9, 2.9, 2.1, 2.55, 1.9, 40], "in");
+cut("R", 40.56, [-0.9, 4.4, 12.4, -0.9, 8, -2.5, 42]); k("R", 40.94, [-0.9, 4.2, 11.8, -0.9, 1.5, 0.3, 42], "out");
+k("R", 43.8, [-2.3, 3.6, 9.6, -2.3, 1.2, 0.2, 40], "io"); k("R", 45.6, [0.5, 3.9, 9.4, 0.5, 2.27, 1.4, 42], "io");
+k("R", 48.8, [0.55, 3.9, 9.0, 0.5, 2.3, 1.5, 42], "sine"); k("R", 50.16, [0.5, 2.6, 3.0, 0.5, 2.55, 1.45, 40], "in");
 // B — dive-into-object match cut on the core, out over the brain, the page on the left half, then the CTA pull-back
-cut("B", 50.2, [0, 2.15, 1.6, 0, 2.0, 0, 38]); k("B", 51.8, [0, 4.2, 11.0, 0, 2.0, 0, 42], "io");
-k("B", 53.8, [1.35, 3.8, 9.4, 1.35, 2.1, 1.9, 42], "io"); k("B", 56.6, [1.4, 3.7, 9.0, 1.35, 2.1, 2.0, 42], "sine");
+cut("B", 50.2, [0, 2.3, 6.0, 0, 2.05, 0, 38]); k("B", 51.8, [0, 4.2, 11.0, 0, 2.0, 0, 42], "io");
+k("B", 53.8, [0, 4.6, 11.8, 0, 2.78, 2.2, 42], "io"); k("B", 56.6, [0.05, 4.6, 11.5, 0, 2.8, 2.3, 42], "sine");
 k("B", 59.0, [0, 4.6, 12.6, 0, 2.1, 0.6, 44], "io"); k("B", 61.5, [0, 5.6, 17.0, 0, 2.3, 0, 46], "io");
 k("B", 68.6, [0, 5.8, 17.6, 0, 2.3, 0, 46], "sine");
 C.sort((a, b) => a[0] - b[0]);

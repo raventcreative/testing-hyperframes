@@ -84,6 +84,11 @@ module robot3d.js, `<canvas id="robo3d" width="820" height="700">` at left -92, 
 - **Transitions differ per reel** (sets from: stripes, blocks, sweep, iris, shutter, doors, slats, dots).
 - Run heavy local tools under `flock /tmp/claude-0/cpu.lock`, renders under `flock /tmp/claude-0/render.lock`.
 
+## Length (client, 2026-11-20): keep reels short
+**Target 45–60 s**, even when the reference is 90–140 s: follow the reference's beat ORDER, not its length — cut or merge
+beats, don't pad. The client explicitly approved shortening. It also halves render time (≈0.9 s/frame on 4 cores with the
+3D robot: 60 s ≈ 1800 frames ≈ 30 min, 90 s ≈ 2650 frames ≈ 50–70 min).
+
 ## Visual direction change (client, 2026-11-20): voxel 3D
 After ~16 reels (11–26) the client said the elements look the same every time ("bosan sama elemennya gitu-gitu aja")
 and that a big-text hook over an empty gradient looks bad. **New reels use the voxel-reels visual language**

@@ -12,10 +12,23 @@ def ic(name, size=24):
 
 BRANDC = {"claude": "#D97757", "whatsapp": "#25D366", "instagram": "#E4405F", "gmail": "#EA4335", "googlecalendar": "#4285F4",
           "google": "#4285F4", "googlesheets": "#34A853", "googlemaps": "#4285F4", "facebook": "#0866FF", "meta": "#0467DF"}
+MULTI = {"google": "google-icon", "gmail": "google-gmail", "googlecalendar": "google-calendar", "googlemaps": "google-maps",
+         "whatsapp": "whatsapp-icon", "claude": "claude-icon", "meta": "meta-icon"}
 def glyph(name, size, color=None):
+    if name in MULTI and color is None:   # official full-colour logo (gilbarbara/logos, CC0)
+        return f'<img class="ml" src="assets/mlogos/{MULTI[name]}.svg" style="height:{size}px;width:auto;max-width:{size}px;object-fit:contain;display:block">'
     p = re.search(r'<path d="([^"]+)"', (D / "assets/logos" / f"{name}.svg").read_text()).group(1)
     return f'<svg viewBox="0 0 24 24" width="{size}" height="{size}" style="display:block"><path fill="{color or BRANDC[name]}" d="{p}"/></svg>'
+def ig_grad(size):
+    """Simple Icons Instagram glyph filled with the official IG gradient."""
+    p = re.search(r'<path d="([^"]+)"', (D / "assets/logos/instagram.svg").read_text()).group(1)
+    return (f'<svg viewBox="0 0 24 24" width="{size}" height="{size}" style="display:block"><defs><radialGradient id="igg" cx="30%" cy="107%" r="150%">'
+            '<stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/>'
+            '<stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs>'
+            f'<path fill="url(#igg)" d="{p}"/></svg>')
 def tile(name, s=56):
+    if name == "instagram" and s >= 60:   # cover: same white app tile as the others, official IG mark inside
+        return f'<div class="app" style="width:{s}px;height:{s}px;border-radius:{int(s*.26)}px">{ig_grad(int(s*.6))}</div>'
     if name == "instagram":
         return (f'<div class="app" style="width:{s}px;height:{s}px;border-radius:{int(s*.26)}px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%)">'
                 f'{glyph(name, int(s*.56), "#fff")}</div>')
@@ -32,9 +45,9 @@ def status(steps):
     return '<div class="stat"><img src="assets/a-mark-white.png"><div class="stx">' + "".join(
         f'<span data-show="{a},{b}">{t}</span>' for a, b, t in steps) + "</div></div>"
 
-def sec(no, day, title, desc, mock):
+def sec(no, day, title, desc, mock, dk=False):
     return (f'<div class="ag"><span class="agt">AGENT {no:02d} <i></i> HARI {day}</span><h2>{title}</h2>'
-            f'<p class="desc">{desc}</p><div class="mock">{mock}</div></div>')
+            f'<p class="desc">{desc}</p><div class="mock{" dk" if dk else ""}">{mock}</div></div>')
 
 def typ(t, dur, text):
     return f'<span data-type="{t},{dur}" data-full="{text}"></span>'
@@ -135,7 +148,7 @@ def post(logo, name, a, b):
 m6 = f'''<div class="win planner"><div class="wh">{glyph("meta", 18)}<b>Planner minggu ini</b><small>3 reels · 3 platform</small></div><div class="pdays">{plan}</div></div>
 <div class="posts">{post(tile("instagram", 22), "Instagram", 3.0, 3.4)}{post(glyph("facebook", 22), "Facebook", 3.8, 4.2)}{post(glyph("google", 20), "Google Bisnis", 4.6, 5.0)}</div>
 {status([(0.2, 2.4, "Jadwalkan 3 reels…"), (2.4, 3.6, "Posting ke Instagram…"), (3.6, 4.4, "Tayang di Facebook"), (4.4, 9, "Update Google Bisnis ✓")])}'''
-s4 = frame(4, sec(5, 5, "Editor Reels <u>Tanpa Begadang</u>", "Klip mentah masuk, reels 30 detik lengkap caption keluar.", m5) + SEP +
+s4 = frame(4, sec(5, 5, "Editor Reels <u>Tanpa Begadang</u>", "Klip mentah masuk, reels 30 detik lengkap caption keluar.", m5, dk=True) + SEP +
           sec(6, 6, "Sekali Jadwal, <u>Tayang di Semua</u>", "Satu reels, tayang di Instagram, Facebook, dan Google Bisnis.", m6))
 
 # ---------------------------------------------------------------- slide 5: agent 7 + bonus

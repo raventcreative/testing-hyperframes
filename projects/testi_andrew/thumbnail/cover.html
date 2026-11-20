@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>Cover — Testimoni Debi Kurniawan (white theme)</title>
+<!-- Same system as projects/adopsi5_thumb/thumbnail/cover.html, white version: the client's screenshot (caption + watermark removed,
+     4x upscaled, face restored — tools/build_testi.py) full-bleed, WHITE gradients top and bottom, thin navy grid behind the subject
+     only, navy logo + eyebrow + 2-line headline + tagline. ?text=0 -> clean photo only. Headline lines via ?e= &h1= &h2= &tag= .
+     Render: HTTP=<port> node thumbnail/render_cover.cjs <out.png> [query] -->
+<style>
+  @font-face { font-family: Poppins; src: url(../assets/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+  @font-face { font-family: Poppins; src: url(../assets/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #ffffff; font-family: Poppins, sans-serif; color: #0b1b4d; -webkit-font-smoothing: antialiased; }
+  #c { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  #bg { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  .layer { position: absolute; left: 0; width: 1080px; }
+  #top { top: 0; height: 820px; background: linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.95) 36%, rgba(250,252,255,.74) 58%, rgba(246,249,255,.28) 80%, rgba(246,249,255,0) 100%); }
+  #bot { bottom: 0; height: 900px; background: linear-gradient(0deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.95) 30%, rgba(255,255,255,.84) 46%, rgba(250,252,255,.5) 64%, rgba(246,249,255,.16) 84%, rgba(246,249,255,0) 100%); }
+  #vig { top: 0; height: 1920px; background: radial-gradient(ellipse 780px 1180px at 50% 54%, rgba(255,255,255,0) 60%, rgba(255,255,255,.5) 100%); }
+  #grid { top: 0; height: 1920px; opacity: .10;
+    background-image: linear-gradient(90deg, rgba(20,44,120,1) 0 1.6px, transparent 1.6px), linear-gradient(0deg, rgba(20,44,120,1) 0 1.6px, transparent 1.6px);
+    background-size: 108px 108px; background-position: -0.8px 12px;
+    -webkit-mask-image: url(../assets/gridmask.png); mask-image: url(../assets/gridmask.png); -webkit-mask-size: 1080px 1920px; mask-size: 1080px 1920px; }
+  .ctr { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; }
+  .t { display: none; }
+  body.text .t { display: block; }
+  #logo { position: absolute; left: 460px; top: 150px; width: 160px; height: auto; }
+  #eyebrow { top: 204px; font: 400 22px/1 Poppins; letter-spacing: 9px; color: #3a5bb8; }
+  #eyebrow b { font-weight: 700; color: #0b1b4d; }
+  #h1 { top: 246px; font: 700 84px/1 Poppins; letter-spacing: -2px; color: #0b1b4d; }
+  #h2 { top: 340px; font: 700 112px/1 Poppins; letter-spacing: -3px;
+    background: linear-gradient(180deg, #13307e 15%, #2f6bff 90%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    padding-bottom: .26em; }
+  /* name tag (lower third), same layout as the client's earlier testimonial covers, in the white-theme gradient #0a0d2c -> #294b77 */
+  #who { position: absolute; left: 150px; top: 1360px; }
+  #who .nm { font: 700 104px/1 Poppins; letter-spacing: -.5px; text-transform: uppercase; white-space: nowrap; padding-bottom: .08em;
+    background: linear-gradient(180deg, #0a0d2c 10%, #294b77 95%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 14px rgba(255,255,255,.95)) drop-shadow(0 0 5px rgba(255,255,255,.85)); }
+  #who .rl { display: inline-block; margin-top: 18px; padding: 15px 30px 16px; border-radius: 12px; background: linear-gradient(90deg, #0a0d2c, #294b77);
+    font: 700 42px/1 Poppins; color: #ffffff; white-space: nowrap; box-shadow: 0 10px 28px rgba(11,27,77,.28); }
+</style>
+</head>
+<body class="text">
+<div id="c">
+  <img id="bg" src="../assets/bg.jpg" alt="" />
+  <div class="layer" id="vig"></div>
+  <div class="layer" id="top"></div>
+  <div class="layer" id="bot"></div>
+  <div class="layer" id="grid"></div>
+  <img class="t" id="logo" src="../assets/logo_navy_trim.png" alt="AI PRENEUR" />
+  <div class="ctr t" id="eyebrow"><b>TESTIMONI</b>&nbsp;PESERTA</div>
+  <div class="ctr t" id="h1">Kata Mereka Setelah</div>
+  <div class="ctr t" id="h2">Belajar AI</div>
+  <div class="t" id="who"><div class="nm" id="nm">Andrew</div><div class="rl" id="rl">Kontraktor &amp; Importir Filter</div></div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  if (q.get("text") === "0") document.body.classList.remove("text");
+  for (const [k, id] of [["e", "eyebrow"], ["h1", "h1"], ["h2", "h2"], ["nm", "nm"], ["rl", "rl"]]) if (q.has(k)) document.getElementById(id).innerHTML = q.get(k);
+  const fit = (id, max) => { const e = document.getElementById(id); let s = parseFloat(getComputedStyle(e).fontSize);
+    const r = document.createRange(); r.selectNodeContents(e);
+    while (r.getBoundingClientRect().width > max && s > 40) { s -= 2; e.style.fontSize = s + "px"; } };
+  Promise.all([document.fonts.ready, new Promise((r) => { const i = document.getElementById("bg"); if (i.complete && i.naturalWidth) r(); else { i.onload = r; i.onerror = r; } })]).then(() => {
+    if (document.body.classList.contains("text")) { fit("h1", 940); fit("h2", 960); fit("nm", 820); }
+    window.COVER_READY = true;
+  });
+</script>
+</body>
+</html>

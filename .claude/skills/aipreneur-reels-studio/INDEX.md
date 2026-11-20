@@ -17,3 +17,4 @@
 | /design-taste-frontend | (Leonxlnx Taste Skill, MIT) professional website/landing pages — real photos, one system, browser-checked gate |
 | /business-explainer-30s | 30 s 5-scene business explainer (problem, what we do, 3 steps, proof, name) as one HTML page |
 | /throughline-explainer | 30 s product explainer where one through-line object transforms every scene and becomes the logo |
+| /prompt-motion-techniques | technique library distilled from 234 prompt-motion.com prompts |

@@ -84,6 +84,17 @@ module robot3d.js, `<canvas id="robo3d" width="820" height="700">` at left -92, 
 - **Transitions differ per reel** (sets from: stripes, blocks, sweep, iris, shutter, doors, slats, dots).
 - Run heavy local tools under `flock /tmp/claude-0/cpu.lock`, renders under `flock /tmp/claude-0/render.lock`.
 
+## Visual direction change (client, 2026-11-20): voxel 3D
+After ~16 reels (11–26) the client said the elements look the same every time ("bosan sama elemennya gitu-gitu aja")
+and that a big-text hook over an empty gradient looks bad. **New reels use the voxel-reels visual language**
+(`.claude/skills/voxel-reels` → `aipreneur-reels-studio`, reference builds `projects/aip_r26_hookmatrix` navy and
+`projects/aip_voxel_uji` white): world first, zoom-out reveal, a different creative transition every beat, objects in a
+3D world instead of panels in a browser window. What stays: this file's Automation rules — 1080×1920, logo top-left,
+caption band, SIMULASI labels, no overclaiming, the AIpreneur robot as presenter with all its movement rules, and the
+fixed Automation CTA (never the "Komen <KEYWORD>" DM CTA, which belongs to the other brand).
+**Hooks show the problem, never state it on a card** (no slogan card, no red/yellow badges — #01ccf7 is the only accent
+on navy, #294b77 on white).
+
 ## Alternating themes (one per video, see reels_log.json → `next_theme`)
 | theme | background | text | accents | logo |
 |---|---|---|---|---|

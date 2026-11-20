@@ -24,3 +24,7 @@ voxel-reels, aip-remake, masterpajak-video, automation-demo, video-carousel, cov
 html-demo (MengTo, MIT — live HTML app demos for web pages), product-launch-film (15 s 2D launch film, landscape), landing-flythrough-3d (3D fly-through of a website), beat-promo-film (20 s minimal promo on a beat grid with real clips), design-taste-frontend (Taste Skill: professional websites / landing pages), business-explainer-30s (30 s 5-scene business explainer), throughline-explainer (30 s explainer with one transforming through-line object), feed-carousel (static IG feed/carousel 1080×1350, navy/white, Poppins Bold + Inter). Keep both copies in sync when a skill changes.
 **Technique bank:** external skills/briefs the client shares are other people's products — keep only the technique and
 apply it to the client's own videos (skills/aipreneur-reels-studio/references/technique_bank.md). Read it for every new video.
+**Real screen recordings (client rule, 2026-11-20):** when a video talks about a website or social media (Instagram,
+TikTok, WhatsApp, a web page…), ask the client to screen-record HIS OWN account / HIS OWN website and use that footage
+(in a phone/browser frame, cropped and zoomed) instead of rebuilt or mock UI. Ask at the start of the job (say exactly what
+to record: which screens, how long, vertical 9:16), and keep building the rest meanwhile.

@@ -9,3 +9,8 @@ Reference builds in the repo: `projects/aip_voxel_uji` (white, 18 s) and `projec
 Start: copy `aipreneur-reels-studio/templates/voxel_reel/` into `projects/<name>/`, plus from R26: `assets/` (fonts,
 brand, mascot3d, sfx), `vendor/three`, `vendor/gsap`, `vendor/mascot3d.js`, `vendor/mascot_face.js`.
 Deliver: MP4 + cover (+HD, `cover-topik`) + DM_<KEYWORD>.md + CAPTION.md.
+
+## Upgrade techniques (always apply)
+Read `aipreneur-reels-studio/references/mascot_robot_recipes.md` and pick 3–5 recipes for this reel (guide object,
+robot-screen portal, button → page, accent-dot journey, spinning pain list, process fill, beat-locked changes, camera
+push, spring motion, ducking). Note the chosen recipes + credits in production/VO_SCRIPT.md.

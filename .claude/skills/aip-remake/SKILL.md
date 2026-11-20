@@ -14,3 +14,8 @@ description: AIpreneur IG remake (R-series R1–R26 style) of a reference reel �
 - Theme alternates per delivered video; brand per `aipreneur-reels-studio/references/brand.md`.
 - If the client wants it more creative / with a 3D world → use `/voxel-reels` instead.
 - Batches: zip with `<name>/` + `<name>/thumbnail/COVER_*.png` (zip -0).
+
+## Upgrade techniques (always apply)
+Read `aipreneur-reels-studio/references/mascot_robot_recipes.md` and pick 3–5 recipes for this reel (guide object,
+robot-screen portal, button → page, accent-dot journey, spinning pain list, process fill, beat-locked changes, camera
+push, spring motion, ducking). Note the chosen recipes + credits in production/VO_SCRIPT.md.

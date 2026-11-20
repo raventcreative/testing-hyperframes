@@ -15,6 +15,7 @@ Read these references before working:
 - `references/thumbnails.md` — navy/white minimal covers + testimonial covers
 - `references/client_rules.md` — every rule/feedback the client gave (the "why" behind the format)
 - `references/qa.md` — the checks to run before sending anything
+- `references/mascot_robot_recipes.md` — concrete upgrade recipes for reels with the 3D mascot + robot (apply 3–5 per reel)
 - `references/technique_bank.md` — techniques borrowed from the external skills (beat grid, through-line object, shared elements, camera, springs, motion blur) — apply them to every new video
 
 ## End-to-end workflow (remake of a reference video)

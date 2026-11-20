@@ -1,4 +1,4 @@
-# Viral website prompts Part 2 (AIpreneur white theme, 1080x1350). Websites are original fictional mockups.
+# Viral website prompts (AIpreneur white theme, 1080x1350). Websites are original fictional mockups.
 import re
 from pathlib import Path
 D = Path(__file__).parent
@@ -11,6 +11,13 @@ def frame(cls, body, swipe=False, foot=True):
     return f'<section class="slide {cls}"><img class="logo" src="assets/logo_dark.png" alt="AIpreneur">{body}{sw}{ft}</section>'
 
 # ---------- website mockups (original) ----------
+SEC2 = {
+"nirmala": '''<div class="s2 n2"><h5>Selected work</h5><div class="wk"><div class="k k1"><small>01</small><b>Lumen Hall</b></div><div class="k k2"><small>02</small><b>Echo Room</b></div><div class="k k3"><small>03</small><b>Nebula Lobby</b></div></div></div>''',
+"kopiloka": '''<div class="s2 k2s"><h5>Today’s menu</h5><div class="mg"><div class="mi"><i></i><b>Kopi Susu Aren</b><small>Rp28.000</small></div><div class="mi"><i></i><b>Cold Brew 1L</b><small>Rp95.000</small></div><div class="mi"><i></i><b>House Latte</b><small>Rp32.000</small></div><div class="mi"><i></i><b>Beans 250 g</b><small>Rp120.000</small></div></div></div>''',
+"retrograde": '''<div class="s2 r2"><h5>Our cases</h5><div class="cs"><div class="tvb l"></div><div class="tvb m"><span>Brand refresh · Toko Lama</span></div><div class="tvb rr"></div></div></div>''',
+"teduh": '''<div class="s2 t2s"><h5>Care you can count on</h5><div class="nm"><div><b data-n="12400">0</b><small>patients served</small></div><div><b data-n="6">0</b><small>hours for lab results</small></div><div><b data-n="18">0</b><small>specialists</small></div></div><div class="dr"><div class="d1"></div><div class="d2"></div><div class="d3"></div></div></div>''',
+"neuron": '''<div class="s2 nn2"><h5>Simple pricing</h5><div class="pl"><div><small>Starter</small><b>$0</b><p>For side projects</p></div><div class="hl"><small>Team</small><b>$49</b><p>Most popular</p></div><div><small>Scale</small><b>Custom</b><p>For companies</p></div></div></div>''',
+}
 SITES = {
 "nirmala": ('''<div class="w w1"><nav><b>NIRMALA</b><i>Work</i><i>Studio</i><i>Contact</i></nav>
   <canvas class="pc" data-k="x"></canvas><span class="l">IMAGINE</span><span class="r">MANIFEST</span>
@@ -38,6 +45,8 @@ P = [
 ]
 def pslide(i, key, name, desc):
     site, cat = SITES[key]
+    site = site.replace('<div class="w ', '<div class="w ', 1)
+    site = site[:site.index('>')+1] + '<div class="pg"><div class="hero">' + site[site.index('>')+1:-6] + '</div>' + SEC2[key] + '</div></div>'
     return frame("ps", f'''<div class="ph"><span class="chip">Prompt {i:02d}/05</span><span class="cat">{cat}</span></div>
   <h1>{name}</h1>
   <div class="br"><div class="bb"><i></i><i></i><i></i><span>{key}.site</span></div>{site}<span class="cn">Concept site</span></div>
@@ -45,7 +54,7 @@ def pslide(i, key, name, desc):
   <p>“You are an expert creative front-end developer. Build a single self-contained <code>index.html</code> for <b>{name}</b>…”</p>
   <p class="pd">{desc}</p></div>''')
 
-cover = frame("cover", f'''<span class="chip c">Part 2</span>
+cover = frame("cover", f'''
   <h1 class="ch1">Viral website<br>prompts.</h1>
   <p class="tg2">5 prompts. 5 websites. Paste one into Claude tonight.</p>
   <img class="ico" src="assets/claude3d_cut.png" alt="Claude">''', swipe=True, foot=False)
@@ -57,6 +66,6 @@ rc = "".join(f'<div class="rr"><em>{i+1:02d}</em><b>{n}</b><span>{SITES[k][1]}</
 recap = frame("rc", f'''<span class="chip">Recap</span><h1>Paste one<br><span>in tonight.</span></h1><div class="rl">{rc}</div>
   <div class="dm">{L("send")}<p>Comment <b>PROMPTS</b> and I’ll DM you all five.</p></div>''')
 slides = [cover] + [pslide(i + 1, *p) for i, p in enumerate(P)] + [make, recap]
-CSS = (D / "style.css").read_text()
+CSS = (D / "style.css").read_text() + (D / "video.css").read_text()
 (D / "carousel.html").write_text(f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Website prompts</title><style>{CSS}</style></head><body>{"".join(slides)}<script>{(D/"particles.js").read_text()}</script></body></html>')
 print("ok", len(slides))

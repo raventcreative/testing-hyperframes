@@ -1,5 +1,7 @@
 """Splice whole VO lines from another ElevenLabs take (same voice, same settings) into the main take, with the character
-alignment carried over. Cuts sit in the middle of the pauses between lines (8 ms fades).
+alignment carried over. Line placement (offsets) comes from the alignment line boundaries, but the AUDIO only switches takes where the take changes, at
+the quietest 20 ms point (both takes < -60 dB RMS, searched -0.6/+0.3 s around the boundary) with an 8 ms crossfade; runs of
+lines from the same take are copied contiguously (ElevenLabs runs lines together, so alignment midpoints sit inside speech).
 Usage: python3 -I tools/splice_vo.py <main.mp3> <other.mp3> <out.mp3> <line,line,...>   (0-based line numbers from <other>)
 Both .json files (written by tools/el_tts_ts.py) must sit next to their .mp3."""
 import json, subprocess, sys
@@ -35,7 +37,34 @@ for i in range(len(JA["lines"])):
     chars.append(txt); cst += [round(v + off, 3) for v in s0]; cen += [round(v + off, 3) for v in e0]
     ln = dict(J["lines"][i]); ln["start"] = round(ln["start"] + off, 3); ln["end"] = round(ln["end"] + off, 3); ln["take"] = src; lines.append(ln)
     audio.append(seg); t0 += len(seg) / SR
-y = np.concatenate(audio)
+y_old = np.concatenate(audio)
+# ---- rebuild by runs: output(T) = take(T - off) ; switch only where the take changes, at measured silence
+offs = [ln["start"] - (JB if ln["take"] == "B" else JA)["lines"][i]["start"] for i, ln in enumerate(lines)]
+def rms(x, t):
+    i = int(t * SR)
+    if i < 441 or i + 441 > len(x): return -120.0
+    s_ = x[i - 441:i + 441] / 32768; return 20 * np.log10(np.sqrt(np.mean(s_ ** 2)) + 1e-9)
+src = lambda i: xb if lines[i]["take"] == "B" else xa
+sw = [0.0]; runs = [0]
+for i in range(len(lines) - 1):
+    if lines[i]["take"] == lines[i + 1]["take"]: continue
+    Ts = lines[i + 1]["start"]; best = None
+    for T in np.arange(Ts - 0.6, Ts + 0.3, 0.005):
+        v = max(rms(src(i), T - offs[i]), rms(src(i + 1), T - offs[i + 1]))
+        if best is None or v < best[1]: best = (T, v)
+    assert best[1] < -60, f"no silence for the switch before line {i + 1}: {best}"
+    sw.append(best[0]); runs.append(i + 1); print(f"  switch {lines[i]['take']}->{lines[i + 1]['take']} at {best[0]:.3f}s ({best[1]:.1f} dB)")
+n = len(y_old); y = np.zeros(n, np.float32); sw.append(n / SR)
+for k in range(len(runs)):
+    i = runs[k]; x = src(i); a0, a1 = int(sw[k] * SR), int(sw[k + 1] * SR); o = int(round(offs[i] * SR))
+    lo, hi = a0 - fade, a1 + fade
+    seg = np.zeros(hi - lo, np.float32); s0, s1 = max(0, lo - o), min(len(x), hi - o)
+    if s1 > s0: seg[(s0 + o) - lo:(s1 + o) - lo] = x[s0:s1]
+    w = np.ones(hi - lo, np.float32)
+    if k > 0: w[:2 * fade] = np.linspace(0, 1, 2 * fade)
+    if k < len(runs) - 1: w[-2 * fade:] = np.linspace(1, 0, 2 * fade)
+    L0, L1 = max(0, lo), min(n, hi); y[L0:L1] += (seg * w)[L0 - lo:L1 - lo]
+
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "1", "-i", "-", "-c:a", "libmp3lame", "-b:a", "128k", str(OUT)],
                input=np.clip(y, -32768, 32767).astype(np.int16).tobytes(), check=True)
 J = dict(JA); J["lines"] = lines; J["duration"] = round(t0, 3); J["align"] = {"chars": "".join(chars), "start": cst, "end": cen}

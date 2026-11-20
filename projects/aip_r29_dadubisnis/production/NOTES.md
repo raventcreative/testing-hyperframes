@@ -16,7 +16,9 @@ CTA **DADU**; DM `production/DM_DADU.md`; caption `production/CAPTION.md`; scrip
 5. `python3 -I tools/sfx.py .` → `assets/audio/sfx.wav` (synthesised; ≈ −30 LUFS vs VO ≈ −17 LUFS). Music bed: render script.
 6. Cover: `python3 thumbnail/build_cover.py && node thumbnail/render_cover.cjs thumbnail/COVER_R29_DADU_1080x1920.png 1`
    (and `... COVER_R29_DADU_HD_2160x3840.png 2`).
-7. Render (shared lock): `render_aip.sh <this dir> AIP_R29_DADU_BISNIS.mp4`.
+7. Render (shared lock): `render_aip.sh <this dir> AIP_R29_DADU_BISNIS.mp4`; the render started before the VO joins were fixed,
+   so the final audio is re-mixed from the picture with `bash tools/remix_audio.sh` (new vo.mp3 + sfx + ducked bed, two-pass
+   loudnorm −14 LUFS; same timeline, video stream copied).
 
 ## Layers
 - `#world` canvas (1080×800 at y 200–1000, transparent, soft fades top/bottom) = `vendor/dice.js`: dice (white/navy/blue/sky

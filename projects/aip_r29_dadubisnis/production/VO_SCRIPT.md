@@ -93,7 +93,12 @@ Komen dadu, aku kirim lewat DM.
   "prompt" ("prom") → diganti: "diteliti dulu", "banyak-banyakan lemparan", "perintah AI siap pakai".
 - **Take 2** (teks baru): kedua model salah di "sewa ruko" (sewarukot / sewarung ke), "idenya" (IB-nya) dan "kebalikannya"
   (kebarikannya) — baris-baris itu benar di take 1 → **VO final = take 2 + baris 8, 9, 21 dari take 1** (`tools/splice_vo.py`,
-  potongan di tengah jeda antarbaris, level per baris −14,7 … −17,0 dB, sama). Cek ulang potongan sambungan: medium benar semua
+  level per baris −14,7 … −17,0 dB, sama). **Perbaikan sambungan (setelah pelajaran R30):** versi pertama memotong
+  di titik tengah batas baris dari alignment — ternyata ElevenLabs menyambung baris tanpa jeda, sehingga 27 titik potong jatuh di
+  dalam suara (−10 … −23 dB) dengan fade 8 ms. `tools/splice_vo.py` sekarang menyalin baris dari take yang sama tanpa potongan, dan
+  hanya pindah take di titik sunyi terukur (RMS 20 ms < −60 dB di kedua take: 29,63 s −85 dB, 44,16 s −85 dB, 124,11 s −88 dB,
+  127,17 s −63 dB) dengan crossfade 8 ms. Posisi tiap kata tidak berubah (alignment identik), jadi gambar tidak perlu dirender ulang;
+  audio final di-mix ulang dengan `tools/remix_audio.sh`. Cek ulang potongan sambungan: medium benar semua
   ("sewa ruko tiga lantai", "ide nya salah", "pebisnis … kebalikannya"); small hanya "ideya" / "namanya" (medium benar).
 - Sisa salah tulis small-saja (medium benar): kinclong/kincelong, nol/enol. "antre" ditulis "antri" (ejaan), "shiny object
   syndrome" benar di kedua model. Tag tidak ikut terbaca. Kredit terpakai ≈ 3 × 2,7 k karakter.

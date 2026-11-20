@@ -1,7 +1,6 @@
-"""Synthesised SFX bed for R24 (4 alat Claude Code: dari kode sampai online) — no samples, no downloads: code typing, page pops,
-road fill + half-cut, toolbox tiles, library-card barcode beep, docs slide + version stamp, key flight + lock turn + unlock chime,
-table/rows/migration files, browser + URL typing, test-buyer form + click + error buzz, DevTools drawer, DEPLOY press + rocket,
-checks, cover lift + toggle + LIVE chime, caution thump + alarm, magnifier sweep, refuse click, CTA (ALAT typing, plane, DM chime), end chime.
+"""Synthesised SFX bed for R27 (tes ide ke warga AI — MiroFish): no samples, no downloads. Helpers here, the event list in
+tools/sfx_events.py (spin ticks, receipt drops, idea throw + crowd pops, letter ticks + star counter, portal whoosh, upload,
+skyline pops, persona rows, feed ticks + debate slam, price + comments, report bars, typing, keys, strike, CTA, end chime).
 Deterministic. Writes assets/audio/sfx.wav. Run: python3 tools/sfx.py ."""
 import json, sys, wave
 from pathlib import Path
@@ -139,97 +138,8 @@ def card(t, g=1.0): put(t, whoosh(0.35, 500, 1600, 1.2, 0.45), W * 0.35 * g); pu
 def chip(t, g=1.0): put(t, pop(700, 1150, 0.07), 0.1 * g); put(t + 0.1, tick(0.02, 2600), 0.05 * g)
 def okck(t): put(t, pop(900, 1500, 0.06), 0.1); put(t + 0.04, chime((1568, 2093), 0.5), 0.035)
 def stamp(t, bad=False): put(t, boom(0.35, 170, 70), 0.18); put(t + 0.02, pop(320, 160, 0.1), 0.1); (put(t + 0.04, buzz(0.18), 0.03) if bad else None)
-# --- s01 hook: code streams in, page builds, "KODE JADI", road fills to the middle, the phone is cut in half, pin drops
-put(0.02, pop(500, 760, 0.08), 0.07)
-typing(0.06, 1.25, 0.07)
-for k in range(2): put(0.3 + k * 0.24, pop(600 + 120 * k, 950 + 120 * k, 0.07), 0.07)
-okck(wt("Claude Code") + 0.05)
-card(wt("baru") - 0.28, 0.8)
-tse = wt("setengah"); put(tse - 0.12, rise(0.45, 300, 900), 0.02); put(tse - 0.05, whoosh(0.32, 2200, 700, 1.4, 0.35), W * 0.35)
-chip(tse + 0.16); put(tse + 0.2, pop(300, 160, 0.1), 0.1)
-tj = wt("jalan."); put(tj + 0.12, pop(320, 180, 0.1), 0.12); put(tj + 0.2, tick(0.02, 2400), 0.06)
-put(st("s02") - 0.28, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.35)
-# --- s02 phone glides left, chip, the form builds, online target, toolbox + 4 tiles
-put(ws("Biar", "s02") - 0.06, whoosh(0.55, 500, 1500, 1.2, 0.5), W * 0.45)
-chip(ws("Biar", "s02") + 0.45, 0.8)
-for k in range(3): put(ws("jadi", "s02") - 0.02 + k * 0.09, pop(650 + 100 * k, 1050 + 100 * k, 0.06), 0.08)
-ton = ws("online,", "s02"); put(ton - 0.1, chime((1318.5, 1760, 2349), 0.7), 0.04); chip(ton + 0.02, 0.7)
-card(ws("pasang", "s02") - 0.14)
-for k in range(4): put(ws("empat", "s02") - 0.1 + k * 0.12, pop(600 + 110 * k, 1000 + 140 * k, 0.07), 0.09)
-put(ws("ini.", "s02"), tick(0.025, 2600), 0.06)
-# --- s03 Context7: tile flies into the library card, barcode beep, request typed, tool calls, docs slide out, version stamp
-put(st("s03") + 0.0, whoosh(0.45, 1600, 500, 1.2, 0.45), W * 0.45); put(st("s03") + 0.44, pop(450, 800, 0.09), 0.1)
-tcx = ws("Context7", "s03"); put(tcx - 0.08, chime((1318.5, 1760, 2637), 0.7), 0.045)
-tup = ws("Upstash:", "s03"); chip(tup - 0.1, 0.7); put(tup + 0.62, square_blips([1760, 2093, 1760, 2093], 0.06), 0.02)
-tsb = ws("sebelum", "s03"); card(tsb - 0.62, 0.7); typing(tsb - 0.4, tsb + 0.72, 0.07); chip(tsb - 0.02, 0.6)
-for t in [ws("ngecek", "s03") - 0.08, ws("dokumentasi", "s03") + 0.02]: put(t, tick(0.025, 3000), 0.08); put(t + 0.03, pop(800, 1300, 0.05), 0.05)
-put(ws("ngecek", "s03") - 0.12, whoosh(0.42, 700, 2200, 1.4, 0.4), W * 0.4)
-okck(ws("resmi", "s03") - 0.04)
-tv = ws("versi", "s03"); put(tv + 0.12, scribble(0.4), 0.04); stamp(tv + 0.48)
-put(ws("pakai.", "s03") - 0.06, pop(700, 1150, 0.06), 0.07)
-out_("s04")
-# --- s04 Supabase: key card, warehouse, key flies + turns + unlocks, table builds, rows, migrations, new column, file 02 lands
-card(st("s04") + 0.0); chip(ws("Supabase", "s04") - 0.12, 0.7); card(st("s04") + 0.22, 0.6)
-k0 = ws("MCP:", "s04") - 0.12; put(k0, whoosh(0.5, 600, 2200, 1.4, 0.4), W * 0.45)
-for dt in (0.54, 0.62, 0.7): put(k0 + dt, tick(0.02, 1800), 0.09)
-put(k0 + 0.78, pop(300, 150, 0.1), 0.12); okck(k0 + 0.84)
-card(ws("tabel", "s04") - 0.3, 0.8)
-for k in range(4): put(ws("tabel", "s04") - 0.02 + k * 0.07, tick(0.02, 2600 + 150 * k), 0.06)
-typing(ws("pesanan", "s04") - 0.1, ws("pesanan", "s04") + 0.2, 0.06)
-for k in range(2): put(ws("database,", "s04") - 0.16 + k * 0.18, pop(500 + 100 * k, 850 + 100 * k, 0.07), 0.08)
-card(ws("tiap", "s04") - 0.22, 0.6); okck(ws("tiap", "s04") + 0.16)
-put(ws("perubahan", "s04") - 0.12, rise(0.35, 500, 1200), 0.02); chip(ws("perubahan", "s04") - 0.02, 0.6)
-put(ws("disimpan", "s04") - 0.04, whoosh(0.5, 1800, 600, 1.3, 0.4), W * 0.4); okck(ws("migration.", "s04") - 0.06)
-out_("s05")
-# --- s05 Chrome DevTools MCP: head, empty browser, URL typed, page loads, test buyer fills + presses, error, DevTools drawer
-card(st("s05") + 0.0); chip(ws("DevTools", "s05") - 0.14, 0.7)
-card(ws("MCP", "s05") - 0.15, 0.8)
-typing(ws("Claude", "s05") + 0.05, ws("webnya", "s05") + 0.2, 0.06)
-for k in range(5): put(ws("webnya", "s05") - 0.15 + k * 0.09, pop(600 + 80 * k, 1000 + 80 * k, 0.05), 0.05)
-chip(ws("Chrome,", "s05") - 0.1, 0.6)
-put(ws("nyobain", "s05") - 0.42, whoosh(0.38, 900, 2000, 1.5, 0.4), W * 0.2)
-typing(ws("nyobain", "s05"), ws("pembeli,", "s05") - 0.14, 0.07)
-tpb = ws("pembeli,", "s05") + 0.04; put(tpb, tick(0.03, 2000), 0.18); put(tpb + 0.01, pop(500, 300, 0.07), 0.1)
-put(tpb + 0.22, buzz(0.22), 0.035); put(tpb + 0.22, pop(500, 250, 0.1), 0.1)
-put(ws("lalu", "s05") - 0.16, whoosh(0.4, 400, 1400, 1.2, 0.45), W * 0.45)
-chip(ws("ngecek", "s05") - 0.08, 0.6)
-for w_ in ["console", "network."]: put(ws(w_, "s05") - 0.08, pop(800, 1300, 0.06), 0.08); put(ws(w_, "s05") - 0.05, tick(0.02, 3200), 0.06)
-out_("s06")
-# --- s06 Vercel: head, console, DEPLOY press + rocket, preview link, checks, covered production, "kamu" OK, cover lifts, LIVE
-card(st("s06") + 0.0); chip(ws("Vercel:", "s06") - 0.12, 0.7); card(ws("Vercel:", "s06") + 0.25, 0.8)
-td6 = ws("deploy", "s06"); put(td6, boom(0.4, 140, 60), 0.16); put(td6 + 0.01, pop(400, 200, 0.08), 0.1)
-put(td6 + 0.08, whoosh(0.45, 500, 2600, 1.3, 0.4), W * 0.5); chip(td6 + 0.2, 0.6)
-card(ws("link", "s06") - 0.2, 0.6); typing(ws("link", "s06") - 0.05, ws("preview", "s06") + 0.2, 0.05)
-card(ws("kamu", "s06") - 0.3, 0.6)
-for k in range(3): put(ws("cek,", "s06") - 0.12 + k * 0.13, pop(900 + 100 * k, 1500 + 100 * k, 0.06), 0.08)
-put(ws("baru", "s06") - 0.05, rise(0.5, 200, 420), 0.02)
-for k in range(4): put(ws("production", "s06") + 0.05 + k * 0.034, tick(0.02, 1600), 0.06)
-tk2 = wt("kamu", st("s06") + 4.0) - 0.08
-put(tk2, tick(0.03, 2000), 0.16); put(tk2 + 0.16, whoosh(0.3, 800, 2200, 1.4, 0.35), W * 0.35)
-put(tk2 + 0.3, pop(700, 1200, 0.06), 0.12); put(tk2 + 0.36, tick(0.02, 2600), 0.08)
-tlv = min(ws("oke.", "s06") - 0.1, tk2 + 0.4); put(tlv, chime((1568, 2093, 2637), 0.8), 0.06)
-put(st("s07") - 0.2, whoosh(0.3, 1800, 600, 1.3, 0.35), W * 0.3)
-# --- s07 caution: header thump, access cards + wires, production alarm, test project, re-route, prompt, magnifier, DELETE, refuse
-put(st("s07") + 0.02, boom(0.35, 170, 70), 0.14); put(st("s07") + 0.04, pop(320, 160, 0.1), 0.08)
-for k in range(4): put(ws("Hati-hati,", "s07") + 0.2 + k * 0.034, tick(0.02, 1900), 0.07)
-for w_ in ["akses", "database", "deploy"]: card(ws(w_, "s07") - 0.14, 0.45)
-put(ws("database", "s07") + 0.05, scribble(0.3), 0.035); put(ws("deploy", "s07") + 0.12, scribble(0.3), 0.035)
-tpp = ws("production.", "s07"); put(tpp - 0.05, buzz(0.3), 0.04); put(tpp + 0.25, buzz(0.2), 0.025)
-card(ws("Latihan", "s07") - 0.12, 0.6); put(ws("project", "s07") - 0.05, whoosh(0.35, 900, 2000, 1.4, 0.35), W * 0.3)
-put(ws("project", "s07") + 0.05, pop(300, 150, 0.1), 0.1); okck(ws("tes,", "s07") - 0.05)
-card(ws("baca", "s07") - 0.32); put(ws("baca", "s07") - 0.04, whoosh(0.6, 800, 1800, 2.0, 0.5), W * 0.22)
-put(ws("perintah", "s07") - 0.06, buzz(0.2), 0.035); put(ws("perintah", "s07") + 0.02, pop(600, 350, 0.08), 0.1)
-tiz = ws("izinkan.", "s07"); put(tiz, tick(0.03, 2000), 0.18); put(tiz + 0.02, pop(500, 260, 0.08), 0.1); okck(tiz + 0.16)
-put(st("s08") - 0.2, whoosh(0.3, 1800, 600, 1.3, 0.35), W * 0.4)
-# --- s08 CTA: package card, comment "ALAT", heart, send, plane, DM chime, end logo
-s8 = st("s08")
-put(s8 + 0.0, pop(500, 900, 0.09), 0.12); put(s8 + 0.02, whoosh(0.4, 400, 1800, 1.3, 0.45), W * 0.5)
-tR = wt("ALAT,"); ta = max(s8 + 0.2, tR - 0.1)
-for k in range(4): put(ta + k * 0.12, tick(0.022, 4200), 0.16)
-put(ta + 0.48, pop(900, 1600, 0.1), 0.15)
-put(wt("aku", s8) - 0.01, tick(0.03, 2000), 0.2); put(wt("aku", s8) + 0.06, whoosh(0.5, 700, 3600, 1.2, 0.45), W * 0.9)
-put(wt("DM.") - 0.12, pop(800, 1300, 0.07), 0.1); put(wt("DM.") + 0.08, chime((1568, 2093), 0.8), 0.07)
-put(T["total_sec"] - 1.15, chime((1046, 1568, 2093, 2637), 1.6), 0.07)
+#@EVENTS@
+exec((P / 'tools/sfx_events.py').read_text())
 out *= 1.25   # +2 dB: same level as the R20 bed (≈ −31.5 LUFS vs VO ≈ −18 LUFS)
 x = np.clip(out, -1, 1); x = (x * 32767).astype(np.int16)
 f = wave.open(str(P / "assets/audio/sfx.wav"), "wb"); f.setnchannels(1); f.setsampwidth(2); f.setframerate(SR); f.writeframes(x.tobytes()); f.close()

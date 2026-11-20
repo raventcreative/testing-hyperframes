@@ -53,7 +53,7 @@ html = f"""<!doctype html>
       .cap .b {{ font-weight: 700; color: var(--white); }}
       .cap .r {{ font-weight: 700; color: var(--cool); }}
       .cap .c {{ font-weight: 700; color: var(--cy); }}
-      .cap .k {{ font-weight: 700; color: var(--cy); background: #ffffff; box-shadow: 0 8px 22px rgba(1,204,247,.35); }}
+      .cap .k {{ font-weight: 700; color: #0b1440; background: var(--cy); box-shadow: 0 8px 22px rgba(1,204,247,.45); }}
       /* persistent brand mark (client logo, white) — top-left inside the safe zone */
       #brandlogo {{ opacity: 0; position: absolute; left: 84px; top: 262px; width: 236px; height: auto; filter: drop-shadow(0 2px 8px rgba(4,8,30,.55)); }}
     </style>

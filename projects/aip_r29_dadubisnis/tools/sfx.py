@@ -1,236 +1,115 @@
-"""Synthesised SFX bed for R24 (4 alat Claude Code: dari kode sampai online) — no samples, no downloads: code typing, page pops,
-road fill + half-cut, toolbox tiles, library-card barcode beep, docs slide + version stamp, key flight + lock turn + unlock chime,
-table/rows/migration files, browser + URL typing, test-buyer form + click + error buzz, DevTools drawer, DEPLOY press + rocket,
-checks, cover lift + toggle + LIVE chime, caution thump + alarm, magnifier sweep, refuse click, CTA (ALAT typing, plane, DM chime), end chime.
-Deterministic. Writes assets/audio/sfx.wav. Run: python3 tools/sfx.py ."""
+"""R29 SFX bed (synthesised, deterministic, no samples): dice clacks on every landing (same timing rules as vendor/dice.js),
+a rattle for the 100-dice rain and the storm, tray thumps, the giant-die crash, whooshes on wipes / iris / flood, stamp thuds,
+card pops on section tabs, counter ticks, a sparkle for the shiny object, success chimes on the sixes, CTA typing + send + DM chime.
+Writes assets/audio/sfx.wav (48 kHz mono, quiet: the VO leads). Run: python3 -I tools/sfx.py ."""
 import json, sys, wave
 from pathlib import Path
 import numpy as np
+from scipy.signal import butter, sosfilt
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 T = json.loads((P / "production/timing.json").read_text())
-SR = 48000; N = int(T["total_sec"] * SR) + SR
-out = np.zeros(N)
-rng = np.random.default_rng(7)
-S = {s["id"]: s for s in T["scenes"]}
-def wt(txt, after=0.0):
-    for w in T["words"]:
-        if w["w"] == txt and w["s"] >= after: return w["s"]
-    return None
-
+SR = 48000; N = int((T["total_sec"] + 1) * SR); out = np.zeros(N)
+rng = np.random.default_rng(29)
+WD = T["words"]; SC = T["scenes"]
+def W(txt, after=0.0):
+    for w in WD:
+        if w["w"] == txt and w["s"] >= after - 1e-6: return w["s"]
+    raise SystemExit("word not found " + txt)
+S = lambda n: SC[n - 1]["start"]
 def put(t, x, g=1.0):
-    i = int(t * SR); j = min(N, i + len(x))
+    i = int(t * SR)
     if i < 0 or i >= N: return
-    out[i:j] += g * x[: j - i]
-
-def svf_bp(x, f, q=1.2):
-    """state-variable band-pass with a per-sample centre frequency"""
-    y = np.zeros_like(x); lo = bp = 0.0
-    fs = 2 * np.sin(np.pi * np.clip(f, 20, SR / 6) / SR); d = 1.0 / q
-    for n in range(len(x)):
-        hp = x[n] - lo - d * bp; bp += fs[n] * hp; lo += fs[n] * bp; y[n] = bp
-    return y
-
-def env(n, a=0.35, shape=2.0):
-    u = np.linspace(0, 1, n); k = int(n * a)
-    e = np.ones(n); e[:k] = np.sin(np.linspace(0, np.pi / 2, k)) ** shape; e[k:] = np.cos(np.linspace(0, np.pi / 2, n - k)) ** shape
-    return e
-
-def whoosh(dur=0.6, f0=300, f1=2600, q=1.1, a=0.45):
-    n = int(dur * SR); u = np.linspace(0, 1, n)
-    f = f0 * (f1 / f0) ** (np.sin(np.pi * u * 0.5) ** 1.3)
-    x = svf_bp(rng.standard_normal(n), f, q) * env(n, a)
-    return x / (np.abs(x).max() + 1e-9)
-
-def boom(dur=1.4, f0=95, f1=38):
+    j = min(N, i + len(x)); out[i:j] += g * x[: j - i]
+def bp(x, lo, hi): return sosfilt(butter(2, [lo, hi], btype="band", fs=SR, output="sos"), x)
+def lp(x, f): return sosfilt(butter(2, f, btype="low", fs=SR, output="sos"), x)
+def norm(x): return x / (np.abs(x).max() + 1e-9)
+def clack(bright=1.0):
+    n = int(0.09 * SR); t = np.arange(n) / SR
+    a = bp(rng.standard_normal(n), 1800, 5200) * np.exp(-t * 90)
+    b = np.sin(2 * np.pi * (520 + 200 * rng.random()) * t) * np.exp(-t * 60) * 0.5
+    th = lp(rng.standard_normal(n), 300) * np.exp(-t * 40) * 1.5
+    return norm(bright * a + b + th)
+def land(t, g=0.5, hops=2):
+    put(t, clack(), g)
+    for k in range(hops): put(t + 0.17 + 0.12 * k, clack(0.7), g * 0.45 / (k + 1))
+def whoosh(dur=0.5, lo=300, hi=3000):
+    n = int(dur * SR); u = np.linspace(0, 1, n); x = rng.standard_normal(n)
+    y = np.zeros(n); seg = 2048
+    for i in range(0, n, seg):
+        c = lo * (hi / lo) ** np.sin(np.pi * min(1, (i + seg / 2) / n) * 0.5) ; y[i:i + seg] = bp(x[i:i + seg + 0][: len(y[i:i + seg])], max(80, c * 0.6), min(SR / 2 - 100, c * 1.6))
+    return norm(y * np.sin(np.pi * u) ** 1.5)
+def thud(f0=110, dur=0.35):
     n = int(dur * SR); t = np.arange(n) / SR
-    ph = 2 * np.pi * np.cumsum(f0 * (f1 / f0) ** (t / dur)) / SR
-    x = np.sin(ph) * np.exp(-t * 3.2)
-    nb = svf_bp(rng.standard_normal(n), np.full(n, 180.0), 0.8) * np.exp(-t * 9) * 0.6
-    x = np.tanh(1.8 * (x + nb))
-    return x / np.abs(x).max()
-
-def pop(f0=900, f1=320, dur=0.09):
+    return norm(np.sin(2 * np.pi * f0 * t * (1 - 0.4 * t / dur)) * np.exp(-t * 14) + 0.3 * lp(rng.standard_normal(n), 400) * np.exp(-t * 30))
+def boom(): return norm(np.tanh(2 * thud(70, 0.9)))
+def pop(f0=880, f1=420, dur=0.08):
     n = int(dur * SR); t = np.arange(n) / SR
-    x = np.sin(2 * np.pi * np.cumsum(f0 * (f1 / f0) ** (t / dur)) / SR) * np.exp(-t * 38)
-    return x / np.abs(x).max()
-
-def tick(dur=0.025, f=4200):
+    return norm(np.sin(2 * np.pi * np.cumsum(f0 * (f1 / f0) ** (t / dur)) / SR) * np.exp(-t * 40))
+def tick(): n = int(0.02 * SR); t = np.arange(n) / SR; return norm(bp(rng.standard_normal(n), 3000, 6000) * np.exp(-t * 300))
+def chime(fs=(880, 1320, 1760), dur=0.9):
     n = int(dur * SR); t = np.arange(n) / SR
-    x = svf_bp(rng.standard_normal(n), np.full(n, f), 2.0) * np.exp(-t * 260)
-    return x / (np.abs(x).max() + 1e-9)
+    return norm(sum(np.sin(2 * np.pi * f * t) * np.exp(-t * (4 + i)) / (i + 1) for i, f in enumerate(fs)))
+def sparkle():
+    x = np.zeros(int(0.9 * SR))
+    for k in range(9):
+        f = 2400 + 1800 * rng.random(); n = int(0.12 * SR); t = np.arange(n) / SR; i = int(k * 0.08 * SR)
+        x[i:i + n] += np.sin(2 * np.pi * f * t) * np.exp(-t * 35) * (1 - k / 12)
+    return norm(x)
+def rattle(dur, dens=60):
+    x = np.zeros(int(dur * SR) + SR // 4)
+    for k in range(int(dur * dens)):
+        c = clack(0.8 + 0.4 * rng.random()); i = int(rng.random() * dur * SR); x[i:i + len(c)] += c * (0.3 + 0.7 * rng.random())
+    return norm(x)
 
-def square_blips(notes, step=0.055):
-    out_ = []
-    for f in notes:
-        n = int(step * SR); t = np.arange(n) / SR
-        out_.append(np.sign(np.sin(2 * np.pi * f * t)) * 0.6 * np.exp(-t * 18))
-    return np.concatenate(out_)
-
-def zap(dur=0.5):
-    n = int(dur * SR); t = np.arange(n) / SR
-    x = np.sin(2 * np.pi * np.cumsum(120 * (2400 / 120) ** (t / dur)) / SR) * env(n, 0.15) * 0.6
-    x += np.sin(2 * np.pi * 60 * t) * 0.35 * np.exp(-t * 4) + 0.15 * np.sin(2 * np.pi * 15734 / 4 * t) * np.exp(-t * 10)
-    return x / np.abs(x).max()
-
-def chime(freqs=(1318.5, 1760, 2637), dur=1.4):
-    n = int(dur * SR); t = np.arange(n) / SR; x = np.zeros(n)
-    for k, f in enumerate(freqs):
-        d = int(k * 0.06 * SR); tt = t[: n - d]
-        x[d:] += np.sin(2 * np.pi * f * tt) * np.exp(-tt * 3.5) * (0.8 ** k)
-    return x / np.abs(x).max()
-
-def rip(dur=0.55):
-    n = int(dur * SR); t = np.arange(n) / SR
-    jit = np.repeat(rng.random(n // 240 + 1), 240)[:n] ** 3
-    x = svf_bp(rng.standard_normal(n), np.linspace(1400, 3600, n), 1.4) * jit * env(n, 0.2)
-    return x / np.abs(x).max()
-
-def scribble(dur=0.6):
-    n = int(dur * SR); t = np.arange(n) / SR
-    am = 0.5 + 0.5 * np.sign(np.sin(2 * np.pi * 13 * t))
-    x = svf_bp(rng.standard_normal(n), 2600 + 900 * np.sin(2 * np.pi * 6.5 * t), 1.6) * am * env(n, 0.2)
-    return x / np.abs(x).max()
-
-def rumble(dur=1.5):
-    n = int(dur * SR); t = np.arange(n) / SR
-    x = svf_bp(rng.standard_normal(n), np.linspace(70, 260, n), 0.7)
-    x = x / np.abs(x).max() * env(n, 0.3, 1.0)
-    return x
-
-
-def flap():
-    """split-flap clack: two quick clicks + a soft low knock"""
-    x = np.zeros(int(0.22 * SR)); a = tick(0.02, 3000); b = tick(0.02, 2400)
-    x[: len(a)] += a; i = int(0.11 * SR); x[i:i + len(b)] += 0.8 * b
-    k = pop(180, 90, 0.08); x[: len(k)] += 0.35 * k
-    return x / np.abs(x).max()
-
-def rise(dur=0.6, f0=300, f1=1200):
-    n = int(dur * SR); t = np.arange(n) / SR
-    x = np.sin(2 * np.pi * np.cumsum(f0 * (f1 / f0) ** (t / dur)) / SR) * env(n, 0.8, 1.0) * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * 14 * t)))
-    return x / np.abs(x).max()
-
-def buzz(dur=0.35):
-    n = int(dur * SR); t = np.arange(n) / SR
-    x = (np.sign(np.sin(2 * np.pi * 110 * t)) * 0.5 + np.sign(np.sin(2 * np.pi * 116 * t)) * 0.5) * env(n, 0.05, 1.0)
-    return x / np.abs(x).max()
-
-def typing(t0, t1, gain=0.11, rate=16):
-    k = 0; t = t0
-    while t < t1:
-        put(t, tick(0.02, 3600 + 500 * (k % 3)), gain * (0.8 + 0.2 * (k % 2))); k += 1; t += 1.0 / rate * (0.8 + 0.4 * ((k * 7) % 5) / 5)
-
-
-
-W = 0.15
-def bell(dur=0.9):
-    n = int(dur * SR); t = np.arange(n) / SR; x = np.zeros(n)
-    for k, f in enumerate((1568, 2349, 3136)):
-        x += np.sin(2 * np.pi * f * t) * np.exp(-t * (4 + 2 * k)) * (0.8 ** k)
-    x *= 0.75 + 0.25 * np.sin(2 * np.pi * 11 * t)
-    return x / np.abs(x).max()
-
-st = lambda i: S[i]["start"]
-def ws(txt, sid):                                      # word time inside a given scene (duplicates-safe)
-    t = wt(txt, st(sid) - 0.05); assert t is not None, (txt, sid); return t
-def out_(sid): put(st(sid) - 0.3, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.45)
-def card(t, g=1.0): put(t, whoosh(0.35, 500, 1600, 1.2, 0.45), W * 0.35 * g); put(t + 0.24, pop(420, 760, 0.09), 0.09 * g)
-def chip(t, g=1.0): put(t, pop(700, 1150, 0.07), 0.1 * g); put(t + 0.1, tick(0.02, 2600), 0.05 * g)
-def okck(t): put(t, pop(900, 1500, 0.06), 0.1); put(t + 0.04, chime((1568, 2093), 0.5), 0.035)
-def stamp(t, bad=False): put(t, boom(0.35, 170, 70), 0.18); put(t + 0.02, pop(320, 160, 0.1), 0.1); (put(t + 0.04, buzz(0.18), 0.03) if bad else None)
-# --- s01 hook: code streams in, page builds, "KODE JADI", road fills to the middle, the phone is cut in half, pin drops
-put(0.02, pop(500, 760, 0.08), 0.07)
-typing(0.06, 1.25, 0.07)
-for k in range(2): put(0.3 + k * 0.24, pop(600 + 120 * k, 950 + 120 * k, 0.07), 0.07)
-okck(wt("Claude Code") + 0.05)
-card(wt("baru") - 0.28, 0.8)
-tse = wt("setengah"); put(tse - 0.12, rise(0.45, 300, 900), 0.02); put(tse - 0.05, whoosh(0.32, 2200, 700, 1.4, 0.35), W * 0.35)
-chip(tse + 0.16); put(tse + 0.2, pop(300, 160, 0.1), 0.1)
-tj = wt("jalan."); put(tj + 0.12, pop(320, 180, 0.1), 0.12); put(tj + 0.2, tick(0.02, 2400), 0.06)
-put(st("s02") - 0.28, whoosh(0.35, 1800, 600, 1.3, 0.35), W * 0.35)
-# --- s02 phone glides left, chip, the form builds, online target, toolbox + 4 tiles
-put(ws("Biar", "s02") - 0.06, whoosh(0.55, 500, 1500, 1.2, 0.5), W * 0.45)
-chip(ws("Biar", "s02") + 0.45, 0.8)
-for k in range(3): put(ws("jadi", "s02") - 0.02 + k * 0.09, pop(650 + 100 * k, 1050 + 100 * k, 0.06), 0.08)
-ton = ws("online,", "s02"); put(ton - 0.1, chime((1318.5, 1760, 2349), 0.7), 0.04); chip(ton + 0.02, 0.7)
-card(ws("pasang", "s02") - 0.14)
-for k in range(4): put(ws("empat", "s02") - 0.1 + k * 0.12, pop(600 + 110 * k, 1000 + 140 * k, 0.07), 0.09)
-put(ws("ini.", "s02"), tick(0.025, 2600), 0.06)
-# --- s03 Context7: tile flies into the library card, barcode beep, request typed, tool calls, docs slide out, version stamp
-put(st("s03") + 0.0, whoosh(0.45, 1600, 500, 1.2, 0.45), W * 0.45); put(st("s03") + 0.44, pop(450, 800, 0.09), 0.1)
-tcx = ws("Context7", "s03"); put(tcx - 0.08, chime((1318.5, 1760, 2637), 0.7), 0.045)
-tup = ws("Upstash:", "s03"); chip(tup - 0.1, 0.7); put(tup + 0.62, square_blips([1760, 2093, 1760, 2093], 0.06), 0.02)
-tsb = ws("sebelum", "s03"); card(tsb - 0.62, 0.7); typing(tsb - 0.4, tsb + 0.72, 0.07); chip(tsb - 0.02, 0.6)
-for t in [ws("ngecek", "s03") - 0.08, ws("dokumentasi", "s03") + 0.02]: put(t, tick(0.025, 3000), 0.08); put(t + 0.03, pop(800, 1300, 0.05), 0.05)
-put(ws("ngecek", "s03") - 0.12, whoosh(0.42, 700, 2200, 1.4, 0.4), W * 0.4)
-okck(ws("resmi", "s03") - 0.04)
-tv = ws("versi", "s03"); put(tv + 0.12, scribble(0.4), 0.04); stamp(tv + 0.48)
-put(ws("pakai.", "s03") - 0.06, pop(700, 1150, 0.06), 0.07)
-out_("s04")
-# --- s04 Supabase: key card, warehouse, key flies + turns + unlocks, table builds, rows, migrations, new column, file 02 lands
-card(st("s04") + 0.0); chip(ws("Supabase", "s04") - 0.12, 0.7); card(st("s04") + 0.22, 0.6)
-k0 = ws("MCP:", "s04") - 0.12; put(k0, whoosh(0.5, 600, 2200, 1.4, 0.4), W * 0.45)
-for dt in (0.54, 0.62, 0.7): put(k0 + dt, tick(0.02, 1800), 0.09)
-put(k0 + 0.78, pop(300, 150, 0.1), 0.12); okck(k0 + 0.84)
-card(ws("tabel", "s04") - 0.3, 0.8)
-for k in range(4): put(ws("tabel", "s04") - 0.02 + k * 0.07, tick(0.02, 2600 + 150 * k), 0.06)
-typing(ws("pesanan", "s04") - 0.1, ws("pesanan", "s04") + 0.2, 0.06)
-for k in range(2): put(ws("database,", "s04") - 0.16 + k * 0.18, pop(500 + 100 * k, 850 + 100 * k, 0.07), 0.08)
-card(ws("tiap", "s04") - 0.22, 0.6); okck(ws("tiap", "s04") + 0.16)
-put(ws("perubahan", "s04") - 0.12, rise(0.35, 500, 1200), 0.02); chip(ws("perubahan", "s04") - 0.02, 0.6)
-put(ws("disimpan", "s04") - 0.04, whoosh(0.5, 1800, 600, 1.3, 0.4), W * 0.4); okck(ws("migration.", "s04") - 0.06)
-out_("s05")
-# --- s05 Chrome DevTools MCP: head, empty browser, URL typed, page loads, test buyer fills + presses, error, DevTools drawer
-card(st("s05") + 0.0); chip(ws("DevTools", "s05") - 0.14, 0.7)
-card(ws("MCP", "s05") - 0.15, 0.8)
-typing(ws("Claude", "s05") + 0.05, ws("webnya", "s05") + 0.2, 0.06)
-for k in range(5): put(ws("webnya", "s05") - 0.15 + k * 0.09, pop(600 + 80 * k, 1000 + 80 * k, 0.05), 0.05)
-chip(ws("Chrome,", "s05") - 0.1, 0.6)
-put(ws("nyobain", "s05") - 0.42, whoosh(0.38, 900, 2000, 1.5, 0.4), W * 0.2)
-typing(ws("nyobain", "s05"), ws("pembeli,", "s05") - 0.14, 0.07)
-tpb = ws("pembeli,", "s05") + 0.04; put(tpb, tick(0.03, 2000), 0.18); put(tpb + 0.01, pop(500, 300, 0.07), 0.1)
-put(tpb + 0.22, buzz(0.22), 0.035); put(tpb + 0.22, pop(500, 250, 0.1), 0.1)
-put(ws("lalu", "s05") - 0.16, whoosh(0.4, 400, 1400, 1.2, 0.45), W * 0.45)
-chip(ws("ngecek", "s05") - 0.08, 0.6)
-for w_ in ["console", "network."]: put(ws(w_, "s05") - 0.08, pop(800, 1300, 0.06), 0.08); put(ws(w_, "s05") - 0.05, tick(0.02, 3200), 0.06)
-out_("s06")
-# --- s06 Vercel: head, console, DEPLOY press + rocket, preview link, checks, covered production, "kamu" OK, cover lifts, LIVE
-card(st("s06") + 0.0); chip(ws("Vercel:", "s06") - 0.12, 0.7); card(ws("Vercel:", "s06") + 0.25, 0.8)
-td6 = ws("deploy", "s06"); put(td6, boom(0.4, 140, 60), 0.16); put(td6 + 0.01, pop(400, 200, 0.08), 0.1)
-put(td6 + 0.08, whoosh(0.45, 500, 2600, 1.3, 0.4), W * 0.5); chip(td6 + 0.2, 0.6)
-card(ws("link", "s06") - 0.2, 0.6); typing(ws("link", "s06") - 0.05, ws("preview", "s06") + 0.2, 0.05)
-card(ws("kamu", "s06") - 0.3, 0.6)
-for k in range(3): put(ws("cek,", "s06") - 0.12 + k * 0.13, pop(900 + 100 * k, 1500 + 100 * k, 0.06), 0.08)
-put(ws("baru", "s06") - 0.05, rise(0.5, 200, 420), 0.02)
-for k in range(4): put(ws("production", "s06") + 0.05 + k * 0.034, tick(0.02, 1600), 0.06)
-tk2 = wt("kamu", st("s06") + 4.0) - 0.08
-put(tk2, tick(0.03, 2000), 0.16); put(tk2 + 0.16, whoosh(0.3, 800, 2200, 1.4, 0.35), W * 0.35)
-put(tk2 + 0.3, pop(700, 1200, 0.06), 0.12); put(tk2 + 0.36, tick(0.02, 2600), 0.08)
-tlv = min(ws("oke.", "s06") - 0.1, tk2 + 0.4); put(tlv, chime((1568, 2093, 2637), 0.8), 0.06)
-put(st("s07") - 0.2, whoosh(0.3, 1800, 600, 1.3, 0.35), W * 0.3)
-# --- s07 caution: header thump, access cards + wires, production alarm, test project, re-route, prompt, magnifier, DELETE, refuse
-put(st("s07") + 0.02, boom(0.35, 170, 70), 0.14); put(st("s07") + 0.04, pop(320, 160, 0.1), 0.08)
-for k in range(4): put(ws("Hati-hati,", "s07") + 0.2 + k * 0.034, tick(0.02, 1900), 0.07)
-for w_ in ["akses", "database", "deploy"]: card(ws(w_, "s07") - 0.14, 0.45)
-put(ws("database", "s07") + 0.05, scribble(0.3), 0.035); put(ws("deploy", "s07") + 0.12, scribble(0.3), 0.035)
-tpp = ws("production.", "s07"); put(tpp - 0.05, buzz(0.3), 0.04); put(tpp + 0.25, buzz(0.2), 0.025)
-card(ws("Latihan", "s07") - 0.12, 0.6); put(ws("project", "s07") - 0.05, whoosh(0.35, 900, 2000, 1.4, 0.35), W * 0.3)
-put(ws("project", "s07") + 0.05, pop(300, 150, 0.1), 0.1); okck(ws("tes,", "s07") - 0.05)
-card(ws("baca", "s07") - 0.32); put(ws("baca", "s07") - 0.04, whoosh(0.6, 800, 1800, 2.0, 0.5), W * 0.22)
-put(ws("perintah", "s07") - 0.06, buzz(0.2), 0.035); put(ws("perintah", "s07") + 0.02, pop(600, 350, 0.08), 0.1)
-tiz = ws("izinkan.", "s07"); put(tiz, tick(0.03, 2000), 0.18); put(tiz + 0.02, pop(500, 260, 0.08), 0.1); okck(tiz + 0.16)
-put(st("s08") - 0.2, whoosh(0.3, 1800, 600, 1.3, 0.35), W * 0.4)
-# --- s08 CTA: package card, comment "ALAT", heart, send, plane, DM chime, end logo
-s8 = st("s08")
-put(s8 + 0.0, pop(500, 900, 0.09), 0.12); put(s8 + 0.02, whoosh(0.4, 400, 1800, 1.3, 0.45), W * 0.5)
-tR = wt("ALAT,"); ta = max(s8 + 0.2, tR - 0.1)
-for k in range(4): put(ta + k * 0.12, tick(0.022, 4200), 0.16)
-put(ta + 0.48, pop(900, 1600, 0.1), 0.15)
-put(wt("aku", s8) - 0.01, tick(0.03, 2000), 0.2); put(wt("aku", s8) + 0.06, whoosh(0.5, 700, 3600, 1.2, 0.45), W * 0.9)
-put(wt("DM.") - 0.12, pop(800, 1300, 0.07), 0.1); put(wt("DM.") + 0.08, chime((1568, 2093), 0.8), 0.07)
-put(T["total_sec"] - 1.15, chime((1046, 1568, 2093, 2637), 1.6), 0.07)
-out *= 1.25   # +2 dB: same level as the R20 bed (≈ −31.5 LUFS vs VO ≈ −18 LUFS)
-x = np.clip(out, -1, 1); x = (x * 32767).astype(np.int16)
-f = wave.open(str(P / "assets/audio/sfx.wav"), "wb"); f.setnchannels(1); f.setsampwidth(2); f.setframerate(SR); f.writeframes(x.tobytes()); f.close()
-print("sfx.wav", round(len(x) / SR, 2), "s, peak", round(float(np.abs(out).max()), 3))
+# ---------------------------------------------------------------- events (mirrors vendor/dice.js)
+land(0.95, 0.55)
+base = W("Lempar", S(2) - 0.1) + 0.05
+for i in range(1, 10): land(base + 0.35 + i * 0.2, 0.35, 1)
+put(W("Lempar", S(3) - 0.1) + 0.25, rattle(1.7, 45), 0.4)
+for i in range(4): put(S(6) + 0.1 + i * 0.12, thud(150), 0.25)
+put(W("Dadunya", S(6)) - 0.05, rattle(0.6, 14), 0.25)
+put(W("kegedean,") - 0.2, whoosh(0.5, 150, 900), 0.25); put(W("kekecilan.") - 0.1, pop(1400, 900), 0.3)
+put(W("ruko") - 0.05, boom(), 0.6)
+land(W("nawarin") + 0.1, 0.18, 1)
+put(W("Dadunya", S(10)) - 0.15, whoosh(0.7, 600, 2400), 0.2)
+t = S(11)
+while t < S(12) - 0.2: land(t + 0.22, 0.3, 1); t += 0.42
+for w in [W("Produk"), W("pasar", S(13)), W("harga"), W("cara", S(13))]: put(w - 0.02, thud(180, 0.25), 0.35); put(w, clack(), 0.25)
+tl = W("sekaligus?") + 0.1
+for i in range(5): land(tl - 0.05 + i * 0.05, 0.3, 1)
+land(W("dadunya", S(18)) - 0.05, 0.45, 0); put(W("dadunya", S(18)) + 0.1, whoosh(0.6, 500, 2600), 0.25)
+put(W("tanpa") - 0.05, whoosh(0.6, 200, 900), 0.25); put(W("lolos") + 0.05, whoosh(0.7, 1200, 200), 0.3)
+for w in ["Modal,", "waktu,", "tenaga"]: land(W(w) + 0.3, 0.35, 1)
+t = S(26)
+while t < S(28): land(t + 0.28, 0.32, 1); put(t, pop(600, 300), 0.15); t += 0.62
+put(W("kunci") + 0.2, thud(240, 0.2), 0.4); put(W("kunci") + 0.38, thud(240, 0.2), 0.4)
+for tt in [W("Dadu", S(29)) + 0.1, W("ubah") - 0.1, W("Tiap", S(30)) + 0.1]: land(tt, 0.45)
+put(W("Tiap", S(30)) + 0.55, chime(), 0.25)
+land(W("Ganti", S(33)) - 0.2, 0.45, 1); put(W("meleset") - 0.05, whoosh(0.4, 800, 3000), 0.3); land(W("sekali.", S(33)) + 0.05, 0.4, 1)
+put(W("shiny") - 0.25, sparkle(), 0.3); put(W("kinclong,") - 0.25, sparkle(), 0.25); put(W("banting") - 0.05, whoosh(0.6, 300, 1500), 0.25)
+put(W("Semuanya") - 0.05, whoosh(0.6, 2400, 300), 0.3)
+put(W("kebalikannya.") - 0.3, whoosh(0.5, 400, 1800), 0.25)
+for w in [W("produknya,"), W("penawarannya,"), W("harganya,"), W("jualannya.")]: put(w - 0.05, pop(500, 900, 0.12), 0.35)
+l6 = W("6.", S(40)) - 0.05; land(l6, 0.5); put(l6 + 0.35, chime((1047, 1568, 2093)), 0.35); put(l6 + 0.95, whoosh(0.5, 300, 2400), 0.3)
+for w in [W("ringkas"), W("cari", S(41)), W("bikin", S(41))]: put(w - 0.25, pop(700, 1100, 0.1), 0.35)
+put(S(42) + 0.1, rattle(1.6, 40), 0.3)
+lg = W("ganti", S(43)) + 0.15; land(lg, 0.5); put(lg + 0.4, chime((988, 1480, 1976)), 0.35)
+# stamps, wipes, iris, tabs
+for w in [W("bisnis?") - 0.05, W("iya.") - 0.08, W("ruko") + 0.25, W("sekali.", S(9)) - 0.1, W("6.", S(10)) - 0.2, W("mental") + 0.02, W("lolos") + 0.2, W("shiny") - 0.12]: put(w + 0.18, thud(90, 0.3), 0.45)
+for tt in [S(7), S(16), S(23), S(28), S(31), S(42)]: put(tt - 0.32, whoosh(0.62, 250, 3200), 0.32)
+for tt in [S(19), S(37)]: put(tt - 0.36, whoosh(0.75, 2600, 300), 0.28)
+for s in SC[1:]: put(s["start"] + 0.08, pop(1200, 700, 0.05), 0.08)
+# counter ticks + CTA
+t = S(11) + 0.1
+while t < W("keluar.") + 0.1: put(t, tick(), 0.12); t += 0.05
+t0 = W("DADU,") - 0.12
+for k in range(4): put(t0 + 0.08 * k, tick(), 0.4)
+put(W("aku", S(45)) + 0.05, pop(900, 500, 0.08), 0.5); put(W("kirim", S(45)) - 0.1, chime((1319, 1760)), 0.3)
+put(T["total_sec"] - 1.0, chime((784, 1175, 1568, 2349), 1.2), 0.3)
+# ---------------------------------------------------------------- write
+out = out[: int(T["total_sec"] * SR)]
+out = out * (0.36 / max(1e-9, np.abs(out).max()))
+pcm = (np.clip(out, -1, 1) * 32767).astype(np.int16)
+with wave.open(str(P / "assets/audio/sfx.wav"), "wb") as f: f.setnchannels(1); f.setsampwidth(2); f.setframerate(SR); f.writeframes(pcm.tobytes())
+print("sfx.wav", round(len(out) / SR, 2), "s peak", round(float(np.abs(out).max()), 3))

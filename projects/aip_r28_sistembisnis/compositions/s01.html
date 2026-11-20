@@ -1,12 +1,105 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s01 HOOK (0.00–6.20) "Bisnismu capek bukan karena kurang kerja keras. Semuanya masih nyangkut di kamu."
+       Recipe "spinning pain list": frame 0 = a "Kerjaan hari ini" card whose task list is already spinning (too fast to read, motion
+       blur), every row assigned "PIC: kamu". "capek": the energy meter drains. "kurang kerja keras": chip + white X stamp.
+       "Semuanya": the list locks on the cyan row "Semuanya nunggu kamu" (mascot points). "nyangkut": the card collapses into the
+       KAMU node, eight task chips burst out and stay wired into it (chaos); "kamu.": warning rings pulse. Hand-over to s02 at the
+       identical jam state (K.jamHTML). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s01-card { left: 90px; top: 318px; width: 900px; height: 470px; transform-origin: 450px 302px; }
+    #s01-card .k-hd { color: #fff; }
+    #s01-en { position: absolute; right: 26px; top: 22px; height: 40px; display: flex; align-items: center; gap: 12px; font: 700 20px/1 Poppins; color: #c7d5ea; white-space: nowrap; }
+    #s01-en .bt { position: relative; width: 120px; height: 30px; border-radius: 9px; box-shadow: inset 0 0 0 2.5px #c7d5ea; }
+    #s01-en .bt::after { content: ""; position: absolute; right: -8px; top: 9px; width: 5px; height: 12px; border-radius: 0 3px 3px 0; background: #c7d5ea; }
+    #s01-en .bt u { position: absolute; left: 5px; top: 5px; width: 110px; height: 20px; border-radius: 5px; background: linear-gradient(90deg, #6adfff, #01ccf7); transform-origin: 0 50%; }
+    #s01-win { position: absolute; left: 30px; top: 88px; width: 840px; height: 360px; overflow: hidden; border-radius: 20px; }
+    #s01-list { position: absolute; left: 0; top: 0; width: 840px; }
+    .s01-row { position: absolute; left: 0; width: 840px; height: 72px; border-radius: 20px; background: #ffffff; box-shadow: 0 8px 18px rgba(2,6,26,.3); }
+    .s01-row i { position: absolute; left: 14px; top: 13px; width: 46px; height: 46px; border-radius: 23px; background: #e6f8fe; color: #0786b0; }
+    .s01-row i svg { position: absolute; left: 12px; top: 12px; width: 22px; height: 22px; }
+    .s01-row b { position: absolute; left: 76px; top: 0; font: 700 27px/72px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s01-row span { position: absolute; right: 14px; top: 16px; height: 40px; padding: 0 16px 0 8px; border-radius: 20px; display: flex; align-items: center; gap: 8px;
+      background: #0b1440; font: 700 19px/1 Poppins; color: #ffffff; white-space: nowrap; }
+    .s01-row span em { font-style: normal; color: #6adfff; }
+    .s01-row span svg { width: 24px; height: 24px; color: #6adfff; }
+    .s01-row.L { background: linear-gradient(90deg, #01ccf7, #6adfff); box-shadow: 0 0 30px rgba(1,204,247,.6); }
+    .s01-row.L i { background: #0b1440; color: #6adfff; }
+    #s01-fadeT, #s01-fadeB { position: absolute; left: 0; width: 840px; height: 60px; pointer-events: none; }
+    #s01-fadeT { top: 0; background: linear-gradient(180deg, rgba(12,22,64,.95), rgba(12,22,64,0)); }
+    #s01-fadeB { bottom: 0; background: linear-gradient(0deg, rgba(12,22,64,.95), rgba(12,22,64,0)); }
+    #s01-q { left: 540px; top: 856px; background: rgba(12,22,64,.92); box-shadow: inset 0 0 0 2px rgba(255,255,255,.35); }
+    #s01-q svg { color: #c7d5ea; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 6.357);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s01"] = tl;
+      const K = window.R28K, P = "s01", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $, popIn, cam } = S;
+      const TASKS = [["message-circle", "Balas chat pelanggan"], ["receipt", "Catat order masuk"], ["banknote", "Cek transfer"], ["pencil", "Bikin konten"],
+        ["clock", "Posting jam 7 malam"], ["package", "Packing pesanan"], ["truck", "Kirim paket"], ["wallet", "Rekap kas harian"], ["user-plus", "Cari karyawan"],
+        ["users", "Wawancara pelamar"], ["phone", "Jawab komplain"], ["circle-dollar-sign", "Bayar supplier"], ["layers", "Update stok"], ["send", "Balas DM"],
+        ["route", "Hitung ongkir"], ["bell", "Follow up pembeli"]];
+      const RH = 84, LAND = 52, N = LAND + 4;
+      let rows = "";
+      for (let k = 0; k < N; k++) {
+        if (k === LAND) { rows += `<div class="s01-row L" style="top:${k * RH}px"><i>${K.svg("triangle-alert")}</i><b>Semuanya nunggu kamu</b><span>${K.svg("user")}PIC: <em>kamu</em></span></div>`; continue; }
+        const [ic, t] = TASKS[k % TASKS.length];
+        rows += `<div class="s01-row" style="top:${k * RH}px"><i>${K.svg(ic)}</i><b>${t}</b><span>${K.svg("user")}PIC: <em>kamu</em></span></div>`;
+      }
+      const z = $("s01-zone");
+      z.innerHTML = `<div class="k-cam" id="s01-cam">` +
+        `<div class="k-glass" id="s01-card"><div class="k-hd"><div class="di">${K.svg("list-checks")}</div>Kerjaan hari ini</div>` +
+        `<div id="s01-en">energi kamu<div class="bt"><u id="s01-enu"></u></div></div>` +
+        `<div id="s01-win"><div id="s01-list" data-layout-ignore>${rows}</div><div id="s01-fadeT"></div><div id="s01-fadeB"></div></div></div>` +
+        `<div class="k-chip" id="s01-q">${K.svg("clock")}kurang kerja keras?</div><div class="k-x" id="s01-x">${K.svg("x")}</div>` +
+        K.jamHTML(P) + `</div>`;
+      const tCap = wt("capek"), tKur = wt("kurang"), tKer = wt("keras."), tSem = wt("Semuanya"), tNy = wt("nyangkut"), tKam = wt("kamu.");
+      cam($("s01-cam"));
+      // ---------------------------------------------------------------- spinning list (moving at frame 0, locks on "Semuanya")
+      const list = $("s01-list"), yEnd = 144 - LAND * RH;
+      // two phases with matched speed: a constant fast spin (too fast to read, blurred) then a power2.out landing on "Semuanya"
+      const T2 = 1.15, T1 = tSem + 0.05 - T2, d2 = (-yEnd) * T2 / (T2 + 2 * T1), d1 = -yEnd - d2;
+      I(list, { y: 0, filter: "blur(5px)" });
+      ft(list, { y: 0 }, { y: -d1, duration: T1, ease: "none" }, 0.005);
+      ft(list, { y: -d1 }, { y: yEnd, duration: T2, ease: "power2.out" }, T1 + 0.005);
+      ft(list, { filter: "blur(5px)" }, { filter: "blur(0px)", duration: 0.7, ease: "power2.in" }, T1 - 0.2);
+      const card = $("s01-card");
+      I(card, { opacity: 1, scale: 1 });
+      // "capek": energy drains to a sliver
+      const enu = $("s01-enu"); I(enu, { scaleX: 1 });
+      ft(enu, { scaleX: 1 }, { scaleX: 0.12, duration: 0.7, ease: "power2.inOut" }, tCap - 0.1);
+      // "kurang kerja keras?" + X stamp
+      const q = $("s01-q"), x = $("s01-x");
+      I(q, { opacity: 0, y: 20, xPercent: -50, yPercent: -50 }); ft(q, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.28, ease: "back.out(1.7)" }, tKur - 0.2);
+      I(x, { x: 360, y: 856, scale: 0, opacity: 0, rotation: -30 });
+      ft(x, { scale: 2.2, opacity: 0, rotation: -30 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.24, ease: "back.out(1.6)" }, tKer - 0.04);
+      ft(q, { opacity: 1 }, { opacity: 0.35, duration: 0.2 }, tKer + 0.12);
+      [q, x].forEach((e) => ft(e, { opacity: e === q ? 0.35 : 1, y: e === q ? 0 : 856 }, { opacity: 0, y: e === q ? 40 : 896, duration: 0.25, ease: "power2.in" }, tSem - 0.1));
+      // lock: the landing row pulses
+      const L = list.querySelector(".s01-row.L"); I(L, { scale: 1, transformOrigin: "50% 50%" });
+      ft(L, { scale: 1 }, { scale: 1.04, duration: 0.16, yoyo: true, repeat: 1, ease: "power2.out" }, tSem + 0.05);
+      // ---------------------------------------------------------------- "nyangkut": the card collapses into the KAMU node
+      const tC = tNy - 0.18;
+      ft(card, { scale: 1, opacity: 1 }, { scale: 0.18, opacity: 0, duration: 0.34, ease: "power3.in" }, tC);
+      const node = $("s01-node"); I(node, { scale: 0, opacity: 0 });
+      ft(node, { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.6)" }, tC + 0.24);
+      K.JAM.forEach((j, i) => {
+        const c = $(`s01-jc${i}`), l = $(`s01-jl${i}`);
+        I(c, { x: 540 - j.x, y: 620 - j.y, scale: 0.3, opacity: 0, xPercent: -50, yPercent: -50 });
+        ft(c, { x: 540 - j.x, y: 620 - j.y, scale: 0.3, opacity: 0 }, { x: 0, y: 0, scale: 1, opacity: 1, duration: 0.42, ease: "back.out(1.5)" }, tC + 0.3 + i * 0.035);
+        I(l, { opacity: 0 }); ft(l, { opacity: 0 }, { opacity: 0.7, duration: 0.2 }, tC + 0.5 + i * 0.035);
+        // jammed: a nervous jitter while "kamu." lands
+        ft(c, { rotation: 0 }, { rotation: i % 2 ? 3 : -3, duration: 0.07, yoyo: true, repeat: 5, ease: "sine.inOut" }, tKam + 0.02 * i);
+      });
+      // "kamu.": warning rings pulse out of the node
+      [0, 1].forEach((k) => { const r = $(`s01-rg${k}`); I(r, { scale: 1, opacity: 0 });
+        ft(r, { scale: 1, opacity: 0.95 }, { scale: 1.55, opacity: 0, duration: 0.6, ease: "power2.out" }, tKam - 0.05 + k * 0.25); });
+      ft(node, { scale: 1 }, { scale: 1.07, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tKam - 0.05);
+      S.finish();
     })();
   </script>
 </template>

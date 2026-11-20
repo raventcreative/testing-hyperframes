@@ -57,7 +57,7 @@
   .k-ok{position:absolute;width:40px;height:40px;border-radius:20px;background:#01ccf7;color:#0b1440;box-shadow:0 0 16px rgba(1,204,247,.6)}
   .k-ok svg{position:absolute;left:9px;top:9px;width:22px;height:22px;stroke-width:3}
   /* ---------------- KAMU node + jammed chips */
-  .k-jc{position:absolute;height:56px;padding:0 22px 0 10px;border-radius:28px;display:flex;align-items:center;gap:10px;transform:translate(-50%,-50%);
+  .k-jc{position:absolute;height:56px;padding:0 22px 0 10px;border-radius:28px;display:flex;align-items:center;gap:10px;
     background:#ffffff;box-shadow:0 12px 28px rgba(2,6,26,.45);font:700 22px/1 Poppins;color:#0a0d2c;white-space:nowrap}
   .k-jc i{position:relative;width:38px;height:38px;border-radius:19px;background:#e6f8fe;color:#0786b0;flex:none}
   .k-jc i svg{position:absolute;left:9px;top:9px;width:20px;height:20px}
@@ -118,16 +118,16 @@
     const popIn = (el, t, from = 0.5, dur = 0.32, ease = "back.out(1.7)") => { I(el, { scale: from, opacity: 0, transformOrigin: "50% 50%" }); ft(el, { scale: from, opacity: 0 }, { scale: 1, opacity: 1, duration: dur, ease }, t); };
     const fadeOut = (el, t, dur = 0.22, extra = {}) => ft(el, Object.assign({ opacity: 1 }, extra.from || {}), Object.assign({ opacity: 0, duration: dur, ease: "power2.in" }, extra.to || {}), t);
     // camera: one eased push 1.00 -> 1.04 over the whole scene (never still, never reversed)
-    const cam = (el) => { I(el, { scale: 1 }); ft(el, { scale: 1 }, { scale: 1.04, duration: Math.max(0.1, D - 0.02), ease: "sine.inOut" }, 0.005); };
+    const cam = (el, z0 = 1, z1 = z0 + 0.04) => { I(el, { scale: z0 }); ft(el, { scale: z0 }, { scale: z1, duration: Math.max(0.1, D - 0.02), ease: "sine.inOut" }, 0.005); };
     return { tl, ft, I, wt, $, finish, type, typeIn, popIn, fadeOut, cam, T0, D, P0 };
   };
 
   // ------------------------------------------------------------------ system bar
   K.barHTML = (P) => K.SYS.map((s, i) => {
     const b = K.TILE(i);
-    return `<div class="k-tile" id="${P}-t${i}" style="left:${b.x}px;top:${b.y}px"><div class="bp"></div><div class="hi" id="${P}-th${i}"></div>` +
-      `<div class="ic">${K.svg(s.ic)}</div><div class="nm" id="${P}-tn${i}">${i + 1}</div><div class="ok" id="${P}-tk${i}">${K.svg("check")}</div>` +
-      `<b>${s.lab}</b><div class="fb"><u id="${P}-tf${i}"></u></div></div>`;
+    return `<div class="k-tile" data-layout-allow-occlusion id="${P}-t${i}" style="left:${b.x}px;top:${b.y}px"><div class="bp"></div><div class="hi" id="${P}-th${i}"></div>` +
+      `<div class="ic">${K.svg(s.ic)}</div><div class="nm" data-layout-allow-occlusion id="${P}-tn${i}">${i + 1}</div><div class="ok" id="${P}-tk${i}">${K.svg("check")}</div>` +
+      `<b data-layout-allow-occlusion>${s.lab}</b><div class="fb"><u id="${P}-tf${i}"></u></div></div>`;
   }).join("");
   // pin the bar: tiles < done are complete (fill 1 + check), tile `act` highlighted
   K.barSet = (S, P, done, act = -1, vis = true) => {

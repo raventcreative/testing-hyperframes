@@ -10,23 +10,16 @@ P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 OFFSET, FPS, TAIL = 9 / 30, 30, 1.6
 R = json.loads((P / "production/vo_words_raw.json").read_text())
 raw = [w for s in R["segments"] for w in s["words"]]
-# alignment fixes (raw seconds), checked against the energy envelope + faster-whisper small (none needed so far)
-# alignment fixes (raw seconds), checked against the VO energy envelope + faster-whisper small/medium: the ElevenLabs alignment put
-# "Context Seven dari Upstash" ~0.2 s late (silence 7.46-7.60, voiced from 7.62; "Up" stop closure 8.55) and "production." (line 7)
-# 0.4 s late (voiced 36.65-37.25, whisper medium 36.68); line 6 "Empat," (voiced 28.07-28.37, the alignment said 28.30 and the
-# energy snap would have pushed it onto "Vercel"), "cek," (31.30-31.42) and "oke." (33.33-33.50) — same snap problem.
-TFIX = {22: (7.62, 7.88), 23: (7.92, 8.14), 24: (8.18, 8.36), 25: (8.40, 9.12), 94: (36.66, 37.26),
-        72: (28.07, 28.37), 81: (31.30, 31.44), 86: (33.33, 33.50)}
+# alignment fixes (raw seconds): none needed so far (checked against the energy envelope + faster-whisper small/medium)
+TFIX = {94: (37.02, 37.36)}   # "ide," (vowel onset glued to "Komen"; whisper small 36.94, medium 37.00 — the energy snap pushed it 0.5 s late)
 for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 
 # merges: (first index, last index, display text, spoken spelling for lip sync)
-MERGE = {2: (3, "Claude Code", "klodkod"), 22: (23, "Context7", "kontekseven")}
+MERGE = {57: (60, "Rp55 ribu.", "limapuluhlimaribu"), 81: (82, "Claude Code,", "klodkod"), 86: (87, "API key.", "eipiaiki")}
 FIX = {}
-FIXI = {107: "ALAT,"}   # spoken "alat" (an Indonesian word, read naturally); the caption shows the CTA keyword upper case
-PRON = {"dm": "diem", "claude": "klod", "context7": "kontekseven", "upstash": "apstes", "supabase": "supabeis", "mcp": "emsipi",
-        "chrome": "krom", "devtools": "devtuls", "google": "gugel", "vercel": "versel", "deploy": "diploi", "preview": "priviu",
-        "production": "prodakson", "console": "konsol", "network": "netwerk", "online": "onlain", "migration": "maigreisyen",
-        "database": "deitabeis", "project": "projek", "webnya": "webnya", "link": "link", "kode": "kode", "ngoding": "ngoding"}
+FIXI = {94: "IDE,"}   # spoken "ide" (an Indonesian word, read naturally); the caption shows the CTA keyword upper case
+PRON = {"dm": "diem", "claude": "klod", "mirofish": "mirofis", "github": "githab", "open": "opn", "source": "sors", "posting": "posting",
+        "ai": "ei", "api": "eipiai", "key": "ki"}
 
 def spoken(w):
     k = re.sub(r"[^a-z0-9]", "", w.lower())
@@ -63,7 +56,7 @@ while i < len(raw):
         j, txt, spk = MERGE[i]; e = raw[j]["e"]; i2 = j + 1
     else:
         txt = FIXI.get(i, FIX.get(w["w"], w["w"])); spk = spoken(txt); e = w["e"]; i2 = i + 1
-    s = w["s"] if i in MERGE else snap(w["s"], e)   # merged two-word names keep the alignment start (the stop consonant between them is not a pause)
+    s = w["s"] if (i in MERGE or i in TFIX) else snap(w["s"], e)   # merged two-word names keep the alignment start (the stop consonant between them is not a pause)
     words.append({"w": txt, "s": round(s + OFFSET, 3), "s0": round(w["s"] + OFFSET, 3), "e": round(e + OFFSET, 3), "sp": spk})
     i = i2
 # a snapped start compresses the rest of its phrase: re-spread the phrase between the new onset and the phrase end
@@ -79,14 +72,16 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [
-    ("s01", "Kode", [3], ["Claude Code"], ["setengah"]),
-    ("s02", "Biar", [3, 6, 9], ["online,", "empat"], ["alat"]),
-    ("s03", "Satu,", [4, 6, 10], ["dokumentasi", "versi"], ["Context7"]),
-    ("s04", "Dua,", [3, 7, 9, 12], ["tabel", "migration."], ["Supabase"]),
-    ("s05", "Tiga,", [4, 6, 11, 15, 18], ["pembeli,", "console", "network."], ["DevTools"]),
-    ("s06", "Empat,", [2, 7, 10, 12], ["preview", "production"], ["Vercel:"]),
-    ("s07", "Hati-hati,", [1, 5, 8, 12, 16], ["production.", "tes,", "baca"], ["Hati-hati,"]),
-    ("s08", "Komen", [2], ["DM."], ["ALAT,"]),
+    ("s01", "Sebelum", [3, 6, 9], ["stok", "iklan,"], ["idemu"]),
+    ("s02", "Namanya", [2, 4, 7], ["source,", "bintang"], ["MiroFish,"]),
+    ("s03", "Kamu", [2, 4, 6, 8, 10], ["dokumen", "ribuan"], ["digital"]),
+    ("s04", "Tiap", [3, 4, 6], ["ingatan,", "bersikap"], ["kepribadian,"]),
+    ("s05", "Lalu", [3, 5, 7], ["posting,", "debat,", "balas"], ["tiruan."]),
+    ("s06", "Contoh:", [1, 4, 5, 8, 9], ["kemahalan,", "awetnya."], ["Rp55 ribu."]),
+    ("s07", "Hasilnya", [2, 5, 7], ["ngobrol"], ["laporan,"]),
+    ("s08", "Pasangnya", [2, 3, 5], ["API key."], ["Claude Code,"]),
+    ("s09", "Ingat,", [1, 3], ["simulasi,"], ["ramalan."]),
+    ("s10", "Komen", [2], ["DM."], ["IDE,"]),
 ]
 LIGHT = {"di", "ke", "dan", "yang", "ini", "itu", "aku", "kamu", "ala", "kayak", "lewat", "ada", "dari", "sampai", "tanpa", "bukan", "cuma",
          "punya", "tetap", "bisa", "langsung", "semua", "masuk", "tiap", "pakai", "kalian", "mau", "isi", "sama", "mana", "buat",

@@ -1,4 +1,4 @@
-"""Builds index.html for the R25 SITUS reel (bedah prompt website 3D; adapted from the R19 ASISTEN builder) from production/timing.json: the client's navy background, word-synced Poppins
+"""Builds index.html for the R30 MARKETING reel (tim marketing AI, 3 modul; adapted from the R25 SITUS builder) from production/timing.json: the client's navy background, word-synced Poppins
 captions (white + cyan #01CCF7) on navy chips (legible over every world), the white AI PRENEUR logo (top-left, safe zone), scene
 slots (s01–s04), shared components live in vendor/r25kit.js, the robot (operator) and the mascot (host).
 All caption chunks sit mid (y≈968, above the mascot's head).
@@ -22,13 +22,13 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>Website 3D dari 1 prompt: bedah promptnya — AI PRENEUR</title>
+    <title>Tim marketing AI, 3 modul — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
-    <script src="vendor/r25icons.js"></script>
-    <script src="vendor/r25kit.js"></script>
+    <script src="vendor/r30icons.js"></script>
+    <script src="vendor/r30kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -111,7 +111,7 @@ html = f"""<!doctype html>
         tl.fromTo("#grain", {{ x: 0, y: 0 }}, {{ x: 64, y: 40, duration: {total}, ease: "steps({int(total * 15)})", immediateRender: false }}, 0);
         pin("#brandlogo", {{ opacity: 0.95 }});   // visible from frame 0
         pin("#glow-a", {{ x: 0, y: 0 }}); pin("#glow-b", {{ x: 0, y: 0 }}); pin("#grain", {{ x: 0, y: 0 }});
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s04"]["start"] + S["s04"]["dur"] - 1.4, 3)});
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s07"]["start"] + S["s07"]["dur"] - 2.2, 3)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         tl.render(0, true, true);   // apply every pinned initial state now (frame 0 of the real runtime)
         window.__timelines = window.__timelines || {{}};

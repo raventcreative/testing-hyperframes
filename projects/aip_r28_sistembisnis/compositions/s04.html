@@ -1,12 +1,89 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s04 (30.13–34.13) "Kalau kelimanya jalan, pendapatan bisa naik, biaya bocor turun."
+       Starts with the finished bar (5 checks). "kelimanya": the five tiles turn into five meshing gears (labels under them);
+       "jalan,": the gears turn (alternating directions) to the end. "pendapatan": a chart card rises; the accent dot draws the
+       cyan "Pendapatan" line upwards ("naik" pill), then rides the navy "Biaya bocor" line down ("turun" pill). Tag "ILUSTRASI ·
+       BUKAN JANJI" (no numbers anywhere). Last 0.28 s: everything clears for s05. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s04-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    .s04-gr { position: absolute; left: 0; top: 0; width: 176px; height: 176px; margin: -88px 0 0 -88px; color: #01ccf7; transform-origin: 50% 50%; }
+    .s04-gr svg { width: 176px; height: 176px; stroke-width: 1.5; filter: drop-shadow(0 0 14px rgba(1,204,247,.55)); }
+    .s04-gr i { position: absolute; left: 62px; top: 62px; width: 52px; height: 52px; border-radius: 26px; background: #0b1440; color: #6adfff; box-shadow: inset 0 0 0 2px #01ccf7; }
+    .s04-gr i svg { position: absolute; left: 13px; top: 13px; width: 26px; height: 26px; filter: none; stroke-width: 2; }
+    .s04-gl { position: absolute; top: 470px; width: 190px; margin-left: -95px; text-align: center; font: 700 20px/28px Poppins; color: #ffffff; white-space: nowrap; }
+    #s04-ch { left: 60px; top: 512px; width: 960px; height: 413px; }
+    #s04-ch svg.pl { position: absolute; left: 0; top: 0; overflow: visible; }
+    .s04-pill { position: absolute; height: 42px; padding: 0 16px 0 10px; border-radius: 21px; display: flex; align-items: center; gap: 6px; font: 700 21px/1 Poppins; white-space: nowrap; }
+    .s04-pill svg { width: 24px; height: 24px; stroke-width: 3; }
+    #s04-pa { left: 700px; top: 70px; background: #01ccf7; color: #0b1440; box-shadow: 0 0 18px rgba(1,204,247,.5); }
+    #s04-pb { left: 650px; top: 298px; background: #0b1440; color: #ffffff; }
+    #s04-pb svg { color: #6adfff; }
+    .s04-lg { position: absolute; top: 372px; height: 30px; display: flex; align-items: center; gap: 10px; font: 700 19px/1 Poppins; color: #294b77; white-space: nowrap; }
+    .s04-lg u { display: block; width: 34px; height: 7px; border-radius: 4px; }
+  </style>
+  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div id="s04-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.823);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s04"] = tl;
+      const K = window.R28K, P = "s04", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $, popIn, cam } = S;
+      const z = $("s04-zone");
+      // chart geometry (card-local)
+      const A = [[90, 318], [250, 296], [420, 262], [590, 214], [760, 160], [900, 112]];
+      const B = [[90, 150], [250, 168], [420, 210], [590, 250], [760, 288], [900, 318]];
+      const len = (pts) => pts.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0);
+      const pth = (pts) => "M" + pts.map((p) => p.join(" ")).join(" L");
+      const LA = len(A), LB = len(B);
+      z.innerHTML = `<div class="k-cam" id="s04-cam">` +
+        K.SYS.map((s, i) => `<div class="s04-gr" id="s04-g${i}" style="left:${K.TC(i).x}px;top:${K.TC(i).y}px">${K.svg("cog")}<i>${K.svg(s.ic)}</i></div>` +
+          `<div class="s04-gl" id="s04-l${i}" style="left:${K.TC(i).x}px">${s.lab}</div>`).join("") +
+        `<div class="k-white" id="s04-ch"><div class="k-hd"><div class="di">${K.svg("chart-line")}</div>Kalau sistemnya jalan</div>` +
+          `<div class="k-tag" style="right:20px;top:27px">ILUSTRASI &middot; BUKAN JANJI</div>` +
+          `<svg class="pl" width="960" height="413"><line x1="80" y1="92" x2="80" y2="350" stroke="#d5deec" stroke-width="3"/><line x1="80" y1="350" x2="920" y2="350" stroke="#d5deec" stroke-width="3"/>` +
+          `<path id="s04-la" d="${pth(A)}" fill="none" stroke="#01ccf7" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${LA.toFixed(1)} ${(LA + 60).toFixed(1)}" stroke-dashoffset="${(LA + 4).toFixed(1)}"/>` +
+          `<path id="s04-lb" d="${pth(B)}" fill="none" stroke="#294b77" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${LB.toFixed(1)} ${(LB + 60).toFixed(1)}" stroke-dashoffset="${(LB + 4).toFixed(1)}"/></svg>` +
+          `<div class="s04-pill" id="s04-pa">${K.svg("arrow-up")}naik</div><div class="s04-pill" id="s04-pb">${K.svg("arrow-down")}turun</div>` +
+          `<div class="s04-lg" style="left:96px"><u style="background:#01ccf7"></u>Pendapatan</div><div class="s04-lg" style="left:290px"><u style="background:#294b77"></u>Biaya bocor</div>` +
+        `</div><div class="k-dot" id="s04-dot"></div></div>` + K.barHTML(P);
+      cam($("s04-cam"));
+      K.barSet(S, P, 5, -1);
+      const tKl = wt("kelimanya"), tJl = wt("jalan,"), tPd = wt("pendapatan"), tNk = wt("naik,"), tBy = wt("biaya"), tTr = wt("turun.");
+      // ---------------------------------------------------------------- tiles -> gears
+      K.SYS.forEach((_, i) => {
+        const t = $(`s04-t${i}`), g = $(`s04-g${i}`), l = $(`s04-l${i}`), tt = tKl - 0.12 + i * 0.06;
+        ft(t, { scale: 1, opacity: 1 }, { scale: 0.6, opacity: 0, duration: 0.24, ease: "power2.in" }, tt);
+        I(g, { scale: 0.4, opacity: 0, rotation: i % 2 ? 22.5 : 0 });
+        ft(g, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.36, ease: "back.out(1.6)" }, tt + 0.12);
+        ft(g, { rotation: i % 2 ? 22.5 : 0 }, { rotation: (i % 2 ? 22.5 : 0) + (i % 2 ? -1 : 1) * 300, duration: D - (tJl - 0.1) - 0.3, ease: "power1.in" }, tJl - 0.1);
+        const ic = g.querySelector("i"), r0 = i % 2 ? -22.5 : 0; I(ic, { rotation: r0, transformOrigin: "50% 50%" });
+        ft(ic, { rotation: r0 }, { rotation: r0 + (i % 2 ? 1 : -1) * 300, duration: D - (tJl - 0.1) - 0.3, ease: "power1.in" }, tJl - 0.1);   // icons stay upright
+        I(l, { opacity: 0, y: 10 }); ft(l, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.24 }, tt + 0.3);
+      });
+      // ---------------------------------------------------------------- chart: the dot draws both lines
+      const ch = $("s04-ch"); I(ch, { y: 120, opacity: 0 });
+      ft(ch, { y: 120, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "back.out(1.2)" }, tPd - 0.42);
+      const dot = $("s04-dot"), OX = 60, OY = 512;
+      I(dot, { x: K.TC(4).x, y: 456, scale: 1, opacity: 1 });
+      ft(dot, { x: K.TC(4).x, y: 456 }, { x: OX + A[0][0], y: OY + A[0][1], duration: 0.34, ease: "power3.inOut" }, tPd - 0.36);
+      const ride = (pts, L, t0, t1) => {
+        let t = t0; const tot = t1 - t0;
+        for (let k = 1; k < pts.length; k++) {
+          const d = (Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]) / L) * tot;
+          ft(dot, { x: OX + pts[k - 1][0], y: OY + pts[k - 1][1] }, { x: OX + pts[k][0], y: OY + pts[k][1], duration: d, ease: "none" }, t); t += d;
+        }
+      };
+      const a0 = tPd - 0.02, a1 = tNk + 0.05, b0 = tBy + 0.02, b1 = tTr + 0.1;
+      ride(A, LA, a0, a1);
+      ft($("s04-la"), { attr: { "stroke-dashoffset": LA + 4 } }, { attr: { "stroke-dashoffset": 0 }, duration: a1 - a0, ease: "none" }, a0);
+      ft(dot, { x: OX + A[5][0], y: OY + A[5][1] }, { x: OX + B[0][0], y: OY + B[0][1], duration: b0 - a1 - 0.02, ease: "power3.inOut" }, a1 + 0.01);
+      ride(B, LB, b0, b1);
+      ft($("s04-lb"), { attr: { "stroke-dashoffset": LB + 4 } }, { attr: { "stroke-dashoffset": 0 }, duration: b1 - b0, ease: "none" }, b0);
+      popIn($("s04-pa"), a1 - 0.04, 0.5); popIn($("s04-pb"), b1 - 0.04, 0.5);
+      // ---------------------------------------------------------------- exit
+      ft($("s04-cam"), { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power2.in" }, D - 0.3);
+      S.finish();
     })();
   </script>
 </template>

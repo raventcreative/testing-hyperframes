@@ -39,3 +39,14 @@ description: AIpreneur static IG feed post / carousel (4:5, 1080×1350 PNG) in t
 4. Kirim PNG + caption (sudut pandang pelengkap, bukan ringkasan slide; hashtag `#aipreneur #skoolcommunity #aimarketing`), commit + push ke `main`.
 
 Contoh hasil: `examples/sample_navy.png`, `examples/sample_white.png`.
+
+## Slide penutup (WAJIB, client rule 2026-11-20)
+Slide terakhir tiap carousel = slide penutup ini, **persis** seperti `examples/closing_reference.png`. **Jangan diterjemahkan, jangan diubah kalimatnya** (tetap bahasa Inggris walau slide lain bahasa Indonesia):
+- Headline: "Your business / deserves a / **better agent.**" (underline "better agent.")
+- Sub: "Less manual work. More business growth." · pills: Custom Software · AI Agents · Automation
+- Kartu akun: avatar A (navy) · **@aipreneur.automation** · "Follow for AI agents and automation" · tombol **Follow**
+- Baris CTA: ikon panah bawah + "Get your custom agentic software. Tap the link in our bio."
+- Background putih, logo kiri atas, counter `NN / NN`, dots footer (tanpa tombol next).
+Render: `python3 skills/feed-carousel/templates/closing/closing.py --n <N> --total <N> --out <png> [--mp4 <mp4>]`
+(`--mp4` = versi animasi 6 s untuk carousel video: elemen naik satu-satu, kursor klik Follow → Following).
+Jangan pasang otomatis ke carousel lama kecuali client minta.

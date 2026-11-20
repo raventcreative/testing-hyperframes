@@ -15,3 +15,4 @@
 | /landing-flythrough-3d | 14.5 s cinematic 3D fly-through of a landing page (1440×1152 60 fps), WebGL2, DOF, title card |
 | /beat-promo-film | 20 s minimal promo cut to 10 bars @120 BPM with real clips, 3D carousel, beat-grid cuts |
 | /design-taste-frontend | (Leonxlnx Taste Skill, MIT) professional website/landing pages — real photos, one system, browser-checked gate |
+| /business-explainer-30s | 30 s 5-scene business explainer (problem, what we do, 3 steps, proof, name) as one HTML page |

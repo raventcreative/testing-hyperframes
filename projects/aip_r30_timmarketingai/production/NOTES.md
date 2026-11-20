@@ -36,3 +36,14 @@
   dot covering chip/station text, channel logos shown too briefly, sensitive card over the dimmed thread, chart labels cut at the
   left edge after the shift, connector mini-logos over the card label, empty beats (s03 start, s04 start, s06 page gap), caret gap.
 - Mascot eyes: pupils in every QA frame (glance disabled). Captions never covered (hero content ≤ y 935).
+
+## v3 — client's own Instagram recording (client rule 2026-11-20: real screen recordings instead of mock UI)
+- `assets/rec/ig_freddie.mp4` (client's recording of @aipreneur_academy) → `assets/rec/seq/` (chrome, IG nav and the Messages pill
+  cropped out: 1408×812 at x 248, y 128; header still from 3.0 s; scroll 14.6→26.8 s speed-ramped into 37 frames @30 fps).
+- s04 changed between 48.1 and 50.7 s only (timeline/VO unchanged): after "setujui" the mock post card, stamp and button give way to a
+  window "Instagram · @aipreneur_academy · REKAMAN ASLI" (48.10); "postingan dijadwalkan": push-in 1→2× on the real profile header
+  (48.38–48.98) + "terjadwal" in the title bar (48.60); pull back (49.05–49.37), cyan ring on the real "Tim Marketing AI / Kamu Bosnya"
+  post (49.32–49.57); real grid scroll, speed-ramped (49.52–50.75); 3D Instagram/TikTok/WhatsApp logos in a column beside the window
+  (49.45–49.8), docking above the thread at 50.43; window fades at 50.38. Comment thread restyled like IG dark comments (username +
+  text on a dark row); thread/reply/sensitive/"Inbox kamu" moments unchanged in time. Mock "copy" cards and channel labels removed.
+- Previous final kept as `out/AIP_R30_v2_mockIG.mp4`.

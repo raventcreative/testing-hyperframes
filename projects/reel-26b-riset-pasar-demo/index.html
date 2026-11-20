@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur Automation — Riset Pasar 35 Agent</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --c: #01ccf7; --line: rgba(255,255,255,0.12); --card: rgba(255,255,255,0.05); --mute: rgba(255,255,255,0.64); --ok: #3ddc97; --heat: #ffb547; --bad: #ff8a8a; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0b1a45; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: #fff; -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #0b1a45; }
+      .ic { display: inline-block; flex: none; }
+      .ic svg { width: 100%; height: 100%; display: block; }
+      b { font-weight: 700; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #0b1a45; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #0b1a45; }
+      #dots { position: absolute; inset: 0; }
+      #grid { position: absolute; inset: 0; opacity: 0.45; background-image: radial-gradient(rgba(255,255,255,0.10) 1.2px, transparent 1.6px); background-size: 36px 36px; }
+      #glow { position: absolute; left: -300px; top: 300px; width: 1100px; height: 1100px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,0.14) 0%, rgba(1,204,247,0) 62%); }
+      .lbl { font-size: 14px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); }
+      .simtag { display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--c); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 20px; padding: 3px 12px; }
+
+      /* ---------- hook (stage x 80-1000, y 290-1240): your offer goes live and stays empty, the rival fills up ---------- */
+      #hookClip { position: absolute; left: 0; top: 270px; width: 1080px; height: 980px; overflow: hidden; }
+      #hook { position: absolute; left: 80px; top: 20px; width: 920px; height: 950px; }
+      #hLane { position: absolute; left: 0; top: 112px; width: 920px; height: 648px; display: flex; gap: 26px; }
+      #hWk { position: absolute; left: 0; right: 0; top: 46px; text-align: center; font-size: 21px; font-weight: 700; letter-spacing: 3.5px; color: var(--mute); opacity: 0; white-space: nowrap; }
+      .hcol { position: relative; width: 447px; height: 648px; border-radius: 32px; background: rgba(8,18,50,0.96); border: 2px solid rgba(255,255,255,0.14); padding: 26px 28px; opacity: 0; box-shadow: 0 26px 60px rgba(0,0,0,0.42); }
+      .hcol.me { border-color: rgba(1,204,247,0.6); }
+      .hh { display: flex; align-items: center; gap: 12px; height: 38px; }
+      .hh .who { font-size: 21px; font-weight: 700; letter-spacing: 3px; color: var(--mute); white-space: nowrap; }
+      .hoff { font-size: 31px; font-weight: 700; line-height: 1.2; margin-top: 16px; }
+      .hbig { position: absolute; left: 28px; top: 300px; display: flex; align-items: baseline; gap: 14px; }
+      .hbig b { font-size: 112px; font-weight: 700; line-height: 1; letter-spacing: -3px; }
+      .hbig em { font-style: normal; font-size: 18px; color: var(--mute); white-space: nowrap; }
+      #hMe .hbig b { color: #fff; } #hRiv .hbig b { color: var(--c); }
+      .hcal { position: absolute; left: 28px; right: 28px; bottom: 34px; display: flex; gap: 9px; }
+      .hcal i { flex: 1; height: 66px; border-radius: 13px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.10); display: block; }
+      .hcal i.on { background: rgba(1,204,247,0.32); border-color: rgba(1,204,247,0.75); }
+      .hkos { position: absolute; left: 28px; bottom: 126px; font-size: 20px; font-weight: 700; letter-spacing: 3px; color: var(--mute); opacity: 0; white-space: nowrap; }
+      #hMorph { position: absolute; left: 0; top: 0; font-size: 112px; font-weight: 700; line-height: 1; letter-spacing: -3px; color: #fff; opacity: 0; }
+
+      #hRoster { position: absolute; left: 0; top: 60px; width: 920px; opacity: 0; }
+      #hRTitle { display: flex; justify-content: center; align-items: baseline; gap: 22px; font-size: 100px; font-weight: 700; line-height: 1; letter-spacing: 1px; white-space: nowrap; }
+      #hT35 { color: var(--c); font-size: 124px; letter-spacing: -3px; }
+      #hCnt { text-align: center; font-size: 30px; color: rgba(255,255,255,0.84); margin-top: 16px; opacity: 0; white-space: nowrap; } #hCnt b { color: var(--c); }
+      #hGrid { position: absolute; left: 22px; top: 312px; width: 876px; height: 390px; opacity: 0; }
+      .ga { position: absolute; width: 112px; height: 66px; border-radius: 18px; background: rgba(8,18,50,0.96); border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center; opacity: 0; box-shadow: 0 10px 22px rgba(0,0,0,0.28); }
+      .ga .ic { width: 32px; height: 32px; color: var(--t); }
+      .ga i { position: absolute; right: 9px; top: 9px; width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.25); display: block; }
+
+      #hTri { position: absolute; left: 0; top: 150px; width: 920px; height: 556px; display: flex; gap: 22px; }
+      .tri { position: relative; width: 292px; border-radius: 30px; background: rgba(8,18,50,0.96); border: 2px solid var(--tb); padding: 28px 26px; opacity: 0; overflow: hidden; box-shadow: 0 26px 60px rgba(0,0,0,0.42); }
+      .tri .q { position: absolute; left: 0; right: 0; top: 176px; text-align: center; font-size: 176px; font-weight: 700; line-height: 1; color: rgba(255,255,255,0.26); }
+      .tri .ans { opacity: 0; }
+      .tri .bx { width: 74px; height: 74px; border-radius: 22px; background: var(--t); color: #04122f; display: flex; align-items: center; justify-content: center; } .tri .bx .ic { width: 40px; height: 40px; }
+      .tri em { display: block; font-style: normal; font-size: 16px; font-weight: 700; letter-spacing: 3px; color: var(--t); margin-top: 186px; white-space: nowrap; }
+      .tri b { display: block; font-size: 33px; line-height: 1.22; margin-top: 10px; }
+
+      #hNeb { position: absolute; left: 0; top: 740px; width: 920px; height: 110px; display: flex; align-items: center; justify-content: center; gap: 22px; }
+      .np { position: relative; height: 84px; padding: 0 30px; border-radius: 42px; display: flex; align-items: center; gap: 14px; font-size: 36px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      .np .ic { width: 38px; height: 38px; }
+      #npA { background: rgba(255,255,255,0.06); border: 2.5px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.72); }
+      #npA .stx { position: absolute; left: 22px; right: 22px; top: 50%; height: 5px; margin-top: -2px; border-radius: 3px; background: rgba(255,255,255,0.8); transform-origin: 0 50%; transform: scaleX(0); }
+      #npB { background: var(--c); color: #04122f; border: 2.5px solid var(--c); }
+      #npArr { width: 46px; height: 46px; color: var(--c); opacity: 0; }
+
+      /* ---------- app window ---------- */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(6, 14, 40, 0.9);
+        border: 1.5px solid rgba(255,255,255,0.14); box-shadow: 0 40px 100px rgba(0,0,0,0.45); opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 62px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.03); }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 2px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.22); display: block; }
+      #tbar .app { font-size: 17px; font-weight: 700; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--c); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 20px; padding: 2px 10px; }
+      #tabs { margin-left: auto; display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: rgba(255,255,255,0.06); position: relative; }
+      #tabs div { position: relative; z-index: 1; height: 34px; padding: 0 12px; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--mute); }
+      #tabs div .ic { width: 15px; height: 15px; }
+      #tabPill { position: absolute; z-index: 0; top: 4px; height: 34px; border-radius: 9px; background: rgba(1,204,247,0.18); border: 1px solid rgba(1,204,247,0.5); }
+      #body { position: absolute; left: 0; right: 0; top: 62px; bottom: 0; }
+      .view { position: absolute; left: 0; top: 0; width: 920px; height: 888px; }
+      #wFlash { position: absolute; inset: 0; background: #dff6ff; opacity: 0; pointer-events: none; }
+      .live { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(61,220,151,0.14); border: 1.5px solid rgba(61,220,151,0.55); font-size: 14px; font-weight: 700; color: var(--ok); white-space: nowrap; }
+      .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: block; }
+      .ahd { position: absolute; left: 28px; right: 28px; top: 18px; height: 68px; border-radius: 20px; background: var(--ta); border: 1.5px solid var(--tb); display: flex; align-items: center; gap: 14px; padding: 0 20px; }
+      .ahd .bx { width: 42px; height: 42px; border-radius: 13px; background: var(--t); color: #04122f; display: flex; align-items: center; justify-content: center; flex: none; } .ahd .bx .ic { width: 23px; height: 23px; }
+      .ahd > b { font-size: 24px; } .ahd .cn { margin-left: auto; font-size: 17px; color: rgba(255,255,255,0.8); white-space: nowrap; } .ahd .cn b { font-size: 24px; color: var(--t); }
+
+      /* competitor view */
+      #cHead { position: absolute; left: 28px; right: 28px; top: 100px; height: 30px; }
+      .ch { position: absolute; top: 0; height: 30px; display: flex; align-items: center; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--mute); }
+      .cr { position: absolute; left: 28px; right: 28px; height: 90px; border-radius: 18px; background: rgba(255,255,255,0.04); border: 1.5px solid var(--line); opacity: 0; }
+      .cr .cell { position: absolute; top: 0; height: 90px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+      .cr .nm b { display: block; font-size: 23px; line-height: 1.2; white-space: nowrap; } .cr .nm em { display: block; font-style: normal; font-size: 16px; color: var(--mute); white-space: nowrap; }
+      .cr .of { flex-direction: row; flex-wrap: wrap; align-content: center; }
+      .cc { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 17px; background: var(--ta); border: 1.5px solid var(--tb); font-size: 16px; font-weight: 700; margin: 3px 8px 3px 0; white-space: nowrap; opacity: 0; }
+      .cpr { font-size: 26px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      .crv { font-size: 24px; font-weight: 700; color: var(--heat); white-space: nowrap; opacity: 0; } .crv em { display: block; font-style: normal; font-size: 15px; color: var(--mute); font-weight: 400; }
+      #gHead { position: absolute; left: 28px; top: 452px; opacity: 0; }
+      .gp { position: absolute; top: 486px; width: 420px; height: 214px; border-radius: 24px; background: rgba(8,18,50,0.9); border: 2px solid var(--tb); padding: 22px 26px; opacity: 0; }
+      .gp .bx { width: 54px; height: 54px; border-radius: 16px; background: var(--ta); color: var(--t); display: flex; align-items: center; justify-content: center; } .gp .bx .ic { width: 30px; height: 30px; }
+      .gp .k { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--t); margin-top: 12px; white-space: nowrap; }
+      .gp b { display: block; font-size: 30px; line-height: 1.15; margin-top: 4px; white-space: nowrap; } .gp em { display: block; font-style: normal; font-size: 18px; color: var(--mute); margin-top: 6px; white-space: nowrap; }
+
+      /* customer voice view */
+      #lgRow { position: absolute; left: 28px; top: 102px; display: flex; gap: 12px; }
+      .lg2 { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 20px; background: rgba(255,255,255,0.06); border: 1.5px solid var(--line); font-size: 17px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      .lg2 .ic { width: 20px; height: 20px; color: var(--ok); }
+      .qt { position: absolute; left: 28px; right: 28px; height: 78px; border-radius: 18px; background: var(--card); border: 1.5px solid var(--line); display: flex; align-items: center; gap: 16px; padding: 0 18px; opacity: 0; }
+      .qt .av { width: 46px; height: 46px; border-radius: 50%; background: var(--ta); color: var(--t); font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+      .qt p { font-size: 21px; line-height: 1.25; white-space: nowrap; }
+      .qt .lc { margin-left: auto; font-size: 13px; font-weight: 700; letter-spacing: 2px; padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--line); color: var(--mute); opacity: 0; }
+      .hl { font-weight: 700; border-radius: 6px; padding: 1px 6px; background: rgba(255,181,71,0); } .hb { font-weight: 700; color: #ffb4b4; border-radius: 6px; padding: 1px 6px; }
+      #svPh { position: absolute; inset: 0; opacity: 0; }
+      .pr { position: absolute; left: 28px; right: 28px; height: 74px; border-radius: 18px; background: var(--card); border: 1.5px solid var(--line); display: flex; align-items: center; gap: 16px; padding: 0 22px; opacity: 0; }
+      .pr .ic { width: 30px; height: 30px; color: var(--heat); } .pr b { font-size: 26px; white-space: nowrap; }
+      .pr .bar { margin-left: auto; width: 210px; height: 12px; border-radius: 6px; background: rgba(255,255,255,0.1); position: relative; } .pr .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--heat); transform-origin: 0 50%; display: block; }
+      .pr .n { width: 74px; text-align: right; font-size: 24px; font-weight: 700; color: var(--heat); white-space: nowrap; }
+
+      /* radar view */
+      #rdBox { position: absolute; left: 28px; top: 102px; width: 392px; height: 392px; border-radius: 50%; background: radial-gradient(circle, rgba(255,181,71,0.12), rgba(255,181,71,0.02) 70%); border: 2px solid rgba(255,181,71,0.5); overflow: hidden; opacity: 0; }
+      .rr { position: absolute; left: 50%; top: 50%; border-radius: 50%; border: 1.5px solid rgba(255,181,71,0.3); transform: translate(-50%, -50%); }
+      #rdSweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(255,181,71,0) 0deg, rgba(255,181,71,0.55) 70deg, rgba(255,181,71,0) 71deg); }
+      #rdMe { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 8px rgba(1,204,247,0.25); }
+      .bl { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: var(--heat); opacity: 0; }
+      #arChip { position: absolute; left: 28px; top: 514px; width: 392px; display: flex; justify-content: center; opacity: 0; }
+      #arChip > span { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 20px; background: rgba(255,181,71,0.14); border: 1.5px solid rgba(255,181,71,0.6); font-size: 17px; font-weight: 700; color: var(--heat); white-space: nowrap; } #arChip .ic { width: 20px; height: 20px; }
+      .rs2 { position: absolute; left: 450px; width: 442px; height: 74px; border-radius: 16px; background: var(--card); border: 1.5px solid var(--line); padding: 10px 16px; opacity: 0; }
+      .rs2 .t { display: flex; align-items: center; justify-content: space-between; font-size: 22px; font-weight: 700; white-space: nowrap; } .rs2 .t span { color: var(--ok); }
+      .rs2 .sp { margin-top: 12px; height: 10px; border-radius: 5px; background: rgba(255,255,255,0.1); position: relative; } .rs2 .sp i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--ok); transform-origin: 0 50%; display: block; }
+      .rs2.hot .t span { color: var(--heat); } .rs2.hot .sp i { background: var(--heat); }
+      #hotChip { position: absolute; left: 450px; top: 520px; width: 442px; display: flex; justify-content: center; opacity: 0; }
+      #hotChip > span { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 20px; background: var(--heat); color: #04122f; font-size: 17px; font-weight: 700; white-space: nowrap; } #hotChip .ic { width: 20px; height: 20px; }
+      #tmBox { position: absolute; left: 28px; top: 590px; width: 864px; height: 270px; border-radius: 24px; background: rgba(255,255,255,0.04); border: 1.5px solid var(--line); opacity: 0; }
+      #tmBox .lbl { position: absolute; left: 24px; top: 16px; }
+      .tmr { position: absolute; left: 24px; font-size: 19px; font-weight: 700; white-space: nowrap; }
+      #tmAx { position: absolute; left: 150px; right: 24px; top: 70px; height: 150px; }
+      #tmAx .tk { position: absolute; top: 0; bottom: 0; width: 1.5px; background: rgba(255,255,255,0.1); }
+      #tmAx .wk { position: absolute; top: 160px; font-size: 13px; color: var(--mute); margin-left: -14px; white-space: nowrap; }
+      .tmb { position: absolute; height: 44px; border-radius: 22px; display: flex; align-items: center; padding: 0 16px; font-size: 16px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      #tmL { left: 0; top: 18px; width: 230px; background: var(--c); color: #04122f; gap: 8px; } #tmL .ic { width: 22px; height: 22px; }
+      #tmK { left: 560px; top: 88px; width: 150px; background: rgba(255,255,255,0.22); color: #fff; }
+      #tmBr { position: absolute; left: 0; top: 64px; width: 560px; height: 0; border-top: 3px dashed var(--heat); opacity: 0; }
+      #tmGap { position: absolute; left: 250px; top: 46px; width: 170px; text-align: center; font-size: 17px; font-weight: 700; color: var(--heat); background: #0d1d4d; padding: 2px 8px; border-radius: 10px; opacity: 0; white-space: nowrap; }
+
+      /* research-brain view */
+      .mn { position: absolute; top: 106px; width: 272px; height: 96px; border-radius: 20px; background: var(--card); border: 1.5px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 0 16px; opacity: 0; }
+      .mn .bx { width: 48px; height: 48px; border-radius: 14px; background: var(--ta); color: var(--t); display: flex; align-items: center; justify-content: center; flex: none; } .mn .bx .ic { width: 26px; height: 26px; }
+      .mn b { display: block; font-size: 20px; white-space: nowrap; } .mn em { display: block; font-style: normal; font-size: 15px; color: var(--mute); white-space: nowrap; }
+      .fa { position: absolute; top: 204px; width: 30px; height: 30px; margin-left: -15px; color: var(--c); transform: rotate(90deg); opacity: 0; }
+      #brainBar { position: absolute; left: 190px; top: 238px; width: 540px; height: 74px; border-radius: 37px; background: rgba(1,204,247,0.14); border: 2px solid rgba(1,204,247,0.65); display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 26px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #brainBar .ic { width: 32px; height: 32px; color: var(--c); }
+      #oDoc { position: absolute; left: 28px; top: 332px; width: 864px; height: 540px; border-radius: 24px; background: rgba(255,255,255,0.06); border: 1.5px solid var(--line); opacity: 0; }
+      #oDoc .dh { position: absolute; left: 24px; right: 24px; top: 16px; display: flex; align-items: center; justify-content: space-between; }
+      .os { position: absolute; left: 24px; right: 24px; border-radius: 18px; padding: 12px 20px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); opacity: 0; }
+      .os .k { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--c); white-space: nowrap; }
+      .os .chs2 { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+      .ch2 { height: 40px; padding: 0 16px; border-radius: 20px; background: var(--ta); border: 1.5px solid var(--tb); font-size: 19px; font-weight: 700; display: flex; align-items: center; white-space: nowrap; opacity: 0; }
+      #os3 { border-color: rgba(1,204,247,0.6); background: rgba(1,204,247,0.1); }
+      #os3 .big { font-size: 38px; font-weight: 700; line-height: 1.2; margin-top: 10px; white-space: nowrap; }
+      #os3 .tg { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; height: 42px; padding: 0 18px; border-radius: 21px; background: var(--c); color: #04122f; font-size: 17px; font-weight: 700; white-space: nowrap; } #os3 .tg .ic { width: 20px; height: 20px; }
+
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--c); background: rgba(1,204,247,0.18); opacity: 0; z-index: 29; }
+
+      /* ---------- stage cards (outside the window) ---------- */
+      .pcard { position: absolute; border-radius: 30px; background: rgba(8,18,50,0.97); border: 1.5px solid rgba(1,204,247,0.45); box-shadow: 0 40px 90px rgba(0,0,0,0.55); opacity: 0; }
+      .pk { font-size: 14px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); white-space: nowrap; } .pt { font-size: 31px; font-weight: 700; line-height: 1.2; margin-top: 6px; }
+      .ol { display: flex; align-items: center; gap: 14px; min-height: 76px; margin-top: 12px; padding: 10px 18px; border-radius: 18px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); font-size: 22px; line-height: 1.25; opacity: 0; }
+      .ol > .ic { width: 34px; height: 34px; color: var(--ok); } .ol small { display: block; font-size: 16px; color: var(--mute); }
+      #pGap { left: 560px; top: 340px; width: 440px; padding: 28px; border-color: rgba(255,181,71,0.6); } #pGap .pk { color: var(--heat); }
+      .bdg { display: inline-flex; align-items: center; gap: 10px; margin-top: 18px; height: 52px; padding: 0 22px; border-radius: 26px; background: var(--c); color: #04122f; font-size: 22px; font-weight: 700; white-space: nowrap; opacity: 0; } .bdg .ic { width: 26px; height: 26px; }
+      #pCopy { left: 80px; top: 360px; width: 440px; padding: 28px; border-color: rgba(255,181,71,0.6); } #pCopy .pk { color: var(--heat); }
+      #pCopy .cp { margin-top: 14px; font-size: 34px; font-weight: 700; line-height: 1.25; }
+      #cpLk { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+      .lk { height: 46px; padding: 0 16px; border-radius: 14px; background: rgba(61,220,151,0.12); border: 1.5px solid rgba(61,220,151,0.55); color: var(--ok); font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; opacity: 0; white-space: nowrap; } .lk .ic { width: 20px; height: 20px; }
+      #pOffer { left: 560px; top: 340px; width: 440px; padding: 28px; border-color: rgba(1,204,247,0.7); }
+      #pOffer .pt { font-size: 42px; line-height: 1.12; margin-top: 8px; } #pOffer .sb { font-size: 22px; color: var(--mute); margin-top: 6px; }
+
+      /* ---------- kinetic stat stack ---------- */
+      #kin { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; opacity: 0; }
+      #kNote { position: absolute; left: 0; right: 0; top: 14px; text-align: center; }
+      .kr { position: absolute; left: 40px; width: 840px; height: 200px; border-radius: 32px; background: rgba(8,18,50,0.95); border: 1.5px solid rgba(255,255,255,0.16); display: flex; align-items: center; gap: 28px; padding: 0 36px; opacity: 0;
+        box-shadow: 0 26px 64px rgba(0,0,0,0.45); }
+      .kr .lg { width: 112px; height: 112px; border-radius: 30px; display: flex; align-items: center; justify-content: center; flex: none; background: rgba(1,204,247,0.16); color: var(--c); } .kr .lg .ic { width: 56px; height: 56px; }
+      .kr .w { font-size: 26px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.8); } .kr .v { font-size: 70px; font-weight: 700; line-height: 1.05; color: var(--c); white-space: nowrap; }
+      #k1 { top: 60px; } #k2 { top: 286px; } #k3 { top: 512px; }
+      #kStamp { position: absolute; left: 130px; width: 660px; top: 758px; height: 132px; border: 5px solid var(--c); border-radius: 30px; background: rgba(4,18,47,0.96); display: flex; align-items: center; justify-content: center; gap: 18px;
+        font-size: 46px; font-weight: 700; letter-spacing: 2px; white-space: nowrap; transform: rotate(-2deg); opacity: 0; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+      #kStamp .ic { width: 54px; height: 54px; color: var(--c); }
+
+      /* ---------- CTA + UI ---------- */
+      #cta { position: absolute; left: 110px; width: 860px; top: 540px; padding: 34px 40px; text-align: center; border-radius: 30px; background: rgba(6, 15, 42, 0.96); border: 1.5px solid rgba(1,204,247,0.4); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: rgba(255,255,255,0.75); } #cta .name { font-size: 60px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; } #cta .sb b { color: var(--c); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 22px; height: 74px; padding: 0 46px; border-radius: 41px; background: var(--c); color: #04122f; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoD { opacity: 0; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; z-index: 2; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; text-shadow: 0 4px 18px rgba(0,0,0,0.45); }
+      .cap s { text-decoration: none; display: inline; white-space: nowrap; font-weight: 400; color: #fff; } .cap s.k { font-weight: 700; color: var(--c); }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); z-index: 1; }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(0,0,0,0.38)); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="88.2" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="88.2" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div><div id="grid"></div><div id="glow"></div>
+
+        <div id="hookClip"><div id="hook">
+          <div id="hWk">MINGGU PERTAMA SETELAH LU LAUNCHING</div>
+          <div id="hLane">
+            <div class="hcol me" id="hMe"><div class="hh"><span class="who">TOKO LU</span><span class="live" id="hLive"><i></i>baru live</span></div>
+              <div class="hoff">Paket baru lu</div><div class="hbig"><b id="hOrdN">0</b><em>order minggu ini</em></div>
+              <div class="hkos" id="hKos">KALENDER MASIH KOSONG</div><div class="hcal" id="hCalMe"></div></div>
+            <div class="hcol" id="hRiv"><div class="hh"><span class="who">KOMPETITOR</span></div>
+              <div class="hoff">Paket yang udah dicari</div><div class="hbig"><b id="hRivN">0</b><em>order minggu ini</em></div>
+              <div class="hcal" id="hCalRv"></div></div>
+          </div>
+          <div id="hMorph">0</div>
+          <div id="hRoster"><div id="hRTitle"><span id="hT35">35</span><span id="hTag">AGENT AI</span></div><div id="hCnt"><b id="hCntN">0</b> / 35 agent riset aktif</div></div>
+          <div id="hGrid"></div>
+          <div id="hTri"></div>
+          <div id="hNeb"><div class="np" id="npA"><span class="t">Nebak</span><i class="stx"></i></div><span class="ic" id="npArr" data-i="arrow-right"></span><div class="np" id="npB"><span class="ic" data-i="circle-check"></span>Udah dicari orang</div></div>
+        </div></div>
+
+        <div id="win"><div id="wcam">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Pusat Riset</span><span id="sim">SIMULASI</span>
+            <div id="tabs"><span id="tabPill"></span><div id="tabKomp"><span class="ic" data-i="eye"></span>Kompetitor</div><div id="tabSuara"><span class="ic" data-i="message-circle"></span>Suara</div>
+              <div id="tabRadar"><span class="ic" data-i="radar"></span>Radar</div><div id="tabOtak"><span class="ic" data-i="brain"></span>Otak</div></div></div>
+          <div id="body">
+            <div class="view" id="vKomp"></div>
+            <div class="view" id="vSuara"></div>
+            <div class="view" id="vRadar"></div>
+            <div class="view" id="vOtak"></div>
+          </div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div><div id="wFlash"></div></div>
+
+        <div class="pcard" id="pGap"><div class="pk">CELAH · DIPETAIN AGENT</div><div class="pt">Di sini lu menang</div>
+          <div class="ol" id="gl0"><span class="ic" data-i="package"></span><div>Paket perawatan malam<small>0 dari 3 kompetitor nawarin</small></div></div>
+          <div class="ol" id="gl1"><span class="ic" data-i="message-square-text"></span><div>Antrean lama banget<small>41 ulasan, belum ada balasan</small></div></div>
+          <div class="bdg" id="gBdg"><span class="ic" data-i="target"></span>2 peluang kosong</div></div>
+
+        <div class="pcard" id="pCopy"><div class="pk">COPY DARI KATA PEMBELI</div>
+          <div class="cp">“Ada slot besok? Booking lewat WA sekarang.”</div>
+          <div id="cpLk"><div class="lk" id="cl0"><span class="ic" data-i="circle-check"></span>Pakai kata asli pembeli</div><div class="lk" id="cl1"><span class="ic" data-i="lock"></span>Nggak bisa dikarang</div></div></div>
+
+        <div class="pcard" id="pOffer"><div class="pk">SATU PENAWARAN · LUNCURIN</div><div class="pt">Paket facial malam</div><div class="sb">booking lewat WA</div>
+          <div class="ol" id="of0"><span class="ic" data-i="trending-up"></span><div>Dicari naik +64%<small>radar permintaan lokal</small></div></div>
+          <div class="ol" id="of1"><span class="ic" data-i="package"></span><div>Belum ada yang nawarin<small>intel kompetitor</small></div></div>
+          <div class="ol" id="of2"><span class="ic" data-i="message-circle"></span><div>Kata pembeli: “ada slot besok?”<small>suara pelanggan</small></div></div></div>
+
+        <div id="kin"><div class="lbl" id="kNote">ANGKA ILUSTRASI · SIMULASI</div>
+          <div class="kr" id="k1"><div class="lg"><span class="ic" data-i="bot"></span></div><div><div class="w">AGENT RISET</div><div class="v"><span id="kc1">0</span> agent</div></div></div>
+          <div class="kr" id="k2"><div class="lg"><span class="ic" data-i="file-text"></span></div><div><div class="w">RINGKASAN SENIN</div><div class="v"><span id="kc2">0</span> halaman</div></div></div>
+          <div class="kr" id="k3"><div class="lg"><span class="ic" data-i="circle-help"></span></div><div><div class="w">TEBAKAN</div><div class="v"><span id="kc3">9</span></div></div></div>
+          <div id="kStamp"><span class="ic" data-i="target"></span>TAU, BUKAN NEBAK</div>
+        </div>
+
+        <div id="cta"><div class="k">Mau sistem kayak gini dipasang di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div><div id="caps"></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="87.66" data-track-index="8" data-volume="1"></audio>
+      <audio id="sx00" class="clip" src="assets/sfx/pop.wav" data-start="1.31" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx01" class="clip" src="assets/sfx/pop.wav" data-start="3.92" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx02" class="clip" src="assets/sfx/sparkle.wav" data-start="5.32" data-duration="1.8" data-track-index="12" data-volume="0.035"></audio>
+      <audio id="sx03" class="clip" src="assets/sfx/ping.wav" data-start="6.32" data-duration="1.32" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx04" class="clip" src="assets/sfx/pop.wav" data-start="8.18" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx05" class="clip" src="assets/sfx/pop.wav" data-start="9.43" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx06" class="clip" src="assets/sfx/pop.wav" data-start="11.22" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx07" class="clip" src="assets/sfx/click.wav" data-start="13.92" data-duration="0.366" data-track-index="13" data-volume="0.08"></audio>
+      <audio id="sx08" class="clip" src="assets/sfx/pop.wav" data-start="14.56" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx09" class="clip" src="assets/sfx/ping.wav" data-start="16.00" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx10" class="clip" src="assets/sfx/whoosh.wav" data-start="17.53" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx11" class="clip" src="assets/sfx/pop.wav" data-start="19.34" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx12" class="clip" src="assets/sfx/pop.wav" data-start="19.54" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx13" class="clip" src="assets/sfx/pop.wav" data-start="19.74" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx14" class="clip" src="assets/sfx/pop.wav" data-start="24.50" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx15" class="clip" src="assets/sfx/pop.wav" data-start="25.62" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx16" class="clip" src="assets/sfx/pop.wav" data-start="26.62" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx17" class="clip" src="assets/sfx/pop.wav" data-start="30.59" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx18" class="clip" src="assets/sfx/pop.wav" data-start="32.41" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx19" class="clip" src="assets/sfx/whoosh.wav" data-start="33.78" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx20" class="clip" src="assets/sfx/ping.wav" data-start="34.63" data-duration="1.32" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx21" class="clip" src="assets/sfx/whoosh.wav" data-start="35.75" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx22" class="clip" src="assets/sfx/pop.wav" data-start="39.30" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx23" class="clip" src="assets/sfx/pop.wav" data-start="39.70" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx24" class="clip" src="assets/sfx/pop.wav" data-start="40.10" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx25" class="clip" src="assets/sfx/ping.wav" data-start="41.26" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx26" class="clip" src="assets/sfx/pop.wav" data-start="44.06" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx27" class="clip" src="assets/sfx/pop.wav" data-start="44.36" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx28" class="clip" src="assets/sfx/pop.wav" data-start="44.66" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx29" class="clip" src="assets/sfx/click.wav" data-start="45.92" data-duration="0.366" data-track-index="11" data-volume="0.08"></audio>
+      <audio id="sx30" class="clip" src="assets/sfx/whoosh.wav" data-start="45.96" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx31" class="clip" src="assets/sfx/pop.wav" data-start="46.57" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx32" class="clip" src="assets/sfx/pop.wav" data-start="46.87" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx33" class="clip" src="assets/sfx/pop.wav" data-start="47.17" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx34" class="clip" src="assets/sfx/ping.wav" data-start="49.56" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx35" class="clip" src="assets/sfx/whoosh.wav" data-start="50.50" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx36" class="clip" src="assets/sfx/pop.wav" data-start="51.35" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx37" class="clip" src="assets/sfx/ping.wav" data-start="51.85" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx38" class="clip" src="assets/sfx/whoosh.wav" data-start="52.24" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx39" class="clip" src="assets/sfx/ping.wav" data-start="53.74" data-duration="1.32" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx40" class="clip" src="assets/sfx/pop.wav" data-start="55.40" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx41" class="clip" src="assets/sfx/pop.wav" data-start="55.62" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx42" class="clip" src="assets/sfx/pop.wav" data-start="55.84" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx43" class="clip" src="assets/sfx/pop.wav" data-start="56.06" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx44" class="clip" src="assets/sfx/pop.wav" data-start="56.28" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx45" class="clip" src="assets/sfx/pop.wav" data-start="57.09" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx46" class="clip" src="assets/sfx/pop.wav" data-start="57.23" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx47" class="clip" src="assets/sfx/pop.wav" data-start="57.37" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx48" class="clip" src="assets/sfx/pop.wav" data-start="57.51" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx49" class="clip" src="assets/sfx/pop.wav" data-start="57.65" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx50" class="clip" src="assets/sfx/ping.wav" data-start="60.52" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx51" class="clip" src="assets/sfx/pop.wav" data-start="62.16" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx52" class="clip" src="assets/sfx/sparkle.wav" data-start="62.72" data-duration="1.8" data-track-index="10" data-volume="0.035"></audio>
+      <audio id="sx53" class="clip" src="assets/sfx/pop.wav" data-start="65.26" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx54" class="clip" src="assets/sfx/pop.wav" data-start="65.64" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx55" class="clip" src="assets/sfx/whoosh.wav" data-start="66.19" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx56" class="clip" src="assets/sfx/pop.wav" data-start="67.44" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx57" class="clip" src="assets/sfx/pop.wav" data-start="67.66" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx58" class="clip" src="assets/sfx/pop.wav" data-start="67.88" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx59" class="clip" src="assets/sfx/sparkle.wav" data-start="68.73" data-duration="1.8" data-track-index="13" data-volume="0.035"></audio>
+      <audio id="sx60" class="clip" src="assets/sfx/whoosh.wav" data-start="69.77" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx61" class="clip" src="assets/sfx/pop.wav" data-start="70.32" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx62" class="clip" src="assets/sfx/pop.wav" data-start="72.50" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx63" class="clip" src="assets/sfx/pop.wav" data-start="74.08" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx64" class="clip" src="assets/sfx/pop.wav" data-start="75.78" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx65" class="clip" src="assets/sfx/ping.wav" data-start="76.78" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx66" class="clip" src="assets/sfx/whoosh.wav" data-start="76.88" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx67" class="clip" src="assets/sfx/pop.wav" data-start="77.43" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx68" class="clip" src="assets/sfx/pop.wav" data-start="77.71" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx69" class="clip" src="assets/sfx/pop.wav" data-start="77.99" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx70" class="clip" src="assets/sfx/pop.wav" data-start="78.98" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx71" class="clip" src="assets/sfx/pop.wav" data-start="79.58" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx72" class="clip" src="assets/sfx/pop.wav" data-start="80.31" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx73" class="clip" src="assets/sfx/click.wav" data-start="80.71" data-duration="0.366" data-track-index="11" data-volume="0.08"></audio>
+      <audio id="sx74" class="clip" src="assets/sfx/whoosh.wav" data-start="81.05" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx75" class="clip" src="assets/sfx/pop.wav" data-start="81.70" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx76" class="clip" src="assets/sfx/click.wav" data-start="84.06" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n, c) => `<span class="ic${c ? " " + c : ""}">${icon(n)}</span>`;
+
+        /* ---------- data ---------- */
+        const tv = (c, rgb) => `--t:${c};--ta:rgba(${rgb},0.16);--tb:rgba(${rgb},0.55)`;
+        const CY = tv("#01ccf7", "1,204,247"), PU = tv("#a78bfa", "167,139,250"), OR = tv("#ffb547", "255,181,71"), GR = tv("#3ddc97", "61,220,151"), PK = tv("#ff7eb6", "255,126,182");
+        const ROLES = [[CY, "search"], [PU, "message-circle"], [OR, "radar"], [GR, "newspaper"], [PK, "chart-pie"]];
+        const COMP = [["Kompetitor A", "1,2 km dari lu", ["Facial basic", "Peeling"], "Rp150rb", "4,2 ★", "318 ulasan"], ["Kompetitor B", "2,4 km dari lu", ["Facial + masker", "Paket 5x"], "Rp210rb", "3,9 ★", "204 ulasan"], ["Kompetitor C", "3,1 km dari lu", ["Laser promo", "Cuci muka"], "Rp175rb", "4,5 ★", "96 ulasan"]];
+        const QUO = [["R", PU, "Kak, <span class=\"hl\">ada slot besok?</span> Pengen coba paket malam.", "ID"], ["D", CY, "<span class=\"hl\">Harganya berapa</span> buat 2 orang ya?", "ID"], ["A", OR, "Hasilnya bagus, tapi <span class=\"hb\">antre lama banget</span>.", "ID"],
+          ["M", GR, "<span class=\"hl\">Can I book</span> for Saturday night?", "EN"], ["S", PK, "Enten <span class=\"hl\">slot sonten</span>, Mbak?", "JV"], ["T", PU, "<span class=\"hl\">Worth it</span> banget, udah repeat 3x.", "ID"]];
+        const PHR = [["ada slot besok?", 86], ["harganya berapa?", 71], ["bisa booking lewat WA?", 54], ["ready kapan?", 39], ["worth it banget", 33]];
+        const RISE = [["facial malam hari", 64, 1], ["paket pengantin", 38, 0], ["kulit berminyak", 21, 0], ["promo gajian", 12, 0], ["treatment rambut", 6, 0]];
+        const BLIPS = [[140, 110], [250, 90], [300, 220], [110, 270], [220, 300]];
+
+        /* ---------- hook ---------- */
+        $("#hGrid").innerHTML = Array.from({ length: 35 }, (_, k) => { const r = Math.floor(k / 7), q = k % 7;
+          return `<div class="ga" id="ga${k}" data-r="${r}" style="left:${q * 128}px;top:${r * 80}px;${ROLES[r][0]}">${ic(ROLES[r][1])}<i></i></div>`; }).join("");
+        $("#hCalMe").innerHTML = $("#hCalRv").innerHTML = Array.from({ length: 7 }, () => "<i></i>").join("");
+        const TRI = [[CY, "users", "PELANGGAN", "Apa yang pelanggan lu mau"], [PU, "eye", "KOMPETITOR", "Apa yang kompetitor lewatin"], [OR, "map-pin", "DUIT", "Di mana duitnya di area lu"]];
+        $("#hTri").innerHTML = TRI.map(([c, i, k, t], n) => `<div class="tri" id="tri${n}" style="${c}"><div class="q" id="triq${n}">?</div>`
+          + `<div class="ans" id="tria${n}"><div class="bx">${ic(i)}</div><em>${k}</em><b>${t}</b></div></div>`).join("");
+
+        /* ---------- competitor view ---------- */
+        const CX = { nm: 20, of: 230, pr: 540, rv: 690 };
+        $("#vKomp").innerHTML = `<div class="ahd" id="kmHd" style="${CY}"><div class="bx">${ic("eye")}</div><b>Intel Kompetitor</b><span class="live"><i></i>mengecek</span><span class="cn"><b id="kmN">0</b> kompetitor lokal</span></div>`
+          + `<div id="cHead"><span class="ch" style="left:${CX.nm}px">KOMPETITOR</span><span class="ch" style="left:${CX.of}px">PENAWARAN</span><span class="ch" style="left:${CX.pr}px">HARGA</span><span class="ch" style="left:${CX.rv}px">REVIEW</span></div>`
+          + COMP.map(([n, d, o, p, r, c], k) => `<div class="cr" id="cr${k}" style="top:${134 + k * 100}px;${[CY, PU, GR][k]}"><div class="cell nm" style="left:${CX.nm}px;width:200px"><b>${n}</b><em>${d}</em></div>`
+            + `<div class="cell of" style="left:${CX.of}px;width:290px">${o.map((x) => `<span class="cc">${x}</span>`).join("")}</div>`
+            + `<div class="cell" style="left:${CX.pr}px;width:140px"><span class="cpr">${p}</span></div>`
+            + `<div class="cell" style="left:${CX.rv}px;width:160px"><span class="crv">${r}<em>${c}</em></span></div></div>`).join("")
+          + `<div class="lbl" id="gHead">CELAH YANG DITINGGALIN KOMPETITOR</div>`
+          + `<div class="gp" id="gp0" style="left:28px;${OR}"><div class="bx">${ic("package")}</div><div class="k">LAYANAN YANG NGGAK ADA</div><b>Paket perawatan malam</b><em>0 dari 3 kompetitor nawarin</em></div>`
+          + `<div class="gp" id="gp1" style="left:472px;${tv("#ff8a8a", "255,138,138")}"><div class="bx">${ic("triangle-alert")}</div><div class="k">KELUHAN YANG NGGAK DIBERESIN</div><b>Antrean lama banget</b><em>41 ulasan, belum ada balasan</em></div>`;
+
+        /* ---------- customer voice view ---------- */
+        $("#vSuara").innerHTML = `<div id="svMain"><div class="ahd" id="svHd" style="${PU}"><div class="bx">${ic("message-circle")}</div><b>Suara Pelanggan</b><span class="live"><i></i>membaca</span><span class="cn"><b id="svN">0</b> review &amp; komentar</span></div>`
+          + `<div id="lgRow">${["Indonesia", "Inggris", "Jawa"].map((l, k) => `<span class="lg2" id="lg${k}">${ic("circle-check")}${l}</span>`).join("")}</div>`
+          + QUO.map(([a, c, t, l], k) => `<div class="qt" id="q${k}" style="top:${162 + k * 90}px;${c}"><span class="av">${a}</span><p>${t}</p><span class="lc">${l}</span></div>`).join("") + `</div>`
+          + `<div id="svPh"><div class="lbl" style="position:absolute;left:30px;top:22px">KATA-KATA PEMBELI · TOP 5 · SIMULASI</div>`
+          + PHR.map(([t, n], k) => `<div class="pr" id="pr${k}" style="top:${64 + k * 86}px">${ic("quote")}<b>“${t}”</b><span class="bar"><i style="width:${Math.round(n / 86 * 100)}%"></i></span><span class="n">×${n}</span></div>`).join("") + `</div>`;
+
+        /* ---------- radar view ---------- */
+        $("#vRadar").innerHTML = `<div class="ahd" id="rdHd" style="${OR}"><div class="bx">${ic("radar")}</div><b>Radar Permintaan Lokal</b><span class="live"><i></i>memantau</span></div>`
+          + `<div id="rdBox"><div class="rr" style="width:130px;height:130px"></div><div class="rr" style="width:260px;height:260px"></div><div class="rr" style="width:380px;height:380px"></div><div id="rdSweep"></div><div id="rdMe"></div>`
+          + BLIPS.map(([x, y], k) => `<div class="bl" id="bl${k}" style="left:${x}px;top:${y}px"></div>`).join("") + `</div>`
+          + `<div id="arChip"><span>${ic("map-pin")}area 5 km dari lokasi lu</span></div>`
+          + RISE.map(([t, p, h], k) => `<div class="rs2${h ? " hot" : ""}" id="rs${k}" style="top:${102 + k * 82}px"><div class="t"><b>${t}</b><span>+${p}%</span></div><div class="sp"><i style="width:${Math.round(p / 64 * 100)}%"></i></div></div>`).join("")
+          + `<div id="hotChip"><span>${ic("flame")}naik paling cepat: facial malam</span></div>`
+          + `<div id="tmBox"><div class="lbl">KAPAN LAUNCHING · MINGGU KE-</div><span class="tmr" style="top:92px">Lu</span><span class="tmr" style="top:162px">Kompetitor</span>`
+          + `<div id="tmAx">` + Array.from({ length: 11 }, (_, k) => `<i class="tk" style="left:${k * 70}px"></i><span class="wk" style="left:${k * 70}px">${k + 1}</span>`).join("")
+          + `<div class="tmb" id="tmL">${ic("rocket")}launching</div><div class="tmb" id="tmK">telat</div><div id="tmBr"></div><div id="tmGap">± 2 bulan</div></div></div>`;
+
+        /* ---------- research brain view ---------- */
+        $("#vOtak").innerHTML = `<div class="ahd" id="otHd" style="${CY}"><div class="bx">${ic("brain")}</div><b>Otak Riset</b><span class="live"><i></i>merangkum</span><span class="cn"><b>35</b> agent → 1 halaman</span></div>`
+          + [["eye", "Kompetitor", "celah & harga", PU, 28], ["message-circle", "Suara", "kata pembeli", GR, 324], ["radar", "Radar", "permintaan naik", OR, 620]].map(([i, t, s, c, x]) => `<div class="mn" style="left:${x}px;${c}"><div class="bx">${ic(i)}</div><div><b>${t}</b><em>${s}</em></div></div>`).join("")
+          + [164, 460, 756].map((x) => `<span class="ic fa" style="left:${x}px">${icon("arrow-right")}</span>`).join("")
+          + `<div id="brainBar">${ic("brain")}Otak Riset · gabungin semuanya</div>`
+          + `<div id="oDoc"><div class="dh"><span class="lbl">RINGKASAN SENIN · 1 HALAMAN</span><span class="simtag">SIMULASI</span></div>`
+          + `<div class="os" id="os1" style="top:62px;height:104px"><div class="k">YANG BERUBAH DI PASAR LU</div><div class="chs2" style="${PU}">${["Kompetitor B naik 10%", "Facial malam +64%", "2 review soal antre"].map((t) => `<span class="ch2">${t}</span>`).join("")}</div></div>`
+          + `<div class="os" id="os2" style="top:180px;height:104px"><div class="k">YANG LAGI DITANYAIN PELANGGAN</div><div class="chs2" style="${GR}">${["Ada slot malam?", "Bisa booking via WA?", "Paket buat 2 orang?"].map((t) => `<span class="ch2">${t}</span>`).join("")}</div></div>`
+          + `<div class="os" id="os3" style="top:298px;height:214px"><div class="k">SATU PENAWARAN BUAT DILUNCURIN</div><div class="big">Paket facial malam, booking lewat WA</div><span class="tg">${ic("rocket")}luncurin minggu ini</span></div></div>`;
+
+        /* ---------- captions ---------- */
+        const KEY = new Set(["salah", "baca", "pasar", "mahal", "riset", "tiga", "puluh", "lima", "agent", "ai", "pelanggan", "kompetitor", "duitnya", "nebak", "simulasinya", "intel", "celah", "menang", "suara", "review", "komentar", "kata-kata",
+          "siap", "beli", "radar", "permintaan", "naik", "launching", "otak", "risetnya", "senin", "halaman", "penawaran", "tau", "link", "bio", "aipreneur", "automation", "ratusan", "bahasa", "karang"]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase().replace(/[^a-z0-9-]/g, "")) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#0b1a45" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 88.2;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        let cur = { x: 760, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const jumpTo = (x, y, at) => { st("#cursor", { x, y }, at); cur = { x, y }; };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const glowOn = (el, at, col) => ft(el, { borderColor: "rgba(255,255,255,0.12)" }, { keyframes: [{ borderColor: col || "#01ccf7", duration: 0.25 }, { duration: 0.7 }, { borderColor: "rgba(255,255,255,0.12)", duration: 0.5 }] }, at);
+        const popIn = (el, at, o) => ft(el, { opacity: 0, scale: 0.8, y: 16 }, Object.assign({ opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }, o || {}), at);
+        const TABS = ["#tabKomp", "#tabSuara", "#tabRadar", "#tabOtak"];
+        const tabSet = (sel, at) => { const el = $(sel); st("#tabPill", { x: el.offsetLeft - 4, width: el.offsetWidth }, at); TABS.forEach((s) => st(s, { color: s === sel ? "#ffffff" : "rgba(255,255,255,0.64)" }, at)); };
+
+        /* camera: zooms the app inside the fixed window frame (screen-recording style) */
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc = cState(460, 475, 1);
+        const SHOTS = [];
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); SHOTS.push({ t: at, d: 0, c: cc }); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; SHOTS.push({ t: at, d: dur || 0.8, c: nx, e: ease || "power3.inOut" }); };
+        const whip = (x, y, s, at) => camTo(x, y, s, at, 0.42, "expo.inOut");
+
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "dark" });
+        Object.assign(FX.POSE.peekR, { x: 530, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 }); // client: peeks fully visible
+        Object.assign(FX.POSE.upR, { x: 455 }); Object.assign(FX.POSE.upL, { x: -14 }); // side rises: clear of the cards on the other half
+        FX.theme("dark", 0);
+        ft("#grid", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -288px", duration: D, ease: "none" }, 0);
+        ft("#glow", { x: 0, y: 0 }, { x: 220, y: 360, duration: D, ease: "sine.inOut" }, 0);
+
+        /* initial states */
+        st(win, { opacity: 0, scale: 0.2, transformPerspective: 2000, transformOrigin: "460px 325px" }, 0);
+        st(["#vSuara", "#vRadar", "#vOtak", "#kin", "#cta", "#pGap", "#pCopy", "#pOffer"], { opacity: 0 }, 0);
+        st(["#pGap", "#pCopy", "#pOffer"], { transformPerspective: 1400 }, 0);
+        st(["#kmHd", "#cHead", "#svHd", "#rdHd", "#otHd", "#oDoc", "#svMain"], { opacity: 0 }, 0);
+        st(["#hCnt", "#hT35", "#npA", "#npB", "#npArr", ".ga", ".hcol", ".tri", "#hGrid", "#hKos", "#hLive", "#hWk"], { opacity: 0 }, 0);
+        st("#hRoster", { opacity: 1 }, 0);
+        tabSet("#tabKomp", 0);
+        camSet(460, 475, 1, 0);
+
+        /* anchors */
+        const tMahal = wt("Salah baca", "mahal"), tMak = ph("Makanya bayangin").start, tDept = ph("satu departemen").start, tIsi = ph("isinya tiga").start, tMer = ph("Mereka tau").start, tPelg = wt("Mereka tau", "pelanggan"), tApaK = ph("apa yang kompetitor").start, tDuit = ph("dan di mana").start;
+        const tBer = ph("Jadi lu berhenti").start, tNebak = wt("Jadi lu berhenti", "nebak"), tMulai = ph("dan mulai jualan").start, tDicari = ph("yang emang").start, tGue = ph("Gue tunjukin").start;
+        const tPer = ph("Pertama, intel").start, tMing = ph("Tiap minggu, dia").start, tPen = ph("penawaran mereka").start, tHarga = wt("penawaran mereka", "harga"), tRev = ph("review mereka").start;
+        const tCel = ph("Terus muncul celah").start, tTing = ph("yang mereka tinggalin").start, tLay = ph("Layanan yang").start, tKel = ph("Keluhan yang").start, tNah = ph("Nah, di situ").start;
+        const tSet = ph("Setelah tau").start, tAgs = ph("agent suara").start, tNen = ph("yang nentuin").start, tBaca = ph("Dia baca ratusan").start, tKom = ph("dan komentar asli").start, tBhs = ph("dalam bahasa").start, tDip = ph("yang dipakai pelanggan").start;
+        const tTer = ph("Terus kasih").start, tSiap = wt("yang dipakai orang", "siap"), tCopy = ph("Copy kayak").start;
+        const tBerik = ph("Berikutnya").start, tGerak = ph("yang bilang kapan").start, tNunj = ph("Dia nunjukin").start, tArea = ph("di area lu sekarang").start, tNaik = ph("dan nandain").start;
+        const tLaun = ph("Jadi lu launching").start, tLaunW = wt("Jadi lu launching", "launching"), tMul = ph("permintaan mulai").start, tBukan = ph("bukan dua bulan").start, tBulan = wt("bukan dua bulan", "bulan");
+        const tDan = ph("Dan yang ngatur").start, tOtak = ph("otak risetnya").start, tSen = ph("Tiap Senin").start, tApaB = ph("Apa yang berubah").start, tApaL = ph("apa yang lagi ditanyain").start, tSatu = ph("dan satu penawaran").start;
+        const tKomp2 = ph("Kompetitor lu nebak").start, tTau = ph("Lu tau.").start, tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");
+
+        /* ===== SCENE 1 · HOOK: your new offer goes live and stays empty while the rival's week fills ===== */
+        FX.enter("home", 0.0); FX.wave(0.5);
+        const posH = (el) => { let x = 0, y = 0, e = el; const H = $("#hook"); while (e && e !== H) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x, y }; };
+        ft("#hWk", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.35 }, 0.05);
+        popIn("#hMe", 0.14, { y: 0, duration: 0.45 }); popIn("#hRiv", 0.34, { y: 0, duration: 0.45 });
+        ft("#hLive", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, 0.5);
+        ft("#hLive i", { opacity: 1 }, { keyframes: [{ opacity: 0.25, duration: 0.34 }, { opacity: 1, duration: 0.34 }], repeat: 3 }, 0.62);
+        $$("#hCalRv i").forEach((el, k) => ft(el, { backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.10)" },
+          { backgroundColor: "rgba(1,204,247,0.32)", borderColor: "rgba(1,204,247,0.75)", duration: 0.22 }, 0.74 + k * 0.16));
+        count($("#hRivN"), 0, 27, 0.74, 1.25);
+        ft("#hKos", { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.35 }, tMahal - 0.45);
+        ft("#hOrdN", { scale: 1 }, { keyframes: [{ scale: 1.16, duration: 0.18 }, { scale: 1, duration: 0.32 }], transformOrigin: "0% 50%" }, tMahal - 0.05);
+        ft("#hMe", { borderColor: "rgba(1,204,247,0.6)" }, { keyframes: [{ borderColor: "rgba(255,255,255,0.55)", duration: 0.2 }, { borderColor: "rgba(1,204,247,0.6)", duration: 0.7 }] }, tMahal - 0.05);
+        FX.face("flat", 0.5, 1.0); FX.face("x", tMahal - 0.1, 0.9); FX.shiver(tMahal + 0.05, 0.42);
+
+        /* match cut: the empty "0" lifts out of your card and becomes the 35-agent headline */
+        const pA = posH($("#hOrdN")), pB = posH($("#hT35"));
+        st("#hMorph", { x: pA.x, y: pA.y, opacity: 0, scale: 1, transformOrigin: "0% 50%" }, 0);
+        st("#hMorph", { opacity: 1 }, tMak - 0.1); st("#hOrdN", { opacity: 0 }, tMak - 0.1);
+        ft("#hMorph", { x: pA.x, y: pA.y, scale: 1 }, { x: pB.x, y: pB.y, scale: 124 / 112, duration: 0.74, ease: "power3.inOut" }, tMak - 0.06);
+        count($("#hMorph"), 0, 35, tMak - 0.06, 0.74);
+        ft([".hcol", "#hWk"], { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.9, duration: 0.3, ease: "power2.in", stagger: 0.05 }, tMak - 0.12);
+        st("#hMorph", { opacity: 0 }, tDept - 0.16); st("#hT35", { opacity: 1 }, tDept - 0.16);
+        FX.drop($("#hTag"), tDept - 0.08, 0.035);
+        FX.face("wide", tDept, 0.8);
+
+        /* the 35-agent roster builds, row by row */
+        st("#hGrid", { opacity: 1 }, tIsi - 0.3);
+        ft(".ga", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, stagger: 0.02, ease: "back.out(1.7)" }, tIsi - 0.25);
+        ft("#hCnt", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 }, tIsi + 0.1);
+        count($("#hCntN"), 0, 35, tIsi + 0.15, 1.2);
+        for (let r = 0; r < 5; r++) { const t = tIsi + 0.15 + r * 0.22;
+          ft($$(`.ga[data-r="${r}"] i`), { backgroundColor: "rgba(255,255,255,0.25)" }, { backgroundColor: "#3ddc97", duration: 0.2, stagger: 0.028 }, t);
+          ft($$(`.ga[data-r="${r}"]`), { borderColor: "rgba(255,255,255,0.12)" }, { keyframes: [{ borderColor: "#01ccf7", duration: 0.2 }, { borderColor: "rgba(255,255,255,0.12)", duration: 0.6 }], stagger: 0.028 }, t); }
+        FX.go("center", tIsi + 0.1, 0.9); FX.face("excited", tIsi + 0.2, 0.9); FX.hop(tIsi + 0.9, 40);
+
+        /* triptych: three questions that flip into their answers */
+        ft(["#hRoster", "#hGrid"], { opacity: 1, y: 0 }, { opacity: 0, y: -34, duration: 0.4, ease: "power2.in" }, tMer - 0.3);
+        [0, 1, 2].forEach((n) => ft("#tri" + n, { opacity: 0, y: 46, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.5)" }, tMer - 0.2 + n * 0.12));
+        [[0, tPelg], [1, tApaK], [2, tDuit]].forEach(([n, t]) => {
+          ft("#triq" + n, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.5, duration: 0.3, ease: "power2.in" }, t - 0.22);
+          ft("#tria" + n, { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, t - 0.05);
+          ft("#tri" + n, { scale: 1 }, { keyframes: [{ scale: 1.045, duration: 0.16 }, { scale: 1, duration: 0.3 }] }, t - 0.05); });
+        FX.point(tPelg); FX.go("right", tApaK, 0.9); FX.beat(tDuit); FX.face("happy", tDuit + 0.2, 0.9);
+
+        /* kinetic type: the strike through "nebak" becomes the underline of what replaces it */
+        ft(".tri", { opacity: 1 }, { opacity: 0.42, duration: 0.35 }, tBer - 0.15);
+        popIn("#npA", tBer - 0.05, { y: 0 });
+        ft("#npA .stx", { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power2.inOut" }, tNebak + 0.12);
+        FX.face("x", tNebak + 0.1, 0.8);
+        ft("#npArr", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3 }, tMulai + 0.1);
+        popIn("#npB", tMulai + 0.4, { y: 0 });
+        ft("#npB", { boxShadow: "0 0 0 0 rgba(1,204,247,0.55)" }, { boxShadow: "0 0 0 22px rgba(1,204,247,0)", duration: 0.75 }, tMulai + 0.6);
+        FX.face("happy", tDicari + 0.2, 0.9); FX.beat(tDicari + 0.2);
+
+        /* ===== ZOOM-IN (punch through the first card) -> SCENE 2 · the app opens on competitor intel ===== */
+        const tZ1 = tGue - 0.15;
+        st("#hook", { transformOrigin: "460px 426px" }, 0);
+        ft("#hook", { scale: 1 }, { scale: 5.5, duration: 0.75, ease: "power3.in" }, tZ1);
+        ft("#hook", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tZ1 + 0.42);
+        ft(["#hRTitle", "#hCnt", "#hGrid", ".tri", "#hNeb"], { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.25, ease: "power1.out" }, tZ1 + 0.18);
+        st("#hook", { display: "none" }, tZ1 + 0.8);
+        ft(win, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power3.out" }, tZ1 + 0.28);
+        FX.go("home", tZ1 + 0.05, 0.9); FX.point(tGue + 0.35);
+        ft("#sim", { scale: 1 }, { keyframes: [{ scale: 1.25, backgroundColor: "rgba(1,204,247,0.2)" }, { scale: 1, backgroundColor: "rgba(1,204,247,0)" }], duration: 0.6 }, tZ1 + 1.15);
+        st(win, { transformOrigin: "50% 50%" }, tZ1 + 1.4);
+
+        /* ===== SCENE 3 · competitor intel: offers, prices, reviews -> the gaps they leave open ===== */
+        ft("#kmHd", { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.4 }, tZ1 + 0.95);
+        ft("#cHead", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tPer - 0.1);
+        COMP.forEach((_, k) => ft("#cr" + k, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, tPer + 0.15 + k * 0.2));
+        count($("#kmN"), 0, 3, tPer + 0.2, 0.7);
+        FX.go("home", tPer, 0.8); FX.point(tPer + 0.3); FX.face("happy", tPer + 0.1, 0.8);
+        camTo(390, 290, 1.45, tMing - 0.4, 0.6);
+        FX.beat(tMing + 0.1); FX.go("center", tMing + 0.1, 0.9);
+        const hdrK = (idx, t) => ft($$("#cHead .ch")[idx], { color: "rgba(255,255,255,0.64)" }, { keyframes: [{ color: "#01ccf7", duration: 0.2 }, { duration: 0.9 }, { color: "rgba(255,255,255,0.64)", duration: 0.3 }] }, t);
+        hdrK(1, tPen); ft(".cc", { opacity: 0, y: 8, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.3, stagger: 0.07, ease: "back.out(1.7)" }, tPen);
+        hdrK(2, tHarga); ft(".cpr", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.12, ease: "power2.out" }, tHarga);
+        whip(560, 290, 1.45, tRev - 0.34);
+        hdrK(3, tRev); ft(".crv", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.12, ease: "power2.out" }, tRev);
+        FX.point(tRev - 0.1); FX.face("wide", tRev + 0.2, 0.8);
+        camTo(460, 475, 1, tCel - 0.45, 0.6);
+        ft("#gHead", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.35 }, tTing - 0.1);
+        FX.face("flat", tTing + 0.1, 0.9);
+        camTo(240, 600, 1.5, tLay - 0.3, 0.6);
+        popIn("#gp0", tLay); glowOn("#gp0", tLay + 0.2, "#ffb547"); FX.beat(tLay + 0.1);
+        whip(680, 600, 1.5, tKel - 0.34);
+        popIn("#gp1", tKel); glowOn("#gp1", tKel + 0.2, "#ff8a8a"); FX.face("x", tKel + 0.1, 0.9);
+
+        /* 3D split: window swings away, the "Di sini lu menang" card floats in on the right half, robot rises on the left half */
+        const tSplit = tNah - 0.55;
+        st(win, { transformOrigin: "100% 50%" }, tSplit - 0.06);
+        ft(win, { x: 0, rotationY: 0, scale: 1, opacity: 1 }, { x: 150, rotationY: -26, scale: 0.86, opacity: 0, duration: 0.55, ease: "power3.in" }, tSplit - 0.05);
+        ft("#pGap", { opacity: 0, x: -140, scale: 0.82, rotationY: 24 }, { opacity: 1, x: 0, scale: 1, rotationY: 0, duration: 0.6, ease: "power3.out" }, tSplit + 0.1);
+        FX.go("upL", tSplit - 0.1, 1.15);
+        ft("#gl0", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, tSplit + 0.5);
+        ft("#gl1", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, tSplit + 0.7);
+        ft("#gBdg", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, tNah + 0.3);
+        FX.point(tNah + 0.2); FX.face("excited", tNah + 0.1, 1.0); FX.beat(tNah + 0.4);
+
+        /* ===== STRIPES -> SCENE 4 · customer voice: hundreds of real reviews, any language ===== */
+        const tW1 = tSet - 1.2;
+        FX.dip("right", tW1 - 0.05, 0.25);
+        FX.stripes(tW1, "dark", (m) => { st("#pGap", { opacity: 0 }, m); st(win, { opacity: 1, x: 0, rotationY: 0, scale: 1, transformOrigin: "50% 50%" }, m);
+          st("#vKomp", { opacity: 0 }, m); st("#vSuara", { opacity: 1 }, m); st("#svMain", { opacity: 1 }, m); tabSet("#tabSuara", m); camSet(460, 475, 1, m); });
+        ft("#svHd", { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.4 }, tW1 + 0.7);
+        FX.face("excited", tSet + 0.05, 0.9); FX.point(tAgs + 0.1);
+        QUO.forEach((_, k) => ft("#q" + k, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, tNen + 0.1 + k * 0.2));
+        FX.go("center", tNen, 0.9);
+        count($("#svN"), 0, 412, tBaca, 3.2, (v) => String(Math.round(v)));
+        FX.beat(tBaca + 0.2); FX.face("wide", tBaca + 0.3, 0.8);
+        ft("#svHd .live", { opacity: 1 }, { keyframes: [{ opacity: 0.4, duration: 0.3 }, { opacity: 1, duration: 0.3 }], repeat: 4 }, tKom);
+        QUO.forEach((_, k) => ft(`#q${k} .lc`, { opacity: 0 }, { opacity: 1, duration: 0.3 }, tBhs + 0.2 + k * 0.1));
+        ["#lg0", "#lg1", "#lg2"].forEach((s, i) => popIn(s, tBhs + 0.1 + i * 0.3, { y: 0 }));
+        FX.point(tBhs + 0.2); FX.go("right", tDip, 0.9); FX.face("happy", tDip + 0.1, 0.9);
+        ft(".hl", { backgroundColor: "rgba(255,181,71,0)", color: "#ffffff" }, { backgroundColor: "rgba(255,181,71,0.28)", color: "#ffd9a0", duration: 0.4, stagger: 0.12, ease: "power2.out" }, tDip + 0.1);
+
+        /* zoom punch-in on the first highlighted phrase -> the buyer-words list */
+        const tZ2 = tTer - 0.85;
+        const hp = posIn($("#q0 .hl"));
+        jumpTo(hp.x + 160, hp.y + 130, tZ2 - 0.9);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tZ2 - 0.85);
+        moveTo(hp.x + 12, hp.y + 10, tZ2 - 0.65, 0.6); click(tZ2); FX.point(tZ2 - 0.4); FX.go("home", tZ2 + 0.2, 0.9);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.12 }, tZ2 + 0.16);
+        ft("#svMain", { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.out" }, tZ2 + 0.04);
+        camTo(hp.x, hp.y, 3.4, tZ2 + 0.04, 0.48, "power3.in");
+        const tPk = tZ2 + 0.52;
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.4, duration: 0.1 }, { opacity: 0, duration: 0.26 }] }, tPk - 0.09);
+        st("#svMain", { opacity: 0 }, tPk); st("#svPh", { opacity: 1 }, tPk);
+        camSet(460, 150, 2.6, tPk); camTo(460, 475, 1, tPk + 0.02, 0.5, "power3.out");
+        const HDR = ["#tbar .dots", "#tbar .app", "#sim", "#tabs", "#svPh .lbl"]; // chrome that the zoom frame would slice: hidden during the reveal
+        st(HDR, { opacity: 0 }, tPk); ft(HDR, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" }, tPk + 0.5);
+        PHR.forEach((_, k) => { ft("#pr" + k, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tPk + 0.2 + k * 0.14);
+          ft(`#pr${k} .bar i`, { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.out" }, tPk + 0.3 + k * 0.14); });
+        FX.face("happy", tTer + 0.1, 0.9); FX.beat(tTer + 0.2);
+        ft("#pr0", { borderColor: "rgba(255,255,255,0.12)" }, { keyframes: [{ borderColor: "#ffb547", duration: 0.2 }, { duration: 1.4 }, { borderColor: "rgba(255,255,255,0.12)", duration: 0.4 }] }, tSiap - 0.3);
+        FX.point(tSiap);
+
+        /* 3D split: the copy card floats in on the left half, robot rises on the right half */
+        const tSplit2 = tCopy - 0.05;
+        st(win, { transformOrigin: "0% 50%" }, tSplit2 - 0.01);
+        ft(win, { x: 0, rotationY: 0, scale: 1, opacity: 1 }, { x: -150, rotationY: 26, scale: 0.86, opacity: 0, duration: 0.55, ease: "power3.in" }, tSplit2);
+        ft("#pCopy", { opacity: 0, x: 140, scale: 0.82, rotationY: -24 }, { opacity: 1, x: 0, scale: 1, rotationY: 0, duration: 0.6, ease: "power3.out" }, tSplit2 + 0.15);
+        FX.go("upR", tSplit2, 1.15);
+        ft("#cl0", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, tSplit2 + 0.8);
+        ft("#cl1", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, tSplit2 + 1.3);
+        FX.point(tSplit2 + 0.4); FX.face("excited", tSplit2 + 0.5, 1.0);
+
+        /* ===== BLOCKS -> SCENE 5 · local demand radar ===== */
+        const tW5 = tBerik - 1.2;
+        FX.dip("home", tW5 - 0.05, 0.25);
+        FX.blocks(tW5, "dark", (m) => { st("#pCopy", { opacity: 0 }, m); st(win, { opacity: 1, x: 0, rotationY: 0, scale: 1, transformOrigin: "50% 50%" }, m);
+          st("#vSuara", { opacity: 0 }, m); st("#vRadar", { opacity: 1 }, m); tabSet("#tabRadar", m); camSet(460, 475, 1, m); });
+        ft("#rdHd", { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.4 }, tW5 + 0.6);
+        ft("#rdBox", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, tW5 + 0.75);
+        ft("#rdSweep", { rotation: 0 }, { rotation: 1440, duration: tLaun - tW5, ease: "none" }, tW5 + 0.7);
+        FX.face("excited", tBerik + 0.05, 0.9); FX.point(tBerik + 0.3);
+        BLIPS.forEach((_, k) => { const t = tGerak + 0.1 + k * 0.22;
+          ft("#bl" + k, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, t);
+          ft("#bl" + k, { boxShadow: "0 0 0 0 rgba(255,181,71,0.7)" }, { boxShadow: "0 0 0 18px rgba(255,181,71,0)", duration: 0.7 }, t + 0.1); });
+        FX.go("center", tGerak, 0.9); FX.beat(tGerak + 0.3);
+        camTo(650, 330, 1.45, tNunj - 0.35, 0.6);
+        RISE.forEach((_, k) => { ft("#rs" + k, { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, tNunj + 0.1 + k * 0.14);
+          ft(`#rs${k} .sp i`, { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.out" }, tNunj + 0.25 + k * 0.14); });
+        FX.point(tNunj + 0.1); FX.go("home", tNunj + 0.2, 0.9);
+        whip(240, 330, 1.35, tArea - 0.34);
+        ft("#arChip", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 }, tArea + 0.05);
+        ft("#rdBox", { borderColor: "rgba(255,181,71,0.5)" }, { keyframes: [{ borderColor: "#ffb547", duration: 0.25 }, { duration: 0.7 }, { borderColor: "rgba(255,181,71,0.5)", duration: 0.4 }] }, tArea);
+        FX.face("wide", tArea + 0.1, 0.8);
+        camTo(460, 475, 1, tNaik - 0.45, 0.6);
+        ft("#rs0", { borderColor: "rgba(255,255,255,0.12)" }, { keyframes: [{ borderColor: "#ffb547", duration: 0.2 }, { duration: 1.4 }, { borderColor: "rgba(255,255,255,0.12)", duration: 0.4 }] }, tNaik);
+        ft("#hotChip", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, tNaik + 0.35);
+        FX.point(tNaik + 0.2); FX.face("excited", tNaik + 0.3, 0.9); FX.hop(tNaik + 0.9, 36);
+        ft("#tmBox", { opacity: 0, y: 24, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, tLaun - 0.2);
+        FX.go("right", tLaun, 0.9);
+        popIn("#tmL", tLaunW - 0.05, { y: 0 });
+        ft("#tmBr", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.5, ease: "power2.out", transformOrigin: "0% 50%" }, tBulan - 0.2);
+        ft("#tmGap", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, tBulan + 0.1);
+        ft("#tmK", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, tBukan + 0.9);
+        FX.beat(tMul); FX.face("happy", tMul + 0.1, 0.9); FX.beat(tBukan + 0.8);
+
+        /* ===== IRIS -> SCENE 6 · the research brain: one page every Monday ===== */
+        const tW6 = tDan - 1.15;
+        FX.dip("center", tW6 - 0.05, 0.25);
+        FX.iris(tW6, "dark", (m) => { st("#vRadar", { opacity: 0 }, m); st("#vOtak", { opacity: 1 }, m); tabSet("#tabOtak", m); camSet(460, 475, 1, m); }, { x: 540, y: 760 });
+        ft("#otHd", { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.4 }, tW6 + 0.7);
+        $$("#vOtak .mn").forEach((el, k) => ft(el, { opacity: 0, y: 24, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, tDan + 0.1 + k * 0.22));
+        ft("#vOtak .fa", { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.12 }, tDan + 0.9);
+        popIn("#brainBar", tOtak - 0.05, { y: 0 });
+        ft("#brainBar", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 24px rgba(1,204,247,0)", duration: 0.8 }, tOtak + 0.2);
+        FX.face("happy", tDan + 0.1, 0.9); FX.point(tOtak);
+        // zoom-out reveal: close-up on the brain bar, pulls back to show the one-page summary
+        camSet(460, 230, 1.8, tSen - 0.55); camTo(460, 475, 1, tSen - 0.5, 0.95, "power3.inOut");
+        const HDR2 = ["#tbar .dots", "#tbar .app", "#sim", "#tabs"]; st(HDR2, { opacity: 0 }, tSen - 0.56); ft(HDR2, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, tSen + 0.45);
+        ft("#oDoc", { opacity: 0, y: 30, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }, tSen + 0.05);
+        FX.go("home", tSen - 0.2, 0.9); FX.beat(tSen + 0.2); FX.face("excited", tSen + 0.2, 0.9);
+        const osIn = (id, t) => { ft(id, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, t); ft(id + " .ch2", { opacity: 0, scale: 0.8, y: 8 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, stagger: 0.14, ease: "back.out(1.7)" }, t + 0.25); };
+        osIn("#os1", tApaB); osIn("#os2", tApaL);
+        FX.point(tApaB + 0.2); FX.go("center", tApaL - 0.1, 0.9); FX.beat(tApaL + 0.1);
+        ft("#os3", { opacity: 0, y: 18, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.4)" }, tSatu - 0.1);
+        ft("#os3 .tg", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, tSatu + 0.9);
+
+        /* 3D split: the offer card floats in on the right half, robot rises on the left half */
+        const tSplit3 = tSatu + 1.0;
+        st(win, { transformOrigin: "100% 50%" }, tSplit3 - 0.06);
+        ft(win, { x: 0, rotationY: 0, scale: 1, opacity: 1 }, { x: 150, rotationY: -26, scale: 0.86, opacity: 0, duration: 0.55, ease: "power3.in" }, tSplit3 - 0.05);
+        ft("#pOffer", { opacity: 0, x: -140, scale: 0.82, rotationY: 24 }, { opacity: 1, x: 0, scale: 1, rotationY: 0, duration: 0.6, ease: "power3.out" }, tSplit3 + 0.1);
+        FX.go("upL", tSplit3 - 0.1, 1.15);
+        ["#of0", "#of1", "#of2"].forEach((s, i) => ft(s, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, tSplit3 + 0.55 + i * 0.28));
+        FX.point(tSplit3 + 0.5); FX.face("excited", tSplit3 + 0.4, 1.0);
+
+        /* ===== SCENE 7 · kinetic stat stack ===== */
+        const tK = tKomp2 - 0.5;
+        ft("#pOffer", { opacity: 1, scale: 1, x: 0 }, { opacity: 0, scale: 0.84, x: 40, duration: 0.35, ease: "power2.in" }, tK - 0.1);
+        st("#kin", { opacity: 1 }, tK);
+        FX.dip("home", tK - 0.15, 0.3);
+        ft("#kNote", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tK + 0.05);
+        ft("#k1", { opacity: 0, y: 60, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.5)" }, tKomp2 - 0.05);
+        ft("#k2", { opacity: 0, y: 60, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.5)" }, tKomp2 + 0.55);
+        ft("#k3", { opacity: 0, y: 60, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.5)" }, tTau - 0.15);
+        ft(".kr .lg .ic", { rotation: 0 }, { rotation: -720, duration: 4, ease: "none" }, tKomp2);
+        count($("#kc1"), 0, 35, tKomp2, 0.9); count($("#kc2"), 0, 1, tKomp2 + 0.6, 0.4); count($("#kc3"), 9, 0, tTau - 0.1, 0.8);
+        ft(".kr", { x: 0 }, { keyframes: [{ x: -9, duration: 0.05 }, { x: 9, duration: 0.06 }, { x: -5, duration: 0.06 }, { x: 0, duration: 0.07 }], stagger: 0.1 }, tTau + 0.4);
+        FX.face("flat", tKomp2 + 0.1, 0.9); FX.face("excited", tTau + 0.05, 0.9); FX.hop(tTau, 36);
+        ft("#kStamp", { opacity: 0, scale: 2.0, rotation: -12 }, { opacity: 1, scale: 1, rotation: -2, duration: 0.3, ease: "power3.in" }, tTau + 0.25);
+        ft(".kr", { opacity: 1 }, { opacity: 0.45, duration: 0.3 }, tTau + 0.35);
+
+        /* ===== ZOOM-THROUGH -> SCENE 8 · CTA: box centred, robot whole at the bottom ===== */
+        const tZ7 = tCta - 0.75;
+        FX.go("center", tZ7 + 0.2, 0.9);
+        st("#kin", { transformOrigin: "460px 475px" }, 0);
+        ft("#kin", { scale: 1 }, { scale: 3.2, duration: 0.6, ease: "power3.in" }, tZ7);
+        ft("#kin", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tZ7 + 0.3);
+        st("#kin", { display: "none" }, tZ7 + 0.65);
+        ft("#cta", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.55, ease: "power3.out" }, tZ7 + 0.35);
+        FX.wave(tCta + 0.5); FX.point(tF - 0.35); FX.face("happy", tF + 0.05, 1.4);
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 22px rgba(1,204,247,0)", duration: 0.7 }, tF + 0.05);
+        FX.face("excited", D - 1.6, 0.9);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /* no-cut-text guard: text sliced by the camera frame fades out during that shot, back in when whole */
+        { const wc = $("#wcam"), wr = wc.getBoundingClientRect(), k = wr.width / VW;
+          const leaves = $$("#wcam *").filter((e) => e.tagName.toLowerCase() === "text" || Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim()));
+          const UNIT = ".ahd, .cr .nm, .cc, .cpr, .crv, .gp, .qt, .pr, .lg2, .rs2, .mn, .os, .ch2, .tmb, #tmGap, #hotChip, #arChip, #brainBar, .live, #tabs, #tbar .app, #sim, #tmBox .lbl, #oDoc .dh, .tmr, .ch";
+          const box = (r) => ({ x0: (r.left - wr.left) / k, y0: (r.top - wr.top) / k, x1: (r.right - wr.left) / k, y1: (r.bottom - wr.top) / k });
+          const textBox = (e) => { if (e.tagName.toLowerCase() === "text") return box(e.getBoundingClientRect());
+            const rg = document.createRange(); let u = null;
+            Array.from(e.childNodes).filter((n) => n.nodeType === 3 && n.textContent.trim()).forEach((n) => { rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
+            return u ? box(u) : box(e.getBoundingClientRect()); };
+          const seen = new Set(), R = [];
+          leaves.forEach((e) => { const u = e.closest(UNIT); const tgt = u && wc.contains(u) ? u : e; if (seen.has(tgt)) return; seen.add(tgt);
+            const q = Object.assign({ e: tgt }, (tgt === e && !u) ? textBox(e) : box(tgt.getBoundingClientRect())); if (q.x1 - q.x0 > 1 && q.y1 - q.y0 > 1) R.push(q); });
+          const sh = SHOTS.slice().sort((a, b) => a.t - b.t);
+          const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
+            const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
+            return inter && !inside; };
+          const lerp = (a, b, f) => ({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, scale: a.scale + (b.scale - a.scale) * f });
+          R.forEach((q) => { let prev = false; const E = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = E[i]; if (!h && prev && i + 1 < sh.length && E[i + 1] && nextT - inT < 0.5) h = true;
+              let mA = -1, mB = -1;
+              if (!h && !prev && i > 0 && S.d > 0.45) { const EZ = { "power3.in": (f) => f * f * f, "power3.out": (f) => 1 - Math.pow(1 - f, 3), "power3.inOut": (f) => (f < 0.5 ? 4 * f * f * f : 1 - Math.pow(-2 * f + 2, 3) / 2) }; const ez = EZ[S.e] || EZ["power3.inOut"];
+                for (let n = 0; n <= 24; n++) if (cut(q, lerp(sh[i - 1].c, S.c, ez(n / 24)))) { if (mA < 0) mA = n; mB = n; } }
+              if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }
+              else if (h && !prev) { if (S.d === 0) st(q.e, { filter: "opacity(0)" }, S.t); else ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: S.d <= 0.45 ? 0.16 : 0.18, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.06 : S.t); }
+              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: S.d <= 0.45 ? 0.2 : 0.25, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.17 : inT);
+              else if (mA >= 0) { const t0 = S.t + (mA / 24) * S.d, t1 = Math.min(S.t + S.d, S.t + ((mB + 1) / 24) * S.d);
+                ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.08, ease: "power1.out" }, Math.max(S.t, t0 - 0.08));
+                ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.22, ease: "power1.out" }, t1); }
+              prev = h; }); });
+          window.__noCut = { leaves: R.length, shots: sh.length }; }
+
+        FX.runGestures();
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

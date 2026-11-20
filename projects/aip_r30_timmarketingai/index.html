@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Website 3D dari 1 prompt: bedah promptnya — AI PRENEUR</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/mascot3d.js"></script>
+    <script src="vendor/robot3d.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/r25icons.js"></script>
+    <script src="vendor/r25kit.js"></script>
+        <style>
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }
+      :root { --cy: #01ccf7; --cy2: #6adfff; --white: #ffffff; --cool: #e3edfa; --ink: #080b2a; --navy: #0b1440; --chip: rgba(8, 14, 46, 0.78); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0a1033; }
+      #main-root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: Poppins, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+      .layer { position: absolute; inset: 0; }
+      /* BG: the client's navy gradient (4:5 original extended to 9:16 by mirrored, blurred bands — never stretched) */
+      #bg .plate { position: absolute; inset: 0; background: url(assets/brand/bg_1080x1920.png) center / 1080px 1920px no-repeat; }
+      .glow { position: absolute; border-radius: 50%; mix-blend-mode: screen; }
+      #glow-a { left: -380px; top: 120px; width: 1000px; height: 1000px; background: radial-gradient(circle, rgba(48,93,143,.30), rgba(48,93,143,0) 66%); }
+      #glow-b { left: 480px; top: 1180px; width: 1000px; height: 1000px; background: radial-gradient(circle, rgba(1,204,247,.12), rgba(1,204,247,0) 66%); }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/brand/grain_256.png); opacity: .06; }
+      /* captions: every word sits on its own navy chip, so it reads over every world */
+      .cap { opacity: 0; position: absolute; left: 70px; right: 70px; text-align: center; font-size: 44px; line-height: 1.5; letter-spacing: -0.005em; }
+      .cap.mid { top: 960px; }
+      .cap.low { top: 1262px; }
+      .cap .m { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.06em 0.06em 0.12em; margin: -0.06em -0.06em -0.12em; }
+      .cap .w { display: inline-block; position: relative; padding: 0.02em 0.26em 0.06em; border-radius: 0.22em; background: var(--chip);
+                 box-shadow: 0 6px 18px rgba(4,8,30,.35), inset 0 0 0 1.5px rgba(255,255,255,.08); }
+      .cap .b { font-weight: 700; color: var(--white); }
+      .cap .r { font-weight: 400; color: var(--cool); }
+      .cap .c { font-weight: 700; color: var(--cy); }
+      .cap .k { font-weight: 700; color: var(--cy); background: #ffffff; box-shadow: 0 8px 22px rgba(1,204,247,.35); }
+      /* persistent brand mark (client logo, white) — top-left inside the safe zone */
+      #brandlogo { opacity: 0; position: absolute; left: 84px; top: 262px; width: 236px; height: auto; filter: drop-shadow(0 2px 8px rgba(4,8,30,.55)); }
+    </style>
+  </head>
+  <body>
+    <div id="main-root" data-composition-id="main" data-start="0" data-duration="86.9" data-width="1080" data-height="1920">
+      <div id="bg" class="clip layer" data-start="0" data-duration="86.9" data-track-index="0">
+        <div class="plate"></div><div id="glow-a" class="glow"></div><div id="glow-b" class="glow"></div>
+      </div>
+      <div id="s01" class="scene" data-composition-id="s01" data-composition-src="compositions/s01.html" data-start="0.0" data-duration="13.1" data-track-index="2" data-width="1080" data-height="1920"></div>
+      <div id="s02" class="scene" data-composition-id="s02" data-composition-src="compositions/s02.html" data-start="13.1" data-duration="10.7333" data-track-index="3" data-width="1080" data-height="1920"></div>
+      <div id="s03" class="scene" data-composition-id="s03" data-composition-src="compositions/s03.html" data-start="23.8333" data-duration="12.6334" data-track-index="4" data-width="1080" data-height="1920"></div>
+      <div id="s04" class="scene" data-composition-id="s04" data-composition-src="compositions/s04.html" data-start="36.4667" data-duration="16.5333" data-track-index="2" data-width="1080" data-height="1920"></div>
+      <div id="s05" class="scene" data-composition-id="s05" data-composition-src="compositions/s05.html" data-start="53.0" data-duration="13.5333" data-track-index="3" data-width="1080" data-height="1920"></div>
+      <div id="s06" class="scene" data-composition-id="s06" data-composition-src="compositions/s06.html" data-start="66.5333" data-duration="10.6334" data-track-index="4" data-width="1080" data-height="1920"></div>
+      <div id="s07" class="scene" data-composition-id="s07" data-composition-src="compositions/s07.html" data-start="77.1667" data-duration="9.7333" data-track-index="2" data-width="1080" data-height="1920"></div>
+      <div id="robot" class="clip" data-composition-id="robot" data-composition-src="compositions/robot.html" data-start="0" data-duration="86.9" data-track-index="6" data-width="1080" data-height="1920"></div>
+      <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="86.9" data-track-index="7" data-width="1080" data-height="1920"></div>
+      <div id="fx" class="clip layer" data-start="0" data-duration="86.9" data-track-index="8"><div id="grain"></div><img id="brandlogo" src="assets/brand/logo_white_trim.png" alt="AI PRENEUR"></div>
+      <div id="caps" class="clip layer" data-start="0" data-duration="86.9" data-track-index="9"></div>
+      <audio id="vo" src="assets/audio/vo.mp3" data-start="0.3" data-duration="84.48" data-track-index="10" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="86.9" data-track-index="11" data-volume="0.9"></audio>
+    </div>
+    <script>
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+        // expand the "scale" shorthand (seek-order-safe scaleY in the HF runtime)
+        const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+        { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+        const P0 = gsap.timeline(); tl.add(P0, 0);   // initial states: nested timeline, first child at 0
+        const pin = (el, v) => { gsap.set(el, _sc(v)); P0.set(el, _sc(v), 0); };
+        const mk = (tag, cls, parent, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; };
+        // VERIFIED word timings (VO offset included): [text, start, style]
+        const W = [
+          ["Riset", 0.38, "b"],
+          ["tren,", 0.8, "c"],
+          ["nulis", 1.34, "b"],
+          ["caption,", 1.94, "c"],
+          ["bikin", 2.3, "b"],
+          ["desain,", 2.62, "c"],
+          ["isi", 3.18, "b"],
+          ["suara,", 3.42, "c"],
+          ["posting,", 4.07, "c"],
+          ["balas", 4.7, "b"],
+          ["komen,", 4.98, "c"],
+          ["cek", 5.5, "b"],
+          ["angka.", 5.74, "c"],
+          ["Semua", 6.54, "b"],
+          ["kamu", 6.94, "b"],
+          ["kerjain", 7.18, "b"],
+          ["sendiri?", 7.54, "c"],
+          ["Coba", 8.21, "b"],
+          ["bayangin", 8.62, "b"],
+          ["semua", 9.1, "b"],
+          ["itu", 9.34, "r"],
+          ["dipegang", 9.58, "b"],
+          ["tim", 10.02, "b"],
+          ["marketing", 10.34, "c"],
+          ["AI,", 10.62, "c"],
+          ["dan", 11.26, "r"],
+          ["kamu", 11.38, "b"],
+          ["cukup", 11.86, "b"],
+          ["jadi", 12.18, "r"],
+          ["bosnya.", 12.46, "c"],
+          ["Bentuknya", 13.09, "b"],
+          ["bukan", 13.54, "b"],
+          ["corong", 13.94, "c"],
+          ["yang", 14.22, "r"],
+          ["sekali", 14.34, "b"],
+          ["jalan", 14.62, "b"],
+          ["selesai,", 14.9, "b"],
+          ["tapi", 15.553, "r"],
+          ["putaran.", 16.06, "c"],
+          ["Hasil", 16.967, "b"],
+          ["minggu", 17.18, "c"],
+          ["ini", 17.5, "r"],
+          ["jadi", 17.82, "r"],
+          ["bahan", 18.1, "b"],
+          ["buat", 18.46, "b"],
+          ["minggu", 18.62, "c"],
+          ["depan.", 18.78, "c"],
+          ["Dan", 19.4, "r"],
+          ["aturan", 19.66, "b"],
+          ["nomor", 20.02, "b"],
+          ["satu:", 20.22, "c"],
+          ["nggak", 20.833, "b"],
+          ["ada", 21.18, "r"],
+          ["postingan", 21.42, "b"],
+          ["yang", 21.82, "r"],
+          ["tayang", 22.02, "c"],
+          ["sebelum", 22.46, "b"],
+          ["kamu", 22.86, "b"],
+          ["setujui.", 23.1, "c"],
+          ["Modul", 23.85, "b"],
+          ["satu,", 24.22, "c"],
+          ["riset", 24.86, "c"],
+          ["dan", 25.18, "r"],
+          ["konten.", 25.46, "c"],
+          ["Claude", 26.167, "b"],
+          ["nyari", 26.38, "b"],
+          ["apa", 26.7, "b"],
+          ["yang", 26.94, "r"],
+          ["lagi", 27.1, "r"],
+          ["rame", 27.26, "c"],
+          ["di", 27.46, "r"],
+          ["pasarmu,", 27.58, "b"],
+          ["dan", 28.327, "r"],
+          ["pertanyaan", 28.46, "c"],
+          ["yang", 28.98, "r"],
+          ["paling", 29.14, "b"],
+          ["sering", 29.5, "b"],
+          ["ditanya", 29.74, "b"],
+          ["pembeli.", 30.033, "b"],
+          ["Dari", 30.62, "r"],
+          ["situ,", 30.86, "b"],
+          ["dia", 31.34, "r"],
+          ["nulis", 31.5, "b"],
+          ["draf", 31.78, "c"],
+          ["postingan,", 31.98, "b"],
+          ["caption,", 33.02, "b"],
+          ["sampai", 33.26, "r"],
+          ["email.", 33.66, "c"],
+          ["Jadi", 34.3, "r"],
+          ["kamu", 34.62, "b"],
+          ["nggak", 34.94, "b"],
+          ["pernah", 35.18, "b"],
+          ["kehabisan", 35.46, "b"],
+          ["ide.", 35.9, "c"],
+          ["Modul", 36.47, "b"],
+          ["dua,", 36.86, "c"],
+          ["kreatif", 37.26, "c"],
+          ["dan", 37.82, "r"],
+          ["distribusi.", 38.02, "c"],
+          ["Higgsfield", 39.06, "c"],
+          ["bikin", 39.42, "b"],
+          ["gambar", 39.82, "b"],
+          ["dan", 40.06, "r"],
+          ["video,", 40.22, "b"],
+          ["ElevenLabs", 40.94, "c"],
+          ["ngisi", 41.5, "b"],
+          ["suaranya.", 41.78, "b"],
+          ["Suara", 42.62, "b"],
+          ["di", 42.9, "r"],
+          ["video", 43.06, "b"],
+          ["ini", 43.26, "r"],
+          ["juga", 43.58, "b"],
+          ["pakai", 43.9, "b"],
+          ["ElevenLabs.", 44.14, "c"],
+          ["Begitu", 45.0, "b"],
+          ["kamu", 45.34, "b"],
+          ["setujui,", 45.58, "c"],
+          ["postingan", 46.353, "b"],
+          ["dijadwalkan", 46.58, "b"],
+          ["ke", 47.22, "r"],
+          ["tiap", 47.34, "b"],
+          ["channel,", 47.74, "c"],
+          ["dan", 48.06, "r"],
+          ["komentar", 48.26, "b"],
+          ["dibalas", 48.887, "b"],
+          ["pakai", 49.34, "b"],
+          ["gaya", 49.66, "b"],
+          ["bahasamu.", 49.98, "c"],
+          ["Yang", 50.887, "r"],
+          ["sensitif,", 50.98, "c"],
+          ["tetap", 51.8, "b"],
+          ["dilempar", 51.98, "b"],
+          ["ke", 52.34, "r"],
+          ["kamu.", 52.46, "c"],
+          ["Modul", 53.01, "b"],
+          ["tiga,", 53.38, "c"],
+          ["putaran", 53.82, "b"],
+          ["analitik.", 54.3, "c"],
+          ["Tiap", 55.073, "b"],
+          ["postingan", 55.34, "b"],
+          ["dicek:", 55.66, "b"],
+          ["mana", 56.22, "b"],
+          ["yang", 56.46, "r"],
+          ["bawa", 56.58, "b"],
+          ["chat,", 57.15, "c"],
+          ["booking,", 57.396, "c"],
+          ["dan", 57.847, "r"],
+          ["penjualan.", 57.98, "c"],
+          ["Bukan", 58.673, "b"],
+          ["cuma", 59.02, "r"],
+          ["likes.", 59.58, "c"],
+          ["Hasilnya", 59.88, "b"],
+          ["balik", 60.62, "b"],
+          ["lagi", 60.98, "r"],
+          ["ke", 61.153, "r"],
+          ["modul", 61.26, "b"],
+          ["satu.", 61.5, "c"],
+          ["Minggu", 62.1, "b"],
+          ["depan,", 62.3, "b"],
+          ["kamu", 62.753, "b"],
+          ["bikin", 62.993, "b"],
+          ["lebih", 63.26, "b"],
+          ["banyak", 63.54, "b"],
+          ["yang", 63.82, "r"],
+          ["terbukti", 63.98, "c"],
+          ["jalan,", 64.34, "b"],
+          ["tanpa", 64.94, "b"],
+          ["rekap", 65.18, "b"],
+          ["spreadsheet", 65.5, "b"],
+          ["manual.", 65.9, "c"],
+          ["Yang", 66.54, "r"],
+          ["menjalankan", 66.78, "b"],
+          ["semuanya", 67.26, "b"],
+          ["Claude", 67.74, "c"],
+          ["Code,", 68.06, "c"],
+          ["tersambung", 68.62, "b"],
+          ["ke", 68.98, "r"],
+          ["data", 69.14, "b"],
+          ["pelanggan,", 69.34, "c"],
+          ["kalender,", 69.9, "c"],
+          ["dan", 70.46, "r"],
+          ["akun", 70.7, "b"],
+          ["sosmedmu.", 70.98, "c"],
+          ["Tiap", 71.75, "b"],
+          ["pagi", 72.1, "b"],
+          ["kamu", 72.3, "b"],
+          ["terima", 72.54, "b"],
+          ["satu", 72.86, "b"],
+          ["halaman:", 73.18, "c"],
+          ["apa", 73.847, "b"],
+          ["yang", 73.94, "r"],
+          ["berhasil,", 74.06, "c"],
+          ["siapa", 74.78, "b"],
+          ["yang", 75.06, "r"],
+          ["sudah", 75.18, "b"],
+          ["booking,", 75.42, "c"],
+          ["dan", 75.98, "r"],
+          ["langkah", 76.14, "b"],
+          ["berikutnya.", 76.46, "c"],
+          ["Ingat,", 77.17, "b"],
+          ["AI", 77.74, "b"],
+          ["cuma", 78.14, "r"],
+          ["memindahkan", 78.38, "b"],
+          ["informasi.", 79.02, "c"],
+          ["Brand", 79.9, "c"],
+          ["dan", 80.18, "r"],
+          ["budget,", 80.5, "c"],
+          ["tetap", 80.86, "b"],
+          ["kamu", 81.14, "b"],
+          ["yang", 81.42, "r"],
+          ["pegang.", 81.62, "c"],
+          ["Komen", 82.1, "b"],
+          ["MARKETING,", 82.38, "m"],
+          ["aku", 83.02, "r"],
+          ["kirim", 83.34, "b"],
+          ["blueprint-nya", 83.58, "c"],
+          ["lewat", 84.06, "r"],
+          ["DM.", 84.3, "c"]
+        ];
+        // caption chunks: [start, end, firstWord, lastWord, position]
+        const CAPS = [
+          [0.13, 1.24, 0, 1, "mid"],
+          [1.24, 2.2, 2, 3, "mid"],
+          [2.2, 3.08, 4, 5, "mid"],
+          [3.08, 3.97, 6, 7, "mid"],
+          [3.97, 5.4, 8, 10, "mid"],
+          [5.4, 6.44, 11, 12, "mid"],
+          [6.44, 7.44, 13, 15, "mid"],
+          [7.44, 8.11, 16, 16, "mid"],
+          [8.11, 9.24, 17, 19, "mid"],
+          [9.24, 10.24, 20, 22, "mid"],
+          [10.24, 11.16, 23, 24, "mid"],
+          [11.16, 12.08, 25, 27, "mid"],
+          [12.08, 13.1, 28, 29, "mid"],
+          [13.1, 14.12, 30, 32, "mid"],
+          [14.12, 14.8, 33, 35, "mid"],
+          [14.8, 16.867, 36, 38, "mid"],
+          [16.867, 17.72, 39, 41, "mid"],
+          [17.72, 18.52, 42, 44, "mid"],
+          [18.52, 19.3, 45, 46, "mid"],
+          [19.3, 20.12, 47, 49, "mid"],
+          [20.12, 20.733, 50, 50, "mid"],
+          [20.733, 21.72, 51, 53, "mid"],
+          [21.72, 22.76, 54, 56, "mid"],
+          [22.76, 23.833, 57, 58, "mid"],
+          [23.833, 24.76, 59, 60, "mid"],
+          [24.76, 26.067, 61, 63, "mid"],
+          [26.067, 26.84, 64, 66, "mid"],
+          [26.84, 27.36, 67, 69, "mid"],
+          [27.36, 28.227, 70, 71, "mid"],
+          [28.227, 29.04, 72, 74, "mid"],
+          [29.04, 29.933, 75, 77, "mid"],
+          [29.933, 30.52, 78, 78, "mid"],
+          [30.52, 31.24, 79, 80, "mid"],
+          [31.24, 31.88, 81, 83, "mid"],
+          [31.88, 33.16, 84, 85, "mid"],
+          [33.16, 34.2, 86, 87, "mid"],
+          [34.2, 35.08, 88, 90, "mid"],
+          [35.08, 36.467, 91, 93, "mid"],
+          [36.467, 37.16, 94, 95, "mid"],
+          [37.16, 37.92, 96, 97, "mid"],
+          [37.92, 38.96, 98, 98, "mid"],
+          [38.96, 39.72, 99, 100, "mid"],
+          [39.72, 40.84, 101, 103, "mid"],
+          [40.84, 41.68, 104, 105, "mid"],
+          [41.68, 42.52, 106, 106, "mid"],
+          [42.52, 43.16, 107, 109, "mid"],
+          [43.16, 44.04, 110, 112, "mid"],
+          [44.04, 44.9, 113, 113, "mid"],
+          [44.9, 46.253, 114, 116, "mid"],
+          [46.253, 47.12, 117, 118, "mid"],
+          [47.12, 47.96, 119, 121, "mid"],
+          [47.96, 49.24, 122, 124, "mid"],
+          [49.24, 50.787, 125, 127, "mid"],
+          [50.787, 51.7, 128, 129, "mid"],
+          [51.7, 52.36, 130, 132, "mid"],
+          [52.36, 53.0, 133, 133, "mid"],
+          [53.0, 53.72, 134, 135, "mid"],
+          [53.72, 54.973, 136, 137, "mid"],
+          [54.973, 56.12, 138, 140, "mid"],
+          [56.12, 57.05, 141, 143, "mid"],
+          [57.05, 57.747, 144, 145, "mid"],
+          [57.747, 58.573, 146, 147, "mid"],
+          [58.573, 59.78, 148, 150, "mid"],
+          [59.78, 61.053, 151, 153, "mid"],
+          [61.053, 62.0, 154, 156, "mid"],
+          [62.0, 62.653, 157, 158, "mid"],
+          [62.653, 63.44, 159, 161, "mid"],
+          [63.44, 64.24, 162, 164, "mid"],
+          [64.24, 65.4, 165, 167, "mid"],
+          [65.4, 66.533, 168, 169, "mid"],
+          [66.533, 67.16, 170, 171, "mid"],
+          [67.16, 68.52, 172, 174, "mid"],
+          [68.52, 69.24, 175, 177, "mid"],
+          [69.24, 70.36, 178, 179, "mid"],
+          [70.36, 71.65, 180, 182, "mid"],
+          [71.65, 72.44, 183, 185, "mid"],
+          [72.44, 73.747, 186, 188, "mid"],
+          [73.747, 74.68, 189, 191, "mid"],
+          [74.68, 75.32, 192, 194, "mid"],
+          [75.32, 76.36, 195, 197, "mid"],
+          [76.36, 77.167, 198, 198, "mid"],
+          [77.167, 78.28, 199, 201, "mid"],
+          [78.28, 79.8, 202, 203, "mid"],
+          [79.8, 80.76, 204, 206, "mid"],
+          [80.76, 81.52, 207, 209, "mid"],
+          [81.52, 82.0, 210, 210, "mid"],
+          [82.0, 82.92, 211, 212, "mid"],
+          [82.92, 83.48, 213, 214, "mid"],
+          [83.48, 84.2, 215, 216, "mid"],
+          [84.2, 86.9, 217, 217, "mid"]
+        ];
+        const root = document.getElementById("caps");
+        CAPS.forEach(([s, e, a, b, pos], ci) => {
+          const c = mk("div", "cap " + pos, root); c.id = "cap" + ci;
+          pin(c, { opacity: 0 });
+          tl.set(c, { opacity: 1 }, s);
+          tl.set(c, { opacity: 0 }, e);
+          for (let i = a; i <= b; i++) {
+            const st = W[i][2];
+            const m = mk("span", "m", c);
+            const w = mk("span", "w " + (st === "m" ? "k" : st), m, W[i][0]);
+            if (i < b) c.appendChild(document.createTextNode(" "));
+            const t = Math.max(s + 0.02, W[i][1] - 0.08);
+            pin(w, { yPercent: 118, opacity: 0 });
+            tl.set(w, { opacity: 1 }, t);
+            tl.fromTo(w, { yPercent: 118 }, { yPercent: 0, duration: 0.34, ease: "power4.out", immediateRender: false }, t);
+            if (st === "m") tl.fromTo(w, { scale: 1 }, { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, t + 0.3);
+          }
+        });
+        // ambient (slow, seekable)
+        tl.fromTo("#glow-a", { x: 0, y: 0 }, { x: 90, y: 70, duration: 86.9, ease: "sine.inOut", immediateRender: false }, 0);
+        tl.fromTo("#glow-b", { x: 0, y: 0 }, { x: -110, y: -60, duration: 86.9, ease: "sine.inOut", immediateRender: false }, 0);
+        tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: 86.9, ease: "steps(1303)", immediateRender: false }, 0);
+        pin("#brandlogo", { opacity: 0.95 });   // visible from frame 0
+        pin("#glow-a", { x: 0, y: 0 }); pin("#glow-b", { x: 0, y: 0 }); pin("#grain", { x: 0, y: 0 });
+        tl.fromTo("#brandlogo", { opacity: 0.95 }, { opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }, 51.6);
+        (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+        tl.render(0, true, true);   // apply every pinned initial state now (frame 0 of the real runtime)
+        window.__timelines = window.__timelines || {};
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

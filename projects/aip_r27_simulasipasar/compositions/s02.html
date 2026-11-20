@@ -1,0 +1,75 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s02-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s02-glow { left: 20px; top: 300px; width: 1040px; height: 700px; }
+    #s02-hl { left: 640px; top: 657px; width: 388px; height: 0; border-top: 4px dashed #294b77; }
+    #s02-ht { left: 744px; top: 637px; height: 40px; padding: 0 16px; border-radius: 20px; background: #294b77; color: #fff; font: 700 15px/40px Poppins, sans-serif;
+      letter-spacing: .12em; white-space: nowrap; box-shadow: 0 10px 18px -10px rgba(10,13,44,.8); transform-origin: 50% 50%; }
+    #s02-tg { left: 380px; top: 360px; width: 76px; height: 76px; border-radius: 50%; background: #ffffff; box-shadow: 0 14px 24px -12px rgba(10,13,44,.6); transform-origin: 50% 50%; }
+    #s02-tg .rg { position: absolute; left: 6px; top: 6px; width: 64px; height: 64px; border-radius: 50%; border: 3px dashed #3a6fe0; }
+    #s02-tg .gl { position: absolute; left: 20px; top: 20px; width: 36px; height: 36px; color: #2a55c4; }
+    #s02-tg .gl svg { width: 36px; height: 36px; display: block; }
+    #s02-tt { left: 468px; top: 383px; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s02 "Biar web pesanan toko kue kamu jadi sampai online, pasang empat alat ini."
+      // Starts EXACTLY as s01 ends (phone at x 652 with the half line) · "Biar web pesanan": the half line fades, the phone glides to
+      // the left, chip "CONTOH · web pesanan toko kue" · "toko kue kamu": the shop header + items pulse · "jadi": the dashed half
+      // turns into the real form + button · "online,": a dashed target badge with a globe + tag "TUJUAN: ONLINE" (a goal, not done
+      // yet) · "pasang empat alat ini": the toolbox card "PASANG DI CLAUDE CODE · 4 alat" with four tiles (library card, warehouse
+      // key, test buyer, launch button). END STATE: phone + chip + badge + toolbox stay (s03 takes over at identical positions).
+      const ID = "s02", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, shake } = S, tl = S.tl;
+      const tBiar = L("Biar"), tToko = L("toko"), tKue = L("kue"), tJadi = L("jadi"), tOn = L("online,"), tPas = L("pasang"), tEm = L("empat"), tIni = L("ini.");
+      let h = `<div class="k-glow k-a" id="s02-glow"></div>`;
+      h += K.orderPhone("s02", { x: 652, y: 362 });
+      h += `<div class="k-a" id="s02-hl"></div><div class="k-a" id="s02-ht">SETENGAH JADI</div>`;
+      h += `<div class="k-chip sm info" id="s02-ct" style="left:64px;top:306px">${K.svg("store", 2.2)}CONTOH · web pesanan toko kue</div>`;
+      h += `<div class="k-a" id="s02-tg"><div class="rg" id="s02-rg"></div><div class="gl">${K.svg("globe", 2)}</div></div>`;
+      h += `<div class="k-tag" id="s02-tt" style="color:#2a55c4">TUJUAN: ONLINE</div>`;
+      h += K.toolbox("s02", { x: 460, y: 318 });
+      $("s02-cam").innerHTML = h;
+      I($("s02-glow"), { opacity: 0.85 });
+
+      // ================================================================ s01 hand-over state → the phone glides left
+      const ph = $("s02-ph"), hl = $("s02-hl"), ht = $("s02-ht");
+      [0, 1].forEach((i) => I($("s02-it" + i), { opacity: 1, scale: 1 }));
+      [0, 1].forEach((i) => I($("s02-fl" + i), { opacity: 0 })); I($("s02-bt"), { opacity: 0 });
+      [0, 1, 2].forEach((i) => I($("s02-wf" + i), { opacity: 1 }));
+      I(hl, { opacity: 1 }); I(ht, { opacity: 1, scale: 1 });
+      ft(hl, { opacity: 1 }, { opacity: 0, duration: 0.2 }, 0.0);
+      ft(ht, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.7, duration: 0.2, ease: "power2.in" }, 0.0);
+      I(ph, { x: 0 }); ft(ph, { x: 0 }, { x: -588, duration: 0.55, ease: "power3.inOut" }, Math.max(0.12, tBiar - 0.06));
+      pop($("s02-ct"), tBiar + 0.45, { scale: 0.7, y: 10 }, 0.26, "back.out(2)");
+      // "toko kue kamu": the shop header + items pulse
+      const st = $("s02-st"); I(st, { scale: 1, transformOrigin: "0% 50%" });
+      ft(st, { scale: 1 }, { scale: 1.08, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tToko - 0.05);
+      [0, 1].forEach((i) => ft($("s02-it" + i), { scale: 1 }, { scale: 1.04, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tKue + i * 0.1));
+      // "jadi": the dashed half becomes the real form
+      [0, 1, 2].forEach((i) => ft($("s02-wf" + i), { opacity: 1 }, { opacity: 0, duration: 0.18 }, tJadi - 0.05 + i * 0.09));
+      [$("s02-fl0"), $("s02-fl1"), $("s02-bt")].forEach((e, i) => { I(e, { opacity: 0, scale: 0.9, y: 10 });
+        ft(e, { opacity: 0, scale: 0.9, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.24, ease: "back.out(2)" }, tJadi - 0.02 + i * 0.09); });
+      // "online,": the target badge (dashed: a goal, not reached yet)
+      const tg = $("s02-tg"), rg = $("s02-rg"), tt = $("s02-tt");
+      pop(tg, tOn - 0.12, { scale: 0.3, y: 0 }, 0.3, "back.out(2.2)");
+      I(rg, { rotation: 0 }); ft(rg, { rotation: 0 }, { rotation: 140, duration: D - tOn + 0.12, ease: "none" }, tOn - 0.12);
+      pop(tt, tOn + 0.02, { scale: 0.7, x: -12, y: 0 }, 0.24, "back.out(2)");
+      ft(tt, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tPas - 0.3);
+
+      // ================================================================ "pasang empat alat ini": the toolbox
+      const tb = $("s02-tb"), tbe = $("s02-tbe"), tbt = $("s02-tbt");
+      pop(tb, tPas - 0.14, { scale: 0.94, y: 34 }, 0.34, "back.out(1.5)");
+      [tbe, tbt].forEach((e, k) => pop(e, tPas - 0.02 + k * 0.06, { scale: 0.9, y: 14 }, 0.26, "power3.out"));
+      [0, 1, 2, 3].forEach((i) => {
+        const t = $("s02-tile" + i);
+        pop(t, tEm - 0.1 + i * 0.12, { scale: 0.7, y: 24 }, 0.3, "back.out(2)");
+        ft(t, { scale: 1 }, { scale: 1.04, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tIni - 0.05 + i * 0.05);
+      });
+      S.done();
+    })();
+  </script>
+</template>

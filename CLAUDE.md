@@ -17,3 +17,8 @@ brand/bg-light.png, text gradient #0a0d2c → #294b77, accent #294b77, dark logo
 Minimal layout with negative space: logo, one chip, 2-line headline, short tagline, the 3D mascot, and ONE topic logo in 3D (open-source,
 see Logos rule) floating above the mascot's head — e.g. TikTok topic → TikTok logo; "3 AI" topic → those three AI logos. Free/value hooks
 ("GRATIS") are fine only when the DM really delivers that exact thing.
+
+**Skills (2026-11-20):** project skills live in `.claude/skills/` (auto-loaded) and a portable copy in `skills/`
+(index: skills/aipreneur-reels-studio/INDEX.md). Pick the matching one even when the client doesn't name it:
+voxel-reels, aip-remake, masterpajak-video, automation-demo, video-carousel, cover-topik, cover-testimoni, cover-foto,
+html-demo (MengTo, MIT — live HTML app demos for web pages). Keep both copies in sync when a skill changes.

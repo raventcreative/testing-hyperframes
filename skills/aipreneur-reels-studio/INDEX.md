@@ -10,3 +10,4 @@
 | /cover-topik | minimal topic thumbnails with 3D logo above the mascot |
 | /cover-testimoni | white testimonial covers |
 | /cover-foto | navy covers from a real photo |
+| /html-demo | (MengTo, MIT) live HTML app-window demos for web pages — not MP4; timing rules reused in /automation-demo |

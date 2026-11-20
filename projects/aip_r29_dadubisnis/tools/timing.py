@@ -17,7 +17,7 @@ for _i, (_s, _e) in TFIX.items(): raw[_i]["s"], raw[_i]["e"] = _s, _e
 # merges: first raw index -> (last raw index, caption text, spoken spelling for lip sync)
 MERGE = {9: (13, "16,7%.", "enambelaskomatujuhpersen"), 20: (25, "83,8%.", "delapanpuluhtigakomadelapanpersen"),
          30: (31, "100%.", "seratuspersen"), 148: (152, "0,02%.", "nolkomanolduapersen")}
-FIXI = {7: "6", 15: "10", 27: "100", 79: "3", 99: "6.", 101: "1.000", 141: "6.", 142: "5", 342: "6.", 396: "DADU,"}
+FIXI = {7: "6", 15: "10", 27: "100", 79: "3", 99: "6.", 101: "1.000", 141: "6.", 142: "5", 342: "6.", 398: "DADU,"}
 PRON = {"dm": "diem", "ai": "ei", "ainya": "einya", "shiny": "syaini", "object": "obyek", "syndrome": "sindrom", "online": "onlain",
         "prompt": "prom", "1000": "seribu", "10": "sepuluh", "100": "seratus", "3": "tiga", "6": "enam", "5": "lima", "dadu": "dadu"}
 
@@ -70,12 +70,12 @@ for w in words: w.pop("s0")
 
 # scene starts as RAW word indices (see production/NOTES.md for the beat list)
 SC_RAW = [0, 14, 26, 32, 42, 51, 65, 71, 81, 90, 100, 108, 116, 127, 142, 153, 157, 165, 170, 175, 184, 194, 197, 204, 214, 220,
-          229, 237, 241, 253, 260, 268, 280, 288, 292, 307, 312, 318, 329, 339, 343, 363, 370, 384, 395]
+          229, 237, 241, 253, 260, 268, 280, 288, 292, 307, 312, 318, 329, 339, 343, 363, 370, 384, 397]
 KEY = {"6", "6.", "16,7%.", "83,8%.", "100%.", "0,02%.", "10", "100", "1.000", "5", "dadu", "dadunya", "nampan", "nampannya", "pasar.", "pasar",
        "pasar,", "ide", "idenya", "kegedean,", "kekecilan.", "salah.", "sempit,", "lantai.", "terbatas.", "acak,", "kunci", "variabelnya.",
-       "pelajaran,", "naik.", "tepat,", "tumbuh.", "meleset", "shiny", "object", "syndrome.", "kinclong,", "nol", "kebalikannya.", "riset.",
+       "pelajaran,", "naik.", "tepat,", "tumbuh.", "meleset", "shiny", "object", "syndrome.", "kinclong,", "nol", "kebalikannya.", "diteliti", "lemparan.", "banyak-banyakan",
        "produknya,", "penawarannya,", "harganya,", "jualannya.", "AI", "ulasan", "keluhan", "versi", "bukan", "tepat.", "lemparanmu,",
-       "DADU,", "DM.", "sekaligus.", "sekaligus?", "lolos", "mental", "keluarga,", "3", "lembar", "kerja", "berulang,"}
+       "DADU,", "DM.", "sekaligus.", "sekaligus?", "lolos", "mental", "keluarga,", "3", "lembar", "kerja", "berulang,", "perintah"}
 w2s = {r: k for k, r in enumerate(rawidx)}
 starts = [w2s[r] for r in SC_RAW]
 scenes = []
@@ -96,7 +96,7 @@ for sc in scenes:
     a0 = sc["w0"]; cur = []
     for wi in range(sc["w0"], sc["w1"] + 1):
         txt = " ".join(words[x]["w"] for x in cur + [wi])
-        if cur and (len(txt) > 21 or len(cur) >= 4):
+        if cur and (len(txt) > 23 or len(cur) >= 4):
             caps.append(cur); cur = []
         cur.append(wi)
         if re.search(r"[,.:?]$", words[wi]["w"]) and wi < sc["w1"]:

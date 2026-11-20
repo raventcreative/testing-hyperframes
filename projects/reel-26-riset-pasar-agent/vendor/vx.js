@@ -73,6 +73,13 @@ function board(big, sub, accent = "#ff6b8a") { // big number board (your stall /
     g.fillStyle = accent; g.font = `700 150px ${FONT}`; fitFont(g, [big], 150, 320); g.textAlign = "center"; g.fillText(big, 192, 180);
   });
 }
+function twoLine(l1, l2) {
+  return ctex(512, 192, (g) => {
+    g.fillStyle = "#0a1644"; rr(g, 0, 0, 512, 192, 26); g.fill(); g.lineWidth = 5; g.strokeStyle = "#01ccf7"; rr(g, 3, 3, 506, 186, 24); g.stroke();
+    g.fillStyle = "#ffffff"; g.textBaseline = "middle"; g.textAlign = "center";
+    fitFont(g, [l1, l2], 40, 430); g.textAlign = "center"; g.fillText(l1, 256, 68); g.fillText(l2, 256, 126);
+  });
+}
 function phrase(txt) { // a buyer phrase slab
   return ctex(512, 128, (g) => {
     g.fillStyle = "#0a1644"; rr(g, 0, 0, 512, 128, 26); g.fill(); g.lineWidth = 5; g.strokeStyle = "#01ccf7"; rr(g, 3, 3, 506, 122, 24); g.stroke();
@@ -99,6 +106,7 @@ function makeTextures() {
   TX.k3 = card("LAPAK C · SIMULASI", [["Penawaran", "3 paket"], ["Harga", "Rp175rb"], ["Review", "4,5 ★"]]);
   TX.page = page();
   TX.ph = ["“ada slot besok?”", "“harganya berapa?”", "“bisa booking lewat WA?”", "“ready kapan?”"].map(phrase);
+  TX.gap = [["LAYANAN YANG", "NGGAK ADA"], ["KELUHAN YANG", "NGGAK DIBERESIN"]].map(([a, b]) => twoLine(a, b));
 }
 
 /* ------------------------------------------------------------------ H: market street — your stall is empty, the next one has a queue */
@@ -164,7 +172,7 @@ function buildG() {
     g.add(grp); Gg.ag.push({ g: grp, v: vis, c, i, col, row, home: grp.position.clone() }); }
   Gg.tow = Q3.map(([txt, c], i) => { const grp = new THREE.Group(); grp.position.set((i - 1) * 3.5, 0, 0); g.add(grp);
     const base = boxes([[0, 0.12, 0, 2.2, 0.24, 2.2, "#17306a"]], MAT, false); grp.add(base);
-    const ring = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.05, 2.0), emi(c, 0.9)); ring.position.y = 0.26; grp.add(ring);
+    const ring = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.05, 1.7), emi(c, 0.55)); ring.position.y = 0.26; grp.add(ring);
     const lb = label(txt, null, null, 0.34); lb.position.set(0, 2.6, 0); grp.add(lb); setLabel(lb, 0);
     const gl = glow(c, 3.0, 2.0); gl.position.set(0, 1.2, 0); gl.material.opacity = 0; grp.add(gl);
     return { grp, ring, lb, gl, c }; });
@@ -182,9 +190,9 @@ function animG(t) {
     a.g.scale.setScalar(Math.max(0.001, on));
     a.v.material.emissiveIntensity = 0.15 + 1.9 * U(t, 10.3 + a.i * 0.05, 10.55 + a.i * 0.05) * (0.75 + 0.25 * Math.sin(t * 5 + a.i)); });
   Gg.tow.forEach((T, i) => { const on = U(t, 15.6 + i * 0.95, 16.2 + i * 0.95, "back");
-    const pad = U(t, 15.25 + i * 0.2, 15.95 + i * 0.2, "out"); T.grp.visible = pad > 0.002;
+    const pad = U(t, 15.9 + i * 0.95, 16.5 + i * 0.95, "out"); T.grp.visible = pad > 0.002;
     T.grp.scale.set(Math.max(0.002, pad), 1, Math.max(0.002, pad));
-    T.ring.material.emissiveIntensity = (0.2 + 1.4 * on) * pad; setLabel(T.lb, U(t, 15.9 + i * 0.95, 16.4 + i * 0.95, "back"));
+    T.ring.material.emissiveIntensity = (0.15 + 0.75 * on) * pad; setLabel(T.lb, U(t, 15.9 + i * 0.95, 16.4 + i * 0.95, "back"));
     T.lb.position.y = 2.6 + 0.06 * Math.sin(t * 2 + i); T.gl.material.opacity = 0.22 * on; });
 }
 
@@ -203,11 +211,12 @@ function buildK() {
   Kk.beam = new THREE.Mesh(new THREE.BoxGeometry(0.1, 5.0, 3.2), new THREE.MeshBasicMaterial({ color: 0x36e0ff, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
   Kk.beam.position.set(0, 2.4, 0); g.add(Kk.beam);
   // the two gaps rise out of the ground between the stalls
-  Kk.gap = [["LAYANAN YANG NGGAK ADA", -1.7], ["KELUHAN YANG NGGAK DIBERESIN", 1.7]].map(([txt, x], i) => {
+  Kk.gap = [-1.75, 1.75].map((x, i) => {
     const grp = new THREE.Group(); grp.position.set(x, 0, 2.3); g.add(grp);
-    const pil = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.5, 0.5), emi("#01ccf7", 1.1)); pil.position.y = 0.75; grp.add(pil);
-    const lb = label(txt, null, null, 0.4); lb.position.set(0, 2.1, 0); grp.add(lb); setLabel(lb, 0);
-    const gl = glow("#01ccf7", 2.4, 2.4); gl.position.y = 1.0; gl.material.opacity = 0; grp.add(gl);
+    const pil = new THREE.Mesh(new THREE.BoxGeometry(0.44, 1.4, 0.44), emi("#01ccf7", 1.1)); pil.position.y = 0.7; grp.add(pil);
+    const lb = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.5625), new THREE.MeshBasicMaterial({ map: TX.gap[i], toneMapped: false, transparent: true, opacity: 0 }));
+    lb.position.set(0, 1.95, 0.02); grp.add(lb);
+    const gl = glow("#01ccf7", 2.2, 2.2); gl.position.y = 0.95; gl.material.opacity = 0; grp.add(gl);
     return { grp, pil, lb, gl }; });
 }
 function animK(t) {
@@ -218,7 +227,8 @@ function animK(t) {
   Kk.beam.visible = false;
   Kk.gap.forEach((G2, i) => { const a = 26.9 + i * 1.9, u = U(t, a, a + 0.55, "back");
     G2.grp.visible = t > a - 0.02; G2.pil.scale.y = Math.max(0.001, u); G2.pil.position.y = 0.75 * u;
-    setLabel(G2.lb, U(t, a + 0.25, a + 0.7, "back")); G2.lb.position.y = 2.1 + 0.06 * Math.sin(t * 2.2 + i);
+    const lu = U(t, a + 0.25, a + 0.7, "out"); G2.lb.material.opacity = lu * (1 - U(t, 30.5, 30.85));
+    G2.lb.position.y = 1.95 + (1 - lu) * -0.2 + 0.05 * Math.sin(t * 2.2 + i); G2.lb.scale.setScalar(0.7 + 0.3 * lu);
     G2.gl.material.opacity = 0.26 * u; });
 }
 
@@ -226,14 +236,14 @@ function animK(t) {
 const Vv = {};
 function buildV() {
   const g = mk("V"); g.add(island(6, 4)); clouds("V", 7, 47);
-  const N = 96; Vv.N = N;
+  const N = 80; Vv.N = N;
   Vv.tiles = new THREE.InstancedMesh(new THREE.BoxGeometry(0.46, 0.34, 0.07),
-    new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x2fd6ff, emissiveIntensity: 0.1, roughness: 0.5 }), N);
+    new THREE.MeshStandardMaterial({ color: 0xc9dcf7, emissive: 0x2fd6ff, emissiveIntensity: 0.06, roughness: 0.6 }), N);
   Vv.tiles.frustumCulled = false; g.add(Vv.tiles);
-  Vv.pos = []; for (let i = 0; i < N; i++) { const col = i % 12, row = (i / 12) | 0; Vv.pos.push([(col - 5.5) * 0.56, 0.5 + row * 0.44, -1.2]); }
-  Vv.frame = boxes([[0, 2.1, -1.45, 7.2, 4.0, 0.14, "#132a5e"]], MAT, false); g.add(Vv.frame);
-  Vv.ph = TX.ph.map((tx, i) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.55), new THREE.MeshBasicMaterial({ map: tx, toneMapped: false, transparent: true, opacity: 0 }));
-    m.position.set(i % 2 ? 1.9 : -1.9, 1.0 + i * 0.75, 1.1); g.add(m); return m; });
+  Vv.pos = []; for (let i = 0; i < N; i++) { const col = i % 10, row = (i / 10) | 0; Vv.pos.push([(col - 4.5) * 0.52, 0.62 + row * 0.42, -1.2]); }
+  Vv.frame = boxes([[0, 2.1, -1.45, 5.9, 3.9, 0.14, "#132a5e"]], MAT, false); g.add(Vv.frame);
+  Vv.ph = TX.ph.map((tx, i) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(1.85, 0.4625), new THREE.MeshBasicMaterial({ map: tx, toneMapped: false, transparent: true, opacity: 0 }));
+    m.position.set(i % 2 ? 1.2 : -1.2, 1.1 + i * 0.72, 1.1); g.add(m); return m; });
 }
 const _o = new THREE.Object3D();
 function animV(t) {
@@ -243,9 +253,9 @@ function animV(t) {
     _o.position.set(p[0], p[1], p[2] + (1 - u) * -0.5); _o.rotation.set(0, 0, 0); _o.scale.setScalar(Math.max(0.001, u));
     _o.updateMatrix(); Vv.tiles.setMatrixAt(i, _o.matrix); }
   Vv.tiles.instanceMatrix.needsUpdate = true;
-  Vv.tiles.material.emissiveIntensity = 0.1 + 0.5 * cl((t - 31.2) / 3, 0, 1);
+  Vv.tiles.material.emissiveIntensity = 0.06 + 0.26 * cl((t - 31.2) / 3, 0, 1);
   Vv.ph.forEach((m, i) => { const a = 36.3 + i * 0.75, u = U(t, a, a + 0.55, "out"); m.visible = t > a - 0.02;
-    m.material.opacity = u * (1 - U(t, 40.2, 40.5)); m.position.z = 1.1 * u + 0.2; m.position.y = 1.0 + i * 0.75 + (1 - u) * -0.4 + 0.03 * Math.sin(t * 2 + i);
+    m.material.opacity = u * (1 - U(t, 40.2, 40.5)); m.position.z = 1.1 * u + 0.2; m.position.y = 1.1 + i * 0.72 + (1 - u) * -0.4 + 0.03 * Math.sin(t * 2 + i);
     m.scale.setScalar(0.6 + 0.4 * u); });
 }
 
@@ -344,11 +354,11 @@ C.push([20.62, [120, 8.4, 22.0, 120, 2.0, 0, 44], "io"]);
 // K — the three stalls, one by one, then down to the two gaps
 k("K", 21.5, [0, 7.0, 20.5, 0, 1.9, 0, 42], "sine"); k("K", 23.0, [-3.4, 3.6, 8.0, -3.4, 1.8, 0, 40], "io");
 k("K", 24.6, [0, 3.7, 8.2, 0, 1.8, 0, 40], "io"); k("K", 26.2, [3.4, 3.6, 8.0, 3.4, 1.8, 0, 40], "io");
-k("K", 27.5, [-0.2, 3.8, 9.0, -0.45, 1.8, 2.0, 42], "io"); k("K", 29.5, [1.7, 3.6, 8.4, 1.7, 1.7, 2.1, 42], "io");
+k("K", 27.5, [-0.25, 4.0, 11.2, -0.55, 1.7, 2.1, 42], "io"); k("K", 29.5, [1.75, 3.8, 10.4, 1.75, 1.6, 2.2, 42], "io");
 k("K", 30.9, [0, 5.4, 13.6, 0, 1.8, 1.4, 44], "sine");
 // V — after the iris: the review wall, then the buyer phrases
 cut("V", 31.0, [0, 4.4, 15.4, 0, 2.1, -1.2, 42]); k("V", 34.4, [0, 4.0, 13.4, 0, 2.0, -1.2, 40], "sine");
-k("V", 36.6, [0, 3.8, 11.4, 0, 2.0, 0.2, 42], "io"); k("V", 39.6, [0, 4.0, 12.2, 0, 2.2, 0.4, 42], "sine");
+k("V", 36.6, [0, 4.0, 13.4, 0, 2.1, 0.3, 42], "io"); k("V", 39.6, [0, 4.2, 14.0, 0, 2.3, 0.4, 42], "sine");
 k("V", 40.52, [0, 4.0, 12.2, 0, 30, -8, 42], "expo"); // whip tilt up to the sky
 // R — starts on the sky, tilts down onto the radar, then the bars sit on the right half
 cut("R", 40.56, [-0.4, 5.2, 16.0, -0.4, 30, -8, 42]); k("R", 41.4, [-0.4, 5.0, 15.4, -0.4, 1.6, 0.4, 42], "io");

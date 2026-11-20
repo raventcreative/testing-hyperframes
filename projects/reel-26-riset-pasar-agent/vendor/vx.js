@@ -171,8 +171,8 @@ function buildG() {
 }
 function animG(t) {
   const form = U(t, 15.2, 17.6, "io"); // 35 agents walk into their three towers
-  Gg.ag.forEach((a) => { const on = U(t, 10.4 + a.row * 0.16 + a.col * 0.03, 10.9 + a.row * 0.16 + a.col * 0.03, "back");
-    a.g.visible = t > 10.4 + a.row * 0.16 + a.col * 0.03;
+  Gg.ag.forEach((a) => { const on = U(t, 9.98 + a.row * 0.1 + a.col * 0.02, 10.4 + a.row * 0.1 + a.col * 0.02, "back");
+    a.g.visible = t > 9.98 + a.row * 0.1 + a.col * 0.02;
     const k = a.i % 3, slot = a.i / 3 | 0, ang = (slot / 12) * Math.PI * 2;
     const tx = (k - 1) * 3.5 + Math.cos(ang) * 0.8, tz = Math.sin(ang) * 0.8;
     a.g.position.x = a.home.x + (tx - a.home.x) * form;
@@ -180,10 +180,11 @@ function animG(t) {
     a.g.position.y = Math.max(0, (1 - on) * 0.8) + Math.sin(form * Math.PI) * 0.12 * Math.abs(Math.sin(t * 6 + a.i));
     a.g.rotation.y = form * ((a.i % 2 ? 1 : -1) * 0.5) + Math.sin(t * 1.2 + a.i) * 0.08;
     a.g.scale.setScalar(Math.max(0.001, on));
-    a.v.material.emissiveIntensity = 0.15 + 1.9 * U(t, 10.5 + a.i * 0.055, 10.75 + a.i * 0.055) * (0.75 + 0.25 * Math.sin(t * 5 + a.i)); });
+    a.v.material.emissiveIntensity = 0.15 + 1.9 * U(t, 10.3 + a.i * 0.05, 10.55 + a.i * 0.05) * (0.75 + 0.25 * Math.sin(t * 5 + a.i)); });
   Gg.tow.forEach((T, i) => { const on = U(t, 15.6 + i * 0.95, 16.2 + i * 0.95, "back");
-    T.grp.visible = t > 15.25;
-    T.ring.material.emissiveIntensity = 0.2 + 1.4 * on; setLabel(T.lb, U(t, 15.9 + i * 0.95, 16.4 + i * 0.95, "back"));
+    const pad = U(t, 15.25 + i * 0.2, 15.95 + i * 0.2, "out"); T.grp.visible = pad > 0.002;
+    T.grp.scale.set(Math.max(0.002, pad), 1, Math.max(0.002, pad));
+    T.ring.material.emissiveIntensity = (0.2 + 1.4 * on) * pad; setLabel(T.lb, U(t, 15.9 + i * 0.95, 16.4 + i * 0.95, "back"));
     T.lb.position.y = 2.6 + 0.06 * Math.sin(t * 2 + i); T.gl.material.opacity = 0.22 * on; });
 }
 
@@ -211,11 +212,10 @@ function buildK() {
 }
 function animK(t) {
   Kk.cards.forEach((c, i) => { const a = 21.4 + i * 1.5, u = U(t, a, a + 0.5, "out");
-    c.p.material.opacity = u * (1 - 0.55 * U(t, 26.3, 26.9)); c.p.position.y = 1.72 + (1 - u) * 0.25;
+    c.p.material.opacity = u * (1 - U(t, 26.3, 26.85)); c.p.position.y = 1.72 + (1 - u) * 0.25;
     c.gl.material.opacity = 0.3 * (U(t, a - 0.25, a) - U(t, a + 0.9, a + 1.3));
     c.grp.position.y = 0.04 * Math.sin(t * 1.6 + i); });
-  { const sw = cl((t - 21.1) / 4.6, 0, 1); Kk.beam.visible = t > 21.05 && t < 26.3;
-    Kk.beam.position.x = -3.4 + sw * 6.8; Kk.beam.material.opacity = 0.22 * U(t, 21.05, 21.3) * (1 - U(t, 25.9, 26.3)); }
+  Kk.beam.visible = false;
   Kk.gap.forEach((G2, i) => { const a = 26.9 + i * 1.9, u = U(t, a, a + 0.55, "back");
     G2.grp.visible = t > a - 0.02; G2.pil.scale.y = Math.max(0.001, u); G2.pil.position.y = 0.75 * u;
     setLabel(G2.lb, U(t, a + 0.25, a + 0.7, "back")); G2.lb.position.y = 2.1 + 0.06 * Math.sin(t * 2.2 + i);

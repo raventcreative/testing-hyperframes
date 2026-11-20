@@ -15,7 +15,7 @@ raw = [w for s in R["segments"] for w in s["words"]]
 # merges: (first index, last index, display text, spoken spelling for lip sync)
 MERGE = {}
 FIX = {}
-FIXI = {212: "MARKETING,"}   # by raw word index (CTA keyword shown upper case; the TTS text is lower case)
+FIXI = {214: "MARKETING,"}   # by raw word index (CTA keyword shown upper case; the TTS text is lower case)
 PRON = {"caption": "kepsyen", "marketing": "marketing", "higgsfield": "higsfild", "elevenlabs": "elevenlebs", "channel": "chenel",
         "booking": "buking", "likes": "laiks", "spreadsheet": "spredsit", "claude": "klod", "code": "kod", "email": "imel", "brand": "bren",
         "budget": "bajet", "blueprintnya": "bluprinnya", "dm": "diem", "ai": "ei", "posting": "posting", "draf": "draf"}
@@ -76,9 +76,9 @@ for w in words: w.pop("s0")
 
 # scenes: id, first word text (sequential match), caption chunk cuts (word offsets), cyan words, marker words
 SC = [   # id, first word, cyan words, marker words (caption chunks are cut automatically)
-    ("s01", "Riset", ["tren,", "caption,", "desain,", "suara,", "posting,", "komen,", "angka.", "sendiri?", "marketing", "AI,", "bosnya."], []),
+    ("s01", "Cari", ["tren,", "caption,", "desain,", "suara,", "posting,", "komen,", "angka.", "sendiri?", "marketing", "AI,", "bosnya."], []),
     ("s02", "Bentuknya", ["corong", "putaran.", "minggu", "depan.", "satu:", "tayang", "setujui."], []),
-    ("s03", "Modul", ["satu,", "riset", "konten.", "rame", "pertanyaan", "draf", "email.", "ide."], []),
+    ("s03", "Modul", ["satu,", "tren", "konten.", "rame", "pertanyaan", "draf", "email.", "ide."], []),
     ("s04", "Modul", ["dua,", "kreatif", "distribusi.", "Higgsfield", "ElevenLabs", "ElevenLabs.", "setujui,", "channel,", "bahasamu.", "sensitif,", "kamu."], []),
     ("s05", "Modul", ["tiga,", "analitik.", "chat,", "booking,", "penjualan.", "likes.", "satu.", "terbukti", "manual."], []),
     ("s06", "Yang", ["Claude", "Code,", "pelanggan,", "kalender,", "sosmedmu.", "halaman:", "berhasil,", "booking,", "berikutnya."], []),

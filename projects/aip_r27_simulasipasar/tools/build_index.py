@@ -1,9 +1,10 @@
-"""Builds index.html for the R24 reel (4 alat biar web dari Claude Code jadi sampai online; adapted from the R20/R12 builder) from production/timing.json: the client's light
+"""Builds index.html for the R27 reel (tes ide produk ke warga AI dulu — MiroFish; adapted from the R24/R20 builder) from production/timing.json: the client's light
 background (white -> soft blue; its baked grid removed and re-created as an ANIMATED CSS grid in the top-right that drifts and
 breathes), word-synced Poppins captions in the navy text gradient (#0a0d2c -> #294b77), the dark AI PRENEUR logo (top-left),
-scene slots (s01–s08), the robot (co-host) and the mascot (host). Shared visual system: vendor/r24kit.js (window.K).
+scene slots (s01–s10), the robot (co-host) and the mascot (host). Shared visual system: vendor/r27kit.js (window.K).
 Every initial state is pinned at 0 in a NESTED timeline (P0, first child at 0); tl.render(0, true, true) at the end of the build.
-Caption styles: b = 700, r = 400, c = 700 + drawn underline, m = navy gradient pill + white 700.   Run: python3 -I tools/build_index.py ."""
+Captions (brand.md): per-word white boxes rgba(255,255,255,.93) with navy-gradient Poppins 700 text (r = 400), each box appears WITH its word
+(never an empty box); c = key word with a #294b77 marker sweep under it; m = navy gradient box + white text.   Run: python3 -I tools/build_index.py ."""
 import json, sys
 from pathlib import Path
 
@@ -23,14 +24,14 @@ html = f"""<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <title>4 alat Claude Code: dari kode sampai online — AI PRENEUR</title>
+    <title>Tes ide ke warga AI dulu (MiroFish) — AI PRENEUR</title>
     <script src="vendor/gsap/dist/gsap.min.js"></script>
     <script src="vendor/mascot3d.js"></script>
     <script src="vendor/robot3d.js"></script>
     <script src="vendor/vo_words.js"></script>
     <script src="vendor/scenes.js"></script>
-    <script src="vendor/r24icons.js"></script>
-    <script src="vendor/r24kit.js"></script>
+    <script src="vendor/r27icons.js"></script>
+    <script src="vendor/r27kit.js"></script>
         <style>
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; }}
       @font-face {{ font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; }}
@@ -51,16 +52,17 @@ html = f"""<!doctype html>
                  background: radial-gradient(circle, rgba(255,255,255,.75), rgba(255,255,255,0) 62%); mix-blend-mode: screen; }}
       #gridtint {{ position: absolute; left: 520px; top: -260px; width: 900px; height: 900px; border-radius: 50%; background: radial-gradient(circle, rgba(126,164,226,.22), rgba(126,164,226,0) 64%); }}
       #grain {{ position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/brand/grain_256.png); opacity: .035; mix-blend-mode: multiply; }}
-      /* captions: navy gradient text with a soft white glow (light background) */
-      .cap {{ opacity: 0; position: absolute; left: 70px; right: 70px; text-align: center; font-size: 50px; line-height: 1.22; letter-spacing: -0.01em; filter: drop-shadow(0 2px 10px rgba(255,255,255,.9)); }}
-      .cap.mid {{ top: 966px; }}
-      .cap .m {{ display: inline-block; overflow: hidden; vertical-align: top; padding: 0.04em 0.1em 0.2em; margin: -0.04em -0.1em -0.2em; }}
-      .cap .w {{ display: inline-block; position: relative; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }}
-      .cap .b {{ font-weight: 700; }}
+      /* captions (brand.md, white theme): per-word boxes, 60 px Poppins Bold, centred above the mascot's head */
+      .cap {{ opacity: 0; position: absolute; left: 50px; right: 50px; top: 962px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 12px; }}
+      .cap .m {{ position: relative; display: block; overflow: hidden; padding: 4px 18px 10px; border-radius: 18px; background: rgba(255,255,255,.93);
+                 box-shadow: 0 14px 26px -16px rgba(10,13,44,.55), 0 0 0 1.5px rgba(10,13,44,.06); transform-origin: 50% 70%; }}
+      .cap .w {{ display: block; position: relative; font-size: 60px; line-height: 76px; letter-spacing: -0.01em; white-space: nowrap;
+                 background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }}
+      .cap .b, .cap .c, .cap .k {{ font-weight: 700; }}
       .cap .r {{ font-weight: 400; }}
-      .cap .c {{ font-weight: 700; }}
-      .cap .c::after {{ content: ""; position: absolute; left: 0.04em; right: 0.04em; bottom: 0.02em; height: 0.11em; border-radius: 0.06em; background: linear-gradient(90deg, rgba(41,75,119,.5), rgba(10,13,44,.3)); }}
-      .cap .k {{ font-weight: 700; color: #fff; -webkit-background-clip: border-box; background-clip: border-box; background: var(--grad); padding: 0 0.22em; border-radius: 0.24em; box-shadow: 0 8px 22px rgba(10,13,44,.22); }}
+      .cap .sw {{ position: absolute; left: 18px; right: 18px; bottom: 9px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #294b77, #2f6bff); transform-origin: 0 50%; }}
+      .cap .m.km {{ background: linear-gradient(135deg, #0a0d2c, #294b77); box-shadow: 0 14px 26px -12px rgba(10,13,44,.75); }}
+      .cap .m.km .w {{ background: none; color: #ffffff; -webkit-background-clip: border-box; background-clip: border-box; }}
       /* persistent brand mark (client logo, dark) — top-left inside the safe zone */
       #brandlogo {{ opacity: 0; position: absolute; left: 84px; top: 262px; width: 236px; height: auto; }}
     </style>
@@ -102,14 +104,16 @@ html = f"""<!doctype html>
           tl.set(c, {{ opacity: 0 }}, e);
           for (let i = a; i <= b; i++) {{
             const st = W[i][2];
-            const m = mk("span", "m", c);
+            const m = mk("span", "m" + (st === "m" ? " km" : ""), c);
             const w = mk("span", "w " + (st === "m" ? "k" : st), m, W[i][0]);
-            if (i < b) c.appendChild(document.createTextNode(" "));
             const t = Math.max(s + 0.02, W[i][1] - 0.08);
-            pin(w, {{ yPercent: 118, opacity: 0 }});
-            tl.set(w, {{ opacity: 1 }}, t);
-            tl.fromTo(w, {{ yPercent: 118 }}, {{ yPercent: 0, duration: 0.34, ease: "power4.out", immediateRender: false }}, t);
-            if (st === "m") tl.fromTo(w, {{ scale: 1 }}, {{ scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }}, t + 0.3);
+            // the BOX appears with its word (invisible before: never an empty box; the line layout stays still), on a small-overshoot spring
+            pin(m, {{ scale: 0.86, opacity: 0 }});
+            tl.fromTo(m, {{ scale: 0.86, opacity: 0 }}, {{ scale: 1, opacity: 1, duration: 0.22, ease: "back.out(1.7)", immediateRender: false }}, t);
+            pin(w, {{ yPercent: 70 }});
+            tl.fromTo(w, {{ yPercent: 70 }}, {{ yPercent: 0, duration: 0.28, ease: "power4.out", immediateRender: false }}, t);
+            if (st === "c") {{ const sw = mk("i", "sw", m); pin(sw, {{ scaleX: 0 }}); tl.fromTo(sw, {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.3, ease: "power2.out", immediateRender: false }}, t + 0.12); }}
+            if (st === "m") tl.fromTo(m, {{ scale: 1 }}, {{ scale: 1.07, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }}, t + 0.26);
           }}
         }});
         // ambient (slow, seekable): the client's grid drifts diagonally by whole cells, a soft light wanders over it, the tint breathes
@@ -119,7 +123,7 @@ html = f"""<!doctype html>
         pin("#brandlogo", {{ opacity: 0.95 }});   // visible from frame 0
         pin("#grid", {{ x: 0, y: 0 }}); pin("#gridhl", {{ x: 600, y: 180 }}); pin("#grain", {{ x: 0, y: 0 }});
         // the CTA end beat shows its own big logo: the small corner mark steps away
-        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s08"]["start"] + S["s08"]["dur"] - 1.2, 3)});
+        tl.fromTo("#brandlogo", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }}, {round(S["s10"]["start"] + S["s10"]["dur"] - 1.2, 3)});
         tl.set({{}}, {{}}, {round(total - 0.01, 4)});
         (function (t) {{ const r = t.render; t.render = function (tt, se, f) {{ if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }}; }})(tl);
         tl.render(0, true, true);

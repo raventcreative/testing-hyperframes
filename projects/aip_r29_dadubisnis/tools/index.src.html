@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>R29 · Bisnis itu lempar dadu: pilih dadu, pilih nampan — AI PRENEUR</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/mascot3d.js"></script>
+    <script src="vendor/robot3d.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/r29time.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
+    <script type="module" src="vendor/dice.js"></script>
+    <style>
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: block; }
+      :root { --grad: linear-gradient(172deg, #0a0d2c 8%, #294b77 92%); --navy: #0a0d2c; --blue: #294b77; --mute: #5d6f8f; --sky: #e3edfa; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f8fe; }
+      #main-root { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Poppins, sans-serif; color: #0a0d2c; -webkit-font-smoothing: antialiased; }
+      .layer { position: absolute; inset: 0; }
+      #bg .plate { position: absolute; inset: 0; background: url(assets/brand/bg_1080x1920.png) center / 1080px 1920px no-repeat; }
+      #gridwrap { position: absolute; left: 330px; top: 160px; width: 900px; height: 820px;
+                  -webkit-mask-image: radial-gradient(ellipse 430px 360px at 450px 405px, #000 35%, transparent 100%); mask-image: radial-gradient(ellipse 430px 360px at 450px 405px, #000 35%, transparent 100%); }
+      #grid { position: absolute; left: -473px; top: -473px; width: 1846px; height: 1766px;
+              background-image: linear-gradient(90deg, rgba(104,132,186,.26) 2px, transparent 2px), linear-gradient(0deg, rgba(104,132,186,.26) 2px, transparent 2px); background-size: 43px 43px; }
+      #gridtint { position: absolute; left: 520px; top: -260px; width: 900px; height: 900px; border-radius: 50%; background: radial-gradient(circle, rgba(126,164,226,.22), rgba(126,164,226,0) 64%); }
+      #world { position: absolute; left: 0; top: 200px; width: 1080px; height: 800px;
+               -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 70px, #000 730px, transparent 800px); mask-image: linear-gradient(180deg, transparent 0, #000 70px, #000 730px, transparent 800px); }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/brand/grain_256.png); opacity: .035; mix-blend-mode: multiply; }
+      #brandlogo { position: absolute; left: 84px; top: 236px; width: 236px; height: auto; opacity: .95; }
+      /* ---------- shared UI pieces (white theme: white cards, navy gradient text, accent #294b77 only) */
+      .card { position: absolute; background: linear-gradient(180deg, #ffffff, #f6f8fd); border-radius: 30px; box-shadow: 0 18px 44px rgba(10,13,44,.14), 0 2px 6px rgba(10,13,44,.06), inset 0 0 0 1.5px rgba(41,75,119,.10); }
+      .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lb { font: 700 24px/1 Poppins; letter-spacing: 3px; color: #294b77; text-transform: uppercase; white-space: nowrap; }
+      .sm { font: 400 26px/1.25 Poppins; color: #5d6f8f; }
+      .tt { position: absolute; left: 540px; top: 318px; display: flex; align-items: center; gap: 14px; padding: 14px 30px 16px 18px; white-space: nowrap;
+            background: #ffffff; border-radius: 24px; box-shadow: 0 14px 30px rgba(10,13,44,.12), inset 0 0 0 2px rgba(41,75,119,.16); font: 700 36px/1.1 Poppins; letter-spacing: -.2px; }
+      .tt .bar { width: 12px; height: 38px; border-radius: 6px; background: #294b77; flex: none; }
+      .tt span.x { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .tt b { color: #294b77; -webkit-text-fill-color: #294b77; }
+      #chip { position: absolute; right: 84px; top: 222px; display: flex; align-items: center; gap: 12px; padding: 10px 20px 10px 12px; background: #ffffff; border-radius: 20px;
+              box-shadow: 0 10px 24px rgba(10,13,44,.12), inset 0 0 0 2px rgba(41,75,119,.18); transform-origin: 100% 50%; }
+      #chip .ic { width: 46px; height: 46px; border-radius: 13px; background: #294b77; display: grid; place-items: center; }
+      #chip .ic svg { width: 28px; height: 28px; }
+      #chip .nm { font: 700 40px/1 Poppins; color: #0a0d2c; }
+      #chip .nm small { font-size: 26px; color: #5d6f8f; }
+      .stamp { position: absolute; padding: 10px 26px 12px; border: 6px solid #294b77; border-radius: 18px; color: #294b77; font: 700 46px/1 Poppins; letter-spacing: 2px; background: rgba(255,255,255,.92); white-space: nowrap; }
+      .ico { display: inline-block; vertical-align: middle; }
+      /* ---------- s01-s03 stat card */
+      #stat { left: 596px; top: 410px; width: 400px; height: 236px; padding: 24px 28px; }
+      #stat .num { font: 700 88px/1 Poppins; margin-top: 12px; letter-spacing: -2px; white-space: nowrap; }
+      #stat .fx { font: 400 28px/1 Poppins; color: #5d6f8f; margin-top: 10px; white-space: nowrap; }
+      #stat .fx sup { font-size: 18px; }
+      #stat .mt { position: absolute; left: 28px; right: 28px; bottom: 22px; height: 12px; border-radius: 6px; background: #e3edfa; overflow: visible; }
+      #stat .mt i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: linear-gradient(90deg, #0a0d2c, #294b77); width: 0; }
+      #stat .mt em { position: absolute; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; background: #294b77; box-shadow: 0 0 0 5px #ffffff, 0 4px 10px rgba(10,13,44,.3); }
+      #gdot { position: absolute; left: 0; top: 0; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; background: #294b77; opacity: 0; transform-origin: 50% 50%; box-shadow: 0 0 0 5px rgba(255,255,255,.9); }
+      /* ---------- s04-s05 */
+      #q4 { left: 120px; top: 430px; width: 840px; padding: 34px 40px 38px; text-align: center; }
+      #q4 .a { font: 700 50px/1.15 Poppins; }
+      #q4 .b { font: 700 74px/1.1 Poppins; margin-top: 10px; }
+      #paper { left: 150px; top: 420px; width: 780px; height: 400px; padding: 34px 44px; transform-origin: 50% 100%; }
+      #paper .row { display: flex; align-items: center; gap: 20px; margin-top: 18px; font: 400 40px/1 Poppins; color: #0a0d2c; white-space: nowrap; }
+      #paper .row b { font-weight: 700; }
+      #paper .ok { position: absolute; right: 40px; bottom: 34px; }
+      #spin { position: absolute; left: 140px; top: 440px; width: 800px; height: 330px; overflow: hidden; border-radius: 30px; background: #0a0d2c; box-shadow: 0 22px 50px rgba(10,13,44,.3); }
+      #spin .reel { position: absolute; left: 0; right: 0; top: 0; }
+      #spin .it { height: 110px; display: flex; align-items: center; justify-content: center; font: 700 52px/1 Poppins; color: #ffffff; white-space: nowrap; }
+      #spin .it.k { color: #e3edfa; }
+      #spin .win { position: absolute; left: 24px; right: 24px; top: 110px; height: 110px; border-radius: 22px; box-shadow: inset 0 0 0 4px #e3edfa; }
+      #spin .fade { position: absolute; inset: 0; background: linear-gradient(180deg, #0a0d2c 0%, rgba(10,13,44,0) 30%, rgba(10,13,44,0) 70%, #0a0d2c 100%); }
+      /* ---------- problem examples */
+      .ex { top: 410px; width: 420px; padding: 22px 26px; }
+      .ex .h { display: flex; align-items: center; gap: 14px; }
+      .ex .h .ib { width: 58px; height: 58px; border-radius: 16px; background: #e3edfa; display: grid; place-items: center; flex: none; }
+      .ex .h .ib svg { width: 36px; height: 36px; }
+      .ex .t1 { font: 700 34px/1.12 Poppins; }
+      .ex .t2 { font: 400 26px/1.25 Poppins; color: #5d6f8f; margin-top: 10px; }
+      .ex .arrow { display: flex; align-items: center; gap: 10px; margin-top: 14px; font: 700 32px/1.1 Poppins; color: #294b77; }
+      #bub { position: absolute; }
+      /* s11 counter */
+      #cnt { left: 596px; top: 420px; width: 400px; padding: 22px 28px; }
+      #cnt .n { font: 700 70px/1 Poppins; margin-top: 8px; }
+      #cnt .row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; padding-top: 14px; border-top: 2px solid #e3edfa; font: 700 34px/1 Poppins; color: #0a0d2c; }
+      #cnt .row b { font-size: 50px; color: #294b77; }
+      /* s15 odds card */
+      #odds { left: 140px; top: 410px; width: 800px; padding: 22px 30px; display: flex; align-items: center; justify-content: space-between; }
+      #odds .f { font: 400 40px/1 Poppins; white-space: nowrap; }
+      #odds .f sup { font-size: 24px; }
+      #odds .r { font: 700 60px/1 Poppins; white-space: nowrap; }
+      /* s17 map pin */
+      #pin { left: 596px; top: 410px; width: 400px; padding: 20px 24px; }
+      #pin .map { position: relative; height: 150px; margin-top: 12px; border-radius: 18px; background: #e3edfa; overflow: hidden; }
+      #pin .map i { position: absolute; left: 50%; top: 50%; border-radius: 50%; border: 4px dashed #294b77; transform: translate(-50%, -50%); }
+      #pin .map svg { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -40px 0 0 -23px; }
+      /* s20 survey */
+      #survey { left: 120px; top: 410px; width: 840px; padding: 24px 30px; }
+      #survey .q { font: 700 38px/1.15 Poppins; }
+      #survey .ans { display: flex; gap: 16px; margin-top: 18px; }
+      #survey .ans span { flex: 1; padding: 16px 0; border-radius: 18px; background: #e3edfa; text-align: center; font: 700 32px/1 Poppins; color: #294b77; white-space: nowrap; }
+      #survey .m { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; font: 700 30px/1 Poppins; }
+      #survey .m b { font-size: 44px; color: #294b77; }
+      /* s21 phone app */
+      #phone { position: absolute; left: 610px; top: 380px; width: 330px; height: 540px; border-radius: 46px; background: #0a0d2c; padding: 14px; box-shadow: 0 24px 50px rgba(10,13,44,.3); }
+      #phone .scr { position: relative; width: 100%; height: 100%; border-radius: 34px; background: #ffffff; padding: 40px 22px 20px; overflow: hidden; }
+      #phone .notch { position: absolute; left: 50%; top: 12px; width: 90px; height: 18px; margin-left: -45px; border-radius: 9px; background: #0a0d2c; }
+      #phone .ap { font: 700 30px/1.1 Poppins; }
+      #phone .sb { font: 400 22px/1.2 Poppins; color: #5d6f8f; margin-top: 6px; }
+      #phone .big { margin-top: 22px; border-radius: 22px; background: #e3edfa; padding: 18px; text-align: center; }
+      #phone .big .l { font: 700 20px/1 Poppins; letter-spacing: 2px; color: #294b77; }
+      #phone .big .n { font: 700 92px/1 Poppins; color: #0a0d2c; margin-top: 8px; }
+      #phone .big .s { font: 400 22px/1.2 Poppins; color: #5d6f8f; margin-top: 6px; }
+      #phone .btn { margin-top: 18px; border-radius: 18px; background: #294b77; color: #fff; text-align: center; padding: 16px 0; font: 700 26px/1 Poppins; }
+      #phone .tag { position: absolute; left: 22px; bottom: 20px; font: 700 18px/1 Poppins; letter-spacing: 2px; color: #5d6f8f; }
+      /* s23-s24 resource bars */
+      #res { left: 140px; top: 410px; width: 800px; padding: 22px 30px; }
+      #res .r { display: flex; align-items: center; gap: 18px; margin-top: 12px; }
+      #res .r .n { width: 170px; font: 700 32px/1 Poppins; }
+      #res .r .b { flex: 1; height: 26px; border-radius: 13px; background: #e3edfa; position: relative; overflow: hidden; }
+      #res .r .b i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 13px; background: linear-gradient(90deg, #0a0d2c, #294b77); }
+      /* s27 scatter */
+      #scat { left: 596px; top: 410px; width: 400px; padding: 20px 24px; }
+      #scat .pl { position: relative; height: 150px; margin-top: 10px; border-radius: 16px; background: #f1f5fc; }
+      #scat .pl i { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: #294b77; }
+      #scat .m { display: flex; justify-content: space-between; margin-top: 12px; font: 700 28px/1 Poppins; }
+      /* s29 throw panel */
+      #ctrl { left: 596px; top: 410px; width: 400px; padding: 20px 24px; }
+      #ctrl .r { margin-top: 12px; }
+      #ctrl .r .n { display: flex; justify-content: space-between; font: 700 24px/1 Poppins; color: #0a0d2c; }
+      #ctrl .r .tr { position: relative; height: 12px; border-radius: 6px; background: #e3edfa; margin-top: 10px; }
+      #ctrl .r .tr i { position: absolute; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: #294b77; box-shadow: 0 0 0 5px #fff, 0 3px 8px rgba(10,13,44,.3); }
+      /* s30 learning chart */
+      #learn { left: 84px; top: 410px; width: 420px; padding: 20px 24px; }
+      #learn svg { display: block; margin-top: 10px; }
+      /* checklist (s31-s32, s38) */
+      .chk { left: 596px; top: 410px; width: 400px; padding: 20px 24px; }
+      .chk .r { display: flex; align-items: center; gap: 14px; margin-top: 12px; font: 700 30px/1.15 Poppins; white-space: nowrap; }
+      .chk .r .bx { width: 42px; height: 42px; border-radius: 12px; background: #294b77; display: grid; place-items: center; flex: none; }
+      .chk .r .bx svg { width: 26px; height: 26px; }
+      .chk .r small { display: block; font: 400 22px/1.2 Poppins; color: #5d6f8f; }
+      /* s34 slam */
+      #slam { position: absolute; left: 90px; top: 400px; width: 900px; text-align: center; }
+      #slam .a { display: inline-block; padding: 16px 34px 20px; border-radius: 28px; background: #0a0d2c; color: #ffffff; font: 700 68px/1.05 Poppins; letter-spacing: -1px; white-space: nowrap; box-shadow: 0 20px 44px rgba(10,13,44,.3); }
+      #slam .b { margin-top: 16px; font: 700 40px/1 Poppins; }
+      /* s35-s36 progress */
+      #prog { left: 140px; top: 410px; width: 800px; padding: 20px 30px; }
+      #prog .t { display: flex; justify-content: space-between; align-items: baseline; }
+      #prog .t b { font: 700 54px/1 Poppins; }
+      #prog .bar { position: relative; height: 26px; border-radius: 13px; background: #e3edfa; margin-top: 14px; }
+      #prog .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 13px; background: linear-gradient(90deg, #0a0d2c, #294b77); }
+      /* s37 flip */
+      #flip { position: absolute; left: 140px; top: 440px; width: 800px; height: 230px; perspective: 1400px; }
+      #flip .f { position: absolute; inset: 0; border-radius: 30px; display: grid; place-items: center; backface-visibility: hidden; -webkit-backface-visibility: hidden; font: 700 62px/1.1 Poppins; text-align: center; padding: 0 30px; }
+      #flip .f1 { background: #ffffff; box-shadow: 0 18px 44px rgba(10,13,44,.14); color: #5d6f8f; }
+      #flip .f2 { background: #0a0d2c; color: #ffffff; transform: rotateX(180deg); box-shadow: 0 18px 44px rgba(10,13,44,.3); }
+      #flipin { position: absolute; inset: 0; transform-style: preserve-3d; }
+      /* s39 process fill */
+      #fill { position: absolute; left: 84px; top: 400px; width: 912px; height: 300px; }
+      #fill .tile { position: absolute; top: 0; width: 210px; height: 92px; border-radius: 22px; background: #ffffff; box-shadow: 0 12px 28px rgba(10,13,44,.12), inset 0 0 0 2px rgba(41,75,119,.14); display: grid; place-items: center; font: 700 28px/1 Poppins; color: #0a0d2c; white-space: nowrap; }
+      #fill .st { position: absolute; top: 96px; width: 14px; height: 0; margin-left: -7px; border-radius: 7px; background: linear-gradient(180deg, #294b77, #0a0d2c); }
+      #fill .tank { position: absolute; left: 0; top: 180px; width: 912px; height: 100px; border-radius: 26px; background: #ffffff; box-shadow: 0 12px 28px rgba(10,13,44,.12), inset 0 0 0 3px #294b77; overflow: hidden; }
+      #fill .tank .lv { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, #0a0d2c, #294b77); }
+      #fill .tank .tx { position: absolute; right: 14px; top: 14px; height: 72px; display: flex; align-items: center; gap: 16px; padding: 0 24px; border-radius: 18px; background: #ffffff; box-shadow: 0 4px 12px rgba(10,13,44,.18); font: 700 32px/1 Poppins; color: #0a0d2c; white-space: nowrap; }
+      #fill .tank .tx .fpc { color: #294b77; }
+      /* s40 flood + s41 AI cards */
+      #flood { position: absolute; left: 0; top: 0; width: 1080px; height: 1000px; background: linear-gradient(180deg, #ffffff 0%, #e3edfa 100%); opacity: 0; }
+      .ai { left: 110px; width: 860px; padding: 20px 26px; display: flex; align-items: center; gap: 22px; }
+      .ai .n { width: 64px; height: 64px; border-radius: 18px; background: #294b77; color: #fff; font: 700 36px/64px Poppins; text-align: center; flex: none; }
+      .ai .tx { flex: 1; min-width: 0; }
+      .ai .tx .a { font: 700 36px/1.1 Poppins; white-space: nowrap; }
+      .ai .tx .b { margin-top: 10px; display: flex; gap: 10px; flex-wrap: nowrap; }
+      .ai .tx .b span { padding: 8px 14px; border-radius: 12px; background: #e3edfa; font: 700 22px/1 Poppins; color: #294b77; white-space: nowrap; }
+      #aitag { position: absolute; left: 110px; top: 400px; font: 700 22px/1 Poppins; letter-spacing: 3px; color: #5d6f8f; }
+      /* s42 kinetic */
+      #k42 { position: absolute; left: 90px; top: 420px; width: 900px; text-align: center; }
+      #k42 .a { font: 700 64px/1.1 Poppins; }
+      #k42 .b { position: relative; display: inline-block; margin-top: 14px; font: 700 62px/1.1 Poppins; color: #5d6f8f; white-space: nowrap; }
+      #k42 .b i { position: absolute; left: -10px; right: -10px; top: 52%; height: 10px; border-radius: 5px; background: #294b77; transform-origin: 0 50%; }
+      #k42 .c { margin-top: 18px; font: 700 40px/1.2 Poppins; color: #294b77; }
+      /* s43 rules */
+      #rules { position: absolute; left: 110px; top: 390px; width: 860px; }
+      #rules .r { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; padding: 16px 22px; border-radius: 24px; background: #ffffff; box-shadow: 0 12px 28px rgba(10,13,44,.12); font: 700 38px/1.1 Poppins; white-space: nowrap; }
+      #rules .r .n { width: 54px; height: 54px; border-radius: 16px; background: #294b77; color: #fff; display: grid; place-items: center; font: 700 30px/1 Poppins; flex: none; }
+      #rules .r b { color: #294b77; }
+      /* s44 worksheet */
+      #ws { left: 160px; top: 380px; width: 760px; padding: 28px 34px; }
+      #ws .h { font: 700 24px/1 Poppins; letter-spacing: 3px; color: #294b77; }
+      #ws .t { font: 700 48px/1.1 Poppins; margin-top: 10px; }
+      #ws .r { display: flex; align-items: center; gap: 16px; margin-top: 16px; font: 400 30px/1.2 Poppins; color: #0a0d2c; white-space: nowrap; }
+      #ws .r i { width: 34px; height: 34px; border-radius: 10px; border: 4px solid #294b77; flex: none; }
+      #ws .ft { display: inline-block; margin-top: 20px; padding: 12px 20px; border-radius: 16px; background: #294b77; color: #fff; font: 700 28px/1 Poppins; }
+      /* s45 CTA */
+      #ctaveil { position: absolute; left: 0; top: 0; width: 1080px; height: 1000px; background: rgba(244,248,254,.72); opacity: 0; -webkit-mask-image: linear-gradient(180deg, #000 85%, transparent); mask-image: linear-gradient(180deg, #000 85%, transparent); }
+      #cbox { position: absolute; left: 110px; top: 470px; width: 860px; display: flex; align-items: center; gap: 22px; padding: 22px 26px; background: #ffffff; border-radius: 28px; box-shadow: 0 20px 44px rgba(10,13,44,.18), inset 0 0 0 2px rgba(41,75,119,.14); }
+      #cbox .av { width: 74px; height: 74px; border-radius: 50%; background: linear-gradient(135deg, #294b77, #0a0d2c); flex: none; }
+      #cbox .in { flex: 1; font: 700 54px/1 Poppins; color: #0a0d2c; letter-spacing: 2px; min-height: 60px; display: flex; align-items: center; }
+      #cbox .ph { font: 400 34px/1 Poppins; color: #8a97b3; letter-spacing: 0; }
+      #cbox .cur { width: 4px; height: 56px; background: #294b77; margin-left: 4px; }
+      #cbox .send { padding: 14px 26px; border-radius: 18px; background: #294b77; color: #ffffff; font: 700 34px/1 Poppins; }
+      #dm { position: absolute; left: 150px; top: 640px; width: 780px; padding: 22px 28px; border-radius: 26px; background: #0a0d2c; box-shadow: 0 20px 44px rgba(10,13,44,.3); }
+      #dm .h { font: 700 24px/1 Poppins; letter-spacing: 3px; color: #e3edfa; }
+      #dm .b { font: 700 38px/1.25 Poppins; color: #fff; margin-top: 12px; }
+      #endlogo { position: absolute; left: 240px; top: 560px; width: 600px; height: auto; }
+      /* wipes */
+      #wipe { position: absolute; left: 0; top: 0; width: 1080px; height: 1000px; overflow: hidden; pointer-events: none; }
+      #wipe i { position: absolute; top: -200px; height: 1400px; width: 240px; transform: skewX(-14deg); }
+      #iris { position: absolute; left: 0; top: 0; width: 1080px; height: 1000px; background: #e3edfa; --r: 1300px; visibility: hidden;
+              -webkit-mask-image: radial-gradient(circle at 540px 640px, transparent var(--r), #000 calc(var(--r) + 2px)); mask-image: radial-gradient(circle at 540px 640px, transparent var(--r), #000 calc(var(--r) + 2px)); }
+      /* captions: per-word white boxes, navy text, key words in #294b77 with a marker sweep */
+      .cap { position: absolute; left: 50px; right: 50px; top: 1000px; text-align: center; font-size: 60px; line-height: 1.5; opacity: 0; }
+      .cap .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .02em .2em .14em; margin: -.02em -.06em -.14em; background: rgba(255,255,255,.94); border-radius: 14px; box-shadow: 0 6px 16px rgba(10,13,44,.10); }
+      .cap .w { display: inline-block; position: relative; isolation: isolate; color: #0a0d2c; font-weight: 700; }
+      .cap .w.k { color: #294b77; }
+      .cap .hl { position: absolute; left: -4px; right: -4px; bottom: .12em; height: .2em; background: rgba(41,75,119,.22); border-radius: 6px; transform-origin: 0 50%; z-index: -1; }
+    </style>
+  </head>
+  <body>
+    <div id="main-root" data-composition-id="main" data-start="0" data-duration="{{TOTAL}}" data-width="1080" data-height="1920" data-fps="30">
+      <div id="bg" class="clip layer" data-start="0" data-duration="{{TOTAL}}" data-track-index="0"><div class="plate"></div><div id="gridtint"></div><div id="gridwrap"><div id="grid"></div></div></div>
+      <div id="stage" class="clip layer" data-start="0" data-duration="{{TOTAL}}" data-track-index="1"><canvas id="world" width="1080" height="800" data-layout-ignore data-layout-allow-occlusion></canvas></div>
+      <div id="ui" class="clip layer" data-start="0" data-duration="{{TOTAL}}" data-track-index="2">
+        <div id="flood" data-layout-ignore data-layout-allow-occlusion></div>
+        <img id="brandlogo" src="assets/brand/logo_dark_trim.png" alt="AI PRENEUR" />
+        <div id="tabs"></div>
+        <div id="chip" data-layout-allow-occlusion><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.4" fill="#fff"/><circle cx="15.5" cy="15.5" r="1.4" fill="#fff"/><circle cx="12" cy="12" r="1.4" fill="#fff"/></svg></span>
+          <span data-layout-allow-occlusion><div class="lb" data-layout-allow-occlusion>MASALAH</div></span><span class="nm" id="chipn" data-layout-allow-occlusion>1<small data-layout-allow-occlusion>/6</small></span></div>
+        <!-- s01-s03 -->
+        <div id="stat" class="card"><div class="lb" id="statl">1× LEMPAR</div><div class="num gt" id="statn">0%</div><div class="fx" id="statf">peluang 1 dari 6</div><div class="mt"><i id="statm"></i><em id="statd"></em></div></div>
+        <!-- s04 -->
+        <div id="q4" class="card"><div class="a gt">Asal nyoba terus…</div><div class="b"><span class="gt">semua pasti sukses?</span></div></div>
+        <!-- s05 -->
+        <div id="paper" class="card"><div class="lb">DI ATAS KERTAS</div>
+          <div class="row" id="p1"><b>1×</b><span class="sm">lempar</span><span class="v gt" style="margin-left:auto;font-weight:700">16,7%</span></div>
+          <div class="row" id="p2"><b>10×</b><span class="sm">lempar</span><span class="v gt" style="margin-left:auto;font-weight:700">83,8%</span></div>
+          <div class="row" id="p3"><b>100×</b><span class="sm">lempar</span><span class="v gt" style="margin-left:auto;font-weight:700">hampir 100%</span></div>
+          <div class="stamp ok" id="pok">IYA</div></div>
+        <div id="spin"><div class="reel" id="reel"></div><div class="fade"></div><div class="win"></div></div>
+        <!-- s08 / s09 examples -->
+        <div id="ex8" class="card ex" style="left:576px"><div class="h"><span class="ib"><svg viewBox="0 0 24 24" fill="none" stroke="#294b77" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h11v6a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3v2M11 3v2"/></svg></span><div><div class="lb">CONTOH</div><div class="t1 gt" style="margin-top:6px">Jualan kopi susu</div></div></div>
+          <div class="arrow"><svg class="ico" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#294b77" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>langsung sewa ruko 3 lantai</div></div>
+        <div id="ex9" class="card ex" style="left:84px"><div class="h"><span class="ib"><svg viewBox="0 0 24 24" fill="none" stroke="#294b77" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></span><div><div class="lb">GRUP KELUARGA</div><div class="t2" style="margin-top:6px">1 pesan, sebulan sekali</div></div></div>
+          <div class="t1 gt" style="margin-top:14px;font-size:30px">"Ada kopi susu ya, kak"</div></div>
+        <div class="stamp" id="st8" style="left:640px;top:600px;transform:rotate(-6deg)">KEGEDEAN</div>
+        <div class="stamp" id="st9" style="left:120px;top:620px;transform:rotate(5deg)">KEKECILAN</div>
+        <!-- s10-s11 -->
+        <div class="stamp" id="st10" style="left:596px;top:430px;transform:rotate(-4deg)">NGGAK ADA 6</div>
+        <div id="cnt" class="card"><div class="lb">DILEMPAR</div><div class="n gt" id="cntn">0×</div><div class="row"><span>Angka 6</span><b>0×</b></div></div>
+        <div id="unk" class="card chk"><div class="lb">YANG BELUM PASTI</div>
+          <div class="r" id="u1"><span class="bx" style="color:#fff;font:700 28px/1 Poppins">?</span><span>Produk baru</span></div><div class="r" id="u2"><span class="bx" style="color:#fff;font:700 28px/1 Poppins">?</span><span>Pasar baru</span></div>
+          <div class="r" id="u3"><span class="bx" style="color:#fff;font:700 28px/1 Poppins">?</span><span>Harga baru</span></div><div class="r" id="u4"><span class="bx" style="color:#fff;font:700 28px/1 Poppins">?</span><span>Cara jualan baru</span></div></div>
+        <!-- s15 -->
+        <div id="odds" class="card"><div class="f gt">(1/6)<sup>5</sup> = 1 : 7.776</div><div class="r gt" id="oddsr">0,013%</div></div>
+        <!-- s17 -->
+        <div id="pin" class="card"><div class="lb">CONTOH PASAR</div><div class="t1 gt" style="font:700 32px/1.1 Poppins;margin-top:8px">Servis mesin ketik</div>
+          <div class="map"><i id="pinr" style="width:120px;height:120px"></i><svg viewBox="0 0 24 24" fill="#294b77"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></div>
+          <div class="sm" style="margin-top:10px">cuma 1 kecamatan</div></div>
+        <div class="stamp" id="st18" style="left:640px;top:560px;transform:rotate(-7deg)">MENTAL!</div>
+        <!-- s20-s22 -->
+        <div id="survey" class="card"><div class="q gt">"Masalah ini kamu rasain?"</div><div class="ans"><span>Nggak</span><span>Biasa aja</span><span>Nggak tuh</span></div>
+          <div class="m"><span>Keluhan pembeli</span><b>0</b></div></div>
+        <div id="phone"><div class="scr"><div class="notch"></div><div class="ap gt">Antre Online</div><div class="sb">Warteg (contoh)</div>
+          <div class="big"><div class="l">ORANG DI DEPANMU</div><div class="n">0</div><div class="s">langsung makan aja</div></div><div class="btn">Ambil antrean</div><div class="tag">ILUSTRASI</div></div></div>
+        <div class="stamp" id="st22" style="left:600px;top:470px;transform:rotate(-5deg)">LOLOS!</div>
+        <!-- s23-s24 -->
+        <div id="res" class="card"><div class="lb">JATAH LEMPARAN</div>
+          <div class="r"><span class="n gt">Modal</span><span class="b"><i id="rb0"></i></span></div>
+          <div class="r"><span class="n gt">Waktu</span><span class="b"><i id="rb1"></i></span></div>
+          <div class="r"><span class="n gt">Tenaga</span><span class="b"><i id="rb2"></i></span></div></div>
+        <div id="spA" class="card ex" style="left:84px;width:440px;top:420px"><div class="lb">CARA A</div><div class="t1 gt" style="margin-top:8px">Tiap gagal, ganti dadu &amp; nampan</div></div>
+        <div id="spB" class="card ex" style="left:556px;width:440px;top:420px"><div class="lb">CARA B</div><div class="t1 gt" style="margin-top:8px">Kunci dadu &amp; nampan, ubah lemparan</div></div>
+        <!-- s27 -->
+        <div id="scat" class="card"><div class="lb">HASIL CARA A</div><div class="pl" id="scpl"></div><div class="m"><span class="gt">Pelajaran</span><span style="color:#294b77">nyaris 0</span></div></div>
+        <!-- s29-s30 -->
+        <div id="ctrl" class="card"><div class="lb">YANG DIUBAH: LEMPARAN</div>
+          <div class="r"><div class="n"><span>Sudut</span><span id="cv0"></span></div><div class="tr"><i id="ck0"></i></div></div>
+          <div class="r"><div class="n"><span>Tenaga</span><span id="cv1"></span></div><div class="tr"><i id="ck1"></i></div></div>
+          <div class="r"><div class="n"><span>Arah</span><span id="cv2"></span></div><div class="tr"><i id="ck2"></i></div></div></div>
+        <div id="learn" class="card"><div class="lb">PELAJARAN TIAP LEMPAR</div>
+          <svg width="372" height="150" viewBox="0 0 372 150"><path d="M10 140H362" stroke="#e3edfa" stroke-width="4"/><path id="lpath" d="M14 130 C 80 124, 120 110, 160 92 S 260 50, 356 18" fill="none" stroke="#294b77" stroke-width="7" stroke-linecap="round"/><circle id="ldot" cx="14" cy="130" r="12" fill="#294b77" stroke="#fff" stroke-width="4"/></svg></div>
+        <!-- s31-s32 -->
+        <div id="chk1" class="card chk"><div class="lb">YANG DIJAGA</div>
+          <div class="r" id="c1a"><span class="bx">{{CHECK}}</span><span>Ide tepat</span></div>
+          <div class="r" id="c1b"><span class="bx">{{LOOP}}</span><span>Pendekatan<small>terus diperbaiki</small></span></div>
+          <div class="r" id="c1c"><span class="bx">{{CHECK}}</span><span>1 pasar<small>besar & lagi tumbuh</small></span></div></div>
+        <!-- s33 -->
+        <div id="ex33" class="card ex" style="left:576px"><div class="lb">KESALAHAN PALING UMUM</div><div class="t1 gt" style="margin-top:10px">Meleset 1×</div>
+          <div class="arrow"><svg class="ico" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#294b77" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>langsung ganti ide</div></div>
+        <!-- s34 -->
+        <div id="slam"><div class="a" id="slama">SHINY OBJECT SYNDROME</div><div class="b gt" id="slamb">ketarik yang kinclong</div></div>
+        <!-- s35-s36 -->
+        <div id="prog" class="card"><div class="t"><span class="lb">MENUJU TARGET</span><b class="gt" id="progn">0%</b></div><div class="bar"><i id="progb"></i></div></div>
+        <!-- s37 -->
+        <div id="flip"><div id="flipin"><div class="f f1">Ganti tiap meleset</div><div class="f f2">Kebalikannya</div></div></div>
+        <!-- s38 -->
+        <div id="chk2" class="card chk" style="left:84px;top:400px"><div class="lb">PEBISNIS BERHASIL</div>
+          <div class="r" id="c2a"><span class="bx">{{CHECK}}</span><span>Pilih pasar<small>hati-hati, diteliti dulu</small></span></div>
+          <div class="r" id="c2b"><span class="bx">{{CHECK}}</span><span>Pilih ide<small>juga hati-hati</small></span></div></div>
+        <!-- s39 -->
+        <div id="fill"><div class="tile" style="left:0">Produk</div><div class="tile" style="left:234px">Penawaran</div><div class="tile" style="left:468px">Harga</div><div class="tile" style="left:702px">Cara jualan</div>
+          <i class="st" style="left:105px"></i><i class="st" style="left:339px"></i><i class="st" style="left:573px"></i><i class="st" style="left:807px"></i>
+          <div class="tank"><div class="lv" id="flv"></div><div class="tx"><span class="lab">PELUANG DAPAT 6</span><span class="fpc">0/4</span></div></div></div>
+        <!-- s41 -->
+        <div id="aitag">AI BANTU · CONTOH TUGAS</div>
+        <div id="ai1" class="card ai" style="top:440px"><span class="n">1</span><div class="tx"><div class="a gt">Ringkas ulasan pembeli</div><div class="b"><span>120 ulasan</span><span>jadi 1 halaman</span></div></div></div>
+        <div id="ai2" class="card ai" style="top:600px"><span class="n">2</span><div class="tx"><div class="a gt">Cari keluhan yang berulang</div><div class="b"><span>"kirimnya lama"</span><span>"porsi kecil"</span></div></div></div>
+        <div id="ai3" class="card ai" style="top:760px"><span class="n">3</span><div class="tx"><div class="a gt">Bikin versi penawaran</div><div class="b"><span>Versi A</span><span>Versi B</span><span>Versi C</span><span>kamu uji</span></div></div></div>
+        <!-- s42 -->
+        <div id="k42"><div class="a gt">Bisnis itu bukan soal</div><div class="b">banyak-banyakan lemparan<i id="k42s"></i></div><div class="c" id="k42c">tapi lemparan yang makin pas</div></div>
+        <!-- s43 -->
+        <div id="rules"><div class="r" id="r1"><span class="n">1</span><span>Pilih <b>dadu</b> yang tepat</span></div><div class="r" id="r2"><span class="n">2</span><span>Pilih <b>nampan</b> yang tepat</span></div>
+          <div class="r" id="r3"><span class="n">3</span><span>Ganti <b>lemparan</b> dulu,</span></div><div class="r" id="r4" style="margin-left:72px"><span>baru (kalau perlu) ganti <b>nampan</b></span></div></div>
+        <div id="ctaveil"></div>
+        <!-- s44 -->
+        <div id="ws" class="card"><div class="h">LEMBAR KERJA · DIKIRIM LEWAT DM</div><div class="t gt">Pilih Dadu &amp; Nampan</div>
+          <div class="r" id="w1"><i></i>Dadu: ide + cara jalanin</div><div class="r" id="w2"><i></i>Nampan: pasar, cek ukurannya</div>
+          <div class="r" id="w3"><i></i>Masalahnya nyata nggak?</div><div class="r" id="w4"><i></i>Catatan tiap lemparan</div><div class="ft" id="w5">+ perintah AI siap pakai</div></div>
+        <!-- s45 -->
+        <div id="cbox"><span class="av"></span><span class="in" id="cin"><span class="ph" id="cph">Tulis komentar…</span><span id="ctx"></span><span class="cur" id="cur"></span></span><span class="send" id="send">Kirim</span></div>
+        <div id="dm"><div class="h">DM · AI PRENEUR</div><div class="b">Lembar kerja + perintah AI terkirim</div></div>
+        <img id="endlogo" src="assets/brand/logo_dark_end.png" alt="AI PRENEUR" />
+        <div class="stamp" id="st4" style="left:780px;top:690px;transform:rotate(8deg);font-size:64px">?</div>
+        <div id="gdot"></div>
+        <div id="wipe" data-layout-ignore data-layout-allow-occlusion></div>
+        <div id="iris" data-layout-ignore data-layout-allow-occlusion></div>
+        <div id="grain"></div>
+      </div>
+      <div id="robot" class="clip" data-composition-id="robot" data-composition-src="compositions/robot.html" data-start="0" data-duration="{{TOTAL}}" data-track-index="6" data-width="1080" data-height="1920"></div>
+      <div id="mascot" class="clip" data-composition-id="mascot" data-composition-src="compositions/mascot.html" data-start="0" data-duration="{{TOTAL}}" data-track-index="7" data-width="1080" data-height="1920"></div>
+      <div id="caps" class="clip layer" data-start="0" data-duration="{{TOTAL}}" data-track-index="9"></div>
+      <audio id="vo" src="assets/audio/vo.mp3" data-start="0.3" data-duration="{{VOSEC}}" data-track-index="10" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="{{TOTAL}}" data-track-index="11" data-volume="0.9"></audio>
+    </div>
+    <script>/*UIJS*/</script>
+  </body>
+</html>

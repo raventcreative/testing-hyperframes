@@ -1,12 +1,149 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s05 MODUL 3 · PUTARAN ANALITIK (55.10–69.23) "Modul tiga, putaran analitik. Tiap postingan dicek: mana yang bawa chat, booking, dan
+       penjualan. Bukan cuma likes. Hasilnya balik lagi ke modul satu. Minggu depan, kamu bikin lebih banyak yang terbukti jalan, tanpa
+       rekap spreadsheet manual."
+       Enters with a whip pan from the right. The loop (3 stations) with station 3 lit; "Tiap postingan dicek": a results table
+       (CONTOH, bars only, no numbers) — columns Likes / Chat / Booking / Jual fill on their words; "Bukan cuma likes.": the likes
+       column is struck and dimmed, the most-liked post dims, the post that brought chats and sales gets "terbukti jalan".
+       "Hasilnya balik lagi ke modul satu": the winner collapses into the accent dot, which rides the loop from station 3 to
+       station 1. "Minggu depan ... terbukti jalan": the dot draws the line over a 4-week bar chart (ILUSTRASI). "tanpa rekap
+       spreadsheet manual": a spreadsheet card is struck and drops away. Exit: camera dives into the chart. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s05-ring { position: absolute; left: 340px; top: 470px; width: 400px; height: 400px; overflow: visible; }
+    .s05-st { position: absolute; left: 0; top: 0; height: 52px; padding: 0 18px 0 6px; border-radius: 26px; display: flex; align-items: center; gap: 8px; background: rgba(12,22,64,.95);
+      box-shadow: inset 0 0 0 2px rgba(106,223,255,.6); font: 700 20px/1 Poppins; color: #fff; white-space: nowrap; transform-origin: 50% 50%; }
+    .s05-st i { display: block; width: 40px; height: 40px; border-radius: 20px; background: linear-gradient(160deg,#9cecff,#01ccf7 55%,#0aa7d6); font: 700 21px/40px Poppins; font-style: normal; color: #0b1440; text-align: center; }
+    .s05-st.on { background: #01ccf7; color: #0b1440; box-shadow: 0 0 30px rgba(1,204,247,.6); }
+    .s05-st.on i { background: #0b1440; color: #6adfff; }
+    #s05-tab { position: absolute; left: 60px; top: 478px; width: 960px; height: 430px; }
+    #s05-tab .hd { position: absolute; top: 18px; font: 700 18px/26px Poppins; letter-spacing: 1.5px; color: #6adfff; white-space: nowrap; }
+    .s05-row { position: absolute; left: 14px; width: 932px; height: 108px; border-radius: 22px; }
+    .s05-row .bg { position: absolute; inset: 0; border-radius: 22px; background: rgba(255,255,255,.05); }
+    .s05-row .hl { position: absolute; inset: 0; border-radius: 22px; background: rgba(1,204,247,.14); box-shadow: inset 0 0 0 2.5px #01ccf7, 0 0 26px rgba(1,204,247,.3); }
+    .s05-row .th { position: absolute; left: 12px; top: 14px; width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(160deg,#2a5aa0,#0b1440); overflow: hidden; }
+    .s05-row .th svg { position: absolute; left: 20px; top: 10px; }
+    .s05-row b { position: absolute; left: 106px; top: 18px; font: 700 21px/28px Poppins; color: #fff; white-space: nowrap; }
+    .s05-row span { position: absolute; left: 106px; top: 50px; font: 400 17px/24px Poppins; color: #e3edfa; opacity: .8; white-space: nowrap; }
+    .s05-bar { position: absolute; top: 48px; width: 112px; height: 14px; border-radius: 7px; background: rgba(255,255,255,.12); }
+    .s05-bar i { position: absolute; left: 0; top: 0; height: 14px; border-radius: 7px; background: linear-gradient(90deg,#6adfff,#01ccf7); transform-origin: 0 50%; }
+    .s05-bar.lk i { background: #e3edfa; }
+    #s05-win { position: absolute; left: 0; top: 0; }
+    #s05-chart { position: absolute; left: 140px; top: 480px; width: 800px; height: 420px; }
+    .s05-col { position: absolute; bottom: 70px; width: 120px; border-radius: 18px 18px 6px 6px; background: linear-gradient(180deg, rgba(1,204,247,.55), rgba(1,204,247,.15)); box-shadow: inset 0 0 0 2px rgba(106,223,255,.6); transform-origin: 50% 100%; }
+    .s05-wl { position: absolute; bottom: 24px; width: 120px; text-align: center; font: 700 20px/28px Poppins; color: #e3edfa; white-space: nowrap; }
+    #s05-cl { position: absolute; left: 0; top: 0; width: 800px; height: 420px; overflow: visible; }
+    #s05-sheet { position: absolute; left: 0; top: 0; width: 240px; height: 170px; border-radius: 22px; background: linear-gradient(180deg,#ffffff,#f4f7fc); box-shadow: 0 18px 40px rgba(2,6,26,.5); transform-origin: 50% 50%; overflow: hidden; }
+    #s05-sheet .h { position: absolute; left: 16px; top: 12px; display: flex; gap: 8px; align-items: center; font: 700 18px/28px Poppins; color: #294b77; white-space: nowrap; }
+    #s05-sheet .h svg { width: 22px; height: 22px; color: #294b77; }
+    #s05-sheet .g { position: absolute; left: 16px; top: 50px; width: 208px; height: 104px; background-image: linear-gradient(#d5deec 1.5px, transparent 1.5px), linear-gradient(90deg, #d5deec 1.5px, transparent 1.5px); background-size: 52px 26px; box-shadow: inset 0 0 0 1.5px #d5deec; }
+  </style>
+  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920">
+    <div id="s05-wrap" class="k-ab" style="width:1080px;height:945px"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 13.523);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s05"] = tl;
+      const K = window.R30K, P = "s05", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $, popIn, fadeOut } = S;
+      $("s05-wrap").innerHTML = K.layers(P);
+      const cam = $("s05-cam"), hud = $("s05-hud");
+      const RC = { x: 540, y: 680, r: 170 }, ANG = [-90, 30, 150];
+      const SP = ANG.map((a) => [RC.x + RC.r * Math.cos((a * Math.PI) / 180), RC.y + RC.r * Math.sin((a * Math.PI) / 180)]);
+      const SN = ["Riset &amp; konten", "Kreatif &amp; distribusi", "Analitik"];
+      const ROWS = [["Reels kopi hujan", "paling banyak likes", [0.92, 0.18, 0.1, 0.14]], ["Foto antar ke kantor", "sepi likes, ramai chat", [0.42, 0.86, 0.74, 0.82]], ["Carousel promo gajian", "biasa saja", [0.3, 0.36, 0.28, 0.32]]];
+      const CX = [452, 588, 724, 860], CN = ["LIKES", "CHAT", "BOOKING", "JUAL"];
+      const WK = [0.32, 0.46, 0.6, 0.78], WX = (i) => 40 + i * 200;
+      cam.innerHTML =
+        `<svg id="s05-ring" viewBox="0 0 400 400"><circle cx="200" cy="200" r="170" fill="none" stroke="#01ccf7" stroke-width="6" stroke-dasharray="10 12" opacity=".8"/></svg>` +
+        `<div class="k-glass" id="s05-tab"><div class="hd" style="left:120px">POSTINGAN</div>` + CN.map((c, i) => `<div class="hd" id="s05-ch${i}" style="left:${CX[i] - 60 + 56}px;width:112px;text-align:center">${c}</div>`).join("") +
+          `<div class="k-strike" id="s05-lx" style="left:${CX[0] - 4 + 0}px;top:30px;width:120px;height:6px"></div>` +
+          ROWS.map(([t, s, v], r) => `<div class="s05-row" id="s05-r${r}" style="top:${62 + r * 120}px"><div class="bg"></div><div class="hl" id="s05-rh${r}"></div><div class="th">${K.cupSVG(40, 50)}</div><b>${t}</b><span>${s}</span>` +
+            v.map((x, c) => `<div class="s05-bar${c ? "" : " lk"}" style="left:${CX[c] - 14 - 0}px"><i id="s05-b${r}${c}" style="width:${x * 112}px"></i></div>`).join("") + `</div>`).join("") +
+          `<div class="k-demo" style="left:262px;top:17px">CONTOH</div></div>` +
+        `<div id="s05-chart">` + WK.map((v, i) => `<div class="s05-col" id="s05-c${i}" style="left:${WX(i)}px;height:${v * 300}px"></div><div class="s05-wl" style="left:${WX(i)}px" id="s05-wl${i}">Minggu ${i + 1}</div>`).join("") +
+          `<svg id="s05-cl" viewBox="0 0 800 420"><path id="s05-cp" d="${WK.map((v, i) => `${i ? "L" : "M"}${WX(i) + 60} ${350 - v * 300 - 26}`).join(" ")}" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1000" stroke-dashoffset="1000"/></svg>` +
+          `<div class="k-demo" style="left:0;top:0">ILUSTRASI &middot; konten yang terbukti jalan</div></div>` +
+        `<div id="s05-sheet"><div class="h">${K.svg("file-spreadsheet")}rekap-manual.xlsx</div><div class="g"></div></div>`;
+      hud.innerHTML = K.headerHTML(P, 3) + SN.map((n, i) => `<div class="s05-st" id="s05-s${i}"><i>${i + 1}</i>${n}</div>`).join("") +
+        K.chipHTML("s05-win", "trophy", "terbukti jalan", true) + K.chipHTML("s05-in", "refresh-cw", "data minggu ini masuk", true) + `<div class="k-strike" id="s05-sx" style="width:270px"></div>` + K.dotHTML(P);
+      const T = { tig: wt("tiga,"), ana: wt("analitik."), tia: wt("Tiap"), dic: wt("dicek:"), cha: wt("chat,"), boo: wt("booking,"), pen: wt("penjualan."), buk: wt("Bukan"),
+        lik: wt("likes."), has: wt("Hasilnya"), bal: wt("balik"), sat: wt("satu."), min: wt("Minggu"), ban: wt("banyak"), ter: wt("terbukti"), jal: wt("jalan,"),
+        tan: wt("tanpa"), rek: wt("rekap"), man: wt("manual.") };
+      K.cam(S);
+      // ---------------------------------------------------------------- whip in from the right
+      const zone = $("s05-zone"); I(zone, { x: 1080, filter: "blur(8px)" });
+      ft(zone, { x: 1080, filter: "blur(8px)" }, { x: 0, filter: "blur(0px)", duration: 0.36, ease: "power3.out" }, 0.005);
+      K.headerIn(S, 0.2, false);
+      // ---------------------------------------------------------------- the loop, station 3 lit
+      const ring = $("s05-ring"); I(ring, { opacity: 0, scale: 0.7, rotation: 0, transformOrigin: "50% 50%" });
+      ft(ring, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, 0.3);
+      ft(ring, { rotation: 0 }, { rotation: 40, duration: 2.2, ease: "none" }, 0.3);
+      const st = SN.map((_, i) => $(`s05-s${i}`));
+      st.forEach((e, i) => { K.at(S, e, SP[i][0], SP[i][1], { scale: 0.5, opacity: 0 }); ft(e, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" }, 0.4 + i * 0.08); });
+      tl.set(st[2], { className: "s05-st on" }, T.ana - 0.05);
+      ft(st[2], { scale: 1 }, { scale: 1.2, duration: 0.16, yoyo: true, repeat: 1, ease: "power2.out" }, T.ana - 0.05);
+      const dot = $("s05-dot"); I(dot, { x: SP[2][0], y: SP[2][1] - 40, scale: 0, opacity: 1 });
+      ft(dot, { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2.4)" }, T.ana);
+      // ---------------------------------------------------------------- results table
+      const out1 = [ring, ...st]; out1.forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "power2.in" }, T.tia - 0.2));
+      ft(dot, { scale: 1 }, { scale: 0, duration: 0.2 }, T.tia - 0.2);
+      const tab = $("s05-tab"); I(tab, { opacity: 0, y: 40 }); ft(tab, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, T.tia - 0.05);
+      ROWS.forEach((_, r) => { const row = $(`s05-r${r}`); I(row, { opacity: 0, x: -30 }); ft(row, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, T.tia + 0.15 + r * 0.12);
+        I($(`s05-rh${r}`), { opacity: 0 });
+        [T.dic, T.cha, T.boo, T.pen].forEach((t, c) => { const b = $(`s05-b${r}${c}`); I(b, { scaleX: 0 }); ft(b, { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.out" }, t - 0.05 + r * 0.06); }); });
+      CN.forEach((_, c) => { const h = $(`s05-ch${c}`); I(h, { opacity: c ? 0.35 : 1 }); if (c) ft(h, { opacity: 0.35 }, { opacity: 1, duration: 0.2 }, [T.cha, T.boo, T.pen][c - 1] - 0.1); });
+      // "Bukan cuma likes."
+      const lx = $("s05-lx"); I(lx, { scaleX: 0 }); ft(lx, { scaleX: 0 }, { scaleX: 1, duration: 0.22, ease: "power3.out" }, T.buk);
+      ft($("s05-ch0"), { opacity: 1 }, { opacity: 0.4, duration: 0.2 }, T.buk + 0.1);
+      ft($("s05-r0"), { opacity: 1 }, { opacity: 0.4, duration: 0.25 }, T.lik - 0.2);
+      ft($("s05-r2"), { opacity: 1 }, { opacity: 0.55, duration: 0.25 }, T.lik - 0.2);
+      ft($("s05-rh1"), { opacity: 0 }, { opacity: 1, duration: 0.25 }, T.lik - 0.2);
+      const win = $("s05-win"); K.at(S, win, 846, 600, { scale: 0.5, opacity: 0 });
+      ft(win, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" }, T.lik);
+      // ---------------------------------------------------------------- the winner collapses into the dot -> rides the loop 3 -> 1
+      ft(tab, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.85, duration: 0.3, ease: "power2.in", transformOrigin: "50% 50%" }, T.has - 0.1);
+      fadeOut(win, T.has - 0.1);
+      tl.set(dot, { x: 540, y: 660 }, T.has - 0.1);
+      ft(dot, { scale: 0 }, { scale: 1.4, duration: 0.3, ease: "back.out(2)" }, T.has + 0.05);
+      ft(ring, { opacity: 0 }, { opacity: 1, duration: 0.3 }, T.has + 0.1);
+      st.forEach((e, i) => ft(e, { opacity: 0 }, { opacity: 1, duration: 0.25 }, T.has + 0.15 + i * 0.05));
+      tl.to(dot, { x: SP[2][0], y: SP[2][1], scale: 1, duration: 0.3, ease: "power2.inOut" }, T.bal - 0.4);
+      { const kf = []; for (let i = 1; i <= 12; i++) { const a = ((150 + i * 10) * Math.PI) / 180; kf.push({ x: RC.x + RC.r * Math.cos(a), y: RC.y + RC.r * Math.sin(a), duration: 0.6 / 12, ease: "none" }); }
+        tl.to(dot, { keyframes: kf }, T.bal - 0.05); }
+      tl.set(st[2], { className: "s05-st" }, T.bal + 0.3); tl.set(st[0], { className: "s05-st on" }, T.sat - 0.1);
+      ft(st[0], { scale: 1 }, { scale: 1.2, duration: 0.16, yoyo: true, repeat: 1, ease: "power2.out" }, T.sat - 0.1);
+      const inn = $("s05-in"); K.at(S, inn, 540, 690, { scale: 0.5, opacity: 0 });
+      ft(inn, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" }, T.sat);
+      ft(dot, { scale: 1 }, { scale: 0, duration: 0.18, ease: "power2.in" }, T.bal + 0.45);
+      // ---------------------------------------------------------------- 4-week chart, the dot draws the line
+      [ring, ...st, inn].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "power2.in" }, T.min - 0.25));
+      const ch = $("s05-chart"); I(ch, { opacity: 0 }); ft(ch, { opacity: 0 }, { opacity: 1, duration: 0.25 }, T.min - 0.1);
+      WK.forEach((_, i) => { const c = $(`s05-c${i}`); I(c, { scaleY: 0 }); ft(c, { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "back.out(1.4)" }, T.min + i * 0.22); });
+      const PT = WK.map((v, i) => [140 + WX(i) + 60, 480 + 350 - v * 300 - 26]);
+      const cp = $("s05-cp"); I(cp, { strokeDashoffset: 1000 });
+      const tD = T.ban - 0.1, dD = T.jal - tD;
+      tl.set(dot, { x: PT[0][0], y: PT[0][1] }, tD - 0.4);
+      ft(dot, { scale: 0 }, { scale: 1, duration: 0.25, ease: "back.out(2.4)" }, tD - 0.3);
+      tl.to(dot, { keyframes: PT.slice(1).map(([x, y]) => ({ x, y, duration: dD / 3, ease: "none" })) }, tD);
+      // path length (3 segments) ~ sum of hypot
+      let L = 0; for (let i = 1; i < 4; i++) L += Math.hypot(PT[i][0] - PT[i - 1][0], PT[i][1] - PT[i - 1][1]);
+      ft(cp, { strokeDashoffset: 1000 }, { strokeDashoffset: 1000 - L, duration: dD, ease: "none" }, tD);
+      ft(dot, { scale: 1 }, { scale: 1.6, duration: 0.18, yoyo: true, repeat: 1 }, T.ter);
+      // ---------------------------------------------------------------- spreadsheet card struck and dropped
+      const sh = $("s05-sheet"), sx = $("s05-sx");
+      ft(ch, { x: 0 }, { x: -120, duration: 0.4, ease: "power3.inOut" }, T.tan - 0.25);
+      ft(dot, { scale: 1 }, { scale: 0, duration: 0.2, ease: "power2.in" }, T.tan - 0.3);
+      I(sh, { x: 1100, y: 560, rotation: 6, opacity: 1, scale: 1 });
+      ft(sh, { x: 1100 }, { x: 800, duration: 0.4, ease: "power3.out" }, T.tan - 0.15);
+      I(sx, { x: 790, y: 650, rotation: -20, scaleX: 0 });
+      ft(sx, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "power3.out" }, T.rek + 0.1);
+      ft(sh, { y: 560, rotation: 6, scale: 1, opacity: 1 }, { y: 760, rotation: 28, scale: 0.6, opacity: 0, duration: 0.5, ease: "power2.in" }, T.man - 0.2);
+      ft(sx, { opacity: 1 }, { opacity: 0, duration: 0.2 }, T.man - 0.1);
+      // ---------------------------------------------------------------- exit: camera dives into the chart
+      const camE = $("s05-cam");
+      ft(camE, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power2.in" }, D - 0.32);
+      K.headerOut(S, D - 0.3);
+      S.finish();
     })();
   </script>
 </template>

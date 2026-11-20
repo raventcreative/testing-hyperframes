@@ -30,53 +30,45 @@
       const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); if (!w) throw new Error("robot: word not found " + txt); return w[1]; };
       const HEAD_FIX = [-0.0775, -0.227, -0.1287];
       const STAND = { fx: 832, fy: 1668, h: 330, ry: -0.38 };
-      const T_IN = wt("baru") - 0.25;                                // flies in on "baru" (the half-road beat)
+      const T_IN = wt("satu") - 0.35;                                // flies in on "satu dadu" in the hook (already on screen by 1 s)
       function frame(t) {
         if (t < T_IN) return null;
         const u = io3((t - T_IN) / 0.75), arc = Math.sin(Math.PI * u) * 160;
         let f = { fx: L(1330, STAND.fx, u), fy: L(1500, STAND.fy, u) - arc, h: L(300, STAND.h, u), ry: L(-1.1, STAND.ry, u), fly: u };
         // small hops on scene cuts (keeps it alive between gestures)
-        for (const sc of SC) { if (sc.id === "s01") continue; const k = t - sc.start; if (k > 0 && k < 0.5) f.fy -= 34 * Math.sin(Math.PI * k / 0.5); }
+        for (const sc of SC) { if (sc.id === "s01") continue; /* small hop on every beat */ const k = t - sc.start; if (k > 0 && k < 0.5) f.fy -= 34 * Math.sin(Math.PI * k / 0.5); }
         return f;
       }
       // ---------------------------------------------------------------- gestures
       const G = [];
       const add = (t, k, d = 0.9, x) => { if (t > 0) G.push(Object.assign({ t, k, d }, x || {})); };
-      const s2 = S("s02").start, s3 = S("s03").start, s4 = S("s04").start, s5 = S("s05").start, s6 = S("s06").start, s7 = S("s07").start, s8 = S("s08").start;
-      add(wt("setengah") - 0.05, "think", 0.6);
-      add(wt("jalan.") - 0.05, "nod", 0.5);
-      add(wt("Biar") - 0.05, "point", 0.6);
-      add(wt("online,") - 0.05, "cheer", 0.6);
-      add(wt("pasang") - 0.08, "type", wt("ini.") - wt("pasang") + 0.2);
-      add(wt("Context7") - 0.05, "happy", 0.6);
-      add(wt("Upstash:") - 0.05, "nod", 0.5);
-      add(wt("sebelum", s3) - 0.4, "type", 1.1);
-      add(wt("ngecek", s3) - 0.05, "scan", wt("resmi") - wt("ngecek", s3) + 0.2);
-      add(wt("versi") - 0.05, "point", 0.6, { up: 1 });
-      add(wt("pakai.") - 0.05, "nod", 0.5);
-      add(wt("Supabase") - 0.05, "happy", 0.6);
-      add(wt("MCP:") - 0.05, "point", 0.7, { up: 1 });
-      add(wt("tabel") - 0.1, "type", wt("database,") - wt("tabel") + 0.3);
-      add(wt("perubahan") - 0.05, "scan", 0.7);
-      add(wt("migration.") - 0.05, "cheer", 0.6);
-      add(wt("DevTools") - 0.05, "happy", 0.6);
-      add(wt("Google:") - 0.05, "nod", 0.5);
-      add(wt("buka") - 0.05, "point", 0.6);
-      add(wt("nyobain") - 0.1, "type", wt("pembeli,") - wt("nyobain") + 0.1);
-      add(wt("pembeli,") + 0.25, "shock", 0.5);
-      add(wt("console") - 0.15, "scan", wt("network.") - wt("console") + 0.5);
-      add(wt("Vercel:") - 0.05, "cheer", 0.6);
-      add(wt("deploy", s6) - 0.05, "point", 0.6);
-      add(wt("preview") - 0.05, "happy", 0.5);
-      add(wt("cek,") - 0.05, "nod", 0.5);
-      add(wt("production", s6) - 0.05, "think", 0.6);
-      add(wt("oke.") - 0.08, "cheer", 0.6);
-      add(wt("Hati-hati,") - 0.05, "shock", 0.6);
-      add(wt("nyentuh") - 0.05, "no", 0.7);
-      add(wt("Latihan") - 0.05, "nod", 0.5);
-      add(wt("tes,") - 0.05, "happy", 0.6);
-      add(wt("baca") - 0.1, "scan", 0.8);
-      add(wt("izinkan.") - 0.05, "no", 0.7);
+      const R = window.R29, SS = R.S;
+      // the robot = the thrower / calculator: types the odds, cheers the sixes, shakes its head at the misses, scans markets
+      add(wt("6") - 0.05, "happy", 0.6); add(wt("16,7%.") - 0.3, "type", 0.9);
+      add(wt("Lempar", SS(2)) - 0.05, "point", 0.6, { up: 1 }); add(wt("83,8%.") - 0.4, "type", 0.8); add(wt("100") - 0.05, "cheer", 0.7); add(wt("100%.") - 0.05, "happy", 0.7);
+      add(wt("Berarti") - 0.05, "think", 1.2); add(wt("sukses") - 0.05, "nod", 0.5); add(wt("iya.") - 0.05, "nod", 0.5); add(wt("dunia") - 0.05, "shock", 0.6); add(wt("cerita.") - 0.05, "no", 0.6);
+      add(wt("Lihat") - 0.05, "point", 0.7, { up: 1 }); add(wt("Dadunya", SS(6)) - 0.05, "scan", 1.4); add(wt("Nampannya") - 0.05, "point", 0.7);
+      add(wt("kegedean,") - 0.05, "shock", 0.6); add(wt("kekecilan.") - 0.05, "think", 0.6);
+      add(wt("ruko") + 0.1, "shock", 0.6); add(wt("lantai.") - 0.05, "no", 0.6); add(wt("grup") - 0.05, "think", 0.8); add(wt("sekali.", SS(9)) - 0.05, "no", 0.6);
+      add(wt("salah.") - 0.05, "shock", 0.5); add(wt("Dadunya", SS(10)) - 0.05, "scan", 1.0); add(wt("6.", SS(10)) - 0.05, "no", 0.7);
+      add(wt("Dilempar") - 0.05, "type", 1.6); add(wt("keluar.") - 0.05, "no", 0.7);
+      add(wt("terlalu") - 0.05, "think", 1.2); add(wt("Produk") - 0.05, "point", 0.6, { up: 1 }); add(wt("harga") - 0.05, "point", 0.6); add(wt("semuanya") - 0.05, "shock", 0.6);
+      add(wt("dadu", SS(14)) - 0.05, "point", 0.6, { up: 1 }); add(wt("harus") - 0.05, "nod", 0.5);
+      add(wt("sekaligus?") - 0.2, "type", 0.9); add(wt("Peluangnya") + 0.1, "shock", 0.6); add(wt("0,02%.") - 0.05, "no", 0.7);
+      add(wt("kekecilan.", SS(16)) - 0.05, "think", 0.6); add(wt("servis") - 0.05, "scan", 1.0); add(wt("mental") - 0.05, "shock", 0.6);
+      add(wt("lantai.", SS(19)) - 0.05, "shock", 0.5); add(wt("dirasain") - 0.05, "think", 0.8); add(wt("warteg") - 0.05, "happy", 0.6); add(wt("antre.") - 0.05, "no", 0.6); add(wt("lolos") - 0.05, "shock", 0.6);
+      add(wt("lemparanmu") - 0.05, "think", 0.7); add(wt("Modal,") - 0.05, "type", 1.6); add(wt("coba.") - 0.05, "nod", 0.5);
+      add(wt("gimana?") - 0.05, "think", 0.7); add(wt("dua") - 0.05, "happy", 0.5);
+      add(wt("gagal,") - 0.05, "shock", 0.5); add(wt("ganti", SS(26)) - 0.05, "scan", 1.2); add(wt("acak,") - 0.05, "no", 0.6);
+      add(wt("kunci") - 0.05, "happy", 0.6); add(wt("Dadu", SS(29)) - 0.05, "point", 0.6, { up: 1 }); add(wt("ubah") - 0.1, "type", 1.2); add(wt("pelajaran,") - 0.05, "cheer", 0.6); add(wt("naik.") - 0.05, "happy", 0.6);
+      add(wt("tepat,") - 0.05, "nod", 0.5); add(wt("perbaiki") - 0.05, "type", 0.9); add(wt("tumbuh.") - 0.05, "cheer", 0.6);
+      add(wt("meleset") - 0.05, "shock", 0.6); add(wt("sekali.", SS(33)) - 0.05, "no", 0.6);
+      add(wt("shiny") - 0.05, "happy", 0.6); add(wt("kinclong,") - 0.05, "scan", 0.8); add(wt("banting") - 0.05, "shock", 0.6); add(wt("nol") - 0.05, "no", 0.7);
+      add(wt("kebalikannya.") - 0.05, "nod", 0.5); add(wt("pasar", SS(38)) - 0.05, "scan", 1.6); add(wt("ide", SS(38) + 2.5) - 0.05, "point", 0.6, { up: 1 });
+      add(wt("produknya,") - 0.1, "type", 3.0); add(wt("6.", SS(40)) - 0.05, "cheer", 0.8);
+      add(wt("AI") - 0.05, "present", 0.8); add(wt("ringkas") - 0.1, "type", 1.0); add(wt("keluhan") - 0.05, "scan", 0.9); add(wt("bikin", SS(41)) - 0.1, "type", 1.2); add(wt("uji.") - 0.05, "happy", 0.6);
+      add(wt("bukan", SS(42)) - 0.05, "no", 0.6); add(wt("Pilih", SS(43)) - 0.05, "point", 0.6, { up: 1 }); add(wt("nampan", SS(43)) - 0.05, "point", 0.6); add(wt("ganti", SS(43)) + 0.2, "cheer", 0.7);
+      add(wt("lembar") - 0.05, "present", 0.8); add(wt("perintah") - 0.1, "type", 0.8);
       add(wt("Komen") + 0.05, "cheer", 0.8); add(wt("DM.") - 0.1, "point", 0.7, { up: 1 }); add(D - 1.1, "wave", 1.0);
       const envG = (t, g) => sm((t - g.t + 0.16) / 0.2) * (1 - sm((t - (g.t + g.d)) / 0.26));
       const BL = []; { let x = T_IN + 1.2, h = 13; while (x < D) { BL.push(x); h = (h * 9301 + 49297) % 233280; x += 2.1 + (h / 233280) * 2.3; } }

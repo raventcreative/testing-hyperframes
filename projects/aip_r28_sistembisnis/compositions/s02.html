@@ -1,12 +1,76 @@
 <template>
-  <style>#root { position: absolute; inset: 0; overflow: hidden; }</style>
-  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920"></div>
+  <style>
+    /* s02 (6.20–9.83) "Solusinya bukan tambah jam kerja, tapi lima sistem."
+       Starts at the s01 jam (KAMU node + 8 wired chips). "Solusinya": the chips are swept outwards (chaos clears). "tambah jam kerja":
+       a "+ jam kerja" chip with a spinning clock, X-stamped on "kerja,". "tapi": the node shrinks into the cyan accent dot (guide
+       object). "lima": the dot hops along the top row and each of the five system tiles springs up as it passes. "sistem.": "5 sistem"
+       headline in the stage; last 0.35 s the dot glides back under tile 1 (hand-over to s03). */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s02-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    #s02-jk { left: 540px; top: 840px; }
+    #s02-jk svg { color: #6adfff; }
+    #s02-h { position: absolute; left: 0; top: 548px; width: 1080px; text-align: center; font: 700 132px/150px Poppins; color: #fff; letter-spacing: -3px; white-space: nowrap; }
+    #s02-h em { font-style: normal; background: linear-gradient(170deg, #b8f1ff 4%, #01ccf7 50%, #0aa7d6 96%); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: 8px; }
+    #s02-sub { position: absolute; left: 0; top: 710px; width: 1080px; text-align: center; font: 700 32px/44px Poppins; color: #c7d5ea; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-zone"></div>
+  </div>
   <script>
     (function () {
-      const tl = gsap.timeline({ paused: true });
-      tl.set({}, {}, 3.79);
-      window.__timelines = window.__timelines || {};
-      window.__timelines["s02"] = tl;
+      const K = window.R28K, P = "s02", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $, cam } = S;
+      const z = $("s02-zone");
+      z.innerHTML = `<div class="k-cam" id="s02-cam">` + K.jamHTML(P) +
+        `<div class="k-chip" id="s02-jk">${K.svg("clock", "", 'id="s02-clk"')}tambah jam kerja?</div><div class="k-x" id="s02-x">${K.svg("x")}</div>` +
+        `<div id="s02-h"><em>5</em> sistem</div><div id="s02-sub">biar usaha nggak nunggu kamu terus</div></div>` +
+        K.barHTML(P) + `<div class="k-dot" id="s02-dot"></div>`;
+      const tTam = wt("tambah"), tKer = wt("kerja,"), tTap = wt("tapi"), tLim = wt("lima"), tSis = wt("sistem.");
+      cam($("s02-cam"), 1.04);   // continues the s01 push (s01 ends at 1.04)
+      // ---------------------------------------------------------------- jam state (identical to the s01 end) -> swept away
+      const node = $("s02-node"); I(node, { scale: 1, opacity: 1 });
+      [0, 1].forEach((k) => I($(`s02-rg${k}`), { opacity: 0 }));
+      K.JAM.forEach((j, i) => {
+        const c = $(`s02-jc${i}`), l = $(`s02-jl${i}`);
+        I(c, { x: 0, y: 0, scale: 1, opacity: 1, xPercent: -50, yPercent: -50 }); I(l, { opacity: 0.7 });
+        const dx = (j.x - 540) * 0.6, dy = (j.y - 620) * 0.6;
+        ft(c, { x: 0, y: 0, opacity: 1, scale: 1 }, { x: dx, y: dy, opacity: 0, scale: 0.7, duration: 0.4, ease: "power3.in" }, 0.06 + i * 0.03);
+        ft(l, { opacity: 0.7 }, { opacity: 0, duration: 0.25 }, 0.06 + i * 0.03);
+      });
+      // ---------------------------------------------------------------- "tambah jam kerja?" -> X
+      const jk = $("s02-jk"), x = $("s02-x"), clk = $("s02-clk");
+      I(jk, { xPercent: -50, yPercent: -50, opacity: 0, y: 24, scale: 1 });
+      ft(jk, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.7)" }, tTam - 0.2);
+      I(clk, { rotation: 0, transformOrigin: "50% 50%" });
+      ft(clk, { rotation: 0 }, { rotation: 720, duration: 1.0, ease: "power1.in" }, tTam - 0.15);
+      I(x, { x: 375, y: 840, scale: 0, opacity: 0, rotation: -30 });
+      ft(x, { scale: 2.2, opacity: 0, rotation: -30 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.24, ease: "back.out(1.6)" }, tKer - 0.04);
+      ft(jk, { opacity: 1 }, { opacity: 0.35, duration: 0.18 }, tKer + 0.1);
+      ft(jk, { y: 0, opacity: 0.35 }, { y: 60, opacity: 0, duration: 0.28, ease: "power2.in" }, tTap - 0.05);
+      ft(x, { y: 840, opacity: 1 }, { y: 900, opacity: 0, duration: 0.28, ease: "power2.in" }, tTap - 0.05);
+      // ---------------------------------------------------------------- "tapi": node -> accent dot; "lima": the dot builds the bar
+      ft(node, { scale: 1, opacity: 1 }, { scale: 0.14, opacity: 0, duration: 0.32, ease: "power3.in" }, tTap);
+      const dot = $("s02-dot");
+      I(dot, { x: 540, y: 620, scale: 0, opacity: 0 });
+      ft(dot, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "back.out(2)" }, tTap + 0.24);
+      K.barSet(S, P, 0, -1, false);
+      const t0 = tLim - 0.2, hop = 0.11;
+      ft(dot, { x: 540, y: 620 }, { x: K.TC(0).x, y: 456, duration: 0.24, ease: "power3.inOut" }, t0 - 0.24);
+      K.SYS.forEach((_, i) => {
+        const tile = $(`s02-t${i}`), tt = t0 + i * hop;
+        ft(tile, { opacity: 0, scale: 0.4, y: 40 }, { opacity: 1, scale: 1, y: 0, duration: 0.34, ease: "back.out(1.6)" }, tt);
+        if (i > 0) ft(dot, { x: K.TC(i - 1).x }, { x: K.TC(i).x, duration: hop, ease: "sine.inOut" }, tt - hop);
+      });
+      // "sistem.": headline in the stage
+      const h = $("s02-h"), sub = $("s02-sub");
+      I(h, { opacity: 0, y: 40, scale: 0.9, transformOrigin: "50% 50%" }); I(sub, { opacity: 0, y: 20 });
+      ft(h, { opacity: 0, y: 40, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.5)" }, tSis - 0.08);
+      ft(sub, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tSis + 0.12);
+      // hand-over: headline clears, dot glides back under tile 1
+      ft(h, { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, D - 0.3);
+      ft(sub, { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power2.in" }, D - 0.3);
+      ft(dot, { x: K.TC(4).x }, { x: K.TC(0).x, duration: 0.34, ease: "power3.inOut" }, D - 0.38);
+      S.finish();
     })();
   </script>
 </template>

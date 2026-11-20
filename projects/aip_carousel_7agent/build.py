@@ -19,7 +19,16 @@ def glyph(name, size, color=None):
         return f'<img class="ml" src="assets/mlogos/{MULTI[name]}.svg" style="height:{size}px;width:auto;max-width:{size}px;object-fit:contain;display:block">'
     p = re.search(r'<path d="([^"]+)"', (D / "assets/logos" / f"{name}.svg").read_text()).group(1)
     return f'<svg viewBox="0 0 24 24" width="{size}" height="{size}" style="display:block"><path fill="{color or BRANDC[name]}" d="{p}"/></svg>'
+def ig_grad(size):
+    """Simple Icons Instagram glyph filled with the official IG gradient."""
+    p = re.search(r'<path d="([^"]+)"', (D / "assets/logos/instagram.svg").read_text()).group(1)
+    return (f'<svg viewBox="0 0 24 24" width="{size}" height="{size}" style="display:block"><defs><radialGradient id="igg" cx="30%" cy="107%" r="150%">'
+            '<stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/>'
+            '<stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs>'
+            f'<path fill="url(#igg)" d="{p}"/></svg>')
 def tile(name, s=56):
+    if name == "instagram" and s >= 60:   # cover: same white app tile as the others, official IG mark inside
+        return f'<div class="app" style="width:{s}px;height:{s}px;border-radius:{int(s*.26)}px">{ig_grad(int(s*.6))}</div>'
     if name == "instagram":
         return (f'<div class="app" style="width:{s}px;height:{s}px;border-radius:{int(s*.26)}px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%)">'
                 f'{glyph(name, int(s*.56), "#fff")}</div>')

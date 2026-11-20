@@ -43,5 +43,24 @@ market then idea · s39 process fill 0/4 → 4/4 · s40 throw lands 6 → dot fl
 banyak-banyakan lemparan" strike · s43 three rules + final six · s44 worksheet card · s45 comment DADU → DM → logo.
 
 ## QA
-Real-runtime snapshots every second (0,5 … 163,5) via `npx hyperframes@0.8.186 snapshot`, JPG contact sheets in the session
-scratchpad `r29/` (qa1_*.jpg, qa2_*.jpg). Dev stills (plain page, no hosts) via scratch `dev.cjs`.
+- Real runtime (`npx hyperframes@0.8.186 snapshot`): full pass every second 0,5 … 163,5 s (164 frames) → sheets `r29/qa1_a … qa1_g.jpg`
+  in the session scratchpad; fix pass of 24 frames on every changed beat (+ first frame 0 and last frame 164,35) → `r29/qa2.jpg`.
+  PNG dumps deleted. Dev stills (plain page, no hosts) `r29/s1 … s7.jpg`.
+- Fixed during QA: hook die entering off-frame; stat card "0,0 %" before the number is spoken (now "?"); the problem chip moved to
+  the top right (full-width cards at y 410 covered it); spread trays cut at the edges + unreadable 3D labels (bigger, trays packed);
+  giant die cut at the left edge; 3D labels for the four unknowns → HTML list card; the floorless tray never lost its floor
+  (`lantai.` matched the earlier "3 lantai." — word lookups now scoped by scene); "?" cubes read upside down during the flip; exits
+  that flew dice over the logo/tab → shrink exits; phone card missing `position:absolute`; ctaveil covering the worksheet; k42 text
+  overlapping the rules; tank text doubled; flip card faces both visible; static survey/phone cards got per-word motion; dice storm
+  kept below the kinetic type; tray shifted lower (shot offset) under the process-fill tank, the rules and the worksheet.
+- `check`: lint 0 errors (5 warnings: nested timeline elements like the kits, duplicate-media hint, negative z-index on the marker).
+  Browser phase: the first full run reported only "text_occluded" on the problem chip under the full-frame mascot canvas (false
+  positive — the chip is visible in every snapshot) → marked `data-layout-allow-occlusion`; contrast 35/35 AA. Later re-runs could
+  not finish the browser phase inside the CLI's 120 s deadline while three other renders loaded the CPU (load ≈ 14 on 4 cores).
+- Mascot eyes checked in every QA frame (glances disabled): pupils present throughout.
+
+## Known notes
+- Captions: the last chunk "aku kirim lewat DM." stays over the end card (house style). Chunks are short (≤ 23 chars) so they
+  never reach the mascot's head.
+- All business examples, the warteg queue app, "120 ulasan" and the complaint quotes are illustrative (labelled CONTOH /
+  ILUSTRASI / CONTOH TUGAS).

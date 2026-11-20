@@ -1,0 +1,160 @@
+<template>
+  <style>
+    /* s02 LOOP + RULE #1 (13.47–24.60) "Bentuknya bukan corong yang sekali jalan selesai, tapi putaran. Hasil minggu ini jadi bahan buat
+       minggu depan. Dan aturan nomor satu: nggak ada postingan yang tayang sebelum kamu setujui."
+       Starts at s01's end state (boss card + 3 module boxes + lines + accent dot on the crown, all in the hud layer). The boss card
+       lifts away, the boxes shrink into three pills docked at the top. "corong": a funnel draws itself, the accent dot drops through it
+       ("sekali jalan") and lands on a "selesai" flag; "tapi": the funnel is struck through; "putaran.": the funnel dissolves into a
+       ring, the three pills fly to the ring's stations and the dot starts lapping it; centre "Minggu 1" rolls to "Minggu 2" on
+       "minggu depan" ("hasil -> bahan"). "Dan aturan": the ring recedes, rule chip "Aturan nomor 1"; a post card (CONTOH) slides to
+       a locked gate in front of the feed and bounces back on "nggak ada"; "sebelum kamu setujui": the approve button pops, is
+       pressed, the lock opens and the post slides into the feed; the button then grows into the cyan flood (button -> page) that
+       becomes s03's header. */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s02-funnel { position: absolute; left: 290px; top: 450px; width: 500px; height: 420px; overflow: visible; }
+    #s02-ring { position: absolute; left: 290px; top: 410px; width: 500px; height: 500px; overflow: visible; }
+    .s02-pill { position: absolute; left: 0; top: 0; height: 58px; padding: 0 20px 0 8px; border-radius: 29px; display: flex; align-items: center; gap: 10px;
+      background: rgba(12,22,64,.94); box-shadow: inset 0 0 0 2px rgba(106,223,255,.6), 0 12px 26px rgba(2,6,26,.5); font: 700 22px/1 Poppins; color: #fff; white-space: nowrap; transform-origin: 50% 50%; }
+    .s02-pill i { display: block; width: 42px; height: 42px; border-radius: 21px; background: linear-gradient(160deg,#9cecff,#01ccf7 55%,#0aa7d6); font: 700 22px/42px Poppins; font-style: normal; color: #0b1440; text-align: center; }
+    #s02-wk { position: absolute; left: 390px; top: 598px; width: 300px; height: 70px; overflow: hidden; }
+    #s02-wkc { position: absolute; left: 0; top: 0; width: 300px; }
+    #s02-wkc b { display: block; height: 70px; font: 700 50px/70px Poppins; color: #fff; text-align: center; white-space: nowrap; }
+    #s02-wks { position: absolute; left: 390px; top: 676px; width: 300px; text-align: center; font: 400 22px/30px Poppins; color: #e3edfa; white-space: nowrap; }
+    #s02-wks em { font-style: normal; font-weight: 700; color: #6adfff; }
+    #s02-post { position: absolute; left: 0; top: 0; width: 300px; height: 238px; border-radius: 26px; background: linear-gradient(180deg,#ffffff,#f4f7fc); box-shadow: 0 22px 50px rgba(2,6,26,.55); overflow: hidden; transform-origin: 50% 50%; }
+    #s02-post .im { position: absolute; left: 14px; top: 14px; width: 272px; height: 130px; border-radius: 18px; background: linear-gradient(160deg,#1d3f7a,#0b1440); overflow: hidden; }
+    #s02-post .im svg { position: absolute; left: 96px; top: 14px; width: 80px; height: 100px; }
+    #s02-post b { position: absolute; left: 18px; top: 154px; font: 700 21px/28px Poppins; color: #0a0d2c; white-space: nowrap; }
+    #s02-post span { position: absolute; left: 18px; top: 184px; font: 400 16px/22px Poppins; color: #294b77; white-space: nowrap; }
+    #s02-post .k-demo { right: 14px; top: 196px; height: 26px; line-height: 26px; font-size: 12px; }
+    #s02-gate { position: absolute; left: 640px; top: 480px; width: 26px; height: 420px; border-radius: 13px; background: rgba(1,204,247,.25); box-shadow: inset 0 0 0 2px #01ccf7, 0 0 24px rgba(1,204,247,.4); transform-origin: 50% 0%; }
+    #s02-lock { position: absolute; left: 653px; top: 690px; width: 86px; height: 86px; margin: -43px 0 0 -43px; border-radius: 43px; background: #0b1440; box-shadow: inset 0 0 0 3px #01ccf7, 0 0 26px rgba(1,204,247,.5); color: #6adfff; transform-origin: 50% 50%; }
+    #s02-lock svg { position: absolute; left: 21px; top: 21px; width: 44px; height: 44px; }
+    #s02-lock .op { opacity: 0; }
+    #s02-feed { position: absolute; left: 700px; top: 470px; width: 320px; height: 440px; border-radius: 30px; }
+    #s02-feed .hd { position: absolute; left: 20px; top: 16px; font: 700 22px/34px Poppins; color: #fff; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+    #s02-feed .hd svg { width: 24px; height: 24px; color: #6adfff; }
+    #s02-feed .sl { position: absolute; left: 20px; width: 280px; border-radius: 18px; border: 2.5px dashed rgba(106,223,255,.45); }
+    #s02-btn { left: 0; top: 0; }
+  </style>
+  <div id="root" data-composition-id="s02" data-width="1080" data-height="1920">
+    <div id="s02-wrap" class="k-ab" style="width:1080px;height:945px"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R30K, P = "s02", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $, popIn, fadeOut } = S;
+      $("s02-wrap").innerHTML = K.layers(P);
+      const cam = $("s02-cam"), hud = $("s02-hud");
+      const PN = ["Riset &amp; konten", "Kreatif &amp; distribusi", "Analitik"];
+      const RC = { x: 540, y: 660, r: 210 };
+      const ST = [-90, 30, 150].map((a) => [RC.x + RC.r * Math.cos((a * Math.PI) / 180), RC.y + RC.r * Math.sin((a * Math.PI) / 180)]);
+      const DOCK = [[250, 392], [560, 392], [850, 392]];
+      const cup = `<svg viewBox="0 0 80 100"><path d="M14 30 H66 L60 92 Q59 98 52 98 H28 Q21 98 20 92 Z" fill="#ffffff"/><path d="M17 44 H63 L60 74 H20 Z" fill="#c98a52"/>` +
+        `<rect x="10" y="22" width="60" height="10" rx="4" fill="#e3edfa"/><path d="M30 14 Q34 6 30 0 M42 14 Q46 6 42 0 M54 14 Q58 6 54 0" stroke="#6adfff" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+      cam.innerHTML =
+        `<svg id="s02-funnel" viewBox="0 0 500 420"><path id="s02-fp" d="M30 20 H470 L300 230 V330 H200 V230 Z" fill="rgba(1,204,247,.08)" stroke="#6adfff" stroke-width="6" stroke-linejoin="round" stroke-dasharray="1600" stroke-dashoffset="1600"/>` +
+        `<text x="250" y="100" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="30" fill="#ffffff" id="s02-ft">corong</text></svg>` +
+        `<div class="k-chip" id="s02-done">${K.svg("flag")}selesai</div><div class="k-strike" id="s02-x" style="width:560px"></div>` +
+        `<svg id="s02-ring" viewBox="0 0 500 500"><circle id="s02-rc" cx="250" cy="250" r="210" fill="none" stroke="#01ccf7" stroke-width="7" stroke-dasharray="1320" stroke-dashoffset="1320" transform="rotate(-90 250 250)" stroke-linecap="round"/>` +
+        [0, 120, 240].map((a) => `<g transform="rotate(${a + 60} 250 250)"><path d="M250 28 l18 12 -18 12" fill="none" stroke="#d6f8ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="s02-ar"/></g>`).join("") + `</svg>` +
+        `<div id="s02-wk"><div id="s02-wkc"><b>Minggu 1</b><b>Minggu 2</b></div></div><div id="s02-wks">hasil <em>&rarr;</em> bahan</div>` +
+        `<div class="k-glass" id="s02-feed"><div class="hd">${K.svg("eye")}Tayang di feed</div><div class="sl" style="top:66px;height:170px" id="s02-sl0"></div><div class="sl" style="top:250px;height:170px"></div></div>` +
+        `<div id="s02-gate"></div><div id="s02-lock">${K.svg("lock")}${K.svg("lock-open", "op")}</div>` +
+        `<div id="s02-post"><div class="im">${cup}</div><b>Promo kopi susu</b><span>draf postingan &middot; Kamis</span><div class="k-demo w">CONTOH</div></div>`;
+      hud.innerHTML =
+        K.linesHTML(P) + K.BOX.map((_, i) => K.boxHTML(P, i)).join("") + K.bossHTML(P) +
+        PN.map((n, i) => `<div class="s02-pill" id="s02-p${i}"><i>${i + 1}</i>${n}</div>`).join("") +
+        `<div class="k-chip on" id="s02-rule">${K.svg("flag")}Aturan nomor 1</div>` + K.btnHTML("s02-btn", "Setujui") + K.floodHTML(P) + K.dotHTML(P);
+      const T = { ben: wt("Bentuknya"), buk: wt("bukan"), cor: wt("corong"), sek: wt("sekali"), sel: wt("selesai,"), tap: wt("tapi"), put: wt("putaran."),
+        has: wt("Hasil"), bah: wt("bahan"), dep: wt("depan."), dan: wt("Dan"), atu: wt("aturan"), sat: wt("satu:"), ngg: wt("nggak"), pos: wt("postingan"),
+        tay: wt("tayang"), seb: wt("sebelum"), set: wt("setujui.") };
+      K.cam(S);
+      // ---------------------------------------------------------------- s01 hand-over: boss + boxes + lines (identical pixels) -> pills
+      const boss = $("s02-boss"), dot = $("s02-dot");
+      I(boss, { x: K.BOSS.x, y: K.BOSS.y, scale: 1, opacity: 1, transformOrigin: "50% 50%" });
+      ft(boss, { y: K.BOSS.y, scale: 1, opacity: 1 }, { y: K.BOSS.y - 70, scale: 0.8, opacity: 0, duration: 0.4, ease: "power2.in" }, 0.15);
+      K.BOX.forEach((_, i) => { const l = $(`s02-ln${i}`); I(l, { opacity: 1 }); fadeOut(l, 0.1, 0.2); });
+      const crown = [K.BOSS.x - 190 + 18 + 72, K.BOSS.y - 58 + 22];
+      I(dot, { x: crown[0], y: crown[1], scale: 1, opacity: 1 });
+      K.BOX.forEach((b, i) => {
+        const bx = $(`s02-bx${i}`), p = $(`s02-p${i}`);
+        I(bx, { x: b.x, y: b.y, scale: 1, opacity: 1, transformOrigin: "50% 50%" });
+        ft(bx, { x: b.x, y: b.y, scale: 1, opacity: 1 }, { x: DOCK[i][0], y: DOCK[i][1], scale: 0.25, opacity: 0, duration: 0.5, ease: "power3.inOut" }, 0.2 + i * 0.05);
+        K.at(S, p, DOCK[i][0], DOCK[i][1], { scale: 0.6, opacity: 0 });
+        ft(p, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.8)" }, 0.5 + i * 0.05);
+      });
+      // ---------------------------------------------------------------- funnel: draws, dot drops through, "selesai"
+      const fp = $("s02-fp"), fun = $("s02-funnel"), ftx = $("s02-ft");
+      I(fun, { opacity: 1, scale: 1, transformOrigin: "50% 50%" }); I(fp, { strokeDashoffset: 1600 }); I(ftx, { opacity: 0 });
+      ft(fp, { strokeDashoffset: 1600 }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, T.ben + 0.1);
+      ft(ftx, { opacity: 0 }, { opacity: 1, duration: 0.25 }, T.cor - 0.1);
+      // dot: crown -> funnel mouth -> through the spout -> flag
+      K.fly(S, dot, crown, [540, 480], T.buk, 0.5, 60);
+      tl.to(dot, { keyframes: [{ x: 600, y: 540, duration: 0.2 }, { x: 560, y: 630, duration: 0.2 }, { x: 540, y: 720, duration: 0.15 }, { x: 540, y: 790, duration: 0.15 }], ease: "none" }, T.sek - 0.05);
+      const done = $("s02-done"); K.at(S, done, 540, 880, { scale: 0.5, opacity: 0 });
+      ft(done, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" }, T.sel);
+      tl.to(dot, { x: 540, y: 826, duration: 0.25, ease: "power2.in" }, T.sel - 0.05);
+      const x = $("s02-x"); I(x, { x: 260, y: 640, rotation: -24, scaleX: 0, opacity: 1 });
+      ft(x, { scaleX: 0 }, { scaleX: 1, duration: 0.24, ease: "power3.out" }, T.tap - 0.05);
+      ft(fun, { opacity: 1 }, { opacity: 0.35, duration: 0.2 }, T.tap);
+      // "putaran.": funnel + strike + flag dissolve, the ring draws, pills fly to the stations
+      [fun, x, done].forEach((e) => fadeOut(e, T.put - 0.25, 0.25));
+      ft(fun, { scale: 1 }, { scale: 0.7, duration: 0.3, ease: "power2.in" }, T.put - 0.25);
+      const rc = $("s02-rc"); I(rc, { strokeDashoffset: 1320 });
+      ft(rc, { strokeDashoffset: 1320 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, T.put - 0.15);
+      document.querySelectorAll("#s02-ring .s02-ar").forEach((a, i) => { I(a, { opacity: 0 }); ft(a, { opacity: 0 }, { opacity: 1, duration: 0.2 }, T.put + 0.3 + i * 0.12); });
+      PN.forEach((_, i) => K.fly(S, $(`s02-p${i}`), DOCK[i], ST[i], T.put + 0.05 + i * 0.08, 0.55, 40));
+      // dot laps the ring (2 laps), starting at the bottom (flag) -> joins the circle
+      const lap = 1.45, a0 = 90, t0 = T.put + 0.25, laps = 2;
+      tl.to(dot, { x: RC.x, y: RC.y + RC.r, duration: 0.25, ease: "power2.out" }, T.put);
+      { const kf = [], n = 36 * laps; for (let i = 1; i <= n; i++) { const a = ((a0 - (i * 360) / 36) * Math.PI) / 180; kf.push({ x: RC.x + RC.r * Math.cos(a), y: RC.y + RC.r * Math.sin(a), duration: lap / 36, ease: "none" }); }
+        tl.to(dot, { keyframes: kf }, t0); }
+      const wk = $("s02-wkc"), wks = $("s02-wks"), wkb = $("s02-wk");
+      I(wkb, { opacity: 0, scale: 0.7, transformOrigin: "50% 50%" }); I(wk, { y: 0 }); I(wks, { opacity: 0, y: 10 });
+      ft(wkb, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, T.has - 0.1);
+      ft(wks, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, T.bah - 0.1);
+      ft(wk, { y: 0 }, { y: -70, duration: 0.35, ease: "back.out(1.6)" }, T.dep - 0.25);
+      // station pulses as the dot passes
+      PN.forEach((_, i) => { const p = $(`s02-p${i}`); [0, 1].forEach((l) => { const ang = [-90, 30, 150][i]; let d = (a0 - ang + 360) % 360; const tp = t0 + (d / 360) * lap + l * lap;
+        if (tp < T.dan) ft(p, { scale: 1.1 }, { scale: 1, duration: 0.3, ease: "power2.out" }, tp); }); });
+      // ---------------------------------------------------------------- rule #1: the gate
+      const ring = $("s02-ring");
+      I(ring, { opacity: 1, scale: 1, transformOrigin: "50% 50%" });
+      [ring, wkb, wks].forEach((e) => { ft(e, { opacity: e === wks ? 1 : 1 }, { opacity: 0, duration: 0.3, ease: "power2.in" }, T.dan - 0.1); });
+      ft(ring, { scale: 1 }, { scale: 0.8, duration: 0.35, ease: "power2.in" }, T.dan - 0.1);
+      PN.forEach((_, i) => { const p = $(`s02-p${i}`); ft(p, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6, duration: 0.3, ease: "power2.in" }, T.dan - 0.05 + i * 0.04); });
+      tl.to(dot, { opacity: 0, scale: 0.4, duration: 0.2 }, T.dan + 0.15);
+      const rule = $("s02-rule"); K.at(S, rule, 540, 400, { scale: 0.5, opacity: 0 });
+      ft(rule, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.34, ease: "back.out(2)" }, T.atu - 0.05);
+      const feed = $("s02-feed"), gate = $("s02-gate"), lock = $("s02-lock"), post = $("s02-post");
+      I(feed, { x: 80, opacity: 0 }); ft(feed, { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T.atu);
+      I(gate, { scaleY: 0, opacity: 1 }); ft(gate, { scaleY: 0 }, { scaleY: 1, duration: 0.35, ease: "power3.out" }, T.sat - 0.1);
+      I(lock, { scale: 0, rotation: 0 }); ft(lock, { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2.2)" }, T.sat);
+      I(post, { x: -340, y: 560, rotation: 0, opacity: 1 });
+      ft(post, { x: -340 }, { x: 80, duration: 0.5, ease: "power3.out" }, T.sat + 0.05);
+      // "nggak ada": bumps the gate, bounces back; lock shakes
+      ft(post, { x: 80 }, { x: 318, duration: 0.3, ease: "power2.in" }, T.ngg - 0.2);
+      ft(post, { x: 318 }, { x: 150, duration: 0.42, ease: "back.out(1.4)" }, T.ngg + 0.1);
+      ft(lock, { rotation: 0 }, { rotation: 14, duration: 0.06, yoyo: true, repeat: 5, ease: "sine.inOut" }, T.ngg + 0.08);
+      ft(gate, { x: 0 }, { x: 6, duration: 0.05, yoyo: true, repeat: 3 }, T.ngg + 0.08);
+      ft(feed, { scale: 1 }, { scale: 1.03, duration: 0.15, yoyo: true, repeat: 1, transformOrigin: "50% 50%" }, T.tay);
+      // "sebelum kamu setujui.": button pops under the post, pressed, the lock opens, the post enters the feed
+      const btn = $("s02-btn"); K.at(S, btn, 300, 860, { scale: 0.4, opacity: 0 });
+      ft(btn, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.34, ease: "back.out(2)" }, T.seb - 0.1);
+      ft(btn, { scale: 1 }, { scale: 0.9, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, T.set);
+      const lc = lock.querySelectorAll("svg");
+      I(lc[0], { opacity: 1 }); I(lc[1], { opacity: 0 }); tl.set(lc[0], { opacity: 0 }, T.set + 0.12); tl.set(lc[1], { opacity: 1 }, T.set + 0.12);
+      ft(gate, { scaleY: 1 }, { scaleY: 0, duration: 0.3, ease: "power3.in" }, T.set + 0.14);
+      ft(lock, { y: 0 }, { y: -40, opacity: 0, duration: 0.3, ease: "power2.in" }, T.set + 0.3);
+      ft(post, { x: 150, y: 560, scale: 1 }, { x: 710, y: 538, scale: 0.92, duration: 0.42, ease: "power3.inOut" }, T.set + 0.16);
+      // button -> page: the button grows into the cyan flood (s03's header contracts out of it)
+      const fl = $("s02-flood"), F = K.FLOOD;
+      I(fl, { left: 300 - 120, top: 860 - 42, width: 240, height: 84, borderRadius: 42, opacity: 0 });
+      tl.set(fl, { opacity: 1 }, D - 0.62);
+      ft(fl, { left: 180, top: 818, width: 240, height: 84, borderRadius: 42 }, { left: F.x, top: F.y, width: F.w, height: F.h, borderRadius: 34, duration: 0.5, ease: "power3.inOut" }, D - 0.6);
+      fadeOut(btn, D - 0.6, 0.1);
+      S.finish();
+    })();
+  </script>
+</template>

@@ -1,0 +1,90 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s05-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s05-glow { left: 20px; top: 300px; width: 1040px; height: 700px; }
+    /* platform 1: feed */
+    #s05-fd { left: 64px; top: 336px; width: 590px; height: 516px; border-radius: 34px; transform-origin: 50% 50%; overflow: hidden; }
+    #s05-fd .k-eb { left: 28px; top: 26px; }
+    #s05-rd { right: 22px; top: 18px; height: 36px; padding: 0 14px; border-radius: 18px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #fff; font: 700 15px/36px Poppins, sans-serif; letter-spacing: .1em; white-space: nowrap; }
+    #s05-mask { left: 14px; top: 70px; width: 562px; height: 432px; overflow: hidden; border-radius: 22px; background: #f2f5fb;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 64px, #000 368px, transparent 432px); mask-image: linear-gradient(180deg, transparent 0, #000 64px, #000 368px, transparent 432px); }
+    #s05-ls { left: 0; top: 0; width: 562px; }
+    /* platform 2: forum */
+    #s05-fo { left: 676px; top: 336px; width: 340px; height: 516px; border-radius: 34px; transform-origin: 50% 50%; }
+    #s05-fo .k-eb { left: 26px; top: 26px; }
+    #s05-ft { left: 22px; top: 64px; width: 296px; height: 108px; border-radius: 22px; background: #eaf0fe; box-shadow: inset 0 0 0 1.5px rgba(41,75,119,.2); }
+    #s05-ft b { position: absolute; left: 18px; top: 14px; font: 700 21px/28px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s05-ft span { position: absolute; left: 18px; top: 48px; font: 400 16px/22px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s05-ft i { position: absolute; left: 18px; top: 74px; font: 700 14px/22px Poppins, sans-serif; color: #294b77; font-style: normal; letter-spacing: .08em; white-space: nowrap; }
+    .s05-re { position: absolute; height: 74px; border-radius: 20px; background: #ffffff; box-shadow: 0 12px 22px -16px rgba(10,13,44,.6), 0 0 0 1.5px rgba(10,13,44,.07); }
+    .s05-re .k-av { left: 10px; top: 13px; width: 48px; height: 48px; }
+    .s05-re b { position: absolute; left: 68px; top: 0; font: 700 18px/74px Poppins, sans-serif; color: #24324f; white-space: nowrap; }
+    .s05-ln { position: absolute; width: 4px; border-radius: 2px; background: #294b77; transform-origin: 50% 0%; }
+    /* debate overlay */
+    .s05-db { position: absolute; top: 560px; height: 104px; padding: 0 30px; border-radius: 30px; font: 700 40px/104px Poppins, sans-serif; white-space: nowrap; transform-origin: 50% 50%; }
+    #s05-dA { left: 92px; background: #ffffff; color: #0a0d2c; box-shadow: 0 24px 40px -22px rgba(10,13,44,.7), 0 0 0 2px rgba(10,13,44,.08); }
+    #s05-dB { left: 610px; background: linear-gradient(135deg, #0a0d2c, #294b77); color: #ffffff; box-shadow: 0 24px 40px -22px rgba(10,13,44,.8); }
+    #s05-vs { left: 476px; top: 566px; width: 92px; height: 92px; border-radius: 50%; background: linear-gradient(135deg, #13307e, #2f6bff); color: #fff; font: 700 34px/92px Poppins, sans-serif; text-align: center; box-shadow: 0 0 0 6px #ffffff, 0 16px 26px -12px rgba(19,48,126,.9); }
+    #s05-tag { left: 236px; top: 870px; }
+  </style>
+  <div id="root" data-composition-id="s05" data-width="1080" data-height="1920">
+    <div id="s05-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s05 "Lalu mereka posting, debat, dan saling balas di media sosial tiruan."  — the CHAOS beat (chaos -> control -> clarity arc)
+      // Platform 1 (a feed) fills with posts that scroll faster and faster, the round counter ticks · "debat": two opinions slam in
+      // from both sides with a VS badge, shake · "saling balas": platform 2 (a forum thread) grows replies, joined by drawn lines ·
+      // "media sosial tiruan": chip "2 MEDIA SOSIAL TIRUAN · jalan bareng" (MiroFish runs two simulated platforms in parallel).
+      const ID = "s05", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, shake, push } = S, tl = S.tl;
+      const tPo = L("posting,"), tDe = L("debat,"), tSa = L("saling"), tBa = L("balas"), tMe = L("media"), tTi = L("tiruan.");
+      const PO = [["Dimas", "Ada kopi literan baru nih. Udah ada yang coba?", 0], ["Rina", "Harga segitu worth it nggak sih?", 1], ["Bayu", "Aku sih lebih suka yang gelasan.", 4],
+        ["Sari", "Buat stok di kantor kayaknya cocok.", 2], ["Andi", "Tergantung rasanya dong.", 3], ["Wulan", "Nggak setuju, literan lebih hemat!", 1],
+        ["Rizky", "Ongkir ke Medan berapa ya?", 0], ["Putri", "Setuju sama yang di atas.", 4], ["Dimas", "Kalau manisnya bisa diatur, aku ikut.", 2], ["Bayu", "Tunggu review dulu deh.", 3]];
+      let lst = ""; PO.forEach(([n, t, v], i) => { lst += K.post("s05", { i, x: 14, y: 14 + i * 184, w: 534, h: 170, v, name: n, text: t, likes: 3 + ((i * 7) % 19), replies: (i * 3) % 7 }); });
+      let h = `<div class="k-glow k-a" id="s05-glow"></div>`;
+      h += `<div class="k-a k-card" id="s05-fd"><div class="k-eb">MEDSOS TIRUAN 1 · FEED</div><div class="k-a" id="s05-rd">RONDE 1</div><div class="k-a" id="s05-mask"><div class="k-a" id="s05-ls">${lst}</div></div></div>`;
+      const RE = [["Kemahalan ah.", 3, 30, 190], ["Hemat kok!", 1, 60, 270], ["Coba dulu baru nilai", 0, 30, 350], ["Setuju!", 2, 60, 430]];
+      let fo = `<div class="k-eb">MEDSOS TIRUAN 2 · FORUM</div><div class="k-a" id="s05-ft"><b>Kopi literan, worth it?</b><span>thread · warga AI</span><i>${RE.length} BALASAN</i></div>`;
+      RE.forEach(([t, v, x, y], i) => { fo += `<i class="s05-ln" id="s05-ln${i}" style="left:${x - 2 + 10}px;top:${i ? y - 16 : 172}px;height:${i ? 16 : y - 172}px"></i>` +
+        `<div class="s05-re" id="s05-re${i}" style="left:${x}px;top:${y}px;width:${296 - x + 22}px"><div class="k-av v${v}">${K.svg("user-round", 2.2)}</div><b>${t}</b></div>`; });
+      h += `<div class="k-a k-card" id="s05-fo">${fo}</div>`;
+      h += `<div class="k-a s05-db" id="s05-dA">"Kemahalan!"</div><div class="k-a s05-db" id="s05-dB">"Worth it!"</div><div class="k-a" id="s05-vs">VS</div>`;
+      h += `<div class="k-chip navy" id="s05-tag">${K.svg("messages-square", 2)}2 MEDSOS TIRUAN · jalan bareng</div>`;
+      $("s05-cam").innerHTML = h;
+      push($("s05-cam"), 540, 620);
+      I($("s05-glow"), { opacity: 0.85 });
+
+      // ================================================================ feed: posts pop then scroll ever faster, round counter ticks
+      const fd = $("s05-fd"), ls = $("s05-ls"), rd = $("s05-rd");
+      pop(fd, 0.0, { scale: 0.95, y: 30 }, 0.3);
+      for (let i = 0; i < 3; i++) pop($("s05-po" + i), 0.14 + i * 0.12 + (i === 2 ? tPo - 0.5 : 0) * 0, { scale: 0.9, y: 24 }, 0.26);
+      I(ls, { y: 0 });
+      ft(ls, { y: 0 }, { y: -184 * 7, duration: D - tPo + 0.1, ease: "power2.in" }, tPo - 0.2);
+      for (let k = 1; k <= 30; k++) { const t = tPo - 0.2 + (D - tPo) * Math.pow(k / 30, 0.7); tl.set(rd, { textContent: "RONDE " + (1 + k) }, t); }
+      for (let i = 0; i < 10; i++) { const lk = $("s05-lk" + i), b = 3 + ((i * 7) % 19); for (let k = 1; k <= 4; k++) tl.set(lk, { textContent: String(b + k * (2 + i % 3)) }, tPo + 0.3 + k * 0.5 + i * 0.05); }
+      // ================================================================ forum (platform 2)
+      const fo2 = $("s05-fo"); pop(fo2, 0.12, { scale: 0.95, y: 30 }, 0.3);
+      RE.forEach((r, i) => { const t = (i < 2 ? tSa - 0.15 : tBa - 0.1) + (i % 2) * 0.16;
+        const ln = $("s05-ln" + i); I(ln, { scaleY: 0 }); ft(ln, { scaleY: 0 }, { scaleY: 1, duration: 0.14, ease: "power2.out" }, t - 0.1);
+        pop($("s05-re" + i), t, { scale: 0.7, x: -20, y: 0 }, 0.24, "back.out(1.9)"); });
+      // ================================================================ "debat": two opinions slam together
+      const dA = $("s05-dA"), dB = $("s05-dB"), vs = $("s05-vs");
+      I(dA, { opacity: 0, x: -300, rotation: -6 }); I(dB, { opacity: 0, x: 300, rotation: 6 }); I(vs, { opacity: 0, scale: 0.2 });
+      ft(dA, { opacity: 0, x: -300, rotation: -6 }, { opacity: 1, x: 0, rotation: -3, duration: 0.22, ease: "power3.out" }, tDe - 0.12);
+      ft(dB, { opacity: 0, x: 300, rotation: 6 }, { opacity: 1, x: 0, rotation: 3, duration: 0.22, ease: "power3.out" }, tDe - 0.08);
+      ft(vs, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2.6)" }, tDe + 0.08);
+      shake(fd, tDe + 0.1, 7); shake(fo2, tDe + 0.12, 6);
+      // the platforms dim while the two opinions are on top (no readable text left half-covered)
+      [fd, fo2].forEach((e) => { ft(e, { opacity: 1 }, { opacity: 0.22, duration: 0.16 }, tDe - 0.14); ft(e, { opacity: 0.22 }, { opacity: 1, duration: 0.2 }, tSa - 0.22); });
+      [dA, dB, vs].forEach((e, k) => ft(e, { opacity: 1, y: 0 }, { opacity: 0, y: 40, duration: 0.2, ease: "power2.in" }, tSa - 0.25 + k * 0.03));
+      // ================================================================ "media sosial tiruan"
+      pop($("s05-tag"), tMe - 0.08, { scale: 0.6, y: 16 }, 0.28, "back.out(2)");
+      ft($("s05-tag"), { scale: 1 }, { scale: 1.07, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tTi + 0.05);
+      // ================================================================ exit
+      K.out(S, [fd, fo2, $("s05-tag")], D - 0.3);
+      S.done();
+    })();
+  </script>
+</template>

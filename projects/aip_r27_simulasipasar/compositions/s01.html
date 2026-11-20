@@ -1,0 +1,130 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s01-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s01-glow { left: 20px; top: 300px; width: 1040px; height: 700px; }
+    /* spinning spend list ("spinning pain list" recipe) */
+    #s01-sp { left: 64px; top: 336px; width: 560px; height: 300px; border-radius: 34px; transform-origin: 50% 50%; }
+    #s01-sp .k-eb { left: 32px; top: 28px; }
+    #s01-win { position: absolute; left: 24px; top: 74px; width: 512px; height: 120px; border-radius: 24px; background: #f2f5fb; box-shadow: inset 0 0 0 1.5px #dfe6f2; overflow: hidden; }
+    #s01-list { position: absolute; left: 0; top: 0; width: 512px; }
+    .s01-it { position: absolute; left: 0; width: 512px; height: 120px; }
+    .s01-it .k-ic { left: 22px; top: 24px; width: 72px; height: 72px; border-radius: 22px; }
+    .s01-it b { position: absolute; left: 116px; top: 0; font: 700 38px/120px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    #s01-win:after { content: ""; position: absolute; inset: 0; border-radius: 24px; background: linear-gradient(180deg, rgba(242,245,251,.95), rgba(242,245,251,0) 28%, rgba(242,245,251,0) 72%, rgba(242,245,251,.95)); }
+    #s01-ar { position: absolute; left: 536px; top: 116px; width: 0; height: 0; border-top: 18px solid transparent; border-bottom: 18px solid transparent; border-right: 22px solid #294b77; }
+    #s01-note { left: 32px; top: 222px; font: 400 21px/30px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    /* the idea card (same frame as the spinner: it morphs into it) */
+    #s01-idea { left: 64px; top: 336px; width: 560px; height: 300px; border-radius: 34px; transform-origin: 50% 50%; }
+    #s01-idea .k-eb { left: 32px; top: 28px; }
+    #s01-idea .k-ic { left: 32px; top: 84px; width: 120px; height: 120px; border-radius: 34px; }
+    #s01-it1 { left: 180px; top: 90px; font: 700 43px/58px Poppins, sans-serif; white-space: nowrap; padding-right: 6px; }
+    #s01-it2 { left: 182px; top: 150px; font: 400 22px/32px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s01-it3 { left: 32px; top: 230px; }
+    /* receipt: money going out */
+    #s01-rc { left: 652px; top: 336px; width: 364px; height: 300px; border-radius: 34px; transform-origin: 50% 50%; }
+    #s01-rc .k-eb { left: 30px; top: 28px; }
+    .s01-row { position: absolute; left: 22px; width: 320px; height: 84px; border-radius: 22px; background: #f2f5fb; box-shadow: inset 0 0 0 1.5px #dfe6f2; }
+    .s01-row .k-ic { left: 14px; top: 14px; width: 56px; height: 56px; border-radius: 18px; }
+    .s01-row b { position: absolute; left: 86px; top: 0; font: 700 25px/84px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s01-row i { position: absolute; right: 18px; top: 26px; width: 32px; height: 32px; border-radius: 50%; background: #0a0d2c; color: #fff; }
+    .s01-row i svg { position: absolute; left: 6px; top: 6px; width: 20px; height: 20px; display: block; }
+    /* the crowd of AI residents */
+    #s01-crowd { left: 64px; top: 664px; width: 952px; height: 262px; border-radius: 34px; background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 2px rgba(41,75,119,.12); }
+    #s01-cl { left: 96px; top: 690px; }
+    #s01-orb { left: 0; top: 0; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 30px; }
+    .s01-rp { position: absolute; left: 540px; top: 800px; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 4px solid #294b77; }
+    .s01-q { position: absolute; padding: 8px 16px; font-size: 20px; line-height: 26px; }
+  </style>
+  <div id="root" data-composition-id="s01" data-width="1080" data-height="1920">
+    <div id="s01-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s01 HOOK "Sebelum stok barang atau bayar iklan, lempar dulu idemu ke warga AI."
+      // Frame 0: a list of things your capital could go to SPINS fast (unreadable on purpose) · "stok": it lands on "Stok barang",
+      // which drops into the "UANG KELUAR" receipt · spins again, lands on "Bayar iklan" (receipt row 2) · "lempar": the receipt
+      // slides away, the spinner card turns into "IDE PRODUK-MU" (lightbulb) · "idemu": the bulb is thrown in an arc into a band of
+      // AI residents · "warga AI": the residents pop in on springs, ripples, three small reactions. END: everything drops out.
+      const ID = "s01", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, shake, push } = S, tl = S.tl;
+      const tStok = L("stok"), tBay = L("bayar"), tIkl = L("iklan,"), tLem = L("lempar"), tIde = L("idemu"), tWar = L("warga"), tAI = L("AI.");
+      const ITEMS = [["Cetak kemasan", "printer"], ["Sewa booth", "store"], ["Stok barang", "package"], ["Endorse", "star"], ["Sewa ruko", "house"], ["Bayar iklan", "megaphone"], ["Desain logo", "sparkles"]];
+      const N = ITEMS.length, REP = 6, RH = 120;
+      let h = `<div class="k-glow k-a" id="s01-glow"></div>`;
+      let list = ""; for (let r = 0; r < REP; r++) ITEMS.forEach(([t, ic], i) => { const k = r * N + i; list += `<div class="s01-it" style="top:${k * RH}px"><div class="k-ic">${K.svg(ic, 2)}</div><b>${t}</b></div>`; });
+      h += `<div class="k-a k-card" id="s01-sp"><div class="k-eb">MODAL MAU DIPAKAI BUAT…</div><div id="s01-win"><div id="s01-list">${list}</div></div><i id="s01-ar"></i>` +
+        `<div class="k-a" id="s01-note">sekali keluar, susah balik</div></div>`;
+      h += `<div class="k-a k-card" id="s01-rc"><div class="k-eb">UANG KELUAR</div>` +
+        `<div class="s01-row" id="s01-r0" style="top:76px"><div class="k-ic">${K.svg("package", 2)}</div><b>Stok barang</b><i>${K.svg("banknote", 2)}</i></div>` +
+        `<div class="s01-row" id="s01-r1" style="top:176px"><div class="k-ic">${K.svg("megaphone", 2)}</div><b>Bayar iklan</b><i>${K.svg("banknote", 2)}</i></div></div>`;
+      h += `<div class="k-a k-card" id="s01-idea"><div class="k-eb">SEBELUM KELUAR MODAL</div><div class="k-ic" id="s01-bulb">${K.svg("lightbulb", 2)}</div>` +
+        `<div class="k-a k-grad" id="s01-it1">Ide produk-mu</div><div class="k-a" id="s01-it2">dites dulu, baru belanja</div>` +
+        `<div class="k-fn" id="s01-it3">${K.svg("users", 2)}<b>ke warga AI</b>&nbsp;· simulasi</div></div>`;
+      h += `<div class="k-a" id="s01-crowd"></div><div class="k-chip sm navy" id="s01-cl">${K.svg("users", 2)}warga AI</div>`;
+      // residents: a loose band, deterministic positions
+      const AV = []; let seed = 7; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+      for (let i = 0; i < 24; i++) { const col = i % 12, row = Math.floor(i / 12); const s = 58 + Math.round(rnd() * 22);
+        const x = 98 + col * 66 + Math.round(rnd() * 14) + (row ? 30 : 0), y = 752 + row * 80 + Math.round(rnd() * 14) - (col % 2) * 10;
+        if (row === 0 && col < 3) continue;   // keep the label free
+        AV.push([x, y, s]); h += K.av("s01", i, x, y, s, (i * 3) % 5); }
+      for (let i = 0; i < 3; i++) h += `<div class="s01-rp" id="s01-rp${i}"></div>`;
+      const Q = [["hmm?", 330, 684], ["mau coba!", 540, 684], ["berapaan?", 790, 684]];
+      Q.forEach(([t, x, y], i) => { h += `<div class="k-bub s01-q" id="s01-q${i}" style="left:${x}px;top:${y}px">${t}</div>`; });
+      h += `<div class="k-a k-ic" id="s01-orb">${K.svg("lightbulb", 2)}</div>`;
+      $("s01-cam").innerHTML = h;
+      push($("s01-cam"), 540, 620);
+      I($("s01-glow"), { opacity: 0.85 });
+
+      // ================================================================ frame 0: the list spins, lands on "Stok barang" then "Bayar iklan"
+      const sp = $("s01-sp"), lst = $("s01-list");
+      I(sp, { opacity: 1, y: 0, scale: 1 }); ft(sp, { y: 16 }, { y: 0, duration: 0.45, ease: "power3.out" }, 0);
+      const yAt = (k) => -k * RH;
+      I(lst, { y: yAt(0) });
+      ft(lst, { y: yAt(0) }, { y: yAt(2 + N * 2), duration: tStok + 0.05, ease: "power3.out" }, 0);           // lands on Stok barang
+      ft(lst, { y: yAt(2 + N * 2) }, { y: yAt(5 + N * 4), duration: tIkl - tBay + 0.3, ease: "power3.out" }, tBay - 0.2);   // lands on Bayar iklan
+      const win = $("s01-win"); [tStok + 0.05, tIkl + 0.1].forEach((t) => ft(win, { scale: 1 }, { scale: 1.04, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out" }, t));
+      const rc = $("s01-rc"); pop(rc, 0.12, { scale: 0.92, y: 24 }, 0.34);
+      const r0 = $("s01-r0"), r1 = $("s01-r1");
+      pop(r0, tStok + 0.08, { scale: 0.7, x: -120, y: 0 }, 0.32);
+      pop(r1, tIkl + 0.12, { scale: 0.7, x: -120, y: 0 }, 0.32);
+      shake(rc, tIkl + 0.3, 5);
+
+      // ================================================================ "lempar": receipt slides away, the spinner becomes the idea card
+      ft(rc, { opacity: 1, x: 0 }, { opacity: 0, x: 260, duration: 0.3, ease: "power2.in" }, tLem - 0.15);
+      ft(sp, { opacity: 1, rotationY: 0 }, { opacity: 0, rotationY: 80, duration: 0.18, ease: "power2.in" }, tLem - 0.12);
+      const idea = $("s01-idea");
+      I(idea, { opacity: 0, rotationY: -80, transformPerspective: 1200 }); I(sp, { transformPerspective: 1200 });
+      ft(idea, { opacity: 0, rotationY: -80 }, { opacity: 1, rotationY: 0, duration: 0.3, ease: "back.out(1.4)" }, tLem + 0.06);
+      const bulb = $("s01-bulb"); ft(bulb, { scale: 1 }, { scale: 1.12, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out" }, tLem + 0.3);
+      pop($("s01-it3"), tLem + 0.32, { scale: 0.8, y: 10 }, 0.24);
+
+      // ================================================================ "idemu": the bulb is thrown in an arc into the residents
+      const crowd = $("s01-crowd"), cl = $("s01-cl"), orb = $("s01-orb");
+      pop(crowd, tLem + 0.1, { scale: 0.96, y: 30 }, 0.3);
+      pop(cl, tLem + 0.24, { scale: 0.7, y: 0 }, 0.24);
+      const ox = 64 + 32 + 60, oy = 336 + 84 + 60, tx = 560, ty = 830, tA = tIde - 0.05, tB = tWar - 0.02;
+      I(orb, { opacity: 0, x: ox, y: oy, scale: 1, rotation: 0 });
+      tl.set(orb, { opacity: 1 }, tA);
+      ft(orb, { x: ox }, { x: tx, duration: tB - tA, ease: "power1.inOut" }, tA);
+      ft(orb, { y: oy }, { y: oy - 120, duration: (tB - tA) * 0.45, ease: "power2.out" }, tA);
+      ft(orb, { y: oy - 120 }, { y: ty, duration: (tB - tA) * 0.55, ease: "power2.in" }, tA + (tB - tA) * 0.45);
+      ft(orb, { rotation: 0 }, { rotation: 300, duration: tB - tA, ease: "none" }, tA);
+      ft(orb, { scale: 1 }, { scale: 0.5, duration: 0.16, ease: "power2.in" }, tB - 0.02);
+      tl.set(orb, { opacity: 0 }, tB + 0.14);
+      for (let i = 0; i < 3; i++) { const r = $("s01-rp" + i); I(r, { opacity: 0, scale: 0.2, x: tx - 540, y: ty - 800 });
+        ft(r, { opacity: 0.9, scale: 0.2 }, { opacity: 0, scale: 3.4 + i, duration: 0.6, ease: "power2.out" }, tB + 0.08 + i * 0.12); }
+      // residents pop outward from the landing point
+      Array.from(document.querySelectorAll("#s01-cam .k-av")).forEach((e) => {
+        const x = parseFloat(e.style.left) + 32, d = Math.abs(x - tx) / 480;
+        pop(e, tB + 0.04 + d * 0.32, { scale: 0.2, y: 16 }, 0.26, "back.out(2)");
+        ft(e, { y: 0 }, { y: -10, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, tAI + 0.1 + d * 0.2);
+      });
+      Q.forEach((q, i) => pop($("s01-q" + i), tAI + 0.06 + i * 0.12, { scale: 0.4, y: 14 }, 0.24, "back.out(2)"));
+
+      // ================================================================ exit
+      K.out(S, [idea, crowd, cl, ...Q.map((q, i) => $("s01-q" + i))], D - 0.3);
+      Array.from(document.querySelectorAll("#s01-cam .k-av")).forEach((e, k) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, D - 0.26 + (k % 5) * 0.01));
+      S.done();
+    })();
+  </script>
+</template>

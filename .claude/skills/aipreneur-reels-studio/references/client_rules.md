@@ -18,3 +18,6 @@
 - Google Drive uploads only when asked. Never paste API keys in chat.
 - When the client is in a hurry, give honest ETA (render ≈ 23 min per 58 s of 3D) and offer the preview with its known flaws,
   but recommend the final.
+- **Real screen recordings** (2026-11-20): if a reel shows a website or social media (IG, TikTok, WhatsApp, web), ask
+  Freddie to screen-record his own account/website and use that real footage (phone/browser frame, crop, zoom, cursor
+  highlights) instead of mock UI. Tell him exactly what to record (screens, ~10–20 s each, 9:16) at the start of the job.

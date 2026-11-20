@@ -1,0 +1,325 @@
+<template>
+  <style>
+    /* s03 THE FIVE SYSTEMS (9.83–30.13). The system bar stays on top (outside the camera); the accent dot rides under the active
+       tile; each tile's bar fills while its system runs (recipe "process fill") and gets a check on the system's last word.
+       A different device and a different transition per system:
+       1 Penjualan  (Satu…otomatis.)  chat card grows out of the dot: 2 customer messages, typing dots, auto-reply + "balasan
+                    otomatis"; the new order slides into "Catatan order"; chip "otomatis". Exit: slide left.
+       2 Pemasaran  (Dua…setujui.)    week calendar slides in; 7 draft cards dealt in; "AI,": sparkle badges + "dibikin AI";
+                    cursor presses "Setujui semua" and the button expands into the "Terjadwal" page (recipe "button -> page"),
+                    which then flies into tile 2.
+       3 Keuangan   (Tiga…rekap.)     transactions wipe in, fly into "Rekap hari ini" bars (illustration, no amounts); chip
+                    "rekap otomatis". Exit: fold.
+       4 Rekrutmen  (Empat…cocok.)    six CVs drop in, pass a filter: 4 "belum cocok" (dim), 2 cocok -> "Wawancara · sama kamu".
+       5 Pengiriman (Lima…nanya.)     route Dikemas -> Dikirim -> Sampai with a truck token, one message to the customer per stop;
+                    the customer's "Kak, paketnya udah sampai mana?" is X-stamped: "nggak perlu nanya". */
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s03-zone { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; overflow: hidden; }
+    .s03-g { position: absolute; left: 0; top: 0; width: 1080px; height: 945px; }
+    /* 1 */
+    .s03-bi, .s03-bo { position: absolute; height: 56px; padding: 0 22px; font: 400 23px/56px Poppins; white-space: nowrap; }
+    .s03-bi { left: 24px; border-radius: 22px 22px 22px 6px; background: #eef3fb; color: #0a0d2c; }
+    .s03-bo { right: 24px; border-radius: 22px 22px 6px 22px; background: #01ccf7; color: #0b1440; font-weight: 700; box-shadow: 0 8px 20px rgba(1,150,200,.25); }
+    .s03-ty { position: absolute; right: 24px; width: 92px; height: 56px; border-radius: 22px 22px 6px 22px; background: #e6f8fe; }
+    .s03-ty i { position: absolute; top: 22px; width: 12px; height: 12px; border-radius: 6px; background: #01a9d6; }
+    .s03-bt { position: absolute; right: 24px; height: 30px; display: flex; align-items: center; gap: 8px; font: 700 18px/1 Poppins; color: #294b77; white-space: nowrap; }
+    .s03-bt svg { width: 22px; height: 22px; color: #01a9d6; }
+    .s03-or { position: absolute; left: 24px; width: 422px; height: 66px; border-radius: 18px; background: #f2f5fa; box-shadow: inset 0 0 0 1.5px #e1e8f2; }
+    .s03-or b { position: absolute; left: 20px; top: 0; font: 700 21px/66px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s03-or span { position: absolute; right: 14px; top: 15px; height: 36px; padding: 0 14px; border-radius: 18px; font: 700 17px/36px Poppins; color: #294b77; background: #e3eaf5; white-space: nowrap; }
+    .s03-or.nw { background: #ffffff; box-shadow: inset 0 0 0 2.5px #01ccf7, 0 10px 24px rgba(1,150,200,.2); }
+    .s03-or.nw span { background: #01ccf7; color: #0b1440; }
+    /* 2 */
+    .s03-day { position: absolute; top: 86px; width: 120px; text-align: center; font: 700 19px/26px Poppins; color: #5d6f8f; }
+    .s03-slot { position: absolute; top: 120px; width: 120px; height: 196px; border-radius: 16px; box-shadow: inset 0 0 0 2px #d5deec; }
+    .s03-dc { position: absolute; top: 120px; width: 120px; height: 196px; border-radius: 16px; background: #ffffff; overflow: hidden;
+      box-shadow: 0 10px 22px rgba(10,13,44,.16), inset 0 0 0 1.5px #e1e8f2; }
+    .s03-dc .bd { position: absolute; left: 0; top: 0; width: 120px; height: 8px; background: linear-gradient(90deg, #6adfff, #01ccf7); }
+    .s03-dc b { position: absolute; left: 12px; top: 20px; font: 700 17px/24px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s03-dc .th { position: absolute; left: 12px; top: 54px; width: 96px; height: 58px; border-radius: 10px; background: #eef3fb; }
+    .s03-dc .ln { position: absolute; left: 12px; height: 8px; border-radius: 4px; background: #dfe6f1; }
+    .s03-dc .ai { position: absolute; right: 8px; bottom: 8px; width: 34px; height: 34px; border-radius: 17px; background: #01ccf7; color: #0b1440; }
+    .s03-dc .ai svg { position: absolute; left: 8px; top: 8px; width: 18px; height: 18px; }
+    .s03-aip { position: absolute; right: 136px; top: 25px; height: 36px; padding: 0 14px 0 10px; border-radius: 18px; display: flex; align-items: center; gap: 8px;
+      background: #e6f8fe; box-shadow: inset 0 0 0 1.5px #01ccf7; font: 700 18px/1 Poppins; color: #0786b0; white-space: nowrap; }
+    .s03-aip svg { width: 20px; height: 20px; }
+    #s03-btn { position: absolute; left: 330px; top: 340px; width: 300px; height: 72px; border-radius: 36px; background: #01ccf7; display: flex; align-items: center; justify-content: center; gap: 10px;
+      font: 700 26px/1 Poppins; color: #0b1440; box-shadow: 0 0 26px rgba(1,204,247,.5), 0 10px 22px rgba(1,150,200,.3); white-space: nowrap; }
+    #s03-btn svg { width: 28px; height: 28px; stroke-width: 3; }
+    #s03-cur { position: absolute; left: 0; top: 0; width: 64px; height: 64px; }
+    #s03-cur svg { width: 64px; height: 64px; color: #0b1440; fill: #ffffff; stroke-width: 1.6; filter: drop-shadow(0 6px 10px rgba(2,6,26,.5)); }
+    #s03-pg { position: absolute; border-radius: 36px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); box-shadow: 0 0 40px rgba(1,204,247,.5); overflow: hidden; }
+    #s03-pgc { position: absolute; left: 0; top: 0; width: 960px; height: 455px; }
+    #s03-pgc .ck { position: absolute; left: 430px; top: 70px; width: 100px; height: 100px; border-radius: 50px; background: #0b1440; color: #6adfff; }
+    #s03-pgc .ck svg { position: absolute; left: 22px; top: 22px; width: 56px; height: 56px; stroke-width: 3; }
+    #s03-pgc b { position: absolute; left: 0; top: 196px; width: 960px; text-align: center; font: 700 64px/80px Poppins; color: #0b1440; letter-spacing: -1px; }
+    #s03-pgc span { position: absolute; left: 0; top: 286px; width: 960px; text-align: center; font: 700 28px/40px Poppins; color: #0b1440; opacity: .8; }
+    /* 3 */
+    .s03-tr { position: absolute; left: 20px; width: 400px; height: 58px; border-radius: 16px; background: #ffffff; box-shadow: 0 8px 18px rgba(2,6,26,.3); }
+    .s03-tr i { position: absolute; left: 10px; top: 9px; width: 40px; height: 40px; border-radius: 20px; background: #e6f8fe; color: #0786b0; }
+    .s03-tr i svg { position: absolute; left: 10px; top: 10px; width: 20px; height: 20px; }
+    .s03-tr b { position: absolute; left: 62px; top: 0; font: 700 21px/58px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s03-tr span { position: absolute; right: 10px; top: 12px; height: 34px; padding: 0 12px; border-radius: 17px; font: 700 16px/34px Poppins; white-space: nowrap; }
+    .s03-tr span.in { background: #01ccf7; color: #0b1440; }
+    .s03-tr span.out { background: #0b1440; color: #ffffff; }
+    .s03-rl { position: absolute; left: 24px; font: 700 22px/30px Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s03-rb { position: absolute; left: 24px; width: 432px; height: 24px; border-radius: 12px; background: #e6edf7; overflow: hidden; }
+    .s03-rb u { position: absolute; left: 0; top: 0; height: 24px; border-radius: 12px; transform-origin: 0 50%; }
+    #s03-txe { position: absolute; left: 0; top: 230px; width: 440px; text-align: center; font: 700 24px/34px Poppins; color: #c7d5ea; white-space: nowrap; }
+    /* 4 */
+    .s03-cv { position: absolute; left: 0; top: 0; width: 118px; height: 150px; border-radius: 16px; background: #ffffff; box-shadow: 0 10px 22px rgba(2,6,26,.4); transform-origin: 50% 50%; }
+    .s03-cv i { position: absolute; left: 35px; top: 16px; width: 48px; height: 48px; border-radius: 24px; background: #e6f8fe; color: #0786b0; }
+    .s03-cv i svg { position: absolute; left: 12px; top: 12px; width: 24px; height: 24px; }
+    .s03-cv .ln { position: absolute; left: 16px; height: 8px; border-radius: 4px; background: #dfe6f1; }
+    .s03-cv .ok { position: absolute; right: -12px; top: -12px; width: 40px; height: 40px; border-radius: 20px; background: #01ccf7; color: #0b1440; box-shadow: 0 0 16px rgba(1,204,247,.7); }
+    .s03-cv .ok svg { position: absolute; left: 9px; top: 9px; width: 22px; height: 22px; stroke-width: 3; }
+    .s03-cv .rg { position: absolute; inset: 0; border-radius: 16px; box-shadow: inset 0 0 0 3px #01ccf7; }
+    #s03-flt { position: absolute; left: 100px; top: 714px; width: 880px; height: 52px; border-radius: 26px; background: rgba(1,204,247,.14); box-shadow: inset 0 0 0 2px #01ccf7, 0 0 24px rgba(1,204,247,.3);
+      display: flex; align-items: center; justify-content: center; gap: 10px; font: 700 21px/1 Poppins; color: #ffffff; white-space: nowrap; transform-origin: 50% 50%; }
+    #s03-flt svg { width: 24px; height: 24px; color: #6adfff; }
+    .s03-zl { position: absolute; font: 700 19px/26px Poppins; color: #c7d5ea; white-space: nowrap; }
+    #s03-ww { position: absolute; left: 700px; top: 792px; width: 300px; height: 124px; border-radius: 24px; background: rgba(12,22,64,.92); box-shadow: inset 0 0 0 2.5px #01ccf7, 0 0 26px rgba(1,204,247,.3); }
+    #s03-ww .di { position: absolute; left: 18px; top: 32px; width: 60px; height: 60px; border-radius: 18px; background: linear-gradient(160deg, #9cecff, #01ccf7 55%, #0aa7d6); color: #0b1440; }
+    #s03-ww .di svg { position: absolute; left: 15px; top: 15px; width: 30px; height: 30px; }
+    #s03-ww b { position: absolute; left: 94px; top: 26px; font: 700 26px/36px Poppins; color: #fff; white-space: nowrap; }
+    #s03-ww span { position: absolute; left: 94px; top: 64px; font: 700 20px/30px Poppins; color: #6adfff; white-space: nowrap; }
+    /* 5 */
+    #s03-trk { position: absolute; left: 100px; top: 117px; width: 760px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.18); }
+    #s03-trf { position: absolute; left: 100px; top: 117px; width: 760px; height: 6px; border-radius: 3px; background: #01ccf7; box-shadow: 0 0 12px rgba(1,204,247,.7); transform-origin: 0 50%; }
+    .s03-st { position: absolute; top: 92px; width: 56px; height: 56px; margin-left: -28px; border-radius: 28px; background: #ffffff; color: #0b1440; box-shadow: 0 8px 18px rgba(2,6,26,.4); }
+    .s03-st svg { position: absolute; left: 15px; top: 15px; width: 26px; height: 26px; }
+    .s03-sl { position: absolute; top: 152px; width: 200px; margin-left: -100px; text-align: center; font: 700 20px/28px Poppins; color: #ffffff; white-space: nowrap; }
+    #s03-tok { position: absolute; left: 0; top: 85px; width: 70px; height: 70px; margin-left: -35px; border-radius: 35px; background: #01ccf7; color: #0b1440; box-shadow: 0 0 26px rgba(1,204,247,.7); }
+    #s03-tok svg { position: absolute; left: 18px; top: 18px; width: 34px; height: 34px; }
+    .s03-nf { position: absolute; left: 24px; height: 42px; padding: 0 16px 0 12px; border-radius: 21px; display: flex; align-items: center; gap: 10px; background: #eef3fb;
+      font: 700 20px/1 Poppins; color: #0a0d2c; white-space: nowrap; }
+    .s03-nf svg { width: 22px; height: 22px; color: #01a9d6; }
+    #s03-cq { position: absolute; left: 690px; top: 690px; width: 330px; height: 235px; border-radius: 28px; background: rgba(12,22,64,.86); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.12); }
+    #s03-cq .who { position: absolute; left: 22px; top: 18px; height: 40px; display: flex; align-items: center; gap: 10px; font: 700 19px/1 Poppins; color: #c7d5ea; white-space: nowrap; }
+    #s03-cq .who i { position: relative; width: 40px; height: 40px; border-radius: 20px; background: rgba(255,255,255,.12); color: #ffffff; }
+    #s03-cq .who i svg { position: absolute; left: 10px; top: 10px; width: 20px; height: 20px; }
+    #s03-qb { position: absolute; left: 22px; top: 70px; width: 250px; padding: 12px 18px; border-radius: 6px 22px 22px 22px; background: #ffffff; font: 400 21px/30px Poppins; color: #0a0d2c; }
+    #s03-np { left: 165px; top: 190px; height: 42px; padding: 0 14px 0 10px; font-size: 20px; }
+    #s03-np svg { width: 20px; height: 20px; }
+  </style>
+  <div id="root" data-composition-id="s03" data-width="1080" data-height="1920">
+    <div id="s03-zone"></div>
+  </div>
+  <script>
+    (function () {
+      const K = window.R28K, P = "s03", D = K.dur(P);
+      const S = K.scene(P, D), { tl, ft, I, wt, $, popIn, cam } = S;
+      const z = $("s03-zone");
+      const hd = (ic, t) => `<div class="k-hd"><div class="di">${K.svg(ic)}</div>${t}</div>`;
+      const tag = (t, x = 20, n = "") => `<div class="k-tag ${n}" style="right:${x}px;top:27px">${t}</div>`;
+      // ---------------------------------------------------------------- 1 Penjualan
+      const g1 = `<div class="s03-g" id="s03-g1">` +
+        `<div class="k-white" id="s03-chat" style="left:60px;top:470px;width:470px;height:455px">${hd("message-circle", "Chat pelanggan")}${tag("CONTOH")}` +
+          `<div class="s03-bi" id="s03-b1" style="top:96px">Kak, masih ada?</div><div class="s03-bi" id="s03-b2" style="top:168px">Bisa kirim ke Bekasi?</div>` +
+          `<div class="s03-ty" id="s03-ty" style="top:240px"><i style="left:20px"></i><i style="left:40px"></i><i style="left:60px"></i></div>` +
+          `<div class="s03-bo" id="s03-b3" style="top:240px">Ada, Kak! Ini katalognya</div>` +
+          `<div class="s03-bt" id="s03-bt" style="top:308px">${K.svg("bot")}balasan otomatis</div></div>` +
+        `<div class="k-white" id="s03-ord" style="left:550px;top:470px;width:470px;height:455px">${hd("receipt", "Catatan order")}` +
+          `<div class="s03-or" style="top:96px"><b>Rina &middot; Depok</b><span>lunas</span></div>` +
+          `<div class="s03-or" style="top:174px"><b>Dimas &middot; Bandung</b><span>dikirim</span></div>` +
+          `<div class="s03-or nw" id="s03-nw" style="top:252px"><b>Pembeli baru &middot; Bekasi</b><span>baru</span></div></div>` +
+        `<div class="k-chip s" id="s03-c1" style="left:540px;top:858px">${K.svg("zap")}otomatis: dibalas + dicatat</div></div>`;
+      // ---------------------------------------------------------------- 2 Pemasaran
+      const DAYS = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"], TYP = ["Reels", "Carousel", "Story", "Promo", "Tips", "Reels", "Live"];
+      const cx = (c) => 24 + c * 132;
+      const g2 = `<div class="s03-g" id="s03-g2">` +
+        `<div class="k-white" id="s03-cal" style="left:60px;top:470px;width:960px;height:455px">${hd("calendar-days", "Konten minggu ini")}${tag("CONTOH")}` +
+          `<div class="s03-aip" id="s03-aip">${K.svg("sparkles")}dibikin AI</div>` +
+          DAYS.map((d, c) => `<div class="s03-day" style="left:${cx(c)}px">${d}</div><div class="s03-slot" style="left:${cx(c)}px"></div>`).join("") +
+          TYP.map((t, c) => `<div class="s03-dc" id="s03-dc${c}" style="left:${cx(c)}px"><div class="bd"></div><b>${t}</b><div class="th"></div>` +
+            `<div class="ln" style="top:126px;width:92px"></div><div class="ln" style="top:144px;width:70px"></div><div class="ai" id="s03-ai${c}">${K.svg("sparkles")}</div></div>`).join("") +
+          `<div id="s03-btn">${K.svg("check")}Setujui semua</div></div>` +
+        `<div id="s03-pg"><div id="s03-pgc"><div class="ck">${K.svg("calendar-check")}</div><b>Terjadwal</b><span>7 konten minggu ini, sudah kamu setujui</span></div></div>` +
+        `<div id="s03-cur">${K.svg("mouse-pointer-2")}</div></div>`;
+      // ---------------------------------------------------------------- 3 Keuangan
+      const TX = [["circle-dollar-sign", "QRIS pembeli", "in"], ["banknote", "Transfer reseller", "in"], ["package", "Bayar supplier", "out"], ["truck", "Ongkir kurir", "out"], ["megaphone", "Iklan", "out"]];
+      const g3 = `<div class="s03-g" id="s03-g3">` +
+        `<div class="k-glass" id="s03-tx" style="left:60px;top:470px;width:440px;height:455px">${hd("banknote", "Transaksi hari ini")}` +
+          `<div id="s03-txe">semua masuk rekap</div>` +
+          TX.map(([ic, t, k], i) => `<div class="s03-tr" id="s03-tr${i}" style="top:${86 + i * 70}px"><i>${K.svg(ic)}</i><b>${t}</b><span class="${k}">${k === "in" ? "masuk" : "keluar"}</span></div>`).join("") + `</div>` +
+        `<div class="k-white" id="s03-rk" style="left:540px;top:470px;width:480px;height:455px">${hd("chart-line", "Rekap hari ini")}${tag("ILUSTRASI")}` +
+          [["Uang masuk", "linear-gradient(90deg,#6adfff,#01ccf7)"], ["Uang keluar", "#294b77"], ["Sisa", "linear-gradient(90deg,#01ccf7,#0aa7d6)"]].map(([l, bg], i) =>
+            `<div class="s03-rl" style="top:${96 + i * 88}px">${l}</div><div class="s03-rb" style="top:${134 + i * 88}px"><u id="s03-rb${i}" style="width:432px;background:${bg}"></u></div>`).join("") + `</div>` +
+        `<div class="k-chip s" id="s03-c3" style="left:780px;top:858px">${K.svg("zap")}rekap otomatis</div></div>`;
+      // ---------------------------------------------------------------- 4 Rekrutmen
+      const CVX = (c) => 121 + c * 144, OKI = [1, 4];
+      const g4 = `<div class="s03-g" id="s03-g4">` +
+        `<div class="k-glass" id="s03-rp" style="left:60px;top:470px;width:960px;height:455px">${hd("inbox", "Lamaran masuk")}${tag("CONTOH", 20, "n")}</div>` +
+        `<div id="s03-flt">${K.svg("filter")}saringan: syarat &amp; pengalaman</div>` +
+        `<div class="s03-zl" id="s03-zl0" style="left:122px;top:784px">belum cocok</div>` +
+        [0, 1, 2, 3, 4, 5].map((c) => `<div class="s03-cv" id="s03-cv${c}"><i>${K.svg("user")}</i><div class="ln" style="top:78px;width:86px"></div>` +
+          `<div class="ln" style="top:96px;width:70px"></div><div class="ln" style="top:114px;width:54px"></div>` +
+          (OKI.includes(c) ? `<div class="rg" id="s03-cr${c}"></div><div class="ok" id="s03-ck${c}">${K.svg("check")}</div>` : "") + `</div>`).join("") +
+        `<div id="s03-ww"><div class="di">${K.svg("calendar-check")}</div><b>Wawancara</b><span>sama kamu</span></div></div>`;
+      // ---------------------------------------------------------------- 5 Pengiriman
+      const STX = [100, 480, 860];
+      const g5 = `<div class="s03-g" id="s03-g5">` +
+        `<div class="k-glass" id="s03-rt" style="left:60px;top:470px;width:960px;height:200px">${hd("package-check", "Status pesanan")}${tag("CONTOH", 20, "n")}` +
+          `<div id="s03-trk"></div><div id="s03-trf"></div>` +
+          [["package", "Dikemas"], ["route", "Dikirim"], ["house", "Sampai"]].map(([ic, l], i) =>
+            `<div class="s03-st" style="left:${STX[i]}px">${K.svg(ic)}</div><div class="s03-sl" style="left:${STX[i]}px">${l}</div>`).join("") +
+          `<div id="s03-tok">${K.svg("truck")}</div></div>` +
+        `<div class="k-white" id="s03-nt" style="left:60px;top:690px;width:600px;height:235px">${hd("bell", "Pesan ke pelanggan")}` +
+          ["Pesananmu lagi dikemas, ya", "Pesananmu sudah dikirim", "Paket sudah sampai. Makasih!"].map((t, i) =>
+            `<div class="s03-nf" id="s03-nf${i}" style="top:${80 + i * 50}px">${K.svg("send")}${t}</div>`).join("") + `</div>` +
+        `<div id="s03-cq"><div class="who"><i>${K.svg("user")}</i>Pelanggan</div><div id="s03-qb">Kak, paketnya udah sampai mana?</div>` +
+          `<div class="k-chip s" id="s03-np">${K.svg("check")}nggak perlu nanya</div></div>` +
+        `<div class="k-x" id="s03-qx">${K.svg("x")}</div></div>`;
+      z.innerHTML = `<div class="k-cam" id="s03-cam">${g1}${g2}${g3}${g4}${g5}</div>` + K.barHTML(P) + `<div class="k-dot" id="s03-dot"></div>`;
+      cam($("s03-cam"));
+      K.barSet(S, P, 0, -1);
+      // ---------------------------------------------------------------- guide dot + bar (per system)
+      const T = {
+        s1: wt("Satu,"), s2: wt("Dua,"), s3: wt("Tiga,"), s4: wt("Empat,"), s5: wt("Lima,"),
+        e1: wt("otomatis."), e2: wt("setujui."), e3: wt("rekap."), e4: wt("cocok."), e5: wt("nanya."),
+      };
+      const dot = $("s03-dot"); I(dot, { x: K.TC(0).x, y: 456, scale: 1, opacity: 1 });
+      const END = [T.e1, T.s3 + 0.45, T.e3, T.e4, T.e5];   // system 2 completes when the "Terjadwal" page lands in its tile
+      [T.s1, T.s2, T.s3, T.s4, T.s5].forEach((ts, i) => {
+        if (i > 0) ft(dot, { x: K.TC(i - 1).x }, { x: K.TC(i).x, duration: 0.36, ease: "power3.inOut" }, ts - 0.12);
+        K.tileOn(S, P, i, ts + 0.02);
+        K.tileFill(S, P, i, ts + 0.35, END[i] + 0.05);
+        K.tileDone(S, P, i, END[i] + 0.08);
+        ft(dot, { scale: 1 }, { scale: 1.7, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" }, END[i] + 0.05);
+      });
+      const G = [1, 2, 3, 4, 5].map((k) => $("s03-g" + k));
+      G.forEach((g, k) => I(g, { opacity: 1, x: 0, y: 0 }));
+      // ================================================================ 1 Penjualan
+      {
+        const chat = $("s03-chat"), ord = $("s03-ord");
+        I(chat, { opacity: 0, scale: 0.2, transformOrigin: "90px -14px" });
+        ft(chat, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.42, ease: "back.out(1.4)" }, T.s1 + 0.06);
+        I(ord, { opacity: 0, x: 80 }); ft(ord, { opacity: 0, x: 80 }, { opacity: 1, x: 0, duration: 0.38, ease: "power3.out" }, T.s1 + 0.3);
+        popIn($("s03-b1"), wt("chat") - 0.12, 0.6); popIn($("s03-b2"), wt("masuk") - 0.05, 0.6);
+        const ty = $("s03-ty"), tD = wt("dibalas");
+        I(ty, { opacity: 0 }); ft(ty, { opacity: 0 }, { opacity: 1, duration: 0.12 }, wt("masuk") + 0.2); ft(ty, { opacity: 1 }, { opacity: 0, duration: 0.08 }, tD - 0.06);
+        ty.querySelectorAll("i").forEach((d, k) => { I(d, { y: 0 }); ft(d, { y: 0 }, { y: -7, duration: 0.14, yoyo: true, repeat: 3, ease: "sine.inOut" }, wt("masuk") + 0.2 + k * 0.07); });
+        popIn($("s03-b3"), tD - 0.02, 0.6);
+        const bt = $("s03-bt"); I(bt, { opacity: 0, y: 8 }); ft(bt, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.24 }, tD + 0.22);
+        const nw = $("s03-nw"); I(nw, { opacity: 0, y: -40, scale: 0.9, transformOrigin: "50% 50%" });
+        ft(nw, { opacity: 0, y: -40, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.5)" }, wt("dicatat") - 0.12);
+        const c1 = $("s03-c1"); I(c1, { xPercent: -50, yPercent: -50, scale: 0.5, opacity: 0, transformOrigin: "50% 50%" });
+        ft(c1, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.32, ease: "back.out(1.7)" }, T.e1 - 0.06);
+        // exit: slide left
+        ft(G[0], { x: 0, opacity: 1 }, { x: -120, opacity: 0, duration: 0.26, ease: "power2.in" }, T.s2 - 0.22);
+      }
+      // ================================================================ 2 Pemasaran
+      {
+        const cal = $("s03-cal");
+        I(G[1], { opacity: 0 }); tl.set(G[1], { opacity: 1 }, T.s2 - 0.05);
+        I(cal, { x: 140, opacity: 0 }); ft(cal, { x: 140, opacity: 0 }, { x: 0, opacity: 1, duration: 0.36, ease: "power3.out" }, T.s2 - 0.04);
+        const tDr = wt("draf"), tAI = wt("AI,"), tKa = wt("kamu", wt("AI,") + S.T0), tTi = wt("tinggal"), tSe = T.e2;
+        TYP.forEach((_, c) => {
+          const d = $(`s03-dc${c}`), tt = tDr - 0.12 + c * 0.085;
+          I(d, { x: 760 - cx(c), y: 520, rotation: 24, opacity: 0, scale: 0.7 });
+          ft(d, { x: 760 - cx(c), y: 520, rotation: 24, opacity: 0, scale: 0.7 }, { x: 0, y: 0, rotation: 0, opacity: 1, scale: 1, duration: 0.42, ease: "back.out(1.3)" }, tt);
+          popIn($(`s03-ai${c}`), tAI - 0.06 + c * 0.035, 0.3, 0.26);
+        });
+        popIn($("s03-aip"), tAI - 0.1, 0.5);
+        const btn = $("s03-btn"); popIn(btn, tKa - 0.18, 0.5);
+        const cur = $("s03-cur");
+        I(cur, { x: 230, y: 1010, opacity: 0 });
+        ft(cur, { opacity: 0 }, { opacity: 1, duration: 0.12 }, tKa - 0.12);
+        ft(cur, { x: 230, y: 1010 }, { x: 520, y: 846, duration: 0.5, ease: "power3.inOut" }, tKa - 0.12);
+        ft(cur, { scale: 1 }, { scale: 0.84, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, tSe - 0.06);
+        ft(btn, { scale: 1 }, { scale: 0.93, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, tSe - 0.06);
+        ft(cur, { opacity: 1 }, { opacity: 0, duration: 0.14 }, tSe + 0.12);
+        // button -> page
+        const pg = $("s03-pg"), pgc = $("s03-pgc");
+        I(pg, { left: 390, top: 810, width: 300, height: 72, opacity: 0, borderRadius: 36 });
+        tl.set(pg, { opacity: 1 }, tSe + 0.1);
+        ft(pg, { left: 390, top: 810, width: 300, height: 72, borderRadius: 36 }, { left: 60, top: 470, width: 960, height: 455, borderRadius: 28, duration: 0.32, ease: "power3.inOut" }, tSe + 0.1);
+        I(pgc, { opacity: 0, y: 16 }); ft(pgc, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.2 }, tSe + 0.3);
+        tl.set(cal, { opacity: 0 }, tSe + 0.42);
+        // the page flies into tile 2 (its fill completes there)
+        ft(pg, { left: 60, top: 470, width: 960, height: 455, borderRadius: 28, opacity: 1 },
+           { left: K.TILE(1).x, top: K.TILE(1).y, width: 180, height: 120, borderRadius: 24, opacity: 0, duration: 0.4, ease: "power3.in" }, T.s3 + 0.14);
+        ft(pgc, { opacity: 1 }, { opacity: 0, duration: 0.14 }, T.s3 + 0.14);
+      }
+      // ================================================================ 3 Keuangan
+      {
+        const tx = $("s03-tx"), rk = $("s03-rk");
+        I(G[2], { opacity: 0 }); tl.set(G[2], { opacity: 1 }, T.s3 + 0.3);
+        I(tx, { clipPath: "inset(0% 0% 100% 0% round 28px)" });
+        ft(tx, { clipPath: "inset(0% 0% 100% 0% round 28px)" }, { clipPath: "inset(0% 0% 0% 0% round 28px)", duration: 0.4, ease: "power3.out" }, T.s3 + 0.32);
+        I(rk, { y: 70, opacity: 0 }); ft(rk, { y: 70, opacity: 0 }, { y: 0, opacity: 1, duration: 0.38, ease: "power3.out" }, T.s3 + 0.46);
+        const tTp = wt("tiap"), tLg = wt("langsung"), tRk = T.e3;
+        const FILL = [0.82, 0.48, 0.34];
+        [0, 1, 2].forEach((i) => I($(`s03-rb${i}`), { scaleX: 0 }));
+        TX.forEach((_, i) => {
+          const r = $(`s03-tr${i}`);
+          I(r, { x: 0, y: 0, scale: 1, opacity: 0, transformOrigin: "50% 50%" });
+          ft(r, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.24, ease: "back.out(1.6)" }, tTp - 0.12 + i * 0.1);
+          const tf = tLg - 0.1 + i * 0.09;
+          ft(r, { x: 0, y: 0, scale: 1, opacity: 1 }, { x: 500, y: 160 - i * 50, scale: 0.4, opacity: 0, duration: 0.36, ease: "power2.in" }, tf);
+        });
+        const txe = $("s03-txe"); I(txe, { opacity: 0 }); ft(txe, { opacity: 0 }, { opacity: 1, duration: 0.3 }, tLg + 0.55);
+        ft($("s03-rb0"), { scaleX: 0 }, { scaleX: FILL[0], duration: 0.4, ease: "power2.out" }, tLg + 0.18);
+        ft($("s03-rb1"), { scaleX: 0 }, { scaleX: FILL[1], duration: 0.45, ease: "power2.out" }, tLg + 0.36);
+        ft($("s03-rb2"), { scaleX: 0 }, { scaleX: FILL[2], duration: 0.4, ease: "power2.out" }, tRk - 0.05);
+        const c3 = $("s03-c3"); I(c3, { xPercent: -50, yPercent: -50, scale: 0.5, opacity: 0, transformOrigin: "50% 50%" });
+        ft(c3, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.32, ease: "back.out(1.7)" }, tRk);
+        // exit: fold
+        I(G[2], { scaleY: 1, transformOrigin: "50% 700px" });
+        ft(G[2], { scaleY: 1, opacity: 1 }, { scaleY: 0.05, opacity: 0, duration: 0.26, ease: "power3.in" }, T.s4 - 0.22);
+      }
+      // ================================================================ 4 Rekrutmen
+      {
+        I(G[3], { opacity: 0, scale: 1, transformOrigin: "540px 700px" }); tl.set(G[3], { opacity: 1 }, T.s4 + 0.02);
+        const rp = $("s03-rp"); I(rp, { opacity: 0, scale: 0.92, transformOrigin: "50% 50%" });
+        ft(rp, { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.34, ease: "back.out(1.4)" }, T.s4 + 0.04);
+        const flt = $("s03-flt"); I(flt, { opacity: 0, y: 16, scaleY: 1 });
+        ft(flt, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, wt("rekrutmen:") + 0.1);
+        const tLm = wt("lamaran"), tDs = wt("disaring"), tWw = wt("wawancara"), tCo = T.e4;
+        let nb = 0, no = 0;
+        [0, 1, 2, 3, 4, 5].forEach((c) => {
+          const v = $(`s03-cv${c}`), ok = OKI.includes(c);
+          I(v, { x: CVX(c), y: 545 - 260, opacity: 0, scale: 1 });
+          ft(v, { y: 545 - 260, opacity: 0 }, { y: 545, opacity: 1, duration: 0.36, ease: "back.out(1.3)" }, tLm - 0.15 + c * 0.05);
+          const tt = tDs - 0.05 + c * 0.05;
+          if (ok) { const k = no++; ft(v, { x: CVX(c), y: 545, scale: 1 }, { x: 470 + k * 112, y: 778, scale: 0.85, duration: 0.5, ease: "power3.inOut" }, tt); }
+          else { const k = nb++; ft(v, { x: CVX(c), y: 545, scale: 1, opacity: 1 }, { x: 96 + k * 74, y: 790, scale: 0.6, opacity: 0.4, duration: 0.5, ease: "power3.inOut" }, tt); }
+          if (ok) { I($(`s03-cr${c}`), { opacity: 0 }); ft($(`s03-cr${c}`), { opacity: 0 }, { opacity: 1, duration: 0.2 }, tt + 0.4);
+                    popIn($(`s03-ck${c}`), tCo - 0.05 + no * 0.05, 0.3, 0.28); }
+        });
+        ft(flt, { scaleY: 1 }, { scaleY: 1.18, duration: 0.14, yoyo: true, repeat: 3, ease: "sine.inOut" }, tDs + 0.05);
+        const zl = $("s03-zl0"); I(zl, { opacity: 0 }); ft(zl, { opacity: 0 }, { opacity: 1, duration: 0.25 }, tDs + 0.45);
+        popIn($("s03-ww"), tWw - 0.12, 0.5);
+        // exit: zoom out
+        ft(G[3], { scale: 1, opacity: 1 }, { scale: 0.86, opacity: 0, duration: 0.26, ease: "power2.in" }, T.s5 - 0.22);
+      }
+      // ================================================================ 5 Pengiriman
+      {
+        I(G[4], { opacity: 0 }); tl.set(G[4], { opacity: 1 }, T.s5 + 0.02);
+        const rt = $("s03-rt"), nt = $("s03-nt"), cq = $("s03-cq");
+        I(rt, { y: -60, opacity: 0 }); ft(rt, { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.38, ease: "back.out(1.3)" }, T.s5 + 0.04);
+        const tPg = wt("pengiriman:"), tPl = wt("pelanggan"), tDk = wt("dikabari"), tPs = wt("pesanannya"), tTn = wt("tanpa");
+        I(nt, { opacity: 0, x: -60 }); ft(nt, { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.34, ease: "power3.out" }, tPg - 0.1);
+        I(cq, { opacity: 0, x: 60 }); ft(cq, { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.34, ease: "power3.out" }, tPl - 0.15);
+        const tok = $("s03-tok"), trf = $("s03-trf");
+        I(tok, { x: STX[0], scale: 0, opacity: 0 }); ft(tok, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.8)" }, tPg);
+        I(trf, { scaleX: 0 });
+        ft(tok, { x: STX[0] }, { x: STX[1], duration: 0.5, ease: "power2.inOut" }, tDk - 0.2);
+        ft(trf, { scaleX: 0 }, { scaleX: 0.5, duration: 0.5, ease: "power2.inOut" }, tDk - 0.2);
+        ft(tok, { x: STX[1] }, { x: STX[2], duration: 0.5, ease: "power2.inOut" }, tPs - 0.25);
+        ft(trf, { scaleX: 0.5 }, { scaleX: 1, duration: 0.5, ease: "power2.inOut" }, tPs - 0.25);
+        [tPg + 0.15, tDk + 0.3, tPs + 0.25].forEach((t, i) => { const n = $(`s03-nf${i}`); I(n, { opacity: 0, x: -30 });
+          ft(n, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.26, ease: "back.out(1.6)" }, t); });
+        const qx = $("s03-qx"), qb = $("s03-qb"), np = $("s03-np");
+        I(qx, { x: 982, y: 742, scale: 0, opacity: 0, rotation: -30 });
+        ft(qx, { scale: 2.2, opacity: 0, rotation: -30 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.24, ease: "back.out(1.6)" }, tTn - 0.04);
+        I(qb, { opacity: 1 }); ft(qb, { opacity: 1 }, { opacity: 0.35, duration: 0.2 }, tTn + 0.1);
+        I(np, { opacity: 0, scale: 0.5, transformOrigin: "50% 50%", xPercent: -50 });
+        ft(np, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.7)" }, T.e5 - 0.05);
+        // exit: clears for s04 (the bar stays)
+        [G[4], qx].forEach((e) => ft(e, { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power2.in" }, D - 0.3));
+      }
+      S.finish();
+    })();
+  </script>
+</template>

@@ -1,0 +1,73 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s04-cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+    #s04-glow { left: 20px; top: 300px; width: 1040px; height: 700px; }
+    /* three mini persona cards (the fan) */
+    .s04-mc { position: absolute; top: 380px; width: 294px; height: 300px; border-radius: 30px; transform-origin: 50% 100%; }
+    .s04-mc .k-av { left: 87px; top: 30px; width: 120px; height: 120px; }
+    .s04-mc b { position: absolute; left: 0; right: 0; top: 166px; text-align: center; font: 700 30px/40px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s04-mc span { position: absolute; left: 0; right: 0; top: 208px; text-align: center; font: 400 20px/28px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    .s04-mc .k-tag { left: 50%; top: 248px; transform: translateX(-50%); }
+    /* the detail card */
+    #s04-dc { left: 64px; top: 336px; width: 952px; height: 590px; border-radius: 36px; transform-origin: 50% 30%; }
+    #s04-dc .k-av { left: 36px; top: 34px; width: 148px; height: 148px; }
+    #s04-dn { left: 214px; top: 44px; font: 700 52px/64px Poppins, sans-serif; white-space: nowrap; padding-right: 6px; }
+    #s04-dr { left: 216px; top: 108px; font: 400 24px/34px Poppins, sans-serif; color: #5d6f8f; white-space: nowrap; }
+    #s04-dt { left: 216px; top: 150px; }
+    .s04-row { position: absolute; left: 36px; width: 880px; height: 112px; border-radius: 26px; background: #f2f5fb; box-shadow: inset 0 0 0 1.5px #dfe6f2; transform-origin: 0% 50%; }
+    .s04-row .k-ic { left: 20px; top: 20px; width: 72px; height: 72px; border-radius: 22px; }
+    .s04-row .k-eb { left: 116px; top: 20px; font-size: 15px; }
+    .s04-row b { position: absolute; left: 116px; top: 46px; font: 700 29px/42px Poppins, sans-serif; color: #0a0d2c; white-space: nowrap; }
+    .s04-row.on { background: #ffffff; box-shadow: inset 0 0 0 3px #294b77, 0 18px 30px -20px rgba(10,13,44,.6); }
+    #s04-hl0, #s04-hl1, #s04-hl2 { position: absolute; left: 36px; width: 880px; height: 112px; border-radius: 26px; box-shadow: inset 0 0 0 3px #294b77; }
+  </style>
+  <div id="root" data-composition-id="s04" data-width="1080" data-height="1920">
+    <div id="s04-cam"></div>
+  </div>
+  <script>
+    (function () {
+      // s04 "Tiap warga punya kepribadian, ingatan, dan cara bersikap sendiri."
+      // "Tiap warga": three resident cards fan up (Rina / Bayu / Sari — fictional AI personas, tagged CONTOH) · "punya": the middle
+      // one (Rina) is picked and expands into her full profile card (shared element), the others slide away · "kepribadian",
+      // "ingatan", "bersikap": one attribute row lights per word (blue outline), the previous one stays filled.
+      const ID = "s04", K = window.K, S = K.boot(ID), { D, L, ft, I, $, pop, shake, push } = S, tl = S.tl;
+      const tTi = L("Tiap"), tWa = L("warga"), tPu = L("punya"), tKe = L("kepribadian,"), tIn = L("ingatan,"), tCa = L("cara"), tBe = L("bersikap");
+      const P = [["Bayu, 34", "driver ojol · Medan", 0], ["Rina, 29", "karyawan · Bekasi", 1], ["Sari, 41", "guru · Solo", 4]];
+      let h = `<div class="k-glow k-a" id="s04-glow"></div>`;
+      P.forEach(([n, r, v], i) => { h += `<div class="k-a k-card s04-mc" id="s04-mc${i}" style="left:${64 + i * 329}px"><div class="k-av v${v}">${K.svg("user-round", 2.2)}</div><b>${n}</b><span>${r}</span><div class="k-tag">WARGA AI</div></div>`; });
+      const ROWS = [["brain", "KEPRIBADIAN", "Hemat, tapi suka coba hal baru"], ["history", "INGATAN", "Pernah kecewa kopi botolan cepat basi"], ["message-circle", "CARA BERSIKAP", "Rajin komentar soal harga"]];
+      let rows = ""; ROWS.forEach(([ic, eb, tx], i) => { rows += `<div class="s04-row" id="s04-r${i}" style="top:${214 + i * 124}px"><div class="k-ic">${K.svg(ic, 2)}</div><div class="k-eb">${eb}</div><b>${tx}</b></div><div id="s04-hl${i}" style="top:${214 + i * 124}px"></div>`; });
+      h += `<div class="k-a k-card" id="s04-dc"><div class="k-av v1">${K.svg("user-round", 2.2)}</div><div class="k-a k-grad" id="s04-dn">Rina, 29</div>` +
+        `<div class="k-a" id="s04-dr">karyawan · Bekasi · suka belanja online</div><div class="k-tag" id="s04-dt">PERSONA AI · CONTOH</div>${rows}</div>`;
+      $("s04-cam").innerHTML = h;
+      push($("s04-cam"), 540, 620);
+      I($("s04-glow"), { opacity: 0.85 });
+
+      // ================================================================ "Tiap warga": the fan
+      const mc = [0, 1, 2].map((i) => $("s04-mc" + i));
+      mc.forEach((e, i) => { I(e, { opacity: 0, y: 120, rotation: (i - 1) * 9, scale: 0.85 });
+        ft(e, { opacity: 0, y: 120, rotation: (i - 1) * 9, scale: 0.85 }, { opacity: 1, y: 0, rotation: (i - 1) * 3, scale: 1, duration: 0.36, ease: "back.out(1.5)" }, Math.max(0.02, tTi - 0.15) + i * 0.08); });
+      ft(mc[1], { y: 0, scale: 1 }, { y: -18, scale: 1.05, duration: 0.2, ease: "power2.out" }, tWa + 0.15);
+      // ================================================================ "punya": Rina's card expands into the profile (others slide out)
+      const tX = tPu - 0.1;
+      ft(mc[0], { opacity: 1, x: 0 }, { opacity: 0, x: -260, duration: 0.26, ease: "power2.in" }, tX);
+      ft(mc[2], { opacity: 1, x: 0 }, { opacity: 0, x: 260, duration: 0.26, ease: "power2.in" }, tX);
+      ft(mc[1], { opacity: 1, scale: 1.05 }, { opacity: 0, scale: 1.5, duration: 0.2, ease: "power2.in" }, tX + 0.06);
+      const dc = $("s04-dc");
+      I(dc, { opacity: 0, scaleX: 0.31, scaleY: 0.51, y: 40 });
+      ft(dc, { opacity: 0, scaleX: 0.31, scaleY: 0.51, y: 40 }, { opacity: 1, scaleX: 1, scaleY: 1, y: 0, duration: 0.36, ease: "back.out(1.2)" }, tX + 0.08);
+      // ================================================================ attribute rows, one per word
+      [tKe, tIn, tBe].forEach((t, i) => {
+        const r = $("s04-r" + i), hl = $("s04-hl" + i);
+        I(r, { opacity: 0, x: -40 }); ft(r, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.28, ease: "back.out(1.5)" }, t - 0.14);
+        I(hl, { opacity: 0 }); ft(hl, { opacity: 0 }, { opacity: 1, duration: 0.12 }, t - 0.06);
+        const tOff = i < 2 ? [tIn, tBe][i] - 0.1 : D - 0.4; ft(hl, { opacity: 1 }, { opacity: 0, duration: 0.2 }, tOff);
+        ft(r, { scale: 1 }, { scale: 1.02, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+      });
+      // ================================================================ exit
+      K.out(S, [dc], D - 0.3);
+      S.done();
+    })();
+  </script>
+</template>

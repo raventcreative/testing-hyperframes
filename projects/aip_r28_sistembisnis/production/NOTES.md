@@ -48,3 +48,12 @@ claps the approval, cheers the gears + CTA, hops on every scene and system chang
 - Small UI labels (CONTOH/ILUSTRASI tags, 15–20 px) are below hyperframes' 28 px type-floor heuristic; they are secondary labels.
 - The "Terjadwal" page is readable for ≈0.6 s (VO moves on to "Tiga").
 - WhatsApp Business feature names in the DM come from consistent secondary sources; the official help pages were DNS-blocked here.
+
+## Render + final checks (20 Nov 2026)
+- Rendered through the shared lock (`render_aip.sh`, pageerrors 0); `out/video.mp4` = picture master. First mix -14.8 LUFS, but whisper
+  MEDIUM on the final heard "wawancara" as "owan cara": an SFX pop sat on the word onset → pop moved 0.2 s earlier and quieter
+  (`tools/sfx.py`), final audio rebuilt from stems with `tools/remix_audio.sh` (VO untouched single take at 0.30 s, SFX fixed 0.62, bed
+  ducked, two-pass loudnorm, video stream copied).
+- Final `out/AIP_R28_SISTEMBISNIS.mp4`: 41.20 s, 1080×1920, 30 fps, **-14.4 LUFS**. Whisper MEDIUM on the final vs `vo_lines.txt`: only
+  numerals (lima/satu/dua/tiga/empat → digits) and spellings (draf → "Draft", rekrutmen → "Recruitment"); no misheard words
+  (`production/final_whisper_medium.log`). VO was never cut, padded or spliced. 19 frames sampled from the final MP4 and checked.

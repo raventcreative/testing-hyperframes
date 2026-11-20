@@ -180,7 +180,7 @@ put(wt_("rekap."), boom(0.22, 200, 90), 0.12)
 put(wt_("rekrutmen:") + 0.1, zap(0.4), 0.025)
 for i in range(6): put(wt_("lamaran") - 0.15 + i * 0.05 + 0.3, boom(0.12, 260, 120), 0.07)
 put(wt_("disaring") - 0.05, whoosh(0.55, 1600, 500, 1.3, 0.45), W * 0.4)
-put(wt_("wawancara") - 0.12, pop(500, 1000, 0.09), 0.12)
+put(wt_("wawancara") - 0.32, pop(500, 1000, 0.09), 0.07)   # moved off the word onset (the pop masked "wa-" in the final mix)
 # 5 pengiriman: truck token, three notifications, X stamp on the question
 put(wt_("pengiriman:"), pop(500, 900, 0.08), 0.1)
 for t_ in (wt_("dikabari") - 0.2, wt_("pesanannya") - 0.25): put(t_, rumble(0.5), 0.05)

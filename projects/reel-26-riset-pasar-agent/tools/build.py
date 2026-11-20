@@ -14,43 +14,39 @@ def wt(s, w):
     return next((x[1] for x in W if x[3] == k and x[0].lower().startswith(w.lower())), ph(s)["start"])
 DUR = {"whoosh": 0.574, "pop": 0.72, "click": 0.366, "ping": 1.32, "sparkle": 1.8}
 VOL = {"whoosh": 0.06, "pop": 0.045, "click": 0.08, "ping": 0.045, "sparkle": 0.035}
-tZ1 = ph("Gue tunjukin")["start"] - 0.15
-tW1 = ph("Agent riset")["start"] - 1.22
-tZ2 = ph("Habis itu")["start"] - 0.85
-tW3 = ph("Tapi draft")["start"] - 0.65
-tW4 = ph("Di sini")["start"] - 0.30
-tPoles = ph("terus poles")["start"] - 0.05
-tZ5 = ph("Terakhir")["start"] - 0.82
-tW6 = ph("AI nulis")["start"] - 0.2
-tZ7 = ph("Mau sistem")["start"] - 0.75
-# one quiet whoosh per transition / 3D swing
-ev = [("whoosh", t) for t in (tZ1 + 0.1, tW1, tZ2 + 0.04, tW3, tW4 + 0.1, tPoles, tZ5, tW6, ph("Tujuh konten")["start"] - 0.5, tZ7)]
+S = lambda s: ph(s)["start"]
+tZ1 = S("Gue tunjukin") - 0.15
+tSplit = S("Nah, di situ") - 0.55
+tW1 = S("Setelah tau") - 1.2
+tZ2 = S("Terus kasih") - 0.85
+tSplit2 = S("Copy kayak") - 0.05
+tW5 = S("Berikutnya") - 1.2
+tW6 = S("Dan yang ngatur") - 1.15
+tSplit3 = S("dan satu penawaran") + 1.0
+tZ7 = S("Mau sistem") - 0.75
+# one quiet whoosh per transition / 3D swing / reveal
+ev = [("whoosh", t) for t in (tZ1 + 0.1, tSplit, tW1, tZ2 + 0.04, tSplit2, tW5, tW6, S("Tiap Senin") - 0.5, tSplit3, tZ7)]
 # hook
-ev += [("pop", 0.1), ("pop", 0.6), ("pop", 1.1), ("sparkle", wt("bisa kelar", "menit")), ("pop", wt("bisa kelar", "bisa") - 0.15),
-       ("pop", ph("dua agent AI")["start"]), ("click", ph("dua agent AI")["start"] + 0.45), ("pop", ph("dua agent AI")["start"] + 0.55),
-       ("ping", wt("dua agent AI", "bagi")), ("pop", wt("dua agent AI", "bagi") + 0.25)]
-# brand voice file
-ev += [("ping", ph("file brand")["start"]), ("pop", ph("niche")["start"]), ("pop", wt("niche", "audiens")), ("pop", ph("gaya ngomong")["start"]),
-       ("pop", wt("sama tiga", "postingan")), ("pop", wt("sama tiga", "postingan") + 0.18), ("pop", wt("sama tiga", "postingan") + 0.36), ("ping", wt("sama tiga", "terbaik") + 0.1)]
-# research
-ev += [("pop", ph("banyak sumber")["start"] + 0.05 + k * 0.18 + 0.3) for k in range(0, 6, 2)]
-ev += [("ping", ph("cari sepuluh")["start"] + 0.3), ("pop", ph("terus pilih")["start"] + 0.05), ("pop", ph("terus pilih")["start"] + 0.5), ("pop", ph("terus pilih")["start"] + 0.9),
-       ("ping", wt("terus pilih", "terkuat")), ("click", tZ2)]
-# table
-ev += [("pop", ph("Habis itu")["start"] + 0.55), ("pop", ph("Senin sampai")["start"] - 0.05), ("pop", ph("Hook")["start"] + 0.05), ("pop", wt("Hook", "poin")),
-       ("pop", ph("caption")["start"]), ("pop", wt("caption", "hashtag")), ("ping", ph("semuanya satu")["start"] + 0.1), ("click", ph("semuanya satu")["start"] + 1.0)]
-# warning + editor
-ev += [("pop", ph("Tapi draft")["start"] + 0.2), ("pop", ph("Tapi draft")["start"] + 0.52), ("pop", ph("Tapi draft")["start"] + 0.84), ("click", wt("gampang", "ketahuan") - 0.08),
-       ("pop", ph("Di sini")["start"] + 1.1), ("pop", ph("Di sini")["start"] + 1.3), ("pop", ph("Di sini")["start"] + 1.5),
-       ("sparkle", ph("Dia belajar")["start"] + 0.9), ("ping", ph("terus poles")["start"] + 0.6), ("pop", ph("terus poles")["start"] + 0.8),
-       ("pop", ph("Fakta")["start"] - 0.05), ("pop", wt("Fakta", "angka") - 0.05), ("pop", ph("sumber nggak")["start"] - 0.05)]
-# review + decision
-ev += [("pop", ph("buka sumbernya")["start"]), ("ping", ph("buka sumbernya")["start"] + 0.5), ("pop", ph("cocokin")["start"]), ("ping", ph("cocokin")["start"] + 0.5),
-       ("pop", ph("buang")["start"]), ("click", ph("buang")["start"] + 0.35), ("pop", ph("AI nulis")["start"] + 0.2), ("pop", ph("AI nulis")["start"] + 0.35), ("pop", ph("AI nulis")["start"] + 0.5),
-       ("ping", ph("keputusan")["start"] + 0.2)]
+ev += [("pop", wt("Salah baca", "mahal") - 0.25), ("pop", S("satu departemen") + 0.2), ("sparkle", S("isinya tiga") + 0.4), ("ping", S("isinya tiga") + 1.4),
+       ("pop", wt("Mereka tau", "pelanggan") - 0.2), ("pop", S("apa yang kompetitor")), ("pop", S("dan di mana")), ("click", wt("Jadi lu berhenti", "nebak") + 0.12),
+       ("pop", S("dan mulai jualan") + 0.4), ("ping", S("yang emang") + 0.3)]
+# competitor intel
+ev += [("pop", S("Pertama, intel") + 0.2), ("pop", S("Pertama, intel") + 0.4), ("pop", S("Pertama, intel") + 0.6), ("pop", S("penawaran mereka")), ("pop", wt("penawaran mereka", "harga")),
+       ("pop", S("review mereka")), ("pop", S("Layanan yang")), ("pop", S("Keluhan yang")), ("ping", S("Nah, di situ") + 0.3)]
+# customer voice
+ev += [("pop", S("yang nentuin") + 0.1), ("pop", S("yang nentuin") + 0.5), ("pop", S("yang nentuin") + 0.9), ("ping", S("Dia baca ratusan") + 0.4),
+       ("pop", S("dalam bahasa") + 0.1), ("pop", S("dalam bahasa") + 0.4), ("pop", S("dalam bahasa") + 0.7), ("click", tZ2),
+       ("pop", S("Terus kasih") - 0.2), ("pop", S("Terus kasih") + 0.1), ("pop", S("Terus kasih") + 0.4), ("ping", wt("yang dipakai orang", "siap")), ("pop", S("Copy kayak") + 0.8), ("ping", S("Copy kayak") + 1.3)]
+# radar
+ev += [("ping", S("Berikutnya") + 0.3)] + [("pop", S("yang bilang kapan") + 0.1 + k * 0.22) for k in range(5)] + [("pop", S("Dia nunjukin") + 0.1 + k * 0.14) for k in range(5)]
+ev += [("ping", S("dan nandain") + 0.4), ("pop", S("Jadi lu launching") - 0.2), ("sparkle", wt("Jadi lu launching", "launching")), ("pop", wt("bukan dua bulan", "bulan")), ("pop", S("bukan dua bulan") + 0.9)]
+# research brain
+ev += [("pop", S("Dan yang ngatur") + 0.1), ("pop", S("Dan yang ngatur") + 0.32), ("pop", S("Dan yang ngatur") + 0.54), ("sparkle", S("otak risetnya")), ("pop", S("Tiap Senin") + 0.05),
+       ("pop", S("Apa yang berubah")), ("pop", S("apa yang lagi ditanyain")), ("pop", S("dan satu penawaran") - 0.1), ("ping", S("dan satu penawaran") + 0.9),
+       ("pop", tSplit3 + 0.55), ("pop", tSplit3 + 0.83), ("pop", tSplit3 + 1.11)]
 # stats + CTA
-ev += [("pop", ph("Tujuh konten")["start"] - 0.1), ("pop", wt("Tujuh konten", "dua") - 0.1), ("pop", ph("dua puluh menit")["start"] - 0.1), ("click", ph("dua puluh menit")["start"] + 0.3),
-       ("pop", ph("Mau sistem")["start"] - 0.1), ("click", wt("Klik link", "link"))]
+ev += [("pop", S("Kompetitor lu nebak") - 0.05), ("pop", S("Kompetitor lu nebak") + 0.55), ("pop", S("Lu tau.") - 0.15), ("click", S("Lu tau.") + 0.25),
+       ("pop", S("Mau sistem") - 0.1), ("click", wt("Klik link", "link"))]
 tags = [f'<audio id="sx{i:02d}" class="clip" src="assets/sfx/{k}.wav" data-start="{t:.2f}" data-duration="{DUR[k]}" data-track-index="{10 + i % 4}" data-volume="{VOL[k]}"></audio>'
         for i, (k, t) in enumerate(sorted(ev, key=lambda e: e[1]))]
 (P / "index.html").write_text(src.replace("<!--SFX-->", "\n      ".join(tags)))

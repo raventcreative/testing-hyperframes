@@ -8,48 +8,60 @@ import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 # caption phrases (short on-screen chunks), in spoken order
-PHRASES = """Tujuh hari konten,
-bisa kelar dalam dua puluh menit.
-Rahasianya,
-dua agent AI yang bagi tugas.
+PHRASES = """Salah baca pasar itu mahal.
+Makanya bayangin,
+satu departemen riset
+isinya tiga puluh lima agent AI.
+Mereka tau apa yang pelanggan lu mau,
+apa yang kompetitor lu lewatin,
+dan di mana duitnya di area lu.
+Jadi lu berhenti nebak,
+dan mulai jualan penawaran
+yang emang udah dicari orang.
 Gue tunjukin simulasinya.
-Pertama, lu kasih satu
-file brand voice:
-niche, audiens,
-gaya ngomong,
-sama tiga postingan terbaik lu.
-Agent riset buka
-banyak sumber sendiri,
-cari sepuluh topik
-yang lagi ramai,
-terus pilih tujuh yang terkuat.
-Habis itu, minta tujuh konten,
-Senin sampai Minggu.
-Hook, poin isi,
-caption, hashtag,
-semuanya satu tabel.
-Tapi draft AI mentah
-gampang ketahuan.
-Di sini agent editor masuk.
-Dia belajar gaya tulisan lu,
-terus poles semua draft.
-Fakta, angka,
-sumber nggak boleh berubah.
-Terakhir, lu review manual:
-buka sumbernya,
-cocokin angkanya,
-buang yang meragukan.
-AI nulis draft,
-keputusan tetep di tangan lu.
-Tujuh konten, dua agent,
-dua puluh menit.
+Pertama, intel kompetitor.
+Tiap minggu, dia ngecek
+kompetitor lokal lu yang paling gede:
+penawaran mereka, harga mereka,
+review mereka.
+Terus muncul celah
+yang mereka tinggalin kosong.
+Layanan yang nggak ada yang nawarin.
+Keluhan yang nggak ada yang beresin.
+Nah, di situ lu menang.
+Setelah tau celahnya,
+agent suara pelanggan
+yang nentuin cara ngomongnya.
+Dia baca ratusan review
+dan komentar asli di niche lu,
+dalam bahasa apa pun
+yang dipakai pelanggan lu.
+Terus kasih kata-kata persis
+yang dipakai orang waktu mereka siap beli.
+Copy kayak gini nggak bisa lu karang.
+Berikutnya, radar permintaan lokal
+yang bilang kapan lu harus gerak.
+Dia nunjukin apa yang lagi dicari orang
+di area lu sekarang,
+dan nandain yang naik paling cepat.
+Jadi lu launching di minggu
+permintaan mulai naik,
+bukan dua bulan setelah kompetitor.
+Dan yang ngatur semuanya,
+otak risetnya.
+Tiap Senin, lu terima satu halaman.
+Apa yang berubah di pasar lu,
+apa yang lagi ditanyain pelanggan,
+dan satu penawaran yang harus lu luncurin berikutnya.
+Kompetitor lu nebak.
+Lu tau.
 Mau sistem kayak gini
 dipasang di bisnis lu?
 Klik link di bio,
 ngobrol langsung sama
 tim AIpreneur Automation.""".strip().split("\n")
 NUM = {"masing-masing": "masing masing", "AIpreneur": "ai prender"}
-ALIAS = {"nggak": "gak", "5": "lima", "1": "satu", "10": "sepuluh", "7": "tujuh", "3": "tiga", "2": "dua", "20": "puluh", "manager": "manajer", "reset": "riset", "lo": "lu", "gua": "gue", "audience": "audiens", "point": "poin", "tetap": "tetep", "senin": "senin"}
+ALIAS = {"nggak": "gak", "5": "lima", "1": "satu", "10": "sepuluh", "7": "tujuh", "3": "tiga", "2": "dua", "20": "puluh", "manager": "manajer", "reset": "riset", "lo": "lu", "gua": "gue", "audience": "audiens", "point": "poin", "tetap": "tetep", "senin": "senin", "35": "lima", "tiga": "tiga", "puluh": "puluh"}
 norm = lambda w: ALIAS.get(re.sub(r"[^a-z0-9]", "", w.lower()), re.sub(r"[^a-z0-9]", "", w.lower()))
 
 w = wave.open(str(P / "assets/audio/vo.wav")); sr = w.getframerate()

@@ -78,7 +78,32 @@ s5 = frame(5, f'''
 <ul class="checks"><li>{ic("check", 22)}Bandingin 30 reels terbaik &amp; terburukmu</li><li>{ic("check", 22)}Nemuin hook dan format yang konsisten menang</li><li>{ic("check", 22)}Ngurutin 20 ide reels khusus buat kamu</li></ul>
 {idea(1, "Tes hook kamu dalam 3 detik", "Lagi naik")}{idea(2, "Reels yang sama, sebelum &amp; sesudah", "Paling disimpan")}{idea(3, "5 kebiasaan yang bikin reach anjlok", "Paling dibagikan")}''')
 
+
+DAYS = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
+def checks(items):
+    return '<ul class="checks">' + "".join(f'<li>{ic("check", 22)}{t}</li>' for t in items) + "</ul>"
+
+reels = "".join(f'<div class="reel"><span>{d}</span><div class="play">{ic("play", 26)}</div><i></i><i class="s"></i></div>' for d in DAYS)
+s6 = frame(6, f'''
+<div class="eyebrow">LANGKAH 5</div>
+<h1>Sulap Ide Terbaik<br>Jadi <u>7 Reels</u> Sekaligus</h1>
+<div class="card prompt"><label>PROMPT KAMU</label><p>Ubah ide teratas tadi jadi 7 reels pakai gaya brand aku.</p></div>
+<div class="eyebrow sm">YANG DIKERJAIN CLAUDE</div>
+{checks(["Nulis script dan hook buat tiap reels", "Nambahin voiceover dan subtitle di ketujuhnya"])}
+<div class="reels">{reels}</div>''')
+
+def day(d, done):
+    return f'<div class="day"><span>{d}</span><div class="dot {"done" if done else ""}">{ic("check" if done else "clock", 34)}</div><small>09.00</small></div>'
+s7 = frame(7, f'''
+<div class="eyebrow">LANGKAH 6</div>
+<h1>Posting Terjadwal,<br>Komen Dibalas <u>Otomatis</u></h1>
+<div class="card prompt"><label>PROMPT KAMU</label><p>Posting satu reels tiap hari jam 9 pagi. Kalau ada yang komen PANDUAN, balas komennya dan kirim link aku lewat DM.</p></div>
+<div class="eyebrow sm">YANG DIKERJAIN CLAUDE</div>
+{checks(["7 reels masuk antrean, satu per hari jam 09.00", "Auto-reply aktif buat keyword PANDUAN", "Link dikirim lewat DM, bukan di kolom komentar"])}
+<div class="card week"><div class="days">{"".join(day(d, k < 2) for k, d in enumerate(DAYS))}</div>
+<div class="legend"><span><b class="f"></b>Sudah tayang</span><span><b></b>Terjadwal</span></div></div>''')
+
 css = (D / "style.css").read_text()
 (D / "feed.html").write_text(f'''<!doctype html><html><head><meta charset="utf-8"><style>{css}</style></head>
-<body>{s1}{s2}{s3}{s4}{s5}</body></html>''')
+<body>{s1}{s2}{s3}{s4}{s5}{s6}{s7}</body></html>''')
 print("ok")

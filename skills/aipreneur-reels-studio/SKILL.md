@@ -15,6 +15,7 @@ Read these references before working:
 - `references/thumbnails.md` — navy/white minimal covers + testimonial covers
 - `references/client_rules.md` — every rule/feedback the client gave (the "why" behind the format)
 - `references/qa.md` — the checks to run before sending anything
+- `references/technique_bank.md` — techniques borrowed from the external skills (beat grid, through-line object, shared elements, camera, springs, motion blur) — apply them to every new video
 
 ## End-to-end workflow (remake of a reference video)
 1. **Analyse the reference**: ffprobe; 24-frame contact sheet; transcribe with faster-whisper (`small`, numpy input,

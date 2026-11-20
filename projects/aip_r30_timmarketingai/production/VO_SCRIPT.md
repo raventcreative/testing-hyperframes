@@ -83,3 +83,9 @@ nama "Kantor Sinar", "Bu Rina" = CONTOH/ILUSTRASI buatan kita (label di layar).
 5. **Chaos → control → clarity → brand** (arc keseluruhan): kerjaan berhamburan → 3 tim AI + bos → modul jelas + ringkasan 1 halaman → kartu brand/budget + logo — daniel-haida-8691d4.
 6. **Camera push 1.00→1.04** per scene (layer `#P-cam`, hand-over di layer `#P-hud` yang tidak di-zoom) + **small-overshoot springs** (back.out ≤2.4) + **beat/word-locked changes** (setiap perubahan dikunci ke kata VO) + **VO ducking** (music bed di-duck oleh render_aip.sh/remix_aip.sh).
 Transisi antar-scene berbeda tiap kali: hand-over org (s01→s02), button→flood (s02→s03), dot-flood (s03→s04), whip pan (s04→s05), dive (s05→s06), swipe-up (s06→s07).
+
+## v3 — rekaman layar asli klien (aturan klien 2026-11-20)
+Beat distribusi Modul 2 (48,1–50,7 dtk) sekarang memakai rekaman layar Freddie sendiri dari profil Instagram @aipreneur_academy
+(`assets/rec/ig_freddie.mp4`), tab/bookmark/address bar browser, navigasi kiri IG dan pill "Messages" dipotong. Isinya: push-in ke header
+profil asli, cyan ring di postingan asli "Tim Marketing AI / Kamu Bosnya", lalu scroll grid asli (speed-ramp). Label "REKAMAN ASLI" di
+title bar. VO, timeline dan momen komentar/inbox tidak berubah (tetap CONTOH, tidak ada rekaman untuk komentar/DM).

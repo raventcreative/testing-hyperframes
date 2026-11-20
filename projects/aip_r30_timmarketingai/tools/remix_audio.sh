@@ -2,7 +2,7 @@
 # R30 final mix without re-rendering the picture: VO (re-padded at true silences, see production/NOTES.md) + SFX at a fixed
 # lower level (no pumping compressor) + music bed ducked under the voice, two-pass loudnorm -14 LUFS; video stream copied.
 set -eu
-IN=out/AIP_R30_preremix.mp4; OUT=out/AIP_R30_TIM_MARKETING_AI.mp4; D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $IN)
+IN=out/video.mp4; OUT=out/AIP_R30_TIM_MARKETING_AI.mp4; D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $IN)
 G="[0:a]aformat=sample_rates=48000:channel_layouts=mono,adelay=300,apad,atrim=end=$D,asplit=2[vo][k];\
 [1:a]aformat=sample_rates=48000:channel_layouts=mono,volume=0.62,apad,atrim=end=$D[sfx];\
 [2:a]aformat=sample_rates=48000:channel_layouts=mono,volume=0.32,apad,atrim=end=$D[bed];\

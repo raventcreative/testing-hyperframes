@@ -18,10 +18,10 @@ scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnviron
   gr.addColorStop(0, "#040a1f"); gr.addColorStop(0.55, "#0a1840"); gr.addColorStop(1, "#13285a"); g.fillStyle = gr; g.fillRect(0, 0, 4, 512);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
 scene.fog = new THREE.Fog(0x0c1a44, 26, 74);
-scene.add(new THREE.HemisphereLight(0x9fbaff, 0x0a1230, 0.78));
+scene.add(new THREE.HemisphereLight(0x9fbaff, 0x0a1230, 0.92));
 const moon = new THREE.DirectionalLight(0xc6dbff, 2.1); moon.castShadow = true; moon.shadow.mapSize.set(2048, 2048); moon.shadow.bias = -0.0004; moon.shadow.normalBias = 0.025;
 Object.assign(moon.shadow.camera, { left: -11, right: 11, top: 11, bottom: -11, near: 1, far: 48 }); scene.add(moon, moon.target);
-const warm = new THREE.DirectionalLight(0xffc48a, 0.7); scene.add(warm, warm.target);
+const warm = new THREE.DirectionalLight(0xbfd4ff, 0.32); scene.add(warm, warm.target);
 const cam = new THREE.PerspectiveCamera(40, W / H, 0.05, 150);
 
 /* ------------------------------------------------------------------ stars */
@@ -146,8 +146,7 @@ function animH(t) {
     p.armL.rotation.x = Math.sin(t * 3 + i) * 0.18; p.head.rotation.y = Math.sin(t * 1.4 + i) * 0.25; });
   // line 3: "?" over your stall, knowledge beam over theirs
   setLabel(Hh.qm, U(t, 6.9, 7.3, "back")); Hh.qm.position.y = 3.5 + 0.08 * Math.sin(t * 2.4);
-  Hh.beam.material.opacity = 0.3 * U(t, 7.9, 8.5) * (1 - U(t, 9.5, 9.9));
-  Hh.beam.rotation.y = t * 0.8;
+  Hh.beam.visible = false;
   Hh.portal.material.opacity = 0.9 * U(t, 9.5, 9.9, "in"); // portal bloom before the zoom-through
 }
 
@@ -165,8 +164,8 @@ function buildG() {
     g.add(grp); Gg.ag.push({ g: grp, v: vis, c, i, col, row, home: grp.position.clone() }); }
   Gg.tow = Q3.map(([txt, c], i) => { const grp = new THREE.Group(); grp.position.set((i - 1) * 3.5, 0, 0); g.add(grp);
     const base = boxes([[0, 0.12, 0, 2.2, 0.24, 2.2, "#17306a"]], MAT, false); grp.add(base);
-    const ring = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.06, 2.3), emi(c, 1.2)); ring.position.y = 0.26; grp.add(ring);
-    const lb = label(txt, null, null, 0.42); lb.position.set(0, 2.5, 0); grp.add(lb); setLabel(lb, 0);
+    const ring = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.05, 2.0), emi(c, 0.9)); ring.position.y = 0.26; grp.add(ring);
+    const lb = label(txt, null, null, 0.34); lb.position.set(0, 2.6, 0); grp.add(lb); setLabel(lb, 0);
     const gl = glow(c, 3.0, 2.0); gl.position.set(0, 1.2, 0); gl.material.opacity = 0; grp.add(gl);
     return { grp, ring, lb, gl, c }; });
 }
@@ -183,8 +182,9 @@ function animG(t) {
     a.g.scale.setScalar(Math.max(0.001, on));
     a.v.material.emissiveIntensity = 0.15 + 1.9 * U(t, 10.5 + a.i * 0.055, 10.75 + a.i * 0.055) * (0.75 + 0.25 * Math.sin(t * 5 + a.i)); });
   Gg.tow.forEach((T, i) => { const on = U(t, 15.6 + i * 0.95, 16.2 + i * 0.95, "back");
+    T.grp.visible = t > 15.25;
     T.ring.material.emissiveIntensity = 0.2 + 1.4 * on; setLabel(T.lb, U(t, 15.9 + i * 0.95, 16.4 + i * 0.95, "back"));
-    T.lb.position.y = 2.5 + 0.06 * Math.sin(t * 2 + i); T.gl.material.opacity = 0.22 * on; });
+    T.lb.position.y = 2.6 + 0.06 * Math.sin(t * 2 + i); T.gl.material.opacity = 0.22 * on; });
 }
 
 /* ------------------------------------------------------------------ K: three competitor stalls scanned -> two gaps */
@@ -330,35 +330,35 @@ function animB(t) {
 const C = []; const at = (w) => (v) => [v[0] + WP[w][0], v[1] + WP[w][1], v[2] + WP[w][2], v[3] + WP[w][0], v[4] + WP[w][1], v[5] + WP[w][2], v[6]];
 const k = (w, t, v, e) => C.push([t, at(w)(v), e]);
 const cut = (w, t, v) => C.push([t, at(w)(v), "lin"]);
-// H — market street: wide on your empty stall, pan to the queue, back, then push into the board (portal)
-k("H", 0, [-1.4, 3.1, 9.4, -1.6, 1.7, 0.2, 44]); k("H", 3.9, [-2.0, 2.7, 7.6, -2.3, 1.7, -0.2, 42], "sine");
-k("H", 5.2, [1.8, 2.6, 7.2, 2.4, 1.5, 0.8, 42], "io"); k("H", 6.6, [1.6, 2.6, 7.0, 2.4, 1.5, 0.8, 42], "sine");
-k("H", 8.0, [0.0, 3.4, 9.0, -0.2, 2.0, -0.2, 46], "io"); k("H", 9.5, [-1.9, 2.6, 5.0, -2.6, 1.8, -0.4, 42], "io");
-k("H", 9.99, [-2.75, 2.0, 0.55, -2.9, 1.78, -0.42, 38], "in");
-// G — portal zoom-through lands close on an agent visor, pulls out over the grid
-cut("G", 10.0, [0.1, 1.0, 1.3, 0, 0.78, 0, 38]); k("G", 11.6, [0, 5.6, 11.6, 0, 1.2, -0.2, 40], "io");
-k("G", 14.0, [0, 5.0, 10.4, 0, 1.0, -0.2, 40], "sine"); k("G", 17.6, [0, 5.4, 13.2, 0, 1.6, 0, 44], "io");
-k("G", 20.0, [0, 5.2, 12.6, 0, 1.6, 0, 44], "sine");
+// H — market street: your empty stall, over to the queue, wide on both, then push into the board (portal)
+k("H", 0, [-2.9, 3.4, 8.4, -2.9, 1.9, -0.3, 44]); k("H", 3.9, [-2.9, 3.0, 7.4, -2.9, 1.8, -0.4, 42], "sine");
+k("H", 5.3, [3.0, 3.8, 10.0, 3.0, 1.7, 0.5, 42], "io"); k("H", 6.7, [2.8, 3.7, 9.6, 3.0, 1.7, 0.5, 42], "sine");
+k("H", 8.2, [0.1, 5.6, 19.5, 0.1, 2.1, -0.3, 44], "io"); k("H", 9.45, [-2.0, 3.6, 8.6, -2.9, 1.9, -0.4, 42], "io");
+k("H", 9.99, [-2.78, 2.1, 1.1, -2.9, 1.78, -0.42, 38], "in");
+// G — portal zoom-through lands among the agents, pulls out over the grid, then wide on the three towers
+cut("G", 10.0, [0.0, 1.15, 2.1, 0, 0.8, -0.3, 38]); k("G", 11.8, [0, 8.0, 16.6, 0, 1.1, -0.3, 42], "io");
+k("G", 14.2, [0, 7.6, 15.6, 0, 1.0, -0.3, 42], "sine"); k("G", 17.8, [0, 8.4, 22.5, 0, 2.0, 0, 44], "io");
+k("G", 20.0, [0, 8.2, 22.0, 0, 2.0, 0, 44], "sine");
 // island hop: one flight key, the camera physically crosses to K
-C.push([20.62, [120, 5.6, 13.6, 120, 1.8, 0, 44], "io"]);
-// K — scan the three stalls, then down to the two gaps
-k("K", 21.4, [0, 4.6, 11.4, 0, 1.8, 0, 42], "sine"); k("K", 23.0, [-3.3, 3.0, 6.2, -3.4, 1.7, 0, 40], "io");
-k("K", 24.6, [0.1, 3.2, 6.6, 0, 1.7, 0, 40], "io"); k("K", 26.2, [3.3, 3.1, 6.4, 3.4, 1.7, 0, 40], "io");
-k("K", 27.4, [-1.7, 3.0, 7.4, -1.7, 1.5, 1.6, 42], "io"); k("K", 29.4, [1.7, 3.0, 7.6, 1.7, 1.5, 1.8, 42], "io");
-k("K", 30.9, [0, 3.6, 9.6, 0, 1.6, 1.4, 44], "sine");
-// V — after the iris: the review wall, then the phrases
-cut("V", 31.0, [0, 3.2, 8.6, 0, 1.9, -1.2, 42]); k("V", 34.4, [0, 3.0, 7.4, 0, 1.8, -1.2, 40], "sine");
-k("V", 36.6, [0, 2.9, 6.6, 0, 1.8, 0.4, 42], "io"); k("V", 39.6, [0, 3.1, 7.2, 0, 2.0, 0.6, 42], "sine");
-k("V", 40.52, [0, 3.2, 7.2, 0, 26, -6, 42], "expo"); // whip tilt up to the sky
-// R — starts on the sky, tilts down onto the radar
-cut("R", 40.56, [-0.6, 4.0, 11.0, -0.4, 26, -6, 42]); k("R", 41.3, [-0.6, 3.9, 10.6, -0.6, 1.5, 0.4, 42], "io");
-k("R", 43.6, [-2.2, 2.6, 6.2, -2.2, 1.2, 0.4, 40], "io"); k("R", 45.4, [1.6, 3.0, 7.2, 2.1, 1.7, 0.6, 42], "io");
-k("R", 48.6, [1.9, 3.0, 6.8, 2.1, 1.8, 0.8, 42], "sine"); k("R", 50.16, [2.08, 2.6, 2.5, 2.1, 2.5, 1.9, 40], "in");
-// B — dive-into-object match cut on the core, pull out over the brain, then the page, then the CTA pull-back
-cut("B", 50.2, [0, 2.1, 1.1, 0, 2.0, 0, 38]); k("B", 51.6, [0, 3.4, 8.2, 0, 2.0, 0, 42], "io");
-k("B", 53.6, [0, 3.2, 7.6, 0, 2.1, 1.4, 42], "io"); k("B", 56.4, [0.1, 3.1, 6.8, 0, 2.1, 1.8, 42], "sine");
-k("B", 58.9, [0, 3.6, 9.4, 0, 2.0, 0.6, 44], "io"); k("B", 61.5, [0, 4.4, 13.0, 0, 2.2, 0, 46], "io");
-k("B", 68.6, [0, 4.6, 13.6, 0, 2.2, 0, 46], "sine");
+C.push([20.62, [120, 8.4, 22.0, 120, 2.0, 0, 44], "io"]);
+// K — the three stalls, one by one, then down to the two gaps
+k("K", 21.5, [0, 7.0, 20.5, 0, 1.9, 0, 42], "sine"); k("K", 23.0, [-3.4, 3.6, 8.0, -3.4, 1.8, 0, 40], "io");
+k("K", 24.6, [0, 3.7, 8.2, 0, 1.8, 0, 40], "io"); k("K", 26.2, [3.4, 3.6, 8.0, 3.4, 1.8, 0, 40], "io");
+k("K", 27.5, [-0.2, 3.8, 9.0, -0.45, 1.8, 2.0, 42], "io"); k("K", 29.5, [1.7, 3.6, 8.4, 1.7, 1.7, 2.1, 42], "io");
+k("K", 30.9, [0, 5.4, 13.6, 0, 1.8, 1.4, 44], "sine");
+// V — after the iris: the review wall, then the buyer phrases
+cut("V", 31.0, [0, 4.4, 15.4, 0, 2.1, -1.2, 42]); k("V", 34.4, [0, 4.0, 13.4, 0, 2.0, -1.2, 40], "sine");
+k("V", 36.6, [0, 3.8, 11.4, 0, 2.0, 0.2, 42], "io"); k("V", 39.6, [0, 4.0, 12.2, 0, 2.2, 0.4, 42], "sine");
+k("V", 40.52, [0, 4.0, 12.2, 0, 30, -8, 42], "expo"); // whip tilt up to the sky
+// R — starts on the sky, tilts down onto the radar, then the bars sit on the right half
+cut("R", 40.56, [-0.4, 5.2, 16.0, -0.4, 30, -8, 42]); k("R", 41.4, [-0.4, 5.0, 15.4, -0.4, 1.6, 0.4, 42], "io");
+k("R", 43.8, [-2.2, 3.4, 9.0, -2.2, 1.3, 0.4, 40], "io"); k("R", 45.6, [0.5, 4.2, 11.6, 0.5, 2.0, 0.9, 42], "io");
+k("R", 48.8, [0.6, 4.2, 11.2, 0.5, 2.1, 1.0, 42], "sine"); k("R", 50.16, [2.09, 2.9, 2.9, 2.1, 2.55, 1.9, 40], "in");
+// B — dive-into-object match cut on the core, out over the brain, the page on the left half, then the CTA pull-back
+cut("B", 50.2, [0, 2.15, 1.6, 0, 2.0, 0, 38]); k("B", 51.8, [0, 4.2, 11.0, 0, 2.0, 0, 42], "io");
+k("B", 53.8, [1.35, 3.8, 9.4, 1.35, 2.1, 1.9, 42], "io"); k("B", 56.6, [1.4, 3.7, 9.0, 1.35, 2.1, 2.0, 42], "sine");
+k("B", 59.0, [0, 4.6, 12.6, 0, 2.1, 0.6, 44], "io"); k("B", 61.5, [0, 5.6, 17.0, 0, 2.3, 0, 46], "io");
+k("B", 68.6, [0, 5.8, 17.6, 0, 2.3, 0, 46], "sine");
 C.sort((a, b) => a[0] - b[0]);
 window.VX = { C, WP };
 scene.add(cam);

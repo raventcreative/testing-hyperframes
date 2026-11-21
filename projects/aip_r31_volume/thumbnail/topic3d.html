@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="UTF-8" />
+<!-- Cover topic object in 3D: our own voxel bullseye + the reel's through-line cyan cube (no brand in this topic, so no brand logo). -->
+<style>html,body{margin:0;background:transparent;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"../vendor/three/three.module.min.js","three/addons/":"../vendor/three/addons/"}}</script>
+</head><body><canvas id="c" width="800" height="800"></canvas>
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { boxes, MAT } from "../vendor/vxlib.js";
+const cv = document.getElementById("c"), r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });
+r.setSize(800, 800, false); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping;
+const s = new THREE.Scene(); s.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture; s.environmentIntensity = 0.3;
+s.add(new THREE.HemisphereLight(0xffffff, 0xa9bddc, 1.1)); const d = new THREE.DirectionalLight(0xffffff, 2.6); d.position.set(3, 5, 6); s.add(d);
+const L = [], R = 1.5, st = 0.15, n = 10;
+for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) { const rr = Math.hypot(i * st, j * st); if (rr > R) continue; const k = Math.floor((rr / R) * 5);
+  L.push([i * st, j * st, 0, st, st, 0.22, ["#01ccf7", "#ffffff", "#294b77", "#ffffff", "#294b77"][k]]); }
+L.push([0, 0, -0.16, R * 2, R * 2, 0.1, "#dfe7f2"]);
+const t = boxes(L, MAT, false); s.add(t);
+const cube = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({ color: 0x01ccf7, emissive: 0x01a8d6, emissiveIntensity: 0.45, roughness: 0.35 }));
+cube.position.set(0.05, 0.05, 0.3); cube.rotation.set(0.5, 0.7, 0.2); s.add(cube);
+const g = new THREE.Group(); g.add(t, cube); s.add(g); g.rotation.set(-0.12, -0.42, 0.04);
+const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 50); cam.position.set(0, 0.3, 7.2); cam.lookAt(0, 0, 0);
+r.render(s, cam); window.READY = true;
+</script></body></html>

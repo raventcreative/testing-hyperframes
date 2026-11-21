@@ -97,8 +97,8 @@ function buildA() {
     [-0.78, 0.35, 3.75, 0.16, 0.5, 0.5, NV2], [0.78, 0.35, 3.75, 0.16, 0.5, 0.5, NV2], [0, 0.85, 3.3, 0.7, 0.5, 0.7, NV]]));
   A.barrel = new THREE.Group(); A.barrel.position.set(0, 1.15, 3.2); g.add(A.barrel);
   A.barrel.add(boxes([[0, 0, -0.55, 0.56, 0.56, 1.5, NV], [0, 0, -1.33, 0.68, 0.68, 0.14, CY], [0, 0.31, -0.4, 0.3, 0.06, 0.9, "#3567b5"], [0, 0, 0.3, 0.7, 0.7, 0.4, "#1f3c62"]]));
-  A.flag = new THREE.Group(); A.flag.position.set(0, 0.0, -1.3); A.barrel.add(A.flag);
-  A.flag.add(boxes([[0, 0.55, 0, 0.05, 1.1, 0.05, "#c3cfe2"], [0.33, 0.9, 0, 0.6, 0.4, 0.03, "#ffffff"], [0.33, 0.9, 0.018, 0.6, 0.06, 0.005, "#e3ebf6"]]));
+  A.flag = new THREE.Group(); A.flag.position.set(0.55, 1.1, 3.0); g.add(A.flag);   // white "give up" flag pops out of the cannon
+  A.flag.add(boxes([[0, 0.8, 0, 0.08, 1.6, 0.08, NV], [0.5, 1.3, 0, 0.9, 0.6, 0.04, "#ffffff"], [0.5, 1.3, 0.025, 0.9, 0.08, 0.005, "#d3ddeb"]]));
   // ammo crate + pile (how much volume is loaded)
   g.add(boxes([[2.0, 0.25, 3.4, 1.6, 0.5, 1.6, "#e9cfa8"], [2.0, 0.52, 3.4, 1.66, 0.05, 1.66, "#d8b98e"]]));
   const PL = []; for (let y = 0; y < 8; y++) for (let i = 0; i < 5; i++) for (let j = 0; j < 5; j++) PL.push([(i - 2) * 0.28, 0.14 + y * 0.28, (j - 2) * 0.28, 0.26, 0.26, 0.26, (i + j + y) & 1 ? CY : "#36b8e6"]);
@@ -159,9 +159,10 @@ function makeTextures() {
     g.lineWidth = 6; g.strokeStyle = on ? "#7fe3ff" : "#c9d6e8"; g.strokeRect(3, 3, w - 6, w - 6);
     if (on < 2) { g.font = `700 54px ${FONT}`; g.textAlign = "center"; g.fillStyle = on ? NV2 : NV; g.fillText(String(i + 1), 64, 84); } })));
   TX.btn = ["POSTING", "KIRIM"].map((s) => ctex(512, 256, (g, w, h) => { g.fillStyle = CY; g.fillRect(0, 0, w, h); g.font = `700 104px ${FONT}`; g.textAlign = "center"; g.fillStyle = NV2; g.fillText(s, w / 2, 166); }));
+  TX.btnBlank = ctex(64, 32, (g, w, h) => { g.fillStyle = CY; g.fillRect(0, 0, w, h); });
   TX.check = ctex(128, 128, (g) => { g.fillStyle = "#ffffff"; g.beginPath(); g.arc(64, 64, 58, 0, 7); g.fill(); g.fillStyle = CY; g.beginPath(); g.arc(64, 64, 48, 0, 7); g.fill();
     g.strokeStyle = "#ffffff"; g.lineWidth = 14; g.lineCap = "round"; g.lineJoin = "round"; g.beginPath(); g.moveTo(38, 66); g.lineTo(56, 84); g.lineTo(90, 46); g.stroke(); });
-  TX.note = ctex(256, 320, (g, w, h) => { g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h); g.fillStyle = NV; g.fillRect(0, 0, w, 52); g.font = `700 30px ${FONT}`; g.fillStyle = "#ffffff"; g.fillText("CATATAN", 20, 37); });
+  TX.note = ctex(256, 320, (g, w, h) => { g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h); g.fillStyle = NV; g.fillRect(0, 0, w, 52); g.fillStyle = CY; g.fillRect(20, 20, 40, 14); });
 }
 function buildB() {
   const g = grp("B"); g.add(island(7, 3));
@@ -253,7 +254,7 @@ function animD(t) {
     const dim = i === WIN ? 0 : U(t, 30.14, 30.5); if (dim > 0) b.scale.multiplyScalar(1 - 0.12 * dim); });
   D.coins.forEach(({ m, k, h, j }) => { const pile = V3(j[0] * 0.5 + (k - 4.5) * 0.12, 0.04 + (h * 10 + k) * 0.05 * 0.55, 1.5 + j[1] * 0.4);
     const dst = BB[k].clone().add(V3(-0.5, 0.04 + h * 0.085, 0.35)); const u = U(t, 28.1 + k * 0.04, 28.7 + k * 0.04, "io");
-    const p = pile.lerp(dst, u); p.y += 1.2 * Math.sin(Math.PI * u); m.position.copy(p); m.rotation.y = u * 3 + k; m.visible = t > 25.0; void sp; });
+    const p = pile.lerp(dst, u); p.y += 0.3 * Math.sin(Math.PI * u); m.position.copy(p); m.rotation.y = u * 3 + k; m.visible = t > 25.0; void sp; });
   const w = spring(t, 30.18, 10, 6), bw = D.boards[WIN].b;
   D.crown.visible = w > 0.01; D.crown.position.set(bw.position.x, bw.position.y + 2.05 + 0.6 * (1 - Math.min(1, w)), bw.position.z); D.crown.scale.setScalar(S(Math.min(1.1, w))); D.crown.rotation.y = t * 1.5;
   D.wglow.position.set(bw.position.x, bw.position.y + 1.25, bw.position.z - 0.3); D.wglow.material.opacity = 0.7 * Math.min(1, w);
@@ -275,7 +276,7 @@ function buildE() {
   E.bell = boxes([[0, 0, 0, 1.0, 0.12, 0.12, "#8a9bb8"], [-0.5, 0, 0, 0.16, 0.5, 0.5, NV2], [0.5, 0, 0, 0.16, 0.5, 0.5, NV2], [-0.36, 0, 0, 0.1, 0.38, 0.38, NV], [0.36, 0, 0, 0.1, 0.38, 0.38, NV]]);
   E.bell.position.set(2.4, 0.3, -3.55); g.add(E.bell);
   g.add(boxes([[3.6, 0.45, -3.5, 0.36, 0.9, 0.36, "#bfe9ff"], [3.6, 0.95, -3.5, 0.2, 0.12, 0.2, NV]]));
-  E.note = new THREE.Group(); E.note.position.set(-4.35, 0.0, -0.6); E.note.rotation.y = 0.55; g.add(E.note);
+  E.note = new THREE.Group(); E.note.position.set(-3.6, 0.0, -3.75); E.note.rotation.y = 0.3; g.add(E.note);
   E.note.add(boxes([[0, 0.2, -0.12, 0.3, 0.4, 0.2, "#c3cfe2"], [0, 1.05, -0.04, 1.36, 1.66, 0.06, NV]]));
   const np = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.5), new THREE.MeshStandardMaterial({ map: TX.note, roughness: 0.8 })); np.position.set(0, 1.05, 0.0); E.note.add(np);
   E.lines = []; for (let k = 0; k < 6; k++) { const l = boxes([[0, 0, 0, 1, 0.07, 0.02, k % 2 ? NV : "#3567b5"]], MAT, false); l.castShadow = false; l.position.set(-0.45, 1.25 - k * 0.17, 0.02); E.note.add(l); E.lines.push(l); }
@@ -387,10 +388,11 @@ function cubeG(t) { // the through-line cube: sits on POSTING, pops off, hops up
 function animG(t) {
   G.btn.forEach(({ b, top, ring }, k) => { const d = t - PRESS[k], pr = d > -0.08 && d < 0.3 ? Math.sin(Math.PI * Math.min(1, (d + 0.08) / 0.38)) : 0;
     b.scale.y = 1 - 0.3 * pr; top.material.emissiveIntensity = 0.25 + 0.9 * pr;
+    const m = t > 47.8 ? TX.btnBlank : TX.btn[k]; if (top.material.map !== m) { top.material.map = m; top.material.emissiveMap = m; top.material.needsUpdate = true; }
     const rr2 = d > 0 && d < 0.7 ? d / 0.7 : 0; ring.material.opacity = rr2 > 0 ? 0.9 * (1 - rr2) : 0; ring.scale.setScalar(1 + 4 * EZ.out(rr2)); });
   const k = (t - HOP0) / HOP;
   G.steps.forEach(({ lit }, i) => { lit.material.emissiveIntensity = 1.4 * U(t, HOP0 + i * HOP, HOP0 + i * HOP + 0.1) + (t > 50.7 ? 0.25 * Math.sin(t * 6 - i * 0.4) : 0); });
-  G.dayLbl.forEach(({ l, i }) => { const t0 = HOP0 + i * HOP - 0.05; setLabel(l, Math.min(1.08, spring(t, t0, 14, 8)) * (1 - U(t, t0 + 0.75, t0 + 0.95))); });
+  G.dayLbl.forEach(({ l }) => setLabel(l, 0));   // day count lives in the chip (labels on the moving spiral risked the frame edge)
   const p = cubeG(t); G.cube.position.copy(p); G.cube.rotation.set(t > 47.4 ? k * 1.57 : 0, 0.4 + (t > 47.4 ? k * 0.3 : 0), 0);
   const hit = t > 52.55; if (hit) { G.cube.position.set(0, 11.2, -3.45); G.cube.scale.set(1.5, 1.5, 0.9); } else G.cube.scale.setScalar(1.5);
   const gl = U(t, 50.7, 51.3) * 0.35 + spring(t, 52.55, 9, 5) * 0.6 * (1 - U(t, 53.8, 54.6));
@@ -416,8 +418,8 @@ const SHOT = [
     [29.9, [0.2, 6.4, 21.0, 0, 1.3, -0.4, 44], "sine"], [30.3, [BB[WIN].x * 0.5, 4.3, 8.8, BB[WIN].x, 2.5, -1.0, 40], "io"], [30.56, [BB[WIN].x, 2.65, 0.5, BB[WIN].x, 2.6, -1.2, 24], "in"]] },
   { w: "E", a: 30.56, b: 37.78, cam: [[30.56, [-2.75, 1.6, -1.6, -2.75, 0.3, -2.2, 30]], [31.5, [0, 16.8, 12.8, 0, 0, 0.35, 44], "out"], [34.6, [0.4, 16.4, 12.4, 0, 0, 0.35, 44], "sine"],
     [36.4, [5.0, 9.4, 15.6, -0.6, 0.9, -0.4, 44], "io"], [37.78, [4.6, 9.0, 14.8, -0.6, 0.9, -0.4, 44], "sine"]] },
-  { w: "F", a: 37.78, b: 44.3, cam: [[37.78, [0, 3.0, 15.2, 0, 3.0, -0.7, 44]], [40.1, [0, 3.0, 14.6, 0, 3.0, -0.7, 44], "sine"], [40.9, [0, 9.0, 18.5, 0, 2.2, -0.2, 44], "io"],
-    [44.0, [0.4, 8.8, 17.8, 0, 2.2, -0.2, 44], "sine"], [44.3, [0, 3.1, 6.5, 0, 3.0, -0.7, 60], "in"]] },
+  { w: "F", a: 37.78, b: 44.3, cam: [[37.78, [0, 3.0, 15.2, 0, 3.0, -0.7, 44]], [40.1, [0, 3.0, 14.6, 0, 3.0, -0.7, 44], "sine"], [40.9, [0, 9.0, 19.5, 0, 2.75, -0.2, 44], "io"],
+    [44.0, [0.4, 8.8, 18.8, 0, 2.75, -0.2, 44], "sine"], [44.3, [0, 3.1, 6.5, 0, 3.0, -0.7, 60], "in"]] },
   { w: "G", a: 44.3, b: 99, camf: camG },
 ];
 function camG(t) {

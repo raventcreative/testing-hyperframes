@@ -92,19 +92,23 @@ const CONTACTS = [["Bu Rina", "Oke kak, besok aku transfer", "09.12"], ["Grup Re
   ["Mbak Sari", "Fotonya aku kirim nanti", "08.30"], ["Grup Alumni 2014", "Reuni jadi tanggal 12?", "08.02"], ["Pak Joko", "Siap, makasih banyak", "Kemarin"], ["Toko Sebelah", "Stiker label sudah jadi", "Kemarin"],
   ["Mama", "Jangan lupa makan ya", "Kemarin"], ["Grup Arisan RT", "Bu Ani: kocokan minggu ini", "Kemarin"], ["Dimas", "File presentasinya mana?", "Senin"], ["Customer 0812…", "Kak, masih ready?", "Senin"],
   ["Grup Admin Toko", "Rekap order hari ini", "Senin"], ["Lina", "Hahaha iya bener", "Minggu"], ["Grup Futsal", "Lapangan jam 8 malam", "Minggu"], ["Om Herman", "Nanti mampir ke rumah", "Sabtu"]];
-const TARGET = ["Pak Bima · Supplier Kain", "Harganya 42 ribu per meter ya kak", "Kemarin"];
-const ROWH = 132, AV = ["#294b77", "#9db2d1", "#5b7bb0", "#b9c9e0", "#0a0d2c"];
+const TARGET = ["Pak Bima · Supplier", "42 ribu per meter ya kak", "Kemarin"];
+const ROWH = 135, AV = ["#294b77", "#9db2d1", "#5b7bb0", "#b9c9e0", "#0a0d2c"];
 let H_T = {};
 function drawList(g, w, h, t) {   // the hook phone: a chat list scrolled far too fast (SIMULASI, invented names)
   g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h);
   const o = H_T.off(t), sp = H_T.speed(t), i0 = Math.floor(o / ROWH);
-  g.save(); g.beginPath(); g.rect(0, 120, w, h - 120); g.clip(); if (sp > 60) g.filter = `blur(${Math.min(7, sp / 160).toFixed(1)}px)`;
+  g.save(); g.beginPath(); g.rect(0, 120, w, 675); g.clip(); if (sp > 60) g.filter = `blur(${Math.min(7, sp / 160).toFixed(1)}px)`;
   for (let i = i0; i < i0 + 10; i++) { const y = 120 + i * ROWH - o, d = i === H_T.iT ? TARGET : CONTACTS[((i % 15) + 15) % 15];
     if (i === H_T.iT && t > H_T.found) { g.fillStyle = "#e3ecf8"; g.fillRect(0, y, w, ROWH); g.fillStyle = BLUE; g.fillRect(0, y, 10, ROWH); }
     avatar(g, 70, y + ROWH / 2, 42, AV[((i % 5) + 5) % 5], d[0][0]);
     g.fillStyle = NAVY; g.font = `700 34px ${FONT}`; g.fillText(d[0], 132, y + 56); g.fillStyle = "#6b7a99"; g.font = `400 27px ${FONT}`; g.fillText(d[1], 132, y + 98);
     g.textAlign = "right"; g.font = `400 22px ${FONT}`; g.fillText(d[2], w - 26, y + 52); g.textAlign = "left"; g.fillStyle = "#e6ecf5"; g.fillRect(132, y + ROWH - 2, w - 132, 2); }
   g.restore(); g.filter = "none";
+  g.fillStyle = "#e3e9f2"; g.fillRect(0, 795, w, h - 795); g.fillStyle = "#ffffff"; rr(g, 24, 815, w - 48, 64, 32); g.fill();
+  g.strokeStyle = "#8a97b3"; g.lineWidth = 5; g.beginPath(); g.arc(66, 845, 14, 0, 7); g.stroke(); g.beginPath(); g.moveTo(76, 855); g.lineTo(88, 867); g.stroke();
+  for (let r = 0; r < 4; r++) { const n = [10, 9, 7, 5][r], kw = r === 3 ? 92 : 50, gap = 7, tw = n * kw + (n - 1) * gap, x0 = (w - tw) / 2;
+    for (let i = 0; i < n; i++) { g.fillStyle = "#ffffff"; rr(g, x0 + i * (kw + gap), 905 + r * 72, kw, 60, 10); g.fill(); } }
   g.fillStyle = NAVY; g.fillRect(0, 0, w, 120); g.fillStyle = "#ffffff"; g.font = `700 44px ${FONT}`; g.fillText("Chat", 36, 78);
   g.fillStyle = BLUE; rr(g, w - 250, 38, 222, 50, 25); g.fill(); g.fillStyle = "#ffffff"; g.font = `700 24px ${FONT}`; g.textAlign = "center"; g.fillText("SIMULASI", w - 139, 72); g.textAlign = "left";
 }
@@ -127,7 +131,7 @@ function buildH() {
   HH.T_STOP = wt("nyariin") - 0.25; HH.T_FOUND = HH.T_STOP + 0.05; HH.T_SLOW = wt("Claude") - 0.15;
   const o1 = 1080 * 0.75 * HH.T_SLOW + 1080 * 0.25 * (1 - Math.cos(HH.T_SLOW * 5.2)) / 5.2;
   const v1 = sp(HH.T_SLOW), Dt = HH.T_STOP - HH.T_SLOW, travel = v1 * Dt / 2;        // decelerate linearly to 0
-  const iT = Math.round((o1 + travel) / ROWH) + 4, oT = (iT - 4) * ROWH;
+  const iT = Math.round((o1 + travel) / ROWH) + 2, oT = (iT - 2) * ROWH;
   H_T = { iT, found: HH.T_FOUND,
     off: (t) => t < HH.T_SLOW ? 1080 * 0.75 * t + 1080 * 0.25 * (1 - Math.cos(t * 5.2)) / 5.2 : t < HH.T_STOP ? o1 + (oT - o1) * EZ.out((t - HH.T_SLOW) / Dt) : oT,
     speed: (t) => t < HH.T_SLOW ? sp(t) : t < HH.T_STOP ? v1 * (1 - (t - HH.T_SLOW) / Dt) : 0 };
@@ -146,7 +150,7 @@ function animH(t) {
   // the found message leaves the screen as the bubble (through-line) and floats above the island
   const iy = 3.45 + 3.3 * 0.9 - (120 + (H_T.iT * ROWH - H_T.off(t)) + ROWH / 2) / 1200 * 6.6 * 0.9;
   const b = U(t, HH.T_FOUND + 0.15, HH.T_FOUND + 0.75, "back"), f = U(t, 6.15, 6.95, "in");
-  HH.bub.visible = t > HH.T_FOUND + 0.15; HH.bub.position.set(-0.2 + 0.2 * (1 - b) + 6 * f, iy + (6.2 - iy) * b + 1.0 * f, -0.4 + 1.6 * b);
+  HH.bub.visible = t > HH.T_FOUND + 0.15; HH.bub.position.set(-0.2 + 2.2 * b + 6 * f, iy + (5.6 - iy) * b + 1.0 * f, -0.4 + 1.2 * b);
   HH.bub.scale.setScalar(0.3 + 0.9 * b); HH.bub.rotation.set(0, 0.25 * Math.sin(t * 2), 0.05 * Math.sin(t * 3));
 }
 
@@ -156,16 +160,16 @@ function buildB() {
   const g = mk("B"); clouds("B", 10, 5);
   const iL = island(1, 2), iR = island(1, 2); iL.position.x = -2.4; iR.position.x = 2.4; g.add(iL, iR);
   const small = ctex(300, 560, (c, w, h) => { drawListStatic(c, w, h); });
-  const ph = phoneBox(1.1, 2.05, small); ph.position.set(-2.4, 1.2, -0.3); g.add(ph); g.add(boxes([[-2.4, 0.1, -0.3, 0.8, 0.2, 0.6, "#c9d6ea"]]));
-  BB.wa = WA(); BB.wa.scale.setScalar(1.1); BB.wa.position.set(-2.4, 3.1, -0.3); g.add(BB.wa);
+  const ph = phoneBox(1.0, 1.86, small); ph.position.set(-2.2, 1.13, -0.3); g.add(ph); g.add(boxes([[-2.2, 0.1, -0.3, 0.8, 0.2, 0.6, "#c9d6ea"]]));
+  BB.wa = WA(); BB.wa.scale.setScalar(1.0); BB.wa.position.set(-2.2, 2.85, -0.3); g.add(BB.wa);
   const mon = ctex(760, 480, (c, w, h) => { c.fillStyle = "#f6f8fc"; c.fillRect(0, 0, w, h); c.fillStyle = NAVY; c.fillRect(0, 0, w, 66); c.fillStyle = "#ffffff"; c.font = `700 34px ${FONT}`; c.fillText("Claude Desktop", 28, 45);
     c.fillStyle = BLUE; c.font = `700 30px ${FONT}`; c.textAlign = "center"; c.fillText("Integrasi", w / 2, 170); c.fillStyle = "#e3ecf8"; rr(c, 120, 200, 520, 84, 20); c.fill();
     c.fillStyle = NAVY; c.font = `700 34px ${MONO}`; c.fillText("whatsapp", w / 2 - 40, 254); c.fillStyle = BLUE; rr(c, 520, 222, 90, 40, 20); c.fill(); c.fillStyle = "#ffffff"; c.beginPath(); c.arc(588, 242, 15, 0, 7); c.fill();
     c.fillStyle = "#8a97b3"; c.font = `400 26px ${FONT}`; c.fillText("SIMULASI", w / 2, 360); });
-  BB.mon = new THREE.Group(); BB.mon.position.set(2.4, 0, -0.3); g.add(BB.mon);
-  BB.mon.add(boxes([[0, 0.05, 0, 1.0, 0.1, 0.6, "#c9d6ea"], [0, 0.55, -0.05, 0.16, 0.9, 0.12, "#9fb2cf"], [0, 1.45, -0.05, 2.15, 1.38, 0.12, "#1b2238"]]));
-  const ms = plane(2.0, 1.26, mon); ms.position.set(0, 1.45, 0.015); BB.mon.add(ms);
-  BB.cl = CL(); BB.cl.scale.setScalar(1.1); BB.cl.position.set(2.4, 3.1, -0.3); g.add(BB.cl);
+  BB.mon = new THREE.Group(); BB.mon.position.set(2.2, 0, -0.3); g.add(BB.mon);
+  BB.mon.add(boxes([[0, 0.05, 0, 0.9, 0.1, 0.6, "#c9d6ea"], [0, 0.43, -0.05, 0.16, 0.75, 0.12, "#9fb2cf"], [0, 1.3, -0.05, 1.75, 1.12, 0.12, "#1b2238"]]));
+  const ms = plane(1.62, 1.02, mon); ms.position.set(0, 1.3, 0.015); BB.mon.add(ms);
+  BB.cl = CL(); BB.cl.scale.setScalar(1.0); BB.cl.position.set(2.2, 2.85, -0.3); g.add(BB.cl);
   BB.sign = dyn(1000, 420, (c, w, h, t) => { c.fillStyle = "#ffffff"; rr(c, 6, 6, w - 12, h - 12, 34); c.fill(); c.strokeStyle = NAVY; c.lineWidth = 8; rr(c, 6, 6, w - 12, h - 12, 34); c.stroke();
     c.fillStyle = "#8a97b3"; c.font = `700 30px ${FONT}`; c.fillText("GITHUB · OPEN SOURCE", 56, 84);
     fitFont(c, ["lharries/whatsapp-mcp"], 66, w - 112, 700, MONO); c.fillStyle = NAVY; c.fillText("lharries/whatsapp-mcp", 56, 170);
@@ -184,14 +188,14 @@ function drawListStatic(c, w, h) { c.fillStyle = "#ffffff"; c.fillRect(0, 0, w, 
   for (let i = 0; i < 6; i++) { const y = 80 + i * 78; avatar(c, 38, y + 34, 24, AV[i % 5], CONTACTS[i][0][0]); c.fillStyle = "#c9d6ea"; rr(c, 76, y + 16, 150 - (i % 3) * 20, 16, 8); c.fill(); rr(c, 76, y + 42, 190, 12, 6); c.fill(); } }
 function animB(t) {
   redraw(BB.sign, t);
-  BB.wa.rotation.y = Math.sin(t * 1.2) * 0.5; BB.cl.rotation.y = Math.sin(t * 1.1 + 1) * 0.5; BB.wa.position.y = 3.1 + 0.06 * Math.sin(t * 2); BB.cl.position.y = 3.1 + 0.06 * Math.sin(t * 2 + 1);
-  const s = U(t, wt("open") - 0.2, wt("open") + 0.35, "back"), up = U(t, BB.T_BR - 0.25, BB.T_BR + 0.35, "in"); BB.board.visible = t > wt("open") - 0.2 && up < 1; BB.board.position.set(0, 2.6 + 3 * (1 - s) + 4 * up, -1.4); BB.board.rotation.z = 0.12 * (1 - s);
+  BB.wa.rotation.y = Math.sin(t * 1.2) * 0.5; BB.cl.rotation.y = Math.sin(t * 1.1 + 1) * 0.5; BB.wa.position.y = 2.85 + 0.06 * Math.sin(t * 2); BB.cl.position.y = 2.85 + 0.06 * Math.sin(t * 2 + 1);
+  const s = U(t, wt("open") - 0.2, wt("open") + 0.35, "back"), up = U(t, BB.T_BR - 0.25, BB.T_BR + 0.35, "in"); BB.board.visible = t > wt("open") - 0.2 && up < 1; BB.board.position.set(0, 2.6 + 3 * (1 - s), -1.4); BB.board.scale.setScalar(Math.max(0.001, 1 - up)); BB.board.rotation.z = 0.12 * (1 - s);
   BB.planks.forEach((m, i) => { const a = BB.T_BR + i * 0.15, u = U(t, a, a + 0.3, "out"); m.visible = t > a; m.position.y = -0.05 + 1.6 * (1 - u); m.rotation.z = 0.6 * (1 - u); });
   BB.rope.visible = t > BB.T_BR + 1.0; BB.rope.scale.x = Math.max(0.001, U(t, BB.T_BR + 1.0, BB.T_BR + 1.3));
   // bubble: lands on the WhatsApp island, waits, then hops over the bridge into the Claude monitor
   const land = U(t, 6.7, 7.2, "out"), c0 = wt("Claude", 12) - 0.6, cross = U(t, c0, c0 + 1.0, "io"), dive = U(t, c0 + 1.0, c0 + 1.35, "in");
-  const x = -1.7 + 3.4 * cross + 0.7 * dive, y = 1.0 + 0.5 * Math.abs(Math.sin(cross * Math.PI * 4)) * (cross > 0 && cross < 1 ? 1 : 0);
-  BB.bub.position.set(x - 4 * (1 - land), y + 2.2 * (1 - land) + 0.06 * Math.sin(t * 3) + 0.45 * dive, 0.9 - 1.15 * dive); BB.bub.scale.setScalar(0.62 * (1 - 0.7 * dive)); BB.bub.visible = t > 6.7 && dive < 1;
+  const x = -1.7 + 3.4 * cross + 0.5 * dive, y = 1.0 + 0.5 * Math.abs(Math.sin(cross * Math.PI * 4)) * (cross > 0 && cross < 1 ? 1 : 0);
+  BB.bub.position.set(x - 4 * (1 - land), y + 2.2 * (1 - land) + 0.06 * Math.sin(t * 3) + 0.3 * dive, 0.9 - 1.15 * dive); BB.bub.scale.setScalar(0.62 * (1 - 0.7 * dive)); BB.bub.visible = t > 6.7 && dive < 1;
 }
 
 /* ---------------------------------------------------------------- K: the cabinet with four drawers (12 tools) */
@@ -217,17 +221,18 @@ function buildK() {
   KK.tiles = []; for (let i = 0; i < 12; i++) { const m = boxes([[0, 0, 0, 0.3, 0.3, 0.3, i % 2 ? BLUE : "#5b7bb0"]]); m.visible = false; g.add(m); KK.tiles.push(m); }
   KK.cards = TOOLS.map(([n, d], i) => { const m = plane(2.05, 0.755, cardTex(i + 1, n, d)); m.visible = false; g.add(m); return m; });
   // laci 2: the reading screen (html-demo style View(t))
-  KK.rs = dyn(960, 640, drawRead); KK.rsm = new THREE.Group(); const rp = plane(2.4, 1.6, KK.rs); KK.rsm.add(rp); KK.rsm.add(boxes([[0, 0, -0.04, 2.52, 1.72, 0.06, NAVY]])); g.add(KK.rsm);
+  KK.rs = dyn(960, 720, drawRead); KK.rsm = new THREE.Group(); const rp = plane(2.25, 1.6875, KK.rs); KK.rsm.add(rp); KK.rsm.add(boxes([[0, 0, -0.04, 2.37, 1.8, 0.06, NAVY]])); g.add(KK.rsm);
   // laci 3: send targets
   KK.tph = phoneBox(0.5, 0.9, ctex(200, 360, (c, w, h) => { c.fillStyle = "#ffffff"; c.fillRect(0, 0, w, h); c.fillStyle = NAVY; c.fillRect(0, 0, w, 50); c.fillStyle = "#e3ecf8"; rr(c, 30, 120, 140, 50, 14); c.fill(); rr(c, 50, 190, 120, 40, 12); c.fill(); }));
   g.add(KK.tph);
   KK.grp = new THREE.Group(); g.add(KK.grp); [-0.32, 0, 0.32].forEach((x, i) => KK.grp.add(boxes([[x, 0.18, 0, 0.22, 0.36, 0.2, AV[i]], [x, 0.48, 0, 0.24, 0.24, 0.24, "#f1c39d"], [x, 0.62, 0, 0.26, 0.06, 0.26, "#3b2a20"]])));
-  const ic = (s) => ctex(200, 200, (c) => { c.fillStyle = "#ffffff"; c.fillRect(0, 0, 200, 200); c.fillStyle = BLUE; c.fillRect(0, 0, 200, 16); c.fillStyle = NAVY; c.textAlign = "center"; fitFont(c, [s], 46, 170); c.fillText(s, 100, 122); });
-  const cube = (s) => { const t = ic(s), m = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.46, 0.46), new THREE.MeshStandardMaterial({ map: t, roughness: 0.6 })); m.castShadow = true; m.visible = false; g.add(m); return m; };
+  const ic = (s) => ctex(200, 200, (c) => { c.fillStyle = "#ffffff"; c.fillRect(0, 0, 200, 200); c.fillStyle = BLUE; c.fillRect(0, 0, 200, 16); c.fillStyle = NAVY; c.textAlign = "center"; fitFont(c, [s], 60, 184); c.fillText(s, 100, 126); });
+  const WM = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
+  const cube = (s) => { const t = ic(s), m = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), [WM, WM, WM, WM, new THREE.MeshStandardMaterial({ map: t, roughness: 0.6 }), WM]); m.castShadow = true; m.visible = false; g.add(m); return m; };
   KK.files = ["GAMBAR", "VIDEO", "DOKUMEN"].map(cube); KK.media = ["FOTO", "VIDEO", "DOKUMEN", "AUDIO"].map(cube);
   KK.sb = [bubble(), bubble()]; KK.sb.forEach((b) => g.add(b));
   KK.voice = bubble(ctex(300, 180, (c, w, h) => { c.fillStyle = "#ffffff"; c.fillRect(0, 0, w, h); c.fillStyle = BLUE; for (let i = 0; i < 11; i++) { const hh = 30 + 70 * Math.abs(Math.sin(i * 1.7)); rr(c, 30 + i * 23, 90 - hh / 2, 12, hh, 6); c.fill(); } })); g.add(KK.voice);
-  KK.lab = ["send_message", "send_file", "send_audio_message", "download_media"].map((s) => { const l = label(s, BLUE, "#ffffff", 0.26); l.visible = false; g.add(l); return l; });
+  KK.lab = ["9/12 · send_message", "10/12 · send_file", "11/12 · send_audio_message", "12/12 · download_media"].map((s) => { const l = label(s, BLUE, "#ffffff", 0.26); l.visible = false; g.add(l); return l; });
   KK.lap = new THREE.Group(); g.add(KK.lap); KK.lap.add(boxes([[0, -0.44, 0, 0.9, 0.86, 0.6, "#dbe5f2"], [0, 0.03, 0, 1.2, 0.06, 0.8, "#c3cfe2"], [0, 0.42, -0.4, 1.2, 0.78, 0.06, "#1b2238"]]));
   KK.lt = dyn(400, 260, (c, w, h, t) => { c.fillStyle = "#f6f8fc"; c.fillRect(0, 0, w, h); c.fillStyle = NAVY; c.font = `700 34px ${FONT}`; c.fillText("Unduhan", 24, 52);
     const n = [0, 1, 2, 3].filter((i) => t > KK.T_MEDIA + 0.45 + i * 0.32).length; for (let i = 0; i < 4; i++) { c.globalAlpha = i < n ? 1 : 0.18; c.fillStyle = BLUE; rr(c, 24 + i * 92, 90, 76, 96, 10); c.fill(); }
@@ -241,32 +246,32 @@ const MSG = [["Pak Bima", "Pagi kak, kain katun masih ada?", 0], ["Kamu", "Masih
   ["Pak Bima", "Harganya 42 ribu per meter ya kak", 0], ["Pak Bima", "Stok ready, kirim Kamis", 0]];
 function drawRead(c, w, h, t) {   // laci BACA: one window, four tools (SIMULASI, invented names)
   const R = KK.T.R, k = t < R[1] ? 0 : t < R[2] ? 1 : t < R[3] ? 2 : 3, nm = TOOLS[4 + k];
-  c.fillStyle = "#ffffff"; c.fillRect(0, 0, w, h); c.fillStyle = NAVY; c.fillRect(0, 0, w, 96);
-  c.fillStyle = "#7fe3ff"; c.font = `700 24px ${FONT}`; c.fillText(`TOOL ${5 + k}/12`, 30, 40); fitFont(c, [nm[0]], 38, w - 300, 700, MONO); c.fillStyle = "#ffffff"; c.fillText(nm[0], 30, 82);
-  c.fillStyle = BLUE; rr(c, w - 200, 28, 172, 44, 22); c.fill(); c.fillStyle = "#fff"; c.font = `700 22px ${FONT}`; c.textAlign = "center"; c.fillText("SIMULASI", w - 114, 58); c.textAlign = "left";
-  const y0 = 120;
+  c.fillStyle = "#ffffff"; c.fillRect(0, 0, w, h); c.fillStyle = NAVY; c.fillRect(0, 0, w, 112);
+  c.fillStyle = "#7fe3ff"; c.font = `700 26px ${FONT}`; c.fillText(`TOOL ${5 + k}/12`, 30, 40); fitFont(c, [nm[0]], 46, w - 290, 700, MONO); c.fillStyle = "#ffffff"; c.fillText(nm[0], 30, 94);
+  c.fillStyle = BLUE; rr(c, w - 226, 32, 196, 50, 25); c.fill(); c.fillStyle = "#fff"; c.font = `700 25px ${FONT}`; c.textAlign = "center"; c.fillText("SIMULASI", w - 128, 66); c.textAlign = "left";
+  const y0 = 130;
   if (k <= 1) {
-    if (k === 0) { c.fillStyle = "#e3ecf8"; rr(c, 30, y0, 300, 52, 26); c.fill(); c.fillStyle = BLUE; c.font = `700 26px ${FONT}`; c.fillText("filter: \"harga\"", 52, y0 + 35); }
-    MSG.forEach(([who, s, me], i) => { const y = y0 + 70 + i * 74, hit = /harga/i.test(s), ctx = k === 1 && i >= 2 && i <= 5, foc = k === 1 && i === 4;
-      c.globalAlpha = k === 0 ? (hit ? 1 : 0.28) : ctx ? 1 : 0.22;
-      c.font = `700 28px ${FONT}`; const tw = Math.min(560, c.measureText(s).width + 48), x = me ? w - 40 - tw : 40;
-      c.fillStyle = foc ? BLUE : me ? "#e3ecf8" : "#f1f4f9"; rr(c, x, y, tw, 60, 20); c.fill(); c.fillStyle = foc ? "#ffffff" : NAVY; c.fillText(s, x + 24, y + 40); });
+    if (k === 0) { c.fillStyle = "#e3ecf8"; rr(c, 30, y0, 330, 58, 29); c.fill(); c.fillStyle = BLUE; c.font = `700 30px ${FONT}`; c.fillText("filter: \"harga\"", 54, y0 + 40); }
+    MSG.forEach(([who, s, me], i) => { const y = y0 + 76 + i * 84, hit = /harga/i.test(s), ctx = k === 1 && i >= 2 && i <= 5, foc = k === 1 && i === 4;
+      c.globalAlpha = k === 0 ? (hit ? 1 : 0.3) : ctx ? 1 : 0.25;
+      c.font = `700 34px ${FONT}`; const tw = Math.min(w - 80, c.measureText(s).width + 52), x = me ? w - 40 - tw : 40;
+      c.fillStyle = foc ? BLUE : me ? "#e3ecf8" : "#f1f4f9"; rr(c, x, y, tw, 68, 22); c.fill(); c.fillStyle = foc ? "#ffffff" : NAVY; c.fillText(s, x + 26, y + 46); });
     c.globalAlpha = 1;
-    if (k === 1) { c.strokeStyle = CYAN; c.lineWidth = 6; rr(c, 20, y0 + 70 + 2 * 74 - 10, w - 40, 4 * 74 + 6, 22); c.stroke(); c.fillStyle = CYAN; rr(c, w - 210, y0 + 20, 180, 44, 22); c.fill(); c.fillStyle = NAVY; c.font = `700 24px ${FONT}`; c.fillText("konteks ±2", w - 190, y0 + 50); }
+    if (k === 1) { c.strokeStyle = CYAN; c.lineWidth = 6; rr(c, 20, y0 + 76 + 2 * 84 - 9, w - 40, 4 * 84 + 2, 24); c.stroke(); c.fillStyle = CYAN; rr(c, w - 250, y0 + 4, 220, 56, 28); c.fill(); c.fillStyle = NAVY; c.font = `700 28px ${FONT}`; c.fillText("konteks ±2", w - 226, y0 + 42); }
   } else if (k === 2) {
-    avatar(c, 90, y0 + 90, 54, BLUE, "B"); c.fillStyle = NAVY; c.font = `700 44px ${FONT}`; c.fillText("Pak Bima", 166, y0 + 84); c.fillStyle = "#6b7a99"; c.font = `400 28px ${FONT}`; c.fillText("supplier kain · nama contoh", 166, y0 + 124);
-    c.fillStyle = "#f1f4f9"; rr(c, 40, y0 + 190, 640, 70, 22); c.fill(); c.fillStyle = NAVY; c.font = `700 30px ${FONT}`; c.fillText("Harganya 42 ribu per meter ya kak", 64, y0 + 236);
-    c.fillStyle = BLUE; rr(c, 40, y0 + 290, 330, 56, 28); c.fill(); c.fillStyle = "#fff"; c.font = `700 26px ${FONT}`; c.fillText("terakhir · kemarin 14.20", 62, y0 + 327);
+    avatar(c, 104, y0 + 104, 66, BLUE, "B"); c.fillStyle = NAVY; c.font = `700 54px ${FONT}`; c.fillText("Pak Bima", 194, y0 + 98); c.fillStyle = "#6b7a99"; c.font = `400 32px ${FONT}`; c.fillText("supplier kain · nama contoh", 194, y0 + 144);
+    c.font = `700 38px ${FONT}`; const s = "Harganya 42 ribu per meter ya kak", tw = c.measureText(s).width + 56; c.fillStyle = "#f1f4f9"; rr(c, 40, y0 + 230, tw, 84, 24); c.fill(); c.fillStyle = NAVY; c.fillText(s, 68, y0 + 286);
+    c.fillStyle = BLUE; rr(c, 40, y0 + 350, 420, 64, 32); c.fill(); c.fillStyle = "#fff"; c.font = `700 32px ${FONT}`; c.fillText("terakhir · kemarin 14.20", 66, y0 + 393);
   } else {
-    c.fillStyle = NAVY; c.font = `700 34px ${FONT}`; c.fillText("Chat yang ada Pak Bima", 40, y0 + 50);
-    [["Pak Bima", "chat pribadi", BLUE], ["Grup Reseller Kain", "38 anggota", "#5b7bb0"], ["Grup Supplier Tekstil", "12 anggota", "#9db2d1"]].forEach(([n, s, col], i) => { const y = y0 + 84 + i * 120, a = U(t, R[3] + 0.15 + i * 0.25, R[3] + 0.4 + i * 0.25);
-      c.globalAlpha = a; avatar(c, 84, y + 50, 40, col, n[0] === "G" ? "G" : "B"); c.fillStyle = NAVY; c.font = `700 32px ${FONT}`; c.fillText(n, 146, y + 44); c.fillStyle = "#6b7a99"; c.font = `400 26px ${FONT}`; c.fillText(s, 146, y + 82); });
+    c.fillStyle = NAVY; c.font = `700 42px ${FONT}`; c.fillText("Chat yang ada Pak Bima", 40, y0 + 60);
+    [["Pak Bima", "chat pribadi", BLUE, "B"], ["Grup Reseller Kain", "38 anggota", "#5b7bb0", "G"], ["Grup Supplier Tekstil", "12 anggota", "#9db2d1", "G"]].forEach(([n, s, col, ch], i) => { const y = y0 + 100 + i * 150, a = U(t, R[3] + 0.15 + i * 0.25, R[3] + 0.4 + i * 0.25);
+      c.globalAlpha = a; avatar(c, 92, y + 62, 52, col, ch); c.fillStyle = NAVY; c.font = `700 40px ${FONT}`; c.fillText(n, 166, y + 54); c.fillStyle = "#6b7a99"; c.font = `400 32px ${FONT}`; c.fillText(s, 166, y + 100); });
     c.globalAlpha = 1; }
 }
 const OPEN = (t, a, b) => EZ.out(cl((t - a) / 0.4, 0, 1)) * (1 - EZ.in(cl((t - b) / 0.35, 0, 1)));
 function cardAnim(m, t, a, next, dyD) {   // a card rises out of the drawer, holds, then drops back into it when the next one comes
-  const u = U(t, a - 0.08, a + 0.32, "back"), dn = U(t, next - 0.1, next + 0.25, "in");
-  m.visible = t > a - 0.08 && dn < 1; m.position.set(0, dyD + 0.45 + 1.05 * u - 0.95 * dn, 1.55 - 0.3 * dn); m.scale.setScalar(Math.max(0.001, 0.35 + 0.65 * u - 0.5 * dn)); m.rotation.set(-1.2 * dn, 0.06 * Math.sin(t * 2), 0);
+  const u = U(t, a - 0.02, a + 0.34, "back"), dn = U(t, next - 0.34, next - 0.06, "in");
+  m.visible = t > a - 0.02 && dn < 1; m.position.set(0, dyD + 0.45 + 1.05 * u - 0.95 * dn, 1.55 - 0.3 * dn); m.scale.setScalar(Math.max(0.001, 0.35 + 0.65 * u - 0.5 * dn)); m.rotation.set(-1.2 * dn, 0.06 * Math.sin(t * 2), 0);
 }
 function animK(t) {
   const T = KK.T;
@@ -277,7 +282,7 @@ function animK(t) {
   KK.dr.forEach((o, i) => { o.strip.material.emissiveIntensity = 2.2 * (U(t, T.empat + i * 0.14, T.empat + i * 0.14 + 0.15) * (1 - U(t, T.L1 - 0.2, T.L1))) + 2.2 * U(t, T.D + 1.4 + i * 0.08, T.D + 1.55 + i * 0.08); });
   const open = [OPEN(t, T.L1 + 0.05, T.L2 - 0.35), OPEN(t, T.L2 + 0.1, T.L3 - 0.35), OPEN(t, T.L3 + 0.25, T.L4 - 0.25), OPEN(t, T.L4 + 0.25, 999)];
   KK.dr.forEach((o, i) => (o.d.position.z = 0.65 + 1.15 * open[i]));
-  { const la = Math.max(1 - U(t, T.L1 - 0.15, T.L1 + 0.15), U(t, T.D + 1.2, T.D + 1.5)); KK.dr.forEach((o) => { o.lp.material.opacity = la; o.lp.visible = la > 0.01; }); }
+  { const la = 1 - U(t, T.L1 - 0.15, T.L1 + 0.15); KK.dr.forEach((o) => { o.lp.material.opacity = la; o.lp.visible = la > 0.01; }); }
   // turntable spin into laci 3
   KK.cab.rotation.y = 2 * Math.PI * EZ.io(cl((t - (T.L3 - 0.35)) / 0.55, 0, 1));
   // laci 1 cards
@@ -292,7 +297,7 @@ function animK(t) {
     KK.tph.visible = KK.grp.visible = t > S[0] - 0.2 && off > 0; KK.tph.position.set(-1.0, y3 + 1.75, 1.5); KK.tph.scale.setScalar(Math.max(0.001, a * off)); KK.grp.position.set(1.0, y3 + 1.45, 1.5); KK.grp.scale.setScalar(Math.max(0.001, U(t, S[0] + 0.35, S[0] + 0.65, "back") * off));
     KK.sb.forEach((b, i) => { const a0 = S[0] + 0.05 + i * 0.55, u = U(t, a0, a0 + 0.5, "io"); b.visible = u > 0 && u < 1; const tx = i ? 1.0 : -1.0, ty = i ? y3 + 2.15 : y3 + 1.75;
       b.position.set(tx * u, y3 + 0.4 + (ty - y3 - 0.4) * u + 0.5 * Math.sin(Math.PI * u), 1.7); b.scale.setScalar(0.4); });
-    KK.files.forEach((m, i) => { const a0 = S[1] + 0.15 + i * 0.42, u = U(t, a0, a0 + 0.5, "back"); m.visible = t > a0 && off > 0; m.position.set((i - 1) * 0.62 * u, y3 + 0.2 + 0.75 * u + 0.4 * Math.sin(Math.PI * cl(u, 0, 1)), 1.6);
+    KK.files.forEach((m, i) => { const a0 = S[1] + 0.15 + i * 0.42, u = U(t, a0, a0 + 0.5, "back"); m.visible = t > a0 && off > 0; m.position.set((i - 1) * 0.72 * u, y3 + 0.2 + 0.75 * u + 0.4 * Math.sin(Math.PI * cl(u, 0, 1)), 1.6);
       m.rotation.set(0.3 * (1 - u), (1 - u) * 4 + 0.3 * Math.sin(t * 2 + i), 0); m.scale.setScalar(Math.max(0.001, 0.85 * u * off)); });
     const v = U(t, S[2] + 0.1, S[2] + 0.5, "back"); KK.voice.visible = t > S[2] + 0.1 && off > 0; KK.voice.position.set(0, y3 + 1.75, 1.7); KK.voice.scale.setScalar(Math.max(0.001, 0.7 * v * off)); }
   // laci 4: media fall into the laptop
@@ -300,8 +305,8 @@ function animK(t) {
     if (KK.lap.visible) redraw(KK.lt, t);
     KK.media.forEach((m, i) => { const a0 = T.D + i * 0.32, u = U(t, a0, a0 + 0.45, "in"); m.visible = u > 0 && u < 1; m.position.set((i - 1.5) * 0.4 * (1 - u), y4 + 2.4 - 1.6 * u, 1.6); m.rotation.set(u * 3, u * 2 + i, 0); m.scale.setScalar(0.8 - 0.4 * u); }); }
   // tool-name pills for laci 3 + 4
-  const LB = [[S[0], S[1]], [S[1], S[2]], [S[2], T.L4 - 0.2], [T.D - 0.1, T.D + 2.3]];
-  KK.lab.forEach((l, i) => { const [a, b] = LB[i], k = U(t, a - 0.1, a + 0.2, "back") * (1 - U(t, b - 0.15, b)); setLabel(l, k); l.position.set(0.45, i < 3 ? y3 + 2.45 : DY(3) + 1.75, 1.6); });
+  const LB = [[S[0], S[1]], [S[1], S[2]], [S[2], T.L4 - 0.2], [T.D - 0.1, T.D + 1.15]];
+  KK.lab.forEach((l, i) => { const [a, b] = LB[i], k = U(t, a - 0.1, a + 0.2, "back") * (1 - U(t, b - 0.15, b)); setLabel(l, k); l.position.set(0, i < 3 ? y3 + 2.45 : DY(3) + 1.75, 1.6); });
 }
 
 /* ---------------------------------------------------------------- A: ask in plain language (scripted chat window on a billboard) */
@@ -339,7 +344,7 @@ function drawAsk(c, w, h, t) {
 }
 function buildA() {
   const g = mk("A"); g.add(island(4, 3)); clouds("A", 10, 11);
-  AA.T = { click: wt("Misalnya,") - 0.15, type: wt("supplier"), typeEnd: wt("ya?") + 0.2, send: wt("Claude", 48) - 0.15, tools: [wt("milih") + 0.05, wt("nyari", 49) - 0.1, wt("pesanmu,") + 0.2], ans: wt("jawab") - 0.1, ansEnd: wt("konteksnya.") + 0.3 };
+  AA.T = { click: wt("Misalnya,") - 0.15, type: wt("supplier"), typeEnd: wt("ya?") + 0.2, send: wt("Claude", 48) - 0.15, tools: [wt("milih") + 0.05, wt("nyari", 49) - 0.1, wt("pesanmu,") + 0.2], ans: wt("lalu", 50) - 0.05, ansEnd: wt("lengkap") + 0.25 };
   AA.tex = dyn(1200, 720, drawAsk);
   AA.bb = new THREE.Group(); AA.bb.position.set(0, 2.55, 0); g.add(AA.bb);
   AA.bb.add(plane(4.0, 2.4, AA.tex)); AA.bb.add(boxes([[0, 0, -0.06, 4.14, 2.54, 0.1, NAVY], [-1.4, -1.9, -0.1, 0.12, 1.4, 0.12, "#9fb2cf"], [1.4, -1.9, -0.1, 0.12, 1.4, 0.12, "#9fb2cf"]]));
@@ -354,13 +359,14 @@ function animA(t) {
   AA.wa.position.set(-1.6, 4.3 + 0.05 * Math.sin(t * 2), 0.1); AA.cl.position.set(1.6, 4.3 + 0.05 * Math.sin(t * 2 + 1), 0.1); AA.wa.rotation.y = Math.sin(t) * 0.5; AA.cl.rotation.y = Math.sin(t + 1) * 0.5;
   AA.wa.visible = AA.cl.visible = false;
   const b = U(t, AA.T.ansEnd - 0.7, AA.T.ansEnd - 0.1, "back"); AA.bub.visible = t > AA.T.ansEnd - 0.7;
-  AA.bub.position.set(0.2 + 0.9 * b, 2.4 + 1.2 * b, 0.1 + 1.4 * b); AA.bub.scale.setScalar(Math.max(0.001, 1.05 * b)); AA.bub.rotation.set(0, -0.15 + 0.1 * Math.sin(t * 2), 0.04);
+  AA.bub.position.set(-0.55 - 0.2 * b, 2.3 - 0.75 * b, 0.1 + 0.6 * b); AA.bub.scale.setScalar(Math.max(0.001, 1.25 * b)); AA.bub.rotation.set(0, -0.15 + 0.1 * Math.sin(t * 2), 0.04);
 }
 
 /* ---------------------------------------------------------------- S: setup — four crates into the machine, terminal, QR, config, restart */
 const SS = {};
 function drawTerm(c, w, h, t) {
   const T = SS.T;
+  if (t < T.clone - 0.4) { c.fillStyle = "#0a0d2c"; c.fillRect(0, 0, w, h); return; }
   if (t < T.cfg - 0.15) {
     c.fillStyle = "#0a0d2c"; c.fillRect(0, 0, w, h); c.fillStyle = "#1b2238"; c.fillRect(0, 0, w, 64); c.fillStyle = "#7fe3ff"; c.font = `700 28px ${FONT}`; c.fillText("Terminal", 28, 43);
     c.fillStyle = "#8a97b3"; c.font = `400 22px ${FONT}`; c.textAlign = "right"; c.fillText("SIMULASI", w - 26, 42); c.textAlign = "left";
@@ -378,7 +384,7 @@ function drawTerm(c, w, h, t) {
     const rs = U(t, T.restart, T.restart + 0.25) * (1 - U(t, T.integ - 0.05, T.integ + 0.15));
     if (rs > 0) { c.globalAlpha = rs; c.fillStyle = "rgba(10,13,44,.88)"; c.fillRect(0, 0, w, h); c.strokeStyle = CYAN; c.lineWidth = 10; c.beginPath(); c.arc(w / 2, h / 2 - 30, 52, t * 9, t * 9 + 4.2); c.stroke();
       c.fillStyle = "#fff"; c.font = `700 34px ${FONT}`; c.textAlign = "center"; c.fillText("Restart Claude Desktop…", w / 2, h / 2 + 80); c.textAlign = "left"; c.globalAlpha = 1; }
-    if (t > T.integ) { const u = U(t, T.integ, T.integ + 0.35, "out"); c.globalAlpha = u; c.fillStyle = "#ffffff"; rr(c, 60, h - 190 + 30 * (1 - u), w - 120, 150, 28); c.fill(); c.strokeStyle = BLUE; c.lineWidth = 5; rr(c, 60, h - 190 + 30 * (1 - u), w - 120, 150, 28); c.stroke();
+    if (t > T.integ) { const u = U(t, T.integ, T.integ + 0.35, "out"); c.globalAlpha = u; c.fillStyle = "rgba(246,248,252,.92)"; c.fillRect(0, 64, w, h - 64); c.fillStyle = "#ffffff"; rr(c, 60, h - 190 + 30 * (1 - u), w - 120, 150, 28); c.fill(); c.strokeStyle = BLUE; c.lineWidth = 5; rr(c, 60, h - 190 + 30 * (1 - u), w - 120, 150, 28); c.stroke();
       c.fillStyle = "#8a97b3"; c.font = `700 22px ${FONT}`; c.fillText("INTEGRASI", 96, h - 140 + 30 * (1 - u)); c.fillStyle = NAVY; c.font = `700 40px ${MONO}`; c.fillText("whatsapp", 96, h - 84 + 30 * (1 - u));
       const on = U(t, T.on, T.on + 0.2); c.fillStyle = on > 0.5 ? BLUE : "#c9d6ea"; rr(c, w - 230, h - 132 + 30 * (1 - u), 120, 60, 30); c.fill(); c.fillStyle = "#fff"; c.beginPath(); c.arc(w - 200 + 60 * on, h - 102 + 30 * (1 - u), 22, 0, 7); c.fill(); c.globalAlpha = 1; }
   }
@@ -394,7 +400,8 @@ function buildS() {
   SS.fill = [0, 1, 2, 3].map((i) => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.38, 0.02), emi(CYAN, 2)); m.position.set(-0.42 + i * 0.28, 0.65, 0.625); m.visible = false; SS.m.add(m); return m; });
   const crateT = (s) => ctex(256, 256, (c) => { c.fillStyle = "#e9cfa8"; c.fillRect(0, 0, 256, 256); c.strokeStyle = "#cfa978"; c.lineWidth = 12; c.strokeRect(6, 6, 244, 244); c.fillStyle = NAVY; c.textAlign = "center";
     const L = s.split("\n"); fitFont(c, L, L.length > 1 ? 54 : 84, 220); L.forEach((l, i) => c.fillText(l, 128, (L.length > 1 ? 118 : 158) + i * 62)); });
-  SS.cr = ["Go", "Python", "UV", "Claude\nDesktop"].map((s) => { const tx = crateT(s), m = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.62, 0.62), new THREE.MeshStandardMaterial({ map: tx, roughness: 0.7 })); m.castShadow = true; g.add(m); return m; });
+  const WD = new THREE.MeshStandardMaterial({ color: 0xe9cfa8, roughness: 0.7 });
+  SS.cr = ["Go", "Python", "UV", "Claude\nDesktop"].map((s) => { const tx = crateT(s), m = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.62, 0.62), [WD, WD, WD, WD, new THREE.MeshStandardMaterial({ map: tx, roughness: 0.7 }), WD]); m.castShadow = true; g.add(m); return m; });
   SS.tex = dyn(960, 620, drawTerm);
   SS.scr = new THREE.Group(); SS.scr.position.set(1.75, 2.15, -0.3); g.add(SS.scr); SS.scr.add(plane(3.0, 1.94, SS.tex)); SS.scr.add(boxes([[0, 0, -0.05, 3.12, 2.06, 0.08, "#1b2238"], [0, -1.55, -0.1, 0.14, 1.2, 0.14, "#9fb2cf"], [0, -2.1, -0.1, 1.2, 0.1, 0.6, "#c9d6ea"]]));
   SS.ph = phoneBox(0.62, 1.15, ctex(240, 440, (c, w, h) => { c.fillStyle = "#0a0d2c"; c.fillRect(0, 0, w, h); c.strokeStyle = CYAN; c.lineWidth = 8; c.strokeRect(40, 120, 160, 160); c.fillStyle = "#fff"; c.font = `700 24px ${FONT}`; c.textAlign = "center"; c.fillText("Scan QR", 120, 340); }));
@@ -404,7 +411,7 @@ function buildS() {
 function animS(t) {
   const T = SS.T; if (t > 52.5) redraw(SS.tex, t);
   SS.cr.forEach((m, i) => { const a = T.crates[i] - 0.25, u = U(t, a, a + 0.42, "in"), sink = U(t, a + 0.5, a + 0.85, "in"); m.visible = t > a && sink < 1;
-    m.position.set(-1.7 + (i - 1.5) * 0.08, 6.5 - 4.3 * u - 0.9 * sink + (u >= 1 && sink === 0 ? 0.08 * Math.exp(-(t - a - 0.42) * 10) * Math.sin((t - a - 0.42) * 40) : 0), 0); m.rotation.set(0.4 * (1 - u), i + 0.6 * (1 - u), 0); m.scale.setScalar(1 - 0.5 * sink); });
+    m.position.set(-1.7 + (i - 1.5) * 0.08, 6.5 - 4.3 * u - 0.9 * sink + (u >= 1 && sink === 0 ? 0.08 * Math.exp(-(t - a - 0.42) * 10) * Math.sin((t - a - 0.42) * 40) : 0), 0); m.rotation.set(0.4 * (1 - u), 0.15 * (i - 1.5) + 0.6 * (1 - u), 0); m.scale.setScalar(1 - 0.5 * sink); });
   SS.fill.forEach((m, i) => (m.visible = t > T.crates[i] + 0.6)); SS.ml.material.emissiveIntensity = t > T.crates[3] + 0.6 ? (Math.floor(t * 6) % 2 ? 3 : 1) : 0.6;
   // phone rises next to the screen and scans the QR
   const p = U(t, T.qr + 0.05, T.qr + 0.45, "back") * (1 - U(t, T.ok + 0.4, T.ok + 0.7)); SS.ph.visible = p > 0.001; SS.ph.position.set(0.1, 2.0 + 0.08 * Math.sin(t * 2), 1.4); SS.ph.rotation.set(0, 0.5, 0); SS.ph.scale.setScalar(Math.max(0.001, p));
@@ -428,7 +435,7 @@ function buildL() {
   LL.house.add(boxes(fr)); const glass = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.56, 1.9), new THREE.MeshStandardMaterial({ color: 0xcfe6ff, transparent: true, opacity: 0.16, roughness: 0.1, depthWrite: false })); glass.position.y = 0.8; LL.house.add(glass);
   LL.house.add(boxes([[0.55, 0.45, -0.3, 1.2, 0.08, 0.7, "#e9cfa8"], [0.1, 0.22, -0.3, 0.08, 0.44, 0.6, "#d8b98e"], [1.0, 0.22, -0.3, 0.08, 0.44, 0.6, "#d8b98e"], [0.55, 0.95, -0.5, 0.9, 0.6, 0.06, "#1b2238"], [0.55, 0.58, -0.5, 0.1, 0.2, 0.1, "#9fb2cf"]]));
   LL.drum = sqlite(LL.house, -0.6, 0.1);
-  LL.sign = label("KOMPUTERMU", BLUE, "#ffffff", 0.28); LL.sign.position.set(-1.9, 2.0, -0.2); g.add(LL.sign);
+  LL.sign = label("KOMPUTERMU", BLUE, "#ffffff", 0.28); LL.sign.position.set(-1.9, 1.6, 1.0); g.add(LL.sign);
   LL.ph = phoneBox(0.42, 0.8, ctex(200, 380, (c, w, h) => drawListStatic(c, w, h))); LL.ph.position.set(-3.3, 0.9, 0.9); LL.ph.rotation.y = 0.5; g.add(LL.ph);
   LL.flow = []; for (let i = 0; i < 6; i++) { const b = bubble(); b.scale.setScalar(0.28); b.visible = false; g.add(b); LL.flow.push(b); }
   // Claude pedestal + the tool gate between
@@ -442,7 +449,7 @@ function buildL() {
   LL.lev = new THREE.Group(); LL.lev.position.set(1.0, 0, 1.6); g.add(LL.lev); LL.lev.add(boxes([[0, 0.12, 0, 0.7, 0.24, 0.5, NAVY]]));
   LL.arm = new THREE.Group(); LL.arm.position.y = 0.24; LL.lev.add(LL.arm); LL.arm.add(boxes([[0, 0.38, 0, 0.08, 0.76, 0.08, "#c3cfe2"], [0, 0.8, 0, 0.22, 0.22, 0.22, CYAN]]));
   LL.levL = label("KAMU YANG ATUR", BLUE, "#fff", 0.27); g.add(LL.levL);
-  LL.T = { flow: wt("Riwayat"), db: wt("database"), local: wt("komputermu", 68), send: wt("dikirim"), tool: wt("tool-nya"), you: wt("kamu", 73) };
+  LL.T = { flow: wt("Riwayat"), db: wt("database"), local: wt("komputermu", 68), send: wt("dikirim"), tool: wt("tool-nya"), you: wt("kamu", 73), tapi: wt("Tapi") };
 }
 function animL(t) {
   const T = LL.T; LL.cl.rotation.y = Math.sin(t * 1.2) * 0.5;
@@ -456,7 +463,7 @@ function animL(t) {
   LL.bar.rotation.z = 1.3 * EZ.io(lift);
   const gu = U(t, T.tool + 0.35, T.tool + 1.25, "io"); LL.go.visible = gu > 0 && gu < 1; LL.go.position.set(-2.5 + (2.1 + 2.5) * gu, 1.0 + 0.9 * Math.sin(Math.PI * gu), -0.3);
   const lv = U(t, T.you - 0.15, T.you + 0.25, "back"); LL.arm.rotation.z = 0.6 - 1.2 * lv;
-  LL.levL.position.set(1.0, 1.65, 1.6); setLabel(LL.levL, U(t, T.you - 0.1, T.you + 0.2, "back"));
+  LL.levL.position.set(1.0, 1.65, 1.6); setLabel(LL.levL, U(t, T.you - 0.1, T.you + 0.2, "back") * (1 - U(t, T.tapi - 0.95, T.tapi - 0.8)));
 }
 
 /* ---------------------------------------------------------------- X: the caution from the README (prompt injection) + checkpoint */
@@ -482,8 +489,8 @@ function buildX() {
   XX.leak = []; for (let i = 0; i < 14; i++) { const m = boxes([[0, 0, 0, 0.12, 0.12, 0.12, i % 2 ? BLUE : "#9db2d1"]]); g.add(m); XX.leak.push(m); }
   // table + conveyor + x-ray arch + the message with a hidden instruction
   g.add(boxes([[0.6, 0.42, 1.6, 4.0, 0.84, 0.9, "#e3ecf8"], [0.6, 0.88, 1.6, 4.0, 0.08, 0.7, "#c3cfe2"]]));
-  XX.arch = new THREE.Group(); XX.arch.position.set(0.9, 0.92, 1.6); g.add(XX.arch); XX.arch.add(boxes([[-0.55, 0.7, 0, 0.14, 1.4, 0.8, NAVY], [0.55, 0.7, 0, 0.14, 1.4, 0.8, NAVY], [0, 1.45, 0, 1.24, 0.16, 0.8, NAVY]]));
-  XX.xr = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 1.25), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0.18, depthWrite: false, toneMapped: false, side: THREE.DoubleSide })); XX.xr.position.set(0.9, 1.6, 1.6); XX.xr.rotation.y = Math.PI / 2; g.add(XX.xr);
+  XX.arch = new THREE.Group(); XX.arch.position.set(0.9, 0.92, 1.6); g.add(XX.arch); XX.arch.add(boxes([[-0.55, 0.5, 0, 0.14, 1.0, 0.8, NAVY], [0.55, 0.5, 0, 0.14, 1.0, 0.8, NAVY], [0, 1.05, 0, 1.24, 0.14, 0.8, NAVY]]));
+  XX.xr = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 0.95), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0.18, depthWrite: false, toneMapped: false, side: THREE.DoubleSide })); XX.xr.position.set(0.9, 1.42, 1.6); XX.xr.rotation.y = Math.PI / 2; g.add(XX.xr);
   XX.troj = bubble(ctex(440, 260, (c, w, h) => { c.fillStyle = "#ffffff"; c.fillRect(0, 0, w, h); c.fillStyle = NAVY; fitFont(c, ["Kak, stoknya masih ada?"], 42, w - 40); c.fillText("Kak, stoknya masih ada?", 20, 110); c.fillStyle = "#eef2f8"; c.fillRect(20, 160, 300, 14); }));
   g.add(XX.troj);
   XX.hid = new THREE.Group(); g.add(XX.hid); XX.hid.add(plane(2.0, 0.75, ctex(800, 300, (c, w, h) => { c.fillStyle = "#0a0d2c"; rr(c, 4, 4, w - 8, h - 8, 26); c.fill(); c.strokeStyle = CYAN; c.lineWidth = 6; rr(c, 4, 4, w - 8, h - 8, 26); c.stroke();
@@ -496,14 +503,16 @@ function buildX() {
 }
 function animX(t) {
   const T = XX.T;
-  const b = U(t, T.tapi - 0.2, T.tapi + 0.4, "back"), dn = U(t, T.art - 0.4, T.art, "in"); XX.board.position.set(0, 2.55 - 3 * (1 - b) - 4 * dn, -1.1); XX.board.rotation.x = -1.2 * (1 - b); XX.board.visible = t > T.tapi - 0.2 && dn < 1;
+  const b = U(t, T.tapi - 0.2, T.tapi + 0.4, "out"), dn = U(t, T.art - 0.4, T.art, "in"); XX.board.position.set(0, 2.55 - 3 * (1 - b) - 4 * dn, -1.1); XX.board.rotation.x = -1.2 * (1 - b); XX.board.visible = t > T.tapi - 0.2 && dn < 1;
   if (XX.board.visible) redraw(XX.tex, t);
-  XX.crack.visible = t > T.risiko + 0.6; XX.crack.material.emissiveIntensity = 1.5 + Math.sin(t * 12);
+  { const ar = U(t, T.pesan - 0.6, T.pesan - 0.2, "out") * (1 - U(t, 90.0, 90.3)); XX.arch.visible = XX.xr.visible = ar > 0.001; XX.arch.scale.set(1, Math.max(0.001, ar), 1);
+    const dr = U(t, T.risiko - 0.1, T.risiko + 0.3, "back") * (1 - U(t, T.art + 0.3, T.art + 0.6)); XX.drum.visible = dr > 0.001; XX.drum.scale.setScalar(Math.max(0.001, dr)); }
+  XX.crack.visible = t > T.risiko + 0.6 && t < T.art + 0.4; XX.crack.material.emissiveIntensity = 1.5 + Math.sin(t * 12);
   XX.leak.forEach((m, i) => { const a = T.risiko + 0.9 + i * 0.16, u = (t - a) / 1.6; m.visible = u > 0 && u < 1 && t < T.art + 0.4; if (!m.visible) return;
-    m.position.set(-1.55 + 1.2 * u * (0.6 + (i % 3) * 0.3), 1.4 + 1.5 * u + 0.25 * Math.sin(u * 6 + i), 1.45 + 0.6 * u); m.rotation.set(u * 4, u * 3 + i, 0); });
-  const c = U(t, T.pesan - 0.3, T.selip, "io"); XX.troj.visible = t > T.pesan - 0.3 && t < T.jadi + 0.2; XX.troj.position.set(-1.3 + 2.2 * c, 1.35, 1.6); XX.troj.scale.setScalar(0.62);
+    m.position.set(-1.55 - 1.3 * u * (0.6 + (i % 3) * 0.3), 1.4 + 1.3 * u + 0.25 * Math.sin(u * 6 + i), 1.45 + 0.9 * u); m.rotation.set(u * 4, u * 3 + i, 0); });
+  const c = U(t, T.pesan - 0.3, T.selip, "io"); XX.troj.visible = t > T.pesan - 0.3 && t < T.jadi + 0.2; XX.troj.position.set(-1.3 + 2.2 * c, 1.38, 1.6); XX.troj.scale.setScalar(0.9);
   XX.xr.material.opacity = t > T.selip - 0.3 && t < T.jadi ? 0.25 + 0.15 * Math.sin(t * 18) : 0.08;
-  const h = U(t, T.selip, T.selip + 0.4, "back") * (1 - U(t, T.jadi - 0.1, T.jadi + 0.2)); XX.hid.visible = h > 0.001; XX.hid.position.set(0.9, 2.6, 1.9); XX.hid.scale.setScalar(Math.max(0.001, h));
+  const h = U(t, T.selip, T.selip + 0.4, "back") * (1 - U(t, T.jadi - 0.1, T.jadi + 0.2)); XX.hid.visible = h > 0.001; XX.hid.position.set(0.9, 2.42, 2.0); XX.hid.scale.setScalar(Math.max(0.001, h));
   const o = U(t, T.jadi, T.cek + 0.1, "out"), go = U(t, T.ngirim + 0.15, T.ngirim + 0.9, "io"); XX.out.visible = t > T.jadi && go < 1;
   XX.out.position.set(-1.6 + 0.85 * o + 2.6 * go, 1.4 + 0.35 * Math.sin(Math.PI * go), 1.6);
   XX.gbar.rotation.z = 1.3 * U(t, T.ngirim - 0.1, T.ngirim + 0.2);
@@ -522,15 +531,15 @@ function buildC() {
   CC.flip = new THREE.Group(); CC.flip.position.set(0, 1.68, 0.03); CC.cal.add(CC.flip); const fp = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.587), new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.DoubleSide })); fp.position.y = -0.79; CC.flip.add(fp);
   CC.qr = new THREE.Group(); CC.qr.position.set(1.55, 1.6, 0); g.add(CC.qr); CC.qr.add(plane(1.2, 1.2, ctex(400, 400, (c) => { c.fillStyle = "#fff"; c.fillRect(0, 0, 400, 400); qrDraw(c, 40, 40, 320, 77); })));
   CC.qr.add(boxes([[0, 0, -0.04, 1.3, 1.3, 0.06, NAVY], [0, -1.05, -0.06, 0.1, 0.9, 0.1, "#9fb2cf"]]));
-  CC.ph = phoneBox(0.5, 0.95, null); g.add(CC.ph); CC.lab = label("SCAN ULANG", BLUE, "#fff", 0.3); g.add(CC.lab);
-  CC.T = { a: wt("kira-kira"), b: wt("hari,", 91), scan: wt("scan", 93) };
+  CC.ph = phoneBox(0.5, 0.95, ctex(240, 440, (c, w, h) => { c.fillStyle = "#0a0d2c"; c.fillRect(0, 0, w, h); c.strokeStyle = CYAN; c.lineWidth = 8; c.strokeRect(40, 120, 160, 160); })); g.add(CC.ph); CC.lab = label("SCAN ULANG", BLUE, "#fff", 0.3); g.add(CC.lab);
+  CC.T = { a: wt("kira-kira"), b: wt("hari,", 91), scan: wt("scan", 93), kon: wt("koneksinya"), mung: wt("mungkin", 93), minta: wt("minta") };
   CC.n = (t) => Math.max(1, Math.min(20, 1 + Math.floor(19 * EZ.out(cl((t - CC.T.a) / (CC.T.b - CC.T.a + 0.2), 0, 1)))));
 }
 function animC(t) {
-  redraw(CC.tex, t); const T = CC.T; const run = t > T.a && t < T.b + 0.2; CC.flip.visible = run; if (run) CC.flip.rotation.x = -((t * 9) % 1) * Math.PI * 0.9;
-  const q = U(t, T.scan - 0.7, T.scan - 0.3, "back"); CC.qr.scale.setScalar(Math.max(0.001, q)); CC.qr.visible = q > 0.001;
-  const p = U(t, T.scan - 0.4, T.scan, "back"); CC.ph.visible = p > 0.001; CC.ph.position.set(1.45, 1.4 + 0.08 * Math.sin(t * 3), 1.3); CC.ph.rotation.set(0, Math.PI, 0); CC.ph.scale.setScalar(Math.max(0.001, p));
-  CC.lab.position.set(1.55, 2.6, 0.3); setLabel(CC.lab, U(t, T.scan - 0.1, T.scan + 0.2, "back"));
+  redraw(CC.tex, t); const T = CC.T; const run = t > T.a && t < T.b + 0.2; CC.flip.visible = run; if (run) { const fr = (t * 9) % 1; CC.flip.rotation.x = -fr * Math.PI * 0.9; CC.flip.visible = fr > 0.3; }
+  const q = U(t, T.kon - 0.1, T.kon + 0.3, "back"); CC.qr.scale.setScalar(Math.max(0.001, q)); CC.qr.visible = q > 0.001;
+  const p = U(t, T.mung - 0.1, T.mung + 0.3, "back"); CC.ph.visible = p > 0.001; CC.ph.position.set(2.35, 1.3 + 0.06 * Math.sin(t * 3), 0.8); CC.ph.rotation.set(0, -0.5, 0); CC.ph.scale.setScalar(Math.max(0.001, p));
+  CC.lab.position.set(1.55, 2.4, 0.3); setLabel(CC.lab, U(t, T.minta - 0.1, T.minta + 0.2, "back") * (1 - U(t, 94.4, 94.5)));
 }
 
 /* ---------------------------------------------------------------- F: you hold the control (both logos, the bridge, your lever) + CTA backdrop */
@@ -566,27 +575,27 @@ function buildPath() {
   k("H", wt("Claude") - 0.2, [0.4, 4.6, 12.0, 0, 4.4, -0.4, 42], "io"); k("H", wt("nyariin") + 0.1, [0.2, 4.9, 13.2, 0, 4.4, -0.4, 42], "sine");
   k("H", 6.25, [0, 6.4, 21, 0, 3.0, 0, 40], "io");
   // flight to B
-  k("B", 6.95, [0, 3.6, 15.5, 0, 1.7, 0, 40], "io"); k("B", wt("Luke") - 0.4, [0, 3.4, 14.2, 0, 1.9, -0.4, 40], "sine"); k("B", BB.T_BR - 0.3, [0.2, 3.3, 14.6, 0, 1.8, -0.4, 40], "sine");
-  k("B", BB.T_BR + 1.0, [-0.4, 2.6, 11.0, 0, 1.1, 0, 40], "io"); k("B", wt("Claude", 12) + 0.3, [1.9, 2.0, 6.0, 2.4, 1.45, -0.3, 40], "io");
-  k("B", wt("Kirain") - 0.2, [2.4, 1.45, 0.75, 2.4, 1.45, -0.3, 40], "in");
+  k("B", 6.95, [0, 3.6, 17, 0, 1.7, 0, 40], "io"); k("B", wt("Luke") - 0.4, [0, 3.4, 16.0, 0, 1.8, -0.4, 40], "sine"); k("B", BB.T_BR - 0.3, [0.2, 3.3, 16.4, 0, 1.8, -0.4, 40], "sine");
+  k("B", BB.T_BR + 1.0, [-0.2, 3.0, 16.0, 0, 1.3, 0, 40], "io"); k("B", wt("Claude", 12) + 0.3, [1.8, 1.9, 5.6, 2.2, 1.3, -0.3, 40], "io");
+  k("B", wt("Kirain") - 0.2, [2.2, 1.3, 0.7, 2.2, 1.3, -0.3, 40], "in");
   // K — out of the white flash: cabinet front
-  cut("K", wt("Kirain") - 0.18, [0, 2.6, 4.0, 0, 2.4, 0, 40]); k("K", wt("chat?") + 0.2, [0, 2.6, 20, 0, 2.4, 0, 40], "out"); k("K", TK.L1 - 0.3, [0, 2.7, 20.6, 0, 2.4, 0, 40], "sine");
+  cut("K", wt("Kirain") - 0.18, [0, 2.6, 4.0, 0, 2.4, 0, 40]); k("K", wt("chat?") + 0.2, [0, 2.6, 22, 0, 2.4, 0, 40], "out"); k("K", TK.L1 - 0.3, [0, 2.7, 22.6, 0, 2.4, 0, 40], "sine");
   k("K", TK.L1 + 0.45, [0, eK(0) + 1.7, 9.4, 0, eK(0) + 1.4, 1.5, 40], "io"); k("K", TK.L2 - 0.35, [0.15, eK(0) + 1.7, 9.1, 0, eK(0) + 1.4, 1.5, 40], "sine");
-  k("K", TK.L2 + 0.05, [0, eK(1) + 1.8, 9.9, 0, eK(1) + 1.55, 1.45, 40], "expo"); k("K", TK.L3 - 0.4, [-0.15, eK(1) + 1.8, 9.6, 0, eK(1) + 1.55, 1.45, 40], "sine");
+  k("K", TK.L2 + 0.05, [0, eK(1) + 1.6, 10.05, 0, eK(1) + 1.37, 1.45, 40], "expo"); k("K", TK.L3 - 0.4, [-0.12, eK(1) + 1.6, 9.85, 0, eK(1) + 1.37, 1.45, 40], "sine");
   k("K", TK.L3 + 0.15, [0, eK(2) + 2.0, 11.4, 0, eK(2) + 1.7, 1.5, 40], "io"); k("K", TK.L4 - 0.25, [0.1, eK(2) + 2.0, 11.1, 0, eK(2) + 1.7, 1.5, 40], "sine");
   k("K", TK.L4 + 0.2, [0, eK(3) + 1.3, 10.0, 0, eK(3) + 1.0, 1.45, 40], "expo"); k("K", TK.D + 1.25, [0, eK(3) + 1.3, 9.7, 0, eK(3) + 1.0, 1.45, 40], "sine");
-  k("K", 41.35, [0, 2.7, 20, 0, 2.4, 0, 40], "io");
+  k("K", 41.35, [0, 2.7, 22, 0, 2.4, 0, 40], "io");
   // A — after the iris
-  cut("A", 41.4, [0, 3.2, 15.0, 0, 2.6, 0, 40]); k("A", wt("Misalnya,") - 0.3, [0, 3.0, 12.4, 0, 2.55, 0, 40], "out"); k("A", wt("Claude", 48) , [0, 3.0, 12.1, 0, 2.55, 0, 40], "sine");
-  k("A", wt("Cara") - 0.6, [0.2, 3.1, 12.4, 0.2, 2.6, 0, 40], "sine"); k("A", wt("Cara") - 0.2, [0.2, 3.4, 12.4, 0.2, 30, -10, 40], "expo");
+  cut("A", 41.4, [0, 3.2, 15.0, 0, 2.5, 0, 40]); k("A", wt("Misalnya,") - 0.3, [0, 3.0, 12.4, 0, 2.48, 0, 40], "out"); k("A", wt("Claude", 48) , [0, 3.0, 12.1, 0, 2.48, 0, 40], "sine");
+  k("A", wt("Cara") - 0.45, [0.1, 3.05, 12.3, 0.1, 2.5, 0, 40], "sine"); k("A", wt("Cara") - 0.2, [0.2, 3.4, 12.4, 0.2, 30, -10, 40], "expo");
   // S — whip down from the sky
   cut("S", wt("Cara") - 0.19, [-1.2, 3.8, 9.5, -1.0, 30, -10, 42]); k("S", wt("pasangnya?") + 0.2, [-1.3, 3.6, 10.0, -1.0, 2.2, 0, 42], "io");
   k("S", SS.T.crates[0] - 0.4, [-1.7, 3.1, 7.6, -1.7, 1.9, 0, 40], "io"); k("S", SS.T.crates[3] + 1.0, [-1.6, 3.2, 7.9, -1.6, 2.0, 0, 40], "sine");
   k("S", SS.T.clone + 0.4, [1.75, 2.6, 10.7, 1.75, 2.3, -0.3, 40], "io"); k("S", SS.T.qr, [1.55, 2.55, 10.9, 1.6, 2.25, -0.3, 40], "sine"); k("S", SS.T.ok + 0.3, [1.6, 2.6, 10.8, 1.65, 2.3, -0.3, 40], "sine");
   k("S", SS.T.cfg + 0.3, [1.75, 2.6, 10.5, 1.75, 2.3, -0.3, 40], "io"); k("S", wt("Riwayat") - 0.5, [1.75, 2.6, 10.2, 1.75, 2.3, -0.3, 40], "sine");
   // L — dolly zoom (vertigo) in, then follow the data
-  cut("L", wt("Riwayat") - 0.45, [-1.9, 1.5, 3.6, -1.9, 1.0, 0, 66]); k("L", wt("Riwayat") + 0.5, [-1.7, 2.0, 10.6, -1.9, 1.0, 0, 34], "io");
-  k("L", LL.T.local + 0.3, [-1.8, 2.0, 10.2, -1.9, 1.0, 0, 35], "sine"); k("L", LL.T.send + 0.2, [0.6, 2.4, 11.6, 0.6, 1.1, 0, 38], "io"); k("L", LL.T.you - 0.5, [0.7, 2.4, 11.2, 0.6, 1.1, 0.3, 38], "sine");
+  cut("L", wt("Riwayat") - 0.45, [-1.9, 1.5, 3.6, -1.9, 1.0, 0, 66]); k("L", wt("Riwayat") + 0.5, [-1.7, 1.9, 10.6, -1.9, 0.85, 0, 34], "io");
+  k("L", LL.T.local + 0.3, [-1.8, 1.9, 10.2, -1.9, 0.85, 0, 35], "sine"); k("L", LL.T.send + 0.2, [0.6, 2.4, 11.6, 0.6, 1.1, 0, 38], "io"); k("L", LL.T.you - 0.5, [0.7, 2.4, 11.2, 0.6, 1.1, 0.3, 38], "sine");
   k("L", LL.T.you + 0.5, [1.0, 2.4, 7.0, 1.0, 1.2, 1.0, 38], "io"); k("L", wt("Tapi") - 0.75, [1.0, 2.5, 7.3, 1.0, 1.2, 1.0, 38], "sine");
   for (let i = 1; i <= 12; i++) { const u = i / 12, a = Math.PI * EZ.io(u), r = 8.0; if (u <= 0.5) k("L", wt("Tapi") - 0.75 + 0.7 * u, [Math.sin(a) * r, 2.6 + 1.2 * Math.sin(a), Math.cos(a) * r, 0, 1.3, 0, 40], "lin");
     else k("X", wt("Tapi") - 0.75 + 0.7 * u, [-Math.sin(a) * r, 2.6 + 1.2 * Math.sin(a), Math.cos(a) * r + 2, 0, 1.6, 0, 40], "lin"); }

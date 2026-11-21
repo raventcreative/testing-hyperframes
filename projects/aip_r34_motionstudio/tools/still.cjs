@@ -11,7 +11,7 @@ const { chromium } = require("playwright");
     window.__timelines.main.seek(t); document.getElementById("ui").style.display = "none";
     window.dispatchEvent(new CustomEvent("hf-seek", { detail: { time: t } })); }, Number(T));
   await p.evaluate((m) => { if (m === "world") document.getElementById("host").style.display = "none";
-    if (m === "host") { document.getElementById("stage").style.display = "none"; document.documentElement.style.background = "transparent"; document.body.style.background = "transparent"; } }, mode);
+    if (m === "host") { document.getElementById("stage").style.display = "none"; const bt = document.getElementById("bot"); if (bt) bt.style.display = "none"; document.documentElement.style.background = "transparent"; document.body.style.background = "transparent"; } }, mode);
   await p.waitForTimeout(500);
   await p.screenshot({ path: out, omitBackground: mode === "host" });
   await b.close();

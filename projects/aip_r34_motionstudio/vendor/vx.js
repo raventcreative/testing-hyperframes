@@ -122,7 +122,7 @@ function buildH() {
     c.add(boxes([[0, 0.55, 0, 1.5, 1.1, 1.0, "#14275a"], [0, 1.12, 0, 1.56, 0.06, 1.06, "#1d3a7a"]]));
     const tx = ctex(600, 432, (q, w, h) => { q.fillStyle = "#0c1a48"; q.fillRect(0, 0, w, h); q.strokeStyle = CY; q.lineWidth = 12; q.strokeRect(6, 6, w - 12, h - 12);
       q.fillStyle = CY; q.textAlign = "center"; q.font = `700 150px ${FONT}`; q.fillText(n, w / 2, name.length > 1 ? 160 : 190);
-      q.fillStyle = "#ffffff"; q.font = `700 86px ${FONT}`; name.forEach((l, k) => q.fillText(l, w / 2, (name.length > 1 ? 268 : 320) + k * 92)); });
+      q.fillStyle = "#ffffff"; q.font = `700 74px ${FONT}`; name.forEach((l, k) => q.fillText(l, w / 2, (name.length > 1 ? 268 : 320) + k * 92)); });
     const f = plane(1.44, 1.04, tx, { transparent: false }); f.position.set(0, 0.55, 0.505); c.add(f);
     const topL = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.03, 0.9), emi(CY, 0)); topL.position.y = 1.16; c.add(topL);
     const gl = glow("#3fdcff", 1.8, 1.0); gl.position.set(0, 1.35, 0); gl.material.opacity = 0; c.add(gl);

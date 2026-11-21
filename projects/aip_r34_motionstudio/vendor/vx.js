@@ -12,16 +12,15 @@ import { MAT, rnd, setSeed, boxes, emi, ctex, rr, cl, EZ, U, keys, glow, label, 
 
 const cv = document.getElementById("vx");
 const W = cv.width, H = cv.height;
-const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true });
+renderer.setClearColor(0x000000, 0);   // client rule: the only background is the brand navy plate (img under the canvas)
 renderer.setPixelRatio(1); renderer.setSize(W, H, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.22;
-{ const c = document.createElement("canvas"); c.width = 4; c.height = 512; const g = c.getContext("2d"); const gr = g.createLinearGradient(0, 0, 0, 512);
-  gr.addColorStop(0, "#040a1f"); gr.addColorStop(0.55, "#0a1840"); gr.addColorStop(1, "#13285a"); g.fillStyle = gr; g.fillRect(0, 0, 4, 512);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
-scene.fog = new THREE.Fog(0x0c1a44, 30, 80);
+scene.background = null;
+scene.fog = new THREE.Fog(0x13284f, 45, 110);
 scene.add(new THREE.HemisphereLight(0x9fbaff, 0x0a1230, 0.8));
 const moon = new THREE.DirectionalLight(0xc6dbff, 2.1); moon.castShadow = true; moon.shadow.mapSize.set(2048, 2048); moon.shadow.bias = -0.0004; moon.shadow.normalBias = 0.025;
 Object.assign(moon.shadow.camera, { left: -10, right: 10, top: 10, bottom: -10, near: 1, far: 45 }); scene.add(moon, moon.target);
@@ -29,7 +28,7 @@ const warm = new THREE.DirectionalLight(0xbfe9ff, 0.6); scene.add(warm, warm.tar
 const cam = new THREE.PerspectiveCamera(40, W / H, 0.05, 160);
 
 /* ---------------------------------------------------------------- stars */
-const stars = new THREE.Group(); scene.add(stars);
+const stars = new THREE.Group(); stars.visible = false;   // no star sprites (brand plate only)
 { setSeed(91); const N = 700, p = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) { const u = rnd() * 2 - 1, a = rnd() * Math.PI * 2, r = 110, s = Math.sqrt(1 - u * u); p[i * 3] = r * s * Math.cos(a); p[i * 3 + 1] = r * u * 0.9 + 4; p[i * 3 + 2] = r * s * Math.sin(a); }
   const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(p, 3));
@@ -52,7 +51,8 @@ function island(nx, nz, a = "#1d3266", b = "#172a58") {
 const WP = { H: [0, 0, 0], F: [60, 0, 0], G: [120, 0, 0], B: [126, -24, 6], S: [200, 0, 0] };
 const VIS = { H: [[-1, 9.17], [38.27, 99]], F: [[9.1, 19.2]], G: [[19.1, 26.45]], B: [[25.85, 30.93]], S: [[30.9, 38.3]] };
 const worlds = {}; const mk = (k) => { const g = new THREE.Group(); g.position.set(...WP[k]); worlds[k] = g; scene.add(g); return g; };
-function clouds(k, n, sd) { setSeed(sd); for (let i = 0; i < n; i++) { const x = (rnd() - 0.5) * 34, y = -6 + rnd() * 9, z = -18 + rnd() * 22;
+function clouds() { }   // no voxel clouds (brand plate only)
+function _cloudsOld(k, n, sd) { setSeed(sd); for (let i = 0; i < n; i++) { const x = (rnd() - 0.5) * 34, y = -6 + rnd() * 9, z = -18 + rnd() * 22;
   if (Math.hypot(x, z) < 8 && y > -4) continue; const L = [], q = 3 + Math.floor(rnd() * 3), sz = 0.8 + rnd() * 1.1;
   for (let j = 0; j < q; j++) L.push([(j - q / 2) * sz * 0.8, (rnd() - 0.3) * sz * 0.5, (rnd() - 0.5) * sz, sz * (1 + rnd()), sz * (0.55 + rnd() * 0.5), sz * (1 + rnd() * 0.8), j & 1 ? "#22386c" : "#1b2f60"]);
   const m = boxes(L, MAT, false); m.castShadow = m.receiveShadow = false; m.position.set(x, y, z); worlds[k].add(m); } }

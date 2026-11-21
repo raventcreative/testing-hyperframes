@@ -84,3 +84,9 @@ Format batch 8: dunia voxel 3D (putih) + maskot 3D host + robot AIpreneur co-hos
   kartu tool, laci), tik halus saat caption muncul, blip kirim/terima pesan (chat, jawaban Claude, DM), tik ketik (pertanyaan, terminal,
   config, "WA"). Level tetap ≈ −8…−10 dB di bawah puncak VO untuk hit/whoosh (lebih pelan untuk tik), tanpa kompresor; tiap transient
   digeser ±150 ms agar ≥ 70 ms dari onset kata (0 event dekat onset).
+
+## Final check (MP4 final out/AIP_R33_WHATSAPP_CLAUDE.mp4, 104,6 dtk)
+- Whisper MEDIUM (id) pada MP4 final, diff kata per kata vs vo_lines.txt: 263/263 kata terdengar, 0 kata hilang/terpotong; hanya beda
+  ejaan/angka (dua belas→12, empat→4, dua puluh→20, sehari-hari→sehari hari, repo-nya/bridge-nya/QR-nya/tool-nya/README-nya/AI-nya
+  dipisah, apa pun→apapun, kira-kira→kira kira, supplier→suplier, riwayat→rewayat) + nama: Claude→"cloud" (pengucapan Inggris), Harries→Harris.
+- Loudness: −14,3 LUFS integrated, true peak −3,8 dBFS, LRA 2,2 LU (two-pass loudnorm, tools/remix_audio.sh).

@@ -1,11 +1,12 @@
 """R31 SFX layer (assets/audio/sfx.wav, 48 kHz mono, 57 s) — client request 2026-11-21 "kasih sound effect biar gak suara VO aja":
 clearly audible and richer. Levels are set relative to the VO PEAK (the remix plays this file at volume 0.62, no compressor):
-  big hits (transition whooshes, impacts)  -8 dB under the VO peak
-  medium (pops, pings, swipes, risers)     -11 dB
-  UI ticks / counters / caption-in clicks  -15 dB
+  big hits (transition whooshes, impacts)  -10 dB under the VO peak
+  medium (pops, pings, swipes)             -13 dB
+  UI ticks / counters / caption-in clicks, risers  -17 dB
+(first pass at -8/-11/-15 with long cinematic whooshes masked words in whisper: 'Masalahnya', 'duduk', 'milih')
 Samples: Pixabay Content License (repo vo_safe set: click key ping pop sparkle type whoosh; indonesia-map-journey set: impact,
 whoosh_c (cinematic), chime). Riser and IG-scroll swipes are synthesised here (filtered noise).
-Rule: no SFX transient on a word onset — a transient within -0.05..+0.08 s of an onset moves to 0.07 s before it (hits) or is
+Rule: no SFX transient on a word onset — a transient within -0.12..+0.10 s of an onset moves to 0.13 s before it (hits) or is
 dropped (repetitive ticks). Risers are swells (no transient) and end on the transition hit."""
 import wave, json
 import numpy as np
@@ -24,7 +25,8 @@ def load(n, maxlen=None):
     a = pcm(f"assets/sfx/{n}.wav")
     if maxlen: L = int(maxlen * SR); a = a[:L] * np.minimum(1, np.linspace(6, 0, len(a[:L])))   # trim with a fade-out
     return a / (np.abs(a).max() + 1e-9)                              # every sample normalised to peak 1
-S = {n: load(n) for n in ["click", "key", "ping", "pop", "sparkle", "type", "whoosh", "impact", "chime"]}
+S = {n: load(n) for n in ["click", "key", "ping", "pop", "sparkle", "type", "whoosh"]}
+S["impact"] = load("impact", 0.6); S["chime"] = load("chime", 0.9)
 S["whoosh_c"] = load("whoosh_c", 1.7)
 rng = np.random.default_rng(31)
 def lp(x, fc):
@@ -49,31 +51,31 @@ def add(x, i, g):
     if i < 0: x = x[-i:]; i = 0
     j = min(len(out), i + len(x)); out[i:j] += g * x[: j - i]
 def put(t, n, db, rate=1.0, tick=False):
-    tp = t; near = [o for o in ONS if -0.05 <= tp - o <= 0.08]
+    tp = t; near = [o for o in ONS if -0.12 <= tp - o <= 0.1]
     if near:
-        if tick: log.append(("drop", round(t, 2), n)); return
-        tp = near[0] - 0.07; log.append(("move", round(t, 2), round(tp, 2), n))
+        if tick or not n.startswith("whoosh"): log.append(("drop", round(t, 2), n)); return   # only transition whooshes move
+        tp = near[0] - 0.13; log.append(("move", round(t, 2), round(tp, 2), n))
     x = S[n]
     if rate != 1.0: x = np.interp(np.arange(0, len(x) - 1, rate), np.arange(len(x)), x)
     add(x, int((tp - PEAK[n] / rate) * SR), lvl(db))
 def put_riser(t_end, d, db):
     x = riser(d); add(x, int((t_end - d) * SR), lvl(db))
 def put_swipe(t, db, k):
-    near = [o for o in ONS if -0.05 <= t + 0.1 - o <= 0.08]
-    if near: t = near[0] - 0.17
+    near = [o for o in ONS if -0.12 <= t + 0.1 - o <= 0.1]
+    if near: t = near[0] - 0.23
     add(SW[k % 4], int(t * SR), lvl(db))
-BIG, MID, UI = -8, -11, -15
+BIG, MID, UI = -10, -13, -17
 # ---- transitions: a whoosh on every one (+ impacts on the cuts that land) and soft risers into the reveals
-put_riser(3.33, 0.9, MID); put(3.33, "whoosh_c", BIG)                                      # zoom-out reveal
+put_riser(3.2, 0.7, UI); put(3.33, "whoosh", BIG, 0.8)                                      # zoom-out reveal
 put(7.22, "whoosh", BIG, 1.2)                                                              # snap cut
-put_riser(13.2, 0.8, MID); put(13.33, "whoosh_c", BIG, 1.1)                                # bullseye -> island hop flight
+put_riser(13.1, 0.6, UI); put(13.36, "whoosh", BIG, 0.9)                                # bullseye -> island hop flight
 put(18.6, "whoosh", BIG, 1.25)                                                             # whip tilt
-put(24.8, "whoosh_c", BIG, 1.2)                                                            # 180 orbit
-put_riser(30.3, 0.7, MID); put(30.3, "whoosh", BIG, 1.4); put(30.56, "impact", BIG)        # dive match cut + flash
-put_riser(37.34, 0.6, MID); put(37.34, "whoosh", BIG, 0.9); put(37.78, "whoosh", MID, 1.3) # iris through the robot face
-put(44.22, "whoosh_c", BIG, 0.9); put(44.3, "impact", BIG)                                 # vertigo cut
+put(24.8, "whoosh", BIG, 0.8)                                                            # 180 orbit
+put_riser(30.3, 0.5, UI); put(30.3, "whoosh", BIG, 1.4); put(30.56, "impact", BIG)        # dive match cut + flash
+put_riser(37.34, 0.5, UI); put(37.34, "whoosh", BIG, 0.9); put(37.78, "whoosh", MID, 1.3) # iris through the robot face
+put(44.24, "whoosh", BIG, 0.8)                                 # vertigo cut
 put(47.25, "whoosh", MID, 0.8)                                                             # crane starts up the spiral
-put_riser(51.67, 0.8, MID); put(51.67, "whoosh", BIG, 1.0)                                 # CTA
+put_riser(51.67, 0.6, UI); put(51.67, "whoosh", BIG, 1.0)                                 # CTA
 # ---- UI: title flips, chip/tag pops, caption-in clicks (just before each caption chunk's first word)
 for t in (0.35, 3.6, 7.4, 13.95, 18.9, 25.05, 31.0, 34.95, 37.9, 44.45, 47.3): put(t, "click", MID)
 for t in (0.5, 7.55, 15.45, 20.15, 27.95, 31.7, 47.55): put(t, "pop", MID, 1.2)           # chip in
@@ -119,7 +121,7 @@ put(39.75, "click", MID)
 for s0 in (40.45, 41.28, 42.25):
     put(s0, "pop", MID, 1.1, tick=True)
     for k in range(1, 10, 2): put(s0 + k * 0.07, "pop", UI, 1.3, tick=True)
-put_riser(43.75, 0.5, UI); put(43.79, "sparkle", MID)
+put(43.55, "sparkle", UI)                                                                  # (no riser/sparkle on "duduk": it masked the word)
 # ---- G: buttons, hops, hit, CTA
 put(44.7, "impact", MID, 1.3); put(44.7, "click", MID, 0.7); put(45.58, "impact", MID, 1.3); put(45.58, "click", MID, 0.75)
 for k in range(0, 30, 2): put(47.62 + k * 0.118, "key", UI, 1.4, tick=True)

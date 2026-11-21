@@ -61,3 +61,15 @@ Co-host: AIpreneur robot (R25 GLB + runtime) flies in beside the mascot at the z
 - Listen-check whisper small + medium on the take: only spelling differences ("Claude"→"Cloud/clot", "pakai"→"pake",
   "87.000", "4." for "Empat", hyphenation). Same known Claude spelling as R11–R30. No word misheard by both models → take kept.
 - Final check on the final MP4 with whisper medium: see production/VO_CHECK.md.
+
+## v2 (client request): real screen recording instead of mock UI
+v1 (all mock UI) is kept as `out/AIP_R34_v1_mock.mp4`. VO take unchanged.
+Source: `brand/rec/claude_code_chrome_2026-10-30.mp4` (client's own Chrome recording). Google search part skipped. Crops contain only
+page content, **no browser chrome and no left sidebar / session titles** (checked frame by frame, zoomed 2×):
+- `assets/rec/home/` — claude.ai home, rec 16.3–17.1 s, crop 700×230 @ (735,415): "What's on today, FREDDIE KASHAWAN?" + prompt box + Project/Opus row.
+- `assets/rec/code/` — Claude Code on the web, new-session input, rec 24.0–26.9 s, crop 358×85 @ (742,945) zoomed 2.6×: "+ Describe a task or ask a
+  question" + Default/Repo. (The centre "Waiting <session title>" list and the 27.5 s+ test typing are outside the crop/time range.)
+Where (≈3.9 s total): HyperFrames monitor 12.85–13.65 (claude.ai home, slow zoom + cyan click highlight on the prompt box) and 13.65–14.45
+(Claude Code input, zoom + highlight) on "Claude nulis HTML"; Blender beat 28.1–30.5 the prompt card is the real Claude Code input on a 3D
+billboard, with the example prompt typed into it (labelled "contoh prompt"). Through-line cube logic unchanged.
+Privacy: frames live in `assets/rec/` (project .gitignore) — never committed (public repo).

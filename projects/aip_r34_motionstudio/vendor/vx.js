@@ -326,8 +326,8 @@ function buildB() {
   const part = (L, p) => { const m = boxes(L); m.position.set(...p); m.visible = false; g.add(m); return m; };
   B.top = boxes([[0, 0, 0, 1.0, 1.0, 1.0, "#d8b98e"]]); g.add(B.top);
   B.legs = [[-0.7, -0.4], [0.7, -0.4], [-0.7, 0.4], [0.7, 0.4]].map(([x, z]) => part([[0, 0.34, 0, 0.1, 0.68, 0.1, "#b48a5e"]], [x, 0, z]));
-  B.lamp = [part([[0, 0.05, 0, 0.4, 0.1, 0.4, "#c3cfe2"]], [-2.6, 0, -0.2]), part([[0, 0.7, 0, 0.08, 1.2, 0.08, "#c3cfe2"]], [-2.6, 0, -0.2]), part([[0, 1.4, 0, 0.5, 0.3, 0.5, "#ffffff"]], [-2.6, 0, -0.2])];
-  B.bulb = new THREE.PointLight(0xfff1d8, 0, 5); B.bulb.position.set(-2.6, 1.2, -0.2); g.add(B.bulb);
+  B.lamp = [part([[0, 0.05, 0, 0.36, 0.1, 0.36, "#c3cfe2"]], [-0.95, 0, -1.25]), part([[0, 0.5, 0, 0.07, 0.8, 0.07, "#c3cfe2"]], [-0.95, 0, -1.25]), part([[0, 0.95, 0, 0.44, 0.24, 0.44, "#ffffff"]], [-0.95, 0, -1.25])];
+  B.bulb = new THREE.PointLight(0xfff1d8, 0, 5); B.bulb.position.set(-0.95, 0.8, -1.25); g.add(B.bulb);
   B.plant = [part([[0, 0.2, 0, 0.44, 0.4, 0.44, "#8a5a3c"]], [-1.55, 0, -0.9]), part([[0, 0.6, 0, 0.3, 0.4, 0.3, "#2ecc71"], [0.18, 0.75, 0, 0.2, 0.3, 0.2, "#27ae60"], [-0.16, 0.8, 0.05, 0.2, 0.3, 0.2, "#27ae60"]], [-1.55, 0, -0.9]),
     part([[0, 1.0, 0, 0.22, 0.3, 0.22, "#2ecc71"]], [-1.55, 0, -0.9])];
   // voxel camera on a tripod, looking at the table; its back screen is the viewfinder we dive into

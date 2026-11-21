@@ -153,8 +153,8 @@ function makeTextures() {
   TX.ad1 = ctex(640, 400, (g, w, h) => { g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h); g.fillStyle = NV2; g.fillRect(0, 0, w, 86);
     g.font = `700 50px ${FONT}`; g.fillStyle = "#ffffff"; g.fillText("1 MATERI IKLAN", 34, 62);
     g.fillStyle = "#c9d6e8"; rr(g, 34, 130, 520, 34, 17); g.fill(); rr(g, 34, 190, 400, 34, 17); g.fill(); g.fillStyle = CY; rr(g, 34, 280, 220, 70, 35); g.fill(); });
-  TX.day = Array.from({ length: 30 }, (_, i) => [0, 1, 2].map((on) => ctex(128, 128, (g, w) => { g.fillStyle = on ? CY : "#ffffff"; g.fillRect(0, 0, w, w);
-    g.lineWidth = 6; g.strokeStyle = on ? "#7fe3ff" : "#c9d6e8"; g.strokeRect(3, 3, w - 6, w - 6);
+  TX.day = Array.from({ length: 30 }, (_, i) => [0, 1, 2, 3].map((on) => ctex(128, 128, (g, w) => { g.fillStyle = on === 1 || on === 2 ? CY : "#ffffff"; g.fillRect(0, 0, w, w);
+    g.lineWidth = 6; g.strokeStyle = on === 1 || on === 2 ? "#7fe3ff" : "#c9d6e8"; g.strokeRect(3, 3, w - 6, w - 6);
     if (on < 2) { g.font = `700 54px ${FONT}`; g.textAlign = "center"; g.fillStyle = on ? NV2 : NV; g.fillText(String(i + 1), 64, 84); } })));
   TX.btn = ["POSTING", "KIRIM"].map((s) => ctex(512, 256, (g, w, h) => { g.fillStyle = CY; g.fillRect(0, 0, w, h); g.font = `700 104px ${FONT}`; g.textAlign = "center"; g.fillStyle = NV2; g.fillText(s, w / 2, 166); }));
   TX.btnBlank = ctex(64, 32, (g, w, h) => { g.fillStyle = CY; g.fillRect(0, 0, w, h); });
@@ -288,7 +288,7 @@ function buildE() {
 const BARH = (i) => 0.35 + i * 0.075 + 0.12 * Math.sin(i * 2.3);
 function animE(t) {
   E.tiles.forEach(({ m, top, bar }, i) => { const u = spring(t, DAY(i), 16, 8); const on = t >= DAY(i);
-    const bt0 = 35.62 + i * 0.03; top.material.map = TX.day[i][t >= bt0 - 0.02 ? 2 : on ? 1 : 0]; top.material.emissiveMap = top.material.map; top.material.emissiveIntensity = on ? 0.55 : 0.15;
+    const bt0 = 35.62 + i * 0.03; top.material.map = TX.day[i][t < 31.0 ? 3 : t >= bt0 - 0.02 ? 2 : on ? 1 : 0];   // numbers only once the camera has pulled out (no cut numbers) top.material.emissiveMap = top.material.map; top.material.emissiveIntensity = on ? 0.55 : 0.15;
     m.position.y = 0.3 + 0.14 * Math.min(1.2, u) * (1 - U(t, DAY(i) + 0.25, DAY(i) + 0.55)) ;
     const pulse = Math.exp(-Math.pow((t - (33.4 + i * 0.03)) / 0.08, 2)); m.position.y += 0.12 * pulse;
     const bt = 35.62 + i * 0.03, hb = BARH(i) * U(t, bt, bt + 0.45, "out") + 0.25 * U(t, 36.86 + i * 0.02, 37.2 + i * 0.02, "out") * (i / 29);

@@ -28,3 +28,5 @@ apply it to the client's own videos (skills/aipreneur-reels-studio/references/te
 TikTok, WhatsApp, a web page…), ask the client to screen-record HIS OWN account / HIS OWN website and use that footage
 (in a phone/browser frame, cropped and zoomed) instead of rebuilt or mock UI. Ask at the start of the job (say exactly what
 to record: which screens, how long, vertical 9:16), and keep building the rest meanwhile.
+
+**Stored recordings = use them automatically (client, 2026-11-21):** the client's recordings live in `brand/rec/` (local only, gitignored; see brand/rec/README.md). Whenever a reel's topic matches one (his IG, his website, Claude/Claude Code…), USE IT in that reel without asking and put it in the agent brief — never fall back to mock UI when a matching recording exists. Only ask him to record something new when no stored recording fits.

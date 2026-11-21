@@ -12,11 +12,11 @@ ICON = {
 }
 SQ = '<svg class="sq" viewBox="0 0 300 24" preserveAspectRatio="none"><path d="M4 8 C80 4, 200 4, 296 7" /><path d="M90 18 C140 12, 200 13, 236 15"/></svg>'
 SLIDES = [
- ("code", "For", "Coding", [("openai", "ChatGPT", "Explain & fix code snippets"), ("lovable", "Lovable", "Build an app by chatting")], ("claudecode", "Claude Code", "An agent that writes, tests & ships")),
- ("clap", "Video", "Creation", [("capcut", "CapCut", "Edit, captions, templates"), ("hailuo", "Hailuo", "Quick AI clips from a prompt")], ("kling", "Kling", "Cinematic AI video, fine control")),
- ("cog", "Task", "Automation", [("zapier", "Zapier", "Plug-and-play app links"), ("make", "Make", "Visual drag-and-drop flows")], ("n8n", "n8n", "AI agents, self-host, full control")),
- ("globe", "Building", "Websites", [("shopify", "Shopify", "An online store in a day"), ("framer", "Framer", "Design-first landing pages")], ("replit", "Replit", "Full-stack apps with an AI agent")),
- ("search", "For", "Research", [("googlegemini", "Gemini", "Fast answers inside Google"), ("perplexity", "Perplexity", "Answers with sources")], ("notebooklm", "NotebookLM", "Deep research on your own docs")),
+ ("code", "For", "Coding", [("openai", "ChatGPT", "Write, explain & debug code"), ("lovable", "Lovable", "Build an app by chatting")], ("claudecode", "Claude Code", "Writes code, runs tests, opens PRs")),
+ ("clap", "Video", "Creation", [("capcut", "CapCut", "Edit, auto captions, templates"), ("hailuo", "Hailuo", "Text or image to AI video")], ("kling", "Kling", "Camera control & motion brush")),
+ ("cog", "Task", "Automation", [("zapier", "Zapier", "Connects 9,000+ apps"), ("make", "Make", "Drag-and-drop visual workflows")], ("n8n", "n8n", "Self-hostable, AI agent workflows")),
+ ("globe", "Building", "Websites", [("shopify", "Shopify", "A store in hours, no coding"), ("framer", "Framer", "No-code sites, built for designers")], ("replit", "Replit", "Full-stack apps with an AI agent")),
+ ("search", "For", "Research", [("googlegemini", "Gemini", "Built into Gmail, Docs & Drive"), ("perplexity", "Perplexity", "Answers with sources")], ("notebooklm", "NotebookLM", "Answers only from your own sources")),
 ]
 def tool(slug, name, why, cls):
     return f'<div class="col {cls}"><div class="bar"><img src="assets/3d/{slug}.png" alt="{name}"></div><div class="nm">{name}</div><div class="why">{why}</div></div>'
@@ -24,7 +24,7 @@ S = []
 for i, (icon, w1, w2, beg, pro) in enumerate(SLIDES):
     sw = '<div class="swipe">Swipe →</div>' if i == 0 else ''
     S.append(f'''<section class="slide"><div class="top"><img class="logo" src="assets/logo_white.png" alt="AIpreneur"></div>
-  <div class="hd">{ICON[icon]}<h1>{w1} <span class="hl">{w2}</span></h1></div>
+  <div class="hd">{ICON[icon]}<h1>{w1} <span class="hl">{w2}</span></h1><p class="note">Ranked by how easy they are to start with, not how good they are.</p></div>
   <div class="chart">
     <div class="lab lb">Beginners{SQ}</div><div class="lab lp">Professionals{SQ}</div>
     <div class="cols">{"".join(tool(*t, "b") for t in beg)}<div class="gap"></div>{tool(*pro, "p")}</div>

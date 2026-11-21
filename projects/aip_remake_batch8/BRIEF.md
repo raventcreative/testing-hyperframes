@@ -81,3 +81,16 @@ References: `projects/aip_remake_batch8/refs/refN.mp4` (gitignored), transcripts
   `production/CAPTION.md` (complementary angle, CTA, #aipreneur #skoolcommunity #aimarketing).
 - Do NOT git commit/push (the coordinator does). Report: final MP4, covers, DM, caption, skills/techniques used, the VO
   check result (whisper medium diff), loudness, and anything not verified.
+
+## ADDENDUM 2026-11-21 — backgrounds: ONLY the 2 brand plates (client reminder)
+"jangan lupa ya background-nya format kita kan 2 aja". The voxel sky must BE the brand plate:
+- NAVY reels (R32, R34): `projects/aip_r25_prompt3d/assets/brand/bg_1080x1920.png` (copy into assets/brand/).
+- WHITE reels (R31, R33): `brand/bg-light.png` (1080×1350 → cover-fit to 1080×1920, copy into assets/brand/).
+How: renderer with alpha (`new WebGLRenderer({alpha:true})`, `setClearColor(0x000000, 0)`, `scene.background = null`,
+no sky dome / star sprites / voxel clouds / sky gradients behind the world), and the plate as a full-frame `<img>` (or CSS
+background) UNDER the `#vx` canvas. Fog: keep it subtle and tint it to the plate's mid colour (navy ≈ #13284f,
+white ≈ #eef3fb) or turn it off so it doesn't paint a non-brand haze. The plate must be clearly visible behind the islands
+in every shot — prefer camera angles that show the backdrop (floating islands, not wall-to-wall floor). Floors/islands keep
+their brand-tinted colours. Every transition flash stays white (white) / cyan-white (navy).
+Then: re-run check + snapshot EVERY second, look at all frames, launch the render with the same command, remix, whisper
+-medium diff + loudness, report. Stop any of your own waiting render launchers/waiter loops before changing files.

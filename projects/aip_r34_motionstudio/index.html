@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>R34 · 4 repo open-source: Claude jadi studio animasi — AI PRENEUR</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/logos.js"></script>
+    <script src="vendor/mascot_face.js"></script>
+    <script src="vendor/mascot3d.js"></script>
+    <script src="vendor/robot3d.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
+    <script type="module" src="vendor/vx.js"></script>
+    <style>
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: block; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #050b22; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Poppins, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+      .layer { position: absolute; inset: 0; }
+      #plate { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #vx { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #veilT { position: absolute; left: 0; top: 0; width: 1080px; height: 560px; background: linear-gradient(180deg, rgba(4,9,28,.62) 0%, rgba(4,9,28,.3) 55%, rgba(4,9,28,0) 100%); }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/brand/grain_256.png); opacity: .035; mix-blend-mode: screen; }
+      #brandlogo { position: absolute; left: 84px; top: 236px; width: 236px; height: auto; opacity: .95; }
+      .tt { position: absolute; left: 540px; top: 330px; opacity: 0; display: flex; align-items: center; gap: 16px; padding: 14px 30px 16px 18px;
+            background: rgba(10,22,68,.94); color: #ffffff; border-radius: 22px; font: 700 40px/1.1 Poppins; letter-spacing: -.3px; white-space: nowrap;
+            box-shadow: 0 16px 34px rgba(0,0,0,.35), 0 0 0 3px #01ccf7; }
+      .tt .tab { width: 14px; height: 40px; border-radius: 6px; background: #01ccf7; flex: none; }
+      .tt b { color: #01ccf7; }
+      #chip { position: absolute; left: 84px; top: 452px; opacity: 0; display: flex; align-items: center; gap: 14px; padding: 10px 20px 10px 12px;
+              background: rgba(10,18,52,.9); border: 3px solid #01ccf7; border-radius: 20px; box-shadow: 0 10px 24px rgba(0,0,0,.35); transform-origin: 0% 50%; }
+      #chip .ic { width: 48px; height: 48px; border-radius: 13px; background: #01ccf7; display: grid; place-items: center; }
+      #chip .ic svg { width: 28px; height: 28px; }
+      #chip .lb { font: 700 19px/1 Poppins; letter-spacing: 3px; color: #9fdcff; }
+      #chip .il { font: 400 15px/1 Poppins; letter-spacing: 1px; color: #7f95c8; margin-top: 6px; }
+      #chip .nm { font: 700 48px/1 Poppins; color: #ffffff; min-width: 62px; text-align: right; }
+      #tag { position: absolute; right: 84px; top: 418px; text-align: right; opacity: 0; transform-origin: 100% 50%; }
+      #tag span { display: inline-block; padding: 14px 24px 16px; border-radius: 20px; background: rgba(10,18,52,.92); border: 3px solid #01ccf7; font: 700 34px/1 Poppins; color: #fff; white-space: nowrap; }
+      #math { position: absolute; right: 84px; top: 452px; text-align: right; opacity: 0; transform-origin: 100% 50%; }
+      #math span { display: inline-block; padding: 12px 26px 14px; border-radius: 20px; background: rgba(10,18,52,.92); border: 3px solid #01ccf7; font: 700 44px/1 Poppins; color: #fff; }
+      #math b { color: #01ccf7; }
+      /* captions: white bold words, each in its own navy box; key words with a cyan marker */
+      .cap { position: absolute; left: 50px; right: 50px; top: 1000px; text-align: center; font-size: 60px; line-height: 1.5; opacity: 0; }
+      .cap .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .02em .2em .16em; margin: -.02em -.07em -.16em; background: rgba(10,13,44,.84); border-radius: 14px; }
+      .cap .w { display: inline-block; position: relative; color: #ffffff; font-weight: 700; }
+      .cap .w.k { color: #7fe8ff; }
+      .cap .hl { position: absolute; left: -4px; right: -4px; bottom: .14em; height: .14em; background: #01ccf7; border-radius: 6px; transform-origin: 0 50%; }
+            #flashW { position: absolute; inset: 0; background: #ffffff; opacity: 0; }
+      #iris { position: absolute; inset: 0; background: #050b22; --r: 1600px; opacity: 0; visibility: hidden;
+              -webkit-mask-image: radial-gradient(circle at 540px 730px, transparent var(--r), #000 calc(var(--r) + 3px)); mask-image: radial-gradient(circle at 540px 730px, transparent var(--r), #000 calc(var(--r) + 3px)); }
+      #ring { position: absolute; left: 340px; top: 530px; width: 400px; height: 400px; border-radius: 50%; border: 22px solid #01ccf7; opacity: 0; box-shadow: 0 0 40px #01ccf7; }
+      #ctaveil { position: absolute; left: 0; top: 0; width: 1080px; height: 1300px; background: rgba(5,11,34,.38); opacity: 0; }
+      #cbox { position: absolute; left: 110px; top: 600px; width: 860px; opacity: 0; display: flex; align-items: center; gap: 22px; padding: 22px 26px; background: #ffffff; border-radius: 28px; box-shadow: 0 20px 44px rgba(0,0,0,.45); }
+      #cbox .av { width: 74px; height: 74px; border-radius: 50%; background: linear-gradient(135deg, #01ccf7, #294b77); flex: none; }
+      #cbox .in { flex: 1; font: 700 54px/1 Poppins; color: #0a0d2c; letter-spacing: 2px; min-height: 60px; display: flex; align-items: center; }
+      #cbox .ph { font: 400 34px/1 Poppins; color: #8a97b3; letter-spacing: 0; }
+      #cbox .cur { width: 4px; height: 56px; background: #01ccf7; margin-left: 4px; }
+      #cbox .send { padding: 14px 26px; border-radius: 18px; background: #01ccf7; color: #0a0d2c; font: 700 34px/1 Poppins; }
+      #dm { position: absolute; left: 150px; top: 770px; width: 780px; opacity: 0; padding: 22px 28px; border-radius: 26px; background: rgba(10,18,52,.95); border: 3px solid #01ccf7; box-shadow: 0 20px 44px rgba(0,0,0,.45); }
+      #dm .h { font: 700 26px/1 Poppins; letter-spacing: 3px; color: #7fe8ff; }
+      #dm .b { font: 700 40px/1.25 Poppins; color: #fff; margin-top: 12px; }
+      #dm .b span { color: #01ccf7; }
+      #vf { position: absolute; left: 90px; top: 520px; width: 900px; height: 560px; opacity: 0; }
+      #vf i { position: absolute; width: 90px; height: 90px; border: 0 solid #ffffff; }
+      #vf .a { left: 0; top: 0; border-left-width: 8px; border-top-width: 8px; } #vf .b { right: 0; top: 0; border-right-width: 8px; border-top-width: 8px; }
+      #vf .c { left: 0; bottom: 0; border-left-width: 8px; border-bottom-width: 8px; } #vf .d { right: 0; bottom: 0; border-right-width: 8px; border-bottom-width: 8px; }
+      #vf .rec { position: absolute; left: 34px; top: 30px; font: 700 34px/1 Poppins; color: #fff; display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-radius: 16px; background: rgba(10,13,44,.82); }
+      #vf .rec span { width: 22px; height: 22px; border-radius: 50%; background: #01ccf7; display: inline-block; }
+      #rb-kb { position: absolute; left: 0; top: 0; width: 300px; height: 100px; margin: -50px 0 0 -150px; opacity: 0; transform-origin: 50% 50%; }
+      #rb-kb .pl { position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(180deg, rgba(1,204,247,.30), rgba(1,204,247,.10));
+        box-shadow: 0 0 0 1.5px rgba(106,223,255,.7), 0 0 26px rgba(1,204,247,.55), inset 0 0 18px rgba(1,204,247,.25); }
+      #rb-kb .ks { position: absolute; left: 16px; top: 13px; width: 268px; height: 74px; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(3, 1fr); gap: 4px; }
+      #rb-kb .ks i { display: block; border-radius: 4px; background: rgba(160,235,255,.22); box-shadow: inset 0 0 0 1px rgba(160,235,255,.35); }
+      #rb-kb .ks i.on { background: rgba(220,250,255,.95); box-shadow: 0 0 10px rgba(1,204,247,.95); }
+    </style>
+  </head>
+    <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="42" data-width="1080" data-height="1920" data-fps="30">
+      <div id="stage" class="clip layer" data-start="0" data-duration="42" data-track-index="1"><img id="plate" src="assets/brand/bg_1080x1920.png" alt="" data-layout-ignore data-layout-allow-occlusion /><canvas id="vx" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas></div>
+      <div id="host" class="clip layer" data-layout-ignore data-layout-allow-occlusion data-start="0" data-duration="42" data-track-index="2"><canvas id="ms" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion style="position:absolute;left:0;top:0;width:1080px;height:1920px"></canvas></div>
+      <div id="bot" class="clip layer" data-layout-ignore data-layout-allow-occlusion data-start="0" data-duration="42" data-track-index="4"><canvas id="rb" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion style="position:absolute;left:0;top:0;width:1080px;height:1920px"></canvas>
+        <div id="rb-kb" data-layout-ignore data-layout-allow-occlusion><div class="pl"></div><div class="ks" id="rb-keys"></div></div></div>
+      <div id="ui" class="clip layer" data-start="0" data-duration="42" data-track-index="3">
+        <div id="veilT"></div><div id="grain"></div>
+        <img id="brandlogo" src="assets/brand/logo_white_trim.png" alt="AI PRENEUR" />
+        <div class="tt" id="t1"><span class="tab"></span><span>DIBIKIN PAKAI <b>KODE</b></span></div>
+        <div class="tt" id="t2"><span class="tab"></span><span><b>4</b> REPO <b>OPEN-SOURCE</b></span></div>
+        <div class="tt" id="t3"><span class="tab"></span><span><b>1</b> · HYPERFRAMES</span></div>
+        <div class="tt" id="t4"><span class="tab"></span><span><b>2</b> · GSAP SKILLS</span></div>
+        <div class="tt" id="t5"><span class="tab"></span><span><b>3</b> · BLENDER MCP</span></div>
+        <div class="tt" id="t6"><span class="tab"></span><span><b>4</b> · VIDEO SHOTCRAFT</span></div>
+        <div id="tag"><span id="tg"></span></div>
+        <div id="caps"></div>
+        <div id="vf" data-layout-ignore data-layout-allow-occlusion><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><div class="rec"><span></span>REC · SHOT 1</div></div>
+        <div id="ctaveil"></div>
+        <div id="cbox"><span class="av"></span><span class="in" id="cin"><span class="ph" id="cph">Tulis komentar…</span><span id="ctx"></span><span class="cur" id="cur"></span></span><span class="send" id="send">Kirim</span></div>
+        <div id="dm"><div class="h">DM · AI PRENEUR</div><div class="b">Daftar repo + link + <span>fungsinya ✓</span></div></div>
+        <div id="flashW" data-layout-ignore data-layout-allow-occlusion></div>
+      </div>
+      <audio id="vo" src="assets/audio/vo.mp3" data-start="0.3" data-duration="41" data-track-index="10" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="42" data-track-index="11" data-volume="1"></audio>
+    </div>
+    <script>
+      (function () {
+        const OFF = 0.3, DUR = 42;
+        const WORDS = [["Video", 0.08, 0.4], ["yang", 0.48, 0.56], ["lagi", 0.64, 0.76], ["kamu", 0.8, 0.96], ["tonton", 1.04, 1.28], ["ini", 1.44, 1.76], ["dibikin", 1.8, 2.16], ["pakai", 2.24, 2.48], ["kode,", 2.72, 3.2], ["bukan", 3.307, 3.52], ["aplikasi", 3.6, 4.0], ["edit.", 4.08, 4.88], ["Empat", 4.96, 5.2], ["repo", 5.28, 5.44], ["open-source", 5.52, 5.92], ["ini", 6.0, 6.32], ["bikin", 6.4, 6.64], ["Claude", 6.72, 7.04], ["jadi", 7.16, 7.28], ["studio", 7.36, 7.6], ["animasi.", 7.68, 8.64], ["Satu,", 8.86, 9.28], ["HyperFrames,", 9.48, 10.16], ["lebih", 10.24, 10.48], ["dari", 10.56, 10.72], ["delapan", 10.8, 11.12], ["puluh", 11.28, 11.36], ["tujuh", 11.44, 11.573], ["ribu", 11.6, 11.8], ["bintang.", 11.84, 12.48], ["Claude", 12.627, 12.72], ["nulis", 12.8, 13.04], ["HTML,", 13.12, 14.0], ["HyperFrames", 14.2, 14.64], ["merendernya", 14.72, 15.2], ["jadi", 15.32, 15.44], ["video.", 15.68, 16.16], ["Reel", 16.307, 16.4], ["ini", 16.48, 16.8], ["juga", 16.88, 17.04], ["dibikin", 17.08, 17.52], ["pakai", 17.6, 17.76], ["HyperFrames.", 17.96, 18.8], ["Dua,", 18.873, 19.36], ["GSAP", 19.44, 20.0], ["skills,", 20.08, 20.64], ["resmi", 20.76, 21.04], ["dari", 21.12, 21.28], ["GreenSock.", 21.36, 22.08], ["Agent", 22.373, 22.4], ["kamu", 22.44, 22.72], ["paham", 22.8, 23.12], ["easing", 23.16, 23.44], ["dan", 23.52, 23.6], ["timeline,", 23.68, 24.32], ["gerakannya", 24.36, 24.8], ["jadi", 24.88, 24.96], ["halus.", 25.12, 25.92], ["Tiga,", 25.993, 26.48], ["Blender", 26.56, 26.88], ["MCP.", 26.96, 27.68], ["Minta", 27.753, 27.92], ["scene", 28.0, 28.16], ["3D,", 28.2, 28.88], ["Claude", 28.96, 29.12], ["yang", 29.2, 29.28], ["nyusun", 29.32, 29.6], ["di", 29.64, 29.68], ["Blender.", 29.76, 30.4], ["Empat,", 30.62, 30.96], ["Video", 31.12, 31.28], ["Shotcraft.", 31.36, 32.16], ["Skill", 32.38, 32.4], ["Claude", 32.48, 32.72], ["Code", 32.8, 32.96], ["dan", 33.04, 33.12], ["Codex:", 33.2, 33.84], ["promo", 33.96, 34.08], ["produk", 34.16, 34.4], ["sinematik", 34.48, 34.88], ["dari", 34.96, 35.12], ["screenshot", 35.16, 35.52], ["kamu,", 35.6, 36.08], ["tiap", 36.16, 36.4], ["shot", 36.48, 36.72], ["bisa", 36.8, 37.04], ["diedit.", 37.12, 37.76], ["Komen", 37.973, 38.0], ["STUDIO,", 38.08, 38.72], ["daftar", 38.76, 38.96], ["repo-nya", 39.04, 39.44], ["aku", 39.6, 39.76], ["kirim", 39.84, 40.16], ["lewat", 40.2, 40.4], ["DM.", 40.44, 41.04]];
+        const KEYW = new Set(["kode", "empat", "opensource", "claude", "studio", "animasi", "hyperframes", "ribu", "bintang", "html", "video", "reel", "gsap", "skills", "resmi", "greensock",
+          "easing", "timeline", "halus", "blender", "mcp", "3d", "shotcraft", "codex", "sinematik", "screenshot", "diedit", "komen", "dm"]);
+        const bare = (w) => w.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const CHUNKS = []; { let a = 0; for (let i = 0; i < WORDS.length; i++) { const end = /[,.:?]$/.test(WORDS[i][0]) || i - a === 3 || i === WORDS.length - 1; if (end) { CHUNKS.push([a, i + 1]); a = i + 1; } } }
+        const tl = gsap.timeline({ paused: true });
+        const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+        { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+        const P0 = gsap.timeline(); tl.add(P0, 0);
+        const pin = (el, v) => { gsap.set(el, _sc(v)); P0.set(el, _sc(v), 0); };
+        const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+        // captions: per-word boxes, bottom while the world is full screen, above the hosts afterwards
+        const caps = document.getElementById("caps");
+        CHUNKS.forEach(([a, b], ci) => {
+          const d = document.createElement("div"); d.className = "cap"; const t0 = WORDS[a][1] + OFF; d.style.top = (t0 < 5.2 ? 1430 : 1000) + "px"; caps.appendChild(d);
+          const ws = [];
+          for (let i = a; i < b; i++) { const m = document.createElement("span"); m.className = "m"; const w = document.createElement("span"); const key = KEYW.has(bare(WORDS[i][0]));
+            w.className = "w" + (key ? " k" : ""); w.textContent = WORDS[i][0]; if (key) { const h = document.createElement("span"); h.className = "hl"; w.appendChild(h); }
+            m.appendChild(w); d.appendChild(m); if (i < b - 1) d.appendChild(document.createTextNode(" ")); ws.push([w, WORDS[i][1] + OFF]); }
+          const tIn = ws[0][1] - 0.06, next = CHUNKS[ci + 1], tOut = next ? WORDS[next[0]][1] + OFF - 0.08 : DUR - 0.3;
+          pin(d, { opacity: 0 }); ft(d, { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, tIn); ft(d, { opacity: 1, y: 0 }, { opacity: 0, y: -10, duration: 0.12, ease: "power2.in" }, Math.max(tIn + 0.2, tOut - 0.12));
+          ws.forEach(([w, t]) => { pin(w.parentNode, { opacity: 0 }); ft(w.parentNode, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Math.max(tIn, t - 0.06));
+            pin(w, { yPercent: 118 }); ft(w, { yPercent: 118 }, { yPercent: 0, duration: 0.3, ease: "power4.out" }, Math.max(tIn, t - 0.05));
+            const h = w.querySelector(".hl"); if (h) { pin(h, { scaleX: 0 }); ft(h, { scaleX: 0 }, { scaleX: 1, duration: 0.26, ease: "power2.out" }, t + 0.08); } });
+        });
+        // titles (flip-in tabs)
+        const title = (id, a, b) => { const e = document.getElementById(id); pin(e, { xPercent: -50, opacity: 0 });
+          ft(e, { opacity: 0, rotationX: -88, y: -20, transformPerspective: 900, transformOrigin: "50% 0%" }, { opacity: 1, rotationX: 0, y: 0, duration: 0.45, ease: "back.out(1.6)" }, a);
+          ft(e, { opacity: 1, y: 0 }, { opacity: 0, y: -24, duration: 0.22, ease: "power2.in" }, b); };
+        [["t1", 0.4, 4.9], ["t2", 5.4, 8.9], ["t3", 9.45, 18.75], ["t4", 19.5, 25.6], ["t5", 26.55, 30.5], ["t6", 31.2, 37.6]].forEach((x) => title(...x));
+        // chip windows (content per seek below)
+        const CHIP = [];
+        const TAGS = [[16.75, 18.7, "REEL INI ✓ HYPERFRAMES"], [21.1, 22.5, "RESMI · GREENSOCK"], [34.3, 35.25, "CONTOH PRODUK"]];
+        pin("#tag", { opacity: 0 }); TAGS.forEach(([a, b]) => { ft("#tag", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, a); ft("#tag", { opacity: 1 }, { opacity: 0, duration: 0.12 }, b - 0.12); });
+        // transitions on the page layer
+        pin("#flashW", { opacity: 0 });
+        ft("#flashW", { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "power2.in" }, 9.05); ft("#flashW", { opacity: 1 }, { opacity: 0, duration: 0.35, ease: "power2.out" }, 9.17);
+        ft("#flashW", { opacity: 0 }, { opacity: 0.9, duration: 0.12, ease: "power2.in" }, 38.12); ft("#flashW", { opacity: 0.9 }, { opacity: 0, duration: 0.35 }, 38.27);
+        pin("#vx", { filter: "blur(0px)" });
+        ft("#vx", { filter: "blur(0px)" }, { filter: "blur(12px)", duration: 0.25, ease: "power2.in" }, 18.92); ft("#vx", { filter: "blur(12px)" }, { filter: "blur(0px)", duration: 0.35, ease: "power2.out" }, 19.17);
+        ft("#vx", { filter: "blur(0px)" }, { filter: "blur(6px)", duration: 0.25, ease: "power2.in" }, 25.8); ft("#vx", { filter: "blur(6px)" }, { filter: "blur(0px)", duration: 0.3, ease: "power2.out" }, 26.1);
+        pin("#vf", { opacity: 0, scale: 1.15 }); ft("#vf", { opacity: 0, scale: 1.15 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" }, 30.93); ft("#vf", { opacity: 1 }, { opacity: 0, scale: 1.3, duration: 0.3, ease: "power2.in" }, 31.75);
+        // CTA
+        pin("#ctaveil", { opacity: 0 }); ft("#ctaveil", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 38.3);
+        pin("#cbox", { opacity: 0, y: 40 }); ft("#cbox", { opacity: 0, y: 40, scale: 0.7 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, 38.3);
+        ft("#send", { scale: 1 }, { scale: 0.88, duration: 0.08, yoyo: true, repeat: 1 }, 39.15);
+        pin("#dm", { opacity: 0, x: 120 }); ft("#dm", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.4, ease: "back.out(1.4)" }, 39.4);
+        tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: DUR, ease: "steps(1260)", immediateRender: false }, 0); pin("#grain", { x: 0, y: 0 });
+        tl.set({}, {}, DUR - 0.01);
+        (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+        tl.render(0, true, true);
+        window.__timelines = window.__timelines || {}; window.__timelines["main"] = tl;
+        const $ = (id) => document.getElementById(id), ez = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+        function texts(t) {
+          { const g = TAGS.find(([a, b]) => t >= a - 0.02 && t < b) || TAGS.find(([a]) => a > t) || TAGS[0]; $("tg").textContent = g[2]; }
+          const typedS = "STUDIO".slice(0, Math.max(0, Math.min(6, Math.floor((t - 38.45) / 0.08) + 1)));
+          $("ctx").textContent = t >= 38.45 ? typedS : ""; $("cph").style.display = t >= 38.45 ? "none" : "inline";
+          $("cur").style.opacity = Math.floor(t * 3) % 2 ? 1 : 0.2;
+        }
+        texts(0); window.addEventListener("hf-seek", (e) => texts(e.detail.time));
+      })();
+    </script>
+    <script src="vendor/mascot_host.js"></script>
+    <script src="vendor/robot_host.js"></script>
+  </body>
+</html>

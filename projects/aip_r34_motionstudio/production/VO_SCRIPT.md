@@ -73,3 +73,8 @@ Where (≈3.9 s total): HyperFrames monitor 12.85–13.65 (claude.ai home, slow 
 (Claude Code input, zoom + highlight) on "Claude nulis HTML"; Blender beat 28.1–30.5 the prompt card is the real Claude Code input on a 3D
 billboard, with the example prompt typed into it (labelled "contoh prompt"). Through-line cube logic unchanged.
 Privacy: frames live in `assets/rec/` (project .gitignore) — never committed (public repo).
+
+## v3 (addendum 2026-11-21): background = brand navy plate only
+WebGL renderer with alpha (clear colour transparent, `scene.background = null`), no star sprites, no voxel clouds, no sky gradient; the plate
+`assets/brand/bg_1080x1920.png` (copied from projects/aip_r25_prompt3d) is a full-frame `<img id="plate">` under the `#vx` canvas, visible
+above/around the floating islands in every shot. Fog tinted to the plate's mid navy (#13284f, 45–110 m). Flashes stay white.

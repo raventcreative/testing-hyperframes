@@ -16,3 +16,6 @@
    lower the SFX level instead. Final check: whisper MEDIUM on the final MP4, diff against vo_lines.txt word by word.
 8. Loudness: render_aip.sh normalises in one pass and can land at −18 LUFS; measure (ebur128) and, if off by > 1 LU,
    remix with a two-pass loudnorm (see projects/aip_r30_timmarketingai/tools/remix_audio.sh).
+9. SFX must be clearly audible (client 2026-11-21: "kasih sound effect biar gak suara VO aja"): whoosh on every transition,
+   pops/clicks on UI and caption-in, typing/blips/ticks where things happen, soft risers on reveals; about −8 to −10 dB under VO
+   peaks, no sidechain pumping, no hit on a word onset. Never ship a reel that sounds like VO + music only.

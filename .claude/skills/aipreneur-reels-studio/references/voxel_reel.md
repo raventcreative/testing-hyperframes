@@ -41,3 +41,6 @@ only for whips/portals.
 ## Timing
 Words from the ElevenLabs alignment (tools/words.py, VO offset +0.3 s). Elements must be on screen when the VO names
 them; transitions finish before the next line starts. Robots/counters land on the counted word.
+
+## Background = ONLY the 2 brand plates (client, 2026-11-21)
+"background-nya format kita kan 2 aja": the voxel world renders on a transparent WebGL canvas (alpha, clear 0, no sky dome/stars/clouds/sky gradient) over the brand plate — navy: `projects/aip_r25_prompt3d/assets/brand/bg_1080x1920.png`, white: `brand/bg-light.png` (cover-fit). Fog tinted to the plate or off. Show the plate behind floating islands in every shot (no wall-to-wall floor).

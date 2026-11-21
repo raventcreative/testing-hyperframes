@@ -51,3 +51,12 @@ flash putih) → pintu lift (layar chat terbelah) → whip tilt vertikal → orb
 - Alur produksi = cara reels AIpreneur ini dibuat (Claude menulis adegan HTML/GSAP, suara ElevenLabs voice Dakocan, render HyperFrames).
 - Logo 3D (Claude, ElevenLabs, Instagram): Simple Icons 16.38.0 (CC0) — lihat production/asset_credits.json.
 - Tidak menampilkan brand/kemasan asli mana pun; keranjang kuning = gerobak voxel kuning generik (bukan logo platform).
+
+## v2 (2026-11-21) — brand plate backdrop + richer SFX (client)
+- Backdrop = the client navy plate `assets/brand/bg_1080x1920.png` (from projects/aip_r25_prompt3d) as a full-frame `<img>` under a
+  transparent WebGL canvas (alpha renderer, clear colour 0, `scene.background = null`); no star sprites, no sky gradient, no voxel
+  clouds; fog subtle and tinted #13284f; the iris wipe uses the plate too. Layout, timing and the VO take are unchanged.
+- SFX v2 (`tools/sfx.py`, mixed in `tools/remix_audio.sh` at a fixed level, no sidechain): whoosh on every transition, soft risers
+  into the reveals, camera shutter on each photo, pops/clicks on UI, soft ticks on every caption-in, chat send/receive blips, typing
+  ticks, render-machine hum + ding, CTA send/receive. Peaks ≈ −7…−10 dB under the VO peak (ticks −13…−16 dB), every event placed by its
+  measured peak and kept ≥60 ms away from any word onset.

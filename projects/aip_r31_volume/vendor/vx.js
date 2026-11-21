@@ -140,7 +140,7 @@ function animA(t) {
     q.c.position.set(q.v.x * tau * 0.6, 2.6 + q.v.y * tau - 4.9 * tau * tau, -10 + q.v.z * tau * 0.7); q.c.rotation.set(q.r + tau * 9, tau * 7, 0); q.c.scale.setScalar(Math.min(1, (1.5 - tau) * 2)); });
 }
 
-/* B — content wall (10 x 10) */
+/* B — the client's real Instagram feed on a big screen (proof of volume) */
 let TX = {};
 function makeTextures() {
   const pal = [["#294b77", "#3567b5"], ["#1f9fd6", "#7fd8f5"], ["#0a0d2c", "#294b77"], ["#5b8fd6", "#a9c6ee"], ["#3567b5", "#01ccf7"], ["#1f3c62", "#5b8fd6"], ["#7aa7e0", "#d3e4fa"], ["#294b77", "#01ccf7"]];
@@ -164,30 +164,35 @@ function makeTextures() {
     g.strokeStyle = "#ffffff"; g.lineWidth = 14; g.lineCap = "round"; g.lineJoin = "round"; g.beginPath(); g.moveTo(38, 66); g.lineTo(56, 84); g.lineTo(90, 46); g.stroke(); });
   TX.note = ctex(256, 320, (g, w, h) => { g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h); g.fillStyle = NV; g.fillRect(0, 0, w, 52); g.fillStyle = CY; g.fillRect(20, 20, 40, 14); });
 }
-function buildB() {
+function buildB() { // a big screen in the voxel world playing the client's REAL Instagram feed (assets/rec, local only, gitignored)
   const g = grp("B"); g.add(island(7, 3));
-  g.add(boxes([[0, 3.25, -0.4, 9.6, 6.6, 0.3, "#f3f6fb"], [0, 3.25, -0.24, 9.2, 6.2, 0.02, "#dfe7f2"], [0, 0.2, -0.4, 10, 0.4, 0.9, NV], [0, 6.6, -0.4, 9.7, 0.12, 0.42, CY],
-    [-4.6, 0.6, 0.2, 0.3, 1.2, 0.3, "#c3cfe2"], [4.6, 0.6, 0.2, 0.3, 1.2, 0.3, "#c3cfe2"]]));
-  B.tiles = [];
-  for (let r = 0; r < 10; r++) for (let c = 0; c < 10; c++) {
-    const i = r * 10 + c, k = Math.floor(hash(i) * 8), grpT = new THREE.Group();
-    const back = boxes([[0, 0, -0.04, 0.82, 0.52, 0.08, "#c3cfe2"]], MAT, false); back.castShadow = false; grpT.add(back);
-    const face = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), new THREE.MeshStandardMaterial({ map: TX.thumb[k], roughness: 0.6 })); face.position.z = 0.002; grpT.add(face);
-    grpT.position.set(-4.05 + c * 0.9, 6.05 - r * 0.6, -0.18); grpT.visible = false; g.add(grpT); B.tiles.push(grpT);
-  }
-  B.rise = [33, 66, 87].map((i) => { const s = glow("#5fe2ff", 1.6, 1.1); s.material.opacity = 0; g.add(s); return { i, s }; });
+  g.add(boxes([[0, 3.55, -0.52, 10.34, 6.16, 0.3, NV2], [0, 0.25, -0.5, 3.2, 0.5, 1.2, NV], [0, 0.52, -0.5, 3.26, 0.05, 1.26, CY], [0, 6.66, -0.52, 10.0, 0.06, 0.32, CY]]));
+  const c = document.createElement("canvas"); c.width = 1200; c.height = 693; B.g2 = c.getContext("2d");
+  B.tex = new THREE.CanvasTexture(c); B.tex.colorSpace = THREE.SRGBColorSpace; B.tex.anisotropy = 8;
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(9.9, 5.717), new THREE.MeshBasicMaterial({ map: B.tex, toneMapped: false })); scr.position.set(0, 3.55, -0.36); g.add(scr);
+  B.cube = cube(1.5); g.add(B.cube);
 }
-const TORD = (() => { const o = [...Array(100).keys()].sort((p, q) => { const d = (i) => Math.hypot((i % 10) - 4.5, (Math.floor(i / 10) - 4.5) * 1.4) + hash(i) * 0.3; return d(p) - d(q); });
-  const r = []; o.forEach((i, k) => (r[i] = k)); return r; })();
-const TILE_T = (i) => { const k = TORD[i]; return k < 5 ? 15.5 + k * 0.07 : 16.7 + ((k - 5) / 94) * 1.05; };
+const IGF = window.IG_FRAMES || null, IGIMG = {};
+const igReady = IGF ? Promise.all(IGF.files.map((f) => new Promise((res) => { const im = new Image(); im.onload = im.onerror = () => res(); im.src = f; IGIMG[f] = im; }))) : Promise.resolve();
+function igFrame(t) { const T = IGF.table; let lo = 0, hi = T.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (T[m][0] < t) lo = m; else hi = m; }
+  return IGIMG[Math.abs(T[lo][0] - t) <= Math.abs(T[hi][0] - t) ? T[lo][1] : T[hi][1]]; }
+function drawB(t) {
+  const g = B.g2, w = 1200, h = 693; g.fillStyle = "#000000"; g.fillRect(0, 0, w, h);
+  const im = IGF && igFrame(t);
+  // zoom on the grid while it scrolls: 1 -> 5/3 = exactly the 3 middle columns of the 5-column feed
+  const z = 1 + (2 / 3) * U(t, 17.45, 18.35, "io"), sw = w / z, sh = h / z, sx = (w - sw) / 2, sy = (h - sh) / 2;
+  if (im && im.naturalWidth) g.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+  else { g.fillStyle = "#ffffff"; g.font = `700 40px ${FONT}`; g.textAlign = "center"; g.fillText("rekaman layar (file lokal)", w / 2, h / 2); g.textAlign = "left"; }
+  // "lima video": outline the first row of 5 posts (header state, zoom 1)
+  const hl = U(t, 15.42, 15.7, "out") * (1 - U(t, 16.45, 16.7));
+  if (hl > 0) { g.save(); g.lineWidth = 10; g.strokeStyle = CY; g.globalAlpha = Math.min(1, hl * 1.4); g.setLineDash([2600 * hl, 4000]); rr(g, 6, 459, w - 12, 228, 14); g.stroke(); g.restore(); }
+  B.tex.needsUpdate = true;
+}
 function animB(t) {
-  B.tiles.forEach((m, i) => { const t0 = TILE_T(i), u = spring(t, t0, 16, 9); m.visible = t > t0; if (!m.visible) return;
-    m.scale.setScalar(S(Math.min(1.12, u))); m.position.z = -0.18 + 0.5 * (1 - Math.min(1, u)); });
-  B.rise.forEach(({ i, s }, k) => { const t0 = 17.6 + k * 0.2, u = spring(t, t0, 10, 6), m = B.tiles[i];
-    const z = -0.18 + (0.9 + 0.5 * (k === 1)) * u; m.position.z = Math.max(m.position.z, z); m.scale.setScalar(1 + (0.25 + 0.25 * (k === 1)) * Math.min(1.1, u));
-    s.position.set(m.position.x, m.position.y, z - 0.1); s.material.opacity = 0.7 * Math.min(1, u); });
+  drawB(t);
+  const land = spring(t, 14.2, 14, 7), hop = Math.max(0, Math.sin(Math.PI * cl((t - 16.6) / 0.35, 0, 1)));
+  B.cube.position.set(4.3, 6.9 + 3 * (1 - Math.min(1, land)) + 0.7 * hop, -0.5); B.cube.rotation.set(0, 0.5 + hop * 1.6, 0); B.cube.visible = t > 13.9;
 }
-
 /* C — follow-up hub */
 const HOUSES = [-2.6, -1.55, -0.5, 0.5, 1.55, 2.6].map((a, i) => ({ a, p: V3(Math.sin(a * 0.48) * 4.4, 0, -Math.cos(a * 0.48) * 3.0 - 0.4) }));
 const WAVES = [20.2, 22.32, 22.88, 23.44];          // follow-up waves (1x, then 2x..4x)
@@ -409,9 +414,9 @@ const SHOT = [
     [4.25, [21, 27, 36, 0, 1.2, -4.6, 40], "io"], [7.2, [19, 25, 33, 0, 1.2, -4.6, 40], "sine"],
     [7.36, [3.2, 7.4, 12.5, 0, 1.6, -6.5, 44], "expo"], [11.4, [2.6, 6.8, 10.8, 0, 1.8, -7, 44], "sine"],
     [12.9, [1.0, 3.8, -2.6, 0, 2.55, -10.2, 44], "io"], [13.33, [0.95, 3.75, -3.2, 0, 2.55, -10.2, 44], "sine"]] },
-  { abs: true, ws: ["A", "B"], a: 13.33, b: 13.89, cam: [[13.33, [0.95, 3.75, -3.2, 0, 2.55, -10.2, 44]], [13.6, [22, 8, 22, 38, 3, -1, 48], "in"], [13.89, [44, 3.7, 19.0, 44, 3.4, -0.4, 44], "out"]] },
-  { w: "B", a: 13.89, b: 18.75, cam: [[13.89, [0, 3.7, 19.0, 0, 3.4, -0.4, 44]], [16.4, [0, 3.6, 24.0, 0, 3.35, -0.4, 44], "io"], [18.3, [0, 3.55, 29.5, 0, 3.3, -0.4, 44], "io"],
-    [18.6, [0, 3.55, 29.6, 0, 3.4, -0.4, 44], "sine"], [18.75, [0, 3.7, 29.4, 0, 16, -0.4, 44], "in"]] },
+  { abs: true, ws: ["A", "B"], a: 13.33, b: 13.89, cam: [[13.33, [0.95, 3.75, -3.2, 0, 2.55, -10.2, 44]], [13.6, [22, 8, 22, 38, 3, -1, 48], "in"], [13.89, [44, 4.35, 30.8, 44, 4.08, -0.4, 44], "out"]] },
+  { w: "B", a: 13.89, b: 18.75, cam: [[13.89, [0, 4.35, 30.8, 0, 4.08, -0.4, 44]], [16.4, [0.3, 4.35, 31.5, 0, 4.08, -0.4, 44], "io"], [18.45, [0, 4.33, 30.7, 0, 4.08, -0.4, 44], "io"],
+    [18.6, [0, 4.33, 30.6, 0, 4.15, -0.4, 44], "sine"], [18.75, [0, 4.45, 30.4, 0, 16, -0.4, 44], "in"]] },
   { w: "C", a: 18.75, b: 25.0, cam: [[18.75, [0, 11.5, 21.5, 0, -10, -1, 44]], [19.15, [0, 11.0, 21.0, 0, 1.0, -0.6, 44], "out"], [21.9, [0.8, 10.6, 20.0, 0, 1.0, -0.6, 44], "sine"],
     [24.7, [-0.6, 10.2, 19.0, 0, 1.0, -0.6, 44], "sine"], [25.0, [-14, 9.0, 11.0, 0, 1.0, -0.6, 44], "in"]] },
   { w: "D", a: 25.0, b: 30.56, orbit: [25.0, 25.95, Math.PI * 0.9, 0], cam: [[25.0, [0, 4.3, 16.6, 0, 1.9, 0, 44]], [27.9, [0, 4.2, 15.6, 0, 1.9, 0, 44], "sine"], [28.5, [0, 6.6, 22.0, 0, 1.3, -0.4, 44], "io"],
@@ -472,7 +477,7 @@ function render(t) {
   renderer.setRenderTarget(null); renderer.render(qScene, qCam);
 }
 window.VX.render = render;
-const P = Promise.all([document.fonts.load(`700 60px Poppins`), document.fonts.load(`400 60px Poppins`)]).then(() => {
+const P = Promise.all([document.fonts.load(`700 60px Poppins`), document.fonts.load(`400 60px Poppins`), igReady]).then(() => {
   makeTextures(); buildA(); buildB(); buildC(); buildD(); buildE(); buildF(); buildG(); buildClouds(); ready = true; render(window.VX.t0 || 0);
 });
 window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {}; window.__hf.buildReady.vx = P;

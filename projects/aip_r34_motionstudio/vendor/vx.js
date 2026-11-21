@@ -179,6 +179,19 @@ function animH(t) {
   }
 }
 
+/* ---------------------------------------------------------------- the client's REAL screen recording (brand/rec/claude_code_chrome_2026-10-30.mp4)
+   cropped to the page content only (no browser chrome, no sidebar, no session titles): assets/rec/home = claude.ai home (rec 16.3–17.1 s),
+   assets/rec/code = Claude Code new-session input (rec 24.0–26.9 s). Local only, gitignored. One JPEG per video frame (30 fps). */
+const REC = { home: [], code: [] };
+function loadRec() {
+  const ld = (dir, pre, n) => Array.from({ length: n }, (_, i) => { const im = new Image(); im.src = `assets/rec/${dir}/${pre}_${String(i + 1).padStart(3, "0")}.jpg`; REC[dir].push(im); return im.decode().catch(() => {}); });
+  return Promise.all([...ld("home", "h", 24), ...ld("code", "c", 88)]);
+}
+const recAt = (k, t, t0) => REC[k][Math.max(0, Math.min(REC[k].length - 1, Math.floor((t - t0) * 30 + 1e-6)))];
+function recRing(c, x, y, w, h, t, t0) { const u = cl((t - t0) / 0.35, 0, 1); if (u <= 0) return; // scripted click highlight on the real UI
+  c.save(); c.strokeStyle = CY; c.globalAlpha = 0.9 * (1 - 0.5 * u); c.lineWidth = 8; rr(c, x - 6 - 10 * u, y - 6 - 10 * u, w + 12 + 20 * u, h + 12 + 20 * u, 22); c.stroke(); c.restore();
+  c.save(); c.strokeStyle = CY; c.lineWidth = 5; rr(c, x - 4, y - 4, w + 8, h + 8, 18); c.stroke(); c.restore(); }
+
 /* ---------------------------------------------------------------- F: HyperFrames — README facts, HTML -> render -> video */
 const F = {};
 const CODE_F = ['<section class="scene">', '  <h1>Studio AI</h1>', '  <div class="maskot"></div>', "</section>"];
@@ -193,11 +206,19 @@ function buildF() {
       c.fillStyle = "#0a0d2c"; c.font = `700 76px ${FONT}`; c.fillText("★ " + n.toFixed(1).replace(".", ",") + " rb", 88, 462);
       c.strokeStyle = CY; c.lineWidth = 7; rr(c, 560, 370, 400, 130, 30); c.stroke(); c.fillStyle = "#ffffff"; c.font = `700 58px ${FONT}`; c.fillText("Apache-2.0", 596, 456);
       c.fillStyle = "#9fdcff"; c.font = `400 40px ${FONT}`; c.fillText("bintang GitHub · 21 Nov 2026", 60, 580); c.globalAlpha = 1; return; }
-    const n = Math.floor(Math.max(0, t - 12.95) * 48); const [x, y] = codeView(c, w, h, CODE_F, n, { px: 46, lh: 72 });
-    if (t < 14.45) { if (Math.floor(t * 3) % 2 === 0) { c.fillStyle = CY; c.fillRect(x + 4, y - 38, 24, 46); } return; }
+    if (t < 14.45) { c.fillStyle = "#181818"; c.fillRect(0, 0, w, h);
+      if (t < 13.65) { // real claude.ai home (crop 700x230), slow zoom, click highlight on the prompt box
+        const z = 1.37 * (1 + 0.05 * EZ.io(cl((t - 12.85) / 0.8, 0, 1))), iw = 700 * z, ih = 230 * z, x0 = (w - iw) / 2, y0 = 70 - (ih - 315) / 2;
+        c.drawImage(recAt("home", t, 12.85), x0, y0, iw, ih); recRing(c, x0 + 60 * z, y0 + 92 * z, 590 * z, 91 * z, t, 13.2);
+      } else { // real Claude Code new-session input (crop 932x218), zoom, click highlight on the input bar
+        const z = 1 + 0.05 * EZ.io(cl((t - 13.65) / 0.8, 0, 1)), iw = 932 * z, ih = 218 * z, x0 = (w - iw) / 2, y0 = 105 - (ih - 218) / 2;
+        c.drawImage(recAt("code", t, 13.65), x0, y0, iw, ih); recRing(c, x0 + 8 * z, y0 + 33 * z, 924 * z, 100 * z, t, 13.85);
+      }
+      return; }
     const p = EZ.io(cl((t - 14.55) / 0.7, 0, 1));
     if (p >= 1) { c.fillStyle = "#081233"; c.fillRect(0, 0, w, h); c.fillStyle = CY; c.beginPath(); c.arc(w / 2, 320, 170, 0, 7); c.fill(); c.strokeStyle = "#0a0d2c"; c.lineWidth = 26; c.lineCap = "round";
       c.lineWidth = 34; c.beginPath(); c.moveTo(w / 2 - 78, 320); c.lineTo(w / 2 - 18, 382); c.lineTo(w / 2 + 88, 255); c.stroke(); return; }
+    c.fillStyle = "#081233"; c.fillRect(0, 0, w, h); c.fillStyle = "#ffffff"; c.font = `700 54px ui-monospace, Menlo, monospace`; c.fillText("$ npx hyperframes render", 60, 150);
     c.fillStyle = "#0e1d4d"; rr(c, 50, 420, w - 100, 170, 26); c.fill();
     c.fillStyle = "#ffffff"; c.font = `700 66px ${FONT}`; c.fillText(p < 1 ? "Rendering… " + Math.round(p * 100) + "%" : "✓ video.mp4", 90, 500);
     c.fillStyle = "rgba(255,255,255,.18)"; rr(c, 90, 528, w - 180, 32, 16); c.fill(); c.fillStyle = CY; rr(c, 90, 528, Math.max(32, (w - 180) * p), 32, 16); c.fill(); });
@@ -287,13 +308,17 @@ const PROMPT = "Buat scene 3D: meja, lampu, tanaman, kamera";
 const BCAM = [1.55, 0, 1.3], BCRY = Math.atan2(-1.55, -1.3);
 function buildB() {
   const g = mk("B"); g.add(island(4, 3, "#2f3650", "#293046")); clouds("B", 7, 29);
-  B.pr = live(1024, 300, (c, w, h, t) => { c.fillStyle = "#ffffff"; rr(c, 6, 6, w - 12, h - 12, 40); c.fill(); c.strokeStyle = CY; c.lineWidth = 10; rr(c, 6, 6, w - 12, h - 12, 40); c.stroke();
-    c.fillStyle = "#294b77"; c.font = `700 40px ${FONT}`; c.fillText("Contoh prompt · kamu → Claude", 50, 76);
-    const s = typed(PROMPT, t, 28.05, 42); c.fillStyle = "#0a0d2c"; c.font = `700 56px ${FONT}`;
-    const lines = []; let line = ""; for (const wd of s.split(" ")) { const tt = line ? line + " " + wd : wd; if (c.measureText(tt).width > w - 110) { lines.push(line); line = wd; } else line = tt; } lines.push(line);
-    lines.slice(0, 2).forEach((l, i) => c.fillText(l, 50, 162 + i * 76));
-    if (s.length < PROMPT.length && Math.floor(t * 3) % 2 === 0) { const li = Math.min(1, lines.length - 1), lw = c.measureText(lines[li]).width; c.fillStyle = CY; c.fillRect(58 + lw, 162 + li * 76 - 44, 6, 54); } });
-  B.card = plane(3.3, 0.97, B.pr.tex); B.card.position.set(0, 2.0, -1.7); g.add(B.card);
+  B.pr = live(1024, 300, (c, w, h, t) => { // the client's real Claude Code input (screen recording) + the example prompt typed into it
+    c.fillStyle = "#181818"; c.fillRect(0, 0, w, h); c.fillStyle = "#0a1644"; c.fillRect(0, 0, w, 66);
+    c.fillStyle = "#ffffff"; c.font = `700 36px ${FONT}`; c.fillText("Claude Code · contoh prompt", 36, 46);
+    const x0 = 46, y0 = 76; c.drawImage(recAt("code", t, 27.2), x0, y0, 932, 218);
+    const s = typed(PROMPT, t, 28.2, 40);
+    if (s.length) { c.fillStyle = "rgb(48,48,48)"; c.fillRect(x0 + 100, y0 + 46, 932 - 106, 66); c.fillStyle = "#ececec"; let px = 38; c.font = `400 ${px}px ${FONT}`;
+      while (c.measureText(PROMPT).width > 812 && px > 24) { px -= 2; c.font = `400 ${px}px ${FONT}`; } c.fillText(s, x0 + 108, y0 + 96);
+      if (s.length < PROMPT.length && Math.floor(t * 3) % 2 === 0) { c.fillStyle = CY; c.fillRect(x0 + 112 + c.measureText(s).width, y0 + 58, 4, 46); } }
+    recRing(c, x0 + 8, y0 + 33, 916, 100, t, 27.95);
+    c.strokeStyle = CY; c.lineWidth = 8; c.strokeRect(4, 4, w - 8, h - 8); });
+  B.card = plane(4.2, 1.23, B.pr.tex); B.card.position.set(0, 1.66, -1.8); g.add(B.card);
   B.logo = logo3d("blender", window.LOGOS.blender.hex, 1.05); B.logo.position.set(0, 0, -0.3); g.add(B.logo);
   B.lab = label("ahujasid/mcp-for-blender", "", "#fff", 0.3); B.lab.position.set(0, 1.05, -0.2); g.add(B.lab);
   B.cl = logo3d("claude", window.LOGOS.claude.hex, 0.5); B.cl.position.set(1.5, 0, -1.45); g.add(B.cl);
@@ -301,10 +326,10 @@ function buildB() {
   const part = (L, p) => { const m = boxes(L); m.position.set(...p); m.visible = false; g.add(m); return m; };
   B.top = boxes([[0, 0, 0, 1.0, 1.0, 1.0, "#d8b98e"]]); g.add(B.top);
   B.legs = [[-0.7, -0.4], [0.7, -0.4], [-0.7, 0.4], [0.7, 0.4]].map(([x, z]) => part([[0, 0.34, 0, 0.1, 0.68, 0.1, "#b48a5e"]], [x, 0, z]));
-  B.lamp = [part([[0, 0.05, 0, 0.4, 0.1, 0.4, "#c3cfe2"]], [-2.0, 0, -0.6]), part([[0, 0.7, 0, 0.08, 1.2, 0.08, "#c3cfe2"]], [-2.0, 0, -0.6]), part([[0, 1.4, 0, 0.5, 0.3, 0.5, "#ffffff"]], [-2.0, 0, -0.6])];
-  B.bulb = new THREE.PointLight(0xfff1d8, 0, 5); B.bulb.position.set(-2.0, 1.2, -0.6); g.add(B.bulb);
-  B.plant = [part([[0, 0.2, 0, 0.44, 0.4, 0.44, "#8a5a3c"]], [-1.0, 0, -1.2]), part([[0, 0.6, 0, 0.3, 0.4, 0.3, "#2ecc71"], [0.18, 0.75, 0, 0.2, 0.3, 0.2, "#27ae60"], [-0.16, 0.8, 0.05, 0.2, 0.3, 0.2, "#27ae60"]], [-1.0, 0, -1.2]),
-    part([[0, 1.0, 0, 0.22, 0.3, 0.22, "#2ecc71"]], [-1.0, 0, -1.2])];
+  B.lamp = [part([[0, 0.05, 0, 0.4, 0.1, 0.4, "#c3cfe2"]], [-2.6, 0, -0.2]), part([[0, 0.7, 0, 0.08, 1.2, 0.08, "#c3cfe2"]], [-2.6, 0, -0.2]), part([[0, 1.4, 0, 0.5, 0.3, 0.5, "#ffffff"]], [-2.6, 0, -0.2])];
+  B.bulb = new THREE.PointLight(0xfff1d8, 0, 5); B.bulb.position.set(-2.6, 1.2, -0.2); g.add(B.bulb);
+  B.plant = [part([[0, 0.2, 0, 0.44, 0.4, 0.44, "#8a5a3c"]], [-1.55, 0, -0.9]), part([[0, 0.6, 0, 0.3, 0.4, 0.3, "#2ecc71"], [0.18, 0.75, 0, 0.2, 0.3, 0.2, "#27ae60"], [-0.16, 0.8, 0.05, 0.2, 0.3, 0.2, "#27ae60"]], [-1.55, 0, -0.9]),
+    part([[0, 1.0, 0, 0.22, 0.3, 0.22, "#2ecc71"]], [-1.55, 0, -0.9])];
   // voxel camera on a tripod, looking at the table; its back screen is the viewfinder we dive into
   B.cam = new THREE.Group(); B.cam.position.set(...BCAM); B.cam.rotation.y = BCRY; g.add(B.cam);
   B.cam.add(boxes([[0, 0.5, 0, 0.06, 1.0, 0.06, "#8a9bb8"], [-0.25, 0.25, 0, 0.05, 0.6, 0.05, "#8a9bb8"], [0.25, 0.25, 0, 0.05, 0.6, 0.05, "#8a9bb8"],
@@ -315,7 +340,7 @@ function buildB() {
 function animB(t) {
   B.pr.redraw(t);
   popLogo(B.logo, t, 26.86, 27.9, 1.95, 1.6); popLabel(B.lab, t, 27.25, 27.9);
-  const cu = U(t, 27.95, 28.3, "back") * (1 - U(t, 30.3, 30.5, "in")); B.card.visible = t > 27.95 && cu > 0.01; B.card.scale.setScalar(Math.max(0.001, cu));
+  const cu = U(t, 28.1, 28.4, "back") * (1 - U(t, 30.3, 30.5, "in")); B.card.visible = t > 28.1 && cu > 0.01; B.card.scale.setScalar(Math.max(0.001, cu));
   popLogo(B.cl, t, 29.26, 30.3, 2.45, 2);
   const land = 26.3, grow = U(t, 29.5, 29.95, "back");
   if (t > 25.75 && t < 30.95) {
@@ -403,7 +428,7 @@ k("H", 5.8, FR([0, 0.82, CRZ], 7.2, 1040, 0.26), "io"); k("H", 8.4, FR([0, 0.82,
 k("H", 8.8, FR([CRX[0], 0.6, CRZ + 0.5], 1.6, 900, 0.08), "io"); k("H", 9.16, FR([CRX[0], 0.55, CRZ + 0.5], 0.4, 900, 0.05), "in");
 // F — out of the portal on the cube, README facts, code, frames fly to the phone, push to the phone, whip tilt up
 cut("F", 9.17, FR([MONF[0] + 1.2, 3.25, MONF[2] + 0.15], 0.55, 900, 0.15)); k("F", 10.1, FR([MONF[0], 2.0, MONF[2]], 3.3, 830, 0.12, 0.12), "io");
-k("F", 12.8, FR([MONF[0], 2.0, MONF[2]], 3.3, 860, 0.12, 0.12), "sine"); k("F", 14.45, FR([MONF[0], 2.0, MONF[2]], 3.3, 900, 0.12, 0.12), "sine");
+k("F", 12.8, FR([MONF[0], 2.0, MONF[2]], 3.3, 860, 0.12, 0.12), "sine"); k("F", 14.45, FR([MONF[0], 2.0, MONF[2]], 3.3, 960, 0.12, 0.12), "sine");
 k("F", 15.3, FR([0.8, 1.75, -0.6], 6.6, 1000, 0.16), "io"); k("F", 16.35, FR([PHF[0], 1.6, PHF[2]], 4.3, 1080, 0.1, -0.4), "io"); k("F", 18.75, FR([PHF[0], 1.6, PHF[2]], 4.15, 1080, 0.1, -0.4), "sine");
 C.push([19.16, (() => { const v = at("F")(FR([PHF[0], 1.6, PHF[2]], 4.15, 1080, 0.1, -0.4)); v[4] += 30; return v; })(), "expo"]);
 // G — tilt down from the sky onto the logo, the board rises, then the lanes; follow the falling cube down to B
@@ -443,7 +468,7 @@ function render(t) {
   renderer.render(scene, cam);
 }
 window.VX.render = render;
-const PR = Promise.all([document.fonts.load(`700 60px Poppins`), document.fonts.load(`400 60px Poppins`)]).then(() => {
+const PR = Promise.all([document.fonts.load(`700 60px Poppins`), document.fonts.load(`400 60px Poppins`), loadRec()]).then(() => {
   buildH(); buildF(); buildG(); buildB(); buildS(); ready = true; render(window.VX.t0 || 0);
 });
 window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {}; window.__hf.buildReady.vx = PR;

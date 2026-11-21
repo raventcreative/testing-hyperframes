@@ -15,18 +15,16 @@ import { MAT, rnd, setSeed, boxes, emi, ctex, rr, cl, EZ, U, keys, glow, label, 
 
 const cv = document.getElementById("vx");
 const W = cv.width, H = cv.height;
-const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true });
-renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });   // transparent: the brand plate is an <img> under the canvas
+renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.setClearColor(0x000000, 0);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.98;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.12;
-{ const c = document.createElement("canvas"); c.width = 4; c.height = 512; const g = c.getContext("2d");
-  const gr = g.createLinearGradient(0, 0, 0, 512); gr.addColorStop(0, "#9fc4f3"); gr.addColorStop(0.5, "#d3e4fa"); gr.addColorStop(1, "#f3f8ff");
-  g.fillStyle = gr; g.fillRect(0, 0, 4, 512); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
-scene.fog = new THREE.Fog(0xdde9f9, 24, 60);
+scene.background = null;   // ADDENDUM 2026-11-21: no sky gradient/dome/clouds — the backdrop is ONLY the white brand plate (brand/bg-light.png)
+scene.fog = new THREE.Fog(0xeef3fb, 24, 60);   // subtle, tinted to the plate's mid colour
 scene.add(new THREE.HemisphereLight(0xffffff, 0xa9bddc, 0.95));
 const sun = new THREE.DirectionalLight(0xfff1df, 2.9); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.025;
@@ -478,7 +476,7 @@ function render(t) {
 }
 window.VX.render = render;
 const P = Promise.all([document.fonts.load(`700 60px Poppins`), document.fonts.load(`400 60px Poppins`), igReady]).then(() => {
-  makeTextures(); buildA(); buildB(); buildC(); buildD(); buildE(); buildF(); buildG(); buildClouds(); ready = true; render(window.VX.t0 || 0);
+  makeTextures(); buildA(); buildB(); buildC(); buildD(); buildE(); buildF(); buildG(); ready = true;   // no voxel clouds (brand plate only) render(window.VX.t0 || 0);
 });
 window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {}; window.__hf.buildReady.vx = P;
 window.addEventListener("hf-seek", (e) => render(e.detail.time));

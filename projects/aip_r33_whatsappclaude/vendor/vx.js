@@ -15,16 +15,15 @@ const VW = window.VO_WORDS;
 const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); if (!w) throw new Error("vx: word not found " + txt); return w[1]; };
 const cv = document.getElementById("vx");
 const W = cv.width, H = cv.height;
-const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });   // transparent: the brand plate shows through
+renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(1); renderer.setSize(W, H, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.35;
-{ const c = document.createElement("canvas"); c.width = 4; c.height = 512; const g = c.getContext("2d"); const gr = g.createLinearGradient(0, 0, 0, 512);
-  gr.addColorStop(0, "#c4d8f2"); gr.addColorStop(0.5, "#e2ecf8"); gr.addColorStop(1, "#f7fafe"); g.fillStyle = gr; g.fillRect(0, 0, 4, 512);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
-scene.fog = new THREE.Fog(0xe6eef9, 34, 90);
+scene.background = null;   // ADDENDUM 2026-11-21: no sky — the white brand plate (assets/brand/bg_light_1080x1920.png) is an <img> under #vx
+scene.fog = new THREE.Fog(0xeef3fb, 40, 110);
 const hemi = new THREE.HemisphereLight(0xffffff, 0xb7c7df, 1.15); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff3e4, 2.3); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.025;
 Object.assign(sun.shadow.camera, { left: -10, right: 10, top: 10, bottom: -10, near: 1, far: 45 }); scene.add(sun, sun.target);
@@ -45,7 +44,7 @@ function island(nx, nz, a = "#f7f9fd", b = "#e8eef8") {
 }
 const WP = { H: [0, 0, 0], B: [60, 0, 0], K: [120, 0, 0], A: [180, 0, 0], S: [240, 0, 0], L: [300, 0, 0], X: [300, 0, -40], C: [360, 0, 0], F: [420, 0, 0] };
 const worlds = {}; const mk = (k) => { const g = new THREE.Group(); g.position.set(...WP[k]); worlds[k] = g; scene.add(g); return g; };
-function clouds(k, n, sd) { setSeed(sd); for (let i = 0; i < n; i++) { const x = (rnd() - 0.5) * 36, y = -7 + rnd() * 11, z = -20 + rnd() * 22;
+function clouds(k, n, sd) { return; setSeed(sd); for (let i = 0; i < n; i++) { const x = (rnd() - 0.5) * 36, y = -7 + rnd() * 11, z = -20 + rnd() * 22;
   if (Math.hypot(x, z) < 9 && y > -4) continue; const L = [], q = 3 + Math.floor(rnd() * 3), sz = 0.8 + rnd() * 1.1;
   for (let j = 0; j < q; j++) L.push([(j - q / 2) * sz * 0.8, (rnd() - 0.3) * sz * 0.5, (rnd() - 0.5) * sz, sz * (1 + rnd()), sz * (0.55 + rnd() * 0.5), sz * (1 + rnd() * 0.8), j & 1 ? "#ffffff" : "#f0f5fc"]);
   const m = boxes(L, MAT, false); m.castShadow = m.receiveShadow = false; m.position.set(x, y, z); worlds[k].add(m); } }

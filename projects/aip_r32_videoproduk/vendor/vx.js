@@ -12,16 +12,16 @@ import { MAT, rnd, setSeed, boxes, emi, rr, cl, EZ, U, keys, blinkAt, person, gl
 
 const cv = document.getElementById("vx");
 const W = cv.width, H = cv.height;
-const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true });
+// brand rule (batch 8 addendum): the backdrop is the client navy plate (<img id="plate"> under this canvas) -> transparent WebGL
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true });
+renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(1); renderer.setSize(W, H, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.22;
-{ const c = document.createElement("canvas"); c.width = 4; c.height = 512; const g = c.getContext("2d"); const gr = g.createLinearGradient(0, 0, 0, 512);
-  gr.addColorStop(0, "#040a1f"); gr.addColorStop(0.55, "#0a1840"); gr.addColorStop(1, "#13285a"); g.fillStyle = gr; g.fillRect(0, 0, 4, 512);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
-scene.fog = new THREE.Fog(0x0c1a44, 26, 70);
+scene.background = null;   // no sky gradient: the brand plate shows through
+scene.fog = new THREE.Fog(0x13284f, 40, 140);   // subtle, tinted to the plate mid colour
 const hemi = new THREE.HemisphereLight(0x9fbaff, 0x0a1230, 0.75); scene.add(hemi);
 const moon = new THREE.DirectionalLight(0xc6dbff, 2.1); moon.castShadow = true; moon.shadow.mapSize.set(2048, 2048); moon.shadow.bias = -0.0004; moon.shadow.normalBias = 0.025;
 Object.assign(moon.shadow.camera, { left: -10, right: 10, top: 10, bottom: -10, near: 1, far: 45 }); scene.add(moon, moon.target);
@@ -47,12 +47,7 @@ const T = {
 window.VX_T = T;
 const envAt = (t) => { const E = window.VO_ENV; const i = Math.floor(t * 100); return i >= 0 && i < E.length ? E[i] / 99 : 0; };
 
-/* ---------------------------------------------------------------- stars */
-const stars = new THREE.Group(); scene.add(stars);
-{ setSeed(91); const N = 700, p = new Float32Array(N * 3);
-  for (let i = 0; i < N; i++) { const u = rnd() * 2 - 1, a = rnd() * Math.PI * 2, r = 110, s = Math.sqrt(1 - u * u); p[i * 3] = r * s * Math.cos(a); p[i * 3 + 1] = Math.abs(r * u) * 0.9 + 4; p[i * 3 + 2] = r * s * Math.sin(a); }
-  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(p, 3));
-  stars.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xcfe2ff, size: 2.2, sizeAttenuation: false, fog: false, transparent: true, opacity: 0.85 }))); }
+const stars = new THREE.Group();   // no star sprites (brand plate only)
 
 /* ---------------------------------------------------------------- shared */
 const RIM = emi("#36e0ff", 1.3);
@@ -72,7 +67,8 @@ const WP = { H: [0, 0, 0, 0], N: [-3, 0, -17, 0], S: [3, 0, -34, 0], R: [-1, 0, 
 const VIS = { H: [-1, 16.3], N: [16.25, 30.74], S: [30.6, 36.3], R: [35.05, 44.32], X: [6.6, 11.2], C: [44.3, 99] };
 const MAP = [5.4, 7.6]; // all chain islands visible together (reveal)
 const worlds = {}; const mk = (k) => { const g = new THREE.Group(); g.position.set(WP[k][0], WP[k][1], WP[k][2]); g.rotation.y = WP[k][3]; worlds[k] = g; scene.add(g); return g; };
-function clouds(k, n, sd) { setSeed(sd); for (let i = 0; i < n; i++) { const x = (rnd() - 0.5) * 34, y = -6 + rnd() * 9, z = -18 + rnd() * 22;
+function clouds() { }   // no voxel clouds (brand plate only)
+function cloudsUnused(k, n, sd) { setSeed(sd); for (let i = 0; i < n; i++) { const x = (rnd() - 0.5) * 34, y = -6 + rnd() * 9, z = -18 + rnd() * 22;
   if (Math.hypot(x, z) < 9 && y > -4) continue; const L = [], q = 3 + Math.floor(rnd() * 3), sz = 0.8 + rnd() * 1.1;
   for (let j = 0; j < q; j++) L.push([(j - q / 2) * sz * 0.8, (rnd() - 0.3) * sz * 0.5, (rnd() - 0.5) * sz, sz * (1 + rnd()), sz * (0.55 + rnd() * 0.5), sz * (1 + rnd() * 0.8), j & 1 ? "#22386c" : "#1b2f60"]);
   const m = boxes(L, MAT, false); m.castShadow = m.receiveShadow = false; m.position.set(x, y, z); worlds[k].add(m); } }
@@ -659,7 +655,7 @@ function render(t) {
   cam.position.set(v[0] + hx, v[1] + hy, v[2]); cam.fov = fov; cam.setViewOffset(W, Hf, 0, 2 * LIFT, W, H); cam.updateProjectionMatrix();
   cam.up.set(0, 1, 0); cam.lookAt(v[3], v[4], v[5]);
   // fog opens up for the wide map shot
-  const far = inMap || (t > 5.3 && t < 11.2) ? 150 : 70; scene.fog.near = far > 100 ? 60 : 26; scene.fog.far = far;
+  const far = inMap || (t > 5.3 && t < 11.2) ? 200 : 140; scene.fog.near = far > 150 ? 90 : 40; scene.fog.far = far;
   if (!LOGO.ig) { LOGO.ig = logo3d("instagram", window.LOGOS.instagram.hex, 1); cam.add(LOGO.ig); }
   { const on = U(t, T.komen - 0.05, T.komen + 0.35, "back"), d = 3.0; LOGO.ig.visible = t > T.komen - 0.05; cam.updateMatrixWorld();
     const v2 = new THREE.Vector3((540 / W) * 2 - 1, 1 - (420 / H) * 2, 0.5).unproject(cam).sub(cam.position).normalize().multiplyScalar(d).add(cam.position); cam.worldToLocal(v2);

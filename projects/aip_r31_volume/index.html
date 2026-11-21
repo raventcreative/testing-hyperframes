@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>R31 · Aturan volume: banyakin percobaan — AI PRENEUR</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/mascot_face.js"></script>
+    <script src="vendor/mascot3d.js"></script>
+    <script src="vendor/robot3d.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
+    <script type="module" src="vendor/vx.js"></script>
+    <style>
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: Poppins; src: url(assets/fonts/poppins-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: block; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #eef4fc; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Poppins, sans-serif; color: #0a0d2c; -webkit-font-smoothing: antialiased; }
+      .layer { position: absolute; inset: 0; }
+      #vx { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #veilT { position: absolute; left: 0; top: 0; width: 1080px; height: 560px; background: linear-gradient(180deg, rgba(246,250,255,.72) 0%, rgba(246,250,255,.34) 55%, rgba(246,250,255,0) 100%); }
+      #grain { position: absolute; left: -64px; top: -64px; width: 1208px; height: 2048px; background: url(assets/brand/grain_256.png); opacity: .03; mix-blend-mode: multiply; }
+      #brandlogo { position: absolute; left: 84px; top: 236px; width: 236px; height: auto; opacity: .95; }
+      .tt { position: absolute; left: 540px; top: 330px; opacity: 0; display: flex; align-items: center; gap: 18px; padding: 16px 34px 18px 20px;
+            background: #0a0d2c; color: #fff; border-radius: 22px; font: 700 42px/1.1 Poppins; letter-spacing: -.3px; white-space: nowrap;
+            box-shadow: 0 16px 34px rgba(10,13,44,.24), inset 0 -4px 0 rgba(1,204,247,.35); }
+      .tt .tab { width: 14px; height: 42px; border-radius: 6px; background: #01ccf7; flex: none; }
+      .tt b { color: #7fe3ff; }
+      #chip { position: absolute; left: 84px; top: 452px; opacity: 0; display: flex; align-items: center; gap: 14px; padding: 12px 22px 12px 14px;
+              background: #ffffff; border: 3px solid #0a0d2c; border-radius: 20px; box-shadow: 0 10px 24px rgba(10,13,44,.16); transform-origin: 0% 50%; }
+      #chip .ic { width: 52px; height: 52px; border-radius: 14px; background: #0a0d2c; display: grid; place-items: center; flex: none; }
+      #chip .ic i { display: block; width: 22px; height: 22px; border-radius: 5px; background: #01ccf7; }
+      #chip .lb { font: 700 19px/1 Poppins; letter-spacing: 3px; color: #294b77; }
+      #chip .nm { font: 700 48px/1 Poppins; color: #0a0d2c; text-align: right; }
+      #chip .sep { width: 3px; height: 46px; background: #d3ddeb; border-radius: 2px; }
+      #tag { position: absolute; right: 84px; top: 458px; opacity: 0; transform-origin: 100% 50%; }
+      #tag span { display: inline-block; padding: 12px 22px 14px; border-radius: 18px; background: #ffffff; border: 3px solid #294b77; font: 700 28px/1 Poppins; color: #294b77; white-space: nowrap; }
+      .cap { position: absolute; left: 50px; right: 50px; top: 1004px; text-align: center; font-size: 62px; line-height: 1.5; opacity: 0; }
+      .cap .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .02em .2em .16em; margin: -.02em -.07em -.16em; background: rgba(255,255,255,.93); border-radius: 14px; isolation: isolate; }
+      .cap .w { display: inline-block; position: relative; color: #0a0d2c; font-weight: 700; }
+      .cap .w.k { background: linear-gradient(172deg, #0a0d2c 10%, #294b77 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap .hl { position: absolute; left: -4px; right: -4px; bottom: .16em; height: .3em; background: rgba(1,204,247,.38); border-radius: 6px; transform-origin: 0 50%; z-index: -1; }
+      #flash { position: absolute; inset: 0; background: #ffffff; opacity: 0; }
+      #iris { position: absolute; inset: 0; background: #0a0d2c; --r: 1700px; opacity: 0; visibility: hidden;
+              -webkit-mask-image: radial-gradient(circle at 842px 1430px, transparent var(--r), #000 calc(var(--r) + 3px)); mask-image: radial-gradient(circle at 842px 1430px, transparent var(--r), #000 calc(var(--r) + 3px)); }
+      #ctaveil { position: absolute; left: 0; top: 700px; width: 1080px; height: 360px; background: radial-gradient(ellipse 620px 190px at 540px 180px, rgba(246,250,255,.8) 0%, rgba(246,250,255,0) 100%); opacity: 0; }
+      #cbox { position: absolute; left: 110px; top: 790px; width: 860px; opacity: 0; display: flex; align-items: center; gap: 22px; padding: 22px 26px; background: #ffffff; border: 3px solid #0a0d2c; border-radius: 28px; box-shadow: 0 20px 44px rgba(10,13,44,.22); }
+      #cbox .av { width: 74px; height: 74px; border-radius: 50%; background: linear-gradient(135deg, #01ccf7, #294b77); flex: none; }
+      #cbox .in { flex: 1; font: 700 54px/1 Poppins; color: #0a0d2c; letter-spacing: 2px; min-height: 60px; display: flex; align-items: center; }
+      #cbox .ph { font: 400 34px/1 Poppins; color: #8a97b3; letter-spacing: 0; }
+      #cbox .cur { width: 4px; height: 56px; background: #01ccf7; margin-left: 4px; }
+      #cbox .send { padding: 14px 26px; border-radius: 18px; background: #01ccf7; color: #0a0d2c; font: 700 34px/1 Poppins; }
+      #dm { position: absolute; left: 110px; top: 790px; width: 860px; opacity: 0; padding: 22px 30px; border-radius: 28px; background: #0a0d2c; box-shadow: 0 20px 44px rgba(10,13,44,.28); }
+      #dm .h { font: 700 24px/1 Poppins; letter-spacing: 3px; color: #7fe3ff; }
+      #dm .b { font: 700 38px/1.25 Poppins; color: #fff; margin-top: 12px; }
+      #dm .b span { color: #01ccf7; }
+      #rb-root { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+      #rb-canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #rb-kb { position: absolute; left: 0; top: 0; width: 300px; height: 100px; margin: -50px 0 0 -150px; opacity: 0; transform-origin: 50% 50%; }
+      #rb-kb .pl { position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(180deg, rgba(1,204,247,.30), rgba(1,204,247,.10));
+        box-shadow: 0 0 0 1.5px rgba(106,223,255,.7), 0 0 26px rgba(1,204,247,.55), inset 0 0 18px rgba(1,204,247,.25); }
+      #rb-kb .ks { position: absolute; left: 16px; top: 13px; width: 268px; height: 74px; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(3, 1fr); gap: 4px; }
+      #rb-kb .ks i { display: block; border-radius: 4px; background: rgba(160,235,255,.22); box-shadow: inset 0 0 0 1px rgba(160,235,255,.35); }
+      #rb-kb .ks i.on { background: rgba(220,250,255,.95); box-shadow: 0 0 10px rgba(1,204,247,.95); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="57" data-width="1080" data-height="1920" data-fps="30">
+      <div id="stage" class="clip layer" data-start="0" data-duration="57" data-track-index="1"><canvas id="vx" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas></div>
+      <div id="host" class="clip layer" data-layout-ignore data-layout-allow-occlusion data-start="0" data-duration="57" data-track-index="2"><canvas id="ms" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion style="position:absolute;left:0;top:0;width:1080px;height:1920px"></canvas></div>
+      <div id="cohost" class="clip layer" data-layout-ignore data-layout-allow-occlusion data-start="0" data-duration="57" data-track-index="3"><div id="rb-root" data-layout-ignore data-layout-allow-occlusion><canvas id="rb-canvas" width="1080" height="1920" data-layout-ignore data-layout-allow-occlusion></canvas><div id="rb-kb" data-layout-ignore data-layout-allow-occlusion><div class="pl"></div><div class="ks" id="rb-keys"></div></div></div></div>
+      <div id="ui" class="clip layer" data-start="0" data-duration="57" data-track-index="4">
+        <div id="veilT"></div><div id="grain"></div>
+        <img id="brandlogo" src="assets/brand/logo_dark_trim.png" alt="AI PRENEUR" />
+        <div class="tt" id="t1"><span class="tab"></span><span><b>3x</b> COBA → NYERAH?</span></div>
+        <div class="tt" id="t2"><span class="tab"></span><span>BUKAN BAKAT, TAPI <b>JUMLAH</b></span></div>
+        <div class="tt" id="t3"><span class="tab"></span><span>ATURAN <b>VOLUME</b></span></div>
+        <div class="tt" id="t4"><span class="tab"></span><span><b>#1</b> KONTEN · 5 → <b>100</b> VIDEO</span></div>
+        <div class="tt" id="t5"><span class="tab"></span><span><b>#2</b> JUALAN · FOLLOW-UP SEMUA</span></div>
+        <div class="tt" id="t6"><span class="tab"></span><span><b>#3</b> IKLAN · UJI <b>10</b> VARIASI</span></div>
+        <div class="tt" id="t7"><span class="tab"></span><span><b>#4</b> OLAHRAGA · <b>30</b> HARI</span></div>
+        <div class="tt" id="t8"><span class="tab"></span><span>COBA → <b>CATAT</b> → PERBAIKI</span></div>
+        <div class="tt" id="t9"><span class="tab"></span><span><b>AI</b> BIKIN VOLUME MURAH</span></div>
+        <div class="tt" id="t10"><span class="tab"></span><span>YANG KLIK TETAP <b>KAMU</b></span></div>
+        <div class="tt" id="t11"><span class="tab"></span><span>1 HARI = <b>1 ANAK TANGGA</b></span></div>
+        <div id="chip"><span class="ic"><i></i></span><span><div class="lb" id="l1">COBA</div></span><span class="nm" id="n1">0</span><span class="sep" id="sp"></span><span><div class="lb" id="l2">KENA</div></span><span class="nm" id="n2">0</span></div>
+        <div id="tag"><span id="tg"></span></div>
+        <div id="caps"></div>
+        <div id="ctaveil"></div>
+        <div id="cbox"><span class="av"></span><span class="in" id="cin"><span class="ph" id="cph">Tulis komentar…</span><span id="ctx"></span><span class="cur" id="cur"></span></span><span class="send" id="send">Kirim</span></div>
+        <div id="dm"><div class="h">DM · AI PRENEUR</div><div class="b">Tracker volume <span>30 hari</span> + prompt AI ✓</div></div>
+        <div id="flash" data-layout-ignore data-layout-allow-occlusion></div><div id="iris" data-layout-ignore data-layout-allow-occlusion></div>
+      </div>
+      <audio id="vo" src="assets/audio/vo.mp3" data-start="0.3" data-duration="55.56" data-track-index="10" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="57" data-track-index="11" data-volume="1"></audio>
+    </div>
+    <script>
+      (function () {
+        const OFF = 0.3, DUR = 57;
+        const WORDS = [["Posting", 0.08, 0.4], ["tiga", 0.44, 0.64], ["kali,", 0.8, 1.36], ["sepi,", 1.44, 2.133], ["langsung", 2.187, 2.32], ["nyerah?", 2.4, 2.96], ["Masalahnya", 3.338, 3.68], ["bukan", 3.72, 4.0], ["bakat.", 4.2, 4.88], ["Masalahnya", 4.96, 5.6], ["jumlah", 5.68, 6.0], ["percobaan.", 6.12, 7.127], ["Aturan", 7.2, 7.52], ["yang", 7.56, 7.6], ["dipopulerkan", 7.64, 8.32], ["Alex", 8.4, 8.64], ["Hormozi:", 8.72, 9.4], ["bikin", 9.44, 9.68], ["volume", 9.76, 10.0], ["sebanyak", 10.08, 10.48], ["itu,", 10.76, 11.093], ["sampai", 11.147, 11.28], ["nggak", 11.32, 11.44], ["masuk", 11.52, 11.76], ["akal", 11.84, 12.16], ["kalau", 12.24, 12.4], ["hasilnya", 12.52, 12.72], ["nggak", 12.76, 12.88], ["datang.", 12.96, 13.606], ["Konten:", 13.674, 14.36], ["jangan", 14.4, 14.64], ["berhenti", 14.68, 15.04], ["di", 15.08, 15.12], ["lima", 15.2, 15.44], ["video.", 15.52, 16.12], ["Bikin", 16.16, 16.32], ["seratus,", 16.4, 17.0], ["biar", 17.04, 17.2], ["peluangnya", 17.28, 17.6], ["makin", 17.68, 17.84], ["besar.", 17.96, 18.485], ["Jualan:", 18.56, 19.32], ["banyak", 19.36, 19.6], ["yang", 19.68, 19.76], ["follow-up", 19.88, 20.08], ["sekali,", 20.16, 20.827], ["lalu", 20.853, 21.04], ["berhenti.", 21.12, 21.84], ["Follow-up", 22.0, 22.32], ["semua", 22.4, 22.72], ["yang", 22.8, 22.88], ["pernah", 22.96, 23.12], ["nanya,", 23.2, 23.68], ["tetap", 23.76, 23.92], ["sopan.", 23.96, 24.652], ["Iklan:", 24.788, 25.36], ["jangan", 25.4, 25.68], ["taruh", 25.76, 25.92], ["semua", 26.0, 26.16], ["budget", 26.32, 26.48], ["di", 26.56, 26.64], ["satu", 26.72, 26.88], ["materi.", 26.96, 27.64], ["Uji", 27.68, 27.92], ["sepuluh", 28.0, 28.2], ["variasi,", 28.24, 28.907], ["biar", 28.933, 29.12], ["data", 29.28, 29.44], ["yang", 29.52, 29.6], ["milih", 29.653, 29.76], ["pemenangnya.", 29.84, 30.646], ["Olahraga:", 30.714, 31.44], ["tiga", 31.48, 31.68], ["puluh", 31.76, 31.92], ["hari", 32.0, 32.16], ["berturut-turut,", 32.28, 33.0], ["bukan", 33.04, 33.36], ["cuma", 33.44, 33.6], ["pas", 33.68, 33.76], ["semangat.", 33.88, 34.566], ["Tiap", 34.634, 34.72], ["percobaan", 34.84, 35.2], ["dicatat,", 35.32, 35.893], ["yang", 35.947, 36.0], ["berikutnya", 36.08, 36.48], ["diperbaiki.", 36.56, 37.449], ["Di", 37.591, 37.6], ["sini", 37.64, 38.08], ["AI", 38.16, 38.48], ["bikin", 38.533, 38.72], ["volume", 38.8, 39.12], ["jadi", 39.2, 39.44], ["murah:", 39.56, 40.107], ["draf", 40.133, 40.32], ["naskah,", 40.36, 40.92], ["variasi", 40.96, 41.36], ["iklan,", 41.44, 41.88], ["pesan", 41.92, 42.16], ["follow-up,", 42.28, 42.853], ["keluar", 42.907, 43.12], ["sekali", 43.2, 43.44], ["duduk.", 43.493, 43.924], ["Tapi", 43.996, 44.16], ["yang", 44.24, 44.32], ["klik", 44.4, 44.56], ["posting", 44.76, 44.96], ["dan", 45.04, 45.12], ["yang", 45.16, 45.2], ["kirim", 45.28, 45.52], ["chat,", 45.6, 45.973], ["tetap", 46.027, 46.16], ["kamu.", 46.24, 46.892], ["Anggap", 47.028, 47.2], ["tiap", 47.24, 47.44], ["hari", 47.56, 47.68], ["satu", 47.76, 48.08], ["anak", 48.12, 48.32], ["tangga.", 48.373, 48.933], ["Isi", 48.987, 49.12], ["dengan", 49.173, 49.28], ["percobaan,", 49.36, 50.04], ["dan", 50.08, 50.24], ["targetmu", 50.44, 50.72], ["makin", 50.76, 50.96], ["dekat.", 51.04, 51.525], ["Komen", 51.6, 51.84], ["volume,", 51.92, 52.44], ["aku", 52.48, 52.64], ["kirim", 52.72, 52.96], ["tracker", 53.12, 53.28], ["tiga", 53.32, 53.52], ["puluh", 53.573, 53.76], ["hari", 53.92, 54.08], ["dan", 54.2, 54.32], ["prompt-nya", 54.44, 54.72], ["lewat", 54.76, 54.96], ["DM.", 55.12, 55.6]];
+        const SHOWAS = { 126: "VOLUME," };
+        const KEYW = new Set(["nyerah", "bakat", "jumlah", "percobaan", "hormozi", "volume", "seratus", "followup", "semua", "sepuluh", "variasi", "data", "pemenangnya",
+          "puluh", "berturutturut", "dicatat", "diperbaiki", "ai", "murah", "kamu", "tangga", "targetmu", "komen", "tracker"]);
+        const bare = (w) => w.toLowerCase().replace(/[^a-z]/g, "");
+        const CHUNKS = []; { let a = 0; for (let i = 0; i < WORDS.length; i++) { const end = /[,.:?]$/.test(WORDS[i][0]) || i - a === 3 || i === WORDS.length - 1; if (end) { CHUNKS.push([a, i + 1]); a = i + 1; } } }
+        const tl = gsap.timeline({ paused: true });
+        const _sc = (v) => { if (!v || typeof v !== "object" || v.scale === undefined) return v; const o = Object.assign({}, v); o.scaleX = o.scaleY = o.scale; delete o.scale; return o; };
+        { const s0 = tl.set.bind(tl), f0 = tl.fromTo.bind(tl), t0 = tl.to.bind(tl); tl.set = (a, v, p) => s0(a, _sc(v), p); tl.fromTo = (a, x, y, p) => f0(a, _sc(x), _sc(y), p); tl.to = (a, v, p) => t0(a, _sc(v), p); }
+        const P0 = gsap.timeline(); tl.add(P0, 0);
+        const pin = (el, v) => { gsap.set(el, _sc(v)); P0.set(el, _sc(v), 0); };
+        const ft = (el, a, b, t) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), t);
+        // per-word captions (box appears with its word; bottom while the world is full screen, above the mascot after)
+        const caps = document.getElementById("caps");
+        CHUNKS.forEach(([a, b], ci) => {
+          const d = document.createElement("div"); d.className = "cap"; const t0 = WORDS[a][1] + OFF; d.style.top = (t0 < 3.5 ? 1430 : 1004) + "px"; caps.appendChild(d);
+          const ws = [];
+          for (let i = a; i < b; i++) { const m = document.createElement("span"); m.className = "m"; const w = document.createElement("span"); const key = KEYW.has(bare(WORDS[i][0]));
+            w.className = "w" + (key ? " k" : ""); w.textContent = SHOWAS[i] || WORDS[i][0]; if (key) { const h = document.createElement("span"); h.className = "hl"; w.appendChild(h); }
+            m.appendChild(w); d.appendChild(m); if (i < b - 1) d.appendChild(document.createTextNode(" ")); ws.push([w, WORDS[i][1] + OFF]); }
+          const tIn = ws[0][1] - 0.06, next = CHUNKS[ci + 1], tOut = next ? WORDS[next[0]][1] + OFF - 0.08 : DUR - 0.3;
+          pin(d, { opacity: 0 }); ft(d, { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, tIn); ft(d, { opacity: 1, y: 0 }, { opacity: 0, y: -10, duration: 0.12, ease: "power2.in" }, Math.max(tIn + 0.2, tOut - 0.12));
+          ws.forEach(([w, t]) => { pin(w.parentNode, { opacity: 0 }); ft(w.parentNode, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Math.max(tIn, t - 0.06));
+            pin(w, { yPercent: 118 }); ft(w, { yPercent: 118 }, { yPercent: 0, duration: 0.3, ease: "power4.out" }, Math.max(tIn, t - 0.05));
+            const h = w.querySelector(".hl"); if (h) { pin(h, { scaleX: 0 }); ft(h, { scaleX: 0 }, { scaleX: 1, duration: 0.26, ease: "power2.out" }, t + 0.08); } });
+        });
+        // section titles (flip down on the beat, leave before the next one)
+        const title = (id, a, b) => { const e = document.getElementById(id); pin(e, { xPercent: -50, opacity: 0 });
+          ft(e, { opacity: 0, rotationX: -88, y: -20, transformPerspective: 900, transformOrigin: "50% 0%" }, { opacity: 1, rotationX: 0, y: 0, duration: 0.45, ease: "back.out(1.6)" }, a);
+          ft(e, { opacity: 1, y: 0 }, { opacity: 0, y: -24, duration: 0.22, ease: "power2.in" }, b); };
+        [["t1", 0.35, 3.2], ["t2", 3.6, 7.05], ["t3", 7.4, 13.15], ["t4", 13.95, 18.45], ["t5", 18.9, 24.75], ["t6", 25.05, 30.3], ["t7", 31.0, 34.75], ["t8", 34.95, 37.4],
+         ["t9", 37.9, 44.0], ["t10", 44.45, 47.05], ["t11", 47.3, 51.55]].forEach((x) => title(...x));
+        // counter chip windows [in, out, label1, label2]
+        const CHIP = [[0.5, 3.2, "COBA", "KENA"], [7.55, 13.15, "COBA", "KENA"], [15.45, 18.45, "VIDEO", ""], [20.15, 24.75, "FOLLOW-UP", "BALASAN"],
+          [27.95, 30.3, "VARIASI", ""], [31.7, 34.75, "HARI", ""], [47.55, 51.55, "ANAK TANGGA", ""]];
+        pin("#chip", { opacity: 0, scale: 0.6 });
+        CHIP.forEach(([a, b]) => { ft("#chip", { opacity: 0, scale: 0.6, x: -30 }, { opacity: 1, scale: 1, x: 0, duration: 0.38, ease: "back.out(2)" }, a);
+          ft("#chip", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.8, duration: 0.18, ease: "power2.in" }, b); });
+        const TAGS = [[7.95, 10.0, "dipopulerkan Alex Hormozi"], [10.05, 13.15, "angka = ilustrasi"], [20.15, 24.75, "balasan = ilustrasi"], [29.55, 30.3, "data = ilustrasi"]];
+        pin("#tag", { opacity: 0 }); TAGS.forEach(([a, b]) => { ft("#tag", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, a); ft("#tag", { opacity: 1 }, { opacity: 0, duration: 0.12 }, b - 0.12); });
+        // transitions on the page layer: white flash on the dive match cut + the vertigo cut; iris through the robot's face
+        pin("#flash", { opacity: 0 });
+        ft("#flash", { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "power2.in" }, 30.46); ft("#flash", { opacity: 1 }, { opacity: 0, duration: 0.35, ease: "power2.out" }, 30.56);
+        ft("#flash", { opacity: 0 }, { opacity: 0.85, duration: 0.08, ease: "power2.in" }, 44.22); ft("#flash", { opacity: 0.85 }, { opacity: 0, duration: 0.3, ease: "power2.out" }, 44.3);
+        pin("#iris", { "--r": "1700px", autoAlpha: 0 }); tl.set("#iris", { autoAlpha: 1 }, 37.3); tl.set("#iris", { autoAlpha: 0 }, 38.25);
+        ft("#iris", { "--r": "1700px" }, { "--r": "0px", duration: 0.4, ease: "power3.in" }, 37.34); ft("#iris", { "--r": "0px" }, { "--r": "1700px", duration: 0.45, ease: "power3.out" }, 37.78);
+        // CTA
+        pin("#ctaveil", { opacity: 0 }); ft("#ctaveil", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 51.85);
+        pin("#cbox", { opacity: 0, y: 40 }); ft("#cbox", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.6)" }, 51.85);
+        ft("#send", { scale: 1 }, { scale: 0.88, duration: 0.08, yoyo: true, repeat: 1 }, 52.95);
+        ft("#cbox", { opacity: 1, x: 0 }, { opacity: 0, x: -140, duration: 0.3, ease: "power2.in" }, 53.25);
+        pin("#dm", { opacity: 0, x: 140 }); ft("#dm", { opacity: 0, x: 140 }, { opacity: 1, x: 0, duration: 0.4, ease: "back.out(1.4)" }, 53.4);
+        tl.fromTo("#grain", { x: 0, y: 0 }, { x: 64, y: 40, duration: DUR, ease: "steps(1710)", immediateRender: false }, 0); pin("#grain", { x: 0, y: 0 });
+        tl.set({}, {}, DUR - 0.01);
+        (function (t) { const r = t.render; t.render = function (tt, se, f) { if (tt < this._tTime - 1e-7) r.call(this, 0, true, true); return r.call(this, tt, se, f); }; })(tl);
+        tl.render(0, true, true);
+        window.__timelines = window.__timelines || {}; window.__timelines["main"] = tl;
+        // per-seek text (pure functions of time; counters come from the same functions that drive the 3D)
+        const $ = (id) => document.getElementById(id);
+        function texts(t) {
+          const V = window.VX; const c = CHIP.find(([a, b]) => t >= a - 0.05 && t < b + 0.3) || CHIP[0];
+          $("l1").textContent = c[2]; $("l2").textContent = c[3]; const two = !!c[3];
+          $("sp").style.display = two ? "block" : "none"; $("l2").parentNode.style.display = two ? "block" : "none"; $("n2").style.display = two ? "block" : "none";
+          let n1 = "", n2 = "";
+          if (V) {
+            if (c[2] === "COBA") { n1 = V.triesAt(t); n2 = V.hitsAt(t); }
+            else if (c[2] === "VIDEO") n1 = t < 16.6 ? Math.min(5, Math.max(0, Math.floor((t - 15.5) / 0.07) + 1)) : Math.min(100, 5 + Math.floor(((t - 16.7) / 1.05) * 95) + 1);
+            else if (c[2] === "FOLLOW-UP") { n1 = V.followAt(t) + "x"; n2 = V.repliesAt(t); }
+            else if (c[2] === "VARIASI") n1 = Math.min(10, Math.max(1, Math.floor((t - 28.05) / 0.05) + 1));
+            else if (c[2] === "HARI") n1 = V.daysAt(t) + "/30";
+            else n1 = V.stepsAt(t) + "/30";
+          }
+          $("n1").textContent = n1; $("n2").textContent = n2;
+          const g = TAGS.find(([a, b]) => t >= a - 0.02 && t < b) || TAGS.find(([a]) => a > t) || TAGS[0]; $("tg").textContent = g[2];
+          const typed = "VOLUME".slice(0, Math.max(0, Math.min(6, Math.floor((t - 52.25) / 0.09) + 1)));
+          $("ctx").textContent = t >= 52.25 ? typed : ""; $("cph").style.display = t >= 52.25 ? "none" : "inline";
+          $("cur").style.opacity = Math.floor(t * 3) % 2 ? 1 : 0.2;
+        }
+        texts(0); window.addEventListener("hf-seek", (e) => texts(e.detail.time));
+      })();
+    </script>
+    <script src="vendor/mascot_host.js"></script>
+    <script src="vendor/robot_host.js"></script>
+  </body>
+</html>

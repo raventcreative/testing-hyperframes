@@ -47,3 +47,7 @@
   (49.45–49.8), docking above the thread at 50.43; window fades at 50.38. Comment thread restyled like IG dark comments (username +
   text on a dark row); thread/reply/sensitive/"Inbox kamu" moments unchanged in time. Mock "copy" cards and channel labels removed.
 - Previous final kept as `out/AIP_R30_v2_mockIG.mp4`.
+
+## 2026-11-20 — status
+- Delivered final = mock-IG version (out/AIP_R30_TIM_MARKETING_AI.mp4, fixed VO, -14.7 LUFS).
+- The composition now uses the client IG recording (assets/rec/, local only, gitignored). Its re-render was stopped on the client request ("buat simpenan"); render + remix with tools/remix_audio.sh only if asked.

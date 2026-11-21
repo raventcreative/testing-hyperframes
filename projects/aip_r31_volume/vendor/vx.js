@@ -15,18 +15,16 @@ import { MAT, rnd, setSeed, boxes, emi, ctex, rr, cl, EZ, U, keys, glow, label, 
 
 const cv = document.getElementById("vx");
 const W = cv.width, H = cv.height;
-const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true });
-renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });   // transparent: the brand plate is an <img> under the canvas
+renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.setClearColor(0x000000, 0);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.98;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.12;
-{ const c = document.createElement("canvas"); c.width = 4; c.height = 512; const g = c.getContext("2d");
-  const gr = g.createLinearGradient(0, 0, 0, 512); gr.addColorStop(0, "#9fc4f3"); gr.addColorStop(0.5, "#d3e4fa"); gr.addColorStop(1, "#f3f8ff");
-  g.fillStyle = gr; g.fillRect(0, 0, 4, 512); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
-scene.fog = new THREE.Fog(0xdde9f9, 24, 60);
+scene.background = null;   // ADDENDUM 2026-11-21: no sky gradient/dome/clouds — the backdrop is ONLY the white brand plate (brand/bg-light.png)
+scene.fog = new THREE.Fog(0xeef3fb, 24, 60);   // subtle, tinted to the plate's mid colour
 scene.add(new THREE.HemisphereLight(0xffffff, 0xa9bddc, 0.95));
 const sun = new THREE.DirectionalLight(0xfff1df, 2.9); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.025;
@@ -155,8 +153,8 @@ function makeTextures() {
   TX.ad1 = ctex(640, 400, (g, w, h) => { g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h); g.fillStyle = NV2; g.fillRect(0, 0, w, 86);
     g.font = `700 50px ${FONT}`; g.fillStyle = "#ffffff"; g.fillText("1 MATERI IKLAN", 34, 62);
     g.fillStyle = "#c9d6e8"; rr(g, 34, 130, 520, 34, 17); g.fill(); rr(g, 34, 190, 400, 34, 17); g.fill(); g.fillStyle = CY; rr(g, 34, 280, 220, 70, 35); g.fill(); });
-  TX.day = Array.from({ length: 30 }, (_, i) => [0, 1, 2].map((on) => ctex(128, 128, (g, w) => { g.fillStyle = on ? CY : "#ffffff"; g.fillRect(0, 0, w, w);
-    g.lineWidth = 6; g.strokeStyle = on ? "#7fe3ff" : "#c9d6e8"; g.strokeRect(3, 3, w - 6, w - 6);
+  TX.day = Array.from({ length: 30 }, (_, i) => [0, 1, 2, 3].map((on) => ctex(128, 128, (g, w) => { g.fillStyle = on === 1 || on === 2 ? CY : "#ffffff"; g.fillRect(0, 0, w, w);
+    g.lineWidth = 6; g.strokeStyle = on === 1 || on === 2 ? "#7fe3ff" : "#c9d6e8"; g.strokeRect(3, 3, w - 6, w - 6);
     if (on < 2) { g.font = `700 54px ${FONT}`; g.textAlign = "center"; g.fillStyle = on ? NV2 : NV; g.fillText(String(i + 1), 64, 84); } })));
   TX.btn = ["POSTING", "KIRIM"].map((s) => ctex(512, 256, (g, w, h) => { g.fillStyle = CY; g.fillRect(0, 0, w, h); g.font = `700 104px ${FONT}`; g.textAlign = "center"; g.fillStyle = NV2; g.fillText(s, w / 2, 166); }));
   TX.btnBlank = ctex(64, 32, (g, w, h) => { g.fillStyle = CY; g.fillRect(0, 0, w, h); });
@@ -268,7 +266,7 @@ function animD(t) {
 /* E — 30-day grid + bars (catat -> perbaiki) */
 const DAY = (i) => 31.78 + i * 0.052;
 function buildE() {
-  const g = grp("E"); g.add(island(5, 4));
+  const g = grp("E"); g.add(island(4, 4));
   g.add(boxes([[0, 0.12, 0, 6.9, 0.24, 5.9, NV], [0, 0.25, 0, 7.0, 0.03, 6.0, CY]]));
   E.tiles = []; for (let i = 0; i < 30; i++) { const r = Math.floor(i / 6), c = i % 6;
     const m = new THREE.Group(); m.position.set(-2.75 + c * 1.1, 0.3, -2.2 + r * 1.1); g.add(m);
@@ -290,7 +288,7 @@ function buildE() {
 const BARH = (i) => 0.35 + i * 0.075 + 0.12 * Math.sin(i * 2.3);
 function animE(t) {
   E.tiles.forEach(({ m, top, bar }, i) => { const u = spring(t, DAY(i), 16, 8); const on = t >= DAY(i);
-    const bt0 = 35.62 + i * 0.03; top.material.map = TX.day[i][t >= bt0 - 0.02 ? 2 : on ? 1 : 0]; top.material.emissiveMap = top.material.map; top.material.emissiveIntensity = on ? 0.55 : 0.15;
+    const bt0 = 35.62 + i * 0.03; top.material.map = TX.day[i][t < 31.0 ? 3 : t >= bt0 - 0.02 ? 2 : on ? 1 : 0];   // numbers only once the camera has pulled out (no cut numbers) top.material.emissiveMap = top.material.map; top.material.emissiveIntensity = on ? 0.55 : 0.15;
     m.position.y = 0.3 + 0.14 * Math.min(1.2, u) * (1 - U(t, DAY(i) + 0.25, DAY(i) + 0.55)) ;
     const pulse = Math.exp(-Math.pow((t - (33.4 + i * 0.03)) / 0.08, 2)); m.position.y += 0.12 * pulse;
     const bt = 35.62 + i * 0.03, hb = BARH(i) * U(t, bt, bt + 0.45, "out") + 0.25 * U(t, 36.86 + i * 0.02, 37.2 + i * 0.02, "out") * (i / 29);
@@ -421,7 +419,7 @@ const SHOT = [
     [24.7, [-0.6, 10.2, 19.0, 0, 1.0, -0.6, 44], "sine"], [25.0, [-14, 9.0, 11.0, 0, 1.0, -0.6, 44], "in"]] },
   { w: "D", a: 25.0, b: 30.56, orbit: [25.0, 25.95, Math.PI * 0.9, 0], cam: [[25.0, [0, 4.3, 16.6, 0, 1.9, 0, 44]], [27.9, [0, 4.2, 15.6, 0, 1.9, 0, 44], "sine"], [28.5, [0, 6.6, 22.0, 0, 1.3, -0.4, 44], "io"],
     [29.9, [0.2, 6.4, 21.0, 0, 1.3, -0.4, 44], "sine"], [30.3, [BB[WIN].x * 0.5, 4.3, 8.8, BB[WIN].x, 2.5, -1.0, 40], "io"], [30.56, [BB[WIN].x, 2.65, 0.5, BB[WIN].x, 2.6, -1.2, 24], "in"]] },
-  { w: "E", a: 30.56, b: 37.78, cam: [[30.56, [-2.75, 1.6, -1.6, -2.75, 0.3, -2.2, 30]], [31.5, [0, 16.8, 12.8, 0, 0, 0.35, 44], "out"], [34.6, [0.4, 16.4, 12.4, 0, 0, 0.35, 44], "sine"],
+  { w: "E", a: 30.56, b: 37.78, cam: [[30.56, [-2.75, 1.6, -1.6, -2.75, 0.3, -2.2, 30]], [31.5, [0, 14.6, 15.6, 0, 0, 0.2, 44], "out"], [34.6, [0.4, 14.3, 15.2, 0, 0, 0.2, 44], "sine"],
     [36.4, [5.0, 9.4, 15.6, -0.6, 0.9, -0.4, 44], "io"], [37.78, [4.6, 9.0, 14.8, -0.6, 0.9, -0.4, 44], "sine"]] },
   { w: "F", a: 37.78, b: 44.3, cam: [[37.78, [0, 3.0, 15.2, 0, 3.0, -0.7, 44]], [40.1, [0, 3.0, 14.6, 0, 3.0, -0.7, 44], "sine"], [40.9, [0, 9.0, 19.5, 0, 2.75, -0.2, 44], "io"],
     [44.0, [0.4, 8.8, 18.8, 0, 2.75, -0.2, 44], "sine"], [44.3, [0, 3.1, 6.5, 0, 3.0, -0.7, 60], "in"]] },
@@ -478,7 +476,7 @@ function render(t) {
 }
 window.VX.render = render;
 const P = Promise.all([document.fonts.load(`700 60px Poppins`), document.fonts.load(`400 60px Poppins`), igReady]).then(() => {
-  makeTextures(); buildA(); buildB(); buildC(); buildD(); buildE(); buildF(); buildG(); buildClouds(); ready = true; render(window.VX.t0 || 0);
+  makeTextures(); buildA(); buildB(); buildC(); buildD(); buildE(); buildF(); buildG(); ready = true;   // no voxel clouds (brand plate only) render(window.VX.t0 || 0);
 });
 window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {}; window.__hf.buildReady.vx = P;
 window.addEventListener("hf-seek", (e) => render(e.detail.time));

@@ -76,3 +76,11 @@ Format batch 8: dunia voxel 3D (putih) + maskot 3D host + robot AIpreneur co-hos
   sehari hari, repo-nya→repo nya…) + "Claude"→"cloud" (nama Inggris, dibaca benar; sama seperti R20) + "Harries"→"Harris". Small salah
   dengar beberapa kata (ritminya, rewaian, nyalimpin, hirain, met) yang didengar benar oleh medium → tidak ada kata yang salah di KEDUA model.
 - Cek akhir pada MP4 final: lihat bagian "Final check" di bawah.
+
+## Revisi 2026-11-21 (addendum batch 8 + permintaan SFX)
+- Background = HANYA plate putih brand (`brand/bg-light.png` cover-fit → `assets/brand/bg_light_1080x1920.png`, `<img>` di bawah kanvas
+  WebGL transparan). Tidak ada langit gradien / awan voxel; fog diwarnai #eef3fb. Wipe shutter + iris pakai putih/biru-muda brand.
+- SFX lebih kaya (tools/sfx.py, 333 event): whoosh di setiap transisi, riser + impact lembut di reveal besar, pop/klik UI (judul, chip,
+  kartu tool, laci), tik halus saat caption muncul, blip kirim/terima pesan (chat, jawaban Claude, DM), tik ketik (pertanyaan, terminal,
+  config, "WA"). Level tetap ≈ −8…−10 dB di bawah puncak VO untuk hit/whoosh (lebih pelan untuk tik), tanpa kompresor; tiap transient
+  digeser ±150 ms agar ≥ 70 ms dari onset kata (0 event dekat onset).

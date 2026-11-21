@@ -52,6 +52,18 @@ Transisi (beda tiap beat): zoom-out reveal · snap cut · island-hop flight · w
 iris lewat wajah robot (portal layar robot) · dolly-zoom (vertigo) · crane spiral mengikuti kubus.
 Resep maskot/robot: guide object (kubus), robot-screen portal (iris), button → page, process fill (stack draf), push kamera pelan.
 
+## Revisi 2026-11-21 (koordinator / klien)
+- **Rekaman layar asli** (aturan klien): beat KONTEN (13,9–18,75 dtk) sekarang memutar feed Instagram asli @aipreneur_academy
+  (brand/rec/ig_aipreneur_academy_profile.mp4) di layar besar dalam dunia voxel, menggantikan dinding konten tiruan. Crop hanya kolom IG
+  tengah (tanpa tab/address bar/bookmark/sidebar/widget Messages); header profil + baris pertama 5 postingan disorot cyan di
+  "lima video", lalu grid di-scroll ±4x (kecepatan scroll dihaluskan dari offset yang diukur) dan zoom tepat ke 3 kolom tengah di
+  "peluangnya makin besar". Tag "feed asli @aipreneur_academy". Frame turunan di assets/rec/ (gitignored, repo publik).
+- **Background hanya plate brand**: WebGL transparan, tanpa langit gradien/awan voxel; di bawah canvas `assets/brand/bg_light_1080x1920.png`
+  (brand/bg-light.png cover-fit). Fog tipis warna plate (#eef3fb). Iris transisi putih.
+- **SFX lebih terasa** (permintaan klien): whoosh di setiap transisi, impact di cut/blok kena target/tombol, riser lembut sebelum reveal,
+  pop/klik UI + klik caption-in, tick counter, swipe di scroll IG; level −8 dB (hit besar) / −11 dB / −15 dB di bawah puncak VO,
+  tanpa sidechain/kompresor di SFX, tidak ada transient di onset kata (dipindah/di-drop otomatis).
+
 ## Teknis
 Three.js (`vendor/vx.js` + `vendor/vxlib.js`, render deterministik per frame lewat hf-seek), maskot klien (`vendor/mascot3d.js` +
 `vendor/mascot_host.js`, lip-sync dari VO), robot AIpreneur (`vendor/robot3d.js` + `vendor/robot_host.js`, port dari R24),

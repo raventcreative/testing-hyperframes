@@ -410,7 +410,7 @@ function animN(t) {
   // blocks drop and stack (small-overshoot landing + dust)
   const BT = BLK_T();
   Nn.blk.forEach((m, i) => { const t0 = BT[i]; m.visible = t > t0 - 0.3; if (!m.visible) return; const u = U(t, t0 - 0.3, t0, "in"), s = t - t0;
-    m.position.set(0, m.userData.y + 2.2 * (1 - u) + (s > 0 ? Math.exp(-s * 9) * Math.abs(Math.sin(s * 16)) * 0.08 : 0), -2.3); m.rotation.y = (1 - u) * 0.6; });
+    m.scale.setScalar(Math.max(0.001, 0.3 + 0.7 * Math.min(1.04, spring(t, t0 - 0.3, 0.35)))); m.position.set(0, m.userData.y + (i === 4 ? 0 : 0.45) * (1 - u) + (s > 0 ? Math.exp(-s * 9) * Math.abs(Math.sin(s * 16)) * 0.08 : 0), -2.3); m.rotation.y = (1 - u) * 0.6; });
   Nn.dust.forEach((d, i) => { const k = i % 5, t0 = BT[k], s = t - t0; d.visible = s > 0 && s < 0.45; if (!d.visible) return; const a = (i / 10) * Math.PI * 2;
     d.position.set(Math.cos(a) * (1.3 + s * 1.2), Nn.blk[k].userData.y - 0.2 + s * 0.6 - s * s * 2, -2.3 + Math.sin(a) * (0.6 + s)); d.scale.setScalar(1 - s / 0.45); });
   // the yellow cart rolls in beside the top block on "keranjang"
@@ -534,7 +534,7 @@ function boardView(g, w, h, t) {
   g.fillStyle = "#f4f8ff"; g.fillRect(0, 0, w, h); g.fillStyle = NAVY; g.fillRect(0, 0, w, 92);
   g.fillStyle = "#ffffff"; g.font = `700 50px ${FONT}`; g.fillText("CEK SEBELUM POSTING", 40, 66);
   CROWS.forEach(([s, f, kind], i) => { const t0 = f(), y = 128 + i * 82; const appear = i < 2 ? U(t, t0 - 0.35, t0 - 0.05, "out") : 1; if (appear <= 0) return; g.globalAlpha = appear;
-    g.fillStyle = INK; fitFont(g, [s], 46, w - 150); g.fillText(s, 116, y + 52);
+    g.fillStyle = INK; fitFont(g, [s], 46, w - 240); g.fillText(s, 116, y + 52);
     const done = U(t, t0, t0 + 0.2, "out");
     g.strokeStyle = "#294b77"; g.lineWidth = 5; rr(g, 40, y + 12, 50, 50, 10); g.stroke();
     if (kind === "x") { if (done > 0) { g.strokeStyle = CY; g.lineWidth = 8; g.beginPath(); g.moveTo(50, y + 22); g.lineTo(50 + 30 * done, y + 22 + 30 * done); g.moveTo(80, y + 22); g.lineTo(80 - 30 * done, y + 22 + 30 * done); g.stroke();
@@ -569,7 +569,7 @@ function animC(t) {
   const rowY = (i) => BCY + BH / 2 - (128 + i * 82 + 37) / 560 * BH;
   const prev = Math.max(0, ri - 1), u = U(t, rows[ri] - 0.3, rows[ri], "io");
   const y = ri === 0 ? rowY(0) : rowY(prev) + (rowY(ri) - rowY(prev)) * u;
-  Cc.mag.visible = t > T.tapi && t < T.komen - 0.3; Cc.mag.position.set(1.22 + 0.04 * Math.sin(t * 5), y + 0.05 * Math.sin(Math.PI * u), 0.3); Cc.mag.rotation.z = 0.1 * Math.sin(t * 2);
+  Cc.mag.visible = t > T.tapi && t < T.komen - 0.3; Cc.mag.position.set(1.33 + 0.02 * Math.sin(t * 5), y + 0.05 * Math.sin(Math.PI * u), 0.3); Cc.mag.rotation.z = 0.1 * Math.sin(t * 2);
 }
 
 /* ---------------------------------------------------------------- the reveal map: chain of 4 islands + glowing path */
@@ -614,8 +614,8 @@ function buildCamera() {
   k("N", SEND() + 0.25, [0.05, 1.92, 10.7, 0.05, 1.76, 0, 40], "sine"); k("N", T.nulis + 0.2, [0.05, 1.82, 10.4, 0.05, 1.68, 0, 40], "io"); k("N", T.detik2 + 0.3, [0.05, 1.8, 10.2, 0.05, 1.68, 0, 40], "sine");
   k("N", DOORS()[0], [0.0, 1.85, 10.4, 0.0, 1.72, 0, 40], "sine");
   // elevator doors: push through the gap to the tower
-  k("N", DOORS()[1] + 0.3, [0.15, 2.1, 8.8, 0.05, 1.38, -2.3, 40], "io"); k("N", T.ajakan + 0.4, [0.25, 2.1, 9.1, 0.12, 1.36, -2.3, 40], "sine");
-  k("N", T.keranjang + 0.2, [0.4, 2.1, 9.7, 0.25, 1.33, -2.1, 40], "io"); k("N", T.tiga - 0.35, [0.4, 2.15, 9.6, 0.25, 1.33, -2.1, 40], "sine");
+  k("N", DOORS()[1] + 0.3, [0.15, 2.22, 8.8, 0.05, 1.5, -2.3, 40], "io"); k("N", T.ajakan + 0.4, [0.25, 2.22, 9.1, 0.12, 1.48, -2.3, 40], "sine");
+  k("N", T.keranjang + 0.2, [0.4, 2.22, 9.7, 0.25, 1.45, -2.1, 40], "io"); k("N", T.tiga - 0.35, [0.4, 2.27, 9.6, 0.25, 1.45, -2.1, 40], "sine");
   // vertical whip tilt to the sky -> S
   k("N", T.tiga - 0.04, [0.4, 2.3, 9.6, 0.25, 30, -10, 40], "expo");
   cut("S", T.tiga - 0.03, [0.2, 2.6, 10.6, 0.2, 30, -8, 40]); k("S", T.tiga + 0.6, [0.2, 2.45, 10.9, 0, 1.4, 0, 40], "io");

@@ -19,7 +19,49 @@ while True:
     ok, f = cap.read()
     if not ok: break
     FL.append(f)
-TGT = json.load(open("out/target3_screen.json"))
+TGT = json.load(open(sys.argv[3] if len(sys.argv) > 3 else "out/target3_screen.json"))
+
+# ---- stabilise the flight: measure the visible camera path, smooth it, warp each frame onto the smooth path ----
+def stabilise(frames, over=1.05):
+    G = [cv2.cvtColor(cv2.resize(f, (270, 480)), cv2.COLOR_BGR2GRAY) for f in frames]
+    sift = cv2.SIFT_create(2000); bf = cv2.BFMatcher(); C = np.array([135.0, 240.0])
+    kp = [sift.detectAndCompute(g, None) for g in G]
+    s_l, t_l = [1.0], [np.zeros(2)]
+    for i in range(1, len(G)):
+        (ka, da), (kb, db) = kp[i - 1], kp[i]; M = None
+        if da is not None and db is not None and len(ka) > 12 and len(kb) > 12:
+            mm = [m for m, n in (q for q in bf.knnMatch(da, db, k=2) if len(q) == 2) if m.distance < 0.75 * n.distance]
+            if len(mm) >= 15:
+                A = np.float32([ka[m.queryIdx].pt for m in mm]); B = np.float32([kb[m.trainIdx].pt for m in mm])
+                M, inl = cv2.estimateAffinePartial2D(A, B, method=cv2.RANSAC, ransacReprojThreshold=2)
+                if M is not None and inl.sum() < 12: M = None
+        if M is None: sc = s_l[-1]; t = (1 - sc) * C
+        else: sc = float(np.sqrt(abs(np.linalg.det(M[:, :2])))); t = M[:, 2] + (M[:, :2] @ C - sc * C) * 0  # drop rotation
+        if M is not None: t = M[:, :2] @ C + M[:, 2] - sc * C                   # translation of the centre under a pure-scale model
+        s_l.append(sc); t_l.append(t)
+    n = len(G); S = np.ones(n); c = np.zeros((n, 2)); c[0] = C
+    for i in range(1, n):
+        S[i] = S[i - 1] * s_l[i]; c[i] = c[i - 1] + (C - s_l[i] * C - t_l[i]) / S[i]
+    def gsmooth(x, sig):
+        k = np.exp(-0.5 * (np.arange(-3 * sig, 3 * sig + 1) / sig) ** 2); k /= k.sum()
+        xp = np.pad(x, ((3 * sig, 3 * sig),) + ((0, 0),) * (x.ndim - 1), mode="edge")
+        return np.apply_along_axis(lambda v: np.convolve(v, k, mode="valid"), 0, xp)
+    Ls = gsmooth(np.log(S), 3); Sm = np.exp(Ls)
+    # smooth the path in screen-relative terms so heavy zoom does not freeze the smoothing
+    cs = c.copy()
+    for _ in range(3):
+        d = (c - cs) * S[:, None]; d = gsmooth(d, 6); cs = c - d / S[:, None] if False else cs
+    cs = gsmooth(c * S[:, None], 6) / gsmooth(S[:, None].repeat(2, 1), 6)
+    out = []; k_ = 1080 / 270.0
+    for i, f in enumerate(frames):
+        r = Sm[i] / S[i] * over; off = (Sm[i] * (c[i] - cs[i])) * k_ * over
+        Cf = np.array([540.0, 960.0])
+        Mw = np.float32([[r, 0, Cf[0] - r * Cf[0] + off[0]], [0, r, Cf[1] - r * Cf[1] + off[1]]])
+        out.append(cv2.warpAffine(f, Mw, (1080, 1920), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REFLECT))
+    corr = [float(np.hypot(*(Sm[i] * (c[i] - cs[i])) * k_)) for i in range(n)]
+    print("stabilise: max shift %.1f px, mean %.1f px" % (max(corr), float(np.mean(corr))))
+    return out
+if '--stab' in sys.argv: FL = stabilise(FL)                          # v4 flight is already smooth (flow morph)
 T_LAND = OFF + 6.2                                 # build3 T_C
 N = int(round((OFF + len(FL) / FPS) * FPS))
 D = N / FPS
@@ -139,9 +181,7 @@ def overlay(img, t, text):
     if t > T_LAND - 0.35:                                                   # pin drop + ripples on Jakarta
         i = min(int(round((t - OFF) * FPS)), len(TGT) - 1); px, py = TGT[i]
         u = (t - (T_LAND - 0.35)) / 0.35
-        if u < 1: yoff = -260 * (1 - u) ** 2; sc = 1.0
-        else:
-            w_ = t - T_LAND; yoff = -18 * np.exp(-w_ * 7) * abs(np.sin(w_ * 16)); sc = 1 + 0.12 * np.exp(-w_ * 6) * np.sin(w_ * 18)
+        yoff = -260 * (1 - ease(min(u, 1))) ; sc = 1.0
         for kq in range(3):
             w_ = t - T_LAND - kq * 0.35
             if 0 < w_ < 1.4:

@@ -186,8 +186,9 @@
       #lkPin .ic { width: 40px; height: 40px; color: var(--c); flex: none; }
       #lkPin b { display: block; font-size: 22px; line-height: 1.25; } #lkPin em { display: block; font-style: normal; font-size: 16px; color: var(--mute); margin-top: 4px; white-space: nowrap; }
       #lkBoard { position: absolute; left: 290px; top: 560px; width: 340px; height: 250px; border-radius: 24px; background: rgba(8,18,50,0.97); border: 3px solid rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
-      #lkBoard .ic { width: 52px; height: 52px; color: rgba(255,255,255,0.4); }
-      #lkBoard b { font-size: 40px; letter-spacing: 3px; margin-top: 14px; white-space: nowrap; }
+      #lkFront { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      #lkFront .ic { width: 52px; height: 52px; color: rgba(255,255,255,0.4); }
+      #lkFront b { font-size: 40px; letter-spacing: 3px; margin-top: 14px; white-space: nowrap; }
       #lkSold { position: absolute; inset: -3px; border-radius: 24px; background: rgba(1,204,247,0.16); border: 3px solid var(--c); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
       #lkSold .ic { width: 52px; height: 52px; color: var(--c); }
       #lkSold b { font-size: 46px; letter-spacing: 3px; margin-top: 14px; color: var(--c); white-space: nowrap; }
@@ -472,7 +473,7 @@
           + `<div class="bub" id="bb2"><div class="who2">CALON PEMBELI</div>Oke, saya datang.</div></div>`
           + `<div id="lkSlot"><div class="k">SURVEI KEKUNCI</div><b>Sabtu, 09.00</b><em>masuk kalender agen &amp; pembeli</em></div>`
           + `<div id="lkPin">${ic("map-pin")}<div><b>1628 Jl. Melati, Bekasi</b><em>alamat + peta kekirim</em></div></div>`
-          + `<div id="lkBoard">${ic("house")}<b>DIJUAL</b><div id="lkSold">${ic("lock-keyhole")}<b>TERJUAL</b></div></div>`;
+          + `<div id="lkBoard"><div id="lkFront">${ic("house")}<b>DIJUAL</b></div><div id="lkSold">${ic("lock-keyhole")}<b>TERJUAL</b></div></div>`;
 
         /* ---------- loop view ---------- */
         $("#vLoop").innerHTML = `<div class="ahd" id="lpHd" style="${OR}"><div class="bx">${ic("heart-pulse")}</div><b>Agent Jaga Relasi</b><span class="live"><i></i>jalan terus</span></div>`
@@ -730,10 +731,9 @@
         ft("#lkPin", { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.36, ease: "power3.out" }, tAlamat - 0.12);
         FX.go("home", tSurvei - 0.2, 0.85); FX.point(tAlamat + 0.05); // home side -> RIGHT arm
         ft("#lkBoard", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, tAlamat + 0.16);
-        st("#lkBoard", { transformPerspective: 900 }, 0);
-        ft("#lkBoard", { rotationY: 0 }, { rotationY: 180, duration: 0.46, ease: "power3.inOut" }, tLaku - 0.38);
-        st("#lkSold", { rotationY: 180 }, 0);
-        ft("#lkSold", { opacity: 0 }, { opacity: 1, duration: 0.01 }, tLaku - 0.15);
+        ft("#lkBoard", { scaleX: 1 }, { scaleX: 0, duration: 0.2, ease: "power2.in" }, tLaku - 0.44);
+        st("#lkFront", { opacity: 0 }, tLaku - 0.24); st("#lkSold", { opacity: 1 }, tLaku - 0.24);
+        ft("#lkBoard", { scaleX: 0 }, { scaleX: 1, duration: 0.26, ease: "back.out(1.5)" }, tLaku - 0.24);
         FX.face("excited", tLaku + 0.1, 1.0); FX.hop(tLaku + 0.15, 36);
 
         /* ===== SWEEP -> SCENE 9 · after closing: review + monthly value ===== */
@@ -745,17 +745,17 @@
         $$("#lpStars .ic").forEach((el, k) => ft(el, { opacity: 0, scale: 0.4, rotation: -20 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.26, ease: "back.out(2)" }, tClosing + 0.42 + k * 0.1));
         ft("#lpVal", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tUpdate - 0.18);
         $$("#lpMon i").forEach((el, k) => ft(el, { scaleY: 0.12 }, { scaleY: 0.3 + k * 0.058, duration: 0.3, ease: "power2.out" }, tUpdate + 0.02 + k * 0.055));
-        FX.go("upL", tUpdate - 0.25, 0.85);                           // SIDE RISE 3 (left half) — the value card is on the right
+        FX.go("upL", tUpdate - 0.42, 0.85);                           // SIDE RISE 3 (left half) — the value card is on the right
         FX.point(tUpdate + 0.3);                                      // upL side -> RIGHT arm
 
         /* ===== ZOOM 3 (pull back) -> the flywheel ===== */
         const tZ3 = tSetahun - 0.62;
-        ft(["#lpRev", "#lpVal"], { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.82, duration: 0.4, ease: "power2.in" }, tZ3);
-        camSet(460, 340, 1.5, tZ3 + 0.3); camTo(460, 475, 1, tZ3 + 0.34, 0.62, "power3.out");
-        ft("#fw", { opacity: 0, scale: 0.72 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, tZ3 + 0.3);
+        FX.go("home", tZ3 - 0.7, 0.85);                               // down to the bottom band before the flywheel fills the stage
+        ft("#fw", { opacity: 0, scale: 0.72 }, { opacity: 1, scale: 1, duration: 0.52, ease: "power3.out" }, tZ3 + 0.08);
+        ft(["#lpRev", "#lpVal"], { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.84, duration: 0.34, ease: "power2.in" }, tZ3 + 0.14);
         $$(".fn").forEach((el, k) => ft(el, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.8)" }, tSetahun - 0.05 + k * 0.17));
-        ft("#fwRing", { rotation: 0 }, { rotation: 360, duration: 20, ease: "none" }, tZ3 + 0.3);
-        FX.go("home", tPindah - 0.3, 0.85); FX.beat(tPindah + 0.1);
+        ft("#fwRing", { rotation: 0 }, { rotation: 360, duration: 20, ease: "none" }, tZ3 + 0.1);
+        FX.beat(tPindah + 0.1);
         ft("#fwNew", { opacity: 0, y: 22, scale: 0.86 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.6)" }, tLeadB - 0.14);
         ft("#fwMid", { scale: 1 }, { keyframes: [{ scale: 1.08, duration: 0.22 }, { scale: 1, duration: 0.34 }] }, tMuter - 0.05);
         $$("#fwStat span").forEach((el, k) => ft(el, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tMuter + 0.02 + k * 0.13));

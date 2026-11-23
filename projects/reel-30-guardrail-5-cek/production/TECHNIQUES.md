@@ -28,3 +28,25 @@ No wipe is used twice, and each one clears before the line that opens the next s
 - Two side rises, each beside a card on the opposite half (approval card left / filter card right).
 - Captions carry a dark halo so they stay readable while the robot passes behind them.
 - Pauses between VO lines are 0.32–0.48 s as recorded — no padding was added.
+
+## Revisi 1 — 4 cacat layout dari klien (render v1)
+
+| # | Beat | Cacat | Perbaikan |
+|---|------|-------|-----------|
+| 1 | hook, "INI LIMA PAGAR…" | blok DITAHAN + 5 kartu pagar + label nempel ke bawah, ruang nggak seimbang | kartu aksi dibungkus `#hTop`, mengecil ke `scale 0.72` + turun 50 px saat `tLima`; pill 430→446, rail 532→548 dan tinggi 212→262, label 812→836 dan muncul `tLima+0.78` (dulu `+1.25`, nyaris nggak kebaca); `.gt .gq` ("?") jadi `position:absolute; inset:0` biar center di kartu; origin zoom punch 678→679 px mengikuti pusat `#gt0` |
+| 2 | feedback loop, ring skor | kartu "Dikasih skor" / "Instruksi baru" nabrak kartu "SKOR BALASAN 88" | ring bulat → elips: `#lpRing` 480×380 di left 220, node kiri/kanan x 270/650 → 220/700, `.ln` 196→240 px (margin −120), `#lpMid` 176→160 px di left 380. Jarak bersih 40 px di kedua sisi; dot ikut elips (`RX 240 / RY 190`) |
+| 3 | kartu approve "Refund ke Bu Rina" | label "Setujui" nggak center di tombol | ikon check di dalam tombol dibuang (yang mendorong teks ke kanan sampai lewat tepi) + rule `.ic` tombol dihapus |
+| 4 | koridor saringan | teks item dan pill hijau keluar dari kotaknya | `.gd` 252→272 px lebar, 330→350 px tinggi, posisi left 32/636 → 20/628; `#gdAg` 260→220 px (left 350), panah 290/594 → 298/576; `#gdEnd` 252→320 px di left 580, font 23→20; copy dipendekin: "Nomor & alamat" + "disensor dulu", "Perintah nyelip" + "dari chat, dibuang". Origin zoom-out scene 5 disesuaikan ke `x 623, y 244` |
+
+## QA tambahan — `tools/layout_audit.cjs`
+
+Node + Playwright, serve folder project lewat http lokal (perlu http karena `robot3d.js` itu ES module),
+seek `window.__timelines.main` ke tiap detik yang diminta, lalu cek tiga hal yang kelewat di pass snapshot:
+
+1. **CUT** — tiap text node dibandingkan ke padding-box kotak induknya (border diperhitungkan). Teks yang
+   lewat tepi > 1.5 px dilaporkan.
+2. **OVER** — semua pasangan kotak yang kelihatan (opacity efektif > 0.12, termasuk `filter: opacity()`)
+   dicek tabrakan bounding box.
+3. **OFF** — label di kotak `display:flex; justify-content:center` yang pusat teksnya meleset > 14 px.
+
+Pakai: `node tools/layout_audit.cjs index.html 5.9,12.2,25.4,34.2`

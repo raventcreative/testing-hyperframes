@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur Automation — Pasang Tim Konten AI</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --n1: #0a0d2c; --n2: #294b77; --grad: linear-gradient(100deg, #0a0d2c 0%, #294b77 100%); --line: rgba(10,13,44,0.10);
+        --mute: rgba(10,13,44,0.55); --soft: rgba(41,75,119,0.08); --ok: #1f9d6b; --warm: #b4731a; --c: #294b77; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fd; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: var(--n1); -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #f4f7fd; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      b { font-weight: 700; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #132650; opacity: 0; }
+      #grid { position: absolute; inset: 0; opacity: 0.5; background-image: radial-gradient(rgba(41,75,119,0.13) 1.2px, transparent 1.6px); background-size: 36px 36px; }
+      #wTint { position: absolute; inset: 0; background: #294b77; opacity: 0; z-index: 46; pointer-events: none; }
+      #glow { position: absolute; left: -280px; top: 320px; width: 1060px; height: 1060px; border-radius: 50%; background: radial-gradient(circle, rgba(41,75,119,0.10) 0%, rgba(41,75,119,0) 62%); }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+
+      /* ---------- hook: your week is empty, then 13 skills fill it ---------- */
+      #hookClip { position: absolute; left: 0; top: 270px; width: 1080px; height: 1000px; overflow: hidden; }
+      #hook { position: absolute; left: 80px; top: 20px; width: 920px; height: 960px; }
+      #hTop { position: absolute; left: 0; right: 0; top: 6px; display: flex; align-items: center; justify-content: center; gap: 14px; }
+      #hClock { display: inline-flex; align-items: center; gap: 12px; height: 62px; padding: 0 26px; border-radius: 31px; background: #fff; box-shadow: 0 14px 34px rgba(41,75,119,0.16); font-size: 30px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      #hClock .ic { width: 30px; height: 30px; color: var(--n2); }
+      #hWeek { position: absolute; left: 0; top: 104px; width: 920px; height: 290px; display: flex; gap: 8px; }
+      .dc { position: relative; width: 124px; border-radius: 22px; background: rgba(255,255,255,0.72); border: 2.5px dashed rgba(41,75,119,0.30); opacity: 0; overflow: hidden; }
+      .dc .dn { position: absolute; left: 0; right: 0; top: 16px; text-align: center; font-size: 19px; font-weight: 700; letter-spacing: 2px; color: var(--mute); white-space: nowrap; }
+      .dc .slot { position: absolute; left: 14px; right: 14px; top: 62px; bottom: 18px; border-radius: 14px; background: rgba(41,75,119,0.05); }
+      .dc .fill { position: absolute; left: 14px; right: 14px; top: 62px; bottom: 18px; border-radius: 14px; background: var(--grad); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0; }
+      .dc .fill .ic { width: 30px; height: 30px; } .dc .fill span { font-size: 15px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+      #hEmpty { position: absolute; left: 0; right: 0; top: 418px; text-align: center; font-size: 26px; font-weight: 700; letter-spacing: 2px; color: var(--mute); opacity: 0; white-space: nowrap; }
+      #hBox { position: absolute; left: 110px; top: 478px; width: 700px; height: 196px; border-radius: 28px; background: #fff; box-shadow: 0 22px 52px rgba(41,75,119,0.18); padding: 24px 30px; opacity: 0; }
+      #hBox .bl { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      #hBox .tx { margin-top: 18px; font-size: 32px; color: rgba(10,13,44,0.34); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+      #hCar { display: inline-block; width: 4px; height: 38px; background: var(--n2); }
+      #hRost { position: absolute; left: 0; top: 478px; width: 920px; opacity: 0; }
+      #hRTop { display: flex; align-items: center; justify-content: center; gap: 16px; }
+      #hBadge { display: inline-flex; align-items: baseline; gap: 12px; height: 86px; padding: 0 32px; border-radius: 43px; background: var(--grad); color: #fff; white-space: nowrap; }
+      #hBadge b { font-size: 54px; line-height: 1; } #hBadge em { font-style: normal; font-size: 24px; font-weight: 700; letter-spacing: 3px; }
+      #hStrip { margin-top: 30px; display: flex; justify-content: center; gap: 11px; }
+      .ag { position: relative; width: 60px; height: 60px; border-radius: 19px; background: #fff; box-shadow: 0 10px 22px rgba(41,75,119,0.16); display: flex; align-items: center; justify-content: center; opacity: 0; }
+      .ag .ic { width: 28px; height: 28px; color: var(--n2); }
+      #hNote { margin-top: 24px; text-align: center; font-size: 24px; color: var(--mute); white-space: nowrap; }
+
+      /* ---------- app window ---------- */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.97);
+        box-shadow: 0 40px 100px rgba(41,75,119,0.30); opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.94); }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; white-space: nowrap; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 2px 10px; white-space: nowrap; }
+      #tabs { margin-left: auto; display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: rgba(41,75,119,0.07); position: relative; }
+      #tabs div { position: relative; z-index: 1; height: 34px; padding: 0 12px; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: rgba(10,13,44,0.74); white-space: nowrap; }
+      #tabs div .ic { width: 15px; height: 15px; }
+      #tabPill { position: absolute; z-index: 0; top: 4px; height: 34px; border-radius: 9px; background: rgba(41,75,119,0.16); }
+      #body { position: absolute; left: 0; right: 0; top: 60px; bottom: 0; }
+      .view { position: absolute; left: 0; top: 0; width: 920px; height: 890px; }
+      #wFlash { position: absolute; inset: 0; background: #ffffff; opacity: 0; pointer-events: none; }
+      .vhd { position: absolute; left: 28px; right: 28px; top: 20px; height: 66px; border-radius: 20px; background: var(--soft); display: flex; align-items: center; gap: 14px; padding: 0 20px; }
+      .vhd .bx { width: 42px; height: 42px; border-radius: 13px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; } .vhd .bx .ic { width: 22px; height: 22px; }
+      .vhd > b { font-size: 23px; white-space: nowrap; } .vhd .cn { margin-left: auto; font-size: 17px; color: var(--mute); white-space: nowrap; }
+
+      /* roster view */
+      #rsGrid { position: absolute; left: 28px; right: 28px; top: 110px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; }
+      .rt { height: 104px; border-radius: 20px; background: #fff; border: 1.5px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0; }
+      .rt .ic { width: 28px; height: 28px; color: var(--n2); } .rt span { font-size: 16px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+      .trow { position: absolute; left: 28px; right: 28px; height: 86px; border-radius: 20px; background: #fff; border: 1.5px solid var(--line); display: flex; align-items: center; gap: 18px; padding: 0 24px; opacity: 0; }
+      .trow .tk { width: 46px; height: 46px; border-radius: 50%; background: rgba(31,157,107,0.12); color: var(--ok); display: flex; align-items: center; justify-content: center; flex: none; } .trow .tk .ic { width: 26px; height: 26px; }
+      .trow b { font-size: 27px; white-space: nowrap; }
+
+      /* writer view */
+      .dline { position: absolute; left: 28px; right: 28px; height: 104px; border-radius: 20px; background: #fff; border: 1.5px solid var(--line); padding: 14px 22px; opacity: 0; }
+      .dline .q { font-size: 24px; line-height: 1.24; white-space: nowrap; }
+      .dline .mt { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+      .dline .bar { width: 240px; height: 11px; border-radius: 6px; background: rgba(41,75,119,0.12); position: relative; }
+      .dline .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--n2); transform-origin: 0 50%; transform: scaleX(0); display: block; }
+      .dline .tagw { font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--mute); white-space: nowrap; }
+      .dline.weak .bar i { background: var(--warm); }
+      #dMark { position: absolute; left: 640px; top: 236px; display: inline-flex; align-items: center; gap: 9px; height: 46px; padding: 0 18px; border-radius: 23px; background: var(--warm); color: #fff; font-size: 18px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; opacity: 0; }
+      #dMark .ic { width: 20px; height: 20px; }
+      #dNew { position: absolute; left: 28px; right: 28px; top: 212px; height: 104px; border-radius: 20px; background: rgba(41,75,119,0.10); border: 2px solid rgba(41,75,119,0.45); padding: 14px 22px; opacity: 0; }
+      #dNew .q { font-size: 24px; font-weight: 700; line-height: 1.24; white-space: nowrap; }
+      #dNew .mt { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+      #dNew .bar { width: 240px; height: 11px; border-radius: 6px; background: rgba(41,75,119,0.14); position: relative; }
+      #dNew .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--ok); transform-origin: 0 50%; transform: scaleX(0); display: block; }
+      #dNew .tagw { font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--ok); white-space: nowrap; }
+      #dHook { position: absolute; left: 28px; top: 604px; display: inline-flex; align-items: center; gap: 10px; height: 50px; padding: 0 20px; border-radius: 25px; background: var(--soft); font-size: 19px; font-weight: 700; color: var(--n2); white-space: nowrap; opacity: 0; }
+      #dHook .ic { width: 22px; height: 22px; }
+
+      /* auditor view */
+      #auRing { position: absolute; left: 70px; top: 150px; width: 300px; height: 300px; opacity: 0; }
+      #auRing svg { width: 300px; height: 300px; transform: rotate(-90deg); display: block; }
+      #auNum { position: absolute; left: 0; right: 0; top: 104px; text-align: center; font-size: 76px; font-weight: 700; line-height: 1; color: var(--n2); }
+      #auOf { position: absolute; left: 0; right: 0; top: 188px; text-align: center; font-size: 20px; font-weight: 700; letter-spacing: 2px; color: var(--mute); white-space: nowrap; }
+      #auKr { position: absolute; left: 430px; top: 150px; width: 414px; opacity: 0; }
+      #auKr .kt { font-size: 19px; font-weight: 700; letter-spacing: 2px; color: var(--mute); white-space: nowrap; }
+      #auDots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 20px; }
+      .kd { height: 68px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center; opacity: 0; }
+      .kd .ic { width: 24px; height: 24px; color: var(--ok); }
+      #auNote { position: absolute; left: 430px; top: 404px; font-size: 17px; color: var(--mute); white-space: nowrap; opacity: 0; }
+      #auFind { position: absolute; left: 28px; right: 28px; top: 506px; }
+      #auFind .fh { font-size: 19px; font-weight: 700; letter-spacing: 2px; color: var(--mute); white-space: nowrap; opacity: 0; }
+      .fr { display: flex; align-items: center; gap: 16px; margin-top: 16px; height: 86px; border-radius: 20px; background: #fff; border: 1.5px solid var(--line); padding: 0 24px; opacity: 0; }
+      .fr .fx { width: 44px; height: 44px; border-radius: 13px; background: rgba(180,115,26,0.14); color: var(--warm); display: flex; align-items: center; justify-content: center; flex: none; } .fr .fx .ic { width: 24px; height: 24px; }
+      .fr b { font-size: 25px; white-space: nowrap; } .fr .fg { margin-left: auto; font-size: 18px; font-weight: 700; color: var(--warm); white-space: nowrap; }
+
+      /* planner view */
+      #plGrid { position: absolute; left: 28px; right: 28px; top: 118px; height: 320px; display: flex; gap: 9px; }
+      .pcol { position: relative; flex: 1; border-radius: 20px; background: #fff; border: 1.5px solid var(--line); opacity: 0; overflow: hidden; }
+      .pcol .ph { position: absolute; left: 0; right: 0; top: 14px; text-align: center; font-size: 17px; font-weight: 700; letter-spacing: 1.5px; color: var(--mute); white-space: nowrap; }
+      .pslot { position: absolute; left: 10px; right: 10px; height: 78px; border-radius: 14px; background: var(--grad); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; opacity: 0; }
+      .pslot .ic { width: 24px; height: 24px; } .pslot span { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; }
+      #plChips { position: absolute; left: 28px; right: 28px; top: 492px; display: flex; flex-wrap: wrap; gap: 12px; }
+      #plNote { position: absolute; left: 28px; right: 28px; top: 600px; height: 92px; border-radius: 22px; background: var(--soft); display: flex; align-items: center; gap: 16px; padding: 0 26px; opacity: 0; }
+      #plNote .ic { width: 28px; height: 28px; color: var(--n2); } #plNote b { font-size: 25px; white-space: nowrap; } #plNote span { margin-left: auto; font-size: 20px; font-weight: 700; color: var(--n2); white-space: nowrap; }
+      .pch { height: 58px; padding: 0 22px; border-radius: 29px; background: #fff; border: 1.5px solid var(--line); display: flex; align-items: center; gap: 11px; font-size: 21px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      .pch .ic { width: 24px; height: 24px; color: var(--n2); }
+
+      /* trend view */
+      #trHead { position: absolute; left: 28px; right: 28px; top: 120px; display: flex; align-items: center; font-size: 15px; font-weight: 700; letter-spacing: 2px; color: var(--mute); opacity: 0; }
+      #trHead .a { width: 300px; white-space: nowrap; } #trHead .b { width: 220px; white-space: nowrap; } #trHead .c { margin-left: auto; white-space: nowrap; }
+      .tr { position: absolute; left: 28px; right: 28px; height: 110px; border-radius: 22px; background: #fff; border: 1.5px solid var(--line); display: flex; align-items: center; padding: 0 26px; opacity: 0; }
+      .tr .nm { width: 300px; } .tr .nm b { display: block; font-size: 25px; white-space: nowrap; } .tr .nm em { display: block; font-style: normal; font-size: 17px; color: var(--mute); white-space: nowrap; }
+      .tr .vw { width: 220px; font-size: 27px; font-weight: 700; white-space: nowrap; }
+      .tr .mp { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+      .tr .mp b { font-size: 34px; color: var(--mute); white-space: nowrap; }
+      .tr.hot { border-color: rgba(41,75,119,0.55); background: rgba(41,75,119,0.07); }
+      .tr.hot .mp b { color: var(--n2); }
+      #trBy { position: absolute; left: 28px; top: 578px; display: inline-flex; align-items: center; gap: 12px; height: 60px; padding: 0 24px; border-radius: 30px; background: var(--grad); color: #fff; font-size: 21px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      #trBy .ic { width: 24px; height: 24px; }
+      #trNote { position: absolute; left: 28px; right: 28px; top: 674px; font-size: 20px; color: var(--mute); white-space: nowrap; opacity: 0; }
+
+      /* install view */
+      #iw { position: absolute; left: 28px; right: 28px; top: 112px; display: flex; gap: 16px; }
+      .iway { flex: 1; height: 84px; border-radius: 22px; background: #fff; border: 2px solid var(--line); display: flex; align-items: center; gap: 14px; padding: 0 22px; opacity: 0; }
+      .iway .no { width: 44px; height: 44px; border-radius: 14px; background: var(--soft); color: var(--n2); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; flex: none; }
+      .iway b { font-size: 23px; white-space: nowrap; }
+      .iway.on { border-color: rgba(41,75,119,0.6); background: rgba(41,75,119,0.07); } .iway.on .no { background: var(--grad); color: #fff; }
+      #term { position: absolute; left: 28px; width: 520px; top: 232px; height: 274px; border-radius: 24px; background: #10172f; padding: 22px 26px; opacity: 0; }
+      #term .tt { font-size: 15px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.5); white-space: nowrap; }
+      #term .ln { margin-top: 16px; font-size: 21px; line-height: 1.5; color: #d7e3ff; white-space: nowrap; }
+      #term .ok2 { display: inline-flex; align-items: center; gap: 10px; margin-top: 18px; font-size: 21px; font-weight: 700; color: #6fe3b0; white-space: nowrap; opacity: 0; }
+      #term .ok2 .ic { width: 22px; height: 22px; }
+      #iDone { position: absolute; left: 28px; top: 534px; display: inline-flex; align-items: center; gap: 10px; height: 54px; padding: 0 22px; border-radius: 27px; background: var(--ok); color: #fff; font-size: 20px; font-weight: 700; letter-spacing: 2px; white-space: nowrap; opacity: 0; }
+      #iDone .ic { width: 22px; height: 22px; }
+
+      #devRow { position: absolute; left: 28px; right: 28px; top: 236px; display: flex; gap: 18px; opacity: 0; }
+      .dev { flex: 1; height: 292px; border-radius: 24px; background: #fff; border: 2px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; opacity: 0; }
+      .dev .shape { position: relative; width: 120px; height: 96px; }
+      .dev .lid { position: absolute; left: 6px; top: 0; width: 96px; height: 64px; border-radius: 9px; border: 3.5px solid var(--n2); }
+      .dev .base { position: absolute; left: 0; bottom: 6px; width: 108px; height: 9px; border-radius: 5px; background: var(--n2); }
+      .dev .br { position: absolute; left: 6px; top: 6px; width: 96px; height: 74px; border-radius: 10px; border: 3.5px solid var(--n2); }
+      .dev .brb { position: absolute; left: 6px; top: 6px; width: 96px; height: 20px; border-bottom: 3.5px solid var(--n2); }
+      .dev .brd { position: absolute; top: 13px; width: 8px; height: 8px; border-radius: 50%; background: var(--n2); }
+      .dev .ph { position: absolute; left: 34px; top: 0; width: 52px; height: 86px; border-radius: 12px; border: 3.5px solid var(--n2); }
+      .dev .phh { position: absolute; left: 50px; top: 8px; width: 20px; height: 4px; border-radius: 2px; background: var(--n2); }
+      .dev b { font-size: 25px; letter-spacing: 1px; white-space: nowrap; }
+      .dev.on { border-color: rgba(41,75,119,0.65); background: rgba(41,75,119,0.07); }
+      #dlBtn { position: absolute; left: 300px; top: 572px; display: inline-flex; align-items: center; gap: 12px; height: 66px; padding: 0 30px; border-radius: 33px; background: var(--grad); color: #fff; font-size: 23px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      #dlBtn .ic { width: 26px; height: 26px; }
+      #tgBox { position: absolute; left: 28px; right: 28px; top: 660px; border-radius: 24px; background: #fff; border: 1.5px solid var(--line); padding: 20px 26px 24px; opacity: 0; }
+      #tgBox .th { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; letter-spacing: 2px; color: var(--mute); white-space: nowrap; }
+      #tgBox .th .ic { width: 20px; height: 20px; }
+      .tgr { display: flex; align-items: center; margin-top: 14px; opacity: 0; }
+      .tgr b { font-size: 23px; white-space: nowrap; }
+      .tgr .sw { margin-left: auto; width: 68px; height: 36px; border-radius: 18px; background: rgba(41,75,119,0.16); position: relative; }
+      .tgr .sw i { position: absolute; left: 4px; top: 4px; width: 28px; height: 28px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(10,13,44,0.25); display: block; }
+
+      /* approve view */
+      #apCard { position: absolute; left: 150px; top: 228px; width: 620px; border-radius: 28px; background: #fff; box-shadow: 0 26px 60px rgba(41,75,119,0.20); padding: 26px 30px 30px; opacity: 0; }
+      #apCard .ak { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); white-space: nowrap; }
+      #apCard .at { font-size: 32px; font-weight: 700; line-height: 1.22; margin-top: 10px; }
+      #apCard .ab { margin-top: 18px; height: 11px; border-radius: 6px; background: rgba(41,75,119,0.10); }
+      #apCard .ab2 { margin-top: 12px; height: 11px; width: 72%; border-radius: 6px; background: rgba(41,75,119,0.10); }
+      #apRow { display: flex; align-items: center; gap: 16px; margin-top: 26px; }
+      #apBtn { display: inline-flex; align-items: center; gap: 12px; height: 72px; padding: 0 34px; border-radius: 36px; background: var(--grad); color: #fff; font-size: 26px; font-weight: 700; white-space: nowrap; }
+      #apBtn .ic { width: 26px; height: 26px; }
+      #apYou { font-size: 21px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+      #apUp { position: absolute; left: 150px; top: 596px; width: 620px; display: flex; justify-content: center; opacity: 0; }
+      #apUp > span { display: inline-flex; align-items: center; gap: 12px; height: 64px; padding: 0 28px; border-radius: 32px; background: rgba(31,157,107,0.14); color: var(--ok); font-size: 23px; font-weight: 700; white-space: nowrap; }
+      #apUp .ic { width: 26px; height: 26px; }
+      #apNote { position: absolute; left: 0; right: 0; top: 722px; text-align: center; opacity: 0; }
+
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(41,75,119,0.4)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--n2); background: rgba(41,75,119,0.14); opacity: 0; z-index: 29; }
+
+      /* ---------- stage cards (outside the window) ---------- */
+      #pBio { position: absolute; left: 80px; top: 404px; width: 452px; border-radius: 30px; background: #fff; box-shadow: 0 40px 90px rgba(41,75,119,0.28); padding: 26px 28px 30px; opacity: 0; }
+      #pBio .pk { font-size: 14px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); white-space: nowrap; }
+      .bioB { margin-top: 16px; border-radius: 18px; padding: 16px 18px; opacity: 0; }
+      #bioOld { background: rgba(10,13,44,0.05); } #bioNew { background: rgba(41,75,119,0.10); border: 2px solid rgba(41,75,119,0.45); }
+      .bioB .bt { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--mute); white-space: nowrap; }
+      .bioB .bv { font-size: 22px; line-height: 1.3; margin-top: 8px; }
+      #bioNew .bv { font-weight: 700; }
+
+      /* ---------- CTA + UI ---------- */
+      #cta { position: absolute; left: 110px; width: 860px; top: 540px; padding: 40px 44px; text-align: center; border-radius: 30px; background: #fff; box-shadow: 0 30px 80px rgba(41,75,119,0.28); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 26px; color: rgba(10,13,44,0.7); } #cta .name { font-size: 62px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; color: rgba(10,13,44,0.75); } #cta .sb b { color: var(--n2); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 24px; height: 74px; padding: 0 44px; border-radius: 37px; background: var(--grad); color: #fff; font-size: 31px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoL { opacity: 0; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; z-index: 2; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px rgba(255,255,255,0.95)); display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
+      #main[data-sc="dark"] .cap .in { background: none; color: #fff; text-shadow: 0 4px 18px rgba(0,0,0,0.45); } #main[data-sc="dark"] .cap s.k { color: #01ccf7; }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); z-index: 1; }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(41,75,119,0.30)); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="59" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="59" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="bgD"></div><div id="grid"></div><div id="glow"></div><div id="wTint"></div>
+
+        <div id="hookClip"><div id="hook">
+          <div id="hTop"><div id="hClock"><span class="ic" data-i="clock"></span>00:12 — kalender konten lu</div></div>
+          <div id="hWeek"></div>
+          <div id="hEmpty">7 HARI KE DEPAN MASIH KOSONG</div>
+          <div id="hBox"><div class="bl">DRAF CAPTION</div><div class="tx"><span id="hCar"></span></div></div>
+          <div id="hRost">
+            <div id="hRTop"><div id="hBadge"><b id="hBadgeN">0</b><em>SKILL AI</em></div></div>
+            <div id="hStrip"></div>
+            <div id="hNote">satu tim, jalan tiap hari</div>
+          </div>
+        </div></div>
+
+        <div id="win"><div id="wcam">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Tim Konten AI</span><span id="sim">SIMULASI</span>
+            <div id="tabs"><span id="tabPill"></span><div id="tabTim"><span class="ic" data-i="users-round"></span>Tim</div><div id="tabTulis"><span class="ic" data-i="pen-line"></span>Tulis</div>
+              <div id="tabAudit"><span class="ic" data-i="user-search"></span>Audit</div><div id="tabJadwal"><span class="ic" data-i="calendar-check"></span>Jadwal</div>
+              <div id="tabTren"><span class="ic" data-i="trending-up"></span>Tren</div><div id="tabPasang"><span class="ic" data-i="command"></span>Pasang</div></div></div>
+          <div id="body">
+            <div class="view" id="vTim">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="users-round"></span></span><b>Tim konten</b><span class="cn">13 skill aktif</span></div>
+              <div id="rsGrid"></div>
+              <div class="trow" id="tr0" style="top:590px"><span class="tk"><span class="ic" data-i="check"></span></span><b>Nggak pernah telat</b></div>
+              <div class="trow" id="tr1" style="top:686px"><span class="tk"><span class="ic" data-i="check"></span></span><b>Nggak pernah libur</b></div>
+              <div class="trow" id="tr2" style="top:782px"><span class="tk"><span class="ic" data-i="check"></span></span><b>Nggak pernah minta gaji</b></div>
+            </div>
+
+            <div class="view" id="vTulis">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="pen-line"></span></span><b>Penulis naskah</b><span class="cn">draf Reels</span></div>
+              <div class="dline weak" id="dl0" style="top:212px"><div class="q">“Capek bikin konten tiap hari?”</div>
+                <div class="mt"><span class="bar"><i id="db0"></i></span><span class="tagw">PEMBUKA LEMAH</span></div></div>
+              <div class="dline" id="dl1" style="top:332px"><div class="q">“Jam 12 malam, kalender masih kosong.”</div>
+                <div class="mt"><span class="bar"><i id="db1"></i></span><span class="tagw">PEMBUKA KUAT</span></div></div>
+              <div class="dline" id="dl2" style="top:452px"><div class="q">“Gue coba satu minggu, hasilnya gini.”</div>
+                <div class="mt"><span class="bar"><i id="db2"></i></span><span class="tagw">PEMBUKA KUAT</span></div></div>
+              <div id="dMark"><span class="ic" data-i="triangle-alert"></span>DITANDAIN</div>
+              <div id="dNew"><div class="q">“Kalender konten lu kosong tujuh hari?”</div>
+                <div class="mt"><span class="bar"><i id="dbN"></i></span><span class="tagw">DIGANTI · KUAT</span></div></div>
+              <div id="dHook"><span class="ic" data-i="list-checks"></span>dicek pakai rumus hook</div>
+            </div>
+
+            <div class="view" id="vAudit">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="user-search"></span></span><b>Auditor akun</b><span class="cn">angka ilustrasi</span></div>
+              <div id="auRing"><svg viewBox="0 0 300 300"><circle cx="150" cy="150" r="128" fill="none" stroke="rgba(41,75,119,0.12)" stroke-width="22"/>
+                <circle id="auArc" cx="150" cy="150" r="128" fill="none" stroke="#294b77" stroke-width="22" stroke-linecap="round" stroke-dasharray="804" stroke-dashoffset="804"/></svg>
+                <div id="auNum">0</div><div id="auOf">SKOR AKUN</div></div>
+              <div id="auKr"><div class="kt">12 KRITERIA DICEK</div><div id="auDots"></div></div>
+              <div id="auNote">bio, hook, konsistensi, highlight…</div>
+              <div id="auFind"><div class="fh">YANG PALING NAHAN</div>
+                <div class="fr" id="fr0"><span class="fx"><span class="ic" data-i="user-pen"></span></span><b>Bio belum jelas jualan apa</b><span class="fg">benerin dulu</span></div>
+                <div class="fr" id="fr1"><span class="fx"><span class="ic" data-i="zap"></span></span><b>Hook masih umum</b><span class="fg">antre</span></div></div>
+            </div>
+
+            <div class="view" id="vJadwal">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="calendar-check"></span></span><b>Perencana konten</b><span class="cn">1 minggu penuh</span></div>
+              <div id="plGrid"></div>
+              <div id="plNote"><span class="ic" data-i="calendar-check"></span><b>7 hari kejadwal</b><span>tinggal lu cek</span></div>
+              <div id="plChips">
+                <div class="pch" id="pc0"><span class="ic" data-i="file-text"></span>Caption</div>
+                <div class="pch" id="pc1"><span class="ic" data-i="layers"></span>Carousel</div>
+                <div class="pch" id="pc2"><span class="ic" data-i="play"></span>Story</div>
+                <div class="pch" id="pc3"><span class="ic" data-i="message-circle"></span>Draf balasan DM</div>
+              </div>
+            </div>
+
+            <div class="view" id="vTren">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="trending-up"></span></span><b>Riset tren</b><span class="cn">angka ilustrasi</span></div>
+              <div id="trHead"><span class="a">AKUN</span><span class="b">VIEW</span><span class="c">KELIPATAN RATA-RATA</span></div>
+              <div class="tr" id="tg0" style="top:170px"><div class="nm"><b>Akun A</b><em>akun gede</em></div><div class="vw">1.200.000</div><div class="mp"><b id="mp0">1,3x</b></div></div>
+              <div class="tr" id="tg1" style="top:300px"><div class="nm"><b>Akun B</b><em>akun menengah</em></div><div class="vw">412.000</div><div class="mp"><b id="mp1">37,5x</b></div></div>
+              <div class="tr" id="tg2" style="top:430px"><div class="nm"><b>Akun C</b><em>akun kecil</em></div><div class="vw">180.000</div><div class="mp"><b id="mp2">60x</b></div></div>
+              <div id="trBy"><span class="ic" data-i="sliders-horizontal"></span>Diurutin dari kelipatan, bukan view</div>
+              <div id="trNote">ide yang meledak, bukan akun yang udah gede</div>
+            </div>
+
+            <div class="view" id="vPasang">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="command"></span></span><b>Pasang skill</b><span class="cn">dua cara</span></div>
+              <div id="iw">
+                <div class="iway" id="iw1"><span class="no">1</span><b>Lewat terminal</b></div>
+                <div class="iway" id="iw2"><span class="no">2</span><b>Lewat aplikasi</b></div>
+              </div>
+              <div id="term"><div class="tt">TERMINAL · SIMULASI</div>
+                <div class="ln" id="tl1">&gt; pasang paket skill</div>
+                <div class="ok2" id="tok"><span class="ic" data-i="circle-check"></span>Siap dipakai</div></div>
+              <div id="iDone"><span class="ic" data-i="badge-check"></span>SELESAI</div>
+              <div id="devRow">
+                <div class="dev" id="dv0"><div class="shape"><span class="lid"></span><span class="base"></span></div><b>Laptop</b></div>
+                <div class="dev" id="dv1"><div class="shape"><span class="br"></span><span class="brb"></span><span class="brd" style="left:16px"></span><span class="brd" style="left:32px"></span><span class="brd" style="left:48px"></span></div><b>Web</b></div>
+                <div class="dev" id="dv2"><div class="shape"><span class="ph"></span><span class="phh"></span></div><b>HP</b></div>
+              </div>
+              <div id="dlBtn"><span class="ic" data-i="file-up"></span>Download sekali</div>
+              <div id="tgBox"><div class="th"><span class="ic" data-i="sliders-horizontal"></span>NYALAIN SKILL YANG LU BUTUHIN</div>
+                <div class="tgr" id="tg_0"><b>Penulis naskah</b><span class="sw"><i></i></span></div>
+                <div class="tgr" id="tg_1"><b>Auditor akun</b><span class="sw"><i></i></span></div>
+                <div class="tgr" id="tg_2"><b>Riset tren</b><span class="sw"><i></i></span></div></div>
+            </div>
+
+            <div class="view" id="vApprove">
+              <div id="apCard"><div class="ak">DRAF SIAP · NUNGGU LU</div><div class="at">“Kalender konten lu kosong tujuh hari?”</div>
+                <div class="ab"></div><div class="ab2"></div>
+                <div id="apRow"><div id="apBtn"><span class="ic" data-i="badge-check"></span>Approve</div><div id="apYou">lu yang pegang</div></div></div>
+              <div id="apUp"><span><span class="ic" data-i="circle-check"></span>Approved — baru naik</span></div>
+              <div id="apNote" class="lbl">ANGKA ILUSTRASI · SIMULASI</div>
+            </div>
+          </div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div><div id="wFlash"></div></div>
+
+        <div id="pBio"><div class="pk">BIO · SEBELUM &amp; SESUDAH</div>
+          <div class="bioB" id="bioOld"><div class="bt">SEBELUM</div><div class="bv">Sharing soal bisnis 🙏</div></div>
+          <div class="bioB" id="bioNew"><div class="bt">SESUDAH</div><div class="bv">Pasang sistem AI.</div></div></div>
+
+        <div id="cta"><div class="k">Mau sistem kayak gini dipasang di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="" /><div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div><div id="caps"></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="58.4" data-track-index="8" data-volume="1"></audio>
+      <!--SFX-->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n, c) => `<span class="ic${c ? " " + c : ""}">${icon(n)}</span>`;
+
+        /* ---------- data ---------- */
+        const DAYS = ["SEN", "SEL", "RAB", "KAM", "JUM", "SAB", "MIN"];
+        const POSTS = [["video", "play"], ["carousel", "layers"], ["story", "feather"], ["video", "play"], ["carousel", "layers"], ["story", "feather"], ["video", "play"]];
+        const SKILLS = [["Tulis naskah", "pen-line"], ["Hook", "zap"], ["Caption", "file-text"], ["Carousel", "layers"], ["Story", "feather"], ["Audit akun", "user-search"],
+          ["Perbaiki bio", "user-pen"], ["Jadwal", "calendar-check"], ["Riset tren", "trending-up"], ["Balas DM", "message-circle"], ["Balas komen", "reply"],
+          ["Ide konten", "sparkles"], ["Laporan", "chart-pie"]];
+
+        /* ---------- hook: empty week + roster ---------- */
+        $("#hWeek").innerHTML = DAYS.map((d, i) => `<div class="dc" id="dc${i}"><div class="dn">${d}</div><div class="slot"></div>
+          <div class="fill" id="df${i}">${ic(POSTS[i][1])}<span>${POSTS[i][0]}</span></div></div>`).join("");
+        $("#hStrip").innerHTML = SKILLS.map(([n, i], k) => `<div class="ag" id="ag${k}">${ic(i)}</div>`).join("");
+
+        /* ---------- app views ---------- */
+        $("#rsGrid").innerHTML = SKILLS.map(([n, i], k) => `<div class="rt" id="rt${k}">${ic(i)}<span>${n}</span></div>`).join("");
+        $("#auDots").innerHTML = Array.from({ length: 12 }, (_, k) => `<div class="kd" id="kd${k}">${ic("check")}</div>`).join("");
+        $("#plGrid").innerHTML = DAYS.map((d, i) => `<div class="pcol" id="pl${i}"><div class="ph">${d}</div>
+          <div class="pslot" id="ps${i}" style="top:50px">${ic(POSTS[i][1])}<span>${POSTS[i][0]}</span></div>
+          ${i % 2 ? `<div class="pslot" id="ps2${i}" style="top:140px">${ic("file-text")}<span>caption</span></div>` : ""}</div>`).join("");
+
+        /* ---------- captions ---------- */
+        const KEY = new Set(["kalender", "konten", "kosong", "tujuh", "hari", "tiga", "belas", "skill", "ai", "simulasinya", "telat", "libur", "gaji", "naskah", "reels", "hook",
+          "lemah", "ditandain", "diganti", "ngaudit", "akun", "dua", "kriteria", "bio-nya", "jadwal", "seminggu", "caption", "dm", "gila", "riset", "tren", "view",
+          "kelipatan", "rata-rata", "meledak", "gede", "dua cara", "terminal", "laptop", "web", "hp", "download", "nyalain", "approve", "link", "bio", "aipreneur", "automation"]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase().replace(/[^a-z0-9-]/g, "")) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#294b77" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 59;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        let cur = { x: 740, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn($(el)); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const jumpTo = (x, y, at) => { st("#cursor", { x, y }, at); cur = { x, y }; };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => ($(el).textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const popIn = (el, at, o) => ft(el, { opacity: 0, scale: 0.82, y: 16 }, Object.assign({ opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.6)" }, o || {}), at);
+        const TABS = ["#tabTim", "#tabTulis", "#tabAudit", "#tabJadwal", "#tabTren", "#tabPasang"];
+        const tabSet = (sel, at) => { const el = $(sel); st("#tabPill", { x: el.offsetLeft - 4, width: el.offsetWidth }, at); TABS.forEach((s) => st(s, { color: s === sel ? "#0a0d2c" : "rgba(10,13,44,0.74)" }, at)); };
+
+        /* camera: zooms the app inside the fixed window frame (screen-recording style) */
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc = cState(460, 475, 1);
+        const SHOTS = [];
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); SHOTS.push({ t: at, d: 0, c: cc }); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; SHOTS.push({ t: at, d: dur || 0.8, c: nx, e: ease || "power3.inOut" }); };
+        const whip = (x, y, s, at) => camTo(x, y, s, at, 0.42, "expo.inOut");
+
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "light" });
+        Object.assign(FX.POSE.peekR, { x: 530, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 });
+        Object.assign(FX.POSE.upR, { x: 455 }); Object.assign(FX.POSE.upL, { x: -14 });
+        FX.theme("light", 0);
+        ft("#grid", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -288px", duration: D, ease: "none" }, 0);
+        ft("#glow", { x: 0, y: 0 }, { x: 200, y: 340, duration: D, ease: "sine.inOut" }, 0);
+
+        /* ---------- initial states ---------- */
+        st(win, { opacity: 0, scale: 0.18, transformPerspective: 2000, transformOrigin: "460px 300px" }, 0);
+        st(["#vTulis", "#vAudit", "#vJadwal", "#vTren", "#vPasang", "#vApprove", "#cta", "#pBio"], { opacity: 0 }, 0);
+        st("#pBio", { transformPerspective: 1400 }, 0);
+        st([".rt", ".trow", ".dline", "#dNew", "#dMark", "#dHook", "#auRing", "#auKr", "#auNote", "#auFind .fh", ".fr", ".kd", ".pcol", ".pslot", ".pch",
+          "#trHead", ".tr", "#trBy", "#trNote", "#plNote", ".iway", "#term", "#iDone", "#devRow", ".dev", "#dlBtn", "#tgBox", ".tgr",
+          "#apCard", "#apUp", "#apNote", ".bioB", "#hClock", ".dc", ".fill", "#hEmpty", "#hBox", "#hRost", ".ag"], { opacity: 0 }, 0);
+        st("#tok", { opacity: 0 }, 0);
+        tabSet("#tabTim", 0);
+        camSet(460, 475, 1, 0);
+
+        /* ---------- anchors ---------- */
+        const tJam = ph("Jam dua belas").start, tKal = ph("kalender konten").start, tTujuh = ph("tujuh hari").start;
+        const tSek = ph("Sekarang yang ngerjain").start, tTiga = ph("tapi tiga belas").start, tGue = ph("Gue tunjukin").start;
+        const tTelat = ph("Timnya nggak pernah").start, tLibur = ph("nggak pernah libur").start, tGaji = ph("nggak pernah minta").start;
+        const tNaskah = ph("Satu nulis naskah").start, tRumus = ph("pakai rumus hook").start, tLemah = ph("Pembuka yang lemah").start, tGanti = ph("terus diganti").start;
+        const tAudit = ph("Satu lagi ngaudit").start, tKrit = ph("pakai dua belas").start, tBio = ph("terus nulis ulang").start;
+        const tJadwal = ph("Ada yang nyusun").start, tDraf = ph("sampai draf caption").start;
+        const tGila = ph("Tapi yang paling").start, tTren = ph("si riset tren").start, tUrut = ph("Dia ngurutin ide").start, tKelip = ph("tapi dari kelipatan").start;
+        const tNaik = ph("Jadi yang naik").start, tBukan = ph("bukan akun yang").start;
+        const tCara = ph("Masangnya ada dua").start, tTerm = ph("Lewat terminal").start, tApl = ph("Atau tinggal buka").start, tDev = ph("di laptop, di web").start;
+        const tDown = ph("Download sekali").start, tAppr = ph("Dan semua hasilnya").start;
+        const tCta = ph("Mau sistem kayak").start, tF = wt("Klik link", "link");
+
+        /* ===== SCENE 1 · HOOK: the week is empty at midnight ===== */
+        FX.enter("home", 0.0); FX.wave(0.45);
+        popIn("#hClock", 0.15);
+        $$(".dc").forEach((el, i) => ft(el, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.34, ease: "power3.out" }, 0.55 + i * 0.07));
+        ft("#hBox", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tKal - 0.1);
+        ft("#hCar", { opacity: 1 }, { keyframes: [{ opacity: 0, duration: 0.01 }, { opacity: 0, duration: 0.33 }, { opacity: 1, duration: 0.01 }, { opacity: 1, duration: 0.33 }], repeat: 9 }, tKal + 0.1);
+        ft("#hEmpty", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35 }, tTujuh);
+        FX.face("flat", tJam + 0.2, 1.1);
+        FX.point(tKal + 0.5);                       /* side L -> RIGHT arm */
+
+        /* 13 skills arrive and fill the week */
+        ft("#hBox", { opacity: 1, y: 0 }, { opacity: 0, y: -18, duration: 0.3, ease: "power2.in" }, tSek - 0.2);
+        ft("#hEmpty", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tSek - 0.2);
+        ft("#hRost", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tSek + 0.05);
+        FX.go("right", tSek - 0.1, 0.85);
+        $$(".ag").forEach((el, i) => ft(el, { opacity: 0, scale: 0.4, y: 18 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, tSek + 0.3 + i * 0.1));
+        count("#hBadgeN", 0, 13, tSek + 0.35, 1.5);
+        $$(".dc").forEach((el, i) => { const t = tTiga + 0.05 + i * 0.12;
+          ft(el, { borderColor: "rgba(41,75,119,0.30)", borderStyle: "dashed" }, { borderColor: "rgba(41,75,119,0.55)", borderStyle: "solid", duration: 0.2 }, t);
+          ft("#df" + i, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.8)" }, t); });
+        FX.face("excited", tTiga + 0.1, 1.0); FX.point(tTiga + 0.35);   /* side R -> LEFT arm */
+        FX.hop(tTiga + 1.0, 34);
+
+        /* ===== ZOOM #1 · punch through one skill chip into the app ===== */
+        const tZ1 = tGue - 0.2;
+        const agP = (() => { const el = $("#ag6"), H = $("#hook"); let x = 0, y = 0, e = el; while (e && e !== H) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + 30, y: y + 30 }; })();
+        st("#hook", { transformOrigin: agP.x + "px " + agP.y + "px" }, 0);
+        FX.dip("home", tZ1 - 0.1, 0.22);
+        ft("#hook", { scale: 1 }, { scale: 4.6, duration: 0.62, ease: "power3.in" }, tZ1);
+        ft("#hook", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, tZ1 + 0.34);
+        st("#hookClip", { display: "none" }, tZ1 + 0.72);
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.55, duration: 0.09 }, { opacity: 0, duration: 0.3 }] }, tZ1 + 0.4);
+        ft(win, { opacity: 0, scale: 0.18 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }, tZ1 + 0.42);
+
+        /* ===== SCENE 2 · the team: 13 tiles + three traits ===== */
+        const tWin = tZ1 + 0.95;
+        $$(".rt").forEach((el, i) => ft(el, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(1.7)" }, tWin + 0.05 + i * 0.045));
+        [[0, tTelat], [1, tLibur], [2, tGaji]].forEach(([i, t]) => {
+          ft("#tr" + i, { opacity: 0, x: -26 }, { opacity: 1, x: 0, duration: 0.34, ease: "power3.out" }, t - 0.12);
+          ft("#tr" + i + " .tk", { scale: 0.3 }, { scale: 1, duration: 0.32, ease: "back.out(2.2)" }, t + 0.1); });
+        camTo(460, 556, 1.03, tTelat - 0.3, 0.9);
+        FX.go("center", tTelat - 0.4, 0.85);
+        FX.beat(tTelat + 0.25); FX.beat(tLibur + 0.2); FX.beat(tGaji + 0.2);
+        FX.face("happy", tGaji + 0.2, 1.0);
+
+        /* ===== SCENE 3 · writer: weak opener is flagged, then replaced ===== */
+        const tV2 = tNaskah - 0.55;
+        st("#vTim", { opacity: 1 }, 0);
+        ft("#vTim", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, tV2);
+        ft("#vTulis", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, tV2 + 0.16);
+        tabSet("#tabTulis", tV2 + 0.2);
+        camTo(460, 475, 1, tV2, 0.5);
+        $$(".dline").forEach((el, i) => ft(el, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, tNaskah + 0.05 + i * 0.14));
+        [[0, 0.34], [1, 0.9], [2, 0.82]].forEach(([i, v]) => ft("#db" + i, { scaleX: 0 }, { scaleX: v, duration: 0.5, ease: "power2.out" }, tNaskah + 0.3 + i * 0.14));
+        popIn("#dHook", tRumus + 0.1);
+        FX.go("home", tV2 + 0.1, 0.85);
+        FX.point(tNaskah + 0.5);                    /* side L -> RIGHT arm */
+        /* flag the weak line, camera close-up */
+        camTo(460, 368, 1.04, tLemah - 0.3, 0.7);
+        popIn("#dMark", tLemah + 0.15);
+        ft("#dl0", { scale: 1 }, { keyframes: [{ scale: 1.035, duration: 0.26, ease: "power2.out" }, { scale: 1, duration: 0.4, ease: "power2.inOut" }] }, tLemah + 0.12);
+        ft("#dl0", { borderColor: "rgba(10,13,44,0.10)" }, { borderColor: "rgba(180,115,26,0.65)", duration: 0.26 }, tLemah + 0.15);
+        FX.face("flat", tLemah + 0.2, 0.9);
+        /* replace it */
+        ft("#dMark", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tGanti - 0.1);
+        ft("#dl0", { opacity: 1, y: 0 }, { opacity: 0, y: -16, duration: 0.26, ease: "power2.in" }, tGanti - 0.05);
+        ft("#dNew", { opacity: 0, y: 20, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.5)" }, tGanti + 0.08);
+        ft("#dbN", { scaleX: 0 }, { scaleX: 0.94, duration: 0.5, ease: "power2.out" }, tGanti + 0.3);
+        FX.face("excited", tGanti + 0.2, 0.9);
+
+        /* ===== SCENE 4 · auditor: score ring + 12 criteria, bio card swings out left ===== */
+        const tV3 = tAudit - 0.5;
+        camTo(460, 475, 1, tV3 - 0.1, 0.5);
+        ft("#vTulis", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, tV3);
+        ft("#vAudit", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, tV3 + 0.16);
+        tabSet("#tabAudit", tV3 + 0.2);
+        ft("#auRing", { opacity: 0, scale: 0.86 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, tAudit + 0.05);
+        ft("#auArc", { attr: { "stroke-dashoffset": 804 } }, { attr: { "stroke-dashoffset": 305 }, duration: 1.1, ease: "power2.out" }, tAudit + 0.25);
+        count("#auNum", 0, 62, tAudit + 0.25, 1.1);
+        ft("#auKr", { opacity: 0, x: 22 }, { opacity: 1, x: 0, duration: 0.34, ease: "power3.out" }, tKrit - 0.1);
+        $$(".kd").forEach((el, i) => ft(el, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2)" }, tKrit + 0.05 + i * 0.045));
+        ft("#auNote", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tKrit + 0.7);
+        ft("#auFind .fh", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tKrit + 0.62);
+        ft("#fr0", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, tKrit + 0.74);
+        ft("#fr1", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, tKrit + 0.94);
+        /* side rise 1: robot stands right, bio card swings out on the LEFT half */
+        FX.go("upR", tBio - 0.95, 1.1);
+        ft(win, { x: 0, rotationY: 0, scale: 1, transformOrigin: "100% 50%" }, { x: 58, rotationY: -16, scale: 0.94, duration: 0.6, ease: "power3.out" }, tBio - 0.55);
+        ft("#pBio", { opacity: 0, x: -40, rotationY: 22, scale: 0.9 }, { opacity: 1, x: 0, rotationY: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tBio - 0.45);
+        ft("#bioOld", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3 }, tBio - 0.18);
+        ft("#bioNew", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.34, ease: "back.out(1.4)" }, tBio + 0.3);
+        FX.point(tBio + 0.35);                      /* side R -> LEFT arm */
+        FX.face("happy", tBio + 0.6, 0.9);
+
+        /* ===== SCENE 5 · planner: the week fills, draft chips ===== */
+        const tV4 = tJadwal - 0.34;
+        ft("#pBio", { opacity: 1, x: 0, scale: 1 }, { opacity: 0, x: -34, scale: 0.92, duration: 0.3, ease: "power2.in" }, tV4 + 0.3);
+        ft(win, { x: 58, rotationY: -16, scale: 0.94 }, { x: 0, rotationY: 0, scale: 1, duration: 0.5, ease: "power3.inOut" }, tV4);
+        ft("#vAudit", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, tV4 + 0.1);
+        ft("#vJadwal", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, tV4 + 0.26);
+        tabSet("#tabJadwal", tV4 + 0.3);
+        FX.go("home", tV4, 0.95);
+        $$(".pcol").forEach((el, i) => ft(el, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, tJadwal + 0.05 + i * 0.07));
+        $$(".pslot").forEach((el, i) => ft(el, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(1.8)" }, tJadwal + 0.45 + i * 0.1));
+        FX.point(tJadwal + 0.5);                    /* side L -> RIGHT arm */
+        $$(".pch").forEach((el, i) => ft(el, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.28, ease: "power3.out" }, tDraf + 0.05 + i * 0.16));
+        ft("#plNote", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tDraf + 0.85);
+        FX.face("happy", tDraf + 0.3, 0.9);
+
+        /* ===== BLOCKS WIPE -> SCENE 6 · trend research ===== */
+        const tW1 = tGila - 1.12;
+        ft("#wTint", { opacity: 0 }, { keyframes: [{ opacity: 0.22, duration: 0.34, ease: "power2.out" }, { opacity: 0.22, duration: 0.42 }, { opacity: 0, duration: 0.42, ease: "power2.in" }] }, tW1 + 0.02);
+        FX.dip("right", tW1 + 0.1, 0.3);
+        FX.blocks(tW1, "light", (m) => {
+          st("#vJadwal", { opacity: 0 }, m); st("#vTren", { opacity: 1 }, m); tabSet("#tabTren", m); camSet(460, 475, 1, m); });
+        ft("#trHead", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tGila + 0.05);
+        $$(".tr").forEach((el, i) => ft(el, { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, tGila + 0.12 + i * 0.12));
+        FX.face("wide", tGila + 0.15, 0.9);
+        FX.point(tTren + 0.1);                      /* side R -> LEFT arm */
+        /* views column dims, multiplier column lights up */
+        camTo(460, 350, 1.04, tUrut + 0.1, 0.75);
+        ft($$(".tr .vw"), { opacity: 1 }, { opacity: 0.32, duration: 0.4 }, tUrut + 0.5);
+        ft($$(".tr .mp b"), { scale: 1 }, { keyframes: [{ scale: 1.16, duration: 0.22 }, { scale: 1, duration: 0.3 }], stagger: 0.1 }, tKelip + 0.1);
+        popIn("#trBy", tKelip + 0.35);
+        camTo(460, 430, 1.02, tNaik - 0.25, 0.7);
+        /* re-sort: the 60x row climbs to the top */
+        ft("#tg2", { y: 0 }, { y: -260, duration: 0.7, ease: "power3.inOut" }, tNaik + 0.15);
+        ft("#tg1", { y: 0 }, { y: 130, duration: 0.7, ease: "power3.inOut" }, tNaik + 0.15);
+        ft("#tg0", { y: 0 }, { y: 130, duration: 0.7, ease: "power3.inOut" }, tNaik + 0.15);
+        st("#tg2", { className: "tr hot" }, tNaik + 0.75);
+        ft("#tg2", { boxShadow: "0 0 0 0 rgba(41,75,119,0)" }, { keyframes: [{ boxShadow: "0 0 0 14px rgba(41,75,119,0.12)", duration: 0.3 }, { boxShadow: "0 0 0 0 rgba(41,75,119,0)", duration: 0.5 }] }, tNaik + 0.8);
+        FX.face("excited", tNaik + 0.3, 1.0); FX.hop(tNaik + 0.9, 32);
+        ft("#trNote", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3 }, tBukan + 0.05);
+        FX.beat(tBukan + 0.2);
+
+        /* ===== SHUTTER WIPE -> SCENE 7 · two ways to install ===== */
+        const tW2 = tCara - 1.16;
+        ft("#wTint", { opacity: 0 }, { keyframes: [{ opacity: 0.22, duration: 0.38, ease: "power2.out" }, { opacity: 0.22, duration: 0.46 }, { opacity: 0, duration: 0.44, ease: "power2.in" }] }, tW2 + 0.02);
+        FX.dip("home", tW2 + 0.1, 0.3);
+        FX.shutter(tW2, "light", (m) => {
+          st("#vTren", { opacity: 0 }, m); st("#vPasang", { opacity: 1 }, m); tabSet("#tabPasang", m); camSet(460, 475, 1, m); });
+        ft("#iw1", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tCara + 0.1);
+        ft("#iw2", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tCara + 0.32);
+        FX.point(tCara + 0.3);                      /* side L -> RIGHT arm */
+        /* way 1 — terminal */
+        FX.go("upR", tTerm - 0.55, 1.1);            /* side rise 2: robot right, terminal on the LEFT half */
+        st("#iw1", { className: "iway on" }, tTerm - 0.1);
+        ft("#term", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.34, ease: "power3.out" }, tTerm - 0.05);
+        camTo(430, 420, 1.04, tTerm + 0.05, 0.7);
+        ft("#tl1", { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.24 }, tTerm + 0.25);
+        ft("#tok", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, tTerm + 0.72);
+        popIn("#iDone", tTerm + 1.05, { duration: 0.34 });
+        FX.point(tTerm + 0.45);                     /* side R -> LEFT arm */
+        FX.face("happy", tTerm + 1.0, 0.9);
+
+        /* ===== FLIP -> way 2: devices, download, toggles ===== */
+        const tFlip = tApl - 0.32;
+        camTo(460, 475, 1, tFlip - 0.05, 0.45);
+        ft(["#term", "#iDone"], { opacity: 1, rotationX: 0 }, { opacity: 0, rotationX: -40, duration: 0.3, ease: "power2.in" }, tFlip);
+        st("#iw1", { className: "iway" }, tFlip + 0.3);
+        st("#iw2", { className: "iway on" }, tFlip + 0.3);
+        st("#devRow", { opacity: 1 }, tFlip + 0.3);
+        ft($$(".dev"), { opacity: 0, rotationX: 40, y: 20 }, { opacity: 1, rotationX: 0, y: 0, duration: 0.36, ease: "power3.out", stagger: 0.04 }, tFlip + 0.32);
+        FX.go("center", tApl - 0.1, 0.95);          /* back to the bottom band, left side */
+        [["#dv0", tDev + 0.1], ["#dv1", tDev + 0.72], ["#dv2", tDev + 1.34]].forEach(([s, t]) => {
+          st(s, { className: "dev on" }, t);
+          ft(s, { scale: 1 }, { keyframes: [{ scale: 1.06, duration: 0.18 }, { scale: 1, duration: 0.26 }] }, t); });
+        FX.point(tDev + 0.2);                       /* side L -> RIGHT arm */
+        FX.face("excited", tDev + 0.3, 1.0);
+        /* download + toggles */
+        FX.go("right", tDown - 0.55, 0.95);
+        popIn("#dlBtn", tDown + 0.05);
+        moveEl("#dlBtn", tDown + 0.1, 0.5); click(tDown + 0.6);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tDown + 0.05);
+        ft("#dlBtn", { scale: 1 }, { keyframes: [{ scale: 0.93, duration: 0.14 }, { scale: 1, duration: 0.24 }] }, tDown + 0.6);
+        ft("#tgBox", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.34, ease: "power3.out" }, tDown + 0.95);
+        camTo(460, 620, 1.03, tDown + 1.0, 0.7);
+        [0, 1, 2].forEach((i) => { const t = tDown + 1.25 + i * 0.33;
+          ft("#tg_" + i, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.26 }, t);
+          ft("#tg_" + i + " .sw", { backgroundColor: "rgba(41,75,119,0.16)" }, { backgroundColor: "#294b77", duration: 0.26 }, t + 0.16);
+          ft("#tg_" + i + " .sw i", { x: 0 }, { x: 32, duration: 0.3, ease: "power2.inOut" }, t + 0.16); });
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tDown + 1.2);
+        FX.point(tDown + 1.3);                      /* side R -> LEFT arm */
+
+        /* ===== ZOOM #2 · zoom-out reveal into the approve card ===== */
+        const tZ2 = tAppr - 0.62;
+        camTo(460, 475, 1, tZ2 - 0.1, 0.5);
+        ft("#vPasang", { opacity: 1 }, { opacity: 0, duration: 0.28, ease: "power1.in" }, tZ2);
+        ft("#vApprove", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, tZ2 + 0.18);
+        ft(win, { scale: 1 }, { keyframes: [{ scale: 0.9, duration: 0.3, ease: "power2.in" }, { scale: 1, duration: 0.45, ease: "power3.out" }] }, tZ2);
+        FX.go("center", tZ2, 0.95);                 /* bottom band, left */
+        ft("#apCard", { opacity: 0, y: 26, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.4)" }, tAppr + 0.05);
+        ft("#apNote", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tAppr + 0.3);
+        jumpTo(430, 560, tAppr + 0.5);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tAppr + 0.55);
+        moveEl("#apBtn", tAppr + 0.7, 0.55); click(tAppr + 1.35);
+        ft("#apBtn", { scale: 1 }, { keyframes: [{ scale: 0.92, duration: 0.14 }, { scale: 1, duration: 0.24 }] }, tAppr + 1.35);
+        popIn("#apUp", tAppr + 1.6, { duration: 0.36 });
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tAppr + 1.9);
+        FX.beat(tAppr + 0.9);
+        FX.face("happy", tAppr + 1.6, 1.1);
+
+        /* ===== ZOOM #3 · through the approve card into the CTA ===== */
+        const tZ3 = tCta - 0.72;
+        ft(win, { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.5, duration: 0.52, ease: "power3.in" }, tZ3);
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.5, duration: 0.1 }, { opacity: 0, duration: 0.28 }] }, tZ3 + 0.22);
+        ft("#cta", { opacity: 0, scale: 0.72 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, tZ3 + 0.34);
+        FX.go("center", tZ3 + 0.2, 0.9);
+        FX.wave(tCta + 0.5); FX.point(tF - 0.35); FX.face("happy", tF + 0.05, 1.4);   /* side L -> wave LEFT, point RIGHT */
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
+        FX.face("excited", D - 1.6, 0.9);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.4 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /* no-cut-text guard: text sliced by the camera frame fades out during that shot, back in when whole */
+        { const wc = $("#wcam"), wr = wc.getBoundingClientRect(), k = wr.width / VW;
+          const leaves = $$("#wcam *").filter((e) => e.tagName.toLowerCase() === "text" || Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim()));
+          const UNIT = ".vhd, .rt, .trow, .dline, #dNew, #dMark, #dHook, #auKr, #auNote, #auNum, #auOf, .fr, #auFind .fh, .kd, .pcol, .pslot, .pch, #trHead, .tr, #trBy, #trNote, .iway, #term, #iDone, .dev, #dlBtn, #tgBox, .tgr, #apCard, #apUp, #apNote, #tbar .app, #sim, #tabs";
+          const box = (r) => ({ x0: (r.left - wr.left) / k, y0: (r.top - wr.top) / k, x1: (r.right - wr.left) / k, y1: (r.bottom - wr.top) / k });
+          const textBox = (e) => { if (e.tagName.toLowerCase() === "text") return box(e.getBoundingClientRect());
+            const rg = document.createRange(); let u = null;
+            Array.from(e.childNodes).filter((n) => n.nodeType === 3 && n.textContent.trim()).forEach((n) => { rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
+            return u ? box(u) : box(e.getBoundingClientRect()); };
+          const seen = new Set(), R = [];
+          leaves.forEach((e) => { const u = e.closest(UNIT); const tgt = u && wc.contains(u) ? u : e; if (seen.has(tgt)) return; seen.add(tgt);
+            const q = Object.assign({ e: tgt }, (tgt === e && !u) ? textBox(e) : box(tgt.getBoundingClientRect())); if (q.x1 - q.x0 > 1 && q.y1 - q.y0 > 1) R.push(q); });
+          const sh = SHOTS.slice().sort((a, b) => a.t - b.t);
+          const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
+            const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
+            return inter && !inside; };
+          const lerp = (a, b, f) => ({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, scale: a.scale + (b.scale - a.scale) * f });
+          R.forEach((q) => { let prev = false; const E = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = E[i]; if (!h && prev && i + 1 < sh.length && E[i + 1] && nextT - inT < 0.5) h = true;
+              let mA = -1, mB = -1;
+              if (!h && !prev && i > 0 && S.d > 0.45) { const EZ = { "power3.in": (f) => f * f * f, "power3.out": (f) => 1 - Math.pow(1 - f, 3), "power3.inOut": (f) => (f < 0.5 ? 4 * f * f * f : 1 - Math.pow(-2 * f + 2, 3) / 2) }; const ez = EZ[S.e] || EZ["power3.inOut"];
+                for (let n = 0; n <= 24; n++) if (cut(q, lerp(sh[i - 1].c, S.c, ez(n / 24)))) { if (mA < 0) mA = n; mB = n; } }
+              if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }
+              else if (h && !prev) { if (S.d === 0) st(q.e, { filter: "opacity(0)" }, S.t); else ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: S.d <= 0.45 ? 0.16 : 0.18, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.06 : S.t); }
+              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: S.d <= 0.45 ? 0.2 : 0.25, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.17 : inT);
+              else if (mA >= 0) { const t0 = S.t + (mA / 24) * S.d, t1 = Math.min(S.t + S.d, S.t + ((mB + 1) / 24) * S.d);
+                ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.08, ease: "power1.out" }, Math.max(S.t, t0 - 0.08));
+                ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.22, ease: "power1.out" }, t1); }
+              prev = h; }); });
+          window.__noCut = { leaves: R.length, shots: sh.length }; }
+
+        FX.runGestures();
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

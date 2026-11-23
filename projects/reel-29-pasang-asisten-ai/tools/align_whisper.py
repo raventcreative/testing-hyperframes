@@ -8,53 +8,36 @@ import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 # caption phrases (short on-screen chunks), in spoken order
-PHRASES = """Salah baca pasar itu mahal.
-Makanya bayangin,
-satu departemen riset
-isinya tiga puluh lima agent AI.
-Mereka tau apa yang pelanggan lu mau,
-apa yang kompetitor lu lewatin,
-dan di mana duitnya di area lu.
-Jadi lu berhenti nebak,
-dan mulai jualan penawaran
-yang emang udah dicari orang.
+PHRASES = """Jam dua belas malam,
+kalender konten lu masih kosong
+tujuh hari ke depan.
+Sekarang yang ngerjain bukan lu sendirian,
+tapi tiga belas skill AI.
 Gue tunjukin simulasinya.
-Pertama, intel kompetitor.
-Tiap minggu, dia ngecek
-kompetitor lokal lu yang paling gede:
-penawaran mereka, harga mereka,
-review mereka.
-Terus muncul celah
-yang mereka tinggalin kosong.
-Layanan yang nggak ada yang nawarin.
-Keluhan yang nggak ada yang beresin.
-Nah, di situ lu menang.
-Setelah tau celahnya,
-agent suara pelanggan
-yang nentuin cara ngomongnya.
-Dia baca ratusan review
-dan komentar asli di niche lu,
-dalam bahasa apa pun
-yang dipakai pelanggan lu.
-Terus kasih kata-kata persis
-yang dipakai orang waktu mereka siap beli.
-Copy kayak gini nggak bisa lu karang.
-Berikutnya, radar permintaan lokal
-yang bilang kapan lu harus gerak.
-Dia nunjukin apa yang lagi dicari orang
-di area lu sekarang,
-dan nandain yang naik paling cepat.
-Jadi lu launching di minggu
-permintaan mulai naik,
-bukan dua bulan setelah kompetitor.
-Dan yang ngatur semuanya,
-otak risetnya.
-Tiap Senin, lu terima satu halaman.
-Apa yang berubah di pasar lu,
-apa yang lagi ditanyain pelanggan,
-dan satu penawaran yang harus lu luncurin berikutnya.
-Kompetitor lu nebak.
-Lu tau.
+Timnya nggak pernah telat,
+nggak pernah libur,
+nggak pernah minta gaji.
+Satu nulis naskah Reels
+pakai rumus hook.
+Pembuka yang lemah ditandain,
+terus diganti.
+Satu lagi ngaudit akun lu
+pakai dua belas kriteria,
+terus nulis ulang bio-nya.
+Ada yang nyusun jadwal seminggu penuh,
+sampai draf caption dan balasan DM.
+Tapi yang paling gila,
+si riset tren.
+Dia ngurutin ide bukan dari jumlah view,
+tapi dari kelipatan rata-rata akunnya.
+Jadi yang naik ke atas itu ide yang meledak,
+bukan akun yang udah gede.
+Masangnya ada dua cara.
+Lewat terminal, buat yang biasa ngoding.
+Atau tinggal buka aplikasinya:
+di laptop, di web, atau di HP.
+Download sekali, terus nyalain skill yang lu butuhin.
+Dan semua hasilnya tetap lu yang approve sebelum naik.
 Mau sistem kayak gini
 dipasang di bisnis lu?
 Klik link di bio,

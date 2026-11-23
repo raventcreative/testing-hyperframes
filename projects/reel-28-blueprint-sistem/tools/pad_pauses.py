@@ -5,7 +5,7 @@ import subprocess, sys, wave
 from pathlib import Path
 import numpy as np
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-PADS = [(27.20, 27.60, 0.45), (35.46, 35.80, 0.70), (45.05, 45.40, 0.25), (51.15, 51.45, 0.80), (64.14, 64.50, 0.70), (66.60, 67.05, 0.30), (75.26, 75.55, 0.30), (77.40, 77.90, 0.40)]   # (search from, to, seconds added)
+PADS = []   # (search from, to, seconds added) — empty: the ElevenLabs take already keeps every gap <=0.42 s (client rule: pauses <=0.45 s)
 raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(P / "assets/audio/vo.mp3"), "-ac", "1", "-ar", "44100", "-f", "s16le", "-"], capture_output=True, check=True).stdout
 x = np.frombuffer(raw, np.int16).astype(np.float32); sr = 44100
 win = int(0.03 * sr); out, last = [], 0

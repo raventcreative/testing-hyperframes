@@ -136,16 +136,24 @@ def overlay(img, t):
 def pipe(path):
     return subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                              "-c:v", "libx264", "-preset", "slow", "-crf", "14", "-pix_fmt", "yuv420p", "-movflags", "+faststart", path], stdin=subprocess.PIPE)
-outs = [(pipe(OUT), True), (pipe(OUT.replace(".mp4", "_CLEAN.mp4")), False)]
+RAW = "--raw" in sys.argv                                            # raw = upscaled picture only (post.py adds blur/vignette/text/SFX)
+if RAW:
+    outs = [(subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
+             "-c:v", "libx264", "-preset", "slow", "-crf", "8", "-pix_fmt", "yuv444p", OUT], stdin=subprocess.PIPE), None)]
+else:
+    outs = [(pipe(OUT), True), (pipe(OUT.replace(".mp4", "_CLEAN.mp4")), False)]
 for i in range(N):
     t = i / FPS; acc = 0
     for d in (-0.22, 0, 0.22):                                      # 3-subframe motion blur (short shutter)
         tt = t + d / FPS; s = src_t(max(tt, 0))
         acc = acc + crop(sample(s), s, z_t(max(tt, 0)))
     fr = up(np.clip(acc / 3, 0, 255).astype(np.uint8))
-    fr = (fr.astype(np.float32) * ease(t / 0.5)).astype(np.uint8)  # fade in from black
-    for p_, txt in outs:
-        TEXT = txt; p_.stdin.write(overlay(fr, t).tobytes())
+    if RAW:
+        outs[0][0].stdin.write(fr.tobytes())
+    else:
+        fr = (fr.astype(np.float32) * ease(t / 0.5)).astype(np.uint8)  # fade in from black
+        for p_, txt in outs:
+            TEXT = txt; p_.stdin.write(overlay(fr, t).tobytes())
     if i % 15 == 0: print(f"frame {i}/{N}", flush=True)
 for p_, _ in outs: p_.stdin.close(); p_.wait()
 print("done", OUT)

@@ -1,21 +1,30 @@
-# reel-26b — techniques applied
+# reel-30 — 5 pagar buat agent AI (blue)
 
-Version B of the market-research reel: same VO, beat order and CTA as the delivered demo build; the on-screen
-element vocabulary was rebuilt because the client found it identical to the previous reels.
+Reference: a static "Guardrails for AI Agents" card — five checks in order (01 feedback loop, 02 corrective
+action, 03 human in the loop, 04 emergency stop, 05 input/output guards) with a flow diagram per check.
+Beats kept in that order; every example re-cast into a local fashion/e-commerce shop. No product names,
+no logos, no reference UI, no "comment X" CTA.
 
-From `.claude/skills/aipreneur-reels-studio/references/technique_bank.md` + `mascot_robot_recipes.md`:
+## Elements borrowed from the reference, then re-shaped
+- Its numbered badge per check -> our "PAGAR 01…05" gate rail in the hook.
+- Its per-card flow diagrams -> one DIFFERENT object per gate instead of five look-alike panels:
+  1. **ring** — work travels a closed loop, score climbs 62 -> 88 in the middle
+  2. **draft sheet that flips** — Draft 1 breaks the rule, turns over as Draft 2
+  3. **forked path** — a decision diamond splits small-value (auto) from big-value (waits)
+  4. **meter + throw switch** — spend runs into a hard limit, the knob throws, owner is paged
+  5. **corridor** — gate, agent, gate, answer
+- Its "result" line per card -> the green result strip under gates 1 and 2, and the closer's verdict cards.
 
-1. **Hook shows the problem, never states it** — your offer goes live and its week stays empty while the rival's
-   fills. Replaces the old "SALAH BACA PASAR" slogan card and its red badge.
-2. **Shared element / match cut** (accent-dot journey) — the empty `0` lifts out of your card, counts up in flight
-   and lands as the `35` of the headline.
-3. **Kinetic type in brand only** — the strike through "Nebak" hands over to "Udah dicari orang".
-4. **One object per scene, never repeated**: two-column scoreboard -> 35-cell roster -> question triptych ->
-   competitor table -> edge-lit slab -> mosaic wall of reviews -> ranked bars -> speech bubble -> radar ->
-   timeline -> node row + one-page document -> printed ticket -> two-column verdict.
-5. **Different transition on every beat** — zoom punch-through (hook), stripes, card flip, blocks, iris,
-   zoom-out reveal, doors, zoom-through (CTA); plus three different hand-offs for the floating cards
-   (3D swing, inflate-from-phrase, print-upward) instead of the same 3D split three times.
-6. **Camera never still** — one eased move per scene, no zoom-in/zoom-out back to back.
+## Transitions — a different one on every beat
+zoom punch-through the first gate (hook -> app) · **sweep** · zoom punch-in on the fixed sheet ·
+**doors** · content zoom-out reveal (opens on a close-up of the input gate, pulls back to the corridor) ·
+**slats** · zoom-through into the CTA. Plus the in-scene card flip and two window swings.
+No wipe is used twice, and each one clears before the line that opens the next scene.
 
-Colour: red removed entirely (client). #01ccf7 is the accent; amber/green stay only as in-app data colours.
+## Client rules applied
+- Hook shows the problem (an unchecked refund one step from sending) instead of stating it on a slogan card.
+- No red or yellow anywhere: #01ccf7 is the accent, a muted slate carries "held", green only on result ticks.
+- Hands alternate: the robot crosses the stage between gates so `FX.point` swaps arms, and `FX.beat` alternates.
+- Two side rises, each beside a card on the opposite half (approval card left / filter card right).
+- Captions carry a dark halo so they stay readable while the robot passes behind them.
+- Pauses between VO lines are 0.32–0.48 s as recorded — no padding was added.

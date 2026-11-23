@@ -50,3 +50,19 @@ seek `window.__timelines.main` ke tiap detik yang diminta, lalu cek tiga hal yan
 3. **OFF** — label di kotak `display:flex; justify-content:center` yang pusat teksnya meleset > 14 px.
 
 Pakai: `node tools/layout_audit.cjs index.html 5.9,12.2,25.4,34.2`
+
+### Cacat tambahan yang ketemu sendiri waktu sweep (bukan dari klien)
+
+5. **`#fnS`** ("Rp 85.000 · balas chat", ~23.5 s) — teks lewat tepi kanan 11 px. Lebar 300→332 px.
+6. **`#waitC`** ("agent nggak gerak sebelum lu jawab", ~24 s) — teks lewat tepi kanan 52 px.
+   Copy jadi "agent diem sampai lu jawab", font 24→22, lebar 392→400, ikon 28→26 + `flex:none`.
+7. **Scene 4 (Rem Darurat)** — setelah wipe doors, jendela cuma nampil header 0.4 s sebelum isinya masuk.
+   `#gaTop` / `#gaTrack` / `#swBox` / `#gaLim` / `#gaLimT` / chip dipindah dari basis `tP4` ke basis `tW4`
+   (+0.86 / +0.98 / +1.2 / +1.4 / +1.55 / +1.7), jadi isi jendela masuk barengan sama headernya.
+
+### Temuan audit yang memang by design (bukan bug)
+
+- `OVER hCard x hStop` — `#hStop` itu bingkai glow yang sengaja digambar mengelilingi `#hCard`.
+- `OVER … x pIzin` / `… x pSar` — kartu overlay sengaja melayang di atas jendela yang diredupkan.
+- `CUT gaTop "Rp …" past top edge` — `#gaTop` itu baris flex tanpa border/background; 11 px itu
+  ascent line-box angka besarnya, nggak ada tepi kotak yang dilewati.

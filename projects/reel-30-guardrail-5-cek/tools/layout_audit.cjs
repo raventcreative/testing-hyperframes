@@ -46,8 +46,10 @@ const MT = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javas
           const rg = document.createRange(); rg.selectNodeContents(tn);
           const tr = rg.getBoundingClientRect();
           if (tr.width < 1) continue;
-          const d = Math.max(pad.l - tr.left, tr.right - pad.r, pad.t - tr.top, tr.bottom - pad.b);
-          if (d > 1.5) cut.push({ box: el.id || el.className, text: tn.nodeValue.trim().slice(0, 34), by: Math.round(d) });
+          const sides = [['left', pad.l - tr.left], ['right', tr.right - pad.r], ['top', pad.t - tr.top], ['bottom', tr.bottom - pad.b]];
+          sides.sort((a, c) => c[1] - a[1]);
+          const d = sides[0][1];
+          if (d > 1.5) cut.push({ box: el.id || el.className, text: tn.nodeValue.trim().slice(0, 34), by: Math.round(d), side: sides[0][0] });
         }
       }
       // 2. element-vs-element overlap
@@ -64,6 +66,8 @@ const MT = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javas
       for (const el of boxes) {
         const cs = getComputedStyle(el);
         if (cs.display !== 'flex' || cs.justifyContent !== 'center') continue;
+        if (cs.flexDirection.startsWith('column')) continue;        // vertical centring, not label centring
+        if (el.querySelector('svg, .ic, .bx, img')) continue;       // an icon legitimately shifts the text
         const r = el.getBoundingClientRect(); const tns = walk(el); if (!tns.length) continue;
         let l = Infinity, rr = -Infinity;
         for (const tn of tns) { const rg = document.createRange(); rg.selectNodeContents(tn); const b = rg.getBoundingClientRect(); if (b.width < 1) continue; l = Math.min(l, b.left); rr = Math.max(rr, b.right); }
@@ -74,7 +78,7 @@ const MT = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javas
       return { cut, over, off };
     });
     const lines = [];
-    out.cut.forEach(x => lines.push(`  CUT   ${x.box} :: "${x.text}" past edge by ${x.by}px`));
+    out.cut.forEach(x => lines.push(`  CUT   ${x.box} :: "${x.text}" past ${x.side} edge by ${x.by}px`));
     out.over.forEach(x => lines.push(`  OVER  ${x.a} x ${x.b} (${x.ox}x${x.oy}px)`));
     out.off.forEach(x => lines.push(`  OFF   ${x.box} :: "${x.text}" off-centre ${x.off}px`));
     console.log(`t=${t}s  ${lines.length ? '' : 'clean'}`);

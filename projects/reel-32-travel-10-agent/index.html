@@ -54,7 +54,8 @@
       #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(6, 14, 40, 0.92);
         border: 1.5px solid rgba(255,255,255,0.14); box-shadow: 0 40px 100px rgba(0,0,0,0.45); opacity: 0; }
       #wcam { position: absolute; left: 0; top: 0; width: 1840px; height: 1900px; transform-origin: 0 0; }
-      #floor { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.07) 1.4px, transparent 1.8px); background-size: 52px 52px; }
+      #floor { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, rgba(1,204,247,0.10) 0%, rgba(1,204,247,0) 64%), #0a1738; }
+      #floorG { position: absolute; inset: -60px; background-image: radial-gradient(rgba(255,255,255,0.16) 1.8px, transparent 2.2px); background-size: 52px 52px; }
       #fPath { position: absolute; left: 0; top: 0; width: 1840px; height: 1900px; overflow: visible; }
       #tbar { position: absolute; left: 0; right: 0; top: 0; height: 62px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(8,18,50,0.92); z-index: 20; }
       #tbar .dots { display: flex; gap: 7px; margin-right: 2px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.22); display: block; }
@@ -64,10 +65,10 @@
       #wFlash { position: absolute; inset: 0; background: #dff6ff; opacity: 0; pointer-events: none; z-index: 25; }
 
       /* a station: its own place on the floor, lit when its agent is called */
-      .stn { position: absolute; border-radius: 26px; background: rgba(10,22,58,0.92); border: 2px solid rgba(255,255,255,0.10); padding: 22px 24px; opacity: 0; }
+      .stn { position: absolute; border-radius: 26px; background: rgba(16,32,76,0.96); border: 2px solid rgba(255,255,255,0.22); padding: 22px 24px; opacity: 0; }
       .stn .sh { display: flex; align-items: center; gap: 14px; }
-      .stn .no { font-size: 26px; font-weight: 700; color: rgba(255,255,255,0.28); letter-spacing: 1px; white-space: nowrap; }
-      .stn .bx { width: 52px; height: 52px; border-radius: 15px; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.55); display: flex; align-items: center; justify-content: center; flex: none; } .stn .bx .ic { width: 27px; height: 27px; }
+      .stn .no { font-size: 26px; font-weight: 700; color: rgba(255,255,255,0.42); letter-spacing: 1px; white-space: nowrap; }
+      .stn .bx { width: 52px; height: 52px; border-radius: 15px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.72); display: flex; align-items: center; justify-content: center; flex: none; } .stn .bx .ic { width: 27px; height: 27px; }
       .stn .sh b { font-size: 34px; line-height: 1.1; white-space: nowrap; }
       .stn .sd { margin-top: 20px; }
       .stn .slv { position: absolute; right: 24px; top: 26px; display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 17px; background: rgba(61,220,151,0.16); border: 1.5px solid rgba(61,220,151,0.6); font-size: 16px; font-weight: 700; color: var(--ok); opacity: 0; white-space: nowrap; }
@@ -194,7 +195,7 @@
             <div id="hWait"><div id="hWaitN">0</div><em>NUNGGU</em></div></div>
         </div></div>
 
-        <div id="win" data-layout-allow-overflow data-layout-allow-occlusion><div id="wcam" data-layout-allow-overflow data-layout-allow-occlusion><div id="floor"></div><svg id="fPath" viewBox="0 0 1840 1900"></svg><div id="stns"></div>
+        <div id="win" data-layout-allow-overflow data-layout-allow-occlusion><div id="wcam" data-layout-allow-overflow data-layout-allow-occlusion><div id="floor"></div><div id="floorG"></div><svg id="fPath" viewBox="0 0 1840 1900"></svg><div id="stns"></div>
           <div id="fTag">LANTAI OPERASI · SIMULASI</div></div>
           <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Lantai Operasi · Travel</span><span id="sim">SIMULASI</span><span class="cn"><b id="tbN">0</b>/10 stasiun nyala</span></div>
           <div id="wFlash"></div></div>
@@ -368,6 +369,8 @@
           + `<span class="slv" id="slv${k}"><i></i>jalan</span><div class="sd" id="sd${k}" data-layout-allow-occlusion data-layout-allow-overflow>${BODY[k]}</div></div>`).join("");
         /* the path that joins the stations, drawn as each one lights */
         const PTS = AG.map((_, k) => ctr(k));
+        const ghost = PTS.slice(0, -1).map((p, k) => svg("line", { x1: p.x, y1: p.y, x2: PTS[k + 1].x, y2: PTS[k + 1].y,
+          stroke: "rgba(255,255,255,0.16)", "stroke-width": 3, "stroke-linecap": "round", "stroke-dasharray": 2000, "stroke-dashoffset": 2000 }, $("#fPath")));
         const segs = PTS.slice(0, -1).map((p, k) => svg("line", { x1: p.x, y1: p.y, x2: PTS[k + 1].x, y2: PTS[k + 1].y,
           stroke: "rgba(1,204,247,0.45)", "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": 2000, "stroke-dashoffset": 2000 }, $("#fPath")));
 
@@ -460,13 +463,15 @@
         ft(win, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.56, ease: "power3.out" }, tZ1 + 0.34);
 
         /* ===== SCENE 2 · the dark floor: ten stations, still unlit ===== */
-        AG.forEach((_, k) => ft("#stn" + k, { opacity: 0, scale: 0.9 }, { opacity: 0.42, scale: 1, duration: 0.36, ease: "back.out(1.5)" }, tSepAg + 0.1 + k * 0.19));
-        AG.forEach((_, k) => st($("#tbN"), { innerHTML: "0" }, tSepAg));
-        ft("#fTag", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tSepAg + 1.1);
+        AG.forEach((_, k) => ft("#stn" + k, { opacity: 0, scale: 0.9 }, { opacity: 0.68, scale: 1, duration: 0.36, ease: "back.out(1.5)" }, tZ1 + 0.5 + k * 0.13));
+        st($("#tbN"), { innerHTML: "0" }, tZ1 + 0.5);
+        ft("#floorG", { backgroundPosition: "0px 0px" }, { backgroundPosition: "-52px -52px", duration: 6.2, ease: "none" }, tZ1 + 0.4);
+        ghost.forEach((g, k) => ft(g, { attr: { "stroke-dashoffset": 2000 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.42, ease: "power1.out" }, tSepAg + 0.15 + k * 0.26));
+        ft("#fTag", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4 }, tSepAg + 0.2);
         FX.go("right", 10.0, 0.8); FX.point(10.8); FX.face("excited", tSepAg + 0.2, 1.1);
         /* number eight is marked while the whole floor is in frame */
         FX.go("center", 12.6, 0.8); FX.beat(13.4);
-        ft("#stn7", { opacity: 0.42 }, { opacity: 0.85, duration: 0.3 }, tFav1 + 0.2);
+        ft("#stn7", { opacity: 0.68 }, { opacity: 0.92, duration: 0.3 }, tFav1 + 0.2);
         ft("#stn7", { boxShadow: "0 0 0 rgba(1,204,247,0)" }, { keyframes: [{ boxShadow: "0 0 46px rgba(1,204,247,0.75)", duration: 0.34 }, { boxShadow: "0 0 14px rgba(1,204,247,0.3)", duration: 0.8 }] }, tFav1 + 0.2);
         ft("#stn7", { scale: 1 }, { keyframes: [{ scale: 1.06, duration: 0.24 }, { scale: 1, duration: 0.36 }] }, tFav1 + 0.25);
         FX.face("happy", tFav1 + 0.5, 0.9);
@@ -483,12 +488,12 @@
         AG.forEach(([i, n, s2, c], k) => { const t = tA[k] - 0.2;
           if (CAM[k]) camTo(CAM[k][0], CAM[k][1], CAM[k][2], t - 0.1, CAM[k][3], "power2.inOut");
           /* the station lights up and stays lit — the floor accumulates */
-          ft("#stn" + k, { opacity: k === 7 ? 0.85 : 0.42 }, { opacity: 1, duration: 0.3 }, t + 0.1);
-          ft("#stn" + k, { borderColor: "rgba(255,255,255,0.10)", backgroundColor: "rgba(10,22,58,0.92)" },
+          ft("#stn" + k, { opacity: k === 7 ? 0.92 : 0.68 }, { opacity: 1, duration: 0.3 }, t + 0.1);
+          ft("#stn" + k, { borderColor: "rgba(255,255,255,0.22)", backgroundColor: "rgba(16,32,76,0.96)" },
             { borderColor: "rgba(" + c[1] + ",0.65)", backgroundColor: "rgba(" + c[1] + ",0.10)", duration: 0.34 }, t + 0.1);
           ft("#sd" + k, { opacity: 0.08 }, { opacity: 1, duration: 0.3 }, t + 0.1);
-          ft("#sno" + k, { color: "rgba(255,255,255,0.28)" }, { color: c[0], duration: 0.3 }, t + 0.1);
-          ft("#sbx" + k, { backgroundColor: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.55)" }, { backgroundColor: c[0], color: "#04122f", duration: 0.3 }, t + 0.12);
+          ft("#sno" + k, { color: "rgba(255,255,255,0.42)" }, { color: c[0], duration: 0.3 }, t + 0.1);
+          ft("#sbx" + k, { backgroundColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.72)" }, { backgroundColor: c[0], color: "#04122f", duration: 0.3 }, t + 0.12);
           ft("#slv" + k, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, t + 0.3);
           st($("#tbN"), { innerHTML: String(k + 1) }, t + 0.3);
           if (k > 0) ft(segs[k - 1], { attr: { "stroke-dashoffset": 2000 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.5, ease: "power2.out" }, t + 0.1); });

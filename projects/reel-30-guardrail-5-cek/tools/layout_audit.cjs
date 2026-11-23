@@ -1,11 +1,21 @@
 const { chromium } = require('playwright');
-const path = require('path');
+const path = require('path'), http = require('http'), fs = require('fs');
+const MT = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.glb': 'model/gltf-binary', '.mp3': 'audio/mpeg', '.wav': 'audio/wav' };
 (async () => {
   const file = process.argv[2];
   const times = process.argv[3].split(',').map(Number);
+  const root = path.dirname(path.resolve(file));
+  const srv = http.createServer((rq, rs) => {
+    const f = path.join(root, decodeURIComponent(rq.url.split('?')[0]));
+    fs.readFile(f, (e, d) => { if (e) { rs.statusCode = 404; return rs.end(); }
+      rs.setHeader('content-type', MT[path.extname(f).toLowerCase()] || 'application/octet-stream'); rs.end(d); });
+  });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  const port = srv.address().port;
   const b = await chromium.launch();
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
-  await p.goto('file://' + path.resolve(file));
+  p.on('pageerror', (e) => console.log('PAGEERROR ' + e.message));
+  await p.goto(`http://127.0.0.1:${port}/${path.basename(file)}`);
   await p.waitForFunction(() => window.__timelines && window.__timelines.main, null, { timeout: 60000 });
   for (const t of times) {
     await p.evaluate((t) => { const tl = window.__timelines.main; tl.pause(); tl.time(t); }, t);
@@ -70,5 +80,5 @@ const path = require('path');
     console.log(`t=${t}s  ${lines.length ? '' : 'clean'}`);
     lines.forEach(l => console.log(l));
   }
-  await b.close();
+  await b.close(); srv.close();
 })();

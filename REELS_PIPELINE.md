@@ -84,6 +84,22 @@ module robot3d.js, `<canvas id="robo3d" width="820" height="700">` at left -92, 
 - **Transitions differ per reel** (sets from: stripes, blocks, sweep, iris, shutter, doors, slats, dots).
 - Run heavy local tools under `flock /tmp/claude-0/cpu.lock`, renders under `flock /tmp/claude-0/render.lock`.
 
+## Client rules added 2026-11-23
+- **Robot must be flawless.** No torn/stretched geometry, no popping, no limb snapping ("ngga patah patah atau rusak").
+  Snapshot the robot at several poses (rest, both side rises, gesture extremes, CTA) and look for skinning tears before
+  rendering. Motion stays eased — no back-overshoot snaps.
+- **Hands alternate.** Right and left hand take turns across the reel (`FX.point`/`beat`/`wave` are side-aware) — never
+  the same hand for every beat.
+- **VO delivery:** keep intonation even. Don't jump from a high-energy tag straight to a flat one; keep the tags within a
+  narrow band across neighbouring lines. **Pauses between lines ≤ ~0.45 s** — long gaps sound dead. Pad only where a wipe
+  truly needs room, and re-time the visuals instead when you can.
+- **Vary the business context.** BANNED (over-used): servis AC, laundry, toko/olshop generik, bengkel, dokter hewan.
+  Also avoid repeating a context used in a recent reel (salon, barbershop, resto, klinik kecantikan). Pick a fresh
+  vertical per reel and record it in production/asset_credits.json so the next reel can avoid it.
+- **Varied demo elements:** study the reference video's own on-screen elements too, not just its script beats, and give
+  each scene its own shape (see reel-26b: triptych flip, edge-lit slab, mosaic wall, card flip, speech bubble, printed
+  ticket, two-column verdict).
+
 ## Length (client, 2026-11-20): keep reels short
 **Target 45–60 s**, even when the reference is 90–140 s: follow the reference's beat ORDER, not its length — cut or merge
 beats, don't pad. The client explicitly approved shortening. It also halves render time (≈0.9 s/frame on 4 cores with the

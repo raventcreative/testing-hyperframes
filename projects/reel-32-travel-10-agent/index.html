@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur Automation — Travel 10 Agent</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --c: #01ccf7; --line: rgba(255,255,255,0.12); --card: rgba(255,255,255,0.05); --mute: rgba(255,255,255,0.64); --ok: #3ddc97; --heat: #ffb547; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0b1a45; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: #fff; -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #0b1a45; }
+      .ic { display: inline-block; flex: none; }
+      .ic svg { width: 100%; height: 100%; display: block; }
+      b { font-weight: 700; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #0b1a45; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #0b1a45; }
+      #grid { position: absolute; inset: 0; opacity: 0.45; background-image: radial-gradient(rgba(255,255,255,0.10) 1.2px, transparent 1.6px); background-size: 36px 36px; }
+      #glow { position: absolute; left: -300px; top: 300px; width: 1100px; height: 1100px; border-radius: 50%; background: radial-gradient(circle, rgba(1,204,247,0.14) 0%, rgba(1,204,247,0) 62%); }
+      .lbl { font-size: 14px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); }
+      .simtag { display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--c); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 20px; padding: 3px 12px; }
+
+      /* ---------- hook: one person, ten jobs queued (stage x 80-1000, y 290-1240) ---------- */
+      #hookClip { position: absolute; left: 0; top: 270px; width: 1080px; height: 980px; overflow: hidden; }
+      #hook { position: absolute; left: 80px; top: 20px; width: 920px; height: 950px; }
+      #hCnt { position: absolute; left: 0; right: 0; top: 0px; text-align: center; font-size: 25px; font-weight: 700; letter-spacing: 3px; color: var(--mute); opacity: 0; white-space: nowrap; }
+      #hCnt b { color: #fff; font-size: 31px; }
+      .tok { position: absolute; width: 418px; height: 128px; border-radius: 22px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.10); display: flex; align-items: center; gap: 14px; padding: 0 18px; opacity: 0; }
+      .tok .bx { width: 54px; height: 54px; border-radius: 16px; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); display: flex; align-items: center; justify-content: center; flex: none; } .tok .bx .ic { width: 28px; height: 28px; }
+      .tok b { display: block; font-size: 24px; line-height: 1.15; color: rgba(255,255,255,0.9); white-space: nowrap; }
+      .tok em { display: block; font-style: normal; font-size: 16px; color: var(--mute); margin-top: 3px; white-space: nowrap; }
+      #hSlow { position: absolute; left: 230px; top: 762px; width: 460px; height: 54px; border-radius: 27px; background: rgba(1,204,247,0.14); border: 1.5px solid rgba(1,204,247,0.55); display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 21px; font-weight: 700; color: var(--c); opacity: 0; white-space: nowrap; }
+      #hSlow .ic { width: 24px; height: 24px; }
+      #hMe { position: absolute; left: 0px; top: 828px; width: 920px; height: 122px; border-radius: 28px; background: rgba(8,18,50,0.96); border: 2px solid rgba(255,255,255,0.18); display: flex; align-items: center; gap: 22px; padding: 0 28px; opacity: 0; box-shadow: 0 26px 60px rgba(0,0,0,0.42); }
+      #hMe .av { width: 66px; height: 66px; border-radius: 50%; background: rgba(1,204,247,0.16); border: 2px solid rgba(1,204,247,0.6); color: var(--c); display: flex; align-items: center; justify-content: center; flex: none; } #hMe .av .ic { width: 34px; height: 34px; }
+      #hMe .who { display: block; font-size: 15px; font-weight: 700; letter-spacing: 3px; color: var(--mute); white-space: nowrap; }
+      #hMe .mtx b { display: block; font-size: 30px; line-height: 1.15; margin-top: 2px; white-space: nowrap; }
+      #hBar { position: relative; flex: 1; height: 14px; border-radius: 7px; background: rgba(255,255,255,0.1); }
+      #hBar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 7px; background: var(--c); transform-origin: 0 50%; transform: scaleX(0); display: block; }
+      #hWait { text-align: right; flex: none; }
+      #hWaitN { font-size: 54px; font-weight: 700; line-height: 1; letter-spacing: -1px; color: #fff; }
+      #hWait em { display: block; font-style: normal; font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--mute); margin-top: 2px; white-space: nowrap; }
+
+      /* ---------- app window ---------- */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(6, 14, 40, 0.9);
+        border: 1.5px solid rgba(255,255,255,0.14); box-shadow: 0 40px 100px rgba(0,0,0,0.45); opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 62px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.03); }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 2px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.22); display: block; }
+      #tbar .app { font-size: 17px; font-weight: 700; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--c); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 20px; padding: 2px 10px; }
+      #tbar .cn { margin-left: auto; font-size: 15px; color: var(--mute); white-space: nowrap; } #tbar .cn b { color: var(--c); }
+      #body { position: absolute; left: 0; right: 0; top: 62px; bottom: 0; }
+      .view { position: absolute; left: 0; top: 0; width: 920px; height: 888px; }
+      #wFlash { position: absolute; inset: 0; background: #dff6ff; opacity: 0; pointer-events: none; }
+      .live { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(61,220,151,0.14); border: 1.5px solid rgba(61,220,151,0.55); font-size: 14px; font-weight: 700; color: var(--ok); white-space: nowrap; }
+      .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: block; }
+
+      /* roster view: 10 numbered agent tiles, 2 x 5 */
+      #rsHd { position: absolute; left: 28px; right: 28px; top: 18px; height: 66px; border-radius: 20px; background: rgba(1,204,247,0.12); border: 1.5px solid rgba(1,204,247,0.5); display: flex; align-items: center; gap: 14px; padding: 0 20px; opacity: 0; }
+      #rsHd .bx { width: 42px; height: 42px; border-radius: 13px; background: var(--c); color: #04122f; display: flex; align-items: center; justify-content: center; flex: none; } #rsHd .bx .ic { width: 23px; height: 23px; }
+      #rsHd b { font-size: 24px; white-space: nowrap; } #rsHd .cn { margin-left: auto; font-size: 17px; color: rgba(255,255,255,0.84); white-space: nowrap; } #rsHd .cn b { color: var(--c); }
+      .rt { position: absolute; width: 418px; height: 128px; border-radius: 22px; background: rgba(255,255,255,0.045); border: 1.5px solid var(--line); display: flex; align-items: center; gap: 14px; padding: 0 18px; opacity: 0; }
+      .rt .no { font-size: 30px; font-weight: 700; color: rgba(255,255,255,0.3); width: 46px; flex: none; white-space: nowrap; }
+      .rt .bx { width: 54px; height: 54px; border-radius: 16px; background: var(--ta); color: var(--t); display: flex; align-items: center; justify-content: center; flex: none; } .rt .bx .ic { width: 28px; height: 28px; }
+      .rt .tx { min-width: 0; } .rt .tx b { display: block; font-size: 24px; line-height: 1.15; white-space: nowrap; }
+      .rt .tx em { display: block; font-style: normal; font-size: 16px; color: var(--mute); margin-top: 3px; white-space: nowrap; }
+      .rt.on { border-color: var(--tb); background: var(--ta); } .rt.on .no { color: var(--t); }
+      #rtStar { position: absolute; width: 56px; height: 56px; border-radius: 50%; background: var(--c); color: #04122f; display: flex; align-items: center; justify-content: center; opacity: 0; box-shadow: 0 10px 26px rgba(0,0,0,0.4); }
+      #rtStar .ic { width: 30px; height: 30px; }
+
+      /* detail view: step strip + one component per agent */
+      #dStrip { position: absolute; left: 236px; top: 96px; width: 448px; height: 34px; opacity: 0; }
+      .sd { position: absolute; top: 0; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.07); border: 1.5px solid var(--line); font-size: 15px; font-weight: 700; color: var(--mute); display: flex; align-items: center; justify-content: center; }
+      .sd.on { background: var(--c); border-color: var(--c); color: #04122f; }
+      #dHd { position: absolute; left: 28px; right: 28px; top: 158px; height: 74px; border-radius: 20px; background: var(--ta); border: 1.5px solid var(--tb); display: flex; align-items: center; gap: 16px; padding: 0 22px; opacity: 0; }
+      #dHd .bx { width: 48px; height: 48px; border-radius: 14px; background: var(--t); color: #04122f; display: flex; align-items: center; justify-content: center; flex: none; } #dHd .bx .ic { width: 26px; height: 26px; }
+      #dHd .no { font-size: 20px; font-weight: 700; color: var(--t); letter-spacing: 2px; white-space: nowrap; }
+      #dHd b { font-size: 28px; white-space: nowrap; }
+      .dc { position: absolute; left: 28px; top: 258px; width: 864px; height: 596px; opacity: 0; }
+
+      /* 01 chat bubbles */
+      .bub { position: absolute; max-width: 560px; padding: 20px 26px; font-size: 26px; line-height: 1.3; border-radius: 26px; opacity: 0; }
+      #d1a { left: 0; top: 24px; background: rgba(255,255,255,0.07); border: 1.5px solid var(--line); border-radius: 26px 26px 26px 8px; }
+      #d1b { right: 0; top: 176px; background: rgba(1,204,247,0.16); border: 1.5px solid rgba(1,204,247,0.6); border-radius: 26px 26px 8px 26px; text-align: left; }
+      #d1c { position: absolute; left: 0; top: 404px; height: 60px; padding: 0 26px; border-radius: 30px; background: rgba(61,220,151,0.14); border: 1.5px solid rgba(61,220,151,0.6); display: flex; align-items: center; gap: 12px; font-size: 23px; font-weight: 700; color: var(--ok); opacity: 0; white-space: nowrap; }
+      #d1c .ic { width: 26px; height: 26px; }
+
+      /* 02 follow-up: horizontal 3-step track */
+      #d2line { position: absolute; left: 92px; top: 150px; width: 680px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.14); }
+      #d2fill { position: absolute; left: 92px; top: 150px; width: 680px; height: 4px; border-radius: 2px; background: var(--c); transform-origin: 0 50%; transform: scaleX(0); }
+      .d2s { position: absolute; top: 86px; width: 184px; text-align: center; opacity: 0; }
+      .d2s .dot { width: 60px; height: 60px; border-radius: 50%; margin: 36px auto 0; background: rgba(8,18,50,1); border: 3px solid var(--c); color: var(--c); display: flex; align-items: center; justify-content: center; } .d2s .dot .ic { width: 28px; height: 28px; }
+      .d2s b { display: block; font-size: 25px; margin-top: 16px; white-space: nowrap; }
+      .d2s em { display: block; font-style: normal; font-size: 18px; color: var(--mute); margin-top: 4px; white-space: nowrap; }
+      #d2tag { position: absolute; left: 0; right: 0; top: 400px; text-align: center; font-size: 24px; font-weight: 700; color: var(--ok); opacity: 0; white-space: nowrap; }
+
+      /* 03 booking: date row + seat meter */
+      .dd { position: absolute; top: 20px; width: 112px; height: 136px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); text-align: center; padding-top: 18px; opacity: 0; }
+      .dd em { display: block; font-style: normal; font-size: 16px; color: var(--mute); letter-spacing: 2px; white-space: nowrap; }
+      .dd b { display: block; font-size: 40px; line-height: 1.1; margin-top: 6px; white-space: nowrap; }
+      .dd.pick { background: rgba(1,204,247,0.18); border-color: var(--c); }
+      #d3seat { position: absolute; left: 0; right: 0; top: 214px; height: 150px; border-radius: 24px; background: rgba(255,255,255,0.04); border: 1.5px solid var(--line); padding: 22px 28px; opacity: 0; }
+      #d3seat .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      #d3row { display: flex; gap: 10px; margin-top: 18px; }
+      #d3row i { flex: 1; height: 46px; border-radius: 11px; background: rgba(255,255,255,0.07); border: 1.5px solid var(--line); display: block; }
+      #d3row i.full { background: rgba(1,204,247,0.42); border-color: var(--c); }
+      #d3n { position: absolute; right: 28px; top: 20px; font-size: 32px; font-weight: 700; color: var(--c); white-space: nowrap; }
+      #d3tag { position: absolute; left: 0; top: 400px; height: 60px; padding: 0 26px; border-radius: 30px; background: rgba(1,204,247,0.14); border: 1.5px solid rgba(1,204,247,0.6); display: flex; align-items: center; gap: 12px; font-size: 23px; font-weight: 700; color: var(--c); opacity: 0; white-space: nowrap; }
+      #d3tag .ic { width: 26px; height: 26px; }
+
+      /* 04 itinerary: 4-day strip */
+      .day { position: absolute; top: 30px; width: 198px; height: 350px; border-radius: 24px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); padding: 20px 18px; opacity: 0; }
+      .day .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); white-space: nowrap; }
+      .day b { display: block; font-size: 27px; line-height: 1.2; margin-top: 10px; }
+      .day .st { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 18px; color: rgba(255,255,255,0.82); line-height: 1.25; }
+      .day .st .ic { width: 20px; height: 20px; color: var(--c); flex: none; }
+      #d4link { position: absolute; left: 110px; top: 198px; width: 644px; height: 3px; background: rgba(1,204,247,0.5); transform-origin: 0 50%; transform: scaleX(0); }
+      #d4tag { position: absolute; left: 0; right: 0; top: 426px; text-align: center; font-size: 24px; font-weight: 700; color: var(--c); opacity: 0; white-space: nowrap; }
+
+      /* 05 vendor: three confirm plates */
+      .ven { position: absolute; top: 40px; width: 272px; height: 330px; border-radius: 26px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); padding: 24px 22px; text-align: center; opacity: 0; }
+      .ven .bx { width: 72px; height: 72px; border-radius: 22px; margin: 0 auto; background: var(--ta); color: var(--t); display: flex; align-items: center; justify-content: center; } .ven .bx .ic { width: 36px; height: 36px; }
+      .ven b { display: block; font-size: 26px; margin-top: 16px; white-space: nowrap; }
+      .ven em { display: block; font-style: normal; font-size: 18px; color: var(--mute); margin-top: 4px; white-space: nowrap; }
+      .ven .ok { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; height: 48px; padding: 0 20px; border-radius: 24px; background: rgba(61,220,151,0.16); border: 1.5px solid rgba(61,220,151,0.6); font-size: 19px; font-weight: 700; color: var(--ok); opacity: 0; white-space: nowrap; }
+      .ven .ok .ic { width: 22px; height: 22px; }
+      #d5tag { position: absolute; left: 0; right: 0; top: 426px; text-align: center; font-size: 24px; font-weight: 700; color: var(--ok); opacity: 0; white-space: nowrap; }
+
+      /* 07 price: one big equation */
+      .eqb { position: absolute; top: 60px; width: 246px; height: 220px; border-radius: 26px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); padding: 22px 24px; opacity: 0; }
+      .eqb .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      .eqb b { display: block; font-size: 42px; line-height: 1.1; margin-top: 14px; white-space: nowrap; }
+      .eqb em { display: block; font-style: normal; font-size: 18px; color: var(--mute); margin-top: 8px; white-space: nowrap; }
+      #eq3 { border-color: rgba(1,204,247,0.6); background: rgba(1,204,247,0.12); } #eq3 b { color: var(--c); }
+      .eqop { position: absolute; top: 142px; font-size: 48px; font-weight: 700; color: rgba(255,255,255,0.5); opacity: 0; white-space: nowrap; }
+      #d7tag { position: absolute; left: 0; right: 0; top: 330px; text-align: center; font-size: 24px; font-weight: 700; color: var(--c); opacity: 0; white-space: nowrap; }
+
+      /* 08 invoice row (in-window teaser) */
+      #d8card { position: absolute; left: 132px; top: 30px; width: 600px; height: 360px; border-radius: 26px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(1,204,247,0.5); padding: 26px 30px; opacity: 0; }
+      #d8card .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); white-space: nowrap; }
+      #d8card .t { font-size: 32px; font-weight: 700; margin-top: 10px; white-space: nowrap; }
+      #d8card .amt { font-size: 54px; font-weight: 700; margin-top: 16px; white-space: nowrap; }
+      #d8card .amt span { font-size: 22px; font-weight: 400; color: var(--mute); margin-left: 10px; }
+      #d8bar { position: absolute; left: 30px; right: 30px; bottom: 76px; height: 14px; border-radius: 7px; background: rgba(255,255,255,0.1); }
+      #d8bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 7px; background: var(--c); transform-origin: 0 50%; transform: scaleX(0); display: block; }
+      #d8st { position: absolute; left: 30px; bottom: 26px; font-size: 20px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+      #d8tag { position: absolute; left: 0; right: 0; top: 440px; text-align: center; font-size: 24px; font-weight: 700; color: var(--c); opacity: 0; white-space: nowrap; }
+
+      /* 09 review */
+      #d9card { position: absolute; left: 92px; top: 40px; width: 680px; height: 400px; border-radius: 30px; background: rgba(255,255,255,0.06); border: 1.5px solid var(--line); padding: 30px 34px; text-align: center; opacity: 0; }
+      #d9stars { display: flex; justify-content: center; gap: 10px; }
+      #d9stars .ic { width: 52px; height: 52px; color: var(--heat); opacity: 0; }
+      #d9card .num { font-size: 76px; font-weight: 700; line-height: 1; margin-top: 18px; color: var(--heat); white-space: nowrap; }
+      #d9card .qt2 { font-size: 26px; line-height: 1.35; margin-top: 18px; color: rgba(255,255,255,0.88); }
+      #d9card em { display: block; font-style: normal; font-size: 18px; color: var(--mute); margin-top: 14px; white-space: nowrap; }
+
+      /* 10 report */
+      #d10box { position: absolute; left: 0; right: 0; top: 20px; height: 330px; border-radius: 26px; background: rgba(255,255,255,0.04); border: 1.5px solid var(--line); padding: 24px 28px; opacity: 0; }
+      #d10box .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      #d10bars { position: absolute; left: 28px; right: 28px; bottom: 28px; height: 196px; display: flex; align-items: flex-end; gap: 18px; }
+      #d10bars i { flex: 1; height: 100%; border-radius: 10px 10px 4px 4px; background: var(--c); transform-origin: 50% 100%; transform: scaleY(0); display: block; }
+      .d10s { position: absolute; top: 382px; width: 418px; height: 128px; border-radius: 22px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); padding: 20px 24px; opacity: 0; }
+      .d10s .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      .d10s b { display: block; font-size: 44px; line-height: 1.1; margin-top: 8px; white-space: nowrap; }
+
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+      #cursor svg { width: 100%; height: 100%; display: block; }
+      #ripple { position: absolute; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--c); background: rgba(1,204,247,0.18); opacity: 0; z-index: 29; }
+
+      /* ---------- stage cards (outside the window) ---------- */
+      .pcard { position: absolute; border-radius: 30px; background: rgba(8,18,50,0.97); border: 1.5px solid rgba(1,204,247,0.5); box-shadow: 0 40px 90px rgba(0,0,0,0.55); opacity: 0; }
+      .pk { font-size: 14px; font-weight: 700; letter-spacing: 2.5px; color: var(--c); white-space: nowrap; }
+      #pKon { left: 80px; top: 404px; width: 452px; padding: 26px 28px 30px; }
+      #pKon .pt { font-size: 30px; font-weight: 700; line-height: 1.2; margin-top: 8px; white-space: nowrap; }
+      .ktile { position: relative; margin-top: 14px; height: 96px; border-radius: 18px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); display: flex; align-items: center; gap: 14px; padding: 0 18px; opacity: 0; }
+      .ktile .bx { width: 52px; height: 52px; border-radius: 15px; background: var(--ta); color: var(--t); display: flex; align-items: center; justify-content: center; flex: none; } .ktile .bx .ic { width: 26px; height: 26px; }
+      .ktile b { display: block; font-size: 23px; line-height: 1.15; white-space: nowrap; }
+      .ktile em { display: block; font-style: normal; font-size: 16px; color: var(--mute); margin-top: 3px; white-space: nowrap; }
+      #pInv { left: 548px; top: 388px; width: 452px; padding: 26px 28px 0; border-color: rgba(1,204,247,0.7); }
+      #pInv .pt { font-size: 34px; font-weight: 700; line-height: 1.16; margin-top: 8px; white-space: nowrap; }
+      #pInv .amt { font-size: 52px; font-weight: 700; margin-top: 14px; white-space: nowrap; }
+      #pInv .perf { position: relative; margin: 22px -28px 0; border-top: 3px dashed rgba(255,255,255,0.28); }
+      #pInv .perf i { position: absolute; top: -17px; width: 32px; height: 32px; border-radius: 50%; background: #0b1a45; display: block; } #pInv .perf .l { left: -16px; } #pInv .perf .r { right: -16px; }
+      #pInv .stub { padding: 20px 0 26px; }
+      #ivBar { height: 14px; border-radius: 7px; background: rgba(255,255,255,0.1); position: relative; }
+      #ivBar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 7px; background: var(--c); transform-origin: 0 50%; transform: scaleX(0); display: block; }
+      #ivPct { display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; font-size: 20px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+      #ivPct b { font-size: 30px; color: var(--c); }
+      .ivr { display: flex; align-items: center; gap: 12px; margin-top: 14px; height: 60px; padding: 0 18px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); font-size: 20px; opacity: 0; white-space: nowrap; }
+      .ivr .ic { width: 24px; height: 24px; color: var(--ok); flex: none; }
+      #ivLunas { position: absolute; left: 28px; right: 28px; bottom: 24px; height: 62px; border-radius: 31px; background: var(--ok); color: #04122f; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 24px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #ivLunas .ic { width: 28px; height: 28px; }
+
+      /* ---------- 24/7 scene ---------- */
+      #kin { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; opacity: 0; }
+      #kNote { position: absolute; left: 0; right: 0; top: 12px; text-align: center; }
+      #kDial { position: absolute; left: 36px; top: 110px; width: 360px; height: 360px; border-radius: 50%; border: 10px solid rgba(255,255,255,0.12); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+      #kArc { position: absolute; inset: -10px; border-radius: 50%; background: conic-gradient(from -90deg, var(--c) 0deg, var(--c) 0deg, rgba(0,0,0,0) 0deg); mask: radial-gradient(circle, transparent 164px, #000 165px); -webkit-mask: radial-gradient(circle, transparent 164px, #000 165px); }
+      #kDial b { font-size: 92px; font-weight: 700; line-height: 1; letter-spacing: -2px; white-space: nowrap; }
+      #kDial em { font-style: normal; font-size: 22px; color: var(--mute); margin-top: 10px; letter-spacing: 2px; white-space: nowrap; }
+      .kp { position: absolute; left: 448px; height: 150px; width: 436px; border-radius: 26px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--line); padding: 22px 26px; opacity: 0; }
+      .kp .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      .kp b { display: block; font-size: 46px; line-height: 1.1; margin-top: 8px; white-space: nowrap; }
+      .kp em { display: block; font-style: normal; font-size: 18px; color: var(--mute); margin-top: 6px; white-space: nowrap; }
+      #kp2 { border-color: rgba(1,204,247,0.6); background: rgba(1,204,247,0.1); } #kp2 b { color: var(--c); }
+      #kDots { position: absolute; left: 448px; top: 430px; width: 436px; display: flex; flex-wrap: wrap; gap: 12px; }
+      #kDots i { width: 76px; height: 40px; border-radius: 12px; background: rgba(1,204,247,0.2); border: 1.5px solid rgba(1,204,247,0.55); opacity: 0; display: block; }
+      #kLine { position: absolute; left: 36px; right: 36px; top: 560px; text-align: center; font-size: 36px; font-weight: 700; line-height: 1.25; opacity: 0; }
+      #kLine span { color: var(--c); }
+
+      /* ---------- CTA + UI ---------- */
+      #cta { position: absolute; left: 110px; width: 860px; top: 540px; padding: 34px 40px; text-align: center; border-radius: 30px; background: rgba(6, 15, 42, 0.96); border: 1.5px solid rgba(1,204,247,0.4); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: rgba(255,255,255,0.75); } #cta .name { font-size: 60px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; } #cta .sb b { color: var(--c); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 22px; height: 74px; padding: 0 46px; border-radius: 41px; background: var(--c); color: #04122f; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoD { opacity: 0; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; z-index: 2; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; text-shadow: 0 4px 18px rgba(0,0,0,0.45); }
+      .cap s { text-decoration: none; display: inline; white-space: nowrap; font-weight: 400; color: #fff; } .cap s.k { font-weight: 700; color: var(--c); }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); z-index: 1; }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(0,0,0,0.38)); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="53.4" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="53.4" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="bgD"></div><div id="grid"></div><div id="glow"></div>
+
+        <div id="hookClip"><div id="hook">
+          <div id="hCnt"><b id="hCntN">0</b> KERJAAN HARI INI · 1 ORANG</div>
+          <div id="hTok"></div>
+          <div id="hSlow"><span class="ic" data-i="clock"></span>dikerjain satu-satu, gantian</div>
+          <div id="hMe"><div class="av"><span class="ic" data-i="user-round"></span></div>
+            <div class="mtx"><span class="who">YANG NGERJAIN</span><b>Lu sendiri</b></div>
+            <div id="hBar"><i></i></div>
+            <div id="hWait"><div id="hWaitN">0</div><em>NUNGGU</em></div></div>
+        </div></div>
+
+        <div id="win"><div id="wcam">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Panel Agent · Travel</span><span id="sim">SIMULASI</span><span class="cn" id="tbCn"><b>10</b> agent</span></div>
+          <div id="body">
+            <div class="view" id="vRoster"></div>
+            <div class="view" id="vDetail"></div>
+          </div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div><div id="wFlash"></div></div>
+
+        <div class="pcard" id="pKon"><div class="pk">AGENT 06 · KONTEN</div><div class="pt">Isi feed tiap minggu</div>
+          <div class="ktile" id="kt0"><div class="bx"><span class="ic" data-i="video"></span></div><div><b>Reels destinasi</b><em>3 spot paling dicari</em></div></div>
+          <div class="ktile" id="kt1"><div class="bx"><span class="ic" data-i="layout-grid"></span></div><div><b>Carousel itinerary</b><em>hari per hari</em></div></div>
+          <div class="ktile" id="kt2"><div class="bx"><span class="ic" data-i="star"></span></div><div><b>Cerita peserta</b><em>dari review asli</em></div></div></div>
+
+        <div class="pcard" id="pInv"><div class="pk">AGENT 08 · INVOICE &amp; DP</div><div class="pt">Trip Labuan Bajo</div>
+          <div class="amt">Rp 7.400.000</div>
+          <div class="perf"><i class="l"></i><i class="r"></i></div>
+          <div class="stub">
+            <div id="ivBar"><i></i></div>
+            <div id="ivPct"><span>DP MASUK</span><b id="ivPctN">0%</b></div>
+            <div class="ivr" id="ivr0"><span class="ic" data-i="send"></span>Invoice kekirim otomatis</div>
+            <div class="ivr" id="ivr1"><span class="ic" data-i="bell"></span>Diingetin H+1 dan H+3</div>
+            <div id="ivLunas"><span class="ic" data-i="badge-check"></span>LUNAS</div>
+          </div></div>
+
+        <div id="kin"><div class="lbl" id="kNote">SIMULASI · ANGKA ILUSTRASI</div>
+          <div id="kDial"><div id="kArc"></div><b id="kDialN">0</b><em>JAM NONSTOP</em></div>
+          <div class="kp" id="kp1" style="top:110px"><div class="k">TETEP</div><b>1 orang</b><em>lu, yang pegang keputusan</em></div>
+          <div class="kp" id="kp2" style="top:286px"><div class="k">YANG NGERJAIN</div><b>10 agent</b><em>satu buat tiap kerjaan</em></div>
+          <div id="kDots"></div>
+          <div id="kLine">Sepuluh kerjaan jalan terus,<br /><span>tanpa nambah sepuluh orang.</span></div>
+        </div>
+
+        <div id="cta"><div class="k">Mau sistem kayak gini dipasang di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="AIpreneur" /><div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div><div id="caps"></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="52.72" data-track-index="8" data-volume="1"></audio>
+      <audio id="sx00" class="clip" src="assets/sfx/pop.wav" data-start="2.68" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx01" class="clip" src="assets/sfx/pop.wav" data-start="3.01" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx02" class="clip" src="assets/sfx/pop.wav" data-start="3.34" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx03" class="clip" src="assets/sfx/pop.wav" data-start="3.67" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx04" class="clip" src="assets/sfx/pop.wav" data-start="4.00" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx05" class="clip" src="assets/sfx/pop.wav" data-start="4.33" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx06" class="clip" src="assets/sfx/pop.wav" data-start="4.66" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx07" class="clip" src="assets/sfx/pop.wav" data-start="4.99" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx08" class="clip" src="assets/sfx/pop.wav" data-start="5.32" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx09" class="clip" src="assets/sfx/pop.wav" data-start="5.65" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx10" class="clip" src="assets/sfx/ping.wav" data-start="6.74" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx11" class="clip" src="assets/sfx/pop.wav" data-start="6.94" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx12" class="clip" src="assets/sfx/click.wav" data-start="7.79" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+      <audio id="sx13" class="clip" src="assets/sfx/whoosh.wav" data-start="8.31" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx14" class="clip" src="assets/sfx/pop.wav" data-start="10.44" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx15" class="clip" src="assets/sfx/pop.wav" data-start="10.64" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx16" class="clip" src="assets/sfx/pop.wav" data-start="10.84" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx17" class="clip" src="assets/sfx/pop.wav" data-start="11.04" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx18" class="clip" src="assets/sfx/pop.wav" data-start="11.24" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx19" class="clip" src="assets/sfx/pop.wav" data-start="11.44" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx20" class="clip" src="assets/sfx/pop.wav" data-start="11.64" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx21" class="clip" src="assets/sfx/pop.wav" data-start="11.84" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx22" class="clip" src="assets/sfx/pop.wav" data-start="12.04" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx23" class="clip" src="assets/sfx/pop.wav" data-start="12.24" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx24" class="clip" src="assets/sfx/sparkle.wav" data-start="13.53" data-duration="1.8" data-track-index="10" data-volume="0.035"></audio>
+      <audio id="sx25" class="clip" src="assets/sfx/ping.wav" data-start="13.58" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx26" class="clip" src="assets/sfx/whoosh.wav" data-start="14.49" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx27" class="clip" src="assets/sfx/pop.wav" data-start="15.54" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx28" class="clip" src="assets/sfx/pop.wav" data-start="15.98" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx29" class="clip" src="assets/sfx/ping.wav" data-start="16.38" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx30" class="clip" src="assets/sfx/pop.wav" data-start="17.70" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx31" class="clip" src="assets/sfx/pop.wav" data-start="17.96" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx32" class="clip" src="assets/sfx/pop.wav" data-start="18.22" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx33" class="clip" src="assets/sfx/pop.wav" data-start="19.86" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx34" class="clip" src="assets/sfx/click.wav" data-start="20.00" data-duration="0.366" data-track-index="12" data-volume="0.08"></audio>
+      <audio id="sx35" class="clip" src="assets/sfx/ping.wav" data-start="20.48" data-duration="1.32" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx36" class="clip" src="assets/sfx/whoosh.wav" data-start="20.70" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx37" class="clip" src="assets/sfx/pop.wav" data-start="21.52" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx38" class="clip" src="assets/sfx/pop.wav" data-start="21.72" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx39" class="clip" src="assets/sfx/pop.wav" data-start="21.92" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx40" class="clip" src="assets/sfx/pop.wav" data-start="22.12" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx41" class="clip" src="assets/sfx/pop.wav" data-start="23.70" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx42" class="clip" src="assets/sfx/pop.wav" data-start="23.90" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx43" class="clip" src="assets/sfx/pop.wav" data-start="24.10" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx44" class="clip" src="assets/sfx/ping.wav" data-start="24.28" data-duration="1.32" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx45" class="clip" src="assets/sfx/whoosh.wav" data-start="25.02" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx46" class="clip" src="assets/sfx/whoosh.wav" data-start="25.53" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx47" class="clip" src="assets/sfx/pop.wav" data-start="25.94" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx48" class="clip" src="assets/sfx/pop.wav" data-start="26.20" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx49" class="clip" src="assets/sfx/pop.wav" data-start="26.46" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx50" class="clip" src="assets/sfx/whoosh.wav" data-start="27.25" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx51" class="clip" src="assets/sfx/pop.wav" data-start="27.67" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx52" class="clip" src="assets/sfx/pop.wav" data-start="27.89" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx53" class="clip" src="assets/sfx/ping.wav" data-start="28.17" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx54" class="clip" src="assets/sfx/pop.wav" data-start="29.12" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx55" class="clip" src="assets/sfx/pop.wav" data-start="31.72" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx56" class="clip" src="assets/sfx/sparkle.wav" data-start="31.90" data-duration="1.8" data-track-index="10" data-volume="0.035"></audio>
+      <audio id="sx57" class="clip" src="assets/sfx/pop.wav" data-start="33.60" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx58" class="clip" src="assets/sfx/click.wav" data-start="34.26" data-duration="0.366" data-track-index="12" data-volume="0.08"></audio>
+      <audio id="sx59" class="clip" src="assets/sfx/whoosh.wav" data-start="34.95" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx60" class="clip" src="assets/sfx/pop.wav" data-start="37.49" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx61" class="clip" src="assets/sfx/pop.wav" data-start="39.30" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx62" class="clip" src="assets/sfx/pop.wav" data-start="40.82" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx63" class="clip" src="assets/sfx/sparkle.wav" data-start="41.22" data-duration="1.8" data-track-index="13" data-volume="0.035"></audio>
+      <audio id="sx64" class="clip" src="assets/sfx/ping.wav" data-start="41.82" data-duration="1.32" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx65" class="clip" src="assets/sfx/whoosh.wav" data-start="42.08" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx66" class="clip" src="assets/sfx/pop.wav" data-start="42.78" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx67" class="clip" src="assets/sfx/sparkle.wav" data-start="44.00" data-duration="1.8" data-track-index="13" data-volume="0.035"></audio>
+      <audio id="sx68" class="clip" src="assets/sfx/pop.wav" data-start="45.04" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx69" class="clip" src="assets/sfx/pop.wav" data-start="45.34" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx70" class="clip" src="assets/sfx/pop.wav" data-start="45.39" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx71" class="clip" src="assets/sfx/pop.wav" data-start="45.44" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx72" class="clip" src="assets/sfx/pop.wav" data-start="45.49" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx73" class="clip" src="assets/sfx/pop.wav" data-start="45.54" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx74" class="clip" src="assets/sfx/ping.wav" data-start="45.56" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx75" class="clip" src="assets/sfx/pop.wav" data-start="45.59" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx76" class="clip" src="assets/sfx/pop.wav" data-start="45.64" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx77" class="clip" src="assets/sfx/pop.wav" data-start="45.69" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx78" class="clip" src="assets/sfx/pop.wav" data-start="45.74" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx79" class="clip" src="assets/sfx/pop.wav" data-start="45.79" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx80" class="clip" src="assets/sfx/whoosh.wav" data-start="46.12" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx81" class="clip" src="assets/sfx/pop.wav" data-start="46.77" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx82" class="clip" src="assets/sfx/click.wav" data-start="49.12" data-duration="0.366" data-track-index="12" data-volume="0.08"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n, c) => `<span class="ic${c ? " " + c : ""}">${icon(n)}</span>`;
+
+        /* ---------- data: ten agents of a tour operator ---------- */
+        const tv = (c, rgb) => `--t:${c};--ta:rgba(${rgb},0.16);--tb:rgba(${rgb},0.55)`;
+        const CY = tv("#01ccf7", "1,204,247"), PU = tv("#a78bfa", "167,139,250"), OR = tv("#ffb547", "255,181,71"), GR = tv("#3ddc97", "61,220,151"), PK = tv("#ff7eb6", "255,126,182");
+        const C1 = ["#01ccf7", "1,204,247"], C2 = ["#a78bfa", "167,139,250"], C3 = ["#ffb547", "255,181,71"], C4 = ["#3ddc97", "61,220,151"], C5 = ["#ff7eb6", "255,126,182"];
+        const AG = [
+          ["message-circle", "Bales chat", "jawab calon peserta", C1],
+          ["repeat", "Follow up", "kejar yang belum bales", C2],
+          ["calendar-check", "Booking", "kunci kursi &amp; tanggal", C4],
+          ["map", "Itinerary", "susun hari per hari", C3],
+          ["handshake", "Vendor lokal", "hotel, transport, guide", C5],
+          ["video", "Konten", "isi feed tiap minggu", C2],
+          ["calculator", "Harga", "hitung margin paket", C3],
+          ["receipt", "Invoice &amp; DP", "tagih sampai lunas", C1],
+          ["star", "Review", "minta ulasan peserta", C4],
+          ["chart-pie", "Laporan", "rekap tiap minggu", C5]];
+        const cvar = (c) => ({ "--t": c[0], "--ta": "rgba(" + c[1] + ",0.16)", "--tb": "rgba(" + c[1] + ",0.55)" });
+
+        /* ---------- hook: ten jobs queued, one person ---------- */
+        $("#hTok").innerHTML = AG.map(([i, n, s2], k) => { const col = k % 2, row = (k - col) / 2;
+          return `<div class="tok" id="tok${k}" style="left:${34 + col * 434}px;top:${44 + row * 144}px"><div class="bx">${ic(i)}</div><div><b>${n}</b><em>${s2}</em></div></div>`; }).join("");
+
+        /* ---------- roster view ---------- */
+        $("#vRoster").innerHTML = `<div id="rsHd"><div class="bx">${ic("users")}</div><b>Tim agent paket wisata</b><span class="cn"><b id="rsN">0</b> / 10 aktif</span></div>`
+          + AG.map(([i, n, s, c], k) => { const col = k % 2, row = (k - col) / 2;
+            return `<div class="rt" id="rt${k}" style="left:${34 + col * 434}px;top:${118 + row * 144}px;${tv(c[0], c[1])}"><span class="no">${String(k + 1).padStart(2, "0")}</span>`
+              + `<div class="bx">${ic(i)}</div><div class="tx"><b>${n}</b><em>${s}</em></div></div>`; }).join("")
+          + `<div id="rtStar">${ic("star")}</div>`;
+
+        /* ---------- detail view: step strip + per-agent component ---------- */
+        const DAYS = [["HARI 1", "Mendarat &amp; snorkeling", ["plane", "Jemput bandara"], ["map-pin", "Pulau Kelor"]],
+          ["HARI 2", "Trip pulau seharian", ["map-pin", "Padar &amp; Komodo"], ["map-pin", "Pink Beach"]],
+          ["HARI 3", "Sunrise &amp; kota", ["map-pin", "Bukit Sylvia"], ["map-pin", "Kota tua"]],
+          ["HARI 4", "Pulang", ["map-pin", "Oleh-oleh"], ["plane", "Antar bandara"]]];
+        const VEN = [["house", "Hotel", "2 malam, 8 kamar", PK], ["truck", "Transport", "2 mobil + sopir", OR], ["users-round", "Guide", "2 guide lokal", GR]];
+        $("#vDetail").innerHTML = `<div id="dStrip">` + AG.map((_, k) => `<div class="sd" id="sd${k}" style="left:${k * 46}px">${k + 1}</div>`).join("") + `</div>`
+          + `<div id="dHd" style="${CY}"><div class="bx" id="dHdIc">${ic("message-circle")}</div><span class="no" id="dHdNo">AGENT 01</span><b id="dHdNm">Bales chat</b><span class="live" id="dHdLv"><i></i>jalan</span></div>`
+          /* 01 chat */
+          + `<div class="dc" id="dc1"><div class="bub" id="d1a">“Kak, trip Labuan Bajo bulan depan masih ada slot?”</div>`
+          + `<div class="bub" id="d1b">“Masih, Kak. Sisa 4 kursi tanggal 12.”</div>`
+          + `<div id="d1c">${ic("zap")}dibales 8 detik, jam berapa pun</div></div>`
+          /* 02 follow-up */
+          + `<div class="dc" id="dc2"><div id="d2line"></div><div id="d2fill"></div>`
+          + [["send", "Chat pertama", "hari ke-0"], ["bell", "Diingetin", "hari ke-2"], ["badge-check", "Deal", "hari ke-5"]].map(([i, t, s], k) =>
+            `<div class="d2s" id="d2s${k}" style="left:${k * 340}px"><div class="dot">${ic(i)}</div><b>${t}</b><em>${s}</em></div>`).join("")
+          + `<div id="d2tag">yang belum bales, dikejar sendiri</div></div>`
+          /* 03 booking */
+          + `<div class="dc" id="dc3">` + ["10", "11", "12", "13", "14", "15", "16"].map((d, k) =>
+            `<div class="dd${k === 2 ? " pick" : ""}" id="dd${k}" style="left:${k * 124}px"><em>${["SEN", "SEL", "RAB", "KAM", "JUM", "SAB", "MIN"][k]}</em><b>${d}</b></div>`).join("")
+          + `<div id="d3seat"><div class="k">KURSI TANGGAL 12</div><div id="d3n">0/16</div><div id="d3row">` + Array.from({ length: 16 }, () => "<i></i>").join("") + `</div></div>`
+          + `<div id="d3tag">${ic("calendar-check")}kursi kekunci begitu DP masuk</div></div>`
+          /* 04 itinerary */
+          + `<div class="dc" id="dc4"><div id="d4link"></div>` + DAYS.map(([k0, t, a, b], k) =>
+            `<div class="day" id="day${k}" style="left:${k * 222}px"><div class="k">${k0}</div><b>${t}</b>`
+            + `<div class="st">${ic(a[0] === "plane" ? "send" : a[0])}${a[1]}</div><div class="st">${ic(b[0] === "plane" ? "send" : b[0])}${b[1]}</div></div>`).join("")
+          + `<div id="d4tag">empat hari, kesusun rapi sendiri</div></div>`
+          /* 05 vendor */
+          + `<div class="dc" id="dc5">` + VEN.map(([i, t, s, c], k) =>
+            `<div class="ven" id="ven${k}" style="left:${k * 296}px;${c}"><div class="bx">${ic(i)}</div><b>${t}</b><em>${s}</em>`
+            + `<span class="ok" id="vok${k}">${ic("circle-check")}confirm</span></div>`).join("")
+          + `<div id="d5tag">tiga vendor, satu kali koordinasi</div></div>`
+          /* 07 price */
+          + `<div class="dc" id="dc7">`
+          + `<div class="eqb" id="eq1" style="left:0"><div class="k">HARGA JUAL</div><b>Rp 7,4jt</b><em>per peserta</em></div>`
+          + `<span class="eqop" id="eqm" style="left:262px">−</span>`
+          + `<div class="eqb" id="eq2" style="left:310px"><div class="k">BIAYA</div><b>Rp 5,1jt</b><em>vendor + ops</em></div>`
+          + `<span class="eqop" id="eqe" style="left:572px">=</span>`
+          + `<div class="eqb" id="eq3" style="left:618px"><div class="k">MARGIN</div><b>Rp 2,3jt</b><em>per peserta</em></div>`
+          + `<div id="d7tag">ganti satu vendor, margin kehitung ulang</div></div>`
+          /* 08 invoice teaser */
+          + `<div class="dc" id="dc8"><div id="d8card"><div class="k">INVOICE · TRIP 12 MEI</div><div class="t">Rina Prasetya · 2 peserta</div>`
+          + `<div class="amt">Rp 7.400.000<span>belum dibayar</span></div><div id="d8bar"><i></i></div><div id="d8st">nunggu DP</div></div>`
+          + `<div id="d8tag">invoice jalan sendiri, lu nggak nagih manual</div></div>`
+          /* 09 review */
+          + `<div class="dc" id="dc9"><div id="d9card"><div id="d9stars">` + Array.from({ length: 5 }, () => ic("star")).join("") + `</div>`
+          + `<div class="num">4,9</div><div class="qt2">“Itinerary-nya enak, nggak buru-buru. Guide-nya sabar banget.”</div><em>diminta otomatis 2 hari setelah trip</em></div></div>`
+          /* 10 report */
+          + `<div class="dc" id="dc10"><div id="d10box"><div class="k">PESERTA PER MINGGU · SIMULASI</div><div id="d10bars">` + Array.from({ length: 7 }, () => "<i></i>").join("") + `</div></div>`
+          + `<div class="d10s" id="d10a" style="left:0"><div class="k">TRIP JALAN</div><b>6 trip</b></div>`
+          + `<div class="d10s" id="d10b" style="left:446px"><div class="k">SLOT KEISI</div><b>88%</b></div></div>`;
+
+        $("#kDots").innerHTML = Array.from({ length: 10 }, (_, k) => `<i id="kd${k}"></i>`).join("");
+
+        /* ---------- captions ---------- */
+        const KEY = new Set(["paket", "wisata", "sendirian", "chat", "itinerary", "dp", "vendor", "sepuluh", "kerjaan", "satu", "orang", "simulasinya", "agent", "ai", "delapan", "favorit",
+          "bales", "follow", "up", "booking", "empat", "lima", "lokal", "enam", "konten", "tujuh", "harga", "invoice", "sembilan", "review", "laporan", "duitnya", "masuk",
+          "kekirim", "diingetin", "lunas", "jam", "nambah", "link", "bio", "aipreneur", "automation", "sistem"]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase().replace(/[^a-z0-9-]/g, "")) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#0b1a45" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 53.4;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        let cur = { x: 760, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const jumpTo = (x, y, at) => { st("#cursor", { x, y }, at); cur = { x, y }; };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const popIn = (el, at, o) => ft(el, { opacity: 0, scale: 0.84, y: 18 }, Object.assign({ opacity: 1, scale: 1, y: 0, duration: 0.42, ease: "back.out(1.6)" }, o || {}), at);
+
+        /* camera: zooms the app inside the fixed window frame (screen-recording style) */
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc = cState(460, 475, 1);
+        const SHOTS = [];
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); SHOTS.push({ t: at, d: 0, c: cc }); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; SHOTS.push({ t: at, d: dur || 0.8, c: nx, e: ease || "power3.inOut" }); };
+
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "dark" });
+        Object.assign(FX.POSE.peekR, { x: 530, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 });
+        Object.assign(FX.POSE.upR, { x: 455 }); Object.assign(FX.POSE.upL, { x: -14 });
+        FX.theme("dark", 0);
+        ft("#grid", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -288px", duration: D, ease: "none" }, 0);
+        ft("#glow", { x: 0, y: 0 }, { x: 220, y: 360, duration: D, ease: "sine.inOut" }, 0);
+
+        /* initial states */
+        st(win, { opacity: 0, scale: 0.2, transformPerspective: 2000, transformOrigin: "460px 325px" }, 0);
+        st(["#vDetail", "#kin", "#cta", "#pKon", "#pInv"], { opacity: 0 }, 0);
+        st([".tok", "#hMe", "#hWait", "#hSlow", "#hCnt", "#hRail", "#rsHd", ".rt", "#dStrip", "#dHd", ".dc", ".ktile", ".ivr", "#ivLunas", "#kDial", ".kp", "#kDots i", "#kLine"], { opacity: 0 }, 0);
+        camSet(460, 475, 1, 0);
+
+        /* ---------- anchors ---------- */
+        const tLu = ph("Lu jualan").start, tBales = ph("Bales chat").start, tKejar = ph("kejar DP").start, tSep = ph("Sepuluh kerjaan, satu").start;
+        const tSim = ph("Ini simulasinya").start, tSepAg = ph("Sepuluh agent AI").start, tFav1 = ph("Dan nomor delapan favorit").start;
+        const tA = Array.from({ length: 10 }, (_, k) => ph(["Nomor satu", "Nomor dua", "Nomor tiga", "Nomor empat", "Nomor lima", "Nomor enam", "Nomor tujuh", "Nomor delapan, agent", "Nomor sembilan", "Dan nomor sepuluh"][k]).start);
+        const tFav = ph("Nomor delapan favorit gue,").start, tKar = ph("karena dia").start;
+        const tInv = ph("Invoice kekirim").start, tDp = ph("DP diingetin").start;
+        const tJalan = ph("Sepuluh kerjaan ini jalan").start, tJam = ph("dua puluh empat jam").start, tTanpa = ph("Tanpa lu nambah").start;
+        const tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");
+
+        /* ===== SCENE 1 · HOOK: ten jobs queued, one person working through them ===== */
+        FX.enter("home", 0.0); FX.wave(0.5);
+        ft("#hCnt", { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.4 }, 0.3);
+        ft("#hMe", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, 0.3);
+        ft("#hMe .av", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" }, 0.55);
+        /* the first job is already on the board before the VO starts listing them */
+        ft("#tok0", { opacity: 0, y: 18, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.6)" }, 0.62);
+        st($("#hCntN"), { innerHTML: "1" }, 0.62);
+        FX.go("center", 2.3, 0.8);
+        /* the rest of the jobs land while the VO names them */
+        AG.forEach((_, k) => { if (k === 0) return; const t = tBales + 0.02 + (k - 1) * 0.42;
+          ft("#tok" + k, { opacity: 0, y: 18, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.6)" }, t); });
+        AG.forEach((_, k) => { if (k === 0) return; st($("#hCntN"), { innerHTML: String(k + 1) }, tBales + 0.02 + (k - 1) * 0.42 + 0.18); });
+        FX.go("right", 4.2, 0.8); FX.beat(4.9);
+        FX.face("wide", tKejar + 0.1, 0.9);
+        /* one person, one at a time: job 1 is lit, the other nine wait */
+        FX.go("center", 6.6, 0.8);
+        ft("#tok0", { borderColor: "rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.04)" },
+          { borderColor: "rgba(1,204,247,0.75)", backgroundColor: "rgba(1,204,247,0.12)", duration: 0.35 }, tSep - 0.4);
+        ft("#hBar i", { scaleX: 0 }, { scaleX: 0.2, duration: 1.7, ease: "none" }, tSep - 0.3);
+        count($("#hWaitN"), 0, 9, tSep + 0.05, 0.9);
+        ft("#hSlow", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35 }, tSep + 0.7);
+        FX.point(7.3); FX.face("x", tSep + 0.3, 1.0); FX.shiver(tSep + 0.45, 0.4);
+
+        /* ===== ZOOM 1 · punch through the queue -> the app opens on the roster ===== */
+        const tZ1 = tSim - 0.85;
+        FX.go("home", 8.4, 0.8);
+        st("#hook", { transformOrigin: "243px 108px" }, 0);
+        ft("#hook", { scale: 1 }, { scale: 4.4, duration: 0.7, ease: "power3.in" }, tZ1);
+        ft("#hook", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, tZ1 + 0.38);
+        st("#hook", { display: "none" }, tZ1 + 0.78);
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.34, duration: 0.1 }, { opacity: 0, duration: 0.28 }] }, tZ1 + 0.3);
+        ft(win, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.56, ease: "power3.out" }, tZ1 + 0.34);
+
+        /* ===== SCENE 2 · ROSTER: ten numbered agents, one per job ===== */
+        ft("#rsHd", { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.36 }, tSim + 0.02);
+        $$(".rt").forEach((el, k) => ft(el, { opacity: 0 }, { opacity: 0.4, duration: 0.3 }, tZ1 + 0.42 + k * 0.03));
+        AG.forEach((_, k) => { const t = tSepAg + 0.18 + k * 0.2;
+          ft("#rt" + k, { opacity: 0.4, y: 10, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.6)" }, t);
+          ft("#rt" + k, { backgroundColor: "rgba(255,255,255,0.045)", borderColor: "rgba(255,255,255,0.12)" },
+            { backgroundColor: "rgba(" + AG[k][3][1] + ",0.16)", borderColor: "rgba(" + AG[k][3][1] + ",0.55)", duration: 0.3 }, t + 0.26);
+          ft("#rt" + k + " .no", { color: "rgba(255,255,255,0.3)" }, { color: AG[k][3][0], duration: 0.3 }, t + 0.26); });
+        AG.forEach((_, k) => st($("#rsN"), { innerHTML: String(k + 1) }, tSepAg + 0.18 + k * 0.2 + 0.2));
+        FX.go("right", 10.0, 0.8); FX.point(10.8); FX.face("excited", tSepAg + 0.2, 1.1);
+        /* number eight gets the star */
+        FX.go("center", 12.6, 0.8); FX.beat(13.4);
+        ft("#rt7", { scale: 1 }, { keyframes: [{ scale: 1.045, duration: 0.22 }, { scale: 1, duration: 0.34 }] }, tFav1 + 0.25);
+        ft("#rt7", { boxShadow: "0 0 0 rgba(1,204,247,0)" }, { keyframes: [{ boxShadow: "0 0 36px rgba(1,204,247,0.55)", duration: 0.3 }, { boxShadow: "0 0 0 rgba(1,204,247,0)", duration: 0.7 }] }, tFav1 + 0.25);
+        { const p = posIn($("#rt7")); st("#rtStar", { left: p.x + 170, top: p.y - 74 }, 0);
+          ft("#rtStar", { opacity: 0, scale: 0.3, rotation: -40 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.42, ease: "back.out(2.2)" }, tFav1 + 0.4); }
+        FX.face("happy", tFav1 + 0.5, 0.9);
+
+        /* ===== SLATS · roster -> detail run ===== */
+        const tW1 = 14.295;
+        FX.go("home", 14.4, 0.8);
+        FX.slats(tW1, "dark", (m) => { st("#vRoster", { opacity: 0 }, m); st("#rtStar", { opacity: 0 }, m); st("#vDetail", { opacity: 1 }, m);
+          st("#dStrip", { opacity: 1 }, m); st("#dHd", { opacity: 1 }, m); camSet(460, 475, 1, m); });
+
+        /* ---------- the ten agents, each with its own shape ---------- */
+        const HD = ["#dc1", "#dc2", "#dc3", "#dc4", "#dc5", null, "#dc7", "#dc8", "#dc9", "#dc10"];
+        let last = null;
+        AG.forEach(([i, n, s, c], k) => { const t = tA[k] - 0.18;
+          st("#dHd", cvar(c), t);
+          st("#dHdIc", { innerHTML: icon(i) }, t);
+          st("#dHdNo", { innerHTML: "AGENT " + String(k + 1).padStart(2, "0") }, t);
+          st("#dHdNm", { innerHTML: n }, t);
+          ft("#dHd", { opacity: 0.25, x: -16 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, t);
+          $$(".sd").forEach((el, j) => st(el, j === k
+            ? { backgroundColor: "#01ccf7", borderColor: "#01ccf7", color: "#04122f" }
+            : { backgroundColor: "rgba(255,255,255,0.07)", borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.64)" }, t));
+          ft("#sd" + k, { scale: 1 }, { keyframes: [{ scale: 1.35, duration: 0.18 }, { scale: 1, duration: 0.26 }] }, t);
+          /* cross-fade: the outgoing shape leaves only after the new one is in, so the window is never empty */
+          if (HD[k]) { if (last) ft(last, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power1.in" }, t + 0.1);
+            ft(HD[k], { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, t + 0.02); last = HD[k]; } });
+
+        /* 01 bales chat */
+        ft("#d1a", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3 }, tA[0] + 0.18);
+        ft("#d1b", { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.3 }, tA[0] + 0.62);
+        ft("#d1c", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.28 }, tA[0] + 1.02);
+        FX.go("right", 16.0, 0.8); FX.point(16.6);
+        /* 02 follow up */
+        ft("#d2fill", { scaleX: 0 }, { scaleX: 1, duration: 1.0, ease: "power2.out" }, tA[1] + 0.2);
+        [0, 1, 2].forEach((k) => popIn("#d2s" + k, tA[1] + 0.18 + k * 0.26));
+        ft("#d2tag", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tA[1] + 1.06);
+        FX.go("center", 18.3, 0.8); FX.beat(19.0);
+        /* 03 booking */
+        [0, 1, 2, 3, 4, 5, 6].forEach((k) => popIn("#dd" + k, tA[2] + 0.1 + k * 0.05));
+        ft("#d3seat", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3 }, tA[2] + 0.42);
+        $$("#d3row i").forEach((el, k) => { if (k < 12) ft(el, { backgroundColor: "rgba(255,255,255,0.07)", borderColor: "rgba(255,255,255,0.12)" }, { backgroundColor: "rgba(1,204,247,0.42)", borderColor: "#01ccf7", duration: 0.18 }, tA[2] + 0.56 + k * 0.035); });
+        count($("#d3n"), 0, 12, tA[2] + 0.56, 0.45, (v) => Math.round(v) + "/16");
+        ft("#d3tag", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.28 }, tA[2] + 1.04);
+
+        /* ===== BLOCKS · booking -> itinerary ===== */
+        FX.go("right", 20.6, 0.8);
+        FX.blocks(20.5, "dark", () => {});
+        /* 04 itinerary */
+        ft("#d4link", { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: "power2.out" }, tA[3] + 0.3);
+        [0, 1, 2, 3].forEach((k) => popIn("#day" + k, tA[3] + 0.16 + k * 0.2));
+        ft("#d4tag", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tA[3] + 1.2);
+        FX.point(21.9);
+        /* 05 vendor */
+        FX.go("home", 23.0, 0.8);
+        [0, 1, 2].forEach((k) => popIn("#ven" + k, tA[4] + 0.14 + k * 0.2));
+        [0, 1, 2].forEach((k) => ft("#vok" + k, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, tA[4] + 0.72 + k * 0.2));
+        ft("#d5tag", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tA[4] + 1.32);
+        FX.beat(23.9);
+
+        /* ===== IRIS · vendor -> konten (pop-out card on the LEFT, robot rises on the RIGHT) ===== */
+        const tW2 = 24.82;
+        FX.go("upR", 25.0, 0.9);
+        FX.iris(tW2, "dark", () => {}, { x: 320, y: 880 });
+        ft(win, { opacity: 1, scale: 1 }, { opacity: 0.3, scale: 0.96, duration: 0.4, ease: "power2.out" }, tA[5] - 0.2);
+        ft("#pKon", { opacity: 0, x: -40, scale: 0.9 }, { opacity: 1, x: 0, scale: 1, duration: 0.42, ease: "back.out(1.5)" }, tA[5] - 0.15);
+        [0, 1, 2].forEach((k) => ft("#kt" + k, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3 }, tA[5] + 0.26 + k * 0.26));
+        FX.point(26.2); FX.face("happy", tA[5] + 0.3, 0.9);
+        /* back into the window for 07 */
+        ft("#pKon", { opacity: 1, x: 0, scale: 1 }, { opacity: 0, x: -34, scale: 0.94, duration: 0.3, ease: "power2.in" }, tA[6] - 0.3);
+        ft(win, { opacity: 0.3, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.36, ease: "power2.out" }, tA[6] - 0.34);
+        FX.go("center", 28.0, 0.9);
+
+        /* 07 harga */
+        popIn("#eq1", tA[6] + 0.12); popIn("#eq2", tA[6] + 0.34); popIn("#eq3", tA[6] + 0.62);
+        ft("#eqm", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tA[6] + 0.3);
+        ft("#eqe", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tA[6] + 0.58);
+        ft("#d7tag", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tA[6] + 0.96);
+        FX.beat(28.6);
+        /* 08 invoice teaser */
+        ft("#d8card", { opacity: 0, y: 20, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.5)" }, tA[7] + 0.12);
+        ft("#d8tag", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tA[7] + 0.9);
+        FX.go("right", 30.2, 0.8); FX.point(30.9);
+        /* 09 review */
+        ft("#d9card", { opacity: 0, y: 20, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.5)" }, tA[8] + 0.12);
+        $$("#d9stars .ic").forEach((el, k) => ft(el, { opacity: 0, scale: 0.4, rotation: -25 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.26, ease: "back.out(2.2)" }, tA[8] + 0.3 + k * 0.08));
+        FX.go("center", 32.3, 0.8); FX.beat(33.0);
+        /* 10 laporan */
+        ft("#d10box", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.3 }, tA[9] + 0.12);
+        $$("#d10bars i").forEach((el, k) => ft(el, { scaleY: 0 }, { scaleY: [0.42, 0.56, 0.5, 0.72, 0.66, 0.88, 1][k], duration: 0.42, ease: "power3.out" }, tA[9] + 0.26 + k * 0.07));
+        popIn("#d10a", tA[9] + 0.6); popIn("#d10b", tA[9] + 0.76);
+        FX.go("right", 34.2, 0.8); FX.point(34.8);
+
+        /* ===== ZOOM 2 · punch into the invoice -> agent 08 as a stage card (RIGHT half, robot rises LEFT) ===== */
+        const tZ2 = tFav - 0.8;
+        ft("#dc10", { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power1.in" }, tZ2 + 0.24);
+        st("#dc8", { opacity: 1 }, tZ2 + 0.02);
+        camTo(460, 468, 2.6, tZ2, 0.5, "power3.in");
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.1, duration: 0.07 }, { opacity: 0, duration: 0.16 }] }, tZ2 + 0.36);
+        ft(win, { opacity: 1, scale: 1 }, { opacity: 0.28, scale: 0.95, duration: 0.4, ease: "power2.out" }, tZ2 + 0.5);
+        ft("#pInv", { opacity: 0, scale: 0.78 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, tZ2 + 0.46);
+        FX.go("upL", 35.9, 0.9); FX.point(36.6);
+        FX.face("excited", tFav + 0.2, 1.0);
+        count($("#ivPctN"), 0, 50, tKar + 0.3, 0.8, (v) => Math.round(v) + "%");
+        ft("#ivBar i", { scaleX: 0 }, { scaleX: 0.5, duration: 0.8, ease: "power2.out" }, tKar + 0.3);
+        ft("#ivr0", { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.3 }, tInv + 0.1);
+        ft("#ivr1", { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.3 }, tDp + 0.1);
+        count($("#ivPctN"), 50, 100, tDp + 0.5, 0.8, (v) => Math.round(v) + "%");
+        ft("#ivBar i", { scaleX: 0.5 }, { scaleX: 1, duration: 0.8, ease: "power2.out" }, tDp + 0.5);
+        ft("#ivLunas", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.36, ease: "back.out(2)" }, tDp + 1.1);
+        FX.face("happy", tDp + 1.15, 1.0);
+
+        /* ===== ZOOM 3 · zoom-out reveal -> the 24/7 scene ===== */
+        const tZ3 = tJalan - 0.62;
+        FX.go("right", 40.0, 0.9); FX.point(40.9);
+        ft("#pInv", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.5, duration: 0.42, ease: "power3.in" }, tZ3);
+        ft(win, { opacity: 0.28, scale: 0.95 }, { opacity: 0, scale: 0.4, duration: 0.42, ease: "power3.in" }, tZ3);
+        st([win, "#pInv"], { display: "none" }, tZ3 + 0.46);
+        ft("#kin", { opacity: 0, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, tZ3 + 0.2);
+        FX.go("center", 42.2, 0.9);
+        ft("#kDial", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, tZ3 + 0.26);
+        count($("#kDialN"), 0, 24, tZ3 + 0.42, 1.25);
+        { const o = { v: 0 }; ft(o, { v: 0 }, { v: 360, duration: 1.35, ease: "power2.out",
+          onUpdate: () => $("#kArc").style.background = `conic-gradient(from -90deg, var(--c) 0deg, var(--c) ${o.v}deg, rgba(0,0,0,0) ${o.v}deg)` }, tZ3 + 0.42); }
+        popIn("#kp1", tZ3 + 0.4); popIn("#kp2", tTanpa - 0.3);
+        $$("#kDots i").forEach((el, k) => ft(el, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2)" }, tTanpa + 0.2 + k * 0.05));
+        ft("#kLine", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.36 }, tTanpa + 0.42);
+        FX.beat(43.3); FX.go("right", 44.4, 0.9); FX.point(45.3);
+        FX.face("excited", tTanpa + 0.3, 1.0);
+
+        /* ===== ZOOM 4 · zoom-through -> CTA: box centred, robot whole at the bottom ===== */
+        const tZ4 = tCta - 0.75;
+        FX.go("center", 46.3, 0.9);
+        st("#kin", { transformOrigin: "460px 475px" }, 0);
+        ft("#kin", { scale: 1 }, { scale: 0.66, duration: 0.46, ease: "power3.in" }, tZ4);
+        ft("#kin", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tZ4 + 0.14);
+        st("#kin", { display: "none" }, tZ4 + 0.48);
+        ft("#cta", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.55, ease: "power3.out" }, tZ4 + 0.34);
+        FX.point(47.4); FX.go("right", 48.4, 0.9); FX.wave(49.6);
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(1,204,247,0.6)" }, { boxShadow: "0 0 0 22px rgba(1,204,247,0)", duration: 0.7 }, tF + 0.05);
+        FX.go("center", 51.0, 0.9);
+        FX.face("happy", 50.0, 1.2); FX.face("excited", D - 1.6, 0.9);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /* no-cut-text guard: text sliced by the camera frame fades out during that shot, back in when whole */
+        { const wc = $("#wcam"), wr = wc.getBoundingClientRect(), k = wr.width / VW;
+          const leaves = $$("#wcam *").filter((e) => e.tagName.toLowerCase() === "text" || Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim()));
+          const UNIT = "#rsHd, .rt, .sd, #dHd, .bub, #d1c, .d2s, #d2tag, .dd, #d3seat, #d3tag, .day, #d4tag, .ven, #d5tag, .eqb, .eqop, #d7tag, #d8card, #d8tag, #d9card, #d10box, .d10s, #tbar .app, #sim, #tbar .cn, .live";
+          const box = (r) => ({ x0: (r.left - wr.left) / k, y0: (r.top - wr.top) / k, x1: (r.right - wr.left) / k, y1: (r.bottom - wr.top) / k });
+          const textBox = (e) => { if (e.tagName.toLowerCase() === "text") return box(e.getBoundingClientRect());
+            const rg = document.createRange(); let u = null;
+            Array.from(e.childNodes).filter((n) => n.nodeType === 3 && n.textContent.trim()).forEach((n) => { rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
+            return u ? box(u) : box(e.getBoundingClientRect()); };
+          const seen = new Set(), R = [];
+          leaves.forEach((e) => { const u = e.closest(UNIT); const tgt = u && wc.contains(u) ? u : e; if (seen.has(tgt)) return; seen.add(tgt);
+            const q = Object.assign({ e: tgt }, (tgt === e && !u) ? textBox(e) : box(tgt.getBoundingClientRect())); if (q.x1 - q.x0 > 1 && q.y1 - q.y0 > 1) R.push(q); });
+          const sh = SHOTS.slice().sort((a, b) => a.t - b.t);
+          const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
+            const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
+            return inter && !inside; };
+          const lerp = (a, b, f) => ({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, scale: a.scale + (b.scale - a.scale) * f });
+          R.forEach((q) => { let prev = false; const E = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = E[i]; if (!h && prev && i + 1 < sh.length && E[i + 1] && nextT - inT < 0.5) h = true;
+              let mA = -1, mB = -1;
+              if (!h && !prev && i > 0 && S.d > 0.45) { const EZ = { "power3.in": (f) => f * f * f, "power3.out": (f) => 1 - Math.pow(1 - f, 3), "power3.inOut": (f) => (f < 0.5 ? 4 * f * f * f : 1 - Math.pow(-2 * f + 2, 3) / 2) }; const ez = EZ[S.e] || EZ["power3.inOut"];
+                for (let n = 0; n <= 24; n++) if (cut(q, lerp(sh[i - 1].c, S.c, ez(n / 24)))) { if (mA < 0) mA = n; mB = n; } }
+              if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }
+              else if (h && !prev) { if (S.d === 0) st(q.e, { filter: "opacity(0)" }, S.t); else ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: S.d <= 0.45 ? 0.16 : 0.18, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.06 : S.t); }
+              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: S.d <= 0.45 ? 0.2 : 0.25, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.17 : inT);
+              else if (mA >= 0) { const t0 = S.t + (mA / 24) * S.d, t1 = Math.min(S.t + S.d, S.t + ((mB + 1) / 24) * S.d);
+                ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.08, ease: "power1.out" }, Math.max(S.t, t0 - 0.08));
+                ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.22, ease: "power1.out" }, t1); }
+              prev = h; }); });
+          window.__noCut = { leaves: R.length, shots: sh.length }; }
+
+        FX.runGestures();
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

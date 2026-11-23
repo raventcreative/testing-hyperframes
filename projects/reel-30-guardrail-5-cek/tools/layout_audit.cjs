@@ -16,7 +16,7 @@ const MT = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javas
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
   p.on('pageerror', (e) => console.log('PAGEERROR ' + e.message));
   await p.goto(`http://127.0.0.1:${port}/${path.basename(file)}`);
-  await p.waitForFunction(() => window.__timelines && window.__timelines.main, null, { timeout: 60000 });
+  await p.waitForFunction(() => !!(window.__timelines && window.__timelines.main), null, { polling: 300, timeout: 120000 });
   for (const t of times) {
     await p.evaluate((t) => { const tl = window.__timelines.main; tl.pause(); tl.time(t); }, t);
     await p.waitForTimeout(90);

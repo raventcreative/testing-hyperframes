@@ -12,7 +12,7 @@ const MT = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javas
   });
   await new Promise((r) => srv.listen(0, '127.0.0.1', r));
   const port = srv.address().port;
-  const b = await chromium.launch();
+  const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
   p.on('pageerror', (e) => console.log('PAGEERROR ' + e.message));
   await p.goto(`http://127.0.0.1:${port}/${path.basename(file)}`);

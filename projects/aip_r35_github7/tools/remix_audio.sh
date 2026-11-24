@@ -1,9 +1,9 @@
 #!/bin/bash
-# R34 final mix without re-rendering the picture (R30 pattern): the untouched VO take (delayed 0.3 s, never cut/padded) + SFX at a
+# R35 final mix without re-rendering the picture (R30 pattern): the untouched VO take (delayed 0.3 s, never cut/padded) + SFX at a
 # fixed lower level (no sidechain on SFX) + music bed ducked under the voice, two-pass loudnorm -14 LUFS; video stream copied.
 set -eu
 cd "$(dirname "$0")/.."
-IN=out/video.mp4; OUT=out/AIP_R34_MOTION_STUDIO.mp4; D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $IN)
+IN=out/video.mp4; OUT=out/AIP_R35_GITHUB_7_TOOLS.mp4; D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $IN)
 [ -f assets/audio/bed.wav ] || python3 ../../tools/music_bed.py "$D" assets/audio/bed.wav 7 > /dev/null
 G="[0:a]aformat=sample_rates=48000:channel_layouts=mono,adelay=300,apad,atrim=end=$D,asplit=2[vo][k];\
 [1:a]aformat=sample_rates=48000:channel_layouts=mono,volume=1.0,apad,atrim=end=$D[sfx];\

@@ -17,8 +17,11 @@ S["impact"] = imp / np.abs(imp).max()
 r = np.random.default_rng(5).normal(0, 1, int(0.7 * SR)); k = np.linspace(0, 1, len(r))
 r = np.convolve(r, np.ones(6) / 6, "same") * (k ** 2.2) * (1 - np.exp(-(1 - k) * 60)); S["riser"] = r / np.abs(r).max()
 PK = {n: int(np.argmax(np.abs(S[n]))) / SR for n in S}
+PW = json.load(open("production/warp_points.json"))          # take-2 scene time -> final VO time (tools/warp.py)
+WI = lambda t: float(np.interp(t, [b for a, b in PW], [a for a, b in PW]))
 moved = []
-def put(t, n, db, rate=1.0):
+def put(t, n, db, rate=1.0, raw=False):
+    if not raw: t = WI(t)
     x = S[n]; pk = PK[n] / rate; g = 10 ** (db / 20)
     clear = lambda u: all(abs(u - o) >= 0.07 for o in ON)
     if not clear(t):
@@ -72,7 +75,7 @@ for k in range(6): put(83.32 + k * 0.08, "key", TK + 2)                         
 ch, a = [], 0
 for i, w in enumerate(W):
     if w[0][-1] in ",.:?" or i - a == 3 or i == len(W) - 1: ch.append(W[a][1] + OFF); a = i + 1
-for t in ch: put(t - 0.06, "click", CAP, 1.5)
+for t in ch: put(t - 0.06, "click", CAP, 1.5, raw=True)
 out = np.clip(out, -1, 1)
 w = wave.open("assets/audio/sfx.wav", "wb"); w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
 w.writeframes((out * 32767).astype(np.int16).tobytes()); w.close()

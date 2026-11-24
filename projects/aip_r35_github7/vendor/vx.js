@@ -454,7 +454,7 @@ function animC(t) {
   Cb.rings.forEach((r, i) => { const ph = ((t - 52.86) * 1.4 + i / 3) % 1; const on = t > 52.86 && t < 54.8 ? 1 : 0; r.scale.setScalar(0.8 + ph * 1.6); r.material.opacity = on * 0.8 * (1 - ph); r.visible = on > 0; });
   { const u = U(t, 51.6, 51.95, "back"), f = U(t, 52.75, 53.25, "in"); Cb.sheet.visible = t > 51.6 && t < 53.25; Cb.sheet.scale.setScalar(Math.max(0.001, u * (1 - 0.9 * f)));
     Cb.sheet.position.set(bez(-2.6, 0, 2.05, f), bez(0.95, 2.4, 1.35, f), bez(0.75, 1.2, 0.5, f)); Cb.sheet.rotation.set(-0.15 * (1 - f), 0, f * 2); }
-  const bu = U(t, 54.5, 55.1, "out") * (1 - U(t, 60.15, 60.45, "in")); Cb.board.visible = t > 54.5 && t < 60.45; Cb.board.position.y = 2.2 - 4.4 * (1 - bu);
+  const bu = U(t, 54.5, 55.1, "out"), bx = 1 - U(t, 60.15, 60.3, "in"); Cb.board.visible = t > 54.5 && t < 60.3; Cb.board.position.y = 2.2 - 4.4 * (1 - bu); Cb.board.scale.setScalar(Math.max(0.001, bx));
   // dot: lands on the keyboard, flies to the speaker cone centre (the dive target)
   if (t < 60.91) {
     if (t < 51.2) { const u = U(t, 50.46, 51.2, "out"); dotAt("C", -2.6 + 4 * (1 - u), 0.42 + 2.5 * (1 - u) * (1 - u), 1.2); }
@@ -603,8 +603,8 @@ for (let i = 1; i <= 6; i++) { const u = i / 6, yaw = u * Math.PI * 1.1; k("V", 
 // C — keyboard + script, speaker, honest-notes board, dive into the speaker cone
 cut("C", 50.46, FR([-2.6, 0.7, 1.1], 3.0, 1000, 0.35)); k("C", 52.4, FR([-2.2, 0.8, 1.0], 3.4, 1000, 0.32), "sine");
 k("C", 53.1, FR([0.0, 1.2, 0.4], 6.4, 1060, 0.18), "io"); k("C", 54.5, FR([0.0, 1.2, 0.4], 6.2, 1060, 0.18), "sine");
-k("C", 55.4, FR([-1.0, 2.2, -2.2], 3.9, 700, 0.05), "io"); k("C", 59.7, FR([-1.0, 2.2, -2.2], 3.9, 720, 0.05), "sine");
-k("C", 60.4, FR([2.05, 1.35, 0.6], 2.2, 1000, 0.03), "io"); k("C", 60.9, FR([2.05, 1.35, 0.7], 0.25, 1000, 0.0), "in");
+k("C", 55.4, FR([-1.0, 2.2, -2.2], 3.9, 700, 0.05), "io"); k("C", 60.3, FR([-1.0, 2.2, -2.2], 3.9, 720, 0.05), "sine");
+k("C", 60.62, FR([2.05, 1.35, 0.6], 2.2, 1000, 0.03), "io"); k("C", 60.9, FR([2.05, 1.35, 0.7], 0.25, 1000, 0.0), "in");
 // M — out of the REC light; meeting table; glass box; island hop flight to Y
 cut("M", 60.91, FR([0.5, 2.25, 0.2], 0.6, 1000, 0.05, -0.3)); k("M", 61.8, FR([0.0, 1.25, 0.2], 5.0, 1040, 0.14), "out");
 k("M", 63.2, FR([0.0, 1.25, 0.2], 4.8, 1040, 0.14), "sine"); k("M", 63.9, FR([1.13, 1.45, 0.42], 2.3, 1000, 0.12, -0.3), "io"); k("M", 65.6, FR([1.13, 1.45, 0.42], 2.2, 1000, 0.12, -0.3), "sine");
@@ -642,4 +642,4 @@ const PR = Promise.all([document.fonts.load(`700 60px Poppins`), document.fonts.
   buildL(); buildJ(); buildU(); buildZ(); buildV(); buildC(); buildM(); buildY(); ready = true; render(window.VX.t0 || 0);
 });
 window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {}; window.__hf.buildReady.vx = PR;
-window.addEventListener("hf-seek", (e) => render(e.detail.time));
+window.addEventListener("hf-seek", (e) => render(window.WARP(e.detail.time)));   // scenes are keyed to the take-2 timeline (tools/warp.py)

@@ -13,8 +13,8 @@
             const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : -99; };
       const HEAD_FIX = [-0.0775, -0.227, -0.1287];
       const STAND = { fx: 850, fy: 1700, h: 330, ry: -0.38 };
-      const HOPS = [13.05, 21.73, 32.37, 41.16, 50.46, 60.91, 69.3, 80.15];
-      const T_IN = 6.3;                                              // at the keyboard from frame 0 (flies in over the first 0.75 s)
+      const HOPS = [13.05, 21.73, 32.37, 41.16, 50.46, 60.91, 69.3, 80.15].map(window.WARPINV);
+      const T_IN = window.WARPINV(6.3);                                              // at the keyboard from frame 0 (flies in over the first 0.75 s)
       function frame(t) {
         if (t < T_IN) return null;
         const u = io3((t - T_IN) / 0.75), arc = Math.sin(Math.PI * u) * 160;
@@ -27,7 +27,7 @@
       const G = [];
       const add = (t, k, d = 0.9, x) => { if (t > 0) G.push(Object.assign({ t, k, d }, x || {})); };
       // co-host acting keyed to the VO (composition times)
-      add(7.0, "wave", 0.8); add(wt("bisnis:") - 0.05, "nod", 0.6); add(wt("foto") - 0.05, "point", 0.6, { up: 1 }); add(wt("meeting.") - 0.05, "happy", 0.6);
+      add(window.WARPINV(7.0), "wave", 0.8); add(wt("bisnis:") - 0.05, "nod", 0.6); add(wt("foto") - 0.05, "point", 0.6, { up: 1 }); add(wt("meeting.") - 0.05, "happy", 0.6);
       add(wt("Jan.") - 0.05, "present", 0.7, { side: "L" }); add(wt("unduh,") - 0.05, "type", 1.2); add(wt("koneksi.") - 0.05, "scan", 0.9); add(wt("laptop.", 19) - 0.05, "happy", 0.6);
       add(wt("Upscayl.") - 0.05, "point", 0.6, { up: 1 }); add(wt("dipertajam") - 0.05, "scan", 1.0); add(wt("AI.", 25) - 0.05, "cheer", 0.6); add(wt("Vulkan.") - 0.05, "think", 0.9);
       add(wt("Buzz.") - 0.05, "present", 0.7, { side: "L" }); add(wt("teks,") - 0.05, "type", 1.4); add(wt("internet.") - 0.05, "nod", 0.6); add(wt("Whisper") - 0.05, "point", 0.7, { up: 1 });

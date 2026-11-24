@@ -1,7 +1,7 @@
 # R35 · 7 aplikasi AI open-source dari GitHub — VO script (NAVY, CTA GITHUB)
 
 Reference: `refs/ref.mp4` (86.2 s, ID, "harta karun GitHub", 7 tools + cooling-pad plug, CTA "Komen BANANA").
-Target 80–90 s → composition **87.0 s** (VO 85.68 s, one untouched ElevenLabs take, offset 0.3 s).
+Target 80–90 s → final **87.0 s** (VO 85.36 s, one untouched ElevenLabs take, offset 0.3 s).
 
 ## VO lines (`production/vo_lines.txt`, voice Dakocan, eleven_v4, auto tags)
 1. Tujuh aplikasi AI di GitHub ini gratis, open-source, dan bisa jalan di laptop kamu sendiri.
@@ -12,7 +12,7 @@ Target 80–90 s → composition **87.0 s** (VO 85.68 s, one untouched ElevenLab
 6. Data bisnis kamu tetap di laptop.
 7. Dua, Upscayl.
 8. Foto produk yang resolusinya kecil, diperbesar dan dipertajam pakai AI.
-9. Ada versi Windows, Mac, dan Linux, tapi butuh kartu grafis yang mendukung Vulkan.
+9. Jalan di Windows, Mac, maupun Linux, asal kartu grafisnya mendukung Vulkan.
 10. Tiga, Buzz.
 11. Rekaman podcast atau video jadi teks, bahkan file subtitle, tanpa koneksi internet.
 12. Mesinnya Whisper dari OpenAI.
@@ -23,7 +23,7 @@ Target 80–90 s → composition **87.0 s** (VO 85.68 s, one untouched ElevenLab
 17. Ketik naskah, keluar suara buat voice over.
 18. Tapi jujur aja: bahasa Indonesia belum ada di daftar bahasanya, dan proyeknya sudah tidak dirawat lagi.
 19. Enam, Meetily.
-20. Asisten meeting: rekam, transkrip, lalu ringkasan otomatis.
+20. Buat meeting: rekam, transkrip, lalu ringkasan otomatis.
 21. Audio dan transkripnya nggak keluar dari laptop kamu.
 22. Tujuh, ComfyUI.
 23. Gambar, video, bahkan audio AI, kamu rakit dari blok-blok node yang disambung.
@@ -73,8 +73,10 @@ Nothing unverifiable kept. Not stated: star counts, "4×", speeds, any result fo
 Co-host: AIpreneur robot (wave, present, type on holo keyboard, scan, shake head on "belum ada", think on hardware caveats, cheer CTA).
 Mascot glances disabled.
 
-## VO QA (listen-check on the take, whisper small + medium)
-- Take 1: both models heard "ngedit" as "edit" → line reworded to "mengolah", whole take regenerated (take 2 = final, untouched).
-- Take 2: only spelling/name differences (open-source→"open source", ChatGPT→"chat GPT", Upscayl→"upscale" = the app's own
-  pronunciation, transkrip→"transcript", ComfyUI→"Comfy UI", numbers as digits, hyphenation). No word misheard by both → kept.
+## VO QA (listen-check on each take, whisper small + medium; whole take regenerated every time, never spliced)
+- Take 1: both models heard "ngedit" as "edit" → reworded "mengolah".
+- Take 2→3: line 9 reworded (it shared 4 consecutive words with the reference: "Ada versi Windows, Mac dan Linux").
+- Take 3: both heard "Asisten" as "Assistant" → reworded "Buat meeting".
+- Take 4 (final, untouched): only spelling/name/number-format differences. Scenes were blocked on take 2 and re-mapped to take 4's
+  word times with tools/warp.py (the picture follows the voice; the VO is not edited).
 - Final check on the final MP4 with whisper medium: see production/VO_CHECK.md.

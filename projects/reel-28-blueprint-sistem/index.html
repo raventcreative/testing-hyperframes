@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur Automation — Kantor Agent Katering</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --n1: #0a0d2c; --n2: #294b77; --grad: linear-gradient(100deg, #0a0d2c 0%, #294b77 100%); --line: rgba(10,13,44,0.10);
+        --auto: #2f6fe4; --autoBg: #e7f0ff; --ok: #1fa855; --okBg: #dcf6e4; --amb: #c46d0e; --ambBg: #fff3e0; --mute: rgba(10,13,44,0.55); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fd; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: var(--n1); -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #f4f7fd; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      b { font-weight: 700; }
+      .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #132650; opacity: 0; }
+      #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
+      .lbl { font-size: 14px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+      .simtag { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.42); border-radius: 20px; padding: 3px 11px; white-space: nowrap; }
+      .card { background: #fff; border: 1.5px solid var(--line); box-shadow: 0 22px 52px rgba(41,75,119,0.16); }
+
+      /* ---------- stage (x 80-1000, y 290-1240) ---------- */
+      #stage { position: absolute; left: 0; top: 262px; width: 1080px; height: 1006px; overflow: hidden; }
+      .sc { position: absolute; left: 80px; top: 28px; width: 920px; height: 950px; }
+
+      /* S1 · time strip: night -> morning, the proposal is already done */
+      #s1 { opacity: 0; }
+      #tStrip { position: absolute; left: 0; top: 196px; width: 920px; height: 300px; border-radius: 40px; padding: 34px 40px; display: flex; align-items: center; justify-content: space-between; }
+      .tEnd { position: relative; width: 268px; text-align: center; opacity: 0.32; }
+      .tEnd.on { opacity: 1; }
+      .tEnd .ic { width: 52px; height: 52px; color: var(--n2); margin: 0 auto; }
+      .tEnd .hh { font-size: 76px; font-weight: 700; line-height: 1; letter-spacing: -2px; margin-top: 12px; }
+      .tEnd .ww { font-size: 19px; font-weight: 700; letter-spacing: 3px; color: var(--mute); margin-top: 10px; white-space: nowrap; }
+      #tRail { position: relative; flex: 1; height: 8px; margin: 0 14px; border-radius: 5px; background: repeating-linear-gradient(90deg, rgba(41,75,119,0.26) 0 12px, transparent 12px 24px); }
+      #tDot { position: absolute; left: 0; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: var(--n2); box-shadow: 0 0 0 8px rgba(41,75,119,0.14); }
+      #tZz { position: absolute; left: 96px; top: 150px; font-size: 34px; font-weight: 700; color: var(--mute); opacity: 0; white-space: nowrap; }
+      #tDone { position: absolute; left: 118px; top: 548px; width: 684px; border-radius: 32px; padding: 28px 32px; opacity: 0; }
+      #tDone .dh { display: flex; align-items: center; gap: 14px; }
+      #tDone .dh .bx { width: 62px; height: 62px; border-radius: 19px; background: var(--autoBg); color: var(--auto); display: flex; align-items: center; justify-content: center; } #tDone .dh .bx .ic { width: 32px; height: 32px; }
+      #tDone .dh b { font-size: 31px; line-height: 1.2; } #tDone .dh em { display: block; font-style: normal; font-size: 19px; color: var(--mute); margin-top: 3px; }
+      #tOk { display: inline-flex; align-items: center; gap: 11px; margin-top: 22px; height: 58px; padding: 0 26px; border-radius: 29px; background: var(--okBg); color: var(--ok); font-size: 24px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #tOk .ic { width: 28px; height: 28px; }
+
+      /* S2 · isometric cutaway office, the lights never go out */
+      #s2 { opacity: 0; }
+      #bldWrap { position: absolute; left: 96px; top: 56px; width: 728px; height: 744px; perspective: 1600px; }
+      #bld { position: absolute; inset: 0; transform: rotateY(-17deg) rotateX(7deg); transform-style: preserve-3d; }
+      #bldRoof { position: absolute; left: 28px; top: 0; width: 672px; height: 62px; border-radius: 18px 18px 6px 6px; background: linear-gradient(180deg, #e9f0fb, #d8e5f6); border: 1.5px solid rgba(41,75,119,0.3); }
+      .flr { position: absolute; left: 56px; width: 616px; height: 190px; border-radius: 18px; background: #fff; border: 1.5px solid rgba(41,75,119,0.22); box-shadow: 0 16px 34px rgba(41,75,119,0.14); padding: 24px 26px; }
+      #flr0 { top: 78px; } #flr1 { top: 286px; } #flr2 { top: 494px; }
+      .flr .wins { display: flex; gap: 14px; }
+      .flr .win { width: 86px; height: 66px; border-radius: 12px; background: rgba(41,75,119,0.10); border: 1.5px solid rgba(41,75,119,0.16); display: block; }
+      .flr .win.on { background: var(--amb); border-color: var(--amb); box-shadow: 0 0 20px rgba(196,109,14,0.45); }
+      .flr .agt { position: absolute; right: 26px; top: 28px; width: 74px; height: 74px; border-radius: 22px; background: var(--autoBg); color: var(--auto); display: flex; align-items: center; justify-content: center; opacity: 0; }
+      .flr .agt .ic { width: 38px; height: 38px; }
+      .flr .fl { position: absolute; left: 26px; bottom: 20px; font-size: 19px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      #bldBase { position: absolute; left: 14px; top: 700px; width: 700px; height: 30px; border-radius: 13px; background: rgba(41,75,119,0.14); }
+      #moon { position: absolute; left: 782px; top: 120px; width: 84px; height: 84px; color: var(--n2); opacity: 0; }
+      #bldChip { position: absolute; left: 236px; top: 848px; display: inline-flex; align-items: center; gap: 12px; height: 70px; padding: 0 30px; border-radius: 35px; background: var(--n2); color: #fff; font-size: 25px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #bldChip .ic { width: 28px; height: 28px; }
+      #bldChip i { width: 13px; height: 13px; border-radius: 50%; background: #7ef0b0; display: block; }
+
+      /* S3 · one person, three roles orbiting, three counters */
+      #s3 { opacity: 0; }
+      #pMe { position: absolute; left: 350px; top: 158px; width: 220px; height: 220px; border-radius: 50%; background: #fff; border: 2.5px solid rgba(41,75,119,0.3); display: flex; align-items: center; justify-content: center; box-shadow: 0 20px 44px rgba(41,75,119,0.18); }
+      #pMe .ic { width: 104px; height: 104px; color: var(--n2); }
+      .ptok { position: absolute; display: inline-flex; align-items: center; gap: 13px; height: 86px; padding: 0 32px; border-radius: 43px; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 14px 30px rgba(41,75,119,0.16); font-size: 31px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      .ptok .ic { width: 34px; height: 34px; color: var(--n2); }
+      #ptk0 { left: 10px; top: 92px; } #ptk1 { left: 544px; top: 112px; } #ptk2 { left: 286px; top: 418px; }
+      #pCnt { position: absolute; left: 0; top: 614px; width: 920px; display: flex; gap: 24px; }
+      .pc { flex: 1; height: 248px; border-radius: 32px; padding: 32px 34px; opacity: 0; }
+      .pc .v { font-size: 104px; font-weight: 700; line-height: 1; letter-spacing: -2px; }
+      .pc .w { font-size: 23px; font-weight: 700; letter-spacing: 3px; color: var(--mute); margin-top: 16px; white-space: nowrap; }
+      #pc2 .v { color: var(--n2); }
+
+      /* ---------- app window ---------- */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: rgba(255,255,255,0.97); border: 1.5px solid var(--line); box-shadow: 0 38px 86px rgba(41,75,119,0.24); opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fff; }
+      #tbar .dots { display: flex; gap: 7px; margin-right: 4px; } #tbar .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
+      #tbar .app { font-size: 19px; font-weight: 700; white-space: nowrap; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.42); border-radius: 20px; padding: 2px 10px; white-space: nowrap; }
+      #tabs { position: relative; margin-left: auto; display: flex; gap: 4px; }
+      #tabPill { position: absolute; left: 0; top: -5px; height: 42px; border-radius: 12px; background: var(--autoBg); }
+      #tabs > div { position: relative; display: flex; align-items: center; gap: 7px; height: 32px; padding: 0 13px; font-size: 16px; font-weight: 700; color: rgba(10,13,44,0.62); white-space: nowrap; }
+      #tabs > div .ic { width: 18px; height: 18px; }
+      #wbody { position: absolute; left: 0; right: 0; top: 60px; bottom: 0; }
+      .view { position: absolute; inset: 0; }
+      .ahd { position: absolute; left: 24px; top: 22px; right: 24px; height: 76px; display: flex; align-items: center; gap: 14px; }
+      .ahd .bx { width: 58px; height: 58px; border-radius: 18px; background: var(--autoBg); color: var(--auto); display: flex; align-items: center; justify-content: center; } .ahd .bx .ic { width: 30px; height: 30px; }
+      .ahd b { font-size: 29px; white-space: nowrap; }
+      .live { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 15px; border-radius: 19px; background: var(--okBg); color: var(--ok); font-size: 16px; font-weight: 700; white-space: nowrap; }
+      .live i { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); display: block; }
+      .cn { margin-left: auto; font-size: 18px; color: var(--mute); white-space: nowrap; } .cn b { color: var(--n2); }
+
+      /* S4 · agent proposal: inbox rail + a quotation that assembles line by line */
+      #brfRow { position: absolute; left: 24px; top: 116px; width: 872px; display: flex; gap: 14px; }
+      .brf { position: relative; flex: 1; height: 96px; border-radius: 18px; background: #f6f9ff; border: 1.5px solid var(--line); padding: 16px 18px; opacity: 0; }
+      .brf b { font-size: 20px; line-height: 1.2; display: block; white-space: nowrap; } .brf em { font-style: normal; font-size: 16px; color: var(--mute); }
+      .brf.on { background: var(--autoBg); border-color: rgba(47,111,228,0.55); }
+      #quo { position: absolute; left: 24px; top: 240px; width: 872px; height: 574px; border-radius: 22px; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 18px 40px rgba(41,75,119,0.12); padding: 28px 30px; opacity: 0; }
+      #quo .qh { display: flex; align-items: center; justify-content: space-between; }
+      #quo .qt { font-size: 28px; font-weight: 700; line-height: 1.2; }
+      #quo .qsub { font-size: 18px; color: var(--mute); margin-top: 4px; white-space: nowrap; }
+      #quo .rule { height: 2px; background: var(--line); margin: 20px 0 6px; }
+      .qr { position: relative; display: flex; align-items: center; justify-content: space-between; height: 92px; border-bottom: 1.5px solid var(--line); }
+      .qr .skl { position: absolute; right: 0; top: 32px; width: 220px; height: 28px; border-radius: 14px; background: rgba(41,75,119,0.13); }
+      .qr .v { opacity: 0; }
+      .qr .k { font-size: 20px; font-weight: 700; letter-spacing: 2px; color: var(--mute); white-space: nowrap; }
+      .qr .v { font-size: 30px; font-weight: 700; white-space: nowrap; }
+      #qTot { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; height: 86px; border-radius: 18px; background: var(--autoBg); padding: 0 22px; opacity: 0; }
+      #qTot .k { font-size: 20px; font-weight: 700; letter-spacing: 2px; color: var(--auto); white-space: nowrap; }
+      #qTot .v { font-size: 34px; font-weight: 700; color: var(--auto); white-space: nowrap; }
+
+      /* S5 · agent produksi: rundown timeline + belanja checklist + crew */
+      #rdHead { position: absolute; left: 24px; top: 124px; right: 24px; display: flex; align-items: center; gap: 14px; }
+      #accChip { display: inline-flex; align-items: center; gap: 10px; height: 54px; padding: 0 22px; border-radius: 27px; background: var(--okBg); color: var(--ok); font-size: 21px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #accChip .ic { width: 26px; height: 26px; }
+      #tlBox { position: absolute; left: 24px; top: 198px; width: 872px; height: 264px; border-radius: 20px; background: #f6f9ff; border: 1.5px solid var(--line); padding: 22px 24px; }
+      #tlAx { position: absolute; left: 24px; right: 24px; top: 72px; height: 2px; background: rgba(41,75,119,0.2); }
+      .tk { position: absolute; top: -9px; width: 2px; height: 18px; background: rgba(41,75,119,0.28); display: block; }
+      .tkw { position: absolute; top: -40px; font-size: 16px; font-weight: 700; color: var(--mute); transform: translateX(-50%); white-space: nowrap; }
+      .tslot { position: absolute; height: 46px; border-radius: 12px; background: rgba(41,75,119,0.09); border: 1.5px dashed rgba(41,75,119,0.18); transform-origin: 0 50%; display: block; }
+      .tbar2 { position: absolute; height: 46px; border-radius: 12px; display: flex; align-items: center; padding: 0 14px; font-size: 17px; font-weight: 700; color: #fff; transform-origin: 0 50%; white-space: nowrap; overflow: hidden; }
+      #chkBox { position: absolute; left: 24px; top: 492px; width: 424px; height: 306px; border-radius: 20px; background: #fff; border: 1.5px solid var(--line); padding: 22px 24px; }
+      #chkBox .ch2 { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      .cki { display: flex; align-items: center; gap: 14px; height: 58px; font-size: 22px; opacity: 0; white-space: nowrap; }
+      .cki .bxx { width: 32px; height: 32px; border-radius: 9px; border: 2px solid rgba(41,75,119,0.3); display: flex; align-items: center; justify-content: center; color: #fff; flex: none; }
+      .cki.done .bxx { background: var(--ok); border-color: var(--ok); } .cki .bxx .ic { width: 20px; height: 20px; opacity: 0; } .cki.done .bxx .ic { opacity: 1; }
+      #crwBox { position: absolute; left: 472px; top: 492px; width: 424px; height: 306px; border-radius: 20px; background: #fff; border: 1.5px solid var(--line); padding: 22px 24px; }
+      #crwBox .ch2 { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      #crwRow { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+      .crw { display: flex; align-items: center; gap: 10px; height: 60px; padding: 0 18px; border-radius: 30px; background: #f6f9ff; border: 1.5px solid var(--line); font-size: 20px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      .crw span.av { width: 34px; height: 34px; border-radius: 50%; background: var(--n2); color: #fff; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+
+      /* S6 · agent analis: a funnel that filters past events down to one package */
+      #evRow { position: absolute; left: 24px; top: 118px; width: 872px; display: flex; gap: 12px; }
+      .ev { flex: 1; height: 104px; border-radius: 16px; background: #fff; border: 1.5px solid var(--line); padding: 12px 14px; opacity: 0; }
+      .ev b { display: block; font-size: 19px; line-height: 1.16; white-space: nowrap; } .ev em { font-style: normal; font-size: 16px; color: var(--mute); }
+      .ev .mg { font-size: 22px; font-weight: 700; margin-top: 6px; display: block; }
+      #fnl { position: absolute; left: 186px; top: 262px; width: 548px; height: 240px; background: linear-gradient(180deg, rgba(47,111,228,0.16), rgba(47,111,228,0.30)); border: 2px solid rgba(47,111,228,0.45); clip-path: polygon(0 0, 100% 0, 66% 100%, 34% 100%); opacity: 0; }
+      #fnlLbl { position: absolute; left: 186px; top: 350px; width: 548px; text-align: center; font-size: 24px; font-weight: 700; letter-spacing: 3px; color: var(--auto); opacity: 0; white-space: nowrap; }
+      #fnlOut { position: absolute; left: 214px; top: 548px; width: 492px; border-radius: 22px; background: #fff; border: 2px solid var(--ok); box-shadow: 0 20px 44px rgba(31,168,85,0.2); padding: 24px 28px; opacity: 0; }
+      #fnlOut .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--ok); white-space: nowrap; }
+      #fnlOut .t { font-size: 32px; font-weight: 700; line-height: 1.2; margin-top: 8px; }
+      #fnlOut .mr { display: flex; align-items: baseline; gap: 12px; margin-top: 14px; }
+      #fnlOut .mr b { font-size: 46px; font-weight: 700; color: var(--ok); line-height: 1; }
+      #fnlOut .mr em { font-style: normal; font-size: 18px; color: var(--mute); white-space: nowrap; }
+      #critBox { position: absolute; left: 24px; top: 556px; width: 872px; height: 236px; border-radius: 20px; background: #fff; border: 1.5px solid var(--line); padding: 22px 26px; }
+      #critBox .ch3 { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      .crit { display: flex; align-items: center; gap: 14px; height: 56px; font-size: 22px; opacity: 0; white-space: nowrap; }
+      .crit .bxx { width: 32px; height: 32px; border-radius: 9px; border: 2px solid rgba(41,75,119,0.3); display: flex; align-items: center; justify-content: center; color: #fff; flex: none; }
+      .crit .bxx .ic { width: 20px; height: 20px; opacity: 0; }
+      .crit.done .bxx { background: var(--ok); border-color: var(--ok); } .crit.done .bxx .ic { opacity: 1; }
+      #anNote { position: absolute; left: 24px; top: 820px; right: 24px; text-align: center; }
+
+      /* S7 · the loop: three nodes, the winning package travels back */
+      #s7 { opacity: 0; }
+      #loopSvg { position: absolute; left: 60px; top: 150px; width: 800px; height: 520px; overflow: visible; }
+      .lnode { position: absolute; width: 230px; border-radius: 26px; padding: 20px 22px; text-align: center; opacity: 0; }
+      .lnode .bx { width: 62px; height: 62px; border-radius: 19px; margin: 0 auto; display: flex; align-items: center; justify-content: center; } .lnode .bx .ic { width: 32px; height: 32px; }
+      .lnode b { display: block; font-size: 24px; margin-top: 12px; white-space: nowrap; }
+      .lnode em { display: block; font-style: normal; font-size: 17px; color: var(--mute); margin-top: 3px; white-space: nowrap; }
+      #ln0 { left: 345px; top: 108px; } #ln1 { left: 638px; top: 486px; } #ln2 { left: 52px; top: 486px; }
+      #pkt { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 10px; height: 58px; padding: 0 22px; border-radius: 29px; background: var(--ok); color: #fff; font-size: 21px; font-weight: 700; opacity: 0; white-space: nowrap; box-shadow: 0 14px 30px rgba(31,168,85,0.3); }
+      #pkt .ic { width: 24px; height: 24px; }
+      #sharp { position: absolute; left: 6px; top: 486px; width: 392px; border-radius: 22px; padding: 20px 24px; opacity: 0; text-align: center; }
+      #sharp .w { font-size: 18px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      #shBars { display: flex; align-items: flex-end; justify-content: center; gap: 16px; height: 104px; margin-top: 18px; }
+      #shBars i { width: 48px; height: 100%; border-radius: 9px 9px 3px 3px; background: var(--n2); display: block; transform-origin: 50% 100%; }
+
+      /* S8 · 24/7 ring */
+      #s8 { opacity: 0; }
+      #ring { position: absolute; left: 210px; top: 110px; width: 500px; height: 500px; border-radius: 50%; border: 5px dashed rgba(41,75,119,0.4); opacity: 0; }
+      #ringMid { position: absolute; left: 210px; top: 250px; width: 500px; text-align: center; opacity: 0; }
+      #ringMid .v { font-size: 128px; font-weight: 700; line-height: 1; letter-spacing: -2px; }
+      #ringMid .w { font-size: 24px; font-weight: 700; letter-spacing: 3px; color: var(--mute); margin-top: 8px; white-space: nowrap; }
+      .rnode { position: absolute; width: 96px; height: 96px; border-radius: 28px; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 12px 26px rgba(41,75,119,0.16); display: flex; align-items: center; justify-content: center; opacity: 0; }
+      .rnode .ic { width: 46px; height: 46px; color: var(--auto); }
+      #noCmd { position: absolute; left: 210px; top: 700px; width: 500px; border-radius: 26px; padding: 22px 26px; display: flex; align-items: center; gap: 18px; opacity: 0; }
+      #noCmd .bx { width: 66px; height: 66px; border-radius: 20px; background: #f1f5fd; color: var(--n2); display: flex; align-items: center; justify-content: center; flex: none; } #noCmd .bx .ic { width: 34px; height: 34px; }
+      #noCmd b { font-size: 27px; line-height: 1.2; } #noCmd em { display: block; font-style: normal; font-size: 18px; color: var(--mute); margin-top: 3px; }
+
+      /* S9 · payoff: volume is not the point, direction is */
+      #s9 { opacity: 0; }
+      #volBox { position: absolute; left: 440px; top: 24px; width: 440px; border-radius: 28px; padding: 26px 30px; text-align: center; opacity: 0; }
+      #volBox .v { font-size: 92px; font-weight: 700; line-height: 1; letter-spacing: -2px; }
+      #volBox .w { font-size: 20px; font-weight: 700; letter-spacing: 3px; color: var(--mute); margin-top: 10px; white-space: nowrap; }
+      #arah { position: absolute; left: 404px; top: 268px; width: 476px; border-radius: 32px; padding: 32px 34px; opacity: 0; }
+      #arah .k { font-size: 16px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); white-space: nowrap; }
+      #arah .t { font-size: 40px; font-weight: 700; line-height: 1.16; margin-top: 12px; }
+      #arah .rowc { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+      #arah .rowc span { height: 56px; padding: 0 20px; border-radius: 28px; background: #f1f5fd; border: 1.5px solid var(--line); font-size: 21px; font-weight: 700; display: flex; align-items: center; opacity: 0; white-space: nowrap; }
+      #swap { position: absolute; left: 60px; top: 620px; width: 800px; display: flex; align-items: center; gap: 22px; }
+      .swp { position: relative; flex: 1; height: 128px; border-radius: 28px; padding: 24px 28px; opacity: 0; }
+      .swp .w { font-size: 16px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); white-space: nowrap; }
+      .swp b { display: block; font-size: 32px; margin-top: 10px; white-space: nowrap; }
+      #swpA .stx { position: absolute; left: 28px; right: 28px; top: 92px; height: 5px; border-radius: 3px; background: rgba(10,13,44,0.55); transform-origin: 0 50%; transform: scaleX(0); }
+      #swpB { background: var(--n2); } #swpB .w { color: rgba(255,255,255,0.7); } #swpB b { color: #fff; }
+      #swpArr { width: 44px; height: 44px; color: var(--n2); flex: none; opacity: 0; }
+
+      /* stage pop-outs: always on the half opposite the rising robot */
+      #pops { position: absolute; inset: 0; }
+      .pop { position: absolute; border-radius: 30px; background: #fff; border: 2px solid rgba(41,75,119,0.3); box-shadow: 0 34px 76px rgba(41,75,119,0.26); padding: 28px 30px; opacity: 0; }
+      .pop .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); white-space: nowrap; }
+      .pop .t { font-size: 34px; font-weight: 700; line-height: 1.18; margin-top: 10px; }
+      .pop .s { font-size: 20px; color: var(--mute); margin-top: 6px; }
+      #pWin { left: 548px; top: 286px; width: 436px; border-color: rgba(31,168,85,0.5); }
+      #pWin .k { color: var(--ok); }
+      #pWin .mr { display: flex; align-items: baseline; gap: 12px; margin-top: 16px; }
+      #pWin .mr b { font-size: 56px; color: var(--ok); line-height: 1; }
+      #pWin .mr em { font-style: normal; font-size: 18px; color: var(--mute); white-space: nowrap; }
+
+      /* ---------- CTA + UI ---------- */
+      #cta { position: absolute; left: 110px; width: 860px; top: 540px; padding: 34px 40px; text-align: center; border-radius: 30px; background: #fff; border: 1.5px solid rgba(41,75,119,0.3); box-shadow: 0 30px 70px rgba(41,75,119,0.2); opacity: 0; z-index: 40; }
+      #cta .k { font-size: 27px; color: var(--mute); } #cta .name { font-size: 60px; font-weight: 700; line-height: 1.08; margin-top: 8px; }
+      #cta .sb { font-size: 27px; margin-top: 10px; } #cta .sb b { color: var(--n2); }
+      #fbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 22px; height: 74px; padding: 0 46px; border-radius: 41px; background: var(--n2); color: #fff; font-size: 32px; font-weight: 700; }
+      #fbtn .ic { width: 32px; height: 32px; }
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(41,75,119,0.35)); }
+      #ripple { position: absolute; left: 0; top: 0; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 3px solid rgba(47,111,228,0.6); opacity: 0; z-index: 29; }
+      #ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; height: auto; } #logoL { opacity: 0; }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; z-index: 2; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px rgba(255,255,255,0.95)); display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); z-index: 1; }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(41,75,119,0.22)); }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="60.2" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="60.2" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div>
+
+        <div id="stage">
+          <div class="sc" id="s1">
+            <div id="tStrip" class="card">
+              <div class="tEnd" id="tNight"><span class="ic" data-i="moon"></span><div class="hh">02.14</div><div class="ww">LU TIDUR</div></div>
+              <div id="tRail"><div id="tDot"></div></div>
+              <div class="tEnd" id="tMorn"><span class="ic" data-i="sunrise"></span><div class="hh">06.30</div><div class="ww">LU BANGUN</div></div>
+            </div>
+            <div id="tZz">z z z</div>
+            <div id="tDone" class="card">
+              <div class="dh"><span class="bx"><span class="ic" data-i="file-text"></span></span><div><b>Proposal · Gedung Serbaguna</b><em>350 tamu · acara Sabtu depan</em></div></div>
+              <div id="tOk"><span class="ic" data-i="circle-check"></span>Siap kirim</div>
+            </div>
+          </div>
+
+          <div class="sc" id="s2">
+            <div id="bldWrap"><div id="bld">
+              <div id="bldRoof"></div>
+              <div class="flr" id="flr0"><div class="wins"></div><span class="agt"><span class="ic" data-i="file-text"></span></span><div class="fl">LANTAI 1</div></div>
+              <div class="flr" id="flr1"><div class="wins"></div><span class="agt"><span class="ic" data-i="calendar-clock"></span></span><div class="fl">LANTAI 2</div></div>
+              <div class="flr" id="flr2"><div class="wins"></div><span class="agt"><span class="ic" data-i="chart-pie"></span></span><div class="fl">LANTAI 3</div></div>
+              <div id="bldBase"></div>
+            </div></div>
+            <span class="ic" id="moon" data-i="moon"></span>
+            <div id="bldChip"><i></i>KANTOR AGENT · NYALA TERUS</div>
+          </div>
+
+          <div class="sc" id="s3">
+            <div id="pMe"><span class="ic" data-i="user"></span></div>
+            <div class="ptok" id="ptk0"><span class="ic" data-i="file-text"></span>Bikin proposal</div>
+            <div class="ptok" id="ptk1"><span class="ic" data-i="calendar-clock"></span>Susun rundown</div>
+            <div class="ptok" id="ptk2"><span class="ic" data-i="calculator"></span>Hitung modal</div>
+            <div id="pCnt">
+              <div class="pc card" id="pc0"><div class="v">3</div><div class="w">PERAN</div></div>
+              <div class="pc card" id="pc1"><div class="v">1</div><div class="w">ORANG</div></div>
+              <div class="pc card" id="pc2"><div class="v">0</div><div class="w">TIDUR</div></div>
+            </div>
+          </div>
+
+          <div class="sc" id="s7">
+            <svg id="loopSvg" viewBox="0 0 800 520"></svg>
+            <div class="lnode card" id="ln0"><span class="bx" style="background:var(--autoBg);color:var(--auto)"><span class="ic" data-i="file-text"></span></span><b>Proposal</b><em>nulis penawaran</em></div>
+            <div class="lnode card" id="ln1"><span class="bx" style="background:var(--ambBg);color:var(--amb)"><span class="ic" data-i="calendar-clock"></span></span><b>Produksi</b><em>rundown & crew</em></div>
+            <div class="lnode card" id="ln2"><span class="bx" style="background:var(--okBg);color:var(--ok)"><span class="ic" data-i="chart-pie"></span></span><b>Analis</b><em>nyaring untung</em></div>
+            <div id="pkt"><span class="ic" data-i="package-check"></span>Paket yang untung</div>
+            <div id="sharp" class="card"><div class="w">PENAWARAN MAKIN TAJAM</div><div id="shBars"><i></i><i></i><i></i></div></div>
+          </div>
+
+          <div class="sc" id="s8">
+            <div id="ring"></div>
+            <div id="ringMid"><div class="v gt">24</div><div class="w">JAM NONSTOP</div></div>
+            <div id="noCmd" class="card"><span class="bx"><span class="ic" data-i="bell-off"></span></span><div><b>Tanpa lu suruh</b><em>0 perintah manual · simulasi</em></div></div>
+          </div>
+
+          <div class="sc" id="s9">
+            <div id="volBox" class="card"><div class="v gt">128</div><div class="w">EVENT · ANGKA ILUSTRASI</div></div>
+            <div id="arah" class="card"><div class="k">YANG AKHIRNYA LU PUNYA</div><div class="t">Waktu buat mikirin arah</div>
+              <div class="rowc"><span id="ar0">Paket baru</span><span id="ar1">Harga naik</span><span id="ar2">Klien besar</span></div></div>
+            <div id="swap">
+              <div class="swp card" id="swpA"><div class="w">DULU</div><b>Ngerjain event</b><i class="stx"></i></div>
+              <span class="ic" id="swpArr" data-i="arrow-right"></span>
+              <div class="swp" id="swpB"><div class="w">SEKARANG</div><b>Ngatur kantornya</b></div>
+            </div>
+          </div>
+          <div id="pops">
+            <div class="pop" id="pWin"><div class="k">PAKET PALING UNTUNG</div><div class="t">Prasmanan B · 350 tamu</div>
+              <div class="mr"><b>+31%</b><em>margin · angka ilustrasi</em></div></div>
+          </div>
+        </div>
+
+        <div id="win"><div id="wcam">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Kantor Agent</span><span id="sim">SIMULASI</span>
+            <div id="tabs"><span id="tabPill"></span><div id="tabProp"><span class="ic" data-i="file-text"></span>Proposal</div>
+              <div id="tabProd"><span class="ic" data-i="calendar-clock"></span>Produksi</div><div id="tabAnal"><span class="ic" data-i="chart-pie"></span>Analis</div></div></div>
+          <div id="wbody">
+            <div class="view" id="vProp"></div>
+            <div class="view" id="vProd"></div>
+            <div class="view" id="vAnal"></div>
+          </div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div></div>
+
+        <div id="cta"><div class="k">Mau sistem kayak gini dipasang di bisnis lu?</div><div class="name gt">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="" />
+          <div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div><div id="caps"></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="59.52" data-track-index="8" data-volume="1"></audio>
+      <audio id="sx00" class="clip" src="assets/sfx/pop.wav" data-start="2.22" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx01" class="clip" src="assets/sfx/pop.wav" data-start="3.38" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx02" class="clip" src="assets/sfx/ping.wav" data-start="4.63" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx03" class="clip" src="assets/sfx/whoosh.wav" data-start="6.00" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx04" class="clip" src="assets/sfx/pop.wav" data-start="6.87" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx05" class="clip" src="assets/sfx/pop.wav" data-start="7.01" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx06" class="clip" src="assets/sfx/pop.wav" data-start="7.15" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx07" class="clip" src="assets/sfx/pop.wav" data-start="8.69" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx08" class="clip" src="assets/sfx/pop.wav" data-start="8.91" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx09" class="clip" src="assets/sfx/pop.wav" data-start="9.13" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx10" class="clip" src="assets/sfx/sparkle.wav" data-start="10.22" data-duration="1.8" data-track-index="12" data-volume="0.035"></audio>
+      <audio id="sx11" class="clip" src="assets/sfx/pop.wav" data-start="10.67" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx12" class="clip" src="assets/sfx/whoosh.wav" data-start="11.12" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx13" class="clip" src="assets/sfx/pop.wav" data-start="12.23" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx14" class="clip" src="assets/sfx/pop.wav" data-start="12.49" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx15" class="clip" src="assets/sfx/pop.wav" data-start="12.75" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx16" class="clip" src="assets/sfx/pop.wav" data-start="13.87" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx17" class="clip" src="assets/sfx/pop.wav" data-start="14.64" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx18" class="clip" src="assets/sfx/pop.wav" data-start="15.48" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx19" class="clip" src="assets/sfx/whoosh.wav" data-start="15.92" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx20" class="clip" src="assets/sfx/pop.wav" data-start="18.34" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx21" class="clip" src="assets/sfx/pop.wav" data-start="18.52" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx22" class="clip" src="assets/sfx/pop.wav" data-start="18.70" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx23" class="clip" src="assets/sfx/click.wav" data-start="19.44" data-duration="0.366" data-track-index="13" data-volume="0.08"></audio>
+      <audio id="sx24" class="clip" src="assets/sfx/pop.wav" data-start="19.73" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx25" class="clip" src="assets/sfx/pop.wav" data-start="21.40" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx26" class="clip" src="assets/sfx/pop.wav" data-start="22.32" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx27" class="clip" src="assets/sfx/pop.wav" data-start="22.84" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx28" class="clip" src="assets/sfx/whoosh.wav" data-start="23.05" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx29" class="clip" src="assets/sfx/ping.wav" data-start="23.52" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx30" class="clip" src="assets/sfx/pop.wav" data-start="25.79" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx31" class="clip" src="assets/sfx/pop.wav" data-start="27.07" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx32" class="clip" src="assets/sfx/pop.wav" data-start="27.23" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx33" class="clip" src="assets/sfx/pop.wav" data-start="27.39" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx34" class="clip" src="assets/sfx/pop.wav" data-start="27.55" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx35" class="clip" src="assets/sfx/pop.wav" data-start="28.48" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx36" class="clip" src="assets/sfx/pop.wav" data-start="28.64" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx37" class="clip" src="assets/sfx/pop.wav" data-start="28.80" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx38" class="clip" src="assets/sfx/whoosh.wav" data-start="29.55" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx39" class="clip" src="assets/sfx/pop.wav" data-start="29.73" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx40" class="clip" src="assets/sfx/pop.wav" data-start="29.87" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx41" class="clip" src="assets/sfx/pop.wav" data-start="30.01" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx42" class="clip" src="assets/sfx/pop.wav" data-start="32.56" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx43" class="clip" src="assets/sfx/pop.wav" data-start="33.69" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx44" class="clip" src="assets/sfx/pop.wav" data-start="33.82" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx45" class="clip" src="assets/sfx/pop.wav" data-start="33.95" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx46" class="clip" src="assets/sfx/pop.wav" data-start="34.08" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx47" class="clip" src="assets/sfx/pop.wav" data-start="34.21" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx48" class="clip" src="assets/sfx/ping.wav" data-start="35.91" data-duration="1.32" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx49" class="clip" src="assets/sfx/whoosh.wav" data-start="36.52" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx50" class="clip" src="assets/sfx/pop.wav" data-start="37.23" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx51" class="clip" src="assets/sfx/pop.wav" data-start="39.68" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx52" class="clip" src="assets/sfx/pop.wav" data-start="39.93" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx53" class="clip" src="assets/sfx/pop.wav" data-start="40.88" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx54" class="clip" src="assets/sfx/pop.wav" data-start="41.05" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx55" class="clip" src="assets/sfx/pop.wav" data-start="41.22" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx56" class="clip" src="assets/sfx/whoosh.wav" data-start="42.00" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx57" class="clip" src="assets/sfx/ping.wav" data-start="42.68" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx58" class="clip" src="assets/sfx/pop.wav" data-start="42.73" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx59" class="clip" src="assets/sfx/pop.wav" data-start="42.87" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx60" class="clip" src="assets/sfx/pop.wav" data-start="43.01" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx61" class="clip" src="assets/sfx/pop.wav" data-start="44.53" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx62" class="clip" src="assets/sfx/whoosh.wav" data-start="45.03" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx63" class="clip" src="assets/sfx/pop.wav" data-start="45.80" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx64" class="clip" src="assets/sfx/pop.wav" data-start="48.02" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx65" class="clip" src="assets/sfx/pop.wav" data-start="48.67" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx66" class="clip" src="assets/sfx/pop.wav" data-start="48.83" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx67" class="clip" src="assets/sfx/pop.wav" data-start="48.99" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx68" class="clip" src="assets/sfx/pop.wav" data-start="50.33" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx69" class="clip" src="assets/sfx/pop.wav" data-start="51.99" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx70" class="clip" src="assets/sfx/whoosh.wav" data-start="52.95" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx71" class="clip" src="assets/sfx/pop.wav" data-start="53.63" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx72" class="clip" src="assets/sfx/click.wav" data-start="56.04" data-duration="0.366" data-track-index="10" data-volume="0.08"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n, c) => `<span class="ic${c ? " " + c : ""}">${icon(n)}</span>`;
+        const svg = (t, a, p) => { const e = document.createElementNS("http://www.w3.org/2000/svg", t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+        /* ---------- static builds ---------- */
+        $$(".flr .wins").forEach((w) => (w.innerHTML = Array.from({ length: 5 }, () => `<i class="win"></i>`).join("")));
+
+        const BRF = [["Wedding · 350 tamu", "masuk 01.52"], ["Gathering kantor", "masuk 02.06"], ["Ulang tahun · 80 tamu", "masuk 02.11"]];
+        $("#vProp").innerHTML = `<div class="ahd"><div class="bx">${ic("file-text")}</div><b>Agent Proposal</b><span class="live"><i></i>nulis</span><span class="cn"><b id="prN">0</b> brief masuk malam ini</span></div>`
+          + `<div id="brfRow">` + BRF.map(([a, b], k) => `<div class="brf" id="brf${k}"><b>${a}</b><em>${b}</em></div>`).join("") + `</div>`
+          + `<div id="quo"><div class="qh"><div><div class="qt">Penawaran Katering</div><div class="qsub">Gedung Serbaguna · Sabtu depan</div></div><span class="simtag">SIMULASI</span></div>`
+          + `<div class="rule"></div>`
+          + `<div class="qr" id="qr0"><span class="k">JUMLAH TAMU</span><span class="skl"></span><span class="v">350 orang</span></div>`
+          + `<div class="qr" id="qr1"><span class="k">MENU</span><span class="skl"></span><span class="v">Prasmanan B</span></div>`
+          + `<div class="qr" id="qr2"><span class="k">HARGA / ORANG</span><span class="skl"></span><span class="v">Rp 125.000</span></div>`
+          + `<div id="qTot"><span class="k">TOTAL PENAWARAN</span><span class="v">Rp 43.750.000</span></div></div>`;
+
+        const TLB = [["Loading barang", 0, 2, "#2f6fe4"], ["Setup venue", 2, 4, "#c46d0e"], ["Acara inti", 6, 4, "#1fa855"], ["Beres-beres", 10, 2, "#294b77"]];
+        const CHK = ["Bahan basah · 3 supplier", "Alat saji · 350 set", "Dekor meja prasmanan"];
+        const CRW = [["AR", "4 koki"], ["BP", "9 server"], ["CS", "2 driver"]];
+        $("#vProd").innerHTML = `<div class="ahd"><div class="bx" style="background:var(--ambBg);color:var(--amb)">${ic("calendar-clock")}</div><b>Agent Produksi</b><span class="live"><i></i>nyusun</span></div>`
+          + `<div id="rdHead"><span class="lbl">RUNDOWN HARI-H · SIMULASI</span><div id="accChip">${ic("circle-check")}Proposal di-ACC</div></div>`
+          + `<div id="tlBox"><div id="tlAx">` + Array.from({ length: 8 }, (_, k) => `<i class="tk" style="left:${k * 117}px"></i><span class="tkw" style="left:${k * 117}px">${String(8 + k * 2).padStart(2, "0")}.00</span>`).join("") + `</div>`
+          + TLB.map(([t, a, w, c], k) => `<div class="tslot" id="ts${k}" style="left:${24 + a * 58.5}px;top:${110 + (k % 2) * 58}px;width:${w * 58.5}px"></div>`).join("")
+          + TLB.map(([t, a, w, c], k) => `<div class="tbar2" id="tb${k}" style="left:${24 + a * 58.5}px;top:${110 + (k % 2) * 58}px;width:${w * 58.5}px;background:${c}">${t}</div>`).join("") + `</div>`
+          + `<div id="chkBox"><div class="ch2">DAFTAR BELANJA</div>` + CHK.map((t, k) => `<div class="cki" id="ck${k}"><span class="bxx">${ic("check")}</span>${t}</div>`).join("") + `</div>`
+          + `<div id="crwBox"><div class="ch2">JADWAL CREW</div><div id="crwRow">` + CRW.map(([a, t], k) => `<div class="crw" id="cw${k}"><span class="av">${a}</span>${t}</div>`).join("") + `</div></div>`;
+
+        const EVS = [["Wedding Mei", "480 tamu", "+9%", "#c46d0e"], ["Gathering Juni", "120 tamu", "+4%", "#c46d0e"], ["Wedding Juli", "350 tamu", "+31%", "#1fa855"], ["Arisan Agustus", "60 tamu", "-2%", "#294b77"], ["Launching Sept", "200 tamu", "+7%", "#c46d0e"]];
+        $("#vAnal").innerHTML = `<div class="ahd"><div class="bx" style="background:var(--okBg);color:var(--ok)">${ic("chart-pie")}</div><b>Agent Analis</b><span class="live"><i></i>nyaring</span><span class="cn"><b id="anN">0</b> event dicek</span></div>`
+          + `<div id="evRow">` + EVS.map(([n, p, m, c], k) => `<div class="ev" id="ev${k}"><b>${n}</b><em>${p}</em><span class="mg" style="color:${c}">margin ${m}</span></div>`).join("") + `</div>`
+          + `<div id="fnl"></div><div id="fnlLbl">SARING: MODAL vs PENAWARAN</div>`
+          + `<div id="critBox"><div class="ch3">YANG DICOCOKIN TIAP EVENT</div>`
+          + [["Modal asli vs penawaran", "wallet"], ["Harga per tamu", "calculator"], ["Rating klien", "star"]].map((r, k) =>
+              `<div class="crit" id="crt${k}"><span class="bxx">${ic("check")}</span>${r[0]}</div>`).join("") + `</div>`
+          + `<div id="anNote"><span class="simtag">ANGKA ILUSTRASI · SIMULASI</span></div>`;
+
+        /* loop arrows */
+        const LS = $("#loopSvg");
+        const ARC = [["a0", "M 460 190 C 650 250, 700 380, 700 470"], ["a1", "M 640 530 C 480 590, 300 590, 160 530"], ["a2", "M 110 470 C 110 360, 180 250, 330 192"]];
+        ARC.forEach(([id, d]) => svg("path", { id, d, fill: "none", stroke: "rgba(41,75,119,0.38)", "stroke-width": 6, "stroke-linecap": "round", "stroke-dasharray": "14 14" }, LS));
+
+        /* ring nodes */
+        const RN = [[-90, "file-text"], [30, "calendar-clock"], [150, "chart-pie"]];
+        RN.forEach(([deg, i], k) => { const r = 200, a = (deg * Math.PI) / 180;
+          const el = document.createElement("div"); el.className = "rnode"; el.id = "rn" + k; el.innerHTML = ic(i);
+          el.style.left = 260 + 200 + Math.cos(a) * r - 37 + "px"; el.style.top = 164 + 200 + Math.sin(a) * r - 37 + "px"; $("#s8").appendChild(el); });
+
+        /* ---------- captions ---------- */
+        const KEY = new Set(["dua", "pagi", "tidur", "setengah", "tujuh", "proposal", "jadi", "mimpi", "kantor", "katering", "agent", "ai", "lampunya", "mati", "sendiri", "tiga", "peran", "satu", "orang", "nol",
+          "pertama", "brief", "penawaran", "lengkap", "tamu", "menu", "harga", "kedua", "produksi", "setujui", "rundown", "belanja", "crew", "ketiga", "penting:", "analis", "event", "nyaring", "paket", "untung",
+          "lolos", "balik", "putaran", "tajam", "puluh", "empat", "jam", "suruh", "lega", "jumlah", "waktu", "arah", "ngatur", "kantornya", "sistem", "bisnis", "link", "bio", "aipreneur", "automation"]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase().replace(/[^a-z0-9-]/g, "")) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#294b77" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 60.2;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        let cur = { x: 760, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn($(el)); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const jumpTo = (x, y, at) => { st("#cursor", { x, y }, at); cur = { x, y }; };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => ($(el).textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const popIn = (el, at, o) => ft(el, { opacity: 0, scale: 0.84, y: 18 }, Object.assign({ opacity: 1, scale: 1, y: 0, duration: 0.42, ease: "back.out(1.6)" }, o || {}), at);
+        const TABS = ["#tabProp", "#tabProd", "#tabAnal"];
+        const tabSet = (sel, at) => { const el = $(sel); st("#tabPill", { x: el.offsetLeft - 4, width: el.offsetWidth + 8 }, at); TABS.forEach((s) => st(s, { color: s === sel ? "#2c68d6" : "rgba(10,13,44,0.62)" }, at)); };
+
+        /* camera: zooms the app inside the fixed window frame (screen-recording style) */
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc = cState(460, 475, 1);
+        const SHOTS = [];
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); SHOTS.push({ t: at, d: 0, c: cc }); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; SHOTS.push({ t: at, d: dur || 0.8, c: nx, e: ease || "power3.inOut" }); };
+
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "light" });
+        Object.assign(FX.POSE.peekR, { x: 530, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 });
+        Object.assign(FX.POSE.upR, { x: 455 }); Object.assign(FX.POSE.upL, { x: -14 });
+        FX.theme("light", 0);
+
+        /* ---------- initial states ---------- */
+        st(win, { opacity: 0, scale: 0.24, transformPerspective: 2000, transformOrigin: "460px 325px" }, 0);
+        st(["#s1", "#s2", "#s3", "#s7", "#s8", "#s9", "#cta"], { opacity: 0 }, 0);
+        st(["#tDone", "#tOk", "#tZz", "#bldChip", "#moon", "#quo", "#qTot", "#accChip", "#fnl", "#fnlLbl", "#pkt", "#sharp", "#ring", "#ringMid", "#noCmd", "#volBox", "#arah", "#swpArr", "#pWin"], { opacity: 0 }, 0);
+        st([".brf", ".cki", ".crw", ".ev", ".lnode", ".rnode", ".swp", ".ptok", ".pc", "#arah .rowc span", ".flr .agt"], { opacity: 0 }, 0);
+        st(".qr .v", { opacity: 0 }, 0); st(".qr .skl", { opacity: 1 }, 0);
+        st([".tbar2"], { scaleX: 0, opacity: 0 }, 0);
+        st(["#vProd", "#vAnal"], { opacity: 0 }, 0);
+        st("#shBars i", { scaleY: 0.18 }, 0);
+        st(ARC.map(([id]) => "#" + id), { opacity: 0 }, 0);
+        tabSet("#tabProp", 0);
+        camSet(460, 475, 1, 0);
+
+        /* ---------- anchors ---------- */
+        const tJam2 = ph("Jam dua pagi").start, tSet7 = ph("Jam setengah").start, tProp = ph("proposal buat").start, tJadi = ph("udah jadi").start;
+        const tMimpi = ph("Itu bukan").start, tKantor = ph("Itu kantor").start, tIsinya = ph("Isinya agent").start, tLampu = ph("lampunya").start;
+        const tDulu = ph("Dulu gue").start, tTiga = ph("Tiga peran").start, tOrang = wt("Tiga peran", "satu"), tNol = wt("Tiga peran", "nol");
+        const tK1 = ph("Karyawan pertama").start, tBrief = ph("Tiap brief").start, tUbah = ph("dia ubah").start, tTamu = ph("jumlah tamu").start, tMenu = wt("jumlah tamu", "menu"), tHarga = wt("jumlah tamu", "harga");
+        const tK2 = ph("Karyawan kedua").start, tAcc = ph("Proposal yang").start, tPecah = ph("dia pecah").start, tBelanja = ph("belanja, sama").start, tCrew = wt("belanja, sama", "crew");
+        const tK3 = ph("Karyawan ketiga").start, tAnalis = ph("agent analis").start, tEvent = ph("Tiap event").start, tSaring = ph("dia nyaring").start, tUntung = ph("yang beneran").start;
+        const tLolos = ph("Paket yang").start, tKirim = ph("dikirim balik").start, tPutaran = ph("Jadi tiap").start, tTajam = ph("penawarannya").start;
+        const t247 = ph("Semua ini").start, tSuruh = ph("tanpa gue").start;
+        const tLega = ph("Yang bikin").start, tBukan = ph("bukan jumlah").start, tArah = ph("Tapi gue").start, tNgerjain = ph("Gue nggak").start, tNgatur = ph("Gue ngatur").start;
+        const tCta = ph("Mau sistem").start, tF = wt("Klik link", "link");
+
+        /* ===== SCENE 1 · HOOK: 02.14 you sleep -> 06.30 the proposal is already done ===== */
+        FX.enter("home", 0.0); FX.wave(0.5);
+        ft("#s1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.05);
+        ft("#tStrip", { opacity: 0, y: 34, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.3)" }, 0.1);
+        st("#tNight", { className: "tEnd on" }, 0.5);
+        ft("#tZz", { opacity: 0, y: 10 }, { opacity: 1, y: -14, duration: 0.5 }, 0.75);
+        ft("#tZz", { opacity: 1 }, { opacity: 0, duration: 0.3 }, tSet7 - 0.1);
+        FX.face("flat", 0.6, 1.1);
+        /* the dot travels the rail: night -> morning */
+        ft("#tDot", { left: "0%" }, { left: "100%", duration: 1.0, ease: "power2.inOut" }, tSet7 - 0.1);
+        st("#tMorn", { className: "tEnd on" }, tSet7 + 0.55);
+        st("#tNight", { className: "tEnd" }, tSet7 + 0.55);
+        FX.go("right", tSet7 - 0.15, 0.85); FX.beat(tSet7 + 0.5);
+        popIn("#tDone", tProp - 0.1, { duration: 0.5 });
+        ft("#tOk", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, tJadi + 0.05);
+        FX.face("happy", tJadi + 0.1, 1.0); FX.hop(tJadi + 0.15, 36);
+
+        /* ===== ZOOM 1 · punch through the morning card -> the office ===== */
+        const tZ1 = tMimpi + 0.35;
+        st("#s1", { transformOrigin: "460px 620px" }, 0);
+        ft("#s1", { scale: 1 }, { scale: 4.4, duration: 0.6, ease: "power3.in" }, tZ1);
+        ft("#s1", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tZ1 + 0.3);
+        st("#s1", { display: "none" }, tZ1 + 0.65);
+        FX.go("center", tZ1 + 0.1, 0.9);
+
+        /* ===== SCENE 2 · the cutaway office: three floors, lights never off ===== */
+        ft("#s2", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.65, ease: "power3.out" }, tZ1 + 0.4);
+        $$(".flr").forEach((el, k) => { ft(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "back.out(1.4)" }, tKantor - 0.15 + k * 0.14);
+          $$(".win", el).slice(0, 2).forEach((w, j) => st(w, { className: "win on" }, tKantor + 0.25 + k * 0.14 + j * 0.1)); });
+        $$(".flr .agt").forEach((el, k) => ft(el, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.38, ease: "back.out(2)" }, tIsinya + 0.1 + k * 0.22));
+        FX.point(tIsinya + 0.15);
+        $$(".flr .win").forEach((el, k) => st(el, { className: "win on" }, tLampu - 0.05 + k * 0.045));
+        ft("#moon", { opacity: 0, x: -40, y: 40 }, { opacity: 0.55, x: 40, y: -20, duration: 1.3, ease: "sine.inOut" }, tLampu);
+        popIn("#bldChip", tLampu + 0.45, { duration: 0.45 });
+        FX.face("excited", tLampu + 0.2, 1.0);
+
+        /* ===== DOORS -> SCENE 3 · one person, three roles, zero sleep ===== */
+        const tW1 = tDulu - 0.86;
+        FX.dip("right", tW1 - 0.05, 0.2);
+        FX.doors(tW1, "light", (m) => { st("#s2", { display: "none" }, m); st("#s3", { opacity: 1 }, m); });
+        ft("#pMe", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.7)" }, tDulu - 0.1);
+        ft("#pMe", { rotation: 0 }, { keyframes: [{ rotation: -4, duration: 0.5, ease: "sine.inOut" }, { rotation: 4, duration: 0.6, ease: "sine.inOut" }, { rotation: 0, duration: 0.5, ease: "sine.inOut" }] }, tDulu + 0.5);
+        $$(".ptok").forEach((el, k) => { ft(el, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.8)" }, tDulu + 0.25 + k * 0.26);
+          ft(el, { y: 0 }, { keyframes: [{ y: -12, duration: 0.9, ease: "sine.inOut" }, { y: 0, duration: 0.9, ease: "sine.inOut" }], repeat: 1 }, tDulu + 0.65 + k * 0.26); });
+        FX.point(tDulu + 0.35); FX.face("x", tDulu + 1.5, 1.2);
+        [tTiga, tOrang, tNol].forEach((t, k) => ft("#pc" + k, { opacity: 0, y: 30, scale: 0.88 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.7)" }, t - 0.08));
+        FX.shiver(tNol + 0.1, 0.45);
+
+        /* ===== ZOOM 2 · punch into the "bikin proposal" token -> the app ===== */
+        const tZ2 = tK1 - 0.72;
+        st("#s3", { transformOrigin: "140px 186px" }, 0);
+        ft("#s3", { scale: 1 }, { scale: 4.2, duration: 0.56, ease: "power3.in" }, tZ2);
+        ft("#s3", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, tZ2 + 0.3);
+        st("#s3", { display: "none" }, tZ2 + 0.6);
+        ft(win, { opacity: 0, scale: 0.24 }, { opacity: 1, scale: 1, duration: 0.55, ease: "power3.out" }, tZ2 + 0.3);
+        FX.go("home", tZ2 + 0.15, 0.85);
+
+        /* ===== SCENE 4 · agent proposal: the window is full from the moment it opens ===== */
+        count("#prN", 0, 3, tK1 + 0.1, 0.8);
+        $$(".brf").forEach((el, k) => ft(el, { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.34, ease: "power2.out" }, tK1 - 0.1 + k * 0.13));
+        ft("#quo", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, tK1 + 0.12);
+        jumpTo(240, 430, tBrief - 0.45);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tBrief - 0.4);
+        moveEl("#brf0", tBrief - 0.25, 0.5);
+        click(tBrief + 0.3);
+        st("#brf0", { className: "brf on" }, tBrief + 0.34);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.18 }, tBrief + 0.6);
+        FX.go("center", tBrief - 0.2, 0.9); FX.point(tBrief + 0.45); FX.face("happy", tUbah + 0.1, 1.0);
+        FX.go("right", tUbah + 0.1, 0.9);
+        [tTamu, tMenu, tHarga].forEach((t, k) => { ft("#qr" + k + " .skl", { opacity: 1 }, { opacity: 0, duration: 0.18 }, t - 0.1);
+          ft("#qr" + k + " .v", { opacity: 0, x: 22 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, t - 0.05); });
+        ft("#qTot", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }, tHarga + 0.5);
+        FX.point(tMenu + 0.05); FX.face("excited", tHarga + 0.5, 0.9);
+
+        /* ===== CARD FLIP -> SCENE 5 · agent produksi ===== */
+        const tFlip = tK2 - 0.62;
+        FX.dip("center", tFlip - 0.1, 0.22);
+        st("#win", { transformPerspective: 2200, transformOrigin: "460px 475px" }, 0);
+        ft("#win", { rotationY: 0 }, { rotationY: -90, duration: 0.3, ease: "power2.in" }, tFlip);
+        st("#vProp", { opacity: 0 }, tFlip + 0.3); st("#vProd", { opacity: 1 }, tFlip + 0.3); tabSet("#tabProd", tFlip + 0.3);
+        camSet(460, 475, 1, tFlip + 0.3);
+        ft("#win", { rotationY: 90 }, { rotationY: 0, duration: 0.34, ease: "power2.out" }, tFlip + 0.3);
+        ft("#accChip", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.36, ease: "back.out(1.9)" }, tAcc + 0.05);
+        $$(".tslot").forEach((el, k) => ft(el, { opacity: 0, scaleX: 0.6 }, { opacity: 1, scaleX: 1, duration: 0.32, ease: "power2.out" }, tK2 + 0.06 + k * 0.08));
+        $$(".cki").forEach((el, k) => ft(el, { opacity: 0, x: -18 }, { opacity: 0.45, x: 0, duration: 0.3 }, tK2 + 0.1 + k * 0.1));
+        $$(".crw").forEach((el, k) => ft(el, { opacity: 0, scale: 0.86 }, { opacity: 0.45, scale: 1, duration: 0.3 }, tK2 + 0.18 + k * 0.1));
+        $$(".tslot").forEach((el, k) => ft(el, { opacity: 1 }, { opacity: 0, duration: 0.24 }, tPecah + 0.02 + k * 0.16));
+        $$(".tbar2").forEach((el, k) => ft(el, { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.42, ease: "power2.out" }, tPecah + 0.05 + k * 0.16));
+        FX.beat(tPecah + 0.2);
+        $$(".cki").forEach((el, k) => { ft(el, { opacity: 0.45 }, { opacity: 1, duration: 0.26 }, tBelanja - 0.26 + k * 0.14);
+          st(el, { className: "cki done" }, tBelanja + 0.12 + k * 0.16); });
+        $$(".crw").forEach((el, k) => ft(el, { opacity: 0.45 }, { opacity: 1, duration: 0.28 }, tCrew - 0.05 + k * 0.14));
+        FX.go("peekR", tBelanja - 0.1, 0.9); FX.point(tCrew + 0.1);
+
+        /* ===== STRIPES -> SCENE 6 · agent analis: the funnel ===== */
+        const tW2 = tK3 - 0.9;
+        camTo(460, 475, 1, tW2 - 0.3, 0.55);
+        FX.dip("home", tW2 - 0.05, 0.2);
+        FX.stripes(tW2, "light", (m) => { st("#vProd", { opacity: 0 }, m); st("#vAnal", { opacity: 1 }, m); tabSet("#tabAnal", m); });
+        ft("#fnl", { opacity: 0, scaleY: 0.5 }, { opacity: 1, scaleY: 1, duration: 0.5, ease: "power3.out", transformOrigin: "50% 0%" }, tK3 - 0.05);
+        ft("#fnlLbl", { opacity: 0 }, { opacity: 1, duration: 0.35 }, tK3 + 0.3);
+        $$(".ev").forEach((el, k) => ft(el, { opacity: 0, y: -26 }, { opacity: 1, y: 0, duration: 0.34, ease: "power2.out" }, tK3 + 0.12 + k * 0.11));
+        $$(".crit").forEach((el, k) => ft(el, { opacity: 0, x: -16 }, { opacity: 0.5, x: 0, duration: 0.3 }, tK3 + 0.4 + k * 0.1));
+        FX.point(tAnalis + 0.05);
+        count("#anN", 0, 5, tEvent - 0.1, 0.8);
+        $$(".ev").forEach((el, k) => ft(el, { scale: 1 }, { keyframes: [{ scale: 1.05, duration: 0.16 }, { scale: 1, duration: 0.26 }] }, tEvent - 0.1 + k * 0.12));
+        /* the losers dim, the winner drops through the funnel */
+        $$(".crit").forEach((el, k) => { ft(el, { opacity: 0.5 }, { opacity: 1, duration: 0.26 }, tEvent + 0.1 + k * 0.16); st(el, { className: "crit done" }, tEvent + 0.3 + k * 0.16); });
+        [0, 1, 3, 4].forEach((k, i) => ft("#ev" + k, { opacity: 1 }, { opacity: 0.28, duration: 0.32 }, tSaring + 0.05 + i * 0.09));
+        ft("#ev2", { y: 0, scale: 1 }, { keyframes: [{ y: 168, scale: 0.86, duration: 0.55, ease: "power2.in" }, { opacity: 0, duration: 0.14 }] }, tSaring + 0.3);
+        /* the winner pops out on the RIGHT half; the window dims behind it */
+        ft(win, { opacity: 1, scale: 1 }, { opacity: 0.32, scale: 0.97, duration: 0.4, ease: "power2.inOut" }, tUntung - 0.2);
+        ft("#pWin", { opacity: 0, x: 40, scale: 0.88 }, { opacity: 1, x: 0, scale: 1, duration: 0.46, ease: "back.out(1.5)" }, tUntung - 0.1);
+        FX.face("excited", tUntung + 0.1, 1.1); FX.point(tUntung + 0.15);
+        FX.go("home", tSaring + 0.1, 0.9);
+
+        /* ===== ZOOM 3 · zoom-out reveal: the funnel shrinks into the loop ===== */
+        const tZ3 = tLolos - 0.66;
+        camTo(460, 475, 1, tZ3 - 0.1, 0.5);
+        FX.go("home", tZ3, 0.9);
+        ft(win, { opacity: 0.32, scale: 0.97 }, { opacity: 0, scale: 0.26, duration: 0.52, ease: "power3.in" }, tZ3 + 0.12);
+        st(win, { display: "none" }, tZ3 + 0.68);
+        ft("#pWin", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.84, duration: 0.34, ease: "power2.in" }, tZ3 + 0.1);
+
+        /* ===== SCENE 7 · the loop: the winning package goes back to proposal ===== */
+        st("#s7", { opacity: 1 }, tZ3 + 0.3);
+        ft(ARC.map(([id]) => "#" + id), { opacity: 0 }, { opacity: 1, duration: 0.4, stagger: 0.07 }, tZ3 + 0.35);
+        $$(".lnode").forEach((el, k) => ft(el, { opacity: 0, scale: 0.75 }, { opacity: 1, scale: 1, duration: 0.42, ease: "back.out(1.6)" }, tZ3 + 0.4 + k * 0.1));
+        ft(ARC.map(([id]) => "#" + id), { strokeDashoffset: 0 }, { strokeDashoffset: -280, duration: 4.2, ease: "none" }, tLolos);
+        ft("#pkt", { opacity: 0, x: 120, y: 530, scale: 0.8 }, { opacity: 1, x: 120, y: 530, scale: 1, duration: 0.38, ease: "back.out(1.8)" }, tLolos + 0.05);
+        ft("#pkt", { x: 120, y: 530 }, { keyframes: [{ x: 300, y: 600, duration: 0.5, ease: "sine.inOut" }, { x: 560, y: 560, duration: 0.5, ease: "sine.inOut" }, { x: 430, y: 200, duration: 0.6, ease: "sine.inOut" }] }, tKirim);
+        ft("#pkt", { opacity: 1 }, { opacity: 0, duration: 0.22 }, tKirim + 1.62);
+        ft("#ln0", { scale: 1 }, { keyframes: [{ scale: 1.07, duration: 0.2 }, { scale: 1, duration: 0.3 }] }, tKirim + 1.6);
+        FX.go("right", tKirim - 0.1, 0.9); FX.point(tKirim + 0.3);
+        /* side rise 1: the loop dims back, the "makin tajam" card holds the LEFT half, robot rises on the RIGHT */
+        ft(["#loopSvg", "#ln0", "#ln1", "#ln2"], { opacity: 1 }, { opacity: 0.26, duration: 0.42, ease: "power2.inOut" }, tPutaran - 0.3);
+        FX.go("upR", tPutaran - 0.55, 1.0);
+        popIn("#sharp", tPutaran + 0.05, { duration: 0.42 });
+        FX.point(tPutaran + 0.55);
+        $$("#shBars i").forEach((el, k) => ft(el, { scaleY: 0.16 }, { scaleY: [0.42, 0.7, 1][k], duration: 0.4, ease: "back.out(1.5)" }, tTajam - 0.1 + k * 0.17));
+        FX.face("happy", tTajam + 0.2, 1.0);
+        ft(["#loopSvg", "#ln0", "#ln1", "#ln2"], { opacity: 0.26 }, { opacity: 1, duration: 0.4, ease: "power2.inOut" }, tTajam + 0.75);
+        FX.go("center", tTajam + 0.7, 0.9);
+
+        /* ===== ROTATE-MORPH -> SCENE 8 · the 24/7 ring ===== */
+        const tM = t247 - 0.58;
+        st("#s7", { transformOrigin: "460px 420px" }, 0);
+        ft("#s7", { rotation: 0, scale: 1 }, { rotation: 26, scale: 0.72, duration: 0.5, ease: "power2.in" }, tM);
+        ft("#s7", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tM + 0.22);
+        st("#s7", { display: "none" }, tM + 0.55);
+        st("#s8", { opacity: 1 }, tM + 0.3);
+        ft("#ring", { opacity: 0, rotation: -40, scale: 0.72 }, { opacity: 1, rotation: 0, scale: 1, duration: 0.6, ease: "power3.out" }, tM + 0.3);
+        ft("#ringMid", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }, t247 + 0.1);
+        $$(".rnode").forEach((el, k) => ft(el, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.36, ease: "back.out(1.9)" }, t247 + 0.15 + k * 0.14));
+        ft("#ring", { rotation: 0 }, { rotation: 360, duration: 9, ease: "none" }, t247);
+        $$(".rnode").forEach((el, k) => ft(el, { scale: 1 }, { keyframes: [{ scale: 1.14, duration: 0.3, ease: "sine.out" }, { scale: 1, duration: 0.45, ease: "sine.inOut" }], repeat: 2, repeatDelay: 0.5 }, t247 + 0.55 + k * 0.3));
+        FX.go("center", tM + 0.25, 0.9); FX.beat(t247 + 0.3);
+        popIn("#noCmd", tSuruh - 0.05, { duration: 0.42 });
+        FX.face("happy", tSuruh + 0.15, 1.0);
+
+        /* ===== SWEEP -> SCENE 9 · volume is not the point, direction is ===== */
+        const tW3 = tLega - 0.82;
+        FX.dip("home", tW3 - 0.05, 0.2);
+        FX.sweep(tW3, "light", (m) => { st("#s8", { display: "none" }, m); st("#s9", { opacity: 1 }, m); });
+        ft("#volBox", { opacity: 0, scale: 1.3, x: -210, y: 286 }, { opacity: 1, scale: 1.52, x: -210, y: 286, duration: 0.48, ease: "back.out(1.5)" }, tLega - 0.05);
+        ft("#volBox", { opacity: 1, scale: 1.52, x: -210, y: 286 }, { opacity: 0.26, scale: 1, x: 0, y: 0, duration: 0.6, ease: "power3.inOut" }, tBukan + 0.34);
+        FX.face("flat", tBukan + 0.1, 0.9);
+        ft("#arah", { opacity: 0, y: 40, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, tArah - 0.66);
+        $$("#arah .rowc span").forEach((el, k) => ft(el, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, tArah + 0.55 + k * 0.16));
+        /* side rise 2: the direction card sits on the RIGHT half, robot rises on the LEFT */
+        FX.go("upL", tArah - 0.5, 1.0); FX.point(tArah + 0.4); FX.face("excited", tArah + 0.95, 1.0);
+        ft("#swpA", { opacity: 0, x: -26 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, tNgerjain - 0.08);
+        ft("#swpA .stx", { scaleX: 0 }, { scaleX: 1, duration: 0.34, ease: "power2.inOut" }, tNgerjain + 0.75);
+        ft("#swpArr", { opacity: 0 }, { opacity: 1, duration: 0.25 }, tNgatur - 0.22);
+        ft("#swpB", { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.42, ease: "back.out(1.5)" }, tNgatur - 0.05);
+        FX.go("home", tNgerjain - 0.55, 0.9); FX.beat(tNgatur + 0.1); FX.face("happy", tNgatur + 0.2, 1.1);
+
+        /* ===== ZOOM-THROUGH -> CTA: box centred, robot whole at the bottom ===== */
+        const tZ4 = tCta - 0.78;
+        st("#s9", { transformOrigin: "460px 700px" }, 0);
+        ft("#s9", { scale: 1 }, { scale: 3.0, duration: 0.6, ease: "power3.in" }, tZ4);
+        ft("#s9", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tZ4 + 0.3);
+        st("#s9", { display: "none" }, tZ4 + 0.65);
+        ft("#cta", { opacity: 0, scale: 0.72 }, { opacity: 1, scale: 1, duration: 0.55, ease: "power3.out" }, tZ4 + 0.35);
+        FX.go("center", tZ4 + 0.2, 0.9);
+        FX.wave(tCta + 0.5); FX.point(tF - 0.35); FX.face("happy", tF + 0.05, 1.4);
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(41,75,119,0.5)" }, { boxShadow: "0 0 0 22px rgba(41,75,119,0)", duration: 0.7 }, tF + 0.05);
+        FX.face("excited", D - 1.6, 0.9);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /* no-cut-text guard: text sliced by the camera frame fades out during that shot, back in when whole */
+        { const wc = $("#wcam"), wr = wc.getBoundingClientRect(), k = wr.width / VW;
+          const leaves = $$("#wcam *").filter((e) => e.tagName.toLowerCase() === "text" || Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim()));
+          const UNIT = ".ahd, .brf, .qr, #qTot, #quo .qh, .cki, .crw, .ev, .tbar2, .tkw, #accChip, #rdHead .lbl, #chkBox .ch2, #crwBox .ch2, #fnlLbl, #anNote, #tbar .app, #sim, #tabs > div, .live, .cn";
+          const box = (r) => ({ x0: (r.left - wr.left) / k, y0: (r.top - wr.top) / k, x1: (r.right - wr.left) / k, y1: (r.bottom - wr.top) / k });
+          const textBox = (e) => { if (e.tagName.toLowerCase() === "text") return box(e.getBoundingClientRect());
+            const rg = document.createRange(); let u = null;
+            Array.from(e.childNodes).filter((n) => n.nodeType === 3 && n.textContent.trim()).forEach((n) => { rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
+            return u ? box(u) : box(e.getBoundingClientRect()); };
+          const seen = new Set(), R = [];
+          leaves.forEach((e) => { const u = e.closest(UNIT); const tgt = u && wc.contains(u) ? u : e; if (seen.has(tgt)) return; seen.add(tgt);
+            const q = Object.assign({ e: tgt }, (tgt === e && !u) ? textBox(e) : box(tgt.getBoundingClientRect())); if (q.x1 - q.x0 > 1 && q.y1 - q.y0 > 1) R.push(q); });
+          const sh = SHOTS.slice().sort((a, b) => a.t - b.t);
+          const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
+            const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
+            return inter && !inside; };
+          const lerp = (a, b, f) => ({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, scale: a.scale + (b.scale - a.scale) * f });
+          R.forEach((q) => { let prev = false; const E = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = E[i]; if (!h && prev && i + 1 < sh.length && E[i + 1] && nextT - inT < 0.5) h = true;
+              let mA = -1, mB = -1;
+              if (!h && !prev && i > 0 && S.d > 0.45) { const EZ = { "power3.in": (f) => f * f * f, "power3.out": (f) => 1 - Math.pow(1 - f, 3), "power3.inOut": (f) => (f < 0.5 ? 4 * f * f * f : 1 - Math.pow(-2 * f + 2, 3) / 2) }; const ez = EZ[S.e] || EZ["power3.inOut"];
+                for (let n = 0; n <= 24; n++) if (cut(q, lerp(sh[i - 1].c, S.c, ez(n / 24)))) { if (mA < 0) mA = n; mB = n; } }
+              if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }
+              else if (h && !prev) { if (S.d === 0) st(q.e, { filter: "opacity(0)" }, S.t); else ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: S.d <= 0.45 ? 0.16 : 0.18, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.06 : S.t); }
+              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: S.d <= 0.45 ? 0.2 : 0.25, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.17 : inT);
+              else if (mA >= 0) { const t0 = S.t + (mA / 24) * S.d, t1 = Math.min(S.t + S.d, S.t + ((mB + 1) / 24) * S.d);
+                ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.08, ease: "power1.out" }, Math.max(S.t, t0 - 0.08));
+                ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.22, ease: "power1.out" }, t1); }
+              prev = h; }); });
+          window.__noCut = { leaves: R.length, shots: sh.length }; }
+
+        FX.runGestures();
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

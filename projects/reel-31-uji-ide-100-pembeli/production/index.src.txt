@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur Automation — Uji Ide ke 100 Pembeli</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --n1: #0a0d2c; --n2: #294b77; --grad: linear-gradient(100deg, #0a0d2c 0%, #294b77 100%); --line: rgba(10,13,44,0.10);
+        --auto: #2f6fe4; --autoBg: #e7f0ff; --ok: #1fa855; --okBg: #dcf6e4; --amb: #c46d0e; --ambBg: #fff3e0; --mute: rgba(10,13,44,0.55);
+        --gy: #8e98ad; --gyBg: #eef1f6; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fd; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: var(--n1); -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #f4f7fd; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      b { font-weight: 700; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #132650; opacity: 0; }
+      #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
+      #glow { position: absolute; left: -280px; top: 260px; width: 1100px; height: 1100px; border-radius: 50%; background: radial-gradient(circle, rgba(47,111,228,0.10) 0%, rgba(47,111,228,0) 62%); }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+      .simtag { display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 3px 12px; white-space: nowrap; }
+
+      /* ---------- hook: your class goes live and the sign-up board stays at 0 while ad money burns ---------- */
+      #hookClip { position: absolute; left: 0; top: 270px; width: 1080px; height: 980px; overflow: hidden; }
+      #hook { position: absolute; left: 80px; top: 20px; width: 920px; height: 950px; }
+      .card { position: absolute; background: #fff; border: 1.5px solid var(--line); border-radius: 28px; box-shadow: 0 26px 60px rgba(41,75,119,0.14), 0 3px 10px rgba(41,75,119,0.07); }
+      #hOffer { left: 150px; top: 60px; width: 620px; height: 286px; padding: 30px 34px; }
+      #hOffer .tagr { display: flex; align-items: center; gap: 12px; }
+      #hOffer .kpill { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border-radius: 20px; background: var(--autoBg); color: var(--auto); font-size: 18px; font-weight: 700; }
+      #hOffer .kpill .ic { width: 20px; height: 20px; }
+      #hOffer h3 { font-size: 50px; line-height: 1.1; margin-top: 18px; font-weight: 700; }
+      #hOffer .pr { margin-top: 10px; font-size: 28px; font-weight: 700; color: var(--n2); }
+      #hLaunch { position: absolute; left: 34px; bottom: 28px; display: inline-flex; align-items: center; gap: 10px; height: 60px; padding: 0 26px; border-radius: 18px; background: var(--grad); color: #fff; font-size: 22px; font-weight: 700; }
+      #hLaunch .ic { width: 22px; height: 22px; }
+      #hLive { position: absolute; right: 34px; bottom: 36px; display: inline-flex; align-items: center; gap: 9px; font-size: 19px; font-weight: 700; color: var(--ok); opacity: 0; }
+      #hLive i { width: 11px; height: 11px; border-radius: 50%; background: var(--ok); display: block; }
+      #hChecks { position: absolute; left: 150px; top: 368px; width: 620px; display: flex; gap: 14px; }
+      #hChecks .ck { flex: 1; height: 62px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 20px; font-weight: 700; color: var(--mute); opacity: 0; }
+      #hChecks .ck .ic { width: 22px; height: 22px; color: var(--ok); }
+      #hBoard { left: 150px; top: 460px; width: 620px; height: 230px; padding: 26px 32px; opacity: 0; }
+      #hBoard .k { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); }
+      #hZero { font-size: 118px; font-weight: 700; line-height: 1; margin-top: 10px; letter-spacing: -2px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #hBoard .sub { position: absolute; right: 32px; bottom: 30px; font-size: 20px; font-weight: 700; color: var(--mute); text-align: right; }
+      #hBurn { position: absolute; left: 150px; top: 706px; width: 620px; height: 170px; }
+      #hBurn .bn { position: absolute; display: inline-flex; align-items: center; gap: 9px; height: 54px; padding: 0 20px; border-radius: 16px; background: var(--ambBg); color: var(--amb); font-size: 22px; font-weight: 700; border: 1.5px solid rgba(196,109,14,0.3); opacity: 0; white-space: nowrap; }
+      #hBurn .bn .ic { width: 20px; height: 20px; }
+
+      /* ---------- app window ---------- */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 36px 90px rgba(41,75,119,0.18); opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 62px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+      #tbar .dots { display: flex; gap: 7px; } #tbar .dots i { width: 11px; height: 11px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
+      #tbar .app { margin-left: 8px; font-size: 19px; font-weight: 700; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.4); border-radius: 14px; padding: 2px 9px; }
+      #tabs { margin-left: auto; position: relative; display: flex; gap: 4px; }
+      #tabs > div { position: relative; z-index: 1; display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 15px; border-radius: 13px; font-size: 17px; font-weight: 700; color: var(--mute); }
+      #tabs > div .ic { width: 18px; height: 18px; }
+      #tabPill { position: absolute; left: 0; top: 0; height: 38px; border-radius: 13px; background: var(--autoBg); }
+      #body { position: absolute; left: 0; right: 0; top: 62px; bottom: 0; }
+      .view { position: absolute; inset: 0; }
+      .ahd { position: absolute; left: 30px; top: 22px; display: flex; align-items: center; gap: 13px; height: 52px; padding: 0 20px 0 12px; border-radius: 18px; background: var(--autoBg); white-space: nowrap; }
+      .ahd .bx { width: 36px; height: 36px; border-radius: 12px; background: var(--auto); color: #fff; display: flex; align-items: center; justify-content: center; }
+      .ahd .bx .ic { width: 20px; height: 20px; }
+      .ahd b { font-size: 22px; } .ahd .cn { font-size: 18px; font-weight: 700; color: var(--auto); }
+
+      /* flow strip */
+      #flIdea { position: absolute; left: 180px; top: 100px; width: 560px; height: 176px; border-radius: 24px; background: #fff; border: 2px solid var(--line); box-shadow: 0 18px 40px rgba(41,75,119,0.12); padding: 24px 28px; }
+      #flIdea .k { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--mute); }
+      #flIdea b { display: block; font-size: 38px; margin-top: 8px; }
+      #flIdea .pr { display: block; margin-top: 8px; font-size: 26px; font-weight: 700; color: var(--n2); }
+      #flRow { position: absolute; left: 45px; top: 400px; width: 830px; height: 170px; }
+      #flRow .fn { position: absolute; top: 0; width: 150px; height: 170px; border-radius: 22px; background: #fff; border: 2px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; opacity: 0; }
+      #flRow .fn .bx { width: 54px; height: 54px; border-radius: 17px; background: var(--autoBg); color: var(--auto); display: flex; align-items: center; justify-content: center; }
+      #flRow .fn .bx .ic { width: 28px; height: 28px; }
+      #flRow .fn em { font-style: normal; font-size: 19px; font-weight: 700; text-align: center; line-height: 1.2; }
+      #flLine { position: absolute; left: 45px; top: 484px; width: 830px; height: 3px; background: rgba(41,75,119,0.18); }
+      #flRun { position: absolute; left: 0; top: 0; width: 0; height: 3px; background: var(--auto); }
+
+      /* advisor table */
+      #bdTable { position: absolute; left: 150px; top: 384px; width: 620px; height: 300px; border-radius: 150px / 90px; background: #eef3fb; border: 2px solid var(--line); opacity: 0; }
+      #bdOffer { position: absolute; left: 310px; top: 474px; width: 300px; height: 118px; border-radius: 20px; background: #fff; border: 2px solid var(--line); box-shadow: 0 14px 30px rgba(41,75,119,0.14); padding: 18px 20px; opacity: 0; }
+      #bdOffer .k { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--mute); }
+      #bdOffer b { display: block; font-size: 25px; margin-top: 6px; }
+      .adv { position: absolute; width: 196px; opacity: 0; }
+      .adv .dsc { width: 92px; height: 92px; margin: 0 auto; border-radius: 50%; background: #fff; border: 2.5px solid var(--line); display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 26px rgba(41,75,119,0.13); }
+      .adv .dsc .ic { width: 42px; height: 42px; color: var(--n2); }
+      .adv em { display: block; font-style: normal; text-align: center; font-size: 20px; font-weight: 700; margin-top: 11px; }
+      .adv .vp { display: block; margin: 9px auto 0; width: fit-content; height: 38px; line-height: 35px; padding: 0 16px; border-radius: 14px; font-size: 17px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      .adv .vp.ok { background: var(--okBg); color: var(--ok); } .adv .vp.rv { background: var(--ambBg); color: var(--amb); }
+
+      /* 100-buyer panel */
+      #pnLeg { position: absolute; left: 153px; top: 112px; width: 614px; display: flex; gap: 12px; }
+      #pnLeg .lg { flex: 1; height: 54px; border-radius: 16px; background: #fff; border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 19px; font-weight: 700; color: var(--n2); opacity: 0; }
+      #pnLeg .lg .ic { width: 20px; height: 20px; }
+      #pnGrid { position: absolute; left: 153px; top: 196px; width: 614px; height: 614px; }
+      #pnGrid .bu { position: absolute; width: 56px; height: 56px; border-radius: 15px; background: var(--gyBg); border: 1.5px solid rgba(10,13,44,0.07); display: flex; align-items: center; justify-content: center; opacity: 0; }
+      #pnGrid .bu .ic { width: 26px; height: 26px; color: var(--gy); }
+      #pnCnt { position: absolute; left: 153px; width: 614px; top: 842px; text-align: center; font-size: 24px; font-weight: 700; color: var(--mute); opacity: 0; }
+      #pnCnt b { font-size: 34px; color: var(--n2); }
+      #pnAsk { position: absolute; left: 153px; top: 196px; width: 614px; height: 76px; border-radius: 20px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 27px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #pnAsk .ic { width: 26px; height: 26px; }
+
+      /* buy / pass split */
+      .col { position: absolute; top: 118px; width: 380px; height: 700px; border-radius: 26px; border: 2px solid var(--line); background: #fff; opacity: 0; }
+      #colYes { left: 70px; } #colNo { left: 470px; }
+      .col .ch2 { position: absolute; left: 24px; top: 22px; display: flex; align-items: center; gap: 11px; font-size: 25px; font-weight: 700; white-space: nowrap; }
+      .col .ch2 .ic { width: 26px; height: 26px; }
+      .col .n { position: absolute; right: 24px; top: 20px; font-size: 40px; font-weight: 700; line-height: 1; }
+      #colYes .ch2, #colYes .n { color: var(--ok); } #colNo .ch2, #colNo .n { color: var(--gy); }
+      .col .mg { position: absolute; left: 24px; top: 96px; width: 332px; }
+      .col .md { position: absolute; width: 30px; height: 30px; border-radius: 9px; opacity: 0; }
+      #colYes .md { background: var(--okBg); border: 1.5px solid rgba(31,168,85,0.35); } #colNo .md { background: var(--gyBg); border: 1.5px solid rgba(10,13,44,0.08); }
+
+      /* objection -> lever */
+      #lvWrap { position: absolute; left: 50px; top: 190px; width: 820px; }
+      /* badge sits IN the flex flow (margin-left:auto) so it can never overlap the lever chip */
+      .lv { position: relative; height: 150px; border-radius: 22px; background: #fff; border: 2px solid var(--line); margin-bottom: 26px; display: flex; align-items: center; padding: 0 22px; gap: 12px; opacity: 0; }
+      .lv .ob { display: inline-flex; align-items: center; gap: 8px; height: 60px; padding: 0 16px; border-radius: 17px; background: var(--gyBg); color: var(--n1); font-size: 20px; font-weight: 700; white-space: nowrap; flex: none; }
+      .lv .ob .ic { width: 20px; height: 20px; flex: none; }
+      .lv .ar { width: 26px; height: 26px; color: var(--mute); flex: none; }
+      .lv .fx2 { display: inline-flex; align-items: center; gap: 8px; height: 60px; padding: 0 16px; border-radius: 17px; background: var(--autoBg); color: var(--auto); font-size: 20px; font-weight: 700; white-space: nowrap; flex: none; }
+      .lv .fx2 .ic { width: 20px; height: 20px; flex: none; }
+      .lv .plus { margin-left: auto; flex: none; height: 60px; line-height: 57px; padding: 0 16px; border-radius: 17px; background: var(--okBg); color: var(--ok); font-size: 22px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #lvNote { position: absolute; left: 50px; top: 530px; font-size: 20px; font-weight: 700; color: var(--mute); opacity: 0; }
+
+      /* money */
+      #mnCalc { position: absolute; left: 60px; top: 150px; width: 360px; height: 560px; border-radius: 26px; background: #fff; border: 2px solid var(--line); box-shadow: 0 18px 40px rgba(41,75,119,0.12); padding: 22px; opacity: 0; }
+      #mnDisp { height: 112px; border-radius: 16px; background: #0f1736; display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; font-size: 52px; font-weight: 700; color: #fff; }
+      #mnKeys { margin-top: 18px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; }
+      #mnKeys i { height: 74px; border-radius: 14px; background: #eef1f6; display: block; }
+      #mnKeys i.a { background: var(--auto); }
+      #mnRows { position: absolute; left: 450px; top: 150px; width: 410px; }
+      .mr { position: relative; height: 170px; border-radius: 22px; background: #fff; border: 2px solid var(--line); margin-bottom: 25px; padding: 22px 24px; opacity: 0; }
+      .mr .k { font-size: 13px; font-weight: 700; letter-spacing: 2.2px; color: var(--mute); }
+      .mr b { display: block; font-size: 44px; margin-top: 12px; line-height: 1; color: var(--n2); }
+      .mr .u { position: absolute; right: 24px; bottom: 22px; font-size: 19px; font-weight: 700; color: var(--mute); }
+      #mnNote { position: absolute; left: 450px; top: 700px; width: 410px; font-size: 19px; font-weight: 700; color: var(--mute); opacity: 0; }
+
+      /* verdict plates */
+      .vp2 { position: absolute; top: 230px; width: 380px; height: 430px; border-radius: 28px; background: #fff; border: 2px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; opacity: 0; }
+      #vpYes { left: 70px; } #vpNo { left: 470px; }
+      .vp2 .bx { width: 104px; height: 104px; border-radius: 32px; display: flex; align-items: center; justify-content: center; }
+      .vp2 .bx .ic { width: 50px; height: 50px; }
+      .vp2 em { font-style: normal; font-size: 40px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+      #vpYes .bx { background: var(--okBg); color: var(--ok); } #vpYes em { color: var(--ok); }
+      #vpNo .bx { background: var(--gyBg); color: var(--gy); } #vpNo em { color: var(--gy); }
+      .vp2 .sm { font-size: 19px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+
+      /* comparison strips */
+      .cs { position: absolute; left: 60px; width: 800px; height: 280px; border-radius: 26px; background: #fff; border: 2px solid var(--line); padding: 24px 28px; opacity: 0; }
+      #csA { top: 150px; } #csB { top: 470px; }
+      .cs .k { font-size: 14px; font-weight: 700; letter-spacing: 2.2px; color: var(--mute); }
+      .cs .big { position: absolute; right: 28px; top: 24px; font-size: 40px; font-weight: 700; }
+      #csA .big { color: var(--amb); } #csB .big { color: var(--ok); }
+      .cs .bars { position: absolute; left: 28px; right: 28px; bottom: 26px; height: 150px; display: flex; align-items: flex-end; gap: 14px; }
+      .cs .bars i { flex: 1; border-radius: 10px 10px 4px 4px; display: block; }
+      #csA .bars i { background: var(--ambBg); border: 1.5px solid rgba(196,109,14,0.3); }
+      #csB .bars i { background: var(--okBg); border: 1.5px solid rgba(31,168,85,0.3); }
+
+      /* ---------- stage cards (outside the window) ---------- */
+      .pc { position: absolute; background: #fff; border: 2px solid var(--line); border-radius: 26px; box-shadow: 0 30px 70px rgba(41,75,119,0.2); opacity: 0; }
+      #pQuote { left: 540px; top: 430px; width: 440px; height: 420px; padding: 26px 28px; }
+      #pQuote .qh { font-size: 13px; font-weight: 700; letter-spacing: 2.2px; color: var(--mute); }
+      .bub { position: relative; margin-top: 20px; border-radius: 20px 20px 20px 6px; background: var(--gyBg); padding: 18px 20px; opacity: 0; }
+      .bub p { font-size: 25px; font-weight: 700; line-height: 1.25; }
+      .bub .who2 { display: block; margin-top: 10px; font-size: 17px; font-weight: 700; color: var(--mute); }
+      #pMoney { left: 100px; top: 492px; width: 420px; height: 272px; padding: 26px 28px; }
+      #pMoney .k { font-size: 13px; font-weight: 700; letter-spacing: 2.2px; color: var(--mute); }
+      #pMoney .vv { display: block; font-size: 70px; font-weight: 700; line-height: 1; margin-top: 14px; color: var(--n2); }
+      #pMoney .ln { margin-top: 22px; padding-top: 18px; border-top: 1.5px solid var(--line); display: flex; justify-content: space-between; font-size: 21px; font-weight: 700; }
+      #pMoney .ln span:last-child { color: var(--n2); }
+      #pReal { left: 580px; top: 440px; width: 400px; height: 400px; padding: 26px 28px; }
+      #pReal .k { font-size: 13px; font-weight: 700; letter-spacing: 2.2px; color: var(--mute); }
+      #pReal h4 { font-size: 32px; font-weight: 700; margin-top: 12px; line-height: 1.15; }
+      #pReal .st2 { margin-top: 20px; display: flex; flex-direction: column; gap: 13px; }
+      #pReal .st2 span { display: flex; align-items: center; gap: 11px; height: 58px; border-radius: 17px; background: var(--autoBg); color: var(--auto); font-size: 21px; font-weight: 700; padding: 0 18px; white-space: nowrap; opacity: 0; }
+      #pReal .st2 span .ic { width: 22px; height: 22px; }
+
+      /* ---------- kinetic caveat stack ---------- */
+      #kin { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; opacity: 0; }
+      #kGhost { position: absolute; left: 153px; top: 150px; width: 614px; height: 500px; }
+      #kGhost i { position: absolute; width: 50px; height: 50px; border-radius: 14px; background: rgba(41,75,119,0.10); display: block; }
+      #kPlate { position: absolute; left: 110px; top: 318px; width: 470px; height: 164px; border-radius: 28px; background: #fff; border: 3px solid var(--n2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 24px 56px rgba(41,75,119,0.2); opacity: 0; }
+      #kPlate b { font-size: 50px; letter-spacing: 3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #kPlate em { font-style: normal; font-size: 15px; font-weight: 700; letter-spacing: 2px; color: var(--mute); }
+
+      /* ---------- CTA + UI ---------- */
+      #cta { position: absolute; left: 110px; top: 560px; width: 860px; border-radius: 32px; background: #fff; border: 2px solid var(--line); box-shadow: 0 34px 80px rgba(41,75,119,0.2); padding: 42px 40px 46px; text-align: center; opacity: 0; }
+      #cta .k { font-size: 24px; font-weight: 700; color: var(--mute); }
+      #cta .name { font-size: 62px; font-weight: 700; margin-top: 12px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #cta .sb { font-size: 25px; margin-top: 10px; color: var(--mute); font-weight: 400; } #cta .sb b { color: var(--n2); }
+      #fbtn { display: inline-flex; align-items: center; gap: 11px; margin-top: 28px; height: 74px; padding: 0 34px; border-radius: 22px; background: var(--grad); color: #fff; font-size: 26px; font-weight: 700; }
+      #fbtn .ic { width: 24px; height: 24px; }
+      #ui { position: absolute; inset: 0; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; }
+      #logoL { opacity: 0; }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(41,75,119,0.22)); }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px rgba(255,255,255,0.95)); display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
+      #main[data-sc="dark"] .cap .in { background: none; color: #fff; text-shadow: 0 4px 18px rgba(0,0,0,0.45); } #main[data-sc="dark"] .cap s.k { color: #01ccf7; }
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(41,75,119,0.3)); }
+      #ripple { position: absolute; left: 0; top: 0; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 50%; background: rgba(47,111,228,0.3); opacity: 0; z-index: 29; }
+      #wFlash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="58.2" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="58.2" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div><div id="glow"></div>
+
+        <div id="hookClip"><div id="hook">
+          <div class="card" id="hOffer">
+            <div class="tagr"><span class="kpill"><span class="ic" data-i="sparkles"></span>IDE BARU</span><span class="simtag">SIMULASI</span></div>
+            <h3>Kelas Konten AI</h3><div class="pr">Rp1.200.000 / peserta</div>
+            <div id="hLaunch"><span class="ic" data-i="rocket"></span>Luncurkan</div>
+            <div id="hLive"><i></i>Tayang</div>
+          </div>
+          <div id="hChecks"><div class="ck" id="ck0"><span class="ic" data-i="circle-check"></span>Materi</div><div class="ck" id="ck1"><span class="ic" data-i="circle-check"></span>Iklan</div><div class="ck" id="ck2"><span class="ic" data-i="circle-check"></span>Landing</div></div>
+          <div class="card" id="hBoard"><div class="k">PENDAFTAR MINGGU INI</div><div id="hZero">0</div><div class="sub">dari target 40<br />angka ilustrasi</div></div>
+          <div id="hBurn"></div>
+        </div></div>
+
+        <div id="win"><div id="wcam">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Uji Ide</span><span id="sim">SIMULASI</span>
+            <div id="tabs"><span id="tabPill"></span><div id="tabAlur"><span class="ic" data-i="workflow"></span>Alur</div><div id="tabPanel"><span class="ic" data-i="users"></span>Panel</div>
+              <div id="tabHit"><span class="ic" data-i="calculator"></span>Hitung</div><div id="tabVonis"><span class="ic" data-i="gavel"></span>Vonis</div></div></div>
+          <div id="body">
+            <div class="view" id="vFlow">
+              <div id="flIdea"><div class="k">IDE YANG MAU DIUJI</div><b>Kelas Konten AI</b><div class="pr">Rp1.200.000</div></div>
+              <div id="flLine"><div id="flRun"></div></div><div id="flRow"></div>
+            </div>
+            <div class="view" id="vBoard">
+              <div class="ahd" id="bdHd"><div class="bx"><span class="ic" data-i="users-round"></span></div><b>Tiga penasihat</b><span class="cn">baca penawaran lu</span></div>
+              <div id="bdTable"></div>
+              <div id="bdOffer"><div class="k">PENAWARAN LU</div><b>Kelas Konten AI</b></div>
+            </div>
+            <div class="view" id="vPanel">
+              <div class="ahd" id="pnHd"><div class="bx"><span class="ic" data-i="users"></span></div><b>Panel pembeli</b><span class="cn">100 profil · simulasi</span></div>
+              <div id="pnLeg"><div class="lg" id="lg0"><span class="ic" data-i="briefcase"></span>Kerjaan</div><div class="lg" id="lg1"><span class="ic" data-i="wallet"></span>Dompet</div><div class="lg" id="lg2"><span class="ic" data-i="circle-help"></span>Masalah</div></div>
+              <div id="pnGrid"></div>
+              <div id="pnCnt"><b id="pnN">0</b> / 100 pembeli dibikin</div>
+              <div id="pnAsk"><span class="ic" data-i="message-circle-question"></span>"Lu bakal beli ini?"</div>
+            </div>
+            <div class="view" id="vSplit">
+              <div class="col" id="colYes"><div class="ch2"><span class="ic" data-i="circle-check"></span>MAU</div><div class="n" id="nYes">0</div><div class="mg" id="mgYes"></div></div>
+              <div class="col" id="colNo"><div class="ch2"><span class="ic" data-i="circle-x"></span>NGGAK</div><div class="n" id="nNo">0</div><div class="mg" id="mgNo"></div></div>
+            </div>
+            <div class="view" id="vLever">
+              <div class="ahd" id="lvHd"><div class="bx"><span class="ic" data-i="key-round"></span></div><b>Pemicu</b><span class="cn">yang bikin "nggak" jadi "mau"</span></div>
+              <div id="lvWrap"></div>
+              <div id="lvNote">simulasi · angka ilustrasi</div>
+            </div>
+            <div class="view" id="vMoney">
+              <div id="mnCalc"><div id="mnDisp">41%</div><div id="mnKeys"></div></div>
+              <div id="mnRows"></div>
+              <div id="mnNote">angka ilustrasi · simulasi</div>
+            </div>
+            <div class="view" id="vVonis">
+              <div class="vp2" id="vpYes"><div class="bx"><span class="ic" data-i="circle-check"></span></div><em>LAYAK</em><span class="sm">lanjut ke uji nyata</span></div>
+              <div class="vp2" id="vpNo"><div class="bx"><span class="ic" data-i="rotate-ccw"></span></div><em>BELUM LAYAK</em><span class="sm">benerin dulu penawarannya</span></div>
+            </div>
+            <div class="view" id="vCmp">
+              <div class="cs" id="csA"><div class="k">BIASANYA · LAUNCHING DULU, BARU TAU</div><div class="big">−Rp25jt</div><div class="bars"></div></div>
+              <div class="cs" id="csB"><div class="k">DI SINI · UJI DULU, BARU LAUNCHING</div><div class="big">Rp0</div><div class="bars"></div></div>
+            </div>
+          </div>
+          <div id="ripple"></div><div id="cursor"></div>
+        </div><div id="wFlash"></div></div>
+
+        <div class="pc" id="pQuote"><div class="qh">ALASAN · BAHASA MEREKA SENDIRI</div>
+          <div class="bub" id="bub0"><p>"Kemahalan buat gue."</p><span class="who2">Rina, 29 · admin</span></div>
+          <div class="bub" id="bub1"><p>"Nggak kebayang hasilnya kayak apa."</p><span class="who2">Dimas, 34 · freelancer</span></div></div>
+        <div class="pc" id="pMoney"><div class="k">UNTUNG PER PESERTA</div><span class="vv" id="pmV">Rp612rb</span>
+          <div class="ln"><span>Balik modal</span><span>14 peserta</span></div></div>
+        <div class="pc" id="pReal"><div class="k">LANGKAH BERIKUTNYA</div><h4>Uji ke orang beneran</h4>
+          <div class="st2"><span id="rs0"><span class="ic" data-i="megaphone"></span>Buka pre-order kecil</span><span id="rs1"><span class="ic" data-i="messages-square"></span>Ngobrol sama 10 calon</span><span id="rs2"><span class="ic" data-i="chart-no-axes-column"></span>Cek yang beneran bayar</span></div></div>
+
+        <div id="kin"><div id="kGhost"></div>
+          <div id="kPlate"><b>SIMULASI</b><em>PEMBELINYA BUKAN ORANG BENERAN</em></div></div>
+
+        <div id="cta"><div class="k">Mau sistem kayak gini dipasang di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="" /><div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div><div id="caps"></div></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="57.44" data-track-index="8" data-volume="1"></audio>
+      <!--SFX-->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n, c) => `<span class="ic${c ? " " + c : ""}">${icon(n)}</span>`;
+
+        /* ---------- build repeated markup ---------- */
+        const BURN = [["Iklan hari 1", "−Rp2,4jt", 0, 8], ["Iklan hari 3", "−Rp1,1jt", 228, 66], ["Iklan hari 6", "−Rp3,8jt", 404, 14]];
+        $("#hBurn").innerHTML = BURN.map(([a, b, x, y], k) => `<span class="bn" id="bn${k}" style="left:${x}px;top:${y}px">${ic("flame")}${a} ${b}</span>`).join("");
+
+        const FLOW = [["lightbulb", "Ide"], ["users-round", "Penasihat"], ["users", "100 pembeli"], ["calculator", "Hitung"], ["gavel", "Vonis"]];
+        $("#flRow").innerHTML = FLOW.map(([i, t], k) => `<div class="fn" id="fn${k}" style="left:${k * 170}px"><div class="bx">${ic(i)}</div><em>${t}</em></div>`).join("");
+
+        const ADV = [["tag", "Ahli harga", "ok", "Wajar"], ["badge-check", "Ahli janji", "rv", "Kurang tajam"], ["split", "Ahli pembeda", "rv", "Belum beda"]];
+        $("#vBoard").insertAdjacentHTML("beforeend", ADV.map(([i, n, c, v], k) => `<div class="adv" id="adv${k}" style="left:${[112, 362, 612][k]}px;top:${[250, 204, 250][k]}px">`
+          + `<div class="dsc">${ic(i)}</div><em>${n}</em><span class="vp ${c}" id="vpl${k}">${v}</span></div>`).join(""));
+
+        $("#pnGrid").innerHTML = Array.from({ length: 100 }, (_, k) => { const r = Math.floor(k / 10), q = k % 10;
+          return `<div class="bu" id="bu${k}" style="left:${q * 62}px;top:${r * 62}px">${ic("user-round")}</div>`; }).join("");
+        const YES = 36, NO = 64;
+        $("#mgYes").innerHTML = Array.from({ length: YES }, (_, k) => `<i class="md" id="my${k}" style="left:${(k % 8) * 42}px;top:${Math.floor(k / 8) * 42}px"></i>`).join("");
+        $("#mgNo").innerHTML = Array.from({ length: NO }, (_, k) => `<i class="md" id="mn${k}" style="left:${(k % 8) * 42}px;top:${Math.floor(k / 8) * 42}px"></i>`).join("");
+
+        const LEV = [["Kemahalan", "wallet", "Cicilan 3x", "+18"], ["Nggak kebayang hasil", "image", "Contoh hasil", "+11"]];
+        $("#lvWrap").innerHTML = LEV.map(([o, i, f, p], k) => `<div class="lv" id="lv${k}"><span class="ob">${ic("circle-x")}${o}</span><span class="ic ar" data-i="arrow-right"></span>`
+          + `<span class="fx2">${ic(i)}${f}</span><span class="plus" id="lp${k}">${p} jadi mau</span></div>`).join("");
+
+        $("#mnKeys").innerHTML = Array.from({ length: 12 }, (_, k) => `<i class="${k === 7 ? "a" : ""}"></i>`).join("");
+        const MROWS = [["UNTUNG PER PESERTA", "Rp612rb", "setelah iklan & tools"], ["BALIK MODAL", "14", "peserta"], ["MARGIN DI RENCANA", "41%", "angka ilustrasi"]];
+        $("#mnRows").innerHTML = MROWS.map(([k, v, u], n) => `<div class="mr" id="mr${n}"><div class="k">${k}</div><b id="mv${n}">${v}</b><span class="u">${u}</span></div>`).join("");
+
+        $("#csA .bars").innerHTML = [92, 80, 71, 58, 47, 35, 24, 14].map((h) => `<i style="height:${h}%"></i>`).join("");
+        $("#csB .bars").innerHTML = Array.from({ length: 8 }, () => `<i style="height:26%"></i>`).join("");
+        $("#kGhost").innerHTML = Array.from({ length: 100 }, (_, k) => `<i style="left:${(k % 10) * 62}px;top:${Math.floor(k / 10) * 56}px"></i>`).join("");
+
+        /* ---------- captions ---------- */
+        const KEY = new Set(["launching", "kelas", "online", "sepi", "simulasinya", "seratus", "pembeli", "duitnya", "penasihat", "penawaran", "harga", "janji", "bedanya",
+          "kerjaan", "dompet", "masalah", "beli", "mau", "nggak", "bahasa", "kemahalan", "hasilnya", "nolak", "angkanya", "untung", "peserta", "modal", "marginnya",
+          "layak", "abis", "sepeser", "simulasi", "lolos", "beneran", "link", "bio", "aipreneur", "automation", "enam", "empat", "tiga", "puluh"]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase().replace(/[^a-z0-9-]/g, "")) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#294b77" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 58.2;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        let cur = { x: 760, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const jumpTo = (x, y, at) => { st("#cursor", { x, y }, at); cur = { x, y }; };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const popIn = (el, at, o) => ft(el, { opacity: 0, scale: 0.8, y: 16 }, Object.assign({ opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.6)" }, o || {}), at);
+        const TABS = ["#tabAlur", "#tabPanel", "#tabHit", "#tabVonis"];
+        const tabSet = (sel, at) => { const el = $(sel); st("#tabPill", { x: el.offsetLeft - 4, width: el.offsetWidth }, at); TABS.forEach((s) => st(s, { color: s === sel ? "#2f6fe4" : "rgba(10,13,44,0.55)" }, at)); };
+
+        /* camera: zooms the app inside the fixed window frame (screen-recording style) */
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc = cState(460, 475, 1);
+        const SHOTS = [];
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); SHOTS.push({ t: at, d: 0, c: cc }); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; SHOTS.push({ t: at, d: dur || 0.8, c: nx, e: ease || "power3.inOut" }); };
+
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "light" });
+        Object.assign(FX.POSE.peekR, { x: 530, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 }); // client: peeks fully visible
+        Object.assign(FX.POSE.upR, { x: 500 }); Object.assign(FX.POSE.upL, { x: -110 }); // side rises clear of the card on the other half
+        FX.theme("light", 0);
+        ft("#glow", { x: 0, y: 0 }, { x: 200, y: 340, duration: D, ease: "sine.inOut" }, 0);
+
+        /* initial states */
+        st(win, { opacity: 0, scale: 0.2, transformPerspective: 2000, transformOrigin: "460px 170px" }, 0);
+        st(["#vBoard", "#vPanel", "#vSplit", "#vLever", "#vMoney", "#vVonis", "#vCmp", "#kin", "#cta", "#pQuote", "#pMoney", "#pReal"], { opacity: 0 }, 0);
+        st(["#pQuote", "#pMoney", "#pReal"], { transformPerspective: 1400 }, 0);
+        st(["#flIdea", "#flLine", "#bdHd", "#pnHd", "#lvHd", "#mnNote", "#lvNote", "#pnCnt", "#pnAsk"], { opacity: 0 }, 0);
+        st("#flRun", { width: 0 }, 0);
+        tabSet("#tabAlur", 0);
+        camSet(460, 475, 1, 0);
+
+        /* anchors */
+        const tHook = 0, tMateri = ph("Materi udah jadi,").start, tIklan = ph("iklan udah jalan,").start, tSepi = ph("terus sepi.").start;
+        const tCek = ph("Cek simulasinya.").start, tUji = ph("Ide lu diuji").start, tSeblm = ph("sebelum duitnya").start;
+        const tPer = ph("Pertama, tiga penasihat").start, tBacaP = ph("baca penawaran lu:").start, tHarga = ph("harga, janji,").start, tBedaD = ph("sama bedanya di mana.").start;
+        const tBikin = ph("Terus dibikin seratus").start, tBedaK = ph("Beda kerjaan, beda dompet,").start, tBedaM = ph("beda masalah.").start;
+        const tTanya = ph("Satu-satu ditanya,").start, tBeli = ph("lu bakal beli ini?").start, tMau = ph("Yang mau tiga puluh enam,").start, tNggak = ph("yang nggak enam puluh empat.").start;
+        const tAlasan = ph("Alasannya pakai bahasa").start, tKmhl = ph("Kemahalan.").start, tKbyg = ph("Nggak kebayang hasilnya.").start;
+        const tDari = ph("Dari situ ketahuan,").start, tApaB = ph("apa yang bikin yang nolak").start;
+        const tAngka = ph("Baru angkanya dicek:").start, tUntung = ph("untung per peserta,").start, tBalik = ph("balik modal di berapa orang,").start, tMargin = ph("marginnya berapa.").start;
+        const tHasil = ph("Hasil akhirnya cuma dua:").start, tLayak = ph("layak, atau belum layak.").start;
+        const tOrang = ph("Orang biasanya baru tau").start, tAbis = ph("setelah duitnya abis.").start, tIniTau = ph("Ini tau sebelum keluar sepeser.").start;
+        const tInget = ph("Tapi inget, pembelinya simulasi.").start, tKalau = ph("Kalau lolos,").start, tUjiL = ph("uji lagi ke orang beneran.").start;
+        const tCta = ph("Mau sistem kayak gini").start, tF = wt("Klik link di bio,", "link");
+
+        /* ===== SCENE 1 · HOOK: the class goes live, the sign-up board stays at 0, ad money burns ===== */
+        FX.enter("home", 0.0); FX.wave(0.45);
+        ft("#hOffer", { opacity: 0, y: 44, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.3)" }, 0.1);
+        jumpTo(560, 640, 0.5);
+        moveTo(300, 600, tMateri - 0.6, 0.55); click(tMateri - 0.25);
+        ft("#hLaunch", { scale: 1 }, { keyframes: [{ scale: 0.92, duration: 0.12 }, { scale: 1, duration: 0.2 }] }, tMateri - 0.25);
+        ft("#hLive", { opacity: 0, x: 14 }, { opacity: 1, x: 0, duration: 0.3 }, tMateri - 0.05);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.2 }, tMateri + 0.15);
+        $$("#hChecks .ck").forEach((el, k) => ft(el, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.32, ease: "back.out(1.5)" }, tMateri + 0.1 + k * 0.26));
+        FX.face("happy", tMateri + 0.1, 0.8); FX.beat(tMateri + 0.3);
+        ft("#hBoard", { opacity: 0, y: 36, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.3)" }, tIklan + 0.35);
+        FX.go("center", tIklan + 0.1, 0.8);
+        BURN.forEach((_, k) => { const t = tSepi - 0.35 + k * 0.2;
+          ft("#bn" + k, { opacity: 0, y: -22 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, t);
+          ft("#bn" + k, { y: 0 }, { y: 16, duration: 1.3, ease: "sine.inOut" }, t + 0.3); });
+        ft("#hZero", { scale: 1 }, { keyframes: [{ scale: 1.1, duration: 0.18 }, { scale: 1, duration: 0.3 }] }, tSepi);
+        FX.face("x", tSepi - 0.05, 1.0); FX.shiver(tSepi + 0.05, 0.4);
+
+        /* ===== ZOOM 1 · punch through the offer card -> the app opens on the flow ===== */
+        const tZ1 = tCek - 0.78;
+        st("#hook", { transformOrigin: "460px 230px" }, 0);
+        ft("#hook", { scale: 1 }, { scale: 3.4, duration: 0.62, ease: "power3.in" }, tZ1);
+        ft("#hook", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, tZ1 + 0.3);
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.45, duration: 0.09 }, { opacity: 0, duration: 0.24 }] }, tZ1 + 0.42);
+        st("#hookClip", { display: "none" }, tZ1 + 0.72);
+        ft(win, { opacity: 0, scale: 0.26 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, tZ1 + 0.3);
+        camSet(460, 235, 1.4, tZ1 + 0.3);
+        ft("#flIdea", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tZ1 + 0.46);
+        ft(["#flLine", "#flRow .fn"], { opacity: 0 }, { opacity: 0.22, duration: 0.35 }, tZ1 + 0.52);
+        FX.go("home", tZ1 + 0.1, 0.7); FX.face("excited", tCek, 0.9); FX.beat(tCek + 0.15);
+
+        /* ===== ZOOM 2 · pull back from the idea card to the whole flow ===== */
+        camTo(460, 420, 1, tUji - 0.2, 1.0, "power3.out");
+        ft("#flLine", { opacity: 0.22 }, { opacity: 1, duration: 0.3 }, tUji + 0.25);
+        $$("#flRow .fn").forEach((el, k) => ft(el, { opacity: 0.22, scale: 0.94, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.34, ease: "back.out(1.6)" }, tUji + 0.3 + k * 0.17));
+        ft("#flRun", { width: 0 }, { width: 830, duration: 1.5, ease: "power1.inOut" }, tUji + 0.45);
+        FX.point(tUji + 0.5);
+        ft("#flRow .fn", { borderColor: "rgba(10,13,44,0.10)" }, { borderColor: "#2f6fe4", duration: 0.22, stagger: 0.17 }, tUji + 0.5);
+        FX.go("center", tSeblm - 0.1, 0.8); FX.beat(tSeblm + 0.2);
+
+        /* ===== SCENE 3 · the three advisors read your offer (round table) ===== */
+        const tT3 = tPer - 0.62;
+        moveEl($("#tabPanel"), tT3 - 0.45, 0.5, -300, -340); click(tT3 - 0.1);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tT3 - 0.5);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.18 }, tT3 + 0.14);
+        st("#vFlow", { opacity: 0 }, tT3); st("#vBoard", { opacity: 1 }, tT3); tabSet("#tabPanel", tT3);
+        camSet(460, 420, 1, tT3);
+        ft("#bdHd", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.3 }, tT3 + 0.04);
+        ft("#bdTable", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.45, ease: "power3.out" }, tT3 + 0.1);
+        ft("#bdOffer", { opacity: 0, y: 24, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, tT3 + 0.24);
+        ADV.forEach((_, k) => ft("#adv" + k, { opacity: 0, y: 30, scale: 0.86 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.5)" }, tT3 + 0.5 + k * 0.22));
+        FX.go("right", tPer - 0.1, 0.8); FX.point(tPer + 0.35);
+        ft("#bdOffer", { boxShadow: "0 14px 30px rgba(41,75,119,0.14)" }, { keyframes: [{ boxShadow: "0 0 0 8px rgba(47,111,228,0.18)", duration: 0.3 }, { boxShadow: "0 14px 30px rgba(41,75,119,0.14)", duration: 0.6 }] }, tBacaP);
+        [0, 1, 2].forEach((k) => { const t = [tHarga + 0.05, tHarga + 0.95, tBedaD + 0.35][k];
+          ft("#vpl" + k, { opacity: 0, y: 12, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.32, ease: "back.out(1.8)" }, t);
+          ft("#adv" + k + " .dsc", { borderColor: "rgba(10,13,44,0.10)" }, { keyframes: [{ borderColor: "#2f6fe4", duration: 0.2 }, { borderColor: "rgba(10,13,44,0.10)", duration: 0.5 }] }, t - 0.1); });
+        FX.go("center", tBedaD + 0.1, 0.8); FX.beat(tBedaD + 0.5);
+
+        /* ===== STRIPES -> SCENE 4 · 100 buyers are built ===== */
+        const tW1 = tBikin - 0.62;
+        FX.stripes(tW1, "light", (m) => { st("#vBoard", { opacity: 0 }, m); st("#vPanel", { opacity: 1 }, m); tabSet("#tabPanel", m); camSet(460, 420, 1, m); });
+        ft("#pnHd", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.3 }, tBikin - 0.1);
+        $$("#pnLeg .lg").forEach((el, k) => ft(el, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.5)" }, tBedaK + 0.05 + k * 0.42));
+        $$("#pnGrid .bu").forEach((el, k) => { const r = Math.floor(k / 10);
+          ft(el, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2)" }, tBikin + 0.05 + r * 0.17 + (k % 10) * 0.012); });
+        ft("#pnCnt", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tBikin + 0.3);
+        count($("#pnN"), 0, 100, tBikin + 0.3, 2.3);
+        FX.face("excited", tBikin + 0.1, 0.9); FX.go("home", tBikin - 0.05, 0.8); FX.point(tBedaK + 0.2);
+        FX.beat(tBedaM + 0.1);
+
+        /* ===== SCENE 5 · every one is asked, then the panel splits into MAU / NGGAK ===== */
+        ft("#pnAsk", { opacity: 0, y: -18, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.6)" }, tTanya - 0.15);
+        ft("#pnGrid", { y: 0 }, { y: 96, duration: 0.45, ease: "power2.out" }, tTanya - 0.1);
+        ft("#pnCnt", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tTanya - 0.1);
+        FX.go("center", tTanya - 0.05, 0.75); FX.face("wide", tBeli, 0.8);
+        const tSplit = tMau - 0.52;
+        ft(["#pnAsk", "#pnGrid", "#pnHd", "#pnLeg"], { opacity: 1 }, { opacity: 0, duration: 0.28, ease: "power1.in" }, tSplit);
+        st("#vPanel", { opacity: 0 }, tSplit + 0.3); st("#vSplit", { opacity: 1 }, tSplit + 0.02);
+        ft("#colYes", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.42, ease: "power3.out" }, tSplit + 0.04);
+        ft("#colNo", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.42, ease: "power3.out" }, tSplit + 0.04);
+        $$("#mgYes .md").forEach((el, k) => ft(el, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2)" }, tMau + 0.08 + k * 0.016));
+        count($("#nYes"), 0, YES, tMau + 0.1, 0.9);
+        $$("#mgNo .md").forEach((el, k) => ft(el, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2)" }, tNggak + 0.08 + k * 0.014));
+        count($("#nNo"), 0, NO, tNggak + 0.1, 1.1);
+        FX.point(tMau + 0.2); FX.face("happy", tMau + 0.1, 0.8);
+        FX.go("right", tNggak - 0.05, 0.8); FX.face("flat", tNggak + 0.3, 0.7);
+
+        /* ===== SCENE 6 · their reasons, in their own words (3D swing + quote card, robot rises left) ===== */
+        const tQ = tAlasan - 0.22;
+        st(win, { transformOrigin: "0% 50%" }, tQ - 0.01);
+        ft(win, { rotationY: 0, x: 0, scale: 1, opacity: 1 }, { rotationY: 17, x: 0, scale: 0.86, opacity: 0.38, duration: 0.6, ease: "power3.inOut" }, tQ);
+        ft("#pQuote", { opacity: 0, x: 60, rotationY: -16, scale: 0.9 }, { opacity: 1, x: 0, rotationY: 0, scale: 1, duration: 0.55, ease: "power3.out" }, tQ + 0.14);
+        ft("#bub0", { opacity: 0, y: 18, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.6)" }, tQ + 0.42);
+        ft("#bub1", { opacity: 0, y: 18, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.6)" }, tKmhl + 0.3);
+        ft("#bub0", { backgroundColor: "#eef1f6" }, { keyframes: [{ backgroundColor: "#e7f0ff", duration: 0.25 }, { backgroundColor: "#eef1f6", duration: 0.6 }] }, tKmhl - 0.05);
+        ft("#bub1", { backgroundColor: "#eef1f6" }, { keyframes: [{ backgroundColor: "#e7f0ff", duration: 0.25 }, { backgroundColor: "#eef1f6", duration: 0.6 }] }, tKbyg - 0.05);
+        FX.go("upL", tQ + 0.1, 1.0); FX.face("wide", tKmhl, 0.8); FX.point(tKmhl + 0.3); FX.beat(tKbyg + 0.2);
+        const tQo = tDari - 1.0;
+        ft("#pQuote", { opacity: 1, x: 0, scale: 1 }, { opacity: 0, x: 46, scale: 0.92, duration: 0.4, ease: "power2.in" }, tQo);
+        ft(win, { rotationY: 17, x: 0, scale: 0.86, opacity: 0.38 }, { rotationY: 0, x: 0, scale: 1, opacity: 1, duration: 0.55, ease: "power3.inOut" }, tQo + 0.05);
+        FX.go("home", tQo, 0.95);
+
+        /* ===== SHUTTER -> SCENE 7 · what turns a NO into a YES ===== */
+        const tW2 = tDari - 0.6;
+        FX.shutter(tW2, "light", (m) => { st("#vSplit", { opacity: 0 }, m); st("#vLever", { opacity: 1 }, m); camSet(460, 420, 1, m); });
+        ft("#lvHd", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.3 }, tDari - 0.05);
+        LEV.forEach((_, k) => { ft("#lv" + k, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, tDari + 0.2 + k * 0.5);
+          ft("#lp" + k, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.9)" }, tApaB + 0.15 + k * 0.55); });
+        ft("#lvNote", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tApaB + 0.4);
+        FX.go("center", tDari + 0.05, 0.8); FX.point(tApaB + 0.2); FX.face("excited", tApaB + 0.3, 0.9);
+
+        /* ===== ZOOM 3 · punch into the margin figure -> the money view ===== */
+        const tZ3 = tAngka - 0.72;
+        camSet(240, 492, 1.6, tZ3 + 0.02);
+        st("#vMoney", { opacity: 1 }, tZ3 + 0.02);
+        ft("#mnCalc", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.42, ease: "power3.out" }, tZ3 + 0.04);
+        ft("#vLever", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tZ3 + 0.04);
+        st("#vLever", { opacity: 0 }, tZ3 + 0.36);
+        tabSet("#tabHit", tZ3 + 0.02);
+        camTo(460, 420, 1, tZ3 + 0.62, 0.72, "power3.out");
+        MROWS.forEach((_, k) => ft("#mr" + k, { opacity: 0, x: 34 }, { opacity: 1, x: 0, duration: 0.38, ease: "power3.out" }, [tAngka + 0.42, tBalik - 0.2, tMargin - 0.32][k]));
+        ft("#mnNote", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tMargin + 0.1);
+        ft("#mnDisp", { opacity: 0.35 }, { keyframes: [{ opacity: 1, duration: 0.25 }, { opacity: 0.6, duration: 0.5 }, { opacity: 1, duration: 0.3 }] }, tAngka + 0.1);
+        FX.go("home", tAngka - 0.1, 0.8); FX.beat(tAngka + 0.3);
+
+        /* robot rises right, beside the profit card on the left half */
+        const tPm = tUntung + 0.1;
+        ft("#pMoney", { opacity: 0, y: 40, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, tPm);
+        ft(win, { opacity: 1 }, { opacity: 0.16, duration: 0.4 }, tPm);
+        ft("#mr0", { opacity: 1 }, { opacity: 0, duration: 0.25 }, tPm); // the pop-out already says Rp612rb — don't echo it behind the card
+        FX.go("upR", tPm + 0.05, 1.0); FX.point(tBalik + 0.1); FX.face("happy", tBalik + 0.2, 0.9);
+        const tPmo = tMargin - 0.42;
+        ft("#pMoney", { opacity: 1, y: 0, scale: 1 }, { opacity: 0, y: 30, scale: 0.93, duration: 0.36, ease: "power2.in" }, tPmo);
+        ft(win, { opacity: 0.16 }, { opacity: 1, duration: 0.4 }, tPmo);
+        ft("#mr0", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tPmo + 0.1);
+        FX.go("center", tPmo, 0.95);
+
+        /* ===== SCENE 9 · the verdict: two plates, one lights up (card flip) ===== */
+        const tFlip = tHasil - 0.5;
+        st("#vMoney", { transformPerspective: 1600, transformOrigin: "50% 50%" }, 0);
+        st("#vVonis", { transformPerspective: 1600, transformOrigin: "50% 50%" }, 0);
+        ft("#vMoney", { rotationY: 0, opacity: 1 }, { rotationY: -90, opacity: 0, duration: 0.3, ease: "power2.in" }, tFlip);
+        st("#vMoney", { opacity: 0 }, tFlip + 0.3);
+        st("#vVonis", { opacity: 1 }, tFlip + 0.3);
+        ft("#vVonis", { rotationY: 90 }, { rotationY: 0, duration: 0.34, ease: "power2.out" }, tFlip + 0.3);
+        tabSet("#tabVonis", tFlip + 0.3);
+        ft("#vpYes", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, tHasil + 0.1);
+        ft("#vpNo", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, tHasil + 0.3);
+        ft("#vpYes", { borderColor: "rgba(10,13,44,0.10)", boxShadow: "0 0 0 0 rgba(31,168,85,0)" }, { borderColor: "#1fa855", boxShadow: "0 0 0 7px rgba(31,168,85,0.14)", duration: 0.4 }, tLayak + 0.1);
+        ft("#vpYes", { scale: 1 }, { keyframes: [{ scale: 1.045, duration: 0.2 }, { scale: 1, duration: 0.3 }] }, tLayak + 0.1);
+        FX.go("right", tHasil - 0.05, 0.8); FX.point(tLayak + 0.15); FX.face("excited", tLayak + 0.2, 1.0);
+
+        /* ===== SCENE 10 · slide across to the comparison strips ===== */
+        const tSlide = tOrang - 0.52;
+        ft("#vVonis", { x: 0 }, { x: -300, duration: 0.42, ease: "power3.inOut" }, tSlide);
+        ft("#vVonis", { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power1.in" }, tSlide);
+        st("#vVonis", { opacity: 0 }, tSlide + 0.42);
+        st("#vCmp", { opacity: 1 }, tSlide + 0.06);
+        ft("#vCmp", { x: 340, opacity: 0 }, { x: 0, opacity: 1, duration: 0.46, ease: "power3.inOut" }, tSlide + 0.06);
+        ft("#csA", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, tSlide + 0.12);
+        $$("#csA .bars i").forEach((el, k) => ft(el, { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.3, ease: "power2.out" }, tAbis - 0.35 + k * 0.055));
+        ft("#csB", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, tAbis - 0.25);
+        $$("#csB .bars i").forEach((el, k) => ft(el, { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.26, ease: "power2.out" }, tIniTau + 0.02 + k * 0.045));
+        FX.go("home", tSlide, 0.85); FX.face("x", tAbis, 0.7); FX.point(tIniTau + 0.2); FX.face("happy", tIniTau + 0.3, 0.9);
+
+        /* ===== ZOOM 4 · the window recedes into the SIMULASI caveat ===== */
+        const tZ4 = tInget - 0.6;
+        ft(win, { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.72, y: -30, duration: 0.5, ease: "power3.in" }, tZ4);
+        st(win, { display: "none" }, tZ4 + 0.5);
+        ft("#kin", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tZ4 + 0.22);
+        $$("#kGhost i").forEach((el, k) => ft(el, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.2 }, tZ4 + 0.26 + Math.floor(k / 10) * 0.035));
+        ft("#kPlate", { opacity: 0, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, tInget + 0.15);
+        FX.go("center", tZ4 + 0.05, 0.9); FX.face("flat", tInget + 0.2, 0.8); FX.beat(tInget + 0.4);
+        /* robot rises left, beside the next-step card on the right half */
+        const tPr = tKalau - 0.2;
+        ft("#pReal", { opacity: 0, x: 46, scale: 0.92 }, { opacity: 1, x: 0, scale: 1, duration: 0.46, ease: "power3.out" }, tPr);
+        ft("#kPlate", { opacity: 1 }, { opacity: 0, y: -18, duration: 0.34, ease: "power2.in" }, tPr);
+        ft("#kin", { opacity: 1 }, { opacity: 0.3, duration: 0.4 }, tPr);
+        $$("#pReal .st2 span").forEach((el, k) => ft(el, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, tUjiL - 0.1 + k * 0.3));
+        FX.go("upL", tPr + 0.05, 1.0); FX.point(tUjiL + 0.2); FX.face("excited", tUjiL + 0.25, 1.0);
+
+        /* ===== ZOOM 5 · everything zooms through into the CTA ===== */
+        const tZ5 = tCta - 0.72;
+        ft(["#pReal", "#kin"], { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tZ5);
+        ft(["#pReal", "#kin"], { scale: 1 }, { scale: 1.5, duration: 0.5, ease: "power3.in" }, tZ5);
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.4, duration: 0.09 }, { opacity: 0, duration: 0.26 }] }, tZ5 + 0.24);
+        ft("#cta", { opacity: 0, scale: 0.72 }, { opacity: 1, scale: 1, duration: 0.52, ease: "power3.out" }, tZ5 + 0.34);
+        FX.go("home", tZ5 + 0.1, 0.95);
+        FX.wave(tCta + 0.45); FX.point(tF - 0.35); FX.face("happy", tF + 0.05, 1.4);
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(47,111,228,0.5)" }, { boxShadow: "0 0 0 22px rgba(47,111,228,0)", duration: 0.7 }, tF + 0.05);
+        FX.face("excited", D - 1.5, 0.9);
+
+        /* captions */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /* no-cut-text guard: text sliced by the camera frame fades out during that shot, back in when whole */
+        { const wc = $("#wcam"), wr = wc.getBoundingClientRect(), k = wr.width / VW;
+          const leaves = $$("#wcam *").filter((e) => e.tagName.toLowerCase() === "text" || Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim()));
+          const UNIT = ".ahd, .fn, #flIdea, .adv, #bdOffer, .lg, .bu, .col .ch2, .col .n, .lv, .plus, .mr, #mnDisp, #mnNote, #lvNote, #pnCnt, #pnAsk, .vp2, .cs, .cs .big, #tabs, #tbar .app, #sim";
+          const box = (r) => ({ x0: (r.left - wr.left) / k, y0: (r.top - wr.top) / k, x1: (r.right - wr.left) / k, y1: (r.bottom - wr.top) / k });
+          const textBox = (e) => { if (e.tagName.toLowerCase() === "text") return box(e.getBoundingClientRect());
+            const rg = document.createRange(); let u = null;
+            Array.from(e.childNodes).filter((n) => n.nodeType === 3 && n.textContent.trim()).forEach((n) => { rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
+            return u ? box(u) : box(e.getBoundingClientRect()); };
+          const seen = new Set(), R = [];
+          leaves.forEach((e) => { const u = e.closest(UNIT); const tgt = u && wc.contains(u) ? u : e; if (seen.has(tgt)) return; seen.add(tgt);
+            const q = Object.assign({ e: tgt }, (tgt === e && !u) ? textBox(e) : box(tgt.getBoundingClientRect())); if (q.x1 - q.x0 > 1 && q.y1 - q.y0 > 1) R.push(q); });
+          const sh = SHOTS.slice().sort((a, b) => a.t - b.t);
+          const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
+            const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
+            return inter && !inside; };
+          const lerp = (a, b, f) => ({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, scale: a.scale + (b.scale - a.scale) * f });
+          R.forEach((q) => { let prev = false; const E = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = E[i]; if (!h && prev && i + 1 < sh.length && E[i + 1] && nextT - inT < 0.5) h = true;
+              let mA = -1, mB = -1;
+              if (!h && !prev && i > 0 && S.d > 0.45) { const EZ = { "power3.in": (f) => f * f * f, "power3.out": (f) => 1 - Math.pow(1 - f, 3), "power3.inOut": (f) => (f < 0.5 ? 4 * f * f * f : 1 - Math.pow(-2 * f + 2, 3) / 2) }; const ez = EZ[S.e] || EZ["power3.inOut"];
+                for (let n = 0; n <= 24; n++) if (cut(q, lerp(sh[i - 1].c, S.c, ez(n / 24)))) { if (mA < 0) mA = n; mB = n; } }
+              if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }
+              else if (h && !prev) { if (S.d === 0) st(q.e, { filter: "opacity(0)" }, S.t); else ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: S.d <= 0.45 ? 0.16 : 0.18, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.06 : S.t); }
+              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: S.d <= 0.45 ? 0.2 : 0.25, ease: "power1.out" }, S.d <= 0.45 ? S.t + 0.17 : inT);
+              else if (mA >= 0) { const t0 = S.t + (mA / 24) * S.d, t1 = Math.min(S.t + S.d, S.t + ((mB + 1) / 24) * S.d);
+                ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.08, ease: "power1.out" }, Math.max(S.t, t0 - 0.08));
+                ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.22, ease: "power1.out" }, t1); }
+              prev = h; }); });
+          window.__noCut = { leaves: R.length, shots: sh.length }; }
+
+        FX.runGestures();
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

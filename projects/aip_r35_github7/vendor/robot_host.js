@@ -13,8 +13,8 @@
             const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); return w ? w[1] : -99; };
       const HEAD_FIX = [-0.0775, -0.227, -0.1287];
       const STAND = { fx: 850, fy: 1700, h: 330, ry: -0.38 };
-      const HOPS = [9.17, 19.17, 26.29, 30.92, 38.27];
-      const T_IN = 5.75;                                              // at the keyboard from frame 0 (flies in over the first 0.75 s)
+      const HOPS = [13.05, 21.73, 32.37, 41.16, 50.46, 60.91, 69.3, 80.15];
+      const T_IN = 6.3;                                              // at the keyboard from frame 0 (flies in over the first 0.75 s)
       function frame(t) {
         if (t < T_IN) return null;
         const u = io3((t - T_IN) / 0.75), arc = Math.sin(Math.PI * u) * 160;
@@ -27,13 +27,15 @@
       const G = [];
       const add = (t, k, d = 0.9, x) => { if (t > 0) G.push(Object.assign({ t, k, d }, x || {})); };
       // co-host acting keyed to the VO (composition times)
-      add(6.6, "wave", 0.8); add(wt("Claude") - 0.05, "point", 0.6, { up: 1 }); add(wt("animasi.") - 0.05, "happy", 0.6);
-      add(wt("HyperFrames,") - 0.05, "present", 0.7, { side: "L" }); add(wt("delapan") - 0.05, "scan", 1.2); add(wt("bintang.") - 0.05, "cheer", 0.6);
-      add(wt("nulis") - 0.05, "type", 1.3); add(wt("merendernya") - 0.05, "scan", 0.9); add(wt("video.", 15) - 0.05, "happy", 0.5); add(wt("Reel") - 0.05, "point", 0.8, { up: 1 });
-      add(wt("GSAP") - 0.05, "present", 0.7, { side: "L" }); add(wt("resmi") - 0.05, "nod", 0.6); add(wt("Agent") + 0.1, "scan", 1.2); add(wt("halus.") - 0.1, "happy", 0.8);
-      add(wt("Blender") - 0.05, "point", 0.6, { up: 1 }); add(wt("Minta") - 0.05, "type", 1.2); add(wt("Claude", 28) - 0.05, "scan", 0.9); add(wt("Blender.") - 0.05, "cheer", 0.5);
-      add(wt("Shotcraft.") - 0.05, "present", 0.6, { side: "L" }); add(wt("Codex:") - 0.05, "nod", 0.5); add(wt("promo") - 0.05, "scan", 1.0); add(wt("screenshot") - 0.05, "point", 0.6, { up: 1 });
-      add(wt("tiap") - 0.05, "think", 0.8); add(wt("diedit.") - 0.05, "happy", 0.5);
+      add(7.0, "wave", 0.8); add(wt("bisnis:") - 0.05, "nod", 0.6); add(wt("foto") - 0.05, "point", 0.6, { up: 1 }); add(wt("meeting.") - 0.05, "happy", 0.6);
+      add(wt("Jan.") - 0.05, "present", 0.7, { side: "L" }); add(wt("unduh,") - 0.05, "type", 1.2); add(wt("koneksi.") - 0.05, "scan", 0.9); add(wt("laptop.", 19) - 0.05, "happy", 0.6);
+      add(wt("Upscayl.") - 0.05, "point", 0.6, { up: 1 }); add(wt("dipertajam") - 0.05, "scan", 1.0); add(wt("AI.", 25) - 0.05, "cheer", 0.6); add(wt("Vulkan.") - 0.05, "think", 0.9);
+      add(wt("Buzz.") - 0.05, "present", 0.7, { side: "L" }); add(wt("teks,") - 0.05, "type", 1.4); add(wt("internet.") - 0.05, "nod", 0.6); add(wt("Whisper") - 0.05, "point", 0.7, { up: 1 });
+      add(wt("Remover.") - 0.05, "present", 0.7, { side: "L" }); add(wt("lagu,") - 0.05, "scan", 1.0); add(wt("terpisah.") - 0.05, "cheer", 0.6); add(wt("mengolah") - 0.05, "type", 1.2);
+      add(wt("Chatterbox.") - 0.05, "point", 0.6, { up: 1 }); add(wt("naskah,") - 0.05, "type", 0.9); add(wt("Indonesia") - 0.05, "no", 0.9); add(wt("dirawat") - 0.05, "think", 0.9);
+      add(wt("Meetily.") - 0.05, "present", 0.7, { side: "L" }); add(wt("transkrip,") - 0.05, "type", 1.3); add(wt("otomatis.") - 0.05, "happy", 0.6); add(wt("laptop", 66) - 0.05, "nod", 0.6);
+      add(wt("ComfyUI.") - 0.05, "point", 0.6, { up: 1 }); add(wt("rakit") - 0.05, "scan", 1.2); add(wt("disambung.") - 0.05, "cheer", 0.5); add(wt("GPU") - 0.05, "think", 1.0); add(wt("spek", 78) - 0.05, "nod", 0.6);
+      add(wt("ketujuh") - 0.05, "present", 0.7, { side: "L" });
       add(wt("Komen") - 0.08, "cheer", 0.9); add(wt("DM.") - 0.1, "point", 0.7, { up: 1 }); add(D - 0.75, "wave", 0.7);
       const envG = (t, g) => sm((t - g.t + 0.16) / 0.2) * (1 - sm((t - (g.t + g.d)) / 0.26));
       const BL = []; { let x = T_IN + 1.2, h = 13; while (x < D) { BL.push(x); h = (h * 9301 + 49297) % 233280; x += 2.1 + (h / 233280) * 2.3; } }

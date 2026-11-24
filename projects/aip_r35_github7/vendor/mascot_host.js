@@ -22,38 +22,49 @@
       // ---------------------------------------------------------------- framing
       const HOST = { fx: 300, fy: 2170, h: 1000, pitch: 4 };
       function view(t) {   // off screen until the voxel world has zoomed out, then rises in (6.1 -> 6.7 s) and settles
-        const u = one((t - 5.3) / 0.6), dy = 1000 * (1 - e3(u)) - 36 * Math.sin(Math.PI * one((t - 5.65) / 0.4));
+        const u = one((t - 5.9) / 0.6), dy = 1000 * (1 - e3(u)) - 36 * Math.sin(Math.PI * one((t - 6.25) / 0.4));
         return { fx: HOST.fx, fy: HOST.fy + dy, h: HOST.h, pitch: HOST.pitch, yaw: 0 };
       }
-      const shown = (t) => t >= 5.28;
+      const shown = (t) => t >= 5.88;
       // ---------------------------------------------------------------- acting
 
       const intents = [
-        { t: 5.36, action: "welcome" },
-        { t: wt("open-source") - 0.1, action: "present", side: "right" },
-        { t: wt("Claude") - 0.1, action: "point", side: "right" },
-        { t: wt("animasi.") - 0.12, action: "reveal" },
+        { t: 5.96, action: "welcome" },
+        { t: wt("Nggak") - 0.1, action: "explain", side: "left" },
+        { t: wt("Aku") - 0.1, action: "present", side: "right" },
+        { t: wt("chat,") - 0.1, action: "point", side: "right" },
+        { t: wt("meeting.") - 0.12, action: "reveal" },
         { t: wt("Satu,") - 0.1, action: "emphasize", side: "right" },
-        { t: wt("delapan") - 0.1, action: "explain", side: "left" },
-        { t: wt("nulis") - 0.1, action: "present", side: "right" },
-        { t: wt("merendernya") - 0.1, action: "explain", side: "left" },
-        { t: wt("Reel") - 0.1, action: "point", side: "right" },
+        { t: wt("model") - 0.1, action: "explain", side: "left" },
+        { t: wt("Data") - 0.1, action: "point", side: "right" },
         { t: wt("Dua,") - 0.1, action: "emphasize", side: "right" },
-        { t: wt("resmi") - 0.1, action: "present", side: "right" },
-        { t: wt("easing") - 0.1, action: "explain", side: "left" },
-        { t: wt("halus.") - 0.12, action: "reveal" },
+        { t: wt("diperbesar") - 0.1, action: "reveal" },
+        { t: wt("Ada") - 0.1, action: "present", side: "right" },
+        { t: wt("tapi", 28) - 0.1, action: "explain", side: "left" },
         { t: wt("Tiga,") - 0.1, action: "emphasize", side: "left" },
-        { t: wt("Minta") - 0.1, action: "present", side: "right" },
-        { t: wt("nyusun") - 0.1, action: "point", side: "right" },
-        { t: wt("Empat,", 30) - 0.1, action: "emphasize", side: "right" },
-        { t: wt("sinematik") - 0.1, action: "explain", side: "left" },
-        { t: wt("diedit.") - 0.12, action: "point", side: "right" },
+        { t: wt("teks,") - 0.1, action: "present", side: "right" },
+        { t: wt("Mesinnya") - 0.1, action: "point", side: "right" },
+        { t: wt("Empat,") - 0.1, action: "emphasize", side: "right" },
+        { t: wt("keluar") - 0.1, action: "reveal" },
+        { t: wt("Berguna") - 0.1, action: "explain", side: "left" },
+        { t: wt("Lima,") - 0.1, action: "emphasize", side: "left" },
+        { t: wt("Ketik") - 0.1, action: "present", side: "right" },
+        { t: wt("Tapi") - 0.1, action: "explain", side: "left" },
+        { t: wt("proyeknya") - 0.1, action: "point", side: "right" },
+        { t: wt("Enam,") - 0.1, action: "emphasize", side: "right" },
+        { t: wt("rekam,") - 0.1, action: "present", side: "right" },
+        { t: wt("Audio") - 0.1, action: "explain", side: "left" },
+        { t: wt("Tujuh,", 60) - 0.1, action: "emphasize", side: "left" },
+        { t: wt("rakit") - 0.1, action: "present", side: "right" },
+        { t: wt("Model") - 0.1, action: "explain", side: "left" },
+        { t: wt("cek") - 0.1, action: "point", side: "right" },
+        { t: wt("Mau") - 0.1, action: "present", side: "right" },
         { t: wt("Komen") - 0.1, action: "cta", side: "right" },
         { t: wt("DM.") - 0.2, action: "point", side: "left" },
         { t: D - 0.5, action: "idle" },
       ];
       intents.sort((p, q) => p.t - q.t);
-      const DIR = M3.direct(VW, D, { intents, seed: 34, quiet: 0.3, look: 0 });
+      const DIR = M3.direct(VW, D, { intents, seed: 35, quiet: 0.3, look: 0 });
       const PERF = buildPerformance(DIR.tracks, D + 0.05, { smooth: 1 });
       const lookUp = () => 0;
       // glances at the robot (small turn: a bigger yaw turns the face decal away and one eye reads blank in the render)

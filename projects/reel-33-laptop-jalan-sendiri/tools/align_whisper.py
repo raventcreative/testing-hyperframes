@@ -8,48 +8,40 @@ import numpy as np
 
 P = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 # caption phrases (short on-screen chunks), in spoken order
-PHRASES = """Lu mau launching kelas online.
-Materi udah jadi,
-iklan udah jalan,
-terus sepi.
+PHRASES = """Laptop gue ngerjain video sendiri,
+gue lagi makan di mall,
+tinggal bales oke dari HP.
 Cek simulasinya.
-Ide lu diuji ke seratus pembeli dulu,
-sebelum duitnya keluar.
-Pertama, tiga penasihat
-baca penawaran lu:
-harga, janji,
-sama bedanya di mana.
-Terus dibikin seratus pembeli.
-Beda kerjaan, beda dompet,
-beda masalah.
-Satu-satu ditanya,
-lu bakal beli ini?
-Yang mau tiga puluh enam,
-yang nggak enam puluh empat.
-Alasannya pakai bahasa mereka sendiri.
-Kemahalan.
-Nggak kebayang hasilnya.
-Dari situ ketahuan,
-apa yang bikin yang nolak tadi jadi mau.
-Baru angkanya dicek:
-untung per peserta,
-balik modal di berapa orang,
-marginnya berapa.
-Hasil akhirnya cuma dua:
-layak, atau belum layak.
-Orang biasanya baru tau
-setelah duitnya abis.
-Ini tau sebelum keluar sepeser.
-Tapi inget, pembelinya simulasi.
-Kalau lolos,
-uji lagi ke orang beneran.
-Mau sistem kayak gini
-dipasang di bisnis lu?
+Sistemnya nyala sendiri tiap jam empat sore.
+Ini bukan satu prompt panjang,
+tapi empat bagian.
+Bagian satu: file panduan yang dibaca tiap jadwal jalan.
+Mau ganti alurnya?
+Edit file itu aja.
+Bagian dua: daftar topik seminggu sama statusnya.
+Bagian tiga: aturan naskah sama aturan motion.
+Biar gaya videonya tetep sama.
+Bagian empat: naskah jadi voice over,
+sekali jalan.
+Pas topiknya abis,
+dia riset sendiri,
+terus kirim lima ide ke HP.
+Tinggal bales nomornya,
+dari mana aja.
+Alurnya simpel: dia kerja,
+kirim kabar,
+gue cek,
+gue bilang oke.
+Nggak ada yang ke-posting sendiri.
+Ada tiga gerbang: topik,
+naskah,
+preview.
+Keputusan akhir tetep di tangan lu.
+Mau sistem kayak gini dipasang di bisnis lu?
 Klik link di bio,
-ngobrol langsung sama
-tim AIpreneur Automation.""".strip().split("\n")
+ngobrol langsung sama tim AIpreneur Automation.""".strip().split("\n")
 NUM = {"masing-masing": "masing masing", "AIpreneur": "ai prender"}
-ALIAS = {"nggak": "gak", "5": "lima", "1": "satu", "10": "sepuluh", "7": "tujuh", "3": "tiga", "2": "dua", "20": "puluh", "manager": "manajer", "reset": "riset", "lo": "lu", "gua": "gue", "audience": "audiens", "point": "poin", "tetap": "tetep", "senin": "senin", "35": "lima", "tiga": "tiga", "puluh": "puluh"}
+ALIAS = {"nggak": "gak", "5": "lima", "1": "satu", "10": "sepuluh", "7": "tujuh", "3": "tiga", "2": "dua", "20": "puluh", "manager": "manajer", "reset": "riset", "lo": "lu", "gua": "gue", "audience": "audiens", "point": "poin", "tetap": "tetep", "balas": "bales", "keposting": "keposting", "voice": "voice", "over": "over", "senin": "senin", "35": "lima", "tiga": "tiga", "puluh": "puluh"}
 norm = lambda w: ALIAS.get(re.sub(r"[^a-z0-9]", "", w.lower()), re.sub(r"[^a-z0-9]", "", w.lower()))
 
 w = wave.open(str(P / "assets/audio/vo.wav")); sr = w.getframerate()

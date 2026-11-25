@@ -1,38 +1,32 @@
 # reel-33 — "laptop jalan sendiri"
 
-White theme (base `light`), 59.6 s composition, VO 58.6 s. Built from reel-31's white template
-(reel-26b is the blue one) with reel-30's `tools/layout_audit.cjs` carried in.
+White theme (base `light`). **Composition 53.9 s, VO 53.36 s** (last word ends 52.94 s).
+Built from reel-31's white template (reel-26b is the blue one) with reel-30's `tools/layout_audit.cjs`
+carried in, plus two audits written for this reel: `tools/robot_audit.py` and `tools/beat_audit.py`.
 
-## Blocker: no voiceover yet
+## Voiceover
 
-Two attempts, two different failures, same outcome — no audio. **No audio was faked.**
+Real VO, ElevenLabs voice Dakocan, model `eleven_v4` (accepted first try — no model fallback needed),
+one call with the whole script so the per-sentence tags stay in one take: `production/vo_text_sent.txt`.
+Word timings from the local `align_whisper.py` (faster-whisper `small`, Indonesian): **136/139 tokens
+matched**, the rest interpolated. Largest gap between caption phrases is **0.457 s**, so no pause padding
+was needed and `tools/pad_pauses.py` (reel-31's, with hard-coded timestamps) was removed from here.
 
-1. First pass: **HTTP 401 "Invalid API key"** — no key was being injected at all (the literal
-   `proxy-injected` placeholder was forwarded).
-2. After the client saved a new key: **HTTP 400 `authentication_error` / `api_key_id_used_as_api_key`** —
-   *"API key ID used as API key - only valid API keys can be used. API keys start with `sk_` and are
-   shown when the key is created or rotated."* The proxy now injects a secret, but the value saved is
-   the key's **ID** (the identifier listed in the ElevenLabs dashboard), not the key itself.
-   Reproduced with a 3-word payload and with the full script — different request ids, identical error,
-   so it is the credential value, not the request.
+Getting there took three credential states, recorded because the error texts are easy to misread:
 
-**Remedy:** in ElevenLabs, create or rotate an API key and save the value that begins with `sk_`
-(shown only at creation/rotation) as the network secret for `api.elevenlabs.io`. The key ID will not work.
+1. **HTTP 401 "Invalid API key"** — nothing was being injected; the literal `proxy-injected` placeholder
+   was forwarded.
+2. **HTTP 400 `authentication_error` / `api_key_id_used_as_api_key`** — a secret *was* injected, but it
+   was the key's **ID**, not the key. A 400 here is still an authentication failure, not a payload problem;
+   reproduced with a 3-word payload and with the full script, different request ids, identical error.
+3. Working, once a value starting with `sk_` (shown only at key creation/rotation) was saved.
 
-`production/vo_text_sent.txt` holds the exact text to send, already assembled.
+No audio was ever faked while this was blocked.
 
-Until the credential is restored:
-
-- `production/word_timing.json` and `vendor/vo_words.js` hold **provisional** timings from
-  `tools/provisional_timing.py` (3.05 words/s, 0.14 s clause gap, 0.30 s line gap). The phrase
-  *texts* match what `align_whisper.py` produces for the same script, so every `ph("…")` anchor in
-  `production/index.src.txt` survives the swap untouched.
-- `assets/audio/vo.wav` is **deliberately absent**, so a render fails loudly instead of shipping silent.
-
-To finish, in order:
+To regenerate, in order — `el_tts.py` and `voice_config.json` live at the repo root, not in this project:
 
 ```bash
-python3 -I ../../tools/el_tts.py "$(sed 's/^[[:space:]]*$//' production/vo_script.txt)" assets/audio/vo.mp3
+python3 -I ../../tools/el_tts.py "$(cat production/vo_text_sent.txt)" assets/audio/vo.mp3
 ```
 
 ```bash
@@ -48,14 +42,37 @@ python3 -I tools/build.py . && python3 -I ../../tools/add_robot3d.py .
 ```
 
 ```bash
-npm run check && python3 -I tools/robot_audit.py && node tools/layout_audit.cjs index.html "$(python3 -c "print(','.join(f'{x*0.37:.2f}' for x in range(1,161)))")"
+npm run check && python3 -I tools/robot_audit.py && python3 -I tools/beat_audit.py
 ```
 
-`el_tts.py` and `voice_config.json` live at the repo root, not in this project. Reel-31's
-`tools/pad_pauses.py` was removed from here: its pad timestamps are hard-coded for that reel and the
-current rule keeps clause gaps ≤ 0.45 s anyway, so plain ffmpeg is the right conversion.
+`align_whisper.py` carries this reel's 32 caption phrases hard-coded in its `PHRASES` block (reel-31's
+were inherited and had to be replaced — it will otherwise align the audio against the wrong script and
+produce timings that look plausible and are wrong).
 
-Real timings will shift every anchor slightly; re-read the contact sheet after the swap.
+## What the real timings changed
+
+The provisional estimate was 58.93 s; the real VO is 53.36 s. The speaking rate was close, but the
+**gaps between lines are far tighter than estimated** (0.14–0.46 s instead of 0.30 s flat), and that is
+what broke things — not the overall length. Fixed after the swap:
+
+- **`FX.iris` / `FX.doors` / `FX.shutter` are ~1.1 s long**, longer than any gap in this VO. What has to
+  land on the beat is the wipe's **mid** (where the scene swaps), not its full open. `beat_audit.py`
+  measures mid for wipes and full settle for camera moves; all ten transitions are now inside tolerance.
+- The **S4 → S5 camera slide** (0.86 s) could not fit a 0.42 s gap and was still moving 0.22 s into
+  "Bagian dua". Compressed to 0.50 s and started on the previous line's last word.
+- The **window swing** was still turning 0.2 s into "Pas topiknya abis"; it now leads by 0.55 s.
+- The **CTA wave** (1.9 s) overran the "link" point, so `runGestures` silently dropped that point — the
+  kind of thing only the audit catches. Wave moved onto the question, point onto the word.
+- **Elements that the shorter lines left no room for:** the "Kelar" plate landed 0.1 s before the shutter
+  (dropped; the chain's fourth node is the payoff, and the nodes were scaled up to fill the panel), the
+  verdict bar had 0.58 s (moved onto its line), the run chips had 0.48 s (moved into the previous line),
+  the schedule footer had 0.52 s, and the third gate tick had 0.2 s (each tick is now stamped just
+  *before* its word, and the gates clear later).
+- **Containers that were briefly empty** because their content was keyed to a line that had moved: the
+  hook's phone, the four-lane panel, the week table. All now arrive with their content.
+- The CTA held 7 s frozen; the dead tail was trimmed and the closing line given its own beat.
+- `tools/build.py` SFX were re-keyed to the new anchors (and spread over 8 tracks, which cleared the
+  overlapping-audio warnings).
 
 ## Scene shapes — no shape used twice
 

@@ -5,10 +5,21 @@ White theme (base `light`), 59.6 s composition, VO 58.6 s. Built from reel-31's 
 
 ## Blocker: no voiceover yet
 
-`tools/el_tts.py` fails with **HTTP 401 "Invalid API key"** — the proxy is not injecting a key for
-`api.elevenlabs.io` (it forwards the literal `proxy-injected` placeholder, and the request reaches
-ElevenLabs and is rejected). Checked twice with different request ids, and `curl $HTTPS_PROXY/__agentproxy/status`
-shows no ElevenLabs relay failure, so the credential itself is the problem. **No audio was faked.**
+Two attempts, two different failures, same outcome — no audio. **No audio was faked.**
+
+1. First pass: **HTTP 401 "Invalid API key"** — no key was being injected at all (the literal
+   `proxy-injected` placeholder was forwarded).
+2. After the client saved a new key: **HTTP 400 `authentication_error` / `api_key_id_used_as_api_key`** —
+   *"API key ID used as API key - only valid API keys can be used. API keys start with `sk_` and are
+   shown when the key is created or rotated."* The proxy now injects a secret, but the value saved is
+   the key's **ID** (the identifier listed in the ElevenLabs dashboard), not the key itself.
+   Reproduced with a 3-word payload and with the full script — different request ids, identical error,
+   so it is the credential value, not the request.
+
+**Remedy:** in ElevenLabs, create or rotate an API key and save the value that begins with `sk_`
+(shown only at creation/rotation) as the network secret for `api.elevenlabs.io`. The key ID will not work.
+
+`production/vo_text_sent.txt` holds the exact text to send, already assembled.
 
 Until the credential is restored:
 

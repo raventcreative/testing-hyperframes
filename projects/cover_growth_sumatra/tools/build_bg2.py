@@ -34,7 +34,7 @@ r = cv2.GaussianBlur(r, (0, 0), 2.6)
 navy = np.array([0x4f, 0x28, 0x13], np.float32)[None, None, :] / 255           # #13284f (BGR)
 r = r * 0.42 + navy * 0.58 * (0.55 + 0.45 * r.mean(axis=2, keepdims=True))    # navy grade, room recedes
 # canvas: same framing as before (photo head at y~690)
-CW, CH, SC, HX, HY, HEAD = 1080, 1920, 1.3, 480, 620, 690
+CW, CH, SC, HX, HY, HEAD = 1080, 1920, 1.75, 485, 620, 650
 A = np.float32([[SC, 0, 540 - HX * SC], [0, SC, HEAD - HY * SC]])
 plate = cv2.resize(cv2.imread("assets/plate_navy.png"), (CW, CH)).astype(np.float32) / 255
 img = cv2.warpAffine(r, A, (CW, CH), flags=cv2.INTER_LANCZOS4, borderValue=(1, 1, 1))

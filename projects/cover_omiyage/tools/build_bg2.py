@@ -15,6 +15,7 @@ m = cv2.resize((m - m.min()) / (m.max() - m.min() + 1e-9), (W0, H0))
 n, l, st, _ = cv2.connectedComponentsWithStats((m > 0.3).astype(np.uint8)); m = (l == 1 + int(np.argmax(st[1:, 4]))).astype(np.uint8)
 ca = cv2.warpAffine(cu[..., 3], M.astype(np.float32), (W0, H0))
 mask = cv2.dilate(((m > 0) | (ca > 0.1)).astype(np.uint8) * 255, np.ones((31, 31), np.uint8))
+for dy in range(10, 130, 10): mask[:-dy] = np.maximum(mask[:-dy], mask[dy:])          # also clear the original head/hair sitting above the cutout
 # LaMa on a square crop around the person, at 512
 ys, xs = np.nonzero(mask); cx, cy = (xs.min() + xs.max()) // 2, (ys.min() + ys.max()) // 2
 S = min(int(max(xs.max() - xs.min(), ys.max() - ys.min()) * 1.15), H0, W0); x0 = int(np.clip(cx - S // 2, 0, W0 - S)); y0 = int(np.clip(cy - S // 2, 0, H0 - S))

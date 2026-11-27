@@ -1,8 +1,7 @@
 /* the client's 3D mascot as the HOST (R-series runtime: lip sync from VO_PHONES/VO_ENV, acting from intents) */
 (function () {
-      // AI PRENEUR chibi businessman = the HOST: half body, left of centre (the robot co-hosts at screen right). Already in frame at
-      // 0 s, delivers the hook, introduces each tool, gets serious on the production caution, delivers the CTA (no glances at the
-      // robot: they made the eyes read blank in the R12/R13 renders). Live WebGL, lip sync from the VO phones.
+      // AI PRENEUR chibi businessman = the corner HOST of R37 (whole body, bottom-left), reacting on every beat. Based on the R35 runtime;
+      // glances disabled (they made the eyes read blank in the R12/R13 renders). Live WebGL, lip sync from the VO phones.
       const M3 = window.Mascot3D;
       const { buildPerformance, buildLipTrack, syllableAccents, vnoise, bump } = M3;
       const VW = window.VO_WORDS, SC = window.VO_SCENES, D = window.TOTAL;
@@ -20,49 +19,26 @@
       const wt = (txt, after = 0) => { const w = VW.find((x) => x[0] === txt && x[1] >= after); if (!w) throw new Error("mascot: word not found " + txt); return w[1]; };
       function accents(t) { let n = 0; for (const a of ACC) { const d = t - a[0]; if (d > -0.25 && d < 0.35) n += bump(t, a[0] + 0.05, 0.17) * a[1]; } return Math.min(1.3, n); }
       // ---------------------------------------------------------------- framing
-      const HOST = { fx: 300, fy: 2170, h: 1000, pitch: 4 };
-      function view(t) {   // off screen until the voxel world has zoomed out, then rises in (6.1 -> 6.7 s) and settles
-        const u = one((t - 5.9) / 0.6), dy = 1000 * (1 - e3(u)) - 36 * Math.sin(Math.PI * one((t - 6.25) / 0.4));
-        return { fx: HOST.fx, fy: HOST.fy + dy, h: HOST.h, pitch: HOST.pitch, yaw: 0 };
+      // R37: the mascot is the small corner HOST (bottom-left), WHOLE body, never cropped. Small canvas (MS_W x MS_H) placed by CSS.
+      const CW = window.MS_W, CH = window.MS_H;
+      const HOST = { fx: CW / 2, fy: CH - 22, h: CH - 70, pitch: 6 };
+      function view(t) {   // hops in from below at 0.05-0.6 s, then a small hop on every beat change
+        const u = one((t - 0.05) / 0.55), dy = (CH + 40) * (1 - e3(u)) - 22 * Math.sin(Math.PI * one((t - 0.45) / 0.3));
+        let hop = 0; for (const b of (window.BEATS || [])) { const d = t - (b - 0.12); if (d > 0 && d < 0.34) hop = Math.max(hop, 16 * Math.sin(Math.PI * d / 0.34)); }
+        return { fx: HOST.fx, fy: HOST.fy + dy - hop, h: HOST.h, pitch: HOST.pitch, yaw: 0 };
       }
-      const shown = (t) => t >= 5.88;
+      const shown = (t) => t >= 0.04;
       // ---------------------------------------------------------------- acting
-
-      const intents = [
-        { t: 5.96, action: "welcome" },
-        { t: wt("Nggak") - 0.1, action: "explain", side: "left" },
-        { t: wt("Aku") - 0.1, action: "present", side: "right" },
-        { t: wt("chat,") - 0.1, action: "point", side: "right" },
-        { t: wt("meeting.") - 0.12, action: "reveal" },
-        { t: wt("Satu,") - 0.1, action: "emphasize", side: "right" },
-        { t: wt("model") - 0.1, action: "explain", side: "left" },
-        { t: wt("Data") - 0.1, action: "point", side: "right" },
-        { t: wt("Dua,") - 0.1, action: "emphasize", side: "right" },
-        { t: wt("diperbesar") - 0.1, action: "reveal" },
-        { t: wt("Jalan") - 0.1, action: "present", side: "right" },
-        { t: wt("asal") - 0.1, action: "explain", side: "left" },
-        { t: wt("Tiga,") - 0.1, action: "emphasize", side: "left" },
-        { t: wt("teks,") - 0.1, action: "present", side: "right" },
-        { t: wt("Mesinnya") - 0.1, action: "point", side: "right" },
-        { t: wt("Empat,") - 0.1, action: "emphasize", side: "right" },
-        { t: wt("keluar") - 0.1, action: "reveal" },
-        { t: wt("Berguna") - 0.1, action: "explain", side: "left" },
-        { t: wt("Lima,") - 0.1, action: "emphasize", side: "left" },
-        { t: wt("Ketik") - 0.1, action: "present", side: "right" },
-        { t: wt("Tapi") - 0.1, action: "explain", side: "left" },
-        { t: wt("proyeknya") - 0.1, action: "point", side: "right" },
-        { t: wt("Enam,") - 0.1, action: "emphasize", side: "right" },
-        { t: wt("rekam,") - 0.1, action: "present", side: "right" },
-        { t: wt("Audio") - 0.1, action: "explain", side: "left" },
-        { t: wt("Tujuh,", 60) - 0.1, action: "emphasize", side: "left" },
-        { t: wt("rakit") - 0.1, action: "present", side: "right" },
-        { t: wt("Model") - 0.1, action: "explain", side: "left" },
-        { t: wt("cek") - 0.1, action: "point", side: "right" },
-        { t: wt("Mau") - 0.1, action: "present", side: "right" },
-        { t: wt("Komen") - 0.1, action: "cta", side: "right" },
-        { t: wt("DM.") - 0.2, action: "point", side: "left" },
-        { t: D - 0.5, action: "idle" },
-      ];
+      // one reaction on every beat (the first word of every VO line), never the same twice in a row; CTA at "Komen".
+      const ACTS = [["present", "right"], ["explain", "right"], ["point", "right"], ["emphasize", "left"], ["reveal", null], ["present", "right"], ["point", "right"], ["explain", "left"], ["emphasize", "right"]];
+      const intents = [{ t: 0.1, action: "welcome" }];
+      (window.BEATS || []).forEach((b, i, arr) => {
+        if (i === 0) return;
+        if (i === arr.length - 1) { intents.push({ t: b - 0.12, action: "cta", side: "right" }); return; }
+        const a = ACTS[i % ACTS.length]; const it = { t: b - 0.14, action: a[0] }; if (a[1]) it.side = a[1]; intents.push(it);
+      });
+      intents.push({ t: wt("DM.") - 0.2, action: "point", side: "right" });
+      intents.push({ t: D - 0.5, action: "idle" });
       intents.sort((p, q) => p.t - q.t);
       const DIR = M3.direct(VW, D, { intents, seed: 35, quiet: 0.3, look: 0 });
       const PERF = buildPerformance(DIR.tracks, D + 0.05, { smooth: 1 });
@@ -88,7 +64,7 @@
       }
       window.__hf = window.__hf || {};
       window.__hf.buildReady = window.__hf.buildReady || {};
-      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_biz_rigged.glb", face: FACE, decals: DECALS, width: 1080, height: 1920, envIntensity: 0.6 })
+      const ready = M3.Mascot.create(canvas, { url: "assets/mascot3d/mascot_biz_rigged.glb", face: FACE, decals: DECALS, width: window.MS_W, height: window.MS_H, envIntensity: 0.6 })
         .then((m) => {
           mascot = m;
           // navy stage: brand-cyan rim light from behind-right

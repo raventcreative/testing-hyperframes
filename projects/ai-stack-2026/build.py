@@ -27,7 +27,7 @@ CSS = (D / "style.css").read_text()
 (D / "carousel.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>AI Stack 2026</title><style>{CSS}</style></head><body>
 <section class="slide">
   <div class="top"><img class="logo" src="assets/logo_white.png" alt="AIpreneur"></div>
-  <h1>One AI tool for <span>every job.</span></h1>
+  <h1>One AI tool for <span>every job</span></h1>
   <div class="list">{rows}</div>
 </section></body></html>''')
 print("ok", len(ROWS))

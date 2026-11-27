@@ -234,7 +234,7 @@
   const MORPH_N = wt(33) - 0.1 + 0.32;   // "membaca": the claude.ai window collapses into the map's centre node
   const ABSORB = wt(34) - 0.1;            // "semuanya": the input tiles fly into the node
   ev(T.s2 + 0.05, "whoosh", -3, 1.1); TILES.forEach((tl, i) => { ev(T.s2 + 0.15 + i * 0.06, "click", -10, 1.3); ev(tl.w, "pop", -1, 0.95 + i * 0.04); });
-  ev(T.s3, "whoosh", -2, 0.8); ev(T.s3 + 0.1, "pop", -4); ev(MORPH_N - 0.32, "whoosh", -4, 1.4); ev(MORPH_N, "ping", -3); ev(ABSORB + 0.25, "sparkle", -2);
+  ev(T.s3 - 0.16, "whoosh", -5, 0.8); ev(T.s3 - 0.02, "pop", -9); ev(MORPH_N - 0.32, "whoosh", -4, 1.4); ev(MORPH_N, "ping", -3); ev(ABSORB + 0.25, "sparkle", -2);
   function inputs(t) {
     if (t < T.s2 - 0.1 || t > T.s4 + 0.3) { hide(INCARD); TILES.forEach((tl, i) => { hide(tl.el); hide(TG[i][0]); hide(TG[i][1]); }); hide(REC); hide(INSVG); return; }
     const cu = spr(t, T.s2, 15, 0.7);

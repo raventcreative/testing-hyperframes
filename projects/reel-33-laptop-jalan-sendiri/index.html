@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AIpreneur Automation — Laptop Jalan Sendiri</title>
+    <script src="vendor/gsap/dist/gsap.min.js"></script>
+    <script src="vendor/vo_words.js"></script>
+    <script src="vendor/icons.js"></script>
+    <script src="vendor/vo_env.js"></script>
+    <script src="vendor/reel_fx.js"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/robot3d/three/three.module.min.js","three/addons/":"./vendor/robot3d/three/addons/"}}</script>
+    <script src="vendor/robot3d/robot3d_state.js"></script>
+    <script type="module" src="vendor/robot3d/robot3d.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Poppins"; src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      :root { --n1: #0a0d2c; --n2: #294b77; --grad: linear-gradient(100deg, #0a0d2c 0%, #294b77 100%); --line: rgba(10,13,44,0.10);
+        --auto: #2f6fe4; --autoBg: #e7f0ff; --ok: #1fa855; --okBg: #dcf6e4; --mute: rgba(10,13,44,0.55);
+        --gy: #8e98ad; --gyBg: #eef1f6; --ink: #0d1430; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f7fd; }
+      body { font-family: "Poppins", sans-serif; font-synthesis: none; color: var(--n1); -webkit-font-smoothing: antialiased; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; background: #f4f7fd; }
+      .ic { display: inline-block; flex: none; } .ic svg { width: 100%; height: 100%; display: block; }
+      .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      b { font-weight: 700; }
+      #bg { position: absolute; inset: 0; background: url(assets/bg-light.png) center / auto 1920px no-repeat #f4f7fd; }
+      #bgD { position: absolute; inset: 0; background: url(assets/bg-blue.png) center / auto 1920px no-repeat #132650; opacity: 0; }
+      #dots { position: absolute; inset: 0; opacity: 0.6; background-image: radial-gradient(rgba(41,75,119,0.12) 1.2px, transparent 1.6px); background-size: 34px 34px; }
+      #glow { position: absolute; left: -280px; top: 260px; width: 1100px; height: 1100px; border-radius: 50%; background: radial-gradient(circle, rgba(47,111,228,0.10) 0%, rgba(47,111,228,0) 62%); }
+      .lbl { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: var(--n2); }
+      .simtag { display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.45); border-radius: 20px; padding: 3px 12px; white-space: nowrap; }
+
+      /* ================= S1 HOOK — full-bleed: a laptop finishing a video, a phone asking for an OK ================ */
+      #hookClip { position: absolute; left: 0; top: 270px; width: 1080px; height: 980px; overflow: hidden; }
+      #hook { position: absolute; left: 80px; top: 20px; width: 920px; height: 950px; }
+
+      #lapWrap { position: absolute; left: 0px; top: 110px; width: 580px; height: 420px; opacity: 0; transform-origin: 50% 70%; }
+      #lapScr { position: absolute; left: 28px; top: 0; width: 524px; height: 330px; border-radius: 18px 18px 6px 6px; background: var(--ink); border: 8px solid #dfe6f2; box-shadow: 0 28px 60px rgba(41,75,119,0.26); overflow: hidden; }
+      #lapBase { position: absolute; left: 0; top: 330px; width: 580px; height: 24px; border-radius: 0 0 16px 16px; background: linear-gradient(180deg, #e7edf7 0%, #cfd9ea 100%); }
+      #lapBase::after { content: ""; position: absolute; left: 244px; top: 0; width: 92px; height: 6px; border-radius: 0 0 7px 7px; background: rgba(10,13,44,0.16); }
+      .lsTop { position: absolute; left: 0; right: 0; top: 0; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid rgba(255,255,255,0.10); }
+      .lsTop i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.22); display: block; }
+      .lsTop span { margin-left: 6px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.72); white-space: nowrap; }
+      #lapClips { position: absolute; left: 16px; top: 54px; display: flex; gap: 9px; }
+      #lapClips i { width: 76px; height: 50px; border-radius: 9px; background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14); display: block; }
+      #lapClips i.on { background: rgba(47,111,228,0.42); border-color: rgba(120,170,255,0.7); }
+      #lapTrk { position: absolute; left: 16px; right: 16px; top: 122px; height: 32px; border-radius: 9px; background: rgba(255,255,255,0.07); overflow: hidden; }
+      #lapTrk i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, rgba(47,111,228,0.55), rgba(120,170,255,0.75)); display: block; }
+      #lapRow { position: absolute; left: 16px; right: 16px; top: 162px; height: 50px; display: flex; align-items: center; justify-content: space-between; }
+      #lapRow em { font-style: normal; font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.74); white-space: nowrap; }
+      #lapPct { font-size: 30px; font-weight: 700; color: #fff; line-height: 1.5; }
+      #lapDone { position: absolute; left: 16px; right: 16px; top: 222px; height: 50px; border-radius: 12px; background: rgba(31,168,85,0.2); border: 1.5px solid rgba(31,168,85,0.6); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 19px; font-weight: 700; color: #7ff0ac; opacity: 0; white-space: nowrap; }
+      #lapDone .ic { width: 22px; height: 22px; }
+
+      #phWrap { position: absolute; left: 596px; top: 206px; width: 324px; height: 600px; opacity: 0; }
+      #phBody { position: absolute; inset: 0; border-radius: 42px; background: #fff; border: 10px solid #e2e9f5; box-shadow: 0 30px 70px rgba(41,75,119,0.24); overflow: hidden; }
+      #phNotch { position: absolute; left: 50%; top: 10px; width: 108px; height: 16px; margin-left: -54px; border-radius: 10px; background: #e2e9f5; }
+      #phCard { position: absolute; left: 18px; right: 18px; top: 50px; border-radius: 20px; background: #f6f9ff; border: 1.5px solid var(--line); padding: 18px 18px 20px; opacity: 0; }
+      #phCard .hd { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--n2); white-space: nowrap; }
+      #phCard .hd .ic { width: 17px; height: 17px; }
+      #phCard h5 { font-size: 24px; font-weight: 700; line-height: 1.22; margin-top: 10px; }
+      #phCard .mt { font-size: 16px; color: var(--mute); margin-top: 6px; white-space: nowrap; }
+      #phThumb { margin-top: 14px; height: 108px; border-radius: 13px; background: var(--ink); display: flex; align-items: center; justify-content: center; }
+      #phThumb .ic { width: 34px; height: 34px; color: rgba(255,255,255,0.7); }
+      #phBtns { display: flex; gap: 10px; margin-top: 16px; }
+      #phOke { position: relative; flex: 1; height: 58px; border-radius: 15px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 21px; font-weight: 700; white-space: nowrap; }
+      #phOke .ic { width: 20px; height: 20px; }
+      #phNanti { width: 100px; height: 58px; border-radius: 15px; background: var(--gyBg); color: var(--mute); display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; white-space: nowrap; }
+      #phSent { position: absolute; left: 18px; right: 18px; top: 404px; height: 60px; border-radius: 15px; background: var(--okBg); border: 1.5px solid rgba(31,168,85,0.5); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 19px; font-weight: 700; color: var(--ok); opacity: 0; white-space: nowrap; }
+      #phSent .ic { width: 21px; height: 21px; }
+      #hThumbTap { position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: rgba(255,255,255,0.5); opacity: 0; }
+
+      #hMall { position: absolute; left: 596px; top: 118px; display: inline-flex; align-items: center; gap: 10px; height: 54px; padding: 0 20px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 12px 28px rgba(41,75,119,0.14); font-size: 20px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #hMall .ic { width: 22px; height: 22px; color: var(--n2); }
+      #hAway { position: absolute; left: 0px; top: 586px; display: inline-flex; align-items: center; gap: 10px; height: 50px; padding: 0 18px; border-radius: 16px; background: var(--autoBg); font-size: 19px; font-weight: 700; color: var(--auto); opacity: 0; white-space: nowrap; }
+      #hAway .ic { width: 20px; height: 20px; }
+
+      /* ================= app window ================= */
+      #win { position: absolute; left: 80px; top: 290px; width: 920px; height: 950px; border-radius: 26px; overflow: hidden; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 36px 90px rgba(41,75,119,0.18); opacity: 0; }
+      #wcam { position: absolute; left: 0; top: 0; width: 920px; height: 950px; transform-origin: 0 0; }
+      #tbar { position: absolute; left: 0; right: 0; top: 0; height: 62px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+      #tbar .dots { display: flex; gap: 7px; } #tbar .dots i { width: 11px; height: 11px; border-radius: 50%; background: rgba(10,13,44,0.14); display: block; }
+      #tbar .app { margin-left: 8px; font-size: 19px; font-weight: 700; white-space: nowrap; }
+      #sim { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--n2); border: 1.5px solid rgba(41,75,119,0.4); border-radius: 14px; padding: 2px 9px; white-space: nowrap; }
+      #tabs { margin-left: auto; position: relative; display: flex; gap: 4px; }
+      #tabs > div { position: relative; z-index: 1; display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 15px; border-radius: 13px; font-size: 17px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+      #tabs > div .ic { width: 18px; height: 18px; }
+      #tabPill { position: absolute; left: 0; top: 0; height: 38px; border-radius: 13px; background: var(--autoBg); }
+      #body { position: absolute; left: 0; right: 0; top: 62px; bottom: 0; }
+      .view { position: absolute; inset: 0; }
+      .vhd { position: absolute; left: 28px; top: 22px; display: flex; align-items: center; gap: 11px; }
+      .vhd .bx { width: 42px; height: 42px; border-radius: 13px; background: var(--autoBg); color: var(--auto); display: flex; align-items: center; justify-content: center; }
+      .vhd .bx .ic { width: 22px; height: 22px; }
+      .vhd b { font-size: 25px; font-weight: 700; white-space: nowrap; }
+      .vnote { position: absolute; left: 28px; bottom: 22px; font-size: 16px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+
+      /* ---- S2 schedule: a round dial, nothing else in the reel is round ---- */
+      #dial { position: absolute; left: 70px; top: 180px; width: 340px; height: 340px; }
+      #dial svg { width: 340px; height: 340px; display: block; }
+      #dialFace { fill: #fff; stroke: rgba(41,75,119,0.22); stroke-width: 3; }
+      #dialArc { fill: none; stroke: var(--auto); stroke-width: 10; stroke-linecap: round; }
+      .dHand { stroke: var(--n1); stroke-width: 9; stroke-linecap: round; }
+      #dialDot { fill: var(--auto); }
+      #dialNum { position: absolute; left: 70px; width: 340px; top: 534px; text-align: center; font-size: 66px; font-weight: 700; line-height: 1.5; letter-spacing: -1px; }
+      #dialSub { position: absolute; left: 70px; width: 340px; top: 634px; text-align: center; font-size: 20px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+      #schCard { position: absolute; left: 470px; top: 180px; width: 388px; border-radius: 24px; background: #fff; border: 2px solid var(--line); box-shadow: 0 20px 46px rgba(41,75,119,0.12); padding: 24px 26px 26px; opacity: 0; }
+      #schCard .k { font-size: 13px; font-weight: 700; letter-spacing: 2.4px; color: var(--n2); white-space: nowrap; }
+      #schCard h4 { font-size: 30px; font-weight: 700; margin-top: 10px; line-height: 1.2; }
+      .srow { display: flex; align-items: center; gap: 12px; height: 64px; margin-top: 16px; padding: 0 16px; border-radius: 15px; background: #f6f9ff; font-size: 19px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      .srow .ic { width: 20px; height: 20px; color: var(--auto); flex: none; }
+      .srow em { font-style: normal; margin-left: auto; font-size: 17px; color: var(--mute); }
+      #schFoot { margin-top: 20px; padding-top: 18px; border-top: 1.5px solid var(--line); font-size: 18px; font-weight: 700; color: var(--mute); line-height: 1.35; opacity: 0; }
+
+      /* ---- S3 one prompt splits into four lanes ---- */
+      #pgOne { position: absolute; left: 200px; top: 150px; width: 520px; height: 600px; border-radius: 22px; background: #fff; border: 2px solid var(--line); box-shadow: 0 18px 44px rgba(41,75,119,0.12); padding: 26px 24px; opacity: 0; }
+      #pgOne .k { font-size: 13px; font-weight: 700; letter-spacing: 2.4px; color: var(--mute); white-space: nowrap; }
+      #pgOne .ln { height: 15px; border-radius: 8px; background: rgba(41,75,119,0.14); margin-top: 15px; }
+      #pgLanes { position: absolute; left: 52px; top: 150px; width: 816px; }
+      .pl { position: relative; height: 128px; margin-bottom: 20px; border-radius: 22px; background: #fff; border: 2px solid var(--line); box-shadow: 0 14px 34px rgba(41,75,119,0.1); display: flex; align-items: center; gap: 20px; padding: 0 26px; opacity: 0; }
+      .pl .no { flex: none; width: 62px; height: 62px; border-radius: 18px; background: var(--autoBg); color: var(--auto); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; }
+      .pl .bx { flex: none; width: 54px; height: 54px; border-radius: 16px; background: #f1f5fd; color: var(--n2); display: flex; align-items: center; justify-content: center; }
+      .pl .bx .ic { width: 26px; height: 26px; }
+      .pl .tx { min-width: 0; }
+      .pl .tx b { display: block; font-size: 26px; font-weight: 700; line-height: 1.15; white-space: nowrap; }
+      .pl .tx em { display: block; font-style: normal; font-size: 18px; color: var(--mute); margin-top: 4px; white-space: nowrap; }
+      .pl .jb { margin-left: auto; flex: none; height: 44px; padding: 0 16px; border-radius: 13px; background: #f1f5fd; color: var(--n2); font-size: 16px; font-weight: 700; display: flex; align-items: center; white-space: nowrap; }
+
+      /* ---- S4 guide file: a sheet of paper, LEFT half (robot rises right) ---- */
+      #pnTab { position: absolute; left: 40px; top: 126px; display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 20px; border-radius: 14px 14px 0 0; background: #eaf0fb; font-size: 18px; font-weight: 700; color: var(--n2); opacity: 0; white-space: nowrap; }
+      #pnTab .ic { width: 19px; height: 19px; }
+      #pnDoc { position: absolute; left: 40px; top: 172px; width: 450px; height: 442px; border-radius: 0 18px 18px 18px; background: #fff; border: 2px solid var(--line); box-shadow: 0 22px 50px rgba(41,75,119,0.14); padding: 26px 26px; opacity: 0; }
+      .dk { position: relative; display: flex; align-items: center; gap: 13px; height: 58px; margin-bottom: 10px; padding: 0 14px; border-radius: 13px; font-size: 19px; font-weight: 700; opacity: 0; }
+      .dk .bx { flex: none; width: 26px; height: 26px; border-radius: 8px; border: 2px solid rgba(41,75,119,0.3); display: flex; align-items: center; justify-content: center; color: #fff; }
+      .dk .bx .ic { width: 16px; height: 16px; opacity: 0; }
+      .dk.on .bx { background: var(--ok); border-color: var(--ok); } .dk.on .bx .ic { opacity: 1; }
+      .dk span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .dk.edit { background: #eaf2ff; }
+      #pnCaret { position: absolute; left: 0; top: 14px; width: 3px; height: 30px; background: var(--auto); opacity: 0; }
+      #pnFree { position: absolute; left: 40px; top: 646px; width: 450px; border-radius: 22px; background: #fff; border: 2px solid var(--line); box-shadow: 0 18px 40px rgba(41,75,119,0.12); padding: 22px 22px 24px; opacity: 0; }
+      #pnFree .ic { width: 30px; height: 30px; color: var(--auto); }
+      #pnFree b { display: block; font-size: 26px; font-weight: 700; margin-top: 10px; line-height: 1.2; }
+      #pnFree em { display: block; font-style: normal; font-size: 17px; color: var(--mute); margin-top: 8px; line-height: 1.3; }
+
+      /* ---- S5 week table ---- */
+      #tbWrap { position: absolute; left: 52px; top: 142px; width: 816px; border-radius: 22px; background: #fff; border: 2px solid var(--line); box-shadow: 0 18px 44px rgba(41,75,119,0.12); overflow: hidden; opacity: 0; }
+      #tbHd { display: flex; align-items: center; height: 58px; padding: 0 22px; background: #f6f9ff; border-bottom: 1.5px solid var(--line); font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--mute); }
+      #tbHd .c1 { width: 108px; flex: none; white-space: nowrap; } #tbHd .c2 { flex: 1; white-space: nowrap; } #tbHd .c3 { width: 170px; flex: none; text-align: right; white-space: nowrap; }
+      .tr { display: flex; align-items: center; height: 82px; padding: 0 22px; border-bottom: 1px solid var(--line); opacity: 0; }
+      .tr:last-child { border-bottom: 0; }
+      .tr .c1 { width: 108px; flex: none; }
+      .tr .c1 i { font-style: normal; display: inline-flex; align-items: center; justify-content: center; height: 38px; min-width: 62px; padding: 0 12px; border-radius: 12px; background: #f1f5fd; color: var(--n2); font-size: 17px; font-weight: 700; white-space: nowrap; }
+      .tr .c2 { flex: 1; min-width: 0; font-size: 22px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 16px; }
+      .tr .c3 { width: 170px; flex: none; display: flex; justify-content: flex-end; }
+      .sp { display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border-radius: 13px; background: var(--gyBg); color: var(--gy); font-size: 17px; font-weight: 700; white-space: nowrap; }
+      .sp .ic { width: 16px; height: 16px; }
+      .sp.go { background: var(--autoBg); color: var(--auto); }
+      .sp.dn { background: var(--okBg); color: var(--ok); }
+      #tbCnt { position: absolute; right: 52px; top: 30px; display: inline-flex; align-items: center; gap: 9px; height: 44px; padding: 0 18px; border-radius: 14px; background: var(--autoBg); color: var(--auto); font-size: 18px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #tbCnt .ic { width: 18px; height: 18px; }
+
+      /* ---- S6 three episode cards with the same fingerprint ---- */
+      #gyRules { position: absolute; left: 52px; top: 120px; display: flex; gap: 16px; }
+      .gr { display: inline-flex; align-items: center; gap: 11px; height: 58px; padding: 0 22px; border-radius: 17px; background: #fff; border: 2px solid var(--line); box-shadow: 0 12px 28px rgba(41,75,119,0.1); font-size: 20px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      .gr .ic { width: 22px; height: 22px; color: var(--auto); }
+      #gyCards { position: absolute; left: 52px; top: 216px; width: 816px; height: 452px; }
+      .gc { position: absolute; top: 0; width: 248px; height: 452px; border-radius: 22px; background: #fff; border: 2px solid var(--line); box-shadow: 0 16px 38px rgba(41,75,119,0.12); padding: 18px; opacity: 0; }
+      .gc .ep { font-size: 13px; font-weight: 700; letter-spacing: 2.2px; color: var(--mute); white-space: nowrap; }
+      .gc .th { margin-top: 12px; height: 206px; border-radius: 15px; background: var(--ink); position: relative; overflow: hidden; }
+      .gc .th .ttl { position: absolute; left: 14px; right: 14px; top: 22px; font-size: 21px; font-weight: 700; color: #fff; line-height: 1.18; }
+      .gc .th .hd2 { position: absolute; left: 14px; bottom: 16px; width: 64px; height: 8px; border-radius: 4px; background: rgba(120,170,255,0.9); }
+      .gf { display: flex; align-items: center; gap: 10px; margin-top: 14px; opacity: 0; }
+      .gf em { font-style: normal; font-size: 15px; font-weight: 700; color: var(--mute); width: 74px; flex: none; white-space: nowrap; }
+      .gf i { flex: 1; height: 12px; border-radius: 6px; background: rgba(41,75,119,0.14); display: block; position: relative; overflow: hidden; }
+      .gf i::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 62%; border-radius: 6px; background: var(--auto); }
+      .gf.b i::after { width: 44%; background: var(--n2); }
+      .gf.c i::after { width: 78%; background: #7aa7ec; }
+      #gySame { position: absolute; left: 52px; top: 706px; width: 816px; height: 92px; border-radius: 20px; background: var(--okBg); border: 2px solid rgba(31,168,85,0.4); display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 24px; font-weight: 700; color: var(--ok); opacity: 0; white-space: nowrap; }
+      #gySame .ic { width: 26px; height: 26px; }
+
+      /* ---- S7 script -> waveform ---- */
+      #swLine { position: absolute; left: 52px; top: 146px; width: 816px; height: 116px; border-radius: 20px; background: #fff; border: 2px solid var(--line); box-shadow: 0 14px 32px rgba(41,75,119,0.1); display: flex; align-items: center; gap: 18px; padding: 0 26px; opacity: 0; }
+      #swLine .bx { flex: none; width: 54px; height: 54px; border-radius: 16px; background: #f1f5fd; color: var(--n2); display: flex; align-items: center; justify-content: center; }
+      #swLine .bx .ic { width: 26px; height: 26px; }
+      #swLine .tx { min-width: 0; }
+      #swLine .tx b { display: block; font-size: 25px; font-weight: 700; white-space: nowrap; }
+      #swLine .tx em { display: block; font-style: normal; font-size: 17px; color: var(--mute); margin-top: 3px; white-space: nowrap; }
+      #swArrow { position: absolute; left: 50%; top: 292px; width: 46px; height: 46px; margin-left: -23px; color: var(--n2); opacity: 0; transform: rotate(90deg); }
+      #swWave { position: absolute; left: 52px; top: 368px; width: 816px; height: 238px; border-radius: 22px; background: var(--ink); box-shadow: 0 18px 44px rgba(41,75,119,0.2); overflow: hidden; opacity: 0; }
+      #swBars { position: absolute; left: 26px; right: 26px; top: 0; bottom: 0; display: flex; align-items: center; gap: 5px; }
+      #swBars i { flex: 1; border-radius: 3px; background: rgba(120,170,255,0.9); display: block; transform: scaleY(0); transform-origin: 50% 50%; }
+      #swRun { position: absolute; left: 52px; top: 646px; display: inline-flex; align-items: center; gap: 11px; height: 62px; padding: 0 24px; border-radius: 18px; background: var(--grad); color: #fff; font-size: 21px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #swRun .ic { width: 22px; height: 22px; }
+      #swDur { position: absolute; left: 330px; top: 646px; display: inline-flex; align-items: center; gap: 10px; height: 62px; padding: 0 22px; border-radius: 18px; background: #f1f5fd; color: var(--n2); font-size: 20px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #swDur .ic { width: 20px; height: 20px; }
+
+      /* ---- S9 flow chain ---- */
+      #flRail { position: absolute; left: 92px; top: 420px; width: 736px; height: 8px; border-radius: 3px; background: rgba(41,75,119,0.16); opacity: 0; }
+      #flRun { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 3px; background: var(--auto); display: block; }
+      #flDot { position: absolute; left: 0; top: -14px; width: 36px; height: 36px; margin-left: -18px; border-radius: 50%; background: var(--auto); border: 4px solid #fff; box-shadow: 0 6px 16px rgba(47,111,228,0.4); opacity: 0; }
+      .fn { position: absolute; top: 300px; width: 168px; padding-bottom: 8px; opacity: 0; }
+      .fn .bx { width: 136px; height: 136px; margin: 0 auto; border-radius: 38px; background: #fff; border: 2px solid var(--line); box-shadow: 0 14px 32px rgba(41,75,119,0.12); display: flex; align-items: center; justify-content: center; color: var(--n2); }
+      .fn .bx .ic { width: 54px; height: 54px; }
+      .fn em { display: block; font-style: normal; text-align: center; font-size: 24px; font-weight: 700; margin-top: 20px; line-height: 1.3; }
+      .fn.on .bx { background: var(--autoBg); border-color: rgba(47,111,228,0.5); color: var(--auto); }
+      
+      /* ---- S10 three approval gates ---- */
+      #gtRow { position: absolute; left: 76px; top: 180px; width: 768px; height: 356px; }
+      .gt2 { position: absolute; top: 0; width: 220px; height: 356px; border-radius: 26px 26px 20px 20px; background: #fff; border: 2px solid var(--line); box-shadow: 0 16px 38px rgba(41,75,119,0.12); padding: 24px 20px; opacity: 0; }
+      .gt2 .no { font-size: 13px; font-weight: 700; letter-spacing: 2.2px; color: var(--mute); white-space: nowrap; }
+      .gt2 .bx { width: 76px; height: 76px; margin: 16px auto 0; border-radius: 24px; background: #f1f5fd; color: var(--n2); display: flex; align-items: center; justify-content: center; }
+      .gt2 .bx .ic { width: 34px; height: 34px; }
+      .gt2 b { display: block; text-align: center; font-size: 25px; font-weight: 700; margin-top: 16px; white-space: nowrap; }
+      .gt2 .ok2 { position: absolute; left: 20px; right: 20px; bottom: 22px; height: 56px; border-radius: 15px; background: var(--okBg); color: var(--ok); display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 18px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      .gt2 .ok2 .ic { width: 19px; height: 19px; }
+      #gtAuto { position: absolute; left: 76px; top: 614px; width: 768px; height: 92px; border-radius: 20px; background: var(--gyBg); border: 2px solid rgba(41,75,119,0.14); display: flex; align-items: center; gap: 16px; padding: 0 26px; opacity: 0; }
+      #gtAuto .ic { width: 26px; height: 26px; color: var(--gy); flex: none; }
+      #gtAuto b { font-size: 24px; font-weight: 700; color: var(--gy); white-space: nowrap; position: relative; }
+      #gtStrike { position: absolute; left: -6px; right: -6px; top: 50%; height: 3px; background: var(--gy); transform: scaleX(0); transform-origin: 0 50%; }
+      #gtAuto em { margin-left: auto; font-style: normal; font-size: 19px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+
+      /* ---- pop-outs (outside #wcam, never touched by the no-cut guard) ---- */
+      .pc { position: absolute; border-radius: 28px; background: #fff; border: 2px solid var(--line); box-shadow: 0 30px 70px rgba(41,75,119,0.2); opacity: 0; }
+
+      /* S8 phone pop-out — RIGHT half (robot rises left) */
+      #pIdea { left: 596px; top: 392px; width: 364px; height: 720px; border-radius: 42px; border: 10px solid #e2e9f5; padding: 0; overflow: hidden; }
+      #pIdNotch { position: absolute; left: 50%; top: 10px; width: 110px; height: 16px; margin-left: -55px; border-radius: 10px; background: #e2e9f5; }
+      #pIdHd { position: absolute; left: 18px; right: 18px; top: 48px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--n2); white-space: nowrap; }
+      #pIdHd .ic { width: 17px; height: 17px; }
+      .idr { position: absolute; left: 18px; right: 18px; height: 78px; border-radius: 16px; background: #f6f9ff; border: 1.5px solid var(--line); display: flex; align-items: center; gap: 13px; padding: 0 14px; opacity: 0; }
+      .idr .no { flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--autoBg); color: var(--auto); display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; }
+      .idr span { min-width: 0; font-size: 18px; font-weight: 700; line-height: 1.22; overflow: hidden; }
+      .idr.pick { background: var(--autoBg); border-color: rgba(47,111,228,0.55); }
+      #pIdWait { position: absolute; left: 18px; right: 18px; top: 96px; height: 78px; border-radius: 16px; background: var(--autoBg); display: flex; align-items: center; gap: 12px; padding: 0 16px; font-size: 18px; font-weight: 700; color: var(--auto); white-space: nowrap; }
+      #pIdWait .ic { width: 22px; height: 22px; flex: none; }
+      #pIdWait .dts { display: flex; gap: 5px; margin-left: auto; }
+      #pIdWait .dts i { width: 7px; height: 7px; border-radius: 50%; background: var(--auto); display: block; }
+      #pIdReply { position: absolute; right: 18px; bottom: 26px; display: inline-flex; align-items: center; gap: 10px; height: 60px; padding: 0 24px; border-radius: 18px; background: var(--grad); color: #fff; font-size: 23px; font-weight: 700; opacity: 0; white-space: nowrap; }
+      #pIdReply .ic { width: 20px; height: 20px; }
+      #pIdAny { position: absolute; left: 18px; bottom: 34px; font-size: 16px; font-weight: 700; color: var(--mute); opacity: 0; white-space: nowrap; }
+
+      /* S10 decision plate — LEFT half (robot rises right) */
+      #pFinal { left: 110px; top: 578px; width: 470px; padding: 26px 30px 28px; text-align: center; }
+      #pFinal em { display: block; font-style: normal; font-size: 20px; color: var(--mute); margin-top: 10px; line-height: 1.3; }
+      #pfChips { display: flex; gap: 10px; margin-top: 22px; }
+      #pfChips span { flex: 1; height: 54px; border-radius: 15px; background: var(--okBg); color: var(--ok); display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 18px; font-weight: 700; white-space: nowrap; }
+      #pfChips span .ic { width: 16px; height: 16px; }
+      #pFinal .k { font-size: 13px; font-weight: 700; letter-spacing: 2.4px; color: var(--n2); white-space: nowrap; }
+      #pFinal h4 { font-size: 40px; font-weight: 700; line-height: 1.2; margin-top: 12px; }
+      
+
+      /* ---- CTA ---- */
+      #cta { position: absolute; left: 110px; top: 560px; width: 860px; border-radius: 32px; background: #fff; border: 2px solid var(--line); box-shadow: 0 34px 80px rgba(41,75,119,0.2); padding: 42px 40px 46px; text-align: center; opacity: 0; }
+      #cta .k { font-size: 24px; font-weight: 700; color: var(--mute); }
+      #cta .name { font-size: 62px; font-weight: 700; margin-top: 12px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #cta .sb { font-size: 25px; margin-top: 10px; color: var(--mute); font-weight: 400; } #cta .sb b { color: var(--n2); }
+      #fbtn { display: inline-flex; align-items: center; gap: 11px; margin-top: 28px; height: 74px; padding: 0 34px; border-radius: 22px; background: var(--grad); color: #fff; font-size: 26px; font-weight: 700; white-space: nowrap; }
+      #fbtn .ic { width: 24px; height: 24px; }
+
+      #ui { position: absolute; inset: 0; }
+      .logo { position: absolute; left: 84px; top: 150px; width: 300px; }
+      #logoL { opacity: 0; }
+      #rmove { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: translateY(700px); z-index: 1; }
+      #robo3d { position: absolute; left: -92px; top: 1362px; width: 820px; height: 700px; filter: drop-shadow(0 18px 26px rgba(41,75,119,0.22)); }
+      #caps { position: absolute; left: 80px; top: 1256px; width: 920px; height: 118px; z-index: 2; }
+      .cap { position: absolute; left: 0; top: 0; width: 920px; height: 118px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+      .cap .in { filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px rgba(255,255,255,0.95)); display: block; font-size: 46px; line-height: 1.16; text-transform: uppercase; letter-spacing: 0.3px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .cap s { text-decoration: none; display: inline; font-weight: 400; } .cap s.k { font-weight: 700; }
+      #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -6px; z-index: 30; opacity: 0; filter: drop-shadow(0 4px 8px rgba(41,75,119,0.3)); }
+      #ripple { position: absolute; left: 0; top: 0; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 50%; background: rgba(47,111,228,0.3); opacity: 0; z-index: 29; }
+      #wFlash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="main" data-composition-id="main" data-start="0" data-duration="53.9" data-width="1080" data-height="1920" data-fps="30">
+      <div id="scene" class="clip" data-start="0" data-duration="53.9" data-track-index="1" style="position:absolute;inset:0;" data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="bg"></div><div id="bgD"></div><div id="dots"></div><div id="glow"></div>
+
+        <div id="hookClip"><div id="hook">
+          <div id="lapWrap">
+            <div id="lapScr">
+              <div class="lsTop"><i></i><i></i><i></i><span>episode-12 · render</span></div>
+              <div id="lapClips"><i></i><i></i><i></i><i></i><i></i></div>
+              <div id="lapTrk"><i></i></div>
+              <div id="lapRow"><em>nyusun video</em><span id="lapPct">0%</span></div>
+              <div id="lapDone"><span class="ic" data-i="circle-check"></span>Preview siap</div>
+            </div>
+            <div id="lapBase"></div>
+          </div>
+          <div id="hAway"><span class="ic" data-i="user-round-x"></span>Gue nggak di depan laptop</div>
+          <div id="hMall"><span class="ic" data-i="map-pin"></span>Lagi makan di mall</div>
+          <div id="phWrap">
+            <div id="phBody">
+              <div id="phNotch"></div>
+              <div id="phCard">
+                <div class="hd"><span class="ic" data-i="bell"></span>MINTA PERSETUJUAN</div>
+                <h5>Preview ep. 12</h5>
+                <div class="mt">durasi 48 detik · simulasi</div>
+                <div id="phThumb"><span class="ic" data-i="play"></span></div>
+                <div id="phBtns"><div id="phOke"><span class="ic" data-i="check"></span>Oke<span id="hThumbTap"></span></div><div id="phNanti">Nanti</div></div>
+              </div>
+              <div id="phSent"><span class="ic" data-i="send"></span>Lanjut diproses</div>
+            </div>
+          </div>
+        </div></div>
+
+        <div id="win"><div id="wcam">
+          <div id="tbar"><span class="dots"><i></i><i></i><i></i></span><span class="app">Otomasi Konten</span><span id="sim">SIMULASI</span>
+            <div id="tabs"><span id="tabPill"></span><div id="tabJadwal"><span class="ic" data-i="clock"></span>Jadwal</div><div id="tabBagian"><span class="ic" data-i="layers"></span>Bagian</div>
+              <div id="tabTopik"><span class="ic" data-i="table"></span>Topik</div><div id="tabGaya"><span class="ic" data-i="palette"></span>Gaya</div></div></div>
+          <div id="body">
+
+            <div class="view" id="vJadwal">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="clock"></span></span><b>Jadwal otomatis</b></div>
+              <div id="dial"><svg viewBox="0 0 300 300">
+                <circle id="dialFace" cx="150" cy="150" r="128" />
+                <path id="dialArc" d="M150 22 A128 128 0 0 1 150 278" />
+                <line class="dHand" id="dHandH" x1="150" y1="150" x2="150" y2="92" />
+                <line class="dHand" id="dHandM" x1="150" y1="150" x2="150" y2="54" />
+                <circle id="dialDot" cx="150" cy="150" r="11" />
+              </svg></div>
+              <div id="dialNum">16.00</div>
+              <div id="dialSub">tiap hari, tanpa diingetin</div>
+              <div id="schCard">
+                <div class="k">YANG JALAN TIAP SORE</div>
+                <h4>Satu putaran produksi</h4>
+                <div class="srow" id="sr0"><span class="ic" data-i="file-text"></span>Baca panduan<em>otomatis</em></div>
+                <div class="srow" id="sr1"><span class="ic" data-i="table"></span>Ambil topik<em>antrean</em></div>
+                <div class="srow" id="sr2"><span class="ic" data-i="send"></span>Kirim kabar<em>ke HP</em></div>
+                <div id="schFoot">tiap hari, tanpa gue buka laptop</div>
+              </div>
+            </div>
+
+            <div class="view" id="vBagian">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="layers"></span></span><b>Isi sistemnya</b></div>
+              <div id="pgOne"><div class="k">SATU PROMPT PANJANG</div>
+                <div class="ln" style="width:94%"></div><div class="ln" style="width:88%"></div><div class="ln" style="width:96%"></div><div class="ln" style="width:72%"></div>
+                <div class="ln" style="width:92%"></div><div class="ln" style="width:84%"></div><div class="ln" style="width:97%"></div><div class="ln" style="width:66%"></div>
+                <div class="ln" style="width:90%"></div><div class="ln" style="width:78%"></div><div class="ln" style="width:94%"></div><div class="ln" style="width:58%"></div></div>
+              <div id="pgLanes"></div>
+              <div class="vnote">simulasi · nama bagian disederhanakan</div>
+            </div>
+
+            <div class="view" id="vPanduan">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="file-text"></span></span><b>Bagian 1 · Panduan</b></div>
+              <div id="pnTab"><span class="ic" data-i="file-text"></span>panduan.md</div>
+              <div id="pnDoc"></div>
+              <div id="pnFree"><span class="ic" data-i="file-pen"></span><b>Ganti alurnya di sini</b><em>edit satu file, nggak usah ngoding</em></div>
+              <div class="vnote">simulasi</div>
+            </div>
+
+            <div class="view" id="vTopik">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="table"></span></span><b>Bagian 2 · Daftar topik</b></div>
+              <div id="tbCnt"><span class="ic" data-i="list-checks"></span>7 topik seminggu</div>
+              <div id="tbWrap">
+                <div id="tbHd"><span class="c1">HARI</span><span class="c2">TOPIK</span><span class="c3">STATUS</span></div>
+              </div>
+              <div class="vnote">simulasi · angka ilustrasi</div>
+            </div>
+
+            <div class="view" id="vGaya">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="palette"></span></span><b>Bagian 3 · Gaya</b></div>
+              <div id="gyRules"><div class="gr" id="gr0"><span class="ic" data-i="type"></span>Aturan naskah</div><div class="gr" id="gr1"><span class="ic" data-i="sparkles"></span>Aturan motion</div></div>
+              <div id="gyCards"></div>
+              <div id="gySame"><span class="ic" data-i="circle-check"></span>Beda topik, gaya tetep sama</div>
+            </div>
+
+            <div class="view" id="vSuara">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="mic"></span></span><b>Bagian 4 · Suara</b></div>
+              <div id="swLine"><span class="bx"><span class="ic" data-i="file-text"></span></span><span class="tx"><b>Naskah episode 12</b><em>sudah lolos aturan naskah</em></span></div>
+              <span class="ic" id="swArrow" data-i="arrow-right"></span>
+              <div id="swWave"><div id="swBars"></div></div>
+              <div id="swRun"><span class="ic" data-i="zap"></span>Sekali jalan</div>
+              <div id="swDur"><span class="ic" data-i="clock"></span>00:48 jadi suara</div>
+              <div class="vnote">simulasi</div>
+            </div>
+
+            <div class="view" id="vAlur">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="workflow"></span></span><b>Alurnya cuma gini</b></div>
+              <div id="flRail"><i id="flRun"></i><span id="flDot"></span></div>
+              <div id="flNodes"></div>
+                  </div>
+
+            <div class="view" id="vGerbang">
+              <div class="vhd"><span class="bx"><span class="ic" data-i="shield-check"></span></span><b>Tiga gerbang persetujuan</b></div>
+              <div id="gtRow"></div>
+              <div id="gtAuto"><span class="ic" data-i="unplug"></span><b>Posting otomatis tanpa dicek<span id="gtStrike"></span></b><em>nggak ada</em></div>
+              <div class="vnote">simulasi</div>
+            </div>
+
+          </div>
+        </div></div>
+
+        <div class="pc" id="pIdea">
+          <div id="pIdNotch"></div>
+          <div id="pIdHd"><span class="ic" data-i="sparkles"></span>IDE BARU · KE HP LU</div>
+          <div id="pIdWait"><span class="ic" data-i="radar"></span>lagi riset tren sendiri<span class="dts"><i></i><i></i><i></i></span></div>
+        </div>
+        <div class="pc" id="pFinal"><div class="k">TETEP DI TANGAN LU</div><h4>Keputusan akhir</h4><em>sistemnya yang kerja, lu yang mutusin</em><div id="pfChips"><span><span class="ic" data-i="check"></span>Topik</span><span><span class="ic" data-i="check"></span>Naskah</span><span><span class="ic" data-i="check"></span>Preview</span></div></div>
+
+        <div id="cta"><div class="k">Mau sistem kayak gini dipasang di bisnis lu?</div><div class="name">AIpreneur Automation</div><div class="sb">Ngobrol langsung sama <b>tim kami</b></div>
+          <div id="fbtn"><span class="ic" data-i="arrow-right"></span>Link di bio</div></div>
+        <div id="ui"><img id="logoD" class="logo" src="assets/logo-aipreneur-dark.png" alt="AIpreneur" /><img id="logoL" class="logo" src="assets/logo-aipreneur-white.png" alt="" /><div id="rmove"><canvas id="robo3d" width="820" height="700"></canvas></div><div id="caps"></div></div>
+        <div id="cursor"></div><div id="ripple"></div><div id="wFlash"></div>
+      </div>
+      <audio id="vo" class="clip" src="assets/audio/vo.wav" data-start="0" data-duration="53.36" data-track-index="8" data-volume="1"></audio>
+      <audio id="sx00" class="clip" src="assets/sfx/pop.wav" data-start="0.12" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx01" class="clip" src="assets/sfx/ping.wav" data-start="1.05" data-duration="1.32" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx02" class="clip" src="assets/sfx/pop.wav" data-start="2.21" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx03" class="clip" src="assets/sfx/pop.wav" data-start="2.48" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx04" class="clip" src="assets/sfx/sparkle.wav" data-start="3.30" data-duration="1.8" data-track-index="14" data-volume="0.035"></audio>
+      <audio id="sx05" class="clip" src="assets/sfx/click.wav" data-start="3.88" data-duration="0.366" data-track-index="15" data-volume="0.08"></audio>
+      <audio id="sx06" class="clip" src="assets/sfx/ping.wav" data-start="4.14" data-duration="1.32" data-track-index="16" data-volume="0.045"></audio>
+      <audio id="sx07" class="clip" src="assets/sfx/whoosh.wav" data-start="4.58" data-duration="0.574" data-track-index="17" data-volume="0.06"></audio>
+      <audio id="sx08" class="clip" src="assets/sfx/pop.wav" data-start="6.52" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx09" class="clip" src="assets/sfx/pop.wav" data-start="6.67" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx10" class="clip" src="assets/sfx/pop.wav" data-start="6.92" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx11" class="clip" src="assets/sfx/pop.wav" data-start="7.16" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx12" class="clip" src="assets/sfx/pop.wav" data-start="7.40" data-duration="0.72" data-track-index="14" data-volume="0.045"></audio>
+      <audio id="sx13" class="clip" src="assets/sfx/click.wav" data-start="7.42" data-duration="0.366" data-track-index="15" data-volume="0.08"></audio>
+      <audio id="sx14" class="clip" src="assets/sfx/whoosh.wav" data-start="8.32" data-duration="0.574" data-track-index="16" data-volume="0.06"></audio>
+      <audio id="sx15" class="clip" src="assets/sfx/click.wav" data-start="8.32" data-duration="0.366" data-track-index="17" data-volume="0.08"></audio>
+      <audio id="sx16" class="clip" src="assets/sfx/pop.wav" data-start="8.49" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx17" class="clip" src="assets/sfx/pop.wav" data-start="10.24" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx18" class="clip" src="assets/sfx/pop.wav" data-start="10.37" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx19" class="clip" src="assets/sfx/pop.wav" data-start="10.50" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx20" class="clip" src="assets/sfx/pop.wav" data-start="10.63" data-duration="0.72" data-track-index="14" data-volume="0.045"></audio>
+      <audio id="sx21" class="clip" src="assets/sfx/whoosh.wav" data-start="11.24" data-duration="0.574" data-track-index="15" data-volume="0.06"></audio>
+      <audio id="sx22" class="clip" src="assets/sfx/pop.wav" data-start="12.02" data-duration="0.72" data-track-index="16" data-volume="0.045"></audio>
+      <audio id="sx23" class="clip" src="assets/sfx/pop.wav" data-start="14.41" data-duration="0.72" data-track-index="17" data-volume="0.045"></audio>
+      <audio id="sx24" class="clip" src="assets/sfx/pop.wav" data-start="14.59" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx25" class="clip" src="assets/sfx/pop.wav" data-start="14.77" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx26" class="clip" src="assets/sfx/pop.wav" data-start="15.62" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx27" class="clip" src="assets/sfx/click.wav" data-start="16.70" data-duration="0.366" data-track-index="13" data-volume="0.08"></audio>
+      <audio id="sx28" class="clip" src="assets/sfx/whoosh.wav" data-start="17.38" data-duration="0.574" data-track-index="14" data-volume="0.06"></audio>
+      <audio id="sx29" class="clip" src="assets/sfx/pop.wav" data-start="17.62" data-duration="0.72" data-track-index="15" data-volume="0.045"></audio>
+      <audio id="sx30" class="clip" src="assets/sfx/pop.wav" data-start="18.34" data-duration="0.72" data-track-index="16" data-volume="0.045"></audio>
+      <audio id="sx31" class="clip" src="assets/sfx/pop.wav" data-start="19.52" data-duration="0.72" data-track-index="17" data-volume="0.045"></audio>
+      <audio id="sx32" class="clip" src="assets/sfx/pop.wav" data-start="19.68" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx33" class="clip" src="assets/sfx/pop.wav" data-start="19.84" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx34" class="clip" src="assets/sfx/ping.wav" data-start="20.02" data-duration="1.32" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx35" class="clip" src="assets/sfx/whoosh.wav" data-start="20.34" data-duration="0.574" data-track-index="13" data-volume="0.06"></audio>
+      <audio id="sx36" class="clip" src="assets/sfx/pop.wav" data-start="20.54" data-duration="0.72" data-track-index="14" data-volume="0.045"></audio>
+      <audio id="sx37" class="clip" src="assets/sfx/pop.wav" data-start="20.66" data-duration="0.72" data-track-index="15" data-volume="0.045"></audio>
+      <audio id="sx38" class="clip" src="assets/sfx/pop.wav" data-start="20.78" data-duration="0.72" data-track-index="16" data-volume="0.045"></audio>
+      <audio id="sx39" class="clip" src="assets/sfx/pop.wav" data-start="21.06" data-duration="0.72" data-track-index="17" data-volume="0.045"></audio>
+      <audio id="sx40" class="clip" src="assets/sfx/pop.wav" data-start="21.46" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx41" class="clip" src="assets/sfx/sparkle.wav" data-start="24.12" data-duration="1.8" data-track-index="11" data-volume="0.035"></audio>
+      <audio id="sx42" class="clip" src="assets/sfx/whoosh.wav" data-start="25.17" data-duration="0.574" data-track-index="12" data-volume="0.06"></audio>
+      <audio id="sx43" class="clip" src="assets/sfx/pop.wav" data-start="25.93" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx44" class="clip" src="assets/sfx/sparkle.wav" data-start="26.19" data-duration="1.8" data-track-index="14" data-volume="0.035"></audio>
+      <audio id="sx45" class="clip" src="assets/sfx/pop.wav" data-start="26.89" data-duration="0.72" data-track-index="15" data-volume="0.045"></audio>
+      <audio id="sx46" class="clip" src="assets/sfx/pop.wav" data-start="27.19" data-duration="0.72" data-track-index="16" data-volume="0.045"></audio>
+      <audio id="sx47" class="clip" src="assets/sfx/click.wav" data-start="27.96" data-duration="0.366" data-track-index="17" data-volume="0.08"></audio>
+      <audio id="sx48" class="clip" src="assets/sfx/whoosh.wav" data-start="28.29" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx49" class="clip" src="assets/sfx/pop.wav" data-start="30.24" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx50" class="clip" src="assets/sfx/pop.wav" data-start="31.51" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx51" class="clip" src="assets/sfx/pop.wav" data-start="31.68" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx52" class="clip" src="assets/sfx/pop.wav" data-start="31.85" data-duration="0.72" data-track-index="14" data-volume="0.045"></audio>
+      <audio id="sx53" class="clip" src="assets/sfx/pop.wav" data-start="32.02" data-duration="0.72" data-track-index="15" data-volume="0.045"></audio>
+      <audio id="sx54" class="clip" src="assets/sfx/pop.wav" data-start="32.19" data-duration="0.72" data-track-index="16" data-volume="0.045"></audio>
+      <audio id="sx55" class="clip" src="assets/sfx/click.wav" data-start="33.47" data-duration="0.366" data-track-index="17" data-volume="0.08"></audio>
+      <audio id="sx56" class="clip" src="assets/sfx/ping.wav" data-start="33.57" data-duration="1.32" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx57" class="clip" src="assets/sfx/whoosh.wav" data-start="34.91" data-duration="0.574" data-track-index="11" data-volume="0.06"></audio>
+      <audio id="sx58" class="clip" src="assets/sfx/pop.wav" data-start="35.66" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx59" class="clip" src="assets/sfx/pop.wav" data-start="37.52" data-duration="0.72" data-track-index="13" data-volume="0.045"></audio>
+      <audio id="sx60" class="clip" src="assets/sfx/pop.wav" data-start="38.40" data-duration="0.72" data-track-index="14" data-volume="0.045"></audio>
+      <audio id="sx61" class="clip" src="assets/sfx/pop.wav" data-start="39.10" data-duration="0.72" data-track-index="15" data-volume="0.045"></audio>
+      <audio id="sx62" class="clip" src="assets/sfx/whoosh.wav" data-start="39.50" data-duration="0.574" data-track-index="16" data-volume="0.06"></audio>
+      <audio id="sx63" class="clip" src="assets/sfx/pop.wav" data-start="39.70" data-duration="0.72" data-track-index="17" data-volume="0.045"></audio>
+      <audio id="sx64" class="clip" src="assets/sfx/pop.wav" data-start="39.82" data-duration="0.72" data-track-index="10" data-volume="0.045"></audio>
+      <audio id="sx65" class="clip" src="assets/sfx/pop.wav" data-start="39.94" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx66" class="clip" src="assets/sfx/pop.wav" data-start="40.20" data-duration="0.72" data-track-index="12" data-volume="0.045"></audio>
+      <audio id="sx67" class="clip" src="assets/sfx/click.wav" data-start="40.85" data-duration="0.366" data-track-index="13" data-volume="0.08"></audio>
+      <audio id="sx68" class="clip" src="assets/sfx/ping.wav" data-start="42.06" data-duration="1.32" data-track-index="14" data-volume="0.045"></audio>
+      <audio id="sx69" class="clip" src="assets/sfx/ping.wav" data-start="43.62" data-duration="1.32" data-track-index="15" data-volume="0.045"></audio>
+      <audio id="sx70" class="clip" src="assets/sfx/ping.wav" data-start="44.32" data-duration="1.32" data-track-index="16" data-volume="0.045"></audio>
+      <audio id="sx71" class="clip" src="assets/sfx/pop.wav" data-start="45.07" data-duration="0.72" data-track-index="17" data-volume="0.045"></audio>
+      <audio id="sx72" class="clip" src="assets/sfx/whoosh.wav" data-start="46.60" data-duration="0.574" data-track-index="10" data-volume="0.06"></audio>
+      <audio id="sx73" class="clip" src="assets/sfx/pop.wav" data-start="46.94" data-duration="0.72" data-track-index="11" data-volume="0.045"></audio>
+      <audio id="sx74" class="clip" src="assets/sfx/click.wav" data-start="49.64" data-duration="0.366" data-track-index="12" data-volume="0.08"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+        const icon = (n) => { const d = ICONS[n]; if (!d) return ""; return d[0] === "lu"
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[1]}</svg>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor">${d[1]}</svg>`; };
+        const ic = (n, c) => `<span class="ic${c ? " " + c : ""}">${icon(n)}</span>`;
+
+        /* ---------- repeated markup ---------- */
+        const LANES = [["01", "file-text", "Panduan", "alur kerjanya", "baca tiap jalan"],
+          ["02", "table", "Topik", "antrean seminggu", "ambil paling atas"],
+          ["03", "palette", "Gaya", "naskah & motion", "biar konsisten"],
+          ["04", "mic", "Suara", "naskah jadi audio", "sekali jalan"]];
+        $("#pgLanes").innerHTML = LANES.map(([n, i, t, s, j], k) => `<div class="pl" id="pl${k}"><span class="no">${n}</span><span class="bx">${ic(i)}</span>`
+          + `<span class="tx"><b>${t}</b><em>${s}</em></span><span class="jb">${j}</span></div>`).join("");
+
+        const DOCL = [["Baca antrean topik", 0], ["Tulis naskah pakai aturan", 0], ["Bikin motion-nya", 0], ["Ubah naskah jadi suara", 1], ["Kirim kabar ke HP", 0]];
+        $("#pnDoc").innerHTML = `<div style="font-size:13px;font-weight:700;letter-spacing:2.4px;color:rgba(10,13,44,0.55);white-space:nowrap">URUTAN KERJA</div>`
+          + DOCL.map(([t, e], k) => `<div class="dk${e ? " edit" : ""}" id="dk${k}" style="margin-top:${k ? 0 : 14}px"><span class="bx">${ic("check")}</span><span>${t}</span>${e ? '<span id="pnCaret"></span>' : ""}</div>`).join("");
+
+        const ROWS = [["Sen", "Hook yang bikin berhenti scroll"], ["Sel", "Tiga kesalahan bikin konten"], ["Rab", "Cara nyusun naskah cepat"],
+          ["Kam", "Alat yang kepake tiap hari"], ["Jum", "Bedah konten yang rame"], ["Sab", "Tanya jawab singkat"], ["Min", "Rekap seminggu"]];
+        $("#tbWrap").insertAdjacentHTML("beforeend", ROWS.map(([d, t], k) => `<div class="tr" id="tr${k}"><span class="c1"><i>${d}</i></span><span class="c2">${t}</span>`
+          + `<span class="c3"><span class="sp" id="sp${k}">${ic("circle-dot")}<em style="font-style:normal">Belum</em></span></span></div>`).join(""));
+
+        const EPS = [["EPISODE 10", "Hook yang bikin berhenti scroll"], ["EPISODE 11", "Tiga kesalahan bikin konten"], ["EPISODE 12", "Cara nyusun naskah cepat"]];
+        $("#gyCards").innerHTML = EPS.map(([e, t], k) => `<div class="gc" id="gc${k}" style="left:${k * 284}px">`
+          + `<div class="ep">${e}</div><div class="th"><div class="ttl">${t}</div><div class="hd2"></div></div>`
+          + `<div class="gf" id="gfa${k}"><em>Tipografi</em><i></i></div><div class="gf b" id="gfb${k}"><em>Warna</em><i></i></div><div class="gf c" id="gfc${k}"><em>Motion</em><i></i></div></div>`).join("");
+
+        $("#swBars").innerHTML = Array.from({ length: 48 }, (_, k) => {
+          const h = [26, 54, 38, 82, 46, 68, 30, 92, 50, 74, 34, 60][k % 12];
+          return `<i id="wb${k}" style="height:${h}%"></i>`; }).join("");
+
+        const FNODE = [["bot", "Dia kerja"], ["send", "Kirim kabar"], ["eye", "Lu cek"], ["check", "Lu bilang oke"]];
+        $("#flNodes").innerHTML = FNODE.map(([i, t], k) => `<div class="fn" id="fn${k}" style="left:${100 + k * 184}px">`
+          + `<span class="bx">${ic(i)}</span><em>${t}</em></div>`).join("");
+
+        const GATES = [["GERBANG 01", "table", "Topik"], ["GERBANG 02", "file-text", "Naskah"], ["GERBANG 03", "play", "Preview"]];
+        $("#gtRow").innerHTML = GATES.map(([n, i, t], k) => `<div class="gt2" id="gt${k}" style="left:${k * 274}px">`
+          + `<div class="no">${n}</div><span class="bx">${ic(i)}</span><b>${t}</b><span class="ok2" id="gok${k}">${ic("check")}Lu setujui</span></div>`).join("");
+
+        const IDEAS = ["Bongkar alat yang lu pakai", "Kesalahan pas mulai konten", "Satu hari tanpa buka laptop", "Cara ngecek hasil AI", "Checklist sebelum posting"];
+        $("#pIdea").insertAdjacentHTML("beforeend", IDEAS.map((t, k) => `<div class="idr${k === 1 ? " pick" : ""}" id="id${k}" style="top:${96 + k * 92}px"><span class="no">${k + 1}</span><span>${t}</span></div>`).join("")
+          + `<div id="pIdReply">${ic("send")}Bales "2"</div><div id="pIdAny">dari mana aja</div>`);
+
+        /* ---------- captions ---------- */
+        const KEY = new Set(["laptop", "video", "sendiri", "mall", "oke", "hp", "simulasinya", "nyala", "empat", "sore", "prompt", "panjang", "bagian",
+          "panduan", "jadwal", "alurnya", "edit", "file", "topik", "seminggu", "statusnya", "naskah", "motion", "gaya", "videonya", "sama",
+          "suara", "voice", "over", "sekali", "jalan", "abis", "riset", "lima", "ide", "nomornya", "mana", "aja", "simpel", "kerja", "kabar",
+          "cek", "ke-posting", "tiga", "gerbang", "preview", "keputusan", "akhir", "tangan", "lu", "link", "bio", "aipreneur", "automation"]);
+        const caps = $("#caps");
+        const capEls = VO_PHR.map((p, k) => { const el = document.createElement("div"); el.className = "cap"; const ws = VO_WORDS.filter((w) => w[3] === k);
+          el.innerHTML = `<span class="in">${ws.map((w) => `<s class="${KEY.has(w[0].toLowerCase().replace(/[^a-z0-9-]/g, "")) ? "k" : ""}">${w[0]}</s>`).join(" ")}</span>`; caps.appendChild(el); return { el, ws, p }; });
+
+        $$("[data-i]").forEach((el) => (el.innerHTML = icon(el.dataset.i)));
+        $("#cursor").innerHTML = `<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#fff" stroke="#294b77" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+
+        /* ---------- timeline ---------- */
+        const tl = gsap.timeline({ paused: true });
+        const ft = (el, a, b, at) => tl.fromTo(el, a, Object.assign({ immediateRender: false }, b), at);
+        const st = (el, v, at) => tl.set(el, v, at);
+        const PH = VO_PHR, ph = (s) => PH.find((p) => p.text.startsWith(s));
+        const wt = (s, w) => { const k = PH.indexOf(ph(s)); const x = VO_WORDS.find((v) => v[3] === k && v[0].toLowerCase().startsWith(w.toLowerCase())); return x ? x[1] : ph(s).start; };
+        const D = 53.9;
+        const win = $("#win");
+        const posIn = (el) => { let x = 0, y = 0, e = el; while (e && e !== win) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 }; };
+        let cur = { x: 760, y: 820 };
+        st("#cursor", { x: cur.x, y: cur.y, opacity: 0 }, 0);
+        const moveTo = (x, y, at, dur) => { ft("#cursor", { x: cur.x, y: cur.y }, { x, y, duration: dur || 0.6, ease: "power2.inOut" }, at); cur = { x, y }; };
+        const moveEl = (el, at, dur, dx, dy) => { const p = posIn(el); moveTo(p.x + (dx || 0), p.y + (dy || 0), at, dur); };
+        const jumpTo = (x, y, at) => { st("#cursor", { x, y }, at); cur = { x, y }; };
+        const click = (at) => { ft("#cursor", { scale: 1 }, { keyframes: [{ scale: 0.82 }, { scale: 1 }], duration: 0.22 }, at);
+          ft("#ripple", { x: cur.x, y: cur.y, scale: 0.2, opacity: 0.9 }, { scale: 1.1, opacity: 0, duration: 0.55, ease: "power2.out" }, at); };
+        const count = (el, from, to, at, dur, fmt) => { const o = { v: from }; ft(o, { v: from }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt ? fmt(o.v) : Math.round(o.v)) }, at); };
+        const popIn = (el, at, o) => ft(el, { opacity: 0, scale: 0.8, y: 16 }, Object.assign({ opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.6)" }, o || {}), at);
+        const TABS = ["#tabJadwal", "#tabBagian", "#tabTopik", "#tabGaya"];
+        const tabSet = (sel, at) => { const el = $(sel); st("#tabPill", { x: el.offsetLeft - 4, width: el.offsetWidth }, at); TABS.forEach((s) => st(s, { color: s === sel ? "#2f6fe4" : "rgba(10,13,44,0.55)" }, at)); };
+
+        /* camera inside the window frame (screen-recording style) */
+        const VW = 920, VH = 950;
+        const cState = (x, y, s) => { let X = VW / 2 - x * s, Y = VH / 2 - y * s;
+          if (s >= 1) { X = Math.min(0, Math.max(VW - VW * s, X)); Y = Math.min(0, Math.max(VH - VH * s, Y)); } return { x: X, y: Y, scale: s }; };
+        let cc = cState(460, 475, 1);
+        const SHOTS = [];
+        const camSet = (x, y, s, at) => { cc = cState(x, y, s); st("#wcam", cc, at); SHOTS.push({ t: at, d: 0, c: cc }); };
+        const camTo = (x, y, s, at, dur, ease) => { const nx = cState(x, y, s); ft("#wcam", cc, Object.assign({}, nx, { duration: dur || 0.8, ease: ease || "power3.inOut" }), at); cc = nx; SHOTS.push({ t: at, d: dur || 0.8, c: nx, e: ease || "power3.inOut" }); };
+
+        const FX = REEL_FX({ tl, ft, st, $, $$, D, r3d: window.R3D, base: "light" });
+        Object.assign(FX.POSE.peekR, { x: 530, y: 20, r: -6 }); Object.assign(FX.POSE.peekL, { x: -110, y: 20, r: 6 });
+        Object.assign(FX.POSE.upR, { x: 500 }); Object.assign(FX.POSE.upL, { x: -110 });
+        FX.theme("light", 0);
+        ft("#glow", { x: 0, y: 0 }, { x: 200, y: 340, duration: D, ease: "sine.inOut" }, 0);
+
+        /* ---------- initial states ---------- */
+        st(win, { opacity: 0, scale: 0.2, transformPerspective: 2000, transformOrigin: "460px 170px" }, 0);
+        st(["#vBagian", "#vPanduan", "#vTopik", "#vGaya", "#vSuara", "#vAlur", "#vGerbang", "#cta", "#pIdea", "#pFinal"], { opacity: 0 }, 0);
+        st(["#pIdea", "#pFinal"], { transformPerspective: 1400 }, 0);
+        st(["#dial", "#dialNum", "#dialSub", "#pgLanes", "#flRail", "#flNodes", "#gtRow", "#gtAuto", "#tbCnt", "#gySame", "#swArrow"], { opacity: 0 }, 0);
+        st("#lapTrk i", { width: 0 }, 0);
+        st("#flRun", { width: 0 }, 0);
+        st(".vnote", { opacity: 0 }, 0);
+        tabSet("#tabJadwal", 0);
+        camSet(460, 475, 1, 0);
+
+        /* ---------- anchors ---------- */
+        const tLap = ph("Laptop gue ngerjain").start, tMall = ph("gue lagi makan").start, tOke = ph("tinggal bales oke").start;
+        const tCek = ph("Cek simulasinya.").start, tNyala = ph("Sistemnya nyala sendiri").start, tSore = wt("Sistemnya nyala sendiri", "sore");
+        const tBukan = ph("Ini bukan satu prompt").start, tEmpat = ph("tapi empat bagian.").start;
+        const tB1 = ph("Bagian satu:").start, tJadwal = wt("Bagian satu:", "jadwal");
+        const tGanti = ph("Mau ganti alurnya?").start, tEdit = ph("Edit file itu aja.").start;
+        const tB2 = ph("Bagian dua:").start, tStatus = wt("Bagian dua:", "statusnya");
+        const tB3 = ph("Bagian tiga:").start, tBiar = ph("Biar gaya videonya").start;
+        const tB4 = ph("Bagian empat:").start, tSekali = ph("sekali jalan.").start;
+        const tAbis = ph("Pas topiknya abis,").start, tRiset = ph("dia riset sendiri,").start, tLima = ph("terus kirim lima ide").start;
+        const tBales = ph("Tinggal bales nomornya,").start, tMana = ph("dari mana aja.").start;
+        const tAlur = ph("Alurnya simpel: dia kerja,").start, tKabar = ph("kirim kabar,").start, tCekN = ph("gue cek,").start, tOkeN = ph("gue bilang oke.").start;
+        const tNggak = ph("Nggak ada yang ke-posting").start;
+        const tGerbang = ph("Ada tiga gerbang: topik,").start, tNaskah = ph("naskah,").start, tPreview = ph("preview.").start;
+        const tKeputusan = ph("Keputusan akhir tetep").start;
+        const tCta = ph("Mau sistem kayak gini").start, tF = wt("Klik link di bio,", "link");
+        const tNgobrol = ph("ngobrol langsung sama").start;
+
+        /* ===== S1 · HOOK — full-bleed laptop + phone, no window, no slogan card ===== */
+        FX.enter("home", 0.0); FX.wave(0.55);
+        ft("#lapWrap", { opacity: 0, y: 44, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" }, 0.12);
+        $$("#lapClips i").forEach((el, k) => ft(el, { opacity: 0.25 }, { opacity: 1, duration: 0.22 }, 0.72 + k * 0.1));
+        $$("#lapClips i").forEach((el, k) => st(el, { className: "on" }, 0.74 + k * 0.1));
+        ft("#lapTrk i", { width: "0%" }, { width: "100%", duration: 2.5, ease: "power1.inOut" }, 0.7);
+        count($("#lapPct"), 0, 100, 0.7, 2.5, (v) => Math.round(v) + "%");
+        popIn("#hAway", tLap + 1.0);
+        ft("#lapDone", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.5)" }, 3.3);
+        FX.face("flat", tLap + 0.2, 1.1); FX.hop(tLap + 1.15, 52);
+
+        popIn("#hMall", tMall + 0.05);
+        ft("#phWrap", { opacity: 0, x: 52, y: 28 }, { opacity: 1, x: 0, y: 0, duration: 0.45, ease: "power3.out" }, tMall + 0.12);
+        ft("#phCard", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.36, ease: "back.out(1.4)" }, tMall + 0.32);
+        FX.hop(tMall + 0.15, 46); FX.face("wide", tMall + 0.3, 0.9);
+
+        /* the OK is tapped — a thumb ring, not a cursor: this beat is a phone, not an app */
+        ft("#hThumbTap", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.18, ease: "power2.out" }, tOke + 0.30);
+        ft("#phOke", { scale: 1 }, { keyframes: [{ scale: 0.93, duration: 0.14 }, { scale: 1, duration: 0.22 }] }, tOke + 0.34);
+        ft("#hThumbTap", { opacity: 1, scale: 1 }, { opacity: 0, scale: 1.7, duration: 0.45, ease: "power2.out" }, tOke + 0.46);
+        ft("#phBtns", { opacity: 1 }, { opacity: 0.35, duration: 0.26, ease: "power2.in" }, tOke + 0.52);
+        ft("#phSent", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.34, ease: "back.out(1.5)" }, tOke + 0.60);
+        FX.point(tOke + 0.30); FX.face("happy", tOke + 0.62, 0.9);
+
+        /* ===== ZOOM 1 · punch through the laptop screen into the app ===== */
+        const tZ1 = tCek - 0.80;
+        st("#hook", { transformOrigin: "290px 165px" }, 0);
+        ft("#hook", { scale: 1 }, { scale: 4.4, duration: 0.7, ease: "power3.in" }, tZ1);
+        ft("#hook", { opacity: 1 }, { opacity: 0, duration: 0.26, ease: "power1.in" }, tZ1 + 0.4);
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.36, duration: 0.09 }, { opacity: 0, duration: 0.26 }] }, tZ1 + 0.4);
+        st("#hookClip", { display: "none" }, tZ1 + 0.78);
+        ft(win, { opacity: 0, scale: 0.26 }, { opacity: 1, scale: 1, duration: 0.56, ease: "power3.out" }, tZ1 + 0.46);
+        FX.go("center", tZ1 + 0.2, 0.9);
+
+        /* ===== S2 · schedule dial (round — nothing else in the reel is) ===== */
+        const tDial = tZ1 + 0.95;
+        ft("#dial", { opacity: 0, scale: 0.84 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, tDial);
+        ft("#dialArc", { attr: { "stroke-dasharray": 402, "stroke-dashoffset": 402 } }, { attr: { "stroke-dashoffset": 110 }, duration: 1.5, ease: "power2.inOut" }, tDial + 0.2);
+        // svgOrigin (SVG user space), not transformOrigin — the latter uses the line's own thin bbox and flings the hand off the dial
+        ft("#dHandM", { rotation: 0, svgOrigin: "150 150" }, { rotation: 720, duration: 1.8, ease: "power2.inOut" }, tDial + 0.2);
+        ft("#dHandH", { rotation: 0, svgOrigin: "150 150" }, { rotation: 120, duration: 1.8, ease: "power2.inOut" }, tDial + 0.2);
+        ft("#dialNum", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tNyala + 0.25);
+        ft("#dialSub", { opacity: 0 }, { opacity: 1, duration: 0.35 }, tNyala + 0.5);
+        popIn("#schCard", tNyala + 0.1);
+        $$(".srow").forEach((el, k) => ft(el, { opacity: 0, x: 22 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, tNyala + 0.5 + k * 0.24));
+        ft("#schFoot", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.36, ease: "power2.out" }, tNyala + 1.0);
+        FX.go("right", tDial - 0.1, 0.9); FX.point(tNyala + 0.35); FX.face("excited", tNyala + 0.4, 0.9);
+
+        /* ===== S3 · one long prompt splits into four lanes ===== */
+        const tT2 = tBukan - 0.55;
+        camTo(460, 420, 1, tT2 - 0.3, 0.5);
+        moveEl($("#tabBagian"), tT2 - 0.45, 0.5); click(tT2 - 0.05);
+        st(["#vJadwal"], { opacity: 0 }, tT2 + 0.06); st("#vBagian", { opacity: 1 }, tT2 + 0.06); tabSet("#tabBagian", tT2 + 0.06);
+        ft("#cursor", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tT2 - 0.5);
+        ft("#cursor", { opacity: 1 }, { opacity: 0, duration: 0.18 }, tT2 + 0.2);
+        ft("#pgOne", { opacity: 0, y: 24, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, tT2 + 0.12);
+        ft("#pgOne", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.9, duration: 0.26, ease: "power2.in" }, tEmpat - 0.45);
+        ft("#pgLanes", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tEmpat - 0.26);
+        $$(".pl").forEach((el, k) => ft(el, { opacity: 0, y: 34, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: "back.out(1.4)" }, tEmpat - 0.24 + k * 0.13));
+        ft(".vnote", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tEmpat + 0.42);
+        FX.go("center", tT2 - 0.2, 0.9); FX.point(tEmpat + 0.1); FX.face("wide", tBukan + 0.1, 0.9);
+
+        /* ===== FX.iris -> S4 guide file (sheet on the LEFT, robot rises RIGHT) ===== */
+        const tW1 = tB1 - 0.62;
+        FX.iris(tW1, "light", (m) => { st("#vBagian", { opacity: 0 }, m); st("#vPanduan", { opacity: 1 }, m); tabSet("#tabBagian", m); camSet(460, 420, 1, m); }, { x: 540, y: 760, ex: 600, ey: 760 });
+        ft("#pnTab", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, tB1 + 0.1);
+        ft("#pnDoc", { opacity: 0, y: 26, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, tB1 + 0.16);
+        $$(".dk").forEach((el, k) => ft(el, { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.28, ease: "power2.out" }, tB1 + 0.5 + k * 0.2));
+        $$(".dk").forEach((el, k) => { if (k < 3) { const at = tJadwal - 0.2 + k * 0.18; st(el, { className: el.className + " on" }, at);
+          ft(el, { backgroundColor: "rgba(31,168,85,0)" }, { keyframes: [{ backgroundColor: "rgba(31,168,85,0.14)", duration: 0.16 }, { backgroundColor: "rgba(31,168,85,0)", duration: 0.5 }] }, at);
+          ft($(".bx", el), { scale: 1 }, { keyframes: [{ scale: 1.22, duration: 0.14, ease: "back.out(3)" }, { scale: 1, duration: 0.24 }] }, at); } });
+        popIn("#pnFree", tGanti + 0.1);
+        ft("#pnCaret", { opacity: 0 }, { keyframes: [{ opacity: 1, duration: 0.12 }, { opacity: 0, duration: 0.2 }, { opacity: 1, duration: 0.2 }, { opacity: 0, duration: 0.22 }, { opacity: 1, duration: 0.2 }], repeat: 1 }, tEdit - 0.1);
+        ft("#dk3", { backgroundColor: "#eaf2ff" }, { backgroundColor: "#d9e8ff", duration: 0.3, yoyo: true, repeat: 1 }, tEdit + 0.1);
+        ft("#pnDoc", { y: 0, scale: 1 }, { y: -14, scale: 1.03, duration: 0.5, ease: "power2.out" }, tGanti - 0.15);
+        ft("#pnDoc", { boxShadow: "0 22px 50px rgba(41,75,119,0.14)" }, { boxShadow: "0 30px 64px rgba(41,75,119,0.22)", duration: 0.5 }, tGanti - 0.15);
+        FX.go("upR", tB1 + 0.3, 1.0); FX.point(tGanti + 0.35); FX.face("happy", tEdit + 0.1, 1.0);
+
+        /* ===== camera slide -> S5 week table ===== */
+        const tT3 = tB2 - 0.46;
+        FX.go("home", tT3 - 0.15, 0.95);
+        ft("#pnDoc", { opacity: 1, x: 0 }, { opacity: 0, x: -70, duration: 0.20, ease: "power2.in" }, tT3);
+        ft(["#pnTab", "#pnFree"], { opacity: 1 }, { opacity: 0, duration: 0.18, ease: "power2.in" }, tT3);
+        st(["#vPanduan"], { opacity: 0 }, tT3 + 0.22); st("#vTopik", { opacity: 1 }, tT3 + 0.22); tabSet("#tabTopik", tT3 + 0.22);
+        camSet(460, 420, 1, tT3 + 0.22);
+        ft("#tbWrap", { opacity: 0, x: 70 }, { opacity: 1, x: 0, duration: 0.26, ease: "power3.out" }, tT3 + 0.24);
+        $$(".tr").forEach((el, k) => ft(el, { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.22, ease: "power2.out" }, tT3 + 0.30 + k * 0.045));
+        ft("#tbCnt", { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, tB2 + 0.5);
+        /* statuses settle: three done, one running, the rest queued */
+        [0, 1, 2].forEach((k) => { st($("#sp" + k), { className: "sp dn" }, tStatus - 0.5 + k * 0.16);
+          st($("#sp" + k).querySelector("em"), { innerHTML: "Selesai" }, tStatus - 0.5 + k * 0.16); });
+        st($("#sp3"), { className: "sp go" }, tStatus - 0.02); st($("#sp3").querySelector("em"), { innerHTML: "Proses" }, tStatus - 0.02);
+        ft("#sp3", { scale: 1 }, { keyframes: [{ scale: 1.08, duration: 0.16 }, { scale: 1, duration: 0.26 }] }, tStatus);
+        ft(".vnote", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tB2 + 0.9);
+        FX.point(tStatus - 0.1); FX.face("excited", tB2 + 0.3, 0.9);
+
+        /* ===== FX.doors -> S6 three episode cards with one fingerprint ===== */
+        const tW2 = tB3 - 0.62;
+        FX.doors(tW2, "light", (m) => { st("#vTopik", { opacity: 0 }, m); st("#vGaya", { opacity: 1 }, m); tabSet("#tabGaya", m); camSet(460, 420, 1, m); });
+        $$(".gc").forEach((el, k) => ft(el, { opacity: 0, y: 34, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "power3.out" }, tW2 + 0.2 + k * 0.12));
+        $$(".gr").forEach((el, k) => ft(el, { opacity: 0, y: -14, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.6)" }, tB3 + 0.1 + k * 0.4));
+        [0, 1, 2].forEach((k) => ["a", "b", "c"].forEach((s, j) => ft("#gf" + s + k, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.26, ease: "power2.out" }, tBiar - 0.5 + j * 0.2 + k * 0.07)));
+        ft("#gySame", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.5)" }, tBiar + 0.12);
+        FX.go("right", tW2 - 0.1, 0.95); FX.point(tBiar + 0.25); FX.face("happy", tBiar + 0.3, 1.0);
+
+        /* ===== ZOOM 2 · punch into the script line -> the waveform scene ===== */
+        const tZ2 = tB4 - 0.68;
+        camTo(240, 320, 2.2, tZ2, 0.46, "power3.in");
+        ft(["#gyCards", "#gyRules", "#gySame"], { opacity: 1 }, { opacity: 0, duration: 0.22, ease: "power1.in" }, tZ2 + 0.2);
+        const tPk = tZ2 + 0.5;
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.3, duration: 0.08 }, { opacity: 0, duration: 0.24 }] }, tPk - 0.08);
+        st("#vGaya", { opacity: 0 }, tPk); st("#vSuara", { opacity: 1 }, tPk);
+        camSet(460, 250, 1.6, tPk); camTo(460, 420, 1, tPk + 0.02, 0.5, "power3.out");
+        ft("#swLine", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, tPk + 0.06);
+        ft("#swArrow", { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, tPk + 0.3);
+        ft("#swWave", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, tPk + 0.46);
+        $$("#swBars i").forEach((el, k) => ft(el, { scaleY: 0 }, { scaleY: 1, duration: 0.26, ease: "power2.out" }, tPk + 0.56 + k * 0.013));
+        popIn("#swRun", tB4 + 1.08); popIn("#swDur", tB4 + 1.38);
+        ft("#swRun", { scale: 1 }, { keyframes: [{ scale: 1.06, duration: 0.16, ease: "power2.out" }, { scale: 1, duration: 0.26 }] }, tSekali);
+        ft(".vnote", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tB4 + 1.6);
+        FX.go("center", tPk + 0.1, 0.9); FX.point(tB4 + 0.9); FX.face("excited", tSekali, 0.9);
+
+        /* ===== 3D swing + phone pop-out (breaks out of the window, RIGHT half) ===== */
+        const tSw = tAbis - 0.55;
+        st(win, { transformOrigin: "0% 50%" }, tSw - 0.01);
+        ft(win, { rotationY: 0, x: 0 }, { rotationY: 17, x: -46, duration: 0.6, ease: "power3.out" }, tSw);
+        ft(win, { opacity: 1 }, { opacity: 0.3, duration: 0.45 }, tRiset - 0.42);
+        ft(["#swLine", "#swWave", "#swRun", "#swDur", "#swArrow", "#vSuara .vhd", "#vSuara .vnote"], { opacity: 1 }, { opacity: 0, duration: 0.32, ease: "power2.in" }, tRiset - 0.4);
+        ft("#pIdea", { opacity: 0, x: 60, y: 30, scale: 0.9 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }, tRiset - 0.1);
+        $$("#pIdWait .dts i").forEach((el, k) => ft(el, { opacity: 0.25 }, { opacity: 1, duration: 0.26, yoyo: true, repeat: 3, ease: "sine.inOut" }, tRiset + 0.2 + k * 0.14));
+        ft("#pIdWait", { opacity: 1 }, { opacity: 0, duration: 0.24, ease: "power2.in" }, tLima - 0.18);
+        $$(".idr").forEach((el, k) => ft(el, { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, tLima + 0.05 + k * 0.17));
+        ft("#id1", { scale: 1 }, { keyframes: [{ scale: 1.05, duration: 0.18 }, { scale: 1, duration: 0.26 }] }, tBales + 0.25);
+        popIn("#pIdReply", tBales + 0.35);
+        ft("#pIdAny", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tMana + 0.05);
+        FX.go("right", tSw - 0.05, 0.95); FX.point(tLima + 0.1);
+        FX.go("upL", tBales - 0.35, 1.0); FX.point(tMana - 0.05); FX.face("excited", tLima + 0.2, 1.0);
+
+        /* ===== ZOOM 3 · pull back out of the pop-out into the flow chain ===== */
+        const tZ3 = tAlur - 0.6;
+        ft("#pIdea", { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.86, duration: 0.36, ease: "power2.in" }, tZ3 + 0.14);
+        ft(win, { rotationY: 17, x: -46, opacity: 0.3 }, { rotationY: 0, x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, tZ3);
+        st("#vSuara", { opacity: 0 }, tZ3 + 0.2); st("#vAlur", { opacity: 1 }, tZ3 + 0.2);
+        camSet(460, 420, 1.26, tZ3 + 0.2); camTo(460, 420, 1, tZ3 + 0.22, 0.5, "power3.out");
+        ft("#flRail", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tZ3 + 0.26);
+        ft("#flNodes", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tZ3 + 0.26);
+        $$(".fn").forEach((el, k) => ft(el, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, tZ3 + 0.3 + k * 0.1));
+        ft("#flDot", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tAlur + 0.1);
+        const FT = [tAlur + 0.15, tKabar, tCekN, tOkeN];
+        FT.forEach((t, k) => { st($("#fn" + k), { className: "fn on" }, t);
+          ft("#fn" + k, { scale: 1 }, { keyframes: [{ scale: 1.07, duration: 0.16 }, { scale: 1, duration: 0.24 }] }, t);
+          ft("#flRun", { width: (k ? (k / 4) * 100 : 6) + "%" }, { width: ((k + 1) / 4) * 100 + "%", duration: Math.max(0.3, (FT[k + 1] || tOkeN + 0.6) - t), ease: "none" }, t);
+          ft("#flDot", { left: (k ? (k / 4) * 100 : 6) + "%" }, { left: ((k + 1) / 4) * 100 + "%", duration: Math.max(0.3, (FT[k + 1] || tOkeN + 0.6) - t), ease: "none" }, t); });
+                FX.go("right", tZ3 + 0.1, 0.95); FX.point(tKabar + 0.1); FX.face("happy", tOkeN + 0.5, 1.1);
+
+        /* ===== FX.shutter -> S10 three gates (plate on the LEFT, robot rises RIGHT) ===== */
+        const tW3 = tNggak - 0.6;
+        FX.shutter(tW3, "light", (m) => { st("#vAlur", { opacity: 0 }, m); st("#vGerbang", { opacity: 1 }, m); camSet(460, 420, 1, m); });
+        ft("#gtAuto", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, tNggak + 0.05);
+        ft("#gtStrike", { scaleX: 0 }, { scaleX: 1, duration: 0.42, ease: "power2.inOut" }, tNggak + 0.75);
+        ft("#gtRow", { opacity: 0 }, { opacity: 1, duration: 0.2 }, tW3 + 0.16);
+        const GT = [tGerbang + 0.1, tNaskah, tPreview];
+        $$(".gt2").forEach((el, k) => ft(el, { opacity: 0, y: 30, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.38, ease: "back.out(1.4)" }, tW3 + 0.2 + k * 0.12));
+        GT.forEach((t, k) => ft("#gt" + k, { scale: 1 }, { keyframes: [{ scale: 1.045, duration: 0.18, ease: "power2.out" }, { scale: 1, duration: 0.3 }] }, t - 0.05));
+        GT.forEach((t, k) => ft("#gok" + k, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.9)" }, t - (k ? 0.12 : -0.05)));
+        ft(".vnote", { opacity: 0 }, { opacity: 1, duration: 0.3 }, tNggak + 0.5);
+        ft(["#gtRow", "#gtAuto", "#vGerbang .vhd", "#vGerbang .vnote"], { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power2.in" }, tKeputusan - 0.3);
+        ft(win, { opacity: 1 }, { opacity: 0.22, duration: 0.36 }, tKeputusan - 0.28);
+        ft("#pFinal", { opacity: 0, x: -44, scale: 0.92 }, { opacity: 1, x: 0, scale: 1, duration: 0.42, ease: "power3.out" }, tKeputusan - 0.05);
+        FX.go("center", tW3 - 0.1, 0.95); FX.point(tGerbang + 0.3);
+        FX.go("upR", tKeputusan - 0.35, 0.9); FX.face("excited", tKeputusan + 0.2, 1.0);
+
+        /* ===== ZOOM 4 · everything zooms through into the CTA ===== */
+        const tZ4 = tCta - 0.72;
+        ft(["#pFinal", win], { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power1.in" }, tZ4);
+        ft(["#pFinal", win], { scale: 1 }, { scale: 1.45, duration: 0.5, ease: "power3.in" }, tZ4);
+        ft("#wFlash", { opacity: 0 }, { keyframes: [{ opacity: 0.4, duration: 0.09 }, { opacity: 0, duration: 0.26 }] }, tZ4 + 0.24);
+        ft("#cta", { opacity: 0, scale: 0.72 }, { opacity: 1, scale: 1, duration: 0.52, ease: "power3.out" }, tZ4 + 0.34);
+        FX.go("home", tZ4 + 0.1, 0.95);
+        FX.wave(tCta + 0.08); FX.point(tF - 0.2); FX.face("happy", tF + 0.05, 1.2);
+        ft("#fbtn", { scale: 1 }, { keyframes: [{ scale: 0.9 }, { scale: 1.07 }, { scale: 1 }], duration: 0.4 }, tF - 0.05);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(47,111,228,0.5)" }, { boxShadow: "0 0 0 22px rgba(47,111,228,0)", duration: 0.7 }, tF + 0.05);
+        ft("#cta .name", { scale: 1 }, { keyframes: [{ scale: 1.035, duration: 0.3, ease: "power2.out" }, { scale: 1, duration: 0.5, ease: "sine.inOut" }] }, tNgobrol + 0.45);
+        ft("#cta", { y: 0 }, { y: -16, duration: 1.6, ease: "sine.inOut" }, tNgobrol);
+        ft("#fbtn", { boxShadow: "0 0 0 0 rgba(47,111,228,0)" }, { boxShadow: "0 0 0 18px rgba(47,111,228,0)", duration: 0.7 }, tNgobrol + 1.05);
+        FX.face("excited", D - 1.5, 0.9);
+
+        /* ---------- captions ---------- */
+        capEls.forEach(({ el, ws, p }, k) => {
+          const next = capEls[k + 1];
+          const end = next ? Math.min(next.p.start, p.end + 0.45) : p.end + 0.6;
+          const tin = Math.max(0, p.start - 0.05), tout = Math.max(tin + 0.3, end - 0.2);
+          ft(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out" }, tin);
+          $$("s", el).forEach((s, i) => ft(s, { opacity: 0.35 }, { opacity: 1, duration: 0.22, ease: "sine.out" }, Math.max(0, ws[i][1] - 0.05)));
+          ft(el, { opacity: 1, y: 0 }, { opacity: 0, y: -6, duration: 0.16, ease: "power1.in" }, tout);
+        });
+
+        /* ---------- no-cut-text guard: text sliced by the camera frame fades out for that shot ---------- */
+        { const wc = $("#wcam"), wr = wc.getBoundingClientRect(), k = wr.width / VW;
+          const leaves = $$("#wcam *").filter((e) => e.tagName.toLowerCase() === "text" || Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim()));
+          const UNIT = ".vhd, .vnote, .pl, .dk, #pnTab, #pnFree, .tr, #tbHd, #tbCnt, .gr, .gc, #gySame, #swLine, #swRun, #swDur, .fn, .gt2, #gtAuto, #schCard, .srow, #schTick, #dialNum, #dialSub, #schFoot, #pgOne, #tabs, #tbar .app, #sim";
+          const box = (r) => ({ x0: (r.left - wr.left) / k, y0: (r.top - wr.top) / k, x1: (r.right - wr.left) / k, y1: (r.bottom - wr.top) / k });
+          const textBox = (e) => { if (e.tagName.toLowerCase() === "text") return box(e.getBoundingClientRect());
+            const rg = document.createRange(); let u = null;
+            Array.from(e.childNodes).filter((n) => n.nodeType === 3 && n.textContent.trim()).forEach((n) => { rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
+            return u ? box(u) : box(e.getBoundingClientRect()); };
+          const seen = new Set(), R = [];
+          leaves.forEach((e) => { const u = e.closest(UNIT); const tgt = u && wc.contains(u) ? u : e; if (seen.has(tgt)) return; seen.add(tgt);
+            const q = Object.assign({ e: tgt }, (tgt === e && !u) ? textBox(e) : box(tgt.getBoundingClientRect())); if (q.x1 - q.x0 > 1 && q.y1 - q.y0 > 1) R.push(q); });
+          const sh = SHOTS.slice().sort((a, b) => a.t - b.t);
+          const cut = (q, c) => { const sc = c.scale, v0x = -c.x / sc, v0y = -c.y / sc, v1x = v0x + VW / sc, v1y = v0y + VH / sc, m = 3;
+            const inter = q.x1 > v0x && q.x0 < v1x && q.y1 > v0y && q.y0 < v1y, inside = q.x0 >= v0x + m && q.x1 <= v1x - m && q.y0 >= v0y + m && q.y1 <= v1y - m;
+            return inter && !inside; };
+          const lerp = (a, b, f) => ({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, scale: a.scale + (b.scale - a.scale) * f });
+          R.forEach((q) => { let prev = false; const E = sh.map((S) => cut(q, S.c));
+            sh.forEach((S, i) => { const nextT = i + 1 < sh.length ? sh[i + 1].t : D, inT = Math.max(S.t, Math.min(S.t + S.d - 0.05, nextT - 0.3));
+              let h = E[i]; if (!h && prev && i + 1 < sh.length && E[i + 1] && nextT - inT < 0.5) h = true;
+              let mA = -1, mB = -1;
+              if (!h && !prev && i > 0 && S.d > 0.45) { const EZ = { "power3.in": (f) => f * f * f, "power3.out": (f) => 1 - Math.pow(1 - f, 3), "power3.inOut": (f) => (f < 0.5 ? 4 * f * f * f : 1 - Math.pow(-2 * f + 2, 3) / 2) }; const ez = EZ[S.e] || EZ["power3.inOut"];
+                for (let n = 0; n <= 24; n++) if (cut(q, lerp(sh[i - 1].c, S.c, ez(n / 24)))) { if (mA < 0) mA = n; mB = n; } }
+              if (i === 0) { if (h) st(q.e, { filter: "opacity(0)" }, S.t); }
+              else if (h && !prev) { if (S.d === 0) st(q.e, { filter: "opacity(0)" }, S.t); else ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: S.d <= 0.45 ? 0.16 : 0.18, ease: "power1.out", overwrite: "auto" }, S.d <= 0.45 ? S.t + 0.06 : S.t); }
+              else if (!h && prev) ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: S.d <= 0.45 ? 0.2 : 0.25, ease: "power1.out", overwrite: "auto" }, S.d <= 0.45 ? S.t + 0.17 : inT);
+              else if (mA >= 0) { const t0 = S.t + (mA / 24) * S.d, t1 = Math.min(S.t + S.d, S.t + ((mB + 1) / 24) * S.d);
+                ft(q.e, { filter: "opacity(1)" }, { filter: "opacity(0)", duration: 0.08, ease: "power1.out", overwrite: "auto" }, Math.max(S.t, t0 - 0.08));
+                ft(q.e, { filter: "opacity(0)" }, { filter: "opacity(1)", duration: 0.22, ease: "power1.out", overwrite: "auto" }, t1); }
+              prev = h; }); });
+          window.__noCut = { leaves: R.length, shots: sh.length }; }
+
+        FX.runGestures();
+        tl.set({}, {}, D - 0.01);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

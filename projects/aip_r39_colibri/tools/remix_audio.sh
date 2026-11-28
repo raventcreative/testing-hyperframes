@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 IN=out/video.mp4; OUT=out/AIP_R39_COLIBRI.mp4; D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $IN)
 [ -f assets/audio/bed.wav ] || python3 ../../tools/music_bed.py "$D" assets/audio/bed.wav 7 > /dev/null
 G="[0:a]aformat=sample_rates=48000:channel_layouts=mono,adelay=300,apad,atrim=end=$D,asplit=2[vo][k];\
-[1:a]aformat=sample_rates=48000:channel_layouts=mono,volume=1.0,apad,atrim=end=$D[sfx];\
+[1:a]aformat=sample_rates=48000:channel_layouts=mono,volume=1.25,apad,atrim=end=$D[sfx];\
 [2:a]aformat=sample_rates=48000:channel_layouts=mono,volume=0.3,apad,atrim=end=$D[bed];\
 [bed][k]sidechaincompress=threshold=0.03:ratio=3:attack=40:release=600[bedd];\
 [vo][sfx][bedd]amix=inputs=3:normalize=0:duration=first"

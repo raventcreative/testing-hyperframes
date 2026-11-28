@@ -1,0 +1,68 @@
+<!doctype html>
+<html><head><meta charset="UTF-8" />
+<!-- Simple Icons path (CC0) or a Lucide glyph -> SVGLoader -> ExtrudeGeometry with a small bevel -> real 3D object.
+     ?name=deepseek            one still (800x800, transparent) for the cover
+     ?name=deepseek&sheet=24   a sprite strip of 24 yaw angles (24 x 220 px) for the in-video spin (window.SHEET = dataURL)
+     ?icon=cpu&col=%2301ccf7   an unbranded Lucide glyph (stroke outlines) extruded the same way -->
+<script src="../vendor/logos.js"></script>
+<script src="../vendor/icons.js"></script>
+<script type="importmap">{"imports":{"three":"../vendor/three/three.module.min.js","three/addons/":"../vendor/three/addons/"}}</script>
+<style>html,body{margin:0;width:800px;height:800px;background:transparent;overflow:hidden}</style></head>
+<body><canvas id="c" width="800" height="800"></canvas>
+<script type="module">
+import * as THREE from "three";
+import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+const Q = new URLSearchParams(location.search);
+const name = Q.get("name"), icon = Q.get("icon"), N = Number(Q.get("sheet") || 0);
+const r = new THREE.WebGLRenderer({ canvas: document.getElementById("c"), antialias: true, alpha: true, preserveDrawingBuffer: true });
+r.setSize(800, 800, false); r.setClearColor(0, 0); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.NoToneMapping;
+const scene = new THREE.Scene(); scene.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.5; scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const k = new THREE.DirectionalLight(0xffffff, 2.2); k.position.set(2, 3, 5); scene.add(k);
+const rim = new THREE.DirectionalLight(0x6adfff, 2.0); rim.position.set(-4, 2, -3); scene.add(rim);
+let shapes, col;
+if (Q.get("chip")) {   // unbranded 3D processor chip (Colibri has no Simple Icons entry): rounded body + die + pins, brand colours
+  const rr = (w, r) => { const s = new THREE.Shape(), h = w / 2; s.moveTo(-h + r, -h); s.lineTo(h - r, -h); s.quadraticCurveTo(h, -h, h, -h + r); s.lineTo(h, h - r); s.quadraticCurveTo(h, h, h - r, h);
+    s.lineTo(-h + r, h); s.quadraticCurveTo(-h, h, -h, h - r); s.lineTo(-h, -h + r); s.quadraticCurveTo(-h, -h, -h + r, -h); return s; };
+  const g = new THREE.Group();
+  const mat = (c, e = 0.05, m = 0.1, ro = 0.35) => new THREE.MeshStandardMaterial({ color: new THREE.Color(c), emissive: new THREE.Color(c), emissiveIntensity: e, metalness: m, roughness: ro });
+  const body = new THREE.Mesh(new THREE.ExtrudeGeometry(rr(16, 2.2), { depth: 2, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.5, bevelSegments: 4, curveSegments: 16 }), mat("#1d3f86", 0.06));
+  body.position.z = -1; g.add(body);
+  const die = new THREE.Mesh(new THREE.ExtrudeGeometry(rr(9, 1.4), { depth: 1, bevelEnabled: true, bevelThickness: 0.35, bevelSize: 0.35, bevelSegments: 3, curveSegments: 12 }), mat("#01ccf7", 0.18, 0.0, 0.3));
+  die.position.z = 1.4; g.add(die);
+  for (let k = 0; k < 4; k++) for (const sd of [0, 1, 2, 3]) {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(1.3, 3.2, 1.0), mat("#b8f1ff", 0.1, 0.4, 0.25)); const o = -4.5 + k * 3;
+    if (sd === 0) p.position.set(o, 9.6, 0); if (sd === 1) p.position.set(o, -9.6, 0); if (sd === 2) { p.rotation.z = Math.PI / 2; p.position.set(9.6, o, 0); } if (sd === 3) { p.rotation.z = Math.PI / 2; p.position.set(-9.6, o, 0); }
+    g.add(p); }
+  scene.add(g); g.rotation.set(-0.35, -0.42, 0.06);
+  const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 200); cam.position.set(0, 0, 50); cam.lookAt(0, 0, 0);
+  r.render(scene, cam); window.READY = true;
+  throw "done";
+}
+if (name) {
+  const Lg = window.LOGOS[name]; col = Lg.render;
+  shapes = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${Lg.path}"/></svg>`).paths.flatMap((p) => SVGLoader.createShapes(p));
+} else {
+  // Lucide glyph: stroke outlines -> filled shapes (SVGLoader.pointsToStroke)
+  col = Q.get("col") || "#01ccf7";
+  const data = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${window.ICO[icon]}</svg>`);
+  shapes = [];
+  for (const p of data.paths) {
+    const st = p.userData.style; const sty = SVGLoader.getStrokeStyle(2.2, "#000", "round", "round", 4);
+    for (const sp of p.subPaths) { const g = SVGLoader.pointsToStroke(sp.getPoints(24), sty); if (!g) continue;
+      const pos = g.attributes.position; for (let i = 0; i < pos.count; i += 3) { const s = new THREE.Shape([new THREE.Vector2(pos.getX(i), pos.getY(i)), new THREE.Vector2(pos.getX(i + 1), pos.getY(i + 1)), new THREE.Vector2(pos.getX(i + 2), pos.getY(i + 2))]); shapes.push(s); } }
+  }
+}
+const geo = name ? new THREE.ExtrudeGeometry(shapes, { depth: 3, bevelEnabled: true, bevelThickness: 0.7, bevelSize: 0.4, bevelSegments: 4, curveSegments: 24 })
+                 : new THREE.ExtrudeGeometry(shapes, { depth: 2.2, bevelEnabled: false });
+geo.center(); geo.scale(1, -1, 1);
+const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: new THREE.Color(col), roughness: 0.35, metalness: 0.0, emissive: new THREE.Color(col), emissiveIntensity: 0.08 }));
+scene.add(mesh);
+const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 200); cam.position.set(0, 0, 58); cam.lookAt(0, 0, 0);
+if (!N) { mesh.rotation.set(0.12, -0.38, 0.04); r.render(scene, cam); window.READY = true; }
+else {
+  const S = 220, strip = document.createElement("canvas"); strip.width = S * N; strip.height = S; const g2 = strip.getContext("2d");
+  for (let i = 0; i < N; i++) { mesh.rotation.set(0.12, (i / N) * Math.PI * 2, 0.0); r.render(scene, cam); g2.drawImage(r.domElement, 0, 0, 800, 800, i * S, 0, S, S); }
+  window.SHEET = strip.toDataURL("image/png"); window.READY = true;
+}
+</script></body></html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="UTF-8" />
+<!-- R38 cover: ONE topic logo as a 3D object (path -> SVGLoader -> ExtrudeGeometry, small bevel). Wi-Fi has no Simple Icons entry (trademark),
+     so ?name=wifi builds an UNBRANDED generic Wi-Fi symbol from our own geometry (3 arcs + dot) in the theme accent #294b77. -->
+<script src="../vendor/logos.js"></script>
+<script type="importmap">{"imports":{"three":"../vendor/three/three.module.min.js","three/addons/":"../vendor/three/addons/"}}</script>
+<style>html,body{margin:0;width:800px;height:800px;background:transparent;overflow:hidden}</style></head>
+<body><canvas id="c" width="800" height="800"></canvas>
+<script type="module">
+import * as THREE from "three";
+import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+const name = new URLSearchParams(location.search).get("name") || "meta";
+function wifiPath() {   // own geometry: annular sectors around (12, 20) pointing up + a dot
+  const cx = 12, cy = 20, a1 = (225 * Math.PI) / 180, a2 = (315 * Math.PI) / 180, P = (r, a) => `${(cx + r * Math.cos(a)).toFixed(3)} ${(cy + r * Math.sin(a)).toFixed(3)}`;
+  let d = "";
+  for (const [ri, ro] of [[3.6, 6.0], [8.0, 10.4], [12.4, 14.8]]) d += `M${P(ro, a1)} A${ro} ${ro} 0 0 1 ${P(ro, a2)} L${P(ri, a2)} A${ri} ${ri} 0 0 0 ${P(ri, a1)} Z `;
+  d += `M${cx - 1.8} ${cy} A1.8 1.8 0 0 1 ${cx} ${cy - 1.8} A1.8 1.8 0 0 1 ${cx + 1.8} ${cy} A1.8 1.8 0 0 1 ${cx} ${cy + 1.8} A1.8 1.8 0 0 1 ${cx - 1.8} ${cy} Z`;
+  return d;
+}
+const Lg = name === "wifi" ? { path: wifiPath(), hex: "#294b77" } : window.LOGOS[name];
+const r = new THREE.WebGLRenderer({ canvas: document.getElementById("c"), antialias: true, alpha: true, preserveDrawingBuffer: true });
+r.setSize(800, 800, false); r.setClearColor(0, 0); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping;
+const scene = new THREE.Scene(); scene.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.5; scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const k = new THREE.DirectionalLight(0xffffff, 2.2); k.position.set(2, 3, 5); scene.add(k);
+const rim = new THREE.DirectionalLight(0x6adfff, 2.0); rim.position.set(-4, 2, -3); scene.add(rim);
+const data = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${Lg.path}"/></svg>`);
+const shapes = data.paths.flatMap((p) => SVGLoader.createShapes(p));
+const geo = new THREE.ExtrudeGeometry(shapes, { depth: 3, bevelEnabled: true, bevelThickness: 0.7, bevelSize: 0.4, bevelSegments: 4, curveSegments: 24 });
+geo.center(); geo.scale(1, -1, 1);
+const col = name === "tiktok" || name === "github" ? "#ffffff" : Lg.hex;
+const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: new THREE.Color(col), roughness: 0.35, metalness: 0.0, emissive: new THREE.Color(col), emissiveIntensity: 0.18 }));
+mesh.rotation.set(0.12, name === "wifi" ? -0.22 : -0.38, name === "wifi" ? 0 : 0.04); scene.add(mesh);
+const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 200); cam.position.set(0, 0, 58); cam.lookAt(0, 0, 0);
+r.render(scene, cam); window.READY = true;
+</script></body></html>

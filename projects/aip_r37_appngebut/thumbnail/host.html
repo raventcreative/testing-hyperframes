@@ -1,0 +1,20 @@
+<!doctype html>
+<html><head><meta charset="UTF-8" />
+<!-- R37 cover: the client's 3D mascot, whole body, high-res, transparent background (same runtime as the reel host). -->
+<script src="../vendor/mascot_face.js"></script><script src="../vendor/mascot3d.js"></script>
+<style>html,body{margin:0;width:1400px;height:1800px;background:transparent;overflow:hidden}canvas{width:1400px;height:1800px}</style></head>
+<body><canvas id="c" width="1400" height="1800"></canvas>
+<script>
+const M3 = window.Mascot3D, D = 3;
+const VW = [["Halo", 0.3, 0.7, 1, "halo"]], PH = [["h", 0.3, 0.5, 0], ["a", 0.5, 0.7, 0]], ENV = new Array(400).fill(0);
+const DIR = M3.direct(VW, D, { intents: [{ t: 0.1, action: "present", side: "right" }], seed: 37, quiet: 0.3, look: 0 });
+const PERF = M3.buildPerformance(DIR.tracks, D, { smooth: 1 });
+M3.Mascot.create(document.getElementById("c"), { url: "../assets/mascot3d/mascot_biz_rigged.glb", face: window.MASCOT_FACE, decals: window.MASCOT_DECALS.map((d) => Object.assign({}, d, { url: "../" + d.url })), width: 1400, height: 1800, envIntensity: 0.6 }).then((m) => {
+  for (const o of m.scene.children) if (o.isDirectionalLight && o.position.z < 0) { o.intensity = 1.6; o.color.setRGB(0.72, 0.84, 1.0); o.position.set(1.6, 1.5, -1.4); }
+  const T = Number(new URLSearchParams(location.search).get("t") || 1.0), Pf = PERF(T);
+  if (m.shadow) m.shadow.visible = false;
+  m.setView({ fx: 700, fy: 1760, h: 1680, pitch: 6, yaw: 0 });
+  m.setState({ root: { x: Pf.root.x, y: Pf.root.y, ry: Pf.root.ry, rz: Pf.root.rz, rx: 0, s: Pf.root.s }, bones: Pf.bones, face: { blink: [0, 0], gaze: [0, 0], mouthMix: 1, mouth: [0.026, 0, 0.004, 0.6], brow: [0, 0] } });
+  m.render(); window.READY = true;
+});
+</script></body></html>

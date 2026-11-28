@@ -1,0 +1,20 @@
+<!doctype html>
+<html><head><meta charset="UTF-8" />
+<!-- Cover mascot: the reel's own rig (vendor/mascot3d.js + the client's GLB) rendered big on a transparent canvas, posed by the same
+     director as the reel (one "present" intent), eyes open, small smile. ?t=<seconds into the pose> -->
+<base href="../" /><script src="vendor/vo_words.js"></script><script src="vendor/mascot_face.js"></script><script src="vendor/mascot3d.js"></script>
+<style>html,body{margin:0;width:1100px;height:1500px;background:transparent;overflow:hidden}</style></head>
+<body><canvas id="c" width="1100" height="1500"></canvas>
+<script>
+const M3 = window.Mascot3D, VW = window.VO_WORDS, D = window.TOTAL, T = Number(new URLSearchParams(location.search).get("t") || 1.1);
+const DIR = M3.direct(VW, D, { intents: [{ t: 0.1, action: "present", side: "right" }, { t: 3, action: "idle" }], seed: 36, quiet: 0.3, look: 0 });
+const PERF = M3.buildPerformance(DIR.tracks, D + 0.05, { smooth: 1 });
+M3.Mascot.create(document.getElementById("c"), { url: "assets/mascot3d/mascot_biz_rigged.glb", face: window.MASCOT_FACE, decals: window.MASCOT_DECALS, width: 1100, height: 1500, envIntensity: 0.6 }).then((m) => {
+  for (const o of m.scene.children) if (o.isDirectionalLight && o.position.z < 0) { o.intensity = 1.6; o.color.setRGB(0.72, 0.84, 1.0); o.position.set(1.6, 1.5, -1.4); }
+  if (m.shadow) m.shadow.visible = false;
+  const Pf = PERF(T);
+  m.setView({ fx: 550, fy: 1460, h: 1380, pitch: 4, yaw: 0 });
+  m.setState({ root: { x: Pf.root.x, y: Pf.root.y, ry: Pf.root.ry, rz: Pf.root.rz, rx: 0, s: Pf.root.s }, bones: Pf.bones, face: { blink: [0, 0], gaze: [0, 0], mouthMix: 1, mouth: 0.15, brow: [0, 0] } });
+  m.render(); window.READY = true;
+});
+</script></body></html>

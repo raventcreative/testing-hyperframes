@@ -22,3 +22,11 @@
   Freddie to screen-record his own account/website and use that real footage (phone/browser frame, crop, zoom, cursor
   highlights) instead of mock UI. Tell him exactly what to record (screens, ~10–20 s each, 9:16) at the start of the job.
 - **Stored recordings, use automatically** (2026-11-21): `brand/rec/` holds his IG, website and Claude Code recordings (README lists them). If a reel's topic matches, use the recording in that reel and name it in the brief — the client said "pakai aja kalau ada pembahasan yang menyangkut". Missed in batch 8 (R31/R34 fixed after).
+
+## 2D reels — mascot staging + no counter (client, 2026-11-28)
+"Pas ngejelasin maskot 3D-nya majuin sampai setengah badan … kalau ngasih contoh maskot 3D-nya hilangin biar video contohnya aja
+… foto 02/24 itu hilangin … jangan pakai dunia voxel."
+- Explaining beats (hook, why it matters, CTA): the 3D mascot comes forward BIG, half-body (waist-up, cropped by the frame
+  bottom), lip-synced, under the spoken headline — animated push-in/rise, never a pop.
+- Example / demo beats (cards, UI windows, diagrams): the mascot is fully hidden; the example gets the whole frame.
+- No beat counter ("02 / 24" pill) in any reel.
